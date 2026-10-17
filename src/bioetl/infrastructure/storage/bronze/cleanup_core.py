@@ -124,8 +124,6 @@ def _xattr_apis() -> tuple[Any, Any, Any | None] | None:  # Any: os xattr callab
 def _xattr_probe_anchor(base_path: Path) -> tuple[int, str] | None:
     """Return ``(st_dev, probe_parent)`` for the Bronze volume, if reachable."""
     try:
-        # A linked root or ancestor is not a probe target. Returning here
-        # avoids creating a temporary directory outside the configured tree.
         _require_unlinked_bronze_root(base_path)
         anchor = Path(os.path.abspath(os.fspath(base_path)))  # noqa: PTH100
         while not anchor.exists() and anchor.parent != anchor:
@@ -248,15 +246,9 @@ def stat_is_link_or_reparse(st: os.stat_result) -> bool:
 def _require_unlinked_bronze_root(
     base_path: Path, *, allow_leaf_link: bool = False
 ) -> None:
-    """Refuse a symlink or reparse point before probe, lock, or mkdir.
-
-    ``allow_leaf_link`` keeps a configured writer alias. Ancestors stay real
-    so a parent link cannot receive a new root or an xattr probe.
-    """
-    absolute = Path(os.path.abspath(os.fspath(base_path)))  # noqa: PTH100
-    components: tuple[Path, ...] = tuple(reversed(absolute.parents))
-    if not allow_leaf_link:
-        components = (*components, absolute)
+    """Refuse a symlink or reparse point before probe, lock, or mkdir."""
+    root = Path(os.path.abspath(os.fspath(base_path)))  # noqa: PTH100
+    components = (*reversed(root.parents), *(() if allow_leaf_link else (root,)))
     for component in components:
         try:
             info = os.lstat(component)
@@ -364,13 +356,11 @@ def bronze_tree_lock(
     create_lock: bool = True,
 ) -> Iterator[BronzeRootLease]:
     """Advisory writer/cleaner lock; ``create_lock=False`` is non-mutating dry-run."""
-    # Shared leases may pin one leaf symlink and still flock. Destructive apply
-    # refuses every linked component before the volume xattr probe.
-    pin_leaf = not exclusive and _platform_cleanup_supported()
+    # Shared leases may pin one leaf symlink; destructive apply stays unlinked.
+    platform = _platform_cleanup_supported()
+    pin_leaf = not exclusive and platform
     _require_unlinked_bronze_root(base_path, allow_leaf_link=pin_leaf)
-    caps = _platform_cleanup_supported() and (
-        not exclusive or _directory_xattr_supported(base_path)
-    )
+    caps = platform and (not exclusive or _directory_xattr_supported(base_path))
     if not caps:
         if exclusive:
             raise NotImplementedError(
