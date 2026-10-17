@@ -1,7 +1,15 @@
-# Canonical applicability catalog shared by the CircleCI and retained Actions coordinators.
-# deployment records the live execution provider; owner_workflow and
-# coordinator_workflow retain legacy definitions until their retirement in #11930.
-# They are compatibility references, not runnable GitHub Actions declarations.
+# Canonical applicability catalog for the pull-request coordinator (#12009).
+# deployment.provider records the runnable workflow provider in this repo.
+# It is not a ruleset enforcement mode and not a stored status-check context.
+# owner_workflow and coordinator_workflow retain legacy definitions until #11930.
+# They are compatibility references, not extra GitHub Actions declarations.
+# policy.github_ruleset_*_enforcement records only the ruleset enforcement field.
+# This schema has no field for stored ruleset contexts. See
+# docs/00-project/governance/05-github-policy.md section 3.
+# enforcement_verified_date is a catalog stamp. The boolean beside it is false
+# so that stamp is not evidence of live merge protection. prose_claims bind
+# that contract to governance prose (#12047). This schema does not store a
+# ruleset-context snapshot.
 schema_version: 1
 version: 3
 aggregator: pr-gate-complete
@@ -12,6 +20,7 @@ deployment:
   workflow: PR Gate Complete
   github_status_transport: check_run
   github_app_binding: github_actions
+  # Target coordinator job name. Not the context string stored on a ruleset.
   required_context: pr-gate-complete
   root_hygiene_context: Fast governance
   legacy_owner_retirement_issue: 11930
@@ -20,11 +29,83 @@ policy:
   allow_cancelled_as_success: false
   require_sha_binding: true
   not_applicable_requires_reason: true
+  # Ruleset enforcement field only. Does not record stored status contexts.
   github_ruleset_13643213_enforcement: disabled
   github_ruleset_15730586_enforcement: disabled
   catalog_check_status: enforced
+  # Runnable catalog provider, not the context stored on a disabled ruleset.
   enforcement_provider: github_actions
+  # Catalog stamp from 2026-10-09. Not evidence that merge is blocked.
   enforcement_verified_date: "2026-10-09"
+  enforcement_verified_date_is_live_protection_evidence: false
+  prose_claim_doc_paths:
+    - .github/CONTRIBUTING.md
+    - .github/SECURITY.md
+    - .github/workflows/pr-required.yml
+    - docs/00-project/governance/05-github-policy.md
+    - docs/03-guides/github-local-workflow.md
+    - docs/03-guides/github-quick-reference.md
+    - docs/04-reference/github-actions-workflows.md
+    - docs/05-operations/ci-cd-integration.md
+    - docs/05-operations/ci-workflow-map.md
+    - docs/05-operations/release-checklist.md
+    - docs/05-operations/runbooks/github-settings-quarterly-review.md
+  prose_claims:
+    - id: deployment-provider
+      required_substrings: ["policy-anchor:deployment-provider", "github_actions"]
+    - id: ruleset-enforcement-mode
+      required_substrings:
+        ["policy-anchor:ruleset-enforcement-mode", "13643213", "15730586", "enforcement: disabled"]
+    - id: stored-ruleset-contexts
+      required_substrings:
+        [
+          "policy-anchor:stored-ruleset-contexts",
+          "ci/circleci: pr-gate-complete",
+          "not active CircleCI protection",
+        ]
+    - id: target-gha-context
+      required_substrings:
+        ["policy-anchor:target-gha-context", "pr-gate-complete", "not the context stored"]
+    - id: enforcement-verified-date
+      required_substrings:
+        [
+          "policy-anchor:enforcement-verified-date",
+          "2026-10-09",
+          "not proof of active merge protection",
+        ]
+    - id: merge-block
+      required_substrings:
+        [
+          "policy-anchor:merge-block",
+          "pr-gate-complete",
+          "does not by itself block merge",
+          "does not confirm live server rulesets",
+        ]
+  prose_forbidden_substrings:
+    - "are **active** as of 2026-10-05"
+    - "the active provider is `.circleci/config.yml`"
+    - "MUST be `enforcement: active`"
+    - "Active main rulesets"
+    - "CI runs through `.circleci/config.yml`"
+    # Current claims that a ruleset already requires this job. Disabled
+    # enforcement makes both phrases false for the live main rulesets.
+    - "GitHub-required merge wall"
+    - "enforces exactly one required status context"
+    - "GitHub required context is job"
+    - "requires only the final"
+  # "GitHub Actions are disabled" is a current-configuration claim.
+  # "historical" allows that phrase on the same line, or in the first paragraph
+  # under a heading that contains the word. One blank line after the heading is
+  # the Markdown separator. A later paragraph or section does not inherit the
+  # heading. keep-disabled, disabled_manually, and individual workflow allow the
+  # phrase only on the same line.
+  prose_scoped_forbidden_phrases:
+    - phrase: "GitHub Actions are disabled"
+      line_allow_if_contains_any:
+        - "historical"
+        - "keep-disabled"
+        - "disabled_manually"
+        - "individual workflow"
 canonical_checks:
   - id: ruff
     owner_workflow: .github/workflows/import-linter.yml
@@ -261,7 +342,7 @@ gates:
     legacy_context: docs-governance
     decision: path_scoped
     paths:
-      include: [.gitignore, AGENTS.md, README.md, LICENSE, .ai/**, .cursor/**, .windsurf/**, .codex/**, .junie/**, .devin/**, .github/copilot-instructions.md, .github/instructions/**, .github/workflows/**, .github/actions/setup-python-uv/**, grafana/**, reports/**, tests/**, grafana/README.md, docs/**, scripts/docs/**, scripts/diagrams/**, scripts/schema/**, scripts/engineering/ci/pr_gate.py, scripts/engineering/qa/check_xwalk_missing_backlog.py, configs/base/**, configs/entities/**, configs/providers/**, configs/composites/**, configs/workflows/**, configs/contracts/**, configs/quality/github_required_checks.yaml, configs/quality/xwalk_missing_backlog.yaml, src/bioetl/application/pipelines/chembl/activity_transformer.py, src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py, src/bioetl/domain/schemas/**, src/bioetl/infrastructure/schemas/**, src/bioetl/domain/contracts/gold/**, tests/architecture/test_ai_runtime_governance_links.py, tests/architecture/test_check_doc_links_guardrails.py, tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py, tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py, mkdocs.yml, pyproject.toml, uv.lock]
+      include: [.gitignore, AGENTS.md, README.md, LICENSE, .ai/**, .cursor/**, .windsurf/**, .codex/**, .junie/**, .devin/**, .github/copilot-instructions.md, .github/instructions/**, .github/workflows/**, .github/CONTRIBUTING.md, .github/SECURITY.md, .github/actions/setup-python-uv/**, grafana/**, reports/**, tests/**, grafana/README.md, docs/**, scripts/docs/**, scripts/diagrams/**, scripts/schema/**, scripts/engineering/ci/pr_gate.py, scripts/engineering/qa/check_xwalk_missing_backlog.py, configs/base/**, configs/entities/**, configs/providers/**, configs/composites/**, configs/workflows/**, configs/contracts/**, configs/quality/github_required_checks.yaml, configs/quality/xwalk_missing_backlog.yaml, src/bioetl/application/pipelines/chembl/activity_transformer.py, src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py, src/bioetl/domain/schemas/**, src/bioetl/infrastructure/schemas/**, src/bioetl/domain/contracts/gold/**, tests/architecture/test_ai_runtime_governance_links.py, tests/architecture/test_check_doc_links_guardrails.py, tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py, tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py, mkdocs.yml, pyproject.toml, uv.lock]
     allowed_results: [success, not_applicable]
     not_applicable_allowed: true
     not_applicable_reason_required: true

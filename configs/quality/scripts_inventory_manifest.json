@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-17T13:08:59.027244+00:00",
+  "generated_at": "2026-10-17T14:01:37.061134+00:00",
   "summary": {
     "total_scripts": 648,
     "status_counts": {
@@ -5869,7 +5869,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 128,
+          "line": 129,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.data_quality"
         },
@@ -6247,13 +6247,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 247,
+          "line": 248,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 367,
+          "line": 368,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
@@ -6298,7 +6298,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 389,
+          "line": 390,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
@@ -6375,7 +6375,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 378,
+          "line": 379,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
@@ -6459,13 +6459,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 250,
+          "line": 251,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 372,
+          "line": 373,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
@@ -6917,7 +6917,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 384,
+          "line": 385,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/fix/harmonize_link_styles.py --dry-run --fail-on-errors"
         },
@@ -7180,7 +7180,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 322,
+          "line": 323,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py \"${lint_targets[@]}\" --json > /tmp/diagram-lint.json"
         },
@@ -7225,7 +7225,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 325,
+          "line": 326,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -7393,7 +7393,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 134,
+          "line": 135,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_all_bundles.py --check"
         },
@@ -7462,7 +7462,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 133,
+          "line": 134,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check"
         },
@@ -7991,7 +7991,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 281,
+          "line": 282,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -8333,13 +8333,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 117,
+          "line": 118,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 219,
+          "line": 232,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json"
         },
@@ -9769,19 +9769,19 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 102,
+          "line": 115,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify \"${classify_args[@]}\""
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 279,
+          "line": 299,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results assert-steps \\"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 363,
+          "line": 383,
           "source_group": "ci",
           "text": "uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results affected-tests \\"
         }
@@ -10264,7 +10264,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 9,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
@@ -10291,16 +10291,28 @@
           "text": "from scripts.engineering.ci.pr_gate import classify_changes, load_catalog"
         },
         {
+          "path": "tests/architecture/test_required_checks_prose_consistency.py",
+          "line": 492,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pr_gate import classify_changes, load_catalog"
+        },
+        {
+          "path": "tests/architecture/test_required_checks_prose_consistency.py",
+          "line": 504,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pr_gate import ("
+        },
+        {
+          "path": "tests/architecture/test_required_checks_prose_consistency.py",
+          "line": 678,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pr_gate import load_catalog"
+        },
+        {
           "path": "tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py",
           "line": 13,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_gate"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py",
-          "line": 15,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci.pr_gate import ("
         }
       ],
       "owner": "@bioetl-platform",
@@ -10313,11 +10325,11 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 737,
+          "line": 757,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10340,6 +10352,12 @@
           "text": "from scripts.engineering.ci.pr_lane_results import affected_pytest_targets"
         },
         {
+          "path": "tests/architecture/test_required_checks_prose_consistency.py",
+          "line": 509,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pr_lane_results import FAST_GOVERNANCE, OWNER_STEPS"
+        },
+        {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
           "line": 8,
           "source_group": "tests",
@@ -10347,21 +10365,15 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 263,
+          "line": 280,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 292,
+          "line": 309,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_lane_results import ("
-        },
-        {
-          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 314,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci.pr_lane_results import affected_pytest_targets"
         }
       ],
       "owner": "@bioetl-platform",
@@ -10540,7 +10552,7 @@
         },
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 401,
+          "line": 395,
           "source_group": "docs",
           "text": "[`replay_parity_inputs.py` pytest plugin](../../scripts/engineering/ci/replay_parity_inputs.py)"
         }
@@ -12702,7 +12714,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 173,
+          "line": 186,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.diagnostics audit-structure --path ."
         },
@@ -12964,7 +12976,7 @@
       "references": [
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 657,
+          "line": 651,
           "source_group": "docs",
           "text": "and [relevance report builder](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/build_relevance_report.py)."
         }
@@ -12983,7 +12995,7 @@
       "references": [
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 655,
+          "line": 649,
           "source_group": "docs",
           "text": "[findings normalizer](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/normalize_findings.py),"
         }
@@ -13002,7 +13014,7 @@
       "references": [
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 656,
+          "line": 650,
           "source_group": "docs",
           "text": "[triage classifier](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/triage_findings.py),"
         }
@@ -13118,7 +13130,7 @@
       "references": [
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 660,
+          "line": 654,
           "source_group": "docs",
           "text": "The [issue 5376 metric snapshot helper](../../scripts/engineering/qa/_refresh_issue5376_live_metrics.py)"
         }
@@ -13303,7 +13315,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 339,
+          "line": 359,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -14730,13 +14742,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 141,
+          "line": 142,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 145,
+          "line": 146,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         },
@@ -18403,13 +18415,13 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 148,
+          "line": 161,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/repo/check_github_actions_runtime_policy.py --pr-required-pins --check"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 565,
+          "line": 585,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
@@ -18427,7 +18439,7 @@
         },
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 590,
+          "line": 591,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -20368,7 +20380,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 510,
+          "line": 511,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
