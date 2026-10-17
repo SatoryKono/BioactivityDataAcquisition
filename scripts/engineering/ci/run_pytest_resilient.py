@@ -14,6 +14,7 @@ import os
 import re
 import shlex
 import sys
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -27,9 +28,11 @@ from scripts.engineering.ci.pytest_receipts import (
 )
 
 _WORKER_CRASH_PATTERNS: tuple[re.Pattern[str], ...] = (
-    re.compile(r"\[gw\d+\]\s+node down:\s+not properly terminated", re.IGNORECASE),
-    re.compile(r"worker.+(crash|terminated unexpectedly)", re.IGNORECASE),
-    re.compile(r"xdist.+(internal error|Interrupted)", re.IGNORECASE),
+    re.compile(r"^\[gw\d+\]\s+node down:\s+\S", re.IGNORECASE),
+    re.compile(r"^replacing crashed worker gw\d+\b", re.IGNORECASE),
+    re.compile(r"^worker gw\d+ crashed\b", re.IGNORECASE),
+    re.compile(r"^maximum crashed workers reached:", re.IGNORECASE),
+    re.compile(r"^xdist\.[\w.]*(?:internal error|Interrupted)\b", re.IGNORECASE),
 )
 _MAXFAIL_INTERRUPT = re.compile(r"stopping after \d+ failures", re.IGNORECASE)
 SUMMARY_FILENAME = "summary.txt"
@@ -161,13 +164,23 @@ def _result_records_failure(item: object) -> bool:
     return item.get("terminal") not in {"passed", "skipped", "xfailed", "xpassed"}
 
 
+def _collection_failed(payload: Mapping[str, object]) -> bool:
+    collection = payload.get("collection")
+    return isinstance(collection, dict) and collection.get("status") == "error"
+
+
 def _payload_explains_failure(payload: object) -> bool:
-    """True when one worker receipt already records why the pass failed."""
+    """True when a worker receipt records a cause, not only a dirty tree.
+
+    A tracked file that changes during the run makes completeness incomplete
+    while every node still passes. That does not explain a later controller
+    failure such as a coverage gate.
+    """
     if not isinstance(payload, dict):
         return False
     if payload.get("exit_code") not in (0, None):
         return True
-    if payload.get("completeness") != "complete":
+    if payload.get("early_stop") is True or _collection_failed(payload):
         return True
     results = payload.get("results")
     if not isinstance(results, dict):

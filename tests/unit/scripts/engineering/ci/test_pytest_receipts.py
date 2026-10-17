@@ -948,9 +948,7 @@ def test_xpassed_does_not_explain_a_controller_failure() -> None:
     assert _payload_explains_failure(failed) is True
 
 
-def test_long_crash_log_keeps_the_terminal_line(
-    receipts: Path, tmp_path: Path
-) -> None:
+def test_long_crash_log_keeps_the_terminal_line(receipts: Path, tmp_path: Path) -> None:
     from scripts.engineering.ci.pytest_receipts import write_runner_terminal_receipt
 
     observed = ("." * 5000) + "\n[gw0] node down: not properly terminated\n"
@@ -1032,6 +1030,35 @@ def test_unsafe_receipt_id_exits_before_pytest(tmp_path: Path) -> None:
     assert not (reports / "junit_parallel.xml").exists()
 
 
+def test_maxfail_on_the_only_test_is_complete(receipts: Path, tmp_path: Path) -> None:
+    test_file = tmp_path / "test_only.py"
+    _write(test_file, "def test_fail():\n    assert False\n")
+    completed = _pytest(test_file, receipts, "--maxfail=1", repo_root=tmp_path)
+    assert completed.returncode == 1, completed.stderr
+    payload = _load(receipts)
+    assert payload["early_stop"] is False
+    assert payload["completeness"] == "complete"
+    assert set(_terminals(payload).values()) == {"failed"}
+
+
+def test_dirty_tree_incompleteness_does_not_explain_controller_failure() -> None:
+    from scripts.engineering.ci.run_pytest_resilient import _payload_explains_failure
+
+    payload = {
+        "exit_code": 0,
+        "completeness": "incomplete",
+        "early_stop": False,
+        "collection": {"status": "observed"},
+        "results": {"t": {"terminal": "passed"}},
+    }
+    assert _payload_explains_failure(payload) is False
+    payload["early_stop"] = True
+    assert _payload_explains_failure(payload) is True
+    payload["early_stop"] = False
+    payload["collection"] = {"status": "error"}
+    assert _payload_explains_failure(payload) is True
+
+
 def test_maxfail_interrupt_is_not_a_worker_crash() -> None:
     from scripts.engineering.ci.run_pytest_resilient import _detect_worker_crash
 
@@ -1039,7 +1066,11 @@ def test_maxfail_interrupt_is_not_a_worker_crash() -> None:
         "xdist.dsession.Interrupted: stopping after 1 failures\n"
     )
     assert _detect_worker_crash("[gw0] node down: not properly terminated\n")
-    assert _detect_worker_crash("worker gw1 terminated unexpectedly\n")
+    assert _detect_worker_crash("worker gw1 crashed and worker restarting disabled\n")
+    assert _detect_worker_crash("replacing crashed worker gw1\n")
+    assert not _detect_worker_crash(
+        "E       AssertionError: worker terminated unexpectedly\n"
+    )
     assert _detect_worker_crash(
         "xdist.dsession.Interrupted: stopping after 1 failures\n"
         "[gw0] node down: not properly terminated\n"

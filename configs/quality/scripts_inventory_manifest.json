@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-17T14:35:37.596467+00:00",
+  "generated_at": "2026-10-17T15:40:28.624687+00:00",
   "summary": {
     "total_scripts": 649,
     "status_counts": {
@@ -10452,7 +10452,7 @@
         },
         {
           "path": "scripts/engineering/ci/run_pytest_resilient.py",
-          "line": 263,
+          "line": 276,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.pytest_abort_diagnostic_adapter import ("
         },
@@ -10483,7 +10483,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/run_pytest_resilient.py",
-          "line": 24,
+          "line": 25,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.pytest_receipts import ("
         },
@@ -10495,7 +10495,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_receipts.py",
-          "line": 954,
+          "line": 952,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_receipts import write_runner_terminal_receipt"
         }
@@ -10705,7 +10705,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
         {
           "path": ".github/workflows/tests.yml",

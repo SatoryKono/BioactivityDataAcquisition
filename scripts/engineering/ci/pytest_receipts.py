@@ -34,9 +34,11 @@ _SECRET_KEY_RE = re.compile(
     re.IGNORECASE,
 )
 _CRASH_OBSERVATION = re.compile(
-    r"(\[gw\d+\]\s+node down:\s+not properly terminated"
-    r"|worker.+(?:crash|terminated unexpectedly)"
-    r"|xdist.+(?:internal error|Interrupted))",
+    r"(^\[gw\d+\]\s+node down:\s+\S"
+    r"|^replacing crashed worker gw\d+"
+    r"|^worker gw\d+ crashed\b"
+    r"|^maximum crashed workers reached:"
+    r"|^xdist\.[\w.]*(?:internal error|Interrupted)\b)",
     re.IGNORECASE,
 )
 _MAXFAIL_OBSERVATION = re.compile(r"stopping after \d+ failures", re.IGNORECASE)
@@ -500,7 +502,17 @@ class ReceiptPlugin:
         phases = _open_occurrence(current, when)
         phases[when] = _merge_phase(phases.get(when), _phase_outcome(report))
 
-    def _early_stop(self, session: Any) -> bool:
+    def _unfinished_selected(self) -> list[str]:
+        needed: dict[str, int] = {}
+        for nodeid in self.selected_nodeids:
+            needed[nodeid] = needed.get(nodeid, 0) + 1
+        return [
+            nodeid
+            for nodeid, count in needed.items()
+            if _finished_occurrences(self.results.get(nodeid)) < count
+        ]
+
+    def _stop_was_requested(self, session: Any) -> bool:
         if getattr(session, "shouldstop", False) or getattr(
             session, "shouldfail", False
         ):
@@ -508,6 +520,14 @@ class ReceiptPlugin:
         maxfail = getattr(session.config.option, "maxfail", 0) or 0
         failed = getattr(session, "testsfailed", 0) or 0
         return bool(maxfail) and failed >= maxfail
+
+    def _early_stop(self, session: Any) -> bool:
+        """True only when a stop request left selected occurrences unfinished.
+
+        ``--maxfail=1`` on the last selected test still finishes that test.
+        The threshold alone is not an early stop.
+        """
+        return self._stop_was_requested(session) and bool(self._unfinished_selected())
 
     def _assigned_nodeids(self, session: Any) -> list[str] | None:
         """Shard assigned to this xdist worker, including tests still queued."""
@@ -557,14 +577,7 @@ class ReceiptPlugin:
     def _completeness(self, early_stop: bool) -> str:
         if self.collection_errors or not self.collection_observed:
             return "unknown"
-        needed: dict[str, int] = {}
-        for nodeid in self.selected_nodeids:
-            needed[nodeid] = needed.get(nodeid, 0) + 1
-        missing = [
-            nodeid
-            for nodeid, count in needed.items()
-            if _finished_occurrences(self.results.get(nodeid)) < count
-        ]
+        missing = self._unfinished_selected()
         if early_stop or missing or getattr(self, "source_diverged", False):
             return "incomplete"
         return "complete"
