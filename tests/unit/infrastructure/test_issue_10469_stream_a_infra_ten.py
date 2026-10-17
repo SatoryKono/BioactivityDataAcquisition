@@ -15,6 +15,7 @@ class _FixedClock:
     def now(self) -> datetime:
         return datetime(2026, 7, 7, 12, 0, tzinfo=UTC)
 
+
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.workflow import (

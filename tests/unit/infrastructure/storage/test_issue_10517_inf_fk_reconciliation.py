@@ -8,6 +8,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from datetime import datetime, UTC
 
+
 class _FixedClock:
     def now(self) -> datetime:
         return datetime(2026, 7, 7, 12, 0, tzinfo=UTC)
