@@ -32,7 +32,7 @@ trend evidence only.
 - Source run id: `local-pr12231-local-coverage-8a4286d`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `2329f48f62a54cb0b994c3bfb0b9d9d8145b6ac2abba674e7728eefdf11d3ffc`
+- Source tree sha256: `df5ec8ae18b69469a318773712506939d52a9ebf6cad653a46a8f3b092e7d27c`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-15T18:50:07.879352+00:00`
 
