@@ -33,8 +33,12 @@ is not used as provenance for this CircleCI capture.
 This evidence covers the canonical 17-shard plan, not every repository test
 surface. The manifest excludes architecture, performance, manual E2E,
 live-provider contracts, and memory selectors; those gates have separate
-workflows. The tracked test-module inventory contains 3,033 `test_*.py` files
-as of 2026-10-08. This summary remains a non-canonical backlog signal and does
+workflows. The historical 2026-10-13 tracked inventory recorded 3,038
+`test_*.py` files. A source-only census on tree `d5711c0c174871d60fe095383eae3ec1f628346e`
+counts 3,051 files using `git ls-tree -r --name-only d5711c0c -- tests`
+and filtering basenames matching `test_*.py`. This is an audited-tree annotation,
+not a new test execution or coverage measurement; the 2026-10-08 capture remains historical. This summary
+remains a non-canonical backlog signal and does
 not claim lifecycle or release admission.
 
 ## Historical backlog signals

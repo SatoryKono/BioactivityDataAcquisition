@@ -4,7 +4,11 @@
 from __future__ import annotations
 
 import asyncio
+import contextvars
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
@@ -12,20 +16,66 @@ import orjson
 import zstandard as zstd
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.storage.bronze.cleanup_core import (
+    BronzeRootLease,
+    _platform_cleanup_supported,
+)
+from bioetl.infrastructure.storage.bronze.cleanup_group_apply import (
+    BronzeGroupCleanup,
+    cleanup_roots,
+    execute_cleanup_plan,
+    group_cleanup_for_lock,
+)
+from bioetl.infrastructure.storage.bronze.cleanup_metrics import (
+    emit_cleanup_outcome_metrics,
+)
+from bioetl.infrastructure.storage.bronze.cleanup_planner import (
+    BronzeCleanupPlannerMixin,
+    _CleanupDatePlan,
+)
+from bioetl.infrastructure.storage.bronze.cleanup_preview_mixin import (
+    BronzeCleanupPreviewMixin,
+)
+from bioetl.infrastructure.storage.bronze.cleanup_support import (
+    bronze_tree_lock,
+    date_dir_name_is_older,
+    find_old_date_dirs,
+    root_components_safe,
+    safe_rmdir,
+    validate_scope_filter,
+)
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncIterator, Callable
 
     from bioetl.domain.ports import LoggerPort, MetricsPort
 
 
-class BronzeWriterReadCleanupMixin:
-    """Filesystem read/list/cleanup helpers for Bronze storage."""
+_CLEANUP_EXECUTOR = ThreadPoolExecutor(
+    max_workers=2, thread_name_prefix="bronze-cleanup"
+)
+
+
+async def _drain_cleanup_worker(task: asyncio.Future[dict[str, int]]) -> None:
+    """Wait through repeated cancellation before releasing the caller."""
+    while not task.done():
+        try:
+            await asyncio.shield(task)
+        except BaseException as exc:
+            if isinstance(exc, asyncio.CancelledError):
+                current = asyncio.current_task()
+                if current is not None:
+                    current.uncancel()
+            elif not task.done():
+                raise
+
+
+class BronzeWriterReadMixin:
+    """Filesystem read and batch listing helpers for Bronze storage."""
 
     base_path: Path = cast(Any, None)  # Any: host attr default (PD3)
     _flat_structure: bool = cast(Any, None)  # Any: host attr default (PD3)
     _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
-    _metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD3)
 
     async def read_bronze(
         self, path: str
@@ -48,6 +98,18 @@ class BronzeWriterReadCleanupMixin:
             if line.strip():
                 yield orjson.loads(line)
 
+    def _batch_search_path(
+        self, provider: str, entity: str, date: datetime | None
+    ) -> Path | None:
+        if self._flat_structure and not provider and not entity:
+            return (
+                self.base_path / date.strftime("%Y-%m-%d") if date else self.base_path
+            )
+        if not provider or not entity:
+            return None
+        path = self.base_path / provider / entity
+        return path / date.strftime("%Y-%m-%d") if date else path
+
     def _list_batches_sync(
         self,
         provider: str,
@@ -55,19 +117,8 @@ class BronzeWriterReadCleanupMixin:
         date: datetime | None = None,
     ) -> list[str]:
         """Sync body for list_batches with blocking Path I/O."""
-        if self._flat_structure and not provider and not entity:
-            search_path = (
-                self.base_path / date.strftime("%Y-%m-%d") if date else self.base_path
-            )
-        else:
-            if not provider or not entity:
-                return []
-            prefix = f"{provider}/{entity}/"
-            if date:
-                prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"
-            search_path = self.base_path / prefix
-
-        if not search_path.exists():
+        search_path = self._batch_search_path(provider, entity, date)
+        if search_path is None or not search_path.exists():
             return []
 
         pattern = "batch_*.jsonl.zst" if date else "**/*.jsonl.zst"
@@ -92,32 +143,51 @@ class BronzeWriterReadCleanupMixin:
         )
         return result
 
+
+class BronzeWriterReadCleanupMixin(
+    BronzeWriterReadMixin, BronzeCleanupPlannerMixin, BronzeCleanupPreviewMixin
+):
+    """Apply and report nonmutating Bronze cleanup plans."""
+
+    _metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD3)
+    _resolve_bronze_path: Callable[[str, str, str, str], str] = cast(
+        Any, None
+    )  # Any: host method default (PD3)
+
+    def _log_cleanup_skip(self, path: str, reason: str) -> None:
+        """Emit a diagnostic for a skipped cleanup candidate."""
+        self._logger.warning(
+            "bronze_cleanup_skip",
+            path=path,
+            reason=reason,
+        )
+
     def _find_old_date_dirs(
         self,
         cutoff_str: str,
         provider: str | None = None,
         entity: str | None = None,
+        on_skip: Callable[[str, str], None] | None = None,
+        base_path: Path | None = None,
     ) -> list[Path]:
-        """Find date directories older than cutoff."""
-        if not self.base_path.exists():
-            return []
-
-        pattern = f"{provider or '*'}/{entity or '*'}"
-        old_dirs: list[Path] = []
-
-        for entity_dir in self.base_path.glob(pattern):
-            if not entity_dir.is_dir():
-                continue
-
-            for date_dir in entity_dir.iterdir():
-                if self._is_old_date_dir(date_dir, cutoff_str):
-                    old_dirs.append(date_dir)
-
-        return old_dirs
+        """Find date directories older than cutoff without following links."""
+        return find_old_date_dirs(
+            base_path if base_path is not None else self.base_path,
+            flat_structure=self._flat_structure,
+            cutoff_str=cutoff_str,
+            provider=provider,
+            entity=entity,
+            on_skip=on_skip or self._log_cleanup_skip,
+            on_flat_filter=lambda: self._logger.warning(
+                "bronze_cleanup_flat_scope_filter",
+                provider=provider,
+                entity=entity,
+            ),
+        )
 
     def _is_old_date_dir(self, path: Path, cutoff_str: str) -> bool:
-        """Check if path is a date directory older than cutoff."""
-        return path.is_dir() and len(path.name) == 10 and path.name < cutoff_str
+        """Check if path is a canonical date directory older than cutoff."""
+        return date_dir_name_is_older(path.name, cutoff_str)
 
     def _cleanup_old_files_sync(
         self,
@@ -125,41 +195,155 @@ class BronzeWriterReadCleanupMixin:
         dry_run: bool,
         provider: str | None,
         entity: str | None,
-    ) -> tuple[int, int, int]:
-        """Sync body for cleanup_old_files with blocking Path I/O."""
-        files, bytes_total, dirs = 0, 0, 0
-
-        for date_dir in self._find_old_date_dirs(cutoff_str, provider, entity):
-            removed_files, removed_bytes = self._remove_old_dir_files(
-                date_dir=date_dir,
-                dry_run=dry_run,
+        cancel_requested: threading.Event | None = None,
+    ) -> dict[str, int]:
+        """Plan once and apply the same candidates under the writer/cleaner lock."""
+        if not dry_run and not _platform_cleanup_supported():
+            raise NotImplementedError(
+                "Bronze destructive cleanup is unsupported on this platform/FS"
             )
-            files += removed_files
-            bytes_total += removed_bytes
-            if dry_run or not any(date_dir.iterdir()):
-                dirs += 1
-                if not dry_run:
-                    date_dir.rmdir()
+        if not self.base_path.exists():
+            return self._empty_cleanup_stats()
+        if dry_run:
+            # Shared lock may resolve writer aliases; linked cleanup roots refuse.
+            if not root_components_safe(self.base_path):
+                return self._empty_cleanup_stats()
+            # Read-only preview must not create .bronze-cleanup.lock in the root.
+            with bronze_tree_lock(
+                self.base_path, exclusive=False, create_lock=False
+            ) as locked_root:
+                return self._cleanup_old_files_locked_sync(
+                    cutoff_str, dry_run, provider, entity, locked_root
+                )
+        with bronze_tree_lock(
+            self.base_path, exclusive=True, allow_group_recovery=True
+        ) as locked_root:
+            if cancel_requested is not None and cancel_requested.is_set():
+                return self._empty_cleanup_stats()
+            return self._cleanup_old_files_locked_sync(
+                cutoff_str, dry_run, provider, entity, locked_root
+            )
 
-        return files, bytes_total, dirs
-
-    def _remove_old_dir_files(
+    def _cleanup_old_files_locked_sync(
         self,
-        *,
-        date_dir: Path,
+        cutoff_str: str,
         dry_run: bool,
-    ) -> tuple[int, int]:
-        """Remove all files from one old Bronze date directory."""
-        files_removed = 0
-        bytes_removed = 0
-        for file_path in date_dir.glob("*"):
-            if not file_path.is_file():
-                continue
-            bytes_removed += file_path.stat().st_size
-            files_removed += 1
-            if not dry_run:
-                file_path.unlink()
-        return files_removed, bytes_removed
+        provider: str | None,
+        entity: str | None,
+        locked_root: BronzeRootLease | None = None,
+    ) -> dict[str, int]:
+        stats = self._empty_cleanup_stats()
+        group_cleanup = group_cleanup_for_lock(
+            locked_root, cutoff_str, self._flat_structure, self._log_cleanup_skip
+        )
+        if (
+            group_cleanup is not None
+            and not dry_run
+            and not group_cleanup.resume(stats, provider, entity)
+        ):
+            return stats
+        root_abs, root_real = cleanup_roots(locked_root, self.base_path)
+        root_fd = locked_root.fd if locked_root is not None else None
+        for date_dir in self._find_old_date_dirs(
+            cutoff_str,
+            provider,
+            entity,
+            on_skip=partial(self._record_cleanup_discovery_skip, stats),
+            base_path=locked_root.path if locked_root is not None else None,
+        ):
+            plan = self._plan_old_dir_files(
+                date_dir, root_abs, root_real, root_fd=root_fd
+            )
+            self._record_cleanup_plan(stats, plan)
+            execute_cleanup_plan(
+                self, dry_run, stats, plan, root_abs, root_real, root_fd, group_cleanup
+            )
+        return stats
+
+    def _record_cleanup_discovery_skip(
+        self, stats: dict[str, int], path: str, reason: str
+    ) -> None:
+        self._log_cleanup_skip(path, reason)
+        if reason in ("scan_error", "stat_error"):
+            stats["directories_failed"] += 1
+        elif reason == "missing_scope":
+            stats["directories_conflicted"] += 1
+        elif reason not in ("not_a_directory", "reserved_maintenance"):
+            stats["directories_skipped"] += 1
+
+    def _apply_cleanup_plan(
+        self,
+        stats: dict[str, int],
+        plan: _CleanupDatePlan,
+        root_abs: Path,
+        root_real: Path,
+        root_fd: int | None,
+        group_cleanup: BronzeGroupCleanup | None,
+    ) -> None:
+        """Apply the exact planned inodes and retain partial-result accounting."""
+        failed_before = stats["files_failed"]
+        conflicted_before = stats["files_conflicted"]
+        stage_failed_before = stats["directories_failed"]
+        stage_conflicted_before = stats["directories_conflicted"]
+
+        def on_stage_error(name: str, _error: OSError) -> None:
+            stats["directories_failed"] += 1
+            self._log_cleanup_skip(str(self.base_path / name), "stage_cleanup_error")
+
+        if group_cleanup is None:
+            raise NotImplementedError(
+                "destructive cleanup requires a pinned group journal"
+            )
+        group_cleanup.apply(plan, stats)
+        if not plan.removable:
+            return
+        if (
+            stats["files_failed"] != failed_before
+            or stats["files_conflicted"] != conflicted_before
+            or stats["directories_failed"] != stage_failed_before
+            or stats["directories_conflicted"] != stage_conflicted_before
+        ):
+            stats["directories_skipped"] += 1
+            return
+        self._apply_planned_directory(
+            stats, plan, root_abs, root_real, root_fd, on_stage_error
+        )
+
+    def _apply_planned_directory(
+        self,
+        stats: dict[str, int],
+        plan: _CleanupDatePlan,
+        root_abs: Path,
+        root_real: Path,
+        root_fd: int | None,
+        on_stage_error: Callable[[str, OSError], None],
+    ) -> None:
+        try:
+            removed_dir = safe_rmdir(
+                plan.path,
+                root_abs,
+                root_real,
+                plan.identity,
+                on_stage_error=on_stage_error,
+                root_fd=root_fd,
+            )
+        except OSError:
+            stats["directories_failed"] += 1
+            self._log_cleanup_skip(str(plan.path), "rmdir_error")
+        else:
+            if removed_dir:
+                stats["directories_removed"] += 1
+            else:
+                stats["directories_conflicted"] += 1
+                self._log_cleanup_skip(str(plan.path), "rmdir_conflict")
+
+    async def cleanup_bronze(
+        self,
+        cutoff_date: datetime,
+        dry_run: bool = False,
+    ) -> dict[str, int]:
+        """Implement ``BronzeStoragePort`` cleanup through the shared helper."""
+        return await self.cleanup_old_files(cutoff_date, dry_run=dry_run)
 
     async def cleanup_old_files(
         self,
@@ -169,71 +353,56 @@ class BronzeWriterReadCleanupMixin:
         entity: str | None = None,
     ) -> dict[str, int]:
         """Remove Bronze files older than cutoff date."""
+        validate_scope_filter(provider, "provider")
+        validate_scope_filter(entity, "entity")
         cutoff_str = cutoff_date.strftime("%Y-%m-%d")
-        files, bytes_total, dirs = await asyncio.to_thread(
-            self._cleanup_old_files_sync,
-            cutoff_str,
-            dry_run,
-            provider,
-            entity,
+        cancel_requested = threading.Event()
+        worker = asyncio.get_running_loop().run_in_executor(
+            _CLEANUP_EXECUTOR,
+            partial(
+                contextvars.copy_context().run,
+                self._cleanup_old_files_sync,
+                cutoff_str,
+                dry_run,
+                provider,
+                entity,
+                cancel_requested,
+            ),
         )
+        try:
+            result = await asyncio.shield(worker)
+        except asyncio.CancelledError:
+            cancel_requested.set()
+            # A cancelled caller must not leave an unobserved destructive thread.
+            await _drain_cleanup_worker(worker)
+            if not worker.cancelled() and worker.exception() is None:
+                self._emit_cleanup_result(cutoff_str, dry_run, worker.result())
+            raise
 
+        self._emit_cleanup_result(cutoff_str, dry_run, result)
+        return result
+
+    def _emit_cleanup_result(
+        self, cutoff_str: str, dry_run: bool, result: dict[str, int]
+    ) -> None:
+        """Account for completed work even when its caller was cancelled."""
         self._logger.info(
             "bronze_cleanup_complete",
             cutoff=cutoff_str,
             dry_run=dry_run,
-            files_removed=files,
-            bytes_freed=bytes_total,
-            dirs_removed=dirs,
+            **result,
         )
-        if not dry_run and files > 0:
+        if not dry_run and result["files_removed"] > 0:
             cleanup_labels = {"operation": "cleanup"}
             self._metrics.increment_counter(
                 "bioetl_bronze_files_removed_total",
-                files,
+                result["files_removed"],
                 cleanup_labels,
             )
             self._metrics.increment_counter(
                 "bioetl_bronze_bytes_freed_total",
-                bytes_total,
+                result["bytes_freed"],
                 cleanup_labels,
             )
-        return {
-            "files_removed": files,
-            "bytes_freed": bytes_total,
-            "directories_removed": dirs,
-        }
-
-    def preview_cleanup(
-        self,
-        provider: str | None = None,
-        entity: str | None = None,
-    ) -> JsonDict:  # Any: preview payload has heterogeneous values
-        """Preview Bronze cleanup scope without deleting files."""
-        preview_root = self._resolve_bronze_preview_root(provider, entity)
-        exists = preview_root.exists()
-        file_count = (
-            sum(1 for file_path in preview_root.rglob("*") if file_path.is_file())
-            if exists
-            else 0
-        )
-
-        return {
-            "path": str(preview_root),
-            "file_count": file_count,
-            "exists": exists,
-        }
-
-    def _resolve_bronze_preview_root(
-        self,
-        provider: str | None,
-        entity: str | None,
-    ) -> Path:
-        """Resolve Bronze preview root for optional provider/entity filters."""
-        if self._flat_structure:
-            return self.base_path
-        if provider and entity:
-            return self.base_path / provider / entity
-        if provider:
-            return self.base_path / provider
-        return self.base_path
+        if not dry_run:
+            emit_cleanup_outcome_metrics(self._metrics, result)
