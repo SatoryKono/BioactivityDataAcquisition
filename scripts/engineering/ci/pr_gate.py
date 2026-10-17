@@ -239,6 +239,29 @@ def _parse_name_status_paths(raw: bytes) -> list[str]:
     return paths
 
 
+
+def check_coordinator_integrity(changed_files: list[str]) -> None:
+    """Block hostile PRs from bypassing checks by editing the coordinator itself.
+
+    A PR-controlled pin-check is not a trust boundary. Until org rulesets enforce
+    workflow sources from the default branch, the coordinator, checker, and registry
+    must be protected from concurrent modification.
+    """
+    protected_files = {
+        ".github/workflows/pr-required.yml",
+        "scripts/engineering/ci/pr_gate.py",
+        "configs/quality/github_required_checks.yaml",
+    }
+    violations = [
+        path for path in changed_files
+        if path.strip().replace("\\", "/") in protected_files
+    ]
+    if violations:
+        raise CatalogError(
+            f"Hostile-PR retarget residual risk: cannot modify trusted coordinator surface {violations}"
+        )
+
+
 def collect_changed_files(
     *,
     event_name: str,
@@ -454,6 +477,8 @@ def _classify_command(args: argparse.Namespace) -> int:
         before_sha=args.before_sha,
         head_sha=args.head_sha,
     )
+    if args.event_name == "pull_request":
+        check_coordinator_integrity(changed)
     matrix = classify_changes(catalog, changed, head_sha=args.head_sha)
     args.artifact.parent.mkdir(parents=True, exist_ok=True)
     args.artifact.write_text(
