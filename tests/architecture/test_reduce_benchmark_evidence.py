@@ -275,6 +275,33 @@ def test_rejects_paths_outside_the_output_root(tmp_path: Path) -> None:
     assert "rejected_output_path" in result.stderr
     assert not outside.exists()
 
+    manifest_dir = tmp_path / "manifest-dir"
+    manifest_dir.mkdir()
+    gate = tmp_path / "gate.json"
+    directory = _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa",
+            "reduce-benchmark-evidence",
+            "--raw-json",
+            str(raw),
+            "--manifest-out",
+            str(manifest_dir),
+            "--gate-out",
+            str(gate),
+            "--baseline",
+            str(tmp_path / "benchmark-summary.json"),
+            "--evidence-dir",
+            str(tmp_path / "evidence"),
+            "--output-root",
+            str(tmp_path),
+        ]
+    )
+    assert directory.returncode == 2, directory.stderr
+    assert "rejected_output_path" in directory.stderr
+    assert not gate.exists()
+
 
 def test_stale_passed_gate_is_replaced(tmp_path: Path) -> None:
     gate = tmp_path / "gate.json"
@@ -633,6 +660,20 @@ def test_non_positive_means_do_not_pass(tmp_path: Path) -> None:
         (repeated_dir / "evidence").rglob("benchmark-summary-candidate.json")
     )
 
+    invalid_schema = _baseline(100)
+    invalid_schema["schema_version"] = 0
+    schema_dir = tmp_path / "bad-schema"
+    schema_dir.mkdir()
+    schema_raw = json.dumps(_measurement(90)).encode()
+    schema_result, schema_gate, _manifest = _invoke(
+        schema_dir, schema_raw, baseline=invalid_schema
+    )
+    assert schema_result.returncode == 1, schema_result.stderr
+    assert _gate(schema_gate)["reason"] == "invalid_baseline"
+    stored_raw = list((schema_dir / "evidence").rglob("benchmark-measurements.json"))
+    assert len(stored_raw) == 1
+    assert stored_raw[0].read_bytes() == schema_raw
+
 
 def test_clean_checkout_accepts_boolean_dirty_false(tmp_path: Path) -> None:
     payload = _measurement(90)
@@ -748,7 +789,10 @@ def test_hotspot_rejects_negative_failures_and_non_positive_latency(
 
 
 def test_confined_byte_write_ignores_predictable_tmp_sibling(tmp_path: Path) -> None:
-    from scripts.engineering.common.repo_paths import write_bytes_confined
+    from scripts.engineering.common.repo_paths import (
+        write_bytes_confined,
+        write_text_confined,
+    )
 
     target = tmp_path / "benchmark-measurements.json"
     decoy = tmp_path / "benchmark-measurements.json.tmp"
@@ -756,6 +800,13 @@ def test_confined_byte_write_ignores_predictable_tmp_sibling(tmp_path: Path) -> 
     write_bytes_confined(target, b"payload", root=tmp_path)
     assert target.read_bytes() == b"payload"
     assert decoy.read_bytes() == b"keep"
+
+    text_target = tmp_path / "benchmark-gate.json"
+    text_decoy = tmp_path / "benchmark-gate.json.tmp"
+    text_decoy.write_text("keep", encoding="utf-8")
+    write_text_confined(text_target, "payload", root=tmp_path)
+    assert text_target.read_text(encoding="utf-8") == "payload"
+    assert text_decoy.read_text(encoding="utf-8") == "keep"
 
 
 @pytest.mark.parametrize("field", ["latency_ms", "p95_latency_ms", "throughput_rps"])

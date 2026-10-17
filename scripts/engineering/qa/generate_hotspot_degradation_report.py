@@ -1053,8 +1053,8 @@ def _emit_reducer(
     if extra:
         body.update(extra)
     text = _dump(body)
-    for path in (args.gate_out, args.manifest_out):
-        write_text_confined(path, text, root=root)
+    write_text_confined(args.manifest_out, text, root=root)
+    write_text_confined(args.gate_out, text, root=root)
     _copy_revision_evidence(args, root, body, text)
     return 0 if status == "passed" else 1
 
@@ -1104,6 +1104,9 @@ def _confine_reducer_outputs(args: argparse.Namespace, root: Path) -> bool:
         ]
         if len(set(resolved)) != len(resolved):
             raise ValueError("reducer outputs must be distinct files")
+        for path in (resolved[1], resolved[2]):
+            if path.exists() and not path.is_file():
+                raise ValueError("reducer output must be a file")
         write_text_confined(
             args.gate_out,
             _dump({"reason": "in_progress", "status": "failed"}),
@@ -1284,6 +1287,9 @@ def _finish_reduction(
             raw_sha=raw_sha,
         )
     if isinstance(loaded, str):
+        stored = _store_raw_evidence(args, root, measured_sha, raw_sha, raw_bytes)
+        if stored is not None:
+            return _emit_reducer(args, root, "failed", stored, {"raw_sha256": raw_sha})
         return _emit_reducer(
             args,
             root,

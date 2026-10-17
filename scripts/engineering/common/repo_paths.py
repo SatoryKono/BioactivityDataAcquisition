@@ -185,7 +185,19 @@ def write_text_confined(
         path, root=root, allow_external_absolute=allow_external_absolute
     )
     resolved.parent.mkdir(parents=True, exist_ok=True)  # NOSONAR - confined path
-    resolved.write_text(data, encoding=encoding)  # NOSONAR - confined path
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=".bioetl-", suffix=".tmp", dir=resolved.parent
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w", encoding=encoding) as handle:
+            handle.write(data)  # NOSONAR - confined parent of rebuilt path
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, resolved)  # NOSONAR - confined parent of rebuilt path
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
     return resolved
 
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-17T14:01:37.061134+00:00",
+  "generated_at": "2026-10-17T14:22:08.939640+00:00",
   "summary": {
     "total_scripts": 648,
     "status_counts": {
@@ -14923,13 +14923,13 @@
         },
         {
           "path": "tests/architecture/test_reduce_benchmark_evidence.py",
-          "line": 706,
+          "line": 747,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_hotspot_degradation_report import ("
         },
         {
           "path": "tests/architecture/test_reduce_benchmark_evidence.py",
-          "line": 769,
+          "line": 820,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_hotspot_degradation_report import ("
         }
