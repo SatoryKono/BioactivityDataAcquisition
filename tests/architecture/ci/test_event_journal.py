@@ -1911,4 +1911,3 @@ def test_late_session_finish_status_change_is_not_complete(tmp_path: Path) -> No
     verdict = _live_verdict(tmp_path / "run")
     assert verdict["status"] != "complete"
     assert verdict["tests_passed"] is not True
-
