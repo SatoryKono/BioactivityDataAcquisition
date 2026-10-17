@@ -584,7 +584,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def _bundle_header_lines(bundle_title: str, diagram_count: int, stamp: str) -> list[str]:
+def _bundle_header_lines(
+    bundle_title: str, diagram_count: int, stamp: str
+) -> list[str]:
     return [
         f"# {bundle_title}\n",
         f"- Generated: {stamp}",
