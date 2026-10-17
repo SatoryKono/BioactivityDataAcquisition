@@ -805,6 +805,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
+    "scripts/engineering/ci/pytest_abort_diagnostic_adapter.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the isolated pytest abort supervisor imported by run_pytest_resilient. The diagnostic manifest is not a JUnit completeness artifact. Keep it supporting so active_script_count_max does not grow.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
     "scripts/engineering/ci/pytest_receipts.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the pytest receipt plugin imported by run_pytest_resilient.py. It is not a CLI entrypoint; keep it supporting and route receipt capture through that runner.",

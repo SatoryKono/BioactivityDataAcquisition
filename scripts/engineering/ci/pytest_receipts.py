@@ -121,7 +121,7 @@ def _is_run_output(
         if relative is not None:
             prefix = _normalize_repo_path(relative.as_posix())
             if normalized == prefix or normalized.startswith(prefix + "/"):
-                return True
+                return status == "??"
     if status != "??":
         return False
     if normalized == ".coverage" or normalized.startswith(".coverage."):
@@ -291,6 +291,15 @@ def _merge_phase(existing: str | None, new: str) -> str:
     return new
 
 
+def _source_diverged(before: Mapping[str, Any], after: Mapping[str, Any]) -> bool:
+    """True when the run dirties measured sources that were clean at start."""
+    before_paths = before.get("measured_dirty_paths")
+    after_paths = after.get("measured_dirty_paths")
+    if isinstance(before_paths, list) and isinstance(after_paths, list):
+        return bool(set(after_paths) - set(before_paths))
+    return before.get("clean") is True and after.get("clean") is not True
+
+
 def _final_exit_code(session: Any, exitstatus: Any) -> int:
     """Return the exit code after other sessionfinish hooks have rewritten it."""
     return int(getattr(session, "exitstatus", exitstatus))
@@ -360,6 +369,7 @@ class ReceiptPlugin:
         self.collection_errors: list[str] = []
         self.results: dict[str, dict[str, str | None]] = {}
         self.source = source_snapshot(self.repo_root, self.receipt_dir)
+        self.source_diverged = False
         head = str(self.source["head"])
         if self.expected_sha and head != self.expected_sha:
             message = f"Checkout SHA mismatch! Expected {self.expected_sha}, got {head}"
@@ -442,7 +452,7 @@ class ReceiptPlugin:
             for nodeid in self.selected_nodeids
             if not _phases_finished(self.results.get(nodeid, _blank_phases()))
         ]
-        if early_stop or missing:
+        if early_stop or missing or getattr(self, "source_diverged", False):
             return "incomplete"
         return "complete"
 
@@ -479,6 +489,9 @@ class ReceiptPlugin:
         assigned = self._assigned_nodeids(session)
         if assigned is not None:
             self.selected_nodeids = assigned
+        finished = source_snapshot(self.repo_root, self.receipt_dir)
+        self.source_diverged = _source_diverged(self.source, finished)
+        self.source = finished
         early_stop = self._early_stop(session)
         payload: dict[str, Any] = {
             "schema_version": _SCHEMA_VERSION,

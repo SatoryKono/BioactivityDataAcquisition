@@ -7,7 +7,6 @@ import os
 import stat
 import subprocess
 import sys
-import time
 from pathlib import Path
 
 import pytest
@@ -346,9 +345,9 @@ def test_timeout_writes_runner_record_without_fake_collection(
         "--fallback-addopts",
         "-q --tb=line -p no:xdist -p no:cacheprovider",
         "--parallel-timeout-seconds",
-        "1",
+        "16",
         "--fallback-timeout-seconds",
-        "1",
+        "16",
         "--skip-serial-pass",
     ]
     completed = subprocess.run(
@@ -532,54 +531,43 @@ def test_sessionfinish_records_rewritten_exit_status(
     assert set(_terminals(payload).values()) == {"failed"}
 
 
-def test_timeout_stops_descendant_processes(tmp_path: Path) -> None:
-    from scripts.engineering.ci.run_pytest_resilient import (
-        _popen_group_kwargs,
-        _terminate_process_tree,
+def test_rejected_timeout_budget_writes_runner_receipt(
+    receipts: Path, tmp_path: Path
+) -> None:
+    test_file = tmp_path / "test_ok.py"
+    _write(test_file, "def test_ok():\n    assert True\n")
+    reports = tmp_path / "reports"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUNNER),
+            "--target",
+            str(test_file),
+            "--reports-dir",
+            str(reports),
+            "--receipt-dir",
+            str(receipts),
+            "--receipt-run-id",
+            "runBudget",
+            "--receipt-attempt",
+            "1",
+            "--parallel-marker",
+            "not slow",
+            "--parallel-timeout-seconds",
+            "10",
+            "--no-fallback",
+            "--skip-serial-pass",
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
     )
-
-    pidfile = tmp_path / "child.pid"
-    script = (
-        "import pathlib, subprocess, sys, time\n"
-        "path = pathlib.Path(sys.argv[1])\n"
-        "child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'])\n"
-        "path.write_text(str(child.pid), encoding='utf-8')\n"
-        "time.sleep(60)\n"
-    )
-    process = subprocess.Popen(
-        [sys.executable, "-c", script, str(pidfile)],
-        **_popen_group_kwargs(),
-    )
-    try:
-        for _ in range(50):
-            if pidfile.is_file():
-                break
-            time.sleep(0.05)
-        assert pidfile.is_file()
-        child_pid = int(pidfile.read_text(encoding="utf-8"))
-        _terminate_process_tree(process)
-        assert process.poll() is not None
-        assert not _pid_is_alive(child_pid)
-    finally:
-        if process.poll() is None:
-            _terminate_process_tree(process)
-
-
-def _pid_is_alive(pid: int) -> bool:
-    if os.name == "nt":
-        import ctypes
-
-        access = 0x1000
-        handle = ctypes.windll.kernel32.OpenProcess(access, False, pid)
-        if not handle:
-            return False
-        ctypes.windll.kernel32.CloseHandle(handle)
-        return True
-    try:
-        os.kill(pid, 0)
-    except OSError:
-        return False
-    return True
+    assert completed.returncode == 2, completed.stderr
+    payload = _load(receipts, run_id="runBudget", pass_name="parallel", worker="runner")
+    assert payload["terminal_kind"] == "invalid_invocation"
+    assert payload["completeness"] == "unknown"
+    assert payload["results"] is None
 
 
 def test_hidden_receipt_dir_and_tracked_reports_stay_distinct(tmp_path: Path) -> None:
@@ -588,6 +576,7 @@ def test_hidden_receipt_dir_and_tracked_reports_stay_distinct(tmp_path: Path) ->
     receipt_dir.mkdir(parents=True)
     assert _normalize_repo_path("./.receipts/receipt.json") == ".receipts/receipt.json"
     assert _is_run_output(".receipts/run/receipt.json", "??", receipt_dir, repo)
+    assert not _is_run_output(".receipts/tracked.py", " M", receipt_dir, repo)
     assert not _is_run_output("reports/quality/input.json", " M", receipt_dir, repo)
     assert _is_run_output("reports/noise.txt", "??", receipt_dir, repo)
 

@@ -9,10 +9,10 @@ are always executed as a dedicated serial pass.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import shlex
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -68,6 +68,8 @@ class PassResult:
     failed_nodeids: list[str]
     worker_crash_detected: bool
     timed_out: bool
+    diagnostic_status: str = ""
+    diagnostic_manifest: Path | None = None
 
 
 def _split_args(raw_args: str) -> list[str]:
@@ -105,62 +107,26 @@ def _merge_process_output(stdout: str, stderr: str) -> str:
     return f"{stdout}\n{stderr}" if stdout else stderr
 
 
-def _decode_timeout_stream(stream: bytes | str | None) -> str:
-    if stream is None:
+def _supervised_output(reports_dir: Path, stdout_file: str, stderr_file: str) -> str:
+    """Read supervisor logs. The diagnostic manifest is not pytest output."""
+    stdout = _read_supervised_log(reports_dir, stdout_file)
+    stderr = _read_supervised_log(reports_dir, stderr_file)
+    return _merge_process_output(stdout, stderr)
+
+
+def _read_supervised_log(reports_dir: Path, relative: str) -> str:
+    from scripts.engineering.common.repo_paths import read_text_confined
+
+    if not relative:
         return ""
-    if isinstance(stream, bytes):
-        return stream.decode("utf-8", errors="replace")
-    return stream
-
-
-def _timeout_output(
-    *,
-    stdout: bytes | str | None,
-    stderr: bytes | str | None,
-    name: str,
-    timeout_seconds: float | None,
-) -> str:
-    output = _merge_process_output(
-        _decode_timeout_stream(stdout),
-        _decode_timeout_stream(stderr),
-    )
-    timeout_note = (
-        f"\n[run_pytest_resilient] pass '{name}' timed out "
-        f"after {timeout_seconds:.0f}s."
-    )
-    return f"{output}{timeout_note}" if output else timeout_note.lstrip()
-
-
-def _popen_group_kwargs() -> dict[str, int | bool]:
-    """Start pytest in its own group so a timeout can stop its descendants."""
-    if os.name == "nt":
-        return {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
-    return {"start_new_session": True}
-
-
-def _terminate_process_tree(process: subprocess.Popen[str]) -> None:
-    """Stop a timed-out pytest process and the children it spawned."""
-    if process.poll() is not None:
-        return
-    if os.name == "nt":
-        subprocess.run(
-            ["taskkill", "/F", "/T", "/PID", str(process.pid)],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    else:
-        import signal
-
-        try:
-            os.killpg(process.pid, signal.SIGKILL)
-        except (ProcessLookupError, PermissionError):
-            process.kill()
     try:
-        process.wait(timeout=10)
-    except subprocess.TimeoutExpired:
-        process.kill()
-        process.wait(timeout=10)
+        return read_text_confined(
+            reports_dir / relative,
+            root=reports_dir,
+            allow_external_absolute=False,
+        )
+    except (OSError, ValueError):
+        return ""
 
 
 def _child_env() -> dict[str, str]:
@@ -174,14 +140,32 @@ def _child_env() -> dict[str, str]:
     return env
 
 
-def _worker_receipt_exists(receipt: ReceiptInvocation, pass_name: str) -> bool:
+def _worker_failure_is_explained(receipt: ReceiptInvocation, pass_name: str) -> bool:
+    """True when a worker receipt already records the failing outcome."""
     root = receipt.directory / receipt.run_id / receipt.attempt / pass_name
     if not root.is_dir():
         return False
-    return any(
-        path.name == "receipt.json" and path.parent.name != "runner"
-        for path in root.rglob("receipt.json")
-    )
+    for path in root.rglob("receipt.json"):
+        if path.parent.name == "runner":
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return False
+        if not isinstance(payload, dict):
+            return False
+        if payload.get("exit_code") not in (0, None):
+            return True
+        if payload.get("completeness") != "complete":
+            return True
+        results = payload.get("results")
+        if isinstance(results, dict) and any(
+            isinstance(item, dict)
+            and item.get("terminal") not in {"passed", "skipped", "xfailed"}
+            for item in results.values()
+        ):
+            return True
+    return False
 
 
 def _record_runner_terminal(
@@ -193,18 +177,19 @@ def _record_runner_terminal(
     timed_out: bool,
     worker_crash: bool,
 ) -> None:
-    """Persist the observed runner failure when the plugin could not."""
+    """Persist a runner failure the worker receipts do not already explain."""
     if receipt is None:
         return
-    aborted = return_code != 0 and not _worker_receipt_exists(receipt, name)
-    if not timed_out and not worker_crash and not aborted:
-        return
+    if return_code == 0:
+        worker_crash = False
     if timed_out:
         kind = "timeout"
     elif worker_crash:
         kind = "worker_crash"
-    else:
+    elif return_code != 0 and not _worker_failure_is_explained(receipt, name):
         kind = "aborted"
+    else:
+        return
     write_runner_terminal_receipt(
         receipt_dir=receipt.directory,
         run_id=receipt.run_id,
@@ -230,11 +215,7 @@ def _run_pass(
     child_env: dict[str, str] | None = None,
 ) -> PassResult:
     """Run pytest pass and persist logs/artifacts."""
-    from scripts.engineering.common.repo_paths import (
-        REPO_ROOT,
-        ensure_safe_cli_argv,
-        resolve_output_path,
-    )
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
     reports_dir = resolve_output_path(reports_dir, root=REPO_ROOT)
     reports_dir.mkdir(parents=True, exist_ok=True)
@@ -255,61 +236,93 @@ def _run_pass(
 
     sys.stdout.write(f"\n=== Running pytest pass: {name} ===\n")
     sys.stdout.write(f"Command: {' '.join(command)}\n")
-    timed_out = False
-    process = subprocess.Popen(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
-        ensure_safe_cli_argv([str(token) for token in command]),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        env=child_env,
-        **_popen_group_kwargs(),
+    from scripts.engineering.ci.pytest_abort_diagnostic_adapter import (
+        DIAGNOSTIC_DUMP_MARGIN_SECONDS,
+        PytestAbortDiagnosticAdapter,
+        child_watchdog_seconds,
     )
-    try:
-        stdout, stderr = process.communicate(timeout=timeout_seconds)
-    except subprocess.TimeoutExpired as exc:
-        timed_out = True
-        _terminate_process_tree(process)
-        try:
-            drained_out, drained_err = process.communicate(timeout=5)
-        except subprocess.TimeoutExpired:
-            drained_out, drained_err = None, None
-        stdout = exc.stdout or drained_out
-        stderr = exc.stderr or drained_err
-    if timed_out:
-        return_code = 124
-        output = _timeout_output(
-            stdout=stdout,
-            stderr=stderr,
-            name=name,
-            timeout_seconds=timeout_seconds,
-        )
-    else:
-        return_code = int(process.returncode if process.returncode is not None else 1)
-        output = _merge_process_output(stdout or "", stderr or "")
+    from scripts.engineering.common.repo_paths import write_text_confined
 
-    log_path.write_text(output, encoding="utf-8")
+    try:
+        watchdog = (
+            None if timeout_seconds is None else child_watchdog_seconds(timeout_seconds)
+        )
+    except ValueError as exc:
+        output = f"[run_pytest_resilient] invalid timeout budget: {exc}\n"
+        write_text_confined(
+            log_path, output, root=reports_dir, allow_external_absolute=False
+        )
+        if receipt is not None:
+            write_runner_terminal_receipt(
+                receipt_dir=receipt.directory,
+                run_id=receipt.run_id,
+                attempt=receipt.attempt,
+                pass_name=name,
+                repo_root=_REPO_ROOT,
+                exit_code=2,
+                terminal_kind="invalid_invocation",
+                observed_error=output,
+            )
+        return PassResult(
+            name=name,
+            command=command,
+            return_code=2,
+            output=output,
+            junit_path=junit_path,
+            log_path=log_path,
+            failed_nodeids=[],
+            worker_crash_detected=False,
+            timed_out=False,
+            diagnostic_status="INVALID_INVOCATION",
+        )
+    manifest = PytestAbortDiagnosticAdapter(
+        timeout=watchdog,
+        dump_margin=DIAGNOSTIC_DUMP_MARGIN_SECONDS,
+        base=reports_dir,
+        child_env=child_env,
+    ).run(
+        command,
+        junit_path,
+        reports_dir / "diagnostics" / name,
+        base=reports_dir,
+    )
+    output = _supervised_output(reports_dir, manifest.stdout_file, manifest.stderr_file)
+    if manifest.status == "WATCHDOG_TIMEOUT":
+        elapsed = 0 if timeout_seconds is None else timeout_seconds
+        output = (
+            f"{output}\n[run_pytest_resilient] pass '{name}' timed out "
+            f"after {elapsed:.0f}s."
+        ).lstrip("\n")
+    write_text_confined(
+        log_path, output, root=reports_dir, allow_external_absolute=False
+    )
     if output:
         sys.stdout.write(output)
     worker_crash = _detect_worker_crash(output)
     _record_runner_terminal(
         receipt=receipt,
         name=name,
-        return_code=return_code,
+        return_code=manifest.wrapper_exit_code,
         output=output,
-        timed_out=timed_out,
+        timed_out=manifest.status == "WATCHDOG_TIMEOUT",
         worker_crash=worker_crash,
     )
+    diagnostic_manifest = None
+    if manifest.diagnostics_persisted and manifest.manifest_file:
+        diagnostic_manifest = reports_dir / manifest.manifest_file
 
     return PassResult(
         name=name,
         command=command,
-        return_code=return_code,
+        return_code=manifest.wrapper_exit_code,
         output=output,
         junit_path=junit_path,
         log_path=log_path,
         failed_nodeids=_extract_failed_nodeids(output),
         worker_crash_detected=worker_crash,
-        timed_out=timed_out,
+        timed_out=manifest.status == "WATCHDOG_TIMEOUT",
+        diagnostic_status=manifest.status,
+        diagnostic_manifest=diagnostic_manifest,
     )
 
 
@@ -340,6 +353,11 @@ def _append_pass_summary(
         f"log={result.log_path} junit={result.junit_path}"
     )
     _append_failed_nodeids(summary_lines, result=result)
+    if result.diagnostic_manifest is not None:
+        summary_lines.append(
+            f"{result.name}_diagnostic: status={result.diagnostic_status} "
+            f"manifest={result.diagnostic_manifest}"
+        )
 
 
 def _summary_state_fields(result: PassResult) -> str:
@@ -484,6 +502,14 @@ def _create_parser() -> argparse.ArgumentParser:
         help="Skip dedicated serial-marker pass.",
     )
     parser.add_argument(
+        "--no-fallback",
+        action="store_true",
+        help=(
+            "Do not start a second pytest pass after a worker crash or watchdog "
+            "timeout. The parallel pass status is returned as-is."
+        ),
+    )
+    parser.add_argument(
         "--parallel-timeout-seconds",
         type=float,
         default=900.0,
@@ -531,15 +557,15 @@ def _create_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     """CLI entrypoint."""
     parser = _create_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     reports_dir = Path(args.reports_dir)
     summary_lines: list[str] = []
 
-    base_command = [sys.executable, "-m", "pytest"]
+    base_command = [sys.executable, "-X", "faulthandler", "-m", "pytest"]
     receipt: ReceiptInvocation | None = None
     if args.receipt_dir:
         base_command.extend(["-p", "scripts.engineering.ci.pytest_receipts"])
@@ -593,8 +619,15 @@ def main() -> int:
         _write_summary(_summary_path(reports_dir), summary_lines)
         return serial_rc
 
-    if _parallel_failure_is_stable(parallel_result):
-        summary_lines.append("parallel_failed_without_worker_crash=true")
+    if _parallel_failure_is_stable(parallel_result) or args.no_fallback:
+        if _parallel_failure_is_stable(parallel_result):
+            summary_lines.append("parallel_failed_without_worker_crash=true")
+        else:
+            _append_parallel_instability_markers(
+                summary_lines,
+                parallel_result=parallel_result,
+            )
+            summary_lines.append("fallback_skipped=true")
         _write_summary(_summary_path(reports_dir), summary_lines)
         return parallel_rc
 
