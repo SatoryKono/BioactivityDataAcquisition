@@ -46,7 +46,13 @@ class GroupRecordStore:
     def _date(self, relative: str) -> Iterator[tuple[int, list[list[int]]]]:
         target = self._root / relative / "_member"
         try:
-            with _anchored_parent(target, self._root, self._root, self._root_fd) as (
+            with _anchored_parent(
+                target,
+                self._root,
+                self._root,
+                self._root_fd,
+                require_destructive_capability=False,
+            ) as (
                 root_fd,
                 date_fd,
                 _name,

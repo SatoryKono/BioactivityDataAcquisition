@@ -1715,10 +1715,69 @@ def test_lock_probes_target_volume_only_for_mutating_operations(
                 tmp_path, exclusive=True, create_lock=create_lock
             ):
                 pytest.fail("Unsupported destructive operation acquired a lease")
+        assert list(tmp_path.iterdir()) == []
     else:
         with support.bronze_tree_lock(
             tmp_path, exclusive=False, create_lock=create_lock
-        ):
-            pass
-    assert calls == ([tmp_path] if exclusive or create_lock else [])
-    assert list(tmp_path.iterdir()) == []
+        ) as lease:
+            assert lease.fd is not None
+        names = sorted(path.name for path in tmp_path.iterdir())
+        assert names == ([".bronze-cleanup.lock"] if create_lock else [])
+    assert calls == ([tmp_path] if exclusive else [])
+
+
+def test_shared_writer_refuses_unreadable_root_listing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An unreadable root listing refuses the shared writer with no mutation."""
+    monkeypatch.setattr(cleanup_core, "_platform_cleanup_supported", lambda: False)
+    sentinel = tmp_path / "sentinel.bin"
+    sentinel.write_bytes(b"keep")
+    real_iterdir = Path.iterdir
+
+    def denied(self: Path):
+        same = os.path.normcase(str(self.resolve())) == os.path.normcase(
+            str(tmp_path.resolve())
+        )
+        if same:
+            raise PermissionError(13, "listing denied")
+        return real_iterdir(self)
+
+    monkeypatch.setattr(Path, "iterdir", denied)
+    with pytest.raises(PermissionError, match="listing denied"):
+        with support.bronze_tree_lock(tmp_path, exclusive=False):
+            pytest.fail("unreadable root acquired a shared lease")
+    assert sentinel.read_bytes() == b"keep"
+    assert not (tmp_path / ".bronze-cleanup.lock").exists()
+
+
+def test_flat_journal_directory_is_reserved_maintenance(tmp_path: Path) -> None:
+    """An empty flat-layout journal directory is reserved maintenance."""
+    root = _abs(tmp_path)
+    journal = root / ".bronze-group-journals"
+    journal.mkdir()
+    (root / _DATE).mkdir()
+    skips: list[tuple[str, str]] = []
+    found = support.find_old_date_dirs(
+        root,
+        flat_structure=True,
+        cutoff_str=_CUTOFF,
+        on_skip=lambda path, reason: skips.append((path, reason)),
+    )
+    assert [path.name for path in found] == [_DATE]
+    assert [reason for _path, reason in skips] == ["reserved_maintenance"]
+    assert journal.is_dir() and not any(journal.iterdir())
+    stats = planner.BronzeCleanupPlannerMixin._empty_cleanup_stats()
+    mixin = type(
+        "_SkipMixin",
+        (),
+        {
+            "_log_cleanup_skip": staticmethod(lambda *_a, **_k: None),
+            "_record_cleanup_discovery_skip": (
+                read_cleanup.BronzeWriterReadCleanupMixin._record_cleanup_discovery_skip
+            ),
+        },
+    )()
+    for path, reason in skips:
+        mixin._record_cleanup_discovery_skip(stats, path, reason)
+    assert stats["directories_skipped"] == 0

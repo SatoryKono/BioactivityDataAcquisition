@@ -332,6 +332,9 @@ def _old_date_children(
 ) -> list[Path]:
     old: list[Path] = []
     for date_dir in iter_safe_child_dirs(parent, on_skip=on_skip):
+        if is_reserved_bronze_maintenance_name(date_dir.name):
+            _notify_skip(on_skip, date_dir, "reserved_maintenance")
+            continue
         if date_dir_name_is_older(date_dir.name, cutoff_str):
             old.append(date_dir)
         elif not date_dir_name_is_canonical(date_dir.name):

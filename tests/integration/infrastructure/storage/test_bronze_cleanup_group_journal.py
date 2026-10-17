@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import errno
-import json
 import hashlib
+import json
 import os
 import platform
 import select
@@ -13,10 +13,8 @@ import sys
 from pathlib import Path
 
 import pytest
-
 from bioetl.infrastructure.storage.bronze import cleanup_group_journal as journal
 from bioetl.infrastructure.storage.bronze import cleanup_group_records as records
-
 
 pytestmark = pytest.mark.integration
 
@@ -233,6 +231,13 @@ def test_begin_rejects_new_attested_inode_after_plan(tmp_path: Path):
     payload = date / spec.names()["payload"]
     payload.unlink()
     payload.write_bytes(b"payload\n")
+    fields = ("st_dev", "st_ino", "st_size", "st_mtime_ns", "st_ctime_ns")
+    planned = expected[payload.name]
+    current = payload.stat()
+    if all(getattr(current, field) == getattr(planned, field) for field in fields):
+        # Overlay can recycle the inode and timestamp of an identical rewrite.
+        bumped = planned.st_mtime_ns + 1_000_000_000
+        os.utime(payload, ns=(bumped, bumped))
     with journal.open_group_journal(root) as operation:
         with pytest.raises(
             journal.GroupJournalConflict, match="planned group member changed"

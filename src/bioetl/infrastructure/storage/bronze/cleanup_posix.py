@@ -21,6 +21,7 @@ from .cleanup_core import (
     _STAGE_PREFIX,
     _CleanupConflict,
     _finish_private_stage,
+    _require_unlinked_bronze_root,
     destructive_cleanup_supported,
     open_bronze_root_no_follow,
     stat_is_link_or_reparse,
@@ -33,10 +34,20 @@ def _same_identity(left: os.stat_result, right: os.stat_result) -> bool:
 
 @contextmanager
 def _anchored_parent(
-    path: Path, root_abs: Path, root_real: Path, root_fd: int | None = None
+    path: Path,
+    root_abs: Path,
+    root_real: Path,
+    root_fd: int | None = None,
+    *,
+    require_destructive_capability: bool = True,
 ) -> Iterator[tuple[int, int, str, list[tuple[int, int, str]]]]:
     """Open every relative parent component without following a link."""
-    if not destructive_cleanup_supported(root_abs):
+    try:
+        # A linked root is a refusal, not a missing volume capability.
+        _require_unlinked_bronze_root(root_abs)
+    except OSError as exc:
+        raise _CleanupConflict from exc
+    if require_destructive_capability and not destructive_cleanup_supported(root_abs):
         raise NotImplementedError("Bronze destructive cleanup has no safe handle API")
     try:
         parts = Path(os.path.abspath(path)).relative_to(root_abs).parts  # noqa: PTH100

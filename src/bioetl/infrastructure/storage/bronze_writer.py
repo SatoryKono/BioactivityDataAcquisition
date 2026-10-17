@@ -12,6 +12,9 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+from bioetl.infrastructure.storage.bronze.cleanup_core import (
+    _require_unlinked_bronze_root,
+)
 from bioetl.infrastructure.storage.bronze.cleanup_support import bronze_tree_lock
 from bioetl.infrastructure.storage.bronze.facade_contracts import (
     BRONZE_WRITE_ERRORS,
@@ -60,6 +63,15 @@ from bioetl.domain.ports.noop import _NoOpSpan
 __all__ = ["BRONZE_WRITE_ERRORS", "BronzeWriter"]
 
 BRONZE_ATOMIC_WRITE_CONTRACT = "atomic_write_bytes via bronze.write_execution"
+
+
+def _prepare_unlinked_bronze_root(base_path: Path) -> None:
+    """Reject a linked ancestor before creating the configured root.
+
+    A leaf symlink remains a writer alias. The shared lock pins its target.
+    """
+    _require_unlinked_bronze_root(base_path, allow_leaf_link=True)
+    base_path.mkdir(parents=True, exist_ok=True)
 
 
 async def _drain_shielded_task[T](task: asyncio.Task[T]) -> None:
@@ -247,7 +259,7 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, request: BronzeWriteRequest
     ) -> BronzeWriteResult:
         """Hold the cooperative root lock through all writer side effects."""
-        await asyncio.to_thread(self.base_path.mkdir, parents=True, exist_ok=True)
+        await asyncio.to_thread(_prepare_unlinked_bronze_root, self.base_path)
         lock = bronze_tree_lock(self.base_path, exclusive=False)
         entering = asyncio.create_task(asyncio.to_thread(lock.__enter__))
         try:

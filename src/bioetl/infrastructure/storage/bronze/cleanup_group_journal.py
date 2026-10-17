@@ -13,6 +13,7 @@ from typing import Any
 from .cleanup_core import (
     _directory_xattr_supported,
     _platform_cleanup_supported,
+    _require_unlinked_bronze_root,
     destructive_cleanup_supported,
 )
 from .cleanup_group_recovery import GroupRecoveryCoordinator
@@ -59,6 +60,7 @@ __all__ = [
 @contextmanager
 def open_group_journal(root: Path) -> Iterator[GroupJournal]:
     """Hold the production cooperative exclusive lock for explicit operations."""
+    _require_unlinked_bronze_root(root)
     if not _platform_cleanup_supported() or not _directory_xattr_supported(root):
         raise NotImplementedError(
             "durable Bronze group apply requires POSIX pinned handles"

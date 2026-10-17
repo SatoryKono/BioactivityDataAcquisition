@@ -124,14 +124,15 @@ def _xattr_apis() -> tuple[Any, Any, Any | None] | None:  # Any: os xattr callab
 def _xattr_probe_anchor(base_path: Path) -> tuple[int, str] | None:
     """Return ``(st_dev, probe_parent)`` for the Bronze volume, if reachable."""
     try:
-        anchor = Path(os.path.abspath(base_path))  # noqa: PTH100
+        # A linked root or ancestor is not a probe target. Returning here
+        # avoids creating a temporary directory outside the configured tree.
+        _require_unlinked_bronze_root(base_path)
+        anchor = Path(os.path.abspath(os.fspath(base_path)))  # noqa: PTH100
         while not anchor.exists() and anchor.parent != anchor:
             anchor = anchor.parent
-        if not anchor.exists():
+        if not anchor.exists() or not anchor.is_dir():
             return None
-        cache_key = int(anchor.stat().st_dev)
-        parent = str(anchor if anchor.is_dir() else anchor.parent)
-        return cache_key, parent
+        return int(anchor.stat().st_dev), str(anchor)
     except OSError:
         return None
 
@@ -198,10 +199,7 @@ def _directory_xattr_supported(base_path: Path | None = None) -> bool:
 
 def _visible_pending_group_markers(base_path: Path) -> bool:
     """Fail-closed reserved journal/stage visibility without a pinned root fd."""
-    try:
-        names = [entry.name for entry in base_path.iterdir()]
-    except OSError:
-        return False
+    names = [entry.name for entry in base_path.iterdir()]
     if any(
         name.startswith((_GROUP_STAGE_PREFIX, _STAGE_PREFIX, _DONE_PREFIX))
         for name in names
@@ -245,6 +243,31 @@ def stat_is_link_or_reparse(st: os.stat_result) -> bool:
     if stat.S_ISLNK(st.st_mode):
         return True
     return bool(getattr(st, "st_file_attributes", 0) & _REPARSE_POINT_ATTR)
+
+
+def _require_unlinked_bronze_root(
+    base_path: Path, *, allow_leaf_link: bool = False
+) -> None:
+    """Refuse a symlink or reparse point before probe, lock, or mkdir.
+
+    ``allow_leaf_link`` keeps a configured writer alias. Ancestors stay real
+    so a parent link cannot receive a new root or an xattr probe.
+    """
+    absolute = Path(os.path.abspath(os.fspath(base_path)))  # noqa: PTH100
+    components: tuple[Path, ...] = tuple(reversed(absolute.parents))
+    if not allow_leaf_link:
+        components = (*components, absolute)
+    for component in components:
+        try:
+            info = os.lstat(component)
+        except FileNotFoundError:
+            return
+        except OSError as exc:
+            raise OSError("Bronze root contains a symlink or reparse point") from exc
+        if stat_is_link_or_reparse(info):
+            raise OSError("Bronze root contains a symlink or reparse point")
+        if not stat.S_ISDIR(info.st_mode):
+            raise OSError("Bronze root is not a directory")
 
 
 def is_reserved_bronze_maintenance_name(name: str) -> bool:
@@ -341,9 +364,12 @@ def bronze_tree_lock(
     create_lock: bool = True,
 ) -> Iterator[BronzeRootLease]:
     """Advisory writer/cleaner lock; ``create_lock=False`` is non-mutating dry-run."""
-    # Preview needs a pinned shared lease, but must never probe by creating files.
+    # Shared leases may pin one leaf symlink and still flock. Destructive apply
+    # refuses every linked component before the volume xattr probe.
+    pin_leaf = not exclusive and _platform_cleanup_supported()
+    _require_unlinked_bronze_root(base_path, allow_leaf_link=pin_leaf)
     caps = _platform_cleanup_supported() and (
-        not (exclusive or create_lock) or _directory_xattr_supported(base_path)
+        not exclusive or _directory_xattr_supported(base_path)
     )
     if not caps:
         if exclusive:
@@ -355,7 +381,7 @@ def bronze_tree_lock(
         return
     import fcntl
 
-    root_path = base_path if exclusive else Path(os.path.realpath(base_path))
+    root_path = Path(os.path.realpath(base_path)) if pin_leaf else base_path
     root_real, root_fd = open_bronze_root_no_follow(root_path)
     try:
         flock_fn: Callable[[int, int], None] = fcntl.__dict__["flock"]

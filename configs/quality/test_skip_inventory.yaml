@@ -355,7 +355,7 @@ entries:
     owner: "@bioetl-storage"
     linked_issue: "#12102"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 12
+    reviewed_skip_calls: 14
     vcr_related: false
     review_date: "2026-10-12"
     rationale: POSIX apply and anchored-operation cases require verified handle APIs; Windows-only refusal tests and junction cases remain platform-conditional. Windows destructive safety is NOT_VERIFIED.
