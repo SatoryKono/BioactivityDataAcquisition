@@ -470,9 +470,13 @@ def _run_journal(
     child_env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
     if env:
         child_env.update(env)
-    if not child_env.get("BIOETL_JOURNAL_REDACTION_KEY"):
-        from scripts.engineering.ci.pytest_event_journal import ensure_redaction_key
+    from scripts.engineering.ci.pytest_event_journal import (
+        _REDACTION_KEY_MIN_LENGTH,
+        ensure_redaction_key,
+    )
 
+    current_key = child_env.get("BIOETL_JOURNAL_REDACTION_KEY", "")
+    if len(current_key) < _REDACTION_KEY_MIN_LENGTH:
         child_env["BIOETL_JOURNAL_REDACTION_KEY"] = ensure_redaction_key()
     return subprocess.run(
         [
@@ -845,7 +849,13 @@ def test_assignment_redacts_only_the_secret_value() -> None:
 
 
 def test_credential_prefixes_stay_out_of_the_journal(tmp_path: Path) -> None:
-    from scripts.engineering.ci.pytest_event_journal import _redaction_token
+    import hashlib
+    import re
+
+    from scripts.engineering.ci.pytest_event_journal import (
+        _redaction_token,
+        ensure_redaction_key,
+    )
 
     first = "AKIAIOSFODNN7EXAMPLE"
     second = "AKIABBBBBBBBBBBBBBBB"
@@ -872,9 +882,17 @@ def test_credential_prefixes_stay_out_of_the_journal(tmp_path: Path) -> None:
     )
     assert first not in blob
     assert second not in blob
+    assert "test_reads" in blob
     assert _redaction_token(first) in blob
     assert _redaction_token(second) in blob
     assert _redaction_token(first) != _redaction_token(second)
+    tokens = set(re.findall(r"\[redacted:[0-9a-f]{12}\]", blob))
+    assert len(tokens) >= 2
+    for secret in (first, second):
+        unsalted = hashlib.sha256(secret.encode("utf-8")).hexdigest()[:12]
+        assert unsalted not in blob
+    assert ensure_redaction_key() not in blob
+    assert "BIOETL_JOURNAL_REDACTION_KEY" not in blob
 
 
 def test_access_key_env_value_is_removed_from_nodeids(
@@ -1454,7 +1472,8 @@ def test_run_pass_forwards_repo_root_on_pythonpath(
     ]
     assert child_env["BIOETL_JOURNAL_INVOCATION_ID"] == result.invocation_id
     assert child_env["BIOETL_JOURNAL_PASS"] == "parallel"
-    assert child_env.get("BIOETL_JOURNAL_REDACTION_KEY")
+    key = child_env.get("BIOETL_JOURNAL_REDACTION_KEY") or ""
+    assert len(key) >= 32
 
 
 def test_quoted_assignment_redacts_the_enclosed_value() -> None:
@@ -1463,7 +1482,14 @@ def test_quoted_assignment_redacts_the_enclosed_value() -> None:
     raw = '--payload={"password":"swordfish"}'
     redacted = _redact_text(raw, ())
     assert "swordfish" not in redacted
-    assert "password" in redacted
+    assert redacted.startswith('--payload={"password":"')
+    assert redacted.endswith('"}')
+    assert "[redacted:" in redacted
+    empty = "--payload={'password':''}"
+    redacted_empty = _redact_text(empty, ())
+    assert redacted_empty.endswith("'}")
+    assert "[redacted:" in redacted_empty
+    assert "''" not in redacted_empty
 
 
 def test_redaction_token_is_not_an_unsalted_digest() -> None:
@@ -1517,6 +1543,8 @@ def test_worker_collection_without_controller_is_unknown(tmp_path: Path) -> None
     verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
     assert verdict["status"] == "unknown"
     assert "missing_controller_collection" in verdict["reasons"]
+    assert verdict["tests_passed"] is None
+    assert verdict["selected_count"] == 0
 
 
 def test_invalid_utf8_receipt_is_damaged(tmp_path: Path) -> None:
@@ -1524,6 +1552,7 @@ def test_invalid_utf8_receipt_is_damaged(tmp_path: Path) -> None:
     path.write_bytes(b"\xff\n")
     verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
     assert verdict["status"] == "unknown"
+    assert verdict["tests_passed"] is None
 
 
 def test_malformed_identity_does_not_escape_reconciliation(tmp_path: Path) -> None:
@@ -1574,3 +1603,312 @@ def test_checkout_sha_command_uses_repository_root(
     assert error is None
     assert sha == "a" * 40
     assert seen["argv"][:3] == ["git", "-C", str(journal._REPO_ROOT)]
+
+
+def test_extra_outcome_copies_do_not_exceed_selected_count(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            *_phases(identity, nodeid, "passed"),
+            *_phases(identity, nodeid, "passed"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert verdict["selected_count"] == 1
+    assert len(verdict["terminals"]) == 1
+    assert verdict["tests_passed"] is True
+
+
+def test_two_selected_copies_with_two_phase_sets_are_complete(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid, nodeid]),
+            *_phases(identity, nodeid, "passed"),
+            *_phases(identity, nodeid, "passed"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert verdict["selected_count"] == 2
+    assert len(verdict["terminals"]) == 2
+    assert verdict["tests_passed"] is True
+
+
+def test_intact_controller_without_collection_uses_worker_list(
+    tmp_path: Path,
+) -> None:
+    controller = _identity(role="controller", worker_id="controller")
+    worker = _identity(role="worker", worker_id="gw0")
+    nodeid = "test_sample.py::test_a"
+    _write_receipt(
+        tmp_path,
+        _finalized(
+            [
+                _start(controller),
+                {"event": "session_finish", "identity": controller, "exitstatus": 0},
+            ]
+        ),
+        name="receipt_controller.jsonl",
+    )
+    _write_receipt(
+        tmp_path,
+        _finalized(
+            [
+                _start(worker),
+                _collected(worker, [nodeid]),
+                *_phases(worker, nodeid, "passed"),
+                {"event": "session_finish", "identity": worker, "exitstatus": 0},
+            ]
+        ),
+        name="receipt_worker.jsonl",
+    )
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert verdict["selected_count"] == 1
+    assert verdict["tests_passed"] is True
+
+
+def test_conflicting_controller_collections_do_not_use_workers(
+    tmp_path: Path,
+) -> None:
+    controller = _identity(role="controller", worker_id="controller")
+    worker = _identity(role="worker", worker_id="gw0")
+    node_a = "test_sample.py::test_a"
+    node_b = "test_sample.py::test_b"
+    _write_receipt(
+        tmp_path,
+        _finalized(
+            [
+                _start(controller),
+                _collected(controller, [node_a]),
+                _collected(controller, [node_b]),
+                {"event": "session_finish", "identity": controller, "exitstatus": 0},
+            ]
+        ),
+        name="receipt_controller.jsonl",
+    )
+    _write_receipt(
+        tmp_path,
+        _finalized(
+            [
+                _start(worker),
+                _collected(worker, [node_a, node_b]),
+                *_phases(worker, node_a, "passed"),
+                *_phases(worker, node_b, "passed"),
+                {"event": "session_finish", "identity": worker, "exitstatus": 0},
+            ]
+        ),
+        name="receipt_worker.jsonl",
+    )
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "unknown"
+    assert verdict["selected_count"] == 0
+    assert "conflicting_collection" in verdict["reasons"]
+    assert verdict["tests_passed"] is None
+
+
+def test_forwarded_origin_with_worker_receipt_is_complete(tmp_path: Path) -> None:
+    controller = _identity(role="controller", worker_id="controller")
+    worker = _identity(role="worker", worker_id="gw0")
+    nodeid = "test_sample.py::test_a"
+    controller_outcomes = _phases(controller, nodeid, "passed")
+    for event in controller_outcomes:
+        event["origin_worker"] = "gw0"
+    _write_receipt(
+        tmp_path,
+        _finalized(
+            [
+                _start(controller),
+                _collected(controller, [nodeid]),
+                *controller_outcomes,
+                {"event": "session_finish", "identity": controller, "exitstatus": 0},
+            ]
+        ),
+        name="receipt_controller.jsonl",
+    )
+    _write_receipt(
+        tmp_path,
+        _finalized(
+            [
+                _start(worker),
+                _collected(worker, [nodeid]),
+                *_phases(worker, nodeid, "passed"),
+                {"event": "session_finish", "identity": worker, "exitstatus": 0},
+            ]
+        ),
+        name="receipt_worker.jsonl",
+    )
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert verdict["selected_count"] == 1
+    assert len(verdict["terminals"]) == 1
+    assert verdict["terminals"][0]["worker_id"] == "gw0"
+    assert verdict["tests_passed"] is True
+
+
+def test_utf8_error_inside_a_complete_receipt_is_unknown(tmp_path: Path) -> None:
+    events = _controller_pass(
+        ["test_sample.py::test_a"],
+        {"test_sample.py::test_a": "passed"},
+    )
+    _write_receipt(tmp_path, events)
+    path = tmp_path / "receipt_test.jsonl"
+    raw = bytearray(path.read_bytes())
+    marker = b"serial-coverage"
+    index = raw.find(marker)
+    assert index >= 0
+    raw[index] = 255
+    path.write_bytes(bytes(raw))
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "unknown"
+    assert verdict["tests_passed"] is None
+
+
+@pytest.mark.parametrize("bad_retry", ["unknown", "0", True, -1])
+def test_bad_retry_index_is_unknown(tmp_path: Path, bad_retry: Any) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    phases = _phases(identity, nodeid, "passed")
+    phases[0]["retry_index"] = bad_retry
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            *phases,
+            {"event": "session_finish", "identity": identity, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "unknown"
+    assert verdict["tests_passed"] is None
+
+
+def test_checkout_sha_from_another_directory_uses_repository_root(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    monkeypatch.chdir(tmp_path)
+    sha, error = journal.measure_checkout_sha()
+    assert error is None
+    expected = subprocess.run(
+        ["git", "-C", str(journal._REPO_ROOT), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert sha == expected
+
+
+def test_redaction_key_is_process_local_until_publish() -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    env_name = journal._REDACTION_KEY_ENV
+    previous_env = os.environ.get(env_name)
+    previous_key = journal._REDACTION_KEY
+    os.environ.pop(env_name, None)
+    journal._REDACTION_KEY = None
+    try:
+        os.environ[env_name] = "x" * 16
+        first = journal.ensure_redaction_key()
+        assert len(first) >= journal._REDACTION_KEY_MIN_LENGTH
+        assert os.environ[env_name] == "x" * 16
+        assert journal.ensure_redaction_key() == first
+        journal.publish_redaction_key()
+        assert os.environ[env_name] == first
+    finally:
+        journal._REDACTION_KEY = previous_key
+        if previous_env is None:
+            os.environ.pop(env_name, None)
+        else:
+            os.environ[env_name] = previous_env
+
+
+def test_safe_env_excludes_the_redaction_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    key = "ab" * 32
+    previous = journal._REDACTION_KEY
+    monkeypatch.setenv(journal._REDACTION_KEY_ENV, key)
+    try:
+        safe = journal._safe_env(())
+    finally:
+        journal._REDACTION_KEY = previous
+    assert journal._REDACTION_KEY_ENV not in safe
+    assert all(key not in value for value in safe.values())
+
+
+@pytest.mark.parametrize("payload", [b"{", b"[1]", b'"text"', b"\xff"])
+def test_malformed_stored_verdict_is_a_controlled_exit(
+    tmp_path: Path, payload: bytes
+) -> None:
+    from scripts.engineering.ci.pytest_event_journal import (
+        JOURNAL_COMPLETENESS_EXIT,
+        verify_directory,
+    )
+
+    journal = tmp_path / "journal"
+    journal.mkdir()
+    (journal / "journal-verdict.json").write_bytes(payload)
+    assert verify_directory(journal) == JOURNAL_COMPLETENESS_EXIT
+
+
+def test_late_session_finish_failure_is_not_complete(tmp_path: Path) -> None:
+    plugin = tmp_path / "late_session_hook.py"
+    plugin.write_text(
+        "import pytest\n\n"
+        "@pytest.hookimpl(trylast=True)\n"
+        "def pytest_sessionfinish(session, exitstatus):\n"
+        "    raise RuntimeError('late session finish')\n",
+        encoding="utf-8",
+    )
+    result = _run_journal(
+        tmp_path / "run",
+        "def test_ok():\n    pass\n",
+        ["-p", "late_session_hook"],
+        {"PYTHONPATH": os.pathsep.join((str(tmp_path), str(_ROOT)))},
+    )
+    assert result.returncode != 0
+    verdict = _live_verdict(tmp_path / "run")
+    assert verdict["status"] != "complete"
+    assert verdict["tests_passed"] is not True
+    blob = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in (tmp_path / "run" / "journal").glob("*.jsonl")
+    )
+    assert '"hook_error": true' in blob
+
+
+def test_late_session_finish_status_change_is_not_complete(tmp_path: Path) -> None:
+    plugin = tmp_path / "late_session_hook.py"
+    plugin.write_text(
+        "import pytest\n\n"
+        "@pytest.hookimpl(trylast=True)\n"
+        "def pytest_sessionfinish(session, exitstatus):\n"
+        "    session.exitstatus = 1\n",
+        encoding="utf-8",
+    )
+    result = _run_journal(
+        tmp_path / "run",
+        "def test_ok():\n    pass\n",
+        ["-p", "late_session_hook"],
+        {"PYTHONPATH": os.pathsep.join((str(tmp_path), str(_ROOT)))},
+    )
+    assert result.returncode != 0
+    verdict = _live_verdict(tmp_path / "run")
+    assert verdict["status"] != "complete"
+    assert verdict["tests_passed"] is not True
+

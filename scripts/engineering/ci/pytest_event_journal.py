@@ -16,15 +16,20 @@ not change the pytest process exit code. Completeness stays not-complete.
 A close-error marker beside the receipt overrides ``io_error`` on the
 finalized line.
 
-Completeness is not the number of JSONL rows and not pytest's exit code.
-``complete`` requires an intact controller collection, intact receipts,
-and an explained terminal state for every selected test. Deselected
-nodeids are removed before that match. A complete run may still contain
-failures. ``GITHUB_RUN_ATTEMPT`` is the workflow attempt, not a retry
-inside this runner. Reconciliation keeps the latest invocation of each
-pass, or the invocation recorded for this process, and the workers that
-share it. A damaged receipt with no authoritative pass and invocation
-blocks the whole directory.
+Completeness is not the row count or pytest's exit code. ``complete``
+requires an intact controller receipt, intact worker receipts for every
+forwarded origin, and an explained terminal state for every selected
+instance. Setup-terminal outcomes still need a teardown report.
+Deselected nodeids are removed before that match. Repeated nodeids stay
+separate instances. A complete run may still contain failures.
+``GITHUB_RUN_ATTEMPT`` is the workflow attempt, not a retry inside this
+runner. Reconciliation keeps the latest invocation of each pass, or the
+invocation recorded for this process, and the workers that share it. A
+damaged receipt with no authoritative pass and invocation blocks the
+whole directory. Receipt bytes must be strict UTF-8. Redaction tokens
+are keyed outside the receipt. A later session-finish hook that raises
+or changes the exit status is stored as ``hook_error`` and keeps the
+pass from being complete.
 """
 
 from __future__ import annotations
@@ -58,6 +63,8 @@ _SECRET_ASSIGNMENT = re.compile(
     r"""['"]?\s*[:=]\s*(?:"([^"]*)"|'([^']*)'|([^\s,;\]"']+))"""
 )
 _REDACTION_KEY_ENV = "BIOETL_JOURNAL_REDACTION_KEY"
+_REDACTION_KEY_MIN_LENGTH = 32
+_REDACTION_KEY: str | None = None
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _SECRET_PREFIX = re.compile(
     r"(?:ghp_[A-Za-z0-9]+|github_pat_[A-Za-z0-9_]+|sk-[A-Za-z0-9]+|"
@@ -100,18 +107,25 @@ def pytest_addoption(parser: Any) -> None:
 
 
 def ensure_redaction_key() -> str:
-    """Return this process's redaction key, creating it when absent.
+    """Return the process-local HMAC key for redaction tokens.
 
-    The key stays in the process environment and is not written into receipts.
-    A fresh key per run stops the token from being an unsalted digest of the
-    secret and from matching the same secret in another run.
+    A long BIOETL_JOURNAL_REDACTION_KEY is reused. Otherwise the process
+    keeps one generated key. The key is not written into receipts.
     """
+    global _REDACTION_KEY
     current = os.environ.get(_REDACTION_KEY_ENV, "")
-    if len(current) >= 16:
+    if len(current) >= _REDACTION_KEY_MIN_LENGTH:
+        _REDACTION_KEY = current
         return current
-    generated = secrets.token_hex(32)
-    os.environ[_REDACTION_KEY_ENV] = generated
-    return generated
+    if _REDACTION_KEY is not None and len(_REDACTION_KEY) >= _REDACTION_KEY_MIN_LENGTH:
+        return _REDACTION_KEY
+    _REDACTION_KEY = secrets.token_hex(32)
+    return _REDACTION_KEY
+
+
+def publish_redaction_key() -> None:
+    """Expose the process key to child processes spawned after configure."""
+    os.environ[_REDACTION_KEY_ENV] = ensure_redaction_key()
 
 
 def _redaction_token(secret: str) -> str:
@@ -416,11 +430,6 @@ class EventJournalPlugin:
             payload["origin_worker"] = origin
         self.record("outcome", payload)
 
-    def pytest_sessionfinish(self, session: Any, exitstatus: int) -> None:
-        _ = session
-        self.record("session_finish", {"exitstatus": int(exitstatus)})
-        self.finalize()
-
 
 def _origin_worker(report: Any) -> str | None:
     """Worker id stamped by xdist on a controller-forwarded report."""
@@ -480,10 +489,57 @@ def _register_collection_hook(config: Any, plugin: EventJournalPlugin) -> None:
     )
 
 
+def _session_finish_payload(
+    session: Any, exitstatus: int, outcome: Any
+) -> dict[str, Any]:
+    """Read the exit status after the other session-finish hooks have run."""
+    final = getattr(session, "exitstatus", exitstatus)
+    try:
+        final_status = int(final)
+    except (TypeError, ValueError):
+        final_status = 1
+    try:
+        initial_status = int(exitstatus)
+    except (TypeError, ValueError):
+        initial_status = final_status
+    hook_failed = getattr(outcome, "excinfo", None) is not None
+    if hook_failed and final_status == 0:
+        final_status = 1
+    payload: dict[str, Any] = {"exitstatus": final_status}
+    if hook_failed or final_status != initial_status:
+        payload["hook_error"] = True
+    return payload
+
+
+def _register_session_finish_hook(config: Any, plugin: EventJournalPlugin) -> None:
+    """Finalize only after every other session-finish hook has completed."""
+    import pytest
+
+    class _SessionFinishHook:
+        def __init__(self, owner: EventJournalPlugin) -> None:
+            self._owner = owner
+
+        @pytest.hookimpl(hookwrapper=True, tryfirst=True)
+        def pytest_sessionfinish(self, session: Any, exitstatus: int) -> Any:
+            outcome = yield
+            self._owner.record(
+                "session_finish",
+                _session_finish_payload(session, exitstatus, outcome),
+            )
+            self._owner.finalize()
+            outcome.get_result()
+
+    config.pluginmanager.register(
+        _SessionFinishHook(plugin),
+        "event_journal_session_finish_hook",
+    )
+
+
 def pytest_configure(config: Any) -> None:
     journal_dir = config.getoption("--event-journal-dir")
     if not journal_dir:
         return
+    publish_redaction_key()
     secrets = _secret_values()
     actual_sha, sha_error = measure_checkout_sha()
     identity = _identity_from_env(actual_sha=actual_sha, secrets=secrets)
@@ -497,6 +553,7 @@ def pytest_configure(config: Any) -> None:
         return
     config.pluginmanager.register(plugin, "event_journal_plugin")
     _register_collection_hook(config, plugin)
+    _register_session_finish_hook(config, plugin)
     plugin.record(
         "session_start",
         {
@@ -587,14 +644,54 @@ def _receipt_io_error(path: Path, events: list[dict[str, Any]]) -> str | None:
     return _recorded_io_error(events)
 
 
+def _is_non_negative_int(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def _optional_str(event: dict[str, Any], field: str) -> bool:
+    value = event.get(field)
+    return value is None or isinstance(value, str)
+
+
+def _optional_count(event: dict[str, Any], field: str) -> bool:
+    value = event.get(field)
+    return value is None or _is_non_negative_int(value)
+
+
+def _identity_well_formed(event: dict[str, Any]) -> bool:
+    identity = event.get("identity")
+    return identity is None or isinstance(identity, dict)
+
+
+def _nodeids_well_formed(event: dict[str, Any]) -> bool:
+    nodeids = event.get("nodeids")
+    if nodeids is None:
+        return True
+    if not isinstance(nodeids, list):
+        return False
+    return all(isinstance(nodeid, str) for nodeid in nodeids)
+
+
+def _outcome_fields_well_formed(event: dict[str, Any]) -> bool:
+    return (
+        _optional_str(event, "nodeid")
+        and _optional_str(event, "when")
+        and _optional_str(event, "classification")
+        and _optional_str(event, "origin_worker")
+        and _optional_count(event, "retry_index")
+        and _optional_count(event, "instance_ordinal")
+        and _optional_count(event, "exitstatus")
+    )
+
+
 def _event_is_well_formed(event: dict[str, Any]) -> bool:
     if not isinstance(event.get("event"), str):
         return False
-    identity = event.get("identity")
-    if identity is not None and not isinstance(identity, dict):
-        return False
-    nodeids = event.get("nodeids")
-    return nodeids is None or isinstance(nodeids, list)
+    return (
+        _identity_well_formed(event)
+        and _nodeids_well_formed(event)
+        and _outcome_fields_well_formed(event)
+    )
 
 
 def _parse_receipt_line(line: str) -> dict[str, Any] | None:
@@ -740,7 +837,7 @@ def _controller_collection(
     deselected: list[str] = []
     errors: list[str] = []
     for event in events:
-        identity = event.get("identity") or {}
+        identity = _event_identity(event)
         if identity.get("role") != "controller":
             continue
         _note_controller_event(event, collections, deselected, errors)
@@ -754,7 +851,7 @@ def _selected_nodeids(
     allow_worker_collection: bool,
 ) -> tuple[list[str] | None, list[str], list[str], bool]:
     selected, deselected, errors, conflict = _controller_collection(events)
-    if selected is None and allow_worker_collection:
+    if selected is None and allow_worker_collection and not conflict:
         selected = _repeated_worker_collection(events)
     if selected is not None:
         selected = _drop_deselected(selected, deselected)
@@ -764,12 +861,12 @@ def _selected_nodeids(
 def _repeated_worker_collection(events: list[dict[str, Any]]) -> list[str] | None:
     """Use one worker collection only when every worker reported that same set.
 
-    Differing per-worker subsets are not unioned or summed: without a
-    controller collection that would invent a selection.
+    The caller uses that list only beside an intact controller receipt whose
+    collections did not conflict. Differing per-worker subsets are not unioned.
     """
     collections: list[tuple[str, ...]] = []
     for event in events:
-        identity = event.get("identity") or {}
+        identity = _event_identity(event)
         if (
             identity.get("role") != "worker"
             or event.get("event") != "collection_finished"
@@ -786,6 +883,36 @@ def _repeated_worker_collection(events: list[dict[str, Any]]) -> list[str] | Non
     return list(unique.pop())
 
 
+def _group_outcome_rows(
+    events: list[dict[str, Any]],
+) -> tuple[dict[tuple[str, str, int], list[dict[str, Any]]], list[str]]:
+    grouped: dict[tuple[str, str, int], list[dict[str, Any]]] = defaultdict(list)
+    reasons: list[str] = []
+    for event in events:
+        if event.get("event") != "outcome":
+            continue
+        retry_index = event.get("retry_index", 0)
+        if retry_index is None:
+            retry_index = 0
+        if not _is_non_negative_int(retry_index):
+            reasons.append("malformed_outcome")
+            continue
+        identity = _event_identity(event)
+        key = (
+            str(event.get("nodeid") or ""),
+            str(event.get("when") or ""),
+            retry_index,
+        )
+        grouped[key].append(
+            {
+                "role": identity.get("role"),
+                "worker_id": identity.get("worker_id"),
+                "classification": event.get("classification"),
+            }
+        )
+    return grouped, reasons
+
+
 def _dedup_outcomes(
     events: list[dict[str, Any]],
 ) -> tuple[dict[tuple[str, str, int], dict[str, Any]], list[str]]:
@@ -795,24 +922,7 @@ def _dedup_outcomes(
     index and is not merged into the earlier attempt. Identical reports of one
     key count as separate item instances. Different classifications conflict.
     """
-    grouped: dict[tuple[str, str, int], list[dict[str, Any]]] = defaultdict(list)
-    for event in events:
-        if event.get("event") != "outcome":
-            continue
-        identity = event.get("identity") or {}
-        key = (
-            str(event.get("nodeid") or ""),
-            str(event.get("when") or ""),
-            int(event.get("retry_index") or 0),
-        )
-        grouped[key].append(
-            {
-                "role": identity.get("role"),
-                "worker_id": identity.get("worker_id"),
-                "classification": event.get("classification"),
-            }
-        )
-    reasons: list[str] = []
+    grouped, reasons = _group_outcome_rows(events)
     chosen: dict[tuple[str, str, int], dict[str, Any]] = {}
     for key, rows in grouped.items():
         workers = [row for row in rows if row["role"] == "worker"]
@@ -848,6 +958,7 @@ def _terminal_states(
         phases = attempts.get(retry_index, {})
         explained, classification = _explain_phases(phases)
         available = _phase_copies(outcomes, nodeid, retry_index, phases, explained)
+        emitted = min(available, copies)
         if available < copies:
             missing.extend([nodeid] * (copies - available))
             if classification == "missing_teardown":
@@ -855,7 +966,7 @@ def _terminal_states(
         _append_terminals(
             terminals,
             nodeid=nodeid,
-            copies=available,
+            copies=emitted,
             phases=phases,
             classification=classification,
             retry_index=retry_index,
@@ -956,7 +1067,7 @@ def _remember_start(
 
 
 def _apply_session_event(event: dict[str, Any], state: dict[str, Any]) -> None:
-    identity = event.get("identity") or {}
+    identity = _event_identity(event)
     kind = event.get("event")
     if kind == "checkout_mismatch":
         _remember_mismatch(event, state)
@@ -970,6 +1081,13 @@ def _apply_session_event(event: dict[str, Any], state: dict[str, Any]) -> None:
     status = event.get("exitstatus")
     if isinstance(status, int):
         state["exitstatus"] = status
+
+
+def _session_finish_reasons(events: list[dict[str, Any]]) -> list[str]:
+    for event in events:
+        if event.get("event") == "session_finish" and event.get("hook_error") is True:
+            return ["session_finish_error"]
+    return []
 
 
 def _session_flags(events: list[dict[str, Any]]) -> dict[str, Any]:
@@ -1083,6 +1201,7 @@ def _verdict_status(reasons: list[str]) -> str:
         or "conflicting_collection" in reasons
         or "missing_controller_collection" in reasons
         or "missing_worker_receipt" in reasons
+        or "malformed_outcome" in reasons
     ):
         return "unknown"
     if (
@@ -1091,6 +1210,7 @@ def _verdict_status(reasons: list[str]) -> str:
         or "collection_error" in reasons
         or "unexplained_selected_tests" in reasons
         or "missing_teardown" in reasons
+        or "session_finish_error" in reasons
     ):
         return "incomplete"
     return "complete"
@@ -1177,6 +1297,7 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
     events = [event for item in receipts for event in item["events"]]
     flags = _session_flags(events)
     reasons.extend(_checkout_reasons(flags))
+    reasons.extend(_session_finish_reasons(events))
     selected, deselected, collection_errors, collection_conflict = _selected_nodeids(
         events,
         allow_worker_collection=_intact_controller_receipt(receipts),
@@ -1222,7 +1343,7 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
 
 def _first_identity_field(events: list[dict[str, Any]], field: str) -> str | None:
     for event in events:
-        identity = event.get("identity") or {}
+        identity = _event_identity(event)
         value = identity.get(field)
         if isinstance(value, str) and value:
             return value
@@ -1231,7 +1352,7 @@ def _first_identity_field(events: list[dict[str, Any]], field: str) -> str | Non
 
 def _first_identity_value(events: list[dict[str, Any]], field: str) -> Any:
     for event in events:
-        identity = event.get("identity") or {}
+        identity = _event_identity(event)
         if field in identity:
             return identity[field]
     return None
@@ -1434,15 +1555,41 @@ def atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
     os.replace(temporary, path)
 
 
+def _stored_executed_passes(path: Path) -> list[str] | None:
+    """Return stored passes, or None when the verdict cannot be trusted."""
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return None
+    try:
+        stored = json.loads(text)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(stored, dict):
+        return None
+    raw = stored.get("executed_passes")
+    if not isinstance(raw, list):
+        return []
+    return [str(item) for item in raw]
+
+
 def verify_directory(
     journal_dir: Path, *, executed_passes: list[str] | None = None
 ) -> int:
     verdict_path = journal_dir / "journal-verdict.json"
     executed = executed_passes
+    if executed is None and verdict_path.exists() and not verdict_path.is_file():
+        sys.stderr.write(
+            "EventJournal completeness unknown: stored_verdict_unreadable\n"
+        )
+        return JOURNAL_COMPLETENESS_EXIT
     if executed is None and verdict_path.is_file():
-        stored = json.loads(verdict_path.read_text(encoding="utf-8"))
-        raw = stored.get("executed_passes")
-        executed = [str(item) for item in raw] if isinstance(raw, list) else []
+        executed = _stored_executed_passes(verdict_path)
+        if executed is None:
+            sys.stderr.write(
+                "EventJournal completeness unknown: stored_verdict_unreadable\n"
+            )
+            return JOURNAL_COMPLETENESS_EXIT
     verdict = reconcile_directory(journal_dir, executed_passes=executed or [])
     if verdict["status"] != "complete":
         sys.stderr.write(
