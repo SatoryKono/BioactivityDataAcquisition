@@ -1085,8 +1085,8 @@ def test_serial_coverage_journal_fits_the_job_timeout() -> None:
     serial = workflow.split("  serial-coverage:\n", 1)[1].split(
         "\n  coverage-verify:", 1
     )[0]
-    assert "timeout-minutes: 20" in serial
-    assert "--parallel-timeout-seconds 840" in serial
+    assert "timeout-minutes: 15" in serial
+    assert "--parallel-timeout-seconds 660" in serial
     assert "--no-fallback" in serial
     assert "pytest-event-journal-serial-coverage" in serial
     assert "if: ${{ always() && !cancelled() }}" in serial

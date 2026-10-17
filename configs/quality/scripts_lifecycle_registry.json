@@ -811,6 +811,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
+    "scripts/engineering/ci/pytest_abort_diagnostic_adapter.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the isolated pytest abort supervisor imported by run_pytest_resilient. The diagnostic manifest is not a JUnit completeness artifact. Keep it supporting so active_script_count_max does not grow.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
     "scripts/engineering/ci/replay_parity_inputs.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the opt-in pytest fixture plugin consumed by the CircleCI replay-parity lane; it supplies deterministic operational inputs and has no standalone CLI. Keep full byte-level output comparison in the owning lane.",
