@@ -619,7 +619,7 @@ def _marker_io_error(path: Path) -> str | None:
         return None
     try:
         text = marker.read_text(encoding="utf-8").strip()
-    except OSError:
+    except (OSError, UnicodeDecodeError):
         return "close_marker_unreadable"
     if text:
         return text
@@ -684,11 +684,17 @@ def _outcome_fields_well_formed(event: dict[str, Any]) -> bool:
     )
 
 
+def _schema_supported(event: dict[str, Any]) -> bool:
+    version = event.get("schema_version")
+    return type(version) is int and version == SCHEMA_VERSION
+
+
 def _event_is_well_formed(event: dict[str, Any]) -> bool:
     if not isinstance(event.get("event"), str):
         return False
     return (
-        _identity_well_formed(event)
+        _schema_supported(event)
+        and _identity_well_formed(event)
         and _nodeids_well_formed(event)
         and _outcome_fields_well_formed(event)
     )
@@ -928,8 +934,8 @@ def _dedup_outcomes(
         workers = [row for row in rows if row["role"] == "worker"]
         controllers = [row for row in rows if row["role"] == "controller"]
         pool = workers or controllers
-        signatures = {(row["worker_id"], row["classification"]) for row in pool}
-        if len(signatures) > 1:
+        classifications = {row["classification"] for row in pool}
+        if len(classifications) > 1:
             reasons.append("conflicting_outcome")
             continue
         chosen[key] = {**pool[0], "count": len(pool)}

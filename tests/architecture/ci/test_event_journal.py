@@ -53,7 +53,11 @@ def _write_receipt(
     truncate: bool = False,
 ) -> None:
     directory.mkdir(parents=True, exist_ok=True)
-    lines = [json.dumps(event, sort_keys=True, ensure_ascii=True) for event in events]
+    lines = []
+    for event in events:
+        payload = dict(event)
+        payload.setdefault("schema_version", 1)
+        lines.append(json.dumps(payload, sort_keys=True, ensure_ascii=True))
     payload = ("\n".join(lines) + ("\n" if lines and not truncate else "")).encode(
         "utf-8"
     )
@@ -1911,3 +1915,58 @@ def test_late_session_finish_status_change_is_not_complete(tmp_path: Path) -> No
     verdict = _live_verdict(tmp_path / "run")
     assert verdict["status"] != "complete"
     assert verdict["tests_passed"] is not True
+
+
+def test_same_classification_from_two_workers_is_not_a_conflict(
+    tmp_path: Path,
+) -> None:
+    controller = _identity(role="controller", worker_id="controller")
+    worker_a = _identity(role="worker", worker_id="gw0")
+    worker_b = _identity(role="worker", worker_id="gw1")
+    nodeid = "test_sample.py::test_a"
+    events = _finalized(
+        [
+            _start(controller),
+            _collected(controller, [nodeid]),
+            *_phases(worker_a, nodeid, "passed"),
+            *_phases(worker_b, nodeid, "passed"),
+            {"event": "session_finish", "identity": controller, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert "conflicting_outcome" not in verdict["reasons"]
+    assert verdict["status"] == "complete"
+    assert verdict["selected_count"] == 1
+
+
+def test_unsupported_schema_version_is_unknown(tmp_path: Path) -> None:
+    name = _named_receipt("parallel", "a" * 32, "controller", "controller", "b" * 32)
+    event = {
+        "event": "journal_finalized",
+        "schema_version": 2,
+        "identity": _identity(role="controller", worker_id="controller"),
+        "prior_line_count": 0,
+        "io_error": None,
+    }
+    (tmp_path / name).write_text(json.dumps(event) + "\n", encoding="utf-8")
+    verdict = reconcile_directory(tmp_path, executed_passes=["parallel"])
+    assert verdict["status"] == "unknown"
+
+
+def test_invalid_utf8_close_marker_is_unknown(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    name = _named_receipt("parallel", "c" * 32, "controller", "controller", "d" * 32)
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            *_phases(identity, nodeid, "passed"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events, name=name)
+    (tmp_path / name).with_name(name + ".close_error").write_bytes(b"\xff\n")
+    verdict = reconcile_directory(tmp_path, executed_passes=["parallel"])
+    assert verdict["status"] == "unknown"
