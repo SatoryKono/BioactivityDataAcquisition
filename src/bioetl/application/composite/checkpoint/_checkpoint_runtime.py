@@ -111,14 +111,11 @@ def load_checkpoint_state(
         data = json.loads(content)
         state = CompositeCheckpointState.from_dict(data)
         raw_state = data.get("state")
-        is_known_legacy_state = raw_state in (
+        if raw_state not in (
+            None,
+            state.state.value,
             "cross_validation_running",
             "cross_validation_completed",
-        )
-        if (
-            raw_state is not None
-            and state.state.value != raw_state
-            and not is_known_legacy_state
         ):
             logger.warning(
                 "Checkpoint state value corrupted, using default",

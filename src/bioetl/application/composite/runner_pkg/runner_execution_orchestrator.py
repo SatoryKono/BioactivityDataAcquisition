@@ -5,10 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
+    build_legacy_completed_execution_context,
+)
 from bioetl.application.composite.runtime_models import (
     CompositeExecutionContext,
 )
-from bioetl.domain.composite.result import MergeResult
 from bioetl.domain.exceptions import CheckpointConflictError
 
 if TYPE_CHECKING:
@@ -109,58 +111,6 @@ def _build_execution_context(
     )
 
 
-def _legacy_completed_execution_result(
-    state: CompositeCheckpointState,
-) -> CompositeLockedExecutionResult:
-    """Resume only finalization for a checkpoint written after legacy CV.
-
-    The legacy state is emitted after merge and cross-validation. Re-running
-    the current combined merge/CV stage would repeat completed writes. The
-    migration marker instead requires enough persisted merge evidence to build
-    the terminal result; if it is missing, fail closed without replaying work.
-    """
-    if not state.seed_completed or state.seed_result is None:
-        raise CheckpointConflictError(
-            state.composite_name,
-            "legacy cross_validation_completed checkpoint lacks completed seed result",
-        )
-    payload = state.merge_result
-    if not isinstance(payload, dict) or not isinstance(
-        payload.get("records_merged"), int
-    ):
-        raise CheckpointConflictError(
-            state.composite_name,
-            "legacy cross_validation_completed checkpoint lacks merge result evidence",
-        )
-
-    merge_fields = {
-        "records_merged",
-        "records_from_seed",
-        "records_enriched",
-        "records_fully_enriched",
-        "sources_used",
-        "field_coverage",
-        "duration_seconds",
-        "output_silver_path",
-        "output_gold_path",
-        "lineage_summary",
-        "quarantine_payloads",
-    }
-    merge_result = MergeResult(
-        **{key: value for key, value in payload.items() if key in merge_fields}
-    )
-    execution_context = _build_execution_context(
-        seed_result=state.seed_result,
-        dependency_results=state.dependency_results,
-        enrichment_results=state.enrichment_results,
-        merge_result=merge_result,
-    )
-    return CompositeLockedExecutionResult(
-        state=state,
-        execution_context=execution_context,
-    )
-
-
 async def _complete_enrichment_phase(
     host: _CompositeLockedExecutionHostProtocol,
     state: CompositeCheckpointState,
@@ -236,7 +186,12 @@ class CompositeRunPhaseService:
                 "so replaying it would repeat completed merge writes",
             )
         if getattr(request.state, "legacy_cv_completion_pending", False) is True:
-            return _legacy_completed_execution_result(request.state)
+            return CompositeLockedExecutionResult(
+                state=request.state,
+                execution_context=build_legacy_completed_execution_context(
+                    request.state
+                ),
+            )
         pre_merge_result = await self.execute_pre_merge(host, request)
         state, merge_result = await self.execute_merge(host, pre_merge_result)
         return CompositeLockedExecutionResult(

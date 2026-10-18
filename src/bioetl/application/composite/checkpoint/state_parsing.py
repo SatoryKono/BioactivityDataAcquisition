@@ -12,7 +12,28 @@ from bioetl.domain.composite.result import (
     SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.normalization import normalize_runtime_anchor_payload
 from bioetl.domain.types import JsonDict
+
+
+def parse_runtime_anchors(data: JsonDict) -> dict[str, str]:
+    """Normalize persisted runtime anchors, defaulting missing values to empty."""
+    normalized_anchors = normalize_runtime_anchor_payload(
+        {
+            "effective_config_hash": data.get("effective_config_hash"),
+            "effective_config_artifact_id": data.get("effective_config_artifact_id"),
+            "execution_fingerprint": data.get("execution_fingerprint"),
+            "dq_contract_compatibility_hash": data.get(
+                "dq_contract_compatibility_hash"
+            ),
+            "input_snapshot_fingerprint": data.get("input_snapshot_fingerprint"),
+            "contract_ref": data.get("contract_ref"),
+            "contract_version": data.get("contract_version"),
+            "manifest_id": data.get("manifest_id"),
+            "composite_run_identity": data.get("composite_run_identity"),
+        }
+    )
+    return {key: value or "" for key, value in normalized_anchors.items()}
 
 
 def parse_seed_result(value: object) -> SeedResult | None:
@@ -117,6 +138,7 @@ __all__ = [
     "parse_dependency_results",
     "parse_enrichment_results",
     "parse_optional_string",
+    "parse_runtime_anchors",
     "parse_seed_result",
     "parse_state",
     "parse_timestamp",
