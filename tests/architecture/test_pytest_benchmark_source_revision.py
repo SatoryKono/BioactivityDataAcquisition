@@ -233,3 +233,100 @@ def test_corrupt_loose_ref_does_not_fall_back_to_packed_refs(tmp_path: Path) -> 
     with pytest.raises(BenchmarkMeasurementContractError) as error:
         validate_benchmark_measurement_json(output, search_from=root)
     assert error.value.code == "provenance_mismatch"
+
+
+@pytest.mark.parametrize("marker", ["REF:", "Ref:", "ref:", "REF: ", "Ref: ", " ref: "])
+def test_malformed_head_marker_is_blocked(tmp_path: Path, marker: str) -> None:
+    """Git markers are case-sensitive and require a separating space."""
+    _write(tmp_path / ".git/HEAD", f"{marker}refs/heads/topic\n")
+    _write(tmp_path / ".git/refs/heads/topic", COMMIT)
+    _assert_blocked(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "value", ["", "GITDIR: metadata", "gitdir:", "gitdir: metadata\nextra"]
+)
+def test_malformed_gitdir_file_is_blocked(tmp_path: Path, value: str) -> None:
+    """A malformed gitfile cannot claim the commit of a plausible directory."""
+    _write(tmp_path / ".git", value)
+    _write(tmp_path / "metadata/HEAD", COMMIT)
+    _assert_blocked(tmp_path)
+
+
+@pytest.mark.parametrize("value", ["", "missing", "../missing", "../common\nextra"])
+def test_invalid_commondir_blocks_detached_head(tmp_path: Path, value: str) -> None:
+    """Present but invalid commondir metadata is never treated as absent."""
+    _write(tmp_path / ".git/HEAD", COMMIT)
+    _write(tmp_path / ".git/commondir", value)
+    _assert_blocked(tmp_path)
+
+
+@pytest.mark.parametrize("cyclic", [False, True])
+@pytest.mark.parametrize("entry", ["refs/heads/topic", "commondir", "packed-refs"])
+def test_broken_metadata_symlinks_block_stale_fallback(
+    tmp_path: Path, cyclic: bool, entry: str
+) -> None:
+    """Broken and cyclic metadata links cannot expose a packed commit."""
+    _write(tmp_path / ".git/HEAD", "ref: refs/heads/topic\n")
+    if entry != "packed-refs":
+        _write(tmp_path / ".git/packed-refs", f"{PACKED} refs/heads/topic\n")
+    link = tmp_path / ".git" / entry
+    link.parent.mkdir(parents=True, exist_ok=True)
+    link.symlink_to(link if cyclic else tmp_path / "missing")
+    _assert_blocked(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "bad", ["garbage", "", "^broken", "^" + COMMIT, COMMIT + " refs/heads/topic"]
+)
+def test_malformed_packed_refs_block_even_after_matching_row(
+    tmp_path: Path, bad: str
+) -> None:
+    """All packed rows must be valid, including duplicates and peeled records."""
+    _write(tmp_path / ".git/HEAD", "ref: refs/heads/topic\n")
+    _write(
+        tmp_path / ".git/packed-refs", f"{COMMIT} refs/heads/topic\n^{COMMIT}\n{bad}\n"
+    )
+    _assert_blocked(tmp_path)
+
+
+def test_common_ref_ignores_stale_private_packed_refs(tmp_path: Path) -> None:
+    """A linked worktree's shared branch belongs exclusively to commondir."""
+    _write(tmp_path / ".git/HEAD", "ref: refs/heads/topic\n")
+    _write(tmp_path / ".git/commondir", "../common\n")
+    _write(tmp_path / ".git/packed-refs", f"{PACKED} refs/heads/topic\n")
+    _write(tmp_path / "common/packed-refs", f"{COMMIT} refs/heads/topic\n")
+    _assert_commit(tmp_path, COMMIT, "refs/heads/topic")
+    (tmp_path / "common/packed-refs").unlink()
+    _assert_blocked(tmp_path)
+
+
+@pytest.mark.parametrize("value", ["REF: refs/heads/other", "Ref: refs/heads/other"])
+def test_loose_ref_marker_is_case_sensitive(tmp_path: Path, value: str) -> None:
+    """A mixed-case symbolic loose ref is corrupt even with a valid target."""
+    _write(tmp_path / ".git/HEAD", "ref: refs/heads/topic\n")
+    _write(tmp_path / ".git/refs/heads/topic", value)
+    _write(tmp_path / ".git/refs/heads/other", COMMIT)
+    _assert_blocked(tmp_path)
+
+
+def test_cyclic_symbolic_refs_do_not_fall_back(tmp_path: Path) -> None:
+    """A symbolic ref cycle is blocked even if packed refs contain a commit."""
+    _write(tmp_path / ".git/HEAD", "ref: refs/heads/a\n")
+    _write(tmp_path / ".git/refs/heads/a", "ref: refs/heads/b\n")
+    _write(tmp_path / ".git/refs/heads/b", "ref: refs/heads/a\n")
+    _write(tmp_path / ".git/packed-refs", f"{COMMIT} refs/heads/a\n")
+    _assert_blocked(tmp_path)
+
+
+@pytest.mark.parametrize("cyclic", [False, True])
+def test_broken_gitfile_symlink_blocks_parent_search(
+    tmp_path: Path, cyclic: bool
+) -> None:
+    """An invalid child checkout must not borrow the parent repository's HEAD."""
+    _write(tmp_path / ".git/HEAD", COMMIT)
+    child = tmp_path / "child"
+    child.mkdir()
+    link = child / ".git"
+    link.symlink_to(link if cyclic else tmp_path / "missing")
+    assert read_source_revision(child).blocked

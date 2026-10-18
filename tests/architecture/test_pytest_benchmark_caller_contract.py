@@ -350,10 +350,11 @@ def test_pytest_wrappers_load_guard_before_benchmark_plugin() -> None:
     for path in wrappers:
         text = path.read_text(encoding="utf-8")
         guard_at = text.index("tests.benchmarks.benchmark_vcs_guard")
-        plugin_at = text.index("pytest_benchmark.plugin")
+        plugin_load = '"-p", "benchmark"' if path.suffix == ".ps1" else "-p benchmark)"
+        plugin_at = text.index(plugin_load)
         assert guard_at < plugin_at
         assert "BIOETL_BENCHMARK_CALLER" in text
-        assert text.count("pytest_benchmark.plugin") == 1
+        assert text.count(plugin_load) == 1
         if path.suffix == ".ps1":
             assert "[string[]]$Args" not in text
             assert '[Alias("Args")]' in text
@@ -823,3 +824,66 @@ def test_guard_leaves_project_subprocess_calls_intact() -> None:
     assert completed.stdout.strip() == "seam-ok"
     with pytest.raises(OSError):
         utils.check_output(["git", "rev-parse", "HEAD"])
+
+
+@pytest.mark.parametrize("autoload", ["0", "1"])
+@pytest.mark.parametrize(
+    "activation",
+    [
+        ["-p", "benchmark"],
+        ["-p", "pytest_benchmark.plugin"],
+        ["-pbenchmark"],
+        ["-ppytest_benchmark.plugin"],
+        ["--benchmark-json=result.json"],
+        ["--benchmark-compare=0001"],
+    ],
+)
+def test_shell_wrapper_guards_explicit_activation(
+    tmp_path: Path, autoload: str, activation: list[str]
+) -> None:
+    """The actual wrapper guards activation outside benchmark directories in all modes."""
+    runtime = tmp_path / "python"
+    runtime.write_text(
+        "#!/bin/sh\nif [ \"$1\" = '-c' ]; then exit 0; fi\nprintf '%s\\n' \"$@\"\n",
+        encoding="utf-8",
+    )
+    runtime.chmod(0o755)
+    env = dict(
+        os.environ,
+        BIOETL_PYTEST_RUNTIME_PYTHON=str(runtime),
+        BIOETL_SKIP_PREFLIGHT="1",
+        BIOETL_SKIP_SETUP_PLUGINS="1",
+        BIOETL_PYTEST_AUTOLOAD=autoload,
+        BIOETL_PYTEST_NARROW="0",
+    )
+    completed = subprocess.run(
+        [
+            "bash",
+            str(ROOT / "scripts/engineering/dev/run_pytest.sh"),
+            "tests/unit/test_example.py",
+            *activation,
+        ],
+        env=env,
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    args = completed.stdout.splitlines()
+    assert args.index(GUARD_PLUGIN) < args.index("benchmark")
+    assert args.count("benchmark") == 1
+    assert "pytest_benchmark.plugin" not in args
+    assert "-ppytest_benchmark.plugin" not in args
+
+
+def test_powershell_guard_is_outside_autoload_branch() -> None:
+    """PowerShell uses the canonical plugin name with unconditional activation handling."""
+    text = (ROOT / "scripts/engineering/dev/run_pytest.ps1").read_text(encoding="utf-8")
+    assert '"-p", "benchmark"' in text
+    assert '"-p", "pytest_benchmark.plugin"' not in text
+    assert text.count("    Enable-BenchmarkPlugin\n") == 1
+    assert (
+        "# Guard explicit activation even when entry-point autoload is enabled.\nif (Test-BenchmarkPluginNeeded"
+        in text
+    )

@@ -37,10 +37,13 @@ function Test-BenchmarkPluginNeeded {
         if ($Arg -like "tests/benchmarks*" -or $Arg -like "*\tests\benchmarks*") {
             return $true
         }
-        if ($Arg -in @("--benchmark-only", "--benchmark-compare")) {
+        if ($Arg -like "--benchmark-*" -or $Arg -cin @("-pbenchmark", "-ppytest_benchmark.plugin")) {
             return $true
         }
-        if ($PreviousArg -eq "-m" -and $Arg -like "*benchmark*") {
+        if ($PreviousArg -ceq "-p" -and $Arg -cin @("benchmark", "pytest_benchmark.plugin")) {
+            return $true
+        }
+        if ($PreviousArg -eq "-m" -and $Arg -like "*benchmark*" -and $Arg -notlike "*not benchmark*") {
             return $true
         }
         $PreviousArg = $Arg
@@ -54,7 +57,7 @@ function Enable-BenchmarkPlugin {
     }
     $script:PytestPluginArgs += @(
         "-p", "tests.benchmarks.benchmark_vcs_guard",
-        "-p", "pytest_benchmark.plugin"
+        "-p", "benchmark"
     )
 }
 
@@ -333,9 +336,6 @@ if ($PytestNarrow) {
     foreach ($Plugin in $PluginModules) {
         $PytestPluginArgs += @("-p", $Plugin)
     }
-    if (Test-BenchmarkPluginNeeded -Args $PytestArgs) {
-        Enable-BenchmarkPlugin
-    }
 } elseif ($env:BIOETL_PYTEST_AUTOLOAD -ne "1") {
     $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = "1"
     $PluginModules = @(
@@ -354,9 +354,25 @@ if ($PytestNarrow) {
     foreach ($Plugin in $PluginModules) {
         $PytestPluginArgs += @("-p", $Plugin)
     }
-    if (Test-BenchmarkPluginNeeded -Args $PytestArgs) {
-        Enable-BenchmarkPlugin
+}
+
+# Guard explicit activation even when entry-point autoload is enabled.
+if (Test-BenchmarkPluginNeeded -Args $PytestArgs) {
+    Enable-BenchmarkPlugin
+    $BenchmarkFilteredArgs = @()
+    for ($Index = 0; $Index -lt $PytestArgs.Count; $Index++) {
+        $Arg = $PytestArgs[$Index]
+        if ($Arg -ceq "-p" -and $Index + 1 -lt $PytestArgs.Count -and
+            $PytestArgs[$Index + 1] -cin @("benchmark", "pytest_benchmark.plugin")) {
+            $Index++
+            continue
+        }
+        if ($Arg -cin @("-pbenchmark", "-ppytest_benchmark.plugin")) {
+            continue
+        }
+        $BenchmarkFilteredArgs += $Arg
     }
+    $PytestArgs = $BenchmarkFilteredArgs
 }
 
 if ($env:OS -eq "Windows_NT" -and -not (Test-PytestCacheDirSpecified -Args $PytestArgs)) {

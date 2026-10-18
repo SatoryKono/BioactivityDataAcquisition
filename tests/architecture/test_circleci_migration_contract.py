@@ -694,3 +694,22 @@ def test_pr_gate_credit_cut_keeps_required_job_names():
     )
     assert "<< parameters.pathspecs >>" not in halt
     assert '"${pathspec_args[@]}"' in halt
+
+
+def test_workflow_map_describes_manual_only_performance():
+    """Published performance routing matches the retained manual GitHub caller."""
+    text = (ROOT / "docs/05-operations/ci-workflow-map.md").read_text(encoding="utf-8")
+    assert "Performance is manual-only" in text
+    row = next(
+        line
+        for line in text.splitlines()
+        if line.startswith("| `performance-nightly.yml` | manual")
+    )
+    assert "workflow_dispatch" in row
+    assert "CircleCI lane removed" in row
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/performance-nightly.yml").read_text(encoding="utf-8")
+    )
+    triggers = workflow.get("on", workflow.get(True))
+    assert "workflow_dispatch" in triggers
+    assert "schedule" not in triggers

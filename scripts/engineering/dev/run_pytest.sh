@@ -147,7 +147,7 @@ _enable_benchmark_plugin() {
         export BIOETL_BENCHMARK_CALLER="run_pytest"
     fi
     PYTEST_PLUGIN_ARGS+=(-p tests.benchmarks.benchmark_vcs_guard)
-    PYTEST_PLUGIN_ARGS+=(-p pytest_benchmark.plugin)
+    PYTEST_PLUGIN_ARGS+=(-p benchmark)
 }
 
 _should_enable_benchmark_plugin() {
@@ -158,13 +158,16 @@ _should_enable_benchmark_plugin() {
             tests/benchmarks|tests/benchmarks/*|*/tests/benchmarks/*)
                 return 0
                 ;;
-            --benchmark-only|--benchmark-compare)
+            --benchmark-*|-pbenchmark|-ppytest_benchmark.plugin)
                 return 0
                 ;;
             *)
                 ;;
         esac
 
+        if [[ "$previous" == "-p" && ( "$arg" == "benchmark" || "$arg" == "pytest_benchmark.plugin" ) ]]; then
+            return 0
+        fi
         if [[ "$previous" == "-m" && "$arg" == *benchmark* && "$arg" != *"not benchmark"* ]]; then
             return 0
         fi
@@ -535,9 +538,6 @@ if [[ "$PYTEST_NARROW" == "1" ]]; then
     if _needs_xdist_plugin "${PYTEST_ARGS[@]}"; then
         PYTEST_PLUGIN_ARGS+=(-p xdist.plugin)
     fi
-    if _should_enable_benchmark_plugin "${PYTEST_ARGS[@]}"; then
-        _enable_benchmark_plugin
-    fi
 elif [[ "${BIOETL_PYTEST_AUTOLOAD:-0}" != "1" ]]; then
     # The mixed Windows+WSL checkout can make third-party pytest entrypoint
     # autoload extremely slow. Keep the standard run deterministic by loading
@@ -565,9 +565,24 @@ elif [[ "${BIOETL_PYTEST_AUTOLOAD:-0}" != "1" ]]; then
     for plugin in "${_core_pytest_plugins[@]}"; do
         PYTEST_PLUGIN_ARGS+=(-p "$plugin")
     done
-    if _should_enable_benchmark_plugin "${PYTEST_ARGS[@]}"; then
-        _enable_benchmark_plugin
-    fi
+fi
+
+# Guard explicit activation in every mode, including entry-point autoload.
+if _should_enable_benchmark_plugin "${PYTEST_ARGS[@]}"; then
+    _enable_benchmark_plugin
+    _benchmark_filtered_args=()
+    for ((_benchmark_i=0; _benchmark_i<${#PYTEST_ARGS[@]}; _benchmark_i++)); do
+        _benchmark_arg="${PYTEST_ARGS[_benchmark_i]}"
+        if [[ "$_benchmark_arg" == "-p" && ( "${PYTEST_ARGS[_benchmark_i+1]:-}" == "benchmark" || "${PYTEST_ARGS[_benchmark_i+1]:-}" == "pytest_benchmark.plugin" ) ]]; then
+            _benchmark_i=$((_benchmark_i + 1))
+            continue
+        fi
+        case "$_benchmark_arg" in
+            -pbenchmark|-ppytest_benchmark.plugin) continue ;;
+        esac
+        _benchmark_filtered_args+=("$_benchmark_arg")
+    done
+    PYTEST_ARGS=("${_benchmark_filtered_args[@]}")
 fi
 
 if [[ "${BIOETL_SKIP_PREFLIGHT:-0}" != "1" && "${BIOETL_SKIP_SETUP_PLUGINS:-0}" != "1" && -f "scripts/ops/launchers/codex/setup_plugins.sh" ]]; then
