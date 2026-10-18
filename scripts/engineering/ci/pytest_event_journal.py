@@ -663,6 +663,16 @@ def pytest_load_initial_conftests(early_config: Any) -> Any:
             if plugin is not None:
                 if getattr(outcome, "excinfo", None) is not None:
                     plugin.record("unconfigure_error", {"hook_error": True})
+                else:
+                    result = outcome.get_result()
+                    plugin.record(
+                        "cmdline_finish",
+                        {
+                            "exitstatus": int(result)
+                            if isinstance(result, int) and not isinstance(result, bool)
+                            else None
+                        },
+                    )
                 plugin.finalize()
             outcome.get_result()
 
@@ -1271,6 +1281,15 @@ def _terminal_states(
             gap_reasons.extend(reasons)
             continue
         retry_index = max(attempts) if attempts else 0
+        if attempts and (
+            sorted(attempts) != list(range(len(attempts)))
+            or any(
+                not any("rerun" in values for values in phases.values())
+                for retry, phases in attempts.items()
+                if retry != retry_index
+            )
+        ):
+            gap_reasons.append("conflicting_outcome")
         phase_lists = attempts.get(retry_index, {})
         if _mixed_copies_conflict(phase_lists, copies):
             gap_reasons.append("conflicting_outcome")
@@ -1635,8 +1654,30 @@ def _controller_order_reasons(events: list[dict[str, Any]]) -> list[str]:
         return ["malformed_session_order"]
     if "session_finish" in kinds:
         tail = kinds[kinds.index("session_finish") + 1 :]
-        if any(kind not in {"journal_finalized", "unconfigure_error"} for kind in tail):
+        if any(
+            kind not in {"journal_finalized", "unconfigure_error", "cmdline_finish"}
+            for kind in tail
+        ):
             return ["malformed_session_order"]
+    return []
+
+
+def _cmdline_finish_reasons(events: list[dict[str, Any]]) -> list[str]:
+    controller = [
+        event for event in events if _event_identity(event).get("role") == "controller"
+    ]
+    finishes = [event for event in controller if event.get("event") == "cmdline_finish"]
+    if not finishes:
+        return []  # Receipts written before cmdline-result recording remain readable.
+    sessions = [event for event in controller if event.get("event") == "session_finish"]
+    if (
+        len(finishes) != 1
+        or len(sessions) != 1
+        or type(finishes[0].get("exitstatus")) is not int
+        or finishes[0]["exitstatus"] != sessions[0].get("exitstatus")
+        or controller.index(finishes[0]) < controller.index(sessions[0])
+    ):
+        return ["cmdline_result_mismatch"]
     return []
 
 
@@ -1692,6 +1733,8 @@ _DAMAGE_REASONS = frozenset(
         "malformed_session_finish",
         "malformed_session_start",
         "malformed_session_order",
+        "cmdline_result_mismatch",
+        "unselected_outcome",
     }
 )
 
@@ -1886,6 +1929,7 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
     reasons.extend(_missing_controller_finish(events))
     reasons.extend(_controller_order_reasons(events))
     reasons.extend(_malformed_session_finish(events))
+    reasons.extend(_cmdline_finish_reasons(events))
     reasons.extend(_pytest_exit_reasons(flags))
     reasons.extend(_unconfigure_reasons(events))
     selected, deselected, collection_errors, collection_conflict = _selected_nodeids(
@@ -1899,6 +1943,9 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
     terminals: list[dict[str, Any]] = []
     missing: list[str] = []
     if selected is not None:
+        selected_nodeids = set(selected)
+        if any(nodeid not in selected_nodeids for nodeid, _, _ in outcomes):
+            reasons.append("unselected_outcome")
         terminals, missing, gap_reasons = _terminal_states(selected, outcomes, events)
         reasons.extend(gap_reasons)
     reasons.extend(

@@ -241,7 +241,7 @@ def test_retry_index_is_not_workflow_attempt_and_does_not_add_tests(
         [
             _start(identity),
             _collected(identity, ["test_sample.py::test_a"]),
-            *_phases(identity, "test_sample.py::test_a", "failed", retry_index=0),
+            *_phases(identity, "test_sample.py::test_a", "rerun", retry_index=0),
             *_phases(identity, "test_sample.py::test_a", "passed", retry_index=1),
             {"event": "session_finish", "identity": identity, "exitstatus": 0},
         ]

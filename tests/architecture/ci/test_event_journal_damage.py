@@ -1116,3 +1116,73 @@ def test_review_duplicate_workers_keep_their_own_identity(tmp_path: Path) -> Non
     verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
     assert verdict["status"] == "complete"
     assert {row["worker_id"] for row in verdict["terminals"]} == {"gw0", "gw1"}
+
+
+@pytest.mark.parametrize("chain", ["failed_then_passed", "missing_zero", "gap"])
+def test_followup_single_retry_chain_rejects_invalid_history(
+    tmp_path: Path, chain: str
+) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    prior = (
+        []
+        if chain == "missing_zero"
+        else _phases(
+            identity, nodeid, "failed" if chain == "failed_then_passed" else "rerun"
+        )
+    )
+    last = 2 if chain == "gap" else 1
+    _write_receipt(
+        tmp_path,
+        _finalized(
+            [
+                _start(identity),
+                _collected(identity, [nodeid]),
+                *prior,
+                *_phases(identity, nodeid, "passed", retry_index=last),
+                {"event": "session_finish", "identity": identity, "exitstatus": 0},
+            ]
+        ),
+    )
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 4
+
+
+def test_followup_unselected_outcome_is_unknown(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    _write_receipt(
+        tmp_path,
+        _finalized(
+            [
+                _start(identity),
+                _collected(identity, [nodeid]),
+                *_phases(identity, nodeid, "passed"),
+                *_phases(identity, "test_sample.py::test_b", "failed"),
+                {"event": "session_finish", "identity": identity, "exitstatus": 1},
+            ]
+        ),
+    )
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 4
+
+
+@pytest.mark.parametrize("failing,forced", [(True, 0), (False, 1)])
+def test_followup_cmdline_result_mismatch_never_proves_completion(
+    tmp_path: Path, failing: bool, forced: int
+) -> None:
+    plugin = tmp_path / "cmdline_override.py"
+    plugin.write_text(
+        "import pytest\n@pytest.hookimpl(hookwrapper=True, tryfirst=True)\ndef pytest_cmdline_main(config):\n    outcome = yield\n    outcome.force_result("
+        + str(forced)
+        + ")\n"
+    )
+    result = _run_journal(
+        tmp_path / "run",
+        "def test_sample(): assert " + str(not failing) + "\n",
+        [],
+        {
+            "PYTHONPATH": os.pathsep.join((str(tmp_path), str(_ROOT))),
+            "PYTEST_PLUGINS": "cmdline_override",
+        },
+    )
+    assert result.returncode == forced
+    assert _live_verdict(tmp_path / "run")["status"] != "complete"
