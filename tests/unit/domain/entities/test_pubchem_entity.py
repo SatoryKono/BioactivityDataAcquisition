@@ -94,14 +94,14 @@ class TestPubchemMolecule:
             )
 
     def test_no_structural_identifier_raises(self) -> None:
-        with pytest.raises(ValueError, match="SMILES/InChI"):
+        with pytest.raises(ValueError, match="structural identifier"):
             PubchemMolecule(
                 **BASE_KWARGS,
                 molecule_id="2244",
             )
 
     def test_inchi_key_alone_not_sufficient(self) -> None:
-        with pytest.raises(ValueError, match="SMILES/InChI"):
+        with pytest.raises(ValueError, match="structural identifier"):
             PubchemMolecule(
                 **BASE_KWARGS,
                 molecule_id="2244",

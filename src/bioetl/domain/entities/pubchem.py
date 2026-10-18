@@ -17,6 +17,7 @@ from dataclasses import dataclass
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from bioetl.domain.entities._validators import require_structure_identifier
 from bioetl.domain.entities.base import BaseEntity
 
 # === Pydantic DTO Model ===
@@ -287,16 +288,14 @@ class PubchemMolecule(BaseEntity):
     z_steric_quadrupole_3d: float | None = None
     feature_count_3d: int | None = None
 
-    def _has_structure(self) -> bool:
-        return bool(self.canonical_smiles or self.isomeric_smiles or self.inchi)
-
     def _validate_invariants(self) -> None:
         """Require a molecule ID and at least one structural identifier."""
         if not self.molecule_id:
             raise ValueError("PubchemMolecule molecule_id is required")
 
-        if not self._has_structure():
-            raise ValueError("PubchemMolecule needs SMILES/InChI")
+        require_structure_identifier(
+            self.canonical_smiles, self.isomeric_smiles, self.inchi, "PubchemMolecule"
+        )
 
 
 __all__ = [
