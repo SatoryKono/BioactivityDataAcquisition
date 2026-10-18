@@ -1,10 +1,10 @@
 {
+  "manifest_sha256": "0d59c8a99af0d40d7a84d0ddc1660e3cfbfe4fdf1fd396145a4a7a037f13461a",
+  "metrics_sha256": "78c739130569f6d29eeb356795810b2d2aca17411bee28fcffee466069de08b4",
   "schema_version": 1,
-  "source_commit": "badcaeb5d30892e9356969342a14403990794201",
-  "source_run_id": "local-bioetl-local-coverage-badcaeb-r2",
-  "source_tree_sha256": "9e242b8fc6a1096161ebcef25fe744fbe7b26ea9447d3ed024b7fc86fdb31f86",
-  "manifest_sha256": "5fa2a54a76e3028a775cae44f9e54a3ee1605d778e8581e49d85d39c29ffceac",
-  "metrics_sha256": "0bbb38f9e0ba436530eefcecbd91e4ee192d90d3517480c96248f4649e25d9e4",
+  "source_commit": "2fe807fe106f8153f2b3537a5fb22c92b9f4bca2",
+  "source_run_id": "local-pr-12267-ci-baseline",
+  "source_tree_sha256": "3bccdc215338328b07ec5210c554d58b2d477ac0970a5c756574808aac7fd86f",
   "trust_tier": "local_single_host",
   "verification_mode": "local_capture"
 }
