@@ -41,12 +41,7 @@ from dataclasses import dataclass, field
 from types import SimpleNamespace
 
 import pytest
-from datetime import datetime, UTC
-
-
-class _FixedClock:
-    def now(self) -> datetime:
-        return datetime(2026, 7, 7, 12, 0, tzinfo=UTC)
+from tests.helpers.clock import fixed_test_clock
 
 
 from bioetl.application.workflow.transforms.reconcile_foreign_keys import (
@@ -219,7 +214,7 @@ async def test_facade_request_is_valid_canonical_adapter_input_integration() -> 
     assert request.dry_run is False
 
     adapter = SilverForeignKeyReconciliationAdapter(
-        clock=_FixedClock(),
+        clock=fixed_test_clock(),
         silver_writer=_SilverReader({"chembl_assay": [], "chembl_target": []}),
         logger=_Logger(),
     )
@@ -234,7 +229,7 @@ async def test_facade_request_is_valid_canonical_adapter_input_integration() -> 
 async def test_facade_payload_mirrors_canonical_result_fields_integration() -> None:
     """Facade payloads must mirror canonical result fields without drift."""
     adapter = SilverForeignKeyReconciliationAdapter(
-        clock=_FixedClock(),
+        clock=fixed_test_clock(),
         silver_writer=_SilverReader(
             {
                 "chembl_assay": [
@@ -278,7 +273,7 @@ async def test_facade_payload_mirrors_canonical_result_fields_integration() -> N
 async def test_dry_run_blocked_reason_parity_integration() -> None:
     """Canonical dry-run results must surface the facade dry-run marker."""
     adapter = SilverForeignKeyReconciliationAdapter(
-        clock=_FixedClock(),
+        clock=fixed_test_clock(),
         silver_writer=_SilverReader(
             {
                 "chembl_assay": [{"assay_id": "a1", "target_id": "MISSING"}],
