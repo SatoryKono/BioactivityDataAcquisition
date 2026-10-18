@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-18T21:56:15.498890+00:00",
+  "generated_at": "2026-10-18T23:56:21.610502+00:00",
   "summary": {
     "total_scripts": 650,
     "status_counts": {
@@ -10442,7 +10442,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
@@ -10473,6 +10473,12 @@
           "line": 647,
           "source_group": "tests",
           "text": "[\"scripts/engineering/ci/pytest_abort_diagnostic_adapter.py\"],"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_pytest_abort_diagnostic_adapter.py",
+          "line": 827,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci import pytest_abort_diagnostic_adapter as owner"
         }
       ],
       "owner": "@bioetl-platform",
@@ -11267,7 +11273,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 285,
+      "reference_count": 288,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -11593,7 +11599,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/run_pytest.ps1",
-          "line": 299,
+          "line": 305,
           "source_group": "scripts",
           "text": "$PreflightScript = Join-Path $ScriptDir \"pretest_guardrails.ps1\""
         }
@@ -12014,7 +12020,7 @@
         "CODEX-RUNTIME",
         "py-test-bot"
       ],
-      "reference_count": 60,
+      "reference_count": 61,
       "references": [
         {
           "path": ".codex/agents/CODEX-RUNTIME.md",
@@ -15015,7 +15021,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 293,
+          "line": 297,
           "source_group": "scripts",
           "text": "`generate_hotspot_degradation_report.py` performance-evidence owner. It has a"
         },
@@ -15027,7 +15033,7 @@
         },
         {
           "path": "tests/architecture/test_pytest_benchmark_caller_contract.py",
-          "line": 924,
+          "line": 925,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_hotspot_degradation_report import ("
         }
@@ -20374,19 +20380,19 @@
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 615,
+          "line": 627,
           "source_group": "scripts",
           "text": "if [[ \"${BIOETL_SKIP_PREFLIGHT:-0}\" != \"1\" && \"${BIOETL_SKIP_SETUP_PLUGINS:-0}\" != \"1\" && -f \"scripts/ops/launchers/codex/setup_plugins.sh\" ]]; then"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 616,
+          "line": 628,
           "source_group": "scripts",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 620,
+          "line": 632,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
         },

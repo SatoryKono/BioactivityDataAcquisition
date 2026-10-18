@@ -616,7 +616,7 @@ def test_workflow_enables_guard_before_benchmark_and_requires_hotspot_evidence()
         step = next(item for item in _workflow_steps() if item.get("name") == name)
         expected = "${{ always() && !cancelled() }}"
         if name == "Reduce benchmark evidence":
-            expected = "${{ always() && !cancelled() && steps.benchmarks.outcome == 'success' && steps.validate-evidence.outcome == 'success' }}"
+            expected = "${{ always() && !cancelled() && steps.benchmarks.outcome == 'success' && steps.measurement-contract.outcome == 'success' && steps.validate-evidence.outcome == 'success' }}"
         assert step.get("if") == expected
 
 
@@ -872,6 +872,7 @@ def test_shell_wrapper_guards_explicit_activation(
     runtime.chmod(0o755)
     env = dict(
         os.environ,
+        BIOETL_BENCHMARK_DATASET="caller-fixture-v1",
         BIOETL_PYTEST_RUNTIME_PYTHON=str(runtime),
         BIOETL_SKIP_PREFLIGHT="1",
         BIOETL_SKIP_SETUP_PLUGINS="1",
@@ -943,3 +944,43 @@ def test_measurement_context_matches_reducer_contract(
         guard.BenchmarkMeasurementContractError, match="BIOETL_BENCHMARK_DATASET"
     ):
         guard.pytest_benchmark_update_json(None, [], payload)
+
+
+@pytest.mark.parametrize("dataset", [None, "", "   ", "custom-input-v7"])
+def test_shell_json_caller_requires_explicit_dataset_before_execution(
+    tmp_path, dataset
+):
+    runtime = tmp_path / "python"
+    runtime.write_text(
+        "#!/bin/sh\nif [ \"$1\" = '-c' ]; then exit 0; fi\nprintf '%s\\n' \"$BIOETL_BENCHMARK_DATASET\"\n"
+    )
+    runtime.chmod(0o755)
+    env = dict(
+        os.environ,
+        BIOETL_PYTEST_RUNTIME_PYTHON=str(runtime),
+        BIOETL_SKIP_PREFLIGHT="1",
+        BIOETL_SKIP_SETUP_PLUGINS="1",
+    )
+    env.pop("BIOETL_BENCHMARK_DATASET", None)
+    if dataset is not None:
+        env["BIOETL_BENCHMARK_DATASET"] = dataset
+    result = subprocess.run(
+        [
+            "bash",
+            str(ROOT / "scripts/engineering/dev/run_pytest.sh"),
+            "tests/benchmarks",
+            "--benchmark-json=fixture.json",
+        ],
+        env=env,
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if dataset == "custom-input-v7":
+        assert result.returncode == 0, result.stderr
+        assert result.stdout.strip() == dataset
+    else:
+        assert result.returncode == 2
+        assert "BIOETL_BENCHMARK_DATASET must identify" in result.stderr
+        assert not result.stdout.strip()

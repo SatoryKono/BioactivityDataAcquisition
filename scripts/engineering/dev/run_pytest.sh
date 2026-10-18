@@ -143,6 +143,18 @@ if [[ "${BIOETL_PYTEST_LIVE_OUTPUT:-0}" == "1" && "$QUIET_REQUESTED" != "1" ]]; 
 fi
 
 _enable_benchmark_plugin() {
+    local arg
+    local dataset="${BIOETL_BENCHMARK_DATASET:-}"
+    for arg in "${PYTEST_ARGS[@]}"; do
+        case "$arg" in
+            --benchmark-json|--benchmark-json=*)
+                if [[ -z "${dataset//[[:space:]]/}" ]]; then
+                    echo "BIOETL_BENCHMARK_DATASET must identify the input fixtures before JSON capture" >&2
+                    exit 2
+                fi
+                ;;
+        esac
+    done
     if [[ -z "${BIOETL_BENCHMARK_CALLER:-}" ]]; then
         export BIOETL_BENCHMARK_CALLER="run_pytest"
     fi

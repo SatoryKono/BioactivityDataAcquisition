@@ -263,14 +263,18 @@ favor of the unified entry point.
 
 Performance Nightly runs `python -m scripts.engineering.qa validate-benchmark-evidence`
 before the existing regression reducer. It requires the benchmark producer outcome
-`success`, a full matching source SHA, nonempty named benchmark records with finite
-positive timings and positive integer rounds/iterations, machine identity, and raw
+`success` and a successful measurement contract check, a full matching source SHA, nonempty named benchmark records with finite
+positive timings (`stddev` may be zero), with `min <= mean/median <= max`,
+positive integer rounds/iterations, machine identity, and raw
 `bioetl_measurement.dataset` / `bioetl_measurement.environment` provenance. The
 validator does not fill missing fields, aggregate measurements, or adopt baselines.
 It writes `benchmark-validation-manifest.json` atomically, binding the exact raw
 JSON SHA256 to source, dataset, machine, and run identity. Local UUIDs are not GitHub
-run IDs and local validation emits no GitHub URL. A failed validation removes any
-stale successful validation manifest.
+run IDs and local validation emits no GitHub URL. A failed validation atomically replaces stale success with a failure manifest.
+Nightly also writes failure manifest/gate artifacts when the producer or contract
+is rejected; reduction and baseline candidate creation remain blocked.
+Local JSON callers must set `BIOETL_BENCHMARK_DATASET` to the actual fixture identity
+before execution; wrappers reject missing identity without guessing a dataset.
 
 The caller/guard from PR #12235 (source commit
 `797707e6c926f97f7701db1ca89cfb6eeed8d7e0`) is integrated in

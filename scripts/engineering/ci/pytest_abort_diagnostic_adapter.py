@@ -331,7 +331,15 @@ class PytestAbortDiagnosticAdapter:
                     timed_out = True
                     recorded = _descendant_pids(proc.pid)
                     delivery, sent = _deliver_diagnostic_signal(proc, recorded)
-                    if delivery in {"process_group", "leaf_descendants"}:
+                    if delivery == "leaf_descendants":
+                        # Give waiting parents time to reap native/Python leaves,
+                        # then dump a still-running Python launcher as well.
+                        deadline = time.monotonic() + self.dump_margin
+                        if not _wait_bounded(proc, self.dump_margin / 2):
+                            fallback, sent = _deliver_diagnostic_signal(proc)
+                            delivery = f"leaf_descendants_then_{fallback}"
+                            _wait_bounded(proc, max(0, deadline - time.monotonic()))
+                    elif delivery == "process_group":
                         _wait_bounded(proc, self.dump_margin)
                     recorded |= _descendant_pids(proc.pid)
                     cleanup_error = _terminate_recorded(proc.pid, recorded)
@@ -631,14 +639,19 @@ def _deliver_diagnostic_signal(
         if _pid_alive(pid) and not _descendant_pids(pid)
     }
     if leaves:
+        delivered = False
         for pid in sorted(leaves):
             try:
                 os.kill(pid, signal.SIGABRT)
+                delivered = True
             except ProcessLookupError:
                 continue
             except OSError:
                 return "error", signal.SIGABRT
-        return "leaf_descendants", signal.SIGABRT
+        if delivered:
+            return "leaf_descendants", signal.SIGABRT
+        # All leaves disappeared between discovery and delivery: actually signal
+        # the launcher group rather than claiming a delivery that never happened.
     try:
         os.killpg(proc.pid, signal.SIGABRT)
     except ProcessLookupError:

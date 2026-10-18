@@ -220,7 +220,7 @@ def test_benchmark_evidence_github_run_requires_real_run_identity(tmp_path, payl
     assert manifest["run_id"] == "123"
 
 
-def test_benchmark_evidence_cli_removes_stale_manifest_on_failure(tmp_path, payload):
+def test_benchmark_evidence_cli_replaces_stale_manifest_on_failure(tmp_path, payload):
     raw = tmp_path / "measurements.json"
     raw.write_text(json.dumps(payload))
     manifest = tmp_path / "manifest.json"
@@ -236,17 +236,22 @@ def test_benchmark_evidence_cli_removes_stale_manifest_on_failure(tmp_path, payl
                 str(manifest),
                 "--expected-sha",
                 _SHA,
+                "--contract-outcome",
+                "success",
                 "--producer-outcome",
                 "failure",
             ]
         )
         == 1
     )
-    assert not manifest.exists()
+    assert json.loads(manifest.read_text())["status"] == "failed"
     assert json.loads(raw.read_text()) == payload
 
 
-def test_benchmark_evidence_cli_rejects_escape_and_overwrite(tmp_path, payload):
+def test_benchmark_evidence_cli_rejects_escape_and_overwrite(
+    tmp_path, payload, monkeypatch, capsys
+):
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
     raw = tmp_path / "measurements.json"
     raw.write_text(json.dumps(payload))
     for output in (str(raw), "../escape.json"):
@@ -261,12 +266,19 @@ def test_benchmark_evidence_cli_rejects_escape_and_overwrite(tmp_path, payload):
                     output,
                     "--expected-sha",
                     _SHA,
+                    "--contract-outcome",
+                    "success",
                     "--producer-outcome",
                     "success",
                 ]
             )
             == 1
         )
+        error = capsys.readouterr().err
+        assert (
+            "Manifest must not overwrite" if output == str(raw) else "outside"
+        ) in error
+        assert not (tmp_path.parent / "escape.json").exists()
         assert json.loads(raw.read_text()) == payload
 
 
@@ -298,6 +310,8 @@ def test_benchmark_evidence_router_validation_never_calls_reducer_or_hotspot(
                 str(manifest),
                 "--expected-sha",
                 _SHA,
+                "--contract-outcome",
+                "success",
                 "--producer-outcome",
                 "success",
             ]
@@ -387,3 +401,97 @@ def test_benchmark_evidence_github_identity_rejects_unicode_digits(
     env[field] = "1\u0661"
     with pytest.raises(ValueError, match="GitHub run provenance"):
         _validate(tmp_path, payload, environ=env)
+
+
+@pytest.mark.parametrize("rejected", ["producer", "contract"])
+@pytest.mark.parametrize("outcome", ["failure", "cancelled", "skipped", ""])
+def test_cli_rejection_emits_only_failure_artifacts(
+    tmp_path, payload, monkeypatch, rejected, outcome
+):
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+    raw = tmp_path / "raw.json"
+    raw.write_text(json.dumps(payload))
+    outputs = [
+        tmp_path / name for name in ("validation.json", "manifest.json", "gate.json")
+    ]
+    for path in outputs:
+        path.write_text('{"status":"passed"}')
+    args = [
+        "--output-root",
+        str(tmp_path),
+        "--measurements",
+        str(raw),
+        "--manifest-out",
+        str(outputs[0]),
+        "--failure-manifest-out",
+        str(outputs[1]),
+        "--failure-gate-out",
+        str(outputs[2]),
+        "--expected-sha",
+        _SHA,
+        "--producer-outcome",
+        outcome if rejected == "producer" else "success",
+        "--contract-outcome",
+        outcome if rejected == "contract" else "success",
+    ]
+    assert main(args) == 1
+    for path in outputs:
+        report = json.loads(path.read_text())
+        assert report["status"] == "failed"
+        assert rejected in report["reason"]
+        assert "measured_sha" not in report
+    assert json.loads(raw.read_text()) == payload
+    assert sorted(p.name for p in tmp_path.iterdir()) == [
+        "gate.json",
+        "manifest.json",
+        "raw.json",
+        "validation.json",
+    ]
+
+
+def test_cli_module_accepts_valid_schema_and_blocks_rejected_contract(
+    tmp_path, payload
+):
+    import os
+    import subprocess
+    import sys
+
+    raw = tmp_path / "raw.json"
+    raw.write_text(json.dumps(payload))
+    env = dict(os.environ, GITHUB_ACTIONS="false")
+    args = [
+        sys.executable,
+        "-m",
+        "scripts.engineering.qa",
+        "validate-benchmark-evidence",
+        "--output-root",
+        str(tmp_path),
+        "--measurements",
+        str(raw),
+        "--manifest-out",
+        "validation.json",
+        "--failure-manifest-out",
+        "manifest.json",
+        "--failure-gate-out",
+        "gate.json",
+        "--producer-outcome",
+        "success",
+        "--expected-sha",
+        _SHA,
+        "--contract-outcome",
+    ]
+    for outcome, expected in [("success", 0), ("failure", 1)]:
+        result = subprocess.run(
+            [*args, outcome], env=env, capture_output=True, text=True, timeout=30
+        )
+        assert result.returncode == expected, result.stdout + result.stderr
+        report = json.loads((tmp_path / "validation.json").read_text())
+        assert report["status"] == ("validated" if expected == 0 else "failed")
+        if expected == 0:
+            assert not (tmp_path / "manifest.json").exists()
+            assert not (tmp_path / "gate.json").exists()
+        else:
+            assert (
+                json.loads((tmp_path / "gate.json").read_text())["status"] == "failed"
+            )
+    assert not list(tmp_path.rglob("*candidate*"))

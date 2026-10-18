@@ -748,6 +748,9 @@ def validate_benchmark_evidence_main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--expected-sha", default=os.environ.get("GITHUB_SHA"))
     parser.add_argument("--producer-outcome", required=True)
+    parser.add_argument("--contract-outcome", required=True)
+    parser.add_argument("--failure-manifest-out", type=Path)
+    parser.add_argument("--failure-gate-out", type=Path)
     parser.add_argument("--output-root", type=Path, default=REPO_ROOT)
     args = parser.parse_args(argv)
     try:
@@ -755,19 +758,49 @@ def validate_benchmark_evidence_main(argv: list[str] | None = None) -> int:
         manifest_out = confined_io_path(args.manifest_out, root=args.output_root)
         if measurements == manifest_out:
             raise ValueError("Manifest must not overwrite measurements")
-        # A failed revalidation must not leave an earlier successful manifest.
-        manifest_out.unlink(missing_ok=True)
+        failure_outputs = [
+            confined_io_path(path, root=args.output_root)
+            for path in (args.failure_manifest_out, args.failure_gate_out)
+            if path is not None
+        ]
+        outputs = [manifest_out, *failure_outputs]
+        if measurements in outputs or len(set(outputs)) != len(outputs):
+            raise ValueError(
+                "Evidence output paths must be distinct from measurements and each other"
+            )
+    except (ValueError, OSError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+    try:
+        if args.contract_outcome != "success":
+            raise ValueError(
+                f"Benchmark measurement contract did not succeed: {args.contract_outcome}"
+            )
         manifest = validate_evidence(
             measurements,
             args.expected_sha,
             producer_outcome=args.producer_outcome,
             root=args.output_root,
         )
-        write_text_confined(
-            manifest_out,
-            json.dumps(manifest, indent=2, sort_keys=True, allow_nan=False) + "\n",
-            root=args.output_root,
-        )
+    except (ValueError, OSError) as exc:
+        # Failure artifacts describe rejection, never measurements or a baseline candidate.
+        manifest = {
+            "schema_version": 1,
+            "status": "failed",
+            "reason": str(exc),
+            "producer_outcome": args.producer_outcome,
+            "contract_outcome": args.contract_outcome,
+        }
+        try:
+            for output in outputs:
+                write_text_confined(output, _dump(manifest), root=args.output_root)
+        except (ValueError, OSError) as write_error:
+            print(f"Error writing failure evidence: {write_error}", file=sys.stderr)
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+    manifest["contract_outcome"] = args.contract_outcome
+    try:
+        write_text_confined(manifest_out, _dump(manifest), root=args.output_root)
     except (ValueError, OSError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
@@ -784,7 +817,7 @@ _Measurement = tuple[str, str, str, str, Decimal]
 
 
 def _dump(payload: Mapping[str, object]) -> str:
-    return json.dumps(payload, ensure_ascii=True, indent=2, sort_keys=True) + "\n"
+    return json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
 
 
 def _resolve_gitdir(repo: Path) -> Path | None:
