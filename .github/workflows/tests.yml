@@ -1386,18 +1386,9 @@ jobs:
         run: |
           set +e
           mkdir -p reports/coverage reports/pytest/serial-coverage reports/test-telemetry
-          if [ -n "${PYTHONPATH:-}" ]; then
-            export PYTHONPATH="$GITHUB_WORKSPACE:$PYTHONPATH"
-          else
-            export PYTHONPATH="$GITHUB_WORKSPACE"
-          fi
           # 660s leaves setup, dump, cleanup, and upload inside the 15-minute job.
           # --no-fallback keeps a watchdog timeout from starting a second pytest.
           uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \
-            --receipt-dir reports/pytest/receipts \
-            --receipt-run-id "${{ github.run_id }}" \
-            --receipt-attempt "${{ github.run_attempt }}" \
-            --receipt-expected-sha "${{ github.sha }}" \
             --target tests/ \
             --reports-dir reports/pytest/serial-coverage \
             --parallel-marker "serial and not e2e and not benchmark and not memory" \
@@ -1417,15 +1408,6 @@ jobs:
           cp reports/pytest/serial-coverage/junit_parallel.xml \
             reports/test-telemetry/junit-serial-coverage.xml
           exit "$TEST_EXIT"
-
-      - name: Upload pytest receipts
-        if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: pytest-receipts-serial-coverage-${{ github.run_id }}-${{ github.run_attempt }}
-          path: reports/pytest/receipts
-          if-no-files-found: error
-          retention-days: 3
 
       - name: Upload serial coverage abort diagnostics
         if: ${{ always() && !cancelled() }}

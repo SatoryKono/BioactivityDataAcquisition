@@ -40,12 +40,11 @@
   "manifest_sha256": "ef6e4ed40c9447084ba1f2ec9368b12dc315180481244a6189712bb55da9a981",
   "merged_tree": "10a72711e7b5f338c437d329823cbb7bbe652012",
   "metrics_sha256": "8395931af06f5ea7a0a670aaf293705a8e6b072a8d71ae7257219e9ccd256268",
-  "retrieved_at_utc": "2026-10-17T11:07:03.085633+00:00",
   "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/12231",
   "schema_version": 1,
   "source_commit": "8a4286d21becf1fe183acfaf3f051bc6f7916038",
   "source_run_id": "local-pr12231-local-coverage-8a4286d",
   "source_tree_sha256": "b3a11bb154433ad72b2f07da87d94f02cfff5f3c2ca8a4fad4fbde96204b0aba",
   "trust_tier": "local_single_host",
-  "verification_mode": "reviewed_snapshot"
+  "verification_mode": "live_github"
 }

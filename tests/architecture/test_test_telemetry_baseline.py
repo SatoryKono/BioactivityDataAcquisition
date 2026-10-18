@@ -19,7 +19,6 @@ import subprocess
 import pytest
 import yaml
 
-from scripts.engineering.ci import test_telemetry_provenance as telemetry_provenance
 from scripts.engineering.ci.test_telemetry_provenance import (
     capture_metrics_are_bound,
     source_commit_is_reachable,
@@ -68,9 +67,7 @@ def test_test_telemetry_baseline_contract_is_present_and_scoped() -> None:
             head = subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
             ).strip()
-            assert source_commit_is_reachable(payload, ROOT, head), (
-                telemetry_provenance.LAST_REACHABILITY_REASON
-            )
+            assert source_commit_is_reachable(payload, ROOT, head)
         assert provenance["required_shards"] == [shard.name for shard in SHARDS]
         assert [row["name"] for row in provenance["shards"]] == provenance[
             "required_shards"

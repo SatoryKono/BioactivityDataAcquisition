@@ -320,7 +320,6 @@ jobs:
       }}
     permissions:
       contents: read
-      pull-requests: read
     steps:
       - name: Checkout
         id: checkout

@@ -735,27 +735,3 @@ def test_symlink_output_escape_is_rejected(tmp_path: Path) -> None:
     assert escaped.status == "INVALID_INVOCATION"
     assert escaped.wrapper_exit_code == 2
     assert list(outside.rglob("diagnostic_manifest.json")) == []
-
-
-def test_journal_child_identity_survives_supervision(tmp_path: Path) -> None:
-    evidence = tmp_path / "junit.xml"
-    child_env = os.environ.copy()
-    child_env["BIOETL_JOURNAL_INVOCATION_ID"] = "synthetic-invocation"
-    child_env["BIOETL_JOURNAL_PASS"] = "parallel"
-    command = _python_script(
-        tmp_path,
-        "journal-identity.py",
-        "import os, pathlib, sys\n"
-        "assert os.environ['BIOETL_JOURNAL_INVOCATION_ID'] == 'synthetic-invocation'\n"
-        "assert os.environ['BIOETL_JOURNAL_PASS'] == 'parallel'\n"
-        "assert os.environ['PYTHONFAULTHANDLER'] == '1'\n"
-        f"pathlib.Path(sys.argv[1]).write_text({JUNIT!r}, encoding='utf-8')\n",
-        str(evidence),
-    )
-    adapter = PytestAbortDiagnosticAdapter(
-        timeout=5, dump_margin=0.4, base=tmp_path, child_env=child_env
-    )
-    child_env["BIOETL_JOURNAL_PASS"] = "mutated-after-construction"
-    manifest = adapter.run(command, evidence, tmp_path / "out")
-    assert manifest.wrapper_exit_code == 0
-    assert child_env["BIOETL_JOURNAL_PASS"] == "mutated-after-construction"

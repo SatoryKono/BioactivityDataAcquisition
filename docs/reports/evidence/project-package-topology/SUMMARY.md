@@ -1,46 +1,46 @@
-Source-only refresh (2026-10-12, composite checkpoint persistence parameter bundle merged with origin/main fe524f074da5): the canonical module inventory records `source_tree_sha256=0d318c17dfd76032544e2e179569af53912aed1d409c2bf8f2725ee9ab589805` and `source_module_count=2566`. This binds the merged source tree; coverage measurements remain those of the last authoritative run recorded below.
+Source-only refresh (2026-10-12, composite checkpoint persistence parameter bundle merged with origin/main fe524f074da5): the canonical module inventory records `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9` and `source_module_count=2566`. This binds the merged source tree; coverage measurements remain those of the last authoritative run recorded below.
 
-Source-only refresh (2026-10-12, PR #12187 review and origin/main sync): the canonical module inventory records `source_tree_sha256=5ef35dfcf5f7339a22f3900043b0b6af49474fcd98ed019e1d89067735f5c2eb` and `source_module_count=2566`. This updates source identity while retaining the accepted coverage measurements and additive XML provenance.
+Source-only refresh (2026-10-12, PR #12187 review and origin/main sync): the canonical module inventory records `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9` and `source_module_count=2566`. This updates source identity while retaining the accepted coverage measurements and additive XML provenance.
 
-Source-only refresh (2026-10-12, CF-061 join-key normalization): the canonical module inventory records `source_tree_sha256=0dfece1cf53b8f33e7dbdfd357cfc12d6e16f51b9e2c1fb6d5fc7a10b0426f83` and `source_module_count=2566`. This binds the merged main tree; coverage measurements remain those of the last authoritative run recorded below.
+Source-only refresh (2026-10-12, CF-061 join-key normalization): the canonical module inventory records `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9` and `source_module_count=2566`. This binds the merged main tree; coverage measurements remain those of the last authoritative run recorded below.
 
-Source-only refresh (2026-10-09, PR #11992 merge of origin/main): the canonical module inventory records `source_tree_sha256=a328f3311ab0958bb47c1d79532e9b655db90ffb6cece4bc4d7af89485a9f265` and `source_module_count=2566`. This binds the merged PR tree; coverage measurements remain those of the last authoritative run recorded below.
+Source-only refresh (2026-10-09, PR #11992 merge of origin/main): the canonical module inventory records `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9` and `source_module_count=2566`. This binds the merged PR tree; coverage measurements remain those of the last authoritative run recorded below.
 
-Coverage refresh (2026-10-10, PR #12164 latest-main integration): the canonical module inventory records `source_tree_sha256=633508ed5fc1a0024adf57c03d3e631af47461a53f525e03f36f145d95b8c8c7` and `source_module_count=2566`. The complete local 17-shard measurement on merge commit `c6549b1772667ecbc1e98f9b429d0d71a49df976` passed all shards and both coverage gates at 99.67% line / 94.25% branch. Remote CI acceptance for the final PR head remains separate.
+Coverage refresh (2026-10-10, PR #12164 latest-main integration): the canonical module inventory records `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9` and `source_module_count=2566`. The complete local 17-shard measurement on merge commit `c6549b1772667ecbc1e98f9b429d0d71a49df976` passed all shards and both coverage gates at 99.67% line / 94.25% branch. Remote CI acceptance for the final PR head remains separate.
 
-Coverage refresh (2026-10-10, PR #12164 final review remediation): the canonical module inventory records `source_tree_sha256=633508ed5fc1a0024adf57c03d3e631af47461a53f525e03f36f145d95b8c8c7` and `source_module_count=2566`. The complete local 17-shard measurement on source commit `4e9fadfef59574ee54eadaae53ab1f55ded131bc` passed all shards and both coverage gates at 99.67% line / 94.25% branch. Remote CI acceptance for the final PR head remains separate.
+Coverage refresh (2026-10-10, PR #12164 final review remediation): the canonical module inventory records `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9` and `source_module_count=2566`. The complete local 17-shard measurement on source commit `4e9fadfef59574ee54eadaae53ab1f55ded131bc` passed all shards and both coverage gates at 99.67% line / 94.25% branch. Remote CI acceptance for the final PR head remains separate.
 
-Coverage refresh (2026-10-10, PR #12164 review remediation): the canonical module inventory records `source_tree_sha256=25bbb95d243a40f5a9ac2e8761a1c434a627afddb36301f132ce5179920277e1` and `source_module_count=2566`. The complete local 17-shard measurement on source commit `9d36a1c974c7bfd6e80f6ce150aa8eb19ad8a062` passed all shards and both coverage gates at 99.67% line / 94.25% branch. Remote CI acceptance for the final PR head remains separate.
+Coverage refresh (2026-10-10, PR #12164 review remediation): the canonical module inventory records `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9` and `source_module_count=2566`. The complete local 17-shard measurement on source commit `9d36a1c974c7bfd6e80f6ce150aa8eb19ad8a062` passed all shards and both coverage gates at 99.67% line / 94.25% branch. Remote CI acceptance for the final PR head remains separate.
 
-Coverage refresh (2026-10-09, PR #12164 conflict and CI remediation): the canonical module inventory records `source_tree_sha256=eeeb853b4721c2204da3905cd181caefc8437f640200e51153a50a111ac318c9` and `source_module_count=2566`. The complete local 17-shard measurement on source commit `0d9fcdb2e00725100eca9a52152c48c212c80fa6` passed all shards and both coverage gates at 99.67% line / 94.25% branch. Remote CI acceptance for the final PR head remains separate.
+Coverage refresh (2026-10-09, PR #12164 conflict and CI remediation): the canonical module inventory records `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9` and `source_module_count=2566`. The complete local 17-shard measurement on source commit `0d9fcdb2e00725100eca9a52152c48c212c80fa6` passed all shards and both coverage gates at 99.67% line / 94.25% branch. Remote CI acceptance for the final PR head remains separate.
 
-Source-only refresh (2026-10-09, PR #11980 merge of origin/main #12153): the canonical module inventory records `source_tree_sha256=8c006b322614aa47c7727a0b2e1d47697cb28df9389c4ca9eba5d143525230e7` and `source_module_count=2566`. This binds the merged PR tree; coverage measurements remain those of the last authoritative 17-shard run recorded below.
+Source-only refresh (2026-10-09, PR #11980 merge of origin/main #12153): the canonical module inventory records `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9` and `source_module_count=2566`. This binds the merged PR tree; coverage measurements remain those of the last authoritative 17-shard run recorded below.
 
-Source-only refresh (2026-10-09, PR #12153 architecture closeout): the canonical module inventory records `source_tree_sha256=605cd7a41e1111420ab749640eb09a8dff101365b4e8df8f6e1df497946bae6a` and `source_module_count=2566`. The complete local 17-shard measurement on source commit `aca391a3c262102a320e27e7e0a7a8c2fe9a2170` passed all shards and both gates at 99.67% line / 94.25% branch. This is the current source binding; the entries below are historical. Remote CI acceptance for the final PR head remains separate.
+Source-only refresh (2026-10-09, PR #12153 architecture closeout): the canonical module inventory records `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9` and `source_module_count=2566`. The complete local 17-shard measurement on source commit `aca391a3c262102a320e27e7e0a7a8c2fe9a2170` passed all shards and both gates at 99.67% line / 94.25% branch. This is the current source binding; the entries below are historical. Remote CI acceptance for the final PR head remains separate.
 
-Source-only refresh (2026-10-09, PR #12096 final architecture closeout): the canonical module inventory records `source_tree_sha256=6e2bf6d41d2fa7b5df095621c6727b5ef3c8be708137539b62cf7991b815f931` and `source_module_count=2566`. The complete local 17-shard measurement on source commit `912f483953c76ede75313f762e41a9848369c3bb` passed all shards and both gates at 99.67% line / 94.25% branch, including all six newly tracked modules. Remote CI acceptance remains separate.
+Source-only refresh (2026-10-09, PR #12096 final architecture closeout): the canonical module inventory records `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9` and `source_module_count=2566`. The complete local 17-shard measurement on source commit `912f483953c76ede75313f762e41a9848369c3bb` passed all shards and both gates at 99.67% line / 94.25% branch, including all six newly tracked modules. Remote CI acceptance remains separate.
 
-Coverage refresh (2026-10-09, PR #12096 Linux architecture closeout): the canonical module inventory records `source_tree_sha256=9fc57cb6d893268c2b5161e7a6e763a2a5d27d0171f3c948a5e417407d213fe9` and `source_module_count=2561`. The complete local 17-shard measurement on source commit `57363ebd46f4cde3340797375694cfc70f497eac` passed all 17 shards and both coverage gates at 99.67% line / 94.24% branch. This is the current source binding; the entries below are historical. Remote CI acceptance for the final PR head remains separate.
+Coverage refresh (2026-10-09, PR #12096 Linux architecture closeout): the canonical module inventory records `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9` and `source_module_count=2561`. The complete local 17-shard measurement on source commit `57363ebd46f4cde3340797375694cfc70f497eac` passed all 17 shards and both coverage gates at 99.67% line / 94.24% branch. This is the current source binding; the entries below are historical. Remote CI acceptance for the final PR head remains separate.
 
-Coverage refresh (2026-10-08, PR #12096 review closeout): the canonical module inventory records `source_tree_sha256=82b56b2edc0f57bbe88216b4218ec37d05e323d5b2dc7ef5c0c475afc88f1337` and `source_module_count=2561` after splitting workflow-binding and env-comment helpers to satisfy the unchanged complexity gates. The complete local 17-shard measurement on `a98125c53252afc237ee3bd409ef0cb4f867128b` passed every shard and both coverage gates at 99.67% line / 94.24% branch. This is local evidence, not CircleCI acceptance or lifecycle ADMIT for the final PR head.
+Coverage refresh (2026-10-08, PR #12096 review closeout): the canonical module inventory records `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9` and `source_module_count=2561` after splitting workflow-binding and env-comment helpers to satisfy the unchanged complexity gates. The complete local 17-shard measurement on `a98125c53252afc237ee3bd409ef0cb4f867128b` passed every shard and both coverage gates at 99.67% line / 94.24% branch. This is local evidence, not CircleCI acceptance or lifecycle ADMIT for the final PR head.
 
-Coverage refresh (2026-10-08, PR #12096 architecture and workflow inventory fixes): current module inventory records `source_tree_sha256=bf341b35caff7e5959ae3b5b092c0f69437e6611ccbbaf91e2ad5f9dc08ef7aa` and `source_module_count=2561`. The complete local 17-shard measurement on source commit `93bab45bda53d25b14498cc601d366465e88eb2f` passed all shards and both gates at 99.67% line / 94.27% branch; nonregressing adoption adds absent module rows and retains accepted values where the raw measurement was lower. This is local evidence, not CircleCI acceptance or lifecycle ADMIT for the final PR head.
+Coverage refresh (2026-10-08, PR #12096 architecture and workflow inventory fixes): current module inventory records `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9` and `source_module_count=2561`. The complete local 17-shard measurement on source commit `93bab45bda53d25b14498cc601d366465e88eb2f` passed all shards and both gates at 99.67% line / 94.27% branch; nonregressing adoption adds absent module rows and retains accepted values where the raw measurement was lower. This is local evidence, not CircleCI acceptance or lifecycle ADMIT for the final PR head.
 
 Source-only integration (2026-10-07, PR #12096): merged main `5551e654990b43ddbc88bc10fdef8a0a2bd2771f`; current canonical source_tree_sha256 `c71e4fcf8d1650c14a65e33f85f37d971b8b92efd2b02d0638f6892af26ac7e3`, with 2558 eligible source modules and 2552 historical coverage rows. Six modules remain unmatched until complete 17-shard coverage is captured and adopted; final-SHA CI acceptance remains required.
 
-Previous source-only refresh (2026-10-07, P02 F1-F7): `source_tree_sha256=7e52b9a05c47ce9c79b095f9672fc1615fa4be68d70d36acb74c18012964d4c6`; `source_module_count=2552`. That binding is derived from the canonical module inventory and covers event/result snapshots, prepared transitions and explicit canonical byte profiles; it is not a new topology audit or a coverage measurement. The previous bindings and measurements below are historical and superseded for source freshness.
+Previous source-only refresh (2026-10-07, P02 F1-F7): `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`; `source_module_count=2552`. That binding is derived from the canonical module inventory and covers event/result snapshots, prepared transitions and explicit canonical byte profiles; it is not a new topology audit or a coverage measurement. The previous bindings and measurements below are historical and superseded for source freshness.
 
 Historical source-only stamps and measurements (superseded bindings):
 
 Source-only refresh (2026-10-07, architecture ownership LOC split): source_tree_sha256 `fb60ec89b76c2879ca58d49ede04cb894ae74ecd28355d27d83c1d2bccdec68a`. File-size and complexity splits stayed inside the existing domain and application limits. Publication vocabulary wiring and repository env loading sit outside the shrink-only hotspot prefixes. Publication classification view construction lives in the existing _publication_type_classification_support module so the public logic module stays under 250 lines. The module-coverage inventory still records `source_module_count=2553`. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
 
-`source_tree_sha256=fb60ec89b76c2879ca58d49ede04cb894ae74ecd28355d27d83c1d2bccdec68a`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2553`
 
 Source-only refresh (2026-10-07, architecture ownership): source_tree_sha256 `ab36ec7abab20cb5fd4459c44d3bf42e5179adc2d0b4c41612d8249da302c9eb`. The module-coverage inventory now records `source_module_count=2553` after the repository env reader. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
 
-`source_tree_sha256=ab36ec7abab20cb5fd4459c44d3bf42e5179adc2d0b4c41612d8249da302c9eb`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2553`
 
@@ -62,71 +62,71 @@ Source-only refresh (2026-10-05, direct owner imports): source_tree_sha256 `0d66
 
 Source-only refresh (2026-10-05, RF-023): sealed target mapping codecs now use the existing infrastructure config loader. Runtime cross-layer group edges are 330, within the unchanged 330 budget. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
 
-`source_tree_sha256=d141e4aaac41d30aa6d90f53dff69fe99d2bf280335a394b41d4ec298485dd08`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2552`
 
 Source-only refresh (2026-10-05): shared EFO normalization identity revision is bound to the current source tree. This is not a new coverage measurement or topology audit. Historical measurements below are unchanged.
 
-`source_tree_sha256=3786dc15afe014d3827d7f940c7cec030d02c993d78487b403eee55b4bdae29b`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 Source-only refresh (2026-10-04): removed the approved LoggerPort alias and restored type-only workflow imports. This rebind does not represent a new coverage measurement; historical measurement records below remain unchanged.
 
-`source_tree_sha256=4db123e5e95045405ceb710e2425c1cd0e733fb6a225dccc7fc4146c63eaacb5`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2552`
 
 Current refresh (2026-10-04): accepted inventory after the complete 17-group local measurement on `c4071c0eeecd6b06f18bc781a0435ee128e0e994` and canonical nonregressing adoption. The raw comparison retains 80 visible module regressions. Retained historical values are not fresh measurements. Current accepted source binding: `78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db`; raw measurement source binding: `78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db`. Earlier refresh notes below remain historical.
 
-`source_tree_sha256=78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2553`
 
 Current refresh (2026-10-04): accepted inventory after the complete 17-group local measurement on `2f6b4cbee2da2f3a7b149b4781432a785cbebff3` and canonical nonregressing adoption. The raw comparison retains 80 visible module regressions. Retained historical values are not fresh measurements. Current accepted source binding: `78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db`; raw measurement source binding: `78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db`. Earlier refresh notes below remain historical.
 
-`source_tree_sha256=78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2553`
 
 Current refresh (2026-10-04): accepted inventory after the complete 17-group local measurement on `72905b3fdb289e7229f17ce36727f2b815241361` and canonical nonregressing adoption. The raw comparison retains 80 visible module regressions. Retained historical values are not fresh measurements. Current accepted source binding: `15a5c83f203ec962c8f6e65ba6166d8d89207e5cbe0acc0f92ca1e631a8f96f8`; raw measurement source binding: `15a5c83f203ec962c8f6e65ba6166d8d89207e5cbe0acc0f92ca1e631a8f96f8`. Earlier refresh notes below remain historical.
 
-`source_tree_sha256=15a5c83f203ec962c8f6e65ba6166d8d89207e5cbe0acc0f92ca1e631a8f96f8`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2553`
 
 Current refresh (2026-10-04): accepted inventory after the complete 17-group local measurement on `e916f820e70c807183fcaf2e73f4cad714524844` and canonical nonregressing adoption. The raw comparison retains 80 visible module regressions. Retained historical values are not fresh measurements. Current accepted source binding: `d2764a40ec87e32214fbbf4ac1ed184b4a4de6b3e755c38c48ed74a86b8a705b`; raw measurement source binding: `d2764a40ec87e32214fbbf4ac1ed184b4a4de6b3e755c38c48ed74a86b8a705b`. Earlier refresh notes below remain historical.
 
-`source_tree_sha256=d2764a40ec87e32214fbbf4ac1ed184b4a4de6b3e755c38c48ed74a86b8a705b`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2553`
 
 Current refresh (2026-10-04): accepted inventory after the complete 17-group local measurement on `13dc2d3819af7a91a63e4e88116f6d4d5acfdcc3` and canonical nonregressing adoption. The raw comparison retains 80 visible module regressions. Retained historical values are not fresh measurements. Current accepted source binding: `f5f56d1b51cb1ccd9483c28e6c9435a807198f2fc61915e05754851ccb480608`; raw measurement source binding: `f5f56d1b51cb1ccd9483c28e6c9435a807198f2fc61915e05754851ccb480608`. Earlier refresh notes below remain historical.
 
-`source_tree_sha256=f5f56d1b51cb1ccd9483c28e6c9435a807198f2fc61915e05754851ccb480608`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2550`
 
 Current refresh (2026-10-04): accepted inventory after the complete 17-group local measurement on `0d89b40862340ad62cd361b8abbd080c64c15264` and canonical nonregressing adoption. The raw comparison retains 67 visible module regressions. Retained historical values are not fresh measurements. Current accepted source binding: `29b4c6ac3d6b9e0e6d1b4919a55d1a2496975439af6efc51713fd1fc86cf4a40`; raw measurement source binding: `29b4c6ac3d6b9e0e6d1b4919a55d1a2496975439af6efc51713fd1fc86cf4a40`. Earlier refresh notes below remain historical.
 
-`source_tree_sha256=29b4c6ac3d6b9e0e6d1b4919a55d1a2496975439af6efc51713fd1fc86cf4a40`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2545`
 
 Current refresh (2026-10-04): accepted inventory after the complete 17-group local measurement on `b7334cc49d144a50a26f656e0241ea6dfe42d0e9` and canonical nonregressing adoption. The raw comparison retains 67 visible module regressions. Retained historical values are not fresh measurements. Current accepted source binding: `8d3e76877a6e5c205d49b926d60e57775d94015f9222ba2f4202ccc55c1026c8`; raw measurement source binding: `8d3e76877a6e5c205d49b926d60e57775d94015f9222ba2f4202ccc55c1026c8`. Earlier refresh notes below remain historical.
 
-`source_tree_sha256=8d3e76877a6e5c205d49b926d60e57775d94015f9222ba2f4202ccc55c1026c8`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2545`
 
 Refresh note (2026-10-04): accepted inventory after the complete 17-group local measurement on `24f569369ce169cf971fd19691158f7e78edf806` and canonical nonregressing adoption. The raw comparison retains 67 visible module regressions. Retained historical values are not fresh measurements. Historical notes below remain historical. Current accepted source binding: `3b2e81219500a0aa6a5c796addb7772d66cff70704e8a85a690ad04726693a75`; raw measurement source binding: `57404f9168a198c9f4398b1cd519f397d3d90e901588e8ecc6469b41af57d203`. The later source-only rebind does not relabel historical coverage as a new measurement.
 
-`source_tree_sha256=3b2e81219500a0aa6a5c796addb7772d66cff70704e8a85a690ad04726693a75`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2546`
 
 Refresh note (2026-09-24): hash-only reconcile after arch-guard landing. Counts and the source fingerprint below come from `reports/quality/module-coverage-inventory.json`. Historical notes remain historical.
 
-`source_tree_sha256=9bb646a395d0ba313f842417d23126c262f2f4cda021b26001034a38b73e6784`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2479`
 
@@ -134,7 +134,7 @@ Refresh note (2026-09-24): hash-only reconcile after composition bootstrap/runti
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=2aeac7963c8a35dc02295df8e6a56389f70b1992f4b042ac67dd35bf3eb72c40`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2479`
 
@@ -144,7 +144,7 @@ fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=de11093aaeedf6fbbac66e555382c843c661d01ad28cd714f631f46acbc05829`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2479`
 
@@ -153,7 +153,7 @@ limit cassette alignment. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=82d9deb446430309237ac3f46fee3696a5d9cd4e1f9ff68bbce34b745dcc3171`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2479`
 
@@ -162,7 +162,7 @@ Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=47ce27d33202543070f07aed754486ed289f886d18670ab4b23cec53b541abf9`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2479`
 
@@ -171,7 +171,7 @@ service shrink. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=c8cdaebaa90fed6b988004615e5887e781c8a3e1ad5d7ba79feecde89d12521e`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2479`
 
@@ -180,7 +180,7 @@ comment on semanticscholar transformer. Counts and the source fingerprint
 below come from `reports/quality/module-coverage-inventory.json`. Historical
 notes remain historical.
 
-`source_tree_sha256=eb89fd6972f9bd94478a1986cc521bf0d96e98e8c795c93627016536cbdbb218`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2479`
 
@@ -189,7 +189,7 @@ and governance rebind loop. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=24d6e17529aca8a02bdb5912227fdf145c254f7d62384842a0a0ed5e491e2c24`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2479`
 
@@ -198,7 +198,7 @@ coverage inventory rebind. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=52395f9d81a57f084005661ccee069a1732068ed6c344bd256f24009aafad4ba`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2493`
 
@@ -207,7 +207,7 @@ and governance rebind loop. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=b36473214ec617167b70f383a8500d7a66d97720b7b76b60e8162565d18fcb50`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2474`
 
@@ -216,7 +216,7 @@ coverage rebind. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=e5ab6c7b712b06de7b2dd77593aac5a6466a30da6be5f23743ea2a52e4b59277`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2484`
 
@@ -226,7 +226,7 @@ fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=0e74e9e3cf7e4cd15eb467a283c843f91cba9fd133d6c826d995429bfcc10d74`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2469`
 
@@ -236,7 +236,7 @@ and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=c7d0ffb86f07bf48b0cc7aadc6c19295456b63640f2c13055d85e134c6d7ee3b`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2470`
 
@@ -246,7 +246,7 @@ source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=05ebd6d6a699bd690dc27a3d4c6a29736eaede5e2ee8684f5bc6dab9b568817f`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2474`
 
@@ -256,7 +256,7 @@ Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=02358f050d0c78c5b18a3c0fb59f7a55f0cda7a80591fb7db505405466c11625`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2474`
 
@@ -265,7 +265,7 @@ rebind. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=54049305075ccc3e44a24c65a2c6250e5f1265ad4af28065fe3a86bcc63e1029`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2469`
 
@@ -275,7 +275,7 @@ inventory). Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=5813dc1c1ee6392f9b158dc0d325623b06f0dcf20b0aec436dbdf9deb803a9da`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2473`
 
@@ -285,7 +285,7 @@ Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=99e35c293ab9ca002641d5c04c88cc424e98832410e0399c16a03011e6795c3f`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2466`
 
@@ -294,7 +294,7 @@ Refresh note (2026-09-11): merge origin/main `#10367` with UniProt mixin fold
 the source fingerprint below come from `reports/quality/module-coverage-inventory.json`.
 Historical notes remain historical.
 
-`source_tree_sha256=3c15f12f14bd31f22d1bb5c19b844c463524445131a468097ada5ffe84a3e700`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2465`
 
@@ -303,13 +303,13 @@ score-card modules; inventory is `source_module_count=2466`. Counts and
 the source fingerprint below come from `reports/quality/module-coverage-inventory.json`.
 Historical notes remain historical.
 
-`source_tree_sha256=16694ef76272b11f9c37c8f871bce072d49425edd0fe18927247f0b9321e2c54`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 `source_module_count=2466`
 
 Refresh note (2026-09-09): inventory grew to `source_module_count=2471` after the flow3 HTTP display helpers and stream-1 merge. Counts and the source fingerprint below come from `reports/quality/module-coverage-inventory.json`. Historical notes remain historical.
 
-`source_tree_sha256=3e4af34912c125fcf6294903e81ef499c40c919f01c60e7699a3dd9d33a39aac`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 Дата: 2026-08-17
 Статус: refreshed
@@ -321,7 +321,7 @@ from the last valid inventory and adding
 `src/bioetl/infrastructure/adapters/uniprot/_idmapping_url_policy.py`.
 Current source baseline is
 `source_module_count=2467` with
-`source_tree_sha256=d6a552f7216d140a38347be81dd03b630947f4850a8f6cb34e08a7138b5622ff`.
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`.
 
 Refresh note (2026-08-26): governance closeout refresh after the composition registry consolidation; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
 
@@ -345,7 +345,7 @@ Current-baseline note (2026-08-17): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
 `source_module_count=2465` with
-`source_tree_sha256=dcf4c865e564cc429c76b1d30de7c1c99100466c47eb3d9155bf1a1e7efb0a92`.
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-08-05) followed the #4343 composite facade narrowing
@@ -423,10 +423,10 @@ Refresh note (2026-09-22): Grafana correction branch source inventory contains
 dependency edges; the generated map has 330 cross-layer group edges and zero
 layer violations. This is a source inventory refresh, not new coverage proof.
 
-`source_tree_sha256=0b8525d1668c34dbc68510828f851c1bb44052578c8b38689d98dd4d65300a51`
+`source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 
 Refresh note (2026-09-22, isolated Grafana continuation): source inventory
-rebound to `source_tree_sha256=6c334dfe51b614f733e0a070d4eb84658e171e21fa6dd11b2ed9a5e024232b00`,
+rebound to `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`,
 `source_module_count=2497`. This stamp is derived from the module inventory;
 it is not a new coverage measurement or a complete topology re-audit.
 
@@ -434,7 +434,7 @@ it is not a new coverage measurement or a complete topology re-audit.
 
 ## Current source inventory binding
 
-- `source_tree_sha256=6667467134761bad3ea43b26f1e0ff8a79a519d2a2e60aa304badb921b80a83a`
+- `source_tree_sha256=ccd33683966c0772114f5457fc0310c875922bcd2d7c86786873f6704cf130c9`
 - `source_module_count=2583`
 - Source modules: `2583`
 - `2529` fully covered

@@ -8,9 +8,9 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
+Audited commit SHA: `eaf29aa2d8ece1500529d2f5469cf1c762c45d92`
 
-Evidence surface SHA-256: `e100c8db2e3a5b3d7817b4de29c37936172d7d64f5e3721671de5807794dc609`
+Evidence surface SHA-256: `89582eb35831dc6faeb18fdb22df0432142b701232caef4b8a5bb862085c4a0f`
 
 ## Current evidence summary
 
@@ -68,8 +68,8 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "e100c8db2e3a5b3d7817b4de29c37936172d7d64f5e3721671de5807794dc609",
+  "audited_commit_sha": "eaf29aa2d8ece1500529d2f5469cf1c762c45d92",
+  "evidence_surface_sha256": "89582eb35831dc6faeb18fdb22df0432142b701232caef4b8a5bb862085c4a0f",
   "metrics": {
     "architecture_integral_score": 10.0,
     "architecture_interpretation": "excellent",
@@ -94,6 +94,9 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
   "schema_version": "technical-debt-audit-summary-v1"
 }
 -->
+
+
+
 
 ## Retained facade importer census
 
