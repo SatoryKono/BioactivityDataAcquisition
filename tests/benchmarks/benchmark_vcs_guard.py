@@ -228,6 +228,9 @@ def _common_gitdir(gitdir: Path) -> Path | None:
     """Resolve the commondir file of a linked worktree git directory."""
     common_file = gitdir / "commondir"
     if not common_file.exists() and not common_file.is_symlink():
+        backlink = gitdir / "gitdir"
+        if backlink.exists() or backlink.is_symlink():
+            raise _CorruptLooseRef
         return None
     raw = common_file.read_text(encoding="utf-8").strip()
     if not raw or "\n" in raw or "\x00" in raw:

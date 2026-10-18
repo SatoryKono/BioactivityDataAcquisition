@@ -422,3 +422,23 @@ def test_broken_gitfile_symlink_blocks_parent_search(
     link = child / ".git"
     link.symlink_to(link if cyclic else tmp_path / "missing")
     assert read_source_revision(child).blocked
+
+
+@pytest.mark.parametrize("backlink_kind", ["file", "broken_symlink", "cyclic_symlink"])
+def test_missing_commondir_file_blocks_linked_worktree(
+    tmp_path: Path, backlink_kind: str
+) -> None:
+    """A linked-worktree backlink requires a readable commondir, even detached."""
+    common = tmp_path / "repo.git"
+    gitdir = common / "worktrees" / "linked"
+    checkout = tmp_path / "linked"
+    _write(checkout / ".git", "gitdir: ../repo.git/worktrees/linked\n")
+    _write(gitdir / "HEAD", COMMIT + "\n")
+    backlink = gitdir / "gitdir"
+    if backlink_kind == "file":
+        _write(backlink, str(checkout / ".git") + "\n")
+    else:
+        backlink.symlink_to(
+            "missing" if backlink_kind == "broken_symlink" else "gitdir"
+        )
+    _assert_blocked(checkout)
