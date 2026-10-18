@@ -170,10 +170,10 @@ class TestQuarantineInspect:
         assert "--limit" in result.output
         assert "--error-code" in result.output
         assert "--run-id" in result.output
-        assert "--silver-filter-only" in result.output
-        assert "Deprecated legacy alias" in result.output
+        assert "--silver-filter-only" not in result.output
+        assert "Deprecated legacy alias" not in result.output
         assert "FILTERED_OUT_SILVER" in result.output
-        assert "sunset 2026-09-30" in result.output
+        assert "sunset 2026-09-30" not in result.output
         assert "not Gold" in normalized_output
         assert "contract/semantic rejects" in normalized_output
 
@@ -296,12 +296,12 @@ class TestQuarantineInspect:
         )
         assert result.exit_code == 0
 
-    def test_inspect_with_silver_filter_shortcut(
+    def test_inspect_with_silver_error_code(
         self,
         cli_runner: CliRunner,
         mock_quarantine_runtime_service: MagicMock,
     ) -> None:
-        """Test quarantine inspect with --silver-filter-only shortcut."""
+        """Test quarantine inspect with explicit Silver error code."""
         mock_quarantine_runtime_service.inspect = AsyncMock(return_value=[])
 
         with patch(
@@ -315,7 +315,8 @@ class TestQuarantineInspect:
                     "inspect",
                     "--pipeline",
                     "chembl_activity",
-                    "--silver-filter-only",
+                    "--error-code",
+                    "FILTERED_OUT_SILVER",
                 ],
             )
 
@@ -370,10 +371,10 @@ class TestQuarantineStats:
         assert "--json" in result.output
         assert "--error-code" in result.output
         assert "--run-id" in result.output
-        assert "--silver-filter-only" in result.output
-        assert "Deprecated legacy alias" in result.output
+        assert "--silver-filter-only" not in result.output
+        assert "Deprecated legacy alias" not in result.output
         assert "FILTERED_OUT_SILVER" in result.output
-        assert "sunset 2026-09-30" in result.output
+        assert "sunset 2026-09-30" not in result.output
         assert "not Gold" in normalized_output
         assert "contract/semantic rejects" in normalized_output
         assert "--group-by" in result.output
@@ -438,12 +439,12 @@ class TestQuarantineStats:
         assert "By Error Code:" in result.output
         assert "By Status:" in result.output
 
-    def test_stats_with_silver_filter_shortcut(
+    def test_stats_with_silver_error_code(
         self,
         cli_runner: CliRunner,
         mock_quarantine_runtime_service: MagicMock,
     ) -> None:
-        """Test quarantine stats with --silver-filter-only shortcut."""
+        """Test quarantine stats with explicit Silver error code."""
         mock_quarantine_runtime_service.get_stats = AsyncMock(
             return_value={
                 "total_count": 3,
@@ -473,7 +474,8 @@ class TestQuarantineStats:
                     "stats",
                     "--pipeline",
                     "chembl_activity",
-                    "--silver-filter-only",
+                    "--error-code",
+                    "FILTERED_OUT_SILVER",
                 ],
             )
 
@@ -534,7 +536,8 @@ class TestQuarantineStats:
                         "stats",
                         "--pipeline",
                         "chembl_activity",
-                        "--silver-filter-only",
+                        "--error-code",
+                        "FILTERED_OUT_SILVER",
                         "--run-id",
                         "00000000-0000-0000-0000-000000000123",
                     ],
@@ -589,7 +592,8 @@ class TestQuarantineStats:
                     "stats",
                     "--pipeline",
                     "chembl_activity",
-                    "--silver-filter-only",
+                    "--error-code",
+                    "FILTERED_OUT_SILVER",
                     "--group-by",
                     "reason-code-field",
                     "--top",
@@ -640,7 +644,8 @@ class TestQuarantineStats:
                     "stats",
                     "--pipeline",
                     "chembl_activity",
-                    "--silver-filter-only",
+                    "--error-code",
+                    "FILTERED_OUT_SILVER",
                     "--group-by",
                     "reason-signature",
                 ],
@@ -692,7 +697,8 @@ class TestQuarantineStats:
                     "stats",
                     "--pipeline",
                     "chembl_activity",
-                    "--silver-filter-only",
+                    "--error-code",
+                    "FILTERED_OUT_SILVER",
                     "--group-by",
                     "reason-code",
                     "--top",
@@ -739,7 +745,8 @@ class TestQuarantineStats:
                     "stats",
                     "--pipeline",
                     "chembl_activity",
-                    "--silver-filter-only",
+                    "--error-code",
+                    "FILTERED_OUT_SILVER",
                     "--group-by",
                     "reason-signature",
                 ],
@@ -1382,3 +1389,27 @@ class TestQuarantineEdgeCases:
             )
 
         assert "Would purge records older than 90 days" in result.output
+
+
+@pytest.mark.parametrize(
+    "command",
+    [("quarantine", "inspect"), ("quarantine", "stats"), ("diagnostics", "quarantine")],
+)
+def test_retired_silver_filter_alias_fails_before_service_resolution(command):
+    """The retired spelling fails at parsing, before any service or storage use."""
+    with (
+        patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service"
+        ) as quarantine_service,
+        patch(
+            "bioetl.interfaces.cli.commands.diagnostics.get_quarantine_runtime_service"
+        ) as diagnostic_service,
+    ):
+        result = CliRunner().invoke(
+            cli, [*command, "--pipeline", "chembl_activity", "--silver-filter-only"]
+        )
+    assert result.exit_code == 2
+    assert "No such option" in result.output
+    assert "--silver-filter-only" in result.output
+    quarantine_service.assert_not_called()
+    diagnostic_service.assert_not_called()
