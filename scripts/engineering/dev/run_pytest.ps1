@@ -28,23 +28,60 @@ $FilteredArgs = @()
 
 function Test-BenchmarkPluginNeeded {
     param(
-        [string[]]$Args
+        [Alias("Args")]
+        [string[]]$CandidateArgs
     )
 
     $PreviousArg = $null
-    foreach ($Arg in $Args) {
-        if ($Arg -like "tests/benchmarks*" -or $Arg -like "*\tests\benchmarks*") {
+    foreach ($Arg in $CandidateArgs) {
+        if ($Arg -match "(^|[/\\])tests[/\\]benchmarks([/\\]|$)") {
             return $true
         }
-        if ($Arg -in @("--benchmark-only", "--benchmark-compare")) {
+        if ($Arg -like "--benchmark-*") {
             return $true
         }
-        if ($PreviousArg -eq "-m" -and $Arg -like "*benchmark*") {
+        if (
+            $Arg -in @(
+                "-pbenchmark",
+                "-p=benchmark",
+                "-ppytest_benchmark",
+                "-p=pytest_benchmark",
+                "-ppytest_benchmark.plugin",
+                "-p=pytest_benchmark.plugin",
+                "-ppytest-benchmark",
+                "-p=pytest-benchmark"
+            ) -or
+            $Arg -like "--plugins=benchmark" -or
+            $Arg -like "--plugins=pytest_benchmark" -or
+            $Arg -like "--plugins=pytest_benchmark.plugin" -or
+            $Arg -like "--plugins=pytest-benchmark"
+        ) {
+            return $true
+        }
+        if ($PreviousArg -in @("-p", "--plugins") -and $Arg -in @(
+            "benchmark",
+            "pytest_benchmark",
+            "pytest_benchmark.plugin",
+            "pytest-benchmark"
+        )) {
+            return $true
+        }
+        if ($PreviousArg -eq "-m" -and $Arg -like "*benchmark*" -and $Arg -notlike "*not benchmark*") {
             return $true
         }
         $PreviousArg = $Arg
     }
     return $false
+}
+
+function Enable-BenchmarkPlugin {
+    if (-not $env:BIOETL_BENCHMARK_CALLER) {
+        $env:BIOETL_BENCHMARK_CALLER = "run_pytest"
+    }
+    $script:PytestPluginArgs += @(
+        "-p", "tests.benchmarks.benchmark_vcs_guard",
+        "-p", "benchmark"
+    )
 }
 
 function Test-CoveragePluginNeeded {
@@ -69,12 +106,13 @@ function Test-CoveragePluginNeeded {
 
 function Remove-CoverageArgs {
     param(
-        [string[]]$Args
+        [Alias("Args")]
+        [string[]]$CandidateArgs
     )
 
     $Filtered = @()
     $SkipNext = $false
-    foreach ($Arg in $Args) {
+    foreach ($Arg in $CandidateArgs) {
         if ($SkipNext) {
             $SkipNext = $false
             continue
@@ -101,11 +139,12 @@ function Remove-CoverageArgs {
 
 function Test-XdistPluginNeeded {
     param(
-        [string[]]$Args
+        [Alias("Args")]
+        [string[]]$CandidateArgs
     )
 
     $PreviousArg = $null
-    foreach ($Arg in $Args) {
+    foreach ($Arg in $CandidateArgs) {
         if (
             $Arg -eq "-n" -or
             $Arg -eq "--numprocesses" -or
@@ -127,11 +166,12 @@ function Test-XdistPluginNeeded {
 
 function Test-XdistAutoRequested {
     param(
-        [string[]]$Args
+        [Alias("Args")]
+        [string[]]$CandidateArgs
     )
 
     $PreviousArg = $null
-    foreach ($Arg in $Args) {
+    foreach ($Arg in $CandidateArgs) {
         if (($PreviousArg -eq "-n" -or $PreviousArg -eq "--numprocesses") -and $Arg -eq "auto") {
             return $true
         }
@@ -150,13 +190,14 @@ function Test-PytestCacheDirValue {
 
 function Test-PytestCacheDirSpecified {
     param(
-        [string[]]$Args
+        [Alias("Args")]
+        [string[]]$CandidateArgs
     )
 
-    for ($i = 0; $i -lt $Args.Count; $i++) {
-        $Arg = $Args[$i]
+    for ($i = 0; $i -lt $CandidateArgs.Count; $i++) {
+        $Arg = $CandidateArgs[$i]
         if ($Arg -eq "-o" -or $Arg -eq "--override-ini") {
-            if (($i + 1 -lt $Args.Count) -and (Test-PytestCacheDirValue -Value $Args[$i + 1])) {
+            if (($i + 1 -lt $CandidateArgs.Count) -and (Test-PytestCacheDirValue -Value $CandidateArgs[$i + 1])) {
                 return $true
             }
             continue
@@ -173,11 +214,12 @@ function Test-PytestCacheDirSpecified {
 
 function Test-PreflightScope {
     param(
-        [string[]]$Args
+        [Alias("Args")]
+        [string[]]$CandidateArgs
     )
 
     $SelectedPaths = @()
-    foreach ($Arg in $Args) {
+    foreach ($Arg in $CandidateArgs) {
         if ($Arg.StartsWith("-")) {
             continue
         }
@@ -317,9 +359,6 @@ if ($PytestNarrow) {
     foreach ($Plugin in $PluginModules) {
         $PytestPluginArgs += @("-p", $Plugin)
     }
-    if (Test-BenchmarkPluginNeeded -Args $PytestArgs) {
-        $PytestPluginArgs += @("-p", "pytest_benchmark.plugin")
-    }
 } elseif ($env:BIOETL_PYTEST_AUTOLOAD -ne "1") {
     $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = "1"
     $PluginModules = @(
@@ -338,9 +377,25 @@ if ($PytestNarrow) {
     foreach ($Plugin in $PluginModules) {
         $PytestPluginArgs += @("-p", $Plugin)
     }
-    if (Test-BenchmarkPluginNeeded -Args $PytestArgs) {
-        $PytestPluginArgs += @("-p", "pytest_benchmark.plugin")
+}
+
+# Guard explicit activation even when entry-point autoload is enabled.
+if (Test-BenchmarkPluginNeeded -Args $PytestArgs) {
+    Enable-BenchmarkPlugin
+    $BenchmarkFilteredArgs = @()
+    for ($Index = 0; $Index -lt $PytestArgs.Count; $Index++) {
+        $Arg = $PytestArgs[$Index]
+        if ($Arg -cin @("-p", "--plugins") -and $Index + 1 -lt $PytestArgs.Count -and
+            $PytestArgs[$Index + 1] -cin @("benchmark", "pytest_benchmark", "pytest_benchmark.plugin", "pytest-benchmark")) {
+            $Index++
+            continue
+        }
+        if ($Arg -cin @("-pbenchmark", "-p=benchmark", "-ppytest_benchmark", "-p=pytest_benchmark", "-ppytest_benchmark.plugin", "-p=pytest_benchmark.plugin", "-ppytest-benchmark", "-p=pytest-benchmark", "--plugins=benchmark", "--plugins=pytest_benchmark", "--plugins=pytest_benchmark.plugin", "--plugins=pytest-benchmark")) {
+            continue
+        }
+        $BenchmarkFilteredArgs += $Arg
     }
+    $PytestArgs = $BenchmarkFilteredArgs
 }
 
 if ($env:OS -eq "Windows_NT" -and -not (Test-PytestCacheDirSpecified -Args $PytestArgs)) {
