@@ -196,75 +196,75 @@ composite.dq_overrides.enricher_overrides.uniprot_idmapping,(dict),(dict),(dict)
 composite.dq_overrides.enricher_overrides.uniprot_protein,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.execution.retry.backoff_multiplier,2.0,2.0,2.0,2.0,2.0,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.execution.retry.max_attempts,3,3,3,3,3,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.abstract,—,—,—,—,"[""pubmed"", ""openalex"", ""chembl"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.affiliation_list,—,—,—,—,"[""pubmed"", ""openalex"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.affiliation_structured,—,—,—,—,"[""pubmed""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.aromatic_ring_count,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.author_details,—,—,—,—,"[""crossref""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.author_h_indices,—,—,—,—,"[""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.author_openalex_ids,—,—,—,—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.author_orcids,—,—,—,—,"[""crossref"", ""openalex"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.author_s2_ids,—,—,—,—,"[""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.black_box_warning,—,—,—,—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.canonical_smiles,—,—,—,—,"[""chembl"", ""pubchem""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.cell_id,—,—,—,—,"[""chembl.assay""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.chemicals,—,—,—,—,"[""pubmed""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.citation_contexts,—,—,—,—,"[""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.citations_made,—,—,—,—,"[""crossref"", ""openalex"", ""pubmed"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.citations_received,—,—,—,—,"[""crossref"", ""openalex"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.databanks,—,—,—,—,"[""pubmed""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.dblp_id,—,—,—,—,"[""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.first_approval,—,—,—,—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.fwci,—,—,—,—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.gene_symbols,—,—,—,—,"[""pubmed""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.grants,—,—,—,—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.hba_count,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.hbd_count,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.heavy_atom_count,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.inchi,—,—,—,—,"[""chembl"", ""pubchem""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.inchi_key,—,—,—,—,"[""chembl"", ""pubchem""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.influential_citation_count,—,—,—,—,"[""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.institution_country_codes,—,—,—,—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.institution_ids,—,—,—,—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.is_retracted,—,—,—,—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.isomeric_smiles,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.iupac_name,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.logp,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.logp_method,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.mag_id,—,—,—,—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.max_phase,—,—,—,—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.mid,—,—,—,—,"[""pubmed""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.molecular_formula,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.molecular_weight,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.molecule_id,—,—,—,—,"[""chembl.activity""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.pii,"[""pubmed""]",—,"[""pubmed""]",—,"[""pubmed""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.polar_surface_area,"[""pubchem"", ""chembl""]",—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.pref_name,"[""chembl"", ""pubchem""]",—,—,—,"[""chembl"", ""pubchem""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.primary_component_id,"[""chembl""]",—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.primary_topic,"[""openalex""]",—,"[""openalex""]",—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.publication_class,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.publication_id,—,—,"[""chembl.activity""]",—,"[""chembl.activity""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.publication_subclass,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.publication_type_unified,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.publisher_id,"[""pubmed""]",—,"[""pubmed""]",—,"[""pubmed""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.qed_weighted,"[""chembl""]",—,—,—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.references,"[""crossref""]",—,"[""crossref""]",—,"[""crossref""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.rotatable_bond_count,"[""pubchem"", ""chembl""]",—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.subject_fields,"[""semanticscholar""]",—,"[""semanticscholar""]",—,"[""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.subject_keywords,"[""crossref"", ""openalex"", ""pubmed"", ""semanticscholar""]",—,"[""crossref"", ""openalex"", ""pubmed"", ""semanticscholar""]",—,"[""crossref"", ""openalex"", ""pubmed"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.subject_mesh,"[""pubmed"", ""openalex""]",—,"[""pubmed"", ""openalex""]",—,"[""pubmed"", ""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.subject_topics,"[""openalex""]",—,"[""openalex""]",—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.synonyms,"[""chembl"", ""pubchem""]",—,—,—,"[""chembl"", ""pubchem""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.target_id,"[""chembl""]",—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.taxonomy_id,"[""chembl""]",—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.therapeutic_flag,"[""chembl""]",—,—,—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.tissue_id,"[""chembl.assay""]",—,"[""chembl.assay""]",—,"[""chembl.assay""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.title,"[""chembl"", ""crossref"", ""openalex""]",—,"[""chembl"", ""crossref"", ""openalex""]",—,"[""chembl"", ""crossref"", ""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+composite.merge.field_priorities.withdrawn_flag,"[""chembl""]",—,—,—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.merge.output.gold,data/output/gold/composite/activity,data/output/gold/composite/assay,data/output/gold/composite/molecule,data/output/gold/composite/publication,data/output/gold/composite/target,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.merge.output.silver,data/output/silver/composite/activity,data/output/silver/composite/assay,data/output/silver/composite/molecule,data/output/silver/composite/publication,data/output/silver/composite/target,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.abstract,—,—,—,—,"[""pubmed"", ""openalex"", ""chembl"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.affiliation_list,—,—,—,—,"[""pubmed"", ""openalex"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.affiliation_structured,—,—,—,—,"[""pubmed""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.aromatic_ring_count,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.author_details,—,—,—,—,"[""crossref""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.author_h_indices,—,—,—,—,"[""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.author_openalex_ids,—,—,—,—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.author_orcids,—,—,—,—,"[""crossref"", ""openalex"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.author_s2_ids,—,—,—,—,"[""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.black_box_warning,—,—,—,—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.canonical_smiles,—,—,—,—,"[""chembl"", ""pubchem""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.cell_id,—,—,—,—,"[""chembl.assay""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.chemicals,—,—,—,—,"[""pubmed""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.citation_contexts,—,—,—,—,"[""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.citations_made,—,—,—,—,"[""crossref"", ""openalex"", ""pubmed"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.citations_received,—,—,—,—,"[""crossref"", ""openalex"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.databanks,—,—,—,—,"[""pubmed""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.dblp_id,—,—,—,—,"[""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.first_approval,—,—,—,—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.fwci,—,—,—,—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.gene_symbols,—,—,—,—,"[""pubmed""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.merge.sort_by.gold,"[""entity_id"", ""activity_id""]","[""entity_id"", ""assay_id""]","[""entity_id"", ""molecule_id""]","[""entity_id"", ""publication_id""]","[""entity_id"", ""target_id""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.grants,—,—,—,—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.hba_count,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.hbd_count,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.heavy_atom_count,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.inchi,—,—,—,—,"[""chembl"", ""pubchem""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.inchi_key,—,—,—,—,"[""chembl"", ""pubchem""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.influential_citation_count,—,—,—,—,"[""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.institution_country_codes,—,—,—,—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.institution_ids,—,—,—,—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.is_retracted,—,—,—,—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.isomeric_smiles,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.iupac_name,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.logp,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.logp_method,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.mag_id,—,—,—,—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.max_phase,—,—,—,—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.mid,—,—,—,—,"[""pubmed""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.molecular_formula,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.molecular_weight,—,—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.molecule_id,—,—,—,—,"[""chembl.activity""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.pii,"[""pubmed""]",—,"[""pubmed""]",—,"[""pubmed""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.polar_surface_area,"[""pubchem"", ""chembl""]",—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.pref_name,"[""chembl"", ""pubchem""]",—,—,—,"[""chembl"", ""pubchem""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.primary_component_id,"[""chembl""]",—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.primary_topic,"[""openalex""]",—,"[""openalex""]",—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.publication_class,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.publication_id,—,—,"[""chembl.activity""]",—,"[""chembl.activity""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.publication_subclass,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.publication_type_unified,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,"[""chembl"", ""pubmed"", ""openalex"", ""crossref"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.publisher_id,"[""pubmed""]",—,"[""pubmed""]",—,"[""pubmed""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.qed_weighted,"[""chembl""]",—,—,—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.references,"[""crossref""]",—,"[""crossref""]",—,"[""crossref""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.rotatable_bond_count,"[""pubchem"", ""chembl""]",—,—,—,"[""pubchem"", ""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.merge.sort_by.silver,"[""entity_id"", ""activity_id""]","[""entity_id"", ""assay_id""]","[""entity_id"", ""molecule_id""]","[""entity_id"", ""publication_id""]","[""entity_id"", ""target_id""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.subject_fields,"[""semanticscholar""]",—,"[""semanticscholar""]",—,"[""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.subject_keywords,"[""crossref"", ""openalex"", ""pubmed"", ""semanticscholar""]",—,"[""crossref"", ""openalex"", ""pubmed"", ""semanticscholar""]",—,"[""crossref"", ""openalex"", ""pubmed"", ""semanticscholar""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.subject_mesh,"[""pubmed"", ""openalex""]",—,"[""pubmed"", ""openalex""]",—,"[""pubmed"", ""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.subject_topics,"[""openalex""]",—,"[""openalex""]",—,"[""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.synonyms,"[""chembl"", ""pubchem""]",—,—,—,"[""chembl"", ""pubchem""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.target_id,"[""chembl""]",—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.taxonomy_id,"[""chembl""]",—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.therapeutic_flag,"[""chembl""]",—,—,—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.tissue_id,"[""chembl.assay""]",—,"[""chembl.assay""]",—,"[""chembl.assay""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.title,"[""chembl"", ""crossref"", ""openalex""]",—,"[""chembl"", ""crossref"", ""openalex""]",—,"[""chembl"", ""crossref"", ""openalex""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.merge.sort_by.withdrawn_flag,"[""chembl""]",—,—,—,"[""chembl""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.merge.target_protein_classification_projection.include_protein_classifications,—,—,—,—,True,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.merge.target_protein_classification_projection.levels,—,—,—,—,"[1, 2, 3, 4, 5]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.merge.target_protein_classification_projection.source_prefix,—,—,—,—,chembl.target_protein_classification,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
