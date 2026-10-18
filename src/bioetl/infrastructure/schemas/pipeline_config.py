@@ -232,13 +232,19 @@ class PipelineYamlConfig(BaseModel):
             "silver": {
                 "allOf": [child_ref],
                 "properties": {
-                    "mode": {"type": ["string", "null"], "enum": ["append", "merge", None]},
+                    "mode": {
+                        "type": ["string", "null"],
+                        "enum": ["append", "merge", None],
+                    },
                 },
             },
             "gold": {
                 "allOf": [child_ref],
                 "properties": {
-                    "mode": {"type": ["string", "null"], "enum": ["append", "overwrite", "scd2", None]},
+                    "mode": {
+                        "type": ["string", "null"],
+                        "enum": ["append", "overwrite", "scd2", None],
+                    },
                 },
             },
         }
@@ -378,12 +384,16 @@ class PipelineYamlConfig(BaseModel):
 
         for layer_name, layer_config in self.sink.items():
             if layer_name not in valid_layers:
-                raise ValueError(f"Unknown sink layer: '{layer_name}'. Allowed: bronze, silver, gold.")
+                raise ValueError(
+                    f"Unknown sink layer: '{layer_name}'. Allowed: bronze, silver, gold."
+                )
 
             mode = layer_config.mode
             if mode is not None and mode not in valid_modes[layer_name]:
                 valid_str = ", ".join(sorted(valid_modes[layer_name]))
-                raise ValueError(f"Invalid mode '{mode}' for {layer_name} layer. Allowed: {valid_str}.")
+                raise ValueError(
+                    f"Invalid mode '{mode}' for {layer_name} layer. Allowed: {valid_str}."
+                )
 
         return self
 

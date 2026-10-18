@@ -230,6 +230,7 @@ def test_validate_config_tree_includes_composite_entity_contracts(
         for error in errors
     )
 
+
 def test_pipeline_config_reports_layer_aware_sink_validation_errors(
     tmp_path: Path,
 ) -> None:
@@ -244,9 +245,15 @@ def test_pipeline_config_reports_layer_aware_sink_validation_errors(
     # Introduce invalid modes that violate layer-aware rules
     pipeline_payload = payload.get("pipeline", payload)
     pipeline_payload["sink"] = {
-        "bronze": {"mode": "merge"}, # Bronze only allows append
-        "silver": {"mode": "overwrite", "sort_by": ["id"]}, # Silver only allows append, merge
-        "gold": {"mode": "merge", "sort_by": ["id"]} # Gold only allows append, overwrite, scd2
+        "bronze": {"mode": "merge"},  # Bronze only allows append
+        "silver": {
+            "mode": "overwrite",
+            "sort_by": ["id"],
+        },  # Silver only allows append, merge
+        "gold": {
+            "mode": "merge",
+            "sort_by": ["id"],
+        },  # Gold only allows append, overwrite, scd2
     }
     _write_yaml(entity_path, payload)
 
