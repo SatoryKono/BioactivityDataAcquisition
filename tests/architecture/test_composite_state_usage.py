@@ -1,6 +1,9 @@
-import ast
 from pathlib import Path
+
+import pytest
+
 from bioetl.domain.composite.state import CompositePipelineState
+
 
 def _find_usage_in_directory(dir_path: Path, member_name: str) -> bool:
     """Find if a specific enum member is used in the given directory."""
@@ -22,6 +25,7 @@ def _find_usage_in_directory(dir_path: Path, member_name: str) -> bool:
 
     return False
 
+@pytest.mark.architecture
 def test_no_dead_composite_pipeline_states():
     """All CompositePipelineState members MUST be used outside of domain/tests.
 

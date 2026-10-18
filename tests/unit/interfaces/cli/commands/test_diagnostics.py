@@ -977,14 +977,14 @@ def test_diagnostics_quarantine_json_reuses_quarantine_stats_helper(
 
 
 @pytest.mark.unit
-def test_diagnostics_quarantine_help_marks_silver_shortcut_as_legacy_alias(
+def test_diagnostics_quarantine_help_documents_explicit_silver_error_code(
     cli_runner: CliRunner,
 ) -> None:
     result = cli_runner.invoke(cli, ["diagnostics", "quarantine", "--help"])
 
     assert result.exit_code == 0
-    assert "--silver-filter-only" in result.output
-    assert "Legacy alias" in result.output
+    assert "--silver-filter-only" not in result.output
+    assert "Legacy alias" not in result.output
     assert "FILTERED_OUT_SILVER" in result.output
     assert "not Gold" in result.output
-    assert "contract/semantic rejects" in result.output
+    assert "contract/semantic rejects" in " ".join(result.output.split())

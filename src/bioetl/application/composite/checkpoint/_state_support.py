@@ -167,6 +167,7 @@ def _replace_checkpoint_state[TCheckpointState: "CompositeCheckpointState"](
         ),
         merge_completed=_resolved(checkpoint_state.merge_completed, merge_completed),
         merge_result=_resolved(checkpoint_state.merge_result, merge_result),
+        legacy_cv_completion_pending=checkpoint_state.legacy_cv_completion_pending,
         checkpoint_schema_version=checkpoint_state.checkpoint_schema_version,
         effective_config_hash=checkpoint_state.effective_config_hash,
         effective_config_artifact_id=checkpoint_state.effective_config_artifact_id,

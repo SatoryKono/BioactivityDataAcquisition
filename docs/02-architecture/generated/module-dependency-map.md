@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2581`
-- Internal import edges (raw): `8315`
+- Internal import edges (raw): `8317`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `329`
@@ -22,7 +22,7 @@ flowchart LR
     composition[composition]
     interfaces[interfaces]
     application -->|1629 OK| application
-    application -->|1103 OK| domain
+    application -->|1105 OK| domain
     composition -->|230 OK| application
     composition -->|649 OK| composition
     composition -->|316 OK| domain
@@ -41,7 +41,7 @@ flowchart LR
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1629 | allowed |
-| `application`    | `domain`         |    1103 | allowed |
+| `application`    | `domain`         |    1105 | allowed |
 | `composition`    | `application`    |     230 | allowed |
 | `composition`    | `composition`    |     649 | allowed |
 | `composition`    | `domain`         |     316 | allowed |
@@ -60,7 +60,7 @@ flowchart LR
 | ------------------------------ | ------------------------------------------ | ------: |
 | `application.services`         | `domain.control_plane`                     |     151 |
 | `infrastructure.adapters`      | `domain.types`                             |     125 |
-| `application.composite`        | `domain.composite`                         |     116 |
+| `application.composite`        | `domain.composite`                         |     117 |
 | `application.core`             | `domain.types`                             |      97 |
 | `application.services`         | `domain.types`                             |      86 |
 | `infrastructure.storage`       | `domain.types`                             |      83 |
@@ -72,8 +72,8 @@ flowchart LR
 | `composition.bootstrap`        | `application.services`                     |      47 |
 | `infrastructure.storage`       | `domain.value_objects`                     |      43 |
 | `composition.factories`        | `domain.ports`                             |      37 |
+| `application.composite`        | `domain.exceptions`                        |      36 |
 | `infrastructure.storage`       | `domain.models`                            |      36 |
-| `application.composite`        | `domain.exceptions`                        |      35 |
 | `composition.bootstrap`        | `domain.ports`                             |      34 |
 | `application.core`             | `domain.ports`                             |      32 |
 | `composition.runtime_builders` | `domain.control_plane`                     |      31 |

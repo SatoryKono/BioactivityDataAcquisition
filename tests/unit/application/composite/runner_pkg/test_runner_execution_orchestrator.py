@@ -39,6 +39,10 @@ from bioetl.application.composite.runner_pkg.runner_execution_orchestrator impor
     CompositeRunPhaseService,
     execute_locked_run_phases,
 )
+from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.runner_pkg.runner_lifecycle_flow import (
+    complete_successful_run,
+)
 from bioetl.domain.composite.result import (
     DependencyResult,
     DependencyStatus,
@@ -47,6 +51,7 @@ from bioetl.domain.composite.result import (
     MergeResult,
     SeedResult,
 )
+from bioetl.domain.exceptions import CheckpointConflictError
 
 
 class _ExecutionHost:
@@ -174,3 +179,125 @@ def test_composite_run_phase_service_exposes_explicit_phase_methods() -> None:
     assert callable(service.execute_pre_merge)
     assert callable(service.execute_merge)
     assert callable(service.execute)
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_legacy_cv_completed_skips_merge_but_runs_completion_receipt() -> None:
+    state = CompositeCheckpointState.from_dict(
+        {
+            "composite_name": "legacy",
+            "run_id": "run-1",
+            "state": "cross_validation_completed",
+            "seed_completed": True,
+            "seed_result": {"pipeline_name": "seed", "records_extracted": 3},
+            "completed_enrichers": ["enricher"],
+            "merge_result": {
+                "records_merged": 3,
+                "records_from_seed": 3,
+                "records_enriched": 2,
+                "records_fully_enriched": 2,
+                "sources_used": ["seed", "enricher"],
+                "duration_seconds": 1.25,
+            },
+        }
+    )
+    host = _ExecutionHost()
+
+    phase_result = await execute_locked_run_phases(
+        host,
+        CompositeLockedExecutionRequest(state=state),
+    )
+
+    assert host.order == []
+    assert phase_result.state.state.value == "merging"
+    assert phase_result.execution_context.seed_result.pipeline_name == "seed"
+    assert phase_result.execution_context.merge_result == MergeResult(
+        records_merged=3,
+        records_from_seed=3,
+        records_enriched=2,
+        records_fully_enriched=2,
+        sources_used=("seed", "enricher"),
+        duration_seconds=1.25,
+    )
+
+    lifecycle = _FinalizationReceiptHost()
+    result = await complete_successful_run(
+        lifecycle,
+        phase_result.state,
+        phase_result.execution_context,
+    )
+
+    assert lifecycle.order == ["finalize", "receipt", "result", "run_finished"]
+    assert result == "completed-result"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_legacy_cv_running_reexecutes_merge_boundary() -> None:
+    state = CompositeCheckpointState.from_dict(
+        {
+            "composite_name": "legacy",
+            "run_id": "run-2",
+            "state": "cross_validation_running",
+            "seed_completed": True,
+            "seed_result": {"pipeline_name": "seed", "records_extracted": 3},
+            "completed_enrichers": ["enricher"],
+        }
+    )
+    assert state.state.value == "enrichment_completed"
+    assert state.legacy_cv_completion_pending is False
+    host = _ExecutionHost()
+    host.initial_state = state
+
+    result = await execute_locked_run_phases(
+        host,
+        CompositeLockedExecutionRequest(state=state),
+    )
+
+    assert host.order.count("merge") == 1
+    assert result.state is host.final_state
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_legacy_cv_completed_without_merge_evidence_fails_closed() -> None:
+    state = CompositeCheckpointState.from_dict(
+        {
+            "composite_name": "legacy",
+            "run_id": "run-3",
+            "state": "cross_validation_completed",
+            "seed_completed": True,
+            "seed_result": {"pipeline_name": "seed", "records_extracted": 3},
+        }
+    )
+    host = _ExecutionHost()
+
+    with pytest.raises(CheckpointConflictError, match="lacks merge result evidence"):
+        await execute_locked_run_phases(
+            host,
+            CompositeLockedExecutionRequest(state=state),
+        )
+
+    assert host.order == []
+
+
+class _FinalizationReceiptHost:
+    def __init__(self) -> None:
+        self.order: list[str] = []
+
+    async def _finalize_pipeline(self, state: object) -> None:
+        self.order.append("finalize")
+
+    def _prepare_composite_result_context(self, execution_context: object) -> object:
+        return execution_context
+
+    def _log_composite_completion(self, completion_context: object) -> None:
+        self.order.append("receipt")
+
+    def _finalize_composite_result(self, completion_context: object) -> str:
+        self.order.append("result")
+        return "completed-result"
+
+    def _record_run_finished(self, execution_context: object) -> None:
+        self.order.append("run_finished")

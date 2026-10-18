@@ -48,6 +48,7 @@ class CompositeCheckpointState:
     enrichment_results: dict[str, EnrichmentResult] = field(default_factory=dict)
     merge_completed: bool = False
     merge_result: JsonDict | None = None
+    legacy_cv_completion_pending: bool = False
     checkpoint_schema_version: str = "1.0.0"
     effective_config_hash: str = ""
     effective_config_artifact_id: str = ""
@@ -152,6 +153,7 @@ class CompositeCheckpointState:
             "enrichment_results": serialize_enrichment_results(self.enrichment_results),
             "merge_completed": self.merge_completed,
             "merge_result": self.merge_result,
+            "legacy_cv_completion_pending": self.legacy_cv_completion_pending,
             "checkpoint_schema_version": self.checkpoint_schema_version,
             "effective_config_hash": normalized_anchors["effective_config_hash"],
             "effective_config_artifact_id": normalized_anchors[
@@ -211,8 +213,15 @@ class CompositeCheckpointState:
             dependency_results=parse_dependency_results(data.get("dependency_results")),
             completed_enrichers=frozenset(data.get("completed_enrichers", [])),
             enrichment_results=parse_enrichment_results(data.get("enrichment_results")),
-            merge_completed=data.get("merge_completed", False),
+            merge_completed=(
+                data.get("merge_completed", False)
+                or data.get("state") == "cross_validation_completed"
+            ),
             merge_result=data.get("merge_result"),
+            legacy_cv_completion_pending=(
+                data.get("legacy_cv_completion_pending", False)
+                or data.get("state") == "cross_validation_completed"
+            ),
             checkpoint_schema_version=data.get("checkpoint_schema_version", "1.0.0"),
             effective_config_hash=normalized_anchors["effective_config_hash"] or "",
             effective_config_artifact_id=(

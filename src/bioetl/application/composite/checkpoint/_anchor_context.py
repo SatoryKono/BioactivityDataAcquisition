@@ -147,6 +147,7 @@ def _copy_checkpoint_state(
         enrichment_results=state.enrichment_results,
         merge_completed=state.merge_completed,
         merge_result=state.merge_result,
+        legacy_cv_completion_pending=state.legacy_cv_completion_pending,
         checkpoint_schema_version=state.checkpoint_schema_version,
         effective_config_hash=(
             state.effective_config_hash

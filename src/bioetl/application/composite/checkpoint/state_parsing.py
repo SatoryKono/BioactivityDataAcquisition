@@ -95,9 +95,18 @@ def parse_optional_string(value: object) -> str | None:
 
 
 def parse_state(value: object) -> CompositePipelineState:
-    """Parse a composite state with fail-closed fallback."""
+    """Parse a composite state, preserving legacy checkpoint progress.
+
+    A running legacy CV state retries from the merge boundary. A completed
+    legacy CV state is handled by the checkpoint migration marker and resumes
+    finalization without invoking merge or cross-validation again.
+    """
     if not isinstance(value, str) or not value:
         return CompositePipelineState.NOT_STARTED
+    if value == "cross_validation_running":
+        return CompositePipelineState.ENRICHMENT_COMPLETED
+    if value == "cross_validation_completed":
+        return CompositePipelineState.MERGING
     try:
         return CompositePipelineState(value)
     except ValueError:
