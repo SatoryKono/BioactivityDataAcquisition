@@ -13,9 +13,8 @@ Note: Dependencies are optional. If no dependencies, SEED_COMPLETED transitions
 directly to ENRICHING (or DEPENDENCIES_RUNNING which immediately transitions to
 DEPENDENCIES_COMPLETED).
 
-Note: Cross-validation is optional. If no cross-validation configured, MERGING
-transitions directly to COMPLETED (or CROSS_VALIDATION_RUNNING which immediately
-transitions to CROSS_VALIDATION_COMPLETED).
+Note: Cross-validation is optional and executes as a sub-step of the MergeService
+(ExecutionPhase.CROSS_VALIDATION). MERGING transitions directly to COMPLETED.
 
 Note: Dry-run composite execution skips MERGING entirely, but that shortcut is
 owned by the application layer rather than the domain FSM.
@@ -40,11 +39,11 @@ class CompositePipelineState(StrEnum):
 
     States: NOT_STARTED, SEED_RUNNING, SEED_COMPLETED, DEPENDENCIES_RUNNING,
     DEPENDENCIES_COMPLETED, ENRICHING, ENRICHMENT_COMPLETED, MERGING,
-    CROSS_VALIDATION_RUNNING, CROSS_VALIDATION_COMPLETED, COMPLETED, FAILED.
+    COMPLETED, FAILED.
 
     Terminal states: COMPLETED, FAILED (no transitions allowed).
     Active states: SEED_RUNNING, DEPENDENCIES_RUNNING, ENRICHING, MERGING,
-        CROSS_VALIDATION_RUNNING (work in progress).
+        (work in progress).
     """
 
     NOT_STARTED = "not_started"
@@ -55,8 +54,6 @@ class CompositePipelineState(StrEnum):
     ENRICHING = "enriching"
     ENRICHMENT_COMPLETED = "enrichment_completed"
     MERGING = "merging"
-    CROSS_VALIDATION_RUNNING = "cross_validation_running"
-    CROSS_VALIDATION_COMPLETED = "cross_validation_completed"
     COMPLETED = "completed"
     FAILED = "failed"
 
@@ -77,7 +74,6 @@ class CompositePipelineState(StrEnum):
             CompositePipelineState.DEPENDENCIES_RUNNING,
             CompositePipelineState.ENRICHING,
             CompositePipelineState.MERGING,
-            CompositePipelineState.CROSS_VALIDATION_RUNNING,
         }
 
     @property
@@ -91,7 +87,7 @@ class CompositePipelineState(StrEnum):
 
         Resumable states have completed work that can be skipped on resume:
         SEED_COMPLETED, DEPENDENCIES_RUNNING, DEPENDENCIES_COMPLETED, ENRICHING,
-        ENRICHMENT_COMPLETED, CROSS_VALIDATION_RUNNING, CROSS_VALIDATION_COMPLETED, FAILED.
+        ENRICHMENT_COMPLETED, FAILED.
 
         FAILED is resumable to allow retry after merge failure - the seed,
         dependency, and enrichment results are preserved in the checkpoint.
@@ -113,8 +109,6 @@ class CompositePipelineState(StrEnum):
             CompositePipelineState.DEPENDENCIES_COMPLETED,
             CompositePipelineState.ENRICHING,
             CompositePipelineState.ENRICHMENT_COMPLETED,
-            CompositePipelineState.CROSS_VALIDATION_RUNNING,
-            CompositePipelineState.CROSS_VALIDATION_COMPLETED,
             CompositePipelineState.FAILED,
         }
 
@@ -181,7 +175,7 @@ class CompositePipelineState(StrEnum):
 # Maps current state value -> set of allowed next state values
 # Note: seed_completed can go to dependencies_running OR enriching (if no dependencies)
 # Note: dry-run completion shortcut is guarded in the application layer
-# Note: merging can go to cross_validation_running OR completed (if no cross-validation)
+# Note: merging goes directly to completed (cross-validation is a sub-step)
 # Note: any active state can transition to FAILED, including MERGING
 _STATE_TRANSITIONS: Mapping[str, frozenset[str]] = {
     "not_started": frozenset({"seed_running"}),
@@ -191,9 +185,7 @@ _STATE_TRANSITIONS: Mapping[str, frozenset[str]] = {
     "dependencies_completed": frozenset({"enriching"}),
     "enriching": frozenset({"enrichment_completed", "failed"}),
     "enrichment_completed": frozenset({"merging"}),
-    "merging": frozenset({"cross_validation_running", "completed", "failed"}),
-    "cross_validation_running": frozenset({"cross_validation_completed", "failed"}),
-    "cross_validation_completed": frozenset({"completed"}),
+    "merging": frozenset({"completed", "failed"}),
     "completed": frozenset(),  # Terminal state
     "failed": frozenset(),  # Terminal state
 }
@@ -218,8 +210,6 @@ _STATE_METRIC_VALUES: Mapping[CompositePipelineState, int] = {
     CompositePipelineState.ENRICHING: 5,
     CompositePipelineState.ENRICHMENT_COMPLETED: 6,
     CompositePipelineState.MERGING: 7,
-    CompositePipelineState.CROSS_VALIDATION_RUNNING: 8,
-    CompositePipelineState.CROSS_VALIDATION_COMPLETED: 9,
     CompositePipelineState.COMPLETED: 10,
     CompositePipelineState.FAILED: 11,
 }

@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "9eba2ad964bf700fbce9cca0e7e05561b38e1564646d16dc906cdc233d8a7576",
-      "limit": "9eba2ad964bf700fbce9cca0e7e05561b38e1564646d16dc906cdc233d8a7576",
+      "current": "5848ed4cc05f18e6b2939a2ae67ed682b403bc62815dabc5a2cc727436b5c95b",
+      "limit": "5848ed4cc05f18e6b2939a2ae67ed682b403bc62815dabc5a2cc727436b5c95b",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,13 +57,13 @@
     {
       "current": {
         "source_module_count": 2583,
-        "source_tree_sha256": "9eba2ad964bf700fbce9cca0e7e05561b38e1564646d16dc906cdc233d8a7576",
+        "source_tree_sha256": "5848ed4cc05f18e6b2939a2ae67ed682b403bc62815dabc5a2cc727436b5c95b",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2583,
-        "source_tree_sha256": "9eba2ad964bf700fbce9cca0e7e05561b38e1564646d16dc906cdc233d8a7576",
+        "source_tree_sha256": "5848ed4cc05f18e6b2939a2ae67ed682b403bc62815dabc5a2cc727436b5c95b",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -262,13 +262,13 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 1,
       "limit": 0,
       "metric": "budget_violations",
       "name": "test_governance_budget_violations",
       "remediation": "Fix test governance budget violations before closeout.",
       "source_artifact": "reports/quality/test-governance-current.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -415,13 +415,13 @@
       "status": "pass"
     },
     {
-      "current": "44eef3c558688dac3fa3922baa88e937af57b127a4980a59c712f1e8fe9ad172",
+      "current": "db481facc9c4e5393c41a1d2cc0585f8c207fe7238e4aa6701ffbba07aebc2c0",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
       "remediation": "Fetch origin/main and regenerate the remote-main architecture debt baseline.",
       "source_artifact": "reports/quality/architecture-debt-remote-main-baseline.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": {
@@ -467,18 +467,21 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 0,
-    "pass": 46,
+    "fail": 2,
+    "pass": 44,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 10.0,
     "architecture_quality_scorecard_interpretation": "excellent",
-    "fail_count": 0,
-    "failing_gates": [],
+    "fail_count": 2,
+    "failing_gates": [
+      "test_governance_budget_violations",
+      "remote_main_architecture_debt_baseline"
+    ],
     "gate_count": 46,
-    "pass_count": 46,
-    "release_gate_status": "passing",
+    "pass_count": 44,
+    "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
   }

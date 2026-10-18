@@ -1001,7 +1001,14 @@
     }
   },
   "assertless_total_candidates": 85,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 1,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1175,8 +1182,10 @@
     ]
   },
   "intentional_no_exception_contract": 85,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "markerless_examples": [
+    "tests/architecture/test_composite_state_usage.py:25"
+  ],
+  "markerless_test_functions": 1,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2025,8 +2034,10 @@
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/architecture/test_composite_state_usage.py:25"
+    ],
+    "markerless_test_functions": 1,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2044,8 +2055,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3064,
-      "test_python_file_count": 3301,
+      "test_glob_file_count": 3065,
+      "test_python_file_count": 3302,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2086,13 +2097,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3064,
+    "total_test_files": 3065,
     "total_test_functions": 30342,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "a11f762c4b2e7c6232a669bc69d3e05c29ef301e94fda047d0225e1c5242b2fa",
+  "source_tree_sha256": "f85a5fbec34f04cb8d1e6932f01af8c1486160101ef5141be8eead5736c2a001",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2101,8 +2112,10 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 85,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/architecture/test_composite_state_usage.py:25"
+    ],
+    "markerless_test_functions": 1,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -2112,8 +2125,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3064,
-    "test_python_file_count": 3301,
+    "test_glob_file_count": 3065,
+    "test_python_file_count": 3302,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2154,7 +2167,7 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3064,
+  "total_test_files": 3065,
   "total_test_functions": 30342,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0

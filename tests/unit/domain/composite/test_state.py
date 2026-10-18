@@ -60,8 +60,6 @@ class TestCompositePipelineStateEnum:
             "ENRICHING",
             "ENRICHMENT_COMPLETED",
             "MERGING",
-            "CROSS_VALIDATION_RUNNING",
-            "CROSS_VALIDATION_COMPLETED",
             "COMPLETED",
             "FAILED",
         }
@@ -200,24 +198,8 @@ class TestValidTransitions:
                 CompositePipelineState.ENRICHMENT_COMPLETED,
                 CompositePipelineState.MERGING,
             ),
-            (
-                CompositePipelineState.MERGING,
-                CompositePipelineState.CROSS_VALIDATION_RUNNING,
-            ),
             (CompositePipelineState.MERGING, CompositePipelineState.COMPLETED),
             (CompositePipelineState.MERGING, CompositePipelineState.FAILED),
-            (
-                CompositePipelineState.CROSS_VALIDATION_RUNNING,
-                CompositePipelineState.CROSS_VALIDATION_COMPLETED,
-            ),
-            (
-                CompositePipelineState.CROSS_VALIDATION_RUNNING,
-                CompositePipelineState.FAILED,
-            ),
-            (
-                CompositePipelineState.CROSS_VALIDATION_COMPLETED,
-                CompositePipelineState.COMPLETED,
-            ),
         ],
     )
     def test_valid_transition_allowed(
@@ -396,30 +378,15 @@ class TestAllowedTransitions:
         assert allowed == frozenset({CompositePipelineState.MERGING})
 
     def test_merging_allowed_transitions(self):
-        """MERGING should allow CROSS_VALIDATION_RUNNING or COMPLETED."""
+        """MERGING should allow COMPLETED or FAILED."""
         allowed = CompositePipelineState.MERGING.allowed_transitions
         assert allowed == frozenset(
             {
-                CompositePipelineState.CROSS_VALIDATION_RUNNING,
-                CompositePipelineState.COMPLETED,
+                    CompositePipelineState.COMPLETED,
                 CompositePipelineState.FAILED,
             }
         )
 
-    def test_cross_validation_running_allowed_transitions(self):
-        """CROSS_VALIDATION_RUNNING should allow CROSS_VALIDATION_COMPLETED or FAILED."""
-        allowed = CompositePipelineState.CROSS_VALIDATION_RUNNING.allowed_transitions
-        assert allowed == frozenset(
-            {
-                CompositePipelineState.CROSS_VALIDATION_COMPLETED,
-                CompositePipelineState.FAILED,
-            }
-        )
-
-    def test_cross_validation_completed_allowed_transitions(self):
-        """CROSS_VALIDATION_COMPLETED should allow COMPLETED only."""
-        allowed = CompositePipelineState.CROSS_VALIDATION_COMPLETED.allowed_transitions
-        assert allowed == frozenset({CompositePipelineState.COMPLETED})
 
 
 class TestMetricValue:
@@ -440,6 +407,12 @@ class TestMetricValue:
             value = state.to_metric_value()
             assert isinstance(value, int)
             assert 0 <= value <= 11
+
+    def test_metric_values_preserved_from_history(self):
+        """Metrics MUST preserve historical assignments. Do not shift slots 8/9!"""
+        assert CompositePipelineState.MERGING.to_metric_value() == 7
+        assert CompositePipelineState.COMPLETED.to_metric_value() == 10
+        assert CompositePipelineState.FAILED.to_metric_value() == 11
 
     def test_metric_values_progress_through_pipeline(self):
         """Metric values should generally increase through pipeline stages."""
