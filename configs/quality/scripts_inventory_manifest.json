@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-17T17:53:10.529990+00:00",
+  "generated_at": "2026-10-18T14:40:34.994910+00:00",
   "summary": {
-    "total_scripts": 649,
+    "total_scripts": 650,
     "status_counts": {
       "active": 334,
-      "supporting": 315
+      "supporting": 316
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -13,9 +13,9 @@
       "ci": 71,
       "docs": 282,
       "other": 16,
-      "scripts": 546,
+      "scripts": 547,
       "skills": 13,
-      "tests": 468
+      "tests": 469
     }
   },
   "scripts": [
@@ -11200,7 +11200,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 284,
+      "reference_count": 285,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -13172,6 +13172,61 @@
       "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
     },
     {
+      "path": "scripts/engineering/qa/_tracked_glob.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/check_semantic_pair_matrix_budget.py",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa._tracked_glob import tracked_files"
+        },
+        {
+          "path": "scripts/engineering/qa/observability_metric_inventory_report.py",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa._tracked_glob import tracked_files"
+        },
+        {
+          "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa._tracked_glob import _get_tracked_paths, tracked_files"
+        },
+        {
+          "path": "scripts/engineering/qa/report_architecture_suite_burndown.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa._tracked_glob import tracked_files"
+        },
+        {
+          "path": "scripts/engineering/qa/report_artifact_duplication_audit.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa._tracked_glob import tracked_files"
+        },
+        {
+          "path": "scripts/engineering/qa/report_basedpyright_suppression_inventory.py",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa._tracked_glob import tracked_files"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/qa/test_tracked_glob.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa._tracked_glob import tracked_files"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the imported Git-index discovery helper shared by QA collectors. It has no standalone CLI; keep execution routed through the owning collector entrypoints."
+    },
+    {
       "path": "scripts/engineering/qa/analyze_duplicate_functions.py",
       "type": "py",
       "status": "supporting",
@@ -13917,7 +13972,7 @@
         },
         {
           "path": "tests/integration/config/test_semantic_pair_matrix_budget.py",
-          "line": 24,
+          "line": 25,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_semantic_pair_matrix_budget import ("
         }
@@ -13950,7 +14005,7 @@
         },
         {
           "path": "tests/integration/config/test_semantic_pair_matrix_budget.py",
-          "line": 28,
+          "line": 29,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_semantic_registry_drift import ("
         },
@@ -15480,7 +15535,7 @@
         },
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_report.py",
-          "line": 26,
+          "line": 27,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_shared import ("
         },
@@ -15895,13 +15950,13 @@
         },
         {
           "path": "tests/architecture/test_artifact_duplication_audit.py",
-          "line": 71,
+          "line": 85,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_artifact_duplication_audit.py\""
         },
         {
           "path": "tests/unit/scripts/test_report_artifact_duplication_audit.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_artifact_duplication_audit import ("
         }
@@ -23145,7 +23200,7 @@
         },
         {
           "path": "docs/04-reference/environment-variables.md",
-          "line": 57,
+          "line": 64,
           "source_group": "docs",
           "text": "| `BIOETL_RUNTIME_SOURCE_ID` | Managed runtime source identity (injected by runtime_manager.py) | No |"
         },

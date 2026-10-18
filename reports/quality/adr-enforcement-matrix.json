@@ -86,13 +86,15 @@
       "decision_date": "2025-05-20",
       "decision_path": "docs/02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md",
       "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
+        "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/unit/scripts/qa/test_report_adr_enforcement_matrix.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
-        "tests/architecture/test_adr_enforcement_matrix.py"
+        "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/unit/scripts/qa/test_report_adr_enforcement_matrix.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",

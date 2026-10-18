@@ -1890,6 +1890,12 @@
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "next_step": "Keep as the internal result-mapping implementation behind the canonical scripts.engineering.ci pr-lane-results command; do not expose a second workflow CLI surface."
+    },
+    "scripts/engineering/qa/_tracked_glob.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the imported Git-index discovery helper shared by QA collectors. It has no standalone CLI; keep execution routed through the owning collector entrypoints.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
     }
   },
   "schema_version": "1.0"

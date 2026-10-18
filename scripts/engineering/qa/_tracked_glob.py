@@ -1,7 +1,7 @@
 """Deterministic repository-wide tracked file discovery helper (Issue #12039).
 
 This module provides the `tracked_files()` helper which bridges the gap between
-standard Python `glob` and the Git index. It uses a per-repository cache of
+standard Python `glob` and the Git index. It reads the current Git index with
 `git ls-files` to ensure that collectors only process tracked files unless
 explicitly opting-in.
 
@@ -17,22 +17,22 @@ from __future__ import annotations
 
 import subprocess
 import sys
-from functools import cache
 from pathlib import Path
 
+from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
-@cache
+
 def _get_tracked_paths(repo_root: Path) -> set[str]:
-    """Retrieve the set of tracked file paths via git ls-files. Cached per root."""
+    """Retrieve the set of tracked file paths via git ls-files. Read afresh so staged changes are visible."""
     try:
         completed = subprocess.run(
-            ["git", "ls-files", "-z"],
+            ensure_safe_cli_argv(["git", "ls-files", "-z"]),
             cwd=repo_root,
             capture_output=True,
             check=True,
             text=False,
         )
-    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+    except (subprocess.CalledProcessError, OSError) as exc:
         print(f"FATAL: git ls-files failed in {repo_root}: {exc}", file=sys.stderr)
         raise SystemExit(1) from exc
 
@@ -51,7 +51,7 @@ def tracked_files(
     """Return file paths under `root` that match `patterns` and are tracked by Git.
 
     When `include_untracked` is True, returns all matching files (tracked and untracked).
-    Uses a process-wide cache of `git ls-files` for efficiency. Fails closed (exits)
+    Reads the index on each call, including in linked worktrees. Fails closed (exits)
     if Git is unavailable or fails.
 
     Args:
@@ -72,7 +72,9 @@ def tracked_files(
     while repo_root.parent != repo_root and not (repo_root / ".git").exists():
         repo_root = repo_root.parent
     if not (repo_root / ".git").exists():
-        repo_root = resolved_root # Fallback, git command will likely fail if not a repo
+        repo_root = (
+            resolved_root  # Fallback, git command will likely fail if not a repo
+        )
 
     tracked = _get_tracked_paths(repo_root) if not include_untracked else set()
 
@@ -95,7 +97,7 @@ def tracked_files(
                 try:
                     rel_path = path.relative_to(repo_root).as_posix()
                 except ValueError:
-                    continue # Not under repo root
+                    continue  # Not under repo root
 
                 if rel_path not in tracked:
                     continue

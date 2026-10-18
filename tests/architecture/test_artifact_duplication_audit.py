@@ -54,23 +54,18 @@ def test_artifact_duplication_audit_report_matches_live_collector() -> None:
     assert payload["duplicate_groups"] == len(payload["groups"])
 
 
-def test_artifact_duplication_audit_ignores_untracked_files() -> None:
-    """Verify that an untracked file (e.g. tmp-matrix-x.json) does not alter collector output."""
-    baseline = collect_artifact_duplication_report(ROOT)
+def test_artifact_duplication_audit_ignores_untracked_files(tmp_path: Path) -> None:
+    """Untracked files inside an included scope must not change the report."""
+    import subprocess
 
-    untracked_target = ROOT / "reports" / "quality" / "tmp-matrix-x.json"
-    try:
-        untracked_target.parent.mkdir(parents=True, exist_ok=True)
-        untracked_target.write_text("{}", encoding="utf-8")
-
-        # Invalidate cache to ensure a fresh git ls-files is read
-        from scripts.engineering.qa._tracked_glob import _get_tracked_paths
-        _get_tracked_paths.cache_clear()
-
-        after = collect_artifact_duplication_report(ROOT)
-        assert baseline == after
-    finally:
-        untracked_target.unlink(missing_ok=True)
+    subprocess.run(["git", "init", str(tmp_path)], check=True, capture_output=True)
+    target = tmp_path / "configs" / "entities" / "tracked.yaml"
+    target.parent.mkdir(parents=True)
+    target.write_text("shared: true\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(tmp_path), "add", "."], check=True)
+    baseline = collect_artifact_duplication_report(tmp_path)
+    target.with_name("untracked.yaml").write_text("shared: true\n", encoding="utf-8")
+    assert collect_artifact_duplication_report(tmp_path) == baseline
 
 
 def test_artifact_duplication_audit_is_registered_for_jscpd_blind_spot() -> None:

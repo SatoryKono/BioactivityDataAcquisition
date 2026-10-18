@@ -17,6 +17,7 @@ import pytest
 import csv
 from datetime import date
 import json
+import subprocess
 from pathlib import Path
 
 import yaml
@@ -273,8 +274,10 @@ def test_current_registry_keeps_pubchem_cid_out_of_chembl_molecule_cluster() -> 
     assert pubchem_members == {"pubchem_compound"}
 
 
+@pytest.mark.parametrize("track_new_snapshot", [True, False])
 def test_semantic_pair_matrix_budget_rejects_newer_generated_snapshot(
     tmp_path: Path,
+    track_new_snapshot: bool,
 ) -> None:
     reports_dir = tmp_path / "reports" / "semantic_pipeline_audit"
     reports_dir.mkdir(parents=True)
@@ -307,12 +310,18 @@ def test_semantic_pair_matrix_budget_rejects_newer_generated_snapshot(
         encoding="utf-8",
     )
 
+    subprocess.run(["git", "init", str(tmp_path)], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(tmp_path), "add", str(old_matrix)], check=True)
+    if track_new_snapshot:
+        subprocess.run(["git", "-C", str(tmp_path), "add", str(new_matrix)], check=True)
+
     result = validate_semantic_pair_matrix_budget(
         repo_root=tmp_path,
         budget_path=budget_path,
         today=date(2026, 5, 22),
     )
 
-    assert any(
-        finding.kind == "stale_reviewed_snapshot" for finding in result.findings
+    assert (
+        any(finding.kind == "stale_reviewed_snapshot" for finding in result.findings)
+        == track_new_snapshot
     ), [finding.message for finding in result.findings]

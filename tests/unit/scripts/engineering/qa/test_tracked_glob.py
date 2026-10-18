@@ -3,21 +3,14 @@
 from __future__ import annotations
 
 import subprocess
-import sys
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
-from scripts.engineering.qa._tracked_glob import _get_tracked_paths, tracked_files
+from scripts.engineering.qa._tracked_glob import tracked_files
 
 pytestmark = pytest.mark.unit
-
-
-@pytest.fixture(autouse=True)
-def clear_tracked_paths_cache():
-    """Ensure the cache is cleared between tests."""
-    _get_tracked_paths.cache_clear()
 
 
 def test_tracked_files_includes_tracked_and_excludes_untracked(tmp_path: Path):
@@ -115,3 +108,52 @@ def test_tracked_files_resolves_patterns_correctly(tmp_path: Path):
             tmp_path / "file_b.csv",
         )
         assert result_specific == expected
+
+
+def _git(root: Path, *args: str) -> None:
+    subprocess.run(["git", "-C", str(root), *args], check=True, capture_output=True)
+
+
+def test_tracked_files_observes_staged_add_remove_and_rename(tmp_path: Path):
+    _git(tmp_path, "init")
+    original = tmp_path / "original.py"
+    original.write_text("tracked", encoding="utf-8")
+    assert tracked_files(tmp_path, "*.py") == ()
+    _git(tmp_path, "add", "original.py")
+    assert tracked_files(tmp_path, "*.py") == (original,)
+    _git(tmp_path, "mv", "original.py", "renamed.py")
+    renamed = tmp_path / "renamed.py"
+    assert tracked_files(tmp_path, "*.py") == (renamed,)
+    _git(tmp_path, "rm", "--cached", "renamed.py")
+    assert renamed.exists()
+    assert tracked_files(tmp_path, "*.py") == ()
+
+
+def test_tracked_files_uses_each_worktree_index(tmp_path: Path):
+    main = tmp_path / "main"
+    main.mkdir()
+    _git(main, "init")
+    (main / "common.py").write_text("common", encoding="utf-8")
+    _git(main, "add", "common.py")
+    _git(
+        main,
+        "-c",
+        "user.name=Test",
+        "-c",
+        "user.email=test@example.invalid",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "commit",
+        "-m",
+        "fixture",
+    )
+    linked = tmp_path / "linked"
+    _git(main, "worktree", "add", "--detach", str(linked))
+    assert (linked / ".git").is_file()
+    assert tracked_files(linked, "*.py") == (linked / "common.py",)
+    extra = linked / "extra.py"
+    extra.write_text("extra", encoding="utf-8")
+    assert tracked_files(linked, "*.py") == (linked / "common.py",)
+    _git(linked, "add", "extra.py")
+    assert tracked_files(linked, "*.py") == (linked / "common.py", extra)
+    assert tracked_files(main, "*.py") == (main / "common.py",)

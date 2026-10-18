@@ -159,11 +159,6 @@ def test_adr_reference_index_uses_python_fallback_when_git_grep_fails(
 ) -> None:
     monkeypatch.setattr(adr_matrix, "_git_grep_reference_lines", lambda repo_root: None)
     monkeypatch.setattr(adr_matrix, "_ripgrep_reference_lines", lambda repo_root: None)
-    monkeypatch.setattr(
-        adr_matrix.subprocess,
-        "run",
-        lambda *_args, **_kwargs: pytest.fail("Python ADR fallback must not call Git"),
-    )
 
     docs_path = tmp_path / "docs" / "00-project" / "RULES.md"
     docs_path.parent.mkdir(parents=True)
@@ -172,6 +167,11 @@ def test_adr_reference_index_uses_python_fallback_when_git_grep_fails(
     tests_path.parent.mkdir(parents=True)
     tests_path.write_text("def test_guard():\n    assert 'ADR-004'\n", encoding="utf-8")
 
+    adr_matrix.subprocess.run(
+        ["git", "init", str(tmp_path)], check=True, capture_output=True
+    )
+    adr_matrix.subprocess.run(["git", "-C", str(tmp_path), "add", "."], check=True)
+    (tests_path.parent / "untracked.py").write_text("ADR-004\n", encoding="utf-8")
     reference_paths_by_adr, manual_exceptions = adr_matrix._reference_index(tmp_path)
 
     assert reference_paths_by_adr["ADR-004"] == {
