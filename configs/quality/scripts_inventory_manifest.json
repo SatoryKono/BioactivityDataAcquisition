@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-17T17:53:10.529990+00:00",
+  "generated_at": "2026-10-18T12:44:11.663272+00:00",
   "summary": {
     "total_scripts": 649,
     "status_counts": {
@@ -23145,7 +23145,7 @@
         },
         {
           "path": "docs/04-reference/environment-variables.md",
-          "line": 57,
+          "line": 64,
           "source_group": "docs",
           "text": "| `BIOETL_RUNTIME_SOURCE_ID` | Managed runtime source identity (injected by runtime_manager.py) | No |"
         },

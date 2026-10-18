@@ -122,7 +122,7 @@ def build_workflow_transform_registry(
         foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
             silver_writer=transform_storage,
             logger=foreign_key_reconciliation_logger,
-            clock=SystemClock(),
+            clock=clock,
             metrics=metrics,
             quarantine=reconciliation_quarantine,
             quarantine_pipeline_name="workflow_transforms",
