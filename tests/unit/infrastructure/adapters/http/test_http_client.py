@@ -420,16 +420,18 @@ class TestUnifiedHTTPClientRequestMethods:
         assert response == mock_response_200
         assert mock_circuit_breaker.call.call_count == 2
 
-
     @pytest.mark.asyncio
     async def test_unified_http_client_outgoing_transport_headers(
         self, mock_rate_limiter
     ):
         """Regression test for actual outgoing request headers on transport boundary."""
         from unittest.mock import AsyncMock
+
         mock_cb = AsyncMock()
+
         async def _call_cb(req_coro, *args, **kwargs):
             return await req_coro()
+
         mock_cb.call.side_effect = _call_cb
 
         client = UnifiedHTTPClient(
@@ -443,6 +445,7 @@ class TestUnifiedHTTPClientRequestMethods:
         )
 
         transport_requests = []
+
         async def mock_handler(request: httpx.Request):
             transport_requests.append(request)
             return httpx.Response(200, json={"status": "ok"})
