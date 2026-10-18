@@ -17,6 +17,8 @@ from pathlib import Path
 
 import pytest
 
+from scripts.engineering.qa._tracked_glob import git_discovery_environment
+
 from scripts.engineering.qa import report_adr_enforcement_matrix as adr_matrix
 from scripts.engineering.qa.report_adr_enforcement_matrix import build_payload
 
@@ -168,9 +170,16 @@ def test_adr_reference_index_uses_python_fallback_when_git_grep_fails(
     tests_path.write_text("def test_guard():\n    assert 'ADR-004'\n", encoding="utf-8")
 
     adr_matrix.subprocess.run(
-        ["git", "init", str(tmp_path)], check=True, capture_output=True
+        ["git", "init", str(tmp_path)],
+        check=True,
+        capture_output=True,
+        env=git_discovery_environment(),
     )
-    adr_matrix.subprocess.run(["git", "-C", str(tmp_path), "add", "."], check=True)
+    adr_matrix.subprocess.run(
+        ["git", "-C", str(tmp_path), "add", "."],
+        check=True,
+        env=git_discovery_environment(),
+    )
     (tests_path.parent / "untracked.py").write_text("ADR-004\n", encoding="utf-8")
     reference_paths_by_adr, manual_exceptions = adr_matrix._reference_index(tmp_path)
 

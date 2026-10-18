@@ -8,7 +8,10 @@ from unittest.mock import ANY, patch
 
 import pytest
 
-from scripts.engineering.qa._tracked_glob import tracked_files
+from scripts.engineering.qa._tracked_glob import (
+    git_discovery_environment,
+    tracked_files,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -112,7 +115,12 @@ def test_tracked_files_resolves_patterns_correctly(tmp_path: Path):
 
 
 def _git(root: Path, *args: str) -> None:
-    subprocess.run(["git", "-C", str(root), *args], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "-C", str(root), *args],
+        check=True,
+        capture_output=True,
+        env=git_discovery_environment(),
+    )
 
 
 def test_tracked_files_observes_staged_add_remove_and_rename(tmp_path: Path):
@@ -206,14 +214,19 @@ def test_discovery_never_scans_ignored_tree(tmp_path: Path, monkeypatch):
 
 def test_discovery_ignores_foreign_git_location(tmp_path: Path, monkeypatch):
     own, foreign = tmp_path / "own", tmp_path / "foreign"
-    for root, name in ((own, "own.py"), (foreign, "foreign.py")):
-        root.mkdir()
-        _git(root, "init")
-        (root / name).write_text("fixture")
-        _git(root, "add", name)
+    foreign.mkdir()
+    _git(foreign, "init")
+    (foreign / "foreign.py").write_text("fixture")
+    _git(foreign, "add", "foreign.py")
+    foreign_index = (foreign / ".git/index").read_bytes()
     monkeypatch.setenv("GIT_DIR", str(foreign / ".git"))
     monkeypatch.setenv("GIT_WORK_TREE", str(foreign))
     monkeypatch.setenv("GIT_INDEX_FILE", str(foreign / ".git/index"))
+    own.mkdir()
+    _git(own, "init")
+    (own / "own.py").write_text("fixture")
+    _git(own, "add", "own.py")
+    assert (foreign / ".git/index").read_bytes() == foreign_index
     assert tracked_files(own, "*.py") == (own / "own.py",)
 
 
