@@ -251,13 +251,16 @@ def _parse_matrix(raw: str) -> Any:
     return None
 
 
-def _redact_secret_value(value: Any) -> Any:
+def _redact_secret_value(value: Any, secrets: tuple[str, ...]) -> Any:
     if isinstance(value, str):
         return _redaction_token(value)
     if isinstance(value, dict):
-        return {str(key): _redact_secret_value(item) for key, item in value.items()}
+        return {
+            _redact_text(str(key), secrets): _redact_secret_value(item, secrets)
+            for key, item in value.items()
+        }
     if isinstance(value, list):
-        return [_redact_secret_value(item) for item in value]
+        return [_redact_secret_value(item, secrets) for item in value]
     if value is None:
         return None
     return _redaction_token(str(value))
@@ -268,10 +271,11 @@ def _redact_structured(value: Any, secrets: tuple[str, ...]) -> Any:
         redacted: dict[str, Any] = {}
         for key, item in value.items():
             name = str(key)
+            safe_name = _redact_text(name, secrets)
             if _SECRET_KEY.search(name) is not None:
-                redacted[name] = _redact_secret_value(item)
+                redacted[safe_name] = _redact_secret_value(item, secrets)
             else:
-                redacted[name] = _redact_structured(item, secrets)
+                redacted[safe_name] = _redact_structured(item, secrets)
         return redacted
     if isinstance(value, list):
         return [_redact_structured(item, secrets) for item in value]
@@ -1107,6 +1111,12 @@ def _repeated_worker_collection(events: list[dict[str, Any]]) -> list[str] | Non
     collections did not conflict. Differing per-worker subsets are not unioned.
     """
     collections: list[tuple[str, ...]] = []
+    workers = {
+        _event_identity(event).get("worker_id")
+        for event in events
+        if _event_identity(event).get("role") == "worker"
+    }
+    collected_workers: set[str] = set()
     for event in events:
         identity = _event_identity(event)
         if (
@@ -1117,7 +1127,8 @@ def _repeated_worker_collection(events: list[dict[str, Any]]) -> list[str] | Non
         nodeids = event.get("nodeids")
         if isinstance(nodeids, list):
             collections.append(tuple(sorted(str(nodeid) for nodeid in nodeids)))
-    if not collections:
+            collected_workers.add(str(identity.get("worker_id")))
+    if not collections or workers != collected_workers:
         return None
     unique = set(collections)
     if len(unique) != 1 or not unique:
@@ -1667,9 +1678,9 @@ def _cmdline_finish_reasons(events: list[dict[str, Any]]) -> list[str]:
         event for event in events if _event_identity(event).get("role") == "controller"
     ]
     finishes = [event for event in controller if event.get("event") == "cmdline_finish"]
-    if not finishes:
-        return []  # Receipts written before cmdline-result recording remain readable.
     sessions = [event for event in controller if event.get("event") == "session_finish"]
+    if not finishes:
+        return ["missing_cmdline_finish"] if sessions else []
     if (
         len(finishes) != 1
         or len(sessions) != 1
@@ -1734,6 +1745,7 @@ _DAMAGE_REASONS = frozenset(
         "malformed_session_start",
         "malformed_session_order",
         "cmdline_result_mismatch",
+        "missing_cmdline_finish",
         "unselected_outcome",
     }
 )
@@ -2197,7 +2209,7 @@ def reconcile_directory(
         "tests_passed": tests_passed,
         "authoritative_passes": authoritative,
         "superseded_passes": superseded,
-        "executed_passes": executed_passes,
+        "executed_passes": executed_passes or names,
         "expected_invocations": _pinned_invocations(receipts, expected_invocations),
         "producer_scope": (
             "resilient-runner passes started by this process; "
@@ -2281,7 +2293,7 @@ def verify_directory(
             [str(item) for item in raw_passes] if isinstance(raw_passes, list) else []
         )
         invocations = _stored_expected_invocations(stored)
-        if invocations is None:
+        if invocations is None or (invocations and set(executed) != set(invocations)):
             sys.stderr.write(
                 "EventJournal completeness unknown: stored_verdict_unreadable\n"
             )
