@@ -1,16 +1,16 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-10-01T21:18:22+03:00_
-
-## 01adomain Ports Method Catalog
-
-![01a-domain-ports-method-catalog](./01a-domain-ports-method-catalog.svg)
-
----
+_Generated: 2026-10-14T08:23:10+03:00_
 
 ## Domain Ports
 
 ![01-domain-ports](./01-domain-ports.svg)
+
+---
+
+## 01adomain Ports Method Catalog
+
+![01a-domain-ports-method-catalog](./01a-domain-ports-method-catalog.svg)
 
 ---
 
@@ -44,27 +44,27 @@ _Generated: 2026-10-01T21:18:22+03:00_
 
 ---
 
-## Application Core Services
-
-![07-application-core-services](./07-application-core-services.svg)
-
----
-
 ## Application Core Services Frontmatter Sandbox
 
 ![07-application-core-services-frontmatter-sandbox](./07-application-core-services-frontmatter-sandbox.svg)
 
 ---
 
-## 08aapplication Services Operation Catalog
+## Application Core Services
 
-![08a-application-services-operation-catalog](./08a-application-services-operation-catalog.svg)
+![07-application-core-services](./07-application-core-services.svg)
 
 ---
 
 ## Application Services
 
 ![08-application-services](./08-application-services.svg)
+
+---
+
+## 08aapplication Services Operation Catalog
+
+![08a-application-services-operation-catalog](./08a-application-services-operation-catalog.svg)
 
 ---
 
@@ -98,15 +98,15 @@ _Generated: 2026-10-01T21:18:22+03:00_
 
 ---
 
-## 14aobservability Method Catalog
-
-![14a-observability-method-catalog](./14a-observability-method-catalog.svg)
-
----
-
 ## Observability
 
 ![14-observability](./14-observability.svg)
+
+---
+
+## 14aobservability Method Catalog
+
+![14a-observability-method-catalog](./14a-observability-method-catalog.svg)
 
 ---
 
@@ -182,15 +182,15 @@ _Generated: 2026-10-01T21:18:22+03:00_
 
 ---
 
-## Pkg Application Observability
-
-![90-pkg-application-observability](./90-pkg-application-observability.svg)
-
----
-
 ## Pkg Application Observability Control Plane Evidence
 
 ![90-pkg-application-observability-control-plane-evidence](./90-pkg-application-observability-control-plane-evidence.svg)
+
+---
+
+## Pkg Application Observability
+
+![90-pkg-application-observability](./90-pkg-application-observability.svg)
 
 ---
 
@@ -224,15 +224,15 @@ _Generated: 2026-10-01T21:18:22+03:00_
 
 ---
 
-## Pkg Application Pipelines Uniprot
-
-![90-pkg-application-pipelines-uniprot](./90-pkg-application-pipelines-uniprot.svg)
-
----
-
 ## Pkg Application Pipelines Uniprot Extractors
 
 ![90-pkg-application-pipelines-uniprot-extractors](./90-pkg-application-pipelines-uniprot-extractors.svg)
+
+---
+
+## Pkg Application Pipelines Uniprot
+
+![90-pkg-application-pipelines-uniprot](./90-pkg-application-pipelines-uniprot.svg)
 
 ---
 
@@ -266,15 +266,15 @@ _Generated: 2026-10-01T21:18:22+03:00_
 
 ---
 
-## Pkg Application Services Control Plane Manifest
-
-![90-pkg-application-services-control-plane-manifest](./90-pkg-application-services-control-plane-manifest.svg)
-
----
-
 ## Pkg Application Services Control Plane Manifest Diagnostics
 
 ![90-pkg-application-services-control-plane-manifest-diagnostics](./90-pkg-application-services-control-plane-manifest-diagnostics.svg)
+
+---
+
+## Pkg Application Services Control Plane Manifest
+
+![90-pkg-application-services-control-plane-manifest](./90-pkg-application-services-control-plane-manifest.svg)
 
 ---
 
@@ -350,21 +350,15 @@ _Generated: 2026-10-01T21:18:22+03:00_
 
 ---
 
-## Pkg Application Services Workflow
-
-![90-pkg-application-services-workflow](./90-pkg-application-services-workflow.svg)
-
----
-
 ## Pkg Application Services Workflow Control Plane
 
 ![90-pkg-application-services-workflow-control-plane](./90-pkg-application-services-workflow-control-plane.svg)
 
 ---
 
-## Pkg Composition
+## Pkg Application Services Workflow
 
-![90-pkg-composition](./90-pkg-composition.svg)
+![90-pkg-application-services-workflow](./90-pkg-application-services-workflow.svg)
 
 ---
 
@@ -413,6 +407,12 @@ _Generated: 2026-10-01T21:18:22+03:00_
 ## Pkg Composition Runtime Builders
 
 ![90-pkg-composition-runtime-builders](./90-pkg-composition-runtime-builders.svg)
+
+---
+
+## Pkg Composition
+
+![90-pkg-composition](./90-pkg-composition.svg)
 
 ---
 
@@ -518,15 +518,15 @@ _Generated: 2026-10-01T21:18:22+03:00_
 
 ---
 
-## Pkg Domain Normalization
-
-![90-pkg-domain-normalization](./90-pkg-domain-normalization.svg)
-
----
-
 ## Pkg Domain Normalization Profiles
 
 ![90-pkg-domain-normalization-profiles](./90-pkg-domain-normalization-profiles.svg)
+
+---
+
+## Pkg Domain Normalization
+
+![90-pkg-domain-normalization](./90-pkg-domain-normalization.svg)
 
 ---
 
@@ -650,13 +650,13 @@ _Generated: 2026-10-01T21:18:22+03:00_
 
 ---
 
-## Pkg Infrastructure Adapters Http Part 1
+## Pkg Infrastructure Adapters Http Part1
 
 ![90-pkg-infrastructure-adapters-http-part1](./90-pkg-infrastructure-adapters-http-part1.svg)
 
 ---
 
-## Pkg Infrastructure Adapters Http Part 2
+## Pkg Infrastructure Adapters Http Part2
 
 ![90-pkg-infrastructure-adapters-http-part2](./90-pkg-infrastructure-adapters-http-part2.svg)
 
@@ -830,12 +830,6 @@ _Generated: 2026-10-01T21:18:22+03:00_
 
 ---
 
-## Pkg Interfaces Cli Commands
-
-![90-pkg-interfaces-cli-commands](./90-pkg-interfaces-cli-commands.svg)
-
----
-
 ## Pkg Interfaces Cli Commands Domains Health
 
 ![90-pkg-interfaces-cli-commands-domains-health](./90-pkg-interfaces-cli-commands-domains-health.svg)
@@ -848,21 +842,27 @@ _Generated: 2026-10-01T21:18:22+03:00_
 
 ---
 
-## Pkg Interfaces Cli Commands Domains Run
-
-![90-pkg-interfaces-cli-commands-domains-run](./90-pkg-interfaces-cli-commands-domains-run.svg)
-
----
-
 ## Pkg Interfaces Cli Commands Domains Run All
 
 ![90-pkg-interfaces-cli-commands-domains-run-all](./90-pkg-interfaces-cli-commands-domains-run-all.svg)
 
 ---
 
+## Pkg Interfaces Cli Commands Domains Run
+
+![90-pkg-interfaces-cli-commands-domains-run](./90-pkg-interfaces-cli-commands-domains-run.svg)
+
+---
+
 ## Pkg Interfaces Cli Commands Domains Shared
 
 ![90-pkg-interfaces-cli-commands-domains-shared](./90-pkg-interfaces-cli-commands-domains-shared.svg)
+
+---
+
+## Pkg Interfaces Cli Commands
+
+![90-pkg-interfaces-cli-commands](./90-pkg-interfaces-cli-commands.svg)
 
 ---
 

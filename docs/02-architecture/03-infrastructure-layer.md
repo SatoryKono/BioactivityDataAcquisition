@@ -205,6 +205,23 @@ PubMedAdapter                         (pubchempy)
 | `bronze/pipeline_helpers.py`      | Request/context helpers        | Подготовка и завершение write pipeline  |
 | `bronze_write_result_helpers.py`  | Helper functions               | Формирование write result               |
 
+`cleanup_old_files()` применяет POSIX-очистку под общей с writer блокировкой.
+`BronzeGroupCleanup` связывает план с `GroupJournal`: перед удалением проверяются
+исходные inode и связь payload, sidecar и optional copy по metadata и хешам.
+Legacy sidecar без подтверждаемой связи и изменённые группы сохраняются.
+Незавершённая операция возобновляется из собственного журнала только в пределах
+текущих cutoff, provider/entity и layout; чужие или неподтверждённые staging
+каталоги блокируют очистку. Счётчики повторного вызова учитывают только оставшиеся
+файлы и подтверждённые удаления этого вызова.
+
+`dry_run=True` не создаёт блокировку, журнал или staging и сообщает кандидатов
+по именам и снимку файловой системы. Это предварительная оценка: проверка
+содержимого группы перед фактическим удалением может отклонить кандидата.
+`preview_cleanup()` считает доступные файлы, а не гарантированные удаления.
+Destructive cleanup требует POSIX pinned handles и directory xattrs; на Windows
+он недоступен. Блокировка кооперативная: защита от враждебного процесса с теми же
+правами пользователя между проверкой имени и syscall не гарантируется.
+
 #### 2.2.2. SilverWriter Mixin Decomposition
 
 | Файл                                  | Класс/роль                      | Назначение                                 |

@@ -191,3 +191,22 @@ async def bounded_source_records[T](
             yield record
     finally:
         await _close_scan(pending, source)
+
+
+async def batched_source_records[T](
+    source: AsyncIterator[T],
+    *,
+    batch_size: int,
+    max_records: int = DEFAULT_SCAN_RECORDS,
+) -> AsyncGenerator[list[T], None]:
+    """Yield bounded source records in fixed-size batches."""
+    if batch_size < 1:
+        raise ValueError("batch_size must be >= 1")
+    buffer: list[T] = []
+    async for record in bounded_source_records(source, max_records=max_records):
+        buffer.append(record)
+        if len(buffer) == batch_size:
+            yield buffer
+            buffer = []
+    if buffer:
+        yield buffer
