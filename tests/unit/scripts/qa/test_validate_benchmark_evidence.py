@@ -4,10 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-from pathlib import Path
 
 import pytest
-import yaml
 
 from scripts.engineering.qa.generate_hotspot_degradation_report import (
     validate_benchmark_evidence_main as main,
@@ -272,50 +270,6 @@ def test_benchmark_evidence_cli_rejects_escape_and_overwrite(tmp_path, payload):
         assert json.loads(raw.read_text()) == payload
 
 
-@pytest.mark.repo_backed
-def test_benchmark_evidence_workflow_keeps_validator_and_main_gates_independent():
-    root = Path(__file__).resolve().parents[4]
-    workflow = yaml.safe_load(
-        (root / ".github/workflows/performance-nightly.yml").read_text()
-    )
-    steps = {
-        step["name"]: step
-        for step in workflow["jobs"]["performance-regression-gate"]["steps"]
-    }
-    producer = steps["Run all performance benchmarks"]
-    validation = steps["Validate benchmark evidence"]
-    assert producer["id"] == "benchmarks"
-    assert "continue-on-error" not in producer
-    assert (
-        "python -m scripts.engineering.qa validate-benchmark-evidence"
-        in validation["run"]
-    )
-    assert validation["env"]["PRODUCER_OUTCOME"] == "${{ steps.benchmarks.outcome }}"
-    assert '--producer-outcome "$PRODUCER_OUTCOME"' in validation["run"]
-    assert "benchmark-validation-manifest.json" in validation["run"]
-    assert "gate-hotspot-report" in steps["Gate on degradation report"]["run"]
-    assert "if [ -f" not in steps["Build hotspot degradation report"]["run"]
-    assert (
-        "steps.validate-evidence.outcome == 'success'"
-        in steps["Reduce benchmark evidence"]["if"]
-    )
-    assert "reduce-benchmark-evidence" in steps["Reduce benchmark evidence"]["run"]
-    assert (
-        "test -s reports/performance/benchmark-validation-manifest.json"
-        in steps["Require validated benchmark artifacts"]["run"]
-    )
-
-
-@pytest.mark.repo_backed
-def test_benchmark_evidence_validator_tests_are_collected_by_automatic_unit_lane():
-    root = Path(__file__).resolve().parents[4]
-    matrix = yaml.safe_load((root / "configs/quality/test_matrix.yaml").read_text())
-    assert "unit-scripts-tooling" in json.dumps(matrix)
-    workflow = (root / ".github/workflows/tests.yml").read_text()
-    assert "tests/unit/scripts/" in workflow
-    assert Path(__file__).relative_to(root).as_posix().startswith("tests/unit/scripts/")
-
-
 def test_benchmark_evidence_router_validation_never_calls_reducer_or_hotspot(
     tmp_path, payload, monkeypatch
 ):
@@ -418,22 +372,18 @@ def test_guard_rejects_missing_dataset_instead_of_fabricating_identity(
         guard.pytest_benchmark_update_json(None, [], payload)
 
 
-def test_nightly_caller_declares_dataset_and_loads_guard_before_benchmark():
-    workflow = yaml.safe_load(
-        (
-            Path(__file__).resolve().parents[4]
-            / ".github/workflows/performance-nightly.yml"
-        ).read_text()
-    )
-    steps = (
-        workflow["jobs"]["performance"]["steps"]
-        if "performance" in workflow["jobs"]
-        else next(iter(workflow["jobs"].values()))["steps"]
-    )
-    producer = next(step for step in steps if step.get("id") == "benchmarks")
-    assert (
-        producer["env"]["BIOETL_BENCHMARK_DATASET"] == "bioetl-synthetic-performance-v1"
-    )
-    assert producer["run"].index("-p tests.benchmarks.benchmark_vcs_guard") < producer[
-        "run"
-    ].index("-p benchmark")
+@pytest.mark.parametrize("field", ["GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT"])
+def test_benchmark_evidence_github_identity_rejects_unicode_digits(
+    tmp_path, payload, field
+):
+    payload["bioetl_measurement"]["environment"] = "github-actions"
+    env = {
+        "GITHUB_ACTIONS": "true",
+        "GITHUB_RUN_ID": "123",
+        "GITHUB_RUN_ATTEMPT": "2",
+        "GITHUB_REPOSITORY": "owner/repo",
+        "GITHUB_SERVER_URL": "https://github.com",
+    }
+    env[field] = "1\u0661"
+    with pytest.raises(ValueError, match="GitHub run provenance"):
+        _validate(tmp_path, payload, environ=env)

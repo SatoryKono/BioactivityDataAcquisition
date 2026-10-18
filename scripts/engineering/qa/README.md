@@ -284,7 +284,9 @@ The committed `benchmark-summary.json` remains explicitly unmeasured until
 separately reviewed measurements are adopted.
 
 Regression tests live in `tests/unit/scripts/qa/test_validate_benchmark_evidence.py`,
-which the automatic `unit-scripts-tooling` other shard collects. The former
+which the automatic `unit-scripts-tooling` other shard collects. Repository-backed
+workflow and lane contracts live in `tests/architecture/test_reduce_benchmark_evidence.py`,
+which the architecture lane runs; unit schema tests do not read repository files. The former
 `tests/engineering/qa` location was outside the automatic unit lane.
 
 The command is implemented by `validate_benchmark_evidence_main` in the existing

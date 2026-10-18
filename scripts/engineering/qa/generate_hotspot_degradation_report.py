@@ -588,6 +588,31 @@ def _evidence_mapping(value: object, label: str) -> dict:
     return value
 
 
+def _validate_benchmark_timing(number: object, key: str) -> None:
+    if type(number) not in (int, float):
+        raise ValueError(f"stats.{key} must be a finite number")
+    try:
+        finite = math.isfinite(number)
+    except OverflowError:
+        finite = False
+    if not finite or number < 0 or (key != "stddev" and number == 0):
+        raise ValueError(
+            f"stats.{key} must be finite and positive (stddev may be zero)"
+        )
+
+
+def _validate_benchmark_stats(stats: dict) -> None:
+    for key in ("rounds", "iterations"):
+        if type(stats.get(key)) is not int or stats[key] < 1:
+            raise ValueError(f"stats.{key} must be a positive integer")
+    for key in _EVIDENCE_TIMINGS:
+        _validate_benchmark_timing(stats.get(key), key)
+    if not stats["min"] <= stats["mean"] <= stats["max"] or not (
+        stats["min"] <= stats["median"] <= stats["max"]
+    ):
+        raise ValueError("Inconsistent timing range")
+
+
 def _validate_raw_benchmarks(value: object) -> int:
     if not isinstance(value, list):
         raise ValueError("benchmarks must be a list")
@@ -604,26 +629,9 @@ def _validate_raw_benchmarks(value: object) -> int:
         identities.add(name)
         if benchmark.get("has_error", False) is not False:
             raise ValueError(f"Failed benchmark detected: {name}")
-        stats = _evidence_mapping(benchmark.get("stats"), "benchmark stats")
-        for key in ("rounds", "iterations"):
-            if type(stats.get(key)) is not int or stats[key] < 1:
-                raise ValueError(f"stats.{key} must be a positive integer")
-        for key in _EVIDENCE_TIMINGS:
-            number = stats.get(key)
-            if type(number) not in (int, float):
-                raise ValueError(f"stats.{key} must be a finite number")
-            try:
-                finite = math.isfinite(number)
-            except OverflowError:
-                finite = False
-            if not finite or number < 0 or (key != "stddev" and number == 0):
-                raise ValueError(
-                    f"stats.{key} must be finite and positive (stddev may be zero)"
-                )
-        if not stats["min"] <= stats["mean"] <= stats["max"] or not (
-            stats["min"] <= stats["median"] <= stats["max"]
-        ):
-            raise ValueError("Inconsistent timing range")
+        _validate_benchmark_stats(
+            _evidence_mapping(benchmark.get("stats"), "benchmark stats")
+        )
     return len(value)
 
 
@@ -638,8 +646,8 @@ def _evidence_run_identity(env: Mapping[str, str], run: dict) -> dict:
     run_id, attempt = env.get("GITHUB_RUN_ID", ""), env.get("GITHUB_RUN_ATTEMPT", "")
     repository = env.get("GITHUB_REPOSITORY", "")
     if (
-        not re.fullmatch(r"[1-9][0-9]*", run_id)
-        or not re.fullmatch(r"[1-9][0-9]*", attempt)
+        not re.fullmatch(r"[1-9]\d*", run_id, flags=re.ASCII)
+        or not re.fullmatch(r"[1-9]\d*", attempt, flags=re.ASCII)
         or not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository)
         or env.get("GITHUB_SERVER_URL") != "https://github.com"
     ):
