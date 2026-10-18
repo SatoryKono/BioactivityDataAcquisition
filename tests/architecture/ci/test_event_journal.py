@@ -1400,6 +1400,30 @@ def test_matrix_values_are_redacted_before_identity_and_safe_env(
     assert _redaction_token(nested) in blob
 
 
+def test_identity_env_strings_are_redacted(monkeypatch: pytest.MonkeyPatch) -> None:
+    from scripts.engineering.ci.pytest_event_journal import (
+        _identity_from_env,
+        _safe_env,
+        _secret_values,
+    )
+
+    monkeypatch.setenv("BIOETL_JOURNAL_PASS", "password=swordfish")
+    monkeypatch.setenv("BIOETL_JOURNAL_INVOCATION_ID", "token=topsecretvalue")
+    monkeypatch.setenv("PYTEST_XDIST_WORKER", "gw0")
+    secrets = _secret_values()
+    identity = _identity_from_env(actual_sha="a" * 40, secrets=secrets)
+    blob = json.dumps(identity, sort_keys=True)
+    assert "swordfish" not in blob
+    assert "topsecretvalue" not in blob
+    assert "[redacted:" in str(identity["pass_name"])
+    assert "[redacted:" in str(identity["invocation_id"])
+    assert identity["worker_id"] == "gw0"
+    assert identity["role"] == "worker"
+    safe = json.dumps(_safe_env(secrets), sort_keys=True)
+    assert "swordfish" not in safe
+    assert "topsecretvalue" not in safe
+
+
 def test_journal_child_env_prepends_the_repo_root(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

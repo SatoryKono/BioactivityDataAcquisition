@@ -36,10 +36,13 @@ empty, unreadable, or not valid UTF-8 also damages it. Redaction tokens
 are keyed outside the receipt. A later session-finish hook that raises
 or changes the exit status is stored as ``hook_error`` and keeps the
 pass from being complete. An intermediate ``rerun`` report is an attempt,
-not a damaged classification. A controller ``session_finish`` counts only
-when ``exitstatus`` is an integer. A direct pytest session without a runner
-pass name is an authoritative ``unspecified`` pass. A phase that only one
-duplicate recorded is not copied onto the other duplicate.
+not a damaged classification. Copies of one nodeid may finish on different
+retry indexes; each copy keeps its own last attempt. A controller
+``session_finish`` counts only when ``exitstatus`` is an integer. A direct
+pytest session without a runner pass name is an authoritative ``unspecified``
+pass. A phase that only one duplicate recorded is not copied onto the other
+duplicate. Environment strings stored in ``identity`` are redacted with the
+same rules as ``safe_env``.
 """
 
 from __future__ import annotations
@@ -316,16 +319,25 @@ def _identity_from_env(
     worker = os.environ.get("PYTEST_XDIST_WORKER") or "controller"
     role = "worker" if os.environ.get("PYTEST_XDIST_WORKER") else "controller"
     invocation = os.environ.get("BIOETL_JOURNAL_INVOCATION_ID") or uuid.uuid4().hex
+    expected_sha = os.environ.get("EXPECTED_CHECKOUT_SHA") or None
     return {
-        "workflow_run_id": os.environ.get("GITHUB_RUN_ID") or "local",
-        "workflow_run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT") or "local",
+        "workflow_run_id": _redact_text(
+            os.environ.get("GITHUB_RUN_ID") or "local", secrets
+        ),
+        "workflow_run_attempt": _redact_text(
+            os.environ.get("GITHUB_RUN_ATTEMPT") or "local", secrets
+        ),
         "job": _redact_text(job, secrets),
         "matrix": _redacted_matrix(matrix_raw, secrets),
         "actual_checkout_sha": actual_sha,
-        "expected_checkout_sha": os.environ.get("EXPECTED_CHECKOUT_SHA") or None,
-        "invocation_id": invocation,
-        "pass_name": os.environ.get("BIOETL_JOURNAL_PASS") or "unspecified",
-        "worker_id": worker,
+        "expected_checkout_sha": (
+            None if expected_sha is None else _redact_text(expected_sha, secrets)
+        ),
+        "invocation_id": _redact_text(invocation, secrets),
+        "pass_name": _redact_text(
+            os.environ.get("BIOETL_JOURNAL_PASS") or "unspecified", secrets
+        ),
+        "worker_id": _redact_text(worker, secrets),
         "role": role,
     }
 
@@ -1146,6 +1158,143 @@ def _dedup_outcomes(
     return chosen, sorted(set(reasons))
 
 
+def _phase_copy_count(phase_lists: dict[str, list[str]]) -> int:
+    if not phase_lists:
+        return 0
+    return max(len(items) for items in phase_lists.values())
+
+
+def _drop_continued_reports(items: list[str], continued: int) -> list[str] | None:
+    """Drop rows that belong to copies already finished on a later retry.
+
+    ``rerun`` marks the earlier attempt. Identical non-rerun rows can be
+    dropped when every remaining value is the same. Mixed terminal rows
+    cannot be paired with the continued copies.
+    """
+    if continued <= 0:
+        return list(items)
+    terminals = [item for item in items if item != "rerun"]
+    reruns = len(items) - len(terminals)
+    if reruns >= continued:
+        leftover = reruns - continued
+        return terminals + ["rerun"] * leftover
+    shortfall = continued - reruns
+    if shortfall > len(terminals) or len(set(terminals)) > 1:
+        return None
+    return terminals[shortfall:]
+
+
+def _terminal_retry_slices(
+    attempts: dict[int, dict[str, list[str]]],
+) -> list[tuple[int, dict[str, list[str]]]] | None:
+    """Last attempt of each copy, from the highest retry index downward.
+
+    ``None`` means a lower retry still holds mixed rows after the continued
+    copies are removed, so those copies cannot be matched.
+    """
+    slices: list[tuple[int, dict[str, list[str]]]] = []
+    continued = 0
+    for retry_index in sorted(attempts, reverse=True):
+        phase_lists = attempts[retry_index]
+        count = _phase_copy_count(phase_lists)
+        if count > continued:
+            filtered: dict[str, list[str]] = {}
+            for when, items in phase_lists.items():
+                kept = _drop_continued_reports(items, continued)
+                if kept is None:
+                    return None
+                if kept:
+                    filtered[when] = kept
+            slices.append((retry_index, filtered))
+        continued = max(continued, count)
+    slices.reverse()
+    return slices
+
+
+def _record_attempt_terminals(
+    terminals: list[dict[str, Any]],
+    missing: list[str],
+    gap_reasons: list[str],
+    *,
+    outcomes: dict[tuple[str, str, int], dict[str, Any]],
+    events: list[dict[str, Any]],
+    workers: dict[tuple[str, int], str],
+    nodeid: str,
+    copies: int,
+    retry_index: int,
+    phase_lists: dict[str, list[str]],
+    attempt_count: int,
+) -> int:
+    """Record one retry slice. The return value is how many copies it covered."""
+    before_terminals = len(terminals)
+    before_missing = len(missing)
+    if _mixed_copies_conflict(phase_lists, copies):
+        gap_reasons.append("conflicting_outcome")
+        return 0
+    worker_id = workers.get((nodeid, retry_index), "controller")
+    if _phases_are_uniform(phase_lists):
+        phases = {when: items[0] for when, items in phase_lists.items() if items}
+        explained, classification = _explain_phases(phases)
+        available = _phase_copies(outcomes, nodeid, retry_index, phases, explained)
+        emitted = min(available, copies)
+        if available < copies:
+            missing.extend([nodeid] * (copies - available))
+            if classification == "missing_teardown":
+                gap_reasons.append("missing_teardown")
+        _append_terminals(
+            terminals,
+            nodeid=nodeid,
+            copies=emitted,
+            phases=phases,
+            classification=classification,
+            retry_index=retry_index,
+            worker_id=worker_id,
+            attempt_count=attempt_count,
+        )
+    elif any(len(items) != copies for items in phase_lists.values()):
+        instances = _ordered_instances(events, nodeid, retry_index)
+        if len(instances) != copies:
+            gap_reasons.append("conflicting_outcome")
+        else:
+            for phases in instances:
+                explained, classification = _explain_phases(phases)
+                if not explained:
+                    missing.append(nodeid)
+                    if classification == "missing_teardown":
+                        gap_reasons.append("missing_teardown")
+                    continue
+                _append_terminals(
+                    terminals,
+                    nodeid=nodeid,
+                    copies=1,
+                    phases=phases,
+                    classification=classification,
+                    retry_index=retry_index,
+                    worker_id=worker_id,
+                    attempt_count=attempt_count,
+                )
+    else:
+        for index in range(copies):
+            phases = _bundle_at(phase_lists, index, copies)
+            explained, classification = _explain_phases(phases)
+            if not explained:
+                missing.append(nodeid)
+                if classification == "missing_teardown":
+                    gap_reasons.append("missing_teardown")
+                continue
+            _append_terminals(
+                terminals,
+                nodeid=nodeid,
+                copies=1,
+                phases=phases,
+                classification=classification,
+                retry_index=retry_index,
+                worker_id=worker_id,
+                attempt_count=attempt_count,
+            )
+    return (len(terminals) - before_terminals) + (len(missing) - before_missing)
+
+
 def _terminal_states(
     selected: list[str],
     outcomes: dict[tuple[str, str, int], dict[str, Any]],
@@ -1168,73 +1317,35 @@ def _terminal_states(
     gap_reasons: list[str] = []
     for nodeid, copies in Counter(selected).items():
         attempts = by_node.get(nodeid) or {}
-        retry_index = max(attempts) if attempts else 0
-        phase_lists = attempts.get(retry_index, {})
-        if _mixed_copies_conflict(phase_lists, copies):
+        slices = _terminal_retry_slices(attempts)
+        if slices is None:
             gap_reasons.append("conflicting_outcome")
             continue
-        worker_id = workers.get((nodeid, retry_index), "controller")
-        if _phases_are_uniform(phase_lists):
-            phases = {when: items[0] for when, items in phase_lists.items() if items}
-            explained, classification = _explain_phases(phases)
-            available = _phase_copies(outcomes, nodeid, retry_index, phases, explained)
-            emitted = min(available, copies)
-            if available < copies:
-                missing.extend([nodeid] * (copies - available))
-                if classification == "missing_teardown":
-                    gap_reasons.append("missing_teardown")
-            _append_terminals(
+        remaining = copies
+        for retry_index, phase_lists in slices:
+            if remaining <= 0:
+                break
+            slice_copies = min(_phase_copy_count(phase_lists), remaining)
+            reasons_before = len(gap_reasons)
+            accounted = _record_attempt_terminals(
                 terminals,
+                missing,
+                gap_reasons,
+                outcomes=outcomes,
+                events=events,
+                workers=workers,
                 nodeid=nodeid,
-                copies=emitted,
-                phases=phases,
-                classification=classification,
+                copies=slice_copies,
                 retry_index=retry_index,
-                worker_id=worker_id,
+                phase_lists=phase_lists,
                 attempt_count=len(attempts),
             )
-            continue
-        if any(len(items) != copies for items in phase_lists.values()):
-            instances = _ordered_instances(events, nodeid, retry_index)
-            if len(instances) != copies:
-                gap_reasons.append("conflicting_outcome")
-                continue
-            for phases in instances:
-                explained, classification = _explain_phases(phases)
-                if not explained:
-                    missing.append(nodeid)
-                    if classification == "missing_teardown":
-                        gap_reasons.append("missing_teardown")
-                    continue
-                _append_terminals(
-                    terminals,
-                    nodeid=nodeid,
-                    copies=1,
-                    phases=phases,
-                    classification=classification,
-                    retry_index=retry_index,
-                    worker_id=worker_id,
-                    attempt_count=len(attempts),
-                )
-            continue
-        for index in range(copies):
-            phases = _bundle_at(phase_lists, index, copies)
-            explained, classification = _explain_phases(phases)
-            if not explained:
-                missing.append(nodeid)
-                if classification == "missing_teardown":
-                    gap_reasons.append("missing_teardown")
-                continue
-            _append_terminals(
-                terminals,
-                nodeid=nodeid,
-                copies=1,
-                phases=phases,
-                classification=classification,
-                retry_index=retry_index,
-                worker_id=worker_id,
-                attempt_count=len(attempts),
-            )
+            if "conflicting_outcome" in gap_reasons[reasons_before:]:
+                remaining = 0
+                break
+            remaining -= accounted
+        if remaining > 0:
+            missing.extend([nodeid] * remaining)
     terminals.sort(key=lambda item: (str(item["nodeid"]), str(item["classification"])))
     return terminals, missing, sorted(set(gap_reasons))
 

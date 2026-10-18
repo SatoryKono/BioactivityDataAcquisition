@@ -56,6 +56,7 @@ class BronzeWriteArtifacts:
     record_count: int
     uncompressed_size: int
     compressed_size: int
+    json_copy_allowed: bool = True
 
 
 @dataclass(frozen=True, slots=True)
@@ -101,6 +102,8 @@ class _BronzeWritePreparationHostProtocol(Protocol):
 def prepare_bronze_write(
     host: _BronzeWritePreparationHostProtocol,
     request: BronzeWriteRequest,
+    *,
+    locked_root: Path | None = None,
 ) -> BronzeWritePrepared:
     """Validate inputs and build the prepared Bronze write context."""
     host._validate_bronze_request_inputs(request)
@@ -132,7 +135,8 @@ def prepare_bronze_write(
         record_list = cast(list[bytes], [])
         records_iter = validated_records
 
-    full_path = host.base_path / relative_path
+    write_root = locked_root or host.base_path
+    full_path = write_root / relative_path
     return BronzeWritePrepared(
         records_iter=records_iter,
         record_list=record_list,
@@ -149,10 +153,12 @@ def build_bronze_write_artifacts(
     full_path: Path,
     record_count: int,
     uncompressed_size: int,
+    json_copy_allowed: bool = True,
 ) -> BronzeWriteArtifacts:
     """Build the measured Bronze write artifact payload."""
     return BronzeWriteArtifacts(
         record_count=record_count,
         uncompressed_size=uncompressed_size,
         compressed_size=full_path.stat().st_size,
+        json_copy_allowed=json_copy_allowed,
     )

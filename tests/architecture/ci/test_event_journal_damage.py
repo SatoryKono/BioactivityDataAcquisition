@@ -694,6 +694,37 @@ def test_intermediate_rerun_keeps_the_final_attempt(tmp_path: Path) -> None:
     assert verify_directory(tmp_path, executed_passes=["parallel"]) == 0
 
 
+def test_duplicate_copies_finish_on_different_retries(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+
+    def attempt(when: str, classification: str, retry_index: int) -> dict[str, Any]:
+        event = _outcome(identity, nodeid, when, classification)
+        event["retry_index"] = retry_index
+        return event
+
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid, nodeid]),
+            *_phases(identity, nodeid, "passed", retry_index=0),
+            attempt("setup", "passed", 0),
+            attempt("call", "rerun", 0),
+            attempt("teardown", "passed", 0),
+            *_phases(identity, nodeid, "passed", retry_index=1),
+            {"event": "session_finish", "identity": identity, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert "unexplained_selected_tests" not in verdict["reasons"]
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert verdict["selected_count"] == 2
+    assert verdict["tests_passed"] is True
+    assert sorted(item["retry_index"] for item in verdict["terminals"]) == [0, 1]
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 0
+
+
 def test_setup_error_copy_does_not_inherit_the_other_call(tmp_path: Path) -> None:
     identity = _identity(role="controller", worker_id="controller")
     nodeid = "test_sample.py::test_a"
