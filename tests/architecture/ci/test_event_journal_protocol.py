@@ -287,3 +287,135 @@ def test_multiple_finalizers_are_rejected(tmp_path: Path, position: int) -> None
     rows[-1]["prior_line_count"] = len(rows) - 1
     path.write_text("".join(json.dumps(row) + "\n" for row in rows))
     assert verify_directory(tmp_path, executed_passes=["parallel"]) == 4
+
+
+@pytest.mark.parametrize("split", [False, True])
+def test_worker_sessions_cannot_complete_each_other(
+    tmp_path: Path, split: bool
+) -> None:
+    controller = _identity(role="controller", worker_id="controller")
+    selected = ["a"] if split else ["a", "b"]
+    _write_receipt(
+        tmp_path,
+        _finalized(
+            [
+                _start(controller),
+                _collected(controller, selected),
+                {"event": "session_finish", "identity": controller, "exitstatus": 0},
+            ]
+        ),
+        name="receipt_controller.jsonl",
+    )
+    for index, node in enumerate(["a", "b"]):
+        worker = _identity(role="worker", worker_id="gw0" if split else f"gw{index}")
+        phases = _phases(worker, "a" if split else node, "passed")
+        if split:
+            phases = phases[:1] if index == 0 else phases[1:]
+        _write_receipt(
+            tmp_path,
+            _finalized(
+                [
+                    _start(worker),
+                    _collected(worker, selected),
+                    *phases,
+                ]
+            ),
+            name=f"receipt_worker{index}.jsonl",
+        )
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == (
+        4 if split else 0
+    )
+
+
+def test_controller_collection_must_precede_outcomes(tmp_path: Path) -> None:
+    path = _complete(tmp_path)
+    assert verify_directory(tmp_path) == 0
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    collection = rows.pop(1)
+    rows.insert(4, collection)
+    path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    assert verify_directory(tmp_path) == 4
+
+
+def test_unstarted_damaged_invocation_requires_explicit_pin(tmp_path: Path) -> None:
+    from scripts.engineering.ci.pytest_event_journal import reconcile_directory
+
+    _complete(tmp_path, "unspecified")
+    assert verify_directory(tmp_path) == 0
+    name = "receipt_unspecified_" + "b" * 32 + "_controller_controller_" + "c" * 32
+    (tmp_path / (name + ".jsonl")).write_bytes(b"{")
+    assert verify_directory(tmp_path) == 4
+    pinned = reconcile_directory(
+        tmp_path,
+        executed_passes=["unspecified"],
+        expected_invocations={"unspecified": "inv-1"},
+    )
+    assert pinned["status"] == "complete"
+    assert pinned["tests_passed"] is True
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("actual_checkout_sha", "b" * 40),
+        ("expected_checkout_sha", "b" * 40),
+        ("workflow_run_id", "another-run"),
+        ("workflow_run_attempt", "2"),
+        ("job", "another-job"),
+        ("matrix", {"os": "different"}),
+    ],
+)
+def test_cross_receipt_shared_identity_must_match(
+    tmp_path: Path,
+    field: str,
+    value: Any,
+) -> None:
+    _worker_complete(tmp_path)
+    for path in tmp_path.glob("*.jsonl"):
+        rows = [json.loads(line) for line in path.read_text().splitlines()]
+        if rows[0]["identity"]["role"] != "worker":
+            continue
+        for row in rows:
+            row["identity"][field] = value
+        path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 4
+
+
+@pytest.mark.parametrize("explicit", [False, True])
+def test_ambiguous_invocation_verdict_roundtrip(tmp_path: Path, explicit: bool) -> None:
+    from scripts.engineering.ci.pytest_event_journal import reconcile_directory
+
+    _complete(tmp_path, "unspecified")
+    name = "receipt_unspecified_" + "b" * 32 + "_controller_controller_" + "c" * 32
+    (tmp_path / (name + ".jsonl")).write_bytes(b"{")
+    verdict = reconcile_directory(
+        tmp_path,
+        executed_passes=["unspecified"],
+        expected_invocations={"unspecified": "inv-1"} if explicit else None,
+    )
+    assert verdict["status"] == ("complete" if explicit else "unknown")
+    (tmp_path / "journal-verdict.json").write_text(json.dumps(verdict))
+    assert verify_directory(tmp_path) == (0 if explicit else 4)
+
+
+@pytest.mark.parametrize("damage", ["late_collection", "early_finish", "missing_start"])
+def test_worker_lifecycle_is_validated(tmp_path: Path, damage: str) -> None:
+    _worker_complete(tmp_path)
+    for path in tmp_path.glob("*.jsonl"):
+        rows = [json.loads(line) for line in path.read_text().splitlines()]
+        if rows[0]["identity"]["role"] != "worker":
+            continue
+        if damage == "missing_start":
+            rows = [row for row in rows if row["event"] != "session_start"]
+        else:
+            kind = (
+                "collection_finished"
+                if damage == "late_collection"
+                else "session_finish"
+            )
+            index = next(i for i, row in enumerate(rows) if row["event"] == kind)
+            row = rows.pop(index)
+            rows.insert(-2 if damage == "late_collection" else 2, row)
+        rows[-1]["prior_line_count"] = len(rows) - 1
+        path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 4
