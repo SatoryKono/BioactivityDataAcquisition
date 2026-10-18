@@ -49,6 +49,7 @@ class CompositeCheckpointState:
     merge_completed: bool = False
     merge_result: JsonDict | None = None
     legacy_cv_completion_pending: bool = False
+    legacy_cv_resume_blocked: bool = False
     checkpoint_schema_version: str = "1.0.0"
     effective_config_hash: str = ""
     effective_config_artifact_id: str = ""
@@ -180,6 +181,8 @@ class CompositeCheckpointState:
         }
         if self.legacy_cv_completion_pending is True:
             payload["legacy_cv_completion_pending"] = True
+        if self.legacy_cv_resume_blocked is True:
+            payload["legacy_cv_resume_blocked"] = True
         return payload
 
     @classmethod
@@ -223,6 +226,10 @@ class CompositeCheckpointState:
             legacy_cv_completion_pending=(
                 data.get("legacy_cv_completion_pending") is True
                 or data.get("state") == "cross_validation_completed"
+            ),
+            legacy_cv_resume_blocked=(
+                data.get("legacy_cv_resume_blocked") is True
+                or data.get("state") == "cross_validation_running"
             ),
             checkpoint_schema_version=data.get("checkpoint_schema_version", "1.0.0"),
             effective_config_hash=normalized_anchors["effective_config_hash"] or "",

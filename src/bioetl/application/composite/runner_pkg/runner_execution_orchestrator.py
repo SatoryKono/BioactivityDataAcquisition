@@ -228,6 +228,13 @@ class CompositeRunPhaseService:
         request: CompositeLockedExecutionContext,
     ) -> CompositeLockedExecutionResult:
         """Execute composite phases in the canonical lock-held order."""
+        if getattr(request.state, "legacy_cv_resume_blocked", False) is True:
+            raise CheckpointConflictError(
+                request.state.composite_name,
+                "legacy cross_validation_running checkpoint cannot resume safely: "
+                "the current merge service combines merge writes and cross-validation, "
+                "so replaying it would repeat completed merge writes",
+            )
         if getattr(request.state, "legacy_cv_completion_pending", False) is True:
             return _legacy_completed_execution_result(request.state)
         pre_merge_result = await self.execute_pre_merge(host, request)

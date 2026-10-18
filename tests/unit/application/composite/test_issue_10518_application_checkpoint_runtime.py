@@ -302,6 +302,7 @@ def test_load_migrates_legacy_state_without_corruption_warning(
     assert state.legacy_cv_completion_pending is (
         raw_state == "cross_validation_completed"
     )
+    assert state.legacy_cv_resume_blocked is (raw_state == "cross_validation_running")
     logger.warning.assert_not_called()
 
 

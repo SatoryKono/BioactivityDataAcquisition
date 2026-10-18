@@ -234,7 +234,9 @@ async def test_legacy_cv_completed_skips_merge_but_runs_completion_receipt() -> 
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_legacy_cv_running_reexecutes_merge_boundary() -> None:
+async def test_legacy_cv_running_fails_closed_without_replaying_completed_work() -> (
+    None
+):
     state = CompositeCheckpointState.from_dict(
         {
             "composite_name": "legacy",
@@ -247,16 +249,22 @@ async def test_legacy_cv_running_reexecutes_merge_boundary() -> None:
     )
     assert state.state.value == "enrichment_completed"
     assert state.legacy_cv_completion_pending is False
+    assert state.legacy_cv_resume_blocked is True
+    assert state.seed_completed is True
+    assert state.completed_enrichers == frozenset({"enricher"})
     host = _ExecutionHost()
     host.initial_state = state
 
-    result = await execute_locked_run_phases(
-        host,
-        CompositeLockedExecutionRequest(state=state),
-    )
+    with pytest.raises(
+        CheckpointConflictError,
+        match="legacy cross_validation_running checkpoint cannot resume safely",
+    ):
+        await execute_locked_run_phases(
+            host,
+            CompositeLockedExecutionRequest(state=state),
+        )
 
-    assert host.order.count("merge") == 1
-    assert result.state is host.final_state
+    assert host.order == []
 
 
 @pytest.mark.unit

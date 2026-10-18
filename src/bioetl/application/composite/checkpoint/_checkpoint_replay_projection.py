@@ -51,6 +51,7 @@ def merge_replay_projection_state(
         ),
         merge_result=replay_projection.merge_result or state.merge_result,
         legacy_cv_completion_pending=state.legacy_cv_completion_pending,
+        legacy_cv_resume_blocked=state.legacy_cv_resume_blocked,
         checkpoint_schema_version=state.checkpoint_schema_version,
         effective_config_hash=state.effective_config_hash,
         effective_config_artifact_id=state.effective_config_artifact_id,
