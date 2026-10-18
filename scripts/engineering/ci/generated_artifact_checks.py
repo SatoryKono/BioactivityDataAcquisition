@@ -45,75 +45,162 @@ def announce(message: str) -> None:
             handle.write(message + "\n")
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+REPORT_NAMES = {
+    "ci": "affected-test-partition.json",
+    "daily": "generated-artifact-daily-selection.json",
+    "validators": "generated-artifact-daily-validators.json",
+}
+
+
+def report_destination(mode: str, supplied: Path | None) -> Path | None:
+    """Accept only the mode's fixed report, never a caller-chosen deletion target."""
+    if supplied is None:
+        if mode in {"ci", "daily"}:
+            raise ValueError("--report is required")
+        return None
+    if mode not in REPORT_NAMES or ".." in supplied.parts:
+        raise ValueError("Invalid report destination")
+    root = ROOT.resolve()
+    expected = root / "reports" / "quality" / REPORT_NAMES[mode]
+    candidate = supplied if supplied.is_absolute() else root / supplied
+    if candidate != expected:
+        raise ValueError(f"Report must be {expected.relative_to(root)}")
+    _reject_symlinks(expected, root)
+    if expected.exists() and not expected.is_file():
+        raise ValueError("Report destination must be a regular file")
+    return expected
+
+
+def _reject_symlinks(path: Path, root: Path) -> None:
+    """Reject symlink components, including dangling links, before filesystem IO."""
+    relative = path.relative_to(root)
+    current = root
+    for part in relative.parts:
+        current = current / part
+        if current.is_symlink():
+            raise ValueError(f"Symlink path is not allowed: {current}")
+    if not path.resolve().is_relative_to(root):
+        raise ValueError("Path escapes repository")
+
+
+def ci_pytest_arguments(argv: list[str]) -> list[str]:
+    """Parse a narrow pytest interface and terminate options before test targets."""
+    parser = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
+    parser.add_argument("-q", action="store_true")
+    parser.add_argument(
+        "--tb",
+        choices=("line", "short", "long", "auto", "native", "no"),
+        default="short",
+    )
+    parser.add_argument("targets", nargs="+")
+    args = parser.parse_args(argv)
+    targets = []
+    root = ROOT.resolve()
+    for target in args.targets:
+        file_part = target.split("::", 1)[0]
+        path = Path(file_part)
+        if (
+            path.is_absolute()
+            or ".." in path.parts
+            or not path.parts
+            or path.parts[0] != "tests"
+        ):
+            raise ValueError("Targets must be repository-relative paths under tests/")
+        if any(ord(char) < 32 for char in target):
+            raise ValueError("Control characters are not allowed in targets")
+        _reject_symlinks(root / path, root)
+        if not (root / path).exists():
+            raise ValueError(f"Test target does not exist: {file_part}")
+        targets.append(target)
+    return (["-q"] if args.q else []) + [f"--tb={args.tb}", "--", *targets]
+
+
+def _parse_arguments(argv: list[str] | None):
+    raw = list(sys.argv[1:] if argv is None else argv)
+    split = raw.index("--") if "--" in raw else len(raw)
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument(
         "mode", choices=("ci", "daily", "validators", "defer-validator")
     )
     parser.add_argument("--report", type=Path)
     parser.add_argument("--validator")
-    args, pytest_args = parser.parse_known_args(argv)
-    if pytest_args[:1] == ["--"]:
-        pytest_args.pop(0)
-    if args.mode in {"validators", "defer-validator"} and pytest_args:
-        parser.error("Unexpected arguments for validator operation")
-    manifest = load_manifest()
-    selectors = {row["node"] for row in manifest["tests"]}
-    if args.mode == "defer-validator":
-        rows = [row for row in manifest["validators"] if row["id"] == args.validator]
-        if len(rows) != 1:
-            parser.error("Unknown daily validator; refusing unproven deferral")
-        announce(
-            f"deferred-to-daily: {args.validator}; owner .github/workflows/nightly.yml (03:00 UTC). No validation PASS is claimed."
-        )
-        return 0
-    if args.mode == "validators":
-        outcomes = []
-        for row in manifest["validators"]:
-            if row["owner"] != "generated-artifact-daily":
-                continue
+    args = parser.parse_args(raw[:split])
+    tail = raw[split + 1 :]
+    try:
+        report = report_destination(args.mode, args.report)
+        if args.mode != "ci" and tail:
+            raise ValueError("Only CI mode accepts explicit pytest targets/options")
+        pytest_args = ci_pytest_arguments(tail) if args.mode == "ci" else []
+    except ValueError as error:
+        parser.error(str(error))
+    return args, report, pytest_args
+
+
+def _run_validators(manifest: dict, report: Path | None) -> int:
+    outcomes = []
+    for row in manifest["validators"]:
+        if row["owner"] == "generated-artifact-daily":
             result = subprocess.run(
                 [sys.executable, *row["argv"]], cwd=ROOT, check=False
             )
             outcomes.append(
                 {"id": row["id"], "argv": row["argv"], "exit_code": result.returncode}
             )
-        if args.report:
-            args.report.parent.mkdir(parents=True, exist_ok=True)
-            args.report.write_text(
-                json.dumps(outcomes, indent=2) + "\n", encoding="utf-8"
-            )
-        return int(any(row["exit_code"] != 0 for row in outcomes))
-    if args.report is None:
-        parser.error("--report is required for a source-bound partition result")
-    # Never consume a previous invocation's proof after a startup/collection error.
-    args.report.unlink(missing_ok=True)
-    if args.mode == "daily":
-        if pytest_args:
-            parser.error(
-                "Daily selection cannot be narrowed by additional pytest filters"
-            )
-        pytest_args = sorted({node.split("::", 1)[0] for node in selectors})
-        pytest_args += ["-n", "0", "-q", "--tb=short"]
-    elif not pytest_args:
-        parser.error("CI mode requires explicit affected targets")
+    if report is not None:
+        report_destination("validators", report)
+        report.parent.mkdir(parents=True, exist_ok=True)
+        report.write_text(json.dumps(outcomes, indent=2) + "\n", encoding="utf-8")
+    return int(any(row["exit_code"] != 0 for row in outcomes))
+
+
+def _run_tests(mode: str, report: Path, pytest_args: list[str], manifest: dict) -> int:
+    selectors = {row["node"] for row in manifest["tests"]}
+    if mode == "daily":
+        pytest_args = [
+            "-n",
+            "0",
+            "-q",
+            "--tb=short",
+            "--",
+            *sorted({node.split("::", 1)[0] for node in selectors}),
+        ]
+    report_destination(mode, report)
+    report.unlink(missing_ok=True)
     command = [
         sys.executable,
         "-m",
         "pytest",
+        f"--artifact-selection={mode}",
+        f"--artifact-selection-report={report}",
         *pytest_args,
-        f"--artifact-selection={args.mode}",
-        f"--artifact-selection-report={args.report}",
     ]
     code = subprocess.run(command, cwd=ROOT, check=False).returncode
-    if args.mode == "ci" and code == 5 and args.report.is_file():
-        payload = json.loads(args.report.read_text(encoding="utf-8"))
+    report_destination(mode, report)
+    if mode == "ci" and code == 5 and report.is_file():
+        payload = json.loads(report.read_text(encoding="utf-8"))
         if proven_deferral(payload, code, selectors):
             announce(
-                f"deferred-to-daily: all {len(payload['collected'])} affected nodes are owned by {manifest['daily_workflow']}; pytest exit 5 retained in {args.report}. No tests passed."
+                f"deferred-to-daily: all {len(payload['collected'])} affected nodes are owned by {manifest['daily_workflow']}; pytest exit 5 retained in {report}. No tests passed."
             )
             return 0
     return code
+
+
+def main(argv: list[str] | None = None) -> int:
+    args, report, pytest_args = _parse_arguments(argv)
+    manifest = load_manifest()
+    if args.mode == "defer-validator":
+        rows = [row for row in manifest["validators"] if row["id"] == args.validator]
+        if len(rows) != 1:
+            raise SystemExit("Unknown daily validator; refusing unproven deferral")
+        announce(
+            f"deferred-to-daily: {args.validator}; owner .github/workflows/nightly.yml (03:00 UTC). No validation PASS is claimed."
+        )
+        return 0
+    if args.mode == "validators":
+        return _run_validators(manifest, report)
+    assert report is not None
+    return _run_tests(args.mode, report, pytest_args, manifest)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-18T23:29:38.806412+00:00",
+  "generated_at": "2026-10-18T23:52:42.568307+00:00",
   "summary": {
     "total_scripts": 652,
     "status_counts": {
@@ -8468,7 +8468,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/docs/README.md",
@@ -8485,6 +8485,12 @@
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
           "line": 258,
+          "source_group": "tests",
+          "text": "from scripts.docs.checks import verify"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
+          "line": 608,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
@@ -10154,7 +10160,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 11,
       "references": [
         {
           "path": ".github/workflows/nightly.yml",
@@ -14308,13 +14314,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 333,
+          "line": 334,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 353,
+          "line": 354,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_evaluators as evaluators"
         },
@@ -14351,7 +14357,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 352,
+          "line": 353,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_report as cli"
         }

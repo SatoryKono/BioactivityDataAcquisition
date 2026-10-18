@@ -293,7 +293,8 @@ def test_daily_validator_failures_survive_and_do_not_suppress_remaining_checks(
 
     monkeypatch.setattr(checks, "load_manifest", lambda: manifest)
     monkeypatch.setattr(checks.subprocess, "run", run)
-    report = tmp_path / "validators.json"
+    monkeypatch.setattr(checks, "ROOT", tmp_path)
+    report = tmp_path / "reports/quality/generated-artifact-daily-validators.json"
     assert checks.main(["validators", "--report", str(report)]) == 1
     assert len(commands) == 2
     assert [row["exit_code"] for row in json.loads(report.read_text())] == [1, 0]
@@ -494,3 +495,131 @@ def test_debt_receipt_records_executed_command_and_scope(tmp_path, generated, sc
         == f"debt_governance_gates-proof-{scope}"
     )
     assert ("--source-only" in command) == (scope == "source")
+
+
+@pytest.mark.parametrize("mode", ["ci", "daily", "validators"])
+@pytest.mark.parametrize(
+    "attack", ["outside", "traversal", "wrong_name", "file_link", "parent_link"]
+)
+def test_runner_rejects_report_escape_before_any_effect(
+    tmp_path, monkeypatch, mode, attack
+):
+    from scripts.engineering.ci import generated_artifact_checks as checks
+
+    root = tmp_path / "repo"
+    root.mkdir()
+    outside = tmp_path / "victim.json"
+    outside.write_text("preserve")
+    monkeypatch.setattr(checks, "ROOT", root)
+    expected = root / "reports/quality" / checks.REPORT_NAMES[mode]
+    expected.parent.mkdir(parents=True)
+    supplied = expected
+    if attack == "outside":
+        supplied = outside
+    elif attack == "traversal":
+        supplied = root / "reports/quality/../../victim.json"
+    elif attack == "wrong_name":
+        supplied = expected.parent / "test-governance-current.json"
+        supplied.write_text("preserve")
+    elif attack == "file_link":
+        expected.symlink_to(outside)
+    else:
+        expected.parent.rmdir()
+        expected.parent.symlink_to(tmp_path, target_is_directory=True)
+    monkeypatch.setattr(
+        checks.subprocess,
+        "run",
+        lambda *a, **k: pytest.fail("subprocess before validation"),
+    )
+    with pytest.raises(SystemExit):
+        checks.main([mode, "--report", str(supplied)])
+    assert outside.read_text() == "preserve"
+    if attack == "wrong_name":
+        assert supplied.read_text() == "preserve"
+
+
+@pytest.mark.parametrize(
+    "option",
+    [
+        "-p",
+        "-c",
+        "--override-ini",
+        "--rootdir",
+        "--basetemp",
+        "--junitxml",
+        "--artifact-selection",
+        "--report",
+    ],
+)
+def test_runner_rejects_pytest_option_injection_before_deleting_report(
+    tmp_path, monkeypatch, option
+):
+    from scripts.engineering.ci import generated_artifact_checks as checks
+
+    monkeypatch.setattr(checks, "ROOT", tmp_path)
+    (tmp_path / "tests").mkdir()
+    report = tmp_path / "reports/quality/affected-test-partition.json"
+    report.parent.mkdir(parents=True)
+    report.write_text("old proof")
+    monkeypatch.setattr(
+        checks.subprocess,
+        "run",
+        lambda *a, **k: pytest.fail("injected command executed"),
+    )
+    with pytest.raises(SystemExit):
+        checks.main(["ci", "--report", str(report), "--", "tests", option, "evil"])
+    assert report.read_text() == "old proof"
+
+
+def test_runner_keeps_targets_and_exit_codes_with_fixed_options(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    from scripts.engineering.ci import generated_artifact_checks as checks
+
+    monkeypatch.setattr(checks, "ROOT", tmp_path)
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests/test_cases.py").write_text("")
+    target = "tests/test_cases.py::TestCases::test_source[value with spaces]"
+    report = tmp_path / "reports/quality/affected-test-partition.json"
+    report.parent.mkdir(parents=True)
+    report.write_text("stale proof")
+    commands = []
+
+    def run(command, **kwargs):
+        assert not report.exists()
+        commands.append(command)
+        return SimpleNamespace(returncode=5)
+
+    monkeypatch.setattr(checks.subprocess, "run", run)
+    assert (
+        checks.main(["ci", "--report", str(report), "--", target, "-q", "--tb=line"])
+        == 5
+    )
+    assert commands[0][-2:] == ["--", target]
+    assert "-q" in commands[0] and "--tb=line" in commands[0]
+    for target in ("../tests", "/tmp/tests", "@args.txt"):
+        with pytest.raises(ValueError):
+            checks.ci_pytest_arguments([target])
+    (tmp_path / "tests/link.py").symlink_to(tmp_path / "outside.py")
+    with pytest.raises(ValueError, match="Symlink"):
+        checks.ci_pytest_arguments(["tests/link.py"])
+
+
+def test_docs_verify_preserves_failure_and_build_exit_codes(monkeypatch):
+    from scripts.docs.checks import verify
+
+    labels = []
+
+    def fail_drift(label, argv):
+        labels.append(label)
+        return 7 if label == "check-drift" else 0
+
+    monkeypatch.setattr(verify, "_run_step", fail_drift)
+    assert verify.main(["--skip-build", "--defer-generated-artifacts"]) == 7
+    assert labels == ["check-links", "check-drift"]
+    monkeypatch.setattr(
+        verify, "_run_step", lambda label, argv: 9 if label == "strict-build" else 0
+    )
+    monkeypatch.setattr(verify, "_require_docs_extra", lambda: 2)
+    assert verify.main([]) == 2
+    monkeypatch.setattr(verify, "_require_docs_extra", lambda: 0)
+    assert verify.main([]) == 9
