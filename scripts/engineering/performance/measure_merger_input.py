@@ -131,7 +131,14 @@ async def run_worker(scale: int, output_file: str):
             "status": "COMPLETED"
         }
 
-        with open(output_file, "w") as f:
+        out_path_obj = Path(output_file).resolve()
+        temp_dir_obj = Path(tempfile.gettempdir()).resolve()
+
+        # Security validation against Path Traversal (SonarCloud)
+        if not out_path_obj.is_relative_to(temp_dir_obj) and not out_path_obj.is_relative_to(Path.cwd()):
+             raise ValueError(f"Output file {output_file} resolves outside expected directories.")
+
+        with open(out_path_obj, "w") as f:
             json.dump(result, f)
 
 
