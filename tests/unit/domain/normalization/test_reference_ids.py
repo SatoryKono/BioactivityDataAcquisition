@@ -235,6 +235,7 @@ def test_ror_reference_identifier_canonicalizes_only_ror_inputs() -> None:
 
 
 def test_build_reference_identifier_families_rejects_missing_required_keys() -> None:
+    """Reject missing normalizer keys with a deterministic sorted diagnostic."""
     expected_keys = {s[3] for s in _REFERENCE_IDENTIFIER_FAMILY_SPECS if s[3]}
     with pytest.raises(ValueError, match="Missing required normalizer keys:") as exc:
         build_reference_identifier_families({})
@@ -243,6 +244,7 @@ def test_build_reference_identifier_families_rejects_missing_required_keys() -> 
 
 
 def test_build_reference_identifier_families_rejects_synthetic_orphan_key() -> None:
+    """Reject a normalizer key absent from the governed family specifications."""
     expected_keys = {s[3] for s in _REFERENCE_IDENTIFIER_FAMILY_SPECS if s[3]}
     normalizers = dict.fromkeys(expected_keys)
     normalizers["synthetic_orphan_key"] = None
@@ -254,6 +256,7 @@ def test_build_reference_identifier_families_rejects_synthetic_orphan_key() -> N
 
 
 def test_build_reference_identifier_families_allows_explicit_none_normalizers() -> None:
+    """Accept explicitly disabled normalizers for every required family key."""
     expected_keys = {s[3] for s in _REFERENCE_IDENTIFIER_FAMILY_SPECS if s[3]}
     normalizers = dict.fromkeys(expected_keys)
 

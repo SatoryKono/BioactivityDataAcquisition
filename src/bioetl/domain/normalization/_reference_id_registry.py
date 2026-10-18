@@ -159,6 +159,7 @@ _REFERENCE_IDENTIFIER_FAMILY_SPECS: tuple[tuple[str, str, str, str, str], ...] =
 def _validate_normalizer_keys(
     normalizers: Mapping[str, ReferenceNormalizer | None],
 ) -> None:
+    """Reject missing or extra normalizer keys before constructing families."""
     expected_keys = {spec[3] for spec in _REFERENCE_IDENTIFIER_FAMILY_SPECS if spec[3]}
     provided_keys = set(normalizers.keys())
 

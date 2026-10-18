@@ -6,6 +6,8 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from tests.helpers.clock import fixed_test_clock
+
 
 from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
     ForeignKeyReconciliationRequest,
@@ -40,9 +42,51 @@ def _request(**overrides: object) -> ForeignKeyReconciliationRequest:
 
 def _adapter() -> SilverForeignKeyReconciliationAdapter:
     return SilverForeignKeyReconciliationAdapter(
+        clock=fixed_test_clock(),
         silver_writer=MagicMock(),  # type: ignore[arg-type]
         logger=MagicMock(),  # type: ignore[arg-type]
     )
+
+
+@pytest.mark.parametrize(
+    "clock_kwargs, error", [({}, TypeError), ({"clock": None}, ValueError)]
+)
+def test_clock_contract_fails_at_construction_without_io(clock_kwargs, error) -> None:
+    """Missing or null clocks fail before any storage/quarantine interaction."""
+    silver, gold, quarantine, logger = (MagicMock() for _ in range(4))
+    with pytest.raises(error, match="clock"):
+        SilverForeignKeyReconciliationAdapter(
+            silver_writer=silver,
+            logger=logger,
+            gold_writer=gold,
+            quarantine=quarantine,
+            **clock_kwargs,
+        )
+    for port in (silver, gold, quarantine, logger):
+        assert port.mock_calls == []
+
+
+def test_clock_contract_preserves_optional_keyword_ports() -> None:
+    clock = fixed_test_clock()
+    ports = {
+        name: MagicMock()
+        for name in (
+            "silver_writer",
+            "logger",
+            "metrics",
+            "quarantine",
+            "gold_writer",
+            "artifact_sink",
+        )
+    }
+    adapter = SilverForeignKeyReconciliationAdapter(
+        clock=clock, quarantine_pipeline_name="workflow_transforms", **ports
+    )
+    assert adapter.clock is clock
+    assert adapter.quarantine_pipeline_name == "workflow_transforms"
+    for name, port in ports.items():
+        assert getattr(adapter, name) is port
+        assert port.mock_calls == []
 
 
 @pytest.mark.asyncio
@@ -99,6 +143,7 @@ async def test_reconcile_loaded_rows_dry_run_and_mutation(
 async def test_debug_artifact_sink_is_invoked() -> None:
     sink = SimpleNamespace(write_reconcile_debug_artifacts=MagicMock())
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=fixed_test_clock(),
         silver_writer=MagicMock(),  # type: ignore[arg-type]
         logger=MagicMock(),  # type: ignore[arg-type]
         artifact_sink=sink,  # type: ignore[arg-type]
