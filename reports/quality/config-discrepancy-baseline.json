@@ -5,7 +5,7 @@
       "inconsistent_parameter_count": 0,
       "raw_inconsistent_parameter_count": 0,
       "sanctioned_partial_parameter_count": 0,
-      "unique_parameter_count": 157
+      "unique_parameter_count": 158
     },
     "entity_effective": {
       "config_count": 22,
@@ -20,7 +20,7 @@
     "inconsistent_parameter_count": 0,
     "raw_inconsistent_parameter_count": 0,
     "sanctioned_partial_parameter_count": 0,
-    "unique_parameter_count": 418
+    "unique_parameter_count": 419
   },
   "parameter_taxonomy": {
     "classification_mode": "derived_from_flattened_config_parameter_paths",
@@ -108,7 +108,7 @@
           }
         },
         "groups": {
-          "domain_entity_contract": 100,
+          "domain_entity_contract": 101,
           "dq_validation": 36,
           "medallion_write_policy": 5,
           "provider_source_access": 3,
@@ -116,7 +116,7 @@
           "runtime_control_plane": 8
         },
         "owner": "BioETL Team",
-        "parameter_count": 157,
+        "parameter_count": 158,
         "unclassified_parameter_count": 0,
         "unclassified_parameters": []
       },
