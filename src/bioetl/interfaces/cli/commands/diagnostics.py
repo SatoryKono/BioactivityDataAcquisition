@@ -71,6 +71,12 @@ __all__ = [
     "get_quarantine_runtime_service",
 ]
 
+SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
+SILVER_FILTER_ALIAS_HELP = (
+    "Legacy alias for --error-code FILTERED_OUT_SILVER; Silver structural "
+    "rejects only, not Gold contract/semantic rejects."
+)
+
 
 def get_observability_diagnostics_bundle() -> ObservabilityDiagnosticsBundle:
     """Load the canonical operator diagnostics bundle on demand."""
@@ -300,12 +306,13 @@ def diagnostics_forensic_diff(
 
 
 @typed_group_command(diagnostics, "quarantine")
-@add_quarantine_stats_options()
+@add_quarantine_stats_options(silver_filter_alias_help=SILVER_FILTER_ALIAS_HELP)
 def diagnostics_quarantine(
     pipeline: str,
     output_json: bool,
     error_code: str | None,
     run_id: str | None,
+    silver_filter_only: bool,
     group_by: str | None,
     top: int,
 ) -> None:
@@ -316,6 +323,7 @@ def diagnostics_quarantine(
             "output_json": output_json,
             "error_code": error_code,
             "run_id": run_id,
+            "silver_filter_only": silver_filter_only,
             "group_by": group_by,
             "top": top,
         },
@@ -324,6 +332,7 @@ def diagnostics_quarantine(
         get_manifest_service=lambda: (
             get_observability_diagnostics_bundle().run_manifest_service
         ),
+        silver_filter_error_code=SILVER_FILTER_ERROR_CODE,
     )
 
 

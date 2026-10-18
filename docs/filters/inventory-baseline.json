@@ -12,16 +12,16 @@
     "conflict": 0
   },
   "surface_totals": {
-    "surfaces_total": 98,
+    "surfaces_total": 102,
     "by_category": {
-      "consumer_alias": 21,
+      "consumer_alias": 25,
       "observability": 10,
       "runtime_gate": 11,
       "silver_config": 10,
       "source_profile": 46
     },
     "by_symbol": {
-      "--silver-filter-only": 2,
+      "--silver-filter-only": 6,
       "FILTERED_OUT_SILVER": 13,
       "FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS": 1,
       "SilverFilterConfig": 1,
@@ -1495,11 +1495,44 @@
       "category": "consumer_alias",
       "surface": "cli_silver_filter_shortcut",
       "symbol": "--silver-filter-only",
-      "path": "docs/04-reference/cli.md",
+      "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "occurrence_count": 1,
-      "first_line": 1245,
-      "role": "Retired CLI shortcut for FILTERED_OUT_SILVER",
-      "migration_relevance": "Removed after sunset 2026-09-30; only retirement notes and negative tests should retain this spelling.",
+      "first_line": 519,
+      "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
+      "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "cli_silver_filter_shortcut",
+      "symbol": "--silver-filter-only",
+      "path": "docs/03-guides/dashboards/monitoring-index.md",
+      "occurrence_count": 2,
+      "first_line": 39,
+      "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
+      "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "cli_silver_filter_shortcut",
+      "symbol": "--silver-filter-only",
+      "path": "docs/04-reference/cli.md",
+      "occurrence_count": 3,
+      "first_line": 1060,
+      "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
+      "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "cli_silver_filter_shortcut",
+      "symbol": "--silver-filter-only",
+      "path": "docs/05-operations/01-monitoring-guide.md",
+      "occurrence_count": 1,
+      "first_line": 267,
+      "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
+      "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
     },
     {
@@ -1509,8 +1542,19 @@
       "path": "docs/05-operations/runbooks/quarantine-management.md",
       "occurrence_count": 1,
       "first_line": 71,
-      "role": "Retired CLI shortcut for FILTERED_OUT_SILVER",
-      "migration_relevance": "Removed after sunset 2026-09-30; only retirement notes and negative tests should retain this spelling.",
+      "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
+      "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "cli_silver_filter_shortcut",
+      "symbol": "--silver-filter-only",
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "occurrence_count": 1,
+      "first_line": 136,
+      "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
+      "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
     },
     {
@@ -1518,7 +1562,7 @@
       "surface": "legacy_silver_error_code",
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "occurrence_count": 2,
+      "occurrence_count": 1,
       "first_line": 509,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
@@ -1551,19 +1595,8 @@
       "surface": "legacy_silver_error_code",
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/04-reference/cli.md",
-      "occurrence_count": 2,
-      "first_line": 1246,
-      "role": "Temporary legacy Silver reject alias",
-      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
-      "notes": ""
-    },
-    {
-      "category": "consumer_alias",
-      "surface": "legacy_silver_error_code",
-      "symbol": "FILTERED_OUT_SILVER",
-      "path": "docs/05-operations/01-monitoring-guide.md",
-      "occurrence_count": 1,
-      "first_line": 267,
+      "occurrence_count": 3,
+      "first_line": 1255,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1649,9 +1682,20 @@
       "category": "consumer_alias",
       "surface": "legacy_silver_error_code",
       "symbol": "FILTERED_OUT_SILVER",
+      "path": "src/bioetl/interfaces/cli/commands/diagnostics.py",
+      "occurrence_count": 2,
+      "first_line": 74,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
-      "occurrence_count": 1,
-      "first_line": 124,
+      "occurrence_count": 2,
+      "first_line": 41,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""

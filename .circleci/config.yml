@@ -13,7 +13,7 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline, docker-publish, architecture-metrics, scorecard, scorecard-publish, release-validation, router-bridge]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline, docker-publish, architecture-metrics, scorecard, scorecard-publish, release-validation, router-bridge]
     default: pr-gate
   include-hypothesis:
     type: boolean
@@ -1548,6 +1548,16 @@ jobs:
                 if [ -r "$path" ]; then printf '\n%s\n' "$path"; cat "$path"; fi
               done
             } > reports/performance/runner-identity.txt
+      - run:
+          name: Run performance benchmarks with existing budgets
+          no_output_timeout: 35m
+          command: |
+            mkdir -p reports/performance
+            timeout --signal=TERM --kill-after=30s 30m \
+              uv run --frozen --no-build pytest tests/performance/ tests/benchmarks/ \
+              -m "benchmark or performance" -p benchmark -p no:xdist -v --tb=short \
+              --perf-obs-out reports/performance/hotspot-observations.jsonl \
+              --junitxml=reports/performance/hotspot-budgets.xml
       - run:
           name: Record performance CPU throttling after benchmarks
           when: always
@@ -4112,6 +4122,15 @@ workflows:
     jobs:
       - github-settings-review:
           context: bioetl-github-read-only
+  performance:
+    when:
+      and:
+        - equal: [performance, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
+    jobs:
+      - performance
   replay-parity:
     when:
       and:
