@@ -228,7 +228,7 @@ class CompositeRunPhaseService:
         request: CompositeLockedExecutionContext,
     ) -> CompositeLockedExecutionResult:
         """Execute composite phases in the canonical lock-held order."""
-        if getattr(request.state, "legacy_cv_completion_pending", False):
+        if getattr(request.state, "legacy_cv_completion_pending", False) is True:
             return _legacy_completed_execution_result(request.state)
         pre_merge_result = await self.execute_pre_merge(host, request)
         state, merge_result = await self.execute_merge(host, pre_merge_result)

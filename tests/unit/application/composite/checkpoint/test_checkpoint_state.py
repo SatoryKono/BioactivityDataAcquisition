@@ -562,7 +562,6 @@ class TestToDict:
             "enrichment_results",
             "merge_completed",
             "merge_result",
-            "legacy_cv_completion_pending",
             "checkpoint_schema_version",
             "effective_config_hash",
             "effective_config_artifact_id",
@@ -579,6 +578,16 @@ class TestToDict:
             "updated_at",
         }
         assert expected_keys == set(d.keys())
+
+    def test_legacy_completion_marker_serializes_only_when_active(self) -> None:
+        state = CompositeCheckpointState(
+            composite_name="c",
+            run_id="r",
+            state=CompositePipelineState.MERGING,
+            legacy_cv_completion_pending=True,
+        )
+
+        assert state.to_dict()["legacy_cv_completion_pending"] is True
 
     def test_state_serialized_as_string_value(self) -> None:
         """FSM state serialized as its StrEnum value."""
@@ -896,6 +905,20 @@ class TestFromDict:
 
         assert state.state is CompositePipelineState.MERGING
         assert state.merge_completed is False
+        assert state.legacy_cv_completion_pending is False
+
+    @pytest.mark.parametrize("invalid_marker", ["true", 1, [], {}])
+    def test_non_bool_legacy_marker_is_ignored(self, invalid_marker: object) -> None:
+        state = CompositeCheckpointState.from_dict(
+            {
+                "composite_name": "c",
+                "run_id": "r",
+                "state": "failed",
+                "legacy_cv_completion_pending": invalid_marker,
+            }
+        )
+
+        assert state.state is CompositePipelineState.FAILED
         assert state.legacy_cv_completion_pending is False
 
     def test_extra_fields_are_ignored(self) -> None:

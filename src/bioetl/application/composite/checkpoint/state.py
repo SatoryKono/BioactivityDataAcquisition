@@ -141,7 +141,7 @@ class CompositeCheckpointState:
                 "composite_run_identity": self.composite_run_identity,
             }
         )
-        return {
+        payload = {
             "composite_name": self.composite_name,
             "run_id": self.run_id,
             "state": self.state.value,
@@ -153,7 +153,6 @@ class CompositeCheckpointState:
             "enrichment_results": serialize_enrichment_results(self.enrichment_results),
             "merge_completed": self.merge_completed,
             "merge_result": self.merge_result,
-            "legacy_cv_completion_pending": self.legacy_cv_completion_pending,
             "checkpoint_schema_version": self.checkpoint_schema_version,
             "effective_config_hash": normalized_anchors["effective_config_hash"],
             "effective_config_artifact_id": normalized_anchors[
@@ -179,6 +178,9 @@ class CompositeCheckpointState:
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
+        if self.legacy_cv_completion_pending is True:
+            payload["legacy_cv_completion_pending"] = True
+        return payload
 
     @classmethod
     def from_dict(
@@ -219,7 +221,7 @@ class CompositeCheckpointState:
             ),
             merge_result=data.get("merge_result"),
             legacy_cv_completion_pending=(
-                data.get("legacy_cv_completion_pending", False)
+                data.get("legacy_cv_completion_pending") is True
                 or data.get("state") == "cross_validation_completed"
             ),
             checkpoint_schema_version=data.get("checkpoint_schema_version", "1.0.0"),

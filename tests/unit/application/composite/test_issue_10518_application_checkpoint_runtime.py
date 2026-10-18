@@ -276,6 +276,35 @@ def test_load_warns_on_corrupted_state_value() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("raw_state", "expected_state"),
+    [
+        ("cross_validation_running", "enrichment_completed"),
+        ("cross_validation_completed", "merging"),
+    ],
+)
+def test_load_migrates_legacy_state_without_corruption_warning(
+    raw_state: str,
+    expected_state: str,
+) -> None:
+    storage = _storage({"cp.json": _payload("c", state=raw_state)})
+    logger = MagicMock()
+
+    state = load_checkpoint_state(
+        storage=storage,
+        logger=logger,
+        composite_name="c",
+        filename="cp.json",
+    )
+
+    assert state is not None
+    assert state.state.value == expected_state
+    assert state.legacy_cv_completion_pending is (
+        raw_state == "cross_validation_completed"
+    )
+    logger.warning.assert_not_called()
+
+
 def test_load_reports_read_failure_with_failed_counter() -> None:
     storage = MagicMock()
     storage.read.side_effect = OSError("disk gone")
