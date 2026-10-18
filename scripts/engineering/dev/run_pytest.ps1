@@ -37,7 +37,7 @@ function Test-BenchmarkPluginNeeded {
         if ($Arg -like "tests/benchmarks*" -or $Arg -like "*\tests\benchmarks*") {
             return $true
         }
-        if ($Arg -like "--benchmark-*" -or $Arg -cin @("-pbenchmark", "-ppytest_benchmark.plugin")) {
+        if ($Arg -like "--benchmark-*") {
             return $true
         }
         if (

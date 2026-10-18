@@ -158,12 +158,14 @@ _requests_explicit_benchmark_plugin() {
             -pbenchmark|-p=benchmark|-ppytest_benchmark|-p=pytest_benchmark|-ppytest_benchmark.plugin|-p=pytest_benchmark.plugin|-ppytest-benchmark|-p=pytest-benchmark|--plugins=benchmark|--plugins=pytest_benchmark|--plugins=pytest_benchmark.plugin|--plugins=pytest-benchmark)
                 return 0
                 ;;
+            *) : ;;
         esac
         if [[ "$previous" == "-p" || "$previous" == "--plugins" ]]; then
             case "$arg" in
                 benchmark|pytest_benchmark|pytest_benchmark.plugin|pytest-benchmark)
                     return 0
                     ;;
+                *) : ;;
             esac
         fi
         previous="$arg"
@@ -603,6 +605,7 @@ if _should_enable_benchmark_plugin "${PYTEST_ARGS[@]}"; then
         fi
         case "$_benchmark_arg" in
             -pbenchmark|-p=benchmark|-ppytest_benchmark|-p=pytest_benchmark|-ppytest_benchmark.plugin|-p=pytest_benchmark.plugin|-ppytest-benchmark|-p=pytest-benchmark|--plugins=benchmark|--plugins=pytest_benchmark|--plugins=pytest_benchmark.plugin|--plugins=pytest-benchmark) continue ;;
+            *) : ;;
         esac
         _benchmark_filtered_args+=("$_benchmark_arg")
     done
