@@ -33,6 +33,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import httpx
+import respx
 import pytest
 
 from bioetl.domain.exceptions import CircuitBreakerOpenError, RetryExhaustedError
@@ -420,16 +421,18 @@ class TestUnifiedHTTPClientRequestMethods:
         assert response == mock_response_200
         assert mock_circuit_breaker.call.call_count == 2
 
-
     @pytest.mark.asyncio
     async def test_unified_http_client_outgoing_transport_headers(
         self, mock_rate_limiter
     ):
         """Regression test for actual outgoing request headers on transport boundary."""
         from unittest.mock import AsyncMock
+
         mock_cb = AsyncMock()
+
         async def _call_cb(req_coro, *args, **kwargs):
             return await req_coro()
+
         mock_cb.call.side_effect = _call_cb
 
         client = UnifiedHTTPClient(
@@ -442,19 +445,15 @@ class TestUnifiedHTTPClientRequestMethods:
             provider="test",
         )
 
-        transport_requests = []
-        async def mock_handler(request: httpx.Request):
-            transport_requests.append(request)
-            return httpx.Response(200, json={"status": "ok"})
+        with respx.mock(assert_all_called=True) as router:
+            route = router.get("https://example.com/test").respond(
+                200, json={"status": "ok"}
+            )
+            async with client:
+                await client.get("https://example.com/test")
 
-        mock_transport = httpx.MockTransport(mock_handler)
-
-        async with client:
-            client._get_client()._transport = mock_transport
-            await client.get("https://example.com/test")
-
-        assert len(transport_requests) == 1
-        req = transport_requests[0]
+        assert route.call_count == 1
+        req = route.calls[0].request
 
         assert req.headers["user-agent"] == "BioETL/1.0 (test@example.com)"
         assert req.headers["accept"] == "application/json"
