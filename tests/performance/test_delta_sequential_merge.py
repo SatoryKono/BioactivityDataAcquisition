@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+import math
+import statistics
 import os
 import sys
 import time
@@ -37,6 +39,7 @@ from tests.helpers.deterministic_ids import (
 )
 
 pytestmark = [
+    pytest.mark.benchmark,
     pytest.mark.performance,
     pytest.mark.serial,
     pytest.mark.timeout(900),  # Sequential merges can be slow
@@ -141,6 +144,34 @@ def _get_file_stats(directory: Path, pattern: str) -> dict[str, int]:
     return {"bytes": total_bytes, "files": file_count}
 
 
+def _build_observation(
+    n_merges: int, durations: list[float], processed_rows: int
+) -> dict[str, Any]:
+    """Report per-merge latency and rows/s from unrounded measured durations."""
+    if len(durations) != n_merges or not durations or processed_rows <= 0:
+        raise ValueError("A complete measured series is required")
+    if any(not math.isfinite(value) or value <= 0 for value in durations):
+        raise ValueError("Merge durations must be finite and positive")
+    # Nearest-rank P95 over the actual sequential merge samples.
+    p95 = sorted(durations)[math.ceil(0.95 * len(durations)) - 1]
+    captured_at = SystemClock().now()
+    return {
+        "benchmark_key": f"delta_sequential_merge_N{n_merges}",
+        "latency_ms": statistics.median(durations) * 1000,
+        "p95_latency_ms": p95 * 1000,
+        "throughput_rps": processed_rows / sum(durations),
+        "timestamp_unix": captured_at.timestamp(),
+        "timestamp": captured_at.isoformat(),
+        "context": {
+            "n_merges": n_merges,
+            "processed_rows": processed_rows,
+            "latency_unit": "per_merge",
+            "throughput_unit": "input_rows_per_second",
+            "p95_method": "nearest_rank",
+        },
+    }
+
+
 @pytest.mark.parametrize("n_merges", [10, 50, 100])
 def test_delta_sequential_merge_scaling(
     tmp_path: Path, n_merges: int, request: pytest.FixtureRequest
@@ -155,6 +186,7 @@ def test_delta_sequential_merge_scaling(
             "Skipping N=100 on CI to prevent timeouts due to known issue #12042"
         )
 
+    t_setup_start = time.perf_counter()
     table_name = f"perf_sequential_{n_merges}"
     round_root = (
         tmp_path / f"seq_merge_{deterministic_uuid_from_callsite('perf_merge').hex[:8]}"
@@ -169,23 +201,39 @@ def test_delta_sequential_merge_scaling(
     overlap_ratio = 0.2
 
     results = []
+    merge_durations = []
     total_records_processed = 0
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    # 1. Setup cost phase
-    t_setup_start = time.perf_counter()
     start_rss = _get_process_rss_mb()
 
     t_setup_end = time.perf_counter()
     setup_time = t_setup_end - t_setup_start
 
+    def save_summary(status: str, **row_outcomes: int) -> None:
+        summary_data = {
+            "n_merges_target": n_merges,
+            "n_merges_completed": len(results),
+            "status": status,
+            "batch_size": batch_size,
+            "overlap_ratio": overlap_ratio,
+            "total_records_processed": total_records_processed,
+            "setup_time_s": round(setup_time, 4),
+            "platform": sys.platform,
+            "merges": results,
+            **row_outcomes,
+        }
+        suffix = "_incomplete" if status == "incomplete" else ""
+        summary_path = tmp_path / f"merge_scaling_N{n_merges}{suffix}.json"
+        with summary_path.open("w", encoding="utf-8") as stream:
+            json.dump(summary_data, stream, indent=2)
+
     try:
         for i in range(n_merges):
             start_idx = i * int(batch_size * (1 - overlap_ratio))
             batch = _generate_synthetic_batch(start_idx, batch_size, overlap_ratio)
-            total_records_processed += len(batch)
 
             t_start = time.perf_counter()
 
@@ -199,8 +247,10 @@ def test_delta_sequential_merge_scaling(
                 )
             )
             t_end = time.perf_counter()
+            total_records_processed += len(batch)
 
             merge_time = t_end - t_start
+            merge_durations.append(merge_time)
 
             log_stats = _get_file_stats(table_path / "_delta_log", "*")
             parquet_stats = _get_file_stats(table_path, "**/*.parquet")
@@ -214,6 +264,7 @@ def test_delta_sequential_merge_scaling(
                 {
                     "round": i + 1,
                     "merge_time_s": round(merge_time, 4),
+                    "merge_time_raw_s": merge_time,
                     "rss_mb": round(current_rss, 2),
                     "rss_delta_mb": round(current_rss - start_rss, 2),
                     "delta_log_files": log_stats["files"],
@@ -225,25 +276,14 @@ def test_delta_sequential_merge_scaling(
             )
 
             if merge_time > 60.0:
-                # Save incomplete results before failing
-                summary_data = {
-                    "n_merges_target": n_merges,
-                    "n_merges_completed": i + 1,
-                    "status": "incomplete",
-                    "batch_size": batch_size,
-                    "overlap_ratio": overlap_ratio,
-                    "total_records_processed": total_records_processed,
-                    "setup_time_s": round(setup_time, 4),
-                    "platform": sys.platform,
-                    "merges": results,
-                }
-                summary_path = tmp_path / f"merge_scaling_N{n_merges}_incomplete.json"
-                with summary_path.open("w", encoding="utf-8") as f:
-                    json.dump(summary_data, f, indent=2)
+                save_summary("incomplete")
                 pytest.fail(
                     f"Merge degraded severely: round {i + 1} took {merge_time:.2f}s"
                 )
 
+    except Exception:
+        save_summary("incomplete")
+        raise
     finally:
         loop.close()
 
@@ -265,23 +305,9 @@ def test_delta_sequential_merge_scaling(
         f"Expected at least {n_merges - 1} versions, got {dt.version()}"
     )
 
-    summary_path = tmp_path / f"merge_scaling_N{n_merges}.json"
-    summary_data = {
-        "n_merges_target": n_merges,
-        "n_merges_completed": n_merges,
-        "status": "complete",
-        "batch_size": batch_size,
-        "overlap_ratio": overlap_ratio,
-        "total_records_processed": total_records_processed,
-        "expected_final_rows": expected_rows,
-        "actual_final_rows": actual_rows,
-        "setup_time_s": round(setup_time, 4),
-        "platform": sys.platform,
-        "merges": results,
-    }
-
-    with summary_path.open("w", encoding="utf-8") as f:
-        json.dump(summary_data, f, indent=2)
+    save_summary(
+        "complete", expected_final_rows=expected_rows, actual_final_rows=actual_rows
+    )
 
     perf_out = request.config.getoption("--perf-obs-out", default=None)
     if perf_out:
@@ -291,15 +317,9 @@ def test_delta_sequential_merge_scaling(
         ):
             f.write(
                 json.dumps(
-                    {
-                        "test": f"test_delta_sequential_merge_scaling_N{n_merges}",
-                        "metric_type": "delta_merge_latency_total",
-                        "value": sum(r["merge_time_s"] for r in results),
-                        # Capture metadata uses real UTC; synthetic rows keep fixed time.
-                        "timestamp": SystemClock().now().isoformat(),
-                        "unit": "s",
-                        "context": {"n_merges": n_merges},
-                    }
+                    _build_observation(
+                        n_merges, merge_durations, total_records_processed
+                    )
                 )
                 + "\n"
             )
