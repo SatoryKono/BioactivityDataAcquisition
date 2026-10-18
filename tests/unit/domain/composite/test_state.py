@@ -382,11 +382,10 @@ class TestAllowedTransitions:
         allowed = CompositePipelineState.MERGING.allowed_transitions
         assert allowed == frozenset(
             {
-                    CompositePipelineState.COMPLETED,
+                CompositePipelineState.COMPLETED,
                 CompositePipelineState.FAILED,
             }
         )
-
 
 
 class TestMetricValue:

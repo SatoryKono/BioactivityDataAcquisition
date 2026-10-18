@@ -25,6 +25,7 @@ def _find_usage_in_directory(dir_path: Path, member_name: str) -> bool:
 
     return False
 
+
 @pytest.mark.architecture
 def test_no_dead_composite_pipeline_states():
     """All CompositePipelineState members MUST be used outside of domain/tests.
@@ -51,11 +52,15 @@ def test_no_dead_composite_pipeline_states():
             for f in domain_dir.rglob("*.py"):
                 if f.name == "state.py":
                     continue
-                if f"CompositePipelineState.{member_name}" in f.read_text(encoding="utf-8"):
+                if f"CompositePipelineState.{member_name}" in f.read_text(
+                    encoding="utf-8"
+                ):
                     is_used = True
                     break
 
         if not is_used:
             dead_members.append(member_name)
 
-    assert not dead_members, f"Found dead CompositePipelineState members with no application/domain usage: {dead_members}"
+    assert not dead_members, (
+        f"Found dead CompositePipelineState members with no application/domain usage: {dead_members}"
+    )
