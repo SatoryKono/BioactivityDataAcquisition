@@ -19,7 +19,7 @@ def test_benchmark_evidence_workflow_keeps_validator_and_main_gates_independent(
         step["name"]: step
         for step in workflow["jobs"]["performance-regression-gate"]["steps"]
     }
-    producer = steps["Run all performance benchmarks"]
+    producer = steps["Run pytest-benchmark cases"]
     validation = steps["Validate benchmark evidence"]
     assert producer["id"] == "benchmarks"
     assert "continue-on-error" not in producer
@@ -71,9 +71,12 @@ def test_nightly_caller_declares_dataset_and_loads_guard_before_benchmark():
         else next(iter(workflow["jobs"].values()))["steps"]
     )
     producer = next(step for step in steps if step.get("id") == "benchmarks")
-    assert (
-        producer["env"]["BIOETL_BENCHMARK_DATASET"] == "bioetl-synthetic-performance-v1"
+    assert "BIOETL_BENCHMARK_DATASET=bioetl-synthetic-benchmarks-v1" in producer["run"]
+    command = "\n".join(
+        line
+        for line in producer["run"].splitlines()
+        if not line.lstrip().startswith("#")
     )
-    assert producer["run"].index("-p tests.benchmarks.benchmark_vcs_guard") < producer[
-        "run"
-    ].index("-p benchmark")
+    assert command.index("-p tests.benchmarks.benchmark_vcs_guard") < command.index(
+        "-p benchmark"
+    )

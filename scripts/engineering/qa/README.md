@@ -276,7 +276,7 @@ The caller/guard from PR #12235 (source commit
 `797707e6c926f97f7701db1ca89cfb6eeed8d7e0`) is integrated in
 `tests.benchmarks.benchmark_vcs_guard` and loaded before `benchmark`.
 The caller explicitly declares `BIOETL_BENCHMARK_DATASET`; Performance Nightly
-uses `bioetl-synthetic-performance-v1` for its deterministic synthetic fixtures.
+uses `bioetl-synthetic-benchmarks-v1` for its deterministic synthetic fixtures.
 The guard emits this dataset and the actual local/GitHub execution environment
 as `bioetl_measurement`. A missing dataset fails closed. Unit schema fixtures
 verify the producer/validator contract without recording benchmark measurements.

@@ -128,12 +128,16 @@ def _resolve_gitdir(start: Path, *, allow_parent_search: bool) -> Path | None:
         if git_entry.is_dir():
             return git_entry
         if not git_entry.is_file():
+            if git_entry.is_symlink() or git_entry.exists():
+                return None
             continue
-        line = git_entry.read_text(encoding="utf-8").strip()
+        line = git_entry.read_text(encoding="utf-8").rstrip("\r\n")
         prefix = "gitdir:"
-        if not line.startswith(prefix):
+        if not line.startswith(prefix + " "):
             return None
         raw = line.split(":", 1)[1].strip()
+        if not raw or "\n" in raw or "\x00" in raw:
+            return None
         gitdir = Path(raw)
         if not gitdir.is_absolute():
             resolved = _safe_resolve(git_entry.parent / gitdir)
@@ -145,30 +149,33 @@ def _resolve_gitdir(start: Path, *, allow_parent_search: bool) -> Path | None:
 
 
 def _packed_ref(gitdir: Path, ref: str) -> str | None:
-    """Return the SHA recorded for a ref in packed-refs.
-
-    One malformed line makes the file unusable. Git rejects the whole file
-    instead of skipping that line and accepting a later entry.
-    """
+    """Return the SHA recorded for a ref in packed-refs."""
     packed = gitdir / "packed-refs"
-    if not packed.is_file():
+    if not packed.exists() and not packed.is_symlink():
         return None
-    found: str | None = None
+    found = None
+    names: set[str] = set()
+    can_peel = False
     for line in packed.read_text(encoding="utf-8").splitlines():
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
+        if line.startswith("#"):
             continue
-        if stripped.startswith("^"):
-            peeled = stripped[1:].strip().lower()
-            if _SHA_RE.fullmatch(peeled) is None:
-                return None
+        if line.startswith("^"):
+            if not can_peel or not _SHA_RE.fullmatch(line[1:].lower()):
+                raise _CorruptLooseRef
+            can_peel = False
             continue
-        sha, separator, name = stripped.partition(" ")
-        sha = sha.strip().lower()
-        if separator != " " or not name or _SHA_RE.fullmatch(sha) is None:
-            return None
-        if name == ref and found is None:
-            found = sha
+        sha, separator, name = line.partition(" ")
+        if (
+            not separator
+            or not _SHA_RE.fullmatch(sha.lower())
+            or not _valid_ref(name)
+            or name in names
+        ):
+            raise _CorruptLooseRef
+        names.add(name)
+        can_peel = True
+        if name == ref:
+            found = sha.lower()
     return found
 
 
@@ -176,69 +183,67 @@ class _CorruptLooseRef(Exception):
     """An existing loose ref is present but is not a SHA or symbolic ref."""
 
 
-class _InvalidCommonDir(Exception):
-    """A linked worktree commondir does not name a directory."""
+def _valid_ref(ref: str) -> bool:
+    """Accept canonical ref paths without Git-forbidden components."""
+    return (
+        ref.startswith("refs/")
+        and not any(
+            char.isspace() or ord(char) < 32 or ord(char) == 127 for char in ref
+        )
+        and not any(
+            token in ref for token in ("..", "@{", "\\", "~", "^", ":", "?", "*", "[")
+        )
+        and all(
+            part and not part.startswith(".") and not part.endswith((".", ".lock"))
+            for part in ref.split("/")
+        )
+    )
 
 
-def _sha_at(
-    gitdir: Path,
-    ref: str,
-    *,
-    depth: int = 0,
-    allow_packed: bool = True,
-) -> str | None:
-    """Read a loose ref.
-
-    packed-refs is used only when no loose entry exists. An existing entry that
-    cannot be read, including a broken or looping symlink, is corrupt. A
-    linked worktree gitdir does not consult its private packed-refs.
-    """
-    if depth > 2 or not ref or ref.startswith(("/", "\\")) or ".." in Path(ref).parts:
-        return None
-    ref_path = gitdir / ref
-    try:
-        ref_path.lstat()
-    except OSError:
-        if not allow_packed:
-            return None
-        return _packed_ref(gitdir, ref)
-    try:
-        value = ref_path.read_text(encoding="utf-8").strip()
-    except (OSError, RuntimeError, UnicodeError) as exc:
-        raise _CorruptLooseRef from exc
-    if value.startswith("ref:"):
-        target = value.split(":", 1)[1].strip()
-        if not target or target == ref:
-            raise _CorruptLooseRef
-        return _sha_at(gitdir, target, depth=depth + 1, allow_packed=allow_packed)
-    lowered = value.lower()
-    if _SHA_RE.fullmatch(lowered):
-        return lowered
-    raise _CorruptLooseRef
+def _sha_at(gitdir: Path, ref: str, *, depth: int = 0) -> str | None:
+    """Read loose refs, refusing damaged entries before consulting packed refs."""
+    if depth > 2 or not _valid_ref(ref):
+        raise _CorruptLooseRef
+    ref_path = gitdir
+    for part in ref.split("/"):
+        ref_path = ref_path / part
+        if ref_path.is_symlink():
+            # A dangling or cyclic loose entry must never expose a stale packed ref.
+            ref_path.resolve(strict=True)
+    if ref_path.exists() or ref_path.is_symlink():
+        value = ref_path.read_text(encoding="utf-8").rstrip("\r\n")
+        if value.startswith("ref: "):
+            target = value[5:]
+            if target == ref:
+                raise _CorruptLooseRef
+            return _sha_at(gitdir, target, depth=depth + 1)
+        lowered = value.lower()
+        if _SHA_RE.fullmatch(lowered):
+            return lowered
+        raise _CorruptLooseRef
+    return _packed_ref(gitdir, ref)
 
 
 def _common_gitdir(gitdir: Path) -> Path | None:
-    """Resolve a linked worktree commondir.
-
-    No commondir file means this gitdir is not a linked worktree. An existing
-    file that cannot be read, or whose path is not a directory, is invalid.
-    """
+    """Resolve the commondir file of a linked worktree git directory."""
     common_file = gitdir / "commondir"
-    try:
-        common_file.lstat()
-    except OSError:
+    if not common_file.exists() and not common_file.is_symlink():
+        backlink = gitdir / "gitdir"
+        if backlink.exists() or backlink.is_symlink():
+            raise _CorruptLooseRef
         return None
-    try:
-        raw = common_file.read_text(encoding="utf-8").strip()
-    except (OSError, RuntimeError, UnicodeError) as exc:
-        raise _InvalidCommonDir from exc
-    if not raw:
-        raise _InvalidCommonDir
+    raw = common_file.read_text(encoding="utf-8").strip()
+    if not raw or "\n" in raw or "\x00" in raw:
+        raise _CorruptLooseRef
     common = Path(raw)
-    resolved = _safe_resolve(common if common.is_absolute() else gitdir / common)
-    if resolved is None or not resolved.is_dir():
-        raise _InvalidCommonDir
-    return resolved
+    if not common.is_absolute():
+        resolved = _safe_resolve(gitdir / common)
+        if resolved is None:
+            raise _CorruptLooseRef
+        common = resolved
+    if not common.is_dir():
+        raise _CorruptLooseRef
+    return common
 
 
 def read_source_revision(
@@ -257,20 +262,22 @@ def read_source_revision(
         gitdir = _resolve_gitdir(root, allow_parent_search=allow_parent_search)
         if gitdir is None or not (gitdir / "HEAD").is_file():
             return SourceRevision("unknown", "blocked", "(unknown)")
-        head_text = (gitdir / "HEAD").read_text(encoding="utf-8").strip()
+        head_text = (gitdir / "HEAD").read_text(encoding="utf-8").rstrip("\r\n")
         common = _common_gitdir(gitdir)
-        if head_text.startswith("ref:"):
-            ref = head_text.split(":", 1)[1].strip()
-            sha = _sha_at(gitdir, ref, allow_packed=common is None)
-            if sha is None and common is not None:
-                sha = _sha_at(common, ref)
+        if head_text.startswith("ref: "):
+            ref = head_text[5:]
+            private = ref.startswith(
+                ("refs/bisect/", "refs/worktree/", "refs/rewritten/")
+            )
+            directory = gitdir if private or common is None else common
+            sha = _sha_at(directory, ref)
             if sha is not None:
                 return SourceRevision(sha, "gitdir_head_file", ref)
             return SourceRevision("unknown", "blocked", ref or "(unknown)")
         sha = head_text.lower()
         if _SHA_RE.fullmatch(sha):
             return SourceRevision(sha, "gitdir_head_file", "(detached head)")
-    except (OSError, RuntimeError, UnicodeError, _CorruptLooseRef, _InvalidCommonDir):
+    except (OSError, RuntimeError, UnicodeError, _CorruptLooseRef):
         return SourceRevision("unknown", "blocked", "(unknown)")
     return SourceRevision("unknown", "blocked", "(unknown)")
 

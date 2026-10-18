@@ -28,14 +28,8 @@ jobs:
       # Suites under tests/benchmarks and tests/performance are deterministic
       # fixtures. Their dataset id is synthetic. The reducer compares it and
       # may write a proposed candidate; CI does not adopt the baseline.
-      # Guard from PR #12235 is integrated here with explicit fixture provenance.
-      - name: Run all performance benchmarks
-        id: benchmarks
-        env:
-          BIOETL_BENCHMARK_CALLER: performance-nightly
-          BIOETL_BENCHMARK_DATASET: bioetl-synthetic-performance-v1
+      - name: Clear stale performance evidence
         run: |
-          mkdir -p reports/performance
           rm -f reports/performance/benchmark-measurements.json \
             reports/performance/benchmark-validation-manifest.json \
             reports/performance/benchmark-manifest.json \
@@ -43,15 +37,38 @@ jobs:
             reports/performance/hotspot-observations.jsonl \
             reports/performance/hotspot-degradation.json \
             reports/performance/hotspot-degradation.md
-          uv run --frozen --no-build pytest tests/performance/ tests/benchmarks/ \
+
+      - name: Run hotspot performance tests
+        run: |
+          mkdir -p reports/performance
+          uv run --frozen --no-build pytest tests/performance/ \
             -m "benchmark or performance" \
             -p no:xdist \
             -v --tb=short \
             --perf-obs-out reports/performance/hotspot-observations.jsonl \
-            --junitxml=reports/performance/hotspot-budgets.xml \
+            --junitxml=reports/performance/hotspot-budgets.xml
+
+      - name: Run pytest-benchmark cases
+        id: benchmarks
+        if: ${{ always() && !cancelled() }}
+        run: |
+          mkdir -p reports/performance
+          # addopts still injects -p no:benchmark. Load the guard first, then
+          # -p benchmark unblocks the plugin. The env label is run provenance,
+          # not the plugin switch.
+          BIOETL_BENCHMARK_CALLER=performance-nightly \
+          BIOETL_BENCHMARK_DATASET=bioetl-synthetic-benchmarks-v1 \
+          uv run --frozen --no-build pytest tests/benchmarks/ \
+            -m benchmark \
             -p tests.benchmarks.benchmark_vcs_guard \
             -p benchmark \
-            --benchmark-json reports/performance/benchmark-measurements.json
+            -p no:xdist \
+            -v --tb=short \
+            --benchmark-json=reports/performance/benchmark-measurements.json
+
+      - name: Require pytest-benchmark measurement JSON
+        if: ${{ always() && !cancelled() }}
+        run: |
           uv run --frozen --no-build python -m tests.benchmarks.benchmark_vcs_guard \
             --validate-measurement-json reports/performance/benchmark-measurements.json
 
