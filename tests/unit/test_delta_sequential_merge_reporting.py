@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -132,6 +133,39 @@ def test_slow_merge_keeps_existing_failure_guard(
     report = json.loads((tmp_path / "merge_scaling_N1_incomplete.json").read_text())
     assert report["n_merges_completed"] == 1
     assert report["merges"][0]["merge_time_s"] == 61.0
+    assert not output.exists()
+
+
+@pytest.mark.parametrize(
+    ("actual_rows", "version", "message"),
+    [(499, 0, "Expected 500 rows, got 499"), (500, -1, "Expected at least 0 versions")],
+)
+def test_final_validation_failure_preserves_completed_evidence(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    actual_rows: int,
+    version: int,
+    message: str,
+) -> None:
+    writer = SimpleNamespace(write_silver=AsyncMock())
+    monkeypatch.setattr(harness, "_create_silver_writer", lambda path: writer)
+    monkeypatch.setattr(
+        "deltalake.DeltaTable",
+        lambda *args: SimpleNamespace(
+            version=lambda: version,
+            to_pyarrow_dataset=lambda: SimpleNamespace(count_rows=lambda: actual_rows),
+        ),
+    )
+    output = tmp_path / "observations.jsonl"
+    with pytest.raises(AssertionError, match=message):
+        harness.test_delta_sequential_merge_scaling(tmp_path, 1, _request(output))
+    writer.write_silver.assert_awaited_once()
+    report = json.loads((tmp_path / "merge_scaling_N1_incomplete.json").read_text())
+    assert report["status"] == "incomplete"
+    assert report["n_merges_completed"] == len(report["merges"]) == 1
+    assert report["total_records_processed"] == 500
+    assert report["merges"][0]["merge_time_raw_s"] > 0
+    assert not (tmp_path / "merge_scaling_N1.json").exists()
     assert not output.exists()
 
 

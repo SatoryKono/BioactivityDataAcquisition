@@ -30,6 +30,8 @@
 Measures Delta Lake write throughput with merge/append operations.
 """
 
+from __future__ import annotations
+
 import asyncio
 import os
 import sys
@@ -91,7 +93,7 @@ class FakeLogger:
     def error(self, _msg: str, **_kwargs: Any) -> None:
         return None
 
-    def bind(self, **_kwargs: Any) -> "FakeLogger":
+    def bind(self, **_kwargs: Any) -> FakeLogger:
         return self
 
 

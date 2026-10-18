@@ -1,5 +1,7 @@
 """Shared activity schema for Delta write performance measurements."""
 
+from __future__ import annotations
+
 import pyarrow as pa
 
 

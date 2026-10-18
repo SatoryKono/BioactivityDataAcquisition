@@ -290,20 +290,24 @@ def test_delta_sequential_merge_scaling(
     # Smoke regression check for row outcomes
     from deltalake import DeltaTable
 
-    dt = DeltaTable(str(table_path))
-    # actual total rows = N * batch_size - overlaps
-    # total overlaps = (N - 1) * overlap_ratio * batch_size
-    expected_rows = n_merges * batch_size - (n_merges - 1) * int(
-        batch_size * overlap_ratio
-    )
-    actual_rows = dt.to_pyarrow_dataset().count_rows()
+    try:
+        dt = DeltaTable(str(table_path))
+        # actual total rows = N * batch_size - overlaps
+        # total overlaps = (N - 1) * overlap_ratio * batch_size
+        expected_rows = n_merges * batch_size - (n_merges - 1) * int(
+            batch_size * overlap_ratio
+        )
+        actual_rows = dt.to_pyarrow_dataset().count_rows()
 
-    assert actual_rows == expected_rows, (
-        f"Expected {expected_rows} rows, got {actual_rows}"
-    )
-    assert dt.version() >= n_merges - 1, (
-        f"Expected at least {n_merges - 1} versions, got {dt.version()}"
-    )
+        assert actual_rows == expected_rows, (
+            f"Expected {expected_rows} rows, got {actual_rows}"
+        )
+        assert dt.version() >= n_merges - 1, (
+            f"Expected at least {n_merges - 1} versions, got {dt.version()}"
+        )
+    except Exception:
+        save_summary("incomplete")
+        raise
 
     save_summary(
         "complete", expected_final_rows=expected_rows, actual_final_rows=actual_rows

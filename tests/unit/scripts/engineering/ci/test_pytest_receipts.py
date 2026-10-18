@@ -83,7 +83,13 @@ def _pytest(
         "--receipt-attempt=1",
         "--receipt-pass=direct",
         f"--receipt-repo-root={repo_root or REPO}",
-        *(["-p", "xdist"] if "-n" in extra or "--dist" in extra else []),
+        *(
+            ["-p", "xdist"]
+            if any(
+                arg in {"-n", "--dist"} or arg.startswith("--dist=") for arg in extra
+            )
+            else []
+        ),
         *extra,
     ]
     return subprocess.run(
@@ -311,13 +317,18 @@ def test_xdist_workers_do_not_double_count(receipts: Path, tmp_path: Path) -> No
         assert collection["selected"] == len(item["results"])
 
 
+@pytest.mark.parametrize("dist_args", [("--dist", "load"), ("--dist=load",)])
 def test_dist_without_workers_still_writes_receipt(
-    receipts: Path, tmp_path: Path
+    receipts: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    dist_args: tuple[str, ...],
 ) -> None:
     pytest.importorskip("xdist")
+    monkeypatch.setenv("PYTEST_DISABLE_PLUGIN_AUTOLOAD", "1")
     test_file = tmp_path / "test_dist_flag.py"
     _write(test_file, "def test_one():\n    assert True\n")
-    completed = _pytest(test_file, receipts, "--dist", "load")
+    completed = _pytest(test_file, receipts, *dist_args)
     assert completed.returncode == 0, completed.stderr
     payload = _load(receipts)
     assert payload["worker"] == "master"
