@@ -2,10 +2,10 @@
   "schema_version": "1.0",
   "generated_at": "2026-10-18T12:03:26.445185+00:00",
   "summary": {
-    "total_scripts": 648,
+    "total_scripts": 649,
     "status_counts": {
       "active": 334,
-      "supporting": 314
+      "supporting": 315
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -13,9 +13,9 @@
       "ci": 71,
       "docs": 282,
       "other": 16,
-      "scripts": 545,
+      "scripts": 546,
       "skills": 13,
-      "tests": 467
+      "tests": 468
     }
   },
   "scripts": [
@@ -2708,7 +2708,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1864,
+          "line": 1882,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check >> \"$log\" 2>&1"
         },
@@ -9781,7 +9781,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 383,
+          "line": 384,
           "source_group": "ci",
           "text": "uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results affected-tests \\"
         }
@@ -10152,7 +10152,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1754,
+          "line": 1772,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.junit_duration_summary"
         },
@@ -10213,7 +10213,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/test_telemetry_provenance.py",
-          "line": 471,
+          "line": 506,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.local_test_telemetry import ("
         },
@@ -10329,7 +10329,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 757,
+          "line": 758,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10452,7 +10452,7 @@
         },
         {
           "path": "scripts/engineering/ci/run_pytest_resilient.py",
-          "line": 134,
+          "line": 276,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.pytest_abort_diagnostic_adapter import ("
         },
@@ -10475,6 +10475,37 @@
       "next_step": "Retain as the isolated pytest abort supervisor imported by run_pytest_resilient. The diagnostic manifest is not a JUnit completeness artifact. Keep it supporting so active_script_count_max does not grow."
     },
     {
+      "path": "scripts/engineering/ci/pytest_receipts.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/engineering/ci/run_pytest_resilient.py",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.ci.pytest_receipts import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_pytest_receipts.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pytest_receipts import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_pytest_receipts.py",
+          "line": 952,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pytest_receipts import write_runner_terminal_receipt"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-01",
+      "next_step": "Retain as the pytest receipt plugin imported by run_pytest_resilient.py. It is not a CLI entrypoint; keep it supporting and route receipt capture through that runner."
+    },
+    {
       "path": "scripts/engineering/ci/quality_integral_gate.py",
       "type": "py",
       "status": "active",
@@ -10483,7 +10514,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1948,
+          "line": 1966,
           "source_group": "ci",
           "text": "\"python -m scripts.engineering.ci.quality_integral_gate\" \\"
         },
@@ -10674,11 +10705,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 17,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1391,
+          "line": 1396,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -10731,7 +10762,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
@@ -10755,29 +10786,29 @@
           "path": "tests/architecture/test_test_telemetry_baseline.py",
           "line": 22,
           "source_group": "tests",
+          "text": "from scripts.engineering.ci import test_telemetry_provenance as telemetry_provenance"
+        },
+        {
+          "path": "tests/architecture/test_test_telemetry_baseline.py",
+          "line": 23,
+          "source_group": "tests",
           "text": "from scripts.engineering.ci.test_telemetry_provenance import ("
         },
         {
           "path": "tests/architecture/test_test_telemetry_governance.py",
           "line": 27,
           "source_group": "tests",
+          "text": "from scripts.engineering.ci import test_telemetry_provenance as telemetry_provenance"
+        },
+        {
+          "path": "tests/architecture/test_test_telemetry_governance.py",
+          "line": 28,
+          "source_group": "tests",
           "text": "from scripts.engineering.ci.test_telemetry_provenance import source_commit_is_reachable"
         },
         {
           "path": "tests/unit/scripts/ci/test_local_test_telemetry.py",
           "line": 18,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci import test_telemetry_provenance as provenance"
-        },
-        {
-          "path": "tests/unit/scripts/ci/test_test_telemetry_provenance.py",
-          "line": 14,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci.test_telemetry_provenance import validate_squash_bridge"
-        },
-        {
-          "path": "tests/unit/scripts/ci/test_test_telemetry_provenance.py",
-          "line": 15,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import test_telemetry_provenance as provenance"
         }
@@ -11526,7 +11557,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1940,
+          "line": 1958,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -13315,7 +13346,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 359,
+          "line": 360,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -16831,7 +16862,7 @@
         },
         {
           "path": "scripts/engineering/ci/test_telemetry_provenance.py",
-          "line": 478,
+          "line": 513,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_module_coverage_inventory import ("
         },
@@ -18421,7 +18452,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 585,
+          "line": 586,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },

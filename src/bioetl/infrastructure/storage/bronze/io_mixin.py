@@ -190,6 +190,8 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
         entity: str,
         date_str: str,
         batch_id: BatchID,
+        *,
+        locked_root: Path | None = None,
     ) -> None:
         """
         Write an uncompressed JSON Lines copy of the records to the bronze path.
@@ -226,7 +228,7 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
 
             jsonl_content = b"".join(records)
 
-            json_full_path = self.base_path / json_relative_path
+            json_full_path = (locked_root or self.base_path) / json_relative_path
             write_bytes_if_absent_or_same(
                 json_full_path,
                 jsonl_content,

@@ -19,6 +19,7 @@ import subprocess
 import pytest
 import yaml
 
+from scripts.engineering.ci import test_telemetry_provenance as telemetry_provenance
 from scripts.engineering.ci.test_telemetry_provenance import (
     capture_metrics_are_bound,
     source_commit_is_reachable,
@@ -67,7 +68,9 @@ def test_test_telemetry_baseline_contract_is_present_and_scoped() -> None:
             head = subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
             ).strip()
-            assert source_commit_is_reachable(payload, ROOT, head)
+            assert source_commit_is_reachable(payload, ROOT, head), (
+                telemetry_provenance.LAST_REACHABILITY_REASON
+            )
         assert provenance["required_shards"] == [shard.name for shard in SHARDS]
         assert [row["name"] for row in provenance["shards"]] == provenance[
             "required_shards"
@@ -82,7 +85,8 @@ def test_test_telemetry_baseline_contract_is_present_and_scoped() -> None:
     else:
         assert source_event in {"pull_request", "push", "workflow_dispatch", "schedule"}
         if source_branch != "main":
-            assert source_event == "pull_request"
+            # A manually dispatched Nightly run may measure the PR branch.
+            assert source_event in {"pull_request", "workflow_dispatch"}
         assert source_run_url == (
             "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/"
             f"{source_run_id}"
