@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import logging
 import os
 import sys
 import time
@@ -49,7 +48,7 @@ class FakeLogger:
     def debug(self, _msg: str, **_kwargs: Any) -> None: pass
     def warning(self, _msg: str, **_kwargs: Any) -> None: pass
     def error(self, _msg: str, **_kwargs: Any) -> None: pass
-    def bind(self, **_kwargs: Any) -> "FakeLogger": return self
+    def bind(self, **_kwargs: Any) -> FakeLogger: return self
 
 def _create_activity_schema() -> pa.Schema:
     return pa.schema([
@@ -81,10 +80,7 @@ def _generate_synthetic_batch(
     overlap_count = int(batch_size * overlap_ratio)
 
     for i in range(batch_size):
-        if i < overlap_count and start_idx > 0:
-            idx = max(0, start_idx - overlap_count + i)
-        else:
-            idx = start_idx + i
+        idx = max(0, start_idx - overlap_count + i) if i < overlap_count and start_idx > 0 else start_idx + i
 
         record_id = f"ACT_{idx:08d}"
 
@@ -200,10 +196,10 @@ def test_delta_sequential_merge_scaling(tmp_path: Path, n_merges: int, request: 
 
             t_start = time.perf_counter()
 
-            async def run_merge():
+            async def run_merge(batch_records=batch):
                 return await writer.write_silver(
                     table_name=table_name,
-                    records=batch,
+                    records=batch_records,
                     schema=schema,
                     primary_keys=["id"],
                     mode=SilverWriteMode.MERGE,
@@ -247,7 +243,7 @@ def test_delta_sequential_merge_scaling(tmp_path: Path, n_merges: int, request: 
                     "merges": results,
                 }
                 summary_path = tmp_path / f"merge_scaling_N{n_merges}_incomplete.json"
-                with open(summary_path, "w") as f:
+                with summary_path.open("w") as f:
                     json.dump(summary_data, f, indent=2)
                 pytest.fail(f"Merge degraded severely: round {i+1} took {merge_time:.2f}s")
 
@@ -280,18 +276,17 @@ def test_delta_sequential_merge_scaling(tmp_path: Path, n_merges: int, request: 
         "merges": results,
     }
 
-    with open(summary_path, "w") as f:
+    with summary_path.open("w") as f:
         json.dump(summary_data, f, indent=2)
 
     perf_out = request.config.getoption("--perf-obs-out", default=None)
     if perf_out:
-        with FileLock(f"{perf_out}.lock"):
-            with open(perf_out, "a", encoding="utf-8") as f:
-                f.write(json.dumps({
-                    "test": f"test_delta_sequential_merge_scaling_N{n_merges}",
-                    "metric_type": "delta_merge_latency_total",
-                    "value": sum(r["merge_time_s"] for r in results),
-                    "timestamp": datetime.now(UTC).isoformat(),
-                    "unit": "s",
-                    "context": {"n_merges": n_merges}
-                }) + "\n")
+        with FileLock(f"{perf_out}.lock"), Path(perf_out).open("a", encoding="utf-8") as f:
+            f.write(json.dumps({
+                "test": f"test_delta_sequential_merge_scaling_N{n_merges}",
+                "metric_type": "delta_merge_latency_total",
+                "value": sum(r["merge_time_s"] for r in results),
+                "timestamp": datetime.now(UTC).isoformat(),
+                "unit": "s",
+                "context": {"n_merges": n_merges}
+            }) + "\n")
