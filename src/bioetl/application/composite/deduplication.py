@@ -130,8 +130,6 @@ class EnricherDeduplicatorService:
         Performs a single group_by with all column aggregations combined,
         instead of N separate group_by operations (one per column).
         """
-        import polars as pl
-
         if not non_key_columns:
             return [], []
 
@@ -181,8 +179,6 @@ class EnricherDeduplicatorService:
         columns_without_conflicts: list[str],
     ) -> list[pl.Expr]:
         """Build aggregation expressions for all columns."""
-        import polars as pl
-
         agg_exprs: list[pl.Expr] = []
         for col in columns_without_conflicts:
             agg_exprs.append(pl.col(col).first().alias(col))
@@ -198,8 +194,6 @@ class EnricherDeduplicatorService:
         Sorting happens on the stringified cell values before joining, ensuring
         deterministic multiset concatenation.
         """
-        import polars as pl
-
         as_string = self._to_string_expr(column, dtype)
         return (
             pl.when(pl.col(column).is_null())
@@ -213,8 +207,6 @@ class EnricherDeduplicatorService:
 
     def _to_string_expr(self, column: str, dtype: pl.DataType) -> pl.Expr:
         """Convert column to string expression."""
-        import polars as pl
-
         col_expr = pl.col(column)
 
         if isinstance(dtype, (pl.List, pl.Struct)):
