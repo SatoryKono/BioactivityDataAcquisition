@@ -694,37 +694,6 @@ def test_intermediate_rerun_keeps_the_final_attempt(tmp_path: Path) -> None:
     assert verify_directory(tmp_path, executed_passes=["parallel"]) == 0
 
 
-def test_duplicate_copies_finish_on_different_retries(tmp_path: Path) -> None:
-    identity = _identity(role="controller", worker_id="controller")
-    nodeid = "test_sample.py::test_a"
-
-    def attempt(when: str, classification: str, retry_index: int) -> dict[str, Any]:
-        event = _outcome(identity, nodeid, when, classification)
-        event["retry_index"] = retry_index
-        return event
-
-    events = _finalized(
-        [
-            _start(identity),
-            _collected(identity, [nodeid, nodeid]),
-            *_phases(identity, nodeid, "passed", retry_index=0),
-            attempt("setup", "passed", 0),
-            attempt("call", "rerun", 0),
-            attempt("teardown", "passed", 0),
-            *_phases(identity, nodeid, "passed", retry_index=1),
-            {"event": "session_finish", "identity": identity, "exitstatus": 0},
-        ]
-    )
-    _write_receipt(tmp_path, events)
-    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
-    assert "unexplained_selected_tests" not in verdict["reasons"]
-    assert verdict["status"] == "complete", verdict["reasons"]
-    assert verdict["selected_count"] == 2
-    assert verdict["tests_passed"] is True
-    assert sorted(item["retry_index"] for item in verdict["terminals"]) == [0, 1]
-    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 0
-
-
 def test_setup_error_copy_does_not_inherit_the_other_call(tmp_path: Path) -> None:
     identity = _identity(role="controller", worker_id="controller")
     nodeid = "test_sample.py::test_a"
@@ -763,3 +732,187 @@ def test_standalone_unspecified_pass_is_authoritative(tmp_path: Path) -> None:
     assert verdict["status"] == "complete"
     assert verdict["tests_passed"] is True
     assert verify_directory(journal) == 0
+
+
+@pytest.mark.parametrize("final_retries", [(0, 1), (1, 0), (1, 2), (2, 1)])
+@pytest.mark.parametrize("damaged", [False, True])
+def test_duplicate_occurrences_keep_their_own_final_retry(
+    tmp_path: Path, final_retries: tuple[int, int], damaged: bool
+) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_duplicate"
+    events = [_start(identity), _collected(identity, [nodeid, nodeid])]
+    for occurrence, final_retry in enumerate(final_retries):
+        for retry in range(final_retry + 1):
+            classification = "rerun" if retry < final_retry else "passed"
+            phases = _phases(identity, nodeid, classification, retry_index=retry)
+            if damaged and occurrence == 0 and retry == final_retry:
+                phases = phases[:-1]
+            events.extend(phases)
+    events.append({"event": "session_finish", "identity": identity, "exitstatus": 0})
+    _write_receipt(tmp_path, _finalized(events))
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == ("incomplete" if damaged else "complete")
+    assert verdict["tests_passed"] is (None if damaged else True)
+    if not damaged:
+        assert sorted(row["retry_index"] for row in verdict["terminals"]) == sorted(
+            final_retries
+        )
+        assert sorted(row["attempt_count"] for row in verdict["terminals"]) == sorted(
+            retry + 1 for retry in final_retries
+        )
+    else:
+        assert "missing_teardown" in verdict["reasons"]
+
+
+@pytest.mark.parametrize("damage", ["unfinished_rerun", "retry_gap", "extra_copy"])
+def test_duplicate_retry_damage_cannot_claim_completeness(
+    tmp_path: Path, damage: str
+) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_duplicate"
+    events = [
+        _start(identity),
+        _collected(identity, [nodeid, nodeid]),
+        *_phases(identity, nodeid, "passed"),
+        *_phases(identity, nodeid, "rerun"),
+    ]
+    retry = 2 if damage == "retry_gap" else 1
+    final = "rerun" if damage == "unfinished_rerun" else "passed"
+    events.extend(_phases(identity, nodeid, final, retry_index=retry))
+    if damage == "extra_copy":
+        events.extend(_phases(identity, nodeid, "passed"))
+    events.append({"event": "session_finish", "identity": identity, "exitstatus": 0})
+    _write_receipt(tmp_path, _finalized(events))
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] != "complete"
+    assert verdict["tests_passed"] is None
+
+
+def test_worker_duplicate_retries_preserve_failed_occurrences(tmp_path: Path) -> None:
+    controller = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_duplicate"
+    _write_receipt(
+        tmp_path,
+        _finalized(
+            [
+                _start(controller),
+                _collected(controller, [nodeid, nodeid]),
+                {"event": "session_finish", "identity": controller, "exitstatus": 1},
+            ]
+        ),
+        name="receipt_controller.jsonl",
+    )
+    for index, retry in enumerate((0, 1)):
+        worker = _identity(role="worker", worker_id=f"gw{index}")
+        events = [_start(worker), _collected(worker, [nodeid, nodeid])]
+        if retry:
+            events.extend(_phases(worker, nodeid, "rerun"))
+        phases = _phases(
+            worker, nodeid, "failed" if index == 0 else "passed", retry_index=retry
+        )
+        events.extend(phases)
+        events.append({"event": "session_finish", "identity": worker, "exitstatus": 1})
+        _write_receipt(
+            tmp_path, _finalized(events), name=f"receipt_worker{index}.jsonl"
+        )
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert verdict["tests_passed"] is False
+    assert {(row["worker_id"], row["retry_index"]) for row in verdict["terminals"]} == {
+        ("gw0", 0),
+        ("gw1", 1),
+    }
+
+
+@pytest.mark.parametrize("fails", [False, True])
+def test_runner_preserves_both_receipt_producers(tmp_path: Path, fails: bool) -> None:
+    test_file = tmp_path / "test_both.py"
+    test_file.write_text(
+        "import os\ndef test_both():\n"
+        "    assert os.environ['BIOETL_MERGE_ENV'] == 'kept'\n"
+        f"    assert {not fails!r}\n",
+        encoding="utf-8",
+    )
+    journal = tmp_path / "journal"
+    receipts = tmp_path / "receipts"
+    env = {
+        **os.environ,
+        "BIOETL_MERGE_ENV": "kept",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+    }
+    env.pop("EXPECTED_CHECKOUT_SHA", None)
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(_ROOT / "scripts/engineering/ci/run_pytest_resilient.py"),
+            "--target",
+            str(test_file),
+            "--reports-dir",
+            str(tmp_path / "reports"),
+            "--journal-dir",
+            str(journal),
+            "--receipt-dir",
+            str(receipts),
+            "--receipt-run-id",
+            "combined",
+            "--receipt-attempt",
+            "1",
+            "--parallel-marker",
+            "not slow",
+            "--parallel-addopts",
+            "-q --noconftest -o addopts= -p no:cacheprovider",
+            "--parallel-timeout-seconds",
+            "0",
+            "--no-fallback",
+            "--skip-serial-pass",
+        ],
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=45,
+    )
+    assert result.returncode == int(fails), result.stdout + result.stderr
+    verdict = json.loads((journal / "journal-verdict.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "complete"
+    assert verdict["tests_passed"] is (not fails)
+    payload = json.loads(
+        (receipts / "combined/1/parallel/master/receipt.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert payload["completeness"] == "complete"
+    assert payload["exit_code"] == int(fails)
+
+
+def test_duplicate_copies_finish_on_different_retries(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+
+    def attempt(when: str, classification: str, retry_index: int) -> dict[str, Any]:
+        event = _outcome(identity, nodeid, when, classification)
+        event["retry_index"] = retry_index
+        return event
+
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid, nodeid]),
+            *_phases(identity, nodeid, "passed", retry_index=0),
+            attempt("setup", "passed", 0),
+            attempt("call", "rerun", 0),
+            attempt("teardown", "passed", 0),
+            *_phases(identity, nodeid, "passed", retry_index=1),
+            {"event": "session_finish", "identity": identity, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert "unexplained_selected_tests" not in verdict["reasons"]
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert verdict["selected_count"] == 2
+    assert verdict["tests_passed"] is True
+    assert sorted(item["retry_index"] for item in verdict["terminals"]) == [0, 1]
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 0

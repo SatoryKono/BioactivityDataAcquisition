@@ -3,7 +3,9 @@ export default {
   ignores: [
     (message) => {
       const head = (message.trimStart().split(/\r?\n/, 1)[0] ?? '');
-      return /^merge\b/i.test(head);
+      // Automated conflict resolutions use this counted subject instead of "Merge".
+      return /^merge\b/i.test(head) ||
+        /^Resolve merge conflicts in [1-9]\d* file\(s\)$/.test(head);
     },
     // CodeRabbit's generated conflict-resolution message includes these trailers.
     (message) =>
