@@ -48,8 +48,8 @@ class TestCliQuarantineInspect:
         assert result.exit_code == 0
         assert "--pipeline" in result.output
         assert "--limit" in result.output
-        assert "--silver-filter-only" in result.output
-        assert "Legacy alias" in result.output
+        assert "--silver-filter-only" not in result.output
+        assert "Legacy alias" not in result.output
         assert "FILTERED_OUT_SILVER" in result.output
         assert "not Gold" in result.output
         assert "contract/semantic rejects" in result.output
@@ -251,7 +251,8 @@ class TestCliQuarantineInspect:
                     "inspect",
                     "--pipeline",
                     "chembl_activity",
-                    "--silver-filter-only",
+                    "--error-code",
+                    "FILTERED_OUT_SILVER",
                 ],
             )
 
