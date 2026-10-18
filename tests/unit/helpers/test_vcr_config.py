@@ -449,3 +449,35 @@ def test_sensitive_query_fields_are_unconditionally_removed(key: str) -> None:
     )
     sanitized = request_hook(request)
     assert parse_qsl(urlsplit(sanitized.uri).query) == [("term", "protein")]
+
+def test_response_sanitizer_preserves_protocol_and_strips_secrets_case_insensitive():
+    """Verify that protocol headers are preserved while secrets are stripped case-insensitively."""
+    hook = cast(Callable[[Any], Any], build_base_vcr_config()["before_record_response"])
+    response = {
+        "status": {"code": 429},
+        "headers": {
+            "Set-Cookie2": ["secret"],
+            "NcBi-SId": ["secret"],
+            "NCBI-PHID": ["secret"],
+            "Retry-After": ["120"],
+            "X-RateLimit-Reset": ["1700000000"],
+            "Date": ["Mon, 01 Jan 2024 00:00:00 GMT"],
+            "Expires": ["Mon, 01 Jan 2024 00:00:00 GMT"],
+            "x-throttling-control": ["something"],
+            "x-chembl-retrieval-time": ["0.1s"]
+        },
+        "body": {"string": b"{}"},
+    }
+
+    sanitized = hook(response)
+    headers = sanitized["headers"]
+
+    assert "Set-Cookie2" not in headers
+    assert "NcBi-SId" not in headers
+    assert "NCBI-PHID" not in headers
+    assert headers["Retry-After"] == ["120"]
+    assert headers["X-RateLimit-Reset"] == ["1700000000"]
+    assert headers["Date"] == ["Mon, 01 Jan 2024 00:00:00 GMT"]
+    assert headers["Expires"] == ["Mon, 01 Jan 2024 00:00:00 GMT"]
+    assert headers["x-throttling-control"] == ["something"]
+    assert headers["x-chembl-retrieval-time"] == ["0.1s"]

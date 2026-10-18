@@ -421,6 +421,46 @@ class TestUnifiedHTTPClientRequestMethods:
         assert mock_circuit_breaker.call.call_count == 2
 
 
+    @pytest.mark.asyncio
+    async def test_unified_http_client_outgoing_transport_headers(
+        self, mock_rate_limiter
+    ):
+        """Regression test for actual outgoing request headers on transport boundary."""
+        from unittest.mock import AsyncMock
+        mock_cb = AsyncMock()
+        async def _call_cb(req_coro, *args, **kwargs):
+            return await req_coro()
+        mock_cb.call.side_effect = _call_cb
+
+        client = UnifiedHTTPClient(
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_cb,
+            user_agent="BioETL/1.0",
+            contact_email="test@example.com",
+            run_id="run-777",
+            timeout=5.0,
+            provider="test",
+        )
+
+        transport_requests = []
+        async def mock_handler(request: httpx.Request):
+            transport_requests.append(request)
+            return httpx.Response(200, json={"status": "ok"})
+
+        mock_transport = httpx.MockTransport(mock_handler)
+
+        async with client:
+            client._get_client()._transport = mock_transport
+            await client.get("https://example.com/test")
+
+        assert len(transport_requests) == 1
+        req = transport_requests[0]
+
+        assert req.headers["user-agent"] == "BioETL/1.0 (test@example.com)"
+        assert req.headers["accept"] == "application/json"
+        assert req.headers["x-correlation-id"] == "run-777"
+
+
 @pytest.mark.unit
 class TestUnifiedHTTPClientObservability:
     """Tests for observability features (Phase 1 refactoring)."""
