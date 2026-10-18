@@ -74,7 +74,8 @@ to this project and `main`, excludes SSH and API config sources, and contains
 Remaining event parity and external acceptance are pending.
 Performance is manual-only: `.github/workflows/performance-nightly.yml`
 accepts `workflow_dispatch` and has no cron schedule. The selectable CircleCI
-`performance` lane has been removed. The GitHub caller loads
+`performance` lane has been removed; its workflow and `-p benchmark` are absent
+from `.circleci/config.yml`. The GitHub caller loads
 `tests.benchmarks.benchmark_vcs_guard` before `benchmark`, validates measurement
 JSON and retains the existing hotspot budgets and evidence gates.
 Historical CircleCI runs remain evidence of their original captures: main job

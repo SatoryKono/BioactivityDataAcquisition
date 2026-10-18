@@ -150,7 +150,31 @@ _enable_benchmark_plugin() {
     PYTEST_PLUGIN_ARGS+=(-p benchmark)
 }
 
+_requests_explicit_benchmark_plugin() {
+    local previous=""
+    local arg
+    for arg in "$@"; do
+        case "$arg" in
+            -pbenchmark|-p=benchmark|-ppytest_benchmark|-p=pytest_benchmark|-ppytest_benchmark.plugin|-p=pytest_benchmark.plugin|-ppytest-benchmark|-p=pytest-benchmark|--plugins=benchmark|--plugins=pytest_benchmark|--plugins=pytest_benchmark.plugin|--plugins=pytest-benchmark)
+                return 0
+                ;;
+        esac
+        if [[ "$previous" == "-p" || "$previous" == "--plugins" ]]; then
+            case "$arg" in
+                benchmark|pytest_benchmark|pytest_benchmark.plugin|pytest-benchmark)
+                    return 0
+                    ;;
+            esac
+        fi
+        previous="$arg"
+    done
+    return 1
+}
+
 _should_enable_benchmark_plugin() {
+    if _requests_explicit_benchmark_plugin "$@"; then
+        return 0
+    fi
     local previous=""
     local arg
     for arg in "$@"; do
@@ -573,12 +597,12 @@ if _should_enable_benchmark_plugin "${PYTEST_ARGS[@]}"; then
     _benchmark_filtered_args=()
     for ((_benchmark_i=0; _benchmark_i<${#PYTEST_ARGS[@]}; _benchmark_i++)); do
         _benchmark_arg="${PYTEST_ARGS[_benchmark_i]}"
-        if [[ "$_benchmark_arg" == "-p" && ( "${PYTEST_ARGS[_benchmark_i+1]:-}" == "benchmark" || "${PYTEST_ARGS[_benchmark_i+1]:-}" == "pytest_benchmark.plugin" ) ]]; then
+        if [[ ( "$_benchmark_arg" == "-p" || "$_benchmark_arg" == "--plugins" ) && ( "${PYTEST_ARGS[_benchmark_i+1]:-}" == "benchmark" || "${PYTEST_ARGS[_benchmark_i+1]:-}" == "pytest_benchmark" || "${PYTEST_ARGS[_benchmark_i+1]:-}" == "pytest_benchmark.plugin" || "${PYTEST_ARGS[_benchmark_i+1]:-}" == "pytest-benchmark" ) ]]; then
             _benchmark_i=$((_benchmark_i + 1))
             continue
         fi
         case "$_benchmark_arg" in
-            -pbenchmark|-ppytest_benchmark.plugin) continue ;;
+            -pbenchmark|-p=benchmark|-ppytest_benchmark|-p=pytest_benchmark|-ppytest_benchmark.plugin|-p=pytest_benchmark.plugin|-ppytest-benchmark|-p=pytest-benchmark|--plugins=benchmark|--plugins=pytest_benchmark|--plugins=pytest_benchmark.plugin|--plugins=pytest-benchmark) continue ;;
         esac
         _benchmark_filtered_args+=("$_benchmark_arg")
     done

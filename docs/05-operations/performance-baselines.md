@@ -73,7 +73,11 @@ Performance baselines ensure that:
 `addopts` keeps `-p no:benchmark`, so a normal pytest run skips those cases.
 The dispatch-only Performance Nightly workflow is the shipped caller that
 passes `-p tests.benchmarks.benchmark_vcs_guard` before `-p benchmark` and
-writes `reports/performance/benchmark-measurements.json`. That guard blocks
+writes `reports/performance/benchmark-measurements.json`. The local
+`run_pytest.sh` and `run_pytest.ps1` wrappers prepend that same guard before
+`-p benchmark` when the selection is a benchmark path, a benchmark marker, or
+an explicit `-p` / `--plugins` benchmark request, including
+`BIOETL_PYTEST_AUTOLOAD=1`. That guard blocks
 the plugin's git/hg probes and records the checkout HEAD from the gitdir.
 `dirty_state` stays `unknown`. The run id is not a commit SHA. Hotspot
 observation fail-open in the same workflow is a separate #12044 gap.

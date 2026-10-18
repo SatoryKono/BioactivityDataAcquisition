@@ -350,11 +350,17 @@ def test_pytest_wrappers_load_guard_before_benchmark_plugin() -> None:
     for path in wrappers:
         text = path.read_text(encoding="utf-8")
         guard_at = text.index("tests.benchmarks.benchmark_vcs_guard")
-        plugin_load = '"-p", "benchmark"' if path.suffix == ".ps1" else "-p benchmark)"
-        plugin_at = text.index(plugin_load)
+        if path.suffix == ".sh":
+            plugin_at = text.index("PYTEST_PLUGIN_ARGS+=(-p benchmark)")
+            assert text.count("PYTEST_PLUGIN_ARGS+=(-p benchmark)") == 1
+            assert "(-p pytest_benchmark.plugin)" not in text
+        else:
+            plugin_at = text.index('"-p", "benchmark"')
+            assert text.count('"-p", "benchmark"') == 1
+            assert '"-p", "pytest_benchmark.plugin"' not in text
         assert guard_at < plugin_at
         assert "BIOETL_BENCHMARK_CALLER" in text
-        assert text.count(plugin_load) == 1
+        assert "BIOETL_PYTEST_AUTOLOAD" in text
         if path.suffix == ".ps1":
             assert "[string[]]$Args" not in text
             assert '[Alias("Args")]' in text
@@ -833,6 +839,11 @@ def test_guard_leaves_project_subprocess_calls_intact() -> None:
         ["-p", "benchmark"],
         ["-p", "pytest_benchmark.plugin"],
         ["-pbenchmark"],
+        ["-p=benchmark"],
+        ["-p", "pytest_benchmark"],
+        ["-ppytest-benchmark"],
+        ["--plugins", "benchmark"],
+        ["--plugins=pytest_benchmark.plugin"],
         ["-ppytest_benchmark.plugin"],
         ["--benchmark-json=result.json"],
         ["--benchmark-compare=0001"],

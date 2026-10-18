@@ -128,6 +128,64 @@ def test_linked_worktree_uses_common_git_directory(tmp_path: Path) -> None:
     _assert_commit(checkout, COMMIT, "refs/heads/topic")
 
 
+def test_uppercase_head_marker_is_blocked(tmp_path: Path) -> None:
+    """A HEAD marker other than the exact prefix ref: is blocked."""
+    root = tmp_path / "uppercase-head"
+    _write(root / ".git" / "HEAD", "REF: refs/heads/topic\n")
+    _write(root / ".git" / "refs" / "heads" / "topic", COMMIT + "\n")
+    _assert_blocked(root)
+
+
+def test_uppercase_gitdir_marker_is_blocked(tmp_path: Path) -> None:
+    """A linked gitfile marker other than the exact prefix gitdir: is blocked."""
+    checkout = tmp_path / "linked"
+    _write(checkout / ".git", "GITDIR: ../repo.git\n")
+    _write(tmp_path / "repo.git" / "HEAD", COMMIT + "\n")
+    _assert_blocked(checkout)
+
+
+def test_malformed_packed_refs_line_does_not_yield_a_later_sha(tmp_path: Path) -> None:
+    """A malformed packed-refs line rejects the file, including a later SHA."""
+    root = tmp_path / "malformed-packed"
+    _write(root / ".git" / "HEAD", "ref: refs/heads/topic\n")
+    _write(
+        root / ".git" / "packed-refs",
+        f"not-a-packed-line\n{PACKED} refs/heads/topic\n",
+    )
+    source = read_source_revision(root, allow_parent_search=False)
+    assert source.revision == "unknown"
+    assert source.revision != PACKED
+    assert source.revision_method == "blocked"
+
+
+def test_worktree_private_packed_refs_do_not_hide_the_common_ref(
+    tmp_path: Path,
+) -> None:
+    """A private worktree packed-refs file does not override the common gitdir."""
+    common = tmp_path / "repo.git"
+    worktree_git = common / "worktrees" / "linked"
+    checkout = tmp_path / "linked"
+    _write(checkout / ".git", "gitdir: ../repo.git/worktrees/linked\n")
+    _write(worktree_git / "HEAD", "ref: refs/heads/topic\n")
+    _write(worktree_git / "commondir", "../..\n")
+    _write(worktree_git / "packed-refs", f"{PACKED} refs/heads/topic\n")
+    _write(common / "packed-refs", f"{COMMIT} refs/heads/topic\n")
+    _assert_commit(checkout, COMMIT, "refs/heads/topic")
+
+
+def test_missing_commondir_target_blocks_detached_worktree_head(
+    tmp_path: Path,
+) -> None:
+    """A missing commondir directory does not accept the private detached HEAD."""
+    common = tmp_path / "repo.git"
+    worktree_git = common / "worktrees" / "linked"
+    checkout = tmp_path / "linked"
+    _write(checkout / ".git", "gitdir: ../repo.git/worktrees/linked\n")
+    _write(worktree_git / "HEAD", COMMIT + "\n")
+    _write(worktree_git / "commondir", "../missing\n")
+    _assert_blocked(checkout)
+
+
 def test_missing_head_is_blocked(tmp_path: Path) -> None:
     """A gitdir without HEAD is blocked."""
     root = tmp_path / "missing"
@@ -216,6 +274,40 @@ def test_symlink_loop_is_blocked_without_vcs_probe(
     assert source.revision == "unknown"
     assert source.revision_method == "blocked"
     assert calls == []
+
+
+def test_broken_symlink_loose_ref_does_not_fall_back_to_packed_refs(
+    tmp_path: Path,
+) -> None:
+    """A broken loose-ref symlink does not fall back to packed-refs."""
+    root = tmp_path / "checkout"
+    ref_path = root / ".git" / "refs" / "heads" / "topic"
+    _write(root / ".git" / "HEAD", "ref: refs/heads/topic\n")
+    _write(root / ".git" / "packed-refs", f"{PACKED} refs/heads/topic\n")
+    ref_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        os.symlink(ref_path.parent / "missing", ref_path)
+    except OSError as exc:
+        pytest.skip(f"symlink is not available: {exc}")
+    source = read_source_revision(root, allow_parent_search=False)
+    assert source.revision == "unknown"
+    assert source.revision != PACKED
+    assert source.revision_method == "blocked"
+
+
+def test_unreadable_loose_ref_directory_does_not_fall_back_to_packed_refs(
+    tmp_path: Path,
+) -> None:
+    """A directory standing in for a loose ref does not fall back to packed-refs."""
+    root = tmp_path / "checkout"
+    _write(root / ".git" / "HEAD", "ref: refs/heads/topic\n")
+    _write(root / ".git" / "packed-refs", f"{PACKED} refs/heads/topic\n")
+    topic = root / ".git" / "refs" / "heads" / "topic"
+    topic.mkdir(parents=True)
+    source = read_source_revision(root, allow_parent_search=False)
+    assert source.revision == "unknown"
+    assert source.revision != PACKED
+    assert source.revision_method == "blocked"
 
 
 def test_corrupt_loose_ref_does_not_fall_back_to_packed_refs(tmp_path: Path) -> None:

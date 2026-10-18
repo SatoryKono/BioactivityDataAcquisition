@@ -40,7 +40,30 @@ function Test-BenchmarkPluginNeeded {
         if ($Arg -like "--benchmark-*" -or $Arg -cin @("-pbenchmark", "-ppytest_benchmark.plugin")) {
             return $true
         }
-        if ($PreviousArg -ceq "-p" -and $Arg -cin @("benchmark", "pytest_benchmark.plugin")) {
+        if (
+            $Arg -in @(
+                "-pbenchmark",
+                "-p=benchmark",
+                "-ppytest_benchmark",
+                "-p=pytest_benchmark",
+                "-ppytest_benchmark.plugin",
+                "-p=pytest_benchmark.plugin",
+                "-ppytest-benchmark",
+                "-p=pytest-benchmark"
+            ) -or
+            $Arg -like "--plugins=benchmark" -or
+            $Arg -like "--plugins=pytest_benchmark" -or
+            $Arg -like "--plugins=pytest_benchmark.plugin" -or
+            $Arg -like "--plugins=pytest-benchmark"
+        ) {
+            return $true
+        }
+        if ($PreviousArg -in @("-p", "--plugins") -and $Arg -in @(
+            "benchmark",
+            "pytest_benchmark",
+            "pytest_benchmark.plugin",
+            "pytest-benchmark"
+        )) {
             return $true
         }
         if ($PreviousArg -eq "-m" -and $Arg -like "*benchmark*" -and $Arg -notlike "*not benchmark*") {
@@ -362,12 +385,12 @@ if (Test-BenchmarkPluginNeeded -Args $PytestArgs) {
     $BenchmarkFilteredArgs = @()
     for ($Index = 0; $Index -lt $PytestArgs.Count; $Index++) {
         $Arg = $PytestArgs[$Index]
-        if ($Arg -ceq "-p" -and $Index + 1 -lt $PytestArgs.Count -and
-            $PytestArgs[$Index + 1] -cin @("benchmark", "pytest_benchmark.plugin")) {
+        if ($Arg -cin @("-p", "--plugins") -and $Index + 1 -lt $PytestArgs.Count -and
+            $PytestArgs[$Index + 1] -cin @("benchmark", "pytest_benchmark", "pytest_benchmark.plugin", "pytest-benchmark")) {
             $Index++
             continue
         }
-        if ($Arg -cin @("-pbenchmark", "-ppytest_benchmark.plugin")) {
+        if ($Arg -cin @("-pbenchmark", "-p=benchmark", "-ppytest_benchmark", "-p=pytest_benchmark", "-ppytest_benchmark.plugin", "-p=pytest_benchmark.plugin", "-ppytest-benchmark", "-p=pytest-benchmark", "--plugins=benchmark", "--plugins=pytest_benchmark", "--plugins=pytest_benchmark.plugin", "--plugins=pytest-benchmark")) {
             continue
         }
         $BenchmarkFilteredArgs += $Arg
