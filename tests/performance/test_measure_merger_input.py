@@ -15,11 +15,20 @@ def test_measurement_harness_smoke():
     assert harness_path.exists(), "Measurement harness script not found."
 
     # Run the worker directly with a small scale to ensure no crashes
-    cmd = [sys.executable, str(harness_path), "--worker", "100", "--out", "smoke_test_out.json"]
+    cmd = [
+        sys.executable,
+        str(harness_path),
+        "--worker",
+        "100",
+        "--out",
+        "smoke_test_out.json",
+    ]
 
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
 
-    assert result.returncode == 0, f"Harness worker failed with exit code {result.returncode}.\nStderr: {result.stderr}"
+    assert result.returncode == 0, (
+        f"Harness worker failed with exit code {result.returncode}.\nStderr: {result.stderr}"
+    )
 
     out_file = Path("smoke_test_out.json")
     assert out_file.exists(), "Harness worker did not produce output JSON."
