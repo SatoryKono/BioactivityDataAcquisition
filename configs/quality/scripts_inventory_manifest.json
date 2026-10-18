@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-18T17:22:37.607325+00:00",
+  "generated_at": "2026-10-18T18:04:56.883454+00:00",
   "summary": {
     "total_scripts": 650,
     "status_counts": {
@@ -10458,7 +10458,7 @@
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 1467,
+          "line": 1483,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pytest_abort_diagnostic_adapter as adapter"
         },
@@ -10519,19 +10519,19 @@
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 491,
+          "line": 507,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_event_journal import _group_receipts"
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 515,
+          "line": 531,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_event_journal import ("
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 883,
+          "line": 899,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_event_journal import _redact_text"
         }
@@ -10812,13 +10812,13 @@
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 792,
+          "line": 808,
           "source_group": "tests",
           "text": "str(_ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\"),"
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 1033,
+          "line": 1049,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import run_pytest_resilient"
         }

@@ -63,6 +63,20 @@ from typing import Any
 import pytest
 
 SCHEMA_VERSION = 1
+_EVENT_NAMES = frozenset(
+    {
+        "session_start",
+        "checkout_mismatch",
+        "collection_finished",
+        "deselected",
+        "collection_error",
+        "outcome",
+        "session_finish",
+        "unconfigure_error",
+        "cmdline_finish",
+        "journal_finalized",
+    }
+)
 JOURNAL_COMPLETENESS_EXIT = 4
 GIT_SHA_TIMEOUT_SECONDS = 10.0
 _SECRET_KEY = re.compile(
@@ -909,7 +923,7 @@ def _timestamp_valid(value: Any) -> bool:
 
 
 def _event_is_well_formed(event: dict[str, Any]) -> bool:
-    if not isinstance(event.get("event"), str):
+    if not isinstance(event.get("event"), str) or event["event"] not in _EVENT_NAMES:
         return False
     return (
         _schema_supported(event)
@@ -1261,6 +1275,37 @@ def _dedup_outcomes(
             continue
         chosen[key] = collapsed
     return chosen, sorted(set(reasons))
+
+
+def _phase_order_reasons(events: list[dict[str, Any]]) -> list[str]:
+    """Reject reordered phases; missing phases retain incomplete semantics."""
+    previous: dict[tuple[str, ...], tuple[int, bool]] = {}
+    ranks = {"setup": 1, "call": 2, "teardown": 3}
+    for event in events:
+        if event.get("event") != "outcome" or event.get("subtest") is True:
+            continue
+        identity = _event_identity(event)
+        key = tuple(
+            str(value)
+            for value in (
+                identity.get("role"),
+                identity.get("worker_id"),
+                event.get("origin_worker"),
+                event.get("nodeid"),
+                event.get("retry_index", 0),
+            )
+        )
+        rank = ranks.get(str(event.get("when")), 0)
+        last, started = previous.get(key, (0, False))
+        if rank == 1:
+            if last and not started:
+                return ["invalid_phase_order"]
+            previous[key] = (rank, True)
+        else:
+            if rank <= last:
+                return ["invalid_phase_order"]
+            previous[key] = (rank, started)
+    return []
 
 
 def _terminal_states(
@@ -1746,6 +1791,8 @@ _DAMAGE_REASONS = frozenset(
         "malformed_session_order",
         "cmdline_result_mismatch",
         "missing_cmdline_finish",
+        "missing_worker_finish",
+        "invalid_phase_order",
         "unselected_outcome",
     }
 )
@@ -1924,6 +1971,19 @@ def _missing_origin_workers(
     return sorted(_outcome_origins(events) - _intact_worker_ids(receipts))
 
 
+def _worker_finish_reasons(receipts: list[dict[str, Any]]) -> list[str]:
+    for receipt in receipts:
+        worker = any(
+            _event_identity(event).get("role") == "worker"
+            for event in receipt["events"]
+        )
+        if worker and not any(
+            event.get("event") == "session_finish" for event in receipt["events"]
+        ):
+            return ["missing_worker_finish"]
+    return []
+
+
 def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[str, Any]:
     """Reconcile one runner pass. See module docstring for the status rules."""
     if not receipts:
@@ -1934,6 +1994,7 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
             tests_passed=None,
         )
     reasons = _receipt_damage_reasons(receipts)
+    reasons.extend(_worker_finish_reasons(receipts))
     events = [event for item in receipts for event in item["events"]]
     flags = _session_flags(events)
     reasons.extend(_checkout_reasons(flags))
@@ -1942,6 +2003,7 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
     reasons.extend(_controller_order_reasons(events))
     reasons.extend(_malformed_session_finish(events))
     reasons.extend(_cmdline_finish_reasons(events))
+    reasons.extend(_phase_order_reasons(events))
     reasons.extend(_pytest_exit_reasons(flags))
     reasons.extend(_unconfigure_reasons(events))
     selected, deselected, collection_errors, collection_conflict = _selected_nodeids(
@@ -2198,6 +2260,10 @@ def reconcile_directory(
             )
         else:
             tests_passed = None
+    if any(name not in _AUTHORITATIVE_PASS_NAMES for name in executed_passes):
+        status = "unknown"
+        tests_passed = None
+        reasons = sorted({*reasons, "unknown_executed_pass"})
     if unattributed:
         status = "unknown"
         tests_passed = None
@@ -2315,7 +2381,12 @@ def verify_directory(
 def _parse_verify_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--verify", type=Path, required=True)
-    parser.add_argument("--executed-pass", action="append", default=[])
+    parser.add_argument(
+        "--executed-pass",
+        action="append",
+        default=[],
+        choices=sorted(_AUTHORITATIVE_PASS_NAMES),
+    )
     return parser.parse_args(argv)
 
 

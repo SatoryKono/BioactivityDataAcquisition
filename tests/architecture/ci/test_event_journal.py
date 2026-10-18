@@ -95,6 +95,21 @@ def _write_receipt(
 
 def _finalized(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
     events = list(events)
+    workers = {
+        json.dumps(event["identity"], sort_keys=True)
+        for event in events
+        if isinstance(event.get("identity"), dict)
+        and event["identity"].get("role") == "worker"
+    }
+    for encoded in sorted(workers):
+        identity = json.loads(encoded)
+        if not any(
+            event.get("event") == "session_finish" and event.get("identity") == identity
+            for event in events
+        ):
+            events.append(
+                {"event": "session_finish", "identity": identity, "exitstatus": 0}
+            )
     if not any(event.get("event") == "cmdline_finish" for event in events):
         finishes = [
             event
@@ -205,7 +220,8 @@ def test_record_count_and_exit_code_are_not_completeness_proof(tmp_path: Path) -
     )
     _write_receipt(tmp_path, events)
     verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
-    assert verdict["status"] == "incomplete"
+    assert verdict["status"] == "unknown"
+    assert "invalid_phase_order" in verdict["reasons"]
     assert "unexplained_selected_tests" in verdict["reasons"]
     assert verdict["tests_passed"] is None
     assert verdict["selected_count"] == 2

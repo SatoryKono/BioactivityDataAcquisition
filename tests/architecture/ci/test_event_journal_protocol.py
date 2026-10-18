@@ -172,3 +172,57 @@ def test_new_each_worker_must_supply_collection(tmp_path: Path) -> None:
     ]
     _write_receipt(tmp_path, _finalized(events))
     assert reconcile_pass(_load(tmp_path), pass_name="parallel")["status"] != "complete"
+
+
+def test_gap_unknown_event_rejected(tmp_path: Path) -> None:
+    path = _complete(tmp_path)
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    rows.insert(1, {**rows[0], "event": "garbage"})
+    rows[-1]["prior_line_count"] = len(rows) - 1
+    path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 4
+
+
+@pytest.mark.parametrize(
+    "order", [("teardown", "setup", "call"), ("call", "setup", "teardown")]
+)
+def test_gap_phase_order_rejected(tmp_path: Path, order: tuple[str, ...]) -> None:
+    path = _complete(tmp_path)
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    phases = {row["when"]: row for row in rows if row["event"] == "outcome"}
+    start = next(i for i, row in enumerate(rows) if row["event"] == "outcome")
+    rows[start : start + 3] = [phases[when] for when in order]
+    path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 4
+
+
+def test_gap_worker_finish_required(tmp_path: Path) -> None:
+    controller = _identity(role="controller", worker_id="controller")
+    worker = _identity(role="worker", worker_id="gw0")
+    _write_receipt(
+        tmp_path,
+        _finalized(
+            [
+                _start(controller),
+                _collected(controller, ["a"]),
+                _start(worker),
+                _collected(worker, ["a"]),
+                *_phases(worker, "a", "passed"),
+                {"event": "session_finish", "identity": worker, "exitstatus": 0},
+                {"event": "session_finish", "identity": controller, "exitstatus": 0},
+            ]
+        ),
+    )
+    for path in tmp_path.glob("*.jsonl"):
+        rows = [json.loads(line) for line in path.read_text().splitlines()]
+        if rows[0]["identity"]["role"] != "worker":
+            continue
+        rows = [row for row in rows if row["event"] != "session_finish"]
+        rows[-1]["prior_line_count"] = len(rows) - 1
+        path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 4
+
+
+def test_gap_unknown_requested_pass_rejected(tmp_path: Path) -> None:
+    _complete(tmp_path)
+    assert verify_directory(tmp_path, executed_passes=["paralell"]) == 4
