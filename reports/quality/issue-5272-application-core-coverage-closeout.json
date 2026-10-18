@@ -613,9 +613,9 @@
       "current_binding_refresh": {
         "source_tree_sha256": "427c860982d9d66336071678160907c7482026ff2babf50a2d037c8f734252e6",
         "evidence": "reports/quality/module-coverage-inventory.json",
-        "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
+        "semantics": "Intermediate PR #12258 inventory binding; not accepted measurement history. No new measurement or CI acceptance claimed."
       },
-      "notes": "Current metrics are rebound to the accepted module inventory. Historical measurements, baseline, and earlier closeout notes are preserved in previous_current_bindings. This does not claim fresh global measured nonregression."
+      "notes": "Preserved intermediate inventory binding from PR #12258 commit 1a0668aa01d3b3f3f5927a5f229c46da69f72ca9. Superseded by final inventory binding 3e715c13a8cc7eccf431e4392a72903ee8e9a54242f18cbe4b735d198c41542d. The recorded metrics and snapshot date are preserved; they do not establish a new measurement or acceptance event."
     },
     {
       "snapshot_date": "2026-08-17",
@@ -634,9 +634,9 @@
       "current_binding_refresh": {
         "source_tree_sha256": "d5b6eae2b31e0ab21e9cbf8f5b1134be04028d11c0d2e33e022eebaf3d52f6a5",
         "evidence": "reports/quality/module-coverage-inventory.json",
-        "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
+        "semantics": "Intermediate PR #12258 inventory binding; not accepted measurement history. No new measurement or CI acceptance claimed."
       },
-      "notes": "Current metrics are rebound to the accepted module inventory. Historical measurements, baseline, and earlier closeout notes are preserved in previous_current_bindings. This does not claim fresh global measured nonregression."
+      "notes": "Preserved intermediate inventory binding from PR #12258 commit 606a5ec9429158263d2de295e364f812dd80808a. Superseded by final inventory binding 3e715c13a8cc7eccf431e4392a72903ee8e9a54242f18cbe4b735d198c41542d. The recorded metrics and snapshot date are preserved; they do not establish a new measurement or acceptance event."
     }
   ],
   "current_binding_refresh": {
