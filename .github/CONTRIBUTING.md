@@ -117,17 +117,19 @@ rules and local/CI command paths, is documented in
 
 ## Branch Protection / PR Validation
 
-Do not push or merge directly to `main`. GitHub ruleset `main` (13643213)
-enforces exactly one required status context:
+Do not push or merge directly to `main`.
 
-- `pr-gate-complete` (from `.github/workflows/pr-required.yml`) — fail-closed
-  aggregator. Keep this green before merge.
+<!-- policy-anchor:deployment-provider --> `deployment.provider` is `github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Rulesets `13643213` and `15730586` are `enforcement: disabled`. <!-- policy-anchor:stored-ruleset-contexts --> Stored `ci/circleci: pr-gate-complete` is not active CircleCI protection. <!-- policy-anchor:target-gha-context --> Target `pr-gate-complete` is not the context stored on those rulesets. <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge. An offline catalog match does not confirm live server rulesets.
 
-> Enforcement is currently DISABLED (ruleset 13643213, #11180): Actions
-> billing will not return, so no required check can run. Do NOT re-enable
-> the ruleset — a required check that cannot run would block `main`. Until
-> billing returns, every merge to `main` MUST pass the manual merge gate
-> below instead of the automated `pr-gate-complete` context.
+The coordinator job is `pr-gate-complete` (`.github/workflows/pr-required.yml`),
+a fail-closed aggregator. Rulesets `13643213` and `15730586` are
+`enforcement: disabled`, so a green coordinator result is evidence for the
+manual merge gate below and is not live merge protection.
+
+> Ruleset `13643213` stays disabled (#11180). Do not re-enable it in this
+> change: a required check that cannot run would block `main`. Enabling server
+> protection is a separate migration step. Until that step is finished, every
+> merge to `main` MUST pass the manual merge gate below.
 
 Leaf jobs such as `checks-complete`, `coverage-verify`, `type-check`,
 schema governance, `detect-secrets`, and `root-hygiene` are consumed by the
@@ -136,7 +138,7 @@ still materialize `pr-gate-complete`; path-scoped owners emit SHA-bound N/A
 instead of leaving extra required checks Pending.
 
 `import-linter.yml` still emits `checks-complete` on coordinator-owned runs;
-that leaf name is not the merge wall.
+that leaf name is not an independent required context.
 
 ### Import-linter local repro
 

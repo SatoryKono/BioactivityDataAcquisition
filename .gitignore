@@ -134,6 +134,22 @@ log_test.txt
 /.mcp-server-context.md
 /.gitignore~
 /reports/*
+# Revision-keyed benchmark evidence survives Actions retention.
+# A measured baseline is adopted by PR; CI must not commit it.
+# These negations follow /reports/* so the last match keeps them.
+!/reports/performance/
+/reports/performance/*
+!/reports/performance/benchmark-summary.json
+!/reports/performance/evidence/
+/reports/performance/evidence/*
+!/reports/performance/evidence/*/
+/reports/performance/evidence/*/*
+!/reports/performance/evidence/*/*/
+/reports/performance/evidence/*/*/*
+!/reports/performance/evidence/*/*/benchmark-measurements.json
+!/reports/performance/evidence/*/*/benchmark-manifest.json
+!/reports/performance/evidence/*/*/benchmark-gate.json
+!/reports/performance/evidence/*/*/benchmark-summary-candidate.json
 # Orientation entry for working reports tree (linked from README / docs/reports).
 !/reports/README.md
 # Bind-identity marker: proves Docker mounts the real checkout reports tree.
@@ -450,8 +466,6 @@ reports/logs/
 reports/logs/*
 !reports/logs/.gitkeep
 reports/observability/grafana/screenshots/
-reports/performance/
-!reports/performance/benchmark-manifest.json
 reports/quality/architecture_debt_execution_plan_*.json
 reports/quality/tasks_architecture_metric_exemptions_*.json
 # Re-include closeout evidence required by architecture freezes (CI-C1-004 / #7518).
