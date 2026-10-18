@@ -25,6 +25,7 @@ def _public_commands(root: click.Command) -> dict[str, click.Command]:
     commands: dict[str, click.Command] = {}
 
     def visit(command: click.Command, path: str, parent: click.Context | None) -> None:
+        """Traverse public descendants using the context of their owning group."""
         if command.hidden:
             return
         commands[path] = command
@@ -80,6 +81,7 @@ def _documented_options(markdown: str) -> dict[str, set[str]]:
 
 
 def _parity_errors(root: click.Command, markdown: str) -> list[str]:
+    """Report command and option differences independently for each command."""
     commands = _public_commands(root)
     documented = _documented_options(markdown)
     errors = [
@@ -123,6 +125,7 @@ def test_public_click_commands_and_options_match_reference() -> None:
 
 @pytest.fixture
 def parity_cli() -> click.Group:
+    """Build a small CLI with aliases and distinct command-owned options."""
     root = click.Group("bioetl")
     root.add_command(
         click.Command(
@@ -138,6 +141,7 @@ def parity_cli() -> click.Group:
 
 
 def test_parity_accepts_secondary_and_short_flags(parity_cli: click.Group) -> None:
+    """Accept both boolean spellings and short aliases declared in the reference."""
     text = "### `alpha`\n| `--toggle / --no-toggle` | flag |\n| `--value`, `-v` | str |\n### `beta`\n```bash\nbioetl beta --other X\n```"
     assert _parity_errors(parity_cli, text) == []
 
@@ -146,6 +150,7 @@ def test_parity_accepts_secondary_and_short_flags(parity_cli: click.Group) -> No
 def test_parity_detects_each_undocumented_alias(
     parity_cli: click.Group, omitted: str
 ) -> None:
+    """Require every public alias rather than only the primary flag."""
     flags = [
         flag for flag in ("--toggle", "--no-toggle", "--value", "-v") if flag != omitted
     ]
@@ -160,6 +165,7 @@ def test_parity_detects_each_undocumented_alias(
 def test_parity_detects_stale_options_in_correct_command(
     parity_cli: click.Group,
 ) -> None:
+    """Reject retired flags in the command where they are documented."""
     text = "### `alpha`\n| `--toggle --no-toggle --value -v --retired` | flags |\n### `beta`\n| `--other` | str |"
     assert _parity_errors(parity_cli, text) == [
         "alpha: unknown documented options ['--retired']"
@@ -169,6 +175,7 @@ def test_parity_detects_stale_options_in_correct_command(
 def test_parity_does_not_borrow_options_from_another_section(
     parity_cli: click.Group,
 ) -> None:
+    """Keep option ownership local to its documented command."""
     text = (
         "### `alpha`\n| `--toggle --no-toggle --value -v --other` | flags |\n### `beta`"
     )
@@ -179,6 +186,7 @@ def test_parity_does_not_borrow_options_from_another_section(
 
 
 def test_parity_requires_optionless_commands_and_rejects_unknown_headings() -> None:
+    """Validate command presence even when no options are declared."""
     root = click.Group("bioetl", commands={"actual": click.Command("actual")})
     assert _parity_errors(root, "### `invented`") == [
         "undocumented command: actual",
@@ -187,13 +195,16 @@ def test_parity_requires_optionless_commands_and_rejects_unknown_headings() -> N
 
 
 def test_parity_uses_hidden_metadata_and_traverses_lazy_groups() -> None:
+    """Resolve lazy public children while excluding hidden options and commands."""
     class LazyGroup(click.Group):
         def list_commands(self, ctx: click.Context) -> list[str]:
+            """Expose the lazy child through the Click discovery interface."""
             return ["child"]
 
         def get_command(
             self, ctx: click.Context, cmd_name: str
         ) -> click.Command | None:
+            """Resolve the child with one public option and one hidden option."""
             return click.Command(
                 "child",
                 params=[
@@ -218,6 +229,7 @@ def test_parity_uses_hidden_metadata_and_traverses_lazy_groups() -> None:
 
 
 def test_parity_ignores_migration_prose_and_description_column() -> None:
+    """Exclude historical flags in prose and table descriptions from declarations."""
     root = click.Group(
         "bioetl",
         commands={"run": click.Command("run", params=[click.Option(["--new"])])},
