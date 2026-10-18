@@ -8507,30 +8507,30 @@
       "boolean_true_values": [],
       "coercion_policy": "default",
       "empty_as_missing": null,
-      "filter_fail_sink": "quarantine",
+      "filter_fail_sink": "not_applicable",
       "is_framework_field": false,
       "logical_type": "integer",
-      "nullable": false,
-      "optional": false,
+      "nullable": true,
+      "optional": true,
       "optionality_sources": [
-        "silver_required_fields"
+        "default_optional"
       ],
-      "physical_type": "int64",
+      "physical_type": "Int64",
       "pipeline": "chembl_publication_similarity",
       "silver_column": "doc_1",
       "silver_filter_tokens": [
-        "structural_presence_guard",
         "structural_type_guard"
       ],
-      "silver_normalisation_tokens": [],
+      "silver_normalisation_tokens": [
+        "invalid_type_to_null"
+      ],
       "silver_validation_tokens": [
-        "structural:presence_required",
-        "structural:type_strict"
+        "structural:type_to_null_warn"
       ],
       "source_db": "ChEMBL",
       "source_table": "publication_similarity",
       "validation_fail_action_prefixes": [
-        "quarantine_filter_rejection"
+        "set_null_and_warn"
       ]
     },
     {
@@ -8538,30 +8538,30 @@
       "boolean_true_values": [],
       "coercion_policy": "default",
       "empty_as_missing": null,
-      "filter_fail_sink": "quarantine",
+      "filter_fail_sink": "not_applicable",
       "is_framework_field": false,
       "logical_type": "integer",
-      "nullable": false,
-      "optional": false,
+      "nullable": true,
+      "optional": true,
       "optionality_sources": [
-        "silver_required_fields"
+        "default_optional"
       ],
-      "physical_type": "int64",
+      "physical_type": "Int64",
       "pipeline": "chembl_publication_similarity",
       "silver_column": "doc_2",
       "silver_filter_tokens": [
-        "structural_presence_guard",
         "structural_type_guard"
       ],
-      "silver_normalisation_tokens": [],
+      "silver_normalisation_tokens": [
+        "invalid_type_to_null"
+      ],
       "silver_validation_tokens": [
-        "structural:presence_required",
-        "structural:type_strict"
+        "structural:type_to_null_warn"
       ],
       "source_db": "ChEMBL",
       "source_table": "publication_similarity",
       "validation_fail_action_prefixes": [
-        "quarantine_filter_rejection"
+        "set_null_and_warn"
       ]
     },
     {
@@ -8648,6 +8648,52 @@
       "validation_fail_action_prefixes": [
         "set_null_and_warn"
       ]
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_publication_similarity",
+      "silver_column": "publication_id1",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "publication_similarity",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_publication_similarity",
+      "silver_column": "publication_id2",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "publication_similarity",
+      "validation_fail_action_prefixes": []
     },
     {
       "boolean_false_values": [],

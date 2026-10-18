@@ -72,6 +72,18 @@ class MockCleanupResult:
     files_removed: int
     bytes_freed: int
     directories_removed: int
+    files_planned: int = 0
+    bytes_planned: int = 0
+    directories_planned: int = 0
+    files_skipped: int = 0
+    bytes_skipped: int = 0
+    directories_skipped: int = 0
+    files_conflicted: int = 0
+    bytes_conflicted: int = 0
+    directories_conflicted: int = 0
+    files_failed: int = 0
+    bytes_failed: int = 0
+    directories_failed: int = 0
 
 
 @pytest.fixture
@@ -80,7 +92,12 @@ def mock_bronze_cleanup_service():
     service = MagicMock()
     service.cleanup = AsyncMock(
         return_value=MockCleanupResult(
-            files_removed=10, bytes_freed=1024 * 1024, directories_removed=2
+            files_removed=10,
+            bytes_freed=1024 * 1024,
+            directories_removed=2,
+            files_planned=10,
+            bytes_planned=1024 * 1024,
+            directories_planned=2,
         )
     )
     return service

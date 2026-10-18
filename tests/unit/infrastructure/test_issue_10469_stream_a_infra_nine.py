@@ -29,6 +29,12 @@ from bioetl.infrastructure.quarantine import _pyarrow_helpers as pyarrow_helpers
 from bioetl.infrastructure.storage.bronze.read_cleanup_mixin import (
     BronzeWriterReadCleanupMixin,
 )
+from bioetl.infrastructure.storage.bronze.validation_mixin import (
+    BronzeWriterValidationMixin,
+)
+from bioetl.infrastructure.storage.bronze.cleanup_support import (
+    destructive_cleanup_supported,
+)
 from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
 from bioetl.infrastructure.storage.support._atomic_replace import (
     AtomicWriteError,
@@ -176,6 +182,9 @@ async def test_bronze_read_list_cleanup_and_preview(tmp_path: Path) -> None:
     host._flat_structure = False
     host._logger = MagicMock()
     host._metrics = MagicMock()
+    host._resolve_bronze_path = (
+        BronzeWriterValidationMixin._resolve_bronze_path.__get__(host)
+    )
     rows = [
         row
         async for row in host.read_bronze(
@@ -204,14 +213,31 @@ async def test_bronze_read_list_cleanup_and_preview(tmp_path: Path) -> None:
     (tmp_path / "pubchem").mkdir()
     (tmp_path / "pubchem" / "compound").write_bytes(b"not-a-dir")
     assert host._find_old_date_dirs("2021-01-01", "pubchem", "compound") == []
-    cleaned = await host.cleanup_old_files(
+    planned = await host.cleanup_old_files(
         datetime(2099, 1, 1, tzinfo=UTC),
-        dry_run=False,
+        dry_run=True,
         provider="chembl",
         entity="activity",
     )
-    assert cleaned["files_removed"] >= 1
-    host._metrics.increment_counter.assert_called()
+    assert planned["files_planned"] == 0
+    assert planned["files_skipped"] == 1
+    assert batch_path.read_bytes() == compressed
+    if destructive_cleanup_supported():
+        cleaned = await host.cleanup_old_files(
+            datetime(2099, 1, 1, tzinfo=UTC),
+            provider="chembl",
+            entity="activity",
+        )
+        assert cleaned["files_removed"] == 0
+        assert cleaned["files_skipped"] == 1
+    else:
+        with pytest.raises(NotImplementedError, match="unsupported"):
+            await host.cleanup_old_files(
+                datetime(2099, 1, 1, tzinfo=UTC),
+                provider="chembl",
+                entity="activity",
+            )
+    assert batch_path.read_bytes() == compressed
     preview = host.preview_cleanup(provider="chembl", entity="activity")
     assert "path" in preview
     host._flat_structure = True

@@ -174,6 +174,15 @@ declared_label_contract_metrics:
   - bioetl_batch_lifecycle_records_total
   - bioetl_bronze_bytes_freed_total
   - bioetl_bronze_bytes_written_total
+  - bioetl_bronze_cleanup_bytes_conflicted_total
+  - bioetl_bronze_cleanup_bytes_failed_total
+  - bioetl_bronze_cleanup_bytes_skipped_total
+  - bioetl_bronze_cleanup_directories_conflicted_total
+  - bioetl_bronze_cleanup_directories_failed_total
+  - bioetl_bronze_cleanup_directories_skipped_total
+  - bioetl_bronze_cleanup_files_conflicted_total
+  - bioetl_bronze_cleanup_files_failed_total
+  - bioetl_bronze_cleanup_files_skipped_total
   - bioetl_bronze_files_removed_total
   - bioetl_bronze_records_written_total
   - bioetl_bronze_write_attempts_total
