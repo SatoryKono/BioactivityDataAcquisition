@@ -1,8 +1,8 @@
 # Slowest Tests
 
-Source commit: `95e20e9a8fbdffaa7d142d1066bb76ec8fb8b788`
-Source run id: `local`
-Source event: `push`
+Source commit: `8a4286d21becf1fe183acfaf3f051bc6f7916038`
+Source run id: `local-pr12231-local-coverage-8a4286d`
+Source event: `local_coverage_verify`
 Source run URL: `pending`
 Refresh status: `captured`
 Executed test cases: `34037`

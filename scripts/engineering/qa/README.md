@@ -71,6 +71,8 @@ python -m scripts.engineering.qa <command> [args...]
 | `refresh-ci-drift-families` | `refresh_governance_artifacts.py` (`ci-drift-families`) | Coupled `--check`/`--update` for telemetry, test-gov, flaky, evidence, remote-main, dataflow. Does **not** call `_ratchet_family_budgets`. |
 | `run-architecture-audit-read-only` | `run_architecture_audit_read_only.py`                | Run check-only architecture evidence diagnostics without pretest sync or artifact writes          |
 | `report-hotspots`                | `generate_hotspot_degradation_report.py`              | Generate performance hotspot degradation report                                                   |
+| `gate-hotspot-report`            | `generate_hotspot_degradation_report.py`              | Fail closed unless the hotspot report is a measured verdict                                      |
+| `reduce-benchmark-evidence`      | `generate_hotspot_degradation_report.py`              | Compare benchmark means with a measured baseline and write a fail-closed gate                    |
 | `report-duplication-baseline`    | `report_duplication_baseline.py`                      | Generate report-only duplication baseline for `composition`/`application`                         |
 | `report-artifact-duplication-audit` | `report_artifact_duplication_audit.py`              | Generate/check exact-byte duplication audit for JSCPD-excluded config, contract, and registry artifacts |
 | `analyze-duplicate-functions`    | `analyze_duplicate_functions.py`                      | Compatibility wrapper for the legacy AST duplicate-function analyzer                              |
@@ -256,3 +258,36 @@ constructor-args checks remain supported during the migration window, but new
 integrations should use the grouped QA commands above. The grouped QA commands
 now own the implementation, and the older direct paths have been removed in
 favor of the unified entry point.
+
+## Independent benchmark evidence validation
+
+Performance Nightly runs `python -m scripts.engineering.qa validate-benchmark-evidence`
+before the existing regression reducer. It requires the benchmark producer outcome
+`success`, a full matching source SHA, nonempty named benchmark records with finite
+positive timings and positive integer rounds/iterations, machine identity, and raw
+`bioetl_measurement.dataset` / `bioetl_measurement.environment` provenance. The
+validator does not fill missing fields, aggregate measurements, or adopt baselines.
+It writes `benchmark-validation-manifest.json` atomically, binding the exact raw
+JSON SHA256 to source, dataset, machine, and run identity. Local UUIDs are not GitHub
+run IDs and local validation emits no GitHub URL. A failed validation removes any
+stale successful validation manifest.
+
+Production depends on caller/guard PR #12235 (`tests.benchmarks.benchmark_vcs_guard`,
+loaded before `benchmark`). The producer must also emit the raw dataset/environment
+context already required by `reduce-benchmark-evidence`; the inspected #12235
+head `75bf7ee224c4950275e132095808fa099ac6758f` does not yet emit that context. Until
+these producer contracts are integrated, the workflow must fail closed. Unit schema
+fixtures are not benchmark measurements or acceptance evidence. The committed
+`benchmark-summary.json` remains explicitly unmeasured until separately reviewed
+measurements are adopted.
+
+Regression tests live in `tests/unit/scripts/qa/test_validate_benchmark_evidence.py`,
+which the automatic `unit-scripts-tooling` other shard collects. The former
+`tests/engineering/qa` location was outside the automatic unit lane.
+
+The command is implemented by `validate_benchmark_evidence_main` in the existing
+`generate_hotspot_degradation_report.py` performance-evidence owner. It has a
+separate validation path from `reduce_benchmark_evidence_main`; sharing the owner
+and QA router does not make validation contingent on a baseline or reducer result.
+The former standalone validator script is removed, preserving the active-script
+cap without lifecycle reclassification, exemptions, or functional retirement.
