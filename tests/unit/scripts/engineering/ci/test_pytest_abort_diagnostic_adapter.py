@@ -229,7 +229,10 @@ def test_windows_timeout_does_not_claim_sigabrt_dump(tmp_path: Path) -> None:
     assert "faulthandler dump captured" not in text
 
 
-def test_launcher_descendant_is_gone_after_cleanup(tmp_path: Path) -> None:
+@pytest.mark.parametrize("launcher_depth", [1, 2])
+def test_launcher_descendant_is_gone_after_cleanup(
+    tmp_path: Path, launcher_depth: int
+) -> None:
     pid_dir = tmp_path / "pids"
     pid_dir.mkdir()
     child_script = pid_dir / "child_sleep.py"
@@ -239,6 +242,14 @@ def test_launcher_descendant_is_gone_after_cleanup(tmp_path: Path) -> None:
         "time.sleep(60)\n",
         encoding="utf-8",
     )
+    if launcher_depth == 2:
+        intermediate = pid_dir / "intermediate.py"
+        intermediate.write_text(
+            "import subprocess, sys\n"
+            f"subprocess.run([sys.executable, {str(child_script)!r}, sys.argv[1]], check=False)\n",
+            encoding="utf-8",
+        )
+        child_script = intermediate
     try:
         _, manifest = _run(
             tmp_path,
@@ -265,6 +276,11 @@ def test_launcher_descendant_is_gone_after_cleanup(tmp_path: Path) -> None:
         assert not _pid_alive(launcher)
         assert not _pid_alive(child)
         assert "cleanup_incomplete" not in (manifest.cleanup_error or "")
+        if os.name == "posix":
+            assert manifest.diagnostic_signal_delivery == "leaf_descendants"
+            diagnostic = (tmp_path / manifest.stderr_file).read_text(encoding="utf-8")
+            assert "Fatal Python error: Aborted" in diagnostic
+            assert "child_sleep.py" in diagnostic
     finally:
         _stop_recorded(pid_dir)
 
