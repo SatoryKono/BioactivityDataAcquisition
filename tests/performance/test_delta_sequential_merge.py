@@ -313,7 +313,8 @@ def test_delta_sequential_merge_scaling(
                         "test": f"test_delta_sequential_merge_scaling_N{n_merges}",
                         "metric_type": "delta_merge_latency_total",
                         "value": sum(r["merge_time_s"] for r in results),
-                        "timestamp": datetime.now(UTC).isoformat(),
+                        # Capture metadata uses real UTC; synthetic rows keep fixed time.
+                        "timestamp": SystemClock().now().isoformat(),
                         "unit": "s",
                         "context": {"n_merges": n_merges},
                     }
