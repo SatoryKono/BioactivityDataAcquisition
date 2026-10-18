@@ -197,10 +197,12 @@ class PytestAbortDiagnosticAdapter:
         dump_margin: float = DIAGNOSTIC_DUMP_MARGIN_SECONDS,
         *,
         base: Path | None = None,
+        child_env: dict[str, str] | None = None,
     ) -> None:
         self.timeout = timeout
         self.dump_margin = dump_margin
         self.base = base
+        self.child_env = None if child_env is None else child_env.copy()
 
     def run(
         self,
@@ -269,7 +271,7 @@ class PytestAbortDiagnosticAdapter:
             manifest.cleanup_error = str(exc)
             manifest.wrapper_exit_code = 2
             return manifest
-        env = os.environ.copy()
+        env = os.environ.copy() if self.child_env is None else self.child_env.copy()
         env["PYTHONFAULTHANDLER"] = "1"
         try:
             stdout = open_confined(
