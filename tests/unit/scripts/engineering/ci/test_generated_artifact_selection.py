@@ -427,3 +427,70 @@ def test_ordinary_observability_inventory_does_not_read_generated_reports(monkey
     ]
     assert commands
     assert all("--typed-observability-views" not in command for command in commands)
+
+
+@pytest.mark.parametrize("generated,scope", [("false", "source"), ("true", "full")])
+def test_debt_receipt_records_executed_command_and_scope(tmp_path, generated, scope):
+    import os
+
+    workflow = yaml.safe_load((ROOT / ".github/workflows/tests.yml").read_text())
+    step = next(
+        s
+        for s in workflow["jobs"]["proof-or-stop-advisory"]["steps"]
+        if s["name"] == "Normalize required producer receipts"
+    )
+    assert (
+        step["env"]["DEBT_GENERATED_ARTIFACTS"] == "${{ inputs.generated-artifacts }}"
+    )
+    log = tmp_path / "calls.jsonl"
+    uv = tmp_path / "uv"
+    uv.write_text(
+        f'#!{sys.executable}\nimport json,sys\nwith open({str(log)!r}, "a") as f: f.write(json.dumps(sys.argv[1:])+"\\n")\n'
+    )
+    uv.chmod(0o755)
+    env = {
+        **os.environ,
+        "PATH": f"{tmp_path}:{os.environ['PATH']}",
+        "DEBT_GENERATED_ARTIFACTS": generated,
+        "GOVERNANCE_RESULT": "success",
+        "QUALITY_RESULT": "success",
+        "TEST_RESULTS": "success",
+        "DOCS_RUNTIME_RC": "0",
+        "PROOF_OR_STOP_RUN_ID": "run",
+        "PROOF_OR_STOP_TASK_ID": "task",
+        "PROOF_OR_STOP_CLAIM": "tested",
+        "PROOF_OR_STOP_TRUST_TIER": "ci",
+        "PROOF_OR_STOP_CI_RUN_ID": "123",
+        "GITHUB_JOB": "proof",
+    }
+    result = subprocess.run(
+        ["bash", "-c", step["run"]],
+        env=env,
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    calls = [json.loads(line) for line in log.read_text().splitlines()]
+    receipt = next(
+        argv
+        for argv in calls
+        if argv[argv.index("--producer") + 1] == "debt_governance_gates"
+    )
+    command = receipt[receipt.index("--command") + 1]
+    target_name = (
+        "Validate debt-governance fail-fast gates"
+        if scope == "source"
+        else "Validate full debt-governance generated evidence"
+    )
+    executed = next(
+        s["run"]
+        for s in workflow["jobs"]["governance-preflight"]["steps"]
+        if s["name"] == target_name
+    )
+    assert executed == "uv run --frozen --no-build " + command
+    assert (
+        receipt[receipt.index("--receipt-id") + 1]
+        == f"debt_governance_gates-proof-{scope}"
+    )
+    assert ("--source-only" in command) == (scope == "source")

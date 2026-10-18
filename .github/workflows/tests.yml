@@ -1963,6 +1963,7 @@ jobs:
         if: ${{ always() && !cancelled() }}
         shell: bash
         env:
+          DEBT_GENERATED_ARTIFACTS: ${{ inputs.generated-artifacts }}
           GOVERNANCE_RESULT: ${{ needs.governance-preflight.result }}
           QUALITY_RESULT: ${{ needs.quality-metrics-gate.result }}
           TEST_RESULTS: >-
@@ -1985,6 +1986,7 @@ jobs:
             local command_text="$3"
             local result="$4"
             local output_path="$5"
+            local receipt_scope="${6:-}"
             local status="pass"
             local -a outcome_args=(--exit-code 0)
             if [[ "$result" == *failure* ]]; then
@@ -2002,7 +2004,7 @@ jobs:
               --task-id "$PROOF_OR_STOP_TASK_ID" \
               --claim "$PROOF_OR_STOP_CLAIM" \
               --producer "$producer" \
-              --receipt-id "${producer}-${GITHUB_JOB}" \
+              --receipt-id "${producer}-${GITHUB_JOB}${receipt_scope:+-${receipt_scope}}" \
               --evidence-kind "$kind" \
               --command "$command_text" \
               --status "$status" \
@@ -2020,10 +2022,16 @@ jobs:
             pretest_guardrails governance \
             "bash scripts/engineering/dev/pretest_guardrails.sh" \
             "$GOVERNANCE_RESULT" "$needs_path"
+          debt_scope="source"
+          debt_command="python -m scripts.engineering.qa report-debt-governance-gates --source-only --check --changed-from-ref refs/remotes/origin/main"
+          if [[ "$DEBT_GENERATED_ARTIFACTS" == "true" ]]; then
+            debt_scope="full"
+            debt_command="python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref refs/remotes/origin/main"
+          fi
           capture_receipt \
             debt_governance_gates debt \
-            "python -m scripts.engineering.qa report-debt-governance-gates" \
-            "$GOVERNANCE_RESULT" "$needs_path"
+            "$debt_command" \
+            "$GOVERNANCE_RESULT" "$needs_path" "$debt_scope"
           capture_receipt \
             quality_integral_gate quality \
             "python -m scripts.engineering.ci.quality_integral_gate" \

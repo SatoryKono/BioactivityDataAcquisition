@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-18T22:31:50.682049+00:00",
+  "generated_at": "2026-10-18T22:39:39.913228+00:00",
   "summary": {
     "total_scripts": 652,
     "status_counts": {
@@ -10644,7 +10644,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2029,
+          "line": 2037,
           "source_group": "ci",
           "text": "\"python -m scripts.engineering.ci.quality_integral_gate\" \\"
         },
@@ -11687,7 +11687,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2021,
+          "line": 2023,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -13226,7 +13226,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 395,
+      "reference_count": 396,
       "references": [
         {
           "path": ".circleci/config.yml",
