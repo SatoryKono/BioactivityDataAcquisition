@@ -50,6 +50,10 @@ def test_same_classification_from_two_workers_is_not_a_conflict(
     events = _finalized(
         [
             _start(controller),
+            _start(worker_a),
+            _start(worker_b),
+            _collected(worker_a, [nodeid]),
+            _collected(worker_b, [nodeid]),
             _collected(controller, [nodeid]),
             *_phases(worker_a, nodeid, "passed"),
             *_phases(worker_b, nodeid, "passed"),
@@ -72,6 +76,10 @@ def test_duplicate_copies_on_different_workers_stay_complete(tmp_path: Path) -> 
     events = _finalized(
         [
             _start(controller),
+            _start(worker_a),
+            _start(worker_b),
+            _collected(worker_a, [nodeid, nodeid]),
+            _collected(worker_b, [nodeid, nodeid]),
             _collected(controller, [nodeid, nodeid]),
             *_phases(worker_a, nodeid, "passed"),
             *_phases(worker_b, nodeid, "passed"),
@@ -346,6 +354,10 @@ def test_worker_deselection_is_counted_once(tmp_path: Path) -> None:
     events = _finalized(
         [
             _start(controller),
+            _start(worker_a),
+            _start(worker_b),
+            _collected(worker_a, [kept]),
+            _collected(worker_b, [kept]),
             _collected(controller, [kept]),
             {"event": "deselected", "identity": worker_a, "nodeids": [dropped]},
             {"event": "deselected", "identity": worker_b, "nodeids": [dropped]},
@@ -595,7 +607,8 @@ def test_verify_reuses_the_invocation_stored_in_the_verdict(tmp_path: Path) -> N
     assert stored["expected_invocations"] == {"parallel": current}
     assert verify_directory(tmp_path) == 4
     latest = reconcile_directory(tmp_path, executed_passes=["parallel"])
-    assert latest["status"] == "complete"
+    assert latest["status"] == "unknown"
+    assert "ambiguous_damaged_invocation" in latest["reasons"]
     assert latest["passes"]["parallel"]["invocation_id"] == old
 
 
@@ -1093,7 +1106,7 @@ def test_review_old_unspecified_damage_is_attributed(tmp_path: Path) -> None:
     assert result.returncode == 0
     for path in (tmp_path / "new" / "journal").glob("*.jsonl"):
         (tmp_path / path.name).write_bytes(path.read_bytes())
-    assert verify_directory(tmp_path, executed_passes=["unspecified"]) == 0
+    assert verify_directory(tmp_path, executed_passes=["unspecified"]) == 4
 
 
 def test_review_duplicate_workers_keep_their_own_identity(tmp_path: Path) -> None:
@@ -1106,6 +1119,10 @@ def test_review_duplicate_workers_keep_their_own_identity(tmp_path: Path) -> Non
         _finalized(
             [
                 _start(controller),
+                _start(worker_a),
+                _start(worker_b),
+                _collected(worker_a, [nodeid, nodeid]),
+                _collected(worker_b, [nodeid, nodeid]),
                 _collected(controller, [nodeid, nodeid]),
                 *_phases(worker_a, nodeid, "passed"),
                 *_phases(worker_b, nodeid, "passed"),
