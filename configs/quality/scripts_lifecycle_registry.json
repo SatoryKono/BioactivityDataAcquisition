@@ -1878,6 +1878,12 @@
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "next_step": "Keep as the internal result-mapping implementation behind the canonical scripts.engineering.ci pr-lane-results command; do not expose a second workflow CLI surface."
+    },
+    "scripts/engineering/qa/validate_benchmark_evidence.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the benchmark evidence validator helper for CI performance gates.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
     }
   },
   "schema_version": "1.0"

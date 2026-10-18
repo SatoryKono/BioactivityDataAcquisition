@@ -82,8 +82,7 @@ def test_test_telemetry_baseline_contract_is_present_and_scoped() -> None:
     else:
         assert source_event in {"pull_request", "push", "workflow_dispatch", "schedule"}
         if source_branch != "main":
-            # A manually dispatched Nightly run may measure the PR branch.
-            assert source_event in {"pull_request", "workflow_dispatch"}
+            assert source_event == "pull_request"
         assert source_run_url == (
             "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/"
             f"{source_run_id}"

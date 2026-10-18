@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2581`
-- Internal import edges (raw): `8315`
+- Scanned modules: `2569`
+- Internal import edges (raw): `8274`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `329`
@@ -28,8 +28,8 @@ flowchart LR
     composition -->|316 OK| domain
     composition -->|296 OK| infrastructure
     domain -->|1307 OK| domain
-    infrastructure -->|803 OK| domain
-    infrastructure -->|1310 OK| infrastructure
+    infrastructure -->|801 OK| domain
+    infrastructure -->|1271 OK| infrastructure
     interfaces -->|72 OK| application
     interfaces -->|61 OK| composition
     interfaces -->|85 OK| domain
@@ -47,8 +47,8 @@ flowchart LR
 | `composition`    | `domain`         |     316 | allowed |
 | `composition`    | `infrastructure` |     296 | allowed |
 | `domain`         | `domain`         |    1307 | allowed |
-| `infrastructure` | `domain`         |     803 | allowed |
-| `infrastructure` | `infrastructure` |    1310 | allowed |
+| `infrastructure` | `domain`         |     801 | allowed |
+| `infrastructure` | `infrastructure` |    1271 | allowed |
 | `interfaces`     | `application`    |      72 | allowed |
 | `interfaces`     | `composition`    |      61 | allowed |
 | `interfaces`     | `domain`         |      85 | allowed |
@@ -63,8 +63,8 @@ flowchart LR
 | `application.composite`        | `domain.composite`                         |     116 |
 | `application.core`             | `domain.types`                             |      97 |
 | `application.services`         | `domain.types`                             |      86 |
-| `infrastructure.storage`       | `domain.types`                             |      83 |
-| `infrastructure.storage`       | `domain.ports`                             |      67 |
+| `infrastructure.storage`       | `domain.types`                             |      82 |
+| `infrastructure.storage`       | `domain.ports`                             |      66 |
 | `application.pipelines`        | `domain.types`                             |      57 |
 | `application.composite`        | `domain.ports`                             |      55 |
 | `application.services`         | `domain.ports`                             |      55 |

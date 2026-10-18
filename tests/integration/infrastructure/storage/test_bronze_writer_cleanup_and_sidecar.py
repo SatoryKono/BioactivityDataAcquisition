@@ -12,7 +12,6 @@
 
 from __future__ import annotations
 
-import os
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -26,7 +25,6 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from tests.helpers.bronze_cleanup import sidecar_bytes
 from tests.testing_support.bronze_writer import (
     batch_id,
     ingestion_ts,
@@ -660,9 +658,6 @@ class TestBronzeWriterCleanupFiltered:
         assert "e1" in str(result[0])
 
     @pytest.mark.asyncio
-    @pytest.mark.skipif(
-        os.name == "nt", reason="Windows destructive cleanup fail-closed (NOT_VERIFIED)"
-    )
     async def test_cleanup_old_files_filtered(
         self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
@@ -674,86 +669,19 @@ class TestBronzeWriterCleanupFiltered:
         )
 
         # Setup
-        artifact = "batch_2024-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
         p1_e1 = tmp_path / "p1" / "e1" / "2024-01-01"
         p1_e1.mkdir(parents=True)
-        (p1_e1 / artifact).touch()
-        (p1_e1 / f"{artifact}.meta.json").write_bytes(
-            sidecar_bytes(b"", artifact, provider="p1", entity="e1")
-        )
+        (p1_e1 / "file").touch()
 
         p2_e1 = tmp_path / "p2" / "e1" / "2024-01-01"
         p2_e1.mkdir(parents=True)
-        (p2_e1 / artifact).touch()
-        (p2_e1 / f"{artifact}.meta.json").write_bytes(
-            sidecar_bytes(b"", artifact, provider="p2", entity="e1")
-        )
+        (p2_e1 / "file").touch()
 
         cutoff = datetime(2024, 6, 1, tzinfo=UTC)
 
         # Cleanup only p1
         result = await writer.cleanup_old_files(cutoff, provider="p1")
 
-        assert result["files_removed"] == 2
+        assert result["files_removed"] == 1
         assert not p1_e1.exists()
         assert p2_e1.exists()
-
-
-@pytest.mark.integration
-@pytest.mark.skipif(
-    os.name == "nt", reason="Windows destructive cleanup fail-closed (NOT_VERIFIED)"
-)
-async def test_writer_produced_batch_preview_apply_and_second_noop(
-    tmp_path: Path,
-    batch_id: BatchID,
-    run_id: RunID,
-    run_type: RunType,
-    sample_records: list[bytes],
-) -> None:
-    """Use the production write path for payload, sidecar and optional copy."""
-    writer = BronzeWriter(
-        base_path=tmp_path,
-        logger=NoOpLogger(),
-        metrics=NoOpMetrics(),
-        json_export=(True, None),
-    )
-    old = datetime(2024, 1, 15, tzinfo=UTC)
-    await writer.write_bronze(
-        records=iter(sample_records),
-        provider="chembl",
-        entity="activity",
-        date=old,
-        batch_id=batch_id,
-        run_id=run_id,
-        run_type=run_type,
-        ingestion_ts=old,
-    )
-    date_dir = tmp_path / "chembl" / "activity" / "2024-01-15"
-    files = sorted(date_dir.iterdir())
-    assert len(files) == 3
-    before = {path.name: (path.read_bytes(), path.stat().st_mtime_ns) for path in files}
-    cutoff = datetime(2024, 6, 1, tzinfo=UTC)
-    planned_paths = [
-        candidate.path.relative_to(tmp_path).as_posix()
-        for candidate in writer._plan_old_dir_files(date_dir, tmp_path, tmp_path).files
-    ]
-
-    dry = await writer.cleanup_old_files(cutoff, dry_run=True)
-
-    assert dry["files_planned"] == 3
-    assert dry["directories_planned"] == 1
-    assert dry["files_removed"] == dry["bytes_freed"] == 0
-    assert {
-        path.name: (path.read_bytes(), path.stat().st_mtime_ns) for path in files
-    } == before
-    assert planned_paths == [
-        candidate.path.relative_to(tmp_path).as_posix()
-        for candidate in writer._plan_old_dir_files(date_dir, tmp_path, tmp_path).files
-    ]
-
-    applied = await writer.cleanup_old_files(cutoff)
-    assert applied["files_planned"] == applied["files_removed"] == 3
-    assert applied["directories_removed"] == 1
-    assert not date_dir.exists()
-    second = await writer.cleanup_old_files(cutoff)
-    assert second["files_planned"] == second["files_removed"] == 0

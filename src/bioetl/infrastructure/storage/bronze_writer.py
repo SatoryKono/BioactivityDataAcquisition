@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import time
 from collections.abc import Iterator
 from datetime import datetime
@@ -12,10 +11,6 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
-from bioetl.infrastructure.storage.bronze.cleanup_core import (
-    _require_unlinked_bronze_root,
-)
-from bioetl.infrastructure.storage.bronze.cleanup_support import bronze_tree_lock
 from bioetl.infrastructure.storage.bronze.facade_contracts import (
     BRONZE_WRITE_ERRORS,
 )
@@ -63,43 +58,6 @@ from bioetl.domain.ports.noop import _NoOpSpan
 __all__ = ["BRONZE_WRITE_ERRORS", "BronzeWriter"]
 
 BRONZE_ATOMIC_WRITE_CONTRACT = "atomic_write_bytes via bronze.write_execution"
-
-
-def _prepare_unlinked_bronze_root(base_path: Path) -> None:
-    """Reject a linked ancestor before creating the configured root.
-
-    A leaf symlink remains a writer alias. The shared lock pins its target.
-    """
-    _require_unlinked_bronze_root(base_path, allow_leaf_link=True)
-    base_path.mkdir(parents=True, exist_ok=True)
-
-
-async def _drain_shielded_task[T](task: asyncio.Task[T]) -> None:
-    """Wait through repeated cancellation while an I/O task still owns its lock."""
-    while not task.done():
-        try:
-            await asyncio.shield(task)
-        except BaseException as exc:
-            if isinstance(exc, asyncio.CancelledError):
-                current = asyncio.current_task()
-                if current is not None:
-                    current.uncancel()
-            elif not task.done():
-                raise
-
-
-async def _wait_for_task_completion[T](task: asyncio.Task[T]) -> None:
-    """Finish shielded I/O, then propagate any cancellation to the caller."""
-    try:
-        await asyncio.shield(task)
-    except asyncio.CancelledError:
-        await _drain_shielded_task(task)
-        raise
-    except BaseException as exc:
-        if isinstance(exc, asyncio.CancelledError) or not task.done():
-            raise
-        # A completed task's result or exception belongs to the caller.
-        return
 
 
 class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
@@ -229,19 +187,32 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         source_metadata: SourceMetadata | None = None,
     ) -> BronzeWriteResult:
         """Write raw records to Bronze layer (JSONL + zstd)."""
-        request = BronzeWriteRequest(
-            records=records,
-            provider=provider,
-            entity=entity,
-            date=date,
-            batch_id=batch_id,
-            run_id=run_id,
-            run_type=run_type,
-            ingestion_ts=ingestion_ts,
-            source_metadata=source_metadata,
+        return await self._write_bronze_with_tracing(
+            BronzeWriteRequest(
+                records=records,
+                provider=provider,
+                entity=entity,
+                date=date,
+                batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
+                ingestion_ts=ingestion_ts,
+                source_metadata=source_metadata,
+            )
         )
-        labels = {"provider": request.provider, "entity": request.entity}
-        self._metrics.increment_counter("bioetl_bronze_write_attempts_total", 1, labels)
+
+    async def cleanup_bronze(
+        self,
+        cutoff_date: datetime,
+        dry_run: bool = False,
+    ) -> dict[str, int]:
+        """Implement ``BronzeStoragePort`` cleanup via the retained cleanup helper."""
+        return await self.cleanup_old_files(cutoff_date, dry_run=dry_run)
+
+    async def _write_bronze_with_tracing(
+        self,
+        request: BronzeWriteRequest,
+    ) -> BronzeWriteResult:
         span_context = (
             self._tracing.get_tracer(__name__).start_as_current_span("write_bronze")
             if self._tracing is not None
@@ -252,74 +223,13 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
             span.set_attribute("entity", request.entity)
             span.set_attribute("batch_id", str(request.batch_id))
             span.set_attribute("run_id", str(request.run_id))
-            self._validate_bronze_request_inputs(request)
-            return await self._write_bronze_under_lock(request)
-
-    async def _write_bronze_under_lock(
-        self, request: BronzeWriteRequest
-    ) -> BronzeWriteResult:
-        """Hold the cooperative root lock through all writer side effects."""
-        await asyncio.to_thread(_prepare_unlinked_bronze_root, self.base_path)
-        lock = bronze_tree_lock(self.base_path, exclusive=False)
-        entering = asyncio.create_task(asyncio.to_thread(lock.__enter__))
-        try:
-            await asyncio.shield(entering)
-        except asyncio.CancelledError:
-            try:
-                await _wait_for_task_completion(entering)
-            finally:
-                if (
-                    entering.done()
-                    and not entering.cancelled()
-                    and entering.exception() is None
-                ):
-                    leaving = asyncio.create_task(
-                        asyncio.to_thread(lock.__exit__, None, None, None)
-                    )
-                    await _wait_for_task_completion(leaving)
-                    leaving.result()
-            raise
-        try:
-            writing = asyncio.create_task(
-                self._write_bronze_with_tracing(request, entering.result().writer_path)
-            )
-            try:
-                return await asyncio.shield(writing)
-            except asyncio.CancelledError:
-                try:
-                    await _wait_for_task_completion(writing)
-                finally:
-                    if writing.done() and not writing.cancelled():
-                        writing.exception()
-                raise
-        finally:
-            leaving = asyncio.create_task(
-                asyncio.to_thread(lock.__exit__, None, None, None)
-            )
-            await _wait_for_task_completion(leaving)
-            leaving.result()
-
-    async def _write_bronze_with_tracing(
-        self,
-        request: BronzeWriteRequest,
-        locked_root: Path | None = None,
-    ) -> BronzeWriteResult:
-        span_context = (
-            self._tracing.get_tracer(__name__).start_as_current_span(
-                "write_bronze_data"
-            )
-            if self._tracing is not None
-            else _NoOpSpan()
-        )
-        with span_context as span:
-            span.set_attribute("provider", request.provider)
-            span.set_attribute("entity", request.entity)
-            span.set_attribute("batch_id", str(request.batch_id))
-            span.set_attribute("run_id", str(request.run_id))
 
             labels = {"provider": request.provider, "entity": request.entity}
+            self._metrics.increment_counter(
+                "bioetl_bronze_write_attempts_total", 1, labels
+            )
             start_time = time.perf_counter()
-            prepared = self._prepare_bronze_write(request, locked_root=locked_root)
+            prepared = self._prepare_bronze_write(request)
             write_artifacts = await self._write_bronze_data_and_sidecar(prepared)
             duration = time.perf_counter() - start_time
             await self._run_bronze_post_write_actions(
@@ -328,8 +238,7 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
                     prepared=prepared,
                     write_artifacts=write_artifacts,
                     duration=duration,
-                ),
-                locked_root=locked_root,
+                )
             )
             total_duration = time.perf_counter() - start_time
             self._metrics.observe_histogram(
@@ -345,7 +254,6 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
                 uncompressed_size=write_artifacts.uncompressed_size,
                 compressed_size=write_artifacts.compressed_size,
                 span=span,
-                locked_root=locked_root,
             )
 
     def _validate_bronze_request_inputs(self, request: BronzeWriteRequest) -> None:
@@ -378,20 +286,16 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
     def _prepare_bronze_write(
         self,
         request: BronzeWriteRequest,
-        *,
-        locked_root: Path | None = None,
     ) -> BronzeWritePrepared:
         """Validate inputs and build the prepared write context."""
-        return prepare_bronze_write(self, request, locked_root=locked_root)
+        return prepare_bronze_write(self, request)
 
     async def _run_bronze_post_write_actions(
         self,
         context: BronzeWritePostwriteContext,
-        *,
-        locked_root: Path | None = None,
     ) -> None:
         """Emit metrics, optional JSON copy, audit log, and metadata sidecar."""
-        await run_bronze_post_write_actions(self, context, locked_root=locked_root)  # pyright: ignore[reportArgumentType]
+        await run_bronze_post_write_actions(self, context)  # pyright: ignore[reportArgumentType]
 
     async def _write_bronze_data_and_sidecar(
         self,

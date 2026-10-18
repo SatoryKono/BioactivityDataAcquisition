@@ -47,26 +47,6 @@ def test_circleci_config_rejects_duplicate_nested_keys():
         _assert_unique_keys(document)
 
 
-def test_bronze_coverage_is_branch_scoped_and_uses_complete_canonical_groups():
-    config = _config()
-    # The canonical tooling group runs subprocess-based Node contracts.
-    assert config["jobs"]["proof-coverage-shard"]["docker"] == [
-        {"image": "cimg/python:3.12-node"}
-    ]
-    workflow = config["workflows"]["bronze-cleanup-coverage"]
-    conditions = workflow["when"]["and"]
-    assert {
-        "equal": ["fix/bronze-cleanup-fs001", "<< pipeline.git.branch >>"]
-    } in conditions
-    assert {
-        "not": {"equal": ["scheduled_pipeline", "<< pipeline.trigger_source >>"]}
-    } in conditions
-    shard, merge = workflow["jobs"]
-    matrix = shard["proof-coverage-shard"]["matrix"]
-    assert matrix["parameters"]["group"] == ["0", "1", "2", "3"]
-    assert merge == {"proof-coverage": {"requires": [matrix["alias"]]}}
-
-
 def test_circleci_heredocs_escape_compiler_interpolation():
     source = (ROOT / ".circleci/config.yml").read_text(encoding="utf-8")
     assert not re.search(r"(?<!\\)<<[ \t]*['\"]", source)

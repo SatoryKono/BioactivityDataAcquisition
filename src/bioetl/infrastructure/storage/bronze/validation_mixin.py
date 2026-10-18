@@ -11,8 +11,6 @@ import orjson
 
 from bioetl.domain.ports import LoggerPort
 
-from .cleanup_core import valid_bronze_scope_name
-
 
 class BronzeWriterValidationMixin:
     """Mixin with input/path validation helpers for Bronze writes."""
@@ -49,7 +47,7 @@ class BronzeWriterValidationMixin:
             ValueError: If provider or entity contains invalid characters.
         """
         for name, label in [(provider, "provider"), (entity, "entity")]:
-            if not valid_bronze_scope_name(name):
+            if not name or not name.replace("_", "").isalnum():
                 raise ValueError(
                     f"Invalid {label} name: '{name}'. "
                     "Use alphanumeric characters and underscores only."

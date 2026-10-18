@@ -70,8 +70,6 @@ class BronzeStoragePort(Protocol):
             dry_run: If True, only count what would be removed.
 
         Returns:
-            Dict with planned, removed, skipped, conflicted, and failed file/
-            directory counts plus planned, freed, and retained bytes. Legacy removed keys
-            remain present; dry-run leaves removed and freed counts at zero.
+            Dict with cleanup stats (files_removed, bytes_freed, directories_removed).
         """
         ...

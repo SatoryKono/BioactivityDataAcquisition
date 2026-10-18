@@ -25,8 +25,7 @@
     "BronzeWriteArtifacts": [
       "record_count",
       "uncompressed_size",
-      "compressed_size",
-      "json_copy_allowed"
+      "compressed_size"
     ],
     "BronzeWritePostwriteContext": [
       "request",
