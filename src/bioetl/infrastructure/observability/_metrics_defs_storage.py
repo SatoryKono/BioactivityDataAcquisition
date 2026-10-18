@@ -100,6 +100,64 @@ BRONZE_BYTES_FREED_TOTAL = Counter(
     ["operation"],
 )
 
+BRONZE_CLEANUP_FILES_SKIPPED_TOTAL = Counter(
+    "bioetl_bronze_cleanup_files_skipped_total",
+    "Total Bronze cleanup files skipped",
+    ["operation"],
+)
+BRONZE_CLEANUP_FILES_CONFLICTED_TOTAL = Counter(
+    "bioetl_bronze_cleanup_files_conflicted_total",
+    "Total Bronze cleanup files conflicted",
+    ["operation"],
+)
+BRONZE_CLEANUP_FILES_FAILED_TOTAL = Counter(
+    "bioetl_bronze_cleanup_files_failed_total",
+    "Total Bronze cleanup files failed",
+    ["operation"],
+)
+BRONZE_CLEANUP_BYTES_SKIPPED_TOTAL = Counter(
+    "bioetl_bronze_cleanup_bytes_skipped_total",
+    "Total Bronze cleanup bytes skipped",
+    ["operation"],
+)
+BRONZE_CLEANUP_BYTES_CONFLICTED_TOTAL = Counter(
+    "bioetl_bronze_cleanup_bytes_conflicted_total",
+    "Total Bronze cleanup bytes conflicted",
+    ["operation"],
+)
+BRONZE_CLEANUP_BYTES_FAILED_TOTAL = Counter(
+    "bioetl_bronze_cleanup_bytes_failed_total",
+    "Total Bronze cleanup bytes failed",
+    ["operation"],
+)
+BRONZE_CLEANUP_DIRECTORIES_SKIPPED_TOTAL = Counter(
+    "bioetl_bronze_cleanup_directories_skipped_total",
+    "Total Bronze cleanup directories skipped",
+    ["operation"],
+)
+BRONZE_CLEANUP_DIRECTORIES_CONFLICTED_TOTAL = Counter(
+    "bioetl_bronze_cleanup_directories_conflicted_total",
+    "Total Bronze cleanup directories conflicted",
+    ["operation"],
+)
+BRONZE_CLEANUP_DIRECTORIES_FAILED_TOTAL = Counter(
+    "bioetl_bronze_cleanup_directories_failed_total",
+    "Total Bronze cleanup directories failed",
+    ["operation"],
+)
+
+BRONZE_CLEANUP_OUTCOME_COUNTERS = {
+    "bioetl_bronze_cleanup_files_skipped_total": BRONZE_CLEANUP_FILES_SKIPPED_TOTAL,
+    "bioetl_bronze_cleanup_files_conflicted_total": BRONZE_CLEANUP_FILES_CONFLICTED_TOTAL,
+    "bioetl_bronze_cleanup_files_failed_total": BRONZE_CLEANUP_FILES_FAILED_TOTAL,
+    "bioetl_bronze_cleanup_bytes_skipped_total": BRONZE_CLEANUP_BYTES_SKIPPED_TOTAL,
+    "bioetl_bronze_cleanup_bytes_conflicted_total": BRONZE_CLEANUP_BYTES_CONFLICTED_TOTAL,
+    "bioetl_bronze_cleanup_bytes_failed_total": BRONZE_CLEANUP_BYTES_FAILED_TOTAL,
+    "bioetl_bronze_cleanup_directories_skipped_total": BRONZE_CLEANUP_DIRECTORIES_SKIPPED_TOTAL,
+    "bioetl_bronze_cleanup_directories_conflicted_total": BRONZE_CLEANUP_DIRECTORIES_CONFLICTED_TOTAL,
+    "bioetl_bronze_cleanup_directories_failed_total": BRONZE_CLEANUP_DIRECTORIES_FAILED_TOTAL,
+}
+
 BRONZE_WRITE_TOTAL_DURATION_SECONDS = Histogram(
     "bioetl_bronze_write_total_duration_seconds",
     "Total Bronze write duration, including side effects and metadata writes",

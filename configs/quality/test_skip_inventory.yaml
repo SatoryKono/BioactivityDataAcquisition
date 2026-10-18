@@ -309,6 +309,66 @@ entries:
     vcr_related: false
     review_date: "2026-07-30"
     rationale: Windows lock-stress contracts are meaningful only on Windows and remain explicitly platform-conditional.
+  - path: tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-storage"
+    linked_issue: "#12102"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 6
+    vcr_related: false
+    review_date: "2026-10-14"
+    rationale: POSIX pinned handles, flock and symlink capability are required for synthetic journal destruction; Windows refusal is tested separately without skips.
+  - path: tests/integration/infrastructure/storage/test_bronze_group_association.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-storage"
+    linked_issue: "#12102"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-10-16"
+    rationale: POSIX pinned directory and flock capability are required for the dry-run mutation guard and the readonly journal refusal; Windows lock cases run without these skips.
+  - path: tests/integration/infrastructure/storage/test_bronze_writer_cleanup.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-storage"
+    linked_issue: "#12102"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-10-12"
+    rationale: Windows destructive apply is fail-closed pending verified handle and reparse-point capability.
+  - path: tests/integration/infrastructure/storage/test_bronze_writer_cleanup_and_sidecar.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-storage"
+    linked_issue: "#12102"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-10-12"
+    rationale: Windows destructive apply is fail-closed; production-writer deletion is verified on POSIX only.
+  - path: tests/integration/infrastructure/storage/test_bronze_writer_cleanup_safety.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-storage"
+    linked_issue: "#12102"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 14
+    vcr_related: false
+    review_date: "2026-10-12"
+    rationale: POSIX apply and anchored-operation cases require verified handle APIs; Windows-only refusal tests and junction cases remain platform-conditional. Windows destructive safety is NOT_VERIFIED.
+  - path: tests/integration/infrastructure/storage/test_bronze_writer_cleanup_writer_races.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-storage"
+    linked_issue: "#12102"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-10-13"
+    rationale: Pinned writer and lock race tests require verified POSIX anchored handle capability; unsupported platforms remain NOT_VERIFIED.
   - path: tests/integration/test_docker_compose_smoke.py
     suite: integration
     category: conditional_environment_guard

@@ -15,11 +15,14 @@ Targets uncovered lines: 78-79, 161, 192, 199, 266-274, 286-292.
 
 from __future__ import annotations
 
+import os
 from datetime import datetime, UTC
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
+
+from tests.helpers.bronze_cleanup import sidecar_bytes
 
 from bioetl.infrastructure.storage.bronze.io_mixin import BronzeWriterIOMixin
 from bioetl.infrastructure.storage.bronze import io_mixin
@@ -293,15 +296,19 @@ class TestCleanupOldFiles:
 
         old_dir = tmp_path / "chembl" / "activity" / "2024-12-01"
         old_dir.mkdir(parents=True)
-        (old_dir / "batch.jsonl.zst").write_bytes(b"data")
+        artifact = "batch_2024-12-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
+        (old_dir / artifact).write_bytes(b"data")
+        (old_dir / f"{artifact}.meta.json").write_bytes(
+            sidecar_bytes(b"data", artifact)
+        )
 
         cutoff = datetime(2025, 1, 1, tzinfo=UTC)
         result = await mixin.cleanup_old_files(cutoff, dry_run=True)
 
         # File still exists
-        assert (old_dir / "batch.jsonl.zst").exists()
-        assert result["files_removed"] == 1
-        assert result["bytes_freed"] > 0
+        assert (old_dir / artifact).exists()
+        assert result["files_planned"] == 2
+        assert result["files_removed"] == result["bytes_freed"] == 0
 
     @pytest.mark.asyncio
     async def test_cleanup_removes_old_files(self, tmp_path: Path) -> None:
@@ -310,14 +317,26 @@ class TestCleanupOldFiles:
 
         old_dir = tmp_path / "chembl" / "activity" / "2024-12-01"
         old_dir.mkdir(parents=True)
-        (old_dir / "batch1.jsonl.zst").write_bytes(b"data1")
-        (old_dir / "batch2.jsonl.zst").write_bytes(b"data2")
+        artifacts = [
+            f"batch_2024-12-01_{suffix}-1234-5678-1234-567812345678.jsonl.zst"
+            for suffix in ("12345678", "87654321")
+        ]
+        for artifact in artifacts:
+            (old_dir / artifact).write_bytes(b"data")
+            (old_dir / f"{artifact}.meta.json").write_bytes(
+                sidecar_bytes(b"data", artifact)
+            )
 
         cutoff = datetime(2025, 1, 1, tzinfo=UTC)
+        if os.name == "nt":
+            with pytest.raises(NotImplementedError, match="unsupported"):
+                await mixin.cleanup_old_files(cutoff, dry_run=False)
+            assert all((old_dir / artifact).exists() for artifact in artifacts)
+            return
         result = await mixin.cleanup_old_files(cutoff, dry_run=False)
 
-        assert result["files_removed"] == 2
-        assert not (old_dir / "batch1.jsonl.zst").exists()
+        assert result["files_removed"] == 4
+        assert not old_dir.exists()
 
     @pytest.mark.asyncio
     async def test_cleanup_increments_metrics(self, tmp_path: Path) -> None:
@@ -328,9 +347,18 @@ class TestCleanupOldFiles:
 
         old_dir = tmp_path / "chembl" / "activity" / "2024-12-01"
         old_dir.mkdir(parents=True)
-        (old_dir / "batch.jsonl.zst").write_bytes(b"data")
+        artifact = "batch_2024-12-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
+        (old_dir / artifact).write_bytes(b"data")
+        (old_dir / f"{artifact}.meta.json").write_bytes(
+            sidecar_bytes(b"data", artifact)
+        )
 
         cutoff = datetime(2025, 1, 1, tzinfo=UTC)
+        if os.name == "nt":
+            with pytest.raises(NotImplementedError, match="unsupported"):
+                await mixin.cleanup_old_files(cutoff, dry_run=False)
+            metrics.increment_counter.assert_not_called()
+            return
         await mixin.cleanup_old_files(cutoff, dry_run=False)
 
         assert metrics.increment_counter.call_count >= 2
@@ -344,6 +372,11 @@ class TestCleanupOldFiles:
 
         # No old files exist
         cutoff = datetime(2020, 1, 1, tzinfo=UTC)
+        if os.name == "nt":
+            with pytest.raises(NotImplementedError, match="unsupported"):
+                await mixin.cleanup_old_files(cutoff, dry_run=False)
+            metrics.increment_counter.assert_not_called()
+            return
         result = await mixin.cleanup_old_files(cutoff, dry_run=False)
 
         assert result["files_removed"] == 0
@@ -360,7 +393,9 @@ class TestPreviewCleanupBronze:
         provider_path = tmp_path / "chembl" / "activity"
         provider_path.mkdir(parents=True)
         (provider_path / "2025-01-15").mkdir()
-        (provider_path / "2025-01-15" / "batch.jsonl.zst").write_bytes(b"data")
+        (provider_path / "2025-01-15" / "batch_2024-12-01_001.jsonl.zst").write_bytes(
+            b"data"
+        )
 
         result = mixin.preview_cleanup(provider="chembl", entity="activity")
 

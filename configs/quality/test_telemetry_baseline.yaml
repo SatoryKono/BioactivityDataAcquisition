@@ -8,7 +8,7 @@ source_commit: badcaeb5d30892e9356969342a14403990794201
 source_run_id: local-bioetl-local-coverage-badcaeb-r2
 source_event: local_coverage_verify
 source_run_url: null
-source_tree_sha256: 9e242b8fc6a1096161ebcef25fe744fbe7b26ea9447d3ed024b7fc86fdb31f86
+source_tree_sha256: d4931026d12ca026932d44db5025e879ecb6828c07df779355a22109f8f60b9f
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
