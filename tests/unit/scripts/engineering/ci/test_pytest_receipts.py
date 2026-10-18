@@ -83,6 +83,7 @@ def _pytest(
         "--receipt-attempt=1",
         "--receipt-pass=direct",
         f"--receipt-repo-root={repo_root or REPO}",
+        *(["-p", "xdist"] if "-n" in extra or "--dist" in extra else []),
         *extra,
     ]
     return subprocess.run(
