@@ -176,6 +176,10 @@ class _CorruptLooseRef(Exception):
     """An existing loose ref is present but is not a SHA or symbolic ref."""
 
 
+class _InvalidCommonDir(Exception):
+    """A linked worktree commondir does not name a directory."""
+
+
 def _sha_at(
     gitdir: Path,
     ref: str,
@@ -214,18 +218,27 @@ def _sha_at(
 
 
 def _common_gitdir(gitdir: Path) -> Path | None:
-    """Resolve the commondir file of a linked worktree git directory."""
+    """Resolve a linked worktree commondir.
+
+    No commondir file means this gitdir is not a linked worktree. An existing
+    file that cannot be read, or whose path is not a directory, is invalid.
+    """
     common_file = gitdir / "commondir"
-    if not common_file.is_file():
+    try:
+        common_file.lstat()
+    except OSError:
         return None
-    raw = common_file.read_text(encoding="utf-8").strip()
+    try:
+        raw = common_file.read_text(encoding="utf-8").strip()
+    except (OSError, RuntimeError, UnicodeError) as exc:
+        raise _InvalidCommonDir from exc
+    if not raw:
+        raise _InvalidCommonDir
     common = Path(raw)
-    if not common.is_absolute():
-        resolved = _safe_resolve(gitdir / common)
-        if resolved is None:
-            return None
-        common = resolved
-    return common
+    resolved = _safe_resolve(common if common.is_absolute() else gitdir / common)
+    if resolved is None or not resolved.is_dir():
+        raise _InvalidCommonDir
+    return resolved
 
 
 def read_source_revision(
@@ -257,7 +270,7 @@ def read_source_revision(
         sha = head_text.lower()
         if _SHA_RE.fullmatch(sha):
             return SourceRevision(sha, "gitdir_head_file", "(detached head)")
-    except (OSError, RuntimeError, UnicodeError, _CorruptLooseRef):
+    except (OSError, RuntimeError, UnicodeError, _CorruptLooseRef, _InvalidCommonDir):
         return SourceRevision("unknown", "blocked", "(unknown)")
     return SourceRevision("unknown", "blocked", "(unknown)")
 

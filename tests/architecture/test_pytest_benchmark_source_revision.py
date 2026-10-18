@@ -150,7 +150,7 @@ def test_malformed_packed_refs_line_does_not_yield_a_later_sha(tmp_path: Path) -
     _write(root / ".git" / "HEAD", "ref: refs/heads/topic\n")
     _write(
         root / ".git" / "packed-refs",
-        "not-a-packed-line\n" f"{PACKED} refs/heads/topic\n",
+        f"not-a-packed-line\n{PACKED} refs/heads/topic\n",
     )
     source = read_source_revision(root, allow_parent_search=False)
     assert source.revision == "unknown"
@@ -171,6 +171,19 @@ def test_worktree_private_packed_refs_do_not_hide_the_common_ref(
     _write(worktree_git / "packed-refs", f"{PACKED} refs/heads/topic\n")
     _write(common / "packed-refs", f"{COMMIT} refs/heads/topic\n")
     _assert_commit(checkout, COMMIT, "refs/heads/topic")
+
+
+def test_missing_commondir_target_blocks_detached_worktree_head(
+    tmp_path: Path,
+) -> None:
+    """A missing commondir directory does not accept the private detached HEAD."""
+    common = tmp_path / "repo.git"
+    worktree_git = common / "worktrees" / "linked"
+    checkout = tmp_path / "linked"
+    _write(checkout / ".git", "gitdir: ../repo.git/worktrees/linked\n")
+    _write(worktree_git / "HEAD", COMMIT + "\n")
+    _write(worktree_git / "commondir", "../missing\n")
+    _assert_blocked(checkout)
 
 
 def test_missing_head_is_blocked(tmp_path: Path) -> None:

@@ -75,7 +75,7 @@ Remaining event parity and external acceptance are pending.
 The prepared `performance` lane preserves benchmark budgets and the five-sample
 window, emits JUnit/observations/JSON/Markdown artifacts, and fails on missing,
 empty or over-budget evidence. Main job 3365 passed 70 tests and all five budgets.
-`bioetl-performance-nightly` is registered for 03:00–03:59 UTC daily. Its first
+`bioetl-performance-nightly` was registered for 03:00–03:59 UTC daily. That registration is historical: `.circleci/config.yml` has no selectable `performance` lane, and `performance-nightly.yml` is manual `workflow_dispatch`. Its first
 scheduled pipeline 272 failed the CrossRef median budget (0.479 ms against
 0.4125 ms); a single diagnostic rerun on the same main SHA passed all 70 tests
 with CrossRef at 0.268 ms. Both attempts are retained; scheduling is demonstrated,
@@ -605,8 +605,10 @@ Main event pipeline371 and heavy pipeline373 are the post-merge checks.
 Actual scheduled performance pipeline370/job6640 on main
 `ba9c80e7b8e1007e984851ea2b40aa6818df3645` passes70 tests without skips;
 all five budget rows pass, with CrossRef median0.242484ms. All six artifacts
-were downloaded and hashed. The schedule was restored to daily03UTC and API
+were downloaded and hashed. The schedule was restored to daily 03:00 UTC and API
 readback matched all twelve original timetables, parameters and actors.
+That restoration is historical evidence. The current caller is manual
+`workflow_dispatch`, not a CircleCI `performance` lane.
 The earlier failing scheduled272 result remains part of the evidence; neither
 thresholds nor the existing observation-window contract changed.
 
