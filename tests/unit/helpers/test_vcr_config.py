@@ -454,6 +454,10 @@ def test_sensitive_query_fields_are_unconditionally_removed(key: str) -> None:
 def test_response_sanitizer_preserves_protocol_and_strips_secrets_case_insensitive():
     """Verify that protocol headers are preserved while secrets are stripped case-insensitively."""
     hook = cast(Callable[[Any], Any], build_base_vcr_config()["before_record_response"])
+
+    # Assert fail-closed for malformed response surfaces
+    assert hook({"status": {"code": 200}, "headers": "invalid"}) is None
+
     response = {
         "status": {"code": 429},
         "headers": {
