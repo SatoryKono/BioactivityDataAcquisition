@@ -2215,13 +2215,36 @@ jobs:
             NAME="${GROUP%%|*}"; REST="${GROUP#*|}"
             PATHS="${REST%%|*}"; XDIST="${REST#*|}"
             mkdir -p reports/test-telemetry
+            JOURNAL_COVERAGE=()
+            if [ "$NAME" = integration ]; then
+              mkdir -p reports/quality/fs001-journal-coverage
+              export COVERAGE_FILE=reports/quality/fs001-journal-coverage/.coverage
+              JOURNAL_COVERAGE=(
+                --cov=bioetl.infrastructure.storage.bronze.cleanup_group_journal
+                --cov=bioetl.infrastructure.storage.bronze.cleanup_group_schema
+                --cov=bioetl.infrastructure.storage.bronze.cleanup_group_records
+                --cov=bioetl.infrastructure.storage.bronze.cleanup_group_members
+                --cov=bioetl.infrastructure.storage.bronze.cleanup_group_recovery
+                --cov-branch
+                --cov-report=term-missing
+                --cov-report=json:reports/quality/fs001-journal-coverage/coverage.json
+                --cov-report=xml:reports/quality/fs001-journal-coverage/coverage.xml
+              )
+            fi
             uv run --frozen --no-build pytest $PATHS \
               -m "not serial and not memory and not fs_contract and not subprocess_backed" \
               $XDIST \
+              "${JOURNAL_COVERAGE[@]}" \
               -q --tb=short \
               --junitxml="reports/test-telemetry/junit.${NAME}.xml"
       - store_test_results:
           path: reports/test-telemetry
+      - store_artifacts:
+          path: reports/test-telemetry
+          destination: integration-junit
+      - store_artifacts:
+          path: reports/quality/fs001-journal-coverage
+          destination: bronze-journal-coverage
 
   # Mirrors tests.yml `dq-consistency-gate`.
   dq-consistency:
@@ -3349,7 +3372,7 @@ jobs:
       NUMEXPR_NUM_THREADS: '1'
   proof-coverage-shard:
     docker:
-    - image: cimg/python:3.12
+    - image: cimg/python:3.12-node
     resource_class: medium
     environment:
       PYTHONPATH: src
@@ -3743,6 +3766,27 @@ workflows:
             - '1'
             - '2'
             - '3'
+
+  # PR #12136 needs real POSIX execution and all canonical coverage shards.
+  # Measurement only: this does not select publication or closeout jobs.
+  bronze-cleanup-coverage:
+    when:
+      and:
+        - or:
+            - equal: [coverage-closeout, << pipeline.parameters.ci-lane >>]
+            - equal: [pr-gate, << pipeline.parameters.ci-lane >>]
+        - equal: [fix/bronze-cleanup-fs001, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
+    jobs:
+      - proof-coverage-shard:
+          matrix:
+            alias: bronze-coverage-shards
+            parameters:
+              group: ['0', '1', '2', '3']
+      - proof-coverage:
+          requires:
+            - bronze-coverage-shards
 
   main-coverage-closeout:
     when:

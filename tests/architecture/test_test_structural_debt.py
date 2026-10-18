@@ -12,10 +12,10 @@
 
 from __future__ import annotations
 
-import pytest
-
 import ast
 from pathlib import Path
+
+import pytest
 
 pytestmark = pytest.mark.architecture
 
@@ -23,7 +23,6 @@ MAX_TEST_FILE_LOC = 2000
 MAX_TEST_FUNCTION_LOC = 200
 
 TEST_FILE_LOC_EXEMPTIONS = {
-    "tests/testing_support/bronze_writer.py": 2025,
     "tests/integration/test_grafana_dashboard_links.py": 2350,
     "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py": 2200,
 }
