@@ -294,6 +294,8 @@ def test_worker_collection_and_controller_redelivery_are_not_summed(
     events = [
         _start(controller),
         _collected(controller, [node_a, node_b]),
+        _start(worker_a),
+        _start(worker_b),
         _collected(worker_a, [node_a, node_b]),
         _collected(worker_b, [node_a, node_b]),
         *_phases(worker_a, node_a, "passed"),
@@ -303,11 +305,6 @@ def test_worker_collection_and_controller_redelivery_are_not_summed(
         {"event": "session_finish", "identity": controller, "exitstatus": 0},
     ]
     _write_receipt(tmp_path, _finalized(events), name="receipt_controller.jsonl")
-    _write_receipt(
-        tmp_path,
-        _finalized([_start(worker_a), _collected(worker_a, [node_a, node_b])]),
-        name="receipt_gw0.jsonl",
-    )
     verdict = reconcile_directory(tmp_path, executed_passes=["parallel"])
     parallel = verdict["passes"]["parallel"]
     assert parallel["selected_count"] == 2
@@ -1283,6 +1280,12 @@ def test_older_damaged_invocation_does_not_hide_the_latest(tmp_path: Path) -> No
         ),
     )
     verdict = reconcile_directory(tmp_path, executed_passes=["parallel"])
+    assert verdict["status"] == "unknown"
+    verdict = reconcile_directory(
+        tmp_path,
+        executed_passes=["parallel"],
+        expected_invocations={"parallel": new_invocation},
+    )
     assert verdict["status"] == "complete", verdict["reasons"]
     assert verdict["tests_passed"] is True
     assert verdict["passes"]["parallel"]["invocation_id"] == new_invocation

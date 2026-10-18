@@ -12,6 +12,7 @@ import asyncio
 import hashlib
 import importlib.metadata
 import json
+import math
 import os
 import platform
 import resource
@@ -122,6 +123,25 @@ def build_service(directory: Path):
     )
 
 
+def validate_values(actual_rows: int, total: float, rows: int) -> None:
+    """Allow only finite roundoff, never missing rows or a fixture-value step.
+
+    Values are multiples of 1.5; at the 100000-row bound the sum is below 2**53.
+    Eight machine epsilons allow a few reduction-rounding ulps (under 1.4e-5
+    at maximum scale), far below a 1.5 fixture step. The 1e-12 absolute floor
+    handles the single-row zero sum without accepting meaningful corruption.
+    """
+    expected = 0.75 * rows * (rows - 1)
+    if (
+        actual_rows != rows
+        or not math.isfinite(total)
+        or not math.isclose(
+            total, expected, rel_tol=8 * sys.float_info.epsilon, abs_tol=1e-12
+        )
+    ):
+        raise ValueError("Production read failed row count/value validation")
+
+
 async def measure(rows: int, directory: Path) -> dict:
     """Measure the live read; fixture preparation never occurs in this interpreter."""
     import pyarrow as pa
@@ -133,10 +153,7 @@ async def measure(rows: int, directory: Path) -> dict:
     frame = await service._read_silver_table("chembl/activity")
     elapsed = time.perf_counter() - start
     peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
-    if frame.height != rows or frame["activity_value"].sum() != 0.75 * rows * (
-        rows - 1
-    ):
-        raise ValueError("Production read failed row count/value validation")
+    validate_values(frame.height, frame["activity_value"].sum(), rows)
     return {
         "rows": rows,
         "wall_time_s": elapsed,
@@ -209,6 +226,37 @@ def fixture_identity(directory: Path) -> dict:
     }
 
 
+def measure_repeat(
+    rows: int,
+    repeat: int,
+    preparation: dict,
+    fixture: dict,
+    common: list[str],
+    timeout_s: int,
+) -> dict:
+    """Retain raw subprocess evidence and fail closed for one repetition."""
+    result = {
+        "rows": rows,
+        "repeat": repeat,
+        "preparation": preparation,
+        "fixture_sha256": fixture,
+        "measurement": None,
+        "status": "BLOCKED",
+    }
+    if preparation["exit_code"] != 0 or preparation["timed_out"]:
+        return result
+    run = run_bounded([*common, "--phase", "measure"], timeout_s)
+    result["measurement"] = run
+    if run["exit_code"] != 0 or run["timed_out"]:
+        return result
+    try:
+        result["raw"] = json.loads(run["stdout"])
+        result["status"] = "COMPLETED"
+    except json.JSONDecodeError:
+        result["status"] = "BLOCKED_INVALID_OUTPUT"
+    return result
+
+
 def orchestrate(args: argparse.Namespace) -> int:
     """Run bounded preparation followed by fresh repeated measurement processes."""
     source = source_identity()
@@ -231,24 +279,11 @@ def orchestrate(args: argparse.Namespace) -> int:
             preparation = run_bounded([*common, "--phase", "prepare"], args.timeout_s)
             fixture = fixture_identity(directory)
             for repeat in range(1, args.repeats + 1):
-                result = {
-                    "rows": rows,
-                    "repeat": repeat,
-                    "preparation": preparation,
-                    "fixture_sha256": fixture,
-                    "measurement": None,
-                    "status": "BLOCKED",
-                }
-                if preparation["exit_code"] == 0 and not preparation["timed_out"]:
-                    run = run_bounded([*common, "--phase", "measure"], args.timeout_s)
-                    result["measurement"] = run
-                    if run["exit_code"] == 0 and not run["timed_out"]:
-                        try:
-                            result["raw"] = json.loads(run["stdout"])
-                            result["status"] = "COMPLETED"
-                        except json.JSONDecodeError:
-                            result["status"] = "BLOCKED_INVALID_OUTPUT"
-                observations.append(result)
+                observations.append(
+                    measure_repeat(
+                        rows, repeat, preparation, fixture, common, args.timeout_s
+                    )
+                )
     payload = {
         "generated_at": datetime.now(UTC).isoformat(),
         "command": [sys.executable, *sys.argv],

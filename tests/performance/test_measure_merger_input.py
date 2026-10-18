@@ -127,3 +127,81 @@ def test_output_boundary_resolves_symlinks(tmp_path):
     link.symlink_to("/proc", target_is_directory=True)
     with pytest.raises(ValueError, match="Path must resolve inside"):
         harness.confined_path(link / "pr12274-never-created.json")
+
+
+@pytest.mark.parametrize("rows", [1, 10, 100_000])
+def test_value_validation_accepts_finite_roundoff(rows):
+    """One representable step is allowed, including around the zero-row-index sum."""
+    import math
+
+    expected = 0.75 * rows * (rows - 1)
+    harness.validate_values(rows, math.nextafter(expected, math.inf), rows)
+
+
+@pytest.mark.parametrize(
+    ("actual_rows", "total", "rows"),
+    [
+        (9, 67.5, 10),
+        (10, float("nan"), 10),
+        (10, float("inf"), 10),
+        (10, -float("inf"), 10),
+        (10, 69.0, 10),
+        (1, 1e-8, 1),
+        (100_000, 7_499_925_001.5, 100_000),
+    ],
+)
+def test_value_validation_rejects_wrong_count_nonfinite_or_corruption(
+    actual_rows, total, rows
+):
+    """Tolerance must not accept a missing row, nonfinite sum or one fixture step."""
+    with pytest.raises(ValueError, match="row count/value validation"):
+        harness.validate_values(actual_rows, total, rows)
+
+
+@pytest.mark.parametrize(
+    ("prep_exit", "prep_timeout", "run_exit", "run_timeout", "stdout", "status"),
+    [
+        (2, False, 0, False, "{}", "BLOCKED"),
+        (0, True, 0, False, "{}", "BLOCKED"),
+        (0, False, -9, True, "partial", "BLOCKED"),
+        (0, False, 3, False, "error", "BLOCKED"),
+        (0, False, 0, True, "{}", "BLOCKED"),
+        (0, False, 0, False, "invalid json", "BLOCKED_INVALID_OUTPUT"),
+        (0, False, 0, False, '{"rows": 10}', "COMPLETED"),
+    ],
+)
+def test_repeat_preserves_raw_failure_and_success_states(
+    monkeypatch, prep_exit, prep_timeout, run_exit, run_timeout, stdout, status
+):
+    """Refactoring must preserve exit/timeout/stdout/stderr and skip failed fixtures."""
+    preparation = {"exit_code": prep_exit, "timed_out": prep_timeout}
+    run = {
+        "exit_code": run_exit,
+        "timed_out": run_timeout,
+        "stdout": stdout,
+        "stderr": "raw stderr",
+        "elapsed_s": 0.125,
+    }
+    calls = []
+
+    def fake_run(command, timeout_s):
+        calls.append((command, timeout_s))
+        return run
+
+    monkeypatch.setattr(harness, "run_bounded", fake_run)
+    fixture = {"table": "digest"}
+    result = harness.measure_repeat(10, 2, preparation, fixture, ["worker"], 30)
+    assert result["status"] == status
+    assert result["preparation"] is preparation
+    assert result["fixture_sha256"] is fixture
+    assert (result["rows"], result["repeat"]) == (10, 2)
+    if prep_exit or prep_timeout:
+        assert calls == []
+        assert result["measurement"] is None
+    else:
+        assert calls == [(["worker", "--phase", "measure"], 30)]
+        assert result["measurement"] is run
+    if status == "COMPLETED":
+        assert result["raw"] == {"rows": 10}
+    else:
+        assert "raw" not in result
