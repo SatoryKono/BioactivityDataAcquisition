@@ -28,12 +28,12 @@ jobs:
       # Suites under tests/benchmarks and tests/performance are deterministic
       # fixtures. Their dataset id is synthetic. The reducer compares it and
       # may write a proposed candidate; CI does not adopt the baseline.
-      # Requires caller/guard from PR #12235, including raw dataset provenance.
-      # Missing producer support is a blocking failure, never a skipped gate.
+      # Guard from PR #12235 is integrated here with explicit fixture provenance.
       - name: Run all performance benchmarks
         id: benchmarks
         env:
           BIOETL_BENCHMARK_CALLER: performance-nightly
+          BIOETL_BENCHMARK_DATASET: bioetl-synthetic-performance-v1
         run: |
           mkdir -p reports/performance
           rm -f reports/performance/benchmark-measurements.json \
