@@ -7,14 +7,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 import bioetl.application.composite.checkpoint._state_support as state_support
-from bioetl.application.composite.checkpoint.state_parsing import (
-    parse_dependency_results,
-    parse_enrichment_results,
-    parse_optional_string,
-    parse_seed_result,
-    parse_state,
-    parse_timestamp,
-)
+from bioetl.application.composite.checkpoint.state_factory import build_checkpoint_state
 from bioetl.application.composite.checkpoint.state_serialization import (
     serialize_dependency_results,
     serialize_enrichment_results,
@@ -191,64 +184,4 @@ class CompositeCheckpointState:
         data: JsonDict,  # Any: checkpoint state has heterogeneous values
     ) -> CompositeCheckpointState:
         """Rebuild state from serialized payload."""
-        normalized_anchors = normalize_runtime_anchor_payload(
-            {
-                "effective_config_hash": data.get("effective_config_hash"),
-                "effective_config_artifact_id": data.get(
-                    "effective_config_artifact_id"
-                ),
-                "execution_fingerprint": data.get("execution_fingerprint"),
-                "dq_contract_compatibility_hash": data.get(
-                    "dq_contract_compatibility_hash"
-                ),
-                "input_snapshot_fingerprint": data.get("input_snapshot_fingerprint"),
-                "contract_ref": data.get("contract_ref"),
-                "contract_version": data.get("contract_version"),
-                "manifest_id": data.get("manifest_id"),
-                "composite_run_identity": data.get("composite_run_identity"),
-            }
-        )
-        return cls(
-            composite_name=data["composite_name"],
-            run_id=data["run_id"],
-            state=parse_state(data.get("state")),
-            seed_completed=data.get("seed_completed", False),
-            seed_result=parse_seed_result(data.get("seed_result")),
-            completed_dependencies=frozenset(data.get("completed_dependencies", [])),
-            dependency_results=parse_dependency_results(data.get("dependency_results")),
-            completed_enrichers=frozenset(data.get("completed_enrichers", [])),
-            enrichment_results=parse_enrichment_results(data.get("enrichment_results")),
-            merge_completed=(
-                data.get("merge_completed", False)
-                or data.get("state") == "cross_validation_completed"
-            ),
-            merge_result=data.get("merge_result"),
-            legacy_cv_completion_pending=(
-                data.get("legacy_cv_completion_pending") is True
-                or data.get("state") == "cross_validation_completed"
-            ),
-            legacy_cv_resume_blocked=(
-                data.get("legacy_cv_resume_blocked") is True
-                or data.get("state") == "cross_validation_running"
-            ),
-            checkpoint_schema_version=data.get("checkpoint_schema_version", "1.0.0"),
-            effective_config_hash=normalized_anchors["effective_config_hash"] or "",
-            effective_config_artifact_id=(
-                normalized_anchors["effective_config_artifact_id"] or ""
-            ),
-            execution_fingerprint=normalized_anchors["execution_fingerprint"] or "",
-            dq_contract_compatibility_hash=(
-                normalized_anchors["dq_contract_compatibility_hash"] or ""
-            ),
-            input_snapshot_fingerprint=(
-                normalized_anchors["input_snapshot_fingerprint"] or ""
-            ),
-            contract_ref=normalized_anchors["contract_ref"] or "",
-            contract_version=normalized_anchors["contract_version"] or "",
-            manifest_id=normalized_anchors["manifest_id"] or "",
-            composite_run_identity=normalized_anchors["composite_run_identity"] or "",
-            last_event_id=parse_optional_string(data.get("last_event_id")),
-            last_event_occurred_at=parse_timestamp(data.get("last_event_occurred_at")),
-            created_at=parse_timestamp(data.get("created_at")),
-            updated_at=parse_timestamp(data.get("updated_at")),
-        )
+        return build_checkpoint_state(cls, data)

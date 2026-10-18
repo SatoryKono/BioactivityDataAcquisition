@@ -83,6 +83,31 @@ def _emit_checkpoint_saved_at_from_state(
     )
 
 
+def _warn_if_checkpoint_state_corrupted(
+    *,
+    logger: LoggerPort,
+    composite_name: str,
+    raw_state: object,
+    state: CompositeCheckpointState,
+) -> None:
+    """Warn when an unknown persisted state was normalized to the default."""
+    known_legacy_states = {
+        "cross_validation_running",
+        "cross_validation_completed",
+    }
+    if (
+        raw_state is not None
+        and state.state.value != raw_state
+        and raw_state not in known_legacy_states
+    ):
+        logger.warning(
+            "Checkpoint state value corrupted, using default",
+            composite=composite_name,
+            raw_state=raw_state,
+            parsed_state=state.state.value,
+        )
+
+
 def resolve_resume_checkpoint_filename(
     *,
     storage: CompositeCheckpointPort,
@@ -111,21 +136,12 @@ def load_checkpoint_state(
         data = json.loads(content)
         state = CompositeCheckpointState.from_dict(data)
         raw_state = data.get("state")
-        is_known_legacy_state = raw_state in (
-            "cross_validation_running",
-            "cross_validation_completed",
+        _warn_if_checkpoint_state_corrupted(
+            logger=logger,
+            composite_name=composite_name,
+            raw_state=raw_state,
+            state=state,
         )
-        if (
-            raw_state is not None
-            and state.state.value != raw_state
-            and not is_known_legacy_state
-        ):
-            logger.warning(
-                "Checkpoint state value corrupted, using default",
-                composite=composite_name,
-                raw_state=raw_state,
-                parsed_state=state.state.value,
-            )
         logger.info(
             "Loaded checkpoint",
             composite=composite_name,

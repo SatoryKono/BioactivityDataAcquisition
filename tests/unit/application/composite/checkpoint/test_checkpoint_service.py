@@ -943,6 +943,94 @@ class TestLoadResume:
         assert state.last_event_id == "entry-4"
 
     @pytest.mark.asyncio
+    async def test_legacy_cv_running_checkpoint_promotes_with_replayed_merge_evidence(
+        self,
+    ) -> None:
+        """A complete ledger suffix can safely advance a blocked legacy checkpoint."""
+        ledger_port = MagicMock()
+        ledger_port.list_entries_after.return_value = [
+            _make_run_ledger_entry(
+                entry_id="entry-2",
+                event_type="composite_merge_completed",
+                occurred_at=datetime(2024, 6, 1, 10, 2, tzinfo=UTC),
+                status="completed",
+                details={"records_merged": 10},
+            ),
+        ]
+        svc, storage, _ = _make_service(
+            resume=True,
+            run_id="run-old",
+            expected_anchors=_anchors(manifest_id="manifest-123"),
+            run_ledger_port=ledger_port,
+        )
+        legacy_checkpoint = {
+            "composite_name": "my_composite",
+            "run_id": "run-old",
+            "state": "cross_validation_running",
+            "seed_completed": True,
+            "seed_result": {
+                "pipeline_name": "chembl_activity",
+                "records_extracted": 100,
+            },
+            "manifest_id": "manifest-123",
+            "composite_run_identity": "run-old",
+            "last_event_id": "entry-1",
+            "last_event_occurred_at": "2024-06-01T09:00:00+00:00",
+        }
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(legacy_checkpoint)
+
+        state = await svc.load()
+
+        assert state.legacy_cv_resume_blocked is False
+        assert state.legacy_cv_completion_pending is True
+        assert state.merge_completed is True
+        assert state.merge_result == {"records_merged": 10}
+        assert state.last_event_id == "entry-2"
+
+    @pytest.mark.asyncio
+    async def test_legacy_cv_running_stays_blocked_with_invalid_merge_evidence(
+        self,
+    ) -> None:
+        """Malformed merge evidence must not unlock a legacy CV checkpoint."""
+        ledger_port = MagicMock()
+        ledger_port.list_entries_after.return_value = [
+            _make_run_ledger_entry(
+                entry_id="entry-2",
+                event_type="composite_merge_completed",
+                occurred_at=datetime(2024, 6, 1, 10, 2, tzinfo=UTC),
+                status="completed",
+                details={"records_merged": "10"},
+            ),
+        ]
+        svc, storage, _ = _make_service(
+            resume=True,
+            run_id="run-old",
+            expected_anchors=_anchors(manifest_id="manifest-123"),
+            run_ledger_port=ledger_port,
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(
+            {
+                "composite_name": "my_composite",
+                "run_id": "run-old",
+                "state": "cross_validation_running",
+                "seed_completed": True,
+                "seed_result": {"pipeline_name": "chembl_activity"},
+                "manifest_id": "manifest-123",
+                "composite_run_identity": "run-old",
+                "last_event_id": "entry-1",
+                "last_event_occurred_at": "2024-06-01T09:00:00+00:00",
+            }
+        )
+
+        state = await svc.load()
+
+        assert state.merge_completed is True
+        assert state.legacy_cv_resume_blocked is True
+        assert state.legacy_cv_completion_pending is False
+
+    @pytest.mark.asyncio
     async def test_resume_emits_replay_not_needed_when_no_suffix_entries_exist(
         self,
     ) -> None:

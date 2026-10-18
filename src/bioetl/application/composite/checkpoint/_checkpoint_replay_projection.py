@@ -20,6 +20,10 @@ def merge_replay_projection_state(
     replay_projection: RunLedgerReplayProjection,
 ) -> CompositeCheckpointState:
     """Apply replay projection fields while preserving snapshot anchors."""
+    completed_legacy_cv = _legacy_cv_completion_is_proven(
+        state=state,
+        replay_projection=replay_projection,
+    )
     return CompositeCheckpointState(
         composite_name=state.composite_name,
         run_id=state.run_id,
@@ -50,8 +54,12 @@ def merge_replay_projection_state(
             else state.merge_completed
         ),
         merge_result=replay_projection.merge_result or state.merge_result,
-        legacy_cv_completion_pending=state.legacy_cv_completion_pending,
-        legacy_cv_resume_blocked=state.legacy_cv_resume_blocked,
+        legacy_cv_completion_pending=(
+            state.legacy_cv_completion_pending or completed_legacy_cv
+        ),
+        legacy_cv_resume_blocked=(
+            state.legacy_cv_resume_blocked and not completed_legacy_cv
+        ),
         checkpoint_schema_version=state.checkpoint_schema_version,
         effective_config_hash=state.effective_config_hash,
         effective_config_artifact_id=state.effective_config_artifact_id,
@@ -67,6 +75,27 @@ def merge_replay_projection_state(
         created_at=state.created_at,
         updated_at=state.updated_at,
     )
+
+
+def _legacy_cv_completion_is_proven(
+    *,
+    state: CompositeCheckpointState,
+    replay_projection: RunLedgerReplayProjection,
+) -> bool:
+    """Promote a blocked legacy CV checkpoint only with complete merge evidence."""
+    if not state.legacy_cv_resume_blocked:
+        return False
+    if replay_projection.projector_coverage_complete is not True:
+        return False
+    if replay_projection.merge_completed is not True:
+        return False
+    if not state.seed_completed or state.seed_result is None:
+        return False
+    merge_result = replay_projection.merge_result
+    if not isinstance(merge_result, dict):
+        return False
+    records_merged = merge_result.get("records_merged")
+    return isinstance(records_merged, int) and not isinstance(records_merged, bool)
 
 
 def log_rich_checkpoint_projection(
