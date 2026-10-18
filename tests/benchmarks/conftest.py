@@ -29,6 +29,12 @@
 
 These fixtures provide consistent test data for reproducible benchmarks.
 All data is synthetic and deterministic to ensure stable measurements.
+
+VCS suppression for an explicit ``-p benchmark`` caller lives in
+``tests.benchmarks.benchmark_vcs_guard`` and must be loaded before that
+plugin. This conftest only skips benchmark-marked tests while the plugin
+is inactive. Wrapping ``get_project_name`` here is too late: pytest-benchmark
+5.2/5.3 calls ``get_tag()`` from ``pytest_addoption``.
 """
 
 import json
@@ -51,7 +57,12 @@ def _benchmark_plugin_active(config: pytest.Config) -> bool:
     pluginmanager = config.pluginmanager
     return any(
         pluginmanager.hasplugin(name)
-        for name in ("benchmark", "pytest_benchmark", "pytest-benchmark")
+        for name in (
+            "benchmark",
+            "pytest_benchmark",
+            "pytest_benchmark.plugin",
+            "pytest-benchmark",
+        )
     )
 
 

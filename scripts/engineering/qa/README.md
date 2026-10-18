@@ -272,14 +272,16 @@ JSON SHA256 to source, dataset, machine, and run identity. Local UUIDs are not G
 run IDs and local validation emits no GitHub URL. A failed validation removes any
 stale successful validation manifest.
 
-Production depends on caller/guard PR #12235 (`tests.benchmarks.benchmark_vcs_guard`,
-loaded before `benchmark`). The producer must also emit the raw dataset/environment
-context already required by `reduce-benchmark-evidence`; the inspected #12235
-head `75bf7ee224c4950275e132095808fa099ac6758f` does not yet emit that context. Until
-these producer contracts are integrated, the workflow must fail closed. Unit schema
-fixtures are not benchmark measurements or acceptance evidence. The committed
-`benchmark-summary.json` remains explicitly unmeasured until separately reviewed
-measurements are adopted.
+The caller/guard from PR #12235 (source commit
+`797707e6c926f97f7701db1ca89cfb6eeed8d7e0`) is integrated in
+`tests.benchmarks.benchmark_vcs_guard` and loaded before `benchmark`.
+The caller explicitly declares `BIOETL_BENCHMARK_DATASET`; Performance Nightly
+uses `bioetl-synthetic-performance-v1` for its deterministic synthetic fixtures.
+The guard emits this dataset and the actual local/GitHub execution environment
+as `bioetl_measurement`. A missing dataset fails closed. Unit schema fixtures
+verify the producer/validator contract without recording benchmark measurements.
+The committed `benchmark-summary.json` remains explicitly unmeasured until
+separately reviewed measurements are adopted.
 
 Regression tests live in `tests/unit/scripts/qa/test_validate_benchmark_evidence.py`,
 which the automatic `unit-scripts-tooling` other shard collects. The former

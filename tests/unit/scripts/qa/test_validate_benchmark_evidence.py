@@ -356,3 +356,84 @@ def test_benchmark_evidence_router_validation_never_calls_reducer_or_hotspot(
         "raw.json",
         "validation.json",
     ]
+
+
+@pytest.mark.parametrize("github", [False, True])
+def test_guard_producer_context_is_accepted_without_vcs_probe(
+    tmp_path, payload, monkeypatch, github
+):
+    from datetime import UTC, datetime
+    from tests.benchmarks import benchmark_vcs_guard as guard
+
+    gitdir = tmp_path / ".git"
+    gitdir.mkdir()
+    (gitdir / "HEAD").write_text(_SHA + "\n")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("BIOETL_BENCHMARK_CALLER", "schema-contract-test")
+    monkeypatch.setenv("BIOETL_BENCHMARK_DATASET", "synthetic-schema-fixture-v1")
+    monkeypatch.setattr(guard, "_RUN_ID", _RUN)
+    monkeypatch.setattr(guard, "_started_at", None)
+    monkeypatch.setattr(guard, "_clock_now", lambda: datetime(2026, 1, 1, tzinfo=UTC))
+    monkeypatch.setattr(guard, "_INSTALLED_BEFORE_PLUGIN", True)
+    monkeypatch.setattr(guard, "_BLOCKED_PROBES", [])
+    env = (
+        {
+            "GITHUB_ACTIONS": "true",
+            "GITHUB_RUN_ID": "123",
+            "GITHUB_RUN_ATTEMPT": "1",
+            "GITHUB_REPOSITORY": "test/repository",
+            "GITHUB_SERVER_URL": "https://github.com",
+        }
+        if github
+        else {}
+    )
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+    for key, value in env.items():
+        monkeypatch.setenv(key, value)
+    payload.pop("bioetl_measurement")
+    guard.pytest_benchmark_update_json(None, [], payload)
+    path = tmp_path / "schema-only.json"
+    path.write_text(json.dumps(payload))
+    assert (
+        guard.validate_benchmark_measurement_json(path, search_from=tmp_path) == payload
+    )
+    manifest = validate_evidence(
+        path, _SHA, producer_outcome="success", environ=env, root=tmp_path
+    )
+    assert manifest["dataset_identity"] == "synthetic-schema-fixture-v1"
+    assert manifest["environment"] == ("github-actions" if github else "local")
+    if not github:
+        assert manifest["run_url"] is None
+
+
+def test_guard_rejects_missing_dataset_instead_of_fabricating_identity(
+    payload, monkeypatch
+):
+    from tests.benchmarks import benchmark_vcs_guard as guard
+
+    monkeypatch.delenv("BIOETL_BENCHMARK_DATASET", raising=False)
+    with pytest.raises(
+        guard.BenchmarkMeasurementContractError, match="BIOETL_BENCHMARK_DATASET"
+    ):
+        guard.pytest_benchmark_update_json(None, [], payload)
+
+
+def test_nightly_caller_declares_dataset_and_loads_guard_before_benchmark():
+    workflow = yaml.safe_load(
+        (
+            Path(__file__).resolve().parents[4]
+            / ".github/workflows/performance-nightly.yml"
+        ).read_text()
+    )
+    steps = (
+        workflow["jobs"]["performance"]["steps"]
+        if "performance" in workflow["jobs"]
+        else next(iter(workflow["jobs"].values()))["steps"]
+    )
+    producer = next(step for step in steps if step.get("id") == "benchmarks")
+    assert (
+        producer["env"]["BIOETL_BENCHMARK_DATASET"] == "bioetl-synthetic-performance-v1"
+    )
+    assert producer["run"].index("-p tests.benchmarks.benchmark_vcs_guard") < producer[
+        "run"
+    ].index("-p benchmark")

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-18T12:40:58.662039+00:00",
+  "generated_at": "2026-10-18T13:47:13.051907+00:00",
   "summary": {
     "total_scripts": 649,
     "status_counts": {
@@ -10464,7 +10464,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_abort_diagnostic_adapter.py",
-          "line": 631,
+          "line": 647,
           "source_group": "tests",
           "text": "[\"scripts/engineering/ci/pytest_abort_diagnostic_adapter.py\"],"
         }
@@ -14948,7 +14948,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 289,
+          "line": 291,
           "source_group": "scripts",
           "text": "`generate_hotspot_degradation_report.py` performance-evidence owner. It has a"
         },
