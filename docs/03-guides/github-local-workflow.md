@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.1.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-25'
+  Last verified: '2026-10-16'
 
 ______________________________________________________________________
 
@@ -251,9 +251,12 @@ Examples:
 
 ## Required PR checks
 
-GitHub-required merge wall is exactly `pr-gate-complete`
-(`.github/workflows/pr-required.yml`). Leaf jobs consumed by the aggregator
-include:
+<!-- policy-anchor:deployment-provider --> `deployment.provider` is `github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Rulesets `13643213` and `15730586` are `enforcement: disabled`. <!-- policy-anchor:stored-ruleset-contexts --> Stored `ci/circleci: pr-gate-complete` is not active CircleCI protection. <!-- policy-anchor:target-gha-context --> Target `pr-gate-complete` is not the context stored on those rulesets. <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge. An offline catalog match does not confirm live server rulesets.
+
+The coordinator job is `pr-gate-complete` (`.github/workflows/pr-required.yml`).
+While those rulesets stay `enforcement: disabled`, a green coordinator job is
+evidence for review, not live merge protection. Leaf jobs consumed by the
+aggregator include:
 
 - `checks-complete`
 - `coverage-verify`
@@ -262,7 +265,7 @@ include:
 - `commit-lint`
 - `type-check`
 
-Do not treat those leaf names as independent GitHub required contexts.
+Do not treat those leaf names as independent required contexts.
 
 ## Cleanup workflow
 
