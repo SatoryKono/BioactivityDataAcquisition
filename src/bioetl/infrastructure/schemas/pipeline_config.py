@@ -218,7 +218,6 @@ class PipelineYamlConfig(BaseModel):
 
     def _customize_sink_schema(schema: JsonDict) -> None:
         """Customize JSON Schema for layer-aware sink constraints."""
-        # Grab the reference to the SinkLayerConfig child schema
         child_ref = schema.get("additionalProperties", {})
         schema["additionalProperties"] = False
 

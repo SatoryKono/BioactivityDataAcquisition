@@ -139,7 +139,7 @@ Performance-тесты находятся в `tests/benchmarks/`:
 | `test_json_serialization.py` | Сравнение JSON encoders (stdlib vs orjson) |
 
 ```bash
-pytest tests/benchmarks/ -v --benchmark-only
+bash scripts/engineering/dev/run_pytest.sh tests/benchmarks/ -v --benchmark-only
 ```
 
 ______________________________________________________________________

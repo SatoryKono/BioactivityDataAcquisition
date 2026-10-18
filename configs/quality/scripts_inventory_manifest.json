@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-18T20:36:04.213698+00:00",
+  "generated_at": "2026-10-18T21:22:18.686023+00:00",
   "summary": {
     "total_scripts": 649,
     "status_counts": {
@@ -11887,7 +11887,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 42,
+      "reference_count": 44,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -11947,7 +11947,7 @@
         "CODEX-RUNTIME",
         "py-test-bot"
       ],
-      "reference_count": 58,
+      "reference_count": 61,
       "references": [
         {
           "path": ".codex/agents/CODEX-RUNTIME.md",
@@ -11960,6 +11960,12 @@
           "line": 47,
           "source_group": "skills",
           "text": "`bash scripts/engineering/dev/run_pytest.sh <tests>`, or the platform-specific"
+        },
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 142,
+          "source_group": "docs",
+          "text": "bash scripts/engineering/dev/run_pytest.sh tests/benchmarks/ -v --benchmark-only"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -11990,12 +11996,6 @@
           "line": 41,
           "source_group": "docs",
           "text": "- WSL/Linux: `setup_env_wsl.sh`, `run_pytest.sh`, `run_mypy.sh`"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/library/test/cycle.md",
-          "line": 40,
-          "source_group": "docs",
-          "text": "- scripts/engineering/dev/run_pytest.sh"
         }
       ]
     },
@@ -14914,7 +14914,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -14953,14 +14953,14 @@
           "text": "_HOTSPOT_REPORT_MODULE = \"scripts.engineering.qa.generate_hotspot_degradation_report\""
         },
         {
-          "path": "tests/architecture/test_reduce_benchmark_evidence.py",
-          "line": 747,
+          "path": "tests/architecture/test_pytest_benchmark_caller_contract.py",
+          "line": 920,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_hotspot_degradation_report import ("
         },
         {
           "path": "tests/architecture/test_reduce_benchmark_evidence.py",
-          "line": 820,
+          "line": 747,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_hotspot_degradation_report import ("
         }
