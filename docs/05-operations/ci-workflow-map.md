@@ -4,7 +4,7 @@ Version: 1.0.3
 Status: active
 Class: published
 Owner: BioETL Team
-Last verified: '2026-10-18'
+Last verified: '2026-09-10'
 
 ______________________________________________________________________
 
@@ -72,18 +72,16 @@ registration was completed on 2026-10-05: `bioetl-github-read-only` is restricte
 to this project and `main`, excludes SSH and API config sources, and contains
 `GITHUB_TOKEN`. Token permissions and job authentication still require run evidence.
 Remaining event parity and external acceptance are pending.
-Performance is manual-only: `.github/workflows/performance-nightly.yml`
-accepts `workflow_dispatch` and has no cron schedule. The selectable CircleCI
-`performance` lane has been removed; its workflow and `-p benchmark` are absent
-from `.circleci/config.yml`. The GitHub caller loads
-`tests.benchmarks.benchmark_vcs_guard` before `benchmark`, validates measurement
-JSON and retains the existing hotspot budgets and evidence gates.
-Historical CircleCI runs remain evidence of their original captures: main job
-3365 passed 70 tests and all five budgets; scheduled pipeline 272 failed the
-CrossRef median budget (0.479 ms against 0.4125 ms), while its diagnostic rerun
-passed with 0.268 ms. Those observations do not establish a currently runnable
-CircleCI lane or five independent successful samples. No external schedule was
-changed or verified by this local patch.
+The prepared `performance` lane preserves benchmark budgets and the five-sample
+window, emits JUnit/observations/JSON/Markdown artifacts, and fails on missing,
+empty or over-budget evidence. Main job 3365 passed 70 tests and all five budgets.
+`bioetl-performance-nightly` is registered for 03:00–03:59 UTC daily. Its first
+scheduled pipeline 272 failed the CrossRef median budget (0.479 ms against
+0.4125 ms); a single diagnostic rerun on the same main SHA passed all 70 tests
+with CrossRef at 0.268 ms. Both attempts are retained; scheduling is demonstrated,
+but stable performance acceptance remains pending. The prepared evidence gate
+requires all five registered benchmarks, rejects duplicate/missing/failed rows,
+and records CPU identity, quota and throttling counters for diagnosis.
 The prepared `replay-parity` lane retains the determinism, idempotency, composite
 resume and independent determinism recheck, with nonempty checksum comparison
 and replay artifacts. `memory-freshness` checks and publishes evidence without
@@ -264,7 +262,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `no-partial-tree-commits.yml` | — | Full-tree guard in root governance | Integrated into root-hygiene; main jobs 3500, 3529, 3549 passed the full-tree guard alongside strict root checks |
 | `opencode-pr-review.yml` | — | Retain disabled review stub policy | Do not activate unpinned installer or write paths |
 | `opencode-triage.yml` | — | Retain disabled triage stub policy | Do not activate unpinned installer or write paths |
-| `performance-nightly.yml` | manual `workflow_dispatch` only | GitHub Actions; CircleCI lane removed | Historical captures: Scheduled pipeline 272 on 303ced3: job 4565 failed CrossRef latency; diagnostic4566 and manual361 pass. Scheduled370/job6640 on main ba9c80e7 passes70 tests/0 skips and all five unchanged budgets; all six artifacts verified, daily03UTC restoration was historical; current YAML is manual-only. Prior failed observation retained; this is not five independent samples |
+| `performance-nightly.yml` | `0 3 * * *` | CircleCI performance | Scheduled pipeline 272 on 303ced3: job 4565 failed CrossRef latency; diagnostic4566 and manual361 pass. Scheduled370/job6640 on main ba9c80e7 passes70 tests/0 skips and all five unchanged budgets; all six artifacts verified, daily03UTC restored. Prior failed observation retained; this is not five independent samples |
 | `port-contracts.yml` | — | CircleCI port-contracts | PR409 and main411 automatic gates accepted. Main7957 on005a7dc6 passes164 contract tests and24 Hypothesis cases, zero skips/errors; both JUnit artifacts independently hashed. Manual include-hypothesis=false remains accepted by4425/pipeline262 |
 | `pr-hygiene.yml` | — | Retain disabled PR maintenance | Preserve #10263; canonical 21-day draft/report-noise policy remains manual |
 | `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Main pipelines 218–220 passed all 81 jobs on a34558b918b5; both production rulesets were read back as active on that date, which is not the 2026-10-16 enforcement mode; legacy owner references retained by the owner decision cancelling #11930 |

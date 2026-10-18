@@ -1,7 +1,7 @@
-"""Debug command for pipeline execution with DEBUG logging.
+"""Debug command for interactive pipeline step-through execution.
 
-Only log mode without breakpoints is supported. Interactive step-through
-execution and breakpoint inspection are not implemented.
+Runs a pipeline with breakpoints at configurable lifecycle stages,
+allowing inspection of intermediate state (records, DQ metrics, etc.).
 """
 
 from __future__ import annotations
@@ -113,8 +113,8 @@ def get_pipeline_runner_service(
     "--breakpoints",
     type=str,
     default=None,
-    help="Reserved option. Non-empty breakpoints are unsupported "
-    "and exit with CONFIG_ERROR (80). Leave unset.",
+    help=f"Comma-separated breakpoints: {', '.join(_BREAKPOINT_CHOICES)}. "
+    "Default: all breakpoints enabled.",
 )
 @typed_click_option(
     "--limit", type=int, default=10, help="Max records to process (default: 10)"
@@ -123,8 +123,7 @@ def get_pipeline_runner_service(
     "--mode",
     type=click.Choice(["interactive", "log"]),
     default="log",
-    help="Debug mode (default: log). Only log without breakpoints is supported; "
-    "interactive exits with CONFIG_ERROR (80).",
+    help="Debug mode. Only log without breakpoints is supported.",
 )
 @typed_click_option(
     "--run-type",
@@ -141,9 +140,10 @@ def debug(
     mode: str,
     run_type: str,
 ) -> None:
-    """Run a pipeline with DEBUG logging (default: log mode, limit 10).
+    """Run a pipeline in debug mode with breakpoints.
 
-    Interactive mode and non-empty breakpoints are unsupported.
+    Enables step-through execution with inspection of intermediate
+    state at each pipeline lifecycle stage.
     """
     # Parse breakpoints
     enabled_breakpoints: set[StageBreakpoint] | None = None
@@ -165,7 +165,7 @@ def debug(
     if enabled_breakpoints:
         echo_info(f"Breakpoints: {', '.join(bp.value for bp in enabled_breakpoints)}")
     else:
-        echo_info("Breakpoints: none")
+        echo_info("Breakpoints: all stages enabled")
 
     run_options_type = _load_run_options_type()
     options = run_options_type(

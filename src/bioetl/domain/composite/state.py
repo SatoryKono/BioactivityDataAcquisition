@@ -154,12 +154,29 @@ class CompositePipelineState(StrEnum):
             Matching CompositePipelineState enum member.
         """
         try:
-            return cls(value.lower())
+            val = value.lower()
+            # Compatibility with pre-12062 checkpoints
+            if val == "cross_validation_running":
+                return cls.MERGING
+            if val == "cross_validation_completed":
+                return cls.COMPLETED
+            return cls(val)
         except ValueError:
             valid = ", ".join(s.value for s in cls)
             raise ValueError(
                 f"Invalid composite pipeline state: {value}. Valid: {valid}"
             ) from None
+
+    @classmethod
+    def _missing_(cls, value: object) -> CompositePipelineState | None:
+        """Handle legacy state names during deserialization from checkpoints."""
+        if isinstance(value, str):
+            val = value.lower()
+            if val == "cross_validation_running":
+                return cls.MERGING
+            if val == "cross_validation_completed":
+                return cls.COMPLETED
+        return super()._missing_(value)
 
     def to_metric_value(self) -> int:
         """Convert state to numeric value (0-11) for Prometheus metrics.

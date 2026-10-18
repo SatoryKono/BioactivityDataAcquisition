@@ -264,7 +264,7 @@ QA image, rule fixtures, and monitoring-profile pins in one reviewed change.
   1. Перейдите в `4. Data Quality` и проверьте `Inspect: Top Silver Reject Reasons (Pareto)` /
      `Inspect: Top Silver Reject Fields`.
   1. Для record-level списка используйте CLI:
-     `bioetl quarantine inspect --pipeline <pipeline> --error-code FILTERED_OUT_SILVER ...`
+     `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only ...`
      (Grafana Silver Reject Explorer UI removed 2026-07-23).
   1. Action-операции: quarantine CLI (`inspect/resolve/replay/purge`).
 - **Identity / Processed Records cards показывают `No data`**:

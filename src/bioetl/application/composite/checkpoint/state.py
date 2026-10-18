@@ -48,8 +48,6 @@ class CompositeCheckpointState:
     enrichment_results: dict[str, EnrichmentResult] = field(default_factory=dict)
     merge_completed: bool = False
     merge_result: JsonDict | None = None
-    legacy_cv_completion_pending: bool = False
-    legacy_cv_resume_blocked: bool = False
     checkpoint_schema_version: str = "1.0.0"
     effective_config_hash: str = ""
     effective_config_artifact_id: str = ""
@@ -142,7 +140,7 @@ class CompositeCheckpointState:
                 "composite_run_identity": self.composite_run_identity,
             }
         )
-        payload = {
+        return {
             "composite_name": self.composite_name,
             "run_id": self.run_id,
             "state": self.state.value,
@@ -179,11 +177,6 @@ class CompositeCheckpointState:
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
-        if self.legacy_cv_completion_pending is True:
-            payload["legacy_cv_completion_pending"] = True
-        if self.legacy_cv_resume_blocked is True:
-            payload["legacy_cv_resume_blocked"] = True
-        return payload
 
     @classmethod
     def from_dict(
@@ -218,19 +211,8 @@ class CompositeCheckpointState:
             dependency_results=parse_dependency_results(data.get("dependency_results")),
             completed_enrichers=frozenset(data.get("completed_enrichers", [])),
             enrichment_results=parse_enrichment_results(data.get("enrichment_results")),
-            merge_completed=(
-                data.get("merge_completed", False)
-                or data.get("state") == "cross_validation_completed"
-            ),
+            merge_completed=data.get("merge_completed", False),
             merge_result=data.get("merge_result"),
-            legacy_cv_completion_pending=(
-                data.get("legacy_cv_completion_pending") is True
-                or data.get("state") == "cross_validation_completed"
-            ),
-            legacy_cv_resume_blocked=(
-                data.get("legacy_cv_resume_blocked") is True
-                or data.get("state") == "cross_validation_running"
-            ),
             checkpoint_schema_version=data.get("checkpoint_schema_version", "1.0.0"),
             effective_config_hash=normalized_anchors["effective_config_hash"] or "",
             effective_config_artifact_id=(

@@ -95,9 +95,10 @@ def add_checkpoint_workflow_options(
     )
 
 
-def add_quarantine_stats_options() -> Callable[
-    [Callable[..., object]], Callable[..., object]
-]:
+def add_quarantine_stats_options(
+    *,
+    silver_filter_alias_help: str,
+) -> Callable[[Callable[..., object]], Callable[..., object]]:
     """Attach the shared quarantine statistics option pack."""
 
     def _decorator(fn: Callable[..., object]) -> Callable[..., object]:
@@ -105,14 +106,13 @@ def add_quarantine_stats_options() -> Callable[
             fn,
             click.option("--pipeline", required=True, help="Pipeline name"),
             click.option("--json", "output_json", is_flag=True, help="Output as JSON"),
-            click.option(
-                "--error-code",
-                help=(
-                    "Scope stats to one error code; FILTERED_OUT_SILVER selects Silver structural "
-                    "rejects only, not Gold contract/semantic rejects"
-                ),
-            ),
+            click.option("--error-code", help="Scope stats to one error code"),
             click.option("--run-id", help="Scope stats to one pipeline run ID"),
+            click.option(
+                "--silver-filter-only",
+                is_flag=True,
+                help=silver_filter_alias_help,
+            ),
             click.option(
                 "--group-by",
                 type=click.Choice(
@@ -146,6 +146,7 @@ def run_quarantine_stats_command(
     show_stats_for_pipeline: Callable[..., None],
     get_runtime_service: Callable[..., object],
     get_manifest_service: Callable[[], object],
+    silver_filter_error_code: str,
 ) -> None:
     """Run the shared quarantine statistics command body."""
     show_stats_for_pipeline(
@@ -154,6 +155,8 @@ def run_quarantine_stats_command(
         pipeline=option_str(command_args, "pipeline"),
         output_json=option_bool(command_args, "output_json"),
         error_code=option_optional_str(command_args, "error_code"),
+        silver_filter_only=option_bool(command_args, "silver_filter_only"),
+        silver_filter_error_code=silver_filter_error_code,
         top=option_int(command_args, "top"),
         group_by=option_optional_str(command_args, "group_by"),
         run_id=option_optional_str(command_args, "run_id"),

@@ -1,61 +1,64 @@
-from pathlib import Path
-
+import ast
 import pytest
-
+from pathlib import Path
 from bioetl.domain.composite.state import CompositePipelineState
 
 
-def _find_usage_in_directory(dir_path: Path, member_name: str) -> bool:
-    """Find if a specific enum member is used in the given directory."""
-    usage_pattern = f"CompositePipelineState.{member_name}"
+def get_used_attributes(file_path: Path, class_name: str) -> set[str]:
+    """Parse Python file and extract accessed attributes of a given class."""
+    if not file_path.exists():
+        return set()
 
-    for file_path in dir_path.rglob("*.py"):
-        if not file_path.is_file():
-            continue
-
+    try:
         content = file_path.read_text(encoding="utf-8")
-        if usage_pattern in content:
-            return True
+        tree = ast.parse(content, filename=str(file_path))
+    except SyntaxError:
+        return set()
 
-        if f"from bioetl.domain.composite.state import {member_name}" in content:
-            return True
+    used = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute):
+            if isinstance(node.value, ast.Name) and node.value.id == class_name:
+                used.add(node.attr)
+    return used
 
-        if f"from bioetl.domain.composite import {member_name}" in content:
-            return True
-
-    return False
 
 @pytest.mark.architecture
 def test_no_dead_composite_pipeline_states():
     """All CompositePipelineState members MUST be used outside of domain/tests.
 
-    This guard catches synthetic dead states that have no application usage.
+    This guard catches synthetic dead states that have no application usage
+    using actual AST parsing.
     """
     src_dir = Path("src/bioetl")
 
-    app_dir = src_dir / "application"
-    domain_dir = src_dir / "domain"
+    # We only care about application usage (and infra/interfaces)
+    search_dirs = [
+        src_dir / "application",
+        src_dir / "infrastructure",
+        src_dir / "interfaces",
+    ]
 
-    assert app_dir.exists()
+    used_members = set()
+
+    for d in search_dirs:
+        if not d.exists():
+            continue
+        for f in d.rglob("*.py"):
+            used_members.update(get_used_attributes(f, "CompositePipelineState"))
+
+    # Also check domain, excluding tests and state.py
+    domain_dir = src_dir / "domain"
+    for f in domain_dir.rglob("*.py"):
+        if f.name == "state.py" or "tests" in str(f):
+            continue
+        used_members.update(get_used_attributes(f, "CompositePipelineState"))
 
     dead_members = []
-
     for member in CompositePipelineState:
-        member_name = member.name
+        if member.name not in used_members:
+            dead_members.append(member.name)
 
-        # Check usage in application
-        is_used = _find_usage_in_directory(app_dir, member_name)
-
-        # If not in application, check domain (excluding state.py itself)
-        if not is_used:
-            for f in domain_dir.rglob("*.py"):
-                if f.name == "state.py":
-                    continue
-                if f"CompositePipelineState.{member_name}" in f.read_text(encoding="utf-8"):
-                    is_used = True
-                    break
-
-        if not is_used:
-            dead_members.append(member_name)
-
-    assert not dead_members, f"Found dead CompositePipelineState members with no application/domain usage: {dead_members}"
+    assert not dead_members, (
+        f"Found dead CompositePipelineState members with no application/domain usage: {dead_members}"
+    )

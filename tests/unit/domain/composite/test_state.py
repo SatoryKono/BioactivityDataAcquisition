@@ -382,11 +382,52 @@ class TestAllowedTransitions:
         allowed = CompositePipelineState.MERGING.allowed_transitions
         assert allowed == frozenset(
             {
-                    CompositePipelineState.COMPLETED,
+                CompositePipelineState.COMPLETED,
                 CompositePipelineState.FAILED,
             }
         )
 
+    def test_legacy_checkpoint_deserialization(self):
+        """Old CROSS_VALIDATION states should map to MERGING and COMPLETED for checkpoint compatibility."""
+        assert (
+            CompositePipelineState("cross_validation_running")
+            == CompositePipelineState.MERGING
+        )
+        assert (
+            CompositePipelineState("cross_validation_completed")
+            == CompositePipelineState.COMPLETED
+        )
+
+        assert (
+            CompositePipelineState.from_string("cross_validation_running")
+            == CompositePipelineState.MERGING
+        )
+        assert (
+            CompositePipelineState.from_string("cross_validation_completed")
+            == CompositePipelineState.COMPLETED
+        )
+
+
+class TestFailureAfterMergeResumeSemantics:
+    """Test failure-after-merge and resume semantics in the context of issue #12062."""
+
+    def test_merging_to_failed_allows_resume(self):
+        """If execution fails during or after merge (e.g. in cross validation sub-step), it transitions to FAILED which is resumable."""
+        state = CompositePipelineState.MERGING
+        state.validate_transition(CompositePipelineState.FAILED)
+        state = CompositePipelineState.FAILED
+        assert state.is_resumable is True
+
+    def test_legacy_resume_semantics(self):
+        """Resume semantics for legacy checkpoints."""
+        # Pre-12062 checkpoints mapped to active CV states are correctly deserialized
+        running = CompositePipelineState.from_string("cross_validation_running")
+        completed = CompositePipelineState.from_string("cross_validation_completed")
+        assert running == CompositePipelineState.MERGING
+        assert completed == CompositePipelineState.COMPLETED
+        # MERGING is not resumable (it's active), COMPLETED is not resumable (it's done)
+        assert running.is_resumable is False
+        assert completed.is_resumable is False
 
 
 class TestMetricValue:
