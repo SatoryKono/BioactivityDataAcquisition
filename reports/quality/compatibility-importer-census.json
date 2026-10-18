@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-10-04",
+  "snapshot_date": "2026-10-18",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -142,12 +142,11 @@
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
       "src_importers": [],
       "test_importers": [
-        "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
         "tests/unit/interfaces/cli/commands/test_cr_8957_cli_residuals.py",
         "tests/unit/interfaces/test_issue_10520_interfaces_tail.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 3,
+      "test_importer_count": 2,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -550,12 +549,11 @@
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
       "src_importers": [],
       "test_importers": [
-        "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
         "tests/unit/interfaces/cli/commands/test_cr_8957_cli_residuals.py",
         "tests/unit/interfaces/test_issue_10520_interfaces_tail.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 3,
+      "test_importer_count": 2,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
