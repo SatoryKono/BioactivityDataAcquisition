@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-18T20:46:29.834868+00:00",
+  "generated_at": "2026-10-18T20:50:55.186957+00:00",
   "command": [
     "/workspace/pr12274-repair/.venv/bin/python",
     "scripts/engineering/performance/measure_merger_input.py",
@@ -14,15 +14,15 @@
     "--timeout-s",
     "30",
     "--out",
-    "/workspace/pr12274-evidence/repeated-observations-isolated.json"
+    "/tmp/pr12274-observations-9d40ebb245.json"
   ],
   "source": {
-    "head_sha": "8f9bd74269b5ecabc70bae34c78ec8dcb89075a5",
-    "head_tree": "2b0ee6a98afdfb2ca4ab96461881d12589f399ca",
+    "head_sha": "9d40ebb2455b8f85598c770736db6c057c5c1a21",
+    "head_tree": "961daeed7941f547d00db602713e9484f4b71f93",
     "working_tree_status": "",
-    "source_bytes_sha256": "858ae166e8e9e3eea392c6ea1db738a395c8d1bb9c71e274520e007d90f5816f",
+    "source_bytes_sha256": "da6b59803e8f9dfffb1ff9e6262e6153c2ab1fe5f5ee048894842376a7254f31",
     "hash_scope": "harness, uv.lock, sorted src/bioetl/**/*.py; path NUL bytes",
-    "harness_sha256": "8fcdc9cd8b5578dabc356eb2e633ca54d7e17518d2a84911ba376caad65ced8a"
+    "harness_sha256": "d46e7adc3d57c9565d6d03ee6289ad1c979b18a8fb9053f5b0935496cfb0ba20"
   },
   "source_unchanged": true,
   "environment": {
@@ -139,7 +139,7 @@
           "--rows",
           "1000",
           "--fixture",
-          "/tmp/merger-measurement-o_lgquw7",
+          "/tmp/merger-measurement-nkk3ijq6",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -149,13 +149,13 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 0.775386841999989,
+        "elapsed_s": 0.5645694009999715,
         "stdout": "",
         "stderr": ""
       },
       "fixture_sha256": {
-        "chembl/activity/_delta_log/00000000000000000000.json": "8a9bb79701178cca92384f6dbc4908aedea8eeb269c3d31cfe9cb39cd041760c",
-        "chembl/activity/part-00001-e7a2fbdb-de01-4bdc-8ebd-cebdc8d864cb-c000.snappy.parquet": "14336f63f02c3a71ec6bcc15bd8e7425f639d8dc2fb94c5037e5639b75d782fe"
+        "chembl/activity/_delta_log/00000000000000000000.json": "09a294918afe86de58cafcdb6d54334dc45b50c70c176954fc571df4ca3a8287",
+        "chembl/activity/part-00001-474e51fd-2a85-4dbe-a891-42218beaf3b6-c000.snappy.parquet": "14336f63f02c3a71ec6bcc15bd8e7425f639d8dc2fb94c5037e5639b75d782fe"
       },
       "measurement": {
         "command": [
@@ -164,7 +164,7 @@
           "--rows",
           "1000",
           "--fixture",
-          "/tmp/merger-measurement-o_lgquw7",
+          "/tmp/merger-measurement-nkk3ijq6",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -174,16 +174,16 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 2.9909718260000204,
-        "stdout": "{\"rows\": 1000, \"wall_time_s\": 0.013040031999992152, \"process_peak_rss_bytes\": 267526144, \"pid\": 3221, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "elapsed_s": 2.441024147999997,
+        "stdout": "{\"rows\": 1000, \"wall_time_s\": 0.018055564000064805, \"process_peak_rss_bytes\": 263688192, \"pid\": 5003, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
         "stderr": ""
       },
       "status": "COMPLETED",
       "raw": {
         "rows": 1000,
-        "wall_time_s": 0.013040031999992152,
-        "process_peak_rss_bytes": 267526144,
-        "pid": 3221,
+        "wall_time_s": 0.018055564000064805,
+        "process_peak_rss_bytes": 263688192,
+        "pid": 5003,
         "service": "bioetl.application.composite.merge_service.MergeService",
         "read_method": "bioetl.application.composite.merger_input_mixin",
         "rlimit_as_bytes": 4294967296
@@ -199,7 +199,7 @@
           "--rows",
           "1000",
           "--fixture",
-          "/tmp/merger-measurement-o_lgquw7",
+          "/tmp/merger-measurement-nkk3ijq6",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -209,13 +209,13 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 0.775386841999989,
+        "elapsed_s": 0.5645694009999715,
         "stdout": "",
         "stderr": ""
       },
       "fixture_sha256": {
-        "chembl/activity/_delta_log/00000000000000000000.json": "8a9bb79701178cca92384f6dbc4908aedea8eeb269c3d31cfe9cb39cd041760c",
-        "chembl/activity/part-00001-e7a2fbdb-de01-4bdc-8ebd-cebdc8d864cb-c000.snappy.parquet": "14336f63f02c3a71ec6bcc15bd8e7425f639d8dc2fb94c5037e5639b75d782fe"
+        "chembl/activity/_delta_log/00000000000000000000.json": "09a294918afe86de58cafcdb6d54334dc45b50c70c176954fc571df4ca3a8287",
+        "chembl/activity/part-00001-474e51fd-2a85-4dbe-a891-42218beaf3b6-c000.snappy.parquet": "14336f63f02c3a71ec6bcc15bd8e7425f639d8dc2fb94c5037e5639b75d782fe"
       },
       "measurement": {
         "command": [
@@ -224,7 +224,7 @@
           "--rows",
           "1000",
           "--fixture",
-          "/tmp/merger-measurement-o_lgquw7",
+          "/tmp/merger-measurement-nkk3ijq6",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -234,16 +234,16 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 2.5372468610000283,
-        "stdout": "{\"rows\": 1000, \"wall_time_s\": 0.01026935599998069, \"process_peak_rss_bytes\": 267218944, \"pid\": 3246, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "elapsed_s": 2.21784217600009,
+        "stdout": "{\"rows\": 1000, \"wall_time_s\": 0.018462193000004845, \"process_peak_rss_bytes\": 263258112, \"pid\": 5028, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
         "stderr": ""
       },
       "status": "COMPLETED",
       "raw": {
         "rows": 1000,
-        "wall_time_s": 0.01026935599998069,
-        "process_peak_rss_bytes": 267218944,
-        "pid": 3246,
+        "wall_time_s": 0.018462193000004845,
+        "process_peak_rss_bytes": 263258112,
+        "pid": 5028,
         "service": "bioetl.application.composite.merge_service.MergeService",
         "read_method": "bioetl.application.composite.merger_input_mixin",
         "rlimit_as_bytes": 4294967296
@@ -259,7 +259,7 @@
           "--rows",
           "1000",
           "--fixture",
-          "/tmp/merger-measurement-o_lgquw7",
+          "/tmp/merger-measurement-nkk3ijq6",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -269,13 +269,13 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 0.775386841999989,
+        "elapsed_s": 0.5645694009999715,
         "stdout": "",
         "stderr": ""
       },
       "fixture_sha256": {
-        "chembl/activity/_delta_log/00000000000000000000.json": "8a9bb79701178cca92384f6dbc4908aedea8eeb269c3d31cfe9cb39cd041760c",
-        "chembl/activity/part-00001-e7a2fbdb-de01-4bdc-8ebd-cebdc8d864cb-c000.snappy.parquet": "14336f63f02c3a71ec6bcc15bd8e7425f639d8dc2fb94c5037e5639b75d782fe"
+        "chembl/activity/_delta_log/00000000000000000000.json": "09a294918afe86de58cafcdb6d54334dc45b50c70c176954fc571df4ca3a8287",
+        "chembl/activity/part-00001-474e51fd-2a85-4dbe-a891-42218beaf3b6-c000.snappy.parquet": "14336f63f02c3a71ec6bcc15bd8e7425f639d8dc2fb94c5037e5639b75d782fe"
       },
       "measurement": {
         "command": [
@@ -284,7 +284,7 @@
           "--rows",
           "1000",
           "--fixture",
-          "/tmp/merger-measurement-o_lgquw7",
+          "/tmp/merger-measurement-nkk3ijq6",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -294,16 +294,16 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 2.440388347999999,
-        "stdout": "{\"rows\": 1000, \"wall_time_s\": 0.010535683000000517, \"process_peak_rss_bytes\": 266481664, \"pid\": 3271, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "elapsed_s": 2.310338338999941,
+        "stdout": "{\"rows\": 1000, \"wall_time_s\": 0.01365616099997169, \"process_peak_rss_bytes\": 266719232, \"pid\": 5053, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
         "stderr": ""
       },
       "status": "COMPLETED",
       "raw": {
         "rows": 1000,
-        "wall_time_s": 0.010535683000000517,
-        "process_peak_rss_bytes": 266481664,
-        "pid": 3271,
+        "wall_time_s": 0.01365616099997169,
+        "process_peak_rss_bytes": 266719232,
+        "pid": 5053,
         "service": "bioetl.application.composite.merge_service.MergeService",
         "read_method": "bioetl.application.composite.merger_input_mixin",
         "rlimit_as_bytes": 4294967296
@@ -319,7 +319,7 @@
           "--rows",
           "10000",
           "--fixture",
-          "/tmp/merger-measurement-7kbqqv74",
+          "/tmp/merger-measurement-99zh3mc1",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -329,13 +329,13 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 0.7343542730000081,
+        "elapsed_s": 0.5852138999999852,
         "stdout": "",
         "stderr": ""
       },
       "fixture_sha256": {
-        "chembl/activity/_delta_log/00000000000000000000.json": "8790e17df6d0fe6c00f4a2dfedc24d8b636e3b6412c5942c1e9ec12125224044",
-        "chembl/activity/part-00001-46140715-3e96-4b10-b568-f6be7b0b0ff0-c000.snappy.parquet": "f5642ad4ddb4b10462cfb19eb227d7c8427684ad7abb3ae069c4470116ab6bf7"
+        "chembl/activity/_delta_log/00000000000000000000.json": "704ec2df1e5141fbedda7767c7059da569f5df4360695a4f83e9d362dde06d8e",
+        "chembl/activity/part-00001-bbf641e0-0072-4eaf-ac47-8e3f93020077-c000.snappy.parquet": "f5642ad4ddb4b10462cfb19eb227d7c8427684ad7abb3ae069c4470116ab6bf7"
       },
       "measurement": {
         "command": [
@@ -344,7 +344,7 @@
           "--rows",
           "10000",
           "--fixture",
-          "/tmp/merger-measurement-7kbqqv74",
+          "/tmp/merger-measurement-99zh3mc1",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -354,16 +354,16 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 3.1385082909999937,
-        "stdout": "{\"rows\": 10000, \"wall_time_s\": 0.015444794000018192, \"process_peak_rss_bytes\": 280457216, \"pid\": 3315, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "elapsed_s": 2.2717779869999504,
+        "stdout": "{\"rows\": 10000, \"wall_time_s\": 0.0236812400000872, \"process_peak_rss_bytes\": 274776064, \"pid\": 5097, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
         "stderr": ""
       },
       "status": "COMPLETED",
       "raw": {
         "rows": 10000,
-        "wall_time_s": 0.015444794000018192,
-        "process_peak_rss_bytes": 280457216,
-        "pid": 3315,
+        "wall_time_s": 0.0236812400000872,
+        "process_peak_rss_bytes": 274776064,
+        "pid": 5097,
         "service": "bioetl.application.composite.merge_service.MergeService",
         "read_method": "bioetl.application.composite.merger_input_mixin",
         "rlimit_as_bytes": 4294967296
@@ -379,7 +379,7 @@
           "--rows",
           "10000",
           "--fixture",
-          "/tmp/merger-measurement-7kbqqv74",
+          "/tmp/merger-measurement-99zh3mc1",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -389,13 +389,13 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 0.7343542730000081,
+        "elapsed_s": 0.5852138999999852,
         "stdout": "",
         "stderr": ""
       },
       "fixture_sha256": {
-        "chembl/activity/_delta_log/00000000000000000000.json": "8790e17df6d0fe6c00f4a2dfedc24d8b636e3b6412c5942c1e9ec12125224044",
-        "chembl/activity/part-00001-46140715-3e96-4b10-b568-f6be7b0b0ff0-c000.snappy.parquet": "f5642ad4ddb4b10462cfb19eb227d7c8427684ad7abb3ae069c4470116ab6bf7"
+        "chembl/activity/_delta_log/00000000000000000000.json": "704ec2df1e5141fbedda7767c7059da569f5df4360695a4f83e9d362dde06d8e",
+        "chembl/activity/part-00001-bbf641e0-0072-4eaf-ac47-8e3f93020077-c000.snappy.parquet": "f5642ad4ddb4b10462cfb19eb227d7c8427684ad7abb3ae069c4470116ab6bf7"
       },
       "measurement": {
         "command": [
@@ -404,7 +404,7 @@
           "--rows",
           "10000",
           "--fixture",
-          "/tmp/merger-measurement-7kbqqv74",
+          "/tmp/merger-measurement-99zh3mc1",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -414,16 +414,16 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 2.4895999789999905,
-        "stdout": "{\"rows\": 10000, \"wall_time_s\": 0.015198867999970389, \"process_peak_rss_bytes\": 276070400, \"pid\": 3340, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "elapsed_s": 2.185130914999945,
+        "stdout": "{\"rows\": 10000, \"wall_time_s\": 0.019687926999949923, \"process_peak_rss_bytes\": 277835776, \"pid\": 5122, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
         "stderr": ""
       },
       "status": "COMPLETED",
       "raw": {
         "rows": 10000,
-        "wall_time_s": 0.015198867999970389,
-        "process_peak_rss_bytes": 276070400,
-        "pid": 3340,
+        "wall_time_s": 0.019687926999949923,
+        "process_peak_rss_bytes": 277835776,
+        "pid": 5122,
         "service": "bioetl.application.composite.merge_service.MergeService",
         "read_method": "bioetl.application.composite.merger_input_mixin",
         "rlimit_as_bytes": 4294967296
@@ -439,7 +439,7 @@
           "--rows",
           "10000",
           "--fixture",
-          "/tmp/merger-measurement-7kbqqv74",
+          "/tmp/merger-measurement-99zh3mc1",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -449,13 +449,13 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 0.7343542730000081,
+        "elapsed_s": 0.5852138999999852,
         "stdout": "",
         "stderr": ""
       },
       "fixture_sha256": {
-        "chembl/activity/_delta_log/00000000000000000000.json": "8790e17df6d0fe6c00f4a2dfedc24d8b636e3b6412c5942c1e9ec12125224044",
-        "chembl/activity/part-00001-46140715-3e96-4b10-b568-f6be7b0b0ff0-c000.snappy.parquet": "f5642ad4ddb4b10462cfb19eb227d7c8427684ad7abb3ae069c4470116ab6bf7"
+        "chembl/activity/_delta_log/00000000000000000000.json": "704ec2df1e5141fbedda7767c7059da569f5df4360695a4f83e9d362dde06d8e",
+        "chembl/activity/part-00001-bbf641e0-0072-4eaf-ac47-8e3f93020077-c000.snappy.parquet": "f5642ad4ddb4b10462cfb19eb227d7c8427684ad7abb3ae069c4470116ab6bf7"
       },
       "measurement": {
         "command": [
@@ -464,7 +464,7 @@
           "--rows",
           "10000",
           "--fixture",
-          "/tmp/merger-measurement-7kbqqv74",
+          "/tmp/merger-measurement-99zh3mc1",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -474,16 +474,16 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 2.7424156810000113,
-        "stdout": "{\"rows\": 10000, \"wall_time_s\": 0.019582063000029848, \"process_peak_rss_bytes\": 278462464, \"pid\": 3365, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "elapsed_s": 2.194230489000006,
+        "stdout": "{\"rows\": 10000, \"wall_time_s\": 0.017572132999930545, \"process_peak_rss_bytes\": 277663744, \"pid\": 5147, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
         "stderr": ""
       },
       "status": "COMPLETED",
       "raw": {
         "rows": 10000,
-        "wall_time_s": 0.019582063000029848,
-        "process_peak_rss_bytes": 278462464,
-        "pid": 3365,
+        "wall_time_s": 0.017572132999930545,
+        "process_peak_rss_bytes": 277663744,
+        "pid": 5147,
         "service": "bioetl.application.composite.merge_service.MergeService",
         "read_method": "bioetl.application.composite.merger_input_mixin",
         "rlimit_as_bytes": 4294967296
@@ -499,7 +499,7 @@
           "--rows",
           "100000",
           "--fixture",
-          "/tmp/merger-measurement-hq0z6kmb",
+          "/tmp/merger-measurement-lu1ahojg",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -509,13 +509,13 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 0.9367565929999842,
+        "elapsed_s": 0.6878058969999756,
         "stdout": "",
         "stderr": ""
       },
       "fixture_sha256": {
-        "chembl/activity/_delta_log/00000000000000000000.json": "2d6b13b20ca160aab9b80273c23e9da5a6f801de7c1e7c0e8f650eb85933c0cd",
-        "chembl/activity/part-00001-6f195624-e4e2-4875-87af-f78994f4ba60-c000.snappy.parquet": "3112ff1b39e0fa8a631efdd1971ec0605459d9bb492bc321d7d33c3d9e907a97"
+        "chembl/activity/_delta_log/00000000000000000000.json": "4a5ade17ef50eea30fd53ad2f435e17349c2d9f0fe23c26794be43b56fc2e8c6",
+        "chembl/activity/part-00001-f68d3d65-6505-4cbb-aaf3-45bbeb34bd00-c000.snappy.parquet": "3112ff1b39e0fa8a631efdd1971ec0605459d9bb492bc321d7d33c3d9e907a97"
       },
       "measurement": {
         "command": [
@@ -524,7 +524,7 @@
           "--rows",
           "100000",
           "--fixture",
-          "/tmp/merger-measurement-hq0z6kmb",
+          "/tmp/merger-measurement-lu1ahojg",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -534,16 +534,16 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 3.1935346580000328,
-        "stdout": "{\"rows\": 100000, \"wall_time_s\": 0.05895560799996247, \"process_peak_rss_bytes\": 320692224, \"pid\": 3410, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "elapsed_s": 2.667525134000016,
+        "stdout": "{\"rows\": 100000, \"wall_time_s\": 0.07656640800007608, \"process_peak_rss_bytes\": 320237568, \"pid\": 5191, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
         "stderr": ""
       },
       "status": "COMPLETED",
       "raw": {
         "rows": 100000,
-        "wall_time_s": 0.05895560799996247,
-        "process_peak_rss_bytes": 320692224,
-        "pid": 3410,
+        "wall_time_s": 0.07656640800007608,
+        "process_peak_rss_bytes": 320237568,
+        "pid": 5191,
         "service": "bioetl.application.composite.merge_service.MergeService",
         "read_method": "bioetl.application.composite.merger_input_mixin",
         "rlimit_as_bytes": 4294967296
@@ -559,7 +559,7 @@
           "--rows",
           "100000",
           "--fixture",
-          "/tmp/merger-measurement-hq0z6kmb",
+          "/tmp/merger-measurement-lu1ahojg",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -569,13 +569,13 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 0.9367565929999842,
+        "elapsed_s": 0.6878058969999756,
         "stdout": "",
         "stderr": ""
       },
       "fixture_sha256": {
-        "chembl/activity/_delta_log/00000000000000000000.json": "2d6b13b20ca160aab9b80273c23e9da5a6f801de7c1e7c0e8f650eb85933c0cd",
-        "chembl/activity/part-00001-6f195624-e4e2-4875-87af-f78994f4ba60-c000.snappy.parquet": "3112ff1b39e0fa8a631efdd1971ec0605459d9bb492bc321d7d33c3d9e907a97"
+        "chembl/activity/_delta_log/00000000000000000000.json": "4a5ade17ef50eea30fd53ad2f435e17349c2d9f0fe23c26794be43b56fc2e8c6",
+        "chembl/activity/part-00001-f68d3d65-6505-4cbb-aaf3-45bbeb34bd00-c000.snappy.parquet": "3112ff1b39e0fa8a631efdd1971ec0605459d9bb492bc321d7d33c3d9e907a97"
       },
       "measurement": {
         "command": [
@@ -584,7 +584,7 @@
           "--rows",
           "100000",
           "--fixture",
-          "/tmp/merger-measurement-hq0z6kmb",
+          "/tmp/merger-measurement-lu1ahojg",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -594,16 +594,16 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 4.438996719000045,
-        "stdout": "{\"rows\": 100000, \"wall_time_s\": 0.06428811500001075, \"process_peak_rss_bytes\": 318365696, \"pid\": 3435, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "elapsed_s": 2.605703385999959,
+        "stdout": "{\"rows\": 100000, \"wall_time_s\": 0.03380053500006852, \"process_peak_rss_bytes\": 320053248, \"pid\": 5216, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
         "stderr": ""
       },
       "status": "COMPLETED",
       "raw": {
         "rows": 100000,
-        "wall_time_s": 0.06428811500001075,
-        "process_peak_rss_bytes": 318365696,
-        "pid": 3435,
+        "wall_time_s": 0.03380053500006852,
+        "process_peak_rss_bytes": 320053248,
+        "pid": 5216,
         "service": "bioetl.application.composite.merge_service.MergeService",
         "read_method": "bioetl.application.composite.merger_input_mixin",
         "rlimit_as_bytes": 4294967296
@@ -619,7 +619,7 @@
           "--rows",
           "100000",
           "--fixture",
-          "/tmp/merger-measurement-hq0z6kmb",
+          "/tmp/merger-measurement-lu1ahojg",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -629,13 +629,13 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 0.9367565929999842,
+        "elapsed_s": 0.6878058969999756,
         "stdout": "",
         "stderr": ""
       },
       "fixture_sha256": {
-        "chembl/activity/_delta_log/00000000000000000000.json": "2d6b13b20ca160aab9b80273c23e9da5a6f801de7c1e7c0e8f650eb85933c0cd",
-        "chembl/activity/part-00001-6f195624-e4e2-4875-87af-f78994f4ba60-c000.snappy.parquet": "3112ff1b39e0fa8a631efdd1971ec0605459d9bb492bc321d7d33c3d9e907a97"
+        "chembl/activity/_delta_log/00000000000000000000.json": "4a5ade17ef50eea30fd53ad2f435e17349c2d9f0fe23c26794be43b56fc2e8c6",
+        "chembl/activity/part-00001-f68d3d65-6505-4cbb-aaf3-45bbeb34bd00-c000.snappy.parquet": "3112ff1b39e0fa8a631efdd1971ec0605459d9bb492bc321d7d33c3d9e907a97"
       },
       "measurement": {
         "command": [
@@ -644,7 +644,7 @@
           "--rows",
           "100000",
           "--fixture",
-          "/tmp/merger-measurement-hq0z6kmb",
+          "/tmp/merger-measurement-lu1ahojg",
           "--memory-mib",
           "4096",
           "--timeout-s",
@@ -654,16 +654,16 @@
         ],
         "exit_code": 0,
         "timed_out": false,
-        "elapsed_s": 3.704510107000033,
-        "stdout": "{\"rows\": 100000, \"wall_time_s\": 0.05790811299999632, \"process_peak_rss_bytes\": 324542464, \"pid\": 3460, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "elapsed_s": 2.791024679999964,
+        "stdout": "{\"rows\": 100000, \"wall_time_s\": 0.04918194100002893, \"process_peak_rss_bytes\": 320061440, \"pid\": 5241, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
         "stderr": ""
       },
       "status": "COMPLETED",
       "raw": {
         "rows": 100000,
-        "wall_time_s": 0.05790811299999632,
-        "process_peak_rss_bytes": 324542464,
-        "pid": 3460,
+        "wall_time_s": 0.04918194100002893,
+        "process_peak_rss_bytes": 320061440,
+        "pid": 5241,
         "service": "bioetl.application.composite.merge_service.MergeService",
         "read_method": "bioetl.application.composite.merger_input_mixin",
         "rlimit_as_bytes": 4294967296

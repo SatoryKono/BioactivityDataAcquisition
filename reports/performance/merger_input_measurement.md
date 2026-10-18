@@ -25,16 +25,16 @@ alone does not establish its cause. Container memory.max was 17179869184 bytes.
 
 ## Repeated observations
 
-Measured source: `8f9bd74269b5ecabc70bae34c78ec8dcb89075a5` (clean worktree).
-Source bytes SHA256: `858ae166e8e9e3eea392c6ea1db738a395c8d1bb9c71e274520e007d90f5816f`.
+Measured source: `9d40ebb2455b8f85598c770736db6c057c5c1a21` (clean worktree).
+Source bytes SHA256: `da6b59803e8f9dfffb1ff9e6262e6153c2ab1fe5f5ee048894842376a7254f31`.
 
 Raw observations: `reports/performance/merger_input_observations.json`.
-Raw bytes SHA256: `248bb096beb9e1f42afb709b96fb228a5544ef8939c23de0824f62622b89c82b`.
+Raw bytes SHA256: `1719f98ea18b5450df740209e4a62baf9bad3ea11bc843fba2f1d29fd832a357`.
 
-Command (the captured original output location is retained in raw JSON):
+Command (a new output filename is required on each invocation):
 
 ```bash
-.venv/bin/python scripts/engineering/performance/measure_merger_input.py --scales 1000 10000 100000 --repeats 3 --memory-mib 4096 --timeout-s 30 --out /workspace/pr12274-evidence/repeated-observations-isolated.json
+.venv/bin/python scripts/engineering/performance/measure_merger_input.py --scales 1000 10000 100000 --repeats 3 --memory-mib 4096 --timeout-s 30 --out /tmp/pr12274-observations-9d40ebb245.json
 ```
 
 All preparation and measurement exits were 0; orchestrator exit was 0.
@@ -44,9 +44,9 @@ controlled. Fresh interpreters do not imply cold filesystem caches.
 
 | Rows | Repeats | Read time median (s) | Read time min–max (s) | Process peak RSS min–max (MiB) |
 | --- | --- | --- | --- | --- |
-| 1,000 | 3 | 0.010536 | 0.010269–0.013040 | 254.14–255.13 |
-| 10,000 | 3 | 0.015445 | 0.015199–0.019582 | 263.28–267.46 |
-| 100,000 | 3 | 0.058956 | 0.057908–0.064288 | 303.62–309.51 |
+| 1,000 | 3 | 0.018056 | 0.013656–0.018462 | 251.06–254.36 |
+| 10,000 | 3 | 0.019688 | 0.017572–0.023681 | 262.05–264.96 |
+| 100,000 | 3 | 0.049182 | 0.033801–0.076566 | 305.23–305.40 |
 
 ## Conclusion and validation limits
 
@@ -55,7 +55,7 @@ inferred from a single narrow synthetic input and no joins. The largest composit
 wide production schemas, simultaneous input retention and fan-out remain unmeasured.
 No production refactor or redesign is justified by this probe.
 
-Owning tests: 91 passed; test-governance architecture tests: 46 passed. Targeted
+Owning tests: 93 passed; test-governance architecture tests: 46 passed. Targeted
 Ruff, docs links and docs drift passed. Selected ARTIFACT_REFRESH families
 (test-gov, flaky fingerprint, remote-main) and debt-governance passed after update.
 The full family check is BLOCKED by stale telemetry hash and unreachable historical
