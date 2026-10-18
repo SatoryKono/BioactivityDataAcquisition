@@ -15,6 +15,9 @@ Exceptions (collectors that intentionally scan untracked files):
 
 from __future__ import annotations
 
+import os
+from fnmatch import fnmatch
+
 import subprocess
 import sys
 from pathlib import Path
@@ -28,6 +31,7 @@ def _get_tracked_paths(repo_root: Path) -> set[str]:
         completed = subprocess.run(
             ensure_safe_cli_argv(["git", "ls-files", "-z"]),
             cwd=repo_root,
+            env=git_discovery_environment(),
             capture_output=True,
             check=True,
             text=False,
@@ -43,65 +47,82 @@ def _get_tracked_paths(repo_root: Path) -> set[str]:
     }
 
 
-def tracked_files(
-    root: Path,
-    *patterns: str,
-    include_untracked: bool = False,
-) -> tuple[Path, ...]:
-    """Return file paths under `root` that match `patterns` and are tracked by Git.
+def git_discovery_environment() -> dict[str, str]:
+    """Bind child Git commands to the requested checkout, not inherited locations."""
+    excluded = {
+        "GIT_DIR",
+        "GIT_WORK_TREE",
+        "GIT_COMMON_DIR",
+        "GIT_INDEX_FILE",
+        "GIT_OBJECT_DIRECTORY",
+        "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+        "GIT_CEILING_DIRECTORIES",
+        "GIT_DISCOVERY_ACROSS_FILESYSTEM",
+    }
+    return {key: value for key, value in os.environ.items() if key not in excluded}
 
-    When `include_untracked` is True, returns all matching files (tracked and untracked).
-    Reads the index on each call, including in linked worktrees. Fails closed (exits)
-    if Git is unavailable or fails.
 
-    Args:
-        root: The directory to search within (must be within a git repository).
-        patterns: One or more glob patterns (e.g. "*.py", "**/test_*.py").
-                  If no patterns are provided, acts as `["*"]`.
-        include_untracked: If True, do not filter by git tracked status.
+def _find_repo_root(root: Path) -> Path:
+    return next((p for p in (root, *root.parents) if (p / ".git").exists()), root)
 
-    Returns:
-        A deterministic (sorted) tuple of Path objects.
-    """
-    resolved_root = root.resolve()
 
-    # We must find the repo root to use git ls-files properly.
-    # Usually, we can just use REPO_ROOT from repo_paths, but for general use
-    # and tests, we'll try to find the .git directory or use the provided root.
-    repo_root = resolved_root
-    while repo_root.parent != repo_root and not (repo_root / ".git").exists():
-        repo_root = repo_root.parent
-    if not (repo_root / ".git").exists():
-        repo_root = (
-            resolved_root  # Fallback, git command will likely fail if not a repo
-        )
-
-    tracked = _get_tracked_paths(repo_root) if not include_untracked else set()
-
-    found_paths: set[Path] = set()
-    effective_patterns = patterns if patterns else ("*",)
-
-    for pattern in effective_patterns:
-        # Use rglob if pattern starts with **/, else glob
-        if pattern.startswith("**/"):
-            iterator = resolved_root.rglob(pattern[3:])
+def _matches_path(parts: tuple[str, ...], pattern: tuple[str, ...]) -> bool:
+    """Advance a set of path positions; ** consumes zero or more components."""
+    positions = {0}
+    for component in pattern:
+        if component == "**":
+            positions = (
+                set(range(min(positions), len(parts) + 1)) if positions else set()
+            )
         else:
-            # If pattern contains ** somewhere else, glob supports it in Python 3.5+
-            iterator = resolved_root.glob(pattern)
+            positions = {
+                index + 1
+                for index in positions
+                if index < len(parts) and fnmatch(parts[index], component)
+            }
+    return len(parts) in positions
 
-        for path in iterator:
-            if not path.is_file():
-                continue
 
-            if not include_untracked:
-                try:
-                    rel_path = path.relative_to(repo_root).as_posix()
-                except ValueError:
-                    continue  # Not under repo root
+def _pattern_parts(pattern: str) -> tuple[str, ...]:
+    if not pattern:
+        raise ValueError("Unacceptable pattern: ''")
+    path = Path(pattern)
+    if path.is_absolute():
+        raise NotImplementedError("Non-relative patterns are unsupported")
+    if sys.version_info < (3, 13) and any(
+        "**" in part and part != "**" for part in path.parts
+    ):
+        raise ValueError("Invalid pattern: '**' can only be an entire path component")
+    # pathlib glob's terminal ** and trailing separator select directories only.
+    if pattern.endswith(os.sep) or (
+        sys.version_info < (3, 13) and path.parts and path.parts[-1] == "**"
+    ):
+        return ()
+    return path.parts
 
-                if rel_path not in tracked:
-                    continue
 
-            found_paths.add(path)
-
-    return tuple(sorted(found_paths))
+def tracked_files(
+    root: Path, *patterns: str, include_untracked: bool = False
+) -> tuple[Path, ...]:
+    """Match indexed paths without walking ignored trees; read the index afresh."""
+    root = root.resolve()
+    patterns = patterns or ("*",)
+    if include_untracked:
+        return tuple(
+            sorted(
+                {p for pattern in patterns for p in root.glob(pattern) if p.is_file()}
+            )
+        )
+    repo_root = _find_repo_root(root)
+    prefix = root.relative_to(repo_root)
+    compiled = tuple(_pattern_parts(pattern) for pattern in patterns)
+    found = set()
+    for name in _get_tracked_paths(repo_root):
+        relative = Path(name)
+        if relative.is_relative_to(prefix):
+            local = relative.relative_to(prefix)
+            if any(_matches_path(local.parts, pattern) for pattern in compiled):
+                candidate = repo_root / relative
+                if candidate.is_file():
+                    found.add(candidate)
+    return tuple(sorted(found))

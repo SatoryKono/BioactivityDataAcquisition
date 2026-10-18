@@ -15,7 +15,11 @@ from pathlib import Path
 from typing import Any
 
 from scripts.generate_adr_registry import ADRMetadata, ADRRegistryGenerator
-from scripts.engineering.qa._tracked_glob import _get_tracked_paths, tracked_files
+from scripts.engineering.qa._tracked_glob import (
+    _get_tracked_paths,
+    git_discovery_environment,
+    tracked_files,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_JSON_OUTPUT = (
@@ -180,6 +184,7 @@ def _git_grep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
                 ]
             ),
             cwd=repo_root,
+            env=git_discovery_environment(),
             check=False,
             capture_output=True,
             text=True,
@@ -225,6 +230,7 @@ def _ripgrep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
                 ]
             ),
             cwd=repo_root,
+            env=git_discovery_environment(),
             check=False,
             capture_output=True,
             text=True,

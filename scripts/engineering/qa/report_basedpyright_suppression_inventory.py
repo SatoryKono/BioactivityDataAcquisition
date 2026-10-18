@@ -27,7 +27,7 @@ import re
 from collections import Counter
 from pathlib import Path
 
-from scripts.engineering.qa._tracked_glob import tracked_files
+from scripts.engineering.qa._tracked_glob import _find_repo_root, tracked_files
 
 PRODUCT_ROOT = Path("src/bioetl")
 DEFAULT_BASELINE = Path("reports/quality/basedpyright-suppression-inventory.json")
@@ -41,8 +41,9 @@ def collect(root: Path) -> dict[str, object]:
     mode_counts: Counter[str] = Counter()
     files_with_suppressions: set[str] = set()
 
-    for path in tracked_files(root, "**/test_*.py", "**/*.py"):
-        rel = path.as_posix()
+    repo_root = _find_repo_root(root.resolve())
+    for path in tracked_files(root, "**/*.py"):
+        rel = path.relative_to(repo_root).as_posix()
         text = path.read_text(encoding="utf-8")
         found = False
         for match in _IGNORE_RE.finditer(text):
@@ -59,7 +60,7 @@ def collect(root: Path) -> dict[str, object]:
 
     total_rules = sum(rule_counts.values()) + sum(mode_counts.values())
     return {
-        "product_root": root.as_posix(),
+        "product_root": root.resolve().relative_to(repo_root).as_posix(),
         "files": len(files_with_suppressions),
         "total_rules": total_rules,
         "by_rule": dict(

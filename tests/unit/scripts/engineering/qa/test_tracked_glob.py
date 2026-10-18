@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 import pytest
 
@@ -38,6 +38,7 @@ def test_tracked_files_includes_tracked_and_excludes_untracked(tmp_path: Path):
         mock_run.assert_called_once_with(
             ["git", "ls-files", "-z"],
             cwd=tmp_path.resolve(),
+            env=ANY,
             capture_output=True,
             check=True,
             text=False,
@@ -157,3 +158,91 @@ def test_tracked_files_uses_each_worktree_index(tmp_path: Path):
     _git(linked, "add", "extra.py")
     assert tracked_files(linked, "*.py") == (linked / "common.py", extra)
     assert tracked_files(main, "*.py") == (main / "common.py",)
+
+
+@pytest.mark.parametrize(
+    "pattern",
+    [
+        "*",
+        "*.py",
+        "**/*.py",
+        "**",
+        "sub/**",
+        "./*.py",
+        "sub/",
+        "sub/**/*.py",
+        "**/sub/**/a?.py",
+        "[ab]*.py",
+        "**/*",
+    ],
+)
+def test_index_matcher_agrees_with_pathlib(tmp_path: Path, pattern: str):
+    _git(tmp_path, "init")
+    for name in ("a.py", "b.txt", ".hidden.py", "sub/a1.py", "sub/deep/a2.py"):
+        path = tmp_path / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("fixture")
+    _git(tmp_path, "add", ".")
+    expected = tuple(
+        sorted(
+            p for p in tmp_path.glob(pattern) if p.is_file() and ".git" not in p.parts
+        )
+    )
+    assert tracked_files(tmp_path, pattern) == expected
+
+
+def test_discovery_never_scans_ignored_tree(tmp_path: Path, monkeypatch):
+    _git(tmp_path, "init")
+    (tmp_path / "a.py").write_text("fixture")
+    _git(tmp_path, "add", "a.py")
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("filesystem traversal is forbidden")
+
+    monkeypatch.setattr(Path, "glob", forbidden)
+    monkeypatch.setattr(Path, "rglob", forbidden)
+    assert tracked_files(tmp_path, "**/*.py") == (tmp_path / "a.py",)
+
+
+def test_discovery_ignores_foreign_git_location(tmp_path: Path, monkeypatch):
+    own, foreign = tmp_path / "own", tmp_path / "foreign"
+    for root, name in ((own, "own.py"), (foreign, "foreign.py")):
+        root.mkdir()
+        _git(root, "init")
+        (root / name).write_text("fixture")
+        _git(root, "add", name)
+    monkeypatch.setenv("GIT_DIR", str(foreign / ".git"))
+    monkeypatch.setenv("GIT_WORK_TREE", str(foreign))
+    monkeypatch.setenv("GIT_INDEX_FILE", str(foreign / ".git/index"))
+    assert tracked_files(own, "*.py") == (own / "own.py",)
+
+
+def test_suppression_inventory_paths_are_portable(tmp_path: Path):
+    from scripts.engineering.qa.report_basedpyright_suppression_inventory import collect
+
+    _git(tmp_path, "init")
+    product = tmp_path / "src/bioetl"
+    product.mkdir(parents=True)
+    (product / "a.py").write_text("# pyright: ignore[reportUnknownMemberType]\n")
+    _git(tmp_path, "add", ".")
+    result = collect(product)
+    assert result["product_root"] == "src/bioetl"
+    assert result["files_list"] == ["src/bioetl/a.py"]
+
+
+def test_singleton_metric_document_obeys_index(tmp_path: Path, monkeypatch):
+    from scripts.engineering.qa import observability_metric_inventory_report as report
+
+    _git(tmp_path, "init")
+    document = tmp_path / "grafana/README.md"
+    document.parent.mkdir()
+    document.write_text("bioetl_pipeline_duration_seconds")
+    monkeypatch.setattr(report, "_DOC_SCAN_ROOTS", (Path("grafana/README.md"),))
+    assert report._scan_documented_metrics_from_docs(tmp_path) == set()
+    _git(tmp_path, "add", ".")
+    assert (
+        "bioetl_pipeline_duration_seconds"
+        in report._scan_documented_metrics_from_docs(tmp_path)
+    )
+    _git(tmp_path, "rm", "--cached", "grafana/README.md")
+    assert report._scan_documented_metrics_from_docs(tmp_path) == set()

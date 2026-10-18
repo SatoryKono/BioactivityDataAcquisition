@@ -521,7 +521,11 @@ def _scan_documented_metrics_from_docs(repo_root: Path) -> set[str]:
         if scan_root == Path("grafana/dashboards"):
             continue
         path = repo_root / scan_root
-        candidates = [path] if path.is_file() else tracked_files(path, "**/*")
+        candidates = (
+            tracked_files(path.parent, path.name)
+            if path.is_file()
+            else tracked_files(path, "**/*")
+        )
         for candidate in candidates:
             if not candidate.is_file() or candidate.suffix not in _TEXT_SUFFIXES:
                 continue

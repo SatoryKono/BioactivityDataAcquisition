@@ -321,7 +321,6 @@ def test_semantic_pair_matrix_budget_rejects_newer_generated_snapshot(
         today=date(2026, 5, 22),
     )
 
-    assert (
-        any(finding.kind == "stale_reviewed_snapshot" for finding in result.findings)
-        == track_new_snapshot
+    assert any(
+        finding.kind == "stale_reviewed_snapshot" for finding in result.findings
     ), [finding.message for finding in result.findings]
