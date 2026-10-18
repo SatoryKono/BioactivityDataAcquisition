@@ -2,20 +2,20 @@
   "schema_version": "1.0",
   "generated_at": "2026-10-18T12:02:39.317379+00:00",
   "summary": {
-    "total_scripts": 648,
+    "total_scripts": 649,
     "status_counts": {
       "active": 334,
-      "supporting": 314
+      "supporting": 315
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
-      "ci": 72,
+      "ci": 73,
       "docs": 282,
       "other": 16,
-      "scripts": 544,
+      "scripts": 545,
       "skills": 13,
-      "tests": 466
+      "tests": 467
     }
   },
   "scripts": [
@@ -2708,7 +2708,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1851,
+          "line": 1892,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check >> \"$log\" 2>&1"
         },
@@ -10152,7 +10152,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1741,
+          "line": 1782,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.junit_duration_summary"
         },
@@ -10420,6 +10420,67 @@
       "next_step": "Retain the tested Scorecard SARIF publication implementation behind the canonical scripts.engineering.ci package router (#11931). CircleCI and operator documentation must invoke that router; source/workflow/approval checks remain owned by this backend. Re-triage if a standalone public entrypoint is introduced."
     },
     {
+      "path": "scripts/engineering/ci/pytest_event_journal.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 31,
+      "references": [
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 1427,
+          "source_group": "ci",
+          "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pytest_event_journal \\"
+        },
+        {
+          "path": "scripts/engineering/ci/run_pytest_resilient.py",
+          "line": 93,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.ci.pytest_event_journal import ensure_redaction_key"
+        },
+        {
+          "path": "scripts/engineering/ci/run_pytest_resilient.py",
+          "line": 264,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.ci.pytest_event_journal import atomic_write_json"
+        },
+        {
+          "path": "scripts/engineering/ci/run_pytest_resilient.py",
+          "line": 305,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.ci.pytest_event_journal import ("
+        },
+        {
+          "path": "tests/architecture/ci/test_event_journal.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pytest_event_journal import ("
+        },
+        {
+          "path": "tests/architecture/ci/test_event_journal.py",
+          "line": 507,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pytest_event_journal import _group_receipts"
+        },
+        {
+          "path": "tests/architecture/ci/test_event_journal.py",
+          "line": 531,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pytest_event_journal import ("
+        },
+        {
+          "path": "tests/architecture/ci/test_event_journal.py",
+          "line": 899,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pytest_event_journal import _redact_text"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the pytest receipt helper imported by run_pytest_resilient.py and verified from the serial-coverage job. The resilient runner stays the public entrypoint; do not promote this module to active or raise active_script_count_max."
+    },
+    {
       "path": "scripts/engineering/ci/quality_integral_gate.py",
       "type": "py",
       "status": "active",
@@ -10428,7 +10489,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1935,
+          "line": 1976,
           "source_group": "ci",
           "text": "\"python -m scripts.engineering.ci.quality_integral_gate\" \\"
         },
@@ -10619,11 +10680,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 19,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1389,
+          "line": 1405,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -10652,22 +10713,22 @@
           "text": "\"run-tests\": \"run_pytest_resilient.py\","
         },
         {
-          "path": "tests/architecture/test_ci_heavy_lane_rebalance.py",
-          "line": 141,
+          "path": "tests/architecture/ci/test_event_journal.py",
+          "line": 808,
           "source_group": "tests",
-          "text": "assert \"run_pytest_resilient.py\" not in verify_block"
+          "text": "str(_ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\"),"
         },
         {
-          "path": "tests/architecture/test_ci_test_strategy.py",
-          "line": 85,
+          "path": "tests/architecture/ci/test_event_journal.py",
+          "line": 1049,
           "source_group": "tests",
-          "text": "\"scripts/engineering/ci/run_pytest_resilient.py\","
+          "text": "from scripts.engineering.ci import run_pytest_resilient"
         },
         {
-          "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 216,
+          "path": "tests/architecture/ci/test_event_journal.py",
+          "line": 1114,
           "source_group": "tests",
-          "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\""
+          "text": "from scripts.engineering.ci import run_pytest_resilient"
         }
       ]
     },
@@ -11114,7 +11175,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 270,
+      "reference_count": 271,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -11471,7 +11532,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1927,
+          "line": 1968,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
