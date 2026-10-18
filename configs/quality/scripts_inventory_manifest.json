@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-18T22:32:58.058686+00:00",
+  "generated_at": "2026-10-18T22:51:31.914734+00:00",
   "summary": {
     "total_scripts": 650,
     "status_counts": {
@@ -10458,7 +10458,7 @@
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 1483,
+          "line": 1486,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pytest_abort_diagnostic_adapter as adapter"
         },
@@ -10485,7 +10485,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 31,
+      "reference_count": 33,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -10519,19 +10519,19 @@
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 507,
+          "line": 504,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_event_journal import _group_receipts"
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 531,
+          "line": 528,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_event_journal import ("
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 899,
+          "line": 896,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_event_journal import _redact_text"
         }
@@ -10562,7 +10562,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_receipts.py",
-          "line": 953,
+          "line": 964,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_receipts import write_runner_terminal_receipt"
         }
@@ -10812,13 +10812,13 @@
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 808,
+          "line": 805,
           "source_group": "tests",
           "text": "str(_ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\"),"
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 1049,
+          "line": 1046,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import run_pytest_resilient"
         }
@@ -14981,7 +14981,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
