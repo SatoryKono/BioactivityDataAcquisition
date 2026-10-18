@@ -32,7 +32,7 @@ trend evidence only.
 - Source run id: `local`
 - Source event: `push`
 - Source run URL: `pending`
-- Source tree sha256: `7f49ec40586784bb4cc78e19e7029db4235b0c46e0f09f800b229193602ed838`
+- Source tree sha256: `ef6d8cb9621d3d899ab05e12ccc9e7f2a2473f24918a81852d2d2f8b38733a2e`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-17T18:37:38.133765+00:00`
 

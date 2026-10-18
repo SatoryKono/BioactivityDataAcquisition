@@ -54,6 +54,51 @@
     "family": "storage_medallion",
     "type": "counter"
   },
+  "bioetl_bronze_cleanup_bytes_conflicted_total": {
+    "description": "Total Bronze cleanup bytes conflicted",
+    "family": "storage_medallion",
+    "type": "counter"
+  },
+  "bioetl_bronze_cleanup_bytes_failed_total": {
+    "description": "Total Bronze cleanup bytes failed",
+    "family": "storage_medallion",
+    "type": "counter"
+  },
+  "bioetl_bronze_cleanup_bytes_skipped_total": {
+    "description": "Total Bronze cleanup bytes skipped",
+    "family": "storage_medallion",
+    "type": "counter"
+  },
+  "bioetl_bronze_cleanup_directories_conflicted_total": {
+    "description": "Total Bronze cleanup directories conflicted",
+    "family": "storage_medallion",
+    "type": "counter"
+  },
+  "bioetl_bronze_cleanup_directories_failed_total": {
+    "description": "Total Bronze cleanup directories failed",
+    "family": "storage_medallion",
+    "type": "counter"
+  },
+  "bioetl_bronze_cleanup_directories_skipped_total": {
+    "description": "Total Bronze cleanup directories skipped",
+    "family": "storage_medallion",
+    "type": "counter"
+  },
+  "bioetl_bronze_cleanup_files_conflicted_total": {
+    "description": "Total Bronze cleanup files conflicted",
+    "family": "storage_medallion",
+    "type": "counter"
+  },
+  "bioetl_bronze_cleanup_files_failed_total": {
+    "description": "Total Bronze cleanup files failed",
+    "family": "storage_medallion",
+    "type": "counter"
+  },
+  "bioetl_bronze_cleanup_files_skipped_total": {
+    "description": "Total Bronze cleanup files skipped",
+    "family": "storage_medallion",
+    "type": "counter"
+  },
   "bioetl_bronze_files_removed_total": {
     "description": "Total Bronze files removed by cleanup maintenance",
     "family": "storage_medallion",
