@@ -196,6 +196,7 @@ def test_parity_requires_optionless_commands_and_rejects_unknown_headings() -> N
 
 def test_parity_uses_hidden_metadata_and_traverses_lazy_groups() -> None:
     """Resolve lazy public children while excluding hidden options and commands."""
+
     class LazyGroup(click.Group):
         def list_commands(self, ctx: click.Context) -> list[str]:
             """Expose the lazy child through the Click discovery interface."""
