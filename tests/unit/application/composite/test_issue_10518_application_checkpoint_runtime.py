@@ -276,6 +276,58 @@ def test_load_warns_on_corrupted_state_value() -> None:
     )
 
 
+@pytest.mark.parametrize("raw_state", [[], {}])
+def test_load_normalizes_unhashable_state_without_losing_progress(
+    raw_state: list[object] | dict[str, object],
+) -> None:
+    payload = _payload(
+        "c",
+        state=raw_state,
+        seed_completed=True,
+        seed_result={
+            "pipeline_name": "chembl_activity",
+            "records_extracted": 3,
+            "records_silver": 2,
+        },
+        completed_dependencies=["uniprot"],
+        dependency_results={
+            "uniprot": {
+                "pipeline_name": "uniprot",
+                "status": "success",
+                "records_extracted": 2,
+                "records_silver": 2,
+            }
+        },
+        merge_completed=True,
+        merge_result={"records_merged": 2},
+    )
+    storage = _storage({"cp.json": payload})
+    logger = MagicMock()
+
+    state = load_checkpoint_state(
+        storage=storage,
+        logger=logger,
+        composite_name="c",
+        filename="cp.json",
+    )
+
+    assert state is not None
+    assert state.state.value == "not_started"
+    assert state.seed_completed is True
+    assert state.seed_result is not None
+    assert state.seed_result.pipeline_name == "chembl_activity"
+    assert state.completed_dependencies == frozenset({"uniprot"})
+    assert state.dependency_results["uniprot"].pipeline_name == "uniprot"
+    assert state.merge_completed is True
+    assert state.merge_result == {"records_merged": 2}
+    logger.warning.assert_any_call(
+        "Checkpoint state value corrupted, using default",
+        composite="c",
+        raw_state=raw_state,
+        parsed_state="not_started",
+    )
+
+
 @pytest.mark.parametrize(
     ("raw_state", "expected_state"),
     [
