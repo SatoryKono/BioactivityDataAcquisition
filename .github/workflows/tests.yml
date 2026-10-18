@@ -376,6 +376,7 @@ jobs:
         with:
           persist-credentials: false
           lfs: false
+          fetch-depth: 0
 
       - name: Reject Git LFS pointer cassettes
         id: vcr_pointer_guard
@@ -501,13 +502,18 @@ jobs:
         if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-adr-enforcement-matrix --check
 
+      - name: Prepare source-governance comparison baseline
+        run: git fetch --no-tags origin main:refs/remotes/origin/main
+
       - name: Validate remote-main architecture debt baseline
         if: inputs.generated-artifacts
-        run: |
-          git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
-          uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
+        run: uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
 
       - name: Validate debt-governance fail-fast gates
+        run: uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --source-only --check --changed-from-ref refs/remotes/origin/main
+
+      - name: Validate full debt-governance generated evidence
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref refs/remotes/origin/main
 
       - name: Dashboard navigation contract sync gate

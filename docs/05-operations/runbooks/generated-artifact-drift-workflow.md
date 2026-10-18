@@ -240,3 +240,21 @@ are never converted into successful deferrals.
 Local pytest defaults to the complete selection. Use `--artifact-selection=ci`
 for PR-equivalent tests. Run the complete artifact test partition with
 `python -m scripts.engineering.ci.generated_artifact_checks daily --report /tmp/generated-artifact-selection.json`.
+
+The governance preflight fetches `origin/main` unconditionally, with full checkout
+history, before source comparisons. Missing refs or merge bases are errors; they
+must never be interpreted as an empty changed-path set.
+
+`report-debt-governance-gates --source-only --check --changed-from-ref ...` evaluates
+authored debt/exemption budgets, budget growth against the base ref, UUID seam
+policy and live DQ contract diagnostics without loading committed generated JSON.
+The full command remains a separate daily step: all module-coverage hashes,
+generated artifact drift, generated metric/residual gates, coherence checks and
+observability release/touched-evidence checks still execute there unchanged.
+Source mode cannot update artifacts or run without an explicit comparison ref.
+
+The ordinary `report-observability-metric-inventory --check` steps remain enabled:
+they collect current metric declarations/emissions, dashboard/rule references and
+source policy inputs and write fresh review evidence. The separate
+`--typed-observability-views` mode checks committed panel inventory drift; these
+ordinary workflow steps do not request that mode.

@@ -2842,7 +2842,7 @@
       "workflow": ".github/workflows/tests.yml",
       "job": "governance-preflight",
       "step": "Validate remote-main architecture debt baseline",
-      "command": "git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main\nuv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check\n",
+      "command": "uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check",
       "reason": "Committed generated artifact validation; retained behind explicit daily input."
     },
     {
@@ -2945,6 +2945,13 @@
         "configs/quality/scripts_inventory_manifest.json"
       ],
       "reason": "Freshness of committed generated output; source/lifecycle contracts remain independent."
+    },
+    {
+      "id": "debt-governance-generated-evidence",
+      "owner": "tests-nightly",
+      "job": "governance-preflight",
+      "step": "Validate full debt-governance generated evidence",
+      "command": "uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref refs/remotes/origin/main"
     }
   ],
   "reviewed_non_artifact_candidates": [

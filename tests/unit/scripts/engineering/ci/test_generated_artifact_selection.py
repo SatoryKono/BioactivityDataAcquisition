@@ -297,3 +297,133 @@ def test_daily_validator_failures_survive_and_do_not_suppress_remaining_checks(
     assert checks.main(["validators", "--report", str(report)]) == 1
     assert len(commands) == 2
     assert [row["exit_code"] for row in json.loads(report.read_text())] == [1, 0]
+
+
+def test_source_governance_fetch_is_unconditional_and_precedes_both_modes():
+    workflow = yaml.safe_load((ROOT / ".github/workflows/tests.yml").read_text())
+    steps = workflow["jobs"]["governance-preflight"]["steps"]
+    checkout = next(step for step in steps if step["name"] == "Checkout code")
+    assert checkout["with"]["fetch-depth"] == 0
+    fetch = next(
+        step
+        for step in steps
+        if step["name"] == "Prepare source-governance comparison baseline"
+    )
+    assert "if" not in fetch and "--depth" not in fetch["run"]
+    assert "main:refs/remotes/origin/main" in fetch["run"]
+    source = next(
+        step
+        for step in steps
+        if step["name"] == "Validate debt-governance fail-fast gates"
+    )
+    daily = next(
+        step
+        for step in steps
+        if step["name"] == "Validate full debt-governance generated evidence"
+    )
+    assert steps.index(fetch) < steps.index(source) < steps.index(daily)
+    assert "if" not in source and "--source-only" in source["run"]
+    assert (
+        daily["if"] == "inputs.generated-artifacts"
+        and "--source-only" not in daily["run"]
+    )
+
+
+def test_missing_comparison_ref_fails_instead_of_empty_changed_paths(tmp_path):
+    from scripts.engineering.qa.debt_governance_gate_evaluators import (
+        _collect_changed_paths,
+    )
+
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    with pytest.raises(ValueError, match="Cannot collect changed paths"):
+        _collect_changed_paths(tmp_path, changed_from_ref="refs/remotes/origin/main")
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        "debt_scorecard_budget_no_growth",
+        "production_uuid4_seams",
+        "dq_contract_registry_blocking_drift",
+    ],
+)
+def test_source_debt_failures_survive_without_generated_inputs(monkeypatch, failure):
+    from scripts.engineering.qa import report_debt_governance_gates as gates
+    from scripts.engineering.qa import debt_governance_gate_report as cli
+    from scripts.engineering.qa import debt_governance_gate_evaluators as evaluators
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("source mode read committed generated evidence")
+
+    monkeypatch.setattr(gates, "_load_json", forbidden)
+    monkeypatch.setattr(evaluators, "_load_json", forbidden)
+    monkeypatch.setattr(
+        gates, "_collect_changed_paths", lambda *a, **k: {"src/changed.py"}
+    )
+    monkeypatch.setattr(gates, "_debt_scorecard_gates", lambda: [])
+    monkeypatch.setattr(
+        gates,
+        "_debt_scorecard_budget_no_growth_gate",
+        lambda **k: gates.Gate(
+            "debt_scorecard_budget_no_growth",
+            "fail" if failure == "debt_scorecard_budget_no_growth" else "pass",
+            "count",
+            1,
+            0,
+            "source",
+            "fix",
+        ),
+    )
+    monkeypatch.setattr(
+        gates,
+        "_load_yaml",
+        lambda *a: {
+            "policy": {"production_uuid4_budget": 0},
+            "seams": ["bad"] if failure == "production_uuid4_seams" else [],
+        },
+    )
+    monkeypatch.setattr(
+        gates,
+        "build_contract_registry_dq_diagnostics",
+        lambda *a: {
+            "blocking_issue_count": int(
+                failure == "dq_contract_registry_blocking_drift"
+            )
+        },
+    )
+    payload = gates.build_source_payload(repo_root=ROOT, changed_from_ref="origin/main")
+    assert payload["summary"]["failing_gates"] == [failure]
+    assert (
+        cli.main(["--source-only", "--check", "--changed-from-ref", "origin/main"]) == 1
+    )
+    with pytest.raises(SystemExit):
+        gates._parse_args(["--source-only", "--check"])
+
+
+def test_ordinary_observability_inventory_does_not_read_generated_reports(monkeypatch):
+    from scripts.engineering.qa import (
+        report_observability_metric_inventory as inventory,
+    )
+
+    original = Path.read_text
+
+    def guarded(path, *args, **kwargs):
+        if path.is_relative_to(ROOT / "reports"):
+            raise AssertionError(
+                f"ordinary metric inventory read generated report: {path}"
+            )
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", guarded)
+    inventory._METRIC_INVENTORY_CACHE.clear()
+    report = inventory.collect_metric_inventory(ROOT)
+    assert report is not None
+    workflow = yaml.safe_load((ROOT / ".github/workflows/tests.yml").read_text())
+    commands = [
+        step["run"]
+        for job in workflow["jobs"].values()
+        for step in job.get("steps", [])
+        if "report-observability-metric-inventory" in step.get("run", "")
+    ]
+    assert commands
+    assert all("--typed-observability-views" not in command for command in commands)
