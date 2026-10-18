@@ -102,12 +102,12 @@ _FAILURE_CLASSIFICATIONS = frozenset({"failed", "setup_error", "teardown_error"}
 _WHEN_CLASSIFICATIONS = {
     "setup": frozenset({"passed", "skipped", "setup_error", "xfail", "rerun"}),
     "call": frozenset({"passed", "failed", "skipped", "xfail", "xpass", "rerun"}),
-    "teardown": frozenset({"passed", "skipped", "teardown_error", "rerun"}),
+    "teardown": frozenset({"passed", "skipped", "teardown_error", "rerun", "xfail"}),
 }
-_TEARDOWN_SUCCESS = frozenset({"passed", "skipped"})
+_TEARDOWN_SUCCESS = frozenset({"passed", "skipped", "xfail"})
 _HEX_32 = re.compile(r"^[0-9a-f]{32}$")
 _PATH_TOKEN = re.compile(r"^[A-Za-z0-9_.-]{1,64}$")
-_AUTHORITATIVE_PASS_NAMES = frozenset({"parallel", "serial", "fallback"})
+_AUTHORITATIVE_PASS_NAMES = frozenset({"parallel", "serial", "fallback", "unspecified"})
 _RECEIPT_FILENAME = re.compile(
     r"^receipt_(?P<pass_name>parallel|serial|fallback|unspecified)_"
     r"(?P<invocation>[0-9a-f]{32})_"
@@ -582,7 +582,8 @@ def _register_session_finish_hook(config: Any, plugin: EventJournalPlugin) -> No
             outcome = yield
             if getattr(outcome, "excinfo", None) is not None:
                 self._owner.record("unconfigure_error", {"hook_error": True})
-            self._owner.finalize()
+            if self._owner.identity["role"] == "worker":
+                self._owner.finalize()
             outcome.get_result()
 
     class _SessionFinishHook:
@@ -649,6 +650,27 @@ def _receipt_path(directory: Path, identity: dict[str, Any]) -> Path:
     return directory / filename
 
 
+@pytest.hookimpl(hookwrapper=True, trylast=True)
+def pytest_load_initial_conftests(early_config: Any) -> Any:
+    """Register the outer command hook after startup plugins have loaded."""
+    yield
+
+    class _CommandFinishHook:
+        @pytest.hookimpl(hookwrapper=True, tryfirst=True)
+        def pytest_cmdline_main(self, config: Any) -> Any:
+            outcome = yield
+            plugin = getattr(config, "_event_journal_owner", None)
+            if plugin is not None:
+                if getattr(outcome, "excinfo", None) is not None:
+                    plugin.record("unconfigure_error", {"hook_error": True})
+                plugin.finalize()
+            outcome.get_result()
+
+    early_config.pluginmanager.register(
+        _CommandFinishHook(), "event_journal_command_finish"
+    )
+
+
 @pytest.hookimpl(optionalhook=True)
 def pytest_configure_node(node: Any) -> None:
     """Pass one redaction key to each xdist worker before it starts."""
@@ -656,6 +678,9 @@ def pytest_configure_node(node: Any) -> None:
     workerinput = getattr(node, "workerinput", None)
     if isinstance(workerinput, dict):
         workerinput[_REDACTION_KEY_ENV] = ensure_redaction_key()
+        invocation = getattr(node.config, "_event_journal_invocation", None)
+        if invocation is not None:
+            workerinput["BIOETL_JOURNAL_INVOCATION_ID"] = invocation
 
 
 def pytest_configure(config: Any) -> None:
@@ -666,11 +691,17 @@ def pytest_configure(config: Any) -> None:
     publish_redaction_key()
     secrets = _secret_values()
     actual_sha, sha_error = measure_checkout_sha()
+    workerinput = getattr(config, "workerinput", {})
+    invocation = workerinput.get("BIOETL_JOURNAL_INVOCATION_ID")
     identity = _identity_from_env(actual_sha=actual_sha, secrets=secrets)
+    if invocation:
+        identity["invocation_id"] = invocation
+    config._event_journal_invocation = identity["invocation_id"]
     directory = Path(str(journal_dir))
     plugin = EventJournalPlugin(config, _receipt_path(directory, identity), identity)
     if plugin._file is None:
         return
+    config._event_journal_owner = plugin
     config.pluginmanager.register(plugin, "event_journal_plugin")
     _register_collection_hook(config, plugin)
     _register_session_finish_hook(config, plugin)
@@ -801,7 +832,24 @@ def _optional_count(event: dict[str, Any], field: str) -> bool:
 
 def _identity_well_formed(event: dict[str, Any]) -> bool:
     identity = event.get("identity")
-    return identity is None or isinstance(identity, dict)
+    if not isinstance(identity, dict):
+        return False
+    strings = (
+        "workflow_run_id",
+        "workflow_run_attempt",
+        "job",
+        "invocation_id",
+        "pass_name",
+        "worker_id",
+    )
+    return (
+        all(isinstance(identity.get(key), str) for key in strings)
+        and bool(identity.get("invocation_id"))
+        and identity.get("role") in {"controller", "worker"}
+        and "matrix" in identity
+        and "actual_checkout_sha" in identity
+        and "expected_checkout_sha" in identity
+    )
 
 
 def _nodeids_well_formed(event: dict[str, Any]) -> bool:
@@ -832,12 +880,27 @@ def _schema_supported(event: dict[str, Any]) -> bool:
     return type(version) is int and version == SCHEMA_VERSION
 
 
+def _timestamp_valid(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError:
+        return False
+    return (
+        parsed.tzinfo == UTC
+        and parsed.isoformat() == value
+        and parsed <= datetime.now(UTC)
+    )
+
+
 def _event_is_well_formed(event: dict[str, Any]) -> bool:
     if not isinstance(event.get("event"), str):
         return False
     return (
         _schema_supported(event)
         and _identity_well_formed(event)
+        and _timestamp_valid(event.get("timestamp"))
         and _nodeids_well_formed(event)
         and _outcome_fields_well_formed(event)
     )
@@ -880,11 +943,15 @@ def _load_receipt(path: Path) -> dict[str, Any]:
             parse_error = True
             continue
         events.append(parsed)
+    if events and any(
+        event.get("identity") != events[0].get("identity") for event in events
+    ):
+        parse_error = True
     finalized = bool(events) and events[-1].get("event") == "journal_finalized"
     prior_ok = False
     if finalized:
         prior = events[-1].get("prior_line_count")
-        prior_ok = prior == len(events) - 1
+        prior_ok = _is_non_negative_int(prior) and prior == len(events) - 1
     return {
         "path": str(path),
         "events": events,
@@ -1072,6 +1139,7 @@ def _group_outcome_rows(
             {
                 "role": identity.get("role"),
                 "worker_id": identity.get("worker_id"),
+                "origin_worker": event.get("origin_worker"),
                 "classification": event.get("classification"),
                 "subtest": event.get("subtest") is True,
             }
@@ -1101,8 +1169,6 @@ def _collapse_outcome_pool(
     """Merge subtest reports. Distinct copies keep their own classifications."""
     if any(row.get("subtest") for row in pool):
         parents = [row for row in pool if not row.get("subtest")]
-        if len({row["classification"] for row in parents}) > 1:
-            return None
         ranked = parents + [row for row in pool if row.get("subtest")]
         worst = max(
             ranked,
@@ -1117,7 +1183,11 @@ def _collapse_outcome_pool(
             **base,
             "subtest": False,
             "classification": worst["classification"],
-            "classifications": [str(worst["classification"])] * count,
+            "classifications": (
+                [str(row["classification"]) for row in parents]
+                if len(parents) > 1
+                else [str(worst["classification"])] * count
+            ),
             "count": count,
         }
     reports = _phase_reports(pool)
@@ -1148,6 +1218,22 @@ def _dedup_outcomes(
         workers = [row for row in rows if row["role"] == "worker"]
         controllers = [row for row in rows if row["role"] == "controller"]
         pool = workers or controllers
+        if workers and controllers:
+            worker_counts = Counter(
+                (row["worker_id"], row["classification"], row["subtest"])
+                for row in workers
+            )
+            controller_counts = Counter(
+                (row["origin_worker"], row["classification"], row["subtest"])
+                for row in controllers
+            )
+            if any(row["origin_worker"] for row in controllers):
+                if worker_counts != controller_counts:
+                    reasons.append("conflicting_outcome")
+            elif Counter(
+                (r["classification"], r["subtest"]) for r in workers
+            ) != Counter((r["classification"], r["subtest"]) for r in controllers):
+                reasons.append("conflicting_outcome")
         collapsed = _collapse_outcome_pool(pool)
         if collapsed is None:
             reasons.append("conflicting_outcome")
@@ -1178,7 +1264,7 @@ def _terminal_states(
     gap_reasons: list[str] = []
     for nodeid, copies in Counter(selected).items():
         attempts = by_node.get(nodeid) or {}
-        if copies > 1 and len(attempts) > 1:
+        if copies > 1:
             rows, absent, reasons = _duplicate_retry_terminals(events, nodeid, copies)
             terminals.extend(rows)
             missing.extend(absent)
@@ -1536,6 +1622,24 @@ def _missing_controller_finish(events: list[dict[str, Any]]) -> list[str]:
     return []
 
 
+def _controller_order_reasons(events: list[dict[str, Any]]) -> list[str]:
+    controller = [
+        event for event in events if _event_identity(event).get("role") == "controller"
+    ]
+    if not controller:
+        return []
+    kinds = [event.get("event") for event in controller]
+    if kinds.count("session_start") != 1:
+        return ["malformed_session_start"]
+    if kinds[0] != "session_start" or kinds.count("session_finish") > 1:
+        return ["malformed_session_order"]
+    if "session_finish" in kinds:
+        tail = kinds[kinds.index("session_finish") + 1 :]
+        if any(kind not in {"journal_finalized", "unconfigure_error"} for kind in tail):
+            return ["malformed_session_order"]
+    return []
+
+
 def _malformed_session_finish(events: list[dict[str, Any]]) -> list[str]:
     """A controller finish proves completion only with a real integer status."""
     for event in events:
@@ -1586,6 +1690,8 @@ _DAMAGE_REASONS = frozenset(
         "journal_io_error",
         "checkout_sha_unmeasured",
         "malformed_session_finish",
+        "malformed_session_start",
+        "malformed_session_order",
     }
 )
 
@@ -1778,6 +1884,7 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
     reasons.extend(_checkout_reasons(flags))
     reasons.extend(_session_finish_reasons(events))
     reasons.extend(_missing_controller_finish(events))
+    reasons.extend(_controller_order_reasons(events))
     reasons.extend(_malformed_session_finish(events))
     reasons.extend(_pytest_exit_reasons(flags))
     reasons.extend(_unconfigure_reasons(events))
@@ -1947,7 +2054,7 @@ def _session_started_at(receipt: dict[str, Any]) -> str:
         if event.get("event") != "session_start":
             continue
         stamp = event.get("timestamp")
-        if isinstance(stamp, str):
+        if _timestamp_valid(stamp):
             return stamp
         return ""
     return ""

@@ -916,3 +916,203 @@ def test_duplicate_copies_finish_on_different_retries(tmp_path: Path) -> None:
     assert verdict["tests_passed"] is True
     assert sorted(item["retry_index"] for item in verdict["terminals"]) == [0, 1]
     assert verify_directory(tmp_path, executed_passes=["parallel"]) == 0
+
+
+def _complete_review_receipt(directory: Path) -> Path:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    _write_receipt(
+        directory,
+        _finalized(
+            [
+                _start(identity),
+                _collected(identity, [nodeid]),
+                *_phases(identity, nodeid, "passed"),
+                {"event": "session_finish", "identity": identity, "exitstatus": 0},
+            ]
+        ),
+    )
+    return directory / "receipt_test.jsonl"
+
+
+@pytest.mark.parametrize(
+    "damage",
+    [
+        "missing_start",
+        "duplicate_start",
+        "early_finish",
+        "identity",
+        "missing_identity",
+        "float_count",
+        "bool_count",
+        "invalid_timestamp",
+        "future_timestamp",
+    ],
+)
+def test_review_receipt_corruption_never_proves_success(
+    tmp_path: Path, damage: str
+) -> None:
+    path = _complete_review_receipt(tmp_path)
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    if damage == "missing_start":
+        rows.pop(0)
+    elif damage == "duplicate_start":
+        rows.insert(1, dict(rows[0]))
+    elif damage == "early_finish":
+        rows.insert(1, rows.pop(-2))
+    elif damage == "identity":
+        rows[3]["identity"]["invocation_id"] = "different-invocation"
+    elif damage == "missing_identity":
+        rows[3].pop("identity")
+    elif damage == "invalid_timestamp":
+        rows[0]["timestamp"] = "zzz"
+    elif damage == "future_timestamp":
+        rows[0]["timestamp"] = "9999-01-01T00:00:00+00:00"
+    rows[-1]["prior_line_count"] = len(rows) - 1
+    if damage == "float_count":
+        rows[-1]["prior_line_count"] = float(len(rows) - 1)
+    elif damage == "bool_count":
+        rows[-1]["prior_line_count"] = True
+    path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 4
+
+
+def test_review_valid_receipt_is_complete(tmp_path: Path) -> None:
+    _complete_review_receipt(tmp_path)
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 0
+
+
+def test_review_forwarded_worker_disagreement_is_unknown(tmp_path: Path) -> None:
+    controller = _identity(role="controller", worker_id="controller")
+    worker = _identity(role="worker", worker_id="gw0")
+    nodeid = "test_sample.py::test_a"
+    forwarded = _phases(controller, nodeid, "failed")
+    for row in forwarded:
+        row["origin_worker"] = "gw0"
+    _write_receipt(
+        tmp_path,
+        _finalized(
+            [
+                _start(controller),
+                _collected(controller, [nodeid]),
+                *_phases(worker, nodeid, "passed"),
+                *forwarded,
+                {"event": "session_finish", "identity": controller, "exitstatus": 1},
+            ]
+        ),
+    )
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert "conflicting_outcome" in verdict["reasons"]
+    assert verdict["tests_passed"] is not True
+
+
+def test_review_duplicate_subtests_keep_parent_outcomes(tmp_path: Path) -> None:
+    result = _run_journal(
+        tmp_path,
+        """import unittest
+count = 0
+class TestCopies(unittest.TestCase):
+    def test_copy(self):
+        global count
+        count += 1
+        with self.subTest(value=1):
+            self.assertTrue(True)
+        self.assertEqual(count, 2)
+""",
+        [str(tmp_path / "test_sample.py"), "--keep-duplicates"],
+    )
+    assert result.returncode == 1
+    verdict = _live_verdict(tmp_path)
+    assert verdict["status"] == "complete", verdict
+    assert verdict["tests_passed"] is False
+
+
+def test_review_teardown_xfail_is_complete(tmp_path: Path) -> None:
+    result = _run_journal(
+        tmp_path,
+        """import pytest
+@pytest.fixture
+def cleanup():
+    yield
+    pytest.xfail('expected teardown')
+def test_ok(cleanup):
+    pass
+""",
+        [],
+    )
+    assert result.returncode == 0, result.stderr
+    assert _live_verdict(tmp_path)["status"] == "complete"
+
+
+def test_review_standalone_workers_share_generated_invocation(tmp_path: Path) -> None:
+    result = _run_journal(
+        tmp_path,
+        "def test_a(): pass\ndef test_b(): pass\n",
+        ["-p", "xdist.plugin", "-n", "2"],
+        {"BIOETL_JOURNAL_INVOCATION_ID": ""},
+    )
+    assert result.returncode == 0, result.stderr
+    assert _live_verdict(tmp_path)["status"] == "complete"
+    identities = {
+        row["identity"]["invocation_id"]
+        for path in (tmp_path / "journal").glob("*.jsonl")
+        for row in map(json.loads, path.read_text().splitlines())
+    }
+    assert len(identities) == 1
+
+
+def test_review_outer_cmdline_failure_never_proves_success(tmp_path: Path) -> None:
+    plugin = tmp_path / "cmdline_boom.py"
+    plugin.write_text(
+        "import pytest\n@pytest.hookimpl(hookwrapper=True, tryfirst=True)\ndef pytest_cmdline_main(config):\n    yield\n    raise RuntimeError('late cmdline failure')\n"
+    )
+    result = _run_journal(
+        tmp_path / "run",
+        "def test_ok(): pass\n",
+        [],
+        {
+            "PYTHONPATH": os.pathsep.join((str(tmp_path), str(_ROOT))),
+            "PYTEST_PLUGINS": "cmdline_boom",
+        },
+    )
+    assert result.returncode != 0
+    assert _live_verdict(tmp_path / "run")["tests_passed"] is not True
+
+
+def test_review_old_unspecified_damage_is_attributed(tmp_path: Path) -> None:
+    stale = _named_receipt(
+        "unspecified", "a" * 32, "controller", "controller", "b" * 32
+    )
+    (tmp_path / stale).write_bytes(b'{"event":')
+    result = _run_journal(
+        tmp_path / "new",
+        "def test_ok(): pass\n",
+        [],
+        {"BIOETL_JOURNAL_PASS": "unspecified"},
+    )
+    assert result.returncode == 0
+    for path in (tmp_path / "new" / "journal").glob("*.jsonl"):
+        (tmp_path / path.name).write_bytes(path.read_bytes())
+    assert verify_directory(tmp_path, executed_passes=["unspecified"]) == 0
+
+
+def test_review_duplicate_workers_keep_their_own_identity(tmp_path: Path) -> None:
+    controller = _identity(role="controller", worker_id="controller")
+    worker_a = _identity(role="worker", worker_id="gw0")
+    worker_b = _identity(role="worker", worker_id="gw1")
+    nodeid = "test_sample.py::test_a"
+    _write_receipt(
+        tmp_path,
+        _finalized(
+            [
+                _start(controller),
+                _collected(controller, [nodeid, nodeid]),
+                *_phases(worker_a, nodeid, "passed"),
+                *_phases(worker_b, nodeid, "passed"),
+                {"event": "session_finish", "identity": controller, "exitstatus": 0},
+            ]
+        ),
+    )
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "complete"
+    assert {row["worker_id"] for row in verdict["terminals"]} == {"gw0", "gw1"}

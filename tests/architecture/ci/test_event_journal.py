@@ -53,10 +53,37 @@ def _write_receipt(
     truncate: bool = False,
 ) -> None:
     directory.mkdir(parents=True, exist_ok=True)
+    identities = {
+        json.dumps(event["identity"], sort_keys=True)
+        for event in events
+        if isinstance(event.get("identity"), dict)
+    }
+    if len(identities) > 1:
+        for index, key in enumerate(sorted(identities)):
+            identity = json.loads(key)
+            subset = [
+                event
+                for event in events
+                if event.get("identity") == identity
+                and event.get("event") != "journal_finalized"
+            ]
+            if events and events[-1].get("event") == "journal_finalized":
+                subset = _finalized(subset)
+            _write_receipt(
+                directory,
+                subset,
+                name=f"{Path(name).stem}_{index}.jsonl",
+                truncate=truncate,
+            )
+        return
+    identity = json.loads(next(iter(identities))) if identities else None
     lines = []
     for event in events:
         payload = dict(event)
         payload.setdefault("schema_version", 1)
+        payload.setdefault("timestamp", "2026-10-17T00:00:00+00:00")
+        if payload.get("event") == "journal_finalized" and identity is not None:
+            payload.setdefault("identity", identity)
         lines.append(json.dumps(payload, sort_keys=True, ensure_ascii=True))
     payload = ("\n".join(lines) + ("\n" if lines and not truncate else "")).encode(
         "utf-8"
