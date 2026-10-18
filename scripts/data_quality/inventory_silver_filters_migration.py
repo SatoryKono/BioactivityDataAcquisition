@@ -315,8 +315,8 @@ SURFACE_PATTERNS: tuple[SurfacePattern, ...] = (
             "docs/03-guides/dashboards/dashboard-v2-usage.md",
             "docs/03-guides/dashboards/monitoring-index.md",
         ),
-        role="CLI/operator shortcut for FILTERED_OUT_SILVER",
-        migration_relevance="Shortcut is a compatibility alias while operator wording moves to structural rejects.",
+        role="Retired CLI shortcut for FILTERED_OUT_SILVER",
+        migration_relevance="Removed after sunset 2026-09-30; only retirement notes and negative tests should retain this spelling.",
     ),
     SurfacePattern(
         category="consumer_alias",

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict
-from typing import Any, Literal
+from typing import Literal
 
 from pydantic import (
     BaseModel,
@@ -216,7 +216,7 @@ class PipelineYamlConfig(BaseModel):
     silver_filters: SilverFiltersConfig = Field(default_factory=SilverFiltersConfig)
     gold_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
 
-    def _customize_sink_schema(schema: dict[str, Any]) -> None:
+    def _customize_sink_schema(schema: JsonDict) -> None:
         """Customize JSON Schema for layer-aware sink constraints."""
         # Grab the reference to the SinkLayerConfig child schema
         child_ref = schema.get("additionalProperties", {})
