@@ -40,7 +40,6 @@ __all__ = [
     "_purge_quarantine",
     "_replay_quarantine",
     "_resolve_quarantine_record",
-    "_resolve_silver_filter_error_code",
     "_show_quarantine_stats",
     "_show_quarantine_stats_for_cli_options",
     "_show_quarantine_stats_for_pipeline_cli_options",
@@ -151,15 +150,6 @@ def _render_stats_dashboard(
         click.echo(line)
 
 
-def _resolve_silver_filter_error_code(
-    *,
-    silver_filter_only: bool,
-    error_code: str | None,
-    silver_filter_error_code: str,
-) -> str | None:
-    return silver_filter_error_code if silver_filter_only else error_code
-
-
 def _inspect_quarantine(
     runtime_service: _QuarantineRuntimeService,
     *,
@@ -238,23 +228,17 @@ def _show_quarantine_stats_for_cli_options(
     pipeline: str,
     output_json: bool,
     error_code: str | None,
-    silver_filter_only: bool,
-    silver_filter_error_code: str,
     top: int = 10,
     group_by: str | None = None,
     run_id: str | None = None,
     run_manifest_service: RunManifestInspectionServiceProtocol | None = None,
 ) -> None:
-    """Resolve shared CLI aliases before displaying quarantine statistics."""
+    """Forward explicit CLI filters before displaying quarantine statistics."""
     _show_quarantine_stats(
         runtime_service,
         pipeline=pipeline,
         output_json=output_json,
-        error_code=_resolve_silver_filter_error_code(
-            silver_filter_only=silver_filter_only,
-            error_code=error_code,
-            silver_filter_error_code=silver_filter_error_code,
-        ),
+        error_code=error_code,
         top=top,
         group_by=group_by,
         run_id=run_id,
@@ -269,8 +253,6 @@ def _show_quarantine_stats_for_pipeline_cli_options(
     pipeline: str,
     output_json: bool,
     error_code: str | None,
-    silver_filter_only: bool,
-    silver_filter_error_code: str,
     top: int = 10,
     group_by: str | None = None,
     run_id: str | None = None,
@@ -280,8 +262,6 @@ def _show_quarantine_stats_for_pipeline_cli_options(
         pipeline=pipeline,
         output_json=output_json,
         error_code=error_code,
-        silver_filter_only=silver_filter_only,
-        silver_filter_error_code=silver_filter_error_code,
         top=top,
         group_by=group_by,
         run_id=run_id,
