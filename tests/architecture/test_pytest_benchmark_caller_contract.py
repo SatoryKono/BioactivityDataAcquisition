@@ -308,6 +308,7 @@ def _probe_env(tmp_path: Path) -> tuple[dict[str, str], Path, Path | None]:
     env["PYTHONPATH"] = os.pathsep.join(pythonpath)
     env["BIOETL_VCS_PROBE_LOG"] = str(log_path)
     env["BIOETL_BENCHMARK_CALLER"] = "synthetic-proof"
+    env["BIOETL_BENCHMARK_DATASET"] = "bioetl-synthetic-benchmarks-v1"
     return env, log_path, locked_src
 
 
@@ -613,7 +614,10 @@ def test_workflow_enables_guard_before_benchmark_and_requires_hotspot_evidence()
         "Reduce benchmark evidence",
     ):
         step = next(item for item in _workflow_steps() if item.get("name") == name)
-        assert step.get("if") == "${{ always() && !cancelled() }}"
+        expected = "${{ always() && !cancelled() }}"
+        if name == "Reduce benchmark evidence":
+            expected = "${{ always() && !cancelled() && steps.benchmarks.outcome == 'success' && steps.validate-evidence.outcome == 'success' }}"
+        assert step.get("if") == expected
 
 
 @pytest.mark.timeout(180)
@@ -935,5 +939,7 @@ def test_measurement_context_matches_reducer_contract(
     else:
         assert result[0:2] == ("bioetl-synthetic-benchmarks-v1", "github-actions")
     monkeypatch.delenv("BIOETL_BENCHMARK_DATASET")
-    guard.pytest_benchmark_update_json(None, [], payload)
-    assert _measurement_context(payload, []) == "incomplete_evidence"
+    with pytest.raises(
+        guard.BenchmarkMeasurementContractError, match="BIOETL_BENCHMARK_DATASET"
+    ):
+        guard.pytest_benchmark_update_json(None, [], payload)
