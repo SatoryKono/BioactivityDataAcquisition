@@ -105,6 +105,17 @@ class TestCompositePipelineStateEnum:
         assert "not_started" in str(exc_info.value)
         assert "completed" in str(exc_info.value)
 
+    @pytest.mark.parametrize(
+        "legacy_value",
+        ["cross_validation_running", "cross_validation_completed"],
+    )
+    def test_retired_checkpoint_names_are_not_domain_states(self, legacy_value: str):
+        """Legacy checkpoint handling stays in the fail-closed migration layer."""
+        with pytest.raises(ValueError):
+            CompositePipelineState(legacy_value)
+        with pytest.raises(ValueError, match="Invalid composite pipeline state"):
+            CompositePipelineState.from_string(legacy_value)
+
 
 class TestTerminalStates:
     """Tests for terminal state detection."""

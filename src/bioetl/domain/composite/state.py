@@ -6,8 +6,7 @@ See ADR-026 for architectural decisions.
 
 Transition flow: NOT_STARTED -> SEED_RUNNING -> SEED_COMPLETED ->
 DEPENDENCIES_RUNNING -> DEPENDENCIES_COMPLETED -> ENRICHING ->
-ENRICHMENT_COMPLETED -> MERGING -> CROSS_VALIDATION_RUNNING ->
-CROSS_VALIDATION_COMPLETED -> COMPLETED. Any active state can -> FAILED.
+ENRICHMENT_COMPLETED -> MERGING -> COMPLETED. Any active state can -> FAILED.
 
 Note: Dependencies are optional. If no dependencies, SEED_COMPLETED transitions
 directly to ENRICHING (or DEPENDENCIES_RUNNING which immediately transitions to
@@ -42,8 +41,8 @@ class CompositePipelineState(StrEnum):
     COMPLETED, FAILED.
 
     Terminal states: COMPLETED, FAILED (no transitions allowed).
-    Active states: SEED_RUNNING, DEPENDENCIES_RUNNING, ENRICHING, MERGING,
-        (work in progress).
+    Active states: SEED_RUNNING, DEPENDENCIES_RUNNING, ENRICHING, MERGING
+    (work in progress).
     """
 
     NOT_STARTED = "not_started"
@@ -66,8 +65,7 @@ class CompositePipelineState(StrEnum):
     def is_active(self) -> bool:
         """Check if this is an active state (work in progress).
 
-        Active states: SEED_RUNNING, DEPENDENCIES_RUNNING, ENRICHING, MERGING,
-            CROSS_VALIDATION_RUNNING.
+        Active states: SEED_RUNNING, DEPENDENCIES_RUNNING, ENRICHING, MERGING.
         """
         return self in {
             CompositePipelineState.SEED_RUNNING,
