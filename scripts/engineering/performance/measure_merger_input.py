@@ -35,6 +35,19 @@ THREAD_ENV = {
 }
 
 
+def confined_path(path: Path) -> Path:
+    """Resolve symlinks and retain the original repository/temporary-root boundary."""
+    resolved = path.resolve()
+    if not any(
+        resolved.is_relative_to(root)
+        for root in (ROOT, Path(tempfile.gettempdir()).resolve())
+    ):
+        raise ValueError(
+            "Path must resolve inside the repository or temporary directory"
+        )
+    return resolved
+
+
 def apply_guard(memory_mib: int, timeout_s: int) -> None:
     """Fail closed before native imports; RLIMIT_AS bounds virtual memory, not RSS."""
     if sys.platform != "linux":
@@ -263,9 +276,10 @@ def orchestrate(args: argparse.Namespace) -> int:
         "observations": observations,
         "conclusion": "NOT_ESTABLISHED: bounded synthetic input-read measurements only",
     }
+    args.out = confined_path(args.out)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     # Never overwrite historical evidence, even on a failed run.
-    with args.out.open("x") as stream:
+    with confined_path(args.out).open("x") as stream:
         json.dump(payload, stream, indent=2)
         stream.write("\n")
     return (
@@ -295,6 +309,7 @@ def main() -> int:
     if args.phase:
         if args.rows is None or not 1 <= args.rows <= 100_000 or args.fixture is None:
             parser.error("worker requires --rows 1..100000 and --fixture")
+        args.fixture = confined_path(args.fixture)
         apply_guard(args.memory_mib, args.timeout_s)
         if args.phase == "prepare":
             prepare_fixture(args.rows, args.fixture)
@@ -303,6 +318,7 @@ def main() -> int:
         return 0
     if args.out is None or args.out.exists():
         parser.error("provide --out pointing to a new raw-observation JSON file")
+    args.out = confined_path(args.out)
     return orchestrate(args)
 
 

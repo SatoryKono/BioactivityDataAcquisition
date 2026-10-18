@@ -107,3 +107,23 @@ def test_existing_raw_evidence_is_preserved(tmp_path):
     )
     assert result.returncode == 2
     assert output.read_text() == "historical bytes"
+
+
+def test_output_boundary_rejects_escape_before_launch():
+    """An absolute output outside the two supported roots cannot launch work."""
+    result = subprocess.run(
+        [sys.executable, harness.__file__, "--out", "/proc/pr12274-never-created.json"],
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    assert result.returncode != 0
+    assert "Path must resolve inside" in result.stderr
+
+
+def test_output_boundary_resolves_symlinks(tmp_path):
+    """A symlink inside temporary storage cannot escape to an external root."""
+    link = tmp_path / "escape"
+    link.symlink_to("/proc", target_is_directory=True)
+    with pytest.raises(ValueError, match="Path must resolve inside"):
+        harness.confined_path(link / "pr12274-never-created.json")
