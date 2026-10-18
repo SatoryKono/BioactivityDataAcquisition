@@ -975,7 +975,8 @@ def _load_receipt(path: Path) -> dict[str, Any]:
         event.get("identity") != events[0].get("identity") for event in events
     ):
         parse_error = True
-    finalized = bool(events) and events[-1].get("event") == "journal_finalized"
+    finalizer_count = sum(event.get("event") == "journal_finalized" for event in events)
+    finalized = finalizer_count == 1 and events[-1].get("event") == "journal_finalized"
     prior_ok = False
     if finalized:
         prior = events[-1].get("prior_line_count")
@@ -1977,10 +1978,17 @@ def _worker_finish_reasons(receipts: list[dict[str, Any]]) -> list[str]:
             _event_identity(event).get("role") == "worker"
             for event in receipt["events"]
         )
-        if worker and not any(
-            event.get("event") == "session_finish" for event in receipt["events"]
-        ):
+        if not worker:
+            continue
+        finishes = [
+            event
+            for event in receipt["events"]
+            if event.get("event") == "session_finish"
+        ]
+        if not finishes:
             return ["missing_worker_finish"]
+        if len(finishes) != 1 or type(finishes[0].get("exitstatus")) is not int:
+            return ["malformed_session_finish"]
     return []
 
 

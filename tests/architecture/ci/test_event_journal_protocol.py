@@ -226,3 +226,64 @@ def test_gap_worker_finish_required(tmp_path: Path) -> None:
 def test_gap_unknown_requested_pass_rejected(tmp_path: Path) -> None:
     _complete(tmp_path)
     assert verify_directory(tmp_path, executed_passes=["paralell"]) == 4
+
+
+@pytest.mark.parametrize("status", ["missing", None, True, False, "0", 0.0])
+def test_worker_finish_requires_integer_status(tmp_path: Path, status: Any) -> None:
+    _worker_complete(tmp_path)
+    for path in tmp_path.glob("*.jsonl"):
+        rows = [json.loads(line) for line in path.read_text().splitlines()]
+        if rows[0]["identity"]["role"] != "worker":
+            continue
+        finish = next(row for row in rows if row["event"] == "session_finish")
+        if status == "missing":
+            finish.pop("exitstatus")
+        else:
+            finish["exitstatus"] = status
+        path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 4
+
+
+def _worker_complete(directory: Path) -> None:
+    controller = _identity(role="controller", worker_id="controller")
+    worker = _identity(role="worker", worker_id="gw0")
+    _write_receipt(
+        directory,
+        _finalized(
+            [
+                _start(controller),
+                _collected(controller, ["a"]),
+                _start(worker),
+                _collected(worker, ["a"]),
+                *_phases(worker, "a", "passed"),
+                {"event": "session_finish", "identity": worker, "exitstatus": 0},
+                {"event": "session_finish", "identity": controller, "exitstatus": 0},
+            ]
+        ),
+    )
+    assert verify_directory(directory, executed_passes=["parallel"]) == 0
+
+
+def test_duplicate_worker_finish_is_rejected(tmp_path: Path) -> None:
+    _worker_complete(tmp_path)
+    for path in tmp_path.glob("*.jsonl"):
+        rows = [json.loads(line) for line in path.read_text().splitlines()]
+        if rows[0]["identity"]["role"] != "worker":
+            continue
+        finish = next(row for row in rows if row["event"] == "session_finish")
+        rows.insert(-1, dict(finish))
+        rows[-1]["prior_line_count"] = len(rows) - 1
+        path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 4
+
+
+@pytest.mark.parametrize("position", [2, -1])
+def test_multiple_finalizers_are_rejected(tmp_path: Path, position: int) -> None:
+    path = _complete(tmp_path)
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 0
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    prior = position if position >= 0 else len(rows) - 1
+    rows.insert(position, {**rows[-1], "prior_line_count": prior})
+    rows[-1]["prior_line_count"] = len(rows) - 1
+    path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 4
