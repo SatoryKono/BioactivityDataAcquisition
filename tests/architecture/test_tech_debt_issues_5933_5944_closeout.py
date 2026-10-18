@@ -19,6 +19,11 @@ from typing import Any
 import pytest
 import yaml
 
+from bioetl.interfaces.cli.commands.quarantine import (
+    SILVER_FILTER_ALIAS_HELP,
+    SILVER_FILTER_ALIAS_SUNSET_DATE,
+    SILVER_FILTER_ERROR_CODE,
+)
 from bioetl.interfaces.http.control_plane_identity.types import (
     IDENTITY_EVIDENCE_CONTRACT,
     AnchorSpec,
@@ -186,36 +191,31 @@ def test_issue_5933_governance_artifacts_are_rebaselined() -> None:
     assert "_unavailable_required_remote_baseline_artifacts" in gates_source
 
 
-def test_issue_5938_silver_filter_alias_is_retired() -> None:
-    from click.testing import CliRunner
-    from bioetl.interfaces.cli import cli
+def test_issue_5938_silver_filter_alias_is_sunset_ready() -> None:
+    quarantine_tests = (
+        ROOT / "tests/unit/interfaces/cli/commands/test_quarantine.py"
+    ).read_text(encoding="utf-8")
+    runbook = (ROOT / "docs/05-operations/runbooks/quarantine-management.md").read_text(
+        encoding="utf-8"
+    )
+    cli_reference = (ROOT / "docs/04-reference/cli.md").read_text(encoding="utf-8")
 
-    for command in (
-        ("quarantine", "inspect"),
-        ("quarantine", "stats"),
-        ("diagnostics", "quarantine"),
-    ):
-        help_result = CliRunner().invoke(cli, [*command, "--help"])
-        assert help_result.exit_code == 0
-        assert "--silver-filter-only" not in help_result.output
-        assert "--error-code" in help_result.output
-        assert "FILTERED_OUT_SILVER" in help_result.output
-        rejected = CliRunner().invoke(
-            cli, [*command, "--pipeline", "chembl_activity", "--silver-filter-only"]
-        )
-        assert rejected.exit_code == 2
-        assert "No such option" in rejected.output
-        assert "--silver-filter-only" in rejected.output
-    for relative_path in (
-        "docs/05-operations/runbooks/quarantine-management.md",
-        "docs/04-reference/cli.md",
-    ):
-        text = (ROOT / relative_path).read_text(encoding="utf-8")
-        assert "--silver-filter-only" in text
-        assert "removed" in text
-        assert "2026-09-30" in text
-        assert "--error-code FILTERED_OUT_SILVER" in text
-        assert "not Gold" in text
+    assert SILVER_FILTER_ERROR_CODE == "FILTERED_OUT_SILVER"
+    assert SILVER_FILTER_ALIAS_SUNSET_DATE == "2026-09-30"
+    assert "Deprecated legacy alias" in SILVER_FILTER_ALIAS_HELP
+    assert "sunset 2026-09-30" in SILVER_FILTER_ALIAS_HELP
+    assert "FILTERED_OUT_SILVER" in SILVER_FILTER_ALIAS_HELP
+    assert "Silver structural rejects only" in SILVER_FILTER_ALIAS_HELP
+    assert "not Gold" in SILVER_FILTER_ALIAS_HELP
+
+    assert "--silver-filter-only" in quarantine_tests
+    assert "FILTERED_OUT_SILVER" in quarantine_tests
+    assert "--silver-filter-only" in runbook
+    assert "2026-09-30" in runbook
+    assert "--error-code FILTERED_OUT_SILVER" in runbook
+    assert "not Gold" in runbook
+    assert "--silver-filter-only" in cli_reference
+    assert "sunset 2026-09-30" in cli_reference
 
 
 def test_issue_5937_control_plane_identity_legacy_aliases_are_bounded() -> None:

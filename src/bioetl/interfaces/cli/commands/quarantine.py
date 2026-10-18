@@ -25,6 +25,7 @@ from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     RunManifestInspectionServiceProtocol,
     _QuarantineRuntimeService,
     _QuarantineService,
+    _resolve_silver_filter_error_code,
     _show_quarantine_stats_for_pipeline_cli_options,
 )
 from bioetl.interfaces.cli.commands.domains.shared.click_options import (
@@ -35,6 +36,14 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
 from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
     add_quarantine_stats_options,
     run_quarantine_stats_command,
+)
+
+SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
+SILVER_FILTER_ALIAS_SUNSET_DATE = "2026-09-30"
+SILVER_FILTER_ALIAS_HELP = (
+    f"Deprecated legacy alias; sunset {SILVER_FILTER_ALIAS_SUNSET_DATE}. "
+    "Legacy alias for --error-code FILTERED_OUT_SILVER. "
+    "Silver structural rejects only, not Gold contract/semantic rejects."
 )
 
 
@@ -118,44 +127,50 @@ def quarantine_serve(host: str, port: int, data_root: Path | None) -> None:
 @typed_group_command(quarantine, "inspect")
 @typed_click_option("--pipeline", required=True, help="Pipeline name")
 @typed_click_option("--limit", type=int, default=100, help="Maximum records to show")
-@typed_click_option(
-    "--error-code",
-    help=(
-        "Filter by error code; FILTERED_OUT_SILVER selects Silver structural "
-        "rejects only, not Gold contract/semantic rejects"
-    ),
-)
+@typed_click_option("--error-code", help="Filter by error code")
 @typed_click_option(
     "--run-id",
     help="Scope inspection to one pipeline run ID",
+)
+@typed_click_option(
+    "--silver-filter-only",
+    is_flag=True,
+    help=SILVER_FILTER_ALIAS_HELP,
 )
 def quarantine_inspect(
     pipeline: str,
     limit: int,
     error_code: str | None,
     run_id: str | None,
+    silver_filter_only: bool,
 ) -> None:
     """Inspect quarantined records for a pipeline."""
     from bioetl.interfaces.cli.commands.domains.quarantine.support import (
         _inspect_quarantine,
     )
 
+    resolved_error_code = _resolve_silver_filter_error_code(
+        silver_filter_only=silver_filter_only,
+        error_code=error_code,
+        silver_filter_error_code=SILVER_FILTER_ERROR_CODE,
+    )
     _inspect_quarantine(
         get_quarantine_runtime_service(pipeline),
         pipeline=pipeline,
         limit=limit,
-        error_code=error_code,
+        error_code=resolved_error_code,
         run_id=run_id,
     )
 
 
 @typed_group_command(quarantine, "stats")
-@add_quarantine_stats_options()
+@add_quarantine_stats_options(silver_filter_alias_help=SILVER_FILTER_ALIAS_HELP)
 def quarantine_stats(
     pipeline: str,
     output_json: bool,
     error_code: str | None,
     run_id: str | None,
+    silver_filter_only: bool,
     group_by: str | None,
     top: int,
 ) -> None:
@@ -165,6 +180,7 @@ def quarantine_stats(
         show_stats_for_pipeline=_show_quarantine_stats_for_pipeline_cli_options,
         get_runtime_service=get_quarantine_runtime_service,
         get_manifest_service=get_run_manifest_service,
+        silver_filter_error_code=SILVER_FILTER_ERROR_CODE,
     )
 
 

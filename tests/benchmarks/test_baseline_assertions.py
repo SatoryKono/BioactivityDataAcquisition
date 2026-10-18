@@ -35,10 +35,8 @@ these tests FAIL if performance degrades below baseline thresholds.
 
 Part of architecture review refactoring plan (R5).
 
-Note: These tests are marked with @pytest.mark.benchmark. Default addopts
-keep ``-p no:benchmark``, and tests/benchmarks/conftest.py skips them until a
-caller passes ``-p tests.benchmarks.benchmark_vcs_guard`` before
-``-p benchmark``. They use perf_counter assertions, not the benchmark fixture.
+Note: These tests are marked with @pytest.mark.benchmark and excluded from
+standard test runs. Run explicitly with: make bench or pytest -m benchmark
 """
 
 from __future__ import annotations

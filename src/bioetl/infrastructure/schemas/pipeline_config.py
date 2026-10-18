@@ -381,10 +381,9 @@ class PipelineYamlConfig(BaseModel):
                 raise ValueError(f"Unknown sink layer: '{layer_name}'. Allowed: bronze, silver, gold.")
 
             mode = layer_config.mode
-            if mode is not None:
-                if mode not in valid_modes[layer_name]:
-                    valid_str = ", ".join(sorted(valid_modes[layer_name]))
-                    raise ValueError(f"Invalid mode '{mode}' for {layer_name} layer. Allowed: {valid_str}.")
+            if mode is not None and mode not in valid_modes[layer_name]:
+                valid_str = ", ".join(sorted(valid_modes[layer_name]))
+                raise ValueError(f"Invalid mode '{mode}' for {layer_name} layer. Allowed: {valid_str}.")
 
         return self
 
