@@ -413,6 +413,8 @@ Collected: `6`
 
 ## Source tree stamp
 
+Historical snapshot (`source_module_count=2492`), not the current source binding.
+
 - source_tree_sha256: `b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f`
 
 `source_module_count=2492`

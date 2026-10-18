@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `main`
-- Source commit: `e5917ce7b9b7e78119eb3f3d790d97034177d337`
-- Source run id: `local`
-- Source event: `push`
+- Source branch: `perf/replace-any-with-logical-or-5102176891185862466`
+- Source commit: `8a4286d21becf1fe183acfaf3f051bc6f7916038`
+- Source run id: `local-pr12231-local-coverage-8a4286d`
+- Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `7f49ec40586784bb4cc78e19e7029db4235b0c46e0f09f800b229193602ed838`
+- Source tree sha256: `a68a4c568a679ae2e92b01b6c743f93bac694e758d06609ec8597446d67ed7f1`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-18T12:06:09.311356+00:00`
+- Refreshed at (UTC): `2026-10-15T18:50:07.879352+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -89,8 +89,8 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `pending`
-- Threshold satisfied: `None`
+- Actual coverage: `99.66%`
+- Threshold satisfied: `True`
 
 ## Duration Telemetry
 
