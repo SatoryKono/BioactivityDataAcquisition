@@ -27,15 +27,15 @@
 # PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
 """Performance benchmarks for critical paths.
 
-Run with ``-p tests.benchmarks.benchmark_vcs_guard`` before ``-p benchmark``.
-Default addopts keep ``-p no:benchmark`` and skip this module.
+Run with: pytest tests/benchmarks/ --benchmark-only
+Or with comparison: pytest tests/benchmarks/ --benchmark-compare
 
 Requirements:
 - pytest-benchmark must be installed
-- Benchmarks are skipped unless that explicit caller is used
+- Benchmarks are skipped if pytest-benchmark is not available
 
 Note: These tests are marked with @pytest.mark.benchmark and excluded from
-standard test runs. Do not use ``make bench``; that target is not defined.
+standard test runs. Run explicitly with: make bench or pytest -m benchmark
 """
 
 from __future__ import annotations

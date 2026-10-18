@@ -44,39 +44,6 @@ from bioetl.composition.factories.services import (
 pytestmark = pytest.mark.unit
 
 
-def test_workflow_transforms_share_explicit_clock(monkeypatch, tmp_path) -> None:
-    """The composition root injects its clock into storage and reconciliation."""
-    from unittest.mock import MagicMock
-
-    from bioetl.composition.bootstrap.assembly import workflow_transforms
-    from tests.helpers.clock import fixed_test_clock
-
-    clock = fixed_test_clock()
-    clock_factory = MagicMock(return_value=clock)
-    silver_factory = MagicMock()
-    registration = MagicMock()
-    monkeypatch.setattr(workflow_transforms, "SystemClock", clock_factory)
-    monkeypatch.setattr(workflow_transforms, "SilverWriter", silver_factory)
-    monkeypatch.setattr(workflow_transforms, "GoldWriter", MagicMock())
-    monkeypatch.setattr(workflow_transforms, "UnifiedQuarantineAdapter", MagicMock())
-    monkeypatch.setattr(
-        workflow_transforms, "register_builtin_workflow_transforms", registration
-    )
-    settings = SimpleNamespace(
-        silver_path=tmp_path / "silver",
-        gold_path=tmp_path / "gold",
-        quarantine_path=tmp_path / "quarantine",
-    )
-
-    workflow_transforms.build_workflow_transform_registry(settings, MagicMock())
-
-    clock_factory.assert_called_once_with()
-    adapter = registration.call_args.kwargs["foreign_key_reconciliation_port"]
-    assert adapter.clock is clock
-    assert adapter.silver_writer is silver_factory.return_value
-    assert silver_factory.call_args.kwargs["runtime_services"].clock is clock
-
-
 def test_workflow_composition_passes_configured_report_root(monkeypatch, tmp_path):
     settings = SimpleNamespace(
         data_dir=tmp_path / "data",

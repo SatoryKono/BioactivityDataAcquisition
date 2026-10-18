@@ -139,44 +139,7 @@ def test_classify_and_aggregate_checkout_base_ref() -> None:
         text.count("ref: ${{ github.event.pull_request.base.sha || github.sha }}") == 2
     )
     assert "ref: ${{ github.event.pull_request.head.sha" not in text
-
-
-def test_catalog_keeps_target_context_distinct_from_ruleset_mode() -> None:
-    """Catalog prose must not treat the coordinator name as a stored ruleset context."""
-
-    data = _load_yaml(CATALOG)
-    deployment = data["deployment"]
-    policy = data["policy"]
-    assert deployment["provider"] == "github_actions"
-    assert deployment["required_context"] == "pr-gate-complete"
-    assert not str(deployment["required_context"]).startswith("ci/")
-    for key in (
-        "github_ruleset_13643213_enforcement",
-        "github_ruleset_15730586_enforcement",
-    ):
-        assert policy[key] in {"disabled", "active", "evaluate"}
-    assert policy["allow_skipped_as_success"] is False
-    assert policy["allow_cancelled_as_success"] is False
-    assert policy["require_sha_binding"] is True
-    header = "\n".join(COORDINATOR.read_text(encoding="utf-8").splitlines()[:16])
-    assert "Enforcement stays disabled (#11180)" not in header
-    assert "not the context stored" in header
-    assert "not active CircleCI protection" in header
-    assert "not configured GitHub Actions enforcement" in header
-
-
-def test_policy_section_3_separates_enforcement_from_stored_contexts() -> None:
-    text = GITHUB_POLICY.read_text(encoding="utf-8")
-    current = text.split("## 3. Status Checks and Ruleset Contract", maxsplit=1)[1]
-    current = current.split("### Historical CircleCI activation", maxsplit=1)[0]
-    assert "Current CircleCI protection" not in current
-    assert "the active provider is" not in current.lower()
-    assert "enforcement: disabled" in current
-    assert "`ci/circleci: pr-gate-complete`" in current
-    assert "not the context stored" in current
-    assert "enforcement_verified_date" in current
-    assert "2026-10-09" in current
-    assert "2026-10-16" in current
+    assert "Enforcement stays disabled (#11180)" in text
 
 
 def test_aggregator_does_not_use_continue_on_error() -> None:

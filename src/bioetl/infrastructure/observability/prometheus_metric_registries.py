@@ -12,7 +12,6 @@ from ._metrics_defs_pipeline_workflow import (
     WORKFLOW_EXPECTED,
     WORKFLOW_PIPELINE_EXPECTED,
 )
-from ._metrics_defs_storage import BRONZE_CLEANUP_OUTCOME_COUNTERS
 
 type PrometheusCounter = Counter
 type PrometheusGauge = Gauge
@@ -160,7 +159,6 @@ STORAGE_MEDALLION_REGISTRY = MetricRegistryFamily(
         "bioetl_bronze_bytes_written_total": _metrics.BRONZE_BYTES_WRITTEN_TOTAL,
         "bioetl_bronze_files_removed_total": _metrics.BRONZE_FILES_REMOVED_TOTAL,
         "bioetl_bronze_bytes_freed_total": _metrics.BRONZE_BYTES_FREED_TOTAL,
-        **BRONZE_CLEANUP_OUTCOME_COUNTERS,
         "bioetl_policy_violations_total": _metrics.POLICY_VIOLATIONS_TOTAL,
         "bioetl_silver_csv_export_start_total": _metrics.SILVER_CSV_EXPORT_START_TOTAL,
         "bioetl_silver_csv_export_success_total": _metrics.SILVER_CSV_EXPORT_SUCCESS_TOTAL,

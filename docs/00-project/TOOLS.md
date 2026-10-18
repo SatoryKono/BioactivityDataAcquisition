@@ -139,7 +139,7 @@ Performance-тесты находятся в `tests/benchmarks/`:
 | `test_json_serialization.py` | Сравнение JSON encoders (stdlib vs orjson) |
 
 ```bash
-BIOETL_BENCHMARK_CALLER=local pytest tests/benchmarks/ -m benchmark -p tests.benchmarks.benchmark_vcs_guard -p benchmark -p no:xdist
+pytest tests/benchmarks/ -v --benchmark-only
 ```
 
 ______________________________________________________________________
@@ -183,10 +183,9 @@ ______________________________________________________________________
 ## CodeRabbit audits
 
 - Playbook: [coderabbit-audit-playbook.md](../03-guides/coderabbit-audit-playbook.md)
-- Workflow: `.github/workflows/coderabbit.yml` (`workflow_dispatch` only;
-  classified `keep-disabled` in the CI map; GitHub App handles PR reviews)
-- Config: `.coderabbit.yaml` (`chill` pilot; automatic incremental reviews,
-  drafts excluded, pause after three reviewed commits; final SHA review required)
+- Workflow: `.github/workflows/coderabbit.yml` (CLI on trusted `main` push /
+  `workflow_dispatch`; GitHub App on PRs)
+- Config: `.coderabbit.yaml` (assertive profile)
 - Residual audit report example:
   `reports/grok/review_coderabbit_architecture_audit_20260728_1520_FINAL.md`
 - Issue pack example: `docs/99-archive/github-issues-20261015/ARCH-CR2-2026-07-29-ISSUE-PACK.md`

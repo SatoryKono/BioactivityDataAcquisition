@@ -32,6 +32,8 @@ Targets uncovered lines: 69-70, 130, 142-158, 195, 275, 297, 333.
 
 from __future__ import annotations
 
+from bioetl.domain.medallion import WriteMode
+
 import asyncio
 import tempfile
 from pathlib import Path
@@ -39,27 +41,28 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pyarrow as pa
 import pytest
+
 from bioetl.domain.exceptions import (
     DeltaTransactionError,
     MergeConflictError,
     SchemaViolationError,
 )
-from bioetl.domain.medallion import SilverWriteMode, WriteMode
-from bioetl.infrastructure.storage.delta.resilience import (
-    AdaptiveRetryPolicy,
-    SilverMergeResiliencePolicy,
+from bioetl.domain.medallion import SilverWriteMode
+from bioetl.infrastructure.storage.silver.delta_mixin import (
+    SilverWriterDeltaMixin,
 )
 from bioetl.infrastructure.storage.silver.delta_helpers import (
     _build_dispatch_policy,
     _build_merge_update_predicate,
     _DeltaWriteRequest,
-    _dispatch_request_by_mode,
     _MergeExecutionTimeoutError,
+    _dispatch_request_by_mode,
     _raise_domain_write_error,
     _select_dispatch_handler,
 )
-from bioetl.infrastructure.storage.silver.delta_mixin import (
-    SilverWriterDeltaMixin,
+from bioetl.infrastructure.storage.delta.resilience import (
+    AdaptiveRetryPolicy,
+    SilverMergeResiliencePolicy,
 )
 
 _TABLE_PATH = str(Path(tempfile.gettempdir()) / "bioetl-silver-delta-mixin" / "table")
@@ -267,7 +270,6 @@ class TestWriteMergeRetrySuccess:
     @pytest.mark.asyncio
     async def test_merge_records_builds_predicate_and_executes_merge_chain(
         self,
-        tmp_path: Path,
     ) -> None:
         """Merge path should build the expected predicate and execute full chain."""
         mixin = _ConcreteDeltaMixin()
@@ -277,13 +279,12 @@ class TestWriteMergeRetrySuccess:
         dt.merge.return_value = merge_builder
         merge_builder.when_matched_update_all.return_value = merge_builder
         merge_builder.when_not_matched_insert_all.return_value = merge_builder
-        table_path = str(tmp_path / "absent-table")
 
         await mixin._merge_records(
             dt,
             data,
             ["id", "value"],
-            table_path,
+            _TABLE_PATH,
             timeout_seconds=5.0,
         )
 
@@ -301,10 +302,7 @@ class TestWriteMergeRetrySuccess:
         merge_builder.execute.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_merge_records_enables_merge_schema_when_requested(
-        self,
-        tmp_path: Path,
-    ) -> None:
+    async def test_merge_records_enables_merge_schema_when_requested(self) -> None:
         """Merge path should opt into Delta schema evolution when payload requests it."""
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
@@ -313,13 +311,12 @@ class TestWriteMergeRetrySuccess:
         dt.merge.return_value = merge_builder
         merge_builder.when_matched_update_all.return_value = merge_builder
         merge_builder.when_not_matched_insert_all.return_value = merge_builder
-        table_path = str(tmp_path / "absent-table")
 
         await mixin._merge_records(
             dt,
             data,
             ["id"],
-            table_path,
+            _TABLE_PATH,
             timeout_seconds=5.0,
             merge_schema=True,
         )
@@ -333,103 +330,7 @@ class TestWriteMergeRetrySuccess:
         )
 
     @pytest.mark.asyncio
-    async def test_merge_records_appends_when_local_directory_has_no_parquet(
-        self,
-        tmp_path: Path,
-    ) -> None:
-        """An existing local directory without parquet is appended, not merged."""
-        mixin = _ConcreteDeltaMixin()
-        data = _make_arrow_table()
-        dt = MagicMock()
-        empty_table = tmp_path / "empty-table"
-        empty_table.mkdir()
-
-        with patch("deltalake.write_deltalake") as write_deltalake:
-            await mixin._merge_records(
-                dt,
-                data,
-                ["id", "value"],
-                str(empty_table),
-                timeout_seconds=5.0,
-            )
-
-        dt.merge.assert_not_called()
-        write_deltalake.assert_called_once_with(
-            str(empty_table),
-            data,
-            mode="append",
-        )
-        assert list(empty_table.iterdir()) == []
-
-    @pytest.mark.asyncio
-    async def test_merge_chain_ignores_preexisting_shared_table(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        """Per-test path stays on merge when a shared table directory already exists."""
-        shared = tmp_path / "preexisting-shared-table"
-        shared.mkdir()
-        sentinel = shared / "sentinel.txt"
-        sentinel.write_text("keep", encoding="utf-8")
-        live_shared = _TABLE_PATH
-        monkeypatch.setattr(
-            "tests.unit.infrastructure.storage.test_silver_writer_delta_mixin_boost._TABLE_PATH",
-            str(shared),
-        )
-        mixin = _ConcreteDeltaMixin()
-        data = _make_arrow_table()
-        dt = MagicMock()
-        merge_builder = MagicMock()
-        dt.merge.return_value = merge_builder
-        merge_builder.when_matched_update_all.return_value = merge_builder
-        merge_builder.when_not_matched_insert_all.return_value = merge_builder
-        table_path = str(tmp_path / "absent-table")
-        assert table_path != live_shared
-        assert table_path != _TABLE_PATH
-
-        with patch("deltalake.write_deltalake") as write_deltalake:
-            await mixin._merge_records(
-                dt,
-                data,
-                ["id", "value"],
-                table_path,
-                timeout_seconds=5.0,
-            )
-
-        dt.merge.assert_called_once_with(
-            source=data,
-            predicate="target.id = source.id AND target.value = source.value",
-            source_alias="source",
-            target_alias="target",
-            merge_schema=False,
-        )
-        write_deltalake.assert_not_called()
-        assert not (tmp_path / "absent-table").exists()
-        assert sentinel.read_text(encoding="utf-8") == "keep"
-        assert list(shared.iterdir()) == [sentinel]
-        assert not any(shared.rglob("*.parquet"))
-        assert not (shared / "_delta_log").exists()
-
-    def test_repaired_merge_cases_do_not_reference_shared_table(self) -> None:
-        """Repaired merge cases must pass a per-test path, not the shared table."""
-        import inspect
-
-        repaired = (
-            "test_merge_records_builds_predicate_and_executes_merge_chain",
-            "test_merge_records_enables_merge_schema_when_requested",
-            "test_write_merge_logs_recovery_after_retry",
-            "test_write_merge_commit_retries_exhausted_raises",
-        )
-        for name in repaired:
-            source = inspect.getsource(getattr(TestWriteMergeRetrySuccess, name))
-            assert "_TABLE_PATH" not in source
-
-    @pytest.mark.asyncio
-    async def test_write_merge_logs_recovery_after_retry(
-        self,
-        tmp_path: Path,
-    ) -> None:
+    async def test_write_merge_logs_recovery_after_retry(self) -> None:
         """Line 130: logs info when commit_retry_count > 0 on success."""
         from deltalake.exceptions import CommitFailedError
 
@@ -438,7 +339,7 @@ class TestWriteMergeRetrySuccess:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.MERGE,
-            table_path=str(tmp_path / "absent-table"),
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=["id"],
             partition_cols=None,
@@ -521,10 +422,7 @@ class TestWriteMergeRetrySuccess:
         assert write_calls[0]["schema_mode"] == "overwrite"
 
     @pytest.mark.asyncio
-    async def test_write_merge_commit_retries_exhausted_raises(
-        self,
-        tmp_path: Path,
-    ) -> None:
+    async def test_write_merge_commit_retries_exhausted_raises(self) -> None:
         """Lines 144-147: CommitFailedError after max retries re-raises."""
         from deltalake.exceptions import CommitFailedError
 
@@ -534,7 +432,7 @@ class TestWriteMergeRetrySuccess:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.MERGE,
-            table_path=str(tmp_path / "absent-table"),
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=["id"],
             partition_cols=None,

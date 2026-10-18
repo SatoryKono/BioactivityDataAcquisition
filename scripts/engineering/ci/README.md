@@ -59,13 +59,3 @@ Canonical taxonomy:
 | `scripts/engineering/ci/apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization                                              |
 | `scripts/engineering/ci/_compatibility_registry.py`       | Shared compatibility registry loader used by telemetry/reporting helpers      |
 | `scripts/engineering/ci/_compatibility_telemetry.py`      | Compatibility inventory telemetry helper used by architecture reporting flows |
-| `scripts/engineering/ci/pytest_abort_diagnostic_adapter.py` | Isolated abort supervisor used by `run_pytest_resilient.py`. Sidecar manifest only; it does not replace JUnit completeness. |
-
-
-On POSIX watchdog expiry, diagnostic SIGABRT targets leaf descendants first.
-Waiting launchers remain alive to reap their children; the adapter waits within
-its existing dump margin before forced cleanup. If there are no descendants,
-it signals the isolated process group. This avoids orphan zombies on container
-PID1 implementations that do not reap, without ignoring live/zombie PIDs or
-changing the timeout failure result. Windows retains its explicit unsupported
-SIGABRT behavior.

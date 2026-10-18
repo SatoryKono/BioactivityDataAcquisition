@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -19,7 +18,9 @@ from bioetl.infrastructure.storage.bronze.pipeline_helpers import (
     BronzeWritePrepared,
     BronzeWriteRequest,
 )
-from bioetl.infrastructure.storage.bronze.cleanup_support import safe_rmdir
+from bioetl.infrastructure.storage.bronze.read_cleanup_mixin import (
+    BronzeWriterReadCleanupMixin,
+)
 from bioetl.infrastructure.storage.bronze.side_effects_mixin import (
     BronzeWriterSideEffectsMixin,
 )
@@ -179,13 +180,35 @@ async def test_metadata_writer_finalize_existing_delegates() -> None:
     assert path == "meta.yaml"
 
 
-@pytest.mark.skipif(
-    os.name == "nt", reason="Windows destructive cleanup fail-closed (NOT_VERIFIED)"
-)
 def test_bronze_cleanup_rmdir(tmp_path: Path) -> None:
     date_dir = tmp_path / "2020-01-01"
     date_dir.mkdir()
-    assert safe_rmdir(date_dir, tmp_path, tmp_path.resolve(), date_dir.stat())
+
+    class _Host(BronzeWriterReadCleanupMixin):
+        def _find_old_date_dirs(
+            self,
+            _cutoff_str: str,
+            _provider: str | None,
+            _entity: str | None,
+        ) -> list[Path]:
+            return [date_dir]
+
+        def _remove_old_dir_files(
+            self,
+            *,
+            date_dir: Path,
+            dry_run: bool,
+        ) -> tuple[int, int]:
+            del date_dir, dry_run
+            return 1, 10
+
+    files, bytes_total, dirs = _Host()._cleanup_old_files_sync(
+        "2021-01-01",
+        False,
+        "chembl",
+        "activity",
+    )
+    assert (files, bytes_total, dirs) == (1, 10, 1)
     assert not date_dir.exists()
 
 

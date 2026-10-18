@@ -45,7 +45,6 @@ python -m bioetl <command> [options]
 ```bash
 bioetl --help
 bioetl run --help
-bioetl --version
 ```
 
 ______________________________________________________________________
@@ -91,10 +90,10 @@ bioetl workflow status <NAME> [OPTIONS]
 | `--ignore-yaml-filter` | Игнорировать YAML filter defaults у pipeline steps |
 | `--skip-gold` | Пропустить Gold writes у pipeline steps |
 | `--execution-context` | Override execution context у pipeline steps |
-| `--use-cached-bronze / --no-cached-bronze` | Override Bronze cache usage у pipeline steps |
+| `--use-cached-bronze/--no-cached-bronze` | Override Bronze cache usage у pipeline steps |
 | `--cached-bronze-path` | Явный Bronze cache path у pipeline steps |
 | `--cached-bronze-date` | Bronze cache date filter у pipeline steps |
-| `--exact-replay / --no-exact-replay` | Override strict exact replay request у pipeline steps |
+| `--exact-replay/--no-exact-replay` | Override strict exact replay request у pipeline steps |
 | `--required-persistence-profile <profile>` | Per-run override for the control-plane persistence profile (`degraded_observable`, `replay_ready`, `forensic_grade`) |
 | `--no-control-plane-archive` | Skip local control-plane archive pack after successful pipeline steps |
 | `--replay-of-run-id` | Explicit parent `run_id` for exact replay pipeline steps |
@@ -189,7 +188,7 @@ bioetl workflow run chembl_core --resume-last
 bioetl workflow run chembl_core --resume-manifest-id wf-manifest-2026-06-30-001
 bioetl workflow run chembl_core --resume-run-id 00000000-0000-0000-0000-000000000111
 bioetl workflow run chembl_core --resume-last --repair-steps reconcile_assay_target_orphans
-bioetl workflow run chembl_reference_pack --limit 100 --required-persistence-profile degraded_observable --no-ensure-observability-backend
+bioetl workflow run chembl_reference_pack --limit 100 --required-persistence-profile degraded_observable --no-health-server --no-ensure-observability-backend
 bioetl workflow run chembl_reference_pack --observability-backend-port 18081
 bioetl workflow status chembl_core
 bioetl workflow status chembl_core --run-id 00000000-0000-0000-0000-000000000111
@@ -238,18 +237,18 @@ bioetl run --pipeline <NAME> [OPTIONS]
 | `--vacuum-after-run`                     | flag   | None          | Запустить VACUUM после успешного выполнения                                               |
 | `--vacuum-retention-days`                | int    | None          | Retention для VACUUM (дней, override YAML config)                                         |
 | `--debug`                                | flag   | False         | Включить DEBUG логирование                                                                |
-| `--tracing / --no-tracing`                 | flag   | None          | Override distributed tracing for this run                                                 |
-| `--debug-export / --no-debug-export`       | flag   | False         | Persist a per-run debug audit pack with Bronze/Silver/Gold traces                         |
+| `--tracing/--no-tracing`                 | flag   | None          | Override distributed tracing for this run                                                 |
+| `--debug-export/--no-debug-export`       | flag   | False         | Persist a per-run debug audit pack with Bronze/Silver/Gold traces                         |
 | `--debug-export-format`                  | choice | `csv,xlsx`    | Repeatable debug-export formats (`csv`, `xlsx`)                                           |
 | `--debug-export-dir`                     | path   | None          | Override the debug-export root directory                                                  |
-| `--health-server / --no-health-server`     | flag   | True          | Включить HTTP health server                                                               |
+| `--health-server/--no-health-server`     | flag   | True          | Включить HTTP health server                                                               |
 | `--health-port`                          | int    | 8000          | Порт для health/metrics server (Docker main default)                                      |
-| `--ensure-observability-backend / --no-ensure-observability-backend` | flag | False | **Default off.** Opt-in auto-start of detached BioETL Ops HTTP backend (`bioetl health server`) |
+| `--ensure-observability-backend/--no-ensure-observability-backend` | flag | False | **Default off.** Opt-in auto-start of detached BioETL Ops HTTP backend (`bioetl health server`) |
 | `--observability-backend-port`           | int    | 8000          | Port for the opt-in detached Ops HTTP / health server backend                             |
-| `--use-cached-bronze / --no-cached-bronze` | flag   | False         | Читать Bronze cache вместо API                                                            |
+| `--use-cached-bronze/--no-cached-bronze` | flag   | False         | Читать Bronze cache вместо API                                                            |
 | `--cached-bronze-date`                   | str    | None          | Фильтровать Bronze cache по дате `YYYY-MM-DD`                                             |
 | `--cached-bronze-path`                   | path   | None          | Явный путь к каталогу Bronze cache                                                        |
-| `--exact-replay / --no-exact-replay`       | flag   | False         | Включить strict exact replay внутри опубликованной support boundary с fail-closed policy  |
+| `--exact-replay/--no-exact-replay`       | flag   | False         | Включить strict exact replay внутри опубликованной support boundary с fail-closed policy  |
 | `--required-persistence-profile`         | choice | None          | Per-run override для control-plane persistence profile (`degraded_observable`, `replay_ready`, `forensic_grade`) |
 | `--no-control-plane-archive`             | flag   | False         | Skip local control-plane archive pack after a successful run                              |
 | `--replay-of-run-id`                     | str    | None          | Явный parent `run_id` для exact replay                                                    |
@@ -402,9 +401,9 @@ bioetl run-all --source <PROVIDER> [OPTIONS]
 | `--yes`, `-y`                        | flag   | False         | Пропустить подтверждение                        |
 | `--list-only`                        | flag   | False         | Только показать список пайплайнов               |
 | `--debug`                            | flag   | False         | DEBUG логирование                               |
-| `--health-server / --no-health-server` | flag   | True          | Включить HTTP health server                     |
+| `--health-server/--no-health-server` | flag   | True          | Включить HTTP health server                     |
 | `--health-port`                      | int    | 8000          | Порт для health/metrics server                  |
-| `--ensure-observability-backend / --no-ensure-observability-backend` | flag | False | Opt-in detached BioETL Ops HTTP backend         |
+| `--ensure-observability-backend/--no-ensure-observability-backend` | flag | False | Opt-in detached BioETL Ops HTTP backend         |
 | `--observability-backend-port`       | int    | 8000          | Port for the opt-in Ops HTTP backend            |
 
 **Примеры:**
@@ -442,20 +441,20 @@ bioetl run-composite --composite <NAME> [OPTIONS]
 | `--composite`                                                  | str  | Required     | Имя композитного пайплайна                           |
 | `--resume`                                                     | flag | False        | Продолжить с checkpoint snapshot + ledger replay     |
 | `--dry-run`                                                    | flag | False        | Предпросмотр без записи                              |
-| `--seed-limit`, `--limit`                                      | int  | None         | Лимит записей для seed пайплайна (равнозначные опции) |
+| `--seed-limit`                                                 | int  | None         | Лимит записей для seed пайплайна                     |
 | `--enrich-only`                                                | str  | None         | Запустить только указанные enrichers (через запятую) |
 | `--required-only`                                              | flag | False        | Пропустить опциональные enrichers                    |
 | `--force-enricher`                                             | str  | None         | Принудительный перезапуск enricher                   |
-| `--use-cached-bronze / --no-cached-bronze`                       | flag | False        | Читать Bronze cache вместо API                       |
+| `--use-cached-bronze/--no-cached-bronze`                       | flag | False        | Читать Bronze cache вместо API                       |
 | `--cached-bronze-date`                                         | str  | None         | Фильтровать Bronze cache по дате `YYYY-MM-DD`        |
 | `--cached-bronze-path`                                         | path | None         | Явный путь к каталогу Bronze cache                   |
-| `--cached-bronze-enrichers / --no-cached-bronze-enrichers`       | flag | None         | Override cached Bronze только для enrichers          |
-| `--cached-bronze-dependencies / --no-cached-bronze-dependencies` | flag | False        | Override cached Bronze для dependency pipelines      |
+| `--cached-bronze-enrichers/--no-cached-bronze-enrichers`       | flag | None         | Override cached Bronze только для enrichers          |
+| `--cached-bronze-dependencies/--no-cached-bronze-dependencies` | flag | False        | Override cached Bronze для dependency pipelines      |
 | `--required-persistence-profile`                               | choice | None       | Per-run override control-plane profile (`degraded_observable`, `replay_ready`, `forensic_grade`). Composite is outside exact-replay; `replay_ready`/`forensic_grade` fail-close |
 | `--debug`                                                      | flag | False        | DEBUG логирование                                    |
-| `--health-server / --no-health-server`                           | flag | True         | Включить HTTP health server                          |
+| `--health-server/--no-health-server`                           | flag | True         | Включить HTTP health server                          |
 | `--health-port`                                                | int  | 8000         | Порт для health/metrics server                       |
-| `--ensure-observability-backend / --no-ensure-observability-backend` | flag | False    | Opt-in detached BioETL Ops HTTP backend              |
+| `--ensure-observability-backend/--no-ensure-observability-backend` | flag | False    | Opt-in detached BioETL Ops HTTP backend              |
 | `--observability-backend-port`                                 | int  | 8000         | Port for the opt-in Ops HTTP backend                 |
 
 **Примеры:**
@@ -919,9 +918,7 @@ ______________________________________________________________________
 
 ### `debug` — Отладка пайплайнов
 
-Запускает пайплайн с DEBUG-логированием и ограничением количества записей.
-Поддерживается только режим `log` без точек останова. Интерактивное пошаговое
-выполнение и инспекция состояния на breakpoints не реализованы.
+Запускает пайплайн с точками останова для отладки. Полезно для пошагового выполнения и инспекции промежуточных состояний.
 
 **Синтаксис:**
 
@@ -939,9 +936,9 @@ bioetl debug --pipeline <NAME> [OPTIONS]
 
 | Опция            | Тип    | По умолчанию  | Описание |
 | ---------------- | ------ | ------------- | -------- |
-| `--breakpoints`  | str    | None          | Зарезервированная опция; непустое значение не поддерживается и завершается с кодом 80 (`CONFIG_ERROR`). Не задавайте её |
+| `--breakpoints`  | str    | all stages    | Comma-separated: `after_preflight`, `after_bronze`, `after_silver`, `after_gold`, `after_dq`, `on_error`, `on_quarantine` |
 | `--limit`        | int    | 10            | Максимальное количество записей |
-| `--mode`         | choice | `log`         | Поддерживается только `log`; значение `interactive` принимается парсером, но отклоняется при выполнении с кодом 80 (`CONFIG_ERROR`) |
+| `--mode`         | choice | `interactive` | `interactive` (CLI prompts) или `log` (auto-continue) |
 | `--run-type`     | choice | `incremental` | `incremental`, `backfill`, `rebuild` |
 
 Migration: `--breakpoint` (singular), `--step-into`, `--inspect-state`,
@@ -951,7 +948,7 @@ debugger port как canonical debug surface.
 **Примеры:**
 
 ```bash
-bioetl debug --pipeline chembl_activity
+bioetl debug --pipeline chembl_activity --breakpoints after_silver
 bioetl debug --pipeline chembl_activity --mode log --limit 10
 bioetl debug --pipeline chembl_activity --run-type incremental
 ```
@@ -1012,7 +1009,6 @@ bioetl diagnostics guide
 
 ```bash
 bioetl diagnostics health [--provider chembl] [--json]
-bioetl diagnostics health -p chembl --json
 ```
 
 #### `diagnostics metrics`
@@ -1030,8 +1026,8 @@ bioetl diagnostics run --run-id <RUN_ID> [--limit 100] [--format text|json|yaml]
 #### `diagnostics dossier`
 
 ```bash
-bioetl diagnostics dossier --run-id <RUN_ID> [--limit 100] [--format text|json|yaml]
-bioetl diagnostics dossier --manifest-id <MANIFEST_ID> [--limit 100] [--format text|json|yaml]
+bioetl diagnostics dossier --run-id <RUN_ID>
+bioetl diagnostics dossier --manifest-id <MANIFEST_ID>
 ```
 
 #### `diagnostics contract-checks`
@@ -1061,7 +1057,7 @@ bioetl diagnostics forensic-diff <left> <right> [--format text|json|yaml]
 #### `diagnostics quarantine`
 
 ```bash
-bioetl diagnostics quarantine --pipeline <NAME> [--json] [--error-code CODE] [--run-id UUID] [--group-by reason-code] [--top 10]
+bioetl diagnostics quarantine --pipeline <NAME> [--json] [--error-code CODE] [--run-id UUID] [--silver-filter-only] [--group-by reason-code] [--top 10]
 ```
 
 `bioetl diagnostics dossier` принимает ровно один идентификатор:
@@ -1242,12 +1238,6 @@ ______________________________________________________________________
 
 ### `quarantine` — Управление карантином
 
-Migration: `--silver-filter-only` removed after sunset 2026-09-30.
-Use `--error-code FILTERED_OUT_SILVER` for `quarantine inspect`,
-`quarantine stats` and `diagnostics quarantine`; the old flag is a usage error.
-This selects Silver structural rejects, not Gold contract/semantic rejects.
-
-
 CLI surface для работы с проблемными записями.
 
 #### `quarantine inspect` — Просмотр записей
@@ -1262,6 +1252,7 @@ bioetl quarantine inspect --pipeline <NAME> [OPTIONS]
 | `--limit`              | int  | 100          | Максимум записей                                |
 | `--error-code`         | str  | None         | Фильтр по коду ошибки                           |
 | `--run-id`             | str  | None         | Ограничить просмотр одним run                   |
+| `--silver-filter-only` | flag | False        | Deprecated legacy alias для `--error-code FILTERED_OUT_SILVER`; sunset 2026-09-30; только Silver structural rejects, не Gold contract/semantic rejects |
 
 **Примеры:**
 
@@ -1283,6 +1274,7 @@ bioetl quarantine stats --pipeline <NAME> [--json]
 | `--json`               | flag | False        | Вывод в JSON                                                                                                           |
 | `--error-code`         | str  | None         | Ограничить статистику одним кодом ошибки                                                                               |
 | `--run-id`             | str  | None         | Ограничить статистику одним run                                                                                        |
+| `--silver-filter-only` | flag | False        | Deprecated legacy alias для `--error-code FILTERED_OUT_SILVER`; sunset 2026-09-30; только Silver structural rejects, не Gold contract/semantic rejects |
 | `--group-by`           | str  | None         | Фокусная Silver-группировка (`reason-code`, `field`, `rule-type`, `operator`, `reason-code-field`, `reason-signature`) |
 | `--top`                | int  | 10           | Лимит элементов в группировках                                                                                         |
 
@@ -1329,7 +1321,6 @@ bioetl quarantine resolve --pipeline <NAME> --payload-hash <HASH> [--status IGNO
 
 ```bash
 bioetl quarantine serve [--host 127.0.0.1] [--port 8000] [--data-root PATH]
-bioetl quarantine serve -p 8000
 ```
 
 Retired Grafana Explorer path. Shipping Grafana identity panels use
@@ -1414,7 +1405,6 @@ ______________________________________________________________________
 
 ```bash
 bioetl health server [--host 127.0.0.1] [--port 8000]
-bioetl health server -p 8000
 ```
 
 Docker main stack publishes health/metrics on `127.0.0.1:8000`. Grafana
@@ -1447,7 +1437,6 @@ bioetl health check [--provider chembl] [--json]
 ```bash
 bioetl health check
 bioetl health check --provider chembl --provider pubchem
-bioetl health check -p chembl -p pubchem
 bioetl health check --json
 ```
 

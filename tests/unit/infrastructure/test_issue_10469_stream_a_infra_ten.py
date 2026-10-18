@@ -9,9 +9,6 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pyarrow as pa
 import pytest
-from tests.helpers.clock import fixed_test_clock
-
-
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.workflow import (
@@ -197,7 +194,6 @@ class TestForeignKeyAdapterLeftovers:
                 return [{"id": "p"}]
 
         adapter = SilverForeignKeyReconciliationAdapter(
-            clock=fixed_test_clock(),
             silver_writer=_MatchingSilver(),  # type: ignore[arg-type]
             logger=logger,
         )
@@ -219,7 +215,6 @@ class TestForeignKeyAdapterLeftovers:
                 raise ValueError("snapshot unavailable")
 
         gold_adapter = SilverForeignKeyReconciliationAdapter(
-            clock=fixed_test_clock(),
             silver_writer=_MatchingSilver(),  # type: ignore[arg-type]
             logger=logger,
             gold_writer=_GoldSnap(),  # type: ignore[arg-type]
@@ -247,7 +242,6 @@ class TestForeignKeyAdapterLeftovers:
                 return {"version": 3, "physical_rows": 2, "current_rows": 1}
 
         ok_adapter = SilverForeignKeyReconciliationAdapter(
-            clock=fixed_test_clock(),
             silver_writer=_MatchingSilver(),  # type: ignore[arg-type]
             logger=logger,
             gold_writer=_GoldOk(),  # type: ignore[arg-type]

@@ -1,5 +1,3 @@
-Source-only refresh (2026-10-18, PR #12259 local clock-injection correction on head fae7565514272d9a3a304f5386a792a9335390ca): the canonical module inventory records `source_tree_sha256=9eba2ad964bf700fbce9cca0e7e05561b38e1564646d16dc906cdc233d8a7576` and `source_module_count=2583`. This binds the local working tree only; historical captures, measurements and their original hashes below are unchanged. It is not a new coverage capture or CI acceptance.
-
 Source-only refresh (2026-10-12, composite checkpoint persistence parameter bundle merged with origin/main fe524f074da5): the canonical module inventory records `source_tree_sha256=0d318c17dfd76032544e2e179569af53912aed1d409c2bf8f2725ee9ab589805` and `source_module_count=2566`. This binds the merged source tree; coverage measurements remain those of the last authoritative run recorded below.
 
 Source-only refresh (2026-10-12, PR #12187 review and origin/main sync): the canonical module inventory records `source_tree_sha256=5ef35dfcf5f7339a22f3900043b0b6af49474fcd98ed019e1d89067735f5c2eb` and `source_module_count=2566`. This updates source identity while retaining the accepted coverage measurements and additive XML provenance.
@@ -415,8 +413,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-Historical snapshot (`source_module_count=2492`), not the current source binding.
-
 - source_tree_sha256: `b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f`
 
 `source_module_count=2492`
@@ -438,11 +434,11 @@ it is not a new coverage measurement or a complete topology re-audit.
 
 ## Current source inventory binding
 
-- `source_tree_sha256=bd124834a4e65f08321e45f6abd8f5154c6116064667bff5394be73436ab943d`
-- `source_module_count=2583`
-- Source modules: `2583`
+- `source_tree_sha256=2018549910b8be3d961b6500fc46e54ff405cf9eabdcaf1ef14cac5d57ab3726`
+- `source_module_count=2571`
+- Source modules: `2571`
 - `2529` fully covered
-- `53` partially covered
+- `41` partially covered
 - Test inventory: `assertless_total_candidates=85`
 
 Derived by scripts/engineering/qa/report_topology_source_binding.py from

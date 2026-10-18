@@ -47,26 +47,6 @@ def test_circleci_config_rejects_duplicate_nested_keys():
         _assert_unique_keys(document)
 
 
-def test_bronze_coverage_is_branch_scoped_and_uses_complete_canonical_groups():
-    config = _config()
-    # The canonical tooling group runs subprocess-based Node contracts.
-    assert config["jobs"]["proof-coverage-shard"]["docker"] == [
-        {"image": "cimg/python:3.12-node"}
-    ]
-    workflow = config["workflows"]["bronze-cleanup-coverage"]
-    conditions = workflow["when"]["and"]
-    assert {
-        "equal": ["fix/bronze-cleanup-fs001", "<< pipeline.git.branch >>"]
-    } in conditions
-    assert {
-        "not": {"equal": ["scheduled_pipeline", "<< pipeline.trigger_source >>"]}
-    } in conditions
-    shard, merge = workflow["jobs"]
-    matrix = shard["proof-coverage-shard"]["matrix"]
-    assert matrix["parameters"]["group"] == ["0", "1", "2", "3"]
-    assert merge == {"proof-coverage": {"requires": [matrix["alias"]]}}
-
-
 def test_circleci_heredocs_escape_compiler_interpolation():
     source = (ROOT / ".circleci/config.yml").read_text(encoding="utf-8")
     assert not re.search(r"(?<!\\)<<[ \t]*['\"]", source)
@@ -213,6 +193,7 @@ def test_compose_placeholders_are_step_scoped_and_runtime_stays_strict():
     "lane",
     [
         "memory-retention",
+        "performance",
         "replay-parity",
         "memory-freshness",
         "port-contracts",
@@ -308,36 +289,6 @@ def test_hotspot_report_dispatcher_accepts_cli_arguments():
     )
     assert result.returncode == 0, result.stderr
     assert "--observations" in result.stdout
-
-
-def test_circleci_performance_lane_is_not_selectable():
-    """Manual and API callers cannot select a CircleCI benchmark run."""
-    config = _config()
-    assert "performance" not in config["parameters"]["ci-lane"]["enum"]
-    assert "performance" not in config["workflows"]
-    for workflow in config["workflows"].values():
-        if not isinstance(workflow, dict):
-            continue
-        for job in workflow.get("jobs", []):
-            job_name = job if isinstance(job, str) else next(iter(job))
-            assert job_name != "performance"
-            defined = config["jobs"].get(job_name)
-            if not isinstance(defined, dict) or "steps" not in defined:
-                continue
-            steps = defined["steps"]
-            for step in steps:
-                if isinstance(step, dict) and "run" in step:
-                    assert "-p benchmark" not in step["run"].get("command", "")
-    assert "-p benchmark" not in (ROOT / ".circleci/config.yml").read_text(
-        encoding="utf-8"
-    )
-    nightly = (ROOT / ".github/workflows/performance-nightly.yml").read_text(
-        encoding="utf-8"
-    )
-    command = nightly.split("BIOETL_BENCHMARK_CALLER=performance-nightly", 1)[1]
-    assert command.index("-p tests.benchmarks.benchmark_vcs_guard") < command.index(
-        "-p benchmark"
-    )
 
 
 @pytest.mark.parametrize(
@@ -714,22 +665,3 @@ def test_pr_gate_credit_cut_keeps_required_job_names():
     )
     assert "<< parameters.pathspecs >>" not in halt
     assert '"${pathspec_args[@]}"' in halt
-
-
-def test_workflow_map_describes_manual_only_performance():
-    """Published performance routing matches the retained manual GitHub caller."""
-    text = (ROOT / "docs/05-operations/ci-workflow-map.md").read_text(encoding="utf-8")
-    assert "Performance is manual-only" in text
-    row = next(
-        line
-        for line in text.splitlines()
-        if line.startswith("| `performance-nightly.yml` | manual")
-    )
-    assert "workflow_dispatch" in row
-    assert "CircleCI lane removed" in row
-    workflow = yaml.safe_load(
-        (ROOT / ".github/workflows/performance-nightly.yml").read_text(encoding="utf-8")
-    )
-    triggers = workflow.get("on", workflow.get(True))
-    assert "workflow_dispatch" in triggers
-    assert "schedule" not in triggers

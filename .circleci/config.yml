@@ -13,7 +13,7 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline, docker-publish, architecture-metrics, scorecard, scorecard-publish, release-validation, router-bridge]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline, docker-publish, architecture-metrics, scorecard, scorecard-publish, release-validation, router-bridge]
     default: pr-gate
   include-hypothesis:
     type: boolean
@@ -1549,6 +1549,16 @@ jobs:
               done
             } > reports/performance/runner-identity.txt
       - run:
+          name: Run performance benchmarks with existing budgets
+          no_output_timeout: 35m
+          command: |
+            mkdir -p reports/performance
+            timeout --signal=TERM --kill-after=30s 30m \
+              uv run --frozen --no-build pytest tests/performance/ tests/benchmarks/ \
+              -m "benchmark or performance" -p benchmark -p no:xdist -v --tb=short \
+              --perf-obs-out reports/performance/hotspot-observations.jsonl \
+              --junitxml=reports/performance/hotspot-budgets.xml
+      - run:
           name: Record performance CPU throttling after benchmarks
           when: always
           command: |
@@ -2205,36 +2215,13 @@ jobs:
             NAME="${GROUP%%|*}"; REST="${GROUP#*|}"
             PATHS="${REST%%|*}"; XDIST="${REST#*|}"
             mkdir -p reports/test-telemetry
-            JOURNAL_COVERAGE=()
-            if [ "$NAME" = integration ]; then
-              mkdir -p reports/quality/fs001-journal-coverage
-              export COVERAGE_FILE=reports/quality/fs001-journal-coverage/.coverage
-              JOURNAL_COVERAGE=(
-                --cov=bioetl.infrastructure.storage.bronze.cleanup_group_journal
-                --cov=bioetl.infrastructure.storage.bronze.cleanup_group_schema
-                --cov=bioetl.infrastructure.storage.bronze.cleanup_group_records
-                --cov=bioetl.infrastructure.storage.bronze.cleanup_group_members
-                --cov=bioetl.infrastructure.storage.bronze.cleanup_group_recovery
-                --cov-branch
-                --cov-report=term-missing
-                --cov-report=json:reports/quality/fs001-journal-coverage/coverage.json
-                --cov-report=xml:reports/quality/fs001-journal-coverage/coverage.xml
-              )
-            fi
             uv run --frozen --no-build pytest $PATHS \
               -m "not serial and not memory and not fs_contract and not subprocess_backed" \
               $XDIST \
-              "${JOURNAL_COVERAGE[@]}" \
               -q --tb=short \
               --junitxml="reports/test-telemetry/junit.${NAME}.xml"
       - store_test_results:
           path: reports/test-telemetry
-      - store_artifacts:
-          path: reports/test-telemetry
-          destination: integration-junit
-      - store_artifacts:
-          path: reports/quality/fs001-journal-coverage
-          destination: bronze-journal-coverage
 
   # Mirrors tests.yml `dq-consistency-gate`.
   dq-consistency:
@@ -3362,7 +3349,7 @@ jobs:
       NUMEXPR_NUM_THREADS: '1'
   proof-coverage-shard:
     docker:
-    - image: cimg/python:3.12-node
+    - image: cimg/python:3.12
     resource_class: medium
     environment:
       PYTHONPATH: src
@@ -3757,27 +3744,6 @@ workflows:
             - '2'
             - '3'
 
-  # PR #12136 needs real POSIX execution and all canonical coverage shards.
-  # Measurement only: this does not select publication or closeout jobs.
-  bronze-cleanup-coverage:
-    when:
-      and:
-        - or:
-            - equal: [coverage-closeout, << pipeline.parameters.ci-lane >>]
-            - equal: [pr-gate, << pipeline.parameters.ci-lane >>]
-        - equal: [fix/bronze-cleanup-fs001, << pipeline.git.branch >>]
-        - not:
-            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
-    jobs:
-      - proof-coverage-shard:
-          matrix:
-            alias: bronze-coverage-shards
-            parameters:
-              group: ['0', '1', '2', '3']
-      - proof-coverage:
-          requires:
-            - bronze-coverage-shards
-
   main-coverage-closeout:
     when:
       and:
@@ -4112,6 +4078,15 @@ workflows:
     jobs:
       - github-settings-review:
           context: bioetl-github-read-only
+  performance:
+    when:
+      and:
+        - equal: [performance, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
+    jobs:
+      - performance
   replay-parity:
     when:
       and:

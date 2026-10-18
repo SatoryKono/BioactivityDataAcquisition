@@ -458,18 +458,18 @@ ______________________________________________________________________
 ### `debug` — Отладка пайплайнов
 
 ```bash
-bioetl debug --pipeline <NAME> [--mode log] [--limit 10] [--run-type incremental]
+bioetl debug --pipeline <NAME> [--breakpoints after_silver] [--mode interactive|log] [--limit 10] [--run-type incremental]
 ```
 
 **Опции:**
-- `--breakpoints` — зарезервировано; непустое значение отклоняется с кодом 80 (`CONFIG_ERROR`), оставьте опцию незаданной
+- `--breakpoints` — comma-separated: `after_preflight`, `after_bronze`, `after_silver`, `after_gold`, `after_dq`, `on_error`, `on_quarantine`
 - `--limit` — максимальное количество записей (по умолчанию 10)
-- `--mode` — только `log` (по умолчанию); `interactive` отклоняется с кодом 80 (`CONFIG_ERROR`)
+- `--mode` — `interactive` или `log`
 - `--run-type` — `incremental`, `backfill`, `rebuild`
 
 **Примеры:**
 ```bash
-bioetl debug --pipeline chembl_activity
+bioetl debug --pipeline chembl_activity --breakpoints after_silver
 bioetl debug --pipeline chembl_activity --mode log --limit 10
 ```
 
