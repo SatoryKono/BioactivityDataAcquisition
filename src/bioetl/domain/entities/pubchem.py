@@ -213,14 +213,9 @@ class PubchemMolecule(BaseEntity):
     Domain entity with lineage fields (run_id, content_hash, etc.).
     For DTO without lineage, use PubchemMoleculeRecord.
 
-    Contains all physicochemical properties defined in PubchemMoleculeSchema:
-    - Structural identifiers (SMILES, InChI, InChI Key)
-    - Nomenclature (molecular formula, IUPAC name)
-    - Physical properties (molecular weight, exact mass)
-    - Computed descriptors (XLogP, TPSA, complexity, charge)
-    - Atom/Bond counts (heavy atoms, H-bond donors/acceptors, rotatable bonds)
-    - Stereochemistry (atom/bond stereo counts)
-    - 3D properties (volume, conformer count, feature counts)
+    Contains the structural identifiers, nomenclature, physicochemical
+    descriptors, atom/bond counts, stereochemistry, and 3D properties
+    defined in PubchemMoleculeSchema.
     """
 
     # === Primary Identifier (REQUIRED) ===
@@ -292,9 +287,11 @@ class PubchemMolecule(BaseEntity):
         if not self.molecule_id:
             raise ValueError("PubchemMolecule molecule_id is required")
 
-        if not (
-            self.canonical_smiles or self.isomeric_smiles or self.inchi
-        ):  # (~64% faster)
+        self._validate_structure()
+
+    def _validate_structure(self) -> None:
+        """Require at least one SMILES or InChI structural identifier."""
+        if not (self.canonical_smiles or self.isomeric_smiles or self.inchi):
             raise ValueError(
                 "PubchemMolecule must have at least one structural identifier "
                 "(SMILES/InChI)"

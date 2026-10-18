@@ -10,7 +10,7 @@
   },
   "debt_budget_policy": "flat_or_decreasing_only",
   "issue": 6045,
-  "module_coverage_inventory_source_tree_sha256": "bbfdef7d895313a7739fd51af7d6ba768d88e0f72028abc44f038e7e08169342",
+  "module_coverage_inventory_source_tree_sha256": "92f28958028cadbaaedd072c5ec76a3ae741b2df7b93d60a1f33fb2514f48769",
   "reviewed_on": "2026-07-20",
   "schema_version": "low-coverage-targeted-tests-6045-v1",
   "source_binding_refresh": {
