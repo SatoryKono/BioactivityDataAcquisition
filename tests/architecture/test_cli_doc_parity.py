@@ -21,6 +21,51 @@ _HEADING = re.compile(r"^#{3,4} `([a-z0-9-]+(?: [a-z0-9-]+)*)`")
 CLI_DOC = Path(__file__).resolve().parents[2] / "docs/04-reference/cli.md"
 
 
+@pytest.mark.parametrize(
+    "suffix",
+    [" | less", " > help.txt", ">help.txt", " 2>errors.txt", " && echo --bogus"],
+)
+def test_shell_control_operators_end_invocation(suffix: str) -> None:
+    """Shell operators are not Click children or options of the next program."""
+    root = click.Group("bioetl", commands={"group": click.Group("group")})
+    text = f"### `group`\n```bash\nbioetl group --help{suffix}\n```"
+    assert _parity_errors(root, text) == []
+
+
+def test_shell_quoted_operator_value_keeps_unknown_child() -> None:
+    """A quoted operator is an option value, not permission to ignore a typo."""
+    root = click.Group("bioetl", params=[click.Option(["--label"])])
+    assert _parity_errors(root, "```sh\nbioetl --label 'a|b' typo\n```") == [
+        "unknown documented command: typo"
+    ]
+
+
+def test_shell_invalid_quote_reports_invocation() -> None:
+    """Malformed documentation identifies the offending invocation."""
+    with pytest.raises(ValueError, match="Invalid documented shell invocation"):
+        _shell_options("bioetl --label 'unfinished", {"": click.Group("bioetl")})
+
+
+@pytest.mark.parametrize(
+    "path", ["quarantine inspect", "quarantine stats", "diagnostics quarantine"]
+)
+def test_migration_example_has_one_effective_silver_filter(path: str) -> None:
+    """The replacement example cannot retain an overriding legacy error code."""
+    from bioetl.interfaces.cli.main import cli
+
+    text = CLI_DOC.read_text(encoding="utf-8")
+    migration = text.split("**Breaking-change migration", 1)[1].split("CLI surface", 1)[
+        0
+    ]
+    example = migration.split("```bash\n", 1)[1].split("```", 1)[0]
+    args = shlex.split(example.replace("\\\n", " "))[3:]
+    command = _public_commands(cli)[path]
+    values, _, _ = command.make_parser(click.Context(command)).parse_args(args.copy())
+    assert args.count("--error-code") == 1
+    assert values["error_code"] == "FILTERED_OUT_SILVER"
+    assert "every existing `--error-code` argument" in migration
+
+
 def _public_commands(root: click.Command) -> dict[str, click.Command]:
     """Resolve eager/lazy children through Click, excluding metadata-hidden trees."""
     commands: dict[str, click.Command] = {}
@@ -47,7 +92,25 @@ def _shell_options(
     invocation: str, commands: dict[str, click.Command]
 ) -> dict[str, set[str]]:
     """Resolve shell paths and group-owned options without invoking callbacks."""
-    parts = shlex.split(invocation)[1:]
+    try:
+        parts = shlex.split(invocation)[1:]
+    except ValueError as exc:
+        raise ValueError(
+            f"Invalid documented shell invocation {invocation!r}: {exc}"
+        ) from exc
+    # Keep quoted/escaped operators and synopsis placeholders intact. Only the
+    # first shell command belongs to this Click invocation.
+    shell_tokens = re.finditer(
+        r"'[^']*'|\"(?:\\.|[^\"\\])*\"|\\.|<[^<>\n]+>|\[[^\]\n]*\]|(?P<operator>[|&;<>])",
+        invocation,
+    )
+    for match in shell_tokens:
+        if match.group("operator"):
+            segment = invocation[: match.start()]
+            if match.group("operator") in "<>":
+                segment = re.sub(r"\s+\d+$", "", segment)
+            parts = shlex.split(segment)[1:]
+            break
     path = ""
     declarations: dict[str, set[str]] = {}
     while path in commands:

@@ -15,7 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   selected Silver structural rejects; they now fail with Click usage exit code 2.
   Operators, scheduled jobs and scripts must replace the flag with
   `--error-code FILTERED_OUT_SILVER`, retaining their existing pipeline/run/limit
-  arguments. The replacement continues to exclude Gold semantic rejects.
+  arguments. Remove any existing `--error-code` arguments so exactly one
+  `--error-code FILTERED_OUT_SILVER` remains: the retired alias overrode those
+  arguments, whereas repeated Click options use the last value.
+  The replacement continues to exclude Gold semantic rejects.
   First-party callers have migrated; external consumers must migrate before
   upgrading. This is a **major-version impact**: the next release containing
   the removal must be **7.0.0**, not a backward-compatible 6.1.x/6.x release.
