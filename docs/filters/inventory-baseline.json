@@ -1805,7 +1805,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "src/bioetl/infrastructure/observability/prometheus_metric_registries.py",
       "occurrence_count": 1,
-      "first_line": 183,
+      "first_line": 185,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
