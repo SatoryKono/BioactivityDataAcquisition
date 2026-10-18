@@ -270,6 +270,19 @@ def _record_runner_terminal(
     )
 
 
+def _remember_journal_invocation(
+    name: str,
+    invocation_id: str,
+    executed_passes: list[str] | None,
+    expected_invocations: dict[str, str] | None,
+) -> None:
+    """Keep the pass list and its invocation binding together."""
+    if executed_passes is not None:
+        executed_passes.append(name)
+    if expected_invocations is not None:
+        expected_invocations[name] = invocation_id
+
+
 def _run_pass(
     *,
     name: str,
@@ -305,14 +318,13 @@ def _run_pass(
     ]
     invocation_id = ""
     if journal_dir is not None:
-        if executed_passes is not None:
-            executed_passes.append(name)
         invocation_id = uuid.uuid4().hex
+        _remember_journal_invocation(
+            name, invocation_id, executed_passes, expected_invocations
+        )
         child_env = _journal_child_env(
             name, invocation_id, allow_no_tests=allow_no_tests, base_env=child_env
         )
-        if expected_invocations is not None:
-            expected_invocations[name] = invocation_id
         command.extend(
             [
                 "-p",
