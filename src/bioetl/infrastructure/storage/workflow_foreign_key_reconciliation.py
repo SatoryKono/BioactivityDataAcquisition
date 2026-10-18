@@ -83,7 +83,7 @@ class ReconcileDebugArtifactSinkProtocol(Protocol):
 class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
     silver_writer: SilverWriter
     logger: LoggerPort
-    clock: ClockPort | None = None
+    clock: ClockPort
     metrics: MetricsPort | None = None
     quarantine: QuarantinePort | None = None
     quarantine_pipeline_name: str | None = None
@@ -92,6 +92,10 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
     _producer_inputs: dict[str, dict[str, dict[str, object]]] = field(
         default_factory=dict, init=False, repr=False
     )
+
+    def __post_init__(self) -> None:
+        if self.clock is None:
+            raise ValueError("clock cannot be None")
 
     async def capture_pipeline_snapshots(
         self, pipeline_name: str, run_id: str
