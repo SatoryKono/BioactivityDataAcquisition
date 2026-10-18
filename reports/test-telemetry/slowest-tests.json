@@ -4,7 +4,7 @@
   "source_run_id": "local-bioetl-local-coverage-badcaeb-r2",
   "source_event": "local_coverage_verify",
   "source_run_url": null,
-  "source_tree_sha256": "ef575c3404cdf5d1dc57c02be39f0d2ccd65d92a941162dc4023e3e3f35ef36f",
+  "source_tree_sha256": "606479e471d9071978db7c3640af12c942435661795cbeafcebb6d6cf4a9376a",
   "refreshed_at_utc": "2026-10-17T17:29:14.810533+00:00",
   "refresh_status": "captured",
   "total_cases": 34094,

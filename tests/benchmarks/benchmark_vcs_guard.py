@@ -446,6 +446,12 @@ def pytest_benchmark_update_json(
     output_json["bioetl_source"] = source
     output_json["bioetl_run"] = run
     output_json["bioetl_vcs_guard"] = guard_status()
+    output_json["bioetl_measurement"] = {
+        "dataset": os.environ.get("BIOETL_BENCHMARK_DATASET", "").strip(),
+        "environment": (
+            "github-actions" if os.environ.get("GITHUB_ACTIONS") == "true" else "local"
+        ),
+    }
 
 
 def _require_mapping(value: object, code: str, label: str) -> dict[str, Any]:

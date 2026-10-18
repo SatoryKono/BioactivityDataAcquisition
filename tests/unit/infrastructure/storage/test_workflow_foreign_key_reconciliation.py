@@ -31,10 +31,10 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
 from unittest.mock import AsyncMock
 
 import pytest
+from tests.helpers.clock import FixedClock, fixed_test_clock
 from deltalake.exceptions import CommitFailedError
 
 from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
@@ -64,6 +64,7 @@ async def test_unbound_current_run_blocks_before_mutation(
     )
     quarantine = _Quarantine()
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=fixed_test_clock(),
         silver_writer=_SilverWriter(),
         gold_writer=_GoldReader(
             {"chembl.assay": [{"assay_id": "a", "target_id": "t"}]}
@@ -143,6 +144,7 @@ class _Quarantine:
 class _GoldMutationWriter:
     execute_errors: list[BaseException] = field(default_factory=list)
     merge_attempts: int = 0
+    update_calls: list[dict[str, str]] = field(default_factory=list)
 
     def _resolve_table_path(self, table_name: str) -> str:
         return f"/tmp/{table_name.replace('.', '/')}"
@@ -155,11 +157,6 @@ class _GoldMutationWriter:
         return func(*args)
 
 
-class _FixedClock:
-    def now(self) -> datetime:
-        return datetime(2026, 7, 7, 12, 0, tzinfo=UTC)
-
-
 @dataclass
 class _MutationHost:
     gold_writer: _GoldMutationWriter
@@ -167,7 +164,7 @@ class _MutationHost:
     quarantine: object | None = None
     quarantine_pipeline_name: str | None = None
     logger: _Logger = field(default_factory=_Logger)
-    clock: _FixedClock = field(default_factory=_FixedClock)
+    clock: FixedClock = field(default_factory=fixed_test_clock)
 
 
 class _FakeAsyncio:
@@ -182,7 +179,8 @@ class _FakeMergeBuilder:
     def __init__(self, writer: _GoldMutationWriter) -> None:
         self._writer = writer
 
-    def when_matched_update(self, **_: object) -> _FakeMergeBuilder:
+    def when_matched_update(self, *, updates: dict[str, str]) -> _FakeMergeBuilder:
+        self._writer.update_calls.append(updates)
         return self
 
     def execute(self) -> dict[str, int]:
@@ -217,6 +215,7 @@ class _FakeGoldModule:
 async def test_gold_dry_run_does_not_mutate_or_quarantine() -> None:
     quarantine = _Quarantine()
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=fixed_test_clock(),
         silver_writer=_SilverWriter(),  # type: ignore[arg-type]
         gold_writer=_GoldReader(
             {
@@ -266,6 +265,7 @@ def test_gold_writer_retries_delta_commit_failures() -> None:
 async def test_gold_source_table_missing_skips_reconciliation() -> None:
     logger = _Logger()
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=fixed_test_clock(),
         silver_writer=_SilverWriter(),  # type: ignore[arg-type]
         gold_writer=_GoldReader(
             {
@@ -343,6 +343,16 @@ async def test_gold_expiry_retries_commit_conflict(
     )
 
     assert writer.merge_attempts == 2
+    assert (
+        writer.update_calls
+        == [
+            {
+                "_valid_to": f"'{fixed_test_clock().now().isoformat()}'",
+                "_is_current": "false",
+            }
+        ]
+        * 2
+    )
     # One schema inspection open + two merge retry attempts.
     assert fake_module.table_paths == [
         "/tmp/chembl/assay",
@@ -355,6 +365,7 @@ async def test_gold_expiry_retries_commit_conflict(
 @pytest.mark.asyncio
 async def test_gold_reference_table_missing_fails_fast() -> None:
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=fixed_test_clock(),
         silver_writer=_SilverWriter(),  # type: ignore[arg-type]
         gold_writer=_GoldReader(
             {
@@ -412,6 +423,7 @@ class _MissingSilverWriter:
 @pytest.mark.asyncio
 async def test_silver_reference_table_missing_fails_closed() -> None:
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=fixed_test_clock(),
         silver_writer=_MissingSilverWriter(),  # type: ignore[arg-type]
         gold_writer=None,
         logger=_Logger(),  # type: ignore[arg-type]
@@ -487,6 +499,7 @@ async def test_unproven_reference_completeness_blocks_mutation(
     )
     quarantine = _Quarantine()
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=fixed_test_clock(),
         silver_writer=_SilverWriter(),
         gold_writer=_GoldReader(
             {
@@ -549,6 +562,7 @@ async def test_mixed_run_mutates_only_selected_run_orphans(
         _capture,
     )
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=fixed_test_clock(),
         silver_writer=_SilverWriter(),
         gold_writer=_GoldReader(
             {

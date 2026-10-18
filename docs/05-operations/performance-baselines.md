@@ -80,7 +80,8 @@ an explicit `-p` / `--plugins` benchmark request, including
 `BIOETL_PYTEST_AUTOLOAD=1`. That guard blocks
 the plugin's git/hg probes and records the checkout HEAD from the gitdir.
 `dirty_state` stays `unknown`. The run id is not a commit SHA. Hotspot
-observation fail-open in the same workflow is a separate #12044 gap.
+reporting and gating run after failures, except cancellation, and reject missing
+or incomplete observations. Artifact upload rejects missing files.
 
 Measurement settings when the plugin is on:
 
@@ -152,9 +153,12 @@ exits 0. That check requires all of the following:
 - `bioetl_vcs_guard.installed_before_plugin` is true and
   `blocked_probe_attempts` is 0
 
-A blocked or unreadable HEAD stays `unknown` and fails this check. Hotspot
-observation skip, the conditional hotspot JSON gate, and
-`if-no-files-found: warn` are unchanged and remain #12044 work.
+A blocked or unreadable HEAD stays `unknown` and fails this check. The nightly
+caller supplies `bioetl_measurement.dataset` as
+`bioetl-synthetic-benchmarks-v1`; the guard records `github-actions` only when
+`GITHUB_ACTIONS=true`, otherwise `local`. The reducer separately checks run
+identity and context before producing an evidence candidate. Local measurements
+do not establish GitHub Actions provenance or adopt a baseline.
 
 ## Updating Baselines
 

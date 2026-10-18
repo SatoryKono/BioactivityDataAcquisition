@@ -34,7 +34,7 @@ function Test-BenchmarkPluginNeeded {
 
     $PreviousArg = $null
     foreach ($Arg in $CandidateArgs) {
-        if ($Arg -like "tests/benchmarks*" -or $Arg -like "*\tests\benchmarks*") {
+        if ($Arg -match "(^|[/\\])tests[/\\]benchmarks([/\\]|$)") {
             return $true
         }
         if ($Arg -like "--benchmark-*") {

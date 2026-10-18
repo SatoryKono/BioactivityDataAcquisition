@@ -181,7 +181,7 @@ _should_enable_benchmark_plugin() {
     local arg
     for arg in "$@"; do
         case "$arg" in
-            tests/benchmarks|tests/benchmarks/*|*/tests/benchmarks/*)
+            tests/benchmarks|tests/benchmarks/*|*/tests/benchmarks|*/tests/benchmarks/*)
                 return 0
                 ;;
             --benchmark-*|-pbenchmark|-ppytest_benchmark.plugin)

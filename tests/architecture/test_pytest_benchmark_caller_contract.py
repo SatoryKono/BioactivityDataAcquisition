@@ -650,6 +650,10 @@ def test_explicit_caller_measures_case_without_vcs_probe(tmp_path: Path) -> None
     test_path.write_text(_SYNTHETIC_TEST, encoding="utf-8")
     output_path = tmp_path / "benchmark-measurements.json"
     env, log_path, locked_src = _probe_env(tmp_path)
+    env["BIOETL_BENCHMARK_DATASET"] = "bioetl-synthetic-benchmarks-v1"
+    assert "BIOETL_BENCHMARK_DATASET=bioetl-synthetic-benchmarks-v1" in _step_run(
+        "Run pytest-benchmark cases"
+    )
     _assert_loaded_benchmark(env, locked_src)
     completed = subprocess.run(
         [
@@ -687,6 +691,8 @@ def test_explicit_caller_measures_case_without_vcs_probe(tmp_path: Path) -> None
     assert rounds
     assert all(isinstance(value, int) and value >= 1 for value in rounds)
     assert payload["bioetl_run"]["caller"] == "synthetic-proof"
+    assert payload["bioetl_measurement"]["environment"] in {"local", "github-actions"}
+    assert payload["bioetl_measurement"]["dataset"] == "bioetl-synthetic-benchmarks-v1"
     assert payload["bioetl_run"]["id"] != payload["bioetl_source"]["revision"]
     assert payload["bioetl_source"]["dirty_state"] == "unknown"
     assert payload["version"] == _expected_benchmark_version()
@@ -847,6 +853,7 @@ def test_guard_leaves_project_subprocess_calls_intact() -> None:
         ["-ppytest_benchmark.plugin"],
         ["--benchmark-json=result.json"],
         ["--benchmark-compare=0001"],
+        [str(ROOT / "tests/benchmarks")],
     ],
 )
 def test_shell_wrapper_guards_explicit_activation(
@@ -898,3 +905,35 @@ def test_powershell_guard_is_outside_autoload_branch() -> None:
         "# Guard explicit activation even when entry-point autoload is enabled.\nif (Test-BenchmarkPluginNeeded"
         in text
     )
+
+
+@pytest.mark.parametrize(
+    "github_actions, expected",
+    [("true", "github-actions"), ("false", "local"), ("", "local")],
+)
+def test_measurement_context_matches_reducer_contract(
+    monkeypatch: pytest.MonkeyPatch, github_actions: str, expected: str
+) -> None:
+    """Context is explicit; local executions never claim the CI environment."""
+    from decimal import Decimal
+    from tests.benchmarks import benchmark_vcs_guard as guard
+    from scripts.engineering.qa.generate_hotspot_degradation_report import (
+        _measurement_context,
+    )
+
+    monkeypatch.setenv("GITHUB_ACTIONS", github_actions)
+    monkeypatch.setenv("BIOETL_BENCHMARK_DATASET", "bioetl-synthetic-benchmarks-v1")
+    payload = {}
+    guard.pytest_benchmark_update_json(None, [], payload)
+    assert payload["bioetl_measurement"] == {
+        "dataset": "bioetl-synthetic-benchmarks-v1",
+        "environment": expected,
+    }
+    result = _measurement_context(payload, [("case", "scope", "", "", Decimal("1"))])
+    if expected == "local":
+        assert result == "unproven_environment"
+    else:
+        assert result[0:2] == ("bioetl-synthetic-benchmarks-v1", "github-actions")
+    monkeypatch.delenv("BIOETL_BENCHMARK_DATASET")
+    guard.pytest_benchmark_update_json(None, [], payload)
+    assert _measurement_context(payload, []) == "incomplete_evidence"

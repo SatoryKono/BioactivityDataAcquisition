@@ -46,6 +46,7 @@ jobs:
           # -p benchmark unblocks the plugin. The env label is run provenance,
           # not the plugin switch.
           BIOETL_BENCHMARK_CALLER=performance-nightly \
+          BIOETL_BENCHMARK_DATASET=bioetl-synthetic-benchmarks-v1 \
           uv run --frozen --no-build pytest tests/benchmarks/ \
             -m benchmark \
             -p tests.benchmarks.benchmark_vcs_guard \
