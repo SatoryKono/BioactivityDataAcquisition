@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import logging
 import os
 import sys
 import time
@@ -43,35 +42,48 @@ pytestmark = [
 
 _WINDOWS_PLATFORM = sys.platform == "win32" or os.name == "nt"
 
+
 class FakeLogger:
     """Minimal fake logger for performance tests."""
-    def info(self, _msg: str, **_kwargs: Any) -> None: pass
-    def debug(self, _msg: str, **_kwargs: Any) -> None: pass
-    def warning(self, _msg: str, **_kwargs: Any) -> None: pass
-    def error(self, _msg: str, **_kwargs: Any) -> None: pass
-    def bind(self, **_kwargs: Any) -> "FakeLogger": return self
+
+    def info(self, _msg: str, **_kwargs: Any) -> None:
+        pass
+
+    def debug(self, _msg: str, **_kwargs: Any) -> None:
+        pass
+
+    def warning(self, _msg: str, **_kwargs: Any) -> None:
+        pass
+
+    def error(self, _msg: str, **_kwargs: Any) -> None:
+        pass
+
+    def bind(self, **_kwargs: Any) -> FakeLogger:
+        return self
+
 
 def _create_activity_schema() -> pa.Schema:
-    return pa.schema([
-        pa.field("id", pa.string()),
-        pa.field("molecule_id", pa.string()),
-        pa.field("assay_id", pa.string()),
-        pa.field("target_id", pa.string()),
-        pa.field("standard_value", pa.float64()),
-        pa.field("standard_units", pa.string()),
-        pa.field("pchembl_value", pa.float64()),
-        pa.field("canonical_smiles", pa.string()),
-        pa.field("_content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.timestamp("us")),
-    ])
+    return pa.schema(
+        [
+            pa.field("id", pa.string()),
+            pa.field("molecule_id", pa.string()),
+            pa.field("assay_id", pa.string()),
+            pa.field("target_id", pa.string()),
+            pa.field("standard_value", pa.float64()),
+            pa.field("standard_units", pa.string()),
+            pa.field("pchembl_value", pa.float64()),
+            pa.field("canonical_smiles", pa.string()),
+            pa.field("_content_hash", pa.string()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.timestamp("us")),
+        ]
+    )
+
 
 def _generate_synthetic_batch(
-    start_idx: int,
-    batch_size: int,
-    overlap_ratio: float = 0.2
+    start_idx: int, batch_size: int, overlap_ratio: float = 0.2
 ) -> list[dict[str, Any]]:
     """Generate a deterministic synthetic batch of records with specified overlap."""
     now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
@@ -81,34 +93,39 @@ def _generate_synthetic_batch(
     overlap_count = int(batch_size * overlap_ratio)
 
     for i in range(batch_size):
-        if i < overlap_count and start_idx > 0:
-            idx = max(0, start_idx - overlap_count + i)
-        else:
-            idx = start_idx + i
+        idx = (
+            max(0, start_idx - overlap_count + i)
+            if i < overlap_count and start_idx > 0
+            else start_idx + i
+        )
 
         record_id = f"ACT_{idx:08d}"
 
-        records.append({
-            "id": record_id,
-            "molecule_id": f"CHEMBL_{idx % 1000}",
-            "assay_id": f"ASSAY_{idx % 100}",
-            "target_id": f"TGT_{idx % 50}",
-            "standard_value": float(idx % 1000) * 1.5,
-            "standard_units": "nM",
-            "pchembl_value": 9.0 - (idx % 100) * 0.01,
-            "canonical_smiles": "CC(=O)Oc1ccccc1C(=O)O",
-            "_content_hash": f"hash_{idx}_{start_idx}",
-            "_run_id": run_id,
-            "_run_type": "perf_test",
-            "_source_batch_id": f"batch_{start_idx}",
-            "_ingestion_ts": now,
-        })
+        records.append(
+            {
+                "id": record_id,
+                "molecule_id": f"CHEMBL_{idx % 1000}",
+                "assay_id": f"ASSAY_{idx % 100}",
+                "target_id": f"TGT_{idx % 50}",
+                "standard_value": float(idx % 1000) * 1.5,
+                "standard_units": "nM",
+                "pchembl_value": 9.0 - (idx % 100) * 0.01,
+                "canonical_smiles": "CC(=O)Oc1ccccc1C(=O)O",
+                "_content_hash": f"hash_{idx}_{start_idx}",
+                "_run_id": run_id,
+                "_run_type": "perf_test",
+                "_source_batch_id": f"batch_{start_idx}",
+                "_ingestion_ts": now,
+            }
+        )
 
     return records
+
 
 def _create_silver_writer(base_path: Path) -> SilverWriter:
     clock = SystemClock()
     from dataclasses import replace
+
     return SilverWriter(
         base_path=base_path,
         logger=FakeLogger(),
@@ -122,54 +139,44 @@ def _create_silver_writer(base_path: Path) -> SilverWriter:
         ),
     )
 
+
 def _get_process_rss_mb() -> float:
     """Get current process RSS in MB."""
     import psutil
+
     process = psutil.Process(os.getpid())
     return process.memory_info().rss / (1024 * 1024)
 
-def _get_delta_log_size(table_path: Path) -> dict[str, int]:
-    """Analyze delta log directory size and file count."""
-    log_dir = table_path / "_delta_log"
-    if not log_dir.exists():
-        return {"bytes": 0, "files": 0}
 
+def _get_file_stats(directory: Path, pattern: str) -> dict[str, int]:
+    """Count matching files and their on-disk bytes."""
     total_bytes = 0
     file_count = 0
-    for p in log_dir.glob("*"):
-        if p.is_file():
-            total_bytes += p.stat().st_size
+    for path in directory.glob(pattern):
+        if path.is_file():
+            total_bytes += path.stat().st_size
             file_count += 1
-
-    return {"bytes": total_bytes, "files": file_count}
-
-def _get_parquet_stats(table_path: Path) -> dict[str, int]:
-    """Analyze parquet file count and total size."""
-    if not table_path.exists():
-        return {"bytes": 0, "files": 0}
-
-    total_bytes = 0
-    file_count = 0
-    for p in table_path.rglob("*.parquet"):
-        if p.is_file():
-            total_bytes += p.stat().st_size
-            file_count += 1
-
     return {"bytes": total_bytes, "files": file_count}
 
 
 @pytest.mark.parametrize("n_merges", [10, 50, 100])
-def test_delta_sequential_merge_scaling(tmp_path: Path, n_merges: int, request: pytest.FixtureRequest):
+def test_delta_sequential_merge_scaling(
+    tmp_path: Path, n_merges: int, request: pytest.FixtureRequest
+):
     """Measure N sequential merges into the same Delta table."""
     if sys.platform.startswith("win"):
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     is_ci = os.environ.get("CI", "").lower() in ("true", "1")
     if is_ci and n_merges > 50:
-        pytest.skip("Skipping N=100 on CI to prevent timeouts due to known issue #12042")
+        pytest.skip(
+            "Skipping N=100 on CI to prevent timeouts due to known issue #12042"
+        )
 
     table_name = f"perf_sequential_{n_merges}"
-    round_root = tmp_path / f"seq_merge_{deterministic_uuid_from_callsite('perf_merge').hex[:8]}"
+    round_root = (
+        tmp_path / f"seq_merge_{deterministic_uuid_from_callsite('perf_merge').hex[:8]}"
+    )
     round_root.mkdir(parents=True, exist_ok=True)
     table_path = round_root / table_name
 
@@ -200,38 +207,40 @@ def test_delta_sequential_merge_scaling(tmp_path: Path, n_merges: int, request: 
 
             t_start = time.perf_counter()
 
-            async def run_merge():
-                return await writer.write_silver(
+            loop.run_until_complete(
+                writer.write_silver(
                     table_name=table_name,
                     records=batch,
                     schema=schema,
                     primary_keys=["id"],
                     mode=SilverWriteMode.MERGE,
                 )
-
-            loop.run_until_complete(run_merge())
+            )
             t_end = time.perf_counter()
 
             merge_time = t_end - t_start
 
-            log_stats = _get_delta_log_size(table_path)
-            parquet_stats = _get_parquet_stats(table_path)
+            log_stats = _get_file_stats(table_path / "_delta_log", "*")
+            parquet_stats = _get_file_stats(table_path, "**/*.parquet")
             current_rss = _get_process_rss_mb()
 
             from deltalake import DeltaTable
+
             dt = DeltaTable(str(table_path))
 
-            results.append({
-                "round": i + 1,
-                "merge_time_s": round(merge_time, 4),
-                "rss_mb": round(current_rss, 2),
-                "rss_delta_mb": round(current_rss - start_rss, 2),
-                "delta_log_files": log_stats["files"],
-                "delta_log_bytes": log_stats["bytes"],
-                "parquet_files": parquet_stats["files"],
-                "parquet_bytes": parquet_stats["bytes"],
-                "table_version": dt.version(),
-            })
+            results.append(
+                {
+                    "round": i + 1,
+                    "merge_time_s": round(merge_time, 4),
+                    "rss_mb": round(current_rss, 2),
+                    "rss_delta_mb": round(current_rss - start_rss, 2),
+                    "delta_log_files": log_stats["files"],
+                    "delta_log_bytes": log_stats["bytes"],
+                    "parquet_files": parquet_stats["files"],
+                    "parquet_bytes": parquet_stats["bytes"],
+                    "table_version": dt.version(),
+                }
+            )
 
             if merge_time > 60.0:
                 # Save incomplete results before failing
@@ -247,23 +256,32 @@ def test_delta_sequential_merge_scaling(tmp_path: Path, n_merges: int, request: 
                     "merges": results,
                 }
                 summary_path = tmp_path / f"merge_scaling_N{n_merges}_incomplete.json"
-                with open(summary_path, "w") as f:
+                with summary_path.open("w", encoding="utf-8") as f:
                     json.dump(summary_data, f, indent=2)
-                pytest.fail(f"Merge degraded severely: round {i+1} took {merge_time:.2f}s")
+                pytest.fail(
+                    f"Merge degraded severely: round {i + 1} took {merge_time:.2f}s"
+                )
 
     finally:
         loop.close()
 
     # Smoke regression check for row outcomes
     from deltalake import DeltaTable
+
     dt = DeltaTable(str(table_path))
     # actual total rows = N * batch_size - overlaps
     # total overlaps = (N - 1) * overlap_ratio * batch_size
-    expected_rows = n_merges * batch_size - (n_merges - 1) * int(batch_size * overlap_ratio)
+    expected_rows = n_merges * batch_size - (n_merges - 1) * int(
+        batch_size * overlap_ratio
+    )
     actual_rows = dt.to_pyarrow_dataset().count_rows()
 
-    assert actual_rows == expected_rows, f"Expected {expected_rows} rows, got {actual_rows}"
-    assert dt.version() >= n_merges - 1, f"Expected at least {n_merges - 1} versions, got {dt.version()}"
+    assert actual_rows == expected_rows, (
+        f"Expected {expected_rows} rows, got {actual_rows}"
+    )
+    assert dt.version() >= n_merges - 1, (
+        f"Expected at least {n_merges - 1} versions, got {dt.version()}"
+    )
 
     summary_path = tmp_path / f"merge_scaling_N{n_merges}.json"
     summary_data = {
@@ -280,18 +298,25 @@ def test_delta_sequential_merge_scaling(tmp_path: Path, n_merges: int, request: 
         "merges": results,
     }
 
-    with open(summary_path, "w") as f:
+    with summary_path.open("w", encoding="utf-8") as f:
         json.dump(summary_data, f, indent=2)
 
     perf_out = request.config.getoption("--perf-obs-out", default=None)
     if perf_out:
-        with FileLock(f"{perf_out}.lock"):
-            with open(perf_out, "a", encoding="utf-8") as f:
-                f.write(json.dumps({
-                    "test": f"test_delta_sequential_merge_scaling_N{n_merges}",
-                    "metric_type": "delta_merge_latency_total",
-                    "value": sum(r["merge_time_s"] for r in results),
-                    "timestamp": datetime.now(UTC).isoformat(),
-                    "unit": "s",
-                    "context": {"n_merges": n_merges}
-                }) + "\n")
+        with (
+            FileLock(f"{perf_out}.lock"),
+            Path(perf_out).open("a", encoding="utf-8") as f,
+        ):
+            f.write(
+                json.dumps(
+                    {
+                        "test": f"test_delta_sequential_merge_scaling_N{n_merges}",
+                        "metric_type": "delta_merge_latency_total",
+                        "value": sum(r["merge_time_s"] for r in results),
+                        "timestamp": datetime.now(UTC).isoformat(),
+                        "unit": "s",
+                        "context": {"n_merges": n_merges},
+                    }
+                )
+                + "\n"
+            )
