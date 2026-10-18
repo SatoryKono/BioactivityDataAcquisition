@@ -68,8 +68,8 @@ bioetl quarantine stats --pipeline {pipeline-name} --error-code FILTERED_OUT_SIL
 bioetl quarantine inspect --pipeline {pipeline-name} --error-code FILTERED_OUT_SILVER --run-id {run-id} --limit 20
 ```
 
-- `--silver-filter-only` remains as a deprecated compatibility alias until
-  2026-09-30. New runbooks and operator examples should use
+- `--silver-filter-only` was removed after its sunset 2026-09-30.
+  It now fails with a usage error. Runbooks and operator examples must use
   `--error-code FILTERED_OUT_SILVER` so the Silver structural reject scope is
   explicit:
 

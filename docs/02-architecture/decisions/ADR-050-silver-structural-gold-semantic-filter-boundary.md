@@ -110,8 +110,9 @@ historical alias retirement rather than config-boundary acceptance.
 
 ## Reject Taxonomy And Operator Surfaces (ADR-017, ADR-018, ADR-045)
 
-`FILTERED_OUT_SILVER`, `silver_filter_rejects`, Silver reject dashboards, and
-CLI shortcuts such as `--silver-filter-only` are temporary compatibility aliases
+The CLI shortcut `--silver-filter-only` was retired after its sunset
+2026-09-30; use `--error-code FILTERED_OUT_SILVER`. The remaining `FILTERED_OUT_SILVER` error code, `silver_filter_rejects`
+summary alias and Silver reject dashboards are temporary compatibility surfaces
 for structural Silver rejects. They are not the target taxonomy for semantic or
 business rejection.
 
