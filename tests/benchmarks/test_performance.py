@@ -27,8 +27,8 @@
 # PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
 """Performance benchmarks for critical paths.
 
-Run with: pytest tests/benchmarks/ --benchmark-only
-Or with comparison: pytest tests/benchmarks/ --benchmark-compare
+Run with: bash scripts/engineering/dev/run_pytest.sh tests/benchmarks/ --benchmark-only
+Or with comparison: bash scripts/engineering/dev/run_pytest.sh tests/benchmarks/ --benchmark-compare
 
 Requirements:
 - pytest-benchmark must be installed
