@@ -33,7 +33,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import httpx
-import respx
 import pytest
 
 from bioetl.domain.exceptions import CircuitBreakerOpenError, RetryExhaustedError
@@ -445,15 +444,20 @@ class TestUnifiedHTTPClientRequestMethods:
             provider="test",
         )
 
-        with respx.mock(assert_all_called=True) as router:
-            route = router.get("https://example.com/test").respond(
-                200, json={"status": "ok"}
-            )
-            async with client:
-                await client.get("https://example.com/test")
+        transport_requests = []
 
-        assert route.call_count == 1
-        req = route.calls[0].request
+        async def mock_handler(request: httpx.Request):
+            transport_requests.append(request)
+            return httpx.Response(200, json={"status": "ok"})
+
+        mock_transport = httpx.MockTransport(mock_handler)
+
+        async with client:
+            client._get_client()._transport = mock_transport
+            await client.get("https://example.com/test")
+
+        assert len(transport_requests) == 1
+        req = transport_requests[0]
 
         assert req.headers["user-agent"] == "BioETL/1.0 (test@example.com)"
         assert req.headers["accept"] == "application/json"

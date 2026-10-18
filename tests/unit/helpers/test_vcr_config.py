@@ -176,6 +176,44 @@ def test_response_sanitizer_removes_secrets_without_mutating_response(cookie_hea
     assert response["headers"][cookie_header] == ["ncbi_sid=session-secret; HttpOnly"]
 
 
+def test_response_sanitizer_preserves_protocol_and_strips_secrets_case_insensitive():
+    """Verify that protocol headers are preserved while secrets are stripped case-insensitively."""
+    hook = cast(Callable[[Any], Any], build_base_vcr_config()["before_record_response"])
+
+    # Assert fail-closed for malformed response surfaces
+    assert hook({"status": {"code": 200}, "headers": "invalid"}) is None
+
+    response = {
+        "status": {"code": 429},
+        "headers": {
+            "Set-Cookie2": ["secret"],
+            "NcBi-SId": ["secret"],
+            "NCBI-PHID": ["secret"],
+            "Retry-After": ["120"],
+            "X-RateLimit-Reset": ["1700000000"],
+            "Date": ["Mon, 01 Jan 2024 00:00:00 GMT"],
+            "Expires": ["Mon, 01 Jan 2024 00:00:00 GMT"],
+            "x-throttling-control": ["something"],
+            "x-chembl-retrieval-time": ["0.1s"],
+        },
+        "body": {"string": b"{}"},
+    }
+
+    sanitized = hook(response)
+    headers = sanitized["headers"]
+
+    assert "Set-Cookie2" not in headers
+    assert "NcBi-SId" not in headers
+    assert "NCBI-PHID" not in headers
+    assert headers["Retry-After"] == ["120"]
+    assert headers["X-RateLimit-Reset"] == ["1700000000"]
+    assert headers["Date"] == ["Mon, 01 Jan 2024 00:00:00 GMT"]
+    assert headers["Expires"] == ["Mon, 01 Jan 2024 00:00:00 GMT"]
+    assert headers["x-throttling-control"] == ["something"]
+    assert headers["x-chembl-retrieval-time"] == ["0.1s"]
+    assert response["headers"]["Set-Cookie2"] == ["secret"]
+
+
 @pytest.mark.parametrize("headers", [None, "invalid", ["Set-Cookie"]])
 def test_response_sanitizer_drops_unsupported_headers(headers):
     """Drop responses whose headers cannot be safely inspected."""
@@ -449,40 +487,3 @@ def test_sensitive_query_fields_are_unconditionally_removed(key: str) -> None:
     )
     sanitized = request_hook(request)
     assert parse_qsl(urlsplit(sanitized.uri).query) == [("term", "protein")]
-
-
-def test_response_sanitizer_preserves_protocol_and_strips_secrets_case_insensitive():
-    """Verify that protocol headers are preserved while secrets are stripped case-insensitively."""
-    hook = cast(Callable[[Any], Any], build_base_vcr_config()["before_record_response"])
-
-    # Assert fail-closed for malformed response surfaces
-    assert hook({"status": {"code": 200}, "headers": "invalid"}) is None
-
-    response = {
-        "status": {"code": 429},
-        "headers": {
-            "Set-Cookie2": ["secret"],
-            "NcBi-SId": ["secret"],
-            "NCBI-PHID": ["secret"],
-            "Retry-After": ["120"],
-            "X-RateLimit-Reset": ["1700000000"],
-            "Date": ["Mon, 01 Jan 2024 00:00:00 GMT"],
-            "Expires": ["Mon, 01 Jan 2024 00:00:00 GMT"],
-            "x-throttling-control": ["something"],
-            "x-chembl-retrieval-time": ["0.1s"],
-        },
-        "body": {"string": b"{}"},
-    }
-
-    sanitized = hook(response)
-    headers = sanitized["headers"]
-
-    assert "Set-Cookie2" not in headers
-    assert "NcBi-SId" not in headers
-    assert "NCBI-PHID" not in headers
-    assert headers["Retry-After"] == ["120"]
-    assert headers["X-RateLimit-Reset"] == ["1700000000"]
-    assert headers["Date"] == ["Mon, 01 Jan 2024 00:00:00 GMT"]
-    assert headers["Expires"] == ["Mon, 01 Jan 2024 00:00:00 GMT"]
-    assert headers["x-throttling-control"] == ["something"]
-    assert headers["x-chembl-retrieval-time"] == ["0.1s"]

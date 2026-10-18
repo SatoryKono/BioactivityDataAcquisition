@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3814 |
-| Tracked doc-like files | 3814 |
+| Doc-like files | 3813 |
+| Tracked doc-like files | 3813 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 78 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3814 |
+| tracked | 3813 |
 
 ## Lifecycle Counts
 
@@ -30,7 +30,7 @@
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 28 |
 | docs_reports_generated_or_route_owned | 7 |
-| docs_reports_retention_sensitive_evidence | 23 |
+| docs_reports_retention_sensitive_evidence | 22 |
 | generated_skill_reference_mirror | 19 |
 | generated_test_run_evidence | 6 |
 | guide | 2 |
@@ -51,7 +51,7 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 749 |
+| Active | 748 |
 | Archived | 1546 |
 | Canonical | 75 |
 | Generated | 1062 |
@@ -61,7 +61,7 @@
 
 | Surface | Count |
 | --- | --- |
-| active | 749 |
+| active | 748 |
 | archive | 1546 |
 | canonical | 75 |
 | generated | 1062 |
@@ -73,7 +73,7 @@
 | --- | --- |
 | archive-after-migration | 156 |
 | generate-automatically | 1062 |
-| keep | 2596 |
+| keep | 2595 |
 
 ## Cleanup Candidates
 
@@ -291,7 +291,6 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/evidence/INDEX.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/README.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/http-header-audit-and-provenance.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/CROSS-SYNTHESIS-project-legacy-compatibility-remediation.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/04-decisions/DECISIONS.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/05-risks/RISKS.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
@@ -300,6 +299,7 @@
 | `docs/reports/evidence/project-legacy-compatibility-remediation/composition-bootstrap-and-registry-compat/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/config-schema-and-migration-compat/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/domain-application-legacy-seams/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/project-legacy-compatibility-remediation/infrastructure-adapters-and-fallbacks/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 
