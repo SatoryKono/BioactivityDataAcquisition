@@ -1,246 +1,326 @@
-"""Measurement harness for eager merger inputs to evaluate `_read_silver_table` performance."""
+"""Bounded Linux Phase-0 probe of the production eager Silver input path.
+
+Fixture creation and each observation run in fresh, resource-limited interpreters.
+RSS is the measurement process lifetime high-water mark (imports included), never
+an incremental allocation estimate. This is not an end-to-end merge benchmark.
+"""
+
+from __future__ import annotations
 
 import argparse
-import gc
+import asyncio
+import hashlib
+import importlib.metadata
 import json
 import os
+import platform
 import resource
 import subprocess
 import sys
 import tempfile
 import time
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, cast
 
-import polars as pl
-from deltalake import write_deltalake
-import pyarrow as pa
-SchemaDict = dict
+ROOT = Path(__file__).resolve().parents[3]
+MIB = 1024**2
+THREAD_ENV = {
+    "MALLOC_ARENA_MAX": "2",
+    "POLARS_MAX_THREADS": "2",
+    "RAYON_NUM_THREADS": "2",
+    "TOKIO_WORKER_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "ARROW_NUM_THREADS": "2",
+}
 
-def generate_synthetic_data(num_rows: int) -> pl.DataFrame:
-    """Generate deterministic synthetic data representative of Activity/Target datasets."""
-    # Deterministic generation
-    schema: SchemaDict = {
-        "entity_id": pl.Utf8,
-        "content_hash": pl.Utf8,
-        "target_id": pl.Utf8,
-        "activity_value": pl.Float64,
-        "_run_id": pl.Utf8,
-        "_ingestion_ts": pl.Utf8,
-        "_source_batch_id": pl.Utf8,
+
+def confined_path(path: Path) -> Path:
+    """Resolve symlinks and retain the original repository/temporary-root boundary."""
+    resolved = path.resolve()
+    if not any(
+        resolved.is_relative_to(root)
+        for root in (ROOT, Path(tempfile.gettempdir()).resolve())
+    ):
+        raise ValueError(
+            "Path must resolve inside the repository or temporary directory"
+        )
+    return resolved
+
+
+def apply_guard(memory_mib: int, timeout_s: int) -> None:
+    """Fail closed before native imports; RLIMIT_AS bounds virtual memory, not RSS."""
+    if sys.platform != "linux":
+        raise RuntimeError("This harness requires Linux RLIMIT_AS and /proc")
+    os.environ.update(THREAD_ENV)
+    resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+    resource.setrlimit(resource.RLIMIT_AS, (memory_mib * MIB, memory_mib * MIB))
+    resource.setrlimit(resource.RLIMIT_CPU, (timeout_s, timeout_s))
+
+
+def prepare_fixture(rows: int, directory: Path) -> None:
+    """Write deterministic narrow Activity/Target-like data, in a separate process."""
+    import polars as pl
+    from deltalake import write_deltalake
+
+    frame = pl.DataFrame(
+        {
+            "entity_id": [f"activity_{i}" for i in range(rows)],
+            "content_hash": [f"hash_{i % 1000}" for i in range(rows)],
+            "target_id": [f"target_{i % 50}" for i in range(rows)],
+            "activity_value": [float(i) * 1.5 for i in range(rows)],
+            "_run_id": ["run_uuid_constant"] * rows,
+            "_ingestion_ts": ["2026-01-01T12:00:00Z"] * rows,
+            "_source_batch_id": ["batch_uuid_constant"] * rows,
+        }
+    )
+    write_deltalake(str(directory / "chembl" / "activity"), frame.to_arrow())
+
+
+def build_service(directory: Path):
+    """Use production composition, MergeService and DeltaReader; no copied read logic.
+
+    Output storage is unused: only _read_silver_table is exercised, not merge().
+    """
+    from bioetl.composition.bootstrap.runtime.composite_merge_service_builder import (
+        build_composite_merge_service,
+    )
+    from bioetl.domain.composite import (
+        CompositeConfig,
+        DependencyConfig,
+        MergeConfig,
+        SeedConfig,
+    )
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+    from bioetl.infrastructure.storage.delta_reader import DeltaReader
+    from bioetl.infrastructure.time.system_clock import SystemClock
+
+    logger = NoOpLogger()
+    config = CompositeConfig(
+        name="measurement",
+        version="1.0.0",
+        seed=SeedConfig(
+            "chembl_activity", ("entity_id", "target_id"), "chembl/activity"
+        ),
+        enrichers=(),
+        dependencies=(DependencyConfig("chembl_target", ("target_id",)),),
+        merge=MergeConfig(
+            "left_outer", "seed_priority", "unused/silver", "unused/gold"
+        ),
+    )
+    return build_composite_merge_service(
+        config=config,
+        storage=None,
+        resolve_gold_schema=lambda _: None,
+        delta_reader=DeltaReader(directory, logger),
+        field_group_registry=None,
+        cross_validator=None,
+        logger=logger,
+        system_columns_to_drop=frozenset(),
+        normalization_policies={},
+        clock=SystemClock(),
+    )
+
+
+async def measure(rows: int, directory: Path) -> dict:
+    """Measure the live read; fixture preparation never occurs in this interpreter."""
+    import pyarrow as pa
+
+    pa.set_cpu_count(2)
+    pa.set_io_thread_count(2)
+    service = build_service(directory)
+    start = time.perf_counter()
+    frame = await service._read_silver_table("chembl/activity")
+    elapsed = time.perf_counter() - start
+    peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
+    if frame.height != rows or frame["activity_value"].sum() != 0.75 * rows * (
+        rows - 1
+    ):
+        raise ValueError("Production read failed row count/value validation")
+    return {
+        "rows": rows,
+        "wall_time_s": elapsed,
+        "process_peak_rss_bytes": peak,
+        "pid": os.getpid(),
+        "service": f"{type(service).__module__}.{type(service).__name__}",
+        "read_method": service._read_silver_table.__func__.__module__,
+        "rlimit_as_bytes": resource.getrlimit(resource.RLIMIT_AS)[0],
     }
 
-    # We construct a mock dataset
-    # By using modulo arithmetic and standard ops we keep it deterministic
-    df = pl.DataFrame(
-        {
-            "entity_id": [f"activity_{i}" for i in range(num_rows)],
-            "content_hash": [f"hash_{i % 1000}" for i in range(num_rows)],
-            "target_id": [f"target_{i % 50}" for i in range(num_rows)],
-            "activity_value": [float(i) * 1.5 for i in range(num_rows)],
-            "_run_id": ["run_uuid_constant"] * num_rows,
-            "_ingestion_ts": ["2026-01-01T12:00:00Z"] * num_rows,
-            "_source_batch_id": ["batch_uuid_constant"] * num_rows,
-        },
-        schema_overrides=schema
-    )
-    return df
 
-class MockDeltaReader:
-    """Mock implementation of DeltaReaderPort."""
-    def __init__(self, table_path: str):
-        self.table_path = table_path
-
-    async def read_table(self, table: str) -> Any:
-        _ = table
-        from deltalake import DeltaTable
-        dt = DeltaTable(self.table_path)
-        # In real DeltaReaderPort, read_table loads as Arrow table
-        return dt.to_pyarrow_table()
-
-class DummyMergeService:
-    """Mock containing the target `_read_silver_table` implementation logic."""
-    def __init__(self, delta_reader: MockDeltaReader):
-        self._delta_reader = delta_reader
-        self._silver_reader = None # We do not test the fallback dicts logic here
-
-    async def _read_silver_table(self, table: str) -> pl.DataFrame:
-        """Read Silver table using delta_reader (Arrow) and convert to Polars.
-        This replicates the actual code in _MergeInputLoaderMixin.
-        """
-        if self._delta_reader is not None:
-            # Read using Delta Lake
-            arrow_table = await self._delta_reader.read_table(table)
-            frame = pl.from_arrow(
-                cast(Any, arrow_table)  # Any: pyarrow Table after read boundary
-            )
-            return frame.to_frame() if isinstance(frame, pl.Series) else frame
-        raise RuntimeError("Mock requires delta_reader")
-
-async def run_worker(scale: int, output_file: str):
-    """Run a single scale measurement."""
-    import asyncio
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        table_path = os.path.join(tmpdir, "mock_table")
-
-        # 1. Generate data
-        df = generate_synthetic_data(scale)
-
-        # 2. Write to Delta
-        write_deltalake(table_path, df.to_arrow())
-
-        # Free memory before measurement
-        del df
-        gc.collect()
-
-        reader = MockDeltaReader(table_path)
-        service = DummyMergeService(reader)
-
-        # 3. Measurement Setup
-        gc.collect()
-        rss_before = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-
-        # 4. Measure
-        start_time = time.perf_counter()
-        loaded_df = await service._read_silver_table("dummy_table_name")
-        end_time = time.perf_counter()
-
-        rss_after = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-
-        wall_time = end_time - start_time
-
-        # ru_maxrss is in KB on Linux, Bytes on MacOS
-        # We will assume Linux KB standard and convert to MB
-        # Wait, Python resource docs: bytes on macOS, kilobytes on Linux.
-        is_macos = sys.platform == "darwin"
-        factor = 1024 * 1024 if is_macos else 1024
-
-        rss_diff_mb = max(0, rss_after - rss_before) / factor
-        rss_peak_mb = rss_after / factor
-
-        # Verify correctness
-        assert len(loaded_df) == scale
-
-        result = {
-            "scale": scale,
-            "wall_time_s": wall_time,
-            "rss_peak_mb": rss_peak_mb,
-            "rss_diff_mb": rss_diff_mb,
-            "status": "COMPLETED"
-        }
-
-        out_path_obj = Path(output_file).resolve()
-        temp_dir_obj = Path(tempfile.gettempdir()).resolve()
-
-        # Security validation against Path Traversal (SonarCloud)
-        if not out_path_obj.is_relative_to(temp_dir_obj) and not out_path_obj.is_relative_to(Path.cwd()):
-             raise ValueError(f"Output file {output_file} resolves outside expected directories.")
-
-        with open(out_path_obj, "w") as f:
-            json.dump(result, f)
-
-
-def orchestrator():
-    """Run the worker across different scales and generate report."""
-    scales = [10_000, 100_000, 500_000, 1_000_000, 2_500_000, 5_000_000]
-
-    results = []
-
-    for scale in scales:
-        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp_out:
-            out_path = tmp_out.name
-
-        cmd = [sys.executable, __file__, "--worker", str(scale), "--out", out_path]
-
-        print(f"Running scale {scale}...")
+def run_bounded(command: list[str], timeout_s: int) -> dict:
+    """Capture actual exits, including termination after a timeout; never infer OOM."""
+    start = time.perf_counter()
+    env = {**os.environ, **THREAD_ENV}
+    with subprocess.Popen(
+        command,
+        cwd=ROOT,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    ) as proc:
+        timed_out = False
         try:
-            # 60s timeout, 4GB memory guard
-            # Memory limit can be set via prlimit or similar, but we can rely on OOM killer
-            # However, prompt asks for safety. Let's just track it via subprocess
-            subprocess.run(cmd, check=True, timeout=60)
-
-            with open(out_path, "r") as f:
-                res = json.load(f)
-            results.append(res)
+            stdout, stderr = proc.communicate(timeout=timeout_s)
         except subprocess.TimeoutExpired:
-            print(f"Scale {scale} TIMED OUT.")
-            results.append({
-                "scale": scale,
-                "wall_time_s": None,
-                "rss_peak_mb": None,
-                "status": "BLOCKED (TIMEOUT)"
-            })
-        except subprocess.CalledProcessError as e:
-            print(f"Scale {scale} FAILED with {e.returncode}.")
-            results.append({
-                "scale": scale,
-                "wall_time_s": None,
-                "rss_peak_mb": None,
-                "status": f"BLOCKED (ERROR {e.returncode})"
-            })
-        except Exception as e:
-            print(f"Scale {scale} ERROR: {e!s}")
-            results.append({
-                "scale": scale,
-                "wall_time_s": None,
-                "rss_peak_mb": None,
-                "status": f"BLOCKED ({e!s})"
-            })
-        finally:
-            if os.path.exists(out_path):
-                os.remove(out_path)
+            timed_out = True
+            proc.kill()
+            stdout, stderr = proc.communicate()
+    return {
+        "command": command,
+        "exit_code": proc.returncode,
+        "timed_out": timed_out,
+        "elapsed_s": time.perf_counter() - start,
+        "stdout": stdout,
+        "stderr": stderr,
+    }
 
-    # Generate Report
-    report_path = Path("reports/performance/merger_input_measurement.md")
-    report_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(report_path, "w") as f:
-        f.write("# Eager Merger Input Measurement Report (Issue 12045 Phase 0)\n\n")
-        f.write(f"Generated at: {datetime.utcnow().isoformat()}Z\n\n")
+def source_identity() -> dict:
+    """Bind observations to commit AND actual source bytes, including an uncommitted harness."""
 
-        f.write("## Measurement Environment\n")
-        f.write("- Operation: `_read_silver_table` (Delta -> Arrow -> Polars)\n")
-        f.write("- Dataset: Synthetic Deterministic Activity/Target schema\n")
-        f.write("- Execution: Isolated processes per scale\n\n")
+    def git(*args: str) -> str:
+        return subprocess.check_output(["git", *args], cwd=ROOT, text=True).strip()
 
-        f.write("## Results\n\n")
-        f.write("| Scale (Rows) | Status | Wall Time (s) | Peak RSS (MB) |\n")
-        f.write("| --- | --- | --- | --- |\n")
+    files = [Path(__file__), ROOT / "uv.lock"]
+    files.extend(sorted((ROOT / "src" / "bioetl").rglob("*.py")))
+    digest = hashlib.sha256()
+    for path in files:
+        digest.update(
+            path.relative_to(ROOT).as_posix().encode() + b"\0" + path.read_bytes()
+        )
+    return {
+        "head_sha": git("rev-parse", "HEAD"),
+        "head_tree": git("rev-parse", "HEAD^{tree}"),
+        "working_tree_status": git("status", "--porcelain"),
+        "source_bytes_sha256": digest.hexdigest(),
+        "hash_scope": "harness, uv.lock, sorted src/bioetl/**/*.py; path NUL bytes",
+        "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    }
 
-        bottleneck_confirmed = False
 
-        for res in results:
-            scale_str = f"{res['scale']:,}"
-            status = res['status']
-            wall_time = f"{res['wall_time_s']:.3f}" if res['wall_time_s'] is not None else "N/A"
-            peak_rss = f"{res['rss_peak_mb']:.1f}" if res['rss_peak_mb'] is not None else "N/A"
+def fixture_identity(directory: Path) -> dict:
+    """Record the actual Delta bytes; log IDs/timestamps need not be deterministic."""
+    return {
+        p.relative_to(directory).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in sorted(directory.rglob("*"))
+        if p.is_file()
+    }
 
-            f.write(f"| {scale_str} | {status} | {wall_time} | {peak_rss} |\n")
 
-            # Very rudimentary bottleneck heuristic: if we timeout or blow up >2GB for 5M rows
-            if res['wall_time_s'] is not None and res['wall_time_s'] > 10.0:
-                 bottleneck_confirmed = True
-            if res['rss_peak_mb'] is not None and res['rss_peak_mb'] > 2000.0:
-                 bottleneck_confirmed = True
+def orchestrate(args: argparse.Namespace) -> int:
+    """Run bounded preparation followed by fresh repeated measurement processes."""
+    source = source_identity()
+    observations = []
+    for rows in args.scales:
+        with tempfile.TemporaryDirectory(prefix="merger-measurement-") as tmp:
+            directory = Path(tmp)
+            common = [
+                sys.executable,
+                str(Path(__file__).resolve()),
+                "--rows",
+                str(rows),
+                "--fixture",
+                tmp,
+                "--memory-mib",
+                str(args.memory_mib),
+                "--timeout-s",
+                str(args.timeout_s),
+            ]
+            preparation = run_bounded([*common, "--phase", "prepare"], args.timeout_s)
+            fixture = fixture_identity(directory)
+            for repeat in range(1, args.repeats + 1):
+                result = {
+                    "rows": rows,
+                    "repeat": repeat,
+                    "preparation": preparation,
+                    "fixture_sha256": fixture,
+                    "measurement": None,
+                    "status": "BLOCKED",
+                }
+                if preparation["exit_code"] == 0 and not preparation["timed_out"]:
+                    run = run_bounded([*common, "--phase", "measure"], args.timeout_s)
+                    result["measurement"] = run
+                    if run["exit_code"] == 0 and not run["timed_out"]:
+                        try:
+                            result["raw"] = json.loads(run["stdout"])
+                            result["status"] = "COMPLETED"
+                        except json.JSONDecodeError:
+                            result["status"] = "BLOCKED_INVALID_OUTPUT"
+                observations.append(result)
+    payload = {
+        "generated_at": datetime.now(UTC).isoformat(),
+        "command": [sys.executable, *sys.argv],
+        "source": source,
+        "source_unchanged": source == source_identity(),
+        "environment": {
+            "platform": platform.platform(),
+            "python": sys.version,
+            "executable": sys.executable,
+            "cgroup_memory_max": Path("/sys/fs/cgroup/memory.max").read_text().strip(),
+            "threads": THREAD_ENV,
+            "packages": {
+                dist.metadata["Name"]: dist.version
+                for dist in sorted(
+                    importlib.metadata.distributions(), key=lambda d: d.metadata["Name"]
+                )
+            },
+            "cpu_affinity_count": len(os.sched_getaffinity(0)),
+        },
+        "limits": {
+            "address_space_mib": args.memory_mib,
+            "timeout_s": args.timeout_s,
+            "cpu_seconds": args.timeout_s,
+        },
+        "observations": observations,
+        "conclusion": "NOT_ESTABLISHED: bounded synthetic input-read measurements only",
+    }
+    args.out = confined_path(args.out)
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    # Never overwrite historical evidence, even on a failed run.
+    with confined_path(args.out).open("x") as stream:
+        json.dump(payload, stream, indent=2)
+        stream.write("\n")
+    return (
+        0
+        if payload["source_unchanged"]
+        and all(row["status"] == "COMPLETED" for row in observations)
+        else 1
+    )
 
-        f.write("\n## Conclusion\n\n")
-        if bottleneck_confirmed:
-            f.write("**Bottleneck Confirmed**: Performance degrades significantly at higher scales, confirming the gap.\n")
+
+def main() -> int:
+    """Parse explicit bounded execution controls before any data allocation."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--phase", choices=("prepare", "measure"))
+    parser.add_argument("--rows", type=int)
+    parser.add_argument("--fixture", type=Path)
+    parser.add_argument("--scales", type=int, nargs="+", default=[100, 1000])
+    parser.add_argument("--repeats", type=int, default=3)
+    parser.add_argument("--memory-mib", type=int, default=4096)
+    parser.add_argument("--timeout-s", type=int, default=30)
+    parser.add_argument("--out", type=Path)
+    args = parser.parse_args()
+    if not 128 <= args.memory_mib <= 4096 or not 1 <= args.timeout_s <= 120:
+        parser.error("memory must be 128..4096 MiB; timeout must be 1..120 seconds")
+    if not 1 <= args.repeats <= 10 or any(not 1 <= n <= 100_000 for n in args.scales):
+        parser.error("repeats must be 1..10; scales must be 1..100000 rows")
+    if args.phase:
+        if args.rows is None or not 1 <= args.rows <= 100_000 or args.fixture is None:
+            parser.error("worker requires --rows 1..100000 and --fixture")
+        args.fixture = confined_path(args.fixture)
+        apply_guard(args.memory_mib, args.timeout_s)
+        if args.phase == "prepare":
+            prepare_fixture(args.rows, args.fixture)
         else:
-            f.write("**Not Established / Limited-scale only**: The operation scales acceptably within the tested bounds.\n")
+            print(json.dumps(asyncio.run(measure(args.rows, args.fixture))))
+        return 0
+    if args.out is None or args.out.exists():
+        parser.error("provide --out pointing to a new raw-observation JSON file")
+    args.out = confined_path(args.out)
+    return orchestrate(args)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--worker", type=int, help="Run as worker for specific scale")
-    parser.add_argument("--out", type=str, help="Output JSON file for worker")
-
-    args = parser.parse_args()
-
-    if args.worker:
-        import asyncio
-        asyncio.run(run_worker(args.worker, args.out))
-    else:
-        orchestrator()
+    raise SystemExit(main())

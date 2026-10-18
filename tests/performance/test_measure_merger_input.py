@@ -1,37 +1,129 @@
-"""Smoke test for the eager merger input measurement harness."""
+"""Regression and negative checks for the bounded production-input probe."""
 
+import json
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
+from scripts.engineering.performance import measure_merger_input as harness
+
 pytestmark = [pytest.mark.performance, pytest.mark.serial]
 
 
-def test_measurement_harness_smoke():
-    """Verify that the measurement harness runs successfully on a minimal scale."""
-    harness_path = Path("scripts/engineering/performance/measure_merger_input.py")
-    assert harness_path.exists(), "Measurement harness script not found."
-
-    # Run the worker directly with a small scale to ensure no crashes
-    cmd = [
-        sys.executable,
-        str(harness_path),
-        "--worker",
-        "100",
-        "--out",
-        "smoke_test_out.json",
-    ]
-
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-
-    assert result.returncode == 0, (
-        f"Harness worker failed with exit code {result.returncode}.\nStderr: {result.stderr}"
+def test_measurement_harness_smoke(tmp_path):
+    """Each repeat uses real production read code in a distinct limited process."""
+    output = tmp_path / "observations.json"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(Path(harness.__file__)),
+            "--scales",
+            "10",
+            "--repeats",
+            "2",
+            "--out",
+            str(output),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=90,
     )
+    assert result.returncode == 0, result.stderr + (
+        output.read_text() if output.exists() else ""
+    )
+    payload = json.loads(output.read_text())
+    first, second = payload["observations"]
+    assert first["raw"]["pid"] != second["raw"]["pid"]
+    assert (
+        first["raw"]["service"]
+        == "bioetl.application.composite.merge_service.MergeService"
+    )
+    assert (
+        first["raw"]["read_method"] == "bioetl.application.composite.merger_input_mixin"
+    )
+    assert first["raw"]["rlimit_as_bytes"] == 4096 * harness.MIB
+    assert first["raw"]["process_peak_rss_bytes"] > 0
+    assert first["preparation"]["exit_code"] == first["measurement"]["exit_code"] == 0
+    assert first["fixture_sha256"]
+    assert payload["source"]["harness_sha256"]
+    assert payload["source_unchanged"]
+    assert payload["conclusion"].startswith("NOT_ESTABLISHED")
 
-    out_file = Path("smoke_test_out.json")
-    assert out_file.exists(), "Harness worker did not produce output JSON."
 
-    # Clean up the test artifact
-    out_file.unlink()
+@pytest.mark.parametrize(
+    "arguments",
+    [
+        ["--memory-mib", "0"],
+        ["--memory-mib", "4097"],
+        ["--scales", "100001"],
+        ["--scales", "-1"],
+        ["--repeats", "0"],
+        ["--timeout-s", "0"],
+        ["--phase", "measure"],
+    ],
+)
+def test_rejects_unbounded_or_invalid_requests(arguments):
+    """Invalid inputs fail before importing data libraries or launching a child."""
+    result = subprocess.run(
+        [sys.executable, harness.__file__, *arguments],
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    assert result.returncode == 2
+
+
+def test_guard_enforces_allocation_limit():
+    """A real child cannot allocate beyond RLIMIT_AS; this is not a mock assertion."""
+    code = (
+        "from scripts.engineering.performance.measure_merger_input import apply_guard; "
+        "apply_guard(128, 5); bytearray(256 * 1024**2)"
+    )
+    result = harness.run_bounded([sys.executable, "-c", code], 10)
+    assert result["exit_code"] != 0
+    assert "MemoryError" in result["stderr"]
+
+
+def test_timeout_records_actual_exit():
+    """Timeout is blocked evidence with the actual kill exit, never successful telemetry."""
+    result = harness.run_bounded(
+        [sys.executable, "-c", "import time; time.sleep(10)"], 1
+    )
+    assert result["timed_out"]
+    assert result["exit_code"] == -9
+
+
+def test_existing_raw_evidence_is_preserved(tmp_path):
+    """The CLI cannot overwrite an earlier observation file."""
+    output = tmp_path / "raw.json"
+    output.write_text("historical bytes")
+    result = subprocess.run(
+        [sys.executable, harness.__file__, "--out", str(output)],
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    assert result.returncode == 2
+    assert output.read_text() == "historical bytes"
+
+
+def test_output_boundary_rejects_escape_before_launch():
+    """An absolute output outside the two supported roots cannot launch work."""
+    result = subprocess.run(
+        [sys.executable, harness.__file__, "--out", "/proc/pr12274-never-created.json"],
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    assert result.returncode != 0
+    assert "Path must resolve inside" in result.stderr
+
+
+def test_output_boundary_resolves_symlinks(tmp_path):
+    """A symlink inside temporary storage cannot escape to an external root."""
+    link = tmp_path / "escape"
+    link.symlink_to("/proc", target_is_directory=True)
+    with pytest.raises(ValueError, match="Path must resolve inside"):
+        harness.confined_path(link / "pr12274-never-created.json")

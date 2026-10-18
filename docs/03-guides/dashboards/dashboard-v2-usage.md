@@ -516,7 +516,7 @@ Compact evidence ниже первого экрана:
   - какие `reason_code` и `field` сейчас доминируют в bounded dashboard summary.
 - Для action-перехода из explorer в CLI используйте:
   ```bash
-  bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only --run-id <run-id> --limit 200
+  bioetl quarantine inspect --pipeline <pipeline> --error-code FILTERED_OUT_SILVER --run-id <run-id> --limit 200
   bioetl quarantine resolve --pipeline <pipeline> --payload-hash <payload-hash> --status IGNORED
   ```
 - Grafana shipped surface: bus dashboards give Prometheus summary/trend and
