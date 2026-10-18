@@ -40,6 +40,7 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
+@pytest.mark.generated_artifact
 def test_issue_5514_flaky_test_burndown_review_matches_canonical_inputs() -> None:
     review = _load_json(FLAKY_REVIEW)
     test_governance = _load_json(TEST_GOVERNANCE)
@@ -67,6 +68,7 @@ def test_issue_5514_flaky_test_burndown_review_matches_canonical_inputs() -> Non
     assert review["reviewed_flaky_tests"] == []
 
 
+@pytest.mark.generated_artifact
 def test_issue_5515_runtime_cardinality_inventory_has_no_unused_event_debt() -> None:
     inventory = _load_json(RUNTIME_CARDINALITY_INVENTORY)
     runtime_review = _load_json(RUNTIME_CARDINALITY_REVIEW)

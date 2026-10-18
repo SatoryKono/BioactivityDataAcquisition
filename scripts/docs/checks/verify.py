@@ -55,6 +55,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--skip-build", action="store_true", help="Skip strict MkDocs build"
     )
+    parser.add_argument(
+        "--defer-generated-artifacts",
+        action="store_true",
+        help="Leave generated output freshness to the scheduled daily owner; retain source checks",
+    )
     args = parser.parse_args(argv)
 
     steps: list[tuple[str, list[str]]] = []
@@ -92,6 +97,7 @@ def main(argv: list[str] | None = None) -> int:
                 ],
             )
         )
+    if not args.skip_drift and not args.defer_generated_artifacts:
         steps.append(
             (
                 "generate-dashboard-panel-inventory",
@@ -116,7 +122,7 @@ def main(argv: list[str] | None = None) -> int:
                 ],
             )
         )
-    if not args.skip_cleanup_inventory:
+    if not args.skip_cleanup_inventory and not args.defer_generated_artifacts:
         steps.append(
             (
                 "generate-cleanup-inventory",
@@ -128,7 +134,7 @@ def main(argv: list[str] | None = None) -> int:
                 ],
             )
         )
-    if not args.skip_normalization_matrix:
+    if not args.skip_normalization_matrix and not args.defer_generated_artifacts:
         steps.append(
             (
                 "generate-pipeline-normalization-matrix",

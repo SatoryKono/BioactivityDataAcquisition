@@ -78,6 +78,7 @@ def _runtime_builder_importer_count(target_module: str) -> int:
     return counter[target_module]
 
 
+@pytest.mark.generated_artifact
 def test_issue_6032_application_core_fan_in_has_headroom() -> None:
     row = _family_row("application_core")
     budgets = row["bounded_growth_budgets"]
@@ -113,6 +114,7 @@ def test_issue_6032_application_core_fan_in_has_headroom() -> None:
     assert _live_family_fan_in("application_core")[0] <= budgets["max_internal_fan_in"]
 
 
+@pytest.mark.generated_artifact
 def test_issue_6034_composition_runtime_seams_keep_headroom() -> None:
     bootstrap = _family_row("composition_bootstrap_runtime")
     runtime_builders = _family_row("composition_runtime_builders")

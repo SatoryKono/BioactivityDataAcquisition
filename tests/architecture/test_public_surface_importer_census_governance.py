@@ -181,6 +181,7 @@ def test_tracked_twin_family_ratchet_declares_touch_no_growth_policy() -> None:
     assert str(touch_policy.get("rationale", "")).strip()
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_touched_twin_family_files_do_not_grow_private_imports() -> None:
     """Touched twin-family surfaces must not grow private-module imports past baseline."""
@@ -475,6 +476,7 @@ def test_retained_public_export_facades_remain_unique_and_budgeted() -> None:
         assert row["resolution_conflicts"] == {}, row["path"]
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_compatibility_importer_census_reports_are_in_sync() -> None:
     """Committed compatibility importer census JSON must match the generator."""

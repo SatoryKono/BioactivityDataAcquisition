@@ -216,3 +216,27 @@ architecture test before closing the task.
   classification in the task or PR closeout.
 - Add follow-up governance work when drift exposed a missing validator or an
   ambiguous ownership boundary.
+
+
+## CI and daily selection
+
+PR/push pytest collection uses `generated_artifact` markers and the individual
+node inventory in `configs/quality/generated_artifact_tests.json`. Tests of
+current committed generated outputs run in the existing `nightly.yml` schedule
+at 03:00 UTC. Source contracts and tests generating temporary fixtures remain
+in ordinary CI; mixed modules use function markers, never directory exclusions.
+
+The daily owner runs all manifest tests serially, including `slow` tests, and
+fails if a manifest node is missing from collection. Standalone output checks
+retain their daily owners in the same manifest. Source, security, exemption,
+and lifecycle checks remain independent of output freshness checks.
+
+An entirely artifact-dependent affected selection emits `deferred-to-daily`
+with its collected node list and the original pytest exit 5. This is not a
+passing test result. Empty selections, collection failures, missing markers,
+and stale manifest selectors remain errors. Daily test and command failures
+are never converted into successful deferrals.
+
+Local pytest defaults to the complete selection. Use `--artifact-selection=ci`
+for PR-equivalent tests. Run the complete artifact test partition with
+`python -m scripts.engineering.ci.generated_artifact_checks daily --report /tmp/generated-artifact-selection.json`.

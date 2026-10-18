@@ -75,6 +75,7 @@ def _is_ancestor(commit: str, head: str) -> bool:
     return result.returncode == 0
 
 
+@pytest.mark.generated_artifact
 def test_committed_test_telemetry_baseline_is_populated() -> None:
     payload = _load_baseline()
 
@@ -103,6 +104,7 @@ def test_committed_test_telemetry_baseline_is_populated() -> None:
     assert context["explicit_exclusions"]
 
 
+@pytest.mark.generated_artifact
 def test_committed_test_telemetry_baseline_respects_freshness_guard() -> None:
     payload = _load_baseline()
     refreshed_at = datetime.fromisoformat(payload["refreshed_at_utc"])
@@ -121,6 +123,7 @@ def test_committed_test_telemetry_baseline_respects_freshness_guard() -> None:
     )
 
 
+@pytest.mark.generated_artifact
 def test_committed_test_telemetry_branch_accurate_source_identity() -> None:
     """Fail closed when branch-accurate telemetry provenance drifts (#5729)."""
     payload = _load_baseline()
@@ -172,6 +175,7 @@ def test_testing_docs_distinguish_authoritative_baseline_from_historical_rollup(
     assert "update_test_telemetry_baseline" in baseline_doc
 
 
+@pytest.mark.generated_artifact
 def test_branch_consumable_test_telemetry_reports_match_committed_baseline() -> None:
     payload = _load_baseline()
     slowest = json.loads(
@@ -208,6 +212,7 @@ def test_branch_consumable_test_telemetry_reports_match_committed_baseline() -> 
     assert "Top Slow Zones" in slowest_md
 
 
+@pytest.mark.generated_artifact
 def test_slow_governance_cache_probe_is_captured_and_isolated() -> None:
     payload = _load_baseline()
     probe = payload["slow_governance_cache_probe"]
@@ -245,6 +250,7 @@ def _module_path_from_telemetry_node(node_id: str) -> Path | None:
     return candidate if candidate.exists() else None
 
 
+@pytest.mark.generated_artifact
 def test_duration_telemetry_top_list_only_references_existing_test_modules() -> None:
     """Stale rankings must not advertise deleted or renamed test modules."""
     payload = _load_baseline()
@@ -262,6 +268,7 @@ def test_duration_telemetry_top_list_only_references_existing_test_modules() -> 
     )
 
 
+@pytest.mark.generated_artifact
 def test_duration_telemetry_execution_context_accounts_for_lane_exclusions() -> None:
     """Full-suite telemetry must either cover lanes or list explicit exclusions."""
     payload = _load_baseline()

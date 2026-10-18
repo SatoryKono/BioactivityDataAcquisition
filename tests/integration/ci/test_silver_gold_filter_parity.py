@@ -48,6 +48,7 @@ def _fixture_scenario() -> dict[str, object]:
     return deepcopy(scenarios[0])
 
 
+@pytest.mark.generated_artifact
 def test_silver_gold_filter_parity_report_matches_golden_fixture() -> None:
     generated = build_silver_gold_parity_report()
     committed = load_silver_gold_parity_report()
@@ -102,6 +103,7 @@ def test_silver_gold_filter_parity_cli_check_round_trip(tmp_path: Path) -> None:
     )
 
 
+@pytest.mark.generated_artifact
 def test_silver_gold_filter_parity_script_path_entry_point() -> None:
     result = subprocess.run(
         [
@@ -160,6 +162,7 @@ def test_silver_gold_filter_parity_rejects_source_profile_drift() -> None:
     assert report["checks"]["same_source_profile"] is False
 
 
+@pytest.mark.generated_artifact
 def test_silver_gold_filter_parity_public_builder_uses_default_fixture() -> None:
     assert (
         build_parity_report(SILVER_GOLD_PARITY_FIXTURE)
@@ -168,6 +171,7 @@ def test_silver_gold_filter_parity_public_builder_uses_default_fixture() -> None
     assert SILVER_GOLD_PARITY_REPORT.name == "silver-gold-filter-parity-report.json"
 
 
+@pytest.mark.generated_artifact
 def test_silver_gold_filter_parity_scenarios_link_to_gold_contract_matrix() -> None:
     matrix = json.loads(CONTRACT_COVERAGE_MATRIX.read_text(encoding="utf-8"))
     rows = {

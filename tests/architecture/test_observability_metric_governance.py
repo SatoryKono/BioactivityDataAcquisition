@@ -568,6 +568,7 @@ def test_runtime_cardinality_allowlist_entries_require_metadata() -> None:
         seen_metrics.add(metric)
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_runtime_cardinality_evidence_artifact_is_committed_and_governed() -> None:
     """Replayable cardinality evidence artifact must stay materialized."""
@@ -655,6 +656,7 @@ def test_runtime_cardinality_evidence_artifact_is_committed_and_governed() -> No
     )
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_runtime_cardinality_live_review_artifact_is_release_grade() -> None:
     """Release cardinality review evidence must not rely on local fallback."""

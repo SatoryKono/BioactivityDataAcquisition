@@ -138,6 +138,7 @@ def test_issues_6159_6169_closeout_scope_is_explicit() -> None:
         assert (ROOT / evidence_path).exists(), evidence_path
 
 
+@pytest.mark.generated_artifact
 def test_issue_6162_compatibility_facades_are_frozen_without_drift() -> None:
     outcome = _outcome("6162")
     summary = _load_json(COMPATIBILITY_CENSUS)["summary"]
@@ -155,6 +156,7 @@ def test_issue_6162_compatibility_facades_are_frozen_without_drift() -> None:
     assert summary["retained_public_export_facades_with_wrapper_contract_drift"] == 0
 
 
+@pytest.mark.generated_artifact
 def test_issue_6163_data_quality_service_hotspot_is_reduced() -> None:
     outcome = _outcome("6163")
     service_source = DQ_SERVICE.read_text(encoding="utf-8")
@@ -215,6 +217,7 @@ def test_issue_6163_data_quality_service_hotspot_is_reduced() -> None:
     )
 
 
+@pytest.mark.generated_artifact
 def test_issue_6164_replay_sensitive_coverage_floors_are_100_percent() -> None:
     outcome = _outcome("6164")
     policy = _load_yaml(COVERAGE_GATES)["replay_sensitive_coverage_floors"]
@@ -235,6 +238,7 @@ def test_issue_6164_replay_sensitive_coverage_floors_are_100_percent() -> None:
             assert (ROOT / str(owner_test)).exists()
 
 
+@pytest.mark.generated_artifact
 def test_issue_6165_dead_code_zero_import_candidates_are_triaged() -> None:
     outcome = _outcome("6165")
     inventory = _load_json(DEAD_CODE_INVENTORY)
@@ -258,6 +262,7 @@ def test_issue_6165_dead_code_zero_import_candidates_are_triaged() -> None:
         assert row["owner_test_count"] >= 1
 
 
+@pytest.mark.generated_artifact
 def test_issue_6166_config_contract_drift_is_zero() -> None:
     outcome = _outcome("6166")
     config_metrics = _load_json(CONFIG_DISCREPANCY)["metrics"]
@@ -291,6 +296,7 @@ def test_issue_6166_config_contract_drift_is_zero() -> None:
     assert {row["coverage_status"] for row in ownership["rows"]} == {"covered"}
 
 
+@pytest.mark.generated_artifact
 def test_issue_6169_script_governance_ratchet_has_headroom() -> None:
     outcome = _outcome("6169")
     manifest = _load_json(SCRIPTS_MANIFEST)

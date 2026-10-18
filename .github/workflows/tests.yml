@@ -6,6 +6,11 @@ permissions:
 
 on:
   workflow_call:
+    inputs:
+      generated-artifacts:
+        description: Run committed generated-evidence checks in the scheduled daily caller
+        type: boolean
+        default: false
 # Workflow-level token is read-only; jobs may only narrow this further.
 
 concurrency:
@@ -13,6 +18,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
+  BIOETL_ARTIFACT_TEST_SELECTION: ${{ inputs.generated-artifacts && 'all' || 'ci' }}
   # Use CI hypothesis profile for faster property-based tests (10 examples instead of 50)
   HYPOTHESIS_PROFILE: ci
   # Optimize Python for CI
@@ -167,12 +173,14 @@ jobs:
         run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming
 
       - name: Validate full VCR metadata inventory
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check
 
       - name: Validate VCR metadata stale-age policy
         run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90
 
       - name: Validate VCR metadata catalog
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-vcr-metadata --check
 
   control-plane-e2e:
@@ -403,8 +411,8 @@ jobs:
       - name: Validate scripts inventory + lifecycle governance
         run: |
           uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \
-            --check \
             --manifest configs/quality/scripts_inventory_manifest.json \
+            --deprecation-report reports/ci/scripts-lifecycle-backlog.md \
             --check-lifecycle \
             --forbid-evaluate-active \
             --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
@@ -416,6 +424,7 @@ jobs:
         run: uv run --frozen --no-build python scripts/engineering/qa/check_test_audit_preflight.py --strict
 
       - name: Validate committed test-governance snapshots
+        if: inputs.generated-artifacts
         run: |
           uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit \
             --check \
@@ -423,30 +432,38 @@ jobs:
             --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
 
       - name: Validate flaky-test burndown review evidence
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-flaky-test-burndown-review --check
 
       - name: Validate config/contract/registry artifact duplication audit
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-artifact-duplication-audit --check
 
       - name: Validate deterministic Neo4j memory ontology invariants
         run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory
 
       - name: Validate hotspot-family baseline artifacts
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-family-baseline --check
 
       - name: Validate contract coverage matrix artifact
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-contract-coverage-matrix --check
 
       - name: Validate Domain I/O taint inventory artifact
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-domain-io-taint-inventory --check
 
       - name: Validate port-adapter-factory coverage map artifact
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-port-adapter-factory-coverage --check
 
       - name: Validate domain aggregate invariant registry
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build pytest tests/architecture/test_domain_aggregate_invariant_registry.py -q --tb=short
 
       - name: Validate compatibility importer census artifacts
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-compatibility-importer-census --check
 
       - name: Validate technical-debt freeze ratchets
@@ -460,12 +477,15 @@ jobs:
             -q --tb=short
 
       - name: Validate dead-code inventory artifacts
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-dead-code-inventory --check
 
       - name: Validate config discrepancy baseline artifacts
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.schema generate-config-matrix --check
 
       - name: Validate Silver/Gold filter parity artifact
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python scripts/data_quality/run_silver_gold_filter_parity.py --check
 
       - name: Validate xwalk missing backlog
@@ -478,9 +498,11 @@ jobs:
         run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming --check
 
       - name: Validate ADR enforcement matrix artifacts
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-adr-enforcement-matrix --check
 
       - name: Validate remote-main architecture debt baseline
+        if: inputs.generated-artifacts
         run: |
           git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
           uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
@@ -652,12 +674,15 @@ jobs:
         run: uv run --frozen --no-build python -m scripts.schema audit-optionality --check
 
       - name: Check matrix structural contract export freshness (blocking)
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.docs export-matrix-structural-contract --check
 
       - name: Check generated config schemas are up to date
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.schema generate-pipeline --check
 
       - name: Check architecture dependency docs drift
+        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check
 
       - name: Check docs drift (forbidden patterns)
@@ -1909,7 +1934,7 @@ jobs:
           set +e
           mkdir -p "reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream"
           log="reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream/docs-runtime.log"
-          uv run --frozen --no-build python -m scripts.docs verify --skip-build > "$log" 2>&1
+          uv run --frozen --no-build python -m scripts.docs verify --skip-build --defer-generated-artifacts > "$log" 2>&1
           verify_rc=$?
           bash scripts/ai/junie/check_junie_mirror.sh --check >> "$log" 2>&1
           mirror_rc=$?
@@ -2004,7 +2029,7 @@ jobs:
           fi
           capture_receipt \
             docs_runtime_checks docs_runtime \
-            "python -m scripts.docs verify --skip-build" \
+            "python -m scripts.docs verify --skip-build --defer-generated-artifacts" \
             "$docs_result" "$docs_path"
 
       - name: Assemble and verify the closeout bundle

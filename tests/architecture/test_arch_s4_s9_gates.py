@@ -98,6 +98,7 @@ def test_s4_composition_dynamic_imports_are_frozen() -> None:
     )
 
 
+@pytest.mark.generated_artifact
 def test_s6_source_tree_manifest_is_the_pinned_sha() -> None:
     # build_manifest() hashes the whole source tree; hash once and reuse
     # `live` so the test stays within the 60s per-test timeout.
@@ -230,6 +231,7 @@ def test_s7_package_cohesion_budgets_are_not_exceeded() -> None:
         assert loc <= int(row["max_package_loc"]), row["path"]
 
 
+@pytest.mark.generated_artifact
 def test_s8_domain_framework_import_ratchet() -> None:
     config = yaml.safe_load(
         (ROOT / "configs/quality/domain_dataframe_zoning.yaml").read_text(
@@ -271,6 +273,7 @@ def test_s8_domain_framework_import_ratchet() -> None:
     assert f"`{status['partially_covered']}` partially covered" in doc
 
 
+@pytest.mark.generated_artifact
 def test_s9_assertless_ratchet_and_expiry_dispersion() -> None:
     assertless = yaml.safe_load(
         (ROOT / "configs/quality/assertless_ratchet.yaml").read_text(encoding="utf-8")

@@ -91,6 +91,7 @@ def test_domain_top_level_root_modules_are_exactly_classified() -> None:
     assert classified == _top_level_domain_module_paths()
 
 
+@pytest.mark.generated_artifact
 def test_true_aggregates_match_invariant_registry() -> None:
     classification = _load_yaml(CLASSIFICATION_PATH)
     registry = _load_json(REGISTRY_PATH)
@@ -135,6 +136,7 @@ def test_non_aggregate_classifications_do_not_overlap_aggregate_package() -> Non
     assert len(non_aggregate_paths) == len(set(non_aggregate_paths))
 
 
+@pytest.mark.generated_artifact
 def test_retired_batch_split_modules_are_absent() -> None:
     """ADR-059 facade must not keep deleted Batch split-module paths (#9642)."""
     aggregates = DOMAIN_ROOT / "aggregates"
