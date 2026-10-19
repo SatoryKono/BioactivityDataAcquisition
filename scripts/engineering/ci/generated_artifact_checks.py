@@ -125,6 +125,9 @@ def ci_pytest_arguments(argv: list[str]) -> list[str]:
             raise ValueError("Targets must be repository-relative paths under tests/")
         if any(ord(char) < 32 for char in target):
             raise ValueError("Control characters are not allowed in targets")
+        # Reject before symlink or existence probes. Names containing |, > or <
+        # are illegal on Windows, so the check must not touch the filesystem.
+        ensure_safe_cli_argv([target])
         _reject_symlinks(root / path, root)
         if not (root / path).exists():
             raise ValueError(f"Test target does not exist: {file_part}")

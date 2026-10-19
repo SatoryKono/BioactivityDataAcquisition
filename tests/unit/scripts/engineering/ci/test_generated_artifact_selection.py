@@ -13,6 +13,7 @@ import pytest
 import yaml
 
 from scripts.engineering.ci.generated_artifact_checks import proven_deferral
+from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 from scripts.engineering.dev.pytest_artifact_selection import (
     ROOT,
     load_manifest,
@@ -220,6 +221,25 @@ def test_real_pytest_partition_and_daily_missing_node_fail_closed(
     result, report = run("ci", "tests")
     assert result.returncode != 0
     assert not proven_deferral(report, result.returncode, {node})
+
+
+def test_committed_generated_artifact_commands_pass_argv_guard() -> None:
+    from scripts.engineering.ci import generated_artifact_checks as checks
+
+    manifest = load_manifest()
+    validate_selectors(manifest)
+    files = sorted({row["node"].split("::", 1)[0] for row in manifest["tests"]})
+    command = checks._pytest_command(
+        "daily",
+        ["-n", "0", "-q", "--tb=short", "--", *files],
+    )
+    assert "--artifact-selection=daily" in command
+    assert all(path in command for path in files)
+    for row in manifest["validators"]:
+        if row["owner"] == "generated-artifact-daily":
+            safe = ensure_safe_cli_argv([sys.executable, *row["argv"]])
+            assert safe[0] == sys.executable
+            assert safe[1:] == row["argv"]
 
 
 def test_real_daily_caller_and_command_partition_are_complete() -> None:
@@ -592,27 +612,38 @@ def test_runner_rejects_pytest_option_injection_before_deleting_report(
 
 
 @pytest.mark.parametrize("token", [";", "|", "&", ">", "<", "`", "$"])
-def test_runner_rejects_shell_metacharacters_before_deleting_report(
+def test_runner_rejects_shell_metacharacters_without_creating_targets(
     tmp_path, monkeypatch, token
 ):
     from scripts.engineering.ci import generated_artifact_checks as checks
 
     monkeypatch.setattr(checks, "ROOT", tmp_path)
-    tests = tmp_path / "tests"
-    tests.mkdir()
-    target_path = tests / f"bad{token}name.py"
-    target_path.write_text("")
+    (tmp_path / "tests").mkdir()
     report = tmp_path / "reports/quality/affected-test-partition.json"
     report.parent.mkdir(parents=True)
     report.write_text("old proof")
+    unsafe_name = f"bad{token}name.py"
+
+    def reject_unsafe(method):
+        def wrapped(self, *args, **kwargs):
+            if self.name == unsafe_name:
+                raise AssertionError(f"filesystem probe of unsafe target: {self.name}")
+            return method(self, *args, **kwargs)
+
+        return wrapped
+
+    monkeypatch.setattr(Path, "exists", reject_unsafe(Path.exists))
+    monkeypatch.setattr(Path, "is_symlink", reject_unsafe(Path.is_symlink))
+    monkeypatch.setattr(Path, "resolve", reject_unsafe(Path.resolve))
     monkeypatch.setattr(
         checks.subprocess,
         "run",
         lambda *a, **k: pytest.fail("metacharacter command executed"),
     )
     with pytest.raises(SystemExit):
-        checks.main(["ci", "--report", str(report), "--", f"tests/bad{token}name.py"])
+        checks.main(["ci", "--report", str(report), "--", f"tests/{unsafe_name}"])
     assert report.read_text() == "old proof"
+    assert list((tmp_path / "tests").iterdir()) == []
 
 
 def test_runner_keeps_targets_and_exit_codes_with_fixed_options(tmp_path, monkeypatch):
