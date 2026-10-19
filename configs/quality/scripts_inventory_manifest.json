@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-19T07:19:19.447013+00:00",
+  "generated_at": "2026-10-19T11:22:57.074158+00:00",
   "summary": {
-    "total_scripts": 652,
+    "total_scripts": 654,
     "status_counts": {
       "active": 334,
-      "supporting": 318
+      "supporting": 320
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -13,9 +13,9 @@
       "ci": 73,
       "docs": 283,
       "other": 16,
-      "scripts": 548,
+      "scripts": 549,
       "skills": 13,
-      "tests": 472
+      "tests": 475
     }
   },
   "scripts": [
@@ -10515,7 +10515,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
@@ -10546,6 +10546,12 @@
           "line": 647,
           "source_group": "tests",
           "text": "[\"scripts/engineering/ci/pytest_abort_diagnostic_adapter.py\"],"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_pytest_abort_diagnostic_adapter.py",
+          "line": 830,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci import pytest_abort_diagnostic_adapter as owner"
         }
       ],
       "owner": "@bioetl-platform",
@@ -11340,7 +11346,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 290,
+      "reference_count": 296,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -11666,7 +11672,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/run_pytest.ps1",
-          "line": 299,
+          "line": 305,
           "source_group": "scripts",
           "text": "$PreflightScript = Join-Path $ScriptDir \"pretest_guardrails.ps1\""
         }
@@ -12112,7 +12118,7 @@
         "CODEX-RUNTIME",
         "py-test-bot"
       ],
-      "reference_count": 66,
+      "reference_count": 67,
       "references": [
         {
           "path": ".codex/agents/CODEX-RUNTIME.md",
@@ -13236,6 +13242,25 @@
       ]
     },
     {
+      "path": "scripts/engineering/performance/measure_merger_input.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/performance/test_measure_merger_input.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "from scripts.engineering.performance import measure_merger_input as harness"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as a bounded Linux operator probe of the eager Silver input path. Keep it supporting so the active script cap stays flat; do not promote it to a product entrypoint."
+    },
+    {
       "path": "scripts/engineering/qa/__main__.py",
       "type": "py",
       "status": "active",
@@ -13335,6 +13360,67 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-11-05",
       "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
+    },
+    {
+      "path": "scripts/engineering/qa/_tracked_glob.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 11,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/check_semantic_pair_matrix_budget.py",
+          "line": 45,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa._tracked_glob import tracked_files"
+        },
+        {
+          "path": "scripts/engineering/qa/observability_metric_inventory_report.py",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa._tracked_glob import tracked_files"
+        },
+        {
+          "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa._tracked_glob import ("
+        },
+        {
+          "path": "scripts/engineering/qa/report_architecture_suite_burndown.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa._tracked_glob import tracked_files"
+        },
+        {
+          "path": "scripts/engineering/qa/report_artifact_duplication_audit.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa._tracked_glob import tracked_files"
+        },
+        {
+          "path": "scripts/engineering/qa/report_basedpyright_suppression_inventory.py",
+          "line": 34,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa._tracked_glob import _find_repo_root, tracked_files"
+        },
+        {
+          "path": "tests/architecture/test_adr_enforcement_matrix.py",
+          "line": 20,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa._tracked_glob import git_discovery_environment"
+        },
+        {
+          "path": "tests/architecture/test_artifact_duplication_audit.py",
+          "line": 21,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa._tracked_glob import git_discovery_environment"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the imported Git-index discovery helper shared by QA collectors. It has no standalone CLI; keep execution routed through the owning collector entrypoints."
     },
     {
       "path": "scripts/engineering/qa/analyze_duplicate_functions.py",
@@ -13628,7 +13714,7 @@
         },
         {
           "path": "tests/architecture/test_adr_enforcement_matrix.py",
-          "line": 95,
+          "line": 97,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/check_dashboard_visual_semantics.py\","
         },
@@ -14082,7 +14168,7 @@
         },
         {
           "path": "tests/integration/config/test_semantic_pair_matrix_budget.py",
-          "line": 24,
+          "line": 25,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_semantic_pair_matrix_budget import ("
         }
@@ -14115,7 +14201,7 @@
         },
         {
           "path": "tests/integration/config/test_semantic_pair_matrix_budget.py",
-          "line": 28,
+          "line": 29,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_semantic_registry_drift import ("
         },
@@ -15097,7 +15183,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 19,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -15131,7 +15217,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 293,
+          "line": 300,
           "source_group": "scripts",
           "text": "`generate_hotspot_degradation_report.py` performance-evidence owner. It has a"
         },
@@ -15143,7 +15229,7 @@
         },
         {
           "path": "tests/architecture/test_pytest_benchmark_caller_contract.py",
-          "line": 932,
+          "line": 937,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_hotspot_degradation_report import ("
         }
@@ -15542,7 +15628,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_cli.py",
@@ -15561,6 +15647,12 @@
           "line": 212,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.observability_metric_inventory_report import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/qa/test_tracked_glob.py",
+          "line": 292,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import observability_metric_inventory_report as report"
         }
       ],
       "owner": "@bioetl-observability",
@@ -15663,7 +15755,7 @@
         },
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_report.py",
-          "line": 26,
+          "line": 27,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_shared import ("
         },
@@ -15912,19 +16004,19 @@
         },
         {
           "path": "tests/architecture/test_adr_enforcement_matrix.py",
-          "line": 20,
+          "line": 22,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import report_adr_enforcement_matrix as adr_matrix"
         },
         {
           "path": "tests/architecture/test_adr_enforcement_matrix.py",
-          "line": 21,
+          "line": 23,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_adr_enforcement_matrix import build_payload"
         },
         {
           "path": "tests/architecture/test_adr_enforcement_matrix.py",
-          "line": 127,
+          "line": 129,
           "source_group": "tests",
           "text": "\"  python -m scripts.engineering.qa.report_adr_enforcement_matrix --update\","
         },
@@ -16072,19 +16164,19 @@
         },
         {
           "path": "tests/architecture/test_artifact_duplication_audit.py",
-          "line": 23,
+          "line": 25,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_artifact_duplication_audit import ("
         },
         {
           "path": "tests/architecture/test_artifact_duplication_audit.py",
-          "line": 72,
+          "line": 97,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_artifact_duplication_audit.py\""
         },
         {
           "path": "tests/unit/scripts/test_report_artifact_duplication_audit.py",
-          "line": 19,
+          "line": 22,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_artifact_duplication_audit import ("
         }
@@ -16099,7 +16191,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/BASEDPRIGHT_PROJECT_DIAGNOSTICS.md",
@@ -16112,6 +16204,18 @@
           "line": 163,
           "source_group": "docs",
           "text": "- `report_basedpyright_suppression_inventory.py` - Generate basedpyright suppression inventory"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/qa/test_tracked_glob.py",
+          "line": 44,
+          "source_group": "tests",
+          "text": "/ \"scripts/engineering/qa/report_basedpyright_suppression_inventory.py\""
+        },
+        {
+          "path": "tests/unit/scripts/engineering/qa/test_tracked_glob.py",
+          "line": 279,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.report_basedpyright_suppression_inventory import collect"
         }
       ],
       "owner": "@bioetl-platform",
@@ -20490,19 +20594,19 @@
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 615,
+          "line": 628,
           "source_group": "scripts",
           "text": "if [[ \"${BIOETL_SKIP_PREFLIGHT:-0}\" != \"1\" && \"${BIOETL_SKIP_SETUP_PLUGINS:-0}\" != \"1\" && -f \"scripts/ops/launchers/codex/setup_plugins.sh\" ]]; then"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 616,
+          "line": 629,
           "source_group": "scripts",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 620,
+          "line": 633,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
         },
