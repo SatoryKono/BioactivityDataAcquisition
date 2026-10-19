@@ -189,16 +189,7 @@
       ],
       "conflict_resolution": "seed_priority",
       "exclude_fields": [],
-      "output": {
-        "gold": "data/output/gold/composite/molecule",
-        "silver": "data/output/silver/composite/molecule"
-      },
-      "preserve_all_sources": true,
-      "sort_by": {
-        "gold": [
-          "entity_id",
-          "molecule_id"
-        ],
+      "field_priorities": {
         "pii": [
           "pubmed"
         ],
@@ -238,10 +229,6 @@
         "references": [
           "crossref"
         ],
-        "silver": [
-          "entity_id",
-          "molecule_id"
-        ],
         "subject_fields": [
           "semanticscholar"
         ],
@@ -271,6 +258,21 @@
           "chembl",
           "crossref",
           "openalex"
+        ]
+      },
+      "output": {
+        "gold": "data/output/gold/composite/molecule",
+        "silver": "data/output/silver/composite/molecule"
+      },
+      "preserve_all_sources": true,
+      "sort_by": {
+        "gold": [
+          "entity_id",
+          "molecule_id"
+        ],
+        "silver": [
+          "entity_id",
+          "molecule_id"
         ]
       },
       "strategy": "left_outer"
@@ -401,8 +403,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.1.0",
-    "semantic_content_hash": "sha256:dfecae3285dd9ef27db73d6b02144f048ba387b3fc51d9591db3a079490216a8",
-    "source_revision": "sha256:dd465c828cf0a66accac266f54f813c14a59ac360de49ed2341e62411ba53f35"
+    "semantic_content_hash": "sha256:35a4d1a56cb89a74fc47523f38a5ce7c389ba79857d0ee81b2648dd56c6e723a",
+    "source_revision": "sha256:f819ff129268d5118075b9a9afc3e6f6d6c1ce6cf3974501f2252667f72885a9"
   },
   "silver": {
     "dq_execution": {

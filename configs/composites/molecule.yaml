@@ -111,14 +111,10 @@ composite:
     output:
       silver: data/output/silver/composite/molecule
       gold: data/output/gold/composite/molecule
-    sort_by:
-      silver:
-      - entity_id
-      - molecule_id
-      gold:
-      - entity_id
-      - molecule_id
-
+    # Field-level priority overrides (when using explicit_rules)
+    # Maps field name to ordered list of source preferences
+    # NOTE: Currently conflict_resolution is seed_priority so these are ignored.
+    field_priorities:
     # -------------------------------------------------------------------------
     # Column Ordering by Semantic Categories
     # -------------------------------------------------------------------------
@@ -127,24 +123,19 @@ composite:
     # that would otherwise fall into the "remaining" bucket at the end.
       pii:
       - pubmed                   # PubMed Publisher Item Identifier
-
       primary_component_id:
       - chembl    # Seed primary_component_id is authoritative
       primary_topic:
       - openalex                 # OpenAlex-unique field
-
       publication_class:
       - chembl
       - pubmed
       - openalex
       - crossref
       - semanticscholar
-
             # === Author Metadata ===
-
       publication_id:
       - chembl.activity       # Activity document reference is primary
-
       publication_subclass:
       - chembl
       - pubmed
@@ -159,43 +150,42 @@ composite:
       - semanticscholar
       publisher_id:
       - pubmed                   # PubMed publisher-specific ID
-
       references:
       - crossref                 # CrossRef-unique cited references
-
       subject_fields:
       - semanticscholar            # S2-unique field
-
       subject_keywords:
       - crossref                 # CrossRef subjects -> subject_keywords
-
       - openalex
       - pubmed
       - semanticscholar
       subject_mesh:
       - pubmed                   # PubMed MeSH is authoritative
-
       - openalex                 # OpenAlex MeSH extraction (fallback)
-
       subject_topics:
       - openalex                 # OpenAlex hierarchical topics
-
       target_id:
       - chembl    # Seed is authoritative for PK
       taxonomy_id:
       - chembl    # ChEMBL taxonomy_id takes priority over UniProt
       tissue_id:
       - chembl.assay
-
     # Field renaming for conflicts
       title:
       - chembl                   # ChEMBL title is authoritative
-
       - crossref
       - openalex
     # -------------------------------------------------------------------------
     # Column Ordering by Canonical Categories
     # -------------------------------------------------------------------------
+    sort_by:
+      silver:
+      - entity_id
+      - molecule_id
+      gold:
+      - entity_id
+      - molecule_id
+
     column_groups:
       # === System / ETL metadata (MUST be first) ===
     - name: system

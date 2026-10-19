@@ -753,6 +753,53 @@ def test_remote_main_baseline_stale_check_ignores_revision_metadata_only(
     )
 
 
+def test_remote_main_baseline_stale_when_live_tracking_ref_mismatches(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    baseline_dir = tmp_path / "reports" / "quality"
+    baseline_dir.mkdir(parents=True)
+    committed = {
+        "schema_version": 1,
+        "generated_by": "scripts.engineering.qa.report_architecture_debt_remote_main_baseline",
+        "evidence_source": "remote_main_git_tree",
+        "remote": "origin",
+        "branch": "main",
+        "remote_main_ref": "refs/heads/main",
+        "remote_main_sha": "same",
+        "local_tracking_ref": "origin/main",
+        "local_tracking_ref_sha": "same",
+        "local_tracking_ref_matches_remote": True,
+        "generator_commands": [
+            "python -m scripts.engineering.qa report-module-coverage --check"
+        ],
+        "artifacts": [
+            {
+                "path": "reports/quality/module-coverage-inventory.json",
+                "source_revision": "same",
+                "blob_sha256": "same-blob",
+                "required": True,
+                "summary": {"available": True, "source_tree_sha256": "same-source"},
+            }
+        ],
+    }
+    live = {**committed, "local_tracking_ref_matches_remote": False}
+    (baseline_dir / "architecture-debt-remote-main-baseline.json").write_text(
+        json.dumps(committed),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        gates.report_architecture_debt_remote_main_baseline,
+        "build_payload",
+        lambda **kwargs: live,
+    )
+
+    assert (
+        gates._remote_main_baseline_artifact_matches_builder(repo_root=tmp_path)
+        is False
+    )
+
+
 def test_render_markdown_separates_weighted_score_from_release_gate_status() -> None:
     payload = {
         "summary": {

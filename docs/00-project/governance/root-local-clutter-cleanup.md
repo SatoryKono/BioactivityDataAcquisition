@@ -39,7 +39,7 @@ inventing new allowlist entries.
    - `.coverage`, root `logs/`, `tmp/`, `test-output/`, `caddy/`, `.tmp_fix/`
    - `_tmp_*.py`, `/_cr_*.py`, `/_publish_*.py`, `_fail_*.txt`, `_a.txt`
    - `temp_closeout.json`, `.tmp_*`, `.tmp_test_run.log`, `mcp-shell.log`
-   - `bash.exe.stackdump`, `nul` / `NUL` (Windows pseudo-file)
+   - `bash.exe.stackdump`, `du.exe.stackdump`, `.tmp_health_check.ps1`, `nul` / `NUL` (Windows pseudo-file)
    - empty exact-root `.worktrees/` (strict-untracked rejects it; non-empty trees hold active worktrees — do not recursive-delete)
    - `arch_fail_report.txt` / other root `*report*.txt`
    - `.gitignore~`
@@ -102,7 +102,8 @@ when no active process depends on them:
 | `uchunk*.xml`, `final_chunk*.xml` | Accidental JUnit / pytest XML dumps |
 | `pytest_*.log`, `mcp-shell.log`, `*.log` at root | Local test/agent logs (also `*.log` gitignored) |
 | `tmp_sub_*.txt`, `temp_closeout.json`, `.tmp_*`, `_tmp_*.py`, `/_cr_*.py`, `/_publish_*.py`, `_fail_*.txt`, `_a.txt` | Agent / accidental scratch files |
-| `bash.exe.stackdump` | MSYS/Cygwin crash dump |
+| `bash.exe.stackdump`, `du.exe.stackdump` | MSYS/Cygwin crash dumps |
+| `.tmp_health_check.ps1` | Transient root health-check helper; exact-name cleanup candidate |
 | `arch_fail_report.txt`, `*report*.txt` at root | Local architecture/test report dumps |
 | `.gitignore~` | Editor backup; `.gitignore` is the tracked source of truth |
 | `.coverage`, `.pytest_cache/`, `.mypy_cache/`, `.ruff_cache/`, `.hypothesis/` | Tool caches |

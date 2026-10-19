@@ -307,12 +307,7 @@
         "uniprot.protein.organism_scientific",
         "uniprot.protein.organism_common"
       ],
-      "output": {
-        "gold": "data/output/gold/composite/target",
-        "silver": "data/output/silver/composite/target"
-      },
-      "preserve_all_sources": false,
-      "sort_by": {
+      "field_priorities": {
         "abstract": [
           "pubmed",
           "openalex",
@@ -389,10 +384,6 @@
         ],
         "gene_symbols": [
           "pubmed"
-        ],
-        "gold": [
-          "entity_id",
-          "target_id"
         ],
         "grants": [
           "openalex"
@@ -516,10 +507,6 @@
           "pubchem",
           "chembl"
         ],
-        "silver": [
-          "entity_id",
-          "target_id"
-        ],
         "subject_fields": [
           "semanticscholar"
         ],
@@ -553,6 +540,21 @@
         ],
         "withdrawn_flag": [
           "chembl"
+        ]
+      },
+      "output": {
+        "gold": "data/output/gold/composite/target",
+        "silver": "data/output/silver/composite/target"
+      },
+      "preserve_all_sources": false,
+      "sort_by": {
+        "gold": [
+          "entity_id",
+          "target_id"
+        ],
+        "silver": [
+          "entity_id",
+          "target_id"
         ]
       },
       "strategy": "left_outer",
@@ -722,8 +724,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.1.0",
-    "semantic_content_hash": "sha256:9899e26e84e1fb808d5d90c9c18171b0216015c4bc80dfba87ae077cc456c998",
-    "source_revision": "sha256:dd465c828cf0a66accac266f54f813c14a59ac360de49ed2341e62411ba53f35"
+    "semantic_content_hash": "sha256:7c4a287105db620409f0f30feacfb269f2936f8016f835288ab883a3f8951c4d",
+    "source_revision": "sha256:f819ff129268d5118075b9a9afc3e6f6d6c1ce6cf3974501f2252667f72885a9"
   },
   "silver": {
     "dq_execution": {

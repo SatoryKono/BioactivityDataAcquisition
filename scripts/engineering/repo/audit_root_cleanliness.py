@@ -64,10 +64,12 @@ FORBIDDEN_TRACKED_ROOT_FILES: frozenset[str] = frozenset(
 )
 FORBIDDEN_LOCAL_ROOT_FILES: frozenset[str] = frozenset(
     {
+        ".tmp_health_check.ps1",
         ".xml",
         "_tmp_panel_inventory.mjs",
         "_tmp_panel_inventory.ps1",
         "coverage.xml",
+        "du.exe.stackdump",
         "mcp-shell.log",
         "NUL",
         "nul",
