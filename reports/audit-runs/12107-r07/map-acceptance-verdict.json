@@ -76,7 +76,7 @@
     },
     {
       "criterion": "bounded runtime smoke is not treated as a complete AST-only universe",
-      "evidence": "AST plus bounded load_providers/list_pipeline_names/__all__ getattr smoke. Complete structural matches require a non-common member and, for private or non-port protocols, the same directory. Not a proof that every config-driven or entry-point load was executed. One test path is not behavioral conformance. Owners are not inferred from CODEOWNERS.",
+      "evidence": "AST plus bounded load_providers/list_pipeline_names/__all__ getattr smoke. Complete structural matches require a non-common member and, for private or non-port protocols, the same directory. Not a proof that every config-driven or entry-point load was executed. One test path is not behavioral conformance. Owners are not inferred from CODEOWNERS. Same-file name uses outside a definition count as references.",
       "verdict": "PASS"
     },
     {
@@ -97,8 +97,8 @@
         "classified_coverage_pct": 100.0,
         "owner_coverage_pct": 0.0,
         "verdict_histogram": {
-          "NOT_VERIFIABLE": 2022,
-          "UNREACHABLE": 10,
+          "NOT_VERIFIABLE": 2031,
+          "UNREACHABLE": 1,
           "VERIFIED": 14
         }
       },
@@ -111,7 +111,7 @@
         "defect_count_meaning": "The promotion rule did not fire. The count is not a claim that unchecked rows have no defects.",
         "no_conformance_assert": 192,
         "unassigned_owners": 2046,
-        "unreachable": 10
+        "unreachable": 1
       },
       "verdict": "PASS"
     },
@@ -136,7 +136,7 @@
       "verdict": "PASS"
     }
   ],
-  "frozen_map_sha256": "6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c",
+  "frozen_map_sha256": "44ce5e1207bcd9b1287427f925e0a4bf789c1547dc1ac2df15271fc0c986db55",
   "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12107",
   "issue_close_performed": false,
   "map_source_pin": {

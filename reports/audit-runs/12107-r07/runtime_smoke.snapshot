@@ -118,7 +118,11 @@ def main() -> int:
     except Exception as exc:  # noqa: BLE001 - smoke records the failure
         errors.append(_error("getattr", exc))
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
-    return int(errors != [] or any(row["ok"] is False for row in result["getattr"]))
+    getattr_rows = result["getattr"]
+    getattr_failed = isinstance(getattr_rows, list) and any(
+        isinstance(row, dict) and row.get("ok") is not True for row in getattr_rows
+    )
+    return 1 if errors or getattr_failed else 0
 
 
 if __name__ == "__main__":

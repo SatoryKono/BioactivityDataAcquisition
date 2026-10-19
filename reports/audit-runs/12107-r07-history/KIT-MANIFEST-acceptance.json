@@ -4,14 +4,14 @@
   "commit_note": "Adds the delta review record. File hashes below exclude this manifest.",
   "files": [
     {
-      "bytes": 24646,
+      "bytes": 25114,
       "path": "reports/audit-runs/12107-r07/build_map_acceptance.snapshot",
-      "sha256": "f5d75d06255903396a0a9bc512a1c57eda0b1b31bafc659c080c0b965de43e3f"
+      "sha256": "50ad7fd303fc63cdb1b2aa71eb1edd4312c7b590ee108adc760ac55af952c51f"
     },
     {
-      "bytes": 6844,
+      "bytes": 6904,
       "path": "reports/audit-runs/12107-r07/map-acceptance-verdict.json",
-      "sha256": "cdf523c56915edecabfbd0ad9e74e936274ec8630f7cb960f6fd7cd137819f03"
+      "sha256": "a9d4f72ae0c415080b364803a149f6af69afd4565b670a58fe2af09869b6c630"
     },
     {
       "bytes": 2161,
@@ -24,9 +24,9 @@
       "sha256": "a31f45ef37b22f59a3394e24628f31f740b59d73010801a3111a747aac017cb3"
     },
     {
-      "bytes": 204832,
+      "bytes": 230611,
       "path": "reports/audit-runs/12107-r07/port-relationship-index.json",
-      "sha256": "d7bf3807eea9cd7c1806a7831fed6dd3c0d8705a2159eb1fd4b273089dba972b"
+      "sha256": "578960c01ea28732af2f0b087c7b83e4c88acc1ff91a01c2bced2faad722def9"
     },
     {
       "bytes": 1550,
@@ -54,29 +54,29 @@
       "sha256": "7f33f61af00f7b49df8a37991537fd56aba0eec99be57bb5346e9e1d2fcd5bda"
     },
     {
-      "bytes": 5313223,
+      "bytes": 5330715,
       "path": "reports/audit-runs/12107-r07/adapter-owner-map.json",
-      "sha256": "6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c"
+      "sha256": "44ce5e1207bcd9b1287427f925e0a4bf789c1547dc1ac2df15271fc0c986db55"
     },
     {
-      "bytes": 26587,
+      "bytes": 26982,
       "path": "reports/audit-runs/12107-r07/acceptance-review.json",
-      "sha256": "4396a3697fc46dfc5b11dea1a69b5bb94fa8452b4d323d926c8daa416f65f148"
+      "sha256": "2c2c261f983a4edce1acc2f5fcbe92eea03f3e7418433bbdb45abf9f399b3117"
     },
     {
-      "bytes": 59311,
+      "bytes": 60035,
       "path": "reports/audit-runs/12107-r07/scan_adapter_owner_map.snapshot",
-      "sha256": "3a559b3f8902b5718b9b99ff39d350b7c6b6cbdbf5953776aa46967bd0b3dcae"
+      "sha256": "3f16bc0ec7c179d7b728b2366d79786ac845bb44b0cef4aed9f1b80f7790bae3"
     },
     {
-      "bytes": 5301,
+      "bytes": 5478,
       "path": "reports/audit-runs/12107-r07-history/KIT-MANIFEST.json",
-      "sha256": "b55c9b66b5f1b37847f404fa97b10830cefd4df7630e936a7ebf930e8d47dbfc"
+      "sha256": "d128ef985e4b4a2caf6f552c3c96ab8fa61b176c12b29a3a40ec1da95ccc71d8"
     },
     {
-      "bytes": 4196,
+      "bytes": 4208,
       "path": "reports/audit-runs/12107-r07-history/KIT-MANIFEST-behavior.json",
-      "sha256": "25302d20e66942452074085df34c6a918950174500d69666c925a10f847879c2"
+      "sha256": "7708c4fcc0c7c0f0ec5f57311c4875c47e262c3c1618c49895456d97874b99ca"
     },
     {
       "bytes": 33677,
@@ -104,14 +104,14 @@
       "sha256": "ce06af108ee3a69d31cb5ac0adae71f3cce7036305b8e0bce3d103742efc6301"
     },
     {
-      "bytes": 53501,
+      "bytes": 53504,
       "path": "reports/audit-runs/12107-r07/r08-lifecycle-inventory.json",
-      "sha256": "275c10d5e5384a6cd049b66f7be2f301d91a976a40c6fb9bc64c00949af736a3"
+      "sha256": "6cac8039a59c91c987c0460cad17746458714aa58a67f20fdc8cb6447d319073"
     },
     {
-      "bytes": 144970,
+      "bytes": 144976,
       "path": "reports/audit-runs/12107-r07/r09-storage-surface-inventory.json",
-      "sha256": "41c231e6a1d4e4219dba227ab385429f170305684f28e47516689e49cd4324e1"
+      "sha256": "7e7791a657ff29f0ad5ce02e3129a9c5c7ac0d6a54aad51b49f1fe3e32129b7a"
     },
     {
       "bytes": 188,

@@ -169,7 +169,7 @@
       "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
       "path": "src/bioetl/application/runtime_clock.py",
       "symbol": "RuntimeClockService",
-      "verdict": "UNREACHABLE"
+      "verdict": "NOT_VERIFIABLE"
     },
     {
       "lifecycle_methods": [

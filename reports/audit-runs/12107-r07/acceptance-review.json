@@ -2,7 +2,7 @@
   "acceptance": "NOT_ACCEPTED",
   "acceptance_matrix": [
     {
-      "evidence": "adapter-owner-map.json sha256 6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c at HEAD 2c018779765294f6f61191e9f6ade860ada94861 tree 2bcf21522cfc5f3e935a391276a3585400032108",
+      "evidence": "Historical bytes remain at reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.json sha256 6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c. The live map after the same-file reachability correction is sha256 44ce5e1207bcd9b1287427f925e0a4bf789c1547dc1ac2df15271fc0c986db55. The scan source pin is still HEAD 2c018779765294f6f61191e9f6ade860ada94861 tree 2bcf21522cfc5f3e935a391276a3585400032108.",
       "item": "historical source pin and frozen map bytes",
       "verdict": "PASS"
     },
@@ -479,6 +479,12 @@
       "DEFECT": 0,
       "NOT_VERIFIABLE": 2022,
       "UNREACHABLE": 10,
+      "VERIFIED": 14
+    },
+    "live_verdict_histogram_after_same_file_fix": {
+      "DEFECT": 0,
+      "NOT_VERIFIABLE": 2031,
+      "UNREACHABLE": 1,
       "VERIFIED": 14
     },
     "inclusion": [

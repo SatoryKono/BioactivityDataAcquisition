@@ -331,6 +331,7 @@ class Scanner:
         self.parse_errors: list[str] = []
         self.provider_links: list[dict[str, str]] = []
         self.name_refs: dict[str, set[str]] = defaultdict(set)
+        self.intra_file_refs: dict[str, set[str]] = defaultdict(set)
 
     def scan_sources(self) -> None:
         for path in _iter_python_files(SRC_ROOT):
@@ -366,6 +367,18 @@ class Scanner:
             self.file_imports[relative] = imports
             for name in names:
                 self.name_refs[name].add(relative)
+            self._collect_intra_file_refs(tree, relative)
+
+    def _collect_intra_file_refs(self, tree: ast.AST, relative: str) -> None:
+        """Keep same-file uses that are not the definition statement itself."""
+        defined = {
+            node.name
+            for node in ast.walk(tree)
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+        }
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Name) and node.id in defined:
+                self.intra_file_refs[node.id].add(relative)
 
     def _collect_imports(
         self,
@@ -956,6 +969,8 @@ def _class_row(
 def _reference_paths(scanner: Scanner, symbol: str, defining_path: str) -> list[str]:
     paths = set(scanner.name_refs.get(symbol, set()))
     paths.discard(defining_path)
+    if defining_path in scanner.intra_file_refs.get(symbol, ()):
+        paths.add(defining_path)
     same_name = [
         info
         for info in list(scanner.classes.values()) + []

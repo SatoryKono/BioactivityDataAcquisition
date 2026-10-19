@@ -7,9 +7,9 @@ one-to-many indexes, and the thirteen behavioral follow-ups.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from collections import defaultdict
-from hashlib import sha256
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -30,6 +30,10 @@ def _load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def _write(path: Path, payload: dict) -> None:
     from scripts.engineering.common.repo_paths import write_text_confined
 
@@ -44,10 +48,20 @@ def _port_names(row: dict) -> list[str]:
     names: list[str] = []
     for key in ("implemented_ports", "partial_ports"):
         for item in row.get(key) or []:
-            name = item.get("name")
-            if isinstance(name, str):
-                names.append(name)
+            label = _port_label(item)
+            if label:
+                names.append(label)
     return names
+
+
+def _port_label(item: dict) -> str:
+    name = item.get("name")
+    if not isinstance(name, str) or not name:
+        return ""
+    path = item.get("path")
+    if isinstance(path, str) and path:
+        return f"{name}@{path}"
+    return f"{name}@unresolved"
 
 
 def _relationship_index(rows: list[dict]) -> dict:
@@ -64,7 +78,10 @@ def _relationship_index(rows: list[dict]) -> dict:
             adapters_multiple.append({**identity, "ports": names})
         for key in ("implemented_ports", "partial_ports"):
             for item in row.get(key) or []:
-                by_port[item["name"]].append(
+                label = _port_label(item)
+                if not label:
+                    continue
+                by_port[label].append(
                     {
                         **identity,
                         "match": item.get("match"),
@@ -81,7 +98,8 @@ def _relationship_index(rows: list[dict]) -> dict:
         "adapter_to_multiple_ports_count": len(adapters_multiple),
         "note": (
             "Single adapter/port links stay on adapter-owner-map.json rows. "
-            "This index makes one-to-many links explicit in both directions. "
+            "Index keys are name@path so same-named protocols in different modules stay distinct. "
+            "A port annotation with an empty path is marked unresolved. "
             "Unresolved rows stay in the 2046 denominator and are not dropped here."
         ),
         "port_to_multiple_implementations": ports_multiple,
@@ -353,7 +371,7 @@ def _followups() -> dict:
     ]
     return {
         "behavior_matrix_acceptance": "NOT_ACCEPTED",
-        "behavior_matrix_sha256": sha256(MATRIX_PATH.read_bytes()).hexdigest(),
+        "behavior_matrix_sha256": _sha256(MATRIX_PATH),
         "does_not_replace_universe": True,
         "duplicates_r08_or_r09_work": False,
         "issue_12108_scope_check": (
@@ -563,7 +581,7 @@ def main() -> None:
         )
     verdict = {
         "criteria": criteria,
-        "frozen_map_sha256": sha256(MAP_PATH.read_bytes()).hexdigest(),
+        "frozen_map_sha256": _sha256(MAP_PATH),
         "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12107",
         "issue_close_performed": False,
         "map_source_pin": document["source_pin"],

@@ -545,7 +545,7 @@
       "implemented_ports": [],
       "path": "src/bioetl/composition/factories/storage/_context_resolution.py",
       "symbol": "rebase_local_data_path",
-      "verdict": "UNREACHABLE"
+      "verdict": "NOT_VERIFIABLE"
     },
     {
       "classification": "factory",
@@ -3980,7 +3980,7 @@
       "implemented_ports": [],
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
       "symbol": "GoldExpiryCommit",
-      "verdict": "UNREACHABLE"
+      "verdict": "NOT_VERIFIABLE"
     },
     {
       "classification": "concrete_adapter",
