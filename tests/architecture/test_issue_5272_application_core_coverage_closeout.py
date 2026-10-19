@@ -47,6 +47,7 @@ def _below_default_floor_count(inventory: dict[str, Any]) -> int:
     )
 
 
+@pytest.mark.generated_artifact
 def test_issue_5272_closeout_matches_live_module_coverage_inventory() -> None:
     skip_if_module_coverage_inventory_is_dirty(root=ROOT, inventory_path=INVENTORY)
     closeout = _load_json(CLOSEOUT)
@@ -104,6 +105,7 @@ def test_issue_5272_closeout_matches_live_module_coverage_inventory() -> None:
         assert closeout["status"] != "validated_local_closeable"
 
 
+@pytest.mark.generated_artifact
 def test_issue_5244_parent_epic_stays_open_until_default_floor_is_zero() -> None:
     skip_if_module_coverage_inventory_is_dirty(root=ROOT, inventory_path=INVENTORY)
     closeout = _load_json(CLOSEOUT)

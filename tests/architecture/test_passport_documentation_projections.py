@@ -29,6 +29,7 @@ def test_runtime_does_not_import_passport_tooling() -> None:
     assert violations == []
 
 
+@pytest.mark.generated_artifact
 def test_committed_passport_completeness_is_exact() -> None:
     report = json.loads(
         (ROOT / "docs/04-reference/passports/completeness-report.json").read_text(

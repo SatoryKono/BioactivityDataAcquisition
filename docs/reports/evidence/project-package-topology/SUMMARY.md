@@ -415,7 +415,9 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: 2018549910b8be3d961b6500fc46e54ff405cf9eabdcaf1ef14cac5d57ab3726
+Historical snapshot (`source_module_count=2492`), not the current source binding.
+
+- source_tree_sha256: `b996d51de90df79e00ff90c9979e8392e93dc95827c97028b27e69ae8564758f`
 
 `source_module_count=2492`
 
@@ -436,7 +438,7 @@ it is not a new coverage measurement or a complete topology re-audit.
 
 ## Current source inventory binding
 
-- `source_tree_sha256=c9cab866fa7133cdac9c6f674c166dfb33f1917b7a3936b3288c0fff75735236`
+- `source_tree_sha256=fc22974784e108d84eddeeff6bcd20b9e05786872dcee574978e39700aeaab38`
 - `source_module_count=2583`
 - Source modules: `2583`
 - `2529` fully covered

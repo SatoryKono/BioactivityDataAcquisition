@@ -35,6 +35,7 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
+@pytest.mark.generated_artifact
 def test_issue_6045_targeted_low_coverage_closeout_is_coherent() -> None:
     skip_if_module_coverage_inventory_is_dirty(
         root=ROOT,

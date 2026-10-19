@@ -51,6 +51,7 @@ def test_issue_5395_time_seams_are_classified_without_replay_exceptions() -> Non
     assert all(seam["replay_critical"] is False for seam in seams)
 
 
+@pytest.mark.generated_artifact
 def test_issue_5398_layer_matrix_has_bronze_silver_gold_rows() -> None:
     payload = _load_json(LAYER_MATRIX)
     rows = cast(list[dict[str, Any]], payload["rows"])
@@ -69,6 +70,7 @@ def test_issue_5398_layer_matrix_has_bronze_silver_gold_rows() -> None:
     assert payload["summary"]["coverage_levels"]["structural_only"] > 0
 
 
+@pytest.mark.generated_artifact
 def test_issue_5400_hotspot_family_budget_warnings_are_reviewed_budget_closures() -> (
     None
 ):

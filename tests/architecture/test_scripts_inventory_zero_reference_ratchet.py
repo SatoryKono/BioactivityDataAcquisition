@@ -38,6 +38,7 @@ def _load_json(path: Path) -> dict[str, object]:
     return payload
 
 
+@pytest.mark.generated_artifact
 def test_zero_reference_supporting_scripts_are_triaged_and_ratcheted() -> None:
     """Zero-reference supporting scripts must stay triaged within scorecard budgets."""
     if sys.platform.startswith("win"):
