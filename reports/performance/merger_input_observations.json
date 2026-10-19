@@ -1,0 +1,674 @@
+{
+  "generated_at": "2026-10-18T20:50:55.186957+00:00",
+  "command": [
+    "/workspace/pr12274-repair/.venv/bin/python",
+    "scripts/engineering/performance/measure_merger_input.py",
+    "--scales",
+    "1000",
+    "10000",
+    "100000",
+    "--repeats",
+    "3",
+    "--memory-mib",
+    "4096",
+    "--timeout-s",
+    "30",
+    "--out",
+    "/tmp/pr12274-observations-9d40ebb245.json"
+  ],
+  "source": {
+    "head_sha": "9d40ebb2455b8f85598c770736db6c057c5c1a21",
+    "head_tree": "961daeed7941f547d00db602713e9484f4b71f93",
+    "working_tree_status": "",
+    "source_bytes_sha256": "da6b59803e8f9dfffb1ff9e6262e6153c2ab1fe5f5ee048894842376a7254f31",
+    "hash_scope": "harness, uv.lock, sorted src/bioetl/**/*.py; path NUL bytes",
+    "harness_sha256": "d46e7adc3d57c9565d6d03ee6289ad1c979b18a8fb9053f5b0935496cfb0ba20"
+  },
+  "source_unchanged": true,
+  "environment": {
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+    "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+    "executable": "/workspace/pr12274-repair/.venv/bin/python",
+    "cgroup_memory_max": "17179869184",
+    "threads": {
+      "MALLOC_ARENA_MAX": "2",
+      "POLARS_MAX_THREADS": "2",
+      "RAYON_NUM_THREADS": "2",
+      "TOKIO_WORKER_THREADS": "2",
+      "OPENBLAS_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "ARROW_NUM_THREADS": "2"
+    },
+    "packages": {
+      "PubChemPy": "1.0.5",
+      "PyYAML": "6.0.3",
+      "Pygments": "2.20.0",
+      "annotated-types": "0.7.0",
+      "anyio": "4.14.2",
+      "attrs": "26.1.0",
+      "beautifulsoup4": "4.15.0",
+      "bioetl": "6.1.0",
+      "certifi": "2026.6.17",
+      "charset-normalizer": "3.4.9",
+      "click": "8.5.0",
+      "coverage": "7.15.2",
+      "defusedxml": "0.7.1",
+      "deltalake": "0.25.5",
+      "detect-secrets": "1.5.0",
+      "execnet": "2.1.2",
+      "googleapis-common-protos": "1.75.0",
+      "grpcio": "1.82.1",
+      "h11": "0.16.0",
+      "httpcore": "1.0.9",
+      "httpx": "0.28.1",
+      "hypothesis": "6.168.5",
+      "idna": "3.18",
+      "iniconfig": "2.3.0",
+      "jsonschema": "4.26.0",
+      "jsonschema-specifications": "2025.9.1",
+      "mypy_extensions": "1.1.0",
+      "numpy": "2.5.1",
+      "opentelemetry-api": "1.45.1",
+      "opentelemetry-exporter-http-transport": "0.66b1",
+      "opentelemetry-exporter-otlp": "1.45.1",
+      "opentelemetry-exporter-otlp-common": "0.66b1",
+      "opentelemetry-exporter-otlp-proto-common": "1.45.1",
+      "opentelemetry-exporter-otlp-proto-grpc": "1.45.1",
+      "opentelemetry-exporter-otlp-proto-http": "1.45.1",
+      "opentelemetry-proto": "1.45.1",
+      "opentelemetry-sdk": "1.45.1",
+      "opentelemetry-semantic-conventions": "0.66b1",
+      "orjson": "3.13.0",
+      "packaging": "26.2",
+      "pandas": "2.2.3",
+      "pandera": "0.34.1",
+      "pluggy": "1.6.0",
+      "polars": "2.0.0",
+      "polars-runtime-32": "2.0.0",
+      "prometheus_client": "0.26.0",
+      "protobuf": "7.35.1",
+      "psutil": "7.2.2",
+      "pyarrow": "25.0.1",
+      "pydantic": "2.13.5",
+      "pydantic-settings": "2.15.0",
+      "pydantic_core": "2.46.5",
+      "pytest": "9.1.1",
+      "pytest-asyncio": "1.4.0",
+      "pytest-cov": "7.1.0",
+      "pytest-recording": "0.14.0",
+      "pytest-timeout": "2.4.0",
+      "pytest-xdist": "3.8.0",
+      "python-dateutil": "2.9.0.post0",
+      "python-dotenv": "1.2.2",
+      "pytz": "2026.2",
+      "referencing": "0.37.0",
+      "requests": "2.34.2",
+      "respx": "0.23.1",
+      "rpds-py": "2026.9.1",
+      "ruff": "0.16.10",
+      "six": "1.17.0",
+      "sortedcontainers": "2.4.0",
+      "soupsieve": "2.9",
+      "structlog": "26.1.0",
+      "syrupy": "6.1.1",
+      "typeguard": "4.5.2",
+      "typing-inspect": "0.9.0",
+      "typing-inspection": "0.4.2",
+      "typing_extensions": "4.16.0",
+      "tzdata": "2026.3",
+      "urllib3": "2.8.0",
+      "vcrpy": "8.3.0",
+      "wrapt": "2.2.2",
+      "zstandard": "0.25.0"
+    },
+    "cpu_affinity_count": 5
+  },
+  "limits": {
+    "address_space_mib": 4096,
+    "timeout_s": 30,
+    "cpu_seconds": 30
+  },
+  "observations": [
+    {
+      "rows": 1000,
+      "repeat": 1,
+      "preparation": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "1000",
+          "--fixture",
+          "/tmp/merger-measurement-nkk3ijq6",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "prepare"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 0.5645694009999715,
+        "stdout": "",
+        "stderr": ""
+      },
+      "fixture_sha256": {
+        "chembl/activity/_delta_log/00000000000000000000.json": "09a294918afe86de58cafcdb6d54334dc45b50c70c176954fc571df4ca3a8287",
+        "chembl/activity/part-00001-474e51fd-2a85-4dbe-a891-42218beaf3b6-c000.snappy.parquet": "14336f63f02c3a71ec6bcc15bd8e7425f639d8dc2fb94c5037e5639b75d782fe"
+      },
+      "measurement": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "1000",
+          "--fixture",
+          "/tmp/merger-measurement-nkk3ijq6",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "measure"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 2.441024147999997,
+        "stdout": "{\"rows\": 1000, \"wall_time_s\": 0.018055564000064805, \"process_peak_rss_bytes\": 263688192, \"pid\": 5003, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "stderr": ""
+      },
+      "status": "COMPLETED",
+      "raw": {
+        "rows": 1000,
+        "wall_time_s": 0.018055564000064805,
+        "process_peak_rss_bytes": 263688192,
+        "pid": 5003,
+        "service": "bioetl.application.composite.merge_service.MergeService",
+        "read_method": "bioetl.application.composite.merger_input_mixin",
+        "rlimit_as_bytes": 4294967296
+      }
+    },
+    {
+      "rows": 1000,
+      "repeat": 2,
+      "preparation": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "1000",
+          "--fixture",
+          "/tmp/merger-measurement-nkk3ijq6",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "prepare"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 0.5645694009999715,
+        "stdout": "",
+        "stderr": ""
+      },
+      "fixture_sha256": {
+        "chembl/activity/_delta_log/00000000000000000000.json": "09a294918afe86de58cafcdb6d54334dc45b50c70c176954fc571df4ca3a8287",
+        "chembl/activity/part-00001-474e51fd-2a85-4dbe-a891-42218beaf3b6-c000.snappy.parquet": "14336f63f02c3a71ec6bcc15bd8e7425f639d8dc2fb94c5037e5639b75d782fe"
+      },
+      "measurement": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "1000",
+          "--fixture",
+          "/tmp/merger-measurement-nkk3ijq6",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "measure"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 2.21784217600009,
+        "stdout": "{\"rows\": 1000, \"wall_time_s\": 0.018462193000004845, \"process_peak_rss_bytes\": 263258112, \"pid\": 5028, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "stderr": ""
+      },
+      "status": "COMPLETED",
+      "raw": {
+        "rows": 1000,
+        "wall_time_s": 0.018462193000004845,
+        "process_peak_rss_bytes": 263258112,
+        "pid": 5028,
+        "service": "bioetl.application.composite.merge_service.MergeService",
+        "read_method": "bioetl.application.composite.merger_input_mixin",
+        "rlimit_as_bytes": 4294967296
+      }
+    },
+    {
+      "rows": 1000,
+      "repeat": 3,
+      "preparation": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "1000",
+          "--fixture",
+          "/tmp/merger-measurement-nkk3ijq6",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "prepare"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 0.5645694009999715,
+        "stdout": "",
+        "stderr": ""
+      },
+      "fixture_sha256": {
+        "chembl/activity/_delta_log/00000000000000000000.json": "09a294918afe86de58cafcdb6d54334dc45b50c70c176954fc571df4ca3a8287",
+        "chembl/activity/part-00001-474e51fd-2a85-4dbe-a891-42218beaf3b6-c000.snappy.parquet": "14336f63f02c3a71ec6bcc15bd8e7425f639d8dc2fb94c5037e5639b75d782fe"
+      },
+      "measurement": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "1000",
+          "--fixture",
+          "/tmp/merger-measurement-nkk3ijq6",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "measure"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 2.310338338999941,
+        "stdout": "{\"rows\": 1000, \"wall_time_s\": 0.01365616099997169, \"process_peak_rss_bytes\": 266719232, \"pid\": 5053, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "stderr": ""
+      },
+      "status": "COMPLETED",
+      "raw": {
+        "rows": 1000,
+        "wall_time_s": 0.01365616099997169,
+        "process_peak_rss_bytes": 266719232,
+        "pid": 5053,
+        "service": "bioetl.application.composite.merge_service.MergeService",
+        "read_method": "bioetl.application.composite.merger_input_mixin",
+        "rlimit_as_bytes": 4294967296
+      }
+    },
+    {
+      "rows": 10000,
+      "repeat": 1,
+      "preparation": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "10000",
+          "--fixture",
+          "/tmp/merger-measurement-99zh3mc1",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "prepare"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 0.5852138999999852,
+        "stdout": "",
+        "stderr": ""
+      },
+      "fixture_sha256": {
+        "chembl/activity/_delta_log/00000000000000000000.json": "704ec2df1e5141fbedda7767c7059da569f5df4360695a4f83e9d362dde06d8e",
+        "chembl/activity/part-00001-bbf641e0-0072-4eaf-ac47-8e3f93020077-c000.snappy.parquet": "f5642ad4ddb4b10462cfb19eb227d7c8427684ad7abb3ae069c4470116ab6bf7"
+      },
+      "measurement": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "10000",
+          "--fixture",
+          "/tmp/merger-measurement-99zh3mc1",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "measure"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 2.2717779869999504,
+        "stdout": "{\"rows\": 10000, \"wall_time_s\": 0.0236812400000872, \"process_peak_rss_bytes\": 274776064, \"pid\": 5097, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "stderr": ""
+      },
+      "status": "COMPLETED",
+      "raw": {
+        "rows": 10000,
+        "wall_time_s": 0.0236812400000872,
+        "process_peak_rss_bytes": 274776064,
+        "pid": 5097,
+        "service": "bioetl.application.composite.merge_service.MergeService",
+        "read_method": "bioetl.application.composite.merger_input_mixin",
+        "rlimit_as_bytes": 4294967296
+      }
+    },
+    {
+      "rows": 10000,
+      "repeat": 2,
+      "preparation": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "10000",
+          "--fixture",
+          "/tmp/merger-measurement-99zh3mc1",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "prepare"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 0.5852138999999852,
+        "stdout": "",
+        "stderr": ""
+      },
+      "fixture_sha256": {
+        "chembl/activity/_delta_log/00000000000000000000.json": "704ec2df1e5141fbedda7767c7059da569f5df4360695a4f83e9d362dde06d8e",
+        "chembl/activity/part-00001-bbf641e0-0072-4eaf-ac47-8e3f93020077-c000.snappy.parquet": "f5642ad4ddb4b10462cfb19eb227d7c8427684ad7abb3ae069c4470116ab6bf7"
+      },
+      "measurement": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "10000",
+          "--fixture",
+          "/tmp/merger-measurement-99zh3mc1",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "measure"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 2.185130914999945,
+        "stdout": "{\"rows\": 10000, \"wall_time_s\": 0.019687926999949923, \"process_peak_rss_bytes\": 277835776, \"pid\": 5122, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "stderr": ""
+      },
+      "status": "COMPLETED",
+      "raw": {
+        "rows": 10000,
+        "wall_time_s": 0.019687926999949923,
+        "process_peak_rss_bytes": 277835776,
+        "pid": 5122,
+        "service": "bioetl.application.composite.merge_service.MergeService",
+        "read_method": "bioetl.application.composite.merger_input_mixin",
+        "rlimit_as_bytes": 4294967296
+      }
+    },
+    {
+      "rows": 10000,
+      "repeat": 3,
+      "preparation": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "10000",
+          "--fixture",
+          "/tmp/merger-measurement-99zh3mc1",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "prepare"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 0.5852138999999852,
+        "stdout": "",
+        "stderr": ""
+      },
+      "fixture_sha256": {
+        "chembl/activity/_delta_log/00000000000000000000.json": "704ec2df1e5141fbedda7767c7059da569f5df4360695a4f83e9d362dde06d8e",
+        "chembl/activity/part-00001-bbf641e0-0072-4eaf-ac47-8e3f93020077-c000.snappy.parquet": "f5642ad4ddb4b10462cfb19eb227d7c8427684ad7abb3ae069c4470116ab6bf7"
+      },
+      "measurement": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "10000",
+          "--fixture",
+          "/tmp/merger-measurement-99zh3mc1",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "measure"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 2.194230489000006,
+        "stdout": "{\"rows\": 10000, \"wall_time_s\": 0.017572132999930545, \"process_peak_rss_bytes\": 277663744, \"pid\": 5147, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "stderr": ""
+      },
+      "status": "COMPLETED",
+      "raw": {
+        "rows": 10000,
+        "wall_time_s": 0.017572132999930545,
+        "process_peak_rss_bytes": 277663744,
+        "pid": 5147,
+        "service": "bioetl.application.composite.merge_service.MergeService",
+        "read_method": "bioetl.application.composite.merger_input_mixin",
+        "rlimit_as_bytes": 4294967296
+      }
+    },
+    {
+      "rows": 100000,
+      "repeat": 1,
+      "preparation": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "100000",
+          "--fixture",
+          "/tmp/merger-measurement-lu1ahojg",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "prepare"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 0.6878058969999756,
+        "stdout": "",
+        "stderr": ""
+      },
+      "fixture_sha256": {
+        "chembl/activity/_delta_log/00000000000000000000.json": "4a5ade17ef50eea30fd53ad2f435e17349c2d9f0fe23c26794be43b56fc2e8c6",
+        "chembl/activity/part-00001-f68d3d65-6505-4cbb-aaf3-45bbeb34bd00-c000.snappy.parquet": "3112ff1b39e0fa8a631efdd1971ec0605459d9bb492bc321d7d33c3d9e907a97"
+      },
+      "measurement": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "100000",
+          "--fixture",
+          "/tmp/merger-measurement-lu1ahojg",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "measure"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 2.667525134000016,
+        "stdout": "{\"rows\": 100000, \"wall_time_s\": 0.07656640800007608, \"process_peak_rss_bytes\": 320237568, \"pid\": 5191, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "stderr": ""
+      },
+      "status": "COMPLETED",
+      "raw": {
+        "rows": 100000,
+        "wall_time_s": 0.07656640800007608,
+        "process_peak_rss_bytes": 320237568,
+        "pid": 5191,
+        "service": "bioetl.application.composite.merge_service.MergeService",
+        "read_method": "bioetl.application.composite.merger_input_mixin",
+        "rlimit_as_bytes": 4294967296
+      }
+    },
+    {
+      "rows": 100000,
+      "repeat": 2,
+      "preparation": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "100000",
+          "--fixture",
+          "/tmp/merger-measurement-lu1ahojg",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "prepare"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 0.6878058969999756,
+        "stdout": "",
+        "stderr": ""
+      },
+      "fixture_sha256": {
+        "chembl/activity/_delta_log/00000000000000000000.json": "4a5ade17ef50eea30fd53ad2f435e17349c2d9f0fe23c26794be43b56fc2e8c6",
+        "chembl/activity/part-00001-f68d3d65-6505-4cbb-aaf3-45bbeb34bd00-c000.snappy.parquet": "3112ff1b39e0fa8a631efdd1971ec0605459d9bb492bc321d7d33c3d9e907a97"
+      },
+      "measurement": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "100000",
+          "--fixture",
+          "/tmp/merger-measurement-lu1ahojg",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "measure"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 2.605703385999959,
+        "stdout": "{\"rows\": 100000, \"wall_time_s\": 0.03380053500006852, \"process_peak_rss_bytes\": 320053248, \"pid\": 5216, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "stderr": ""
+      },
+      "status": "COMPLETED",
+      "raw": {
+        "rows": 100000,
+        "wall_time_s": 0.03380053500006852,
+        "process_peak_rss_bytes": 320053248,
+        "pid": 5216,
+        "service": "bioetl.application.composite.merge_service.MergeService",
+        "read_method": "bioetl.application.composite.merger_input_mixin",
+        "rlimit_as_bytes": 4294967296
+      }
+    },
+    {
+      "rows": 100000,
+      "repeat": 3,
+      "preparation": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "100000",
+          "--fixture",
+          "/tmp/merger-measurement-lu1ahojg",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "prepare"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 0.6878058969999756,
+        "stdout": "",
+        "stderr": ""
+      },
+      "fixture_sha256": {
+        "chembl/activity/_delta_log/00000000000000000000.json": "4a5ade17ef50eea30fd53ad2f435e17349c2d9f0fe23c26794be43b56fc2e8c6",
+        "chembl/activity/part-00001-f68d3d65-6505-4cbb-aaf3-45bbeb34bd00-c000.snappy.parquet": "3112ff1b39e0fa8a631efdd1971ec0605459d9bb492bc321d7d33c3d9e907a97"
+      },
+      "measurement": {
+        "command": [
+          "/workspace/pr12274-repair/.venv/bin/python",
+          "/workspace/pr12274-repair/scripts/engineering/performance/measure_merger_input.py",
+          "--rows",
+          "100000",
+          "--fixture",
+          "/tmp/merger-measurement-lu1ahojg",
+          "--memory-mib",
+          "4096",
+          "--timeout-s",
+          "30",
+          "--phase",
+          "measure"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_s": 2.791024679999964,
+        "stdout": "{\"rows\": 100000, \"wall_time_s\": 0.04918194100002893, \"process_peak_rss_bytes\": 320061440, \"pid\": 5241, \"service\": \"bioetl.application.composite.merge_service.MergeService\", \"read_method\": \"bioetl.application.composite.merger_input_mixin\", \"rlimit_as_bytes\": 4294967296}\n",
+        "stderr": ""
+      },
+      "status": "COMPLETED",
+      "raw": {
+        "rows": 100000,
+        "wall_time_s": 0.04918194100002893,
+        "process_peak_rss_bytes": 320061440,
+        "pid": 5241,
+        "service": "bioetl.application.composite.merge_service.MergeService",
+        "read_method": "bioetl.application.composite.merger_input_mixin",
+        "rlimit_as_bytes": 4294967296
+      }
+    }
+  ],
+  "conclusion": "NOT_ESTABLISHED: bounded synthetic input-read measurements only"
+}

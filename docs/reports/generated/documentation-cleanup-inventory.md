@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3817 |
-| Tracked doc-like files | 3817 |
+| Doc-like files | 3823 |
+| Tracked doc-like files | 3823 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 78 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3817 |
+| tracked | 3823 |
 
 ## Lifecycle Counts
 
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 123 |
+| working_report | 129 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -55,7 +55,7 @@
 | Archived | 1550 |
 | Canonical | 75 |
 | Generated | 1062 |
-| Working | 382 |
+| Working | 388 |
 
 ## Surface Families
 
@@ -65,13 +65,13 @@
 | archive | 1550 |
 | canonical | 75 |
 | generated | 1062 |
-| working | 382 |
+| working | 388 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 156 |
+| archive-after-migration | 162 |
 | generate-automatically | 1062 |
 | keep | 2599 |
 
@@ -131,6 +131,12 @@
 | `reports/observability/runtime_cardinality_review.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_review_pr.json` | Working | 0 | archive-after-migration |
 | `reports/performance/benchmark-summary.json` | Working | 0 | archive-after-migration |
+| `reports/performance/history/merger_input_8f9bd74269/merger_input_measurement.md` | Working | 0 | archive-after-migration |
+| `reports/performance/history/merger_input_8f9bd74269/merger_input_observations.json` | Working | 0 | archive-after-migration |
+| `reports/performance/history/merger_input_919147a/LIMITATIONS.md` | Working | 0 | archive-after-migration |
+| `reports/performance/history/merger_input_919147a/original-report.md` | Working | 0 | archive-after-migration |
+| `reports/performance/merger_input_measurement.md` | Working | 0 | archive-after-migration |
+| `reports/performance/merger_input_observations.json` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
@@ -153,12 +159,6 @@
 | `reports/quality/coderabbit/20260813/01-scope-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260813/_S01-domain-aggregates.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260813/_S01-domain-registry.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260816/01-scope-matrix.json` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260816/01-scope-matrix.md` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260816/_S01-domain-aggregates.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260816/_S01-domain-registry.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260925_085141/scope_matrix.json` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/_domain_aggregates_open.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
