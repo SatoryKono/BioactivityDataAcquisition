@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-19T05:20:18.998570+00:00",
+  "generated_at": "2026-10-19T06:26:45.166980+00:00",
   "summary": {
     "total_scripts": 652,
     "status_counts": {
@@ -10635,7 +10635,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_receipts.py",
-          "line": 952,
+          "line": 964,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_receipts import write_runner_terminal_receipt"
         }
@@ -15097,7 +15097,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -15143,7 +15143,7 @@
         },
         {
           "path": "tests/architecture/test_pytest_benchmark_caller_contract.py",
-          "line": 924,
+          "line": 932,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_hotspot_degradation_report import ("
         }
