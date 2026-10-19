@@ -52,7 +52,6 @@ def _gate(payload: dict[str, Any], name: str) -> dict[str, Any]:
     raise AssertionError(f"missing debt governance gate: {name}")
 
 
-@pytest.mark.generated_artifact
 def test_issue_5642_adapter_duplication_is_below_opening_baseline() -> None:
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
@@ -61,7 +60,6 @@ def test_issue_5642_adapter_duplication_is_below_opening_baseline() -> None:
     assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] < 70
 
 
-@pytest.mark.generated_artifact
 def test_issue_5643_pipeline_and_cli_duplication_are_below_opening_baselines() -> None:
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
@@ -72,7 +70,6 @@ def test_issue_5643_pipeline_and_cli_duplication_are_below_opening_baselines() -
     assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] < 5
 
 
-@pytest.mark.generated_artifact
 def test_issue_5645_hotspot_warning_count_is_ratcheted_down() -> None:
     baseline = _load_json(HOTSPOT_BASELINE)
     gates = _load_json(DEBT_GATES)

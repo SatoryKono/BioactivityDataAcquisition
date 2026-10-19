@@ -84,7 +84,6 @@ def _family_is_clean(
     return bool(matched) and all(row.get("duplicate_count") == 0 for row in matched)
 
 
-@pytest.mark.generated_artifact
 def test_hotspot_family_duplication_budgets_hold_reviewed_baseline() -> None:
     """Hotspot-family duplication budgets must not grow past the reviewed baseline."""
     scorecard = _load_scorecard()
@@ -190,7 +189,6 @@ def test_hotspot_family_duplication_budgets_hold_reviewed_baseline() -> None:
             )
 
 
-@pytest.mark.generated_artifact
 def test_reviewed_baseline_hotspot_families_match_reviewed_duplication_snapshot() -> (
     None
 ):

@@ -52,7 +52,6 @@ Commands:
     report-family-baseline Generate/check RF-06 hotspot-family baseline artifacts
     report-hotspots      Generate hotspot degradation report
     gate-hotspot-report  Fail closed when the hotspot report is missing or unmeasured
-    validate-benchmark-evidence  Independently validate raw benchmark evidence
     reduce-benchmark-evidence  Fail closed on benchmark evidence and regression
     report-duplication-baseline  Generate report-only duplication baseline
     report-artifact-duplication-audit  Generate/check JSCPD-excluded governance artifact duplication audit
@@ -238,10 +237,6 @@ COMMAND_SPECS.update(
         "refresh-ci-drift-families": module_command(
             "scripts.engineering.qa.refresh_governance_artifacts",
             "ci-drift-families",
-        ),
-        "validate-benchmark-evidence": module_command(
-            _HOTSPOT_REPORT_MODULE,
-            "validate-benchmark-evidence",
         ),
         "gate-hotspot-report": module_command(
             _HOTSPOT_REPORT_MODULE,

@@ -77,7 +77,6 @@ def _gate(payload: dict[str, Any], name: str) -> dict[str, Any]:
     raise AssertionError(f"missing gate: {name}")
 
 
-@pytest.mark.generated_artifact
 def test_issue_5619_governance_gates_are_fresh_and_passing() -> None:
     gates = _load_json(DEBT_GATES)
 
@@ -100,7 +99,6 @@ def test_issue_5619_governance_gates_are_fresh_and_passing() -> None:
     assert not stale_artifacts.get("dq_contract_registry_diagnostics")
 
 
-@pytest.mark.generated_artifact
 def test_issue_5620_lazy_export_facades_have_no_orphan_or_conflict_exports() -> None:
     census = _load_json(COMPAT_CENSUS)
     summary = census["summary"]
@@ -125,7 +123,6 @@ def test_issue_5621_internal_silver_metadata_reexport_budget_is_ratcheted() -> N
     ).exists()
 
 
-@pytest.mark.generated_artifact
 def test_issue_5622_full_app_duplication_ratchet_records_cli_burn_down() -> None:
     duplication = _load_json(DUPLICATION)
     by_target = {target["target"]: target for target in duplication["targets"]}
@@ -141,7 +138,6 @@ def test_issue_5622_full_app_duplication_ratchet_records_cli_burn_down() -> None
     assert by_target["src/bioetl/composition/bootstrap"]["duplicate_count"] == 0
 
 
-@pytest.mark.generated_artifact
 def test_issue_5623_runtime_cardinality_review_is_fresh_and_passed() -> None:
     gates = _load_json(DEBT_GATES)
     review = _load_json(RUNTIME_CARDINALITY_REVIEW)
@@ -167,7 +163,6 @@ def test_issue_5623_runtime_cardinality_review_is_fresh_and_passed() -> None:
     assert inventory["runtime_cardinality_threshold_violations"] == []
 
 
-@pytest.mark.generated_artifact
 def test_issue_5624_hotspot_budgets_are_ratcheted_to_live_guard_values() -> None:
     scorecard = _load_yaml(DEBT_SCORECARD)
     baseline = _load_json(HOTSPOT_BASELINE)
@@ -192,7 +187,6 @@ def test_issue_5624_hotspot_budgets_are_ratcheted_to_live_guard_values() -> None
         )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5625_test_governance_compatibility_inventory_is_ratcheted() -> None:
     config = _load_yaml(TEST_GOVERNANCE_CONFIG)
     report = _load_json(TEST_GOVERNANCE_REPORT)["report"]

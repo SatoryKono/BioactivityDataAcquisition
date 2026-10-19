@@ -62,7 +62,6 @@ def _duplication_target(payload: dict[str, Any], target: str) -> dict[str, Any]:
     raise AssertionError(f"missing duplication target: {target}")
 
 
-@pytest.mark.generated_artifact
 def test_issue_6022_generated_artifact_coherence_gates_pass() -> None:
     coverage = _load_json(MODULE_COVERAGE)
     scorecard = _load_json(SCORECARD)
@@ -83,7 +82,6 @@ def test_issue_6022_generated_artifact_coherence_gates_pass() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_6023_dependency_map_has_runtime_headroom() -> None:
     closeout = _load_json(CLOSEOUT)
     dependency_map = _load_json(DEPENDENCY_MAP)
@@ -104,7 +102,6 @@ def test_issue_6023_dependency_map_has_runtime_headroom() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_6024_runtime_builder_hotspot_fan_in_has_headroom() -> None:
     closeout = _load_json(CLOSEOUT)
     hotspot = _load_json(HOTSPOT)
@@ -120,7 +117,6 @@ def test_issue_6024_runtime_builder_hotspot_fan_in_has_headroom() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_6025_duplication_baseline_distinguishes_raw_and_actionable_counts() -> (
     None
 ):
@@ -154,7 +150,6 @@ def test_issue_6026_tracked_mcp_config_is_current_and_pruned() -> None:
     assert "/mnt/wsl/docker-desktop-bind-mounts" not in json.dumps(script_mcp)
 
 
-@pytest.mark.generated_artifact
 def test_issue_6027_pandera_and_topology_docs_match_current_runtime() -> None:
     topology = (
         ROOT
@@ -178,7 +173,6 @@ def test_issue_6027_pandera_and_topology_docs_match_current_runtime() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_6028_test_governance_duplicate_names_are_zero() -> None:
     closeout = _load_json(CLOSEOUT)
     test_governance = _load_json(TEST_GOVERNANCE)

@@ -36,11 +36,6 @@ The BioETL DQ Contract System defines four primary contract types that govern da
 - Composite configs: `configs/composites/{entity}.yaml` (field definitions)
 - Exported JSON: `docs/04-reference/contracts/gold/*.json` (for external consumers)
 
-
-**Validation vs Persisted Order**:
-- **Input Validation**: BioETL default schemas (`ETLRecordSchema`, `IDMappingSchema`) use `ordered=False` (order-agnostic validation). This allows the validation ports to accept valid records regardless of their column order (e.g. from shuffled dictionaries), as long as all required fields and types match. External or custom schemas can still use `ordered=True` if strict order validation is needed.
-- **Persisted Canonical Order**: The actual deterministic persisted order (e.g. Delta/Parquet output) is strictly enforced as a writer concern during the IO preparation path, mapping to the definitive `canonical_column_order`.
-
 **Source-of-truth routing**:
 
 - `src/bioetl/domain/schemas/` owns executable Pandera structural contracts.

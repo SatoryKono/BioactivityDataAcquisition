@@ -52,7 +52,6 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
-@pytest.mark.generated_artifact
 def test_issue_5729_test_telemetry_artifacts_match_current_head() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5729"]
@@ -70,7 +69,6 @@ def test_issue_5729_test_telemetry_artifacts_match_current_head() -> None:
     assert coverage["coverage"] == baseline["coverage"]
 
 
-@pytest.mark.generated_artifact
 def test_issue_5730_storage_and_control_plane_coverage_tail_is_below_floor() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5730"]
@@ -88,7 +86,6 @@ def test_issue_5730_storage_and_control_plane_coverage_tail_is_below_floor() -> 
         )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5731_runner_and_observer_branch_gaps_are_closed() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5731"]
@@ -99,7 +96,6 @@ def test_issue_5731_runner_and_observer_branch_gaps_are_closed() -> None:
         assert modules[module]["coverage_percent"] >= minimum
 
 
-@pytest.mark.generated_artifact
 def test_issue_5732_assertless_contract_inventory_is_reduced() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5732"]
@@ -124,7 +120,6 @@ def test_issue_5732_assertless_contract_inventory_is_reduced() -> None:
         assert file_family_counts[file_path] == expected_count
 
 
-@pytest.mark.generated_artifact
 def test_issue_5733_heavy_runtime_mode_bootstrap_tests_are_removed_from_hotspot_file() -> (
     None
 ):

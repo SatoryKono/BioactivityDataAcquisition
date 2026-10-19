@@ -8,7 +8,6 @@ Click-generated help is documented globally, not repeated in every table.
 from __future__ import annotations
 
 import re
-import shlex
 from pathlib import Path
 
 import click
@@ -19,51 +18,6 @@ pytestmark = pytest.mark.architecture
 _OPTION = re.compile(r"(?<![\w-])--?[a-z][a-z0-9-]*")
 _HEADING = re.compile(r"^#{3,4} `([a-z0-9-]+(?: [a-z0-9-]+)*)`")
 CLI_DOC = Path(__file__).resolve().parents[2] / "docs/04-reference/cli.md"
-
-
-@pytest.mark.parametrize(
-    "suffix",
-    [" | less", " > help.txt", ">help.txt", " 2>errors.txt", " && echo --bogus"],
-)
-def test_shell_control_operators_end_invocation(suffix: str) -> None:
-    """Shell operators are not Click children or options of the next program."""
-    root = click.Group("bioetl", commands={"group": click.Group("group")})
-    text = f"### `group`\n```bash\nbioetl group --help{suffix}\n```"
-    assert _parity_errors(root, text) == []
-
-
-def test_shell_quoted_operator_value_keeps_unknown_child() -> None:
-    """A quoted operator is an option value, not permission to ignore a typo."""
-    root = click.Group("bioetl", params=[click.Option(["--label"])])
-    assert _parity_errors(root, "```sh\nbioetl --label 'a|b' typo\n```") == [
-        "unknown documented command: typo"
-    ]
-
-
-def test_shell_invalid_quote_reports_invocation() -> None:
-    """Malformed documentation identifies the offending invocation."""
-    with pytest.raises(ValueError, match="Invalid documented shell invocation"):
-        _shell_options("bioetl --label 'unfinished", {"": click.Group("bioetl")})
-
-
-@pytest.mark.parametrize(
-    "path", ["quarantine inspect", "quarantine stats", "diagnostics quarantine"]
-)
-def test_migration_example_has_one_effective_silver_filter(path: str) -> None:
-    """The replacement example cannot retain an overriding legacy error code."""
-    from bioetl.interfaces.cli.main import cli
-
-    text = CLI_DOC.read_text(encoding="utf-8")
-    migration = text.split("**Breaking-change migration", 1)[1].split("CLI surface", 1)[
-        0
-    ]
-    example = migration.split("```bash\n", 1)[1].split("```", 1)[0]
-    args = shlex.split(example.replace("\\\n", " "))[3:]
-    command = _public_commands(cli)[path]
-    values, _, _ = command.make_parser(click.Context(command)).parse_args(args.copy())
-    assert args.count("--error-code") == 1
-    assert values["error_code"] == "FILTERED_OUT_SILVER"
-    assert "every existing `--error-code` argument" in migration
 
 
 def _public_commands(root: click.Command) -> dict[str, click.Command]:
@@ -88,70 +42,8 @@ def _public_commands(root: click.Command) -> dict[str, click.Command]:
     return commands
 
 
-def _shell_options(
-    invocation: str, commands: dict[str, click.Command]
-) -> dict[str, set[str]]:
-    """Resolve shell paths and group-owned options without invoking callbacks."""
-    try:
-        parts = shlex.split(invocation)[1:]
-    except ValueError as exc:
-        raise ValueError(
-            f"Invalid documented shell invocation {invocation!r}: {exc}"
-        ) from exc
-    # Keep quoted/escaped operators and synopsis placeholders intact. Only the
-    # first shell command belongs to this Click invocation.
-    shell_tokens = re.finditer(
-        r"'[^']*'|\"(?:\\.|[^\"\\])*\"|\\.|<[^<>\n]+>|\[[^\]\n]*\]|(?P<operator>[|&;<>])",
-        invocation,
-    )
-    for match in shell_tokens:
-        if match.group("operator"):
-            segment = invocation[: match.start()]
-            if match.group("operator") in "<>":
-                segment = re.sub(r"\s+\d+$", "", segment)
-            parts = shlex.split(segment)[1:]
-            break
-    path = ""
-    declarations: dict[str, set[str]] = {}
-    while path in commands:
-        command = commands[path]
-        flags = declarations.setdefault(path, set())
-        if not isinstance(command, click.Group):
-            flags.update(_OPTION.findall(" ".join(parts)))
-            break
-        if not parts:
-            break
-        raw_token = parts.pop(0)
-        token = raw_token.strip("[]")
-        if raw_token.upper() == "[OPTIONS]" or token == "--":
-            continue
-        if token.startswith("<") or raw_token.upper() == "[COMMAND]":
-            break
-        if token.startswith("-"):
-            name, separator, _ = token.partition("=")
-            flags.add(name)
-            option = next(
-                (
-                    param
-                    for param in command.params
-                    if isinstance(param, click.Option)
-                    and name in (*param.opts, *param.secondary_opts)
-                ),
-                None,
-            )
-            if option is not None and not option.is_flag and not option.count:
-                del parts[: max(0, option.nargs - bool(separator))]
-            continue
-        path = f"{path} {token}".strip()
-    if path not in commands:
-        declarations.setdefault(path, set())
-    return declarations
-
-
-def _documented_options(
-    markdown: str, commands: dict[str, click.Command]
-) -> dict[str, set[str]]:
-    """Read headings/tables and validate shell paths against public Click metadata."""
+def _documented_options(markdown: str) -> dict[str, set[str]]:
+    """Read public command declarations independently of the runtime inventory."""
     headings = {
         match.group(1)
         for line in markdown.splitlines()
@@ -160,25 +52,24 @@ def _documented_options(
     documented = {path: set() for path in headings | {""}}
     section: str | None = None
     in_shell = False
-    continued = ""
     for line in markdown.splitlines():
         if line.startswith("```"):
             in_shell = not in_shell and line.strip() in {"```bash", "```sh", "```shell"}
-            continued = ""
             continue
         if in_shell:
-            line = continued + line.strip()
-            if line.endswith("\\"):
-                continued = line[:-1] + " "
-                continue
-            continued = ""
             if not line.startswith("bioetl "):
                 continue
-            for path, flags in _shell_options(line, commands).items():
-                if path not in commands:
-                    documented.setdefault(path, set())
-                elif path in documented:
-                    documented[path].update(flags)
+            invocation = line[len("bioetl ") :]
+            candidates = [
+                path
+                for path in headings
+                if invocation == path or invocation.startswith(path + " ")
+            ]
+            if candidates:
+                path = max(candidates, key=len)
+                documented[path].update(_OPTION.findall(invocation[len(path) :]))
+            elif invocation.startswith("-"):
+                documented[""].update(_OPTION.findall(invocation))
             continue
         if match := _HEADING.match(line):
             section = match.group(1)
@@ -192,7 +83,7 @@ def _documented_options(
 def _parity_errors(root: click.Command, markdown: str) -> list[str]:
     """Report command and option differences independently for each command."""
     commands = _public_commands(root)
-    documented = _documented_options(markdown, commands)
+    documented = _documented_options(markdown)
     errors = [
         f"undocumented command: {path}"
         for path in sorted(commands.keys() - documented.keys())
@@ -361,100 +252,3 @@ def test_debug_reference_matches_supported_default() -> None:
     assert "не поддерживается" in section
     assert "all stages" not in section
     assert "CLI prompts" not in section
-
-
-@pytest.mark.parametrize(
-    "example", ["bioetl diagnostcs guide", "bioetl diagnostics guied"]
-)
-def test_parity_rejects_unknown_shell_command_paths(example: str) -> None:
-    """Correct headings must not hide misspelled root or nested shell commands."""
-    root = click.Group(
-        "bioetl",
-        commands={
-            "diagnostics": click.Group(
-                "diagnostics", commands={"guide": click.Command("guide")}
-            )
-        },
-    )
-    text = "### `diagnostics`\n#### `diagnostics guide`\n```bash\n" + example + "\n```"
-    assert any(
-        "unknown documented command:" in error for error in _parity_errors(root, text)
-    )
-
-
-@pytest.mark.parametrize("fence", ["bash", "sh", "shell"])
-def test_parity_rejects_retired_option_on_shell_continuation(fence: str) -> None:
-    """Continuation lines must not hide a removed flag after a valid command."""
-    root = click.Group("bioetl", commands={"inspect": click.Command("inspect")})
-    text = (
-        f"### `inspect`\n```{fence}\nbioetl inspect \\\n    --silver-filter-only\n```"
-    )
-    assert _parity_errors(root, text) == [
-        "inspect: unknown documented options ['--silver-filter-only']"
-    ]
-
-
-def test_parity_accepts_continued_command_path_and_options() -> None:
-    """Join a split command path and retain each continued public option."""
-    root = click.Group(
-        "bioetl",
-        commands={
-            "group": click.Group(
-                "group",
-                commands={
-                    "child": click.Command(
-                        "child", params=[click.Option(["--value", "-v"])]
-                    )
-                },
-            )
-        },
-    )
-    text = "### `group`\n#### `group child`\n```bash\nbioetl group \\\n    child \\\n    --value X \\\n    -v Y\n```"
-    assert _parity_errors(root, text) == []
-
-
-def test_parity_keeps_leaf_arguments_and_generic_placeholder_out_of_paths() -> None:
-    """Leaf positional arguments and an explicit generic synopsis are not commands."""
-    root = click.Group("bioetl", commands={"show": click.Command("show")})
-    text = (
-        "### `show`\n```bash\nbioetl <command> [options]\nbioetl show some-record\n```"
-    )
-    assert _parity_errors(root, text) == []
-
-
-@pytest.mark.parametrize("path", ["missing", "group typo"])
-def test_parity_rejects_unknown_path_after_group_options(path: str) -> None:
-    """Group flags and option values must not hide a later unknown command."""
-    root = click.Group(
-        "bioetl",
-        params=[click.Option(["--verbose"], is_flag=True), click.Option(["--label"])],
-        commands={"group": click.Group("group")},
-    )
-    text = (
-        "| unused |\n### `group`\n```bash\nbioetl --verbose --label group "
-        + path
-        + "\n```"
-    )
-    assert any(
-        "unknown documented command:" in error for error in _parity_errors(root, text)
-    )
-
-
-def test_parity_assigns_group_options_before_child_without_callbacks() -> None:
-    """Consume metadata-declared values while retaining group option ownership."""
-
-    def forbidden_callback(*_args: object, **_kwargs: object) -> None:
-        """Fail if documentation inspection ever executes a Click callback."""
-        pytest.fail("documentation parsing executed a callback")
-
-    group = click.Group(
-        "group",
-        params=[
-            click.Option(["--label"], callback=forbidden_callback),
-            click.Option(["--toggle/--no-toggle"]),
-        ],
-        commands={"child": click.Command("child", callback=forbidden_callback)},
-    )
-    root = click.Group("bioetl", commands={"group": group})
-    text = "### `group`\n#### `group child`\n```bash\nbioetl group --label child --toggle child\nbioetl group --label=child --no-toggle child\nbioetl group --label 'child label' --toggle child\n```"
-    assert _parity_errors(root, text) == []

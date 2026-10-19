@@ -140,7 +140,6 @@ log_test.txt
 !/reports/performance/
 /reports/performance/*
 !/reports/performance/benchmark-summary.json
-!/reports/performance/benchmark-manifest.json
 !/reports/performance/evidence/
 /reports/performance/evidence/*
 !/reports/performance/evidence/*/

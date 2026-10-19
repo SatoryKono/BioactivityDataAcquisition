@@ -37,7 +37,6 @@ def _load_rows() -> list[dict[str, object]]:
     return normalized
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_contract_coverage_matrix_rows_cover_all_entity_configs() -> None:
     """Each tracked entity config must have exactly one coverage-matrix row."""
@@ -57,7 +56,6 @@ def test_contract_coverage_matrix_rows_cover_all_entity_configs() -> None:
     assert actual == expected
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_contract_coverage_matrix_declares_gold_enabled_semantics() -> None:
     """The public metric must not conflate runtime state with schema availability."""
@@ -82,7 +80,6 @@ def test_contract_coverage_matrix_declares_gold_enabled_semantics() -> None:
             assert row.get("gold_strict_validation_declared") is True
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_contract_coverage_matrix_gold_enabled_rows_have_full_governance_surfaces() -> (
     None
@@ -107,7 +104,6 @@ def test_contract_coverage_matrix_gold_enabled_rows_have_full_governance_surface
     assert not violations, "\n".join(violations)
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_contract_coverage_matrix_gold_enabled_rows_have_layer_pandera_details() -> (
     None
@@ -153,7 +149,6 @@ def test_contract_coverage_matrix_gold_enabled_rows_have_layer_pandera_details()
     assert not violations, "\n".join(violations)
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_contract_coverage_matrix_tracks_constraint_and_golden_evidence() -> None:
     """Gold-enabled rows must expose constraint completeness and golden-test evidence."""
@@ -203,7 +198,6 @@ def test_contract_coverage_matrix_tracks_constraint_and_golden_evidence() -> Non
     assert not violations, "\n".join(violations)
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_contract_coverage_matrix_exclusions_are_explicit() -> None:
     """Excluded rows must carry an explicit justification and payload summary parity."""
@@ -225,7 +219,6 @@ def test_contract_coverage_matrix_exclusions_are_explicit() -> None:
     assert not violations, "\n".join(violations)
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_contract_coverage_matrix_covered_rows_reference_existing_governance_files() -> (
     None

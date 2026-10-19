@@ -22,7 +22,6 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 JSON_ARTIFACT = PROJECT_ROOT / "reports" / "quality" / "contract-coverage-matrix.json"
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_contract_coverage_matrix_is_current() -> None:
     """Contract coverage matrix JSON must match the generator output."""

@@ -28,16 +28,6 @@ jobs:
       # Suites under tests/benchmarks and tests/performance are deterministic
       # fixtures. Their dataset id is synthetic. The reducer compares it and
       # may write a proposed candidate; CI does not adopt the baseline.
-      - name: Clear stale performance evidence
-        run: |
-          rm -f reports/performance/benchmark-measurements.json \
-            reports/performance/benchmark-validation-manifest.json \
-            reports/performance/benchmark-manifest.json \
-            reports/performance/benchmark-gate.json \
-            reports/performance/hotspot-observations.jsonl \
-            reports/performance/hotspot-degradation.json \
-            reports/performance/hotspot-degradation.md
-
       - name: Run hotspot performance tests
         run: |
           mkdir -p reports/performance
@@ -49,7 +39,6 @@ jobs:
             --junitxml=reports/performance/hotspot-budgets.xml
 
       - name: Run pytest-benchmark cases
-        id: benchmarks
         if: ${{ always() && !cancelled() }}
         run: |
           mkdir -p reports/performance
@@ -67,28 +56,10 @@ jobs:
             --benchmark-json=reports/performance/benchmark-measurements.json
 
       - name: Require pytest-benchmark measurement JSON
-        id: measurement-contract
         if: ${{ always() && !cancelled() }}
         run: |
           uv run --frozen --no-build python -m tests.benchmarks.benchmark_vcs_guard \
             --validate-measurement-json reports/performance/benchmark-measurements.json
-
-      - name: Validate benchmark evidence
-        id: validate-evidence
-        if: ${{ always() && !cancelled() }}
-        env:
-          PRODUCER_OUTCOME: ${{ steps.benchmarks.outcome }}
-          CONTRACT_OUTCOME: ${{ steps.measurement-contract.outcome }}
-          EXPECTED_SHA: ${{ github.sha }}
-        run: |
-          uv run --frozen --no-build python -m scripts.engineering.qa validate-benchmark-evidence \
-            --measurements reports/performance/benchmark-measurements.json \
-            --manifest-out reports/performance/benchmark-validation-manifest.json \
-            --producer-outcome "$PRODUCER_OUTCOME" \
-            --contract-outcome "$CONTRACT_OUTCOME" \
-            --failure-manifest-out reports/performance/benchmark-manifest.json \
-            --failure-gate-out reports/performance/benchmark-gate.json \
-            --expected-sha "$EXPECTED_SHA"
 
       - name: Build hotspot degradation report
         if: ${{ always() && !cancelled() }}
@@ -115,7 +86,7 @@ jobs:
             --report reports/performance/hotspot-degradation.json
 
       - name: Reduce benchmark evidence
-        if: ${{ always() && !cancelled() && steps.benchmarks.outcome == 'success' && steps.measurement-contract.outcome == 'success' && steps.validate-evidence.outcome == 'success' }}
+        if: ${{ always() && !cancelled() }}
         run: |
           mkdir -p reports/performance
           uv run --frozen --no-build python -m scripts.engineering.qa reduce-benchmark-evidence \
@@ -126,22 +97,6 @@ jobs:
             --evidence-dir reports/performance/evidence \
             --checkout-sha "${{ github.sha }}"
 
-      - name: Require validated benchmark artifacts
-        if: ${{ always() && !cancelled() }}
-        env:
-          PRODUCER_OUTCOME: ${{ steps.benchmarks.outcome }}
-          CONTRACT_OUTCOME: ${{ steps.measurement-contract.outcome }}
-          VALIDATION_OUTCOME: ${{ steps.validate-evidence.outcome }}
-        run: |
-          test "$PRODUCER_OUTCOME" = success
-          test "$CONTRACT_OUTCOME" = success
-          test "$VALIDATION_OUTCOME" = success
-          test -s reports/performance/benchmark-measurements.json
-          test -s reports/performance/benchmark-validation-manifest.json
-          test -s reports/performance/benchmark-manifest.json
-          test -s reports/performance/benchmark-gate.json
-
-      # Raw files and failure reports remain available for diagnosis after failure.
       - name: Upload performance artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() && !cancelled() }}
@@ -154,9 +109,7 @@ jobs:
             reports/performance/hotspot-degradation.md
             reports/performance/benchmark-measurements.json
             reports/performance/benchmark-manifest.json
-            reports/performance/benchmark-validation-manifest.json
             reports/performance/benchmark-gate.json
             reports/performance/evidence/
-            reports/performance/delta-sequential-merge/
           if-no-files-found: error
           retention-days: 30

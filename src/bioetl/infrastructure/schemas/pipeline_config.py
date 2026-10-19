@@ -215,43 +215,7 @@ class PipelineYamlConfig(BaseModel):
     gold_table: str | None = Field(default=None, min_length=1)
     silver_filters: SilverFiltersConfig = Field(default_factory=SilverFiltersConfig)
     gold_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
-
-    def _customize_sink_schema(schema: JsonDict) -> None:
-        """Customize JSON Schema for layer-aware sink constraints."""
-        child_ref = schema.get("additionalProperties", {})
-        schema["additionalProperties"] = False
-
-        schema["properties"] = {
-            "bronze": {
-                "allOf": [child_ref],
-                "properties": {
-                    "mode": {"type": ["string", "null"], "enum": ["append", None]},
-                },
-            },
-            "silver": {
-                "allOf": [child_ref],
-                "properties": {
-                    "mode": {
-                        "type": ["string", "null"],
-                        "enum": ["append", "merge", None],
-                    },
-                },
-            },
-            "gold": {
-                "allOf": [child_ref],
-                "properties": {
-                    "mode": {
-                        "type": ["string", "null"],
-                        "enum": ["append", "overwrite", "scd2", None],
-                    },
-                },
-            },
-        }
-
-    sink: dict[str, SinkLayerConfig] = Field(
-        default_factory=dict,
-        json_schema_extra=_customize_sink_schema,
-    )
+    sink: dict[str, SinkLayerConfig] = Field(default_factory=dict)
     source: SourceConfig = Field(default_factory=SourceConfig)
     input_filter: InputFilterYamlConfig = Field(default_factory=InputFilterYamlConfig)
     maintenance: MaintenanceConfig = Field(default_factory=MaintenanceConfig)
@@ -370,31 +334,6 @@ class PipelineYamlConfig(BaseModel):
                 raise ValueError(
                     f"sink.{layer_name}.sort_by must be configured for deterministic output"
                 )
-
-    @model_validator(mode="after")
-    def validate_sink_modes(self) -> PipelineYamlConfig:
-        """Validate layer-aware sink modes and keys."""
-        valid_layers = {"bronze", "silver", "gold"}
-        valid_modes = {
-            "bronze": {"append"},
-            "silver": {"append", "merge"},
-            "gold": {"append", "overwrite", "scd2"},
-        }
-
-        for layer_name, layer_config in self.sink.items():
-            if layer_name not in valid_layers:
-                raise ValueError(
-                    f"Unknown sink layer: '{layer_name}'. Allowed: bronze, silver, gold."
-                )
-
-            mode = layer_config.mode
-            if mode is not None and mode not in valid_modes[layer_name]:
-                valid_str = ", ".join(sorted(valid_modes[layer_name]))
-                raise ValueError(
-                    f"Invalid mode '{mode}' for {layer_name} layer. Allowed: {valid_str}."
-                )
-
-        return self
 
     @model_validator(mode="after")
     def validate_primary_key_split(self) -> PipelineYamlConfig:

@@ -107,7 +107,6 @@ def _under_coverage_floor(
     ]
 
 
-@pytest.mark.generated_artifact
 def test_issue_5707_governance_artifacts_are_current_and_passing() -> None:
     scorecard = _load_json(SCORECARD)
     gates = _load_json(DEBT_GATES)
@@ -149,7 +148,6 @@ def test_issue_5707_governance_artifacts_are_current_and_passing() -> None:
     assert remote_gate["current"] == remote_baseline["baseline_artifact_fingerprint"]
 
 
-@pytest.mark.generated_artifact
 def test_issue_5708_adapter_delegation_duplication_is_bounded() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5708"]
@@ -180,7 +178,6 @@ def test_issue_5708_adapter_delegation_duplication_is_bounded() -> None:
     assert {row["category"] for row in adapters["actionability"]} == set()
 
 
-@pytest.mark.generated_artifact
 def test_issue_5709_pipeline_transformer_duplication_is_reduced() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5709"]
@@ -200,7 +197,6 @@ def test_issue_5709_pipeline_transformer_duplication_is_reduced() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5710_architecture_performance_evidence_is_isolated() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5710"]
@@ -230,7 +226,6 @@ def test_issue_5710_architecture_performance_evidence_is_isolated() -> None:
     assert baseline["slow_governance_cache_probe"]["lane_isolation"]["isolated"] is True
 
 
-@pytest.mark.generated_artifact
 def test_issue_5711_coverage_tail_is_zero_unmeasured_and_owner_anchored() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5711"]
@@ -281,7 +276,6 @@ def test_issue_5711_coverage_tail_is_zero_unmeasured_and_owner_anchored() -> Non
             assert (ROOT / owner_test).exists(), owner_test
 
 
-@pytest.mark.generated_artifact
 def test_issue_5712_retained_public_compatibility_seams_are_bounded() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5712"]
@@ -297,7 +291,6 @@ def test_issue_5712_retained_public_compatibility_seams_are_bounded() -> None:
     assert summary["twin_pair_count"] == 0
 
 
-@pytest.mark.generated_artifact
 def test_issue_5713_compatibility_test_debt_is_ratcheted() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5713"]
@@ -324,7 +317,6 @@ def test_issue_5713_compatibility_test_debt_is_ratcheted() -> None:
         assert report[key] == outcome[key]
 
 
-@pytest.mark.generated_artifact
 def test_issue_5714_dead_code_governance_has_no_untriaged_candidates() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5714"]
@@ -344,7 +336,6 @@ def test_issue_5714_dead_code_governance_has_no_untriaged_candidates() -> None:
     assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
 
 
-@pytest.mark.generated_artifact
 def test_issue_5715_no_growth_enforcement_gates_are_active() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5715"]

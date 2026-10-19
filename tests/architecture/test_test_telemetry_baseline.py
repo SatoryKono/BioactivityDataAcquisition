@@ -41,7 +41,6 @@ def _load_yaml(path: Path) -> dict[str, object]:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
-@pytest.mark.generated_artifact
 def test_test_telemetry_baseline_contract_is_present_and_scoped() -> None:
     payload = _load_yaml(BASELINE_YAML)
 
@@ -108,14 +107,12 @@ def test_test_telemetry_baseline_doc_is_published_from_engineering_index() -> No
     assert "test-telemetry-baseline.md" in readme
 
 
-@pytest.mark.generated_artifact
 def test_branch_consumable_test_telemetry_reports_exist() -> None:
     assert SLOWEST_JSON.exists()
     assert SLOWEST_MD.exists()
     assert COVERAGE_SUMMARY_JSON.exists()
 
 
-@pytest.mark.generated_artifact
 def test_tests_workflow_and_baseline_contract_use_same_artifact_paths() -> None:
     payload = _load_yaml(BASELINE_YAML)
     workflow = WORKFLOW.read_text(encoding="utf-8")

@@ -21,10 +21,9 @@ from bioetl.application.composite.runner_pkg.runner_result_types import (
     CompositeResultBuildRequest,
     _PreparedCompositeResultContext,
 )
-from bioetl.application.composite.runtime_models import CompositeExecutionContext
 from bioetl.application.runtime_timestamps import derive_completion_timestamp
-from bioetl.domain.composite.result import CompositeResult, MergeResult
-from bioetl.domain.exceptions import BioETLError, CheckpointConflictError
+from bioetl.domain.composite.result import CompositeResult
+from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
     from bioetl.application.composite.checkpoint import (
@@ -40,7 +39,6 @@ __all__ = [
     "CompositeResultBuildContext",
     "CompositeResultBuildRequest",
     "build_composite_result",
-    "build_legacy_completed_execution_context",
     "finalize_composite_result",
     "finalize_pipeline",
     "log_composite_completion",
@@ -76,60 +74,6 @@ class CompositePipelineFinalizationResult:
     """Terminal checkpoint state produced by finalization helpers."""
 
     completed_state: CompositeCheckpointState
-
-
-def build_legacy_completed_execution_context(
-    state: CompositeCheckpointState,
-) -> CompositeExecutionContext:
-    """Resume only finalization for a checkpoint written after legacy CV.
-
-    The legacy state is emitted after merge and cross-validation. Re-running
-    the current combined merge/CV stage would repeat completed writes. The
-    migration marker instead requires enough persisted merge evidence to build
-    the terminal result; if it is missing, fail closed without replaying work.
-    """
-    if not state.seed_completed or state.seed_result is None:
-        raise CheckpointConflictError(
-            state.composite_name,
-            "legacy cross_validation_completed checkpoint lacks completed seed result",
-        )
-    payload = state.merge_result
-    if not isinstance(payload, dict) or not isinstance(
-        payload.get("records_merged"), int
-    ):
-        raise CheckpointConflictError(
-            state.composite_name,
-            "legacy cross_validation_completed checkpoint lacks merge result evidence",
-        )
-
-    merge_fields = {
-        "records_merged",
-        "records_from_seed",
-        "records_enriched",
-        "records_fully_enriched",
-        "sources_used",
-        "field_coverage",
-        "duration_seconds",
-        "output_silver_path",
-        "output_gold_path",
-        "lineage_summary",
-        "quarantine_payloads",
-    }
-    try:
-        merge_result = MergeResult(
-            **{key: value for key, value in payload.items() if key in merge_fields}
-        )
-    except (TypeError, ValueError) as error:
-        raise CheckpointConflictError(
-            state.composite_name,
-            "legacy cross_validation_completed checkpoint has invalid merge result evidence",
-        ) from error
-    return CompositeExecutionContext(
-        seed_result=state.seed_result,
-        dependency_results=state.dependency_results,
-        enrichment_results=state.enrichment_results,
-        merge_result=merge_result,
-    )
 
 
 def prepare_composite_result_context(

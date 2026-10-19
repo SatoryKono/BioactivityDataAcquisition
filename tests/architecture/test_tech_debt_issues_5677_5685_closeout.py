@@ -83,7 +83,6 @@ def _gate(payload: dict[str, Any], name: str) -> dict[str, Any]:
     raise AssertionError(f"missing debt governance gate: {name}")
 
 
-@pytest.mark.generated_artifact
 def test_issue_5678_contract_exclusions_are_burned_down_to_zero() -> None:
     ownership = _load_json(OWNERSHIP_MAP)
     coverage = _load_json(CONTRACT_COVERAGE)
@@ -108,7 +107,6 @@ def test_issue_5678_contract_exclusions_are_burned_down_to_zero() -> None:
     }
 
 
-@pytest.mark.generated_artifact
 def test_issues_5679_5680_5685_duplication_ratchets_are_lower() -> None:
     duplication = _load_json(DUPLICATION_BASELINE)
     # CLI target was removed from duplication baseline
@@ -143,7 +141,6 @@ def test_issues_5679_5680_5685_duplication_ratchets_are_lower() -> None:
     assert {row["direction"] for row in ratchets.values()} == {"reduced"}
 
 
-@pytest.mark.generated_artifact
 def test_issue_5681_retained_compatibility_surfaces_are_reviewed() -> None:
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
     census = _load_json(COMPATIBILITY_CENSUS)
@@ -166,7 +163,6 @@ def test_issue_5681_retained_compatibility_surfaces_are_reviewed() -> None:
         assert_retained_entrypoint_src_importers(entry)
 
 
-@pytest.mark.generated_artifact
 def test_issue_5682_compatibility_test_inventory_is_ratcheted_to_zero() -> None:
     config = _load_yaml(TEST_GOVERNANCE_CONFIG)
     report_payload = _load_json(TEST_GOVERNANCE_REPORT)
@@ -189,7 +185,6 @@ def test_issue_5682_compatibility_test_inventory_is_ratcheted_to_zero() -> None:
     assert (ROOT / "tests/architecture/test_silver_filter_identity_surface.py").exists()
 
 
-@pytest.mark.generated_artifact
 def test_issue_5683_dead_code_inventory_has_no_untriaged_candidates() -> None:
     inventory = _load_json(DEAD_CODE_INVENTORY)
     summary = inventory["summary"]
@@ -215,7 +210,6 @@ def test_issue_5683_dead_code_inventory_has_no_untriaged_candidates() -> None:
     }
 
 
-@pytest.mark.generated_artifact
 def test_issue_5684_governance_freshness_gates_are_passing() -> None:
     gates = _load_json(DEBT_GATES)
     review = _load_json(RUNTIME_CARDINALITY_REVIEW)

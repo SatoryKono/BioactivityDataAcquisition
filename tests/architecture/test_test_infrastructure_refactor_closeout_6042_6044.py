@@ -33,7 +33,6 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
-@pytest.mark.generated_artifact
 def test_issue_6042_bootstrap_profile_blocks_unproven_scope_widening() -> None:
     """Bootstrap profile stays live-topology-bound (#6042 remainder / #6892)."""
     profile = _load_json(BOOTSTRAP_PROFILE)
@@ -89,7 +88,6 @@ def test_issue_6042_bootstrap_profile_blocks_unproven_scope_widening() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_6044_support_helper_ownership_map_is_complete() -> None:
     support_map = _load_json(SUPPORT_MAP)
 

@@ -31,7 +31,7 @@ def _require_docs_extra() -> int:
     return 2
 
 
-def _parse_args(argv: list[str] | None) -> argparse.Namespace:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--skip-links", action="store_true", help="Skip link/spec/config checks"
@@ -55,15 +55,8 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument(
         "--skip-build", action="store_true", help="Skip strict MkDocs build"
     )
-    parser.add_argument(
-        "--defer-generated-artifacts",
-        action="store_true",
-        help="Leave generated output freshness to the scheduled daily owner; retain source checks",
-    )
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
 
-
-def _verification_steps(args: argparse.Namespace) -> list[tuple[str, list[str]]]:
     steps: list[tuple[str, list[str]]] = []
     if not args.skip_links:
         # Full check-links suite (unflagged = all runners). Partial
@@ -99,7 +92,6 @@ def _verification_steps(args: argparse.Namespace) -> list[tuple[str, list[str]]]
                 ],
             )
         )
-    if not args.skip_drift and not args.defer_generated_artifacts:
         steps.append(
             (
                 "generate-dashboard-panel-inventory",
@@ -124,7 +116,7 @@ def _verification_steps(args: argparse.Namespace) -> list[tuple[str, list[str]]]
                 ],
             )
         )
-    if not args.skip_cleanup_inventory and not args.defer_generated_artifacts:
+    if not args.skip_cleanup_inventory:
         steps.append(
             (
                 "generate-cleanup-inventory",
@@ -136,7 +128,7 @@ def _verification_steps(args: argparse.Namespace) -> list[tuple[str, list[str]]]
                 ],
             )
         )
-    if not args.skip_normalization_matrix and not args.defer_generated_artifacts:
+    if not args.skip_normalization_matrix:
         steps.append(
             (
                 "generate-pipeline-normalization-matrix",
@@ -150,13 +142,8 @@ def _verification_steps(args: argparse.Namespace) -> list[tuple[str, list[str]]]
             )
         )
 
-    return steps
-
-
-def main(argv: list[str] | None = None) -> int:
-    args = _parse_args(argv)
-    for label, command in _verification_steps(args):
-        exit_code = _run_step(label, command)
+    for label, argv in steps:
+        exit_code = _run_step(label, argv)
         if exit_code != 0:
             return exit_code
 

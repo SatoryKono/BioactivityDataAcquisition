@@ -12,12 +12,9 @@
 
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 
 import pytest
-
-from scripts.engineering.qa._tracked_glob import git_discovery_environment
 
 from scripts.engineering.qa.report_artifact_duplication_audit import (
     collect_artifact_duplication_report,
@@ -48,17 +45,6 @@ def test_collect_artifact_duplication_report_groups_exact_byte_duplicates(
         "registry: unique\n",
     )
 
-    subprocess.run(
-        ["git", "init", str(tmp_path)],
-        check=True,
-        capture_output=True,
-        env=git_discovery_environment(),
-    )
-    subprocess.run(
-        ["git", "-C", str(tmp_path), "add", "."],
-        check=True,
-        env=git_discovery_environment(),
-    )
     report = collect_artifact_duplication_report(tmp_path)
 
     assert report["total_files"] == 3
@@ -99,17 +85,6 @@ def test_collect_artifact_duplication_report_counts_patterns_from_glob_matches(
         "c: 3\n",
     )
 
-    subprocess.run(
-        ["git", "init", str(tmp_path)],
-        check=True,
-        capture_output=True,
-        env=git_discovery_environment(),
-    )
-    subprocess.run(
-        ["git", "-C", str(tmp_path), "add", "."],
-        check=True,
-        env=git_discovery_environment(),
-    )
     report = collect_artifact_duplication_report(tmp_path)
 
     assert report["pattern_file_counts"]["configs/**/*.yaml"] == 2

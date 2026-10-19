@@ -12,8 +12,7 @@ or unusable evidence, and a manifest that cannot be saved are nonzero.
 supervised argv; it is not a pytest addopt. ``PYTHONFAULTHANDLER=1`` is set
 only in the child environment and is not copied into the manifest.
 
-POSIX delivers ``SIGABRT`` to leaf descendants first so launchers can reap
-them. With no descendants it signals the isolated process group.
+POSIX delivers the diagnostic signal to the child's session with ``SIGABRT``.
 Native Windows does not support ``Popen.send_signal(SIGABRT)``; the timeout
 path terminates the recorded descendant tree and stays nonzero, without
 claiming a faulthandler dump. A result observed on one platform is not
@@ -325,23 +324,17 @@ class PytestAbortDiagnosticAdapter:
         try:
             if self.timeout is None:
                 proc.wait()
-            elif not _wait_bounded(proc, float(self.timeout)):
-                timed_out = True
-                recorded = _descendant_pids(proc.pid)
-                delivery, sent = _deliver_diagnostic_signal(proc, recorded)
-                if delivery == "leaf_descendants":
-                    # Give waiting parents time to reap native/Python leaves,
-                    # then dump a still-running Python launcher as well.
-                    deadline = time.monotonic() + self.dump_margin
-                    if not _wait_bounded(proc, self.dump_margin / 2):
-                        fallback, sent = _deliver_diagnostic_signal(proc)
-                        delivery = f"leaf_descendants_then_{fallback}"
-                        _wait_bounded(proc, max(0, deadline - time.monotonic()))
-                elif delivery == "process_group":
-                    _wait_bounded(proc, self.dump_margin)
-                recorded |= _descendant_pids(proc.pid)
-                cleanup_error = _terminate_recorded(proc.pid, recorded)
-                manifest.cleanup_error = cleanup_error or None
+            else:
+                finished = _wait_bounded(proc, float(self.timeout))
+                if not finished:
+                    timed_out = True
+                    recorded = _descendant_pids(proc.pid)
+                    delivery, sent = _deliver_diagnostic_signal(proc)
+                    if delivery == "process_group":
+                        _wait_bounded(proc, self.dump_margin)
+                    recorded |= _descendant_pids(proc.pid)
+                    cleanup_error = _terminate_recorded(proc.pid, recorded)
+                    manifest.cleanup_error = cleanup_error or None
         finally:
             if proc.poll() is None:
                 _terminate_recorded(proc.pid, _descendant_pids(proc.pid))
@@ -624,37 +617,12 @@ def _wait_bounded(proc: subprocess.Popen[bytes], seconds: float) -> bool:
     return True
 
 
-def _abort_leaves(leaves: set[int]) -> bool:
-    """Signal live leaves, allowing vanished processes to fall back to the group."""
-    delivered = False
-    for pid in sorted(leaves):
-        try:
-            os.kill(pid, signal.SIGABRT)
-            delivered = True
-        except ProcessLookupError:
-            continue
-    return delivered
-
-
 def _deliver_diagnostic_signal(
     proc: subprocess.Popen[bytes],
-    descendants: set[int] | None = None,
 ) -> tuple[str, int | None]:
-    """Abort leaves before launchers so waiting parents can reap their children."""
+    """Signal the isolated POSIX session. Windows has no SIGABRT fallback."""
     if os.name != "posix":
         return "unsupported", None
-    leaves = {
-        pid
-        for pid in (descendants or set())
-        if _pid_alive(pid) and not _descendant_pids(pid)
-    }
-    try:
-        if _abort_leaves(leaves):
-            return "leaf_descendants", signal.SIGABRT
-    except OSError:
-        return "error", signal.SIGABRT
-    # All leaves disappeared between discovery and delivery: actually signal
-    # the launcher group rather than claiming a delivery that never happened.
     try:
         os.killpg(proc.pid, signal.SIGABRT)
     except ProcessLookupError:

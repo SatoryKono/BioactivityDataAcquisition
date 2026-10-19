@@ -61,7 +61,6 @@ def test_issue_5954_memory_workflow_smoke_is_bounded_and_wired() -> None:
     assert '"$PYTHON_BIN" -m memory.tooling.workflow smoke' in pretest_text
 
 
-@pytest.mark.generated_artifact
 def test_issue_5955_debt_governance_rollup_blocks_budget_growth() -> None:
     tests_workflow = TESTS_WORKFLOW.read_text(encoding="utf-8")
 
@@ -76,7 +75,6 @@ def test_issue_5955_debt_governance_rollup_blocks_budget_growth() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5962_flaky_inventory_is_explicit_and_fail_fast() -> None:
     gates = _load_json(DEBT_GATES)
     review = _load_json(FLAKY_REVIEW)
@@ -102,7 +100,6 @@ def test_issue_5962_flaky_inventory_is_explicit_and_fail_fast() -> None:
     assert _gate(gates, "flaky_test_untriaged_count")["status"] == "pass"
 
 
-@pytest.mark.generated_artifact
 def test_issue_5963_observability_freshness_and_zero_debt_gates_are_release_blocking() -> (
     None
 ):

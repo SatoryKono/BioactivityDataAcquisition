@@ -45,7 +45,6 @@ def _skip_if_source_tree_is_dirty() -> None:
         )
 
 
-@pytest.mark.generated_artifact
 def test_module_coverage_inventory_covers_every_source_module() -> None:
     _skip_if_source_tree_is_dirty()
     committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
@@ -57,7 +56,6 @@ def test_module_coverage_inventory_covers_every_source_module() -> None:
     assert inventory_paths == expected_paths
 
 
-@pytest.mark.generated_artifact
 def test_module_coverage_inventory_source_tree_hash_is_current() -> None:
     _skip_if_source_tree_is_dirty()
     committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))

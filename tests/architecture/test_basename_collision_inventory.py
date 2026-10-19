@@ -46,7 +46,6 @@ def test_request_metadata_basenames_are_provider_prefixed() -> None:
     assert len(renamed) >= 7
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_basename_collision_inventory_exists_and_is_honest() -> None:
     assert _INV.is_file()

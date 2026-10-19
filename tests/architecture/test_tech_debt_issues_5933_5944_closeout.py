@@ -83,7 +83,6 @@ def _duplication_target(payload: dict[str, Any], target: str) -> dict[str, Any]:
     raise AssertionError(f"missing duplication target: {target}")
 
 
-@pytest.mark.generated_artifact
 def test_issue_5933_governance_artifacts_are_rebaselined() -> None:
     closeout = _load_json(CLOSEOUT)
     gates = _load_json(DEBT_GATES)
@@ -273,7 +272,6 @@ def test_issue_5937_control_plane_identity_legacy_aliases_are_bounded() -> None:
     assert legacy.implementation_status == "SHIPPED"
 
 
-@pytest.mark.generated_artifact
 def test_issue_5942_observability_runtime_cardinality_is_clean() -> None:
     gates = _load_json(DEBT_GATES)
     inventory = _load_json(RUNTIME_CARDINALITY_INVENTORY)
@@ -304,7 +302,6 @@ def test_issue_5942_observability_runtime_cardinality_is_clean() -> None:
     assert _gate(gates, "observability_release_review_status")["status"] == "pass"
 
 
-@pytest.mark.generated_artifact
 def test_issue_5943_config_compatibility_and_contracts_are_clean() -> None:
     discrepancy = _load_json(CONFIG_DISCREPANCY)
     coverage = _load_json(CONTRACT_COVERAGE)
@@ -341,7 +338,6 @@ def test_issue_5943_config_compatibility_and_contracts_are_clean() -> None:
             assert (ROOT / relative_path).exists(), (row["id"], relative_path)
 
 
-@pytest.mark.generated_artifact
 def test_issue_5944_test_governance_closeout_metrics_are_clean() -> None:
     test_governance = _load_json(TEST_GOVERNANCE)
     dead_code = _load_json(DEAD_CODE_INVENTORY)

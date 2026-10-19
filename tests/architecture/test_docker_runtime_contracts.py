@@ -1319,7 +1319,6 @@ def test_structured_command_output_is_parsed_before_evidence_is_bounded(
     assert len(preflight._command_evidence(observation)["stdout"]) == 4000
 
 
-@pytest.mark.generated_artifact
 def test_pre_change_baseline_captures_all_original_root_causes_without_secrets() -> (
     None
 ):

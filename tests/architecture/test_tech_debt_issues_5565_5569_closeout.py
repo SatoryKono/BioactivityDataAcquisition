@@ -121,7 +121,6 @@ def test_issue_5567_control_plane_facades_have_bounded_first_party_imports() -> 
         assert len(actual) <= int(facade["max_src_importer_count"])
 
 
-@pytest.mark.generated_artifact
 def test_issue_5568_non_composite_config_duplication_is_explicitly_governed() -> None:
     closeout = _load_json(CLOSEOUT)
     backlog = _load_json(CONFIG_BACKLOG)
@@ -140,7 +139,6 @@ def test_issue_5568_non_composite_config_duplication_is_explicitly_governed() ->
         assert str(governance["rationale"]).strip(), cluster["block_path"]
 
 
-@pytest.mark.generated_artifact
 def test_issue_5569_retired_observability_events_have_lifecycle_guards() -> None:
     governance = _load_yaml(OBSERVABILITY_GOVERNANCE)
     event_governance = governance["event_signal_governance"]

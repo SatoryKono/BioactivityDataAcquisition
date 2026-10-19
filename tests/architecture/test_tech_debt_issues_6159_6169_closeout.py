@@ -138,7 +138,6 @@ def test_issues_6159_6169_closeout_scope_is_explicit() -> None:
         assert (ROOT / evidence_path).exists(), evidence_path
 
 
-@pytest.mark.generated_artifact
 def test_issue_6162_compatibility_facades_are_frozen_without_drift() -> None:
     outcome = _outcome("6162")
     summary = _load_json(COMPATIBILITY_CENSUS)["summary"]
@@ -156,7 +155,7 @@ def test_issue_6162_compatibility_facades_are_frozen_without_drift() -> None:
     assert summary["retained_public_export_facades_with_wrapper_contract_drift"] == 0
 
 
-def test_issue_6163_live_source_hotspot_is_reduced() -> None:
+def test_issue_6163_data_quality_service_hotspot_is_reduced() -> None:
     outcome = _outcome("6163")
     service_source = DQ_SERVICE.read_text(encoding="utf-8")
     helper_source = DQ_ANOMALIES.read_text(encoding="utf-8")
@@ -168,6 +167,11 @@ def test_issue_6163_live_source_hotspot_is_reduced() -> None:
     assert "bioetl_dq_validation_score" not in service_source
     assert "def _emit_validation_gauges(" in helper_source
     assert "bioetl_dq_validation_score" in helper_source
+
+    row = _module_row_by_path(outcome["reduced_surface"])
+    assert row["source_lines"] == service_lines
+    assert row["coverage_percent"] == 100.0
+    assert row["missing_lines"] == 0
 
     control_plane_path = ROOT / "src/bioetl/application/services/control_plane"
     control_plane_files = sorted(control_plane_path.rglob("*.py"))
@@ -191,36 +195,6 @@ def test_issue_6163_live_source_hotspot_is_reduced() -> None:
         <= outcome["control_plane_reduced_surface_line_count_after_max"]
         <= 249
     )
-
-    scorecard_family = _hotspot_family_row(
-        _load_yaml(DEBT_SCORECARD)["hotspot_family_ratchets"],
-        outcome["control_plane_family"],
-    )
-    assert (
-        scorecard_family["metrics"]["files_ge_250_loc"]
-        == control_plane_large_file_count
-    )
-
-
-@pytest.mark.generated_artifact
-def test_issue_6163_data_quality_service_hotspot_is_reduced() -> None:
-    outcome = _outcome("6163")
-    service_lines = len(DQ_SERVICE.read_text(encoding="utf-8").splitlines())
-    row = _module_row_by_path(outcome["reduced_surface"])
-    assert row["source_lines"] == service_lines
-    assert row["coverage_percent"] == 100.0
-    assert row["missing_lines"] == 0
-    control_plane_large_file_count = count_files_ge_loc(
-        files=sorted(
-            (ROOT / "src/bioetl/application/services/control_plane").rglob("*.py")
-        ),
-        min_lines=250,
-    )
-    reduced_surface_lines = len(
-        (ROOT / outcome["control_plane_reduced_surface"])
-        .read_text(encoding="utf-8")
-        .splitlines()
-    )
     control_plane_module_row = _module_row_by_path(
         outcome["control_plane_reduced_surface"]
     )
@@ -230,10 +204,17 @@ def test_issue_6163_data_quality_service_hotspot_is_reduced() -> None:
         _load_json(HOTSPOT_BASELINE),
         outcome["control_plane_family"],
     )
+    scorecard_family = _hotspot_family_row(
+        _load_yaml(DEBT_SCORECARD)["hotspot_family_ratchets"],
+        outcome["control_plane_family"],
+    )
     assert hotspot_family["files_ge_250_loc"] == control_plane_large_file_count
+    assert (
+        scorecard_family["metrics"]["files_ge_250_loc"]
+        == control_plane_large_file_count
+    )
 
 
-@pytest.mark.generated_artifact
 def test_issue_6164_replay_sensitive_coverage_floors_are_100_percent() -> None:
     outcome = _outcome("6164")
     policy = _load_yaml(COVERAGE_GATES)["replay_sensitive_coverage_floors"]
@@ -254,7 +235,6 @@ def test_issue_6164_replay_sensitive_coverage_floors_are_100_percent() -> None:
             assert (ROOT / str(owner_test)).exists()
 
 
-@pytest.mark.generated_artifact
 def test_issue_6165_dead_code_zero_import_candidates_are_triaged() -> None:
     outcome = _outcome("6165")
     inventory = _load_json(DEAD_CODE_INVENTORY)
@@ -278,7 +258,6 @@ def test_issue_6165_dead_code_zero_import_candidates_are_triaged() -> None:
         assert row["owner_test_count"] >= 1
 
 
-@pytest.mark.generated_artifact
 def test_issue_6166_config_contract_drift_is_zero() -> None:
     outcome = _outcome("6166")
     config_metrics = _load_json(CONFIG_DISCREPANCY)["metrics"]
@@ -312,7 +291,6 @@ def test_issue_6166_config_contract_drift_is_zero() -> None:
     assert {row["coverage_status"] for row in ownership["rows"]} == {"covered"}
 
 
-@pytest.mark.generated_artifact
 def test_issue_6169_script_governance_ratchet_has_headroom() -> None:
     outcome = _outcome("6169")
     manifest = _load_json(SCRIPTS_MANIFEST)

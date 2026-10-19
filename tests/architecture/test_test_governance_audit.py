@@ -217,7 +217,6 @@ def test_current_test_audit_issue_closeout_tracks_live_evidence() -> None:
         )
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_test_audit_closeout_2026_06_19_tracks_issue_pack_evidence() -> None:
     """#5410/#5423-#5435 closeout must stay backed by live governance evidence."""
@@ -281,7 +280,6 @@ def test_test_audit_closeout_2026_06_19_tracks_issue_pack_evidence() -> None:
         assert (ROOT / relative_path).exists()
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_test_audit_closeout_2026_07_08_tracks_corrected_tst_plan() -> None:
     """#6065-#6073 closeout must stay tied to corrected, evidence-backed policy."""
@@ -376,7 +374,6 @@ def test_test_audit_closeout_2026_07_08_tracks_corrected_tst_plan() -> None:
     assert cast(YamlMap, gold_registry)["scope"] == invariants["gold_snapshot_scope"]
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_test_governance_report_defines_test_file_and_repo_backed_counts() -> None:
     """Audit counts must distinguish pytest test files from all test Python files."""
@@ -423,7 +420,6 @@ def test_test_file_inventory_is_independent_of_pycache(tmp_path: Path) -> None:
     )
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_rf_009_test_governance_closeout_tracks_live_zero_debt_metrics() -> None:
     """RF-009 closeout now tracks duplicate names (reduced to 0 after cleanup)."""
@@ -464,7 +460,6 @@ def test_rf_009_test_governance_closeout_tracks_live_zero_debt_metrics() -> None
         assert int(report[metric_name]) == int(expected_value)
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_static_test_governance_report_stays_within_committed_budgets() -> None:
     payload = _load_yaml(CONFIG_PATH)
@@ -525,7 +520,6 @@ def test_governance_preflight_uses_fail_closed_lfs_contract() -> None:
     assert "Fail-closed (#7493)" in body
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_test_governance_artifacts_match_live_collector(
     cached_subprocess_run,
@@ -639,7 +633,6 @@ def test_governance_hash_releases_payloads_without_changing_digest(
     assert counts["live"] == 0
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_critical_behavior_envelopes_have_assertion_evidence() -> None:
     """Critical envelopes may include no-exception tests but need assertion evidence."""
@@ -673,7 +666,6 @@ def test_critical_behavior_envelopes_have_assertion_evidence() -> None:
     assert not violations, "\n".join(violations)
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_compatibility_test_file_max_follows_stream_g_downward_ratchet() -> None:
     """#5435: compatibility_test_file_max may only ratchet down to live inventory."""
@@ -723,7 +715,6 @@ def test_test_governance_budgets_are_explicit_no_growth_ratchets() -> None:
     assert set(cast(list[str], ratchet["ratcheted_fields"])) == set(budgets)
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_static_test_governance_report_reuses_cached_inventory_scan() -> None:
     """Governance report is now committed artifact, not regenerated in tests."""
@@ -751,7 +742,6 @@ def test_static_test_governance_report_reuses_cached_inventory_scan() -> None:
     assert "report" in report
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_assertless_triage_matches_static_report_categories() -> None:
     payload = _load_yaml(CONFIG_PATH)
@@ -769,7 +759,6 @@ def test_assertless_triage_matches_static_report_categories() -> None:
     assert cast(YamlMap, triage["policy"])["new_no_effect_tests"]
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_no_weak_no_value_candidates_remain_in_integration_or_e2e() -> None:
     report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
@@ -799,7 +788,6 @@ def test_duplicate_name_triage_tracks_top_generic_names() -> None:
     assert cast(YamlMap, triage["fixture_builder_policy"])["consolidate_when"]
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_fixture_asset_duplication_inventory_artifact_matches_static_report() -> None:
     payload = json.loads(FIXTURE_DUPLICATION_INVENTORY_PATH.read_text(encoding="utf-8"))
@@ -840,7 +828,6 @@ def test_oversized_test_module_inventory_tracks_current_top_modules() -> None:
         )
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_compatibility_inventory_covers_every_detected_compatibility_test_file() -> (
     None

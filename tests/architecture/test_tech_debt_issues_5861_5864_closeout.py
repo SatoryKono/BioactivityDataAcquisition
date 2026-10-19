@@ -88,7 +88,6 @@ def _module_row(payload: dict[str, Any], module: str) -> dict[str, Any]:
     raise AssertionError(f"Missing module coverage row: {module}")
 
 
-@pytest.mark.generated_artifact
 def test_issue_5861_dq_evaluator_has_golden_and_property_evidence() -> None:
     closeout = _load_json(CLOSEOUT)
     inventory = _load_json(MODULE_COVERAGE)
@@ -109,7 +108,6 @@ def test_issue_5861_dq_evaluator_has_golden_and_property_evidence() -> None:
     ).exists()
 
 
-@pytest.mark.generated_artifact
 def test_issue_5862_contract_registry_and_ledger_have_domain_invariant_evidence() -> (
     None
 ):
@@ -143,7 +141,6 @@ def test_issue_5862_contract_registry_and_ledger_have_domain_invariant_evidence(
     ).exists()
 
 
-@pytest.mark.generated_artifact
 def test_issue_5863_control_plane_hotspot_loc_ratchet_improved() -> None:
     closeout = _load_json(CLOSEOUT)
     hotspot = _load_json(HOTSPOT_FAMILY)
@@ -181,7 +178,6 @@ def test_issue_5863_control_plane_hotspot_loc_ratchet_improved() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5864_runtime_builder_registration_is_explicit_and_helper_ratio_improved() -> (
     None
 ):

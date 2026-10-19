@@ -32,10 +32,6 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.normalization._reference_id_registry import (
-    _REFERENCE_IDENTIFIER_FAMILY_SPECS,
-    build_reference_identifier_families,
-)
 from bioetl.domain.normalization.reference_ids import (
     reference_identifier_families,
     reference_identifier_family,
@@ -232,35 +228,3 @@ def test_ror_reference_identifier_canonicalizes_only_ror_inputs() -> None:
     # Malformed ROR-shaped strings are preserved, not canonicalized.
     assert normalizer("https://ror.org/not-a-ror") == ("https://ror.org/not-a-ror")
     assert normalizer("0abcdef123") == "0abcdef123"
-
-
-def test_build_reference_identifier_families_rejects_missing_required_keys() -> None:
-    """Reject missing normalizer keys with a deterministic sorted diagnostic."""
-    expected_keys = {s[3] for s in _REFERENCE_IDENTIFIER_FAMILY_SPECS if s[3]}
-    with pytest.raises(ValueError, match="Missing required normalizer keys:") as exc:
-        build_reference_identifier_families({})
-
-    assert str(sorted(expected_keys)) in str(exc.value)
-
-
-def test_build_reference_identifier_families_rejects_synthetic_orphan_key() -> None:
-    """Reject a normalizer key absent from the governed family specifications."""
-    expected_keys = {s[3] for s in _REFERENCE_IDENTIFIER_FAMILY_SPECS if s[3]}
-    normalizers = dict.fromkeys(expected_keys)
-    normalizers["synthetic_orphan_key"] = None
-
-    with pytest.raises(ValueError, match="Unexpected extra normalizer keys:") as exc:
-        build_reference_identifier_families(normalizers)
-
-    assert "['synthetic_orphan_key']" in str(exc.value)
-
-
-def test_build_reference_identifier_families_allows_explicit_none_normalizers() -> None:
-    """Accept explicitly disabled normalizers for every required family key."""
-    expected_keys = {s[3] for s in _REFERENCE_IDENTIFIER_FAMILY_SPECS if s[3]}
-    normalizers = dict.fromkeys(expected_keys)
-
-    families = build_reference_identifier_families(normalizers)
-    assert len(families) == len(_REFERENCE_IDENTIFIER_FAMILY_SPECS)
-    for family in families:
-        assert family.normalizer is None

@@ -10,7 +10,6 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
-from scripts.engineering.qa._tracked_glob import tracked_files
 
 DEFAULT_ROOT = Path("tests/architecture")
 DEFAULT_JSON = Path("reports/quality/architecture-suite-burndown-inventory.json")
@@ -38,7 +37,7 @@ def _stem_family(path: Path) -> str:
 
 
 def scan(root: Path) -> dict[str, Any]:
-    files = list(tracked_files(root, "**/test_*.py"))
+    files = sorted(root.rglob("test_*.py"))
     total_loc = 0
     skip_hits = 0
     families: dict[str, list[str]] = defaultdict(list)

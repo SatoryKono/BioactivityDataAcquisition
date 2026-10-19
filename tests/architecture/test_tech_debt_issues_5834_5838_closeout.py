@@ -141,7 +141,6 @@ def _root_review_rows() -> dict[str, dict[str, Any]]:
     }
 
 
-@pytest.mark.generated_artifact
 def test_issue_5834_live_baseline_cleanup_and_owner_review_artifacts_are_current() -> (
     None
 ):
@@ -162,7 +161,6 @@ def test_issue_5834_live_baseline_cleanup_and_owner_review_artifacts_are_current
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5835_tolerated_local_only_root_clutter_is_reviewed_without_promoting_it() -> (
     None
 ):
@@ -203,7 +201,6 @@ def test_issue_5835_tolerated_local_only_root_clutter_is_reviewed_without_promot
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5836_root_env_surfaces_remain_security_review_only() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5836"]
@@ -229,7 +226,6 @@ def test_issue_5836_root_env_surfaces_remain_security_review_only() -> None:
         assert evidence_row["registry_classification"] == "security_review_required"
 
 
-@pytest.mark.generated_artifact
 def test_issue_5837_root_codex_wsl_shims_are_retired_and_owner_anchored() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5837"]
@@ -266,7 +262,6 @@ def test_issue_5837_root_codex_wsl_shims_are_retired_and_owner_anchored() -> Non
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5838_root_docker_adjuncts_are_reviewed_and_evidence_backed() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5838"]

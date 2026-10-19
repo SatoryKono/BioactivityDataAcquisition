@@ -42,9 +42,6 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(REPO_ROOT))
 
 
-from scripts.engineering.qa._tracked_glob import tracked_files
-
-
 @dataclass(frozen=True, slots=True)
 class PairMatrixFinding:
     """One semantic pair-matrix budget finding."""
@@ -104,9 +101,7 @@ def _snapshot_date_from_matrix_path(path: Path) -> date | None:
 
 def _latest_generated_matrix_path(repo_root: Path) -> Path | None:
     report_dir = repo_root / "reports" / "semantic_pipeline_audit"
-    candidates = list(
-        tracked_files(report_dir, f"{PAIR_MATRIX_PREFIX}*.csv", include_untracked=True)
-    )
+    candidates = sorted(report_dir.glob(f"{PAIR_MATRIX_PREFIX}*.csv"))
     return candidates[-1] if candidates else None
 
 

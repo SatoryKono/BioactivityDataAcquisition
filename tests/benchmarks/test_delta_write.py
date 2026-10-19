@@ -30,8 +30,6 @@
 Measures Delta Lake write throughput with merge/append operations.
 """
 
-from __future__ import annotations
-
 import asyncio
 import os
 import sys
@@ -53,9 +51,6 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from bioetl.infrastructure.time import SystemClock
 from tests.benchmarks.conftest import calculate_payload_size_mb
-from tests.helpers.delta_activity_schema import (
-    create_activity_schema as _create_activity_schema,
-)
 from tests.helpers.deterministic_ids import (
     deterministic_uuid_from_callsite,
     deterministic_uuid_string_from_callsite,
@@ -93,8 +88,29 @@ class FakeLogger:
     def error(self, _msg: str, **_kwargs: Any) -> None:
         return None
 
-    def bind(self, **_kwargs: Any) -> FakeLogger:
+    def bind(self, **_kwargs: Any) -> "FakeLogger":
         return self
+
+
+def _create_activity_schema() -> pa.Schema:
+    """Create a PyArrow schema for activity records."""
+    return pa.schema(
+        [
+            pa.field("id", pa.string()),
+            pa.field("molecule_id", pa.string()),
+            pa.field("assay_id", pa.string()),
+            pa.field("target_id", pa.string()),
+            pa.field("standard_value", pa.float64()),
+            pa.field("standard_units", pa.string()),
+            pa.field("pchembl_value", pa.float64()),
+            pa.field("canonical_smiles", pa.string()),
+            pa.field("_content_hash", pa.string()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.timestamp("us")),
+        ]
+    )
 
 
 def _prepare_records_for_delta(
@@ -114,7 +130,9 @@ def _prepare_records_for_delta(
             "standard_units": record.get("standard_units", ""),
             "pchembl_value": record.get("pchembl_value"),
             "canonical_smiles": record.get("canonical_smiles", ""),
-            "content_hash": deterministic_uuid_string_from_callsite("test_delta_write"),
+            "_content_hash": deterministic_uuid_string_from_callsite(
+                "test_delta_write"
+            ),
             "_run_id": run_id,
             "_run_type": "benchmark",
             "_source_batch_id": "benchmark_batch_0001",

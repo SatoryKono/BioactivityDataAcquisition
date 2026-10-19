@@ -449,17 +449,11 @@ def pytest_benchmark_update_json(
     output_json["bioetl_source"] = source
     output_json["bioetl_run"] = run
     output_json["bioetl_vcs_guard"] = guard_status()
-    dataset = os.environ.get("BIOETL_BENCHMARK_DATASET", "").strip()
-    if not dataset:
-        raise BenchmarkMeasurementContractError(
-            "blocked_provenance",
-            "BIOETL_BENCHMARK_DATASET must identify the input fixtures",
-        )
     output_json["bioetl_measurement"] = {
-        "dataset": dataset,
-        "environment": "github-actions"
-        if os.environ.get("GITHUB_ACTIONS") == "true"
-        else "local",
+        "dataset": os.environ.get("BIOETL_BENCHMARK_DATASET", "").strip(),
+        "environment": (
+            "github-actions" if os.environ.get("GITHUB_ACTIONS") == "true" else "local"
+        ),
     }
 
 

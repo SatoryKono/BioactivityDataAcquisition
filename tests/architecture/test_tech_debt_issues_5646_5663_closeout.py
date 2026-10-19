@@ -70,7 +70,6 @@ def _gate(payload: dict[str, Any], name: str) -> dict[str, Any]:
     raise AssertionError(f"missing debt governance gate: {name}")
 
 
-@pytest.mark.generated_artifact
 def test_issue_5656_debt_governance_gates_are_fail_fast_and_current() -> None:
     gates = _load_json(DEBT_GATES)
     summary = gates["summary"]
@@ -87,7 +86,6 @@ def test_issue_5656_debt_governance_gates_are_fail_fast_and_current() -> None:
     assert "--changed-from-ref refs/remotes/origin/main" in workflow
 
 
-@pytest.mark.generated_artifact
 def test_issue_5660_hotspot_family_warnings_are_zero_without_budget_growth() -> None:
     hotspot = _load_json(HOTSPOT_BASELINE)
     gates = _load_json(DEBT_GATES)
@@ -118,7 +116,6 @@ def test_issue_5660_hotspot_family_warnings_are_zero_without_budget_growth() -> 
         )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5662_config_contract_dq_and_observability_evidence_is_release_grade() -> (
     None
 ):
@@ -163,7 +160,6 @@ def test_issue_5662_config_contract_dq_and_observability_evidence_is_release_gra
         assert _gate(gates, gate_name)["status"] == "pass"
 
 
-@pytest.mark.generated_artifact
 def test_issue_5663_test_inventory_and_snapshot_policy_are_bounded() -> None:
     config = _load_yaml(TEST_GOVERNANCE_CONFIG)
     report_payload = _load_json(TEST_GOVERNANCE_REPORT)

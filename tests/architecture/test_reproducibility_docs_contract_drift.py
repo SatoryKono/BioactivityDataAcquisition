@@ -146,7 +146,6 @@ def test_publication_provider_docs_mark_occurrence_provenance_as_sidecar_only() 
         assert "sidecar/control-plane" in text, relative_path
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_normalization_matrix_declares_non_contract_scope_and_drops_storage_wording() -> (
     None
@@ -362,7 +361,6 @@ def test_run_manifest_contract_bounds_composite_exact_replay_claims() -> None:
     assert "It is not a project-wide claim" in contract
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_reproducibility_support_matrix_matches_published_profiles() -> None:
     """Generated support docs must drift-check against domain profiles."""

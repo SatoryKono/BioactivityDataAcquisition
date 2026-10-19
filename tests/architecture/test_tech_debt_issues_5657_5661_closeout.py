@@ -95,7 +95,6 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
-@pytest.mark.generated_artifact
 def test_issue_5657_retained_public_compatibility_surfaces_remain_bounded() -> None:
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
     census = _load_json(COMPATIBILITY_CENSUS)
@@ -126,7 +125,6 @@ def test_issue_5657_retained_public_compatibility_surfaces_remain_bounded() -> N
         assert facade["resolution_conflicts"] == {}
 
 
-@pytest.mark.generated_artifact
 def test_issue_5658_adapter_duplication_is_below_opening_baseline() -> None:
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
@@ -139,7 +137,6 @@ def test_issue_5658_adapter_duplication_is_below_opening_baseline() -> None:
     assert not CROSSREF_FETCH_HELPERS.exists()
 
 
-@pytest.mark.generated_artifact
 def test_issue_5659_cli_and_pipeline_duplication_are_below_opening_baselines() -> None:
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
@@ -177,7 +174,6 @@ def test_issue_5659_cli_and_pipeline_duplication_are_below_opening_baselines() -
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5661_dead_code_review_window_is_current_and_fully_triaged() -> None:
     inventory = _load_json(DEAD_CODE_INVENTORY)
     review = inventory["review_window"]

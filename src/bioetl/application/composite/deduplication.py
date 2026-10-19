@@ -96,16 +96,6 @@ class EnricherDeduplicatorService:
             .agg(agg_exprs)
             .sort(key_columns)
         )
-        if columns_with_conflicts:
-            result = result.with_columns(
-                [
-                    pl.col(column)
-                    .list.eval(pl.element().struct.field("display"))
-                    .list.join("|")
-                    .alias(column)
-                    for column in columns_with_conflicts
-                ]
-            )
         self._record_deduplicated(records_before - len(result))
 
         self._log_deduplication(
@@ -140,6 +130,8 @@ class EnricherDeduplicatorService:
         Performs a single group_by with all column aggregations combined,
         instead of N separate group_by operations (one per column).
         """
+        import polars as pl
+
         if not non_key_columns:
             return [], []
 
@@ -189,6 +181,8 @@ class EnricherDeduplicatorService:
         columns_without_conflicts: list[str],
     ) -> list[pl.Expr]:
         """Build aggregation expressions for all columns."""
+        import polars as pl
+
         agg_exprs: list[pl.Expr] = []
         for col in columns_without_conflicts:
             agg_exprs.append(pl.col(col).first().alias(col))
@@ -197,20 +191,26 @@ class EnricherDeduplicatorService:
         return agg_exprs
 
     def _build_concat_expr(self, column: str, dtype: pl.DataType) -> pl.Expr:
-        """Build expression that concatenates conflicting values with |.
+        """Build expression that concatenates values with |.
 
-        Distinct original values stay distinct even when their rendered text
-        matches. Null is rendered as ``"null"`` and does not collapse into a
-        literal ``"null"``. Rendered texts are then sorted lexicographically.
-        That sort is inside the cell, not a sort of the joined result.
+        Note: Values are NOT sorted and duplicates are NOT removed.
+        The order is preserved from the original data.
         """
-        source = pl.col(column)
+        import polars as pl
+
         as_string = self._to_string_expr(column, dtype)
-        display = pl.when(source.is_null()).then(pl.lit("null")).otherwise(as_string)
-        return pl.struct(display=display, value=source).unique().sort().alias(column)
+        return (
+            pl.when(pl.col(column).is_null())
+            .then(pl.lit("null"))
+            .otherwise(as_string)
+            .str.join("|")
+            .alias(column)
+        )
 
     def _to_string_expr(self, column: str, dtype: pl.DataType) -> pl.Expr:
         """Convert column to string expression."""
+        import polars as pl
+
         col_expr = pl.col(column)
 
         if isinstance(dtype, (pl.List, pl.Struct)):

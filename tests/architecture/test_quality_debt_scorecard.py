@@ -306,7 +306,6 @@ def test_debt_scorecard_declares_explicit_coarse_budget_sync() -> None:
         ), f"governance.coarse_budgets.{metric_name}.ratchet_policy must be non-empty"
 
 
-@pytest.mark.generated_artifact
 def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
     """Only transition/sunset compatibility residue should remain scorecard debt."""
     scorecard = load_debt_scorecard()
@@ -370,7 +369,6 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
     assert expired_metric.get("max_count") == 0
 
 
-@pytest.mark.generated_artifact
 def test_debt_scorecard_declares_public_entrypoint_governance_kpis() -> None:
     """Sanctioned public entrypoints must stay visible as governance, not debt."""
     scorecard = load_debt_scorecard()
@@ -485,7 +483,6 @@ def test_debt_scorecard_declares_runtime_uuid_governance_kpis() -> None:
         )
 
 
-@pytest.mark.generated_artifact
 def test_debt_scorecard_declares_retirement_governance_kpis() -> None:
     """Retirement/dead-code governance must stay synchronized with live review debt."""
     scorecard = load_debt_scorecard()
@@ -555,7 +552,6 @@ def test_debt_scorecard_declares_retirement_governance_kpis() -> None:
         )
 
 
-@pytest.mark.generated_artifact
 def test_debt_scorecard_config_surface_ratchet_matches_baseline() -> None:
     """Config-surface ratchet budgets must match the committed discrepancy baseline."""
     scorecard = load_debt_scorecard()
@@ -628,7 +624,6 @@ def test_debt_scorecard_config_surface_ratchet_matches_baseline() -> None:
         assert legacy_policy["target_count"] == 0
 
 
-@pytest.mark.generated_artifact
 def test_debt_scorecard_hotspot_family_metrics_match_committed_baseline() -> None:
     """Scorecard hotspot metrics must stay aligned with reviewed baseline artifacts."""
     scorecard = load_debt_scorecard()

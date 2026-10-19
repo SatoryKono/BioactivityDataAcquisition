@@ -197,7 +197,6 @@ _C0_FAMILY_CAPS = {
 }
 
 
-@pytest.mark.generated_artifact
 def test_hotspot_family_fan_in_census_matches_live_ast_graph() -> None:
     """#10470: committed reverse-import census must equal the live AST graph."""
     committed = load_quality_json("hotspot-family-baseline.json")

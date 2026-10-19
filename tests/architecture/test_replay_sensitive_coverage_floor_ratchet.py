@@ -40,7 +40,6 @@ def _load_json(path: Path) -> dict[str, object]:
     return payload
 
 
-@pytest.mark.generated_artifact
 def test_replay_sensitive_module_coverage_floors_hold() -> None:
     """Replay-sensitive modules must stay above committed coverage floors."""
     policy = _load_yaml(POLICY_PATH).get("replay_sensitive_coverage_floors", {})

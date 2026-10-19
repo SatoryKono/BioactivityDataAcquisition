@@ -51,7 +51,6 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
-@pytest.mark.generated_artifact
 def test_issue_5510_control_plane_root_facade_stays_zero_src_importers() -> None:
     payload = _load_json(COMPATIBILITY_CENSUS)
     summary = payload["summary"]
@@ -63,7 +62,6 @@ def test_issue_5510_control_plane_root_facade_stays_zero_src_importers() -> None
     assert len(control_plane["src_importers"]) == 0
 
 
-@pytest.mark.generated_artifact
 def test_issues_5511_5512_duplication_wave_reduced_live_baseline_counts() -> None:
     payload = _load_json(DUPLICATION_BASELINE)
     rows = {row["target"]: row for row in payload["targets"] if isinstance(row, dict)}
@@ -86,7 +84,6 @@ def test_issue_5513_coverage_gate_promoted_to_block() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5514_flaky_review_stays_zero() -> None:
     payload = _load_json(FLAKY_REVIEW)
 
@@ -94,7 +91,6 @@ def test_issue_5514_flaky_review_stays_zero() -> None:
     assert payload["reviewed_flaky_tests"] == []
 
 
-@pytest.mark.generated_artifact
 def test_issue_5515_unused_event_review_stays_zero() -> None:
     payload = _load_json(RUNTIME_CARDINALITY_INVENTORY)
 

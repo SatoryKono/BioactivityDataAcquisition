@@ -10,8 +10,6 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
-from scripts.engineering.qa._tracked_glob import tracked_files
-
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_JSON_ARTIFACT = Path(
     "reports/quality/config-contract-registry-artifact-duplication.json"
@@ -66,7 +64,9 @@ def _iter_tracked_paths(
 ) -> list[Path]:
     paths: dict[str, Path] = {}
     for pattern in include_patterns:
-        for path in tracked_files(root, pattern):
+        for path in root.glob(pattern):
+            if not path.is_file():
+                continue
             if path.suffix.lower() not in TRACKED_EXTENSIONS:
                 continue
             relative = path.relative_to(root).as_posix()
@@ -107,8 +107,8 @@ def _discover_scoped_paths(
     pattern_file_counts: Counter[str] = Counter()
     for pattern in include_patterns:
         pattern_seen: set[str] = set()
-        for path in tracked_files(resolved_root, pattern):
-            if path.suffix.lower() not in TRACKED_EXTENSIONS:
+        for path in resolved_root.glob(pattern):
+            if not path.is_file() or path.suffix.lower() not in TRACKED_EXTENSIONS:
                 continue
             relative = path.relative_to(resolved_root).as_posix()
             if _matches_any(relative, exclude_patterns):

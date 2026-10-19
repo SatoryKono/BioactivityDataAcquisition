@@ -71,7 +71,6 @@ def test_issue_5974_time_seam_guards_are_extended() -> None:
     assert len(memory_now_seams) > 0, "Memory tooling datetime.now must be classified"
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_issue_5975_slow_governance_hotspots_are_budgeted() -> None:
     """Slow governance scan hotspots must have shared caches and a no-growth budget."""
@@ -99,7 +98,6 @@ def test_issue_5975_slow_governance_hotspots_are_budgeted() -> None:
     assert slow_lane["suite_name"] == "architecture-slow-governance"
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_issue_5976_duplicate_name_inventory_consolidated() -> None:
     """Duplicate test-name inventory must be consolidated into main governance artifact."""

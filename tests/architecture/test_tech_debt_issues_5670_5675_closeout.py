@@ -111,7 +111,6 @@ def _gate(payload: dict[str, Any], name: str) -> dict[str, Any]:
     raise AssertionError(f"missing debt governance gate: {name}")
 
 
-@pytest.mark.generated_artifact
 def test_issue_5671_governance_artifact_references_are_backed_by_live_evidence() -> (
     None
 ):
@@ -148,7 +147,6 @@ def test_issue_5671_governance_artifact_references_are_backed_by_live_evidence()
     assert "reports/quality/contract-registry-dq-diagnostics.json" in contract_workflow
 
 
-@pytest.mark.generated_artifact
 def test_issue_5672_retained_public_compatibility_surfaces_are_reviewed() -> None:
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
     census = _load_json(COMPATIBILITY_CENSUS)
@@ -180,7 +178,6 @@ def test_issue_5672_retained_public_compatibility_surfaces_are_reviewed() -> Non
         assert facade["resolution_conflicts"] == {}
 
 
-@pytest.mark.generated_artifact
 def test_issue_5673_duplication_baseline_is_below_second_wave_targets() -> None:
     duplication = _load_json(DUPLICATION_BASELINE)
     targets = {target["target"]: target for target in duplication["targets"]}
@@ -212,7 +209,6 @@ def test_issue_5674_internal_compatibility_shims_have_current_expiry_guards() ->
             assert _src_importers(module_name) == set(shim["allowed_src_importers"])
 
 
-@pytest.mark.generated_artifact
 def test_issue_5675_compatibility_tests_and_snapshot_lane_are_bounded() -> None:
     config = _load_yaml(TEST_GOVERNANCE_CONFIG)
     report_payload = _load_json(TEST_GOVERNANCE_REPORT)

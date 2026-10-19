@@ -74,9 +74,10 @@ def test_wrapper_autopreflight_scope_is_limited_to_full_repo_and_config_heavy_ru
             "determine_preflight_scope()"
         )
     ]
-    powershell_scope_start = powershell.index("function Test-PreflightScope")
     powershell_scope_block = powershell[
-        powershell_scope_start : powershell.index("\n}\n", powershell_scope_start)
+        powershell.index("function Test-PreflightScope") : powershell.index(
+            "foreach ($Arg in $PytestArgs)"
+        )
     ]
 
     for expected in (

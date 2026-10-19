@@ -56,7 +56,6 @@ def test_domain_public_facades_have_documented_classification() -> None:
         assert not missing, f"{facade} exports missing from traceability: {missing}"
 
 
-@pytest.mark.generated_artifact
 def test_aggregate_registry_anchors_resolve() -> None:
     registry = json.loads(
         (quality_artifact_path("domain-aggregate-invariant-registry.json")).read_text(
@@ -72,7 +71,6 @@ def test_aggregate_registry_anchors_resolve() -> None:
         assert all((ROOT / path).exists() for path in row["test_paths"])
 
 
-@pytest.mark.generated_artifact
 def test_pipeline_contract_matrix_matches_active_inventory() -> None:
     report = json.loads(
         (quality_artifact_path("contract-coverage-matrix.json")).read_text(

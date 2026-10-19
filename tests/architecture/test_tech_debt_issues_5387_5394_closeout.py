@@ -68,7 +68,6 @@ def _closeout_by_issue() -> dict[int, dict[str, Any]]:
     return {int(issue["number"]): issue for issue in issues if isinstance(issue, dict)}
 
 
-@pytest.mark.generated_artifact
 def test_issue_5387_scorecard_coverage_evidence_matches_inventory() -> None:
     skip_if_module_coverage_inventory_is_dirty(
         root=ROOT,
@@ -93,7 +92,6 @@ def test_issue_5387_scorecard_coverage_evidence_matches_inventory() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5388_compatibility_facade_counts_stay_within_ratchets() -> None:
     census = _load_json(COMPAT_CENSUS)
     debt_scorecard = _load_yaml(DEBT_SCORECARD)
@@ -114,7 +112,6 @@ def test_issue_5388_compatibility_facade_counts_stay_within_ratchets() -> None:
     assert summary["retained_public_export_facades_with_resolution_conflicts"] == 0
 
 
-@pytest.mark.generated_artifact
 def test_issue_5389_control_plane_use_case_seams_remain_explicit() -> None:
     control_plane_root = (
         ROOT / "src" / "bioetl" / "application" / "services" / "control_plane"
@@ -167,7 +164,6 @@ def test_issue_5389_control_plane_use_case_seams_remain_explicit() -> None:
     assert "Use-case ownership remains in Application" in audit_text
 
 
-@pytest.mark.generated_artifact
 def test_issue_5390_vcr_metadata_review_debt_is_zero() -> None:
     catalog = _load_json(VCR_CATALOG)
     totals = catalog["totals"]
@@ -177,7 +173,6 @@ def test_issue_5390_vcr_metadata_review_debt_is_zero() -> None:
     assert totals["duplicate_scenario_stem_count"] == 0
 
 
-@pytest.mark.generated_artifact
 def test_issue_5391_config_compatibility_legacy_taxonomy_is_no_growth() -> None:
     baseline = _load_json(CONFIG_BASELINE)
     review = _load_json(CONFIG_TAXONOMY_REVIEW)
@@ -202,7 +197,6 @@ def test_issue_5391_config_compatibility_legacy_taxonomy_is_no_growth() -> None:
         assert family_review["review_date"] == "2026-09-30"
 
 
-@pytest.mark.generated_artifact
 def test_issue_5392_coverage_tail_reduction_matches_live_inventory() -> None:
     skip_if_module_coverage_inventory_is_dirty(
         root=ROOT,
@@ -248,7 +242,6 @@ def test_issue_5392_coverage_tail_reduction_matches_live_inventory() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5393_full_app_duplication_baseline_covers_required_scope() -> None:
     payload = _load_json(FULL_APP_DUPLICATION)
     expected_targets = {

@@ -75,12 +75,6 @@ function Test-BenchmarkPluginNeeded {
 }
 
 function Enable-BenchmarkPlugin {
-    foreach ($Arg in $PytestArgs) {
-        if (($Arg -eq "--benchmark-json" -or $Arg -like "--benchmark-json=*") -and
-            [string]::IsNullOrWhiteSpace($env:BIOETL_BENCHMARK_DATASET)) {
-            throw "BIOETL_BENCHMARK_DATASET must identify the input fixtures before JSON capture"
-        }
-    }
     if (-not $env:BIOETL_BENCHMARK_CALLER) {
         $env:BIOETL_BENCHMARK_CALLER = "run_pytest"
     }

@@ -79,7 +79,6 @@ def test_hash_policy_is_common_across_entity_effective_family() -> None:
     assert "hash_policy" in all_keys
 
 
-@pytest.mark.generated_artifact
 def test_entity_residual_backlog_matches_live_metrics_and_scorecard() -> None:
     """Committed backlog artifact must mirror live residual metrics and scorecard."""
     backlog = build_backlog()
@@ -105,7 +104,6 @@ def test_entity_residual_backlog_matches_live_metrics_and_scorecard() -> None:
     assert backlog["entity_effective"]["actionable_partial_key_count"] == 0
 
 
-@pytest.mark.generated_artifact
 def test_config_surface_duplication_audit_matches_live_backlog() -> None:
     """Structured config duplication audit must stay committed and CI-visible."""
     committed = _load_json(BACKLOG_PATH)

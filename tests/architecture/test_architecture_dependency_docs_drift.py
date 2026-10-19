@@ -94,7 +94,6 @@ def test_nightly_workflow_regenerates_dependency_map() -> None:
     assert "git diff --exit-code -- docs/02-architecture/generated" in workflow
 
 
-@pytest.mark.generated_artifact
 def test_dependency_map_drift_check_passes_current_repo(
     monkeypatch,
 ) -> None:
@@ -180,7 +179,6 @@ def test_dependency_map_check_explains_source_fingerprint_only_drift(
     assert "topology content matches" in stdout
 
 
-@pytest.mark.generated_artifact
 def test_dependency_map_generated_markdown_uses_canonical_generator_path() -> None:
     markdown = Path(
         "docs/02-architecture/generated/module-dependency-map.md"
@@ -190,7 +188,6 @@ def test_dependency_map_generated_markdown_uses_canonical_generator_path() -> No
     ), "Generated dependency-map markdown should point to the canonical generator"
 
 
-@pytest.mark.generated_artifact
 def test_dependency_map_generated_markdown_declares_scope_boundary() -> None:
     markdown = Path(
         "docs/02-architecture/generated/module-dependency-map.md"

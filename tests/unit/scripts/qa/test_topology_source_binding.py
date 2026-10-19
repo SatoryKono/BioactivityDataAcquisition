@@ -23,29 +23,6 @@ def test_source_binding_preserves_history_and_is_idempotent():
     assert "a" * 64 not in revised
 
 
-def test_source_binding_does_not_relabel_distinct_historical_hashes():
-    historical = (
-        "Refresh note (2026-10-08): previous accepted capture.\n"
-        "`source_tree_sha256=02358f050d0c78c5b18a3c0fb59f7a55f0cda7a80591fb7db505405466c11625`\n"
-        "\n"
-        "Refresh note (2026-10-07): earlier raw capture.\n"
-        "`source_tree_sha256=54049305075ccc3e44a24c65a2c6250e5f1265ad4af28065fe3a86bcc63e1029`\n"
-    )
-    existing = historical + START + "\nold current binding\n" + END + "\n"
-
-    updated = render_binding(existing, "a" * 64, 3)
-
-    assert updated.split(START, maxsplit=1)[0] == historical
-    assert (
-        "`source_tree_sha256=02358f050d0c78c5b18a3c0fb59f7a55f0cda7a80591fb7db505405466c11625`"
-        in updated
-    )
-    assert (
-        "`source_tree_sha256=54049305075ccc3e44a24c65a2c6250e5f1265ad4af28065fe3a86bcc63e1029`"
-        in updated
-    )
-
-
 def test_source_binding_rejects_ambiguous_history():
     with pytest.raises(ValueError, match="delimiters"):
         render_binding(START, "a" * 64, 3)

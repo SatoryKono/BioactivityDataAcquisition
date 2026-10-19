@@ -91,7 +91,6 @@ def test_domain_top_level_root_modules_are_exactly_classified() -> None:
     assert classified == _top_level_domain_module_paths()
 
 
-@pytest.mark.generated_artifact
 def test_true_aggregates_match_invariant_registry() -> None:
     classification = _load_yaml(CLASSIFICATION_PATH)
     registry = _load_json(REGISTRY_PATH)
@@ -151,26 +150,13 @@ def test_retired_batch_split_modules_are_absent() -> None:
     for row in classification["true_aggregates"]:
         live_paths.add(str(row["root_module"]))
         live_paths.update(str(path) for path in row["implementation_modules"])
+    registry = _load_json(REGISTRY_PATH)
+    for row in registry["aggregates"]:
+        live_paths.add(str(row["root_module"]))
+        live_paths.update(str(path) for path in row["implementation_modules"])
     forbidden = {
         "src/bioetl/domain/aggregates/_batch_record.py",
         "src/bioetl/domain/aggregates/_batch_status.py",
         "src/bioetl/domain/aggregates/_batch_lifecycle.py",
     }
     assert live_paths.isdisjoint(forbidden)
-
-
-@pytest.mark.generated_artifact
-def test_retired_batch_split_modules_are_absent_from_generated_registry() -> None:
-    registry = _load_json(REGISTRY_PATH)
-    live_paths = {
-        str(path)
-        for row in registry["aggregates"]
-        for path in [row["root_module"], *row["implementation_modules"]]
-    }
-    assert live_paths.isdisjoint(
-        {
-            "src/bioetl/domain/aggregates/_batch_record.py",
-            "src/bioetl/domain/aggregates/_batch_status.py",
-            "src/bioetl/domain/aggregates/_batch_lifecycle.py",
-        }
-    )

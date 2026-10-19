@@ -116,7 +116,6 @@ def _load_catalog_module() -> CatalogModule:
     return cast(CatalogModule, cast(object, module))
 
 
-@pytest.mark.generated_artifact
 def test_vcr_metadata_catalog_drift_check_passes_current_repo() -> None:
     if sys.platform.startswith("win"):
         pytest.skip("Skipped on Windows due to filesystem performance")

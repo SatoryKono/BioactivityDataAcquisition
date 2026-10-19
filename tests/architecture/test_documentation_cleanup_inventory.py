@@ -53,7 +53,6 @@ def _rows_by_path() -> dict[str, dict[str, object]]:
     }
 
 
-@pytest.mark.generated_artifact
 def test_documentation_cleanup_inventory_artifacts_exist() -> None:
     """Tracked cleanup inventory outputs must be present for drift checks."""
     assert INVENTORY_JSON.exists(), (
@@ -62,7 +61,6 @@ def test_documentation_cleanup_inventory_artifacts_exist() -> None:
     assert INVENTORY_MD.exists()
 
 
-@pytest.mark.generated_artifact
 def test_documentation_cleanup_inventory_has_no_unknown_published_docs() -> None:
     """Published docs surfaces must not remain in the Unknown bucket."""
     payload = _inventory_payload()
@@ -78,7 +76,6 @@ def test_documentation_cleanup_inventory_has_no_unknown_published_docs() -> None
     assert not unknown_published, unknown_published[:10]
 
 
-@pytest.mark.generated_artifact
 def test_documentation_cleanup_inventory_surface_families_present() -> None:
     """Inventory summary must separate canonical/generated/working/archive surfaces."""
     payload = _inventory_payload()
@@ -91,7 +88,6 @@ def test_documentation_cleanup_inventory_surface_families_present() -> None:
     assert expected <= families
 
 
-@pytest.mark.generated_artifact
 def test_documentation_cleanup_inventory_has_no_duplicate_surfaces() -> None:
     """Published duplicate documentation surfaces must be merged or redirected."""
     payload = _inventory_payload()
@@ -105,7 +101,6 @@ def test_documentation_cleanup_inventory_has_no_duplicate_surfaces() -> None:
     assert not duplicate_paths, duplicate_paths[:10]
 
 
-@pytest.mark.generated_artifact
 def test_ai_skill_reference_redirects_are_active_compatibility_surfaces() -> None:
     """Legacy local skill-reference URLs stay active after duplicate body removal."""
     rows = _rows_by_path()
@@ -130,7 +125,6 @@ def test_ai_skill_reference_redirects_are_active_compatibility_surfaces() -> Non
         assert rows[path]["recommended_action"] == "keep"
 
 
-@pytest.mark.generated_artifact
 def test_documentation_cleanup_inventory_routes_diagram_artifacts() -> None:
     """Generated diagram support artifacts must have explicit route ownership."""
     rows = _rows_by_path()
@@ -152,7 +146,6 @@ def test_documentation_cleanup_inventory_routes_diagram_artifacts() -> None:
         assert rows[path]["generated_route"] == route_id
 
 
-@pytest.mark.generated_artifact
 def test_documentation_cleanup_inventory_covers_github_issue_drafts() -> None:
     """Issue drafts and packs must be lifecycle-classified before cleanup."""
     from scripts.docs.checks.documentation_cleanup_inventory import _is_doc_like
@@ -186,7 +179,6 @@ def test_documentation_cleanup_inventory_covers_github_issue_drafts() -> None:
     assert migrated["recommended_action"] == "keep"
 
 
-@pytest.mark.generated_artifact
 def test_documentation_cleanup_inventory_covers_root_entrypoints() -> None:
     """Root docs that are intentionally retained must have explicit kinds."""
     rows = _rows_by_path()
@@ -200,7 +192,6 @@ def test_documentation_cleanup_inventory_covers_root_entrypoints() -> None:
         assert rows[path]["root_doc_kind"] == kind
 
 
-@pytest.mark.generated_artifact
 def test_documentation_cleanup_inventory_accounts_for_local_docs_reports() -> None:
     """Available local docs/reports artifacts must be counted deterministically."""
     payload = _inventory_payload()
@@ -227,7 +218,6 @@ def test_documentation_cleanup_inventory_accounts_for_local_docs_reports() -> No
     assert inventory_json["generated_route"] == "documentation-cleanup-inventory"
 
 
-@pytest.mark.generated_artifact
 def test_documentation_cleanup_inventory_generated_routes_are_owned() -> None:
     """Every Generated row needs a route or a documented deterministic exception."""
     payload = _inventory_payload()
@@ -260,7 +250,6 @@ def test_documentation_cleanup_inventory_generated_routes_are_owned() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_documentation_cleanup_inventory_classifies_plans_and_reports() -> None:
     """Plans and reports must distinguish active backlog from cleanup candidates."""
     rows = _rows_by_path()
@@ -285,7 +274,6 @@ def test_documentation_cleanup_inventory_classifies_plans_and_reports() -> None:
     assert baseline["generated_route"] == "dead-code-inventory-quality-baseline"
 
 
-@pytest.mark.generated_artifact
 def test_documentation_cleanup_inventory_maps_drafts_and_skill_mirrors() -> None:
     """D-series drafts and generated AI skill mirrors need explicit lifecycle."""
     rows = _rows_by_path()
@@ -304,7 +292,6 @@ def test_documentation_cleanup_inventory_maps_drafts_and_skill_mirrors() -> None
     assert license_mirror["generated_route"] == "ai-local-generated-docs-helpers"
 
 
-@pytest.mark.generated_artifact
 def test_documentation_cleanup_inventory_check_passes() -> None:
     """Generator --check must stay synchronized with committed inventory artifacts."""
     skip_if_artifact_is_not_authoritative(

@@ -58,7 +58,6 @@ def test_domain_ports_inventory_live_scan_is_consistent() -> None:
     assert all(item["runtime_checkable"] for item in ports)
 
 
-@pytest.mark.generated_artifact
 def test_domain_ports_inventory_artifacts_match_live_scan() -> None:
     payload = _load_live()
     expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"

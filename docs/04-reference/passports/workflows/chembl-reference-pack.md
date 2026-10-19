@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:chembl_reference_pack`
 - Schema: `1.0.0`
-- Source revision: `sha256:dd465c828cf0a66accac266f54f813c14a59ac360de49ed2341e62411ba53f35`
+- Source revision: `sha256:491e934adf3b3aea9ccde0bde155f86f627593f259026b85c503d895f7e395f5`
 
 ## Evidence
 
@@ -168,7 +168,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:af8a9911fdccdd9c9f1d44175a8b3680d54339214ee098e41d4915489a5bed18",
-    "source_revision": "sha256:dd465c828cf0a66accac266f54f813c14a59ac360de49ed2341e62411ba53f35"
+    "source_revision": "sha256:491e934adf3b3aea9ccde0bde155f86f627593f259026b85c503d895f7e395f5"
   },
   "source_references": [
     {

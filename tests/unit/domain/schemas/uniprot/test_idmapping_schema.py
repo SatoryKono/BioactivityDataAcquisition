@@ -199,9 +199,9 @@ class TestSchemaConfiguration:
         assert schema.strict is True
 
     def test_schema_is_ordered(self) -> None:
-        """Test schema has ordered mode disabled (order-agnostic)."""
+        """Test schema has ordered mode enabled."""
         schema = IDMappingSchema.to_schema()
-        assert schema.ordered is False
+        assert schema.ordered is True
 
     def test_schema_has_coerce(self) -> None:
         """Test schema has coerce mode enabled."""

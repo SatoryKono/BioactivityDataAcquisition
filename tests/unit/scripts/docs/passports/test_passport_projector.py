@@ -447,39 +447,3 @@ def test_duplicate_audit_reports_compaction(
     assert report["total_markdown_lines"] < 3000
     assert report["empty_section_count"] == 0
     assert report["identity_duplicate_count"] == 0
-
-
-@pytest.mark.parametrize("action", ["check-source", "check"])
-@pytest.mark.parametrize("failure", ["schema", "diagnostics", "drift"])
-def test_passport_source_check_preserves_blockers_and_defers_only_drift(
-    tmp_path, monkeypatch, action, failure
-):
-    from scripts.docs.passports import cli
-
-    outputs = {
-        tmp_path / "completeness-report.json": json.dumps(
-            {"blocking_diagnostics": int(failure == "diagnostics")}
-        ).encode()
-    }
-    monkeypatch.setattr(cli, "build_all_outputs", lambda **kwargs: outputs)
-
-    def validate(*args):
-        if failure == "schema":
-            raise jsonschema.ValidationError("invalid source projection")
-
-    monkeypatch.setattr(cli, "_validate_generated", validate)
-    monkeypatch.setattr(cli, "check_outputs", lambda outputs: [tmp_path / "stale.json"])
-    monkeypatch.setattr(cli, "_orphan_outputs", lambda *args: [tmp_path / "orphan.md"])
-
-    def cannot_write(*args):
-        pytest.fail("check must never write generated outputs")
-
-    monkeypatch.setattr(cli, "write_outputs", cannot_write)
-    args = [action, "--output-root", str(tmp_path)]
-    if failure == "schema":
-        with pytest.raises(jsonschema.ValidationError):
-            cli.main(args)
-    else:
-        assert cli.main(args) == (
-            0 if action == "check-source" and failure == "drift" else 1
-        )

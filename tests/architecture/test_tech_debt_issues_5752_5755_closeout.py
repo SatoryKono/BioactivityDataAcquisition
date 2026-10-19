@@ -59,7 +59,6 @@ def _load_json(path: Path) -> dict[str, object]:
     return payload
 
 
-@pytest.mark.generated_artifact
 def test_issue_5755_removed_supporting_wrappers_are_absent_and_untracked() -> None:
     manifest = _load_json(SCRIPTS_MANIFEST)
     registry = _load_json(SCRIPTS_REGISTRY)
@@ -106,7 +105,6 @@ def test_issue_5754_forensic_public_imports_use_canonical_seam() -> None:
     ) not in forensic_integration
 
 
-@pytest.mark.generated_artifact
 def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     compatibility = _load_json(COMPATIBILITY_CENSUS)
     test_governance = _load_json(TEST_GOVERNANCE)

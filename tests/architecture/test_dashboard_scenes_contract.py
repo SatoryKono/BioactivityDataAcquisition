@@ -84,7 +84,6 @@ def test_committed_scenes_parity_ledger_matches_live_dashboards() -> None:
     assert summary["write_actions"] == []  # type: ignore[index]
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.parametrize(
     ("group", "theme", "width", "height"),
     [

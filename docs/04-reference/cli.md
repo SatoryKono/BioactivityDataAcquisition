@@ -817,7 +817,7 @@ bioetl report diff --pipeline <NAME> --run-id-a <UUID> --run-id-b <UUID> [--root
 По умолчанию dry-run. `--apply` удаляет.
 
 ```bash
-bioetl report prune --kind <pipeline|workflow> [--owner <NAME>] [--max-count N] [--max-age-days N] [--apply] [--root PATH]
+bioetl report prune --kind pipeline|workflow [--owner <NAME>] [--max-count N] [--max-age-days N] [--apply] [--root PATH]
 ```
 
 ______________________________________________________________________
@@ -1247,30 +1247,6 @@ Use `--error-code FILTERED_OUT_SILVER` for `quarantine inspect`,
 `quarantine stats` and `diagnostics quarantine`; the old flag is a usage error.
 This selects Silver structural rejects, not Gold contract/semantic rejects.
 
-**Breaking-change migration (#12054; next release: 7.0.0):**
-
-1. Operators and owners of scripts, scheduled jobs and monitoring commands must
-   find invocations of the removed flag in all three commands above.
-2. Remove `--silver-filter-only` and every existing `--error-code` argument,
-   then supply exactly one `--error-code FILTERED_OUT_SILVER`. The retired alias
-   overrode any explicit error code; repeating `--error-code` instead lets Click
-   use the last value and can silently select different records.
-   Preserve `--pipeline`, `--run-id`, limits and output options. First-party
-   consumers already use the canonical filter.
-3. Validate each migrated invocation against the same quarantine data: it must
-   select Silver structural rejects and exclude Gold semantic rejects. The old
-   flag now exits with Click usage code 2; do not suppress that error in wrappers.
-
-For example, replace the old `bioetl quarantine inspect --pipeline chembl_activity
---silver-filter-only --error-code OTHER` invocation with:
-
-```bash
-bioetl quarantine inspect --pipeline chembl_activity \
-  --error-code FILTERED_OUT_SILVER
-```
-
-This removal requires the next major release (7.0.0); package version 6.1.0
-continues to identify the last release until the release process updates it.
 
 CLI surface для работы с проблемными записями.
 

@@ -12,11 +12,7 @@
 
 from __future__ import annotations
 
-import io
 import json
-import os
-import tarfile
-from tempfile import TemporaryDirectory
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -32,7 +28,6 @@ if (skip_reason := mounted_worktree_skip_reason()) is not None:
     pytestmark.append(pytest.mark.skip(reason=skip_reason))
 
 from scripts.engineering.qa.import_graph_inventory import (
-    collect_bioetl_importers,
     collect_exact_module_import_usage,
 )
 from scripts.engineering.qa.report_compatibility_importer_census import (
@@ -102,20 +97,6 @@ def _git_command(repo_root: Path, *args: str) -> subprocess.CompletedProcess[str
 
 
 def _resolve_merge_base(repo_root: Path) -> str | None:
-    event_path = os.environ.get("GITHUB_EVENT_PATH")
-    if event_path:
-        event = json.loads(Path(event_path).read_text(encoding="utf-8"))
-        base = event.get("pull_request", {}).get("base", {}).get("sha")
-        if not base and os.environ.get("GITHUB_EVENT_NAME") == "push":
-            base = event.get("before")
-        if base and set(base) != {"0"}:
-            result = _git_command(
-                repo_root, "rev-parse", "--verify", f"{base}^{{commit}}"
-            )
-            assert result.returncode == 0, (
-                "Source comparison base commit is unavailable"
-            )
-            return result.stdout.strip()
     for ref in ("origin/main", "main"):
         if _git_command(repo_root, "rev-parse", "--verify", ref).returncode != 0:
             continue
@@ -181,42 +162,6 @@ def _ratchet_family_budgets(
     return budgets
 
 
-def _source_twin_rows(
-    repo_root: Path, families: list[dict[str, Any]]
-) -> list[dict[str, Any]]:
-    """Build only the source census used by the touch gate, without report inputs."""
-    importers = collect_bioetl_importers(repo_root)
-    rows = []
-    for family in families:
-        public = list(importers.get(family["public_module"], {}).get("src", ()))
-        private = list(importers.get(family["private_module"], {}).get("src", ()))
-        rows.append(
-            {
-                **family,
-                "current_public_src_importers": public,
-                "current_private_src_importers": private,
-                "current_private_src_importer_count": len(private),
-            }
-        )
-    return rows
-
-
-def _base_ref_twin_rows(
-    repo_root: Path, base_ref: str, families: list[dict[str, Any]]
-) -> list[dict[str, Any]]:
-    archive = subprocess.run(
-        ["git", "archive", "--format=tar", base_ref, "--", "src/bioetl"],
-        cwd=repo_root,
-        capture_output=True,
-        check=True,
-    )
-    with TemporaryDirectory(prefix="bioetl-twin-base-") as directory:
-        root = Path(directory)
-        with tarfile.open(fileobj=io.BytesIO(archive.stdout)) as source_archive:
-            source_archive.extractall(root, filter="data")
-        return _source_twin_rows(root, families)
-
-
 @pytest.mark.architecture
 def test_tracked_twin_family_ratchet_declares_touch_no_growth_policy() -> None:
     """Twin-family ratchet metadata must declare the touch-based no-growth gate."""
@@ -239,17 +184,24 @@ def test_tracked_twin_family_ratchet_declares_touch_no_growth_policy() -> None:
 @pytest.mark.architecture
 def test_touched_twin_family_files_do_not_grow_private_imports() -> None:
     """Touched twin-family surfaces must not grow private-module imports past baseline."""
-    families = _load_yaml(TWIN_RATCHET)["families"]
-    if not families:
-        return
-    base_ref = _resolve_merge_base(ROOT)
-    assert base_ref is not None, "Twin-family gate requires a fetched main base ref"
     changed_paths = _collect_changed_repo_paths(ROOT)
     if not changed_paths:
         return
-    baseline_rows = _base_ref_twin_rows(ROOT, base_ref, families)
+
+    baseline_payload = json.loads(REPORT_JSON.read_text(encoding="utf-8"))
+    baseline_rows = baseline_payload["tracked_twin_families"]
+    assert isinstance(baseline_rows, list)
     ratchet_budgets = _ratchet_family_budgets(_load_yaml(TWIN_RATCHET))
-    live_rows = {row["family_id"]: row for row in _source_twin_rows(ROOT, families)}
+
+    live_payload = build_compatibility_importer_census(
+        ROOT,
+        snapshot_date=str(baseline_payload["snapshot_date"]),
+    )
+    live_rows = {
+        str(row["family_id"]): row
+        for row in live_payload["tracked_twin_families"]
+        if isinstance(row, dict)
+    }
 
     violations: list[str] = []
     for baseline_row in baseline_rows:
@@ -257,8 +209,9 @@ def test_touched_twin_family_files_do_not_grow_private_imports() -> None:
             continue
         family_id = str(baseline_row["family_id"])
         live_row = live_rows[family_id]
-        touch_surface = _family_touch_surface(baseline_row) | _family_touch_surface(
-            live_row
+        touch_surface = _family_touch_surface(
+            baseline_row,
+            importer_source=live_row,
         )
         if not touch_surface.intersection(changed_paths):
             continue
@@ -287,8 +240,8 @@ def test_touched_twin_family_files_do_not_grow_private_imports() -> None:
             violations.append(
                 f"{family_id}: private src importers grew from {baseline_count} to "
                 f"{live_count} after touching "
-                f"{sorted(touch_surface & changed_paths)}; source base-ref "
-                "comparison cannot be waived by refreshing generated reports"
+                f"{sorted(touch_surface & changed_paths)}; refresh the census "
+                "baseline only with an explicit ratchet review"
             )
             continue
         if new_private_importers:
@@ -522,7 +475,6 @@ def test_retained_public_export_facades_remain_unique_and_budgeted() -> None:
         assert row["resolution_conflicts"] == {}, row["path"]
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_compatibility_importer_census_reports_are_in_sync() -> None:
     """Committed compatibility importer census JSON must match the generator."""

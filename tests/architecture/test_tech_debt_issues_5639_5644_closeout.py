@@ -65,7 +65,6 @@ def _latest_report(pattern: str) -> Path:
     return matches[-1]
 
 
-@pytest.mark.generated_artifact
 def test_issue_5639_architecture_debt_planner_tracks_live_artifact_backlog() -> None:
     tasks = _load_json(
         ROOT
@@ -96,7 +95,6 @@ def test_issue_5639_architecture_debt_planner_tracks_live_artifact_backlog() -> 
     ]
 
 
-@pytest.mark.generated_artifact
 def test_issue_5640_stable_public_seams_are_governed_outside_compatibility_debt() -> (
     None
 ):

@@ -356,7 +356,6 @@ def test_retained_zero_import_rows_have_owner_test_evidence() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_dead_code_inventory_artifacts_are_committed_and_current() -> None:
     """Dead-code review evidence must stay materialized for zero-import triage."""
     assert DEAD_CODE_JSON_PATH.exists()
@@ -374,7 +373,6 @@ def test_dead_code_inventory_artifacts_are_committed_and_current() -> None:
     assert DEAD_CODE_MD_PATH.read_text(encoding="utf-8") == _render_markdown(expected)
 
 
-@pytest.mark.generated_artifact
 def test_dead_code_inventory_review_window_stays_fresh() -> None:
     """The repo-wide dead-code inventory must stay within the governed review window."""
     triage = _load_triage()

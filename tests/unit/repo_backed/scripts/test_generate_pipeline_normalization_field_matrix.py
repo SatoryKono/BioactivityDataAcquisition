@@ -1316,6 +1316,5 @@ def test_csv_columns_include_non_chembl_inventory_evidence_fields() -> None:
     assert "observed_source" in CSV_COLUMNS
 
 
-@pytest.mark.generated_artifact
 def test_pipeline_normalization_field_matrix_1288__e14ed559() -> None:
     assert check_artifacts(DEFAULT_OUT_DIR.resolve()) == 0

@@ -36,7 +36,6 @@ def test_branch_hygiene_allows_established_automation_providers() -> None:
         assert f"`{provider}/`" in policy
 
 
-@pytest.mark.generated_artifact
 def test_committed_branch_hygiene_inventory_is_dry_run() -> None:
     snapshot = ROOT / "reports" / "quality" / "branch-hygiene-inventory-2026-09-09.json"
     payload = json.loads(snapshot.read_text(encoding="utf-8"))

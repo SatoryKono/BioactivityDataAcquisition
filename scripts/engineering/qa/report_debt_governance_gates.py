@@ -137,21 +137,9 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "touched-surface governance gates."
         ),
     )
-    parser.add_argument(
-        "--source-only",
-        action="store_true",
-        help="Evaluate source/debt policies without committed generated evidence",
-    )
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--update", action="store_true")
-    args = parser.parse_args(argv)
-    if args.source_only and (
-        not args.check or not args.changed_from_ref or args.update
-    ):
-        parser.error(
-            "--source-only requires --check and --changed-from-ref, and forbids --update"
-        )
-    return args
+    return parser.parse_args(argv)
 
 
 def _load_json(repo_root: Path, rel_path: str) -> dict[str, Any]:
@@ -294,49 +282,6 @@ def _gate_status_counts(gates: list[Gate]) -> dict[str, int]:
         "pass": sum(1 for gate in gates if gate.status == "pass"),
         "warn": sum(1 for gate in gates if gate.status == "warn"),
         "fail": sum(1 for gate in gates if gate.status == "fail"),
-    }
-
-
-def build_source_payload(
-    *, repo_root: Path, changed_from_ref: str
-) -> dict[str, object]:
-    """Evaluate authored source policies; generated-evidence gates remain in daily.
-
-    Keep these existing assertions shared with the full report. Do not build the
-    full payload then filter failures: generated inputs must never be read here.
-    """
-    changed_paths = _collect_changed_paths(repo_root, changed_from_ref=changed_from_ref)
-    gates = _debt_scorecard_gates()
-    gates.append(
-        _debt_scorecard_budget_no_growth_gate(
-            repo_root=repo_root,
-            changed_from_ref=changed_from_ref,
-        )
-    )
-    gates.extend(_runtime_uuid_gates(_load_yaml(repo_root, RUNTIME_UUID_SEAMS_YAML)))
-    diagnostics = build_contract_registry_dq_diagnostics(repo_root)
-    gates.append(
-        _hard_limit_gate(
-            name="dq_contract_registry_blocking_drift",
-            metric="blocking_issue_count",
-            current=diagnostics["blocking_issue_count"],
-            limit=0,
-            source_artifact="scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload",
-            remediation="Fix DQ contract diagnostics before closeout.",
-        )
-    )
-    counts = _gate_status_counts(gates)
-    return {
-        "schema_version": 1,
-        "scope": "source",
-        "changed_paths": sorted(changed_paths),
-        "generated_evidence_owner": ".github/workflows/nightly.yml",
-        "summary": {
-            "gate_count": len(gates),
-            "fail_count": counts["fail"],
-            "failing_gates": [gate.name for gate in gates if gate.status == "fail"],
-        },
-        "gates": [gate.as_dict() for gate in gates],
     }
 
 

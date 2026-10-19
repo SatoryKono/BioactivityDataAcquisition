@@ -76,7 +76,6 @@ def test_issue_5978_branch_coverage_is_promoted_to_hard_gate() -> None:
     assert all(check["status"] == "pass" for check in stability["consecutive_checks"])
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_issue_5978_coverage_tail_status_documented() -> None:
     """Coverage tail status is documented and meets requirements."""
@@ -150,7 +149,6 @@ def test_issue_5978_evidence_paths_exist() -> None:
         assert path.exists(), f"Evidence path does not exist: {evidence_path}"
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_issue_5983_branch_gate_promotion_evidence_is_current() -> None:
     """Issue #5983 has explicit hard-gate promotion evidence."""

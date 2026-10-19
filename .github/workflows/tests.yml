@@ -6,11 +6,6 @@ permissions:
 
 on:
   workflow_call:
-    inputs:
-      generated-artifacts:
-        description: Run committed generated-evidence checks in the scheduled daily caller
-        type: boolean
-        default: false
 # Workflow-level token is read-only; jobs may only narrow this further.
 
 concurrency:
@@ -18,7 +13,6 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  BIOETL_ARTIFACT_TEST_SELECTION: ci
   # Use CI hypothesis profile for faster property-based tests (10 examples instead of 50)
   HYPOTHESIS_PROFILE: ci
   # Optimize Python for CI
@@ -173,14 +167,12 @@ jobs:
         run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming
 
       - name: Validate full VCR metadata inventory
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check
 
       - name: Validate VCR metadata stale-age policy
         run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90
 
       - name: Validate VCR metadata catalog
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-vcr-metadata --check
 
   control-plane-e2e:
@@ -376,10 +368,6 @@ jobs:
         with:
           persist-credentials: false
           lfs: false
-          fetch-depth: 0
-
-      - name: Prepare source-governance comparison baseline
-        run: git fetch --no-tags origin main:refs/remotes/origin/main
 
       - name: Reject Git LFS pointer cassettes
         id: vcr_pointer_guard
@@ -415,8 +403,8 @@ jobs:
       - name: Validate scripts inventory + lifecycle governance
         run: |
           uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \
+            --check \
             --manifest configs/quality/scripts_inventory_manifest.json \
-            --deprecation-report reports/ci/scripts-lifecycle-backlog.md \
             --check-lifecycle \
             --forbid-evaluate-active \
             --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
@@ -428,7 +416,6 @@ jobs:
         run: uv run --frozen --no-build python scripts/engineering/qa/check_test_audit_preflight.py --strict
 
       - name: Validate committed test-governance snapshots
-        if: inputs.generated-artifacts
         run: |
           uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit \
             --check \
@@ -436,38 +423,30 @@ jobs:
             --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
 
       - name: Validate flaky-test burndown review evidence
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-flaky-test-burndown-review --check
 
       - name: Validate config/contract/registry artifact duplication audit
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-artifact-duplication-audit --check
 
       - name: Validate deterministic Neo4j memory ontology invariants
         run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory
 
       - name: Validate hotspot-family baseline artifacts
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-family-baseline --check
 
       - name: Validate contract coverage matrix artifact
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-contract-coverage-matrix --check
 
       - name: Validate Domain I/O taint inventory artifact
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-domain-io-taint-inventory --check
 
       - name: Validate port-adapter-factory coverage map artifact
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-port-adapter-factory-coverage --check
 
       - name: Validate domain aggregate invariant registry
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build pytest tests/architecture/test_domain_aggregate_invariant_registry.py -q --tb=short
 
       - name: Validate compatibility importer census artifacts
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-compatibility-importer-census --check
 
       - name: Validate technical-debt freeze ratchets
@@ -481,15 +460,12 @@ jobs:
             -q --tb=short
 
       - name: Validate dead-code inventory artifacts
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-dead-code-inventory --check
 
       - name: Validate config discrepancy baseline artifacts
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.schema generate-config-matrix --check
 
       - name: Validate Silver/Gold filter parity artifact
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python scripts/data_quality/run_silver_gold_filter_parity.py --check
 
       - name: Validate xwalk missing backlog
@@ -502,18 +478,14 @@ jobs:
         run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming --check
 
       - name: Validate ADR enforcement matrix artifacts
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-adr-enforcement-matrix --check
 
       - name: Validate remote-main architecture debt baseline
-        if: inputs.generated-artifacts
-        run: uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
+        run: |
+          git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
+          uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
 
       - name: Validate debt-governance fail-fast gates
-        run: uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --source-only --check --changed-from-ref refs/remotes/origin/main
-
-      - name: Validate full debt-governance generated evidence
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref refs/remotes/origin/main
 
       - name: Dashboard navigation contract sync gate
@@ -680,15 +652,12 @@ jobs:
         run: uv run --frozen --no-build python -m scripts.schema audit-optionality --check
 
       - name: Check matrix structural contract export freshness (blocking)
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.docs export-matrix-structural-contract --check
 
       - name: Check generated config schemas are up to date
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.schema generate-pipeline --check
 
       - name: Check architecture dependency docs drift
-        if: inputs.generated-artifacts
         run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check
 
       - name: Check docs drift (forbidden patterns)
@@ -1393,9 +1362,6 @@ jobs:
 
   serial-coverage:
     runs-on: ubuntu-latest
-    # Longer than --parallel-timeout-seconds below so a hung producer exits
-    # inside the job. Repository policy keeps always() && !cancelled() on
-    # uploads, including the journal receipt.
     timeout-minutes: 15
     needs: dependency-preflight
     permissions:
@@ -1417,15 +1383,9 @@ jobs:
       - name: Run serial-only coverage producer
         env:
           COVERAGE_FILE: reports/coverage/.coverage.serial
-          # github.sha matches the checkout, including the pull_request
-          # synthetic merge commit. The journal records git rev-parse HEAD
-          # and refuses complete when the two differ.
-          EXPECTED_CHECKOUT_SHA: ${{ github.sha }}
-          BIOETL_JOURNAL_JOB: serial-coverage
-          BIOETL_JOURNAL_MATRIX: "{}"
         run: |
           set +e
-          mkdir -p reports/coverage reports/pytest/serial-coverage reports/test-telemetry reports/pytest/journal
+          mkdir -p reports/coverage reports/pytest/serial-coverage reports/test-telemetry
           if [ -n "${PYTHONPATH:-}" ]; then
             export PYTHONPATH="$GITHUB_WORKSPACE:$PYTHONPATH"
           else
@@ -1434,17 +1394,16 @@ jobs:
           # 660s leaves setup, dump, cleanup, and upload inside the 15-minute job.
           # --no-fallback keeps a watchdog timeout from starting a second pytest.
           uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \
-            --journal-dir "reports/pytest/journal" \
             --receipt-dir reports/pytest/receipts \
             --receipt-run-id "${{ github.run_id }}" \
             --receipt-attempt "${{ github.run_attempt }}" \
             --receipt-expected-sha "${{ github.sha }}" \
             --target tests/ \
             --reports-dir reports/pytest/serial-coverage \
-            --parallel-timeout-seconds 660 \
-            --no-fallback \
             --parallel-marker "serial and not e2e and not benchmark and not memory" \
             --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
+            --parallel-timeout-seconds 660 \
+            --no-fallback \
             --skip-serial-pass
           TEST_EXIT=$?
           if [ ! -s "$COVERAGE_FILE" ]; then
@@ -1457,29 +1416,7 @@ jobs:
           fi
           cp reports/pytest/serial-coverage/junit_parallel.xml \
             reports/test-telemetry/junit-serial-coverage.xml
-          # This receipt covers resilient-runner passes of serial-coverage
-          # only. Other pytest jobs in this workflow are separate producers.
-          uv run --frozen --no-build python -m scripts.engineering.ci.pytest_event_journal \
-            --verify reports/pytest/journal
-          JOURNAL_EXIT=$?
-          if [ "$JOURNAL_EXIT" -ne 0 ]; then
-            echo "::error::pytest event journal is not complete (exit ${JOURNAL_EXIT})."
-          fi
-          if [ "$TEST_EXIT" -ne 0 ]; then
-            exit "$TEST_EXIT"
-          fi
-          exit "$JOURNAL_EXIT"
-
-      - name: Upload pytest event journal
-        if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: pytest-event-journal-serial-coverage
-          path: |
-            reports/pytest/journal
-            reports/pytest/serial-coverage/journal-verdict.json
-          if-no-files-found: warn
-          retention-days: 3
+          exit "$TEST_EXIT"
 
       - name: Upload pytest receipts
         if: ${{ always() && !cancelled() }}
@@ -1940,7 +1877,7 @@ jobs:
           set +e
           mkdir -p "reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream"
           log="reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream/docs-runtime.log"
-          uv run --frozen --no-build python -m scripts.docs verify --skip-build --defer-generated-artifacts > "$log" 2>&1
+          uv run --frozen --no-build python -m scripts.docs verify --skip-build > "$log" 2>&1
           verify_rc=$?
           bash scripts/ai/junie/check_junie_mirror.sh --check >> "$log" 2>&1
           mirror_rc=$?
@@ -1963,7 +1900,6 @@ jobs:
         if: ${{ always() && !cancelled() }}
         shell: bash
         env:
-          DEBT_GENERATED_ARTIFACTS: ${{ inputs.generated-artifacts }}
           GOVERNANCE_RESULT: ${{ needs.governance-preflight.result }}
           QUALITY_RESULT: ${{ needs.quality-metrics-gate.result }}
           TEST_RESULTS: >-
@@ -1986,7 +1922,6 @@ jobs:
             local command_text="$3"
             local result="$4"
             local output_path="$5"
-            local receipt_scope="${6:-}"
             local status="pass"
             local -a outcome_args=(--exit-code 0)
             if [[ "$result" == *failure* ]]; then
@@ -2004,7 +1939,7 @@ jobs:
               --task-id "$PROOF_OR_STOP_TASK_ID" \
               --claim "$PROOF_OR_STOP_CLAIM" \
               --producer "$producer" \
-              --receipt-id "${producer}-${GITHUB_JOB}${receipt_scope:+-${receipt_scope}}" \
+              --receipt-id "${producer}-${GITHUB_JOB}" \
               --evidence-kind "$kind" \
               --command "$command_text" \
               --status "$status" \
@@ -2022,16 +1957,10 @@ jobs:
             pretest_guardrails governance \
             "bash scripts/engineering/dev/pretest_guardrails.sh" \
             "$GOVERNANCE_RESULT" "$needs_path"
-          debt_scope="source"
-          debt_command="python -m scripts.engineering.qa report-debt-governance-gates --source-only --check --changed-from-ref refs/remotes/origin/main"
-          if [[ "$DEBT_GENERATED_ARTIFACTS" == "true" ]]; then
-            debt_scope="full"
-            debt_command="python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref refs/remotes/origin/main"
-          fi
           capture_receipt \
             debt_governance_gates debt \
-            "$debt_command" \
-            "$GOVERNANCE_RESULT" "$needs_path" "$debt_scope"
+            "python -m scripts.engineering.qa report-debt-governance-gates" \
+            "$GOVERNANCE_RESULT" "$needs_path"
           capture_receipt \
             quality_integral_gate quality \
             "python -m scripts.engineering.ci.quality_integral_gate" \
@@ -2043,7 +1972,7 @@ jobs:
           fi
           capture_receipt \
             docs_runtime_checks docs_runtime \
-            "python -m scripts.docs verify --skip-build --defer-generated-artifacts" \
+            "python -m scripts.docs verify --skip-build" \
             "$docs_result" "$docs_path"
 
       - name: Assemble and verify the closeout bundle

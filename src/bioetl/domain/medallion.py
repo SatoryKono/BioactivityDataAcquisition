@@ -89,6 +89,7 @@ class WriteModePolicy:
     ALLOWED_MODES: ClassVar[dict[Layer, set[WriteMode]]] = {
         Layer.BRONZE: {WriteMode.APPEND},
         Layer.SILVER: {WriteMode.MERGE, WriteMode.APPEND},
+        Layer.GOLD: {WriteMode.OVERWRITE, WriteMode.APPEND},
     }
 
     def validate(self, layer: Layer, mode: WriteMode) -> None:
@@ -98,12 +99,7 @@ class WriteModePolicy:
             layer: Medallion layer to validate against (BRONZE, SILVER, or GOLD).
             mode: Write mode to check for compliance with layer policy.
         """
-        allowed = self.ALLOWED_MODES.get(layer)
-        if allowed is None:
-            raise PolicyViolationError(
-                f"{layer.value} does not support generic write modes. "
-                "Use GoldWriteMode for Gold writes."
-            )
+        allowed = self.ALLOWED_MODES[layer]
         if mode not in allowed:
             allowed_names = (
                 "{"

@@ -89,7 +89,6 @@ def test_issue_5700_preflight_is_strict_and_documented() -> None:
     assert "check_test_audit_preflight --strict" in testing_guide
 
 
-@pytest.mark.generated_artifact
 def test_issue_5701_telemetry_surfaces_share_current_head_metadata() -> None:
     payload = _load_json(CLOSEOUT)["outcomes"]["5701"]
     baseline = _load_yaml(TELEMETRY_BASELINE)
@@ -160,7 +159,6 @@ def test_issue_5703_cached_governance_scans_stay_isolated() -> None:
     ]
 
 
-@pytest.mark.generated_artifact
 def test_issue_5705_vcr_catalog_has_no_metadata_reviewed_backlog() -> None:
     payload = _load_json(CLOSEOUT)["outcomes"]["5705"]
     catalog = _load_json(VCR_CATALOG)
@@ -182,7 +180,6 @@ def test_issue_5705_vcr_catalog_has_no_metadata_reviewed_backlog() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5706_coverage_tail_head_is_explicit_and_matches_inventory() -> None:
     payload = _load_json(CLOSEOUT)["outcomes"]["5706"]
     inventory = _load_json(MODULE_COVERAGE)

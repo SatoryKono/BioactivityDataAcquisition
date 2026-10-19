@@ -104,7 +104,6 @@ def _retained_entrypoint(payload: dict[str, Any], path: str) -> dict[str, Any]:
     raise AssertionError(f"Missing retained entrypoint row for {path}")
 
 
-@pytest.mark.generated_artifact
 def test_issue_5524_filter_metadata_registry_replaces_inline_duplicates() -> None:
     registry = _load_yaml(FILTER_METADATA_REGISTRY)
     backlog = _load_json(CONFIG_SURFACE_BACKLOG)
@@ -127,7 +126,6 @@ def test_issue_5524_filter_metadata_registry_replaces_inline_duplicates() -> Non
         assert "metadata" not in filters
 
 
-@pytest.mark.generated_artifact
 def test_issue_5525_pipeline_sink_shell_is_deduplicated_from_raw_entity_configs() -> (
     None
 ):
@@ -147,7 +145,6 @@ def test_issue_5525_pipeline_sink_shell_is_deduplicated_from_raw_entity_configs(
         assert "sink" not in pipeline
 
 
-@pytest.mark.generated_artifact
 def test_issue_5526_module_coverage_warning_debt_is_replaced_with_reviewed_ratchets() -> (
     None
 ):
@@ -171,7 +168,6 @@ def test_issue_5526_module_coverage_warning_debt_is_replaced_with_reviewed_ratch
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5527_internal_composite_wrapper_dependency_is_removed() -> None:
     payload = _load_json(COMPATIBILITY_CENSUS)
     row = _retained_entrypoint(
@@ -185,7 +181,6 @@ def test_issue_5527_internal_composite_wrapper_dependency_is_removed() -> None:
     assert row["internal_callers_zero"] is True
 
 
-@pytest.mark.generated_artifact
 def test_issue_5528_entrypoints_public_export_budget_is_ratchet_down() -> None:
     payload = _load_json(COMPATIBILITY_CENSUS)
     inventory = _load_yaml(COMPATIBILITY_INVENTORY)

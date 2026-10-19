@@ -45,7 +45,6 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
-@pytest.mark.generated_artifact
 def test_issue_10596_census_artifacts_exist_with_counts() -> None:
     assert GENERATOR.exists()
     assert CENSUS_JSON.exists()
@@ -67,7 +66,6 @@ def test_issue_10596_census_artifacts_exist_with_counts() -> None:
     assert f"- unjustified_count: {summary['unjustified_count']}" in markdown
 
 
-@pytest.mark.generated_artifact
 def test_issue_10596_census_findings_are_deterministically_sorted() -> None:
     payload = _load_json(CENSUS_JSON)
     keys = [(str(row["path"]), int(row["line"])) for row in payload["findings"]]
@@ -192,7 +190,6 @@ def test_issue_10596_record_normalization_processor_satisfies_protocol_at_runtim
     assert normalized["_x"] == 1
 
 
-@pytest.mark.generated_artifact
 def test_issue_10596_unjustified_budget_file_exists_and_is_shrink_only() -> None:
     assert BUDGET.exists()
     budget = yaml.safe_load(BUDGET.read_text(encoding="utf-8"))

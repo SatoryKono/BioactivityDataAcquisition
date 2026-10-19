@@ -149,21 +149,11 @@ def main(argv: list[str] | None = None) -> int:
     from scripts.engineering.qa.report_debt_governance_gates import (
         _parse_args,
         build_payload,
-        build_source_payload,
     )
     from memory.proof import emit_receipt_from_environment
 
     args = _parse_args(argv)
     repo_root = Path(args.repo_root).resolve()
-    if args.source_only:
-        payload = build_source_payload(
-            repo_root=repo_root, changed_from_ref=args.changed_from_ref
-        )
-        print(json.dumps(payload, indent=2, sort_keys=True))
-        errors = _failing_gate_errors(payload["summary"], payload)
-        for error in errors:
-            print(error, file=sys.stderr)
-        return int(bool(errors))
     payload = build_payload(
         repo_root=repo_root,
         changed_from_ref=args.changed_from_ref,

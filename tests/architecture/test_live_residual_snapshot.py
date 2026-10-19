@@ -29,7 +29,6 @@ ROOT = Path(__file__).resolve().parents[2]
 pytestmark = pytest.mark.architecture
 
 
-@pytest.mark.generated_artifact
 def test_live_residual_snapshot_artifact_exists_and_has_policy_shape() -> None:
     payload = load_live_residual_snapshot()
     assert payload["linked_issue"] == "#6891"
@@ -46,7 +45,6 @@ def test_live_residual_snapshot_artifact_exists_and_has_policy_shape() -> None:
     assert payload["module_coverage"]["unmeasured_module_count"] >= 0
 
 
-@pytest.mark.generated_artifact
 def test_live_residual_snapshot_is_not_regressed_by_live_hotspot_metrics() -> None:
     """Hotspot residual may only shrink relative to the committed live snapshot."""
     from scripts.engineering.qa.hotspot_family_metrics import (
@@ -76,7 +74,6 @@ def test_live_residual_snapshot_is_not_regressed_by_live_hotspot_metrics() -> No
         )
 
 
-@pytest.mark.generated_artifact
 def test_live_residual_snapshot_dead_code_and_clusters_match_committed_artifacts() -> (
     None
 ):
@@ -118,7 +115,6 @@ def test_live_residual_snapshot_dead_code_and_clusters_match_committed_artifacts
     )
 
 
-@pytest.mark.generated_artifact
 def test_closeout_program_mass_metrics_only_shrink() -> None:
     """Closeout freeze mass may only shrink relative to the live residual snapshot."""
     from scripts.engineering.qa.report_live_residual_snapshot import (
@@ -171,7 +167,6 @@ def test_live_residual_cli_check_enforces_closeout_program_ratchets() -> None:
         )
 
 
-@pytest.mark.generated_artifact
 def test_historical_tech_debt_closeout_json_artifacts_remain_present() -> None:
     """Evidence of closed issue packs remains as reports, not thrashing freezes.
 

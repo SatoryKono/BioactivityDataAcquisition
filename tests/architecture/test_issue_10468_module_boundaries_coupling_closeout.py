@@ -80,7 +80,6 @@ def _live_families() -> dict[str, dict[str, Any]]:
     }
 
 
-@pytest.mark.generated_artifact
 def test_issue_10468_generated_scorecard_proves_coupling_10() -> None:
     """#10475: coupling 10.0 is derived from generated metrics, not a hardcoded grade."""
     scorecard = _load_json(SCORECARD)
@@ -107,7 +106,6 @@ def test_issue_10468_generated_scorecard_proves_coupling_10() -> None:
     assert metrics["lazy_util"] == 0.0
 
 
-@pytest.mark.generated_artifact
 def test_issue_10468_hotspot_family_maxima_and_caps_hold() -> None:
     """C2–C4 maxima stay below shrink-only caps; C5 evidence matches live census."""
     hotspot = _load_json(HOTSPOT_BASELINE)

@@ -105,7 +105,6 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
-@pytest.mark.generated_artifact
 def test_issue_5839_retained_public_seams_are_metadata_backed_and_zero_burden() -> None:
     closeout = _load_json(CLOSEOUT)
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
@@ -140,7 +139,6 @@ def test_issue_5839_retained_public_seams_are_metadata_backed_and_zero_burden() 
         assert facade["resolution_conflicts"] == {}
 
 
-@pytest.mark.generated_artifact
 def test_issue_5840_adapter_duplication_is_below_audit_baseline() -> None:
     closeout = _load_json(CLOSEOUT)
     duplication = _load_json(DUPLICATION_BASELINE)
@@ -169,7 +167,6 @@ def test_issue_5840_adapter_duplication_is_below_audit_baseline() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5841_pipeline_transformer_duplication_is_below_audit_baseline() -> None:
     closeout = _load_json(CLOSEOUT)
     duplication = _load_json(DUPLICATION_BASELINE)
@@ -194,7 +191,6 @@ def test_issue_5841_pipeline_transformer_duplication_is_below_audit_baseline() -
     assert "default_entity_type" in context_text
 
 
-@pytest.mark.generated_artifact
 def test_issue_5842_zero_import_candidates_are_fully_governed() -> None:
     closeout = _load_json(CLOSEOUT)
     inventory = _load_json(DEAD_CODE_INVENTORY)
@@ -229,7 +225,6 @@ def test_issue_5842_zero_import_candidates_are_fully_governed() -> None:
         assert row["owner_test_count"] == row["owner_test_paths_exist_count"]
 
 
-@pytest.mark.generated_artifact
 def test_issue_5843_composite_shared_policy_has_single_authority_surface() -> None:
     closeout = _load_json(CLOSEOUT)
     backlog = _load_json(CONFIG_BACKLOG)
@@ -265,7 +260,6 @@ def test_issue_5843_composite_shared_policy_has_single_authority_surface() -> No
         assert raw.get("lineage", {}) == {}
 
 
-@pytest.mark.generated_artifact
 def test_issue_5844_runtime_tail_has_targeted_behavioral_coverage_evidence() -> None:
     closeout = _load_json(CLOSEOUT)
     tail_map = _load_json(COVERAGE_TAIL_MAP)
@@ -292,7 +286,6 @@ def test_issue_5844_runtime_tail_has_targeted_behavioral_coverage_evidence() -> 
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5845_zero_reference_supporting_scripts_have_owner_or_removal_metadata() -> (
     None
 ):

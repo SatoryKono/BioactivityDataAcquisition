@@ -75,7 +75,6 @@ def _normalize_live_collector_comparison(
     return normalized
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 @pytest.mark.timeout(600)
 def test_architecture_quality_scorecard_artifact_matches_live_collector() -> None:
@@ -93,7 +92,6 @@ def test_architecture_quality_scorecard_artifact_matches_live_collector() -> Non
     ) == _normalize_live_collector_comparison(live), SCORECARD_REFRESH_HINT
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_architecture_quality_scorecard_blocks_debt_budget_growth_policy() -> None:
     committed = json.loads(ARTIFACT.read_text(encoding="utf-8"))
@@ -103,7 +101,6 @@ def test_architecture_quality_scorecard_blocks_debt_budget_growth_policy() -> No
     assert len(committed["categories"]) == 10
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_architecture_quality_scorecard_module_coverage_evidence_is_consistent() -> (
     None
@@ -158,7 +155,6 @@ def test_architecture_quality_scorecard_module_coverage_evidence_is_consistent()
             ), SCORECARD_REFRESH_HINT
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_architecture_quality_scorecard_includes_adr_and_observability_gates() -> None:
     committed = json.loads(ARTIFACT.read_text(encoding="utf-8"))
@@ -191,7 +187,6 @@ def test_architecture_quality_scorecard_includes_adr_and_observability_gates() -
     assert committed["metrics"]["runtime_cardinality_review_required_count"] == 0
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_architecture_quality_scorecard_diagnostics_match_shrink_only_sources() -> None:
     committed = json.loads(ARTIFACT.read_text(encoding="utf-8"))
@@ -223,7 +218,6 @@ def test_architecture_quality_scorecard_diagnostics_match_shrink_only_sources() 
     assert diagnostics["composition_module_count"] <= composition_budget["max_modules"]
 
 
-@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_architecture_quality_scorecard_includes_duplication_hotspot_and_test_governance_evidence() -> (
     None

@@ -33,7 +33,6 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
-@pytest.mark.generated_artifact
 def test_layer_contract_coverage_matrix_covers_every_entity_layer() -> None:
     payload = _load_json(MATRIX_PATH)
     rows = payload["rows"]
@@ -56,7 +55,6 @@ def test_layer_contract_coverage_matrix_covers_every_entity_layer() -> None:
     assert actual == expected
 
 
-@pytest.mark.generated_artifact
 def test_layer_contract_coverage_matrix_classifies_contract_surfaces() -> None:
     payload = _load_json(MATRIX_PATH)
     rows = payload["rows"]
@@ -98,7 +96,6 @@ def test_layer_contract_coverage_matrix_classifies_contract_surfaces() -> None:
     assert not violations, "\n".join(violations)
 
 
-@pytest.mark.generated_artifact
 def test_layer_contract_coverage_gold_rows_reuse_canonical_gold_matrix() -> None:
     payload = _load_json(MATRIX_PATH)
     gold_payload = _load_json(GOLD_MATRIX_PATH)

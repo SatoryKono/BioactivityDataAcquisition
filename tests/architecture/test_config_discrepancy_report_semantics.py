@@ -24,7 +24,6 @@ REPORT_PATH = ROOT / "docs" / "reports" / "generated" / "config-discrepancies-re
 BASELINE_PATH = ROOT / "reports" / "quality" / "config-discrepancy-baseline.json"
 
 
-@pytest.mark.generated_artifact
 def test_config_discrepancy_report_separates_actionable_drift_from_sanctioned_variance() -> (
     None
 ):

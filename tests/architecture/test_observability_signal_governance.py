@@ -68,7 +68,6 @@ def test_observability_governance_declares_event_signal_contracts() -> None:
     )
 
 
-@pytest.mark.generated_artifact
 def test_runtime_observability_event_inventory_is_committed_and_sorted() -> None:
     payload = json.loads(EVIDENCE_PATH.read_text(encoding="utf-8"))
 
@@ -96,7 +95,6 @@ def test_runtime_observability_event_inventory_is_committed_and_sorted() -> None
             assert emitters == sorted(emitters)
 
 
-@pytest.mark.generated_artifact
 def test_retired_observability_event_declarations_are_governed_and_inactive() -> None:
     governance = yaml.safe_load(GOVERNANCE_PATH.read_text(encoding="utf-8"))
     event_governance = governance["event_signal_governance"]

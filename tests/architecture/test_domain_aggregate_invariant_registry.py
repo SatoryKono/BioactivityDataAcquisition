@@ -37,7 +37,6 @@ def _registry_aggregate_rows() -> list[dict[str, Any]]:
     return list(_registry_payload()["aggregates"])
 
 
-@pytest.mark.generated_artifact
 def test_domain_aggregate_invariant_registry_is_committed_and_complete() -> None:
     """Public aggregate roots must have explicit invariant evidence rows."""
     payload = _registry_payload()
@@ -63,7 +62,6 @@ def test_domain_aggregate_roots_match_public_exports() -> None:
         assert f'"{aggregate_name}"' in aggregate_init
 
 
-@pytest.mark.generated_artifact
 def test_domain_aggregate_invariant_rows_reference_existing_sources() -> None:
     """Every invariant row must point to real source modules and test evidence."""
     for row in _registry_aggregate_rows():
@@ -77,7 +75,6 @@ def test_domain_aggregate_invariant_rows_reference_existing_sources() -> None:
             assert (PROJECT_ROOT / relative_path).exists(), relative_path
 
 
-@pytest.mark.generated_artifact
 def test_domain_aggregate_invariant_rows_have_direct_test_envelopes() -> None:
     """Each aggregate must have at least one invariant-focused test module."""
     for row in _registry_aggregate_rows():

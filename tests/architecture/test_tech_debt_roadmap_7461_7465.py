@@ -59,7 +59,6 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
-@pytest.mark.generated_artifact
 def test_retained_entrypoint_burn_down_plan_covers_inventory_paths() -> None:
     """#7461: burn-down plan must cover every retained entrypoint (no silent drops)."""
     plan = _load_json(RETAINED_PLAN)
@@ -88,7 +87,6 @@ def test_retained_entrypoint_burn_down_plan_covers_inventory_paths() -> None:
     assert plan["policy"]["silent_removal"] == "forbidden"
 
 
-@pytest.mark.generated_artifact
 def test_zero_ref_supporting_scripts_review_covers_manifest_zero_refs() -> None:
     """#7463: review artifact must list every inventory zero-ref supporting script."""
     review = _load_json(ZERO_REF_REVIEW)
@@ -120,7 +118,6 @@ def test_zero_ref_supporting_scripts_review_covers_manifest_zero_refs() -> None:
         assert proof.get("method")
 
 
-@pytest.mark.generated_artifact
 def test_closeout_fold_progress_and_live_residual_closeout_program() -> None:
     """#7464: fold progress + live residual closeout_program residual freezes."""
     progress = _load_json(CLOSEOUT_FOLD)

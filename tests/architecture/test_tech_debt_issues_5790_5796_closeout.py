@@ -149,7 +149,6 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
-@pytest.mark.generated_artifact
 def test_issue_5790_compatibility_metadata_is_present_and_conflict_free() -> None:
     closeout = _load_json(CLOSEOUT)
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
@@ -194,7 +193,6 @@ def test_issue_5790_compatibility_metadata_is_present_and_conflict_free() -> Non
     assert "sunset status:" in snapshot_text
 
 
-@pytest.mark.generated_artifact
 def test_issue_5791_adapter_duplication_dropped_under_canonical_error_bundle_owner() -> (
     None
 ):
@@ -226,7 +224,6 @@ def test_issue_5791_adapter_duplication_dropped_under_canonical_error_bundle_own
     assert "build_common_network_error_bundle" in pubmed_text
 
 
-@pytest.mark.generated_artifact
 def test_issue_5792_pipeline_duplication_dropped_under_base_transformer_defaults() -> (
     None
 ):
@@ -263,7 +260,6 @@ def test_issue_5792_pipeline_duplication_dropped_under_base_transformer_defaults
         assert "def __init__(" not in text
 
 
-@pytest.mark.generated_artifact
 def test_issue_5793_zero_import_candidates_have_explicit_owner_governance() -> None:
     closeout = _load_json(CLOSEOUT)
     inventory = _load_json(DEAD_CODE_INVENTORY)
@@ -298,7 +294,6 @@ def test_issue_5793_zero_import_candidates_have_explicit_owner_governance() -> N
         assert row["owner_test_count"] == row["owner_test_paths_exist_count"]
 
 
-@pytest.mark.generated_artifact
 def test_issue_5794_shared_composite_policy_is_externalized() -> None:
     closeout = _load_json(CLOSEOUT)
     backlog = _load_json(CONFIG_BACKLOG)
@@ -364,7 +359,6 @@ def test_issue_5795_runtime_basics_has_committed_targeted_coverage_proof() -> No
     )
 
 
-@pytest.mark.generated_artifact
 def test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_governance() -> (
     None
 ):

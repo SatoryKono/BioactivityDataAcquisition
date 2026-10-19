@@ -464,7 +464,6 @@ def test_flaky_review_input_preflight_returns_payload_for_valid_object(
     assert gate.current == "available_valid_object"
 
 
-@pytest.mark.generated_artifact
 def test_build_payload__missing_flaky_review__fails_gate_without_crashing(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -512,7 +511,6 @@ def test_build_payload__missing_flaky_review__fails_gate_without_crashing(
     assert payload["summary"]["release_gate_status"] == "failing"
 
 
-@pytest.mark.generated_artifact
 def test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -556,7 +554,6 @@ def test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stal
     assert summary["release_gate_status"] == "failing"
 
 
-@pytest.mark.generated_artifact
 def test_build_payload_tolerates_unavailable_remote_main_baseline_builder(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -606,7 +603,6 @@ def test_build_payload_tolerates_unavailable_remote_main_baseline_builder(
     assert "generated_artifact_drift" not in failing_gates
 
 
-@pytest.mark.generated_artifact
 def test_build_payload_marks_config_surface_backlog_drift_as_stale_artifact(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -634,7 +630,6 @@ def test_build_payload_marks_config_surface_backlog_drift_as_stale_artifact(
     assert "generated_artifact_drift" in summary["failing_gates"]
 
 
-@pytest.mark.generated_artifact
 def test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

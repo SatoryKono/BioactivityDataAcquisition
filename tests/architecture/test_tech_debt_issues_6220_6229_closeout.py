@@ -52,7 +52,6 @@ def test_issue_6220_public_lazy_facades_are_fully_classified() -> None:
     assert closeout["ratchets"]["unclassified_public_lazy_facades"]["current"] == 0
 
 
-@pytest.mark.generated_artifact
 def test_issue_6221_config_compatibility_facade_has_zero_first_party_importers() -> (
     None
 ):
@@ -70,7 +69,6 @@ def test_issue_6221_config_compatibility_facade_has_zero_first_party_importers()
         assert symbol["max_src_importers"] == 0
 
 
-@pytest.mark.generated_artifact
 def test_issue_6222_bootstrap_and_control_plane_ownership_are_violation_free() -> None:
     closeout = _load_json(CLOSEOUT)
     scorecard = _load_json(ROOT / "reports/quality/architecture-quality-scorecard.json")
@@ -92,7 +90,6 @@ def test_issue_6222_bootstrap_and_control_plane_ownership_are_violation_free() -
     assert control_plane_policy["facades"]
 
 
-@pytest.mark.generated_artifact
 def test_issue_6224_dead_code_review_has_no_untriaged_zero_import_candidates() -> None:
     closeout = _load_json(CLOSEOUT)
     inventory = _load_json(ROOT / "reports/quality/dead-code-inventory.json")
@@ -107,7 +104,6 @@ def test_issue_6224_dead_code_review_has_no_untriaged_zero_import_candidates() -
     assert summary["triaged_retained_without_owner_tests_count"] == 0
 
 
-@pytest.mark.generated_artifact
 def test_issue_6225_aggregate_registry_and_classification_are_aligned() -> None:
     closeout = _load_json(CLOSEOUT)
     registry = _load_json(
@@ -127,7 +123,6 @@ def test_issue_6225_aggregate_registry_and_classification_are_aligned() -> None:
     }
 
 
-@pytest.mark.generated_artifact
 def test_issue_6226_pipeline_config_contract_gates_are_blocker_free() -> None:
     closeout = _load_json(CLOSEOUT)
     ownership = _load_json(
@@ -153,7 +148,6 @@ def test_issue_6226_pipeline_config_contract_gates_are_blocker_free() -> None:
     assert discrepancy["metrics"]["inconsistent_parameter_count"] == 0
 
 
-@pytest.mark.generated_artifact
 def test_issue_6227_replay_identity_and_observability_drift_gates_are_zero() -> None:
     closeout = _load_json(CLOSEOUT)
     uuid_seams = _load_yaml(ROOT / "configs/quality/runtime_uuid_seams.yaml")
@@ -173,7 +167,6 @@ def test_issue_6227_replay_identity_and_observability_drift_gates_are_zero() -> 
     assert vcr["totals"]["unowned_cassette_count"] == 0
 
 
-@pytest.mark.generated_artifact
 def test_issue_6229_architecture_scan_hotspots_are_split_and_cache_backed() -> None:
     test_matrix = _load_yaml(ROOT / "configs/quality/test_matrix.yaml")
     shards = _load_yaml(ROOT / "configs/quality/pytest_shards.yaml")

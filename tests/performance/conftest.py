@@ -14,9 +14,3 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         default=None,
         help="Path to JSONL file where hotspot performance observations are appended.",
     )
-
-    parser.addoption(
-        "--delta-merge-report-dir",
-        default="reports/performance/delta-sequential-merge",
-        help="Directory for isolated sequential Delta observations and raw summaries.",
-    )

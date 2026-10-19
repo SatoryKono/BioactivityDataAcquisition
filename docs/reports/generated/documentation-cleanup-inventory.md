@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3824 |
-| Tracked doc-like files | 3824 |
+| Doc-like files | 3813 |
+| Tracked doc-like files | 3813 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 78 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3824 |
+| tracked | 3813 |
 
 ## Lifecycle Counts
 
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 130 |
+| working_report | 123 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -52,28 +52,28 @@
 | Status | Count |
 | --- | --- |
 | Active | 748 |
-| Archived | 1550 |
+| Archived | 1546 |
 | Canonical | 75 |
 | Generated | 1062 |
-| Working | 389 |
+| Working | 382 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
 | active | 748 |
-| archive | 1550 |
+| archive | 1546 |
 | canonical | 75 |
 | generated | 1062 |
-| working | 389 |
+| working | 382 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 163 |
+| archive-after-migration | 156 |
 | generate-automatically | 1062 |
-| keep | 2599 |
+| keep | 2595 |
 
 ## Cleanup Candidates
 
@@ -121,7 +121,6 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | Working | 0 | archive-after-migration |
 | `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
-| `reports/docs-evidence/http-header-audit-and-provenance.md` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/security-ui-final-20261003/bioetl-scenes-app-gates.json` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/security-ui-final-20261003/bioetl-selectorshell-panel-gates.json` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/selector-audit-2026-07-20/selector-evidence.json` | Working | 0 | archive-after-migration |
@@ -132,12 +131,6 @@
 | `reports/observability/runtime_cardinality_review.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_review_pr.json` | Working | 0 | archive-after-migration |
 | `reports/performance/benchmark-summary.json` | Working | 0 | archive-after-migration |
-| `reports/performance/history/merger_input_8f9bd74269/merger_input_measurement.md` | Working | 0 | archive-after-migration |
-| `reports/performance/history/merger_input_8f9bd74269/merger_input_observations.json` | Working | 0 | archive-after-migration |
-| `reports/performance/history/merger_input_919147a/LIMITATIONS.md` | Working | 0 | archive-after-migration |
-| `reports/performance/history/merger_input_919147a/original-report.md` | Working | 0 | archive-after-migration |
-| `reports/performance/merger_input_measurement.md` | Working | 0 | archive-after-migration |
-| `reports/performance/merger_input_observations.json` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
@@ -159,6 +152,13 @@
 | `reports/quality/coderabbit/20260813/01-scope-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260813/01-scope-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260813/_S01-domain-aggregates.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260813/_S01-domain-registry.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260816/01-scope-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260816/01-scope-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260816/_S01-domain-aggregates.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260816/_S01-domain-registry.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260925_085141/scope_matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/_domain_aggregates_open.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
