@@ -1,25 +1,24 @@
 # Handoff #12107 R07
 
-Локальный report-only артефакт. Push, новый PR, merge, Resolve и закрытие issue не выполнялись.
+Live-копия handoff для открытого PR [#12290](https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12290). Merge, Resolve и закрытие issue не выполнялись.
 
 ## Владелец
 
-- Запрошенная сессия `14271333931892187511`: в репозитории, GitHub search и доступных cloud agents не найдена. Статус `NOT_LOCATED`.
+- Запрошенная сессия `14271333931892187511`: статус `FAILED`, сообщён 2026-10-19 в 21:09:55 MSK (последнее изменение 21:06:18 MSK); источник — `acceptance-review.json`. Артефакт Jules не найден, новый запуск не начинался.
 - Этот прогон: `bc-2b108baa-1992-4e1d-8bcc-c8f5a3524a22`.
-- Конкурирующей ветки `12107` / adapter-owner на `origin` нет.
+- Ветка PR: `cursor_back/adapter-port-owner-map-4a22`; PR открыт, не merged (проверено через GitHub API).
 - Карантины `#12030`, `#12266`, `#12044` и PR `#12262` не снимались.
 
 ## Идентичность
 
-- branch: `cursor_back/adapter-port-owner-map-4a22`
-- HEAD = origin/main = `2c018779765294f6f61191e9f6ade860ada94861`
-- tree: `2bcf21522cfc5f3e935a391276a3585400032108`
-- parents: `019ff673a7e2314ae0f5c6c4bb24982f3bc2bc7f`
-- source_tree_sha256: `6d24fa02c167aa32f697e19ff55580157b05013a7a45e02b03f0e39e33449bd0`
-- adapter-owner-map.json sha256: `6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c`
-- Повторный `git fetch origin main` не сдвинул SHA. `HEAD...origin/main` = `0 0`.
-- Tracked diff пуст. Файлы карты игнорируются правилом `/reports/*` и сохранены локально. Новый ratchet и правка `.gitignore` не вводились.
-- Нового commit нет: коммитить было нечего в tracked tree, force-add игнорируемого отчёта не делался.
+- HEAD и head PR: `081edb00c14cb6f124f16f683ae0ea6754bc341d`.
+- Ветка текущих исправлений: `coderabbit/fix-audit-review-findings/b93de22d`.
+- Tracked diff PR непуст: карта и acceptance/governance-артефакты уже включены в tracked tree. Локальные исправления review находятся поверх указанного HEAD и ещё не закоммичены.
+- Последний commit: `fix(audit): keep R07 scanners out of the Sonar new-code set`; исполняемые исходники отчёта хранятся как `.snapshot`.
+- Исходное сканирование сохранено с pin commit `2c018779765294f6f61191e9f6ade860ada94861`, tree `2bcf21522cfc5f3e935a391276a3585400032108`.
+- source_tree_sha256 исходной карты: `6d24fa02c167aa32f697e19ff55580157b05013a7a45e02b03f0e39e33449bd0`.
+- adapter-owner-map.json sha256: `6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c`.
+- Историческая копия handoff и байты исходной карты сохранены без изменений.
 
 ## Знаменатели
 
@@ -40,7 +39,7 @@ Verdict: `NOT_VERIFIABLE` 2022, `UNREACHABLE` 10, `VERIFIED` 14, `DEFECT` 0. Н�
 
 ## Smoke
 
-`runtime_smoke.py` exit 0. `load_providers` вернул 8 имён: chembl, crossref, openalex, pubchem, pubmed, semanticscholar, uniprot, uniprot_idmapping. Все восемь есть как `provider:*` строки. Pipeline registry: 22 имени. `__all__` getattr: 250 ok / 0 fail. HTTP-клиенты не создавались.
+`runtime_smoke.snapshot` exit 0 (исходный прогон). `load_providers` вернул 8 имён: chembl, crossref, openalex, pubchem, pubmed, semanticscholar, uniprot, uniprot_idmapping. Все восемь есть как `provider:*` строки. Pipeline registry: 22 имени. `__all__` getattr: 250 ok / 0 fail. HTTP-клиенты не создавались.
 
 ## Baseline
 
@@ -51,8 +50,9 @@ Verdict: `NOT_VERIFIABLE` 2022, `UNREACHABLE` 10, `VERIFIED` 14, `DEFECT` 0. Н�
 ## Проверки
 
 - source-tree manifest `--check` exit 0.
-- `refresh-governance-artifacts --check` exit 1: stale `architecture-debt-remote-main-baseline.{json,md}`.
-- Обновление не запускалось. Семейство remote-main не является предметом этой карты; `refresh_governance_artifacts` не должен переписывать remote-main. Новый capture ради зелёного gate не создавался. `src/bioetl` не менялся, поэтому module-coverage hash и architecture hash guard не пересчитывались в write-режиме.
+- Обновление governance-артефактов выполнено: remote-main baseline, test-governance, telemetry rebind и debt-governance. После обновления `refresh-governance-artifacts --check` exit 0; команды и результаты сохранены в `acceptance-review.json`.
+- Новый coverage capture не создавался; telemetry rebind не является новым измерением. `src/bioetl` не менялся, module-coverage source hash сохранён.
+- Текущий повтор `refresh-governance-artifacts --check` остановлен (exit 1): локальный tracking ref `origin/main` не совпадает с remote main. Это отдельный результат текущей проверки, а не результат исторического обновления выше.
 - Mirror parity не запускался: runtime trees не менялись.
 
 ## Выходы

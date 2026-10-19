@@ -885,10 +885,15 @@ def _build_inventory_record(
     incoming: Counter[str],
     outgoing_counts: Counter[str],
 ) -> dict[str, Any]:
+    metadata_text = (
+        _read_declared_metadata(path)
+        if not text and lifecycle == "active_quality_baseline" and path.endswith(".md")
+        else text
+    )
     classification_text = (
         _read_declared_metadata(path)
         if lifecycle == "docs_reports_curated_or_historical_report"
-        else text
+        else metadata_text
     )
     status, freshness, action = _classify(
         path, classification_text, duplicate_group, route, lifecycle
@@ -907,9 +912,9 @@ def _build_inventory_record(
         "extension": Path(path).suffix.lower() or "(none)",
         "section": section,
         "tracking_state": _tracking_state(path, tracked_all),
-        "owner": _extract_owner(text) or "BioETL Team",
-        "declared_status": _extract_declared_status(text),
-        "declared_class": _extract_declared_class(text),
+        "owner": _extract_owner(metadata_text) or "BioETL Team",
+        "declared_status": _extract_declared_status(metadata_text),
+        "declared_class": _extract_declared_class(metadata_text),
         "lifecycle": lifecycle,
         "github_issue_number": issue_number,
         "github_issue_url": (

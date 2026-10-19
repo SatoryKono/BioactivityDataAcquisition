@@ -33,7 +33,7 @@
     "successful_rebind_is_not_measurement_input_compatibility": true
   },
   "rebind_stamp_is_not_a_coverage_measurement": true,
-  "rebind_stamp_source_tree_sha256": "e692e8d58b088c81f2564cf219bc4fe488534d4d9bdf8a7400fccb2b7389cb68",
+  "rebind_stamp_source_tree_sha256": "dc24826347be11e3a4e25408d7d9679d2f93b37ea861488eb95bae01918c6c58",
   "schema_version": 2,
   "why_not_applicable_to_current_tree": "The preserved capture identifies test tree b3a11bb154433ad72b2f07da87d94f02cfff5f3c2ca8a4fad4fbde96204b0aba. Commits after that capture add tests. Those tests were not part of the 17-shard run, so the stored coverage percentages do not measure the current test tree. The live source_tree_sha256 is only the documented rebind stamp."
 }

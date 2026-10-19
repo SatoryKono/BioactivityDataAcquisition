@@ -4,9 +4,9 @@
   "commit_note": "Adds the delta review record. File hashes below exclude this manifest.",
   "files": [
     {
-      "bytes": 24518,
+      "bytes": 24646,
       "path": "reports/audit-runs/12107-r07/build_map_acceptance.snapshot",
-      "sha256": "06b679476f8f65c2e6aee5a0e50c702acbce08d1ec87dddbf56368acbcf24f64"
+      "sha256": "f5d75d06255903396a0a9bc512a1c57eda0b1b31bafc659c080c0b965de43e3f"
     },
     {
       "bytes": 6844,
@@ -36,7 +36,7 @@
     {
       "bytes": 2681,
       "path": "reports/audit-runs/12107-r07/telemetry-applicability.json",
-      "sha256": "d9884b14e9fb9bdb956749694a0fc902e79013b0f0c7dde2ca191a46245c619c"
+      "sha256": "e3a0bedbe13c19bbc6e31412297f870159477cce72832c7c62f654db5d2e04a9"
     },
     {
       "bytes": 3004,
@@ -71,7 +71,7 @@
     {
       "bytes": 5301,
       "path": "reports/audit-runs/12107-r07-history/KIT-MANIFEST.json",
-      "sha256": "62ec97103b54e96aec87f4d4f755182e18fd9d9320b8f9887f93f3b802842542"
+      "sha256": "b55c9b66b5f1b37847f404fa97b10830cefd4df7630e936a7ebf930e8d47dbfc"
     },
     {
       "bytes": 4196,

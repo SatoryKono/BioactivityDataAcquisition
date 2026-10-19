@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
+from hashlib import sha256
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -352,7 +353,7 @@ def _followups() -> dict:
     ]
     return {
         "behavior_matrix_acceptance": "NOT_ACCEPTED",
-        "behavior_matrix_sha256": "7f33f61af00f7b49df8a37991537fd56aba0eec99be57bb5346e9e1d2fcd5bda",
+        "behavior_matrix_sha256": sha256(MATRIX_PATH.read_bytes()).hexdigest(),
         "does_not_replace_universe": True,
         "duplicates_r08_or_r09_work": False,
         "issue_12108_scope_check": (
@@ -429,7 +430,11 @@ def _criteria(document: dict, rows: list[dict], followups: dict) -> list[dict]:
                 "missing_required_fields": missing_fields,
                 "rows": len(rows),
             },
-            "verdict": "PASS",
+            "verdict": (
+                "PASS"
+                if missing_fields == 0 and blank_discovery == 0 and blank_evidence == 0
+                else "FAIL"
+            ),
         },
         {
             "criterion": "one adapter to many ports and one port to many implementations are explicit",
@@ -558,7 +563,7 @@ def main() -> None:
         )
     verdict = {
         "criteria": criteria,
-        "frozen_map_sha256": "6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c",
+        "frozen_map_sha256": sha256(MAP_PATH.read_bytes()).hexdigest(),
         "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12107",
         "issue_close_performed": False,
         "map_source_pin": document["source_pin"],
