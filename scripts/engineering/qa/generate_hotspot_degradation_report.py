@@ -815,7 +815,6 @@ def _archive_validation_failures(
     """Retain owned rejection bytes before clearing their current output paths."""
     from scripts.engineering.common.repo_paths import (
         read_bytes_confined,
-        write_bytes_confined,
     )
 
     history = manifest_out.with_name(f"{manifest_out.stem}.failure-history")
@@ -829,11 +828,7 @@ def _archive_validation_failures(
             continue
         digest = hashlib.sha256(raw).hexdigest()
         archived = history / f"{output.name}.{digest}.json"
-        if archived.exists():
-            if read_bytes_confined(archived, root=root) != raw:
-                raise ValueError("Validation failure archive collision")
-        else:
-            write_bytes_confined(archived, raw, root=root)
+        _write_validation_failure_archive(archived, raw, root)
         pending.append((output, raw, archived))
     for output, raw, archived in pending:
         if read_bytes_confined(archived, root=root) != raw:
@@ -841,6 +836,20 @@ def _archive_validation_failures(
         if read_bytes_confined(output, root=root) != raw:
             raise ValueError("Validation failure output changed during archival")
         output.unlink()
+
+
+def _write_validation_failure_archive(archived: Path, raw: bytes, root: Path) -> None:
+    """Create an archive or verify the existing content-addressed evidence."""
+    from scripts.engineering.common.repo_paths import (
+        read_bytes_confined,
+        write_bytes_confined,
+    )
+
+    if archived.exists():
+        if read_bytes_confined(archived, root=root) != raw:
+            raise ValueError("Validation failure archive collision")
+    else:
+        write_bytes_confined(archived, raw, root=root)
 
 
 def _is_validation_failure(raw: bytes) -> bool:
