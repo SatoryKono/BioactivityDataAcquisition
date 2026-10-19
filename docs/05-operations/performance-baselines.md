@@ -95,6 +95,7 @@ Measurement settings when the plugin is on:
 # Explicit local caller. Guard first, then -p benchmark.
 mkdir -p reports/performance
 BIOETL_BENCHMARK_CALLER=local \
+BIOETL_BENCHMARK_DATASET=bioetl-synthetic-benchmarks-v1 \
 pytest tests/benchmarks/ \
   -m benchmark \
   -p tests.benchmarks.benchmark_vcs_guard \
