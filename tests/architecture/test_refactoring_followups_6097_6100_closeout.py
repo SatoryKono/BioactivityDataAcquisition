@@ -60,6 +60,7 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
+@pytest.mark.generated_artifact
 def test_issue_6097_public_facades_have_explicit_owners_and_bounded_census() -> None:
     census = _load_json(COMPATIBILITY_CENSUS)
     summary = census["summary"]
@@ -102,6 +103,7 @@ def test_issue_6098_runtime_scc_budget_was_reduced_without_stale_acceptance() ->
     )
 
 
+@pytest.mark.generated_artifact
 def test_issue_6099_config_governance_has_owner_map_and_zero_drift() -> None:
     baseline = _load_json(CONFIG_BASELINE)
     diagnostics = _load_json(CONTRACT_DIAGNOSTICS)
@@ -136,6 +138,7 @@ def test_issue_6099_config_governance_has_owner_map_and_zero_drift() -> None:
         assert entry["exit_strategy"] == "retain-permanent-canonical-alias"
 
 
+@pytest.mark.generated_artifact
 def test_issue_6100_vcr_replay_preflight_is_registered_and_catalog_safe() -> None:
     qa_main = (ROOT / "scripts" / "engineering" / "qa" / "__main__.py").read_text(
         encoding="utf-8"

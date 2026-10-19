@@ -168,6 +168,7 @@ def test_non_chembl_exact_replay_families_have_edge_fixtures() -> None:
     )
 
 
+@pytest.mark.generated_artifact
 def test_test_sys_01_bronze_inventory_artifact_is_current() -> None:
     """Committed inventory keeps non-ChEMBL bronze promotion evidence honest."""
     inv_path = (

@@ -666,7 +666,9 @@ def _collect_changed_paths(
         check=False,
     )
     if result.returncode != 0:
-        return set()
+        raise ValueError(
+            f"Cannot collect changed paths from {ref!r}: {result.stderr.strip()}"
+        )
     return {line.strip() for line in result.stdout.splitlines() if line.strip()}
 
 
