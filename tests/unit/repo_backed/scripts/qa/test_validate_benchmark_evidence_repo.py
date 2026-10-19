@@ -21,6 +21,25 @@ def test_benchmark_evidence_workflow_keeps_validator_and_main_gates_independent(
     }
     producer = steps["Run pytest-benchmark cases"]
     validation = steps["Validate benchmark evidence"]
+    contract = steps["Require pytest-benchmark measurement JSON"]
+    assert contract["id"] == "measurement-contract"
+    assert (
+        validation["env"]["CONTRACT_OUTCOME"]
+        == "${{ steps.measurement-contract.outcome }}"
+    )
+    assert '--contract-outcome "$CONTRACT_OUTCOME"' in validation["run"]
+    assert (
+        "--failure-gate-out reports/performance/benchmark-gate.json"
+        in validation["run"]
+    )
+    assert (
+        "steps.measurement-contract.outcome == 'success'"
+        in steps["Reduce benchmark evidence"]["if"]
+    )
+    assert (
+        'test "$CONTRACT_OUTCOME" = success'
+        in steps["Require validated benchmark artifacts"]["run"]
+    )
     assert producer["id"] == "benchmarks"
     assert "continue-on-error" not in producer
     assert (
