@@ -1,10 +1,10 @@
 {
-  "manifest_sha256": "f1b55dd55ccfd38fca2ebec1ee5172d54ed78272c6c8c55a06a29ebe89441c1b",
-  "metrics_sha256": "2319fd4b747e7014bb29926ef4f5b8a2e29fcccd80f36e1fac75881c7ea6977b",
+  "manifest_sha256": "680b8f527d056f08048098b420d0623ff64478ffad78ff869b648476e0f86c0f",
+  "metrics_sha256": "2ca5e0bb7fa78da97ffdc54a31b14e23716f5889feb4c823d856e02b31396550",
   "schema_version": 1,
-  "source_commit": "c09e776cecd2d0df98d1babf4bcc01109bdf985e",
-  "source_run_id": "local-pr-12268-final",
-  "source_tree_sha256": "33389129ad11d0afcfa96dfa35121a8f31d0ac1eedbd848091c21184d35ed99e",
+  "source_commit": "25e494aaeb41798e2a51fa5c57c6fddbd0e8a927",
+  "source_run_id": "local-pr12272-verified",
+  "source_tree_sha256": "8198a617157acafdadfa8aa2c92de2c844f3372f997e9cb29407bdb13075b839",
   "trust_tier": "local_single_host",
   "verification_mode": "local_capture"
 }

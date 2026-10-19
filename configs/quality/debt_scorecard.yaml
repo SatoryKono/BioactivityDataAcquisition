@@ -265,11 +265,12 @@ config_surface_ratchet:
       rationale: Entity/composite config surface must stay bounded while contract drift is burned down.
       ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates the budget.
     unique_parameter_count:
-      current_count: 418
-      max_count: 418
+      current_count: 419
+      max_count: 419
       owner: '@bioetl-config'
       linked_issue: '#4818'
-      rationale: Flattened parameter vocabulary must not expand silently across the unified config matrix.
+      rationale: Flattened parameter vocabulary includes the field_priorities mapping container restored
+        by PR 12272; the existing settings moved out of sort_by without adding runtime options.
       ratchet_policy: Non-growth fail-fast unless a reviewed schema expansion updates the budget.
     inconsistent_parameter_count:
       current_count: 0
@@ -339,9 +340,10 @@ config_surface_ratchet:
           rationale: Composite runtime configs under configs/composites/*.yaml.
           ratchet_policy: Non-growth fail-fast for composite runtime surface.
         unique_parameter_count:
-          current_count: 157
-          max_count: 157
-          rationale: Flattened vocabulary for composite runtime configs only.
+          current_count: 158
+          max_count: 158
+          rationale: Composite vocabulary includes the restored field_priorities container (PR 12272);
+            actionable, raw, and sanctioned drift remain zero.
           ratchet_policy: Non-growth fail-fast unless composite schema expansion updates budget.
         inconsistent_parameter_count:
           current_count: 0
