@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-19T10:56:55.094081+00:00",
+  "generated_at": "2026-10-19T11:22:57.074158+00:00",
   "summary": {
     "total_scripts": 654,
     "status_counts": {
-      "active": 335,
-      "supporting": 319
+      "active": 334,
+      "supporting": 320
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -13244,7 +13244,7 @@
     {
       "path": "scripts/engineering/performance/measure_merger_input.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -13254,7 +13254,11 @@
           "source_group": "tests",
           "text": "from scripts.engineering.performance import measure_merger_input as harness"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as a bounded Linux operator probe of the eager Silver input path. Keep it supporting so the active script cap stays flat; do not promote it to a product entrypoint."
     },
     {
       "path": "scripts/engineering/qa/__main__.py",
