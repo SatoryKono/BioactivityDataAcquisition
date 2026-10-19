@@ -1,4 +1,130 @@
 {
+<<<<<<< HEAD
+  "captured_at_utc": "2026-10-19T16:29:29Z",
+  "source": "GET GitHub REST API for rulesets 13643213 and 15730586 (#12009 closeout)",
+  "repository": "SatoryKono/BioactivityDataAcquisition",
+  "exact_repo_revision": "f47669c6b1352749794cf2d13e283cfa9dc2c955",
+  "ruleset_evidence": [
+    {
+      "api_url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/rulesets/13643213",
+      "api_response_status": 200,
+      "observation_time_utc": "2026-10-19T16:29:29Z",
+      "byte_count": 1160,
+      "raw_response_sha256": "5b38efe0b522f009ad1120352b37c4d6d3151c0be81f6d9c8933135125c68e5f",
+      "content": {
+        "id": 13643213,
+        "name": "main",
+        "target": "branch",
+        "source_type": "Repository",
+        "source": "SatoryKono/BioactivityDataAcquisition",
+        "enforcement": "disabled",
+        "conditions": {
+          "ref_name": {
+            "exclude": [],
+            "include": [
+              "refs/heads/main"
+            ]
+          }
+        },
+        "rules": [
+          {
+            "type": "deletion"
+          },
+          {
+            "type": "non_fast_forward"
+          },
+          {
+            "type": "pull_request",
+            "parameters": {
+              "required_approving_review_count": 0,
+              "dismiss_stale_reviews_on_push": true,
+              "required_reviewers": [],
+              "require_code_owner_review": false,
+              "require_last_push_approval": false,
+              "required_review_thread_resolution": true,
+              "require_extra_approval_for_unattributed_changes": false,
+              "allowed_merge_methods": [
+                "merge",
+                "squash",
+                "rebase"
+              ]
+            }
+          },
+          {
+            "type": "required_status_checks",
+            "parameters": {
+              "strict_required_status_checks_policy": true,
+              "do_not_enforce_on_create": false,
+              "required_status_checks": [
+                {
+                  "context": "ci/circleci: pr-gate-complete"
+                }
+              ]
+            }
+          }
+        ],
+        "node_id": "RRS_lACqUmVwb3NpdG9yec5CCKoOzgDQLc0",
+        "created_at": "2026-03-08T20:58:54.537Z",
+        "updated_at": "2026-10-07T15:19:50.037Z",
+        "_links": {
+          "self": {
+            "href": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/rulesets/13643213"
+          },
+          "html": {
+            "href": "https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213"
+          }
+        }
+      }
+    },
+    {
+      "api_url": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586",
+      "api_response_status": 200,
+      "observation_time_utc": "2026-10-19T16:29:29Z",
+      "byte_count": 821,
+      "raw_response_sha256": "86bf45391c08e498c3c07fb8507db7db7f5f108fc404e48d089aff7463e13f7c",
+      "content": {
+        "id": 15730586,
+        "name": "root-hygiene-required-check",
+        "target": "branch",
+        "source_type": "Repository",
+        "source": "SatoryKono/BioactivityDataAcquisition",
+        "enforcement": "disabled",
+        "conditions": {
+          "ref_name": {
+            "exclude": [],
+            "include": [
+              "refs/heads/main"
+            ]
+          }
+        },
+        "rules": [
+          {
+            "type": "required_status_checks",
+            "parameters": {
+              "strict_required_status_checks_policy": true,
+              "do_not_enforce_on_create": false,
+              "required_status_checks": [
+                {
+                  "context": "ci/circleci: pr-gate-complete"
+                },
+                {
+                  "context": "ci/circleci: root-hygiene"
+                }
+              ]
+            }
+          }
+        ],
+        "node_id": "RRS_lACqUmVwb3NpdG9yec5CCKoOzgDwB5o",
+        "created_at": "2026-04-29T15:41:56.749Z",
+        "updated_at": "2026-10-07T15:23:26.600Z",
+        "_links": {
+          "self": {
+            "href": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586"
+          },
+          "html": {
+            "href": "https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586"
+          }
+=======
   "captured_at_utc": "2026-10-19T15:08:23Z",
   "source": "GET GitHub REST API for rulesets 13643213 and 15730586 (#12009 closeout)",
   "repository": "SatoryKono/BioactivityDataAcquisition",
@@ -147,6 +273,7 @@
         },
         "html": {
           "href": "https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586"
+>>>>>>> origin/main
         }
       }
     }
@@ -158,6 +285,12 @@
       "ci/circleci: root-hygiene"
     ],
     "enforcement": "disabled",
+<<<<<<< HEAD
+    "observation": "Rulesets 13643213 and 15730586 have enforcement disabled but retain stored ci/circleci contexts. A disabled ruleset with legacy contexts does not constitute an active runnable GHA provider or ACTIVE CircleCI enforcement, matching catalog flags."
+  }
+}
+=======
     "observation": "Both rulesets are disabled, but they store ci/circleci contexts. This matches the catalog flags and docs."
   }
 }
+>>>>>>> origin/main
