@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-19T06:26:45.166980+00:00",
+  "generated_at": "2026-10-19T06:28:44.752599+00:00",
   "summary": {
     "total_scripts": 652,
     "status_counts": {
@@ -12112,7 +12112,7 @@
         "CODEX-RUNTIME",
         "py-test-bot"
       ],
-      "reference_count": 60,
+      "reference_count": 66,
       "references": [
         {
           "path": ".codex/agents/CODEX-RUNTIME.md",
@@ -12125,6 +12125,12 @@
           "line": 47,
           "source_group": "skills",
           "text": "`bash scripts/engineering/dev/run_pytest.sh <tests>`, or the platform-specific"
+        },
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 142,
+          "source_group": "docs",
+          "text": "bash scripts/engineering/dev/run_pytest.sh tests/benchmarks/ -v --benchmark-only"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -12155,12 +12161,6 @@
           "line": 41,
           "source_group": "docs",
           "text": "- WSL/Linux: `setup_env_wsl.sh`, `run_pytest.sh`, `run_mypy.sh`"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/library/test/cycle.md",
-          "line": 40,
-          "source_group": "docs",
-          "text": "- scripts/engineering/dev/run_pytest.sh"
         }
       ]
     },
