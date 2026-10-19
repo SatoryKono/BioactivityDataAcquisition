@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-18T23:44:03.381432+00:00",
+  "generated_at": "2026-10-19T01:11:24.736061+00:00",
   "summary": {
     "total_scripts": 650,
     "status_counts": {
@@ -12014,7 +12014,7 @@
         "CODEX-RUNTIME",
         "py-test-bot"
       ],
-      "reference_count": 65,
+      "reference_count": 66,
       "references": [
         {
           "path": ".codex/agents/CODEX-RUNTIME.md",
