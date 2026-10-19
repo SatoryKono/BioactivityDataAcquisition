@@ -136,7 +136,7 @@ def _write_governance(tmp_path: Path) -> None:
                         "candidates": [
                             {
                                 "path": ".mcp-server-context.md",
-                                "current_live_state": "absent_from_root_baseline",
+                                "current_live_state": "present_local_only_root_surface",
                                 "action_if_reintroduced": "retain_as_documented_machine_local_context_do_not_track_or_delete",
                             },
                         ],

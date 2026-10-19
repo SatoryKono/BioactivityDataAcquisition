@@ -543,7 +543,7 @@ review_lanes:
       - rg -n "AGENT\\.md|QUICK_START\\.md|MCP_SETUP\\.md|dashboard-audit-report\\.md|query_test_docs_memory|seed_test_docs_memory|test_neo4j_memory|Dockerfile|requirements\\.txt|tests/conftest\\.py|conftest\\.py" .github docs scripts tests configs README.md Makefile pyproject.toml package.json
     candidates:
       - path: .mcp-server-context.md
-        current_live_state: absent_from_root_baseline
+        current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: retain_as_documented_machine_local_context_do_not_track_or_delete
       - path: AGENT.md

@@ -362,7 +362,7 @@ def test_root_hygiene_review_registry_tracks_absent_root_logs_and_test_print() -
     )
     assert (
         ad_hoc_by_path[".mcp-server-context.md"]["current_live_state"]
-        == "absent_from_root_baseline"
+        == "present_local_only_root_surface"
     )
     assert (
         ad_hoc_by_path[".mcp-server-context.md"]["action_if_reintroduced"]
