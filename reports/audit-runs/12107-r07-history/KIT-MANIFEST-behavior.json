@@ -1,0 +1,108 @@
+{
+  "based_on_commit": "80dfee0fd39ec7022ff487f1dda69f17e3c84fb9",
+  "based_on_tree": "a0d027ffa0d70bef9daf3d78d52a1981a5492ce4",
+  "files": [
+    {
+      "bytes": 26587,
+      "path": "reports/audit-runs/12107-r07/acceptance-review.json",
+      "sha256": "4396a3697fc46dfc5b11dea1a69b5bb94fa8452b4d323d926c8daa416f65f148"
+    },
+    {
+      "bytes": 5313223,
+      "path": "reports/audit-runs/12107-r07/adapter-owner-map.json",
+      "sha256": "6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c"
+    },
+    {
+      "bytes": 678422,
+      "path": "reports/audit-runs/12107-r07/adapter-owner-map.md",
+      "sha256": "4de1e3c0d7e2735d40ecfc675b658368f8e61cac2b220efa6666fa3ee985c486"
+    },
+    {
+      "bytes": 9867,
+      "path": "reports/audit-runs/12107-r07/behavior-obligation-matrix.json",
+      "sha256": "7f33f61af00f7b49df8a37991537fd56aba0eec99be57bb5346e9e1d2fcd5bda"
+    },
+    {
+      "bytes": 4988,
+      "path": "reports/audit-runs/12107-r07/handoff.md",
+      "sha256": "7bad4259fed5a19bbaae73e75128898916dad84fd1a0acdb3fcf118a7936d511"
+    },
+    {
+      "bytes": 188,
+      "path": "reports/audit-runs/12107-r07/logs/pytest-24-on-80dfee.txt",
+      "sha256": "2a6ba78902190edb858ad1f428ddb425b73b444384c853380e45c16a2a04f1a0"
+    },
+    {
+      "bytes": 187,
+      "path": "reports/audit-runs/12107-r07/logs/pytest-8-surface-on-80dfee.txt",
+      "sha256": "719bcf98eda08adbdb7d134d9fabc11d216ef8cd6d4f71023d38431f5141f325"
+    },
+    {
+      "bytes": 143,
+      "path": "reports/audit-runs/12107-r07/logs/pytest-lifecycle-precommit.txt",
+      "sha256": "b0559b9bd434f410cdeeb06960ce89837f3a0439568463d643a8c4e9a2f51534"
+    },
+    {
+      "bytes": 2180,
+      "path": "reports/audit-runs/12107-r07/owner-decision-package.json",
+      "sha256": "f01873c6ecd1d770a0a117ed2e6ae8b887b22925e61a537501f9cd1d4b894d6c"
+    },
+    {
+      "bytes": 53501,
+      "path": "reports/audit-runs/12107-r07/r08-lifecycle-inventory.json",
+      "sha256": "275c10d5e5384a6cd049b66f7be2f301d91a976a40c6fb9bc64c00949af736a3"
+    },
+    {
+      "bytes": 144970,
+      "path": "reports/audit-runs/12107-r07/r09-storage-surface-inventory.json",
+      "sha256": "41c231e6a1d4e4219dba227ab385429f170305684f28e47516689e49cd4324e1"
+    },
+    {
+      "bytes": 3897,
+      "path": "reports/audit-runs/12107-r07/runtime_smoke.py",
+      "sha256": "66d3025c680ec7d31a42298e3d421fe8420ef0a03a5fa64e4ee8b1f9225206c6"
+    },
+    {
+      "bytes": 589,
+      "path": "reports/audit-runs/12107-r07/scan-manifest.json",
+      "sha256": "98b4f67151cfeb92ebd8fe1ade7c102b233f809583e8cb57572240e535aea3a6"
+    },
+    {
+      "bytes": 59269,
+      "path": "reports/audit-runs/12107-r07/scan_adapter_owner_map.py",
+      "sha256": "f68322db872ddd102c87fddecedbff9b46206f8d547ed4980b4a1688d25ef730"
+    },
+    {
+      "bytes": 1870,
+      "path": "reports/audit-runs/12107-r07/telemetry-applicability.json",
+      "sha256": "4affae100146b8a80b30ee38d7e5a3469ed60af406f49fe2afa584913898c846"
+    },
+    {
+      "bytes": 6994,
+      "path": "reports/audit-runs/12107-r07/telemetry-historical/coverage-summary.json",
+      "sha256": "a64d99432044b6ee4675659e233cc824a4735b15ebe35a2a81220d14f3354bf2"
+    },
+    {
+      "bytes": 23331,
+      "path": "reports/audit-runs/12107-r07/telemetry-historical/slowest-tests.json",
+      "sha256": "ce06af108ee3a69d31cb5ac0adae71f3cce7036305b8e0bce3d103742efc6301"
+    },
+    {
+      "bytes": 33677,
+      "path": "reports/audit-runs/12107-r07/telemetry-historical/squash-provenance.json",
+      "sha256": "1780547842c0057a68b90f39139ae7e1610d07049314b43a7f7ec8b6ae30abcc"
+    },
+    {
+      "bytes": 8918,
+      "path": "reports/audit-runs/12107-r07/telemetry-historical/test-telemetry-baseline.md",
+      "sha256": "2ed461df19a16fcf90a8363464f498438f0c075e7d24598e3e27d93a051b73c7"
+    },
+    {
+      "bytes": 40919,
+      "path": "reports/audit-runs/12107-r07/telemetry-historical/test_telemetry_baseline.yaml",
+      "sha256": "a5fc27a42c29cd504cc7d05c6d59ae9e9de50876eccba7b4277bee487ea0d34b"
+    }
+  ],
+  "note": "Hashes of the evidence directory before the behavior commit. The commit that adds this manifest is recorded after creation.",
+  "schema_version": 1
+}

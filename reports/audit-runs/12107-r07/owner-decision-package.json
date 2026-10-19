@@ -1,0 +1,40 @@
+{
+  "gaps": [
+    "No accepted document names a person as semantic, composition, or lifecycle owner of a specific adapter.",
+    "BioETL Team is a role label, not a resolvable assignee.",
+    "CODEOWNERS does not distribute the three owner concerns."
+  ],
+  "groups_requiring_assignment": [
+    "eight registered data-source providers",
+    "noop port implementations",
+    "TRACKED_PORTS storage writers",
+    "PipelineRegistry and ProviderRegistry",
+    "remaining rows of the 2046 universe"
+  ],
+  "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12107",
+  "issue_criterion": "Missing owners receive tracking responsibility. The issue does not require a new runtime ownership field, and CODEOWNERS remains review ownership.",
+  "owner_meaning_for_12107": {
+    "composition_owner": "Accountable for registration and discovery of the row.",
+    "lifecycle_owner": "Accountable for resource open, close, and failure behavior.",
+    "semantic_owner": "Accountable for the behavioral contract of the row."
+  },
+  "people_assigned_by_this_change": [],
+  "proposals_with_documentary_grounds": [
+    {
+      "assigned": false,
+      "candidate": "BioETL Team",
+      "ground": "Owner header on docs/02-architecture/diagrams/descriptions/architecture/05b-adapter-hierarchy-providers.md and the port-adapter diagram descriptions.",
+      "kind": "role"
+    },
+    {
+      "assigned_as_semantic_owner": false,
+      "candidate": "@SatoryKono",
+      "ground": ".github/CODEOWNERS default and domain/composition paths.",
+      "kind": "codeowners_review"
+    }
+  ],
+  "role_responsibility_allowed": "A documented role may be proposed as tracking responsibility. It is not a GitHub account and is not recorded here as an assigned owner.",
+  "runtime_owner_field_required_by_issue": false,
+  "schema_version": 1,
+  "single_question": "Считать ли документированную роль BioETL Team допустимой tracking-ответственностью semantic, composition и lifecycle owner для восьми зарегистрированных провайдеров, или #12107 требует именного владельца?"
+}

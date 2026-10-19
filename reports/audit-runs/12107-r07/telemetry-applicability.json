@@ -1,0 +1,24 @@
+{
+  "assessment": "NOT_VERIFIABLE",
+  "documented_procedure": [
+    "docs/05-engineering/test-telemetry-baseline.md section Branch-accurate provenance",
+    "python -m scripts.engineering.ci.update_test_telemetry_baseline --rebind-current-tree",
+    "The command requires source_event local_coverage_verify, a reachable source_commit, and capture_metrics_are_bound against reports/test-telemetry/squash-provenance.json.",
+    "It replaces only the top-level source_tree_sha256 with the live test-tree hash and preserves the captured coverage metrics."
+  ],
+  "new_coverage_measurement_claimed": false,
+  "original_measurement": {
+    "manifest_sha256": "ef6e4ed40c9447084ba1f2ec9368b12dc315180481244a6189712bb55da9a981",
+    "preserved_copy": "reports/audit-runs/12107-r07/telemetry-historical/",
+    "provenance_test_tree_sha256": "b3a11bb154433ad72b2f07da87d94f02cfff5f3c2ca8a4fad4fbde96204b0aba",
+    "receipt": "reports/audit-runs/12107-r07/telemetry-historical/squash-provenance.json",
+    "source_commit": "8a4286d21becf1fe183acfaf3f051bc6f7916038",
+    "source_event": "local_coverage_verify",
+    "source_run_id": "local-pr12231-local-coverage-8a4286d",
+    "source_tree_sha256_before_rebind": "39252b21b0c71b6e74136a7005186d9339ef815ed0d7cfe71d16b38e6b04f51f"
+  },
+  "rebind_stamp_is_not_a_coverage_measurement": true,
+  "rebind_stamp_source_tree_sha256": "e692e8d58b088c81f2564cf219bc4fe488534d4d9bdf8a7400fccb2b7389cb68",
+  "schema_version": 1,
+  "why_not_applicable_to_current_tree": "The preserved capture identifies test tree b3a11bb154433ad72b2f07da87d94f02cfff5f3c2ca8a4fad4fbde96204b0aba and the pre-rebind source_tree_sha256 39252b21b0c71b6e74136a7005186d9339ef815ed0d7cfe71d16b38e6b04f51f. Commits after that capture add tests. Those tests were not part of the 17-shard run, so the stored coverage percentages do not measure the current test tree."
+}
