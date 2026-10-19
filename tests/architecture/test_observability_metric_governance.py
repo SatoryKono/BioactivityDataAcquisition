@@ -521,18 +521,40 @@ def test_tests_workflow_runs_live_review_only_with_configured_prometheus() -> No
 def test_tests_workflow_blocks_touched_metric_changes_on_stale_or_degraded_review() -> (
     None
 ):
-    workflow = (ROOT / ".github" / "workflows" / "tests.yml").read_text(
-        encoding="utf-8"
+    # Source contracts stay mandatory; committed review freshness belongs to daily.
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/tests.yml").read_text(encoding="utf-8")
     )
-    command = (
-        "uv run --frozen --no-build python -m scripts.engineering.qa "
-        "report-debt-governance-gates --check "
+    steps = workflow["jobs"]["governance-preflight"]["steps"]
+    by_name = {step["name"]: step for step in steps}
+    checkout = by_name["Checkout code"]
+    assert checkout["with"]["fetch-depth"] == 0
+    fetch = by_name["Prepare source-governance comparison baseline"]
+    assert fetch["run"] == "git fetch --no-tags origin main:refs/remotes/origin/main"
+    assert "if" not in fetch
+    prefix = "uv run --frozen --no-build python -m scripts.engineering.qa "
+    source = by_name["Validate debt-governance fail-fast gates"]
+    assert source["run"] == (
+        prefix + "report-debt-governance-gates --source-only --check "
         "--changed-from-ref refs/remotes/origin/main"
     )
-
-    assert command in workflow
-    fetch_command = "git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main"
-    assert workflow.index(fetch_command) < workflow.index(command)
+    assert "if" not in source
+    full = by_name["Validate full debt-governance generated evidence"]
+    assert full["run"] == (
+        prefix + "report-debt-governance-gates --check "
+        "--changed-from-ref refs/remotes/origin/main"
+    )
+    assert full["if"] == "inputs.generated-artifacts"
+    assert steps.index(fetch) < steps.index(source) < steps.index(full)
+    metric_source = by_name["Dashboard semantic release policy gate (token-free)"]
+    assert "if" not in metric_source
+    command = metric_source["run"].replace("\\\n", " ")
+    assert "report-observability-metric-inventory" in command
+    inventory_command = command.split("report-observability-metric-inventory", 1)[
+        1
+    ].split("uv run", 1)[0]
+    assert "--check" in inventory_command.split()
+    assert "--typed-observability-views" not in inventory_command
 
 
 @pytest.mark.architecture

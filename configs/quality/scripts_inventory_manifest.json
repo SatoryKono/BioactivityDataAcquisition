@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-19T00:14:18.609657+00:00",
+  "generated_at": "2026-10-19T00:50:34.514637+00:00",
   "summary": {
     "total_scripts": 652,
     "status_counts": {
@@ -8484,13 +8484,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 258,
+          "line": 275,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 611,
+          "line": 635,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
@@ -10160,7 +10160,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 13,
       "references": [
         {
           "path": ".github/workflows/nightly.yml",
@@ -10194,19 +10194,19 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 14,
+          "line": 15,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.generated_artifact_checks import proven_deferral"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 279,
+          "line": 296,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import generated_artifact_checks as checks"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 510,
+          "line": 527,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import generated_artifact_checks as checks"
         }
@@ -11748,7 +11748,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 15,
+          "line": 16,
           "source_group": "tests",
           "text": "from scripts.engineering.dev.pytest_artifact_selection import ("
         }
@@ -14322,13 +14322,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 334,
+          "line": 351,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 354,
+          "line": 371,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_evaluators as evaluators"
         },
@@ -14365,7 +14365,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 353,
+          "line": 370,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_report as cli"
         }

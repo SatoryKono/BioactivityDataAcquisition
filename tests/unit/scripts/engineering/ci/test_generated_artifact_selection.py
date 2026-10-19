@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import errno
 import json
 from pathlib import Path
 import subprocess
@@ -19,6 +20,22 @@ from scripts.engineering.dev.pytest_artifact_selection import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+def _symlink_or_skip(link: Path, target: Path, *, directory: bool = False) -> None:
+    """Skip only unavailable symlink support/Windows privileges, not test failures."""
+    try:
+        link.symlink_to(target, target_is_directory=directory)
+    except NotImplementedError:
+        pytest.skip("Platform does not implement symlinks")
+    except OSError as exc:
+        unsupported = exc.errno in {errno.ENOSYS, errno.ENOTSUP, errno.EOPNOTSUPP}
+        windows_privilege = getattr(exc, "winerror", None) == 1314 or (
+            sys.platform == "win32" and exc.errno in {errno.EACCES, errno.EPERM}
+        )
+        if unsupported or windows_privilege:
+            pytest.skip(f"Symlink creation is unsupported: {exc}")
+        raise
 
 
 def test_manifest_selectors_exist_and_do_not_cover_entire_modules() -> None:
@@ -525,10 +542,10 @@ def test_runner_rejects_report_escape_before_any_effect(
         supplied = expected.parent / "test-governance-current.json"
         supplied.write_text("preserve")
     elif attack == "file_link":
-        expected.symlink_to(outside)
+        _symlink_or_skip(expected, outside)
     else:
         expected.parent.rmdir()
-        expected.parent.symlink_to(tmp_path, target_is_directory=True)
+        _symlink_or_skip(expected.parent, tmp_path, directory=True)
     monkeypatch.setattr(
         checks.subprocess,
         "run",
@@ -602,7 +619,14 @@ def test_runner_keeps_targets_and_exit_codes_with_fixed_options(tmp_path, monkey
     for target in ("../tests", "/tmp/tests", "@args.txt"):
         with pytest.raises(ValueError):
             checks.ci_pytest_arguments([target])
-    (tmp_path / "tests/link.py").symlink_to(tmp_path / "outside.py")
+
+
+def test_runner_rejects_symlink_test_target(tmp_path, monkeypatch):
+    from scripts.engineering.ci import generated_artifact_checks as checks
+
+    monkeypatch.setattr(checks, "ROOT", tmp_path)
+    (tmp_path / "tests").mkdir()
+    _symlink_or_skip(tmp_path / "tests/link.py", tmp_path / "outside.py")
     with pytest.raises(ValueError, match="Symlink"):
         checks.ci_pytest_arguments(["tests/link.py"])
 
@@ -765,3 +789,53 @@ def test_twin_source_base_uses_event_commit_and_rejects_missing_base(
     )
     with pytest.raises(AssertionError, match="base commit is unavailable"):
         gate._resolve_merge_base(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "value", ["unknown", "short --rootdir=/tmp", "-p", "", "short\n-p"]
+)
+def test_unknown_traceback_format_fails_before_any_effect(tmp_path, monkeypatch, value):
+    from scripts.engineering.ci import generated_artifact_checks as checks
+
+    monkeypatch.setattr(checks, "ROOT", tmp_path)
+    (tmp_path / "tests").mkdir()
+    report = tmp_path / "reports/quality/affected-test-partition.json"
+    report.parent.mkdir(parents=True)
+    report.write_text("preserve")
+    monkeypatch.setattr(
+        checks.subprocess, "run", lambda *a, **k: pytest.fail("invalid tb executed")
+    )
+    with pytest.raises(ValueError, match="Unsupported pytest traceback"):
+        checks.traceback_option(value)
+    with pytest.raises(SystemExit):
+        checks.main(["ci", "--report", str(report), "--", "tests", f"--tb={value}"])
+    assert report.read_text() == "preserve"
+
+
+@pytest.mark.parametrize("value", ["line", "short", "long", "auto", "native", "no"])
+def test_traceback_formats_emit_closed_literal_options(value):
+    from scripts.engineering.ci import generated_artifact_checks as checks
+
+    assert checks.traceback_option(value) == "--tb=" + value
+
+
+@pytest.mark.parametrize(
+    "failure", ["unsupported", "windows_privilege", "not_implemented", "disk_full"]
+)
+def test_symlink_setup_skips_only_unsupported_creation(tmp_path, monkeypatch, failure):
+    error = {
+        "unsupported": OSError(errno.ENOTSUP, "unsupported"),
+        "windows_privilege": OSError(errno.EPERM, "privilege not held"),
+        "not_implemented": NotImplementedError("symlinks"),
+        "disk_full": OSError(errno.ENOSPC, "disk full"),
+    }[failure]
+    if failure == "windows_privilege":
+        error.winerror = 1314
+
+    def create(*args, **kwargs):
+        raise error
+
+    monkeypatch.setattr(Path, "symlink_to", create)
+    expected = OSError if failure == "disk_full" else pytest.skip.Exception
+    with pytest.raises(expected):
+        _symlink_or_skip(tmp_path / "link", tmp_path / "target")

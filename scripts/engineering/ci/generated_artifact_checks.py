@@ -83,6 +83,22 @@ def _reject_symlinks(path: Path, root: Path) -> None:
         raise ValueError("Path escapes repository")
 
 
+def traceback_option(value: str) -> str:
+    """Emit only literal pytest options, even when parser validation is bypassed."""
+    options = {
+        "line": "--tb=line",
+        "short": "--tb=short",
+        "long": "--tb=long",
+        "auto": "--tb=auto",
+        "native": "--tb=native",
+        "no": "--tb=no",
+    }
+    try:
+        return options[value]
+    except KeyError as exc:
+        raise ValueError("Unsupported pytest traceback format") from exc
+
+
 def ci_pytest_arguments(argv: list[str]) -> list[str]:
     """Parse a narrow pytest interface and terminate options before test targets."""
     parser = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
@@ -112,7 +128,7 @@ def ci_pytest_arguments(argv: list[str]) -> list[str]:
         if not (root / path).exists():
             raise ValueError(f"Test target does not exist: {file_part}")
         targets.append(target)
-    return (["-q"] if args.q else []) + [f"--tb={args.tb}", "--", *targets]
+    return (["-q"] if args.q else []) + [traceback_option(args.tb), "--", *targets]
 
 
 def _parse_arguments(argv: list[str] | None):
