@@ -4,9 +4,9 @@
   "commit_note": "Adds the delta review record. File hashes below exclude this manifest.",
   "files": [
     {
-      "bytes": 24432,
-      "path": "reports/audit-runs/12107-r07/build_map_acceptance.py",
-      "sha256": "209a93cfaad9a3374fcb9d0b6fa39b5f5d17d7115886aea00206c5b728aa8934"
+      "bytes": 24497,
+      "path": "scripts/audit/12107-r07/build_map_acceptance.py",
+      "sha256": "d1ccbf5836df746c9887a33ca9b42401f57f6db2d99ae99124ead107beb96f64"
     },
     {
       "bytes": 6844,
@@ -64,14 +64,14 @@
       "sha256": "4396a3697fc46dfc5b11dea1a69b5bb94fa8452b4d323d926c8daa416f65f148"
     },
     {
-      "bytes": 59269,
-      "path": "reports/audit-runs/12107-r07/scan_adapter_owner_map.py",
-      "sha256": "f68322db872ddd102c87fddecedbff9b46206f8d547ed4980b4a1688d25ef730"
+      "bytes": 59283,
+      "path": "scripts/audit/12107-r07/scan_adapter_owner_map.py",
+      "sha256": "31539af4212d20c6a36fdb3f5e915a3a3deff5d4578975f8c766b9ea3a07d77b"
     },
     {
-      "bytes": 4986,
+      "bytes": 5182,
       "path": "reports/audit-runs/12107-r07-history/KIT-MANIFEST.json",
-      "sha256": "2b1ef34b058ddcb9a9f81575f3d1dd147f3b515392f9bce8189c41228f503ded"
+      "sha256": "b8a716a5c8ae2157377ebfb6ced190ecee93d0be8471e7a994910219d8ce0d1e"
     },
     {
       "bytes": 4196,
@@ -139,5 +139,6 @@
   "prior_25_file_manifest_sha256": "c712251c46803d0fa07237cee2101226c536e52c796b10dbc1026a3b493c29d1",
   "reviewed_delta": "91f3791066aebad1b8516969179da5e947e8f430..6b1b10a7bb5b688560dc0c799bc09be3c1c163d1",
   "remediation_commit": "5a600bcb7422a405c5285343a07e8a245029f50d",
-  "schema_version": 4
+  "schema_version": 4,
+  "python_location_note": "Python sources live under scripts/audit so audit-structure PYTHON_LOCATION passes. History copies keep the original scanner bytes. The frozen map JSON and Markdown stay in reports/audit-runs."
 }

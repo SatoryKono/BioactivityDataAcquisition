@@ -6,7 +6,7 @@ This script is an audit method. It is not a quality ratchet, does not write
 
 Usage (from the repository root)::
 
-    .venv/bin/python reports/audit-runs/12107-r07/scan_adapter_owner_map.py
+    .venv/bin/python scripts/audit/12107-r07/scan_adapter_owner_map.py
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ if str(PROJECT_ROOT) not in sys.path:
 SRC_ROOT = PROJECT_ROOT / "src" / "bioetl"
 TEST_ROOT = PROJECT_ROOT / "tests"
 OUT_DIR = PROJECT_ROOT / "reports" / "audit-runs" / "12107-r07"
-SMOKE_SCRIPT = OUT_DIR / "runtime_smoke.py"
+SMOKE_SCRIPT = Path(__file__).resolve().parent / "runtime_smoke.py"
 BASELINE_PORTS = PROJECT_ROOT / "reports" / "quality" / "domain-ports-inventory.json"
 BASELINE_COVERAGE = (
     PROJECT_ROOT / "reports" / "quality" / "port-adapter-factory-coverage.json"
@@ -1554,7 +1554,7 @@ def main() -> int:
         },
         "domain_port_protocol_count_star_port": len(domain_port_names),
         "followups": _followups(rows),
-        "generated_by": "reports/audit-runs/12107-r07/scan_adapter_owner_map.py",
+        "generated_by": "scripts/audit/12107-r07/scan_adapter_owner_map.py",
         "parse_errors": scanner.parse_errors,
         "protocol_count": len(protocols),
         "protocols": protocols,

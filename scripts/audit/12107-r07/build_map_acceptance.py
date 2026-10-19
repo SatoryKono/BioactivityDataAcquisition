@@ -11,7 +11,12 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
+ROOT = (
+    Path(__file__).resolve().parents[3]
+    / "reports"
+    / "audit-runs"
+    / "12107-r07"
+)
 MAP_PATH = ROOT / "adapter-owner-map.json"
 MATRIX_PATH = ROOT / "behavior-obligation-matrix.json"
 
