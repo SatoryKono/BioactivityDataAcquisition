@@ -157,5 +157,6 @@ jobs:
             reports/performance/benchmark-validation-manifest.json
             reports/performance/benchmark-gate.json
             reports/performance/evidence/
+            reports/performance/delta-sequential-merge/
           if-no-files-found: error
           retention-days: 30

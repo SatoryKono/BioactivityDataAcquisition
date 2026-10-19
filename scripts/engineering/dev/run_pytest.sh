@@ -153,6 +153,7 @@ _enable_benchmark_plugin() {
                     exit 2
                 fi
                 ;;
+            *) : ;;
         esac
     done
     if [[ -z "${BIOETL_BENCHMARK_CALLER:-}" ]]; then
@@ -192,7 +193,7 @@ _should_enable_benchmark_plugin() {
     local previous=""
     local arg
     for arg in "$@"; do
-        case "$arg" in
+        case "${arg//\\//}" in
             tests/benchmarks|tests/benchmarks/*|*/tests/benchmarks|*/tests/benchmarks/*)
                 return 0
                 ;;

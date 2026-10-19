@@ -800,6 +800,8 @@ def validate_benchmark_evidence_main(argv: list[str] | None = None) -> int:
         return 1
     manifest["contract_outcome"] = args.contract_outcome
     try:
+        for output in failure_outputs:
+            confined_io_path(output, root=args.output_root).unlink(missing_ok=True)
         write_text_confined(manifest_out, _dump(manifest), root=args.output_root)
     except (ValueError, OSError) as exc:
         print(f"Error: {exc}", file=sys.stderr)

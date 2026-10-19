@@ -325,25 +325,23 @@ class PytestAbortDiagnosticAdapter:
         try:
             if self.timeout is None:
                 proc.wait()
-            else:
-                finished = _wait_bounded(proc, float(self.timeout))
-                if not finished:
-                    timed_out = True
-                    recorded = _descendant_pids(proc.pid)
-                    delivery, sent = _deliver_diagnostic_signal(proc, recorded)
-                    if delivery == "leaf_descendants":
-                        # Give waiting parents time to reap native/Python leaves,
-                        # then dump a still-running Python launcher as well.
-                        deadline = time.monotonic() + self.dump_margin
-                        if not _wait_bounded(proc, self.dump_margin / 2):
-                            fallback, sent = _deliver_diagnostic_signal(proc)
-                            delivery = f"leaf_descendants_then_{fallback}"
-                            _wait_bounded(proc, max(0, deadline - time.monotonic()))
-                    elif delivery == "process_group":
-                        _wait_bounded(proc, self.dump_margin)
-                    recorded |= _descendant_pids(proc.pid)
-                    cleanup_error = _terminate_recorded(proc.pid, recorded)
-                    manifest.cleanup_error = cleanup_error or None
+            elif not _wait_bounded(proc, float(self.timeout)):
+                timed_out = True
+                recorded = _descendant_pids(proc.pid)
+                delivery, sent = _deliver_diagnostic_signal(proc, recorded)
+                if delivery == "leaf_descendants":
+                    # Give waiting parents time to reap native/Python leaves,
+                    # then dump a still-running Python launcher as well.
+                    deadline = time.monotonic() + self.dump_margin
+                    if not _wait_bounded(proc, self.dump_margin / 2):
+                        fallback, sent = _deliver_diagnostic_signal(proc)
+                        delivery = f"leaf_descendants_then_{fallback}"
+                        _wait_bounded(proc, max(0, deadline - time.monotonic()))
+                elif delivery == "process_group":
+                    _wait_bounded(proc, self.dump_margin)
+                recorded |= _descendant_pids(proc.pid)
+                cleanup_error = _terminate_recorded(proc.pid, recorded)
+                manifest.cleanup_error = cleanup_error or None
         finally:
             if proc.poll() is None:
                 _terminate_recorded(proc.pid, _descendant_pids(proc.pid))
@@ -626,6 +624,18 @@ def _wait_bounded(proc: subprocess.Popen[bytes], seconds: float) -> bool:
     return True
 
 
+def _abort_leaves(leaves: set[int]) -> bool:
+    """Signal live leaves, allowing vanished processes to fall back to the group."""
+    delivered = False
+    for pid in sorted(leaves):
+        try:
+            os.kill(pid, signal.SIGABRT)
+            delivered = True
+        except ProcessLookupError:
+            continue
+    return delivered
+
+
 def _deliver_diagnostic_signal(
     proc: subprocess.Popen[bytes],
     descendants: set[int] | None = None,
@@ -638,20 +648,13 @@ def _deliver_diagnostic_signal(
         for pid in (descendants or set())
         if _pid_alive(pid) and not _descendant_pids(pid)
     }
-    if leaves:
-        delivered = False
-        for pid in sorted(leaves):
-            try:
-                os.kill(pid, signal.SIGABRT)
-                delivered = True
-            except ProcessLookupError:
-                continue
-            except OSError:
-                return "error", signal.SIGABRT
-        if delivered:
+    try:
+        if _abort_leaves(leaves):
             return "leaf_descendants", signal.SIGABRT
-        # All leaves disappeared between discovery and delivery: actually signal
-        # the launcher group rather than claiming a delivery that never happened.
+    except OSError:
+        return "error", signal.SIGABRT
+    # All leaves disappeared between discovery and delivery: actually signal
+    # the launcher group rather than claiming a delivery that never happened.
     try:
         os.killpg(proc.pid, signal.SIGABRT)
     except ProcessLookupError:

@@ -480,7 +480,7 @@ def test_cli_module_accepts_valid_schema_and_blocks_rejected_contract(
         _SHA,
         "--contract-outcome",
     ]
-    for outcome, expected in [("success", 0), ("failure", 1)]:
+    for outcome, expected in [("success", 0), ("failure", 1), ("success", 0)]:
         result = subprocess.run(
             [*args, outcome], env=env, capture_output=True, text=True, timeout=30
         )

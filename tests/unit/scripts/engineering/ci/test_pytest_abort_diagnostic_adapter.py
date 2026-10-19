@@ -777,7 +777,10 @@ def test_journal_child_identity_survives_supervision(tmp_path: Path) -> None:
     assert child_env["BIOETL_JOURNAL_PASS"] == "mutated-after-construction"
 
 
-@pytest.mark.skipif(os.name != "posix", reason="POSIX signal integration")
+@pytest.mark.skipif(
+    os.name != "posix" or not Path("/proc").is_dir(),
+    reason="POSIX signal integration requires /proc descendant discovery",
+)
 def test_native_child_timeout_dumps_python_runner_and_reaps_child(
     tmp_path: Path,
 ) -> None:

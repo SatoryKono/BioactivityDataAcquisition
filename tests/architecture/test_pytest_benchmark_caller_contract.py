@@ -33,6 +33,7 @@ import io
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -629,6 +630,8 @@ def test_default_pytest_skips_benchmark_and_does_not_probe(tmp_path: Path) -> No
             sys.executable,
             "-m",
             "pytest",
+            "-p",
+            "timeout",
             "--confcutdir",
             str(ROOT / "tests" / "benchmarks"),
             "tests/benchmarks/test_baseline_assertions.py::TestContentHashBaselines::test_small_record_baseline",
@@ -664,6 +667,8 @@ def test_explicit_caller_measures_case_without_vcs_probe(tmp_path: Path) -> None
             sys.executable,
             "-m",
             "pytest",
+            "-p",
+            "timeout",
             "--noconftest",
             "--confcutdir",
             str(tmp_path),
@@ -717,6 +722,8 @@ def test_guard_after_benchmark_records_probe_and_rejects_provenance(
             sys.executable,
             "-m",
             "pytest",
+            "-p",
+            "timeout",
             "--noconftest",
             "--confcutdir",
             str(tmp_path),
@@ -798,6 +805,8 @@ def test_collect_only_does_not_probe_before_execution(tmp_path: Path) -> None:
             sys.executable,
             "-m",
             "pytest",
+            "-p",
+            "timeout",
             "--noconftest",
             "--confcutdir",
             str(tmp_path),
@@ -858,12 +867,15 @@ def test_guard_leaves_project_subprocess_calls_intact() -> None:
         ["--benchmark-json=result.json"],
         ["--benchmark-compare=0001"],
         [str(ROOT / "tests/benchmarks")],
+        [r"C:\fixtures\tests\benchmarks"],
     ],
 )
 def test_shell_wrapper_guards_explicit_activation(
     tmp_path: Path, autoload: str, activation: list[str]
 ) -> None:
     """The actual wrapper guards activation outside benchmark directories in all modes."""
+    bash = shutil.which("bash")
+    assert bash is not None, "bash is required for the shell wrapper contract"
     runtime = tmp_path / "python"
     runtime.write_text(
         "#!/bin/sh\nif [ \"$1\" = '-c' ]; then exit 0; fi\nprintf '%s\\n' \"$@\"\n",
@@ -881,7 +893,7 @@ def test_shell_wrapper_guards_explicit_activation(
     )
     completed = subprocess.run(
         [
-            "bash",
+            bash,
             str(ROOT / "scripts/engineering/dev/run_pytest.sh"),
             "tests/unit/test_example.py",
             *activation,
@@ -950,6 +962,8 @@ def test_measurement_context_matches_reducer_contract(
 def test_shell_json_caller_requires_explicit_dataset_before_execution(
     tmp_path, dataset
 ):
+    bash = shutil.which("bash")
+    assert bash is not None, "bash is required for the shell wrapper contract"
     runtime = tmp_path / "python"
     runtime.write_text(
         "#!/bin/sh\nif [ \"$1\" = '-c' ]; then exit 0; fi\nprintf '%s\\n' \"$BIOETL_BENCHMARK_DATASET\"\n"
@@ -966,7 +980,7 @@ def test_shell_json_caller_requires_explicit_dataset_before_execution(
         env["BIOETL_BENCHMARK_DATASET"] = dataset
     result = subprocess.run(
         [
-            "bash",
+            bash,
             str(ROOT / "scripts/engineering/dev/run_pytest.sh"),
             "tests/benchmarks",
             "--benchmark-json=fixture.json",
