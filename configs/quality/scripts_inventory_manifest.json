@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-18T23:52:42.568307+00:00",
+  "generated_at": "2026-10-19T00:00:02.557663+00:00",
   "summary": {
     "total_scripts": 652,
     "status_counts": {
-      "active": 336,
-      "supporting": 316
+      "active": 334,
+      "supporting": 318
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -10158,7 +10158,7 @@
     {
       "path": "scripts/engineering/ci/generated_artifact_checks.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 11,
       "references": [
@@ -10210,7 +10210,11 @@
           "source_group": "tests",
           "text": "from scripts.engineering.ci import generated_artifact_checks as checks"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the internal CI scheduling/receipt adapter used by pr-required and nightly workflows. Its bounded CLI delegates to pytest and existing validators; it is not a new independent operator or validation entrypoint. Keep policy ownership with the test matrix and existing producer commands."
     },
     {
       "path": "scripts/engineering/ci/junit_duration_summary.py",
@@ -11732,7 +11736,7 @@
     {
       "path": "scripts/engineering/dev/pytest_artifact_selection.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -11748,7 +11752,11 @@
           "source_group": "tests",
           "text": "from scripts.engineering.dev.pytest_artifact_selection import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the pytest collection plugin loaded by tests/conftest.py; it has no standalone CLI and owns only the scheduling partition used by governed CI/daily lanes."
     },
     {
       "path": "scripts/engineering/dev/pytest_junit_subtests.py",
