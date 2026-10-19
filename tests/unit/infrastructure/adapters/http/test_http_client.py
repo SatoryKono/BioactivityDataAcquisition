@@ -430,6 +430,7 @@ class TestUnifiedHTTPClientRequestMethods:
         mock_cb = AsyncMock()
 
         async def _call_cb(req_coro, *args, **kwargs):
+            """Invoke the request coroutine without circuit-breaker short-circuit."""
             return await req_coro()
 
         mock_cb.call.side_effect = _call_cb
@@ -442,11 +443,13 @@ class TestUnifiedHTTPClientRequestMethods:
             run_id="run-777",
             timeout=5.0,
             provider="test",
+            trust_env=False,
         )
 
         transport_requests = []
 
         async def mock_handler(request: httpx.Request):
+            """Capture the request that reaches the replaced default transport."""
             transport_requests.append(request)
             return httpx.Response(200, json={"status": "ok"})
 

@@ -45,6 +45,7 @@ def _rows() -> list[dict[str, object]]:
     return normalized
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_port_adapter_factory_coverage_has_no_unresolved_core_ports() -> None:
     payload = _payload()
@@ -69,6 +70,7 @@ def test_port_adapter_factory_coverage_has_no_unresolved_core_ports() -> None:
     assert universe["semantic_completeness"] == "not_assessed"
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_port_adapter_factory_coverage_paths_exist() -> None:
     violations: list[str] = []
@@ -89,6 +91,7 @@ def test_port_adapter_factory_coverage_paths_exist() -> None:
     assert not violations, "\n".join(violations)
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_port_adapter_factory_coverage_artifact_is_current() -> None:
     result = subprocess.run(

@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3814 |
-| Tracked doc-like files | 3814 |
+| Doc-like files | 3824 |
+| Tracked doc-like files | 3824 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 78 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3814 |
+| tracked | 3824 |
 
 ## Lifecycle Counts
 
@@ -30,7 +30,7 @@
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 28 |
 | docs_reports_generated_or_route_owned | 7 |
-| docs_reports_retention_sensitive_evidence | 23 |
+| docs_reports_retention_sensitive_evidence | 22 |
 | generated_skill_reference_mirror | 19 |
 | generated_test_run_evidence | 6 |
 | guide | 2 |
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 123 |
+| working_report | 130 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -51,29 +51,29 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 749 |
-| Archived | 1546 |
+| Active | 748 |
+| Archived | 1550 |
 | Canonical | 75 |
 | Generated | 1062 |
-| Working | 382 |
+| Working | 389 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 749 |
-| archive | 1546 |
+| active | 748 |
+| archive | 1550 |
 | canonical | 75 |
 | generated | 1062 |
-| working | 382 |
+| working | 389 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 156 |
+| archive-after-migration | 163 |
 | generate-automatically | 1062 |
-| keep | 2596 |
+| keep | 2599 |
 
 ## Cleanup Candidates
 
@@ -121,6 +121,7 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | Working | 0 | archive-after-migration |
 | `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
+| `reports/docs-evidence/http-header-audit-and-provenance.md` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/security-ui-final-20261003/bioetl-scenes-app-gates.json` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/security-ui-final-20261003/bioetl-selectorshell-panel-gates.json` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/selector-audit-2026-07-20/selector-evidence.json` | Working | 0 | archive-after-migration |
@@ -131,6 +132,12 @@
 | `reports/observability/runtime_cardinality_review.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_review_pr.json` | Working | 0 | archive-after-migration |
 | `reports/performance/benchmark-summary.json` | Working | 0 | archive-after-migration |
+| `reports/performance/history/merger_input_8f9bd74269/merger_input_measurement.md` | Working | 0 | archive-after-migration |
+| `reports/performance/history/merger_input_8f9bd74269/merger_input_observations.json` | Working | 0 | archive-after-migration |
+| `reports/performance/history/merger_input_919147a/LIMITATIONS.md` | Working | 0 | archive-after-migration |
+| `reports/performance/history/merger_input_919147a/original-report.md` | Working | 0 | archive-after-migration |
+| `reports/performance/merger_input_measurement.md` | Working | 0 | archive-after-migration |
+| `reports/performance/merger_input_observations.json` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
@@ -152,13 +159,6 @@
 | `reports/quality/coderabbit/20260813/01-scope-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260813/01-scope-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260813/_S01-domain-aggregates.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260813/_S01-domain-registry.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260816/01-scope-matrix.json` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260816/01-scope-matrix.md` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260816/_S01-domain-aggregates.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260816/_S01-domain-registry.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260925_085141/scope_matrix.json` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/_domain_aggregates_open.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -291,7 +291,6 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/evidence/INDEX.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/README.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/http-header-audit-and-provenance.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/CROSS-SYNTHESIS-project-legacy-compatibility-remediation.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/04-decisions/DECISIONS.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/05-risks/RISKS.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
@@ -300,6 +299,7 @@
 | `docs/reports/evidence/project-legacy-compatibility-remediation/composition-bootstrap-and-registry-compat/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/config-schema-and-migration-compat/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/domain-application-legacy-seams/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/project-legacy-compatibility-remediation/infrastructure-adapters-and-fallbacks/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 

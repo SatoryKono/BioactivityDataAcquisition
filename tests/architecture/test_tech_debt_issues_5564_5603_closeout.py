@@ -64,6 +64,7 @@ def _family_row(payload: dict[str, Any], family_name: str) -> dict[str, Any]:
     raise AssertionError(f"missing hotspot family row: {family_name}")
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_issue_5564_debt_governance_gates_remain_passing() -> None:
     gates = _load_json(DEBT_GATES)
@@ -77,6 +78,7 @@ def test_issue_5564_debt_governance_gates_remain_passing() -> None:
     assert summary["architecture_quality_scorecard_integral_score"] >= 8.92
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_issue_5597_retained_public_surfaces_are_bounded_and_owned() -> None:
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
@@ -106,6 +108,7 @@ def test_issue_5597_retained_public_surfaces_are_bounded_and_owned() -> None:
             assert row["src_importers"] == []
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_issue_5598_cli_duplication_first_wave_is_burned_down() -> None:
     payload = _load_json(DUPLICATION_BASELINE)
@@ -117,6 +120,7 @@ def test_issue_5598_cli_duplication_first_wave_is_burned_down() -> None:
     assert payload["summary"]["total_duplicate_clusters"] == 0
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_issue_5599_active_hotspot_total_loc_decreases_without_budget_growth() -> None:
     """Fold residual freezes onto live residual snapshot non-growth (#7464 / #6891)."""
@@ -166,6 +170,7 @@ def test_issue_5599_active_hotspot_total_loc_decreases_without_budget_growth() -
     )
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_issue_5600_zero_import_inventory_is_owned_and_time_bounded() -> None:
     inventory = _load_json(DEAD_CODE_INVENTORY)

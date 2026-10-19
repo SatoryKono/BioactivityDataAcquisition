@@ -58,6 +58,7 @@ def _target_duplicate_count(payload: dict[str, Any], target: str) -> int:
     raise AssertionError(f"Missing duplication target row: {target}")
 
 
+@pytest.mark.generated_artifact
 def test_issue_5866_full_app_duplication_ratchet_is_enforced() -> None:
     closeout = _load_json(CLOSEOUT)
     baseline = _load_json(BASELINE)
@@ -77,6 +78,7 @@ def test_issue_5866_full_app_duplication_ratchet_is_enforced() -> None:
     )
 
 
+@pytest.mark.generated_artifact
 def test_issue_5867_adapter_duplication_burned_down() -> None:
     closeout = _load_json(CLOSEOUT)
     baseline = _load_json(BASELINE)
@@ -91,6 +93,7 @@ def test_issue_5867_adapter_duplication_burned_down() -> None:
     ).exists()
 
 
+@pytest.mark.generated_artifact
 def test_issue_5868_pipeline_duplication_burned_down() -> None:
     closeout = _load_json(CLOSEOUT)
     baseline = _load_json(BASELINE)
@@ -110,6 +113,7 @@ def test_issue_5868_pipeline_duplication_burned_down() -> None:
     ).exists()
 
 
+@pytest.mark.generated_artifact
 def test_issue_5869_replay_sensitive_coverage_floors_hold() -> None:
     closeout = _load_json(CLOSEOUT)
     inventory = _load_json(INVENTORY)

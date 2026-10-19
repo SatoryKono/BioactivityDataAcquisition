@@ -29,11 +29,11 @@
 
 Compares performance of stdlib json vs orjson for typical BioETL workloads.
 
-Run with ``-p tests.benchmarks.benchmark_vcs_guard`` before ``-p benchmark``.
-Default addopts keep ``-p no:benchmark``.
+Run with:
+    bash scripts/engineering/dev/run_pytest.sh tests/benchmarks/test_json_serialization.py -v --benchmark-only
 
 Requirements:
-    - pytest-benchmark and orjson
+    - pip install pytest-benchmark orjson
 """
 
 from __future__ import annotations

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- **Silver quarantine CLI alias retirement (#12054):**
+  `--silver-filter-only` is removed from `quarantine inspect`, `quarantine stats`
+  and `diagnostics quarantine` after its 2026-09-30 sunset. Older invocations
+  selected Silver structural rejects; they now fail with Click usage exit code 2.
+  Operators, scheduled jobs and scripts must replace the flag with
+  `--error-code FILTERED_OUT_SILVER`, retaining their existing pipeline/run/limit
+  arguments. Remove any existing `--error-code` arguments so exactly one
+  `--error-code FILTERED_OUT_SILVER` remains: the retired alias overrode those
+  arguments, whereas repeated Click options use the last value.
+  The replacement continues to exclude Gold semantic rejects.
+  First-party callers have migrated; external consumers must migrate before
+  upgrading. This is a **major-version impact**: the next release containing
+  the removal must be **7.0.0**, not a backward-compatible 6.1.x/6.x release.
+  The current 6.1.0 package metadata remains the last released version; this
+  Unreleased entry does not publish or claim a 7.0.0 release.
+
 ### Security
 
 - **Code scanning #1464 / #1462:** `check_no_partial_tree._git` allowlists git

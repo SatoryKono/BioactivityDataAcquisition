@@ -29,6 +29,7 @@ def _load_json(path: Path) -> dict[str, object]:
     return payload
 
 
+@pytest.mark.generated_artifact
 def test_issue_6016_hotspot_family_fan_in_is_no_longer_saturated() -> None:
     """composition_factories_pipeline should have margin below its fan-in budget."""
     baseline = _load_json(ROOT / "reports/quality/hotspot-family-baseline.json")
@@ -61,6 +62,7 @@ def test_issue_6016_hotspot_family_fan_in_is_no_longer_saturated() -> None:
     assert not family.get("budget_warnings")
 
 
+@pytest.mark.generated_artifact
 def test_issue_6019_duplication_triage_matches_current_baselines() -> None:
     """Duplication triage should reflect current report-only baseline counts."""
     closeout = _load_json(CLOSEOUT)
