@@ -989,7 +989,7 @@
         "reason": "Live accepted-inventory floor count; this binding does not close the parent epic."
       },
       "current_binding_refresh": {
-        "source_tree_sha256": "27a61bcbe8f88d546aad463363cd2fcc5b38464b64829e308d47a63b66379254",
+        "source_tree_sha256": "bdbfc6e64d7ce90a6c375cf0cabfda52513c802f9460cba2b1fff161c2c7ba7e",
         "evidence": "reports/quality/module-coverage-inventory.json",
         "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
       },
@@ -997,7 +997,7 @@
     }
   ],
   "current_binding_refresh": {
-    "source_tree_sha256": "95c6551ec63e5ac29301fc19859eae983b31538a1d06ee71ae0627863eaba3e5",
+    "source_tree_sha256": "5208ac236166f04cb1090267d21ca9601bf0c6b95248faf9b5d8c9dab2579e9d",
     "evidence": "reports/quality/module-coverage-inventory.json",
     "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
   },
