@@ -1,0 +1,128 @@
+{
+  "do_not_rewrite": [
+    "reports/audit-runs/12107-r07/adapter-owner-map.json",
+    "reports/audit-runs/12107-r07-history/6b39eef8bf65aacb"
+  ],
+  "files": [
+    {
+      "bytes": 26587,
+      "group": "live",
+      "path": "reports/audit-runs/12107-r07/acceptance-review.json",
+      "sha256": "4396a3697fc46dfc5b11dea1a69b5bb94fa8452b4d323d926c8daa416f65f148"
+    },
+    {
+      "bytes": 5313223,
+      "group": "live",
+      "path": "reports/audit-runs/12107-r07/adapter-owner-map.json",
+      "sha256": "6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c"
+    },
+    {
+      "bytes": 678422,
+      "group": "live",
+      "path": "reports/audit-runs/12107-r07/adapter-owner-map.md",
+      "sha256": "4de1e3c0d7e2735d40ecfc675b658368f8e61cac2b220efa6666fa3ee985c486"
+    },
+    {
+      "bytes": 4988,
+      "group": "live",
+      "path": "reports/audit-runs/12107-r07/handoff.md",
+      "sha256": "7bad4259fed5a19bbaae73e75128898916dad84fd1a0acdb3fcf118a7936d511"
+    },
+    {
+      "bytes": 53501,
+      "group": "live",
+      "path": "reports/audit-runs/12107-r07/r08-lifecycle-inventory.json",
+      "sha256": "275c10d5e5384a6cd049b66f7be2f301d91a976a40c6fb9bc64c00949af736a3"
+    },
+    {
+      "bytes": 144970,
+      "group": "live",
+      "path": "reports/audit-runs/12107-r07/r09-storage-surface-inventory.json",
+      "sha256": "41c231e6a1d4e4219dba227ab385429f170305684f28e47516689e49cd4324e1"
+    },
+    {
+      "bytes": 3897,
+      "group": "live",
+      "path": "reports/audit-runs/12107-r07/runtime_smoke.py",
+      "sha256": "66d3025c680ec7d31a42298e3d421fe8420ef0a03a5fa64e4ee8b1f9225206c6"
+    },
+    {
+      "bytes": 589,
+      "group": "live",
+      "path": "reports/audit-runs/12107-r07/scan-manifest.json",
+      "sha256": "98b4f67151cfeb92ebd8fe1ade7c102b233f809583e8cb57572240e535aea3a6"
+    },
+    {
+      "bytes": 59269,
+      "group": "live",
+      "path": "reports/audit-runs/12107-r07/scan_adapter_owner_map.py",
+      "sha256": "f68322db872ddd102c87fddecedbff9b46206f8d547ed4980b4a1688d25ef730"
+    },
+    {
+      "bytes": 5313223,
+      "group": "frozen_history",
+      "path": "reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.json",
+      "sha256": "6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c"
+    },
+    {
+      "bytes": 678422,
+      "group": "frozen_history",
+      "path": "reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.md",
+      "sha256": "4de1e3c0d7e2735d40ecfc675b658368f8e61cac2b220efa6666fa3ee985c486"
+    },
+    {
+      "bytes": 4988,
+      "group": "frozen_history",
+      "path": "reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/handoff.md",
+      "sha256": "7bad4259fed5a19bbaae73e75128898916dad84fd1a0acdb3fcf118a7936d511"
+    },
+    {
+      "bytes": 53501,
+      "group": "frozen_history",
+      "path": "reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/r08-lifecycle-inventory.json",
+      "sha256": "275c10d5e5384a6cd049b66f7be2f301d91a976a40c6fb9bc64c00949af736a3"
+    },
+    {
+      "bytes": 144970,
+      "group": "frozen_history",
+      "path": "reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/r09-storage-surface-inventory.json",
+      "sha256": "41c231e6a1d4e4219dba227ab385429f170305684f28e47516689e49cd4324e1"
+    },
+    {
+      "bytes": 3897,
+      "group": "frozen_history",
+      "path": "reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/runtime_smoke.py",
+      "sha256": "66d3025c680ec7d31a42298e3d421fe8420ef0a03a5fa64e4ee8b1f9225206c6"
+    },
+    {
+      "bytes": 589,
+      "group": "frozen_history",
+      "path": "reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/scan-manifest.json",
+      "sha256": "98b4f67151cfeb92ebd8fe1ade7c102b233f809583e8cb57572240e535aea3a6"
+    },
+    {
+      "bytes": 59269,
+      "group": "frozen_history",
+      "path": "reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/scan_adapter_owner_map.py",
+      "sha256": "f68322db872ddd102c87fddecedbff9b46206f8d547ed4980b4a1688d25ef730"
+    }
+  ],
+  "frozen_directory_is_byte_identical_to_original_live_files": true,
+  "historical_map_sha256": "6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c",
+  "integration_base": {
+    "branch": "cursor_back/adapter-port-owner-map-4a22",
+    "head": "2c018779765294f6f61191e9f6ade860ada94861",
+    "origin_main": "2c018779765294f6f61191e9f6ade860ada94861",
+    "source_tree_sha256": "6d24fa02c167aa32f697e19ff55580157b05013a7a45e02b03f0e39e33449bd0",
+    "tree": "2bcf21522cfc5f3e935a391276a3585400032108"
+  },
+  "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12107",
+  "reproduction": [
+    "git fetch origin main",
+    "git rev-parse HEAD",
+    "git rev-parse 'HEAD^{tree}'",
+    ".venv/bin/python reports/audit-runs/12107-r07/scan_adapter_owner_map.py"
+  ],
+  "reproduction_warning": "The scanner writes the live directory. Do not point it at the frozen hash directory and do not replace the historical map bytes.",
+  "schema_version": 1
+}

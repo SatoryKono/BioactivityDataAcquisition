@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+"""Bounded registry and getattr smoke for the R07 adapter map.
+
+This process must not construct HTTP clients or start servers. It only calls
+registration entrypoints and resolves declared ``__all__`` exports.
+"""
+
+from __future__ import annotations
+
+import importlib
+import json
+import traceback
+
+GETATTR_MODULES: tuple[str, ...] = (
+    "bioetl.composition.providers",
+    "bioetl.composition.factories",
+    "bioetl.composition.factories.pipeline",
+    "bioetl.composition.factories.services",
+    "bioetl.composition.bootstrap",
+    "bioetl.composition.registry_api",
+    "bioetl.domain.ports",
+    "bioetl.infrastructure.observability",
+    "bioetl.infrastructure.control_plane",
+    "bioetl.infrastructure.export",
+)
+
+
+def _error(step: str, exc: BaseException) -> dict[str, str]:
+    return {
+        "step": step,
+        "type": type(exc).__name__,
+        "message": str(exc)[:500],
+        "trace": traceback.format_exc()[-1500:],
+    }
+
+
+def _providers() -> list[str]:
+    from bioetl.composition.providers.loader import load_providers
+    from bioetl.composition.providers.provider_registry import (
+        get_default_provider_registry,
+    )
+
+    load_providers()
+    registry = get_default_provider_registry()
+    return sorted(str(name) for name in registry.list_providers())
+
+
+def _pipelines() -> list[str]:
+    from bioetl.composition.factories.pipeline._registry_factory_catalog import (
+        list_pipeline_names,
+    )
+
+    return sorted(str(name) for name in list_pipeline_names())
+
+
+def _getattr_exports() -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for module_name in GETATTR_MODULES:
+        try:
+            module = importlib.import_module(module_name)
+        except Exception as exc:  # noqa: BLE001 - smoke records the failure
+            rows.append(
+                {
+                    "module": module_name,
+                    "attr": None,
+                    "ok": False,
+                    "error": type(exc).__name__,
+                    "message": str(exc)[:300],
+                }
+            )
+            continue
+        exports = list(getattr(module, "__all__", []))
+        for attr in exports:
+            try:
+                value = getattr(module, attr)
+            except Exception as exc:  # noqa: BLE001 - smoke records the failure
+                rows.append(
+                    {
+                        "module": module_name,
+                        "attr": attr,
+                        "ok": False,
+                        "error": type(exc).__name__,
+                        "message": str(exc)[:300],
+                    }
+                )
+                continue
+            rows.append(
+                {
+                    "module": module_name,
+                    "attr": attr,
+                    "ok": True,
+                    "resolved_type": type(value).__name__,
+                }
+            )
+    rows.sort(key=lambda item: (str(item["module"]), str(item["attr"])))
+    return rows
+
+
+def main() -> int:
+    result: dict[str, object] = {
+        "providers": None,
+        "pipelines": None,
+        "getattr": [],
+        "errors": [],
+    }
+    errors = result["errors"]
+    assert isinstance(errors, list)
+    try:
+        result["providers"] = _providers()
+    except Exception as exc:  # noqa: BLE001 - smoke records the failure
+        errors.append(_error("providers", exc))
+    try:
+        result["pipelines"] = _pipelines()
+    except Exception as exc:  # noqa: BLE001 - smoke records the failure
+        errors.append(_error("pipelines", exc))
+    try:
+        result["getattr"] = _getattr_exports()
+    except Exception as exc:  # noqa: BLE001 - smoke records the failure
+        errors.append(_error("getattr", exc))
+    print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
