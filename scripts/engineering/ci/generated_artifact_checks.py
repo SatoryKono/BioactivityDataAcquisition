@@ -9,6 +9,7 @@ from pathlib import Path
 import subprocess
 import sys
 
+from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 from scripts.engineering.dev.pytest_artifact_selection import (
     MANIFEST,
     ROOT,
@@ -128,7 +129,28 @@ def ci_pytest_arguments(argv: list[str]) -> list[str]:
         if not (root / path).exists():
             raise ValueError(f"Test target does not exist: {file_part}")
         targets.append(target)
-    return (["-q"] if args.q else []) + [traceback_option(args.tb), "--", *targets]
+    return ensure_safe_cli_argv(
+        (["-q"] if args.q else []) + [traceback_option(args.tb), "--", *targets]
+    )
+
+
+def _pytest_command(mode: str, pytest_args: list[str]) -> list[str]:
+    """Build pytest argv from fixed mode tokens and reject shell metacharacters."""
+    if mode == "ci":
+        selection = "--artifact-selection=ci"
+        report_name = REPORT_NAMES["ci"]
+    elif mode == "daily":
+        selection = "--artifact-selection=daily"
+        report_name = REPORT_NAMES["daily"]
+    else:
+        raise ValueError("Only CI and daily modes run pytest")
+    report_arg = (
+        "--artifact-selection-report="
+        + (ROOT / "reports" / "quality" / report_name).as_posix()
+    )
+    return ensure_safe_cli_argv(
+        [sys.executable, "-m", "pytest", selection, report_arg, *pytest_args]
+    )
 
 
 def _parse_arguments(argv: list[str] | None):
@@ -156,8 +178,10 @@ def _run_validators(manifest: dict, report: Path | None) -> int:
     outcomes = []
     for row in manifest["validators"]:
         if row["owner"] == "generated-artifact-daily":
-            result = subprocess.run(
-                [sys.executable, *row["argv"]], cwd=ROOT, check=False
+            result = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+                ensure_safe_cli_argv([sys.executable, *row["argv"]]),
+                cwd=ROOT,
+                check=False,
             )
             outcomes.append(
                 {"id": row["id"], "argv": row["argv"], "exit_code": result.returncode}
@@ -180,17 +204,17 @@ def _run_tests(mode: str, report: Path, pytest_args: list[str], manifest: dict) 
             "--",
             *sorted({node.split("::", 1)[0] for node in selectors}),
         ]
+    try:
+        command = _pytest_command(mode, pytest_args)
+    except ValueError as error:
+        raise SystemExit(str(error)) from error
     report_destination(mode, report)
     report.unlink(missing_ok=True)
-    command = [
-        sys.executable,
-        "-m",
-        "pytest",
-        f"--artifact-selection={mode}",
-        f"--artifact-selection-report={report}",
-        *pytest_args,
-    ]
-    code = subprocess.run(command, cwd=ROOT, check=False).returncode
+    code = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+        command,
+        cwd=ROOT,
+        check=False,
+    ).returncode
     report_destination(mode, report)
     if mode == "ci" and code == 5 and report.is_file():
         payload = json.loads(report.read_text(encoding="utf-8"))

@@ -591,6 +591,30 @@ def test_runner_rejects_pytest_option_injection_before_deleting_report(
     assert report.read_text() == "old proof"
 
 
+@pytest.mark.parametrize("token", [";", "|", "&", ">", "<", "`", "$"])
+def test_runner_rejects_shell_metacharacters_before_deleting_report(
+    tmp_path, monkeypatch, token
+):
+    from scripts.engineering.ci import generated_artifact_checks as checks
+
+    monkeypatch.setattr(checks, "ROOT", tmp_path)
+    tests = tmp_path / "tests"
+    tests.mkdir()
+    target_path = tests / f"bad{token}name.py"
+    target_path.write_text("")
+    report = tmp_path / "reports/quality/affected-test-partition.json"
+    report.parent.mkdir(parents=True)
+    report.write_text("old proof")
+    monkeypatch.setattr(
+        checks.subprocess,
+        "run",
+        lambda *a, **k: pytest.fail("metacharacter command executed"),
+    )
+    with pytest.raises(SystemExit):
+        checks.main(["ci", "--report", str(report), "--", f"tests/bad{token}name.py"])
+    assert report.read_text() == "old proof"
+
+
 def test_runner_keeps_targets_and_exit_codes_with_fixed_options(tmp_path, monkeypatch):
     from types import SimpleNamespace
     from scripts.engineering.ci import generated_artifact_checks as checks
