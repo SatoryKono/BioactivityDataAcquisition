@@ -1,221 +1,108 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+"""Acceptance for public archive readback without the original sources.
+
+``FileArchiveStore.verify`` re-reads the live data root. After those sources
+are removed, the public verify path returns ``archive_evidence_invalid`` even
+though the pack still holds the restored bytes. Checksum, identity, and
+inventory damage stay covered by the file-archive unit suite.
+"""
+
+from __future__ import annotations
+
 import json
 import shutil
+from datetime import UTC, datetime
 from pathlib import Path
-import uuid
-from datetime import datetime, UTC
+from uuid import UUID
 
 import pytest
 
 from bioetl.domain.control_plane import (
-    RunManifest,
+    ControlPlaneArtifactLifecycleDecision,
     ControlPlaneArtifactLifecyclePlan,
     ControlPlaneArtifactRef,
     ControlPlaneArtifactSurface,
-    ControlPlaneArtifactLifecycleDecision,
+    RunManifest,
 )
-from bioetl.infrastructure.control_plane.file_archive_store import FileArchiveStore
 from bioetl.domain.types import RunID
+from bioetl.infrastructure.control_plane.file_archive_store import FileArchiveStore
+
+_OBSERVED_AT = datetime(2026, 4, 28, 12, 0, tzinfo=UTC)
+_LEDGER = '{"event":"retain"}\n'
 
 
-@pytest.fixture
-def isolated_roots(tmp_path):
+def _acceptance_case(
+    tmp_path: Path,
+) -> tuple[FileArchiveStore, RunManifest, ControlPlaneArtifactLifecyclePlan, Path]:
     data_root = tmp_path / "data"
-    archive_root = tmp_path / "archive"
-    report_root = tmp_path / "reports"
-    restore_root = tmp_path / "restore"
-
     data_root.mkdir()
-    archive_root.mkdir()
-    report_root.mkdir()
-    restore_root.mkdir()
-
-    return data_root, archive_root, report_root, restore_root
-
-
-def test_archive_restore_acceptance(isolated_roots):
-    data_root, archive_root, report_root, _restore_root = isolated_roots
-
-    # 1. Setup a valid manifest and plan
-    run_id = RunID(uuid.uuid4())
     manifest = RunManifest(
-        manifest_id="test-manifest",
-        run_id=run_id,
-        pipeline_name="test-pipeline",
-        created_at=datetime.now(UTC),
-        source_refs=(),
-        execution_fingerprint="fingerprint",
+        manifest_id="archive-acceptance",
+        run_id=RunID(UUID(int=90)),
+        pipeline_name="archive-acceptance",
+        created_at=_OBSERVED_AT,
+        execution_fingerprint="fingerprint-r09",
     )
-
-    # Create source artifacts
     manifest_path = data_root / "manifest.json"
-    manifest_path.write_text(json.dumps(manifest.to_dict()))
-
     ledger_path = data_root / "ledger.jsonl"
-    ledger_path.write_text('{"event": "test"}')
-
+    manifest_path.write_text(json.dumps(manifest.to_dict()), encoding="utf-8")
+    ledger_path.write_text(_LEDGER, encoding="utf-8")
     plan = ControlPlaneArtifactLifecyclePlan(
-        generated_at=datetime.now(UTC),
-        cutoff=datetime.now(UTC),
+        generated_at=_OBSERVED_AT,
+        cutoff=_OBSERVED_AT,
         dry_run=True,
-        resolution_issues=(),
-        artifacts=(
+        artifacts=tuple(
             ControlPlaneArtifactRef(
-                path=str(manifest_path),
-                surface=ControlPlaneArtifactSurface.RUN_MANIFEST,
-                artifact_id="manifest-id",
+                surface=surface,
+                path=str(path),
+                artifact_id="archive-acceptance",
                 decision=ControlPlaneArtifactLifecycleDecision.RETAIN,
-                reason="test",
-            ),
-            ControlPlaneArtifactRef(
-                path=str(ledger_path),
-                surface=ControlPlaneArtifactSurface.RUN_LEDGER,
-                artifact_id="ledger-id",
-                decision=ControlPlaneArtifactLifecycleDecision.RETAIN,
-                reason="test",
-            ),
+                reason="acceptance",
+            )
+            for path, surface in (
+                (manifest_path, ControlPlaneArtifactSurface.RUN_MANIFEST),
+                (ledger_path, ControlPlaneArtifactSurface.RUN_LEDGER),
+            )
         ),
     )
-
-    # 2. Capture archive
-    store = FileArchiveStore(
-        data_root=data_root, archive_root=archive_root, report_root=report_root
-    )
-    pack_path = store.create(manifest=manifest, plan=plan)
-
-    # 3. Verify archive via public API (with source present)
-    verified, _reason = store.verify(manifest=manifest, plan=plan)
-    assert verified is True
-
-    # 4. Remove source fixture to simulate "source absent" readback
-    shutil.rmtree(data_root)
-
-    # 5. Independent readback
-    try:
-        data_root.mkdir()
-        store_restore = FileArchiveStore(
-            data_root=data_root, archive_root=archive_root, report_root=report_root
-        )
-        verified_restore, reason_restore = store_restore.verify(
-            manifest=manifest, plan=plan
-        )
-    except Exception as e:
-        verified_restore = False
-        reason_restore = str(e)
-
-    report = {
-        "sweep_id": "test_r09",
-        "archive_acceptance": {
-            "source_missing_verification": "NOT_VERIFIABLE"
-            if not verified_restore
-            else "VERIFIED",
-            "reason": reason_restore,
-            "blocker": "FileArchiveStore.verify reads directly from original data_root instead of checking the restored payload against the index. Independent public readback without original source is therefore unachievable through the current public verify.",
-        },
-    }
-
-    report_file = report_root / "archive-restore-acceptance.json"
-    report_file.write_text(json.dumps(report, indent=2))
-
-    # Output markdown report as well
-    md_report = f"""# Archive Restore Acceptance Report
-
-**Sweep ID**: test_r09
-**Status**: {"NOT_VERIFIABLE" if not verified_restore else "VERIFIED"}
-**Reason**: {reason_restore}
-**Blocker**: FileArchiveStore.verify reads directly from original data_root instead of checking the restored payload against the index. Independent public readback without original source is therefore unachievable through the current public verify.
-"""
-    # Write to durable project path as required
-    persistent_report_dir = Path("reports/audit-runs/test_r09")
-    persistent_report_dir.mkdir(parents=True, exist_ok=True)
-    (persistent_report_dir / "archive-restore-acceptance.json").write_text(
-        json.dumps(report, indent=2)
-    )
-    (persistent_report_dir / "archive-restore-acceptance.md").write_text(md_report)
-
-    assert verified_restore is False
-
-
-def test_archive_restore_negative_cases(isolated_roots):
-    data_root, archive_root, report_root, _restore_root = isolated_roots
-
-    run_id = RunID(uuid.uuid4())
-    manifest = RunManifest(
-        manifest_id="test-manifest",
-        run_id=run_id,
-        pipeline_name="test-pipeline",
-        created_at=datetime.now(UTC),
-        source_refs=(),
-        execution_fingerprint="fingerprint",
+    return (
+        FileArchiveStore(data_root, tmp_path / "archive"),
+        manifest,
+        plan,
+        ledger_path,
     )
 
-    manifest_path = data_root / "manifest.json"
-    manifest_path.write_text(json.dumps(manifest.to_dict()))
-    ledger_path = data_root / "ledger.jsonl"
-    ledger_path.write_text('{"event": "test"}')
 
-    plan = ControlPlaneArtifactLifecyclePlan(
-        generated_at=datetime.now(UTC),
-        cutoff=datetime.now(UTC),
-        dry_run=True,
-        resolution_issues=(),
-        artifacts=(
-            ControlPlaneArtifactRef(
-                path=str(manifest_path),
-                surface=ControlPlaneArtifactSurface.RUN_MANIFEST,
-                artifact_id="manifest-id",
-                decision=ControlPlaneArtifactLifecycleDecision.RETAIN,
-                reason="test",
-            ),
-            ControlPlaneArtifactRef(
-                path=str(ledger_path),
-                surface=ControlPlaneArtifactSurface.RUN_LEDGER,
-                artifact_id="ledger-id",
-                decision=ControlPlaneArtifactLifecycleDecision.RETAIN,
-                reason="test",
-            ),
-        ),
+@pytest.mark.integration
+def test_public_verify_cannot_read_archive_without_original_sources(
+    tmp_path: Path,
+) -> None:
+    store, manifest, plan, ledger_path = _acceptance_case(tmp_path)
+    pack = store.create(manifest=manifest, plan=plan)
+    restored = pack / "restored" / "ledger.jsonl"
+
+    assert store.verify(manifest=manifest, plan=plan) == (
+        True,
+        "archive_restore_verified",
+    )
+    assert restored.read_text(encoding="utf-8") == ledger_path.read_text(
+        encoding="utf-8"
     )
 
-    store = FileArchiveStore(
-        data_root=data_root, archive_root=archive_root, report_root=report_root
+    shutil.rmtree(store.data_root)
+    store.data_root.mkdir()
+
+    assert store.verify(manifest=manifest, plan=plan) == (
+        False,
+        "archive_evidence_invalid",
     )
-    pack_path = store.create(manifest=manifest, plan=plan)
-
-    ledger_archive = pack_path / "files" / "ledger.jsonl"
-    ledger_archive.write_text('{"event": "corrupted"}')
-    verified, reason = store.verify(manifest=manifest, plan=plan)
-    assert verified is False
-    assert "archive_checksum_mismatch" in reason or "archive_evidence_invalid" in reason
-
-    # Restore original for next test
-    ledger_archive.write_text('{"event": "test"}')
-
-    # Test identity mismatch
-    index_path = pack_path / "index.json"
-    payload = json.loads(index_path.read_text())
-    payload["manifest_sha256"] = "wrong"
-    index_path.write_text(json.dumps(payload))
-
-    verified, reason = store.verify(manifest=manifest, plan=plan)
-    assert verified is False
-    assert "archive_identity_mismatch" in reason
-
-    # Test missing member
-    # Instead of store._manifest_digest, we will just use the correct hash.
-    # To be perfectly correct, just reload original index and pop.
-    store_clean = FileArchiveStore(
-        data_root=data_root, archive_root=archive_root, report_root=report_root
-    )
-    # The digest was originally correct. Let's fix the identity to avoid false negatives.
-    import importlib
-
-    archive_module = importlib.import_module(
-        "bioetl.infrastructure.control_plane.file_archive_store"
-    )
-    payload["manifest_sha256"] = archive_module._manifest_digest(manifest)
-    payload["files"].pop()  # remove a member
-    index_path.write_text(json.dumps(payload))
-
-    verified, reason = store.verify(manifest=manifest, plan=plan)
-    assert verified is False
-    assert "archive_inventory_mismatch" in reason
+    assert restored.read_text(encoding="utf-8") == _LEDGER
