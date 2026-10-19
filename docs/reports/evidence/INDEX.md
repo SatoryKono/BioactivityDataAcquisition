@@ -43,6 +43,9 @@ Full pack inventory after DOC-GOV-01 relocate:
 Do **not** re-copy bulk packs into `docs/reports/evidence/`. New investigations
 write under `reports/` first.
 
+- HTTP header consumer audit and ChEMBL cassette provenance:
+  [http-header-audit-and-provenance.md](../../../reports/docs-evidence/http-header-audit-and-provenance.md)
+
 ## Related
 
 - [docs/reports/README.md](../README.md)
