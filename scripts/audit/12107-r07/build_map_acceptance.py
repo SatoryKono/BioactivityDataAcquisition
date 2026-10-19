@@ -35,9 +35,12 @@ def _load(path: Path) -> dict:
 
 
 def _write(path: Path, payload: dict) -> None:
-    path.write_text(
+    from scripts.engineering.common.repo_paths import write_text_confined
+
+    write_text_confined(
+        path,
         json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
+        root=ROOT,
     )
 
 

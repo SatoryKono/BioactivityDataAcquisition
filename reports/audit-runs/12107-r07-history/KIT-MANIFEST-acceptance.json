@@ -4,9 +4,9 @@
   "commit_note": "Adds the delta review record. File hashes below exclude this manifest.",
   "files": [
     {
-      "bytes": 24497,
+      "bytes": 24583,
       "path": "scripts/audit/12107-r07/build_map_acceptance.py",
-      "sha256": "d1ccbf5836df746c9887a33ca9b42401f57f6db2d99ae99124ead107beb96f64"
+      "sha256": "e5b715666209f0de26b85794a13ba30814b7acb514b0308857183025a37cd8a2"
     },
     {
       "bytes": 6844,
