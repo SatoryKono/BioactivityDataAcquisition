@@ -28,7 +28,7 @@ alone does not establish its cause. Container memory.max was 17179869184 bytes.
 Measured source: `8f9bd74269b5ecabc70bae34c78ec8dcb89075a5` (clean worktree).
 Source bytes SHA256: `858ae166e8e9e3eea392c6ea1db738a395c8d1bb9c71e274520e007d90f5816f`.
 
-Raw observations: `reports/performance/merger_input_observations.json`.
+Raw observations: `reports/performance/history/merger_input_8f9bd74269/merger_input_observations.json`.
 Raw bytes SHA256: `248bb096beb9e1f42afb709b96fb228a5544ef8939c23de0824f62622b89c82b`.
 
 Command (the captured original output location is retained in raw JSON):

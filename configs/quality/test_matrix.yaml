@@ -12,6 +12,16 @@ adr_ref: ADR-042
 
 test_lanes:
   schema_version: 1
+  generated_artifact_partition:
+    manifest: configs/quality/generated_artifact_tests.json
+    marker: generated_artifact
+    ordinary_ci_selection: ci
+    daily_selection: daily
+    daily_workflow: .github/workflows/nightly.yml
+    daily_cron: "0 3 * * *"
+    include_slow: true
+    execution: serial
+    empty_affected_outcome: deferred-to-daily-only-with-complete-collection-proof
   source: configs/quality/test_matrix.yaml
   summary: >
     Canonical named pytest lanes for comparable local and CI test-health runs.

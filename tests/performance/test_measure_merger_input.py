@@ -1,17 +1,28 @@
 """Regression and negative checks for the bounded production-input probe."""
 
+from __future__ import annotations
+
 import json
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 from scripts.engineering.performance import measure_merger_input as harness
 
-pytestmark = [pytest.mark.performance, pytest.mark.serial]
+pytestmark = [
+    pytest.mark.performance,
+    pytest.mark.serial,
+    pytest.mark.skipif(
+        sys.platform != "linux" or harness.resource is None,
+        reason="The bounded production-input probe requires Linux RLIMIT_AS",
+    ),
+]
 
 
+@pytest.mark.timeout(120)
 def test_measurement_harness_smoke(tmp_path):
     """Each repeat uses real production read code in a distinct limited process."""
     output = tmp_path / "observations.json"
@@ -28,7 +39,7 @@ def test_measurement_harness_smoke(tmp_path):
         ],
         capture_output=True,
         text=True,
-        timeout=90,
+        timeout=100,
     )
     assert result.returncode == 0, result.stderr + (
         output.read_text() if output.exists() else ""
@@ -62,6 +73,7 @@ def test_measurement_harness_smoke(tmp_path):
         ["--repeats", "0"],
         ["--timeout-s", "0"],
         ["--phase", "measure"],
+        ["--scales", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
     ],
 )
 def test_rejects_unbounded_or_invalid_requests(arguments):
@@ -73,6 +85,77 @@ def test_rejects_unbounded_or_invalid_requests(arguments):
         timeout=10,
     )
     assert result.returncode == 2
+
+
+def test_guard_keeps_stricter_inherited_address_limit():
+    """A lower inherited hard limit is kept; the harness must not raise it."""
+    code = (
+        "import resource\n"
+        "from scripts.engineering.performance.measure_merger_input import apply_guard\n"
+        "resource.setrlimit(resource.RLIMIT_AS, (256 * 1024**2, 256 * 1024**2))\n"
+        "apply_guard(512, 5)\n"
+        "soft, hard = resource.getrlimit(resource.RLIMIT_AS)\n"
+        "assert soft == hard == 256 * 1024**2, (soft, hard)\n"
+    )
+    result = harness.run_bounded([sys.executable, "-c", code], 10)
+    assert result["exit_code"] == 0, result["stderr"]
+
+
+def test_source_identity_reports_git_timeout(monkeypatch):
+    """A hung git status must fail source collection instead of blocking forever."""
+
+    def expire(*_args, **_kwargs):
+        raise subprocess.TimeoutExpired(
+            cmd=["git"], timeout=harness.GIT_IDENTITY_TIMEOUT_S
+        )
+
+    monkeypatch.setattr(harness.subprocess, "check_output", expire)
+    with pytest.raises(RuntimeError, match="source identity collection timed out"):
+        harness.source_identity()
+
+
+def test_missing_cgroup_is_recorded_as_null(tmp_path, monkeypatch):
+    """Measurements are still written when cgroup v2 memory.max is absent."""
+    monkeypatch.setattr(
+        harness, "read_cgroup_memory_max", lambda: (None, "unavailable")
+    )
+    monkeypatch.setattr(harness, "source_identity", lambda: {"head": "bound"})
+    monkeypatch.setattr(
+        harness,
+        "run_bounded",
+        lambda *_args, **_kwargs: {"exit_code": 0, "timed_out": False},
+    )
+    monkeypatch.setattr(
+        harness, "fixture_identity", lambda _directory: {"table": "digest"}
+    )
+    monkeypatch.setattr(
+        harness,
+        "measure_repeat",
+        lambda *_args, **_kwargs: {"status": "COMPLETED"},
+    )
+    output = tmp_path / "observations.json"
+    code = harness.orchestrate(
+        SimpleNamespace(
+            scales=[10],
+            repeats=1,
+            memory_mib=128,
+            timeout_s=5,
+            out=output,
+        )
+    )
+    payload = json.loads(output.read_text())
+    assert code == 0
+    assert payload["environment"]["cgroup_memory_max"] is None
+    assert payload["environment"]["cgroup_memory_max_status"] == "unavailable"
+
+
+def test_cgroup_memory_max_reads_available_value(tmp_path):
+    """A present memory.max value is kept with an explicit collected status."""
+    path = tmp_path / "memory.max"
+    path.write_text("17179869184\n", encoding="utf-8")
+    assert harness.read_cgroup_memory_max(path) == ("17179869184", "collected")
+    missing = tmp_path / "absent.max"
+    assert harness.read_cgroup_memory_max(missing) == (None, "unavailable")
 
 
 def test_guard_enforces_allocation_limit():

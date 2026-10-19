@@ -98,6 +98,7 @@ def _src_importers(module_name: str) -> set[str]:
     return importers
 
 
+@pytest.mark.generated_artifact
 def test_issue_5655_freshness_gates_are_fail_fast_and_clean() -> None:
     gates = _load_json(DEBT_GATES)
     contract = _load_json(CONTRACT_DIAGNOSTICS)
@@ -145,6 +146,7 @@ def test_issue_5655_freshness_gates_are_fail_fast_and_clean() -> None:
     assert "validate_registry_dq_refs.py" in contract_workflow
 
 
+@pytest.mark.generated_artifact
 def test_issue_5651_retained_public_compatibility_surfaces_are_justified() -> None:
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
     census = _load_json(COMPATIBILITY_CENSUS)
@@ -197,6 +199,7 @@ def test_issue_5652_stream_b_silver_filter_identity_facade_has_zero_src_importer
     assert actual == set()
 
 
+@pytest.mark.generated_artifact
 def test_issue_5653_dead_code_review_window_is_current_and_fully_triaged() -> None:
     inventory = _load_json(DEAD_CODE_INVENTORY)
     review = inventory["review_window"]

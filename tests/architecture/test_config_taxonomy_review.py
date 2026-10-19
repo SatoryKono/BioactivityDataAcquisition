@@ -54,6 +54,7 @@ def _live_compatibility_legacy_keys_by_family() -> dict[str, list[str]]:
     return result
 
 
+@pytest.mark.generated_artifact
 def test_config_compatibility_legacy_taxonomy_review_matches_live_baseline() -> None:
     """The reviewed taxonomy artifact must match the generated discrepancy report."""
     baseline = _load_json(BASELINE_PATH)
@@ -93,6 +94,7 @@ def test_config_compatibility_legacy_taxonomy_review_matches_live_baseline() -> 
         )
 
 
+@pytest.mark.generated_artifact
 def test_config_compatibility_legacy_review_freezes_exact_key_set() -> None:
     """Reviewed legacy taxonomy keys must not grow or rotate without review."""
     review = _load_json(REVIEW_PATH)
@@ -115,6 +117,7 @@ def test_config_compatibility_legacy_review_freezes_exact_key_set() -> None:
         assert review_family["compatibility_legacy_count"] == len(reviewed_keys)
 
 
+@pytest.mark.generated_artifact
 def test_config_compatibility_legacy_taxonomy_has_ci_guard_links() -> None:
     """Every declared guard in the review artifact must be a real repo file."""
     review = _load_json(REVIEW_PATH)
@@ -126,6 +129,7 @@ def test_config_compatibility_legacy_taxonomy_has_ci_guard_links() -> None:
         assert (ROOT / guard).exists(), f"Missing config compatibility guard: {guard}"
 
 
+@pytest.mark.generated_artifact
 def test_composite_runtime_alias_family_removal_is_published() -> None:
     """Composite compatibility_legacy review must publish retired alias families."""
     review = _load_json(REVIEW_PATH)
@@ -192,6 +196,7 @@ def test_composite_runtime_alias_family_removal_is_published() -> None:
         assert isinstance(preconditions, list) and preconditions
 
 
+@pytest.mark.generated_artifact
 def test_composite_runtime_first_safe_removal_wave_is_recorded() -> None:
     """The first confirmed-unused alias family removal must stay explicit."""
     review = _load_json(REVIEW_PATH)

@@ -15,7 +15,6 @@ import json
 import math
 import os
 import platform
-import resource
 import subprocess
 import sys
 import tempfile
@@ -23,8 +22,16 @@ import time
 from datetime import UTC, datetime
 from pathlib import Path
 
+try:
+    import resource
+except ImportError:  # Windows has no Unix resource module
+    resource = None  # type: ignore[assignment]
+
 ROOT = Path(__file__).resolve().parents[3]
 MIB = 1024**2
+GIT_IDENTITY_TIMEOUT_S = 30
+CGROUP_MEMORY_MAX = Path("/sys/fs/cgroup/memory.max")
+MAX_SCALES = 8
 THREAD_ENV = {
     "MALLOC_ARENA_MAX": "2",
     "POLARS_MAX_THREADS": "2",
@@ -49,14 +56,31 @@ def confined_path(path: Path) -> Path:
     return resolved
 
 
+def _clamp_to_hard_limit(requested: int, hard: int) -> int:
+    """Never raise an inherited hard limit; negative means RLIM_INFINITY."""
+    if hard < 0:
+        return requested
+    return min(requested, hard)
+
+
 def apply_guard(memory_mib: int, timeout_s: int) -> None:
     """Fail closed before native imports; RLIMIT_AS bounds virtual memory, not RSS."""
-    if sys.platform != "linux":
+    if sys.platform != "linux" or resource is None:
         raise RuntimeError("This harness requires Linux RLIMIT_AS and /proc")
     os.environ.update(THREAD_ENV)
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
-    resource.setrlimit(resource.RLIMIT_AS, (memory_mib * MIB, memory_mib * MIB))
-    resource.setrlimit(resource.RLIMIT_CPU, (timeout_s, timeout_s))
+    address_hard = resource.getrlimit(resource.RLIMIT_AS)[1]
+    cpu_hard = resource.getrlimit(resource.RLIMIT_CPU)[1]
+    address_bytes = _clamp_to_hard_limit(memory_mib * MIB, address_hard)
+    cpu_seconds = _clamp_to_hard_limit(timeout_s, cpu_hard)
+    resource.setrlimit(
+        resource.RLIMIT_AS,
+        (address_bytes, address_hard if address_hard >= 0 else address_bytes),
+    )
+    resource.setrlimit(
+        resource.RLIMIT_CPU,
+        (cpu_seconds, cpu_hard if cpu_hard >= 0 else cpu_seconds),
+    )
 
 
 def prepare_fixture(rows: int, directory: Path) -> None:
@@ -146,6 +170,8 @@ async def measure(rows: int, directory: Path) -> dict:
     """Measure the live read; fixture preparation never occurs in this interpreter."""
     import pyarrow as pa
 
+    if resource is None:
+        raise RuntimeError("This harness requires Linux RLIMIT_AS and /proc")
     pa.set_cpu_count(2)
     pa.set_io_thread_count(2)
     service = build_service(directory)
@@ -198,7 +224,19 @@ def source_identity() -> dict:
     """Bind observations to commit AND actual source bytes, including an uncommitted harness."""
 
     def git(*args: str) -> str:
-        return subprocess.check_output(["git", *args], cwd=ROOT, text=True).strip()
+        command = ("git", *args)
+        try:
+            return subprocess.check_output(
+                command,
+                cwd=ROOT,
+                text=True,
+                timeout=GIT_IDENTITY_TIMEOUT_S,
+            ).strip()
+        except subprocess.TimeoutExpired as exc:
+            rendered = " ".join(command)
+            raise RuntimeError(
+                f"source identity collection timed out after {GIT_IDENTITY_TIMEOUT_S}s: {rendered}"
+            ) from exc
 
     files = [Path(__file__), ROOT / "uv.lock"]
     files.extend(sorted((ROOT / "src" / "bioetl").rglob("*.py")))
@@ -257,9 +295,21 @@ def measure_repeat(
     return result
 
 
+def read_cgroup_memory_max(path: Path = CGROUP_MEMORY_MAX) -> tuple[str | None, str]:
+    """Return cgroup v2 memory.max, or null when the file is absent."""
+    try:
+        value = path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return None, "unavailable"
+    if not value:
+        return None, "unavailable"
+    return value, "collected"
+
+
 def orchestrate(args: argparse.Namespace) -> int:
     """Run bounded preparation followed by fresh repeated measurement processes."""
     source = source_identity()
+    cgroup_memory_max, cgroup_memory_max_status = read_cgroup_memory_max()
     observations = []
     for rows in args.scales:
         with tempfile.TemporaryDirectory(prefix="merger-measurement-") as tmp:
@@ -293,7 +343,8 @@ def orchestrate(args: argparse.Namespace) -> int:
             "platform": platform.platform(),
             "python": sys.version,
             "executable": sys.executable,
-            "cgroup_memory_max": Path("/sys/fs/cgroup/memory.max").read_text().strip(),
+            "cgroup_memory_max": cgroup_memory_max,
+            "cgroup_memory_max_status": cgroup_memory_max_status,
             "threads": THREAD_ENV,
             "packages": {
                 dist.metadata["Name"]: dist.version
@@ -339,8 +390,14 @@ def main() -> int:
     args = parser.parse_args()
     if not 128 <= args.memory_mib <= 4096 or not 1 <= args.timeout_s <= 120:
         parser.error("memory must be 128..4096 MiB; timeout must be 1..120 seconds")
-    if not 1 <= args.repeats <= 10 or any(not 1 <= n <= 100_000 for n in args.scales):
-        parser.error("repeats must be 1..10; scales must be 1..100000 rows")
+    if (
+        not 1 <= args.repeats <= 10
+        or not 1 <= len(args.scales) <= MAX_SCALES
+        or any(not 1 <= n <= 100_000 for n in args.scales)
+    ):
+        parser.error(
+            "repeats must be 1..10; scales must contain 1..8 values of 1..100000 rows"
+        )
     if args.phase:
         if args.rows is None or not 1 <= args.rows <= 100_000 or args.fixture is None:
             parser.error("worker requires --rows 1..100000 and --fixture")

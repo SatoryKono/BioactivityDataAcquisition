@@ -58,9 +58,10 @@ No production refactor or redesign is justified by this probe.
 Owning tests: 93 passed; test-governance architecture tests: 46 passed. Targeted
 Ruff, docs links and docs drift passed. Selected ARTIFACT_REFRESH families
 (test-gov, flaky fingerprint, remote-main) and debt-governance passed after update.
-The full family check is BLOCKED by stale telemetry hash and unreachable historical
-source commit; no telemetry was fabricated or rebound. No budgets were increased.
+The exact commands for those historical results were not retained in the source
+commit and are not reconstructed here. The full family check is BLOCKED by stale
+telemetry hash and unreachable historical source commit; no telemetry was
+fabricated or rebound. No budgets were increased.
 
-The current PR body describes different historical results and must be reconciled
-at publication review; it has not been edited by this local task. The four reported
+The PR description matches this report's NOT_ESTABLISHED result. The four reported
 Sonar issues still require exact current details; no claim of fixing them is made.

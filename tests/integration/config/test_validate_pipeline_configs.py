@@ -229,3 +229,36 @@ def test_validate_config_tree_includes_composite_entity_contracts(
         "section: filters" in error
         for error in errors
     )
+
+
+def test_pipeline_config_reports_layer_aware_sink_validation_errors(
+    tmp_path: Path,
+) -> None:
+    """Integration test to verify Pydantic layer-aware sink schema validation fails correctly."""
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+    import pydantic
+
+    configs_root = _build_minimal_crossref_tree(tmp_path)
+    entity_path = configs_root / "entities" / "crossref" / "publication.yaml"
+    payload = _load_yaml(entity_path)
+
+    # Introduce invalid modes that violate layer-aware rules
+    pipeline_payload = payload.get("pipeline", payload)
+    pipeline_payload["sink"] = {
+        "bronze": {"mode": "merge"},  # Bronze only allows append
+        "silver": {
+            "mode": "overwrite",
+            "sort_by": ["id"],
+        },  # Silver only allows append, merge
+        "gold": {
+            "mode": "merge",
+            "sort_by": ["id"],
+        },  # Gold only allows append, overwrite, scd2
+    }
+    _write_yaml(entity_path, payload)
+
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        PipelineYamlConfig(**pipeline_payload)
+
+    error_str = str(exc_info.value)
+    assert "Invalid mode 'merge' for bronze layer" in error_str
