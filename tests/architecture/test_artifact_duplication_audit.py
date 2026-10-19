@@ -17,6 +17,8 @@ from pathlib import Path
 from typing import Any, cast
 
 import pytest
+
+from scripts.engineering.qa._tracked_glob import git_discovery_environment
 import yaml
 
 from scripts.engineering.qa import __main__ as qa_router
@@ -53,6 +55,29 @@ def test_artifact_duplication_audit_report_matches_live_collector() -> None:
     assert payload["policy_scope"] == "config_contract_registry_artifact_duplication"
     assert {"config", "contract", "registry"}.issubset(payload["scope_file_counts"])
     assert payload["duplicate_groups"] == len(payload["groups"])
+
+
+def test_artifact_duplication_audit_ignores_untracked_files(tmp_path: Path) -> None:
+    """Untracked files inside an included scope must not change the report."""
+    import subprocess
+
+    subprocess.run(
+        ["git", "init", str(tmp_path)],
+        check=True,
+        capture_output=True,
+        env=git_discovery_environment(),
+    )
+    target = tmp_path / "configs" / "entities" / "tracked.yaml"
+    target.parent.mkdir(parents=True)
+    target.write_text("shared: true\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "add", "."],
+        check=True,
+        env=git_discovery_environment(),
+    )
+    baseline = collect_artifact_duplication_report(tmp_path)
+    target.with_name("untracked.yaml").write_text("shared: true\n", encoding="utf-8")
+    assert collect_artifact_duplication_report(tmp_path) == baseline
 
 
 def test_artifact_duplication_audit_is_registered_for_jscpd_blind_spot() -> None:

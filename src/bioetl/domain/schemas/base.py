@@ -84,5 +84,7 @@ class ETLRecordSchema(pa.DataFrameModel):
         """Pandera configuration."""
 
         strict = True  # Disallow columns not specified in the schema
-        ordered = True  # Enforce column order
+        ordered = (
+            False  # Order-agnostic validation; writer enforces final canonical order
+        )
         coerce = True  # Coerce data types to match schema
