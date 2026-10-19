@@ -64,6 +64,7 @@ def _composite_duplication_clusters(
     ]
 
 
+@pytest.mark.generated_artifact
 def test_issue_5559_module_coverage_gate_current_values_match_zero_residuals() -> None:
     gates_policy = _load_yaml(MODULE_COVERAGE_GATES)["aggregate_residual_ratchets"]
     debt_gates = _load_json(DEBT_GATES)
@@ -92,6 +93,7 @@ def test_issue_5559_module_coverage_gate_current_values_match_zero_residuals() -
     # warning_gates may include unmeasured residual while coverage XML lags.
 
 
+@pytest.mark.generated_artifact
 def test_issue_5560_public_merge_entrypoint_has_zero_first_party_importers() -> None:
     census = _load_json(COMPATIBILITY_CENSUS)
     retained = {
@@ -108,6 +110,7 @@ def test_issue_5560_public_merge_entrypoint_has_zero_first_party_importers() -> 
     assert census["summary"]["retained_public_export_facade_count"] <= 4
 
 
+@pytest.mark.generated_artifact
 def test_issue_5561_config_duplication_clusters_are_owner_addressable() -> None:
     closeout = _load_json(CLOSEOUT)
     backlog = _load_json(CONFIG_BACKLOG)
@@ -170,6 +173,7 @@ def test_issue_5562_skip_inventory_entries_are_individually_accountable() -> Non
     }
 
 
+@pytest.mark.generated_artifact
 def test_issue_5563_excluded_non_gold_rows_are_burned_down_to_zero() -> None:
     ownership = _load_json(CONTRACT_OWNERSHIP)
     rows = ownership["rows"]

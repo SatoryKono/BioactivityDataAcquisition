@@ -98,6 +98,7 @@ def test_s4_composition_dynamic_imports_are_frozen() -> None:
     )
 
 
+@pytest.mark.generated_artifact
 def test_s6_source_tree_manifest_is_the_pinned_sha() -> None:
     # build_manifest() hashes the whole source tree; hash once and reuse
     # `live` so the test stays within the 60s per-test timeout.
@@ -260,6 +261,10 @@ def test_s8_domain_framework_import_ratchet() -> None:
     assert count == int(config["max_framework_imports"])
     assert str(config["linked_issue"]) == "9630"
     assert not pandas_in_forbidden
+
+
+@pytest.mark.generated_artifact
+def test_s8_documented_inventory_matches_generated_coverage() -> None:
     inventory = load_quality_json("module-coverage-inventory.json")
     summary = inventory["summary"]
     status = summary["status_counts"]
@@ -271,6 +276,7 @@ def test_s8_domain_framework_import_ratchet() -> None:
     assert f"`{status['partially_covered']}` partially covered" in doc
 
 
+@pytest.mark.generated_artifact
 def test_s9_assertless_ratchet_and_expiry_dispersion() -> None:
     assertless = yaml.safe_load(
         (ROOT / "configs/quality/assertless_ratchet.yaml").read_text(encoding="utf-8")

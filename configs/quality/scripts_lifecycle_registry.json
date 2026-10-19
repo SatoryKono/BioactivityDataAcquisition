@@ -775,6 +775,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/ci/generated_artifact_checks.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal CI scheduling/receipt adapter used by pr-required and nightly workflows. Its bounded CLI delegates to pytest and existing validators; it is not a new independent operator or validation entrypoint. Keep policy ownership with the test matrix and existing producer commands.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
+    },
     "scripts/engineering/ci/junit_duration_summary.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the shared JUnit record-accounting backend imported by update_test_telemetry_baseline and invoked internally by the tests workflow. Its CLI has no operator inputs and only adapts CI environment/artifact paths; the owning tests workflow remains the public execution surface.",
@@ -888,6 +894,12 @@
       "next_step": "Retain as the native-Windows compatibility facade that delegates to the canonical pretest_guardrails.sh implementation; keep the shell implementation as the governed behavior source and remove this wrapper only when Windows test launchers no longer require it.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
+    },
+    "scripts/engineering/dev/pytest_artifact_selection.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the pytest collection plugin loaded by tests/conftest.py; it has no standalone CLI and owns only the scheduling partition used by governed CI/daily lanes.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
     },
     "scripts/engineering/dev/pytest_junit_subtests.py": {
       "decision": "shared_helper_module",

@@ -1496,7 +1496,7 @@
       "surface": "cli_silver_filter_shortcut",
       "symbol": "--silver-filter-only",
       "path": "docs/04-reference/cli.md",
-      "occurrence_count": 1,
+      "occurrence_count": 3,
       "first_line": 1245,
       "role": "Retired CLI shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Removed after sunset 2026-09-30; only retirement notes and negative tests should retain this spelling.",
@@ -1551,7 +1551,7 @@
       "surface": "legacy_silver_error_code",
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/04-reference/cli.md",
-      "occurrence_count": 2,
+      "occurrence_count": 4,
       "first_line": 1246,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
@@ -2058,7 +2058,7 @@
       "symbol": "validate_no_semantic_silver_filter_payload",
       "path": "src/bioetl/infrastructure/schemas/pipeline_config.py",
       "occurrence_count": 2,
-      "first_line": 306,
+      "first_line": 342,
       "role": "Fail-fast Silver semantic key guard",
       "migration_relevance": "Boundary hook that rejects semantic Silver keys before domain conversion.",
       "notes": ""
@@ -2069,7 +2069,7 @@
       "symbol": "source_profile",
       "path": "configs/_schema/pipeline.json",
       "occurrence_count": 1,
-      "first_line": 2020,
+      "first_line": 2080,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""
@@ -2135,7 +2135,7 @@
       "symbol": "source_profile",
       "path": "src/bioetl/infrastructure/schemas/pipeline_config.py",
       "occurrence_count": 2,
-      "first_line": 269,
+      "first_line": 305,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""
@@ -2245,7 +2245,7 @@
       "symbol": "extraction_params",
       "path": "src/bioetl/infrastructure/schemas/pipeline_config.py",
       "occurrence_count": 4,
-      "first_line": 264,
+      "first_line": 300,
       "role": "Source-profile extraction policy",
       "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
       "notes": ""

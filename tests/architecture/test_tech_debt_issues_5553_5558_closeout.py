@@ -66,6 +66,7 @@ def _hotspot_row(payload: dict[str, Any], family_name: str) -> dict[str, Any]:
     raise AssertionError(f"Missing hotspot family row for {family_name}")
 
 
+@pytest.mark.generated_artifact
 def test_issue_5553_governance_artifacts_are_aligned_to_committed_inventory() -> None:
     gates_policy = _load_yaml(MODULE_COVERAGE_GATES)
     debt_gates = _load_json(DEBT_GATES)
@@ -87,6 +88,7 @@ def test_issue_5553_governance_artifacts_are_aligned_to_committed_inventory() ->
     _assert_lower_hex_digest(remote_baseline_gate["current"], length=64)
 
 
+@pytest.mark.generated_artifact
 def test_issue_5554_control_plane_public_facade_has_zero_first_party_interface_importers() -> (
     None
 ):
@@ -96,6 +98,8 @@ def test_issue_5554_control_plane_public_facade_has_zero_first_party_interface_i
     assert summary["control_plane_root_src_importer_count"] == 0
     assert summary["retained_public_export_facade_count"] <= 4
 
+
+def test_issue_5554_interfaces_do_not_import_control_plane_facade() -> None:
     interface_paths = sorted((ROOT / "src" / "bioetl" / "interfaces").rglob("*.py"))
     offenders = [
         path.relative_to(ROOT).as_posix()
@@ -106,6 +110,7 @@ def test_issue_5554_control_plane_public_facade_has_zero_first_party_interface_i
     assert offenders == []
 
 
+@pytest.mark.generated_artifact
 def test_issue_5555_hotspot_reviewed_baselines_capture_current_reductions() -> None:
     hotspot = _load_json(HOTSPOT_BASELINE)
     scorecard = _load_yaml(SCORECARD)

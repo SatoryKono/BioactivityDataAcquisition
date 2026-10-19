@@ -135,6 +135,7 @@ def test_config_discrepancy_evidence_scans_config_snapshot_once(
     generator._build_config_discrepancy_evidence_cached.cache_clear()
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_config_discrepancy_baseline_matches_live_generator() -> None:
     """Committed config-surface baseline must match the deterministic generator."""
