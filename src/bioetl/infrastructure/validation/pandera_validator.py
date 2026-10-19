@@ -141,13 +141,13 @@ class BasePanderaValidator:
         return seeded
 
     def _reorder_to_schema(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Reorder DataFrame columns to match schema definition order.
+        """Reorder DataFrame columns to match schema definition order, if schema is ordered.
 
-        Preserves extra columns at the end so strict=True still catches them.
+        If schema is not ordered, preserves DataFrame order but ensures schema columns are validated.
         Skips reordering for DataFrameModel classes that lack .columns.
 
         Returns:
-            DataFrame with schema-defined columns first, followed by extra columns.
+            DataFrame reordered to schema (if ordered), or original DataFrame (if unordered).
         """
         assert self._schema is not None
         if not hasattr(self._schema, "columns"):
