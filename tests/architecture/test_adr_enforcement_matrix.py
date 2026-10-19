@@ -131,6 +131,7 @@ def _matrix_drift_report(committed: dict[str, object], live: dict[str, object]) 
     return "\n".join(lines)
 
 
+@pytest.mark.generated_artifact
 def test_adr_enforcement_matrix_artifact_matches_live_generator() -> None:
     assert ARTIFACT.exists()
 
@@ -141,6 +142,7 @@ def test_adr_enforcement_matrix_artifact_matches_live_generator() -> None:
         raise AssertionError(_matrix_drift_report(committed, live))
 
 
+@pytest.mark.generated_artifact
 def test_accepted_adr_enforcement_matrix_has_no_unreviewed_gaps() -> None:
     payload = json.loads(ARTIFACT.read_text(encoding="utf-8"))
 

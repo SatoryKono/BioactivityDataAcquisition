@@ -23,6 +23,7 @@ from tests.helpers import assert_router_python_command, repo_root, run_repo_pyth
 pytestmark = pytest.mark.architecture
 
 
+@pytest.mark.generated_artifact
 def test_scripts_inventory_manifest_exists_and_has_required_keys() -> None:
     """Inventory manifest must exist and keep a stable schema."""
     root = repo_root()
@@ -45,6 +46,7 @@ def test_scripts_inventory_manifest_exists_and_has_required_keys() -> None:
     assert "status_counts" in summary
 
 
+@pytest.mark.generated_artifact
 def test_scripts_inventory_manifest_summary_matches_scripts_payload() -> None:
     """Committed summary counts must be derived from the committed scripts list."""
     root = repo_root()
@@ -79,6 +81,7 @@ def test_scripts_inventory_dispatcher_targets_canonical_checker() -> None:
     )
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.slow
 @pytest.mark.timeout(600)
 def test_scripts_inventory_manifest_drift_check_passes() -> None:

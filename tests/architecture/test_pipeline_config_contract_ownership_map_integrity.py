@@ -41,6 +41,7 @@ def _load_rows() -> list[dict[str, object]]:
     return normalized
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_pipeline_config_contract_ownership_map_rows_reference_existing_artifacts() -> (
     None
@@ -87,6 +88,7 @@ def test_pipeline_config_contract_ownership_map_rows_reference_existing_artifact
     assert not violations, "\n".join(violations)
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_pipeline_config_contract_ownership_map_has_full_gold_coverage() -> None:
     """Gold-enabled rows must link config, registry, contract YAML, JSON, and schema."""
@@ -161,6 +163,7 @@ def test_pipeline_config_contract_ownership_map_has_full_gold_coverage() -> None
     assert not violations, "\n".join(violations)
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_pipeline_config_contract_ownership_map_contract_refs_match_contract_yaml() -> (
     None

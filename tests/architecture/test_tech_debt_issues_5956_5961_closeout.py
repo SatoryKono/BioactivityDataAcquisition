@@ -70,6 +70,7 @@ def _gate(payload: dict[str, Any], name: str) -> dict[str, Any]:
     raise AssertionError(f"missing debt-governance gate: {name}")
 
 
+@pytest.mark.generated_artifact
 def test_duplication_burndown_ratchets_are_lowered_for_5956_and_5961() -> None:
     closeout = _load_json(CLOSEOUT)
     duplication = _load_json(DUPLICATION)
@@ -126,6 +127,7 @@ def test_duplication_burndown_ratchets_are_lowered_for_5956_and_5961() -> None:
     assert _gate(gates, "full_app_duplication_total_clusters")["status"] == "pass"
 
 
+@pytest.mark.generated_artifact
 def test_compatibility_and_config_facades_are_frozen_for_5957_and_5958() -> None:
     closeout = _load_json(CLOSEOUT)
     census = _load_json(COMPATIBILITY_CENSUS)
@@ -174,6 +176,7 @@ def test_compatibility_and_config_facades_are_frozen_for_5957_and_5958() -> None
         assert symbol["max_src_importers"] == 0
 
 
+@pytest.mark.generated_artifact
 def test_scripts_and_root_hygiene_burndown_for_5959_and_5960() -> None:
     closeout = _load_json(CLOSEOUT)
     manifest = _load_json(SCRIPTS_MANIFEST)

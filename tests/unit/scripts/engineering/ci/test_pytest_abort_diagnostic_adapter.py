@@ -775,3 +775,73 @@ def test_journal_child_identity_survives_supervision(tmp_path: Path) -> None:
     manifest = adapter.run(command, evidence, tmp_path / "out")
     assert manifest.wrapper_exit_code == 0
     assert child_env["BIOETL_JOURNAL_PASS"] == "mutated-after-construction"
+
+
+@pytest.mark.skipif(
+    os.name != "posix" or not Path("/proc").is_dir(),
+    reason="POSIX signal integration requires /proc descendant discovery",
+)
+def test_native_child_timeout_dumps_python_runner_and_reaps_child(
+    tmp_path: Path,
+) -> None:
+    import shutil
+    import time
+
+    sleep = shutil.which("sleep")
+    if sleep is None:
+        pytest.skip("native sleep executable unavailable")
+    pid_file = tmp_path / "native.pid"
+    started = time.monotonic()
+    try:
+        _, manifest = _run(
+            tmp_path,
+            _python_script(
+                tmp_path,
+                "native_runner.py",
+                "import pathlib, subprocess, time\n"
+                f"child = subprocess.Popen([{sleep!r}, '60'])\n"
+                f"pathlib.Path({str(pid_file)!r}).write_text(str(child.pid))\n"
+                "child.wait()\n"
+                "time.sleep(60)\n",
+            ),
+            tmp_path / "missing.xml",
+            timeout=1.5,
+            margin=1.0,
+        )
+        assert manifest.status == "WATCHDOG_TIMEOUT"
+        assert manifest.wrapper_exit_code == 124
+        assert (
+            manifest.diagnostic_signal_delivery == "leaf_descendants_then_process_group"
+        )
+        diagnostic = (tmp_path / manifest.stderr_file).read_text()
+        assert "Fatal Python error: Aborted" in diagnostic
+        assert "native_runner.py" in diagnostic
+        assert not _pid_alive(int(pid_file.read_text()))
+        assert "cleanup_incomplete" not in (manifest.cleanup_error or "")
+        assert time.monotonic() - started < 10
+    finally:
+        if pid_file.exists() and _pid_alive(int(pid_file.read_text())):
+            _terminate_pid(int(pid_file.read_text()))
+
+
+def test_disappearing_leaves_really_fall_back_to_launcher(monkeypatch) -> None:
+    import signal
+    from types import SimpleNamespace
+    from scripts.engineering.ci import pytest_abort_diagnostic_adapter as owner
+
+    if os.name != "posix":
+        pytest.skip("POSIX signal delivery")
+    delivered = []
+    monkeypatch.setattr(owner, "_pid_alive", lambda pid: True)
+    monkeypatch.setattr(owner, "_descendant_pids", lambda pid: set())
+
+    def disappeared(pid, sig):
+        raise ProcessLookupError(pid)
+
+    monkeypatch.setattr(owner.os, "kill", disappeared)
+    monkeypatch.setattr(
+        owner.os, "killpg", lambda pid, sig: delivered.append((pid, sig))
+    )
+    result = owner._deliver_diagnostic_signal(SimpleNamespace(pid=101), {202, 203})
+    assert result == ("process_group", signal.SIGABRT)
+    assert delivered == [(101, signal.SIGABRT)]

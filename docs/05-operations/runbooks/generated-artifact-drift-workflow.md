@@ -216,3 +216,56 @@ architecture test before closing the task.
   classification in the task or PR closeout.
 - Add follow-up governance work when drift exposed a missing validator or an
   ambiguous ownership boundary.
+
+
+## CI and daily selection
+
+PR/push pytest collection uses `generated_artifact` markers and the individual
+node inventory in `configs/quality/generated_artifact_tests.json`. Tests of
+current committed generated outputs run in the existing `nightly.yml` schedule
+at 03:00 UTC. Source contracts and tests generating temporary fixtures remain
+in ordinary CI; mixed modules use function markers, never directory exclusions.
+
+The daily owner runs all manifest tests serially, including `slow` tests, and
+fails if a manifest node is missing from collection. Standalone output checks
+retain their daily owners in the same manifest. Source, security, exemption,
+and lifecycle checks remain independent of output freshness checks.
+
+An entirely artifact-dependent affected selection emits `deferred-to-daily`
+with its collected node list and the original pytest exit 5. This is not a
+passing test result. Empty selections, collection failures, missing markers,
+and stale manifest selectors remain errors. Daily test and command failures
+are never converted into successful deferrals.
+
+Local pytest defaults to the complete selection. Use `--artifact-selection=ci`
+for PR-equivalent tests. Run the complete artifact test partition with
+`python -m scripts.engineering.ci.generated_artifact_checks daily --report reports/quality/generated-artifact-daily-selection.json`.
+
+The governance preflight fetches `origin/main` unconditionally, with full checkout
+history, before source comparisons. Missing refs or merge bases are errors; they
+must never be interpreted as an empty changed-path set.
+
+`report-debt-governance-gates --source-only --check --changed-from-ref ...` evaluates
+authored debt/exemption budgets, budget growth against the base ref, UUID seam
+policy and live DQ contract diagnostics without loading committed generated JSON.
+The full command remains a separate daily step: all module-coverage hashes,
+generated artifact drift, generated metric/residual gates, coherence checks and
+observability release/touched-evidence checks still execute there unchanged.
+Source mode cannot update artifacts or run without an explicit comparison ref.
+
+The ordinary `report-observability-metric-inventory --check` steps remain enabled:
+they collect current metric declarations/emissions, dashboard/rule references and
+source policy inputs and write fresh review evidence. The separate
+`--typed-observability-views` mode checks committed panel inventory drift; these
+ordinary workflow steps do not request that mode.
+
+Coverage-producing jobs use the same `ci` selection in PR/push and nightly runs.
+The separate daily artifact job supplies generated-evidence coverage without
+changing the test population used for coverage measurement.
+
+`python -m scripts.docs passports check-source` validates freshly projected
+schemas and blocking diagnostics in ordinary CI without comparing committed
+output bytes or orphan files. The full `passports check` remains a daily validator.
+Mixed architecture tests retain separate unmarked source assertions. The touched
+twin-family private-import gate compares live source with the PR base commit or
+push-before commit (local runs use the main merge base), never a generated census.

@@ -748,6 +748,9 @@ def validate_benchmark_evidence_main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--expected-sha", default=os.environ.get("GITHUB_SHA"))
     parser.add_argument("--producer-outcome", required=True)
+    parser.add_argument("--contract-outcome", required=True)
+    parser.add_argument("--failure-manifest-out", type=Path)
+    parser.add_argument("--failure-gate-out", type=Path)
     parser.add_argument("--output-root", type=Path, default=REPO_ROOT)
     args = parser.parse_args(argv)
     try:
@@ -755,24 +758,122 @@ def validate_benchmark_evidence_main(argv: list[str] | None = None) -> int:
         manifest_out = confined_io_path(args.manifest_out, root=args.output_root)
         if measurements == manifest_out:
             raise ValueError("Manifest must not overwrite measurements")
-        # A failed revalidation must not leave an earlier successful manifest.
-        manifest_out.unlink(missing_ok=True)
+        failure_outputs = [
+            confined_io_path(path, root=args.output_root)
+            for path in (args.failure_manifest_out, args.failure_gate_out)
+            if path is not None
+        ]
+        outputs = [manifest_out, *failure_outputs]
+        if measurements in outputs or len(set(outputs)) != len(outputs):
+            raise ValueError(
+                "Evidence output paths must be distinct from measurements and each other"
+            )
+    except (ValueError, OSError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+    try:
+        if args.contract_outcome != "success":
+            raise ValueError(
+                f"Benchmark measurement contract did not succeed: {args.contract_outcome}"
+            )
         manifest = validate_evidence(
             measurements,
             args.expected_sha,
             producer_outcome=args.producer_outcome,
             root=args.output_root,
         )
-        write_text_confined(
-            manifest_out,
-            json.dumps(manifest, indent=2, sort_keys=True, allow_nan=False) + "\n",
-            root=args.output_root,
-        )
+    except (ValueError, OSError) as exc:
+        # Failure artifacts describe rejection, never measurements or a baseline candidate.
+        manifest = {
+            "schema_version": 1,
+            "status": "failed",
+            "reason": str(exc),
+            "producer_outcome": args.producer_outcome,
+            "contract_outcome": args.contract_outcome,
+        }
+        try:
+            for output in outputs:
+                write_text_confined(output, _dump(manifest), root=args.output_root)
+        except (ValueError, OSError) as write_error:
+            print(f"Error writing failure evidence: {write_error}", file=sys.stderr)
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+    manifest["contract_outcome"] = args.contract_outcome
+    try:
+        _archive_validation_failures(outputs, manifest_out, args.output_root)
+        write_text_confined(manifest_out, _dump(manifest), root=args.output_root)
     except (ValueError, OSError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
     print(f"Validation successful. Manifest written to {manifest_out}")
     return 0
+
+
+def _archive_validation_failures(
+    outputs: list[Path], manifest_out: Path, root: Path
+) -> None:
+    """Retain owned rejection bytes before clearing their current output paths."""
+    from scripts.engineering.common.repo_paths import (
+        read_bytes_confined,
+    )
+
+    history = manifest_out.with_name(f"{manifest_out.stem}.failure-history")
+    pending: list[tuple[Path, bytes, Path]] = []
+    for output in outputs:
+        try:
+            raw = read_bytes_confined(output, root=root)
+        except FileNotFoundError:
+            continue
+        if not _is_validation_failure(raw):
+            continue
+        digest = hashlib.sha256(raw).hexdigest()
+        archived = history / f"{output.name}.{digest}.json"
+        _write_validation_failure_archive(archived, raw, root)
+        pending.append((output, raw, archived))
+    for output, raw, archived in pending:
+        if read_bytes_confined(archived, root=root) != raw:
+            raise ValueError("Validation failure archive bytes do not match")
+        if read_bytes_confined(output, root=root) != raw:
+            raise ValueError("Validation failure output changed during archival")
+        output.unlink()
+
+
+def _write_validation_failure_archive(archived: Path, raw: bytes, root: Path) -> None:
+    """Create an archive or verify the existing content-addressed evidence."""
+    from scripts.engineering.common.repo_paths import (
+        read_bytes_confined,
+        write_bytes_confined,
+    )
+
+    if archived.exists():
+        if read_bytes_confined(archived, root=root) != raw:
+            raise ValueError("Validation failure archive collision")
+    else:
+        write_bytes_confined(archived, raw, root=root)
+
+
+def _is_validation_failure(raw: bytes) -> bool:
+    """Return whether raw bytes are a validator-owned rejection document."""
+    try:
+        payload = json.loads(raw)
+    except (ValueError, UnicodeError):
+        return False
+    return (
+        isinstance(payload, dict)
+        and set(payload)
+        == {
+            "schema_version",
+            "status",
+            "reason",
+            "producer_outcome",
+            "contract_outcome",
+        }
+        and payload["schema_version"] == 1
+        and payload["status"] == "failed"
+        and isinstance(payload["reason"], str)
+        and isinstance(payload["producer_outcome"], str)
+        and isinstance(payload["contract_outcome"], str)
+    )
 
 
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -784,7 +885,7 @@ _Measurement = tuple[str, str, str, str, Decimal]
 
 
 def _dump(payload: Mapping[str, object]) -> str:
-    return json.dumps(payload, ensure_ascii=True, indent=2, sort_keys=True) + "\n"
+    return json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
 
 
 def _resolve_gitdir(repo: Path) -> Path | None:
