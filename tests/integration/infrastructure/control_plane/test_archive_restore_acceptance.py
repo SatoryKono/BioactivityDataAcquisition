@@ -1,16 +1,21 @@
 import json
-import hashlib
 import shutil
 from pathlib import Path
-from dataclasses import replace
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 import pytest
 
-from bioetl.domain.control_plane import RunManifest, ControlPlaneArtifactLifecyclePlan, ControlPlaneArtifactRef, ControlPlaneArtifactSurface, ControlPlaneArtifactLifecycleDecision
+from bioetl.domain.control_plane import (
+    RunManifest,
+    ControlPlaneArtifactLifecyclePlan,
+    ControlPlaneArtifactRef,
+    ControlPlaneArtifactSurface,
+    ControlPlaneArtifactLifecycleDecision,
+)
 from bioetl.infrastructure.control_plane.file_archive_store import FileArchiveStore
 from bioetl.domain.types import RunID
+
 
 @pytest.fixture
 def isolated_roots(tmp_path):
@@ -26,8 +31,9 @@ def isolated_roots(tmp_path):
 
     return data_root, archive_root, report_root, restore_root
 
+
 def test_archive_restore_acceptance(isolated_roots):
-    data_root, archive_root, report_root, restore_root = isolated_roots
+    data_root, archive_root, report_root, _restore_root = isolated_roots
 
     # 1. Setup a valid manifest and plan
     run_id = RunID(uuid.uuid4())
@@ -35,9 +41,9 @@ def test_archive_restore_acceptance(isolated_roots):
         manifest_id="test-manifest",
         run_id=run_id,
         pipeline_name="test-pipeline",
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
         source_refs=(),
-        execution_fingerprint="fingerprint"
+        execution_fingerprint="fingerprint",
     )
 
     # Create source artifacts
@@ -48,22 +54,36 @@ def test_archive_restore_acceptance(isolated_roots):
     ledger_path.write_text('{"event": "test"}')
 
     plan = ControlPlaneArtifactLifecyclePlan(
-        generated_at=datetime.now(timezone.utc),
-        cutoff=datetime.now(timezone.utc),
+        generated_at=datetime.now(UTC),
+        cutoff=datetime.now(UTC),
         dry_run=True,
         resolution_issues=(),
         artifacts=(
-            ControlPlaneArtifactRef(path=str(manifest_path), surface=ControlPlaneArtifactSurface.RUN_MANIFEST, artifact_id="manifest-id", decision=ControlPlaneArtifactLifecycleDecision.RETAIN, reason="test"),
-            ControlPlaneArtifactRef(path=str(ledger_path), surface=ControlPlaneArtifactSurface.RUN_LEDGER, artifact_id="ledger-id", decision=ControlPlaneArtifactLifecycleDecision.RETAIN, reason="test")
-        )
+            ControlPlaneArtifactRef(
+                path=str(manifest_path),
+                surface=ControlPlaneArtifactSurface.RUN_MANIFEST,
+                artifact_id="manifest-id",
+                decision=ControlPlaneArtifactLifecycleDecision.RETAIN,
+                reason="test",
+            ),
+            ControlPlaneArtifactRef(
+                path=str(ledger_path),
+                surface=ControlPlaneArtifactSurface.RUN_LEDGER,
+                artifact_id="ledger-id",
+                decision=ControlPlaneArtifactLifecycleDecision.RETAIN,
+                reason="test",
+            ),
+        ),
     )
 
     # 2. Capture archive
-    store = FileArchiveStore(data_root=data_root, archive_root=archive_root, report_root=report_root)
+    store = FileArchiveStore(
+        data_root=data_root, archive_root=archive_root, report_root=report_root
+    )
     pack_path = store.create(manifest=manifest, plan=plan)
 
     # 3. Verify archive via public API (with source present)
-    verified, reason = store.verify(manifest=manifest, plan=plan)
+    verified, _reason = store.verify(manifest=manifest, plan=plan)
     assert verified is True
 
     # 4. Remove source fixture to simulate "source absent" readback
@@ -72,8 +92,12 @@ def test_archive_restore_acceptance(isolated_roots):
     # 5. Independent readback
     try:
         data_root.mkdir()
-        store_restore = FileArchiveStore(data_root=data_root, archive_root=archive_root, report_root=report_root)
-        verified_restore, reason_restore = store_restore.verify(manifest=manifest, plan=plan)
+        store_restore = FileArchiveStore(
+            data_root=data_root, archive_root=archive_root, report_root=report_root
+        )
+        verified_restore, reason_restore = store_restore.verify(
+            manifest=manifest, plan=plan
+        )
     except Exception as e:
         verified_restore = False
         reason_restore = str(e)
@@ -81,10 +105,12 @@ def test_archive_restore_acceptance(isolated_roots):
     report = {
         "sweep_id": "test_r09",
         "archive_acceptance": {
-            "source_missing_verification": "NOT_VERIFIABLE" if not verified_restore else "VERIFIED",
+            "source_missing_verification": "NOT_VERIFIABLE"
+            if not verified_restore
+            else "VERIFIED",
             "reason": reason_restore,
-            "blocker": "FileArchiveStore.verify reads directly from original data_root instead of checking the restored payload against the index. Independent public readback without original source is therefore unachievable through the current public verify."
-        }
+            "blocker": "FileArchiveStore.verify reads directly from original data_root instead of checking the restored payload against the index. Independent public readback without original source is therefore unachievable through the current public verify.",
+        },
     }
 
     report_file = report_root / "archive-restore-acceptance.json"
@@ -101,22 +127,25 @@ def test_archive_restore_acceptance(isolated_roots):
     # Write to durable project path as required
     persistent_report_dir = Path("reports/audit-runs/test_r09")
     persistent_report_dir.mkdir(parents=True, exist_ok=True)
-    (persistent_report_dir / "archive-restore-acceptance.json").write_text(json.dumps(report, indent=2))
+    (persistent_report_dir / "archive-restore-acceptance.json").write_text(
+        json.dumps(report, indent=2)
+    )
     (persistent_report_dir / "archive-restore-acceptance.md").write_text(md_report)
 
     assert verified_restore is False
 
+
 def test_archive_restore_negative_cases(isolated_roots):
-    data_root, archive_root, report_root, restore_root = isolated_roots
+    data_root, archive_root, report_root, _restore_root = isolated_roots
 
     run_id = RunID(uuid.uuid4())
     manifest = RunManifest(
         manifest_id="test-manifest",
         run_id=run_id,
         pipeline_name="test-pipeline",
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
         source_refs=(),
-        execution_fingerprint="fingerprint"
+        execution_fingerprint="fingerprint",
     )
 
     manifest_path = data_root / "manifest.json"
@@ -125,17 +154,31 @@ def test_archive_restore_negative_cases(isolated_roots):
     ledger_path.write_text('{"event": "test"}')
 
     plan = ControlPlaneArtifactLifecyclePlan(
-        generated_at=datetime.now(timezone.utc),
-        cutoff=datetime.now(timezone.utc),
+        generated_at=datetime.now(UTC),
+        cutoff=datetime.now(UTC),
         dry_run=True,
         resolution_issues=(),
         artifacts=(
-            ControlPlaneArtifactRef(path=str(manifest_path), surface=ControlPlaneArtifactSurface.RUN_MANIFEST, artifact_id="manifest-id", decision=ControlPlaneArtifactLifecycleDecision.RETAIN, reason="test"),
-            ControlPlaneArtifactRef(path=str(ledger_path), surface=ControlPlaneArtifactSurface.RUN_LEDGER, artifact_id="ledger-id", decision=ControlPlaneArtifactLifecycleDecision.RETAIN, reason="test")
-        )
+            ControlPlaneArtifactRef(
+                path=str(manifest_path),
+                surface=ControlPlaneArtifactSurface.RUN_MANIFEST,
+                artifact_id="manifest-id",
+                decision=ControlPlaneArtifactLifecycleDecision.RETAIN,
+                reason="test",
+            ),
+            ControlPlaneArtifactRef(
+                path=str(ledger_path),
+                surface=ControlPlaneArtifactSurface.RUN_LEDGER,
+                artifact_id="ledger-id",
+                decision=ControlPlaneArtifactLifecycleDecision.RETAIN,
+                reason="test",
+            ),
+        ),
     )
 
-    store = FileArchiveStore(data_root=data_root, archive_root=archive_root, report_root=report_root)
+    store = FileArchiveStore(
+        data_root=data_root, archive_root=archive_root, report_root=report_root
+    )
     pack_path = store.create(manifest=manifest, plan=plan)
 
     ledger_archive = pack_path / "files" / "ledger.jsonl"
@@ -160,12 +203,17 @@ def test_archive_restore_negative_cases(isolated_roots):
     # Test missing member
     # Instead of store._manifest_digest, we will just use the correct hash.
     # To be perfectly correct, just reload original index and pop.
-    store_clean = FileArchiveStore(data_root=data_root, archive_root=archive_root, report_root=report_root)
+    store_clean = FileArchiveStore(
+        data_root=data_root, archive_root=archive_root, report_root=report_root
+    )
     # The digest was originally correct. Let's fix the identity to avoid false negatives.
     import importlib
-    archive_module = importlib.import_module("bioetl.infrastructure.control_plane.file_archive_store")
+
+    archive_module = importlib.import_module(
+        "bioetl.infrastructure.control_plane.file_archive_store"
+    )
     payload["manifest_sha256"] = archive_module._manifest_digest(manifest)
-    payload["files"].pop() # remove a member
+    payload["files"].pop()  # remove a member
     index_path.write_text(json.dumps(payload))
 
     verified, reason = store.verify(manifest=manifest, plan=plan)
