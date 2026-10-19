@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2581`
-- Internal import edges (raw): `8316`
+- Internal import edges (raw): `8320`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `329`
@@ -21,8 +21,8 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1629 OK| application
-    application -->|1103 OK| domain
+    application -->|1631 OK| application
+    application -->|1105 OK| domain
     composition -->|230 OK| application
     composition -->|649 OK| composition
     composition -->|316 OK| domain
@@ -40,8 +40,8 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1629 | allowed |
-| `application`    | `domain`         |    1103 | allowed |
+| `application`    | `application`    |    1631 | allowed |
+| `application`    | `domain`         |    1105 | allowed |
 | `composition`    | `application`    |     230 | allowed |
 | `composition`    | `composition`    |     649 | allowed |
 | `composition`    | `domain`         |     316 | allowed |
@@ -72,8 +72,8 @@ flowchart LR
 | `composition.bootstrap`        | `application.services`                     |      47 |
 | `infrastructure.storage`       | `domain.value_objects`                     |      43 |
 | `composition.factories`        | `domain.ports`                             |      37 |
+| `application.composite`        | `domain.exceptions`                        |      36 |
 | `infrastructure.storage`       | `domain.models`                            |      36 |
-| `application.composite`        | `domain.exceptions`                        |      35 |
 | `composition.bootstrap`        | `domain.ports`                             |      34 |
 | `application.core`             | `domain.ports`                             |      32 |
 | `composition.runtime_builders` | `domain.control_plane`                     |      31 |

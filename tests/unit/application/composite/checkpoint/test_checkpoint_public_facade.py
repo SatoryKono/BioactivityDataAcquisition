@@ -88,6 +88,7 @@ def test_public_facade_merges_runtime_anchors_into_checkpoint_state() -> None:
         composite_name="composite_publication",
         run_id="run-1",
         state=CompositePipelineState.SEED_RUNNING,
+        legacy_cv_resume_blocked=True,
     )
 
     merged = merge_expected_anchors(state, anchors)
@@ -108,6 +109,7 @@ def test_public_facade_merges_runtime_anchors_into_checkpoint_state() -> None:
     assert merged.contract_version == anchors.contract_version
     assert merged.manifest_id == "manifest-123"
     assert merged.composite_run_identity == "run-42"
+    assert merged.legacy_cv_resume_blocked is True
     assert fresh.effective_config_hash == anchors.effective_config_hash
     assert fresh.effective_config_artifact_id == anchors.effective_config_artifact_id
     assert fresh.execution_fingerprint == anchors.execution_fingerprint
