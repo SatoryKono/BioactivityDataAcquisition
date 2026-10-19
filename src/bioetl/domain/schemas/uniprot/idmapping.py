@@ -134,7 +134,9 @@ class IDMappingSchema(ETLRecordSchema):
         """Pandera configuration."""
 
         strict = True
-        ordered = False  # Order-agnostic validation; writer enforces final canonical order
+        ordered = (
+            False  # Order-agnostic validation; writer enforces final canonical order
+        )
         coerce = True
         name = "IDMappingSchema"
         description = "UniProt ID Mapping Silver layer validation"
