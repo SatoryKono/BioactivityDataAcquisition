@@ -15,6 +15,11 @@ from pathlib import Path
 from typing import Any
 
 from scripts.generate_adr_registry import ADRMetadata, ADRRegistryGenerator
+from scripts.engineering.qa._tracked_glob import (
+    _get_tracked_paths,
+    git_discovery_environment,
+    tracked_files,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_JSON_OUTPUT = (
@@ -167,7 +172,6 @@ def _git_grep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
                     "git",
                     "grep",
                     "--no-color",
-                    "--untracked",
                     "-I",
                     "-E",
                     "-i",
@@ -180,6 +184,7 @@ def _git_grep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
                 ]
             ),
             cwd=repo_root,
+            env=git_discovery_environment(),
             check=False,
             capture_output=True,
             text=True,
@@ -225,6 +230,7 @@ def _ripgrep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
                 ]
             ),
             cwd=repo_root,
+            env=git_discovery_environment(),
             check=False,
             capture_output=True,
             text=True,
@@ -236,31 +242,36 @@ def _ripgrep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
     if result.returncode not in (0, 1):
         return None
 
+    tracked = _get_tracked_paths(repo_root)
     lines: list[tuple[str, str]] = []
     for raw_line in result.stdout.splitlines():
         try:
             path, _line_number, text = raw_line.split(":", 2)
         except ValueError:
             continue
-        lines.append((path, text))
+        if path in tracked:
+            lines.append((path, text))
     return lines
 
 
-def _python_reference_lines(repo_root: Path) -> list[tuple[str, str]]:
-    """Fallback ADR reference scan for environments where Git commands fail."""
-    scan_paths = _python_scan_paths(repo_root)
-    max_workers = min(32, (os.cpu_count() or 1) + 4)
-    lines: list[tuple[str, str]] = []
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        for file_lines in executor.map(
-            lambda rel_path: _read_python_reference_lines(
-                repo_root=repo_root,
-                rel_path=rel_path,
-            ),
-            scan_paths,
-        ):
-            lines.extend(file_lines)
-    return lines
+def _python_scan_paths(repo_root: Path) -> tuple[str, ...]:
+    """Return repo-relative scan paths strictly using git-tracked files."""
+    discovered: set[str] = set()
+    for prefix in _SCAN_PREFIXES:
+        prefix_path = repo_root / prefix
+        if not prefix_path.exists():
+            continue
+
+        for path in tracked_files(prefix_path, "**/*"):
+            if not path.is_file():
+                continue
+            try:
+                rel_path = path.relative_to(repo_root).as_posix()
+            except ValueError:
+                continue
+            if _should_scan_path(rel_path):
+                discovered.add(rel_path)
+    return tuple(sorted(discovered))
 
 
 def _read_python_reference_lines(
@@ -280,29 +291,21 @@ def _read_python_reference_lines(
     return tuple(reference_lines)
 
 
-def _iter_prefix_files(prefix_path: Path) -> tuple[Path, ...]:
-    if prefix_path.is_dir():
-        return tuple(path for path in prefix_path.rglob("*") if path.is_file())
-    if prefix_path.is_file():
-        return (prefix_path,)
-    return ()
-
-
-def _python_scan_paths(repo_root: Path) -> tuple[str, ...]:
-    """Return repo-relative scan paths without relying on Git discovery."""
-    discovered: set[str] = set()
-    for prefix in _SCAN_PREFIXES:
-        prefix_path = repo_root / prefix
-        if not prefix_path.exists():
-            continue
-        for path in _iter_prefix_files(prefix_path):
-            try:
-                rel_path = path.relative_to(repo_root).as_posix()
-            except ValueError:
-                continue
-            if _should_scan_path(rel_path):
-                discovered.add(rel_path)
-    return tuple(sorted(discovered))
+def _python_reference_lines(repo_root: Path) -> list[tuple[str, str]]:
+    """Scan for ADR references using Python."""
+    scan_paths = _python_scan_paths(repo_root)
+    max_workers = min(32, (os.cpu_count() or 1) + 4)
+    lines: list[tuple[str, str]] = []
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for file_lines in executor.map(
+            lambda rel_path: _read_python_reference_lines(
+                repo_root=repo_root,
+                rel_path=rel_path,
+            ),
+            scan_paths,
+        ):
+            lines.extend(file_lines)
+    return lines
 
 
 def _reference_index(
@@ -424,7 +427,7 @@ def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
         "generated_by": "scripts.engineering.qa.report_adr_enforcement_matrix",
         "source": {
             "adr_decisions_dir": "docs/02-architecture/decisions",
-            "tracked_file_discovery": "git grep --untracked with python fallback",
+            "tracked_file_discovery": "tracked_files(root)",
             "manual_exception_marker_prefix": _MANUAL_EXCEPTION_PREFIX,
         },
         "summary": {
