@@ -1282,6 +1282,19 @@ class TestDeduplicateEnricher:
         row_a = res1.filter(pl.col("doi") == "a")
         assert row_a["title"][0] == "T1|T2|T3"
 
+    def test_null_and_literal_null_stay_distinct(self, deduplicator):
+        """Missing values and the literal string null are different conflicts."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a", "a"],
+                "title": [None, "null", "null"],
+            }
+        )
+        result = deduplicator.deduplicate(df, ["doi"], "test")
+        assert result["title"][0] == "null|null"
+
     def test_repeats_are_collapsed(self, deduplicator):
         """Test repeated string values are collapsed."""
         import polars as pl

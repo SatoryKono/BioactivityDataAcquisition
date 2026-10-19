@@ -96,6 +96,16 @@ class EnricherDeduplicatorService:
             .agg(agg_exprs)
             .sort(key_columns)
         )
+        if columns_with_conflicts:
+            result = result.with_columns(
+                [
+                    pl.col(column)
+                    .list.eval(pl.element().struct.field("display"))
+                    .list.join("|")
+                    .alias(column)
+                    for column in columns_with_conflicts
+                ]
+            )
         self._record_deduplicated(records_before - len(result))
 
         self._log_deduplication(
@@ -187,23 +197,17 @@ class EnricherDeduplicatorService:
         return agg_exprs
 
     def _build_concat_expr(self, column: str, dtype: pl.DataType) -> pl.Expr:
-        """Build expression that concatenates values with |.
+        """Build expression that concatenates conflicting values with |.
 
-        Note: The resulting string consists of unique, lexicographically sorted
-        string values from the cell, with nulls explicitly represented as "null".
-        Sorting happens on the stringified cell values before joining, ensuring
-        deterministic multiset concatenation.
+        Distinct original values stay distinct even when their rendered text
+        matches. Null is rendered as ``"null"`` and does not collapse into a
+        literal ``"null"``. Rendered texts are then sorted lexicographically.
+        That sort is inside the cell, not a sort of the joined result.
         """
+        source = pl.col(column)
         as_string = self._to_string_expr(column, dtype)
-        return (
-            pl.when(pl.col(column).is_null())
-            .then(pl.lit("null"))
-            .otherwise(as_string)
-            .unique()
-            .sort()
-            .str.join("|")
-            .alias(column)
-        )
+        display = pl.when(source.is_null()).then(pl.lit("null")).otherwise(as_string)
+        return pl.struct(display=display, value=source).unique().sort().alias(column)
 
     def _to_string_expr(self, column: str, dtype: pl.DataType) -> pl.Expr:
         """Convert column to string expression."""
