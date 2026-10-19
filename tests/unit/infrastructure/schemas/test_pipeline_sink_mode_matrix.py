@@ -14,13 +14,16 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 pytestmark = pytest.mark.unit
 
+
 def _get_schema() -> dict[str, object]:
     repo_root = Path(__file__).resolve().parents[4]
     schema_path = repo_root / "configs" / "_schema" / "pipeline.json"
     with open(schema_path, encoding="utf-8") as f:
         return json.load(f)
 
+
 SCHEMA = _get_schema()
+
 
 def _base_payload() -> dict[str, object]:
     return {
@@ -31,6 +34,7 @@ def _base_payload() -> dict[str, object]:
         "technical_primary_key": "entity_id",
     }
 
+
 # Parameters: layer, mode, should_pass
 MATRIX = [
     ("bronze", "append", True),
@@ -40,7 +44,6 @@ MATRIX = [
     ("bronze", "scd2", False),
     ("bronze", "UNKNOWN", False),
     ("bronze", "", False),
-
     ("silver", "append", True),
     ("silver", "merge", True),
     ("silver", None, True),
@@ -49,7 +52,6 @@ MATRIX = [
     ("silver", "delete", False),
     ("silver", "UNKNOWN", False),
     ("silver", "", False),
-
     ("gold", "append", True),
     ("gold", "overwrite", True),
     ("gold", "scd2", True),
@@ -65,8 +67,11 @@ MIXED_CASE_MATRIX = [
     ("gold", "Scd2", False),
 ]
 
+
 @pytest.mark.parametrize("layer, mode, should_pass", MATRIX + MIXED_CASE_MATRIX)
-def test_pipeline_sink_mode_pydantic_validation(layer: str, mode: str | None, should_pass: bool) -> None:
+def test_pipeline_sink_mode_pydantic_validation(
+    layer: str, mode: str | None, should_pass: bool
+) -> None:
     payload = _base_payload()
     payload["sink"] = {
         layer: {
@@ -84,8 +89,11 @@ def test_pipeline_sink_mode_pydantic_validation(layer: str, mode: str | None, sh
             PipelineYamlConfig.model_validate(payload)
         assert "Invalid mode" in str(exc.value) or "Input should be" in str(exc.value)
 
+
 @pytest.mark.parametrize("layer, mode, should_pass", MATRIX + MIXED_CASE_MATRIX)
-def test_pipeline_sink_mode_jsonschema_validation(layer: str, mode: str | None, should_pass: bool) -> None:
+def test_pipeline_sink_mode_jsonschema_validation(
+    layer: str, mode: str | None, should_pass: bool
+) -> None:
     payload = _base_payload()
     payload["sink"] = {
         layer: {
@@ -100,6 +108,7 @@ def test_pipeline_sink_mode_jsonschema_validation(layer: str, mode: str | None, 
     else:
         with pytest.raises(JsonSchemaValidationError):
             validate(instance=payload, schema=SCHEMA)
+
 
 def test_unknown_layer_rejected() -> None:
     payload = _base_payload()
@@ -117,6 +126,7 @@ def test_unknown_layer_rejected() -> None:
     with pytest.raises(JsonSchemaValidationError):
         validate(instance=payload, schema=SCHEMA)
 
+
 def test_disabled_sink_invalid_mode_rejected() -> None:
     payload = _base_payload()
     payload["sink"] = {
@@ -132,6 +142,7 @@ def test_disabled_sink_invalid_mode_rejected() -> None:
 
     with pytest.raises(JsonSchemaValidationError):
         validate(instance=payload, schema=SCHEMA)
+
 
 def test_omitted_mode_preserves_default() -> None:
     payload = _base_payload()
