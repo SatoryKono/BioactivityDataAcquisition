@@ -480,6 +480,7 @@ def test_cli_module_accepts_valid_schema_and_blocks_rejected_contract(
         _SHA,
         "--contract-outcome",
     ]
+    rejected_bytes = {}
     for outcome, expected in [("success", 0), ("failure", 1), ("success", 0)]:
         result = subprocess.run(
             [*args, outcome], env=env, capture_output=True, text=True, timeout=30
@@ -494,4 +495,178 @@ def test_cli_module_accepts_valid_schema_and_blocks_rejected_contract(
             assert (
                 json.loads((tmp_path / "gate.json").read_text())["status"] == "failed"
             )
+            rejected_bytes = {
+                name: (tmp_path / name).read_bytes()
+                for name in ("validation.json", "manifest.json", "gate.json")
+            }
+    history = tmp_path / "validation.failure-history"
+    for name, raw_bytes in rejected_bytes.items():
+        archived = list(history.glob(f"{name}.*.json"))
+        assert len(archived) == 1
+        assert archived[0].read_bytes() == raw_bytes
+    assert raw.read_bytes() == json.dumps(payload).encode()
     assert not list(tmp_path.rglob("*candidate*"))
+
+
+@pytest.mark.parametrize(
+    "unrelated", [b"not-json", b'{"status":"failed","owner":"other"}']
+)
+def test_success_preserves_unrelated_optional_outputs(
+    tmp_path, payload, monkeypatch, unrelated
+):
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+    raw = tmp_path / "raw.json"
+    raw.write_text(json.dumps(payload))
+    gate = tmp_path / "gate.json"
+    gate.write_bytes(unrelated)
+    assert (
+        main(
+            [
+                "--output-root",
+                str(tmp_path),
+                "--measurements",
+                str(raw),
+                "--manifest-out",
+                "validation.json",
+                "--failure-gate-out",
+                str(gate),
+                "--expected-sha",
+                _SHA,
+                "--producer-outcome",
+                "success",
+                "--contract-outcome",
+                "success",
+            ]
+        )
+        == 0
+    )
+    assert gate.read_bytes() == unrelated
+    assert not (tmp_path / "validation.failure-history").exists()
+
+
+@pytest.mark.parametrize("encoding", ["utf-8", "utf-16"])
+def test_failure_archive_preserves_bytes_under_windows_translation(
+    tmp_path, monkeypatch, encoding
+):
+    from scripts.engineering.common import repo_paths
+    from scripts.engineering.qa.generate_hotspot_degradation_report import (
+        _archive_validation_failures,
+    )
+
+    fdopen = repo_paths.os.fdopen
+
+    def windows_fdopen(fd, mode, **kwargs):
+        if "b" not in mode:
+            kwargs["newline"] = "\r\n"
+        return fdopen(fd, mode, **kwargs)
+
+    monkeypatch.setattr(repo_paths.os, "fdopen", windows_fdopen)
+    raw = (
+        json.dumps(
+            {
+                "schema_version": 1,
+                "status": "failed",
+                "reason": "rejected",
+                "producer_outcome": "failure",
+                "contract_outcome": "success",
+            },
+            indent=2,
+        )
+        .replace("\n", "\r\n")
+        .encode(encoding)
+    )
+    output = tmp_path / "failure.json"
+    manifest = tmp_path / "validation.json"
+    archived = (
+        tmp_path
+        / "validation.failure-history"
+        / (f"failure.json.{hashlib.sha256(raw).hexdigest()}.json")
+    )
+    for _ in range(2):
+        output.write_bytes(raw)
+        _archive_validation_failures([output], manifest, tmp_path)
+        assert archived.read_bytes() == raw
+        assert not output.exists()
+
+
+def test_failure_archive_preserves_invalid_utf8(tmp_path):
+    from scripts.engineering.qa.generate_hotspot_degradation_report import (
+        _archive_validation_failures,
+    )
+
+    output = tmp_path / "foreign.json"
+    raw = b'{"status":"failed","reason":"\xff"}\r\n'
+    output.write_bytes(raw)
+    _archive_validation_failures([output], tmp_path / "validation.json", tmp_path)
+    assert output.read_bytes() == raw
+    assert not (tmp_path / "validation.failure-history").exists()
+
+
+def test_failure_archive_verifies_written_bytes_before_removal(tmp_path, monkeypatch):
+    from scripts.engineering.common import repo_paths
+    from scripts.engineering.qa.generate_hotspot_degradation_report import (
+        _archive_validation_failures,
+    )
+
+    output = tmp_path / "failure.json"
+    raw = json.dumps(
+        {
+            "schema_version": 1,
+            "status": "failed",
+            "reason": "rejected",
+            "producer_outcome": "failure",
+            "contract_outcome": "success",
+        }
+    ).encode()
+    output.write_bytes(raw)
+    writer = repo_paths.write_bytes_confined
+
+    def corrupt(path, data, **kwargs):
+        return writer(path, data + b"\n", **kwargs)
+
+    monkeypatch.setattr(repo_paths, "write_bytes_confined", corrupt)
+    with pytest.raises(ValueError, match="archive"):
+        _archive_validation_failures([output], tmp_path / "validation.json", tmp_path)
+    assert output.read_bytes() == raw
+
+
+@pytest.mark.parametrize("failure", ["collision", "changed_current"])
+def test_failure_archive_preserves_conflicting_evidence(tmp_path, monkeypatch, failure):
+    from scripts.engineering.common import repo_paths
+    from scripts.engineering.qa.generate_hotspot_degradation_report import (
+        _archive_validation_failures,
+    )
+
+    raw = json.dumps(
+        {
+            "schema_version": 1,
+            "status": "failed",
+            "reason": "rejected",
+            "producer_outcome": "failure",
+            "contract_outcome": "success",
+        }
+    ).encode()
+    output = tmp_path / "failure.json"
+    output.write_bytes(raw)
+    archived = (
+        tmp_path
+        / "validation.failure-history"
+        / (f"failure.json.{hashlib.sha256(raw).hexdigest()}.json")
+    )
+    foreign = b"independent evidence"
+    if failure == "collision":
+        archived.parent.mkdir()
+        archived.write_bytes(foreign)
+    else:
+        writer = repo_paths.write_bytes_confined
+
+        def change_current(path, data, **kwargs):
+            result = writer(path, data, **kwargs)
+            output.write_bytes(foreign)
+            return result
+
+        monkeypatch.setattr(repo_paths, "write_bytes_confined", change_current)
+    with pytest.raises(ValueError, match="collision|changed"):
+        _archive_validation_failures([output], tmp_path / "validation.json", tmp_path)
+    assert output.read_bytes() == (raw if failure == "collision" else foreign)
+    assert archived.read_bytes() == (foreign if failure == "collision" else raw)

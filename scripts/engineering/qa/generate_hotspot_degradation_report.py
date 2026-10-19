@@ -800,14 +800,70 @@ def validate_benchmark_evidence_main(argv: list[str] | None = None) -> int:
         return 1
     manifest["contract_outcome"] = args.contract_outcome
     try:
-        for output in failure_outputs:
-            confined_io_path(output, root=args.output_root).unlink(missing_ok=True)
+        _archive_validation_failures(outputs, manifest_out, args.output_root)
         write_text_confined(manifest_out, _dump(manifest), root=args.output_root)
     except (ValueError, OSError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
     print(f"Validation successful. Manifest written to {manifest_out}")
     return 0
+
+
+def _archive_validation_failures(
+    outputs: list[Path], manifest_out: Path, root: Path
+) -> None:
+    """Retain owned rejection bytes before clearing their current output paths."""
+    from scripts.engineering.common.repo_paths import (
+        read_bytes_confined,
+        write_bytes_confined,
+    )
+
+    history = manifest_out.with_name(f"{manifest_out.stem}.failure-history")
+    pending: list[tuple[Path, bytes, Path]] = []
+    for output in outputs:
+        try:
+            raw = read_bytes_confined(output, root=root)
+        except FileNotFoundError:
+            continue
+        if not _is_validation_failure(raw):
+            continue
+        digest = hashlib.sha256(raw).hexdigest()
+        archived = history / f"{output.name}.{digest}.json"
+        if archived.exists():
+            if read_bytes_confined(archived, root=root) != raw:
+                raise ValueError("Validation failure archive collision")
+        else:
+            write_bytes_confined(archived, raw, root=root)
+        pending.append((output, raw, archived))
+    for output, raw, archived in pending:
+        if read_bytes_confined(archived, root=root) != raw:
+            raise ValueError("Validation failure archive bytes do not match")
+        if read_bytes_confined(output, root=root) != raw:
+            raise ValueError("Validation failure output changed during archival")
+        output.unlink()
+
+
+def _is_validation_failure(raw: bytes) -> bool:
+    try:
+        payload = json.loads(raw)
+    except (ValueError, UnicodeError):
+        return False
+    return (
+        isinstance(payload, dict)
+        and set(payload)
+        == {
+            "schema_version",
+            "status",
+            "reason",
+            "producer_outcome",
+            "contract_outcome",
+        }
+        and payload["schema_version"] == 1
+        and payload["status"] == "failed"
+        and isinstance(payload["reason"], str)
+        and isinstance(payload["producer_outcome"], str)
+        and isinstance(payload["contract_outcome"], str)
+    )
 
 
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")

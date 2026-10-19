@@ -273,6 +273,9 @@ JSON SHA256 to source, dataset, machine, and run identity. Local UUIDs are not G
 run IDs and local validation emits no GitHub URL. A failed validation atomically replaces stale success with a failure manifest.
 Nightly also writes failure manifest/gate artifacts when the producer or contract
 is rejected; reduction and baseline candidate creation remain blocked.
+After a successful retry, recognized validator rejection files are retained
+byte-for-byte in `<validation-manifest-stem>.failure-history/` before their active
+paths are cleared. Unrelated optional output files are left untouched.
 Local JSON callers must set `BIOETL_BENCHMARK_DATASET` to the actual fixture identity
 before execution; wrappers reject missing identity without guessing a dataset.
 
