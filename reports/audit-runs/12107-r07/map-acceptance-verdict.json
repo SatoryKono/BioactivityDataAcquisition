@@ -118,9 +118,10 @@
     {
       "criterion": "eight-provider behavior matrix does not replace the universe and its open cells stay follow-up",
       "evidence": {
+        "inside_12109_count": 0,
         "mandatory_not_verified": 13,
         "matrix_acceptance": "NOT_ACCEPTED",
-        "r08": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+        "r08_scope": "#12108 covers HTTP client policy, timeout, cancellation, generator close, executor lifecycle, and shared-client ownership. It does not accept provider payload parsing or HealthStatus mapping. R07 does not implement those #12108 tests.",
         "r09": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12109"
       },
       "verdict": "PASS"

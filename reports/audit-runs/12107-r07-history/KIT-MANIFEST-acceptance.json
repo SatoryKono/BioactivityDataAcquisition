@@ -1,17 +1,17 @@
 {
-  "based_on_commit": "9df98e17afa94f3695e61db7a9e31d23eb3867d3",
-  "based_on_tree": "5fa3001a541982372e815caba76a31246d0af8fc",
-  "commit_note": "The commit that adds this manifest is recorded after the manifest is written. This manifest hashes the acceptance inputs and outputs present before that commit.",
+  "based_on_commit": "91f3791066aebad1b8516969179da5e947e8f430",
+  "based_on_tree": "f18ff73a25a804d596818c4fd363b0f8eaeb3388",
+  "commit_note": "Hashes are the post-review kit. The commit that records this manifest is created after the file is written.",
   "files": [
     {
-      "bytes": 20065,
+      "bytes": 21868,
       "path": "reports/audit-runs/12107-r07/build_map_acceptance.py",
-      "sha256": "397ec7def82b90782ef7885beaedd63aa4d2900b8e7ff7f42a0de4800a32f15f"
+      "sha256": "e67a08f0b43d08a6c4acf042b5b6a250848a98e4fb6e5a5d3043ece4b9bb3a6b"
     },
     {
-      "bytes": 6640,
+      "bytes": 6844,
       "path": "reports/audit-runs/12107-r07/map-acceptance-verdict.json",
-      "sha256": "084c80226f4cd3f38d0c94171a01a739b5b9655d59aa9c2ea2c924db3d8f0ab6"
+      "sha256": "cdf523c56915edecabfbd0ad9e74e936274ec8630f7cb960f6fd7cd137819f03"
     },
     {
       "bytes": 2161,
@@ -19,9 +19,9 @@
       "sha256": "731537b38c9425b9b6b3b324c934d59ed5e417a98f4c890a7247c4e6fea1a358"
     },
     {
-      "bytes": 6727,
+      "bytes": 9768,
       "path": "reports/audit-runs/12107-r07/behavior-followups.json",
-      "sha256": "7152eed9db4e9bb2f9292150c9f86c579cb84987219cd8eba4cc0320713d1d2b"
+      "sha256": "aaa1dca4c623a9424b37d089b5b9043c597410d38ef11ed18b2a033626ca6d7b"
     },
     {
       "bytes": 204832,
@@ -37,6 +37,11 @@
       "bytes": 2681,
       "path": "reports/audit-runs/12107-r07/telemetry-applicability.json",
       "sha256": "d9884b14e9fb9bdb956749694a0fc902e79013b0f0c7dde2ca191a46245c619c"
+    },
+    {
+      "bytes": 3004,
+      "path": "reports/audit-runs/12107-r07/independent-review-91f379.json",
+      "sha256": "94f762b0e5a90221ddf0f29f8405f4c66e043da784537e6aaef7d3e556d3487a"
     },
     {
       "bytes": 9867,
@@ -126,5 +131,6 @@
   ],
   "frozen_map_sha256": "6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c",
   "historical_receipt_sha256": "1780547842c0057a68b90f39139ae7e1610d07049314b43a7f7ec8b6ae30abcc",
-  "schema_version": 1
+  "reviewed_commit": "91f3791066aebad1b8516969179da5e947e8f430",
+  "schema_version": 2
 }

@@ -143,142 +143,188 @@ def _tracking_decision(rows: list[dict]) -> dict:
     }
 
 
+def _cell(
+    *,
+    adapter: str,
+    operation: str,
+    case: str,
+    obligation: str,
+    missing_evidence: str,
+    inside_12108: str,
+    outside_12108: str | None,
+) -> dict:
+    return {
+        "adapter": adapter,
+        "case": case,
+        "inside_12108": inside_12108,
+        "inside_12109": False,
+        "missing_evidence": missing_evidence,
+        "obligation": obligation,
+        "operation": operation,
+        "outside_12108": outside_12108,
+        "status": "mandatory_not_verified",
+    }
+
+
 def _followups() -> dict:
     consumer = "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108"
     storage = "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12109"
+    fetch_inside = (
+        "Timeout propagation and cancellation propagation, including early close of the fetch generator."
+    )
+    fetch_outside = (
+        "Successful provider-record materialization stays R07 missing evidence. "
+        "#12108 accepts client policy and lifecycle, not payload parsing."
+    )
+    health_inside = (
+        "Timeout and cancellation of the probe. PubChem uses the sync_base executor named by #12108."
+    )
+    health_outside = (
+        "Mapping a successful probe to HEALTHY, or a caught probe error to a non-HEALTHY status, "
+        "stays R07 missing evidence. That status contract is not an #12108 acceptance row."
+    )
+    close_inside = (
+        "Shared or nested client ownership and close order. "
+        "The BaseHttpAdapter no-op does not release the injected client."
+    )
     rows = [
-        {
-            "adapter": "ChemblAdapter",
-            "case": "normal_timeout_cancellation",
-            "follow_up": consumer,
-            "missing_evidence": "The health probe was not executed against a controlled client.",
-            "obligation": "health_check returns a non-HEALTHY status when the probe raises a documented health error, and CancelledError propagates.",
-            "operation": "health_check",
-            "status": "mandatory_not_verified",
-        },
-        {
-            "adapter": "ChemblAdapter",
-            "case": "resource_release",
-            "follow_up": consumer,
-            "missing_evidence": "aclose is the BaseHttpAdapter no-op. The fixture recorded exit_calls == 0.",
-            "obligation": "DataSourcePort requires release of the acquired client. The observed no-op does not release the injected client.",
-            "operation": "aclose",
-            "status": "mandatory_not_verified",
-        },
-        {
-            "adapter": "PubMedAdapter",
-            "case": "normal_timeout_cancellation",
-            "follow_up": consumer,
-            "missing_evidence": "fetch transport was not executed.",
-            "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
-            "operation": "fetch",
-            "status": "mandatory_not_verified",
-        },
-        {
-            "adapter": "SemanticScholarAdapter",
-            "case": "normal_timeout_cancellation",
-            "follow_up": consumer,
-            "missing_evidence": "fetch transport was not executed.",
-            "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
-            "operation": "fetch",
-            "status": "mandatory_not_verified",
-        },
-        {
-            "adapter": "OpenAlexAdapter",
-            "case": "normal_timeout_cancellation",
-            "follow_up": consumer,
-            "missing_evidence": "Existing tests replace fetch methods. This map does not drive the transport.",
-            "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
-            "operation": "fetch",
-            "status": "mandatory_not_verified",
-        },
-        {
-            "adapter": "OpenAlexAdapter",
-            "case": "normal_timeout_cancellation",
-            "follow_up": consumer,
-            "missing_evidence": "The health probe helper was not executed.",
-            "obligation": "health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
-            "operation": "health_check",
-            "status": "mandatory_not_verified",
-        },
-        {
-            "adapter": "CrossRefAdapter",
-            "case": "normal_timeout_cancellation",
-            "follow_up": consumer,
-            "missing_evidence": "fetch transport was not executed.",
-            "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
-            "operation": "fetch",
-            "status": "mandatory_not_verified",
-        },
-        {
-            "adapter": "CrossRefAdapter",
-            "case": "normal_timeout_cancellation",
-            "follow_up": consumer,
-            "missing_evidence": "The health probe helper was not executed.",
-            "obligation": "health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
-            "operation": "health_check",
-            "status": "mandatory_not_verified",
-        },
-        {
-            "adapter": "UniProtAdapter",
-            "case": "normal_timeout_cancellation",
-            "follow_up": consumer,
-            "missing_evidence": "Existing tests replace fetch methods. Transport was not executed.",
-            "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
-            "operation": "fetch",
-            "status": "mandatory_not_verified",
-        },
-        {
-            "adapter": "UniProtAdapter",
-            "case": "normal_timeout_cancellation",
-            "follow_up": consumer,
-            "missing_evidence": "The health probe helper was not executed.",
-            "obligation": "health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
-            "operation": "health_check",
-            "status": "mandatory_not_verified",
-        },
-        {
-            "adapter": "UniProtAdapter",
-            "case": "resource_release",
-            "follow_up": consumer,
-            "missing_evidence": "aclose is the BaseHttpAdapter no-op. The fixture recorded exit_calls == 0.",
-            "obligation": "DataSourcePort requires release of the acquired client. The observed no-op does not release the injected client.",
-            "operation": "aclose",
-            "status": "mandatory_not_verified",
-        },
-        {
-            "adapter": "PubChemAdapter",
-            "case": "normal_timeout_cancellation",
-            "follow_up": consumer,
-            "missing_evidence": "pubchempy transport was not executed.",
-            "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
-            "operation": "fetch",
-            "status": "mandatory_not_verified",
-        },
-        {
-            "adapter": "PubChemAdapter",
-            "case": "normal_timeout_cancellation",
-            "follow_up": consumer,
-            "missing_evidence": "The pubchempy probe was not executed.",
-            "obligation": "health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
-            "operation": "health_check",
-            "status": "mandatory_not_verified",
-        },
+        _cell(
+            adapter="ChemblAdapter",
+            operation="health_check",
+            case="normal_timeout_cancellation",
+            obligation="health_check returns a non-HEALTHY status when the probe raises a documented health error, and CancelledError propagates.",
+            missing_evidence="The health probe was not executed against a controlled client.",
+            inside_12108=health_inside,
+            outside_12108=health_outside,
+        ),
+        _cell(
+            adapter="ChemblAdapter",
+            operation="aclose",
+            case="resource_release",
+            obligation="DataSourcePort requires release of the acquired client. The observed no-op does not release the injected client.",
+            missing_evidence="aclose is the BaseHttpAdapter no-op. The fixture recorded exit_calls == 0.",
+            inside_12108=close_inside,
+            outside_12108=None,
+        ),
+        _cell(
+            adapter="PubMedAdapter",
+            operation="fetch",
+            case="normal_timeout_cancellation",
+            obligation="fetch yields the scripted records on success and propagates timeout and cancellation.",
+            missing_evidence="fetch transport was not executed.",
+            inside_12108=fetch_inside,
+            outside_12108=fetch_outside,
+        ),
+        _cell(
+            adapter="SemanticScholarAdapter",
+            operation="fetch",
+            case="normal_timeout_cancellation",
+            obligation="fetch yields the scripted records on success and propagates timeout and cancellation.",
+            missing_evidence="fetch transport was not executed.",
+            inside_12108=fetch_inside,
+            outside_12108=fetch_outside,
+        ),
+        _cell(
+            adapter="OpenAlexAdapter",
+            operation="fetch",
+            case="normal_timeout_cancellation",
+            obligation="fetch yields the scripted records on success and propagates timeout and cancellation.",
+            missing_evidence="Existing tests replace fetch methods. This map does not drive the transport.",
+            inside_12108=fetch_inside,
+            outside_12108=fetch_outside,
+        ),
+        _cell(
+            adapter="OpenAlexAdapter",
+            operation="health_check",
+            case="normal_timeout_cancellation",
+            obligation="health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
+            missing_evidence="The health probe helper was not executed.",
+            inside_12108=health_inside,
+            outside_12108=health_outside,
+        ),
+        _cell(
+            adapter="CrossRefAdapter",
+            operation="fetch",
+            case="normal_timeout_cancellation",
+            obligation="fetch yields the scripted records on success and propagates timeout and cancellation.",
+            missing_evidence="fetch transport was not executed.",
+            inside_12108=fetch_inside,
+            outside_12108=fetch_outside,
+        ),
+        _cell(
+            adapter="CrossRefAdapter",
+            operation="health_check",
+            case="normal_timeout_cancellation",
+            obligation="health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
+            missing_evidence="The health probe helper was not executed.",
+            inside_12108=health_inside,
+            outside_12108=health_outside,
+        ),
+        _cell(
+            adapter="UniProtAdapter",
+            operation="fetch",
+            case="normal_timeout_cancellation",
+            obligation="fetch yields the scripted records on success and propagates timeout and cancellation.",
+            missing_evidence="Existing tests replace fetch methods. Transport was not executed.",
+            inside_12108=fetch_inside,
+            outside_12108=fetch_outside,
+        ),
+        _cell(
+            adapter="UniProtAdapter",
+            operation="health_check",
+            case="normal_timeout_cancellation",
+            obligation="health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
+            missing_evidence="The health probe helper was not executed.",
+            inside_12108=health_inside,
+            outside_12108=health_outside,
+        ),
+        _cell(
+            adapter="UniProtAdapter",
+            operation="aclose",
+            case="resource_release",
+            obligation="DataSourcePort requires release of the acquired client. The observed no-op does not release the injected client.",
+            missing_evidence="aclose is the BaseHttpAdapter no-op. The fixture recorded exit_calls == 0.",
+            inside_12108=close_inside,
+            outside_12108=None,
+        ),
+        _cell(
+            adapter="PubChemAdapter",
+            operation="fetch",
+            case="normal_timeout_cancellation",
+            obligation="fetch yields the scripted records on success and propagates timeout and cancellation.",
+            missing_evidence="pubchempy transport was not executed.",
+            inside_12108=fetch_inside,
+            outside_12108=fetch_outside,
+        ),
+        _cell(
+            adapter="PubChemAdapter",
+            operation="health_check",
+            case="normal_timeout_cancellation",
+            obligation="health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
+            missing_evidence="The pubchempy probe was not executed.",
+            inside_12108=health_inside,
+            outside_12108=health_outside,
+        ),
     ]
     return {
         "behavior_matrix_acceptance": "NOT_ACCEPTED",
         "behavior_matrix_sha256": "7f33f61af00f7b49df8a37991537fd56aba0eec99be57bb5346e9e1d2fcd5bda",
         "does_not_replace_universe": True,
         "duplicates_r08_or_r09_work": False,
+        "issue_12108_scope_check": (
+            "#12108 covers HTTP client policy, timeout, cancellation, generator close, "
+            "executor lifecycle, and shared-client ownership. It does not accept provider payload parsing "
+            "or HealthStatus mapping. R07 does not implement those #12108 tests."
+        ),
         "mandatory_not_verified_count": len(rows),
         "r08_http_lifecycle": consumer,
         "r09_storage_surface": storage,
         "rows": rows,
-        "schema_version": 1,
+        "schema_version": 2,
         "storage_note": (
             "None of these thirteen obligations is a storage contract. "
-            "Storage remains the existing r09-storage-surface-inventory.json input to #12109. "
-            "R07 does not add storage conformance tests."
+            "inside_12109 is false on every row. "
+            "Storage remains the existing r09-storage-surface-inventory.json input to #12109."
         ),
         "universe_denominator_unchanged": 2046,
     }
@@ -394,9 +440,12 @@ def _criteria(document: dict, rows: list[dict], followups: dict) -> list[dict]:
         {
             "criterion": "eight-provider behavior matrix does not replace the universe and its open cells stay follow-up",
             "evidence": {
+                "inside_12109_count": sum(
+                    1 for row in followups["rows"] if row["inside_12109"]
+                ),
                 "mandatory_not_verified": followups["mandatory_not_verified_count"],
                 "matrix_acceptance": followups["behavior_matrix_acceptance"],
-                "r08": followups["r08_http_lifecycle"],
+                "r08_scope": followups["issue_12108_scope_check"],
                 "r09": followups["r09_storage_surface"],
             },
             "verdict": "PASS",
@@ -433,6 +482,8 @@ def main() -> None:
     }
     if keys != matrix_keys:
         raise SystemExit("follow-up keys do not match the frozen matrix")
+    if any(row["inside_12109"] or not row["inside_12108"] for row in followups["rows"]):
+        raise SystemExit("follow-up scope drifted from the #12108 check")
     index = _relationship_index(rows)
     decision = _tracking_decision(rows)
     criteria = _criteria(document, rows, followups)
