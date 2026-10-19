@@ -143,6 +143,53 @@ def _tracking_decision(rows: list[dict]) -> dict:
     }
 
 
+def _tracking() -> dict[str, object]:
+    return {
+        "basis": (
+            "docs/02-architecture/diagrams/descriptions/architecture/"
+            "05b-adapter-hierarchy-providers.md header Owner: BioETL Team"
+        ),
+        "not_semantic_owner": True,
+        "role": "BioETL Team",
+        "type": "tracking_responsibility",
+    }
+
+
+def _outside(adapter: str, kind: str) -> dict[str, object]:
+    if kind == "fetch":
+        follow_id = f"R07-FU-FETCH-PAYLOAD-{adapter}"
+        remainder = "Successful materialization of one scripted provider record."
+        criterion = (
+            f"An in-process fixture with no live network asserts that {adapter}.fetch "
+            "yields one scripted provider record. Timeout and cancellation stay with #12108."
+        )
+    elif kind == "health":
+        follow_id = f"R07-FU-HEALTH-STATUS-{adapter}"
+        remainder = "HealthStatus mapping for a successful probe and a documented probe error."
+        criterion = (
+            f"An in-process fixture with no live network asserts that {adapter}.health_check "
+            "returns HEALTHY for a successful controlled probe and a non-HEALTHY status when "
+            "the probe raises a documented health error. Timeout and cancellation stay with #12108."
+        )
+    else:
+        raise ValueError(kind)
+    return {
+        "closure_criterion": criterion,
+        "follow_up": {
+            "assigned_issue": None,
+            "closes_with_12107": False,
+            "id": follow_id,
+            "kind": "durable_audit_follow_up",
+            "not_issue_12108": True,
+            "not_issue_12109": True,
+            "record": "reports/audit-runs/12107-r07/behavior-followups.json",
+            "survives_12107_closure": True,
+        },
+        "remainder": remainder,
+        "tracking_responsibility": _tracking(),
+    }
+
+
 def _cell(
     *,
     adapter: str,
@@ -151,8 +198,8 @@ def _cell(
     obligation: str,
     missing_evidence: str,
     inside_12108: str,
-    outside_12108: str | None,
-) -> dict:
+    outside_kind: str | None,
+) -> dict[str, object]:
     return {
         "adapter": adapter,
         "case": case,
@@ -161,7 +208,7 @@ def _cell(
         "missing_evidence": missing_evidence,
         "obligation": obligation,
         "operation": operation,
-        "outside_12108": outside_12108,
+        "outside_12108": None if outside_kind is None else _outside(adapter, outside_kind),
         "status": "mandatory_not_verified",
     }
 
@@ -172,16 +219,10 @@ def _followups() -> dict:
     fetch_inside = (
         "Timeout propagation and cancellation propagation, including early close of the fetch generator."
     )
-    fetch_outside = (
-        "Successful provider-record materialization stays R07 missing evidence. "
-        "#12108 accepts client policy and lifecycle, not payload parsing."
-    )
-    health_inside = (
-        "Timeout and cancellation of the probe. PubChem uses the sync_base executor named by #12108."
-    )
-    health_outside = (
-        "Mapping a successful probe to HEALTHY, or a caught probe error to a non-HEALTHY status, "
-        "stays R07 missing evidence. That status contract is not an #12108 acceptance row."
+    health_inside = "Timeout and cancellation of the HTTP probe."
+    pubchem_health_inside = (
+        "Timeout and cancellation of the pubchempy probe. "
+        "PubChem uses the sync_base executor named by #12108."
     )
     close_inside = (
         "Shared or nested client ownership and close order. "
@@ -195,7 +236,7 @@ def _followups() -> dict:
             obligation="health_check returns a non-HEALTHY status when the probe raises a documented health error, and CancelledError propagates.",
             missing_evidence="The health probe was not executed against a controlled client.",
             inside_12108=health_inside,
-            outside_12108=health_outside,
+            outside_kind="health",
         ),
         _cell(
             adapter="ChemblAdapter",
@@ -204,7 +245,7 @@ def _followups() -> dict:
             obligation="DataSourcePort requires release of the acquired client. The observed no-op does not release the injected client.",
             missing_evidence="aclose is the BaseHttpAdapter no-op. The fixture recorded exit_calls == 0.",
             inside_12108=close_inside,
-            outside_12108=None,
+            outside_kind=None,
         ),
         _cell(
             adapter="PubMedAdapter",
@@ -213,7 +254,7 @@ def _followups() -> dict:
             obligation="fetch yields the scripted records on success and propagates timeout and cancellation.",
             missing_evidence="fetch transport was not executed.",
             inside_12108=fetch_inside,
-            outside_12108=fetch_outside,
+            outside_kind="fetch",
         ),
         _cell(
             adapter="SemanticScholarAdapter",
@@ -222,7 +263,7 @@ def _followups() -> dict:
             obligation="fetch yields the scripted records on success and propagates timeout and cancellation.",
             missing_evidence="fetch transport was not executed.",
             inside_12108=fetch_inside,
-            outside_12108=fetch_outside,
+            outside_kind="fetch",
         ),
         _cell(
             adapter="OpenAlexAdapter",
@@ -231,7 +272,7 @@ def _followups() -> dict:
             obligation="fetch yields the scripted records on success and propagates timeout and cancellation.",
             missing_evidence="Existing tests replace fetch methods. This map does not drive the transport.",
             inside_12108=fetch_inside,
-            outside_12108=fetch_outside,
+            outside_kind="fetch",
         ),
         _cell(
             adapter="OpenAlexAdapter",
@@ -240,7 +281,7 @@ def _followups() -> dict:
             obligation="health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
             missing_evidence="The health probe helper was not executed.",
             inside_12108=health_inside,
-            outside_12108=health_outside,
+            outside_kind="health",
         ),
         _cell(
             adapter="CrossRefAdapter",
@@ -249,7 +290,7 @@ def _followups() -> dict:
             obligation="fetch yields the scripted records on success and propagates timeout and cancellation.",
             missing_evidence="fetch transport was not executed.",
             inside_12108=fetch_inside,
-            outside_12108=fetch_outside,
+            outside_kind="fetch",
         ),
         _cell(
             adapter="CrossRefAdapter",
@@ -258,7 +299,7 @@ def _followups() -> dict:
             obligation="health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
             missing_evidence="The health probe helper was not executed.",
             inside_12108=health_inside,
-            outside_12108=health_outside,
+            outside_kind="health",
         ),
         _cell(
             adapter="UniProtAdapter",
@@ -267,7 +308,7 @@ def _followups() -> dict:
             obligation="fetch yields the scripted records on success and propagates timeout and cancellation.",
             missing_evidence="Existing tests replace fetch methods. Transport was not executed.",
             inside_12108=fetch_inside,
-            outside_12108=fetch_outside,
+            outside_kind="fetch",
         ),
         _cell(
             adapter="UniProtAdapter",
@@ -276,7 +317,7 @@ def _followups() -> dict:
             obligation="health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
             missing_evidence="The health probe helper was not executed.",
             inside_12108=health_inside,
-            outside_12108=health_outside,
+            outside_kind="health",
         ),
         _cell(
             adapter="UniProtAdapter",
@@ -285,7 +326,7 @@ def _followups() -> dict:
             obligation="DataSourcePort requires release of the acquired client. The observed no-op does not release the injected client.",
             missing_evidence="aclose is the BaseHttpAdapter no-op. The fixture recorded exit_calls == 0.",
             inside_12108=close_inside,
-            outside_12108=None,
+            outside_kind=None,
         ),
         _cell(
             adapter="PubChemAdapter",
@@ -294,7 +335,7 @@ def _followups() -> dict:
             obligation="fetch yields the scripted records on success and propagates timeout and cancellation.",
             missing_evidence="pubchempy transport was not executed.",
             inside_12108=fetch_inside,
-            outside_12108=fetch_outside,
+            outside_kind="fetch",
         ),
         _cell(
             adapter="PubChemAdapter",
@@ -302,8 +343,8 @@ def _followups() -> dict:
             case="normal_timeout_cancellation",
             obligation="health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
             missing_evidence="The pubchempy probe was not executed.",
-            inside_12108=health_inside,
-            outside_12108=health_outside,
+            inside_12108=pubchem_health_inside,
+            outside_kind="health",
         ),
     ]
     return {
@@ -320,7 +361,11 @@ def _followups() -> dict:
         "r08_http_lifecycle": consumer,
         "r09_storage_surface": storage,
         "rows": rows,
-        "schema_version": 2,
+        "outside_closure_note": (
+            "Acceptance or closure of #12107 does not close outside_12108 follow-up ids. "
+            "Each id stays open until its closure_criterion is met."
+        ),
+        "schema_version": 3,
         "storage_note": (
             "None of these thirteen obligations is a storage contract. "
             "inside_12109 is false on every row. "
@@ -484,6 +529,19 @@ def main() -> None:
         raise SystemExit("follow-up keys do not match the frozen matrix")
     if any(row["inside_12109"] or not row["inside_12108"] for row in followups["rows"]):
         raise SystemExit("follow-up scope drifted from the #12108 check")
+    for row in followups["rows"]:
+        outside = row["outside_12108"]
+        if outside is None:
+            continue
+        follow_up = outside["follow_up"]
+        if not outside["closure_criterion"] or not outside["tracking_responsibility"]:
+            raise SystemExit("outside remainder lacks closure or tracking")
+        if follow_up["closes_with_12107"] or not follow_up["survives_12107_closure"]:
+            raise SystemExit("outside remainder would close with the map")
+        if follow_up["not_issue_12108"] is not True or follow_up["not_issue_12109"] is not True:
+            raise SystemExit("outside remainder was assigned to R08 or R09")
+        if outside["tracking_responsibility"]["not_semantic_owner"] is not True:
+            raise SystemExit("tracking responsibility was recorded as semantic ownership")
     index = _relationship_index(rows)
     decision = _tracking_decision(rows)
     criteria = _criteria(document, rows, followups)

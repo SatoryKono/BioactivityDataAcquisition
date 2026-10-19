@@ -1,12 +1,12 @@
 {
-  "based_on_commit": "91f3791066aebad1b8516969179da5e947e8f430",
-  "based_on_tree": "f18ff73a25a804d596818c4fd363b0f8eaeb3388",
-  "commit_note": "Hashes are the post-review kit. The commit that records this manifest is created after the file is written.",
+  "based_on_commit": "6b1b10a7bb5b688560dc0c799bc09be3c1c163d1",
+  "based_on_tree": "2140554cf887b81ed7849d459f57651873953c12",
+  "commit_note": "Post-review remediation of outside_12108 follow-ups. The commit that adds this manifest follows 6b1b10a7.",
   "files": [
     {
-      "bytes": 21868,
+      "bytes": 24432,
       "path": "reports/audit-runs/12107-r07/build_map_acceptance.py",
-      "sha256": "e67a08f0b43d08a6c4acf042b5b6a250848a98e4fb6e5a5d3043ece4b9bb3a6b"
+      "sha256": "209a93cfaad9a3374fcb9d0b6fa39b5f5d17d7115886aea00206c5b728aa8934"
     },
     {
       "bytes": 6844,
@@ -19,9 +19,9 @@
       "sha256": "731537b38c9425b9b6b3b324c934d59ed5e417a98f4c890a7247c4e6fea1a358"
     },
     {
-      "bytes": 9768,
+      "bytes": 19365,
       "path": "reports/audit-runs/12107-r07/behavior-followups.json",
-      "sha256": "aaa1dca4c623a9424b37d089b5b9043c597410d38ef11ed18b2a033626ca6d7b"
+      "sha256": "a31f45ef37b22f59a3394e24628f31f740b59d73010801a3111a747aac017cb3"
     },
     {
       "bytes": 204832,
@@ -131,6 +131,7 @@
   ],
   "frozen_map_sha256": "6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c",
   "historical_receipt_sha256": "1780547842c0057a68b90f39139ae7e1610d07049314b43a7f7ec8b6ae30abcc",
-  "reviewed_commit": "91f3791066aebad1b8516969179da5e947e8f430",
-  "schema_version": 2
+  "prior_manifest_sha256": "c45e740263948d2c983e0fbcf067ef815bde2e25667f7256d33be537dfaa965e",
+  "reviewed_delta_parent": "91f3791066aebad1b8516969179da5e947e8f430",
+  "schema_version": 3
 }
