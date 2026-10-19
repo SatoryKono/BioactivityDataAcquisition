@@ -74,9 +74,8 @@ def record_workflow_started(
         status="running",
         updated_at=started_entry.occurred_at,
         last_event_id=started_entry.entry_id,
-        repair_required=bool(ambiguous) or any(
-            step.commit_pending_confirmation for step in context.state.steps
-        ),
+        repair_required=bool(ambiguous)
+        or any(step.commit_pending_confirmation for step in context.state.steps),
         repair_hint=context.state.repair_hint if ambiguous else None,
         ambiguous_step_ids=ambiguous,
     )
