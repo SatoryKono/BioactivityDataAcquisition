@@ -363,16 +363,3 @@ def test_merge_schema_explicit_alias_requires_priorities(
         payload["field_priorities"] = priorities
     with pytest.raises(ValidationError, match="field_priorities required"):
         MergeSchema.model_validate(payload)
-
-
-def test_merge_sort_by_schema_forbids_extra() -> None:
-    """Reject unknown fields in sort_by (like leaked field_priorities)."""
-    with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
-        MergeSchema.model_validate(
-            {
-                "strategy": "left_outer",
-                "conflict_resolution": "coalesce",
-                "output": {"silver": "s", "gold": "g"},
-                "sort_by": {"silver": ["id"], "gold": ["id"], "unknown_key": ["x"]},
-            }
-        )

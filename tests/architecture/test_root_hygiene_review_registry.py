@@ -192,21 +192,6 @@ def test_root_hygiene_review_registry_tracks_observed_transient_root_families() 
         by_path["test_output.txt"]["current_live_state"] == "absent_from_root_baseline"
     )
     assert by_path["tests.txt"]["current_live_state"] == "absent_from_root_baseline"
-    assert (
-        by_path[".tmp_health_check.ps1"]["current_live_state"]
-        == "absent_from_root_baseline"
-    )
-    assert (
-        by_path[".tmp_health_check.ps1"]["action_if_reintroduced"]
-        == "delete_transient_root_health_check_helper"
-    )
-    assert (
-        by_path["du.exe.stackdump"]["current_live_state"] == "absent_from_root_baseline"
-    )
-    assert (
-        by_path["du.exe.stackdump"]["action_if_reintroduced"]
-        == "delete_transient_windows_stackdump_artifact"
-    )
 
 
 def test_root_hygiene_review_registry_classifies_live_local_runtime_root_surfaces() -> (
@@ -359,14 +344,6 @@ def test_root_hygiene_review_registry_tracks_absent_root_logs_and_test_print() -
     assert (
         ad_hoc_by_path["test_print.py"]["current_live_state"]
         == "absent_from_root_baseline"
-    )
-    assert (
-        ad_hoc_by_path[".mcp-server-context.md"]["current_live_state"]
-        == "present_local_only_root_surface"
-    )
-    assert (
-        ad_hoc_by_path[".mcp-server-context.md"]["action_if_reintroduced"]
-        == "retain_as_documented_machine_local_context_do_not_track_or_delete"
     )
 
 

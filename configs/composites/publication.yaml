@@ -327,8 +327,6 @@ composite:
     output:
       silver: data/output/silver/composite/publication
       gold: data/output/gold/composite/publication
-        # Field-level priority overrides (when using explicit_rules)
-        # Maps field name to ordered list of source preferences
     sort_by:
       silver:
         - entity_id
@@ -337,7 +335,9 @@ composite:
         - entity_id
         - publication_id
 
+        # Field-level priority overrides (when using explicit_rules)
 
+        # Maps field name to ordered list of source preferences
 
     column_groups:
             # === System / ETL metadata (MUST be first) ===

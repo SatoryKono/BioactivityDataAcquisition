@@ -6,8 +6,8 @@ last_verified: "2026-08-05"
 current_live_root_baseline:
   tracked_root_audit_status: pass
   strict_untracked_root_audit_status: pass
-  tracked_root_file_count: 37
-  allowlist_entry_count: 37
+  tracked_root_file_count: 38
+  allowlist_entry_count: 38
   verification_command: >-
     .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py
     --strict-untracked
@@ -173,19 +173,11 @@ review_lanes:
     classification: review_required
     scope: observed transient root helpers, raw test dumps, and reviewed root artifact routing
     verification:
-      - git ls-files .coverage coverage.xml mcp-shell.log .tmp_health_check.ps1 du.exe.stackdump _tmp_panel_inventory.mjs _tmp_panel_inventory.ps1 temp_analyze_conflicting.py temp_get_hash.py test_output.txt tests.txt logs artifacts
+      - git ls-files .coverage coverage.xml mcp-shell.log _tmp_panel_inventory.mjs _tmp_panel_inventory.ps1 temp_analyze_conflicting.py temp_get_hash.py test_output.txt tests.txt logs artifacts
       - git check-ignore -v .coverage coverage.xml mcp-shell.log
       - rg -n "\\.coverage$|coverage\\.xml|mcp-shell\\.log|_tmp_panel_inventory\\.(mjs|ps1)|temp_analyze_conflicting\\.py|temp_get_hash\\.py|test_output\\.txt|tests\\.txt|logs/|reports/logs/|artifacts/debug_exports/" .github docs scripts tests configs README.md Makefile pyproject.toml .gitignore
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
     candidates:
-      - path: .tmp_health_check.ps1
-        current_live_state: absent_from_root_baseline
-        canonical_path: null
-        action_if_reintroduced: delete_transient_root_health_check_helper
-      - path: du.exe.stackdump
-        current_live_state: absent_from_root_baseline
-        canonical_path: null
-        action_if_reintroduced: delete_transient_windows_stackdump_artifact
       - path: artifacts
         current_live_state: present_local_only_root_surface
         canonical_path: null
@@ -539,13 +531,9 @@ review_lanes:
     classification: review_required
     scope: non-canonical root notes, diagnostics, and ad-hoc tests
     verification:
-      - git ls-files .mcp-server-context.md AGENT.md QUICK_START.md MCP_SETUP.md dashboard-audit-report.md query_test_docs_memory.js seed_test_docs_memory.js test_neo4j_memory.py Dockerfile entrypoint.sh requirements.txt conftest.py
+      - git ls-files AGENT.md QUICK_START.md MCP_SETUP.md dashboard-audit-report.md query_test_docs_memory.js seed_test_docs_memory.js test_neo4j_memory.py Dockerfile entrypoint.sh requirements.txt conftest.py
       - rg -n "AGENT\\.md|QUICK_START\\.md|MCP_SETUP\\.md|dashboard-audit-report\\.md|query_test_docs_memory|seed_test_docs_memory|test_neo4j_memory|Dockerfile|requirements\\.txt|tests/conftest\\.py|conftest\\.py" .github docs scripts tests configs README.md Makefile pyproject.toml package.json
     candidates:
-      - path: .mcp-server-context.md
-        current_live_state: present_local_only_root_surface
-        canonical_path: null
-        action_if_reintroduced: retain_as_documented_machine_local_context_do_not_track_or_delete
       - path: AGENT.md
         current_live_state: absent_from_root_baseline
         canonical_path: AGENTS.md

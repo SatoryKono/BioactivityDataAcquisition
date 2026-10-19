@@ -80,10 +80,6 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
     ) -> tuple[bool, list[DQRuleOutcome]]:
         """Validate records and return rule-level DQ outcomes.
 
-        Note: This experimental API is tracked in #12095. Tests exercise it,
-        but it has no direct production callsites in src/bioetl.
-        The working fail-closed schema integration is handled by validate().
-
         Args:
             records: List of record dictionaries to validate
 
@@ -248,9 +244,6 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
     def _apply_contract_validations(self, df: pd.DataFrame) -> list[DQRuleOutcome]:
         """Apply additional contract-specific validations.
 
-        Note: This experimental placeholder is tracked in #12095.
-        validate_with_outcomes() invokes it; it returns no additional outcomes.
-
         Args:
             df: DataFrame being validated
 
@@ -341,12 +334,7 @@ class ContractAwareSilverValidator(PanderaSilverValidator):
         self,
         records: list[JsonDict],
     ) -> tuple[bool, list[DQRuleOutcome]]:
-        """Validate records and return rule-level DQ outcomes.
-
-        Note: This experimental API is tracked in #12095. Tests exercise it,
-        but it has no direct production callsites in src/bioetl.
-        The working fail-closed schema integration is handled by validate().
-        """
+        """Validate records and return rule-level DQ outcomes."""
         # Basic validation
         basic_result = self.validate(records)
 

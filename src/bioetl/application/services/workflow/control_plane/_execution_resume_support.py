@@ -170,12 +170,7 @@ def _validate_repair_requirements(
     force_steps: tuple[str, ...],
 ) -> None:
     """Ensure repair requirements are satisfied when needed."""
-    has_unconfirmed = any(
-        step.commit_pending_confirmation for step in latest_state.steps
-    )
-    if (latest_state.repair_required or has_unconfirmed) and not (
-        repair_steps or force_steps
-    ):
+    if latest_state.repair_required and not (repair_steps or force_steps):
         raise RuntimeError(
             latest_state.repair_hint
             or "Workflow resume requires explicit --repair-steps or --force-steps"

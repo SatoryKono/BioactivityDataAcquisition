@@ -42,10 +42,8 @@ SAFE_ROOT_LOCAL_PATHS: frozenset[str] = frozenset(
         ".mypy_cache",
         ".pytest_cache",
         ".ruff_cache",
-        ".tmp_health_check.ps1",
         ".xml",
         "coverage.xml",
-        "du.exe.stackdump",
         "mcp-shell.log",
         # Windows device-name root clutter (registry: root_transient_helpers_and_outputs).
         # Prefer shell `rm -f ./nul` or extended \\?\ paths when Path.unlink hits WinError 5.
@@ -70,14 +68,6 @@ ALLOWED_LANES: frozenset[str] = frozenset(
     {
         "local_runtime_root_dirs",
         "root_transient_helpers_and_outputs",
-    }
-)
-# absent_from_root_baseline stays valid on a clean CI tree. Exact names on
-# SAFE_ROOT_LOCAL_PATHS must still be deletable when those files reappear.
-CLEANUP_ELIGIBLE_LIVE_STATES: frozenset[str] = frozenset(
-    {
-        "absent_from_root_baseline",
-        "present_local_only_root_surface",
     }
 )
 
@@ -187,7 +177,7 @@ def _registry_row_is_cleanup_eligible(
         return None
     if raw_path in SECURITY_ROOT_PATHS or "/" in raw_path:
         return None
-    if live_state not in CLEANUP_ELIGIBLE_LIVE_STATES:
+    if live_state != "present_local_only_root_surface":
         return None
     if is_within_blocked_cleanup_zone(raw_path, blocked_cleanup_paths):
         return None
@@ -276,10 +266,6 @@ def _candidate_category(path: str) -> str:
         return "coverage"
     if path == "mcp-shell.log":
         return "local_logs"
-    if path == ".tmp_health_check.ps1":
-        return "transient_helper"
-    if path == "du.exe.stackdump":
-        return "crash_dump"
     if _is_windows_reserved_root_name(path):
         return "windows_device_name_clutter"
     if path == ".xml" or path.startswith("Test Results - Pytest_All."):

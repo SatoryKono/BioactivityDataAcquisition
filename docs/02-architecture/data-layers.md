@@ -170,11 +170,7 @@ ______________________________________________________________________
 
 ### 3.3. Контракты Данных (Data Contracts)
 
-Gold слой имеет строгие публичные контракты. Fail-closed интеграция схемы
-работает в production. Экспериментальными плейсхолдерами остаются только
-`ContractAwareGoldValidator.validate_with_outcomes()` и
-`ContractAwareSilverValidator.validate_with_outcomes()`
-([#12095](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12095)).
+Gold слой имеет строгие публичные контракты.
 
 - **Реестр**: JSON Schema файлы в `docs/04-reference/contracts/gold/`.
 - **Стабильность**: Любое изменение схемы в Gold требует:

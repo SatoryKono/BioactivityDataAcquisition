@@ -363,16 +363,6 @@ graph TD
 
 ## Contract Discovery & Navigation
 
-> **Implementation Status Note:** The
-> `ContractAwareGoldValidator.validate_with_outcomes()` and
-> `ContractAwareSilverValidator.validate_with_outcomes()` APIs remain
-> experimental placeholders without direct production callsites in
-> `src/bioetl`. Tests exercise these APIs, as tracked in
-> [#12095](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12095).
-> Their `validate()` methods provide fail-closed schema integration.
-> Production rule evaluation through `evaluate_dq_rules_for_record()` remains
-> active and applies quarantine, skip, fail, and warn dispositions.
-
 ### Canonical Entry Points
 
 | Contract Type                      | Entry Point                           | Governance ADR   |

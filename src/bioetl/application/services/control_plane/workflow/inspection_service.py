@@ -86,8 +86,7 @@ class WorkflowInspectionService:
             completed_at=state.completed_at,
             last_error_type=state.last_error_type,
             last_error_message=state.last_error_message,
-            repair_required=state.repair_required
-            or any(step.commit_pending_confirmation for step in state.steps),
+            repair_required=state.repair_required,
             repair_hint=state.repair_hint,
             ambiguous_step_ids=state.ambiguous_step_ids,
             ledger_entry_count=len(self.ledger_port.list_entries(state.manifest_id)),
