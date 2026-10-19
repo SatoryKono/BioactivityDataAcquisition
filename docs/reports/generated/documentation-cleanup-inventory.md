@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3824 |
-| Tracked doc-like files | 3824 |
+| Doc-like files | 3823 |
+| Tracked doc-like files | 3823 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 78 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3824 |
+| tracked | 3823 |
 
 ## Lifecycle Counts
 
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 130 |
+| working_report | 129 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -55,7 +55,7 @@
 | Archived | 1550 |
 | Canonical | 75 |
 | Generated | 1062 |
-| Working | 389 |
+| Working | 388 |
 
 ## Surface Families
 
@@ -65,13 +65,13 @@
 | archive | 1550 |
 | canonical | 75 |
 | generated | 1062 |
-| working | 389 |
+| working | 388 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 163 |
+| archive-after-migration | 162 |
 | generate-automatically | 1062 |
 | keep | 2599 |
 
@@ -121,7 +121,6 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | Working | 0 | archive-after-migration |
 | `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
-| `reports/docs-evidence/http-header-audit-and-provenance.md` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/security-ui-final-20261003/bioetl-scenes-app-gates.json` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/security-ui-final-20261003/bioetl-selectorshell-panel-gates.json` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/selector-audit-2026-07-20/selector-evidence.json` | Working | 0 | archive-after-migration |
@@ -159,6 +158,7 @@
 | `reports/quality/coderabbit/20260813/01-scope-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260813/01-scope-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260813/_S01-domain-aggregates.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260813/_S01-domain-registry.txt` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
