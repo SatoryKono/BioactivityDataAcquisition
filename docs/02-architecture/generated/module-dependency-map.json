@@ -1,24 +1,24 @@
 {
   "summary": {
     "scanned_modules": 2581,
-    "total_internal_imports": 8320,
+    "total_internal_imports": 8316,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 329,
     "violations": 0,
-    "source_fingerprint": "a65e34d2820df1b55c6c89b3dc65c32345be286722f84e8254efc38d23b5a903"
+    "source_fingerprint": "e0ced2132ef4b9cb3ac3b4623ffa2440d98e28c097f566fe64627e3145c46ca4"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1631,
+      "imports": 1629,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1105,
+      "imports": 1103,
       "allowed": true
     },
     {
@@ -160,14 +160,14 @@
       "imports": 37
     },
     {
-      "source": "application.composite",
-      "target": "domain.exceptions",
-      "imports": 36
-    },
-    {
       "source": "infrastructure.storage",
       "target": "domain.models",
       "imports": 36
+    },
+    {
+      "source": "application.composite",
+      "target": "domain.exceptions",
+      "imports": 35
     },
     {
       "source": "composition.bootstrap",
