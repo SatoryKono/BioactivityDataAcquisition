@@ -1,0 +1,130 @@
+{
+  "based_on_commit": "9df98e17afa94f3695e61db7a9e31d23eb3867d3",
+  "based_on_tree": "5fa3001a541982372e815caba76a31246d0af8fc",
+  "commit_note": "The commit that adds this manifest is recorded after the manifest is written. This manifest hashes the acceptance inputs and outputs present before that commit.",
+  "files": [
+    {
+      "bytes": 20065,
+      "path": "reports/audit-runs/12107-r07/build_map_acceptance.py",
+      "sha256": "397ec7def82b90782ef7885beaedd63aa4d2900b8e7ff7f42a0de4800a32f15f"
+    },
+    {
+      "bytes": 6640,
+      "path": "reports/audit-runs/12107-r07/map-acceptance-verdict.json",
+      "sha256": "084c80226f4cd3f38d0c94171a01a739b5b9655d59aa9c2ea2c924db3d8f0ab6"
+    },
+    {
+      "bytes": 2161,
+      "path": "reports/audit-runs/12107-r07/tracking-responsibility-decision.json",
+      "sha256": "731537b38c9425b9b6b3b324c934d59ed5e417a98f4c890a7247c4e6fea1a358"
+    },
+    {
+      "bytes": 6727,
+      "path": "reports/audit-runs/12107-r07/behavior-followups.json",
+      "sha256": "7152eed9db4e9bb2f9292150c9f86c579cb84987219cd8eba4cc0320713d1d2b"
+    },
+    {
+      "bytes": 204832,
+      "path": "reports/audit-runs/12107-r07/port-relationship-index.json",
+      "sha256": "d7bf3807eea9cd7c1806a7831fed6dd3c0d8705a2159eb1fd4b273089dba972b"
+    },
+    {
+      "bytes": 1550,
+      "path": "reports/audit-runs/12107-r07/owner-decision-package.json",
+      "sha256": "cf0c244e16468ec82bdf0f2f9fa9ce327d10d12075835a311e09c96d48c94b31"
+    },
+    {
+      "bytes": 2681,
+      "path": "reports/audit-runs/12107-r07/telemetry-applicability.json",
+      "sha256": "d9884b14e9fb9bdb956749694a0fc902e79013b0f0c7dde2ca191a46245c619c"
+    },
+    {
+      "bytes": 9867,
+      "path": "reports/audit-runs/12107-r07/behavior-obligation-matrix.json",
+      "sha256": "7f33f61af00f7b49df8a37991537fd56aba0eec99be57bb5346e9e1d2fcd5bda"
+    },
+    {
+      "bytes": 5313223,
+      "path": "reports/audit-runs/12107-r07/adapter-owner-map.json",
+      "sha256": "6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c"
+    },
+    {
+      "bytes": 26587,
+      "path": "reports/audit-runs/12107-r07/acceptance-review.json",
+      "sha256": "4396a3697fc46dfc5b11dea1a69b5bb94fa8452b4d323d926c8daa416f65f148"
+    },
+    {
+      "bytes": 59269,
+      "path": "reports/audit-runs/12107-r07/scan_adapter_owner_map.py",
+      "sha256": "f68322db872ddd102c87fddecedbff9b46206f8d547ed4980b4a1688d25ef730"
+    },
+    {
+      "bytes": 4986,
+      "path": "reports/audit-runs/12107-r07-history/KIT-MANIFEST.json",
+      "sha256": "2b1ef34b058ddcb9a9f81575f3d1dd147f3b515392f9bce8189c41228f503ded"
+    },
+    {
+      "bytes": 4196,
+      "path": "reports/audit-runs/12107-r07-history/KIT-MANIFEST-behavior.json",
+      "sha256": "25302d20e66942452074085df34c6a918950174500d69666c925a10f847879c2"
+    },
+    {
+      "bytes": 33677,
+      "path": "reports/audit-runs/12107-r07/telemetry-historical/squash-provenance.json",
+      "sha256": "1780547842c0057a68b90f39139ae7e1610d07049314b43a7f7ec8b6ae30abcc"
+    },
+    {
+      "bytes": 40919,
+      "path": "reports/audit-runs/12107-r07/telemetry-historical/test_telemetry_baseline.yaml",
+      "sha256": "a5fc27a42c29cd504cc7d05c6d59ae9e9de50876eccba7b4277bee487ea0d34b"
+    },
+    {
+      "bytes": 8918,
+      "path": "reports/audit-runs/12107-r07/telemetry-historical/test-telemetry-baseline.md",
+      "sha256": "2ed461df19a16fcf90a8363464f498438f0c075e7d24598e3e27d93a051b73c7"
+    },
+    {
+      "bytes": 6994,
+      "path": "reports/audit-runs/12107-r07/telemetry-historical/coverage-summary.json",
+      "sha256": "a64d99432044b6ee4675659e233cc824a4735b15ebe35a2a81220d14f3354bf2"
+    },
+    {
+      "bytes": 23331,
+      "path": "reports/audit-runs/12107-r07/telemetry-historical/slowest-tests.json",
+      "sha256": "ce06af108ee3a69d31cb5ac0adae71f3cce7036305b8e0bce3d103742efc6301"
+    },
+    {
+      "bytes": 53501,
+      "path": "reports/audit-runs/12107-r07/r08-lifecycle-inventory.json",
+      "sha256": "275c10d5e5384a6cd049b66f7be2f301d91a976a40c6fb9bc64c00949af736a3"
+    },
+    {
+      "bytes": 144970,
+      "path": "reports/audit-runs/12107-r07/r09-storage-surface-inventory.json",
+      "sha256": "41c231e6a1d4e4219dba227ab385429f170305684f28e47516689e49cd4324e1"
+    },
+    {
+      "bytes": 188,
+      "path": "reports/audit-runs/12107-r07/logs/pytest-24-on-80dfee.txt",
+      "sha256": "2a6ba78902190edb858ad1f428ddb425b73b444384c853380e45c16a2a04f1a0"
+    },
+    {
+      "bytes": 187,
+      "path": "reports/audit-runs/12107-r07/logs/pytest-8-surface-on-80dfee.txt",
+      "sha256": "719bcf98eda08adbdb7d134d9fabc11d216ef8cd6d4f71023d38431f5141f325"
+    },
+    {
+      "bytes": 14921,
+      "path": "tests/unit/infrastructure/adapters/test_registered_datasource_lifecycle_contracts.py",
+      "sha256": "1fa3906d5ae022b38dbf8f13724291e38cc3c89d7dfc0cb74e2c2f9356abf981"
+    },
+    {
+      "bytes": 4892,
+      "path": "tests/architecture/test_registered_datasource_port_surface.py",
+      "sha256": "f00fb4776aae23bdf08857f000994b4f10a6ec02b2020eb14590c2b46d0764d4"
+    }
+  ],
+  "frozen_map_sha256": "6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c",
+  "historical_receipt_sha256": "1780547842c0057a68b90f39139ae7e1610d07049314b43a7f7ec8b6ae30abcc",
+  "schema_version": 1
+}

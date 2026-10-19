@@ -1,0 +1,131 @@
+{
+  "behavior_matrix_acceptance": "NOT_ACCEPTED",
+  "behavior_matrix_sha256": "7f33f61af00f7b49df8a37991537fd56aba0eec99be57bb5346e9e1d2fcd5bda",
+  "does_not_replace_universe": true,
+  "duplicates_r08_or_r09_work": false,
+  "mandatory_not_verified_count": 13,
+  "r08_http_lifecycle": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+  "r09_storage_surface": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12109",
+  "rows": [
+    {
+      "adapter": "ChemblAdapter",
+      "case": "normal_timeout_cancellation",
+      "follow_up": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+      "missing_evidence": "The health probe was not executed against a controlled client.",
+      "obligation": "health_check returns a non-HEALTHY status when the probe raises a documented health error, and CancelledError propagates.",
+      "operation": "health_check",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "ChemblAdapter",
+      "case": "resource_release",
+      "follow_up": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+      "missing_evidence": "aclose is the BaseHttpAdapter no-op. The fixture recorded exit_calls == 0.",
+      "obligation": "DataSourcePort requires release of the acquired client. The observed no-op does not release the injected client.",
+      "operation": "aclose",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "PubMedAdapter",
+      "case": "normal_timeout_cancellation",
+      "follow_up": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+      "missing_evidence": "fetch transport was not executed.",
+      "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
+      "operation": "fetch",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "SemanticScholarAdapter",
+      "case": "normal_timeout_cancellation",
+      "follow_up": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+      "missing_evidence": "fetch transport was not executed.",
+      "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
+      "operation": "fetch",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "OpenAlexAdapter",
+      "case": "normal_timeout_cancellation",
+      "follow_up": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+      "missing_evidence": "Existing tests replace fetch methods. This map does not drive the transport.",
+      "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
+      "operation": "fetch",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "OpenAlexAdapter",
+      "case": "normal_timeout_cancellation",
+      "follow_up": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+      "missing_evidence": "The health probe helper was not executed.",
+      "obligation": "health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
+      "operation": "health_check",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "CrossRefAdapter",
+      "case": "normal_timeout_cancellation",
+      "follow_up": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+      "missing_evidence": "fetch transport was not executed.",
+      "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
+      "operation": "fetch",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "CrossRefAdapter",
+      "case": "normal_timeout_cancellation",
+      "follow_up": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+      "missing_evidence": "The health probe helper was not executed.",
+      "obligation": "health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
+      "operation": "health_check",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "UniProtAdapter",
+      "case": "normal_timeout_cancellation",
+      "follow_up": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+      "missing_evidence": "Existing tests replace fetch methods. Transport was not executed.",
+      "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
+      "operation": "fetch",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "UniProtAdapter",
+      "case": "normal_timeout_cancellation",
+      "follow_up": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+      "missing_evidence": "The health probe helper was not executed.",
+      "obligation": "health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
+      "operation": "health_check",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "UniProtAdapter",
+      "case": "resource_release",
+      "follow_up": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+      "missing_evidence": "aclose is the BaseHttpAdapter no-op. The fixture recorded exit_calls == 0.",
+      "obligation": "DataSourcePort requires release of the acquired client. The observed no-op does not release the injected client.",
+      "operation": "aclose",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "PubChemAdapter",
+      "case": "normal_timeout_cancellation",
+      "follow_up": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+      "missing_evidence": "pubchempy transport was not executed.",
+      "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
+      "operation": "fetch",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "PubChemAdapter",
+      "case": "normal_timeout_cancellation",
+      "follow_up": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+      "missing_evidence": "The pubchempy probe was not executed.",
+      "obligation": "health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
+      "operation": "health_check",
+      "status": "mandatory_not_verified"
+    }
+  ],
+  "schema_version": 1,
+  "storage_note": "None of these thirteen obligations is a storage contract. Storage remains the existing r09-storage-surface-inventory.json input to #12109. R07 does not add storage conformance tests.",
+  "universe_denominator_unchanged": 2046
+}
