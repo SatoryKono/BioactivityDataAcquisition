@@ -1,0 +1,1642 @@
+#!/usr/bin/env python3
+"""Report-only R07 universe scan: adapters, factories, callable seams, owners.
+
+This script is an audit method. It is not a quality ratchet, does not write
+``configs/quality/``, and does not change debt budgets.
+
+Usage (from the repository root)::
+
+    .venv/bin/python reports/audit-runs/12107-r07/scan_adapter_owner_map.snapshot
+"""
+
+from __future__ import annotations
+
+import ast
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+from collections import defaultdict
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+SRC_ROOT = PROJECT_ROOT / "src" / "bioetl"
+TEST_ROOT = PROJECT_ROOT / "tests"
+OUT_DIR = PROJECT_ROOT / "reports" / "audit-runs" / "12107-r07"
+SMOKE_SCRIPT = Path(__file__).resolve().parent / "runtime_smoke.snapshot"
+BASELINE_PORTS = PROJECT_ROOT / "reports" / "quality" / "domain-ports-inventory.json"
+BASELINE_COVERAGE = (
+    PROJECT_ROOT / "reports" / "quality" / "port-adapter-factory-coverage.json"
+)
+
+CANDIDATE_ROOTS: tuple[str, ...] = (
+    "src/bioetl/infrastructure/adapters/",
+    "src/bioetl/infrastructure/storage/",
+    "src/bioetl/infrastructure/quarantine/",
+    "src/bioetl/infrastructure/control_plane/",
+    "src/bioetl/infrastructure/checkpoint/",
+    "src/bioetl/infrastructure/observability/",
+    "src/bioetl/infrastructure/time/",
+    "src/bioetl/infrastructure/locking/",
+    "src/bioetl/infrastructure/export/",
+    "src/bioetl/infrastructure/compat/",
+    "src/bioetl/infrastructure/serialization/",
+    "src/bioetl/domain/ports/noop/",
+    "src/bioetl/composition/factories/",
+    "src/bioetl/composition/providers/",
+    "src/bioetl/application/core/data_sources/",
+)
+
+NAME_TOKENS: tuple[str, ...] = (
+    "Adapter",
+    "Client",
+    "Store",
+    "Writer",
+    "Reader",
+    "Factory",
+    "Registry",
+    "Clock",
+    "Lock",
+)
+
+LIFECYCLE_METHODS = frozenset(
+    {
+        "close",
+        "aclose",
+        "shutdown",
+        "start",
+        "stop",
+        "connect",
+        "disconnect",
+        "__enter__",
+        "__exit__",
+        "__aenter__",
+        "__aexit__",
+    }
+)
+CONTRACT_DUNDERS = frozenset(
+    {"__enter__", "__exit__", "__aenter__", "__aexit__", "__call__"}
+)
+WEAK_MEMBER_NAMES = frozenset(
+    {
+        "close",
+        "read",
+        "write",
+        "get",
+        "set",
+        "run",
+        "start",
+        "stop",
+        "flush",
+        "exists",
+        "open",
+        "name",
+        "id",
+        "keys",
+        "items",
+        "update",
+        "clear",
+        "append",
+        "add",
+        "remove",
+        "contains",
+        "configure",
+        "get_config",
+        "__call__",
+        "logger",
+        "load",
+        "metrics",
+        "base_path",
+        "get_source_metadata",
+        "fetch_filtered",
+        "provider_name",
+        "config",
+        "settings",
+        "clock",
+        "now",
+        "bind",
+        "info",
+        "debug",
+        "warning",
+        "error",
+        "health_check",
+        "aclose",
+    }
+)
+VERIFIED_TEST_MARKERS: tuple[str, ...] = (
+    "test_adapter_port_conformance.py",
+    "test_port_contracts",
+    "test_adapter_contracts",
+    "test_registry_contracts",
+    "test_strict_architecture_contracts",
+)
+UNASSIGNED = "unassigned-tracking"
+REVIEW_OWNER = "@SatoryKono"
+VERIFIED_RULE = (
+    "bounded_structural_registration_architecture_assert: complete structural "
+    "or explicit port match, composition/package/runtime reachability, and an "
+    "architecture test function that both names the symbol and contains assert. "
+    "This is not exhaustive semantic conformance."
+)
+
+
+@dataclass
+class ClassInfo:
+    name: str
+    path: str
+    module: str
+    line: int
+    bases: list[str]
+    own_members: set[str]
+    decorators: set[str]
+    is_protocol: bool
+    is_dataclass: bool
+    abstract: bool
+    has_post_init: bool
+    required_collaborators: list[str]
+    hidden_defaults: list[str]
+    resolved_members: set[str] = field(default_factory=set)
+    resolved_bases: list[str] = field(default_factory=list)
+    unresolved_bases: list[str] = field(default_factory=list)
+
+
+@dataclass
+class FuncInfo:
+    name: str
+    path: str
+    module: str
+    line: int
+    returns: list[str]
+    decorators: set[str]
+
+
+def _relative(path: Path) -> str:
+    return path.resolve().relative_to(PROJECT_ROOT.resolve()).as_posix()
+
+
+def _module_name(path: str) -> str:
+    relative = path[len("src/") :] if path.startswith("src/") else path
+    if relative.endswith("/__init__.py"):
+        relative = relative[: -len("/__init__.py")]
+    elif relative.endswith(".py"):
+        relative = relative[: -len(".py")]
+    return relative.replace("/", ".")
+
+
+def _decorator_name(node: ast.expr) -> str:
+    current = node.func if isinstance(node, ast.Call) else node
+    if isinstance(current, ast.Name):
+        return current.id
+    if isinstance(current, ast.Attribute):
+        return current.attr
+    return ""
+
+
+def _base_name(node: ast.expr) -> str:
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        return node.attr
+    if isinstance(node, ast.Subscript):
+        return _base_name(node.value)
+    return ""
+
+
+def _annotation_names(node: ast.AST | None) -> list[str]:
+    if node is None:
+        return []
+    names: list[str] = []
+    for child in ast.walk(node):
+        if isinstance(child, ast.Name):
+            names.append(child.id)
+        elif isinstance(child, ast.Attribute):
+            names.append(child.attr)
+    return names
+
+
+def _is_member_name(name: str) -> bool:
+    if name in CONTRACT_DUNDERS or name in LIFECYCLE_METHODS:
+        return True
+    return not name.startswith("_")
+
+
+def _field_kind(call: ast.Call) -> str:
+    keywords = {item.arg: item.value for item in call.keywords if item.arg}
+    if "default" in keywords or "default_factory" in keywords:
+        return "hidden_default"
+    init_node = keywords.get("init")
+    if isinstance(init_node, ast.Constant) and init_node.value is False:
+        return "hidden_default"
+    return "required"
+
+
+def _collaborators(node: ast.ClassDef) -> tuple[list[str], list[str]]:
+    required: list[str] = []
+    hidden: list[str] = []
+    for child in node.body:
+        if isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name):
+            name = child.target.id
+            if name.startswith("_"):
+                continue
+            value = child.value
+            if isinstance(value, ast.Call) and _decorator_name(value) == "field":
+                kind = _field_kind(value)
+            elif value is None:
+                kind = "required"
+            else:
+                kind = "hidden_default"
+            (required if kind == "required" else hidden).append(name)
+        elif isinstance(child, ast.FunctionDef) and child.name == "__init__":
+            args = child.args
+            positional = list(args.args)
+            defaults = list(args.defaults)
+            offset = len(positional) - len(defaults)
+            for index, arg in enumerate(positional):
+                if arg.arg in {"self", "cls"}:
+                    continue
+                if index < offset:
+                    required.append(arg.arg)
+                else:
+                    hidden.append(arg.arg)
+    return sorted(set(required)), sorted(set(hidden))
+
+
+def _own_members(node: ast.ClassDef) -> set[str]:
+    members: set[str] = set()
+    for child in node.body:
+        if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if _is_member_name(child.name):
+                members.add(child.name)
+        elif isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name):
+            if _is_member_name(child.target.id):
+                members.add(child.target.id)
+    return members
+
+
+def _iter_python_files(root: Path) -> list[Path]:
+    return sorted(path for path in root.rglob("*.py") if path.is_file())
+
+
+def _parse_tree(path: Path) -> ast.AST | None:
+    try:
+        return ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    except (OSError, SyntaxError, UnicodeError):
+        return None
+
+
+def _load_json(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"expected object JSON: {path}")
+    return payload
+
+
+def _git(*args: str) -> str:
+    completed = subprocess.run(
+        ["git", *args],
+        cwd=PROJECT_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return completed.stdout.strip()
+
+
+def _atomic_write(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(content, encoding="utf-8")
+    os.replace(temporary, path)
+
+
+def _sha256_text(content: str) -> str:
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+
+class Scanner:
+    def __init__(self) -> None:
+        self.classes: dict[tuple[str, str], ClassInfo] = {}
+        self.functions: list[FuncInfo] = []
+        self.file_names: dict[str, set[str]] = {}
+        self.file_imports: dict[str, dict[str, str]] = {}
+        self.export_keys: dict[str, set[str]] = {}
+        self.getattr_modules: set[str] = set()
+        self.parse_errors: list[str] = []
+        self.provider_links: list[dict[str, str]] = []
+        self.name_refs: dict[str, set[str]] = defaultdict(set)
+        self.intra_file_refs: dict[str, set[str]] = defaultdict(set)
+
+    def scan_sources(self) -> None:
+        for path in _iter_python_files(SRC_ROOT):
+            relative = _relative(path)
+            tree = _parse_tree(path)
+            if tree is None:
+                self.parse_errors.append(relative)
+                continue
+            module = _module_name(relative)
+            names: set[str] = set()
+            imports: dict[str, str] = {}
+            self._collect_imports(tree, module, imports)
+            for node in tree.body:
+                if isinstance(node, ast.ClassDef):
+                    self._add_class(node, relative, module, names)
+                elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    self._add_function(node, relative, module, names)
+                elif isinstance(node, ast.Assign):
+                    self._collect_export_assign(node, relative)
+            if any(
+                isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                and node.name == "__getattr__"
+                for node in tree.body
+            ):
+                self.getattr_modules.add(relative)
+            self._collect_provider_links(tree, relative)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Name):
+                    names.add(node.id)
+                elif isinstance(node, ast.Attribute):
+                    names.add(node.attr)
+            self.file_names[relative] = names
+            self.file_imports[relative] = imports
+            for name in names:
+                self.name_refs[name].add(relative)
+            self._collect_intra_file_refs(tree, relative)
+
+    def _collect_intra_file_refs(self, tree: ast.AST, relative: str) -> None:
+        """Keep same-file uses that are not the definition statement itself."""
+        defined = {
+            node.name
+            for node in ast.walk(tree)
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+        }
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Name) and node.id in defined:
+                self.intra_file_refs[node.id].add(relative)
+
+    def _collect_imports(
+        self,
+        tree: ast.AST,
+        module: str,
+        imports: dict[str, str],
+    ) -> None:
+        for node in tree.body:
+            if not isinstance(node, ast.ImportFrom):
+                continue
+            base = node.module or ""
+            if node.level:
+                parts = module.split(".")
+                keep = max(len(parts) - node.level, 0)
+                prefix = parts[:keep]
+                if base:
+                    prefix.append(base)
+                base = ".".join(prefix)
+            for alias in node.names:
+                local = alias.asname or alias.name
+                imports[local] = f"{base}.{alias.name}" if base else alias.name
+
+    def _add_class(
+        self,
+        node: ast.ClassDef,
+        path: str,
+        module: str,
+        names: set[str],
+    ) -> None:
+        names.add(node.name)
+        bases = [name for name in (_base_name(item) for item in node.bases) if name]
+        decorators = {
+            name for name in (_decorator_name(item) for item in node.decorator_list) if name
+        }
+        required, hidden = _collaborators(node)
+        info = ClassInfo(
+            name=node.name,
+            path=path,
+            module=module,
+            line=node.lineno,
+            bases=bases,
+            own_members=_own_members(node),
+            decorators=decorators,
+            is_protocol="Protocol" in bases,
+            is_dataclass="dataclass" in decorators,
+            abstract="ABC" in bases or "abstractmethod" in _class_decorator_methods(node),
+            has_post_init=any(
+                isinstance(child, ast.FunctionDef) and child.name == "__post_init__"
+                for child in node.body
+            ),
+            required_collaborators=required,
+            hidden_defaults=hidden,
+        )
+        self.classes[(module, node.name)] = info
+
+    def _add_function(
+        self,
+        node: ast.FunctionDef | ast.AsyncFunctionDef,
+        path: str,
+        module: str,
+        names: set[str],
+    ) -> None:
+        if node.name.startswith("_") and not node.name.startswith("_create"):
+            if not (
+                node.name.startswith(("_get_", "_build_", "_register_"))
+                or "provider" in path
+            ):
+                names.add(node.name)
+                return
+        names.add(node.name)
+        self.functions.append(
+            FuncInfo(
+                name=node.name,
+                path=path,
+                module=module,
+                line=node.lineno,
+                returns=_annotation_names(node.returns),
+                decorators={
+                    name
+                    for name in (_decorator_name(item) for item in node.decorator_list)
+                    if name
+                },
+            )
+        )
+
+    def _collect_export_assign(self, node: ast.Assign, path: str) -> None:
+        targets = [
+            target.id
+            for target in node.targets
+            if isinstance(target, ast.Name)
+        ]
+        if not ({"__all__", "_PUBLIC_EXPORTS", "FACTORY_EXPORTS"} & set(targets)):
+            return
+        keys = self.export_keys.setdefault(path, set())
+        for child in ast.walk(node.value):
+            if isinstance(child, ast.Constant) and isinstance(child.value, str):
+                keys.add(child.value)
+
+    def _collect_provider_links(self, tree: ast.AST, path: str) -> None:
+        if "/providers/" not in path and "/factories/datasource/" not in path:
+            return
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call):
+                self._collect_provider_call(node, path)
+                continue
+            if isinstance(node, ast.Dict):
+                self._collect_provider_dict(node, path)
+                continue
+            if not isinstance(node, (ast.Tuple, ast.List)):
+                continue
+            strings = [
+                item.value
+                for item in node.elts
+                if isinstance(item, ast.Constant) and isinstance(item.value, str)
+            ]
+            symbols = [item.id for item in node.elts if isinstance(item, ast.Name)]
+            if strings and symbols:
+                for provider_name in strings:
+                    if re.fullmatch(r"[a-z][a-z0-9_]{2,}", provider_name) is None:
+                        continue
+                    for symbol in symbols:
+                        if not (
+                            symbol[:1].isupper()
+                            or symbol.startswith(
+                                ("create_", "_create_", "build_", "_build_")
+                            )
+                        ):
+                            continue
+                        self.provider_links.append(
+                            {
+                                "provider": provider_name,
+                                "symbol": symbol,
+                                "path": path,
+                            }
+                        )
+    def _collect_provider_call(self, node: ast.Call, path: str) -> None:
+        provider_name = ""
+        adapter_name = ""
+        for keyword in node.keywords:
+            if keyword.arg in {"provider", "provider_name"} and isinstance(
+                keyword.value, ast.Constant
+            ):
+                if isinstance(keyword.value.value, str):
+                    provider_name = keyword.value.value
+            elif keyword.arg == "adapter_class" and isinstance(keyword.value, ast.Name):
+                adapter_name = keyword.value.id
+        if re.fullmatch(r"[a-z][a-z0-9_]{2,}", provider_name) is None or not adapter_name:
+            return
+        self.provider_links.append(
+            {
+                "provider": provider_name,
+                "symbol": adapter_name,
+                "path": path,
+            }
+        )
+
+    def _collect_provider_dict(self, node: ast.Dict, path: str) -> None:
+        for key, value in zip(node.keys, node.values, strict=False):
+            if not isinstance(key, ast.Constant) or not isinstance(key.value, str):
+                continue
+            if re.fullmatch(r"[a-z][a-z0-9_]{2,}", key.value) is None:
+                continue
+            if not isinstance(value, ast.Call):
+                continue
+            for keyword in value.keywords:
+                if keyword.arg == "adapter_class" and isinstance(keyword.value, ast.Name):
+                    self.provider_links.append(
+                        {
+                            "provider": key.value,
+                            "symbol": keyword.value.id,
+                            "path": path,
+                        }
+                    )
+
+    def resolve_inheritance(self) -> None:
+        by_name: dict[str, list[ClassInfo]] = defaultdict(list)
+        for info in self.classes.values():
+            by_name[info.name].append(info)
+        for info in self.classes.values():
+            resolved, unresolved = self._resolve_bases(info, by_name)
+            info.resolved_bases = resolved
+            info.unresolved_bases = unresolved
+        self._member_cache: dict[tuple[str, str], set[str]] = {}
+        for info in self.classes.values():
+            info.resolved_members = self._resolved_members(info, set())
+
+    def _resolve_bases(
+        self,
+        info: ClassInfo,
+        by_name: dict[str, list[ClassInfo]],
+    ) -> tuple[list[str], list[str]]:
+        resolved: list[str] = []
+        unresolved: list[str] = []
+        imports = self.file_imports.get(info.path, {})
+        for base in info.bases:
+            if base in {"Protocol", "ABC", "object", "Exception", "BaseException"}:
+                continue
+            target = imports.get(base)
+            found: ClassInfo | None = None
+            if target and "." in target:
+                module, name = target.rsplit(".", 1)
+                found = self.classes.get((module, name))
+            if found is None:
+                same = self.classes.get((info.module, base))
+                found = same
+            if found is None and len(by_name.get(base, [])) == 1:
+                found = by_name[base][0]
+            if found is None:
+                unresolved.append(base)
+            else:
+                resolved.append(f"{found.path}:{found.line}:{found.name}")
+        return resolved, unresolved
+
+    def _resolved_members(self, info: ClassInfo, visiting: set[tuple[str, str]]) -> set[str]:
+        key = (info.module, info.name)
+        cached = self._member_cache.get(key)
+        if cached is not None:
+            return cached
+        if key in visiting:
+            return set(info.own_members)
+        visiting.add(key)
+        members = set(info.own_members)
+        for base_key in info.resolved_bases:
+            path, line_text, name = base_key.rsplit(":", 2)
+            parent = self.classes.get(self._base_identity(path, line_text, name))
+            if parent is not None:
+                members.update(self._resolved_members(parent, visiting))
+        visiting.remove(key)
+        self._member_cache[key] = members
+        return members
+
+    def _base_identity(self, path: str, line_text: str, name: str) -> tuple[str, str]:
+        module = _module_name(path)
+        found = self.classes.get((module, name))
+        if found is not None and str(found.line) == line_text:
+            return module, name
+        for (candidate_module, candidate_name), info in self.classes.items():
+            if info.path == path and info.name == name and str(info.line) == line_text:
+                return candidate_module, candidate_name
+        return module, name
+
+
+def _class_decorator_methods(node: ast.ClassDef) -> set[str]:
+    names: set[str] = set()
+    for child in node.body:
+        if not isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        for decorator in child.decorator_list:
+            name = _decorator_name(decorator)
+            if name:
+                names.add(name)
+    return names
+
+
+def _in_candidate_root(path: str) -> bool:
+    return any(path.startswith(root) for root in CANDIDATE_ROOTS)
+
+
+def _name_has_token(name: str) -> bool:
+    return any(token in name for token in NAME_TOKENS)
+
+
+def _classification(path: str, name: str, info: ClassInfo | None) -> tuple[str, str]:
+    if "/noop/" in path or name.startswith("NoOp"):
+        return "noop", "path contains /noop/ or name starts with NoOp"
+    if name.endswith("Mixin"):
+        return "mixin", "name ends with Mixin"
+    if info is not None and (info.abstract or name.startswith(("Base", "Abstract"))):
+        return "abstract_base", "ABC, abstractmethod, or Base/Abstract name"
+    if any(token in name for token in ("Wrapper", "Facade", "Shim")):
+        return "wrapper", "name contains Wrapper, Facade, or Shim"
+    if path.endswith("__init__.py") and info is None:
+        return "compatibility_export", "package re-export seam"
+    if "/compat/" in path or name.endswith("Compat"):
+        return "compatibility_export", "compat package or Compat suffix"
+    if name.startswith(("_create_", "_build_", "_register_", "_get_")):
+        return (
+            "callable_seam",
+            "private factory or registration helper kept in the denominator",
+        )
+    if (
+        path.endswith(("_support.py", "_helpers.py"))
+        or "/support/" in path
+        or name.startswith("_")
+    ):
+        return "pure_helper", "support/helper module or private symbol"
+    if "/factories/" in path or name.endswith("Factory") or name.startswith(
+        ("create_", "build_")
+    ):
+        return "factory", "factory path, Factory suffix, or create_/build_ function"
+    if name.startswith(("register_", "load_", "ensure_")) or "/providers/registration" in path:
+        return "callable_seam", "registration or loader function"
+    if info is not None and _in_candidate_root(path):
+        return "concrete_adapter", "class in a candidate adapter/factory root"
+    if _name_has_token(name):
+        return "concrete_adapter", "symbol name contains an adapter/factory token"
+    if info is None:
+        return (
+            "pure_helper",
+            "module-level function without factory, registration, or adapter shape",
+        )
+    return "unresolved", "included by structural or registration evidence without a tighter class"
+
+
+def _protocol_catalog(scanner: Scanner) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for info in scanner.classes.values():
+        if not info.is_protocol:
+            continue
+        rows.append(
+            {
+                "line": info.line,
+                "members": sorted(info.resolved_members),
+                "name": info.name,
+                "path": info.path,
+                "runtime_checkable": "runtime_checkable" in info.decorators,
+            }
+        )
+    rows.sort(key=lambda item: (str(item["path"]), int(item["line"]), str(item["name"])))
+    return rows
+
+
+def _ports_for_class(
+    info: ClassInfo,
+    protocols: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    implemented: list[dict[str, Any]] = []
+    partial: list[dict[str, Any]] = []
+    explicit = set(info.bases)
+    for protocol in protocols:
+        members = set(protocol["members"])
+        if not members:
+            continue
+        present = sorted(members & info.resolved_members)
+        missing = sorted(members - info.resolved_members)
+        ratio = len(present) / len(members)
+        explicit_hit = protocol["name"] in explicit
+        record = {
+            "line": protocol["line"],
+            "match": "explicit_base" if explicit_hit else "complete_structural",
+            "missing_methods": missing,
+            "name": protocol["name"],
+            "path": protocol["path"],
+            "ratio": round(ratio, 4),
+        }
+        if explicit_hit or (
+            ratio == 1.0 and _structural_match_allowed(info.path, protocol, members)
+        ):
+            implemented.append(record)
+        elif (
+            ratio >= 0.6
+            and len(present) >= 2
+            and _structural_match_allowed(info.path, protocol, members)
+        ):
+            partial.append(
+                {
+                    "line": protocol["line"],
+                    "matched_methods": present,
+                    "missing_methods": missing,
+                    "name": protocol["name"],
+                    "path": protocol["path"],
+                    "ratio": round(ratio, 4),
+                }
+            )
+    implemented.sort(key=lambda item: (str(item["path"]), str(item["name"])))
+    partial.sort(key=lambda item: (str(item["path"]), str(item["name"])))
+    return implemented, partial
+
+
+def _feature_dir(path: str) -> str:
+    return path.rsplit("/", 1)[0]
+
+
+def _structural_match_allowed(
+    class_path: str,
+    protocol: dict[str, Any],
+    members: set[str],
+) -> bool:
+    """Reject subset matches on common members and cross-package host protocols."""
+    if not members or members <= WEAK_MEMBER_NAMES:
+        return False
+    if not any(member not in WEAK_MEMBER_NAMES for member in members):
+        return False
+    protocol_name = str(protocol["name"])
+    protocol_path = str(protocol["path"])
+    internal = protocol_name.startswith("_") or "/ports/" not in protocol_path
+    if internal:
+        return _feature_dir(class_path) == _feature_dir(protocol_path)
+    return True
+
+
+def _baseline_adapter_index() -> dict[str, list[dict[str, str]]]:
+    if not BASELINE_COVERAGE.is_file():
+        return {}
+    payload = _load_json(BASELINE_COVERAGE)
+    index: dict[str, list[dict[str, str]]] = defaultdict(list)
+    rows = payload.get("rows", [])
+    if not isinstance(rows, list):
+        return {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        symbols = row.get("adapter_symbols", [])
+        if not isinstance(symbols, list):
+            continue
+        for symbol in symbols:
+            index[str(symbol)].append(
+                {
+                    "port_name": str(row.get("port_name", "")),
+                    "port_path": str(row.get("port_path", "")),
+                }
+            )
+    return index
+
+
+def _select_rows(scanner: Scanner, protocols: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    baseline = _baseline_adapter_index()
+    rows: list[dict[str, Any]] = []
+    seen: set[tuple[str, int, str]] = set()
+
+    def add(row: dict[str, Any]) -> None:
+        key = (str(row["path"]), int(row["line"]), str(row["symbol"]))
+        if key in seen:
+            return
+        seen.add(key)
+        rows.append(row)
+
+    for info in scanner.classes.values():
+        if info.is_protocol:
+            continue
+        implemented, partial = _ports_for_class(info, protocols)
+        tracked = baseline.get(info.name, [])
+        include = (
+            _in_candidate_root(info.path)
+            or _name_has_token(info.name)
+            or bool(implemented)
+            or bool(partial)
+            or bool(tracked)
+        )
+        if not include:
+            continue
+        classification, rule = _classification(info.path, info.name, info)
+        if classification == "unresolved" and (implemented or partial):
+            classification = "structural_candidate"
+            rule = "class outside candidate roots kept because a scoped structural port matched"
+        if tracked:
+            known = {(item["name"], item["path"]) for item in implemented}
+            for item in tracked:
+                key = (item["port_name"], item["port_path"])
+                if key not in known:
+                    implemented.append(
+                        {
+                            "line": 0,
+                            "match": "baseline_tracked",
+                            "missing_methods": [],
+                            "name": item["port_name"],
+                            "path": item["port_path"],
+                            "ratio": None,
+                        }
+                    )
+        add(
+            _class_row(
+                info,
+                classification,
+                rule,
+                implemented,
+                partial,
+            )
+        )
+
+    for func in scanner.functions:
+        if func.name.startswith("__"):
+            continue
+        in_composition_seam = func.path.startswith("src/bioetl/composition/") and (
+            func.name.startswith(
+                ("create_", "build_", "register_", "load_", "ensure_", "_create_", "_build_", "_register_")
+            )
+        )
+        if not (_in_candidate_root(func.path) or in_composition_seam):
+            continue
+        classification, rule = _classification(func.path, func.name, None)
+        port_names = [name for name in func.returns if name.endswith("Port") or name.endswith("Protocol")]
+        add(
+            {
+                "bootstrap": None,
+                "classification": classification,
+                "classification_rule": rule,
+                "implemented_ports": [
+                    {
+                        "line": 0,
+                        "match": "return_annotation",
+                        "missing_methods": [],
+                        "name": name,
+                        "path": "",
+                        "ratio": None,
+                    }
+                    for name in sorted(set(port_names))
+                ],
+                "internal_contract": "return annotation only" if port_names else "none-observed",
+                "kind": "function",
+                "lifecycle_methods": [],
+                "line": func.line,
+                "partial_ports": [],
+                "path": func.path,
+                "symbol": func.name,
+                "unresolved_bases": [],
+            }
+        )
+
+    for link in scanner.provider_links:
+        add(
+            {
+                "bootstrap": None,
+                "classification": "provider_variant",
+                "classification_rule": "string/symbol tuple in provider registration or datasource factory",
+                "implemented_ports": [],
+                "internal_contract": link["symbol"],
+                "kind": "provider_variant",
+                "lifecycle_methods": [],
+                "line": 0,
+                "partial_ports": [],
+                "path": link["path"],
+                "symbol": f"provider:{link['provider']}",
+                "unresolved_bases": [],
+                "linked_symbol": link["symbol"],
+            }
+        )
+
+    for path in sorted(scanner.getattr_modules):
+        if not (
+            path.startswith("src/bioetl/composition/")
+            or path.startswith("src/bioetl/infrastructure/")
+            or path.startswith("src/bioetl/domain/ports/")
+        ):
+            continue
+        add(
+            {
+                "bootstrap": None,
+                "classification": "callable_seam",
+                "classification_rule": "module defines __getattr__ dynamic export",
+                "implemented_ports": [],
+                "internal_contract": "dynamic getattr registry",
+                "kind": "getattr_registry",
+                "lifecycle_methods": [],
+                "line": 0,
+                "partial_ports": [],
+                "path": path,
+                "symbol": "__getattr__",
+                "unresolved_bases": [],
+            }
+        )
+    return rows
+
+
+def _class_row(
+    info: ClassInfo,
+    classification: str,
+    rule: str,
+    implemented: list[dict[str, Any]],
+    partial: list[dict[str, Any]],
+) -> dict[str, Any]:
+    internal = [
+        base
+        for base in info.bases
+        if base not in {"Protocol", "ABC", "object"} and not base.endswith("Port")
+    ]
+    return {
+        "bootstrap": {
+            "dataclass": info.is_dataclass,
+            "hidden_default_params": info.hidden_defaults,
+            "post_init": info.has_post_init,
+            "required_collaborators": info.required_collaborators,
+        },
+        "classification": classification,
+        "classification_rule": rule,
+        "implemented_ports": implemented,
+        "internal_contract": ", ".join(internal) if internal else "none-observed",
+        "kind": "class",
+        "lifecycle_methods": sorted(LIFECYCLE_METHODS & info.resolved_members),
+        "line": info.line,
+        "partial_ports": partial,
+        "path": info.path,
+        "symbol": info.name,
+        "unresolved_bases": info.unresolved_bases,
+    }
+
+
+def _reference_paths(scanner: Scanner, symbol: str, defining_path: str) -> list[str]:
+    paths = set(scanner.name_refs.get(symbol, set()))
+    paths.discard(defining_path)
+    if defining_path in scanner.intra_file_refs.get(symbol, ()):
+        paths.add(defining_path)
+    same_name = [
+        info
+        for info in list(scanner.classes.values()) + []
+        if info.name == symbol
+    ]
+    function_count = sum(1 for func in scanner.functions if func.name == symbol)
+    unique = len(same_name) + function_count <= 1
+    if unique:
+        return sorted(paths)
+    kept: set[str] = set()
+    for path in paths:
+        imports = scanner.file_imports.get(path, {})
+        if symbol in imports:
+            kept.add(path)
+        elif path.rsplit("/", 1)[0] == defining_path.rsplit("/", 1)[0]:
+            kept.add(path)
+    return sorted(kept)
+
+
+_IDENTIFIERS = re.compile(r"\b[A-Za-z_][A-Za-z0-9_]*\b")
+
+
+def _build_test_index(symbols: set[str]) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
+    interesting = {
+        symbol
+        for symbol in symbols
+        if len(symbol) >= 4 and symbol not in {"__getattr__", "object"}
+    }
+    mentions: dict[str, list[str]] = defaultdict(list)
+    asserts: dict[str, list[str]] = defaultdict(list)
+    for path in _iter_python_files(TEST_ROOT):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            continue
+        present = interesting.intersection(_IDENTIFIERS.findall(text))
+        if not present:
+            continue
+        relative = _relative(path)
+        tree = _parse_tree(path)
+        asserted: set[str] = set()
+        if tree is not None:
+            asserted = _asserted_symbols(tree, present)
+        for symbol in sorted(present):
+            mentions[symbol].append(relative)
+            if symbol in asserted:
+                asserts[symbol].append(relative)
+    return mentions, asserts
+
+
+def _asserted_symbols(tree: ast.AST, present: set[str]) -> set[str]:
+    found: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        names: set[str] = set()
+        saw_assert = False
+        for child in ast.walk(node):
+            if isinstance(child, ast.Assert):
+                saw_assert = True
+            elif isinstance(child, ast.Name) and child.id in present:
+                names.add(child.id)
+            elif isinstance(child, ast.Attribute) and child.attr in present:
+                names.add(child.attr)
+        if saw_assert:
+            found.update(names)
+    return found
+
+
+def _enrich(
+    scanner: Scanner,
+    rows: list[dict[str, Any]],
+    smoke: dict[str, Any],
+) -> None:
+    providers = set(smoke.get("providers") or [])
+    getattr_ok = {
+        (str(item.get("module")), str(item.get("attr")))
+        for item in smoke.get("getattr") or []
+        if isinstance(item, dict) and item.get("ok") is True
+    }
+    export_names = {
+        name
+        for names in scanner.export_keys.values()
+        for name in names
+    }
+    index_symbols: set[str] = set()
+    for row in rows:
+        index_symbols.add(str(row["symbol"]).split(":", 1)[-1])
+        linked = row.get("linked_symbol")
+        if isinstance(linked, str):
+            index_symbols.add(linked)
+    mention_index, assert_index = _build_test_index(index_symbols)
+    for row in rows:
+        symbol = str(row["symbol"])
+        path = str(row["path"])
+        lookup = symbol.split(":", 1)[-1]
+        refs = _reference_paths(scanner, lookup, path)
+        composition = [item for item in refs if item.startswith("src/bioetl/composition/")]
+        exported = lookup in export_names or any(
+            lookup in names and names_path.endswith("__init__.py")
+            for names_path, names in scanner.export_keys.items()
+        )
+        runtime = False
+        if symbol.startswith("provider:") and symbol.split(":", 1)[1] in providers:
+            runtime = True
+        module = _module_name(path)
+        if (module, lookup) in getattr_ok or (module, symbol) in getattr_ok:
+            runtime = True
+        if runtime:
+            reachability = "runtime_registered"
+        elif composition:
+            reachability = "composition_referenced"
+        elif exported:
+            reachability = "package_exported"
+        elif refs:
+            reachability = "static_referenced"
+        else:
+            reachability = "defining_file_only"
+        mentions = mention_index.get(lookup, [])
+        asserts = assert_index.get(lookup, [])
+        if asserts:
+            test_level = "assert_present"
+        elif mentions:
+            test_level = "mention"
+        else:
+            test_level = "none"
+        if test_level != "none" and reachability == "defining_file_only":
+            reachability = "test_mentioned"
+        registration = composition[:12]
+        if runtime:
+            registration = ["runtime_smoke:load_providers", *registration]
+        if path in scanner.getattr_modules:
+            registration = [f"getattr:{path}", *registration]
+        ports = row.get("implemented_ports") or []
+        partial = row.get("partial_ports") or []
+        semantic_anchor = "follow-up:no-port-anchor"
+        if ports:
+            semantic_anchor = str(ports[0].get("path") or ports[0].get("name"))
+        elif partial:
+            semantic_anchor = str(partial[0].get("path") or partial[0].get("name"))
+        composition_anchor = registration[0] if registration else "follow-up:no-composition-anchor"
+        lifecycle_methods = row.get("lifecycle_methods") or []
+        lifecycle_anchor = (
+            path
+            if lifecycle_methods
+            else "follow-up:no-lifecycle-surface; input for #12108"
+        )
+        row.update(
+            {
+                "codeowner_is_not_semantic_owner": True,
+                "codeowner_review_owner": REVIEW_OWNER,
+                "composition_owner": UNASSIGNED,
+                "composition_tracking_responsibility": composition_anchor,
+                "conformance_test_paths": asserts[:12],
+                "discovery_path": _discovery(reachability, registration, path),
+                "lifecycle_owner": UNASSIGNED,
+                "lifecycle_tracking_responsibility": lifecycle_anchor,
+                "mention_test_count": len(mentions),
+                "mention_test_paths": mentions[:12],
+                "reachability": reachability,
+                "registration_entrypoint": registration or ["none-observed"],
+                "semantic_owner": UNASSIGNED,
+                "semantic_tracking_responsibility": semantic_anchor,
+                "test_evidence_level": test_level,
+            }
+        )
+        verdict, missing = _verdict(row)
+        row["verdict"] = verdict
+        row["missing_evidence"] = missing
+
+
+def _discovery(reachability: str, registration: list[str], path: str) -> str:
+    if registration and registration != ["none-observed"]:
+        return f"{reachability}: {registration[0]}"
+    return f"{reachability}: {path}"
+
+
+def _verdict(row: dict[str, Any]) -> tuple[str, list[str]]:
+    classification = str(row["classification"])
+    ports = list(row.get("implemented_ports") or [])
+    missing: list[str] = []
+    structural_gap = [
+        f"{item['name']}: {', '.join(item['missing_methods'])}"
+        for item in ports
+        if item.get("missing_methods")
+    ]
+    unresolved = list(row.get("unresolved_bases") or [])
+    explicit_or_baseline = any(
+        item.get("match") in {"explicit_base", "baseline_tracked"} for item in ports
+    )
+    complete = any(
+        item.get("match") in {"complete_structural", "explicit_base"}
+        and not item.get("missing_methods")
+        for item in ports
+    )
+    if explicit_or_baseline and structural_gap and not unresolved:
+        missing.append("structural methods missing for a claimed port: " + "; ".join(structural_gap))
+        missing.append("owner contract is not implied by CODEOWNERS")
+        return "DEFECT", missing
+    if explicit_or_baseline and structural_gap and unresolved:
+        missing.append("claimed port has a structural gap but bases are unresolved: " + ", ".join(unresolved))
+        missing.append("gap is not promoted to DEFECT because the resolver may be incomplete")
+    architecture_asserts = [
+        path
+        for path in row.get("conformance_test_paths") or []
+        if path.startswith("tests/architecture/")
+        and any(marker in path for marker in VERIFIED_TEST_MARKERS)
+    ]
+    reachable = row.get("reachability") in {
+        "runtime_registered",
+        "composition_referenced",
+        "package_exported",
+    }
+    if (
+        complete
+        and reachable
+        and architecture_asserts
+        and classification in {"concrete_adapter", "noop", "factory"}
+    ):
+        missing.append(VERIFIED_RULE)
+        if row.get("semantic_owner") == UNASSIGNED:
+            missing.append("semantic/composition/lifecycle owners remain unassigned-tracking")
+        return "VERIFIED", missing
+    if (
+        row.get("reachability") == "defining_file_only"
+        and classification in {
+            "concrete_adapter",
+            "factory",
+            "provider_variant",
+            "structural_candidate",
+            "unresolved",
+        }
+        and not ports
+    ):
+        missing.append("no composition, package export, runtime smoke, or test reference")
+        missing.append("row stays in the universe denominator")
+        return "UNREACHABLE", missing
+    if not ports:
+        missing.append("no complete structural port match")
+    if row.get("partial_ports"):
+        missing.append("partial structural port overlap is not conformance")
+    if row.get("test_evidence_level") != "assert_present":
+        missing.append("no test function both names the symbol and contains assert")
+    elif not architecture_asserts:
+        missing.append("assert presence is not architecture-contract evidence and does not prove conformance")
+    if not reachable:
+        missing.append(f"reachability is {row.get('reachability')}")
+    if classification in {"pure_helper", "abstract_base", "mixin", "compatibility_export", "wrapper"}:
+        missing.append(
+            f"classified as {classification}; exclusion is documented and the row stays in the denominator"
+        )
+    missing.append("owners are unassigned-tracking; CODEOWNERS review owner is not a semantic owner")
+    return "NOT_VERIFIABLE", missing
+
+
+def _coverage(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    total = len(rows)
+    classified = sum(1 for row in rows if row["classification"] != "unresolved")
+    owners = sum(
+        1
+        for row in rows
+        if row["semantic_owner"] != UNASSIGNED
+        and row["composition_owner"] != UNASSIGNED
+        and row["lifecycle_owner"] != UNASSIGNED
+    )
+    verified = sum(1 for row in rows if row["verdict"] == "VERIFIED")
+    histogram: dict[str, int] = defaultdict(int)
+    classes: dict[str, int] = defaultdict(int)
+    for row in rows:
+        histogram[str(row["verdict"])] += 1
+        classes[str(row["classification"])] += 1
+
+    def ratio(numerator: int) -> float:
+        return round(100.0 * numerator / total, 2) if total else 0.0
+
+    return {
+        "behavioral_conformance_coverage_pct": ratio(verified),
+        "behavioral_conformance_definition": (
+            "VERIFIED rows / universe. Exclusions do not shrink this denominator."
+        ),
+        "classified_coverage_pct": ratio(classified),
+        "classified_definition": "rows whose classification is not unresolved / universe",
+        "classification_histogram": dict(sorted(classes.items())),
+        "owner_coverage_pct": ratio(owners),
+        "owner_definition": (
+            "rows with semantic, composition, and lifecycle owners other than "
+            "unassigned-tracking / universe. Tracking responsibility is not ownership."
+        ),
+        "universe_count": total,
+        "verdict_histogram": dict(sorted(histogram.items())),
+        "verified_count": verified,
+    }
+
+
+def _run_smoke() -> tuple[dict[str, Any], int]:
+    python = PROJECT_ROOT / ".venv" / "bin" / "python"
+    executable = str(python if python.is_file() else Path(sys.executable))
+    try:
+        completed = subprocess.run(
+            [executable, str(SMOKE_SCRIPT)],
+            cwd=PROJECT_ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return {
+            "errors": [{"step": "process", "type": "TimeoutExpired", "message": str(exc)[:500]}],
+            "getattr": [],
+            "pipelines": None,
+            "providers": None,
+            "returncode": 124,
+            "stderr_tail": "",
+        }, 124
+    payload: dict[str, Any]
+    try:
+        parsed = json.loads(completed.stdout or "{}")
+        payload = parsed if isinstance(parsed, dict) else {"errors": ["non-object smoke output"]}
+    except json.JSONDecodeError:
+        payload = {
+            "errors": [{"step": "parse", "type": "JSONDecodeError", "message": "smoke stdout was not JSON"}],
+            "getattr": [],
+            "pipelines": None,
+            "providers": None,
+        }
+    payload["returncode"] = completed.returncode
+    payload["stderr_tail"] = completed.stderr[-1500:]
+    return payload, completed.returncode
+
+
+def _baseline_summary() -> dict[str, Any]:
+    ports = _load_json(BASELINE_PORTS) if BASELINE_PORTS.is_file() else {}
+    coverage = _load_json(BASELINE_COVERAGE) if BASELINE_COVERAGE.is_file() else {}
+    port_summary = ports.get("summary", {}) if isinstance(ports.get("summary"), dict) else {}
+    return {
+        "domain_ports_inventory": {
+            "generated_by": ports.get("generated_by"),
+            "limitation": "Protocol classes named *Port under domain/ports only",
+            "summary": port_summary,
+        },
+        "port_adapter_factory_coverage": {
+            "covered_count": coverage.get("covered_count"),
+            "limitation": "explicit TRACKED_PORTS / core_active_ports; not the R07 universe",
+            "row_count": coverage.get("row_count"),
+            "scope": coverage.get("scope"),
+            "semantic_completeness": coverage.get("semantic_completeness"),
+        },
+    }
+
+
+def _source_pin() -> dict[str, Any]:
+    try:
+        from scripts.engineering.qa.report_module_coverage_inventory import (
+            compute_source_tree_sha256,
+        )
+
+        source_tree_sha256 = compute_source_tree_sha256(repo_root=PROJECT_ROOT)
+    except Exception as exc:  # noqa: BLE001 - pin must record the failure, not invent a hash
+        source_tree_sha256 = f"UNKNOWN:{type(exc).__name__}:{exc}"
+    return {
+        "branch": _git("branch", "--show-current"),
+        "head": _git("rev-parse", "HEAD"),
+        "origin_main": _git("rev-parse", "origin/main"),
+        "porcelain": _git("status", "--porcelain=v1", "-uall"),
+        "source_tree_sha256": source_tree_sha256,
+        "tree": _git("rev-parse", "HEAD^{tree}"),
+    }
+
+
+def _followups(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, str]]]:
+    def brief(row: dict[str, Any]) -> dict[str, str]:
+        return {
+            "classification": str(row["classification"]),
+            "path": str(row["path"]),
+            "symbol": str(row["symbol"]),
+            "verdict": str(row["verdict"]),
+        }
+
+    return {
+        "defects": [brief(row) for row in rows if row["verdict"] == "DEFECT"],
+        "no_conformance_assert": [
+            brief(row)
+            for row in rows
+            if row["test_evidence_level"] != "assert_present"
+            and row["classification"] in {"concrete_adapter", "noop", "factory", "provider_variant"}
+        ],
+        "unassigned_owners": [brief(row) for row in rows if row["semantic_owner"] == UNASSIGNED],
+        "unreachable": [brief(row) for row in rows if row["verdict"] == "UNREACHABLE"],
+    }
+
+
+def _lifecycle_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    selected = [
+        row
+        for row in rows
+        if row.get("lifecycle_methods")
+        or "/http/" in str(row["path"])
+        or str(row["classification"]) in {"concrete_adapter", "noop"}
+        and any(token in str(row["symbol"]) for token in ("Client", "Adapter", "Clock", "Lock"))
+    ]
+    return [
+        {
+            "lifecycle_methods": row.get("lifecycle_methods"),
+            "lifecycle_owner": row.get("lifecycle_owner"),
+            "lifecycle_tracking_responsibility": row.get("lifecycle_tracking_responsibility"),
+            "path": row["path"],
+            "symbol": row["symbol"],
+            "verdict": row["verdict"],
+        }
+        for row in selected
+    ]
+
+
+def _storage_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    selected = []
+    for row in rows:
+        path = str(row["path"])
+        ports = " ".join(
+            str(item.get("name", ""))
+            for item in list(row.get("implemented_ports") or [])
+            + list(row.get("partial_ports") or [])
+        )
+        if "/storage/" in path or "/export/" in path or any(
+            token in ports or token in str(row["symbol"])
+            for token in ("Storage", "Bronze", "Silver", "Gold", "Writer", "Reader")
+        ):
+            selected.append(row)
+    return [
+        {
+            "classification": row["classification"],
+            "implemented_ports": [
+                item.get("name") for item in row.get("implemented_ports") or []
+            ],
+            "path": row["path"],
+            "symbol": row["symbol"],
+            "verdict": row["verdict"],
+        }
+        for row in selected
+    ]
+
+
+def _markdown(payload: dict[str, Any]) -> str:
+    summary = payload["coverage"]
+    pin = payload["source_pin"]
+    lines = [
+        "# R07 adapter / port / owner map",
+        "",
+        "Report-only аудит. Это не ratchet и не доказательство полного behavioral conformance.",
+        "",
+        "## Pin",
+        "",
+        f"- HEAD: `{pin['head']}`",
+        f"- tree: `{pin['tree']}`",
+        f"- origin/main: `{pin['origin_main']}`",
+        f"- branch: `{pin['branch']}`",
+        f"- source_tree_sha256: `{pin['source_tree_sha256']}`",
+        "",
+        "## Denominators",
+        "",
+        "| Metric | Value |",
+        "| --- | ---: |",
+        f"| universe | {summary['universe_count']} |",
+        f"| classified coverage % | {summary['classified_coverage_pct']} |",
+        f"| owner coverage % | {summary['owner_coverage_pct']} |",
+        f"| behavioral conformance coverage % | {summary['behavioral_conformance_coverage_pct']} |",
+        "",
+        "Owner coverage считает только назначенный ownership contract. "
+        "`unassigned-tracking` и CODEOWNERS `@SatoryKono` его не создают.",
+        "",
+        "Behavioral denominator — весь universe. Классификация helper/ABC/mixin/export "
+        "строку не исключает.",
+        "",
+        "## Verdicts",
+        "",
+        "| Verdict | Count |",
+        "| --- | ---: |",
+    ]
+    for name, count in payload["coverage"]["verdict_histogram"].items():
+        lines.append(f"| `{name}` | {count} |")
+    lines.extend(
+        [
+            "",
+            "## Classification",
+            "",
+            "| Class | Count |",
+            "| --- | ---: |",
+        ]
+    )
+    for name, count in payload["coverage"]["classification_histogram"].items():
+        lines.append(f"| `{name}` | {count} |")
+    lines.extend(["", "## Smoke", "", "```json"])
+    smoke_view = {
+        "errors": payload["smoke"].get("errors"),
+        "pipeline_count": len(payload["smoke"].get("pipelines") or []),
+        "provider_count": len(payload["smoke"].get("providers") or []),
+        "providers": payload["smoke"].get("providers"),
+        "returncode": payload["smoke"].get("returncode"),
+    }
+    lines.append(json.dumps(smoke_view, ensure_ascii=False, indent=2, sort_keys=True))
+    lines.extend(
+        [
+            "```",
+            "",
+            "## Follow-up: defects",
+            "",
+        ]
+    )
+    _append_brief(lines, payload["followups"]["defects"])
+    lines.extend(["", "## Follow-up: unreachable", ""])
+    _append_brief(lines, payload["followups"]["unreachable"][:80])
+    lines.extend(
+        [
+            "",
+            "## Rows",
+            "",
+            "| Symbol | Path | Class | Ports | Reachability | Owners S/C/L | Tests | Verdict |",
+            "| --- | --- | --- | --- | --- | --- | --- | --- |",
+        ]
+    )
+    for row in payload["rows"]:
+        ports = ", ".join(
+            str(item.get("name")) for item in row.get("implemented_ports") or []
+        ) or "-"
+        tests = ", ".join(row.get("conformance_test_paths") or []) or "-"
+        owners = (
+            f"{row['semantic_owner']} / {row['composition_owner']} / {row['lifecycle_owner']}"
+        )
+        lines.append(
+            "| "
+            + " | ".join(
+                _cell(value)
+                for value in (
+                    row["symbol"],
+                    f"{row['path']}:{row['line']}",
+                    row["classification"],
+                    ports,
+                    row["reachability"],
+                    owners,
+                    tests,
+                    row["verdict"],
+                )
+            )
+            + " |"
+        )
+    lines.extend(
+        [
+            "",
+            "Полные поля, missing evidence и tracking responsibility — в `adapter-owner-map.json`.",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def _append_brief(lines: list[str], rows: list[dict[str, str]]) -> None:
+    if not rows:
+        lines.append("Нет строк.")
+        return
+    for row in rows:
+        lines.append(
+            f"- `{row['symbol']}` `{row['path']}` {row['classification']} {row['verdict']}"
+        )
+
+
+def _cell(value: object) -> str:
+    return str(value).replace("|", "/").replace("\n", " ")
+
+
+def main() -> int:
+    pin = _source_pin()
+    scanner = Scanner()
+    scanner.scan_sources()
+    scanner.resolve_inheritance()
+    protocols = _protocol_catalog(scanner)
+    rows = _select_rows(scanner, protocols)
+    smoke, smoke_code = _run_smoke()
+    _enrich(scanner, rows, smoke)
+    rows.sort(key=lambda item: (str(item["path"]), int(item["line"]), str(item["symbol"])))
+    domain_port_names = [
+        item
+        for item in protocols
+        if item["path"].startswith("src/bioetl/domain/ports/") and str(item["name"]).endswith("Port")
+    ]
+    payload: dict[str, Any] = {
+        "baseline": _baseline_summary(),
+        "coverage": _coverage(rows),
+        "definitions": {
+            "candidate_roots": list(CANDIDATE_ROOTS),
+            "universe": (
+                "classes in candidate roots, token-named classes, structural Protocol "
+                "matches, composition factory/register functions, provider-variant tuples, "
+                "and composition/infrastructure/domain-port __getattr__ seams"
+            ),
+            "verdict_rule": VERIFIED_RULE,
+        },
+        "domain_port_protocol_count_star_port": len(domain_port_names),
+        "followups": _followups(rows),
+        "generated_by": "reports/audit-runs/12107-r07/scan_adapter_owner_map.snapshot",
+        "parse_errors": scanner.parse_errors,
+        "protocol_count": len(protocols),
+        "protocols": protocols,
+        "rows": rows,
+        "schema_version": 1,
+        "scope_limitation": (
+            "AST plus bounded load_providers/list_pipeline_names/__all__ getattr smoke. "
+            "Complete structural matches require a non-common member and, for private "
+            "or non-port protocols, the same directory. "
+            "Not a proof that every config-driven or entry-point load was executed. "
+            "One test path is not behavioral conformance. Owners are not inferred from CODEOWNERS."
+        ),
+        "smoke": smoke,
+        "source_pin": pin,
+    }
+    payload["coverage"] = _coverage(rows)
+    json_text = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    markdown = _markdown(payload)
+    lifecycle = _lifecycle_rows(rows)
+    storage = _storage_rows(rows)
+    _atomic_write(OUT_DIR / "adapter-owner-map.json", json_text)
+    _atomic_write(OUT_DIR / "adapter-owner-map.md", markdown)
+    _atomic_write(
+        OUT_DIR / "r08-lifecycle-inventory.json",
+        json.dumps(
+            {
+                "consumer": "#12108",
+                "limitation": "lifecycle owner is unassigned-tracking unless a later contract assigns it",
+                "rows": lifecycle,
+                "row_count": len(lifecycle),
+            },
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+    )
+    _atomic_write(
+        OUT_DIR / "r09-storage-surface-inventory.json",
+        json.dumps(
+            {
+                "consumer": "#12109",
+                "limitation": "path/symbol/port token inventory, not a storage conformance proof",
+                "rows": storage,
+                "row_count": len(storage),
+            },
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+    )
+    manifest = {
+        "adapter_owner_map_sha256": _sha256_text(json_text),
+        "domain_port_protocol_count_star_port": len(domain_port_names),
+        "parse_errors": scanner.parse_errors,
+        "smoke_returncode": smoke_code,
+        "source_pin": pin,
+        "universe_count": len(rows),
+    }
+    _atomic_write(
+        OUT_DIR / "scan-manifest.json",
+        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+    )
+    print(json.dumps(manifest, ensure_ascii=False, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

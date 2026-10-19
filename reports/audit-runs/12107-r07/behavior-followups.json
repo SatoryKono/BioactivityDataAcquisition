@@ -1,0 +1,368 @@
+{
+  "behavior_matrix_acceptance": "NOT_ACCEPTED",
+  "behavior_matrix_sha256": "7f33f61af00f7b49df8a37991537fd56aba0eec99be57bb5346e9e1d2fcd5bda",
+  "does_not_replace_universe": true,
+  "duplicates_r08_or_r09_work": false,
+  "issue_12108_scope_check": "#12108 covers HTTP client policy, timeout, cancellation, generator close, executor lifecycle, and shared-client ownership. It does not accept provider payload parsing or HealthStatus mapping. R07 does not implement those #12108 tests.",
+  "mandatory_not_verified_count": 13,
+  "r08_http_lifecycle": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108",
+  "r09_storage_surface": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12109",
+  "rows": [
+    {
+      "adapter": "ChemblAdapter",
+      "case": "normal_timeout_cancellation",
+      "inside_12108": "Timeout and cancellation of the HTTP probe.",
+      "inside_12109": false,
+      "missing_evidence": "The health probe was not executed against a controlled client.",
+      "obligation": "health_check returns a non-HEALTHY status when the probe raises a documented health error, and CancelledError propagates.",
+      "operation": "health_check",
+      "outside_12108": {
+        "closure_criterion": "An in-process fixture with no live network asserts that ChemblAdapter.health_check returns HEALTHY for a successful controlled probe and a non-HEALTHY status when the probe raises a documented health error. Timeout and cancellation stay with #12108.",
+        "follow_up": {
+          "assigned_issue": null,
+          "closes_with_12107": false,
+          "id": "R07-FU-HEALTH-STATUS-ChemblAdapter",
+          "kind": "durable_audit_follow_up",
+          "not_issue_12108": true,
+          "not_issue_12109": true,
+          "record": "reports/audit-runs/12107-r07/behavior-followups.json",
+          "survives_12107_closure": true
+        },
+        "remainder": "HealthStatus mapping for a successful probe and a documented probe error.",
+        "tracking_responsibility": {
+          "basis": "docs/02-architecture/diagrams/descriptions/architecture/05b-adapter-hierarchy-providers.md header Owner: BioETL Team",
+          "not_semantic_owner": true,
+          "role": "BioETL Team",
+          "type": "tracking_responsibility"
+        }
+      },
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "ChemblAdapter",
+      "case": "resource_release",
+      "inside_12108": "Shared or nested client ownership and close order. The BaseHttpAdapter no-op does not release the injected client.",
+      "inside_12109": false,
+      "missing_evidence": "aclose is the BaseHttpAdapter no-op. The fixture recorded exit_calls == 0.",
+      "obligation": "DataSourcePort requires release of the acquired client. The observed no-op does not release the injected client.",
+      "operation": "aclose",
+      "outside_12108": null,
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "PubMedAdapter",
+      "case": "normal_timeout_cancellation",
+      "inside_12108": "Timeout propagation and cancellation propagation, including early close of the fetch generator.",
+      "inside_12109": false,
+      "missing_evidence": "fetch transport was not executed.",
+      "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
+      "operation": "fetch",
+      "outside_12108": {
+        "closure_criterion": "An in-process fixture with no live network asserts that PubMedAdapter.fetch yields one scripted provider record. Timeout and cancellation stay with #12108.",
+        "follow_up": {
+          "assigned_issue": null,
+          "closes_with_12107": false,
+          "id": "R07-FU-FETCH-PAYLOAD-PubMedAdapter",
+          "kind": "durable_audit_follow_up",
+          "not_issue_12108": true,
+          "not_issue_12109": true,
+          "record": "reports/audit-runs/12107-r07/behavior-followups.json",
+          "survives_12107_closure": true
+        },
+        "remainder": "Successful materialization of one scripted provider record.",
+        "tracking_responsibility": {
+          "basis": "docs/02-architecture/diagrams/descriptions/architecture/05b-adapter-hierarchy-providers.md header Owner: BioETL Team",
+          "not_semantic_owner": true,
+          "role": "BioETL Team",
+          "type": "tracking_responsibility"
+        }
+      },
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "SemanticScholarAdapter",
+      "case": "normal_timeout_cancellation",
+      "inside_12108": "Timeout propagation and cancellation propagation, including early close of the fetch generator.",
+      "inside_12109": false,
+      "missing_evidence": "fetch transport was not executed.",
+      "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
+      "operation": "fetch",
+      "outside_12108": {
+        "closure_criterion": "An in-process fixture with no live network asserts that SemanticScholarAdapter.fetch yields one scripted provider record. Timeout and cancellation stay with #12108.",
+        "follow_up": {
+          "assigned_issue": null,
+          "closes_with_12107": false,
+          "id": "R07-FU-FETCH-PAYLOAD-SemanticScholarAdapter",
+          "kind": "durable_audit_follow_up",
+          "not_issue_12108": true,
+          "not_issue_12109": true,
+          "record": "reports/audit-runs/12107-r07/behavior-followups.json",
+          "survives_12107_closure": true
+        },
+        "remainder": "Successful materialization of one scripted provider record.",
+        "tracking_responsibility": {
+          "basis": "docs/02-architecture/diagrams/descriptions/architecture/05b-adapter-hierarchy-providers.md header Owner: BioETL Team",
+          "not_semantic_owner": true,
+          "role": "BioETL Team",
+          "type": "tracking_responsibility"
+        }
+      },
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "OpenAlexAdapter",
+      "case": "normal_timeout_cancellation",
+      "inside_12108": "Timeout propagation and cancellation propagation, including early close of the fetch generator.",
+      "inside_12109": false,
+      "missing_evidence": "Existing tests replace fetch methods. This map does not drive the transport.",
+      "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
+      "operation": "fetch",
+      "outside_12108": {
+        "closure_criterion": "An in-process fixture with no live network asserts that OpenAlexAdapter.fetch yields one scripted provider record. Timeout and cancellation stay with #12108.",
+        "follow_up": {
+          "assigned_issue": null,
+          "closes_with_12107": false,
+          "id": "R07-FU-FETCH-PAYLOAD-OpenAlexAdapter",
+          "kind": "durable_audit_follow_up",
+          "not_issue_12108": true,
+          "not_issue_12109": true,
+          "record": "reports/audit-runs/12107-r07/behavior-followups.json",
+          "survives_12107_closure": true
+        },
+        "remainder": "Successful materialization of one scripted provider record.",
+        "tracking_responsibility": {
+          "basis": "docs/02-architecture/diagrams/descriptions/architecture/05b-adapter-hierarchy-providers.md header Owner: BioETL Team",
+          "not_semantic_owner": true,
+          "role": "BioETL Team",
+          "type": "tracking_responsibility"
+        }
+      },
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "OpenAlexAdapter",
+      "case": "normal_timeout_cancellation",
+      "inside_12108": "Timeout and cancellation of the HTTP probe.",
+      "inside_12109": false,
+      "missing_evidence": "The health probe helper was not executed.",
+      "obligation": "health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
+      "operation": "health_check",
+      "outside_12108": {
+        "closure_criterion": "An in-process fixture with no live network asserts that OpenAlexAdapter.health_check returns HEALTHY for a successful controlled probe and a non-HEALTHY status when the probe raises a documented health error. Timeout and cancellation stay with #12108.",
+        "follow_up": {
+          "assigned_issue": null,
+          "closes_with_12107": false,
+          "id": "R07-FU-HEALTH-STATUS-OpenAlexAdapter",
+          "kind": "durable_audit_follow_up",
+          "not_issue_12108": true,
+          "not_issue_12109": true,
+          "record": "reports/audit-runs/12107-r07/behavior-followups.json",
+          "survives_12107_closure": true
+        },
+        "remainder": "HealthStatus mapping for a successful probe and a documented probe error.",
+        "tracking_responsibility": {
+          "basis": "docs/02-architecture/diagrams/descriptions/architecture/05b-adapter-hierarchy-providers.md header Owner: BioETL Team",
+          "not_semantic_owner": true,
+          "role": "BioETL Team",
+          "type": "tracking_responsibility"
+        }
+      },
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "CrossRefAdapter",
+      "case": "normal_timeout_cancellation",
+      "inside_12108": "Timeout propagation and cancellation propagation, including early close of the fetch generator.",
+      "inside_12109": false,
+      "missing_evidence": "fetch transport was not executed.",
+      "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
+      "operation": "fetch",
+      "outside_12108": {
+        "closure_criterion": "An in-process fixture with no live network asserts that CrossRefAdapter.fetch yields one scripted provider record. Timeout and cancellation stay with #12108.",
+        "follow_up": {
+          "assigned_issue": null,
+          "closes_with_12107": false,
+          "id": "R07-FU-FETCH-PAYLOAD-CrossRefAdapter",
+          "kind": "durable_audit_follow_up",
+          "not_issue_12108": true,
+          "not_issue_12109": true,
+          "record": "reports/audit-runs/12107-r07/behavior-followups.json",
+          "survives_12107_closure": true
+        },
+        "remainder": "Successful materialization of one scripted provider record.",
+        "tracking_responsibility": {
+          "basis": "docs/02-architecture/diagrams/descriptions/architecture/05b-adapter-hierarchy-providers.md header Owner: BioETL Team",
+          "not_semantic_owner": true,
+          "role": "BioETL Team",
+          "type": "tracking_responsibility"
+        }
+      },
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "CrossRefAdapter",
+      "case": "normal_timeout_cancellation",
+      "inside_12108": "Timeout and cancellation of the HTTP probe.",
+      "inside_12109": false,
+      "missing_evidence": "The health probe helper was not executed.",
+      "obligation": "health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
+      "operation": "health_check",
+      "outside_12108": {
+        "closure_criterion": "An in-process fixture with no live network asserts that CrossRefAdapter.health_check returns HEALTHY for a successful controlled probe and a non-HEALTHY status when the probe raises a documented health error. Timeout and cancellation stay with #12108.",
+        "follow_up": {
+          "assigned_issue": null,
+          "closes_with_12107": false,
+          "id": "R07-FU-HEALTH-STATUS-CrossRefAdapter",
+          "kind": "durable_audit_follow_up",
+          "not_issue_12108": true,
+          "not_issue_12109": true,
+          "record": "reports/audit-runs/12107-r07/behavior-followups.json",
+          "survives_12107_closure": true
+        },
+        "remainder": "HealthStatus mapping for a successful probe and a documented probe error.",
+        "tracking_responsibility": {
+          "basis": "docs/02-architecture/diagrams/descriptions/architecture/05b-adapter-hierarchy-providers.md header Owner: BioETL Team",
+          "not_semantic_owner": true,
+          "role": "BioETL Team",
+          "type": "tracking_responsibility"
+        }
+      },
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "UniProtAdapter",
+      "case": "normal_timeout_cancellation",
+      "inside_12108": "Timeout propagation and cancellation propagation, including early close of the fetch generator.",
+      "inside_12109": false,
+      "missing_evidence": "Existing tests replace fetch methods. Transport was not executed.",
+      "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
+      "operation": "fetch",
+      "outside_12108": {
+        "closure_criterion": "An in-process fixture with no live network asserts that UniProtAdapter.fetch yields one scripted provider record. Timeout and cancellation stay with #12108.",
+        "follow_up": {
+          "assigned_issue": null,
+          "closes_with_12107": false,
+          "id": "R07-FU-FETCH-PAYLOAD-UniProtAdapter",
+          "kind": "durable_audit_follow_up",
+          "not_issue_12108": true,
+          "not_issue_12109": true,
+          "record": "reports/audit-runs/12107-r07/behavior-followups.json",
+          "survives_12107_closure": true
+        },
+        "remainder": "Successful materialization of one scripted provider record.",
+        "tracking_responsibility": {
+          "basis": "docs/02-architecture/diagrams/descriptions/architecture/05b-adapter-hierarchy-providers.md header Owner: BioETL Team",
+          "not_semantic_owner": true,
+          "role": "BioETL Team",
+          "type": "tracking_responsibility"
+        }
+      },
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "UniProtAdapter",
+      "case": "normal_timeout_cancellation",
+      "inside_12108": "Timeout and cancellation of the HTTP probe.",
+      "inside_12109": false,
+      "missing_evidence": "The health probe helper was not executed.",
+      "obligation": "health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
+      "operation": "health_check",
+      "outside_12108": {
+        "closure_criterion": "An in-process fixture with no live network asserts that UniProtAdapter.health_check returns HEALTHY for a successful controlled probe and a non-HEALTHY status when the probe raises a documented health error. Timeout and cancellation stay with #12108.",
+        "follow_up": {
+          "assigned_issue": null,
+          "closes_with_12107": false,
+          "id": "R07-FU-HEALTH-STATUS-UniProtAdapter",
+          "kind": "durable_audit_follow_up",
+          "not_issue_12108": true,
+          "not_issue_12109": true,
+          "record": "reports/audit-runs/12107-r07/behavior-followups.json",
+          "survives_12107_closure": true
+        },
+        "remainder": "HealthStatus mapping for a successful probe and a documented probe error.",
+        "tracking_responsibility": {
+          "basis": "docs/02-architecture/diagrams/descriptions/architecture/05b-adapter-hierarchy-providers.md header Owner: BioETL Team",
+          "not_semantic_owner": true,
+          "role": "BioETL Team",
+          "type": "tracking_responsibility"
+        }
+      },
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "UniProtAdapter",
+      "case": "resource_release",
+      "inside_12108": "Shared or nested client ownership and close order. The BaseHttpAdapter no-op does not release the injected client.",
+      "inside_12109": false,
+      "missing_evidence": "aclose is the BaseHttpAdapter no-op. The fixture recorded exit_calls == 0.",
+      "obligation": "DataSourcePort requires release of the acquired client. The observed no-op does not release the injected client.",
+      "operation": "aclose",
+      "outside_12108": null,
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "PubChemAdapter",
+      "case": "normal_timeout_cancellation",
+      "inside_12108": "Timeout propagation and cancellation propagation, including early close of the fetch generator.",
+      "inside_12109": false,
+      "missing_evidence": "pubchempy transport was not executed.",
+      "obligation": "fetch yields the scripted records on success and propagates timeout and cancellation.",
+      "operation": "fetch",
+      "outside_12108": {
+        "closure_criterion": "An in-process fixture with no live network asserts that PubChemAdapter.fetch yields one scripted provider record. Timeout and cancellation stay with #12108.",
+        "follow_up": {
+          "assigned_issue": null,
+          "closes_with_12107": false,
+          "id": "R07-FU-FETCH-PAYLOAD-PubChemAdapter",
+          "kind": "durable_audit_follow_up",
+          "not_issue_12108": true,
+          "not_issue_12109": true,
+          "record": "reports/audit-runs/12107-r07/behavior-followups.json",
+          "survives_12107_closure": true
+        },
+        "remainder": "Successful materialization of one scripted provider record.",
+        "tracking_responsibility": {
+          "basis": "docs/02-architecture/diagrams/descriptions/architecture/05b-adapter-hierarchy-providers.md header Owner: BioETL Team",
+          "not_semantic_owner": true,
+          "role": "BioETL Team",
+          "type": "tracking_responsibility"
+        }
+      },
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "PubChemAdapter",
+      "case": "normal_timeout_cancellation",
+      "inside_12108": "Timeout and cancellation of the pubchempy probe. PubChem uses the sync_base executor named by #12108.",
+      "inside_12109": false,
+      "missing_evidence": "The pubchempy probe was not executed.",
+      "obligation": "health_check returns HEALTHY for a successful probe, a non-HEALTHY status on timeout, and propagates cancellation.",
+      "operation": "health_check",
+      "outside_12108": {
+        "closure_criterion": "An in-process fixture with no live network asserts that PubChemAdapter.health_check returns HEALTHY for a successful controlled probe and a non-HEALTHY status when the probe raises a documented health error. Timeout and cancellation stay with #12108.",
+        "follow_up": {
+          "assigned_issue": null,
+          "closes_with_12107": false,
+          "id": "R07-FU-HEALTH-STATUS-PubChemAdapter",
+          "kind": "durable_audit_follow_up",
+          "not_issue_12108": true,
+          "not_issue_12109": true,
+          "record": "reports/audit-runs/12107-r07/behavior-followups.json",
+          "survives_12107_closure": true
+        },
+        "remainder": "HealthStatus mapping for a successful probe and a documented probe error.",
+        "tracking_responsibility": {
+          "basis": "docs/02-architecture/diagrams/descriptions/architecture/05b-adapter-hierarchy-providers.md header Owner: BioETL Team",
+          "not_semantic_owner": true,
+          "role": "BioETL Team",
+          "type": "tracking_responsibility"
+        }
+      },
+      "status": "mandatory_not_verified"
+    }
+  ],
+  "outside_closure_note": "Acceptance or closure of #12107 does not close outside_12108 follow-up ids. Each id stays open until its closure_criterion is met.",
+  "schema_version": 3,
+  "storage_note": "None of these thirteen obligations is a storage contract. inside_12109 is false on every row. Storage remains the existing r09-storage-surface-inventory.json input to #12109.",
+  "universe_denominator_unchanged": 2046
+}

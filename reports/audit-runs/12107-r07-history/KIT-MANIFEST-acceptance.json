@@ -1,0 +1,144 @@
+{
+  "based_on_commit": "5a600bcb7422a405c5285343a07e8a245029f50d",
+  "based_on_tree": "be730c39faff2e52103adb1fe3d498aebcce2d47",
+  "commit_note": "Adds the delta review record. File hashes below exclude this manifest.",
+  "files": [
+    {
+      "bytes": 25114,
+      "path": "reports/audit-runs/12107-r07/build_map_acceptance.snapshot",
+      "sha256": "50ad7fd303fc63cdb1b2aa71eb1edd4312c7b590ee108adc760ac55af952c51f"
+    },
+    {
+      "bytes": 6904,
+      "path": "reports/audit-runs/12107-r07/map-acceptance-verdict.json",
+      "sha256": "a9d4f72ae0c415080b364803a149f6af69afd4565b670a58fe2af09869b6c630"
+    },
+    {
+      "bytes": 2161,
+      "path": "reports/audit-runs/12107-r07/tracking-responsibility-decision.json",
+      "sha256": "731537b38c9425b9b6b3b324c934d59ed5e417a98f4c890a7247c4e6fea1a358"
+    },
+    {
+      "bytes": 19365,
+      "path": "reports/audit-runs/12107-r07/behavior-followups.json",
+      "sha256": "a31f45ef37b22f59a3394e24628f31f740b59d73010801a3111a747aac017cb3"
+    },
+    {
+      "bytes": 230611,
+      "path": "reports/audit-runs/12107-r07/port-relationship-index.json",
+      "sha256": "578960c01ea28732af2f0b087c7b83e4c88acc1ff91a01c2bced2faad722def9"
+    },
+    {
+      "bytes": 1550,
+      "path": "reports/audit-runs/12107-r07/owner-decision-package.json",
+      "sha256": "cf0c244e16468ec82bdf0f2f9fa9ce327d10d12075835a311e09c96d48c94b31"
+    },
+    {
+      "bytes": 2681,
+      "path": "reports/audit-runs/12107-r07/telemetry-applicability.json",
+      "sha256": "e3a0bedbe13c19bbc6e31412297f870159477cce72832c7c62f654db5d2e04a9"
+    },
+    {
+      "bytes": 3004,
+      "path": "reports/audit-runs/12107-r07/independent-review-91f379.json",
+      "sha256": "94f762b0e5a90221ddf0f29f8405f4c66e043da784537e6aaef7d3e556d3487a"
+    },
+    {
+      "bytes": 2899,
+      "path": "reports/audit-runs/12107-r07/independent-review-6b1b10a7.json",
+      "sha256": "cefeac265422f32f1c3a7e7572fe133be7c1b74dcadb1612a1a7d97a1ad1b63d"
+    },
+    {
+      "bytes": 9867,
+      "path": "reports/audit-runs/12107-r07/behavior-obligation-matrix.json",
+      "sha256": "7f33f61af00f7b49df8a37991537fd56aba0eec99be57bb5346e9e1d2fcd5bda"
+    },
+    {
+      "bytes": 5330715,
+      "path": "reports/audit-runs/12107-r07/adapter-owner-map.json",
+      "sha256": "44ce5e1207bcd9b1287427f925e0a4bf789c1547dc1ac2df15271fc0c986db55"
+    },
+    {
+      "bytes": 26982,
+      "path": "reports/audit-runs/12107-r07/acceptance-review.json",
+      "sha256": "2c2c261f983a4edce1acc2f5fcbe92eea03f3e7418433bbdb45abf9f399b3117"
+    },
+    {
+      "bytes": 60035,
+      "path": "reports/audit-runs/12107-r07/scan_adapter_owner_map.snapshot",
+      "sha256": "3f16bc0ec7c179d7b728b2366d79786ac845bb44b0cef4aed9f1b80f7790bae3"
+    },
+    {
+      "bytes": 5478,
+      "path": "reports/audit-runs/12107-r07-history/KIT-MANIFEST.json",
+      "sha256": "d128ef985e4b4a2caf6f552c3c96ab8fa61b176c12b29a3a40ec1da95ccc71d8"
+    },
+    {
+      "bytes": 4208,
+      "path": "reports/audit-runs/12107-r07-history/KIT-MANIFEST-behavior.json",
+      "sha256": "7708c4fcc0c7c0f0ec5f57311c4875c47e262c3c1618c49895456d97874b99ca"
+    },
+    {
+      "bytes": 33677,
+      "path": "reports/audit-runs/12107-r07/telemetry-historical/squash-provenance.json",
+      "sha256": "1780547842c0057a68b90f39139ae7e1610d07049314b43a7f7ec8b6ae30abcc"
+    },
+    {
+      "bytes": 40919,
+      "path": "reports/audit-runs/12107-r07/telemetry-historical/test_telemetry_baseline.yaml",
+      "sha256": "a5fc27a42c29cd504cc7d05c6d59ae9e9de50876eccba7b4277bee487ea0d34b"
+    },
+    {
+      "bytes": 8918,
+      "path": "reports/audit-runs/12107-r07/telemetry-historical/test-telemetry-baseline.md",
+      "sha256": "2ed461df19a16fcf90a8363464f498438f0c075e7d24598e3e27d93a051b73c7"
+    },
+    {
+      "bytes": 6994,
+      "path": "reports/audit-runs/12107-r07/telemetry-historical/coverage-summary.json",
+      "sha256": "a64d99432044b6ee4675659e233cc824a4735b15ebe35a2a81220d14f3354bf2"
+    },
+    {
+      "bytes": 23331,
+      "path": "reports/audit-runs/12107-r07/telemetry-historical/slowest-tests.json",
+      "sha256": "ce06af108ee3a69d31cb5ac0adae71f3cce7036305b8e0bce3d103742efc6301"
+    },
+    {
+      "bytes": 53504,
+      "path": "reports/audit-runs/12107-r07/r08-lifecycle-inventory.json",
+      "sha256": "6cac8039a59c91c987c0460cad17746458714aa58a67f20fdc8cb6447d319073"
+    },
+    {
+      "bytes": 144976,
+      "path": "reports/audit-runs/12107-r07/r09-storage-surface-inventory.json",
+      "sha256": "7e7791a657ff29f0ad5ce02e3129a9c5c7ac0d6a54aad51b49f1fe3e32129b7a"
+    },
+    {
+      "bytes": 188,
+      "path": "reports/audit-runs/12107-r07/logs/pytest-24-on-80dfee.txt",
+      "sha256": "2a6ba78902190edb858ad1f428ddb425b73b444384c853380e45c16a2a04f1a0"
+    },
+    {
+      "bytes": 187,
+      "path": "reports/audit-runs/12107-r07/logs/pytest-8-surface-on-80dfee.txt",
+      "sha256": "719bcf98eda08adbdb7d134d9fabc11d216ef8cd6d4f71023d38431f5141f325"
+    },
+    {
+      "bytes": 14921,
+      "path": "tests/unit/infrastructure/adapters/test_registered_datasource_lifecycle_contracts.py",
+      "sha256": "1fa3906d5ae022b38dbf8f13724291e38cc3c89d7dfc0cb74e2c2f9356abf981"
+    },
+    {
+      "bytes": 4892,
+      "path": "tests/architecture/test_registered_datasource_port_surface.py",
+      "sha256": "f00fb4776aae23bdf08857f000994b4f10a6ec02b2020eb14590c2b46d0764d4"
+    }
+  ],
+  "frozen_map_sha256": "6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c",
+  "historical_receipt_sha256": "1780547842c0057a68b90f39139ae7e1610d07049314b43a7f7ec8b6ae30abcc",
+  "prior_25_file_manifest_sha256": "c712251c46803d0fa07237cee2101226c536e52c796b10dbc1026a3b493c29d1",
+  "reviewed_delta": "91f3791066aebad1b8516969179da5e947e8f430..6b1b10a7bb5b688560dc0c799bc09be3c1c163d1",
+  "remediation_commit": "5a600bcb7422a405c5285343a07e8a245029f50d",
+  "schema_version": 4,
+  "python_location_note": "Scanner sources are stored as .snapshot text so audit-structure does not treat them as Python and SonarQube Cloud does not count the historical duplicate as new code. History snapshot bytes stay the original scanner. Run with python on the .snapshot path."
+}

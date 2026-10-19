@@ -1,0 +1,1381 @@
+{
+  "consumer": "#12108",
+  "limitation": "lifecycle owner is unassigned-tracking unless a later contract assigns it",
+  "row_count": 148,
+  "rows": [
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/application/composite/runner_pkg/runner_execution_orchestrator.py",
+      "symbol": "CompositeLockedExecutionContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/application/composite/runner_pkg/runner_execution_orchestrator.py",
+      "symbol": "CompositeLockedExecutionResult",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/application/core/config.py",
+      "symbol": "LockConfig",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/core/data_source_mixins.py",
+      "path": "src/bioetl/application/core/data_source_mixins.py",
+      "symbol": "_WrappedAdapterHealthDelegationMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/core/data_source_mixins.py",
+      "path": "src/bioetl/application/core/data_source_mixins.py",
+      "symbol": "_WrappedDataSourceDelegationMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/core/data_sources/_derived_assay_source.py",
+      "path": "src/bioetl/application/core/data_sources/_derived_assay_source.py",
+      "symbol": "_DerivedAssayDataSourceBase",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/core/data_sources/assay_parameters.py",
+      "path": "src/bioetl/application/core/data_sources/assay_parameters.py",
+      "symbol": "AssayParametersDataSource",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/core/data_sources/filtered.py",
+      "path": "src/bioetl/application/core/data_sources/filtered.py",
+      "symbol": "FilteredDataSource",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/core/data_sources/idmapping.py",
+      "path": "src/bioetl/application/core/data_sources/idmapping.py",
+      "symbol": "IDMappingDataSource",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/core/data_sources/publication_term.py",
+      "path": "src/bioetl/application/core/data_sources/publication_term.py",
+      "symbol": "PublicationTermDataSource",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/core/data_sources/subcellular_fraction.py",
+      "path": "src/bioetl/application/core/data_sources/subcellular_fraction.py",
+      "symbol": "SubcellularFractionDataSource",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/application/core/lifecycle/lock_runtime_service.py",
+      "symbol": "LockRuntimeServiceCreateContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/core/lifecycle/lock_runtime_service.py",
+      "path": "src/bioetl/application/core/lifecycle/lock_runtime_service.py",
+      "symbol": "LockRuntimeService",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/core/pipeline_services.py",
+      "path": "src/bioetl/application/core/pipeline_services.py",
+      "symbol": "PipelineService",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__enter__",
+        "__exit__"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/observability/observer.py",
+      "path": "src/bioetl/application/observability/observer.py",
+      "symbol": "PipelineObserver",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/application/runtime_clock.py",
+      "symbol": "RuntimeClockService",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/services/checkpoint/checkpoint_service.py",
+      "path": "src/bioetl/application/services/checkpoint/checkpoint_service.py",
+      "symbol": "CheckpointService",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/services/export_lineage/audit_inspection_service.py",
+      "path": "src/bioetl/application/services/export_lineage/audit_inspection_service.py",
+      "symbol": "AuditInspectionService",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/application/services/ops/lock_service.py",
+      "symbol": "LockInfo",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/services/ops/lock_service.py",
+      "path": "src/bioetl/application/services/ops/lock_service.py",
+      "symbol": "LockService",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "start"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/services/ops/metrics_service.py",
+      "path": "src/bioetl/application/services/ops/metrics_service.py",
+      "symbol": "_MetricsStartMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "start"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/services/ops/metrics_service.py",
+      "path": "src/bioetl/application/services/ops/metrics_service.py",
+      "symbol": "_MetricsLifecycleMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "start"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/services/ops/metrics_service.py",
+      "path": "src/bioetl/application/services/ops/metrics_service.py",
+      "symbol": "MetricsService",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/application/services/quality/quarantine_service.py",
+      "path": "src/bioetl/application/services/quality/quarantine_service.py",
+      "symbol": "QuarantineService",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/composition/bootstrap/runtime/assay_replay_capture.py",
+      "path": "src/bioetl/composition/bootstrap/runtime/assay_replay_capture.py",
+      "symbol": "RequestReader",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/composition/factories/storage/bundle.py",
+      "path": "src/bioetl/composition/factories/storage/bundle.py",
+      "symbol": "StorageBundle",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/composition/factories/storage/health_mixin.py",
+      "path": "src/bioetl/composition/factories/storage/health_mixin.py",
+      "symbol": "StorageBundleHealthMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py",
+      "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py",
+      "symbol": "TargetProteinClassificationSnapshotDataSource",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/domain/adapter_config.py",
+      "symbol": "AdapterConfig",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/domain/exceptions/internal_lock.py",
+      "symbol": "LockLostError",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/domain/exceptions/internal_lock.py",
+      "symbol": "LockAcquisitionError",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/domain/locking.py",
+      "symbol": "LockNotHeldError",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/domain/locking.py",
+      "symbol": "LockContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/domain/locking.py",
+      "symbol": "LockContextHolder",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/domain/ports/noop/_audit_pii.py",
+      "path": "src/bioetl/domain/ports/noop/_audit_pii.py",
+      "symbol": "NoOpAudit",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/domain/ports/noop/_memory_metadata.py",
+      "path": "src/bioetl/domain/ports/noop/_memory_metadata.py",
+      "symbol": "NoOpMetadataWriter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "close"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/domain/ports/noop/_metrics.py",
+      "path": "src/bioetl/domain/ports/noop/_metrics.py",
+      "symbol": "NoOpMetrics",
+      "verdict": "VERIFIED"
+    },
+    {
+      "lifecycle_methods": [
+        "__enter__",
+        "__exit__"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/domain/ports/noop/_tracing.py",
+      "path": "src/bioetl/domain/ports/noop/_tracing.py",
+      "symbol": "_NoOpSpan",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "close"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/domain/ports/noop/_tracing.py",
+      "path": "src/bioetl/domain/ports/noop/_tracing.py",
+      "symbol": "NoOpTracing",
+      "verdict": "VERIFIED"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/adapter_error_classifier.py",
+      "symbol": "AdapterErrorClassifier",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/base.py",
+      "path": "src/bioetl/infrastructure/adapters/base.py",
+      "symbol": "BaseHttpAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/base_metrics.py",
+      "symbol": "AdapterMetricsRecorder",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/cached_bronze_data_source.py",
+      "path": "src/bioetl/infrastructure/adapters/cached_bronze_data_source.py",
+      "symbol": "CachedBronzeDataSource",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/chembl/client.py",
+      "path": "src/bioetl/infrastructure/adapters/chembl/client.py",
+      "symbol": "ChemblAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/chembl/target_protein_classification_data_source.py",
+      "path": "src/bioetl/infrastructure/adapters/chembl/target_protein_classification_data_source.py",
+      "symbol": "TargetProteinClassificationSnapshotDataSource",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/common/dependency_context.py",
+      "symbol": "HttpAdapterDependencyContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/common/dependency_context.py",
+      "symbol": "SyncAdapterDependencyContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/crossref/client.py",
+      "path": "src/bioetl/infrastructure/adapters/crossref/client.py",
+      "symbol": "CrossRefAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "start"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/crossref/models_shared.py",
+      "path": "src/bioetl/infrastructure/adapters/crossref/models_shared.py",
+      "symbol": "CrossRefLicense",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
+      "path": "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
+      "symbol": "CircuitBreakerDataSourceDecorator",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/decorators/retry.py",
+      "path": "src/bioetl/infrastructure/adapters/decorators/retry.py",
+      "symbol": "RetryingDataSourceDecorator",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/error_handling.py",
+      "symbol": "AdapterErrorHandler",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_circuit_breaker_support.py",
+      "symbol": "emit_state_metric",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_circuit_breaker_support.py",
+      "symbol": "emit_counter_metric",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_circuit_breaker_support.py",
+      "symbol": "decide_attempt_state",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_circuit_breaker_support.py",
+      "symbol": "record_success",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_circuit_breaker_support.py",
+      "symbol": "record_failure",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_circuit_breaker_support.py",
+      "symbol": "time_until_retry",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_circuit_breaker_support.py",
+      "symbol": "is_circuit_breaker_error",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_client_retry_flow.py",
+      "symbol": "RetryPolicyContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_client_retry_flow.py",
+      "symbol": "should_retry_response",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_client_retry_flow.py",
+      "symbol": "should_record_retry_budget_exhaustion",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_client_retry_flow.py",
+      "symbol": "handle_response_attempt",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_client_retry_flow.py",
+      "symbol": "handle_request_exception",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_client_retry_models.py",
+      "symbol": "_RequestAttemptOutcome",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_client_retry_models.py",
+      "symbol": "_RetryRequestState",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_client_retry_request_flow.py",
+      "symbol": "HTTPClientRetryRequestFlow",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_health_monitor_models.py",
+      "symbol": "HealthAdjustedConfig",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_health_monitor_observability.py",
+      "symbol": "emit_provider_health_metric",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_health_monitor_observability.py",
+      "symbol": "restore_provider_health_status",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_health_monitor_observability.py",
+      "symbol": "emit_health_check_observability",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_health_monitor_observability.py",
+      "symbol": "emit_unhealthy_alert",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_health_monitor_transitions.py",
+      "symbol": "check_clear_window",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_health_monitor_transitions.py",
+      "symbol": "record_success_transition",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_health_monitor_transitions.py",
+      "symbol": "record_error_transition",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_health_monitor_transitions.py",
+      "symbol": "record_health_check_transition",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/_health_monitor_transitions.py",
+      "symbol": "get_adaptive_params_for_status",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/circuit_breaker.py",
+      "symbol": "CircuitBreakerGuard",
+      "verdict": "VERIFIED"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/http/client.py",
+      "path": "src/bioetl/infrastructure/adapters/http/client.py",
+      "symbol": "UnifiedHTTPClient",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/http/client_context_mixin.py",
+      "path": "src/bioetl/infrastructure/adapters/http/client_context_mixin.py",
+      "symbol": "HTTPClientContextMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/client_request_methods_mixin.py",
+      "symbol": "HTTPClientRequestMethodsMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
+      "symbol": "HTTPClientRetryMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__enter__",
+        "__exit__"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/http/client_retry_observability.py",
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_observability.py",
+      "symbol": "_NoOpSpan",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_observability.py",
+      "symbol": "start_request_span",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_observability.py",
+      "symbol": "mark_span_error",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_observability.py",
+      "symbol": "finalize_request_observability",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_observability.py",
+      "symbol": "raise_retry_exhausted",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_observability.py",
+      "symbol": "handle_circuit_breaker_trip",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_policy.py",
+      "symbol": "parse_retry_after",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/client_retry_policy.py",
+      "symbol": "can_retry",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/health.py",
+      "symbol": "assess_health_from_circuit_breaker",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/health.py",
+      "symbol": "_Probe",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/health.py",
+      "symbol": "HealthProbeCoordinator",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/health.py",
+      "symbol": "ProviderResources",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/health.py",
+      "symbol": "provider_execution_scope",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/health.py",
+      "symbol": "resolve_provider_resources",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/health_monitor.py",
+      "symbol": "__getattr__",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/health_monitor.py",
+      "symbol": "ProviderHealthState",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/health_monitor.py",
+      "symbol": "ProviderHealthMonitor",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/health_tracker.py",
+      "symbol": "ProviderHealthTracker",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/pagination.py",
+      "symbol": "PaginationTruncatedError",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/pagination.py",
+      "symbol": "raise_pagination_truncated",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/pagination.py",
+      "symbol": "PaginatedFetcherMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/rate_limiter.py",
+      "symbol": "TokenBucketRateLimiter",
+      "verdict": "VERIFIED"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/request_timing.py",
+      "symbol": "_RequestKwargs",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/http/request_timing.py",
+      "symbol": "execute_timed_request",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/adapters/input/idmapping_csv_reader_adapter.py",
+      "symbol": "IDMappingCsvReaderAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/openalex/client.py",
+      "path": "src/bioetl/infrastructure/adapters/openalex/client.py",
+      "symbol": "OpenAlexAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/openalex/health_adapter_mixin.py",
+      "path": "src/bioetl/infrastructure/adapters/openalex/health_adapter_mixin.py",
+      "symbol": "OpenAlexAdapterHealthMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose",
+        "close"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/pubchem/client.py",
+      "path": "src/bioetl/infrastructure/adapters/pubchem/client.py",
+      "symbol": "PubChemAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/pubmed/adapter.py",
+      "path": "src/bioetl/infrastructure/adapters/pubmed/adapter.py",
+      "symbol": "PubMedAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/semanticscholar/adapter.py",
+      "path": "src/bioetl/infrastructure/adapters/semanticscholar/adapter.py",
+      "symbol": "SemanticScholarAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/semanticscholar/health_metadata_mixin.py",
+      "path": "src/bioetl/infrastructure/adapters/semanticscholar/health_metadata_mixin.py",
+      "symbol": "SemanticScholarHealthMetadataMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose",
+        "close"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/sync_base.py",
+      "path": "src/bioetl/infrastructure/adapters/sync_base.py",
+      "symbol": "BaseSyncAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "start"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/uniprot/_uniprot_model_structures.py",
+      "path": "src/bioetl/infrastructure/adapters/uniprot/_uniprot_model_structures.py",
+      "symbol": "UniProtFeatureLocation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/uniprot/client.py",
+      "path": "src/bioetl/infrastructure/adapters/uniprot/client.py",
+      "symbol": "UniProtAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__",
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py",
+      "path": "src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py",
+      "symbol": "UniProtIDMappingClient",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/audit/file_audit.py",
+      "path": "src/bioetl/infrastructure/audit/file_audit.py",
+      "symbol": "FileAuditAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
+      "path": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
+      "symbol": "LocalCheckpointAdapter",
+      "verdict": "VERIFIED"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/control_plane/artifact_byte_comparison.py",
+      "symbol": "FileArtifactByteComparisonAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/export/debug_export_adapter.py",
+      "symbol": "DebugExportAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/export/export_catalog_adapter.py",
+      "symbol": "ExportCatalogAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/export/export_writer_adapter.py",
+      "symbol": "ExportWriterAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/locking/memory_lock.py",
+      "path": "src/bioetl/infrastructure/locking/memory_lock.py",
+      "symbol": "MemoryLock",
+      "verdict": "VERIFIED"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/observability/debug_adapters.py",
+      "symbol": "InteractiveDebugAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/observability/debug_adapters.py",
+      "symbol": "LoggingDebugAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/observability/health_metrics_exposition.py",
+      "symbol": "HealthMetricsExpositionAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/observability/metrics_publisher_adapter.py",
+      "symbol": "MetricsPublisherAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "start"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/observability/metrics_server_adapter.py",
+      "path": "src/bioetl/infrastructure/observability/metrics_server_adapter.py",
+      "symbol": "MetricsServerAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "close"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/observability/prometheus_metrics.py",
+      "path": "src/bioetl/infrastructure/observability/prometheus_metrics.py",
+      "symbol": "PrometheusMetrics",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__enter__",
+        "__exit__"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/observability/tracing.py",
+      "path": "src/bioetl/infrastructure/observability/tracing.py",
+      "symbol": "_SpanHandle",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "close"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/observability/tracing.py",
+      "path": "src/bioetl/infrastructure/observability/tracing.py",
+      "symbol": "OpenTelemetryTracer",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/quarantine/unified.py",
+      "path": "src/bioetl/infrastructure/quarantine/unified.py",
+      "symbol": "UnifiedQuarantineAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/schemas/base_schemas_chembl.py",
+      "symbol": "HttpClientConfig",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/storage/composite_replay_inputs.py",
+      "path": "src/bioetl/infrastructure/storage/composite_replay_inputs.py",
+      "symbol": "CompositeInputCapture",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/storage/composite_replay_inputs.py",
+      "path": "src/bioetl/infrastructure/storage/composite_replay_inputs.py",
+      "symbol": "CompositeReplayInputReader",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/storage/delta_reader.py",
+      "path": "src/bioetl/infrastructure/storage/delta_reader.py",
+      "symbol": "DeltaReader",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__enter__",
+        "__exit__"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/storage/gold/cancellation.py",
+      "path": "src/bioetl/infrastructure/storage/gold/cancellation.py",
+      "symbol": "_DeferredCancellation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__aenter__",
+        "__aexit__"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/storage/gold/cancellation.py",
+      "path": "src/bioetl/infrastructure/storage/gold/cancellation.py",
+      "symbol": "_PhysicalCancellationBoundary",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__enter__",
+        "__exit__"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/storage/gold/commit_outcome.py",
+      "path": "src/bioetl/infrastructure/storage/gold/commit_outcome.py",
+      "symbol": "GoldOutcomeBoundary",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__enter__",
+        "__exit__"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/storage/gold/commit_outcome.py",
+      "path": "src/bioetl/infrastructure/storage/gold/commit_outcome.py",
+      "symbol": "GoldDiagnosticsBoundary",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "aclose"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/storage/metadata_writer_public.py",
+      "path": "src/bioetl/infrastructure/storage/metadata_writer_public.py",
+      "symbol": "MetadataWriter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/storage/run_report_store_adapter.py",
+      "symbol": "FileRunReportStoreAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [
+        "__enter__",
+        "__exit__"
+      ],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "src/bioetl/infrastructure/storage/support/atomic_group.py",
+      "path": "src/bioetl/infrastructure/storage/support/atomic_group.py",
+      "symbol": "AtomicWriteGroup",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py",
+      "symbol": "SilverForeignKeyReconciliationAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/storage/workflow_row_reconciliation.py",
+      "symbol": "StorageRowReconciliationAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/infrastructure/time/system_clock.py",
+      "symbol": "SystemClock",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "lifecycle_methods": [],
+      "lifecycle_owner": "unassigned-tracking",
+      "lifecycle_tracking_responsibility": "follow-up:no-lifecycle-surface; input for #12108",
+      "path": "src/bioetl/interfaces/http/types.py",
+      "symbol": "_StaticHealthMetricsExposition",
+      "verdict": "NOT_VERIFIABLE"
+    }
+  ]
+}

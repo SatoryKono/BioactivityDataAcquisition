@@ -1,0 +1,58 @@
+{
+  "bioetl_team_is_semantic_owner": false,
+  "findings": [
+    {
+      "id": "AUD-001",
+      "remediation": "behavior-followups.json schema 2 splits each cell into inside_12108 and outside_12108. inside_12109 is false. No R08 or R09 tests were added.",
+      "severity": "substantial",
+      "title": "Thirteen follow-ups assigned the whole obligation to #12108",
+      "evidence": "At 91f3791066 every behavior-followups row set follow_up to issue 12108. #12108 accepts client policy, timeout, cancellation, generator close, executor lifecycle, and shared-client ownership. Successful record materialization and HEALTHY mapping are outside that acceptance."
+    }
+  ],
+  "issue_12107_closed": false,
+  "manifest_at_reviewed_commit": {
+    "bytes": 5275,
+    "mismatches": 0,
+    "path": "reports/audit-runs/12107-r07-history/KIT-MANIFEST-acceptance.json",
+    "sha256": "dc702a5762711651062e8002a007976f258bc49660d989e54810a9cc9befa33b"
+  },
+  "metrics": {
+    "owner_coverage": "0/2046",
+    "trace_pointer_coverage": "2046/2046",
+    "tracking_responsibility_coverage": "2046/2046",
+    "universe": 2046
+  },
+  "recommendation_ru": "карта соответствует всем acceptance criteria, оставшиеся поведенческие пробелы оформлены как follow-up",
+  "reviewed_commit": "91f3791066aebad1b8516969179da5e947e8f430",
+  "reviewed_tree": "f18ff73a25a804d596818c4fd363b0f8eaeb3388",
+  "row_audit": {
+    "bioetl_team_in_owner_fields": 0,
+    "blank_discovery": 0,
+    "blank_tests_and_missing_evidence": 0,
+    "classification_histogram_matches_coverage": true,
+    "codeowner_exceptions": 0,
+    "missing_required_fields": 0,
+    "owner_assigned": 0,
+    "port_index_matches": true,
+    "unique_path_line_symbol": 2046,
+    "verdicts": {
+      "NOT_VERIFIABLE": 2022,
+      "UNREACHABLE": 10,
+      "VERIFIED": 14
+    }
+  },
+  "schema_version": 1,
+  "telemetry": {
+    "current_coverage": "NOT_VERIFIABLE",
+    "historical_receipt_equals_live_receipt": true,
+    "historical_receipt_sha256": "1780547842c0057a68b90f39139ae7e1610d07049314b43a7f7ec8b6ae30abcc",
+    "measurement_id": "local-pr12231-local-coverage-8a4286d",
+    "procedure": "python -m scripts.engineering.ci.update_test_telemetry_baseline --rebind-current-tree",
+    "rebind_admissible_as_stamp": true,
+    "rebind_proves_current_tree_coverage": false,
+    "source_commit_is_ancestor_of_head": false,
+    "source_commit_reachable_via_squash_bridge": true,
+    "squash_bridge_pr": 12231,
+    "why": "capture_metrics_are_bound is true and validate_squash_bridge accepts PR 12231 because merge 51c51734d250e36b8e63d3f717606c07f873ed44 is an ancestor of HEAD. The bridge checks unchanged test inputs between the capture commit and that PR head, not between the capture and the current test tree. Live source_tree_sha256 e692e8d58b088c81f2564cf219bc4fe488534d4d9bdf8a7400fccb2b7389cb68 differs from captured test tree b3a11bb154433ad72b2f07da87d94f02cfff5f3c2ca8a4fad4fbde96204b0aba."
+  }
+}

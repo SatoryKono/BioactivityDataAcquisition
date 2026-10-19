@@ -1,0 +1,4314 @@
+{
+  "consumer": "#12109",
+  "limitation": "path/symbol/port token inventory, not a storage conformance proof",
+  "row_count": 567,
+  "rows": [
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "GoldValidatorPort",
+        "SilverValidatorPort"
+      ],
+      "path": "src/bioetl/application/composite/cross_validator.py",
+      "symbol": "EnrichmentCrossValidator",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/application/composite/merger_output_mixin.py",
+      "symbol": "MergeOutputWriterMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "GoldValidatorPort",
+        "SilverValidatorPort"
+      ],
+      "path": "src/bioetl/application/composite/preflight_validator.py",
+      "symbol": "CompositePreflightValidationService",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/application/core/_record_normalization_hash_support.py",
+      "symbol": "RecordNormalizationHashSupportMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "abstract_base",
+      "implemented_ports": [
+        "TransformerExecutionOwner",
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/core/base.py",
+      "symbol": "BasePipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [
+        "PreSilverIdentityHost"
+      ],
+      "path": "src/bioetl/application/core/base_transformer_dependency_helpers_mixin.py",
+      "symbol": "_BaseTransformerDependencyHelpersMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/application/core/batch_writer.py",
+      "symbol": "BatchWriterOptions",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "BatchWriteStorageProtocol"
+      ],
+      "path": "src/bioetl/application/core/batch_writer.py",
+      "symbol": "BatchWriter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/application/core/batch_writer_columns_mixin.py",
+      "symbol": "BatchWriterColumnsMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [
+        "BatchWriteStorageProtocol"
+      ],
+      "path": "src/bioetl/application/core/batch_writer_io_mixin.py",
+      "symbol": "BatchWriterIOMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/application/core/batch_writer_tracing_mixin.py",
+      "symbol": "BatchWriterTracingMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "_LockRuntimeHostProtocol",
+        "StorageFactoryProtocol",
+        "GoldValidatorPort",
+        "SilverValidatorPort",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/core/lifecycle/lock_runtime_service.py",
+      "symbol": "LockRuntimeService",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/application/core/pre_silver_adapter_mixin.py",
+      "symbol": "_PreSilverRecordAdapterMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [
+        "TransformerExecutionOwner"
+      ],
+      "path": "src/bioetl/application/core/pre_silver_adapter_mixin.py",
+      "symbol": "PreSilverAdapterMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [
+        "TransformerExecutionOwner"
+      ],
+      "path": "src/bioetl/application/core/pre_silver_finalization_flow.py",
+      "symbol": "_PreSilverFinalizationFlowMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "TransformerExecutionOwner",
+        "_RecordNormalizationMappingHost",
+        "PreSilverFinalizerProtocol"
+      ],
+      "path": "src/bioetl/application/core/record_normalization_processor.py",
+      "symbol": "RecordNormalizationProcessor",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+      "symbol": "ChEMBLActivityPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+      "symbol": "ChEMBLAssayPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+      "symbol": "ChEMBLAssayParametersPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+      "symbol": "ChEMBLCellLinePipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+      "symbol": "ChEMBLCompoundRecordPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+      "symbol": "ChEMBLMoleculePipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+      "symbol": "ChEMBLProteinClassPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+      "symbol": "ChEMBLPublicationPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+      "symbol": "ChEMBLPublicationSimilarityPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+      "symbol": "ChEMBLPublicationTermPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+      "symbol": "ChEMBLSubcellularFractionPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+      "symbol": "ChEMBLTargetPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+      "symbol": "ChEMBLTargetComponentPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+      "symbol": "ChEMBLTargetProteinClassificationPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+      "symbol": "ChEMBLTissuePipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/generic.py",
+      "symbol": "GenericPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/pubchem/__init__.py",
+      "symbol": "PubChemCompoundPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/pubmed/__init__.py",
+      "symbol": "PubMedPublicationPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/application/pipelines/uniprot/__init__.py",
+      "symbol": "UniProtProteinPipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "HistoricalReplayCorpusServiceProtocol",
+        "_HistoricalCorpusReader"
+      ],
+      "path": "src/bioetl/application/services/control_plane/replay/historical_corpus_service.py",
+      "symbol": "HistoricalReplayCorpusService",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "BronzeDQAnalyzerPort",
+        "GoldDQAnalyzerPort",
+        "SilverDQAnalyzerPort"
+      ],
+      "path": "src/bioetl/application/services/dq/bronze_analyzer.py",
+      "symbol": "BronzeDQAnalyzer",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "BronzeDQAnalyzerPort",
+        "GoldDQAnalyzerPort",
+        "SilverDQAnalyzerPort"
+      ],
+      "path": "src/bioetl/application/services/dq/gold_analyzer.py",
+      "symbol": "GoldDQAnalyzer",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "BronzeDQAnalyzerPort",
+        "GoldDQAnalyzerPort",
+        "SilverDQAnalyzerPort"
+      ],
+      "path": "src/bioetl/application/services/dq/silver_analyzer.py",
+      "symbol": "SilverDQAnalyzer",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "DataSourceFactoryPort",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/composition/bootstrap/assembly/health_service.py",
+      "symbol": "_HealthCheckDataSourceFactory",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [
+        "CompositeRuntimeStorageProtocol"
+      ],
+      "path": "src/bioetl/composition/bootstrap/composite_infrastructure_context.py",
+      "symbol": "build_manifest_storage_factory",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "DeltaReaderPort"
+      ],
+      "path": "src/bioetl/composition/bootstrap/runtime/assay_replay_capture.py",
+      "symbol": "RequestReader",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort",
+        "PipelineRegistryPort",
+        "RunnerFactoryPort"
+      ],
+      "path": "src/bioetl/composition/bootstrap/runtime/composite_child_runner.py",
+      "symbol": "_ChildRunnerFactory",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "DataSourceFactoryPort",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/composition/factories/datasource/data_source_factory.py",
+      "symbol": "DataSourceFactory",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [
+        "BronzeDQConfigPort",
+        "GoldDQConfigPort",
+        "SilverDQConfigPort"
+      ],
+      "path": "src/bioetl/composition/factories/dq/_context_resolver_support.py",
+      "symbol": "extract_single_dq_config_impl",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [
+        "BronzeDQConfigPort",
+        "GoldDQConfigPort",
+        "SilverDQConfigPort"
+      ],
+      "path": "src/bioetl/composition/factories/dq/context_resolver.py",
+      "symbol": "extract_single_dq_config",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [
+        "SilverValidatorPort"
+      ],
+      "path": "src/bioetl/composition/factories/pipeline/_creation_metadata.py",
+      "symbol": "_create_silver_validator",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/composition/factories/pipeline/run_context_factory.py",
+      "symbol": "RunContextFactory",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort",
+        "PipelineRegistryPort",
+        "RunnerFactoryPort"
+      ],
+      "path": "src/bioetl/composition/factories/pipeline/runner.py",
+      "symbol": "RunnerFactory",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/composition/factories/services/common_service_wiring.py",
+      "symbol": "_LazyStorageFactory",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [
+        "GoldValidatorPort"
+      ],
+      "path": "src/bioetl/composition/factories/services/pipeline_record_processor_builder.py",
+      "symbol": "build_record_processor_config_and_validator",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/composition/factories/services/runtime_managers.py",
+      "symbol": "UuidBatchIdGenerator",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_bronze.py",
+      "symbol": "create_bronze_writer",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_context_resolution.py",
+      "symbol": "StorageCreationContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_context_resolution.py",
+      "symbol": "create_csv_exporter_from_config",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_context_resolution.py",
+      "symbol": "resolve_layer_path",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_context_resolution.py",
+      "symbol": "rebase_local_data_path",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_context_resolution.py",
+      "symbol": "get_layer_configs",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_context_resolution.py",
+      "symbol": "resolve_storage_paths",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_context_resolution.py",
+      "symbol": "create_layer_exporters",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_context_resolution.py",
+      "symbol": "resolve_export_flags",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_context_resolution.py",
+      "symbol": "log_export_status",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_context_resolution.py",
+      "symbol": "log_configured_export_status",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_context_resolution.py",
+      "symbol": "resolve_flat_structure_flags",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_context_resolution.py",
+      "symbol": "build_storage_creation_context",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_gold.py",
+      "symbol": "create_gold_writer",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_helpers.py",
+      "symbol": "resolve_delta_writer_base_path",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_helpers.py",
+      "symbol": "resolve_delta_writer_flat_structure",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_helpers.py",
+      "symbol": "load_pipeline_contract_policy",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_helpers.py",
+      "symbol": "load_contract_rollout_policy",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_helpers.py",
+      "symbol": "create_storage_adapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_layer_writers.py",
+      "symbol": "load_contract_rollout_policy",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_layer_writers.py",
+      "symbol": "_SilverLayerWriterSupport",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_layer_writers.py",
+      "symbol": "create_silver_layer_writer_impl",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_layer_writers.py",
+      "symbol": "create_gold_layer_writer_impl",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_silver.py",
+      "symbol": "CreateSilverWriterRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/_silver.py",
+      "symbol": "create_silver_writer",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [
+        "AuditPort"
+      ],
+      "path": "src/bioetl/composition/factories/storage/audit.py",
+      "symbol": "create_audit_port",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [
+        "CompositeMergeStorageProtocol",
+        "CompositeRuntimeStorageProtocol",
+        "GoldMergedWriteProtocol",
+        "SilverMergedWriteProtocol",
+        "BronzeStoragePort",
+        "GoldStoragePort",
+        "MergedStoragePort",
+        "SilverStoragePort",
+        "StorageMaintenancePort"
+      ],
+      "path": "src/bioetl/composition/factories/storage/bundle.py",
+      "symbol": "StorageBundle",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/clear_mixin.py",
+      "symbol": "StorageBundleClearMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [
+        "TracingPort"
+      ],
+      "path": "src/bioetl/composition/factories/storage/factory.py",
+      "symbol": "resolve_tracing_port",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [
+        "StorageContextProtocol"
+      ],
+      "path": "src/bioetl/composition/factories/storage/factory.py",
+      "symbol": "StorageContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/composition/factories/storage/factory.py",
+      "symbol": "StorageFactory",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/health_mixin.py",
+      "symbol": "StorageBundleHealthMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/maintenance_mixin.py",
+      "symbol": "StorageBundleMaintenanceMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [
+        "GoldMergedWriteProtocol",
+        "SilverMergedWriteProtocol",
+        "MergedStoragePort"
+      ],
+      "path": "src/bioetl/composition/factories/storage/merged_mixin.py",
+      "symbol": "StorageBundleMergedMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/resilience.py",
+      "symbol": "run_storage_blocking",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/resilience.py",
+      "symbol": "create_silver_atomic_retry_policy",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/resilience.py",
+      "symbol": "create_silver_merge_resilience_policy",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/composition/factories/storage/write_mixin.py",
+      "symbol": "StorageBundleWriteMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort",
+        "ExecutionObservabilityPort"
+      ],
+      "path": "src/bioetl/composition/observability.py",
+      "symbol": "ObservabilityBundle",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/domain/aggregates/_batch_aggregate.py",
+      "symbol": "Batch",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/domain/aggregates/quarantine_entry.py",
+      "symbol": "QuarantineEntry",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/domain/context.py",
+      "symbol": "PipelineContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/domain/context_run.py",
+      "symbol": "PipelineRunContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "GoldValidatorPort",
+        "SilverValidatorPort"
+      ],
+      "path": "src/bioetl/domain/control_plane/contract_registry_types.py",
+      "symbol": "ContractRegistryEntry",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "GoldValidatorPort",
+        "SilverValidatorPort"
+      ],
+      "path": "src/bioetl/domain/control_plane/gold_contract.py",
+      "symbol": "GoldContract",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/domain/control_plane/gold_contract.py",
+      "symbol": "GoldContractRegistry",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/domain/locking.py",
+      "symbol": "LockContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "GoldValidatorPort",
+        "SilverValidatorPort"
+      ],
+      "path": "src/bioetl/domain/medallion.py",
+      "symbol": "WriteModePolicy",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "noop",
+      "implemented_ports": [
+        "MetadataWriterPort"
+      ],
+      "path": "src/bioetl/domain/ports/noop/_memory_metadata.py",
+      "symbol": "NoOpMetadataWriter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "GoldValidatorPort",
+        "SilverValidatorPort"
+      ],
+      "path": "src/bioetl/domain/types/contract_identity.py",
+      "symbol": "ContractIdentity",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/domain/value_objects/run_context.py",
+      "symbol": "RunContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "DataSourcePort"
+      ],
+      "path": "src/bioetl/infrastructure/adapters/cached_bronze_data_source.py",
+      "symbol": "CachedBronzeDataSource",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "InputFilterPort"
+      ],
+      "path": "src/bioetl/infrastructure/adapters/input/csv_filter_reader.py",
+      "symbol": "CsvFilterReader",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "IDMappingSourceReaderPort"
+      ],
+      "path": "src/bioetl/infrastructure/adapters/input/idmapping_csv_reader_adapter.py",
+      "symbol": "IDMappingCsvReaderAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/adapters/pubmed/_filter_fetch_support.py",
+      "symbol": "_EmptyBronzeAsyncIterator",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "AdrServicePort",
+        "GoldValidatorPort",
+        "SilverValidatorPort"
+      ],
+      "path": "src/bioetl/infrastructure/adr/fs_adr_service.py",
+      "symbol": "FilesystemAdrCatalog",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "ProviderSettingsProtocol",
+        "_StoragePathSettingsHost"
+      ],
+      "path": "src/bioetl/infrastructure/config/_base.py",
+      "symbol": "Settings",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/config/_composite_gold_schema_registry.py",
+      "symbol": "_LazyCompositeGoldSchemaRegistry",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "StorageFactoryProtocol",
+        "BatchIdGeneratorPort"
+      ],
+      "path": "src/bioetl/infrastructure/control_plane/file_archive_store.py",
+      "symbol": "FileArchiveStore",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/__init__.py",
+      "symbol": "__getattr__",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "CsvExporterProtocol"
+      ],
+      "path": "src/bioetl/infrastructure/export/csv_exporter.py",
+      "symbol": "CsvExporter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+      "symbol": "atomic_csv_write",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+      "symbol": "append_to_csv",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/csv_exporter_table_ops.py",
+      "symbol": "is_complex_type",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/csv_exporter_table_ops.py",
+      "symbol": "serialize_column_to_json",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/csv_exporter_table_ops.py",
+      "symbol": "flatten_table_for_csv",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/csv_exporter_table_ops.py",
+      "symbol": "sort_table",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/csv_exporter_table_ops.py",
+      "symbol": "deduplicate_table",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "DebugExportPort"
+      ],
+      "path": "src/bioetl/infrastructure/export/debug_export_adapter.py",
+      "symbol": "DebugExportAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "symbol": "resolve_debug_export_root",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "symbol": "collect_headers",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "symbol": "normalize_csv_value",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "symbol": "write_debug_csv",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "symbol": "write_debug_schema",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "symbol": "chunk_table_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "symbol": "sheet_name_for_chunk",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "symbol": "write_sheet_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "symbol": "acquire_worksheet",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "symbol": "write_debug_xlsx",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "symbol": "fingerprint_artifact",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "symbol": "compute_pack_hash",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "symbol": "compute_tables_hash",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "DQReportWriterPort"
+      ],
+      "path": "src/bioetl/infrastructure/export/dq_report_writer.py",
+      "symbol": "DQReportWriter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "ExportCatalogPort"
+      ],
+      "path": "src/bioetl/infrastructure/export/export_catalog_adapter.py",
+      "symbol": "ExportCatalogAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "ExportWriterPort"
+      ],
+      "path": "src/bioetl/infrastructure/export/export_writer_adapter.py",
+      "symbol": "ExportWriterAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "BronzeDQConfigPort",
+        "GoldDQConfigPort",
+        "SilverDQConfigPort"
+      ],
+      "path": "src/bioetl/infrastructure/schemas/dq_report_config.py",
+      "symbol": "BronzeDQReportConfig",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "BronzeDQConfigPort",
+        "GoldDQConfigPort",
+        "SilverDQConfigPort"
+      ],
+      "path": "src/bioetl/infrastructure/schemas/dq_report_config.py",
+      "symbol": "SilverDQReportConfig",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "BronzeDQConfigPort",
+        "GoldDQConfigPort",
+        "SilverDQConfigPort"
+      ],
+      "path": "src/bioetl/infrastructure/schemas/dq_report_config.py",
+      "symbol": "GoldDQReportConfig",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/audit_normalization.py",
+      "symbol": "require_audit_timestamp",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/audit_normalization.py",
+      "symbol": "require_audit_run_id",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/base_delta_writer.py",
+      "symbol": "delta_table",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/base_delta_writer.py",
+      "symbol": "_get_string_fields",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/base_delta_writer.py",
+      "symbol": "_get_delta_table_arrow_schema",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/base_delta_writer.py",
+      "symbol": "coerce_null_types_for_delta",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "abstract_base",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/base_delta_writer.py",
+      "symbol": "BaseDeltaWriter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/base_delta_writer_access.py",
+      "symbol": "BaseDeltaWriterTableAccessMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+      "symbol": "_CleanupConflict",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+      "symbol": "BronzeRootLease",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+      "symbol": "open_bronze_root_no_follow",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+      "symbol": "valid_bronze_scope_name",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+      "symbol": "shared_lease_without_caps",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+      "symbol": "destructive_cleanup_supported",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+      "symbol": "stat_is_link_or_reparse",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+      "symbol": "is_reserved_bronze_maintenance_name",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+      "symbol": "bronze_tree_lock",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_apply.py",
+      "symbol": "BronzeGroupCleanup",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_apply.py",
+      "symbol": "group_cleanup_for_lock",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_apply.py",
+      "symbol": "cleanup_roots",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_apply.py",
+      "symbol": "execute_cleanup_plan",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py",
+      "symbol": "open_group_journal",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py",
+      "symbol": "GroupJournal",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_members.py",
+      "symbol": "GroupMemberRecovery",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py",
+      "symbol": "GroupRecordStore",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_recovery.py",
+      "symbol": "GroupRecoveryCoordinator",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_metrics.py",
+      "symbol": "emit_cleanup_outcome_metrics",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_metrics.py",
+      "symbol": "GroupJournalConflict",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_metrics.py",
+      "symbol": "GroupJournalFailure",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_metrics.py",
+      "symbol": "GroupRecoveryResult",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_metrics.py",
+      "symbol": "GroupSpec",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_planner.py",
+      "symbol": "_CleanupCandidate",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_planner.py",
+      "symbol": "_CleanupDatePlan",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_planner.py",
+      "symbol": "_CleanupPlanScope",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_planner.py",
+      "symbol": "BronzeCleanupPlannerMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_posix.py",
+      "symbol": "_StageOrigin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_posix.py",
+      "symbol": "safe_unlink",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_posix.py",
+      "symbol": "safe_rmdir",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py",
+      "symbol": "BronzeCleanupPreviewMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "symbol": "bronze_tree_lock",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "symbol": "real_root",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "symbol": "root_components_safe",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "symbol": "is_within_root",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "symbol": "is_fully_resolved",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "symbol": "is_owned_artifact",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "symbol": "date_dir_name_is_canonical",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "symbol": "date_dir_name_is_older",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "symbol": "validate_scope_filter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "symbol": "scan_dir_entries",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "symbol": "iter_safe_child_dirs",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "symbol": "iter_writer_scope_dirs",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "symbol": "safe_named_child_dir",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "symbol": "find_old_date_dirs",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "symbol": "candidate_is_safe",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/facade_contracts.py",
+      "symbol": "BronzeWriterRuntimeServices",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+      "symbol": "BronzeWriterIOMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+      "symbol": "write_bytes_if_absent_or_same",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_assembly.py",
+      "symbol": "BronzeLineageMetadataRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_assembly.py",
+      "symbol": "BronzeMetadataPayloadRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_assembly.py",
+      "symbol": "build_bronze_lineage_metadata",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_assembly.py",
+      "symbol": "build_bronze_metadata_payload",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_assembly.py",
+      "symbol": "build_full_bronze_metadata",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_mixin.py",
+      "symbol": "BronzeWriterMetadataMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_operations.py",
+      "symbol": "BronzeMetadataWriteRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_operations.py",
+      "symbol": "PreparedBronzeMetadataWrite",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_operations.py",
+      "symbol": "prepare_bronze_metadata_write",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_operations.py",
+      "symbol": "_build_bronze_metadata_input_request",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_paths.py",
+      "symbol": "calculate_bronze_completed_at",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_paths.py",
+      "symbol": "resolve_bronze_metadata_base_path",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_snapshot_refs.py",
+      "symbol": "build_bronze_source_metadata_with_live_snapshot",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_snapshot_refs.py",
+      "symbol": "attach_live_snapshot_to_source_metadata",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_snapshot_refs.py",
+      "symbol": "build_live_input_snapshot_ref_if_available",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_snapshot_refs.py",
+      "symbol": "build_live_input_snapshot_ref",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_snapshot_refs.py",
+      "symbol": "content_addressed_snapshot_id",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metadata_snapshot_refs.py",
+      "symbol": "compute_file_sha256",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/metrics_mixin.py",
+      "symbol": "BronzeWriterMetricsMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/pipeline_helpers.py",
+      "symbol": "BronzeWriteRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/pipeline_helpers.py",
+      "symbol": "BronzeWritePrepared",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/pipeline_helpers.py",
+      "symbol": "BronzeWriteArtifacts",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/pipeline_helpers.py",
+      "symbol": "BronzeWritePostwriteContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/pipeline_helpers.py",
+      "symbol": "prepare_bronze_write",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/pipeline_helpers.py",
+      "symbol": "build_bronze_write_artifacts",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+      "symbol": "BronzeWriterReadMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+      "symbol": "BronzeWriterReadCleanupMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/reporting_helpers.py",
+      "symbol": "BronzeAuditWriteRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/reporting_helpers.py",
+      "symbol": "BronzeMetadataInputRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/reporting_helpers.py",
+      "symbol": "build_bronze_audit_entry",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/reporting_helpers.py",
+      "symbol": "build_bronze_metadata_input",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py",
+      "symbol": "BronzeWriterSideEffectsMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/validation_mixin.py",
+      "symbol": "BronzeWriterValidationMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/write_execution.py",
+      "symbol": "run_bronze_post_write_actions",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze/write_execution.py",
+      "symbol": "write_bronze_data_and_sidecar",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/bronze_write_result_helpers.py",
+      "symbol": "is_bronze_write_result_persisted",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "BronzeStoragePort"
+      ],
+      "path": "src/bioetl/infrastructure/storage/bronze_writer.py",
+      "symbol": "BronzeWriter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/composite_replay_bundle.py",
+      "symbol": "digest_bytes",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/composite_replay_bundle.py",
+      "symbol": "implementation_fingerprint",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/composite_replay_bundle.py",
+      "symbol": "publish_bytes",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/composite_replay_bundle.py",
+      "symbol": "confined_path",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/composite_replay_bundle.py",
+      "symbol": "publish_json",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/composite_replay_bundle.py",
+      "symbol": "load_verified_json",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/composite_replay_bundle.py",
+      "symbol": "canonical_table",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/composite_replay_bundle.py",
+      "symbol": "publish_table",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/composite_replay_bundle.py",
+      "symbol": "verify_bundle",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/composite_replay_evidence.py",
+      "symbol": "replay_artifacts",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/composite_replay_evidence.py",
+      "symbol": "project_assay_replay",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/composite_replay_evidence.py",
+      "symbol": "verify_replay_outputs",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/composite_replay_evidence.py",
+      "symbol": "verification_receipt",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "DeltaReaderPort"
+      ],
+      "path": "src/bioetl/infrastructure/storage/composite_replay_inputs.py",
+      "symbol": "CompositeInputCapture",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "DeltaReaderPort"
+      ],
+      "path": "src/bioetl/infrastructure/storage/composite_replay_inputs.py",
+      "symbol": "CompositeReplayInputReader",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/arrow_converter.py",
+      "symbol": "ArrowSchemaPreparationContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/arrow_converter.py",
+      "symbol": "serialize_value_for_arrow_schema",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/arrow_converter.py",
+      "symbol": "get_string_fields",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/arrow_converter.py",
+      "symbol": "build_arrow_schema_preparation_context",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/arrow_converter.py",
+      "symbol": "filter_record_for_schema",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/arrow_converter.py",
+      "symbol": "sort_arrow_table_by_primary_keys",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/arrow_converter.py",
+      "symbol": "ArrowDataConverter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/gold_table_vacuum.py",
+      "symbol": "vacuum_gold_delta_table",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/path_layout.py",
+      "symbol": "has_provider_entity_suffix",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/path_layout.py",
+      "symbol": "resolve_delta_writer_base_path",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/resilience.py",
+      "symbol": "AdaptiveRetryPolicy",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/resilience.py",
+      "symbol": "SilverMergeResiliencePolicy",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/resilience.py",
+      "symbol": "build_default_atomic_replace_retry_policy",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/resilience.py",
+      "symbol": "build_default_atomic_group_replace_retry_policy",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/resilience.py",
+      "symbol": "build_default_silver_merge_policy",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/schema_ops.py",
+      "symbol": "delta_schema_to_pyarrow",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/schema_ops.py",
+      "symbol": "coerce_null_types_for_delta",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/schema_ops.py",
+      "symbol": "drop_nondeterministic_persisted_fields",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+      "symbol": "resolve_parquet_file_uri",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+      "symbol": "read_delta_records",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+      "symbol": "load_delta_table",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+      "symbol": "normalize_delta_filesystem_path",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+      "symbol": "resolve_delta_table_path",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+      "symbol": "get_delta_table_arrow_schema",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+      "symbol": "clear_delta_tables",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "DeltaReaderPort"
+      ],
+      "path": "src/bioetl/infrastructure/storage/delta_reader.py",
+      "symbol": "DeltaReader",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta_reader_helpers.py",
+      "symbol": "count_delta_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/delta_reader_helpers.py",
+      "symbol": "try_native_delta_row_count",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/file_metadata_index.py",
+      "symbol": "FileMetadataIndex",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/cancellation.py",
+      "symbol": "GoldWriteCancelled",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/cancellation.py",
+      "symbol": "_DeferredCancellation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/cancellation.py",
+      "symbol": "_PhysicalCancellationBoundary",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/commit_outcome.py",
+      "symbol": "await_physical_commit",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/commit_outcome.py",
+      "symbol": "receipt_for",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/commit_outcome.py",
+      "symbol": "GoldOutcomeBoundary",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/commit_outcome.py",
+      "symbol": "GoldDiagnosticsBoundary",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/io_delta_mixins.py",
+      "symbol": "_GoldWriterExecutorArrowMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [
+        "GoldWriterSimpleDeltaHostProtocol",
+        "_GoldMergedWriteHostProtocol"
+      ],
+      "path": "src/bioetl/infrastructure/storage/gold/io_delta_mixins.py",
+      "symbol": "_GoldWriterSimpleDeltaMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/io_delta_mixins.py",
+      "symbol": "_GoldWriterScd2MergeMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/io_delta_runtime.py",
+      "symbol": "_SimpleGoldWriteRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/io_delta_runtime.py",
+      "symbol": "_PreparedSimpleGoldWrite",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/io_delta_runtime.py",
+      "symbol": "_PreparedScd2GoldWrite",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/io_delta_runtime.py",
+      "symbol": "_build_simple_gold_write",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/io_helpers.py",
+      "symbol": "load_gold_writer_module",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/io_helpers.py",
+      "symbol": "initialize_scd2_records",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/io_helpers.py",
+      "symbol": "write_scd2_once",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [
+        "GoldMergedWriteProtocol",
+        "GoldWriterSimpleDeltaHostProtocol",
+        "_GoldMergedWriteHostProtocol"
+      ],
+      "path": "src/bioetl/infrastructure/storage/gold/io_mixin.py",
+      "symbol": "_GoldWriterMergedDispatchMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [
+        "GoldMergedWriteProtocol",
+        "GoldWriterSimpleDeltaHostProtocol",
+        "_GoldMergedWriteHostProtocol"
+      ],
+      "path": "src/bioetl/infrastructure/storage/gold/io_mixin.py",
+      "symbol": "GoldWriterIOMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/io_preparation.py",
+      "symbol": "_GoldMergedWriteRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/io_preparation.py",
+      "symbol": "_PreparedGoldMergedWrite",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_audit.py",
+      "symbol": "_GoldAuditWriteRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_audit.py",
+      "symbol": "_build_gold_audit_entry",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_mixin.py",
+      "symbol": "GoldWriterMetadataMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_operation_helpers.py",
+      "symbol": "normalize_delta_version_value",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_operation_helpers.py",
+      "symbol": "extract_delta_table_version",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_operation_helpers.py",
+      "symbol": "raise_missing_gold_metadata_bundle",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_operations.py",
+      "symbol": "_GoldMetadataWriteRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_operations.py",
+      "symbol": "_GoldMergedMetadataWriteRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_operations.py",
+      "symbol": "_PreparedGoldMetadataWrite",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_payloads.py",
+      "symbol": "build_gold_metadata_input",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_payloads.py",
+      "symbol": "build_gold_merged_metadata_input",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_payloads.py",
+      "symbol": "build_gold_metadata_payload",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/metadata_payloads.py",
+      "symbol": "build_gold_metadata_via_coordinator",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/pipeline_helpers.py",
+      "symbol": "GoldWriteRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/pipeline_helpers.py",
+      "symbol": "PreparedGoldWriteContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/pipeline_helpers.py",
+      "symbol": "GoldWriteDispatchContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/pipeline_helpers.py",
+      "symbol": "GoldWritePostwriteContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/pipeline_helpers.py",
+      "symbol": "normalize_scd_config",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/pipeline_helpers.py",
+      "symbol": "set_gold_write_span_attributes",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/pipeline_helpers.py",
+      "symbol": "prepare_gold_write",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/pipeline_helpers.py",
+      "symbol": "post_write_gold",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py",
+      "symbol": "_build_read_projection",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py",
+      "symbol": "GoldWriterReadCleanupMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [
+        "GoldWriterSimpleDeltaHostProtocol"
+      ],
+      "path": "src/bioetl/infrastructure/storage/gold/runtime_helpers.py",
+      "symbol": "GoldWriterRuntimeServices",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/runtime_helpers.py",
+      "symbol": "build_gold_writer_runtime_services",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/validation_mixin.py",
+      "symbol": "GoldWriterValidationMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold/writer_request.py",
+      "symbol": "_build_gold_write_request",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold_writer.py",
+      "symbol": "delta_table",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/gold_writer.py",
+      "symbol": "write_deltalake",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "GoldMergedWriteProtocol",
+        "GoldStoragePort",
+        "GoldReconciliationReaderProtocol",
+        "GoldSnapshotReaderProtocol"
+      ],
+      "path": "src/bioetl/infrastructure/storage/gold_writer.py",
+      "symbol": "GoldWriter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/lineage_persistence.py",
+      "symbol": "lineage_fragment_publication_required",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/lineage_persistence.py",
+      "symbol": "emit_lineage_refs_missing_metric",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/lineage_persistence.py",
+      "symbol": "emit_composite_source_selection_metrics",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/lineage_persistence.py",
+      "symbol": "resolve_metadata_and_lineage_fragment",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/lineage_persistence.py",
+      "symbol": "persist_lineage_fragment_if_present",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/builder_base.py",
+      "symbol": "_get_git_commit_cached",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/builder_base.py",
+      "symbol": "_build_silver_artifact_id",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/builder_base.py",
+      "symbol": "_build_gold_artifact_id",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/builder_base.py",
+      "symbol": "_MetadataBuilderBase",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/metadata_helpers.py",
+      "symbol": "_build_metadata",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/metadata_helpers.py",
+      "symbol": "build_and_validate_metadata",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/metadata_helpers.py",
+      "symbol": "inspect_schema_metadata",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/metadata_helpers.py",
+      "symbol": "_get_config",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/writer_operations.py",
+      "symbol": "_PreparedMetadataWrite",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/writer_operations.py",
+      "symbol": "_MetadataWriteRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/writer_operations.py",
+      "symbol": "_ResolvedMetadataTarget",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/writer_operations.py",
+      "symbol": "_MetadataWriteTelemetryContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/writer_operations.py",
+      "symbol": "_PreparedMetadataWriteOperation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/writer_operations.py",
+      "symbol": "_MetadataWriteRetryState",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/writer_operations.py",
+      "symbol": "_MetadataWriteFinalTelemetry",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/writer_operations.py",
+      "symbol": "_get_metadata_filename",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/writer_operations.py",
+      "symbol": "_build_prepared_metadata_write",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/writer_operations.py",
+      "symbol": "_build_metadata_write_telemetry_context",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/writer_operations.py",
+      "symbol": "_build_prepared_metadata_write_operation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/writer_operations.py",
+      "symbol": "_build_metadata_write_final_telemetry",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata/writer_operations.py",
+      "symbol": "_build_retry_callback",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata_artifact_dataset.py",
+      "symbol": "derive_dataset_ref",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata_artifact_dataset.py",
+      "symbol": "resolve_lineage_log_context",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata_artifact_details.py",
+      "symbol": "build_artifact_publication_details",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata_artifact_details.py",
+      "symbol": "resolve_artifact_semantics",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata_artifact_details.py",
+      "symbol": "attach_input_snapshot_details",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata_artifact_details.py",
+      "symbol": "serialize_input_snapshot_ref",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata_artifact_metrics.py",
+      "symbol": "artifact_publication_metric_labels",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata_artifact_metrics.py",
+      "symbol": "record_artifact_publication_metric",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata_artifact_metrics.py",
+      "symbol": "require_artifact_publication_identifier",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "wrapper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata_writer.py",
+      "symbol": "_FacadeMetadataWriterOperations",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata_writer.py",
+      "symbol": "MetadataWriter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata_writer_finalizers.py",
+      "symbol": "build_silver_metadata_finalizer",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata_writer_finalizers.py",
+      "symbol": "build_gold_metadata_finalizer",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata_writer_helpers.py",
+      "symbol": "load_existing_metadata_model",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/metadata_writer_operations_impl.py",
+      "symbol": "_MetadataWriterOperations",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "MetadataWriterPort"
+      ],
+      "path": "src/bioetl/infrastructure/storage/metadata_writer_public.py",
+      "symbol": "MetadataWriter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "RunReportStorePort"
+      ],
+      "path": "src/bioetl/infrastructure/storage/run_report_store_adapter.py",
+      "symbol": "FileRunReportStoreAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/audit_operations.py",
+      "symbol": "_SilverAuditWriteRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/audit_operations.py",
+      "symbol": "_build_silver_audit_entry",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py",
+      "symbol": "_MergeExecutionTimeoutError",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py",
+      "symbol": "ReplaySafeRerunContract",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py",
+      "symbol": "build_replay_safe_rerun_contract",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py",
+      "symbol": "_build_content_changed_predicate",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py",
+      "symbol": "_build_merge_update_predicate",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py",
+      "symbol": "_build_merge_condition",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py",
+      "symbol": "_build_merge_execute_callable",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/delta_mixin.py",
+      "symbol": "SilverWriterDeltaMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/delta_request_models.py",
+      "symbol": "_DeltaWriteRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/delta_request_models.py",
+      "symbol": "_DeltaWriteDispatchPolicy",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/delta_request_models.py",
+      "symbol": "_build_dispatch_policy",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/delta_write_execution.py",
+      "symbol": "_build_plain_delta_write_kwargs",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/finalization_models.py",
+      "symbol": "_SilverWriteFinalizationPreparationRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/finalization_models.py",
+      "symbol": "_SilverWriteResultFinalizationRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [
+        "_SilverWriterMergedHostProtocol"
+      ],
+      "path": "src/bioetl/infrastructure/storage/silver/maintenance_mixin.py",
+      "symbol": "SilverWriterMaintenanceMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [
+        "SilverMergedWriteProtocol",
+        "_SilverWriterMergedHostProtocol"
+      ],
+      "path": "src/bioetl/infrastructure/storage/silver/merged_mixin.py",
+      "symbol": "SilverWriterMergedMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/merged_operations.py",
+      "symbol": "_MergedSilverWriteRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/merged_operations.py",
+      "symbol": "_build_merged_silver_write_request",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/merged_operations.py",
+      "symbol": "_PreparedMergedSilverWrite",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/merged_request_support.py",
+      "symbol": "_CommonMergedWriteFields",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/merged_request_support.py",
+      "symbol": "_build_common_merged_write_fields",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/merged_request_support.py",
+      "symbol": "_build_merged_write_request_from_mapping",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/metadata_mixin.py",
+      "symbol": "SilverWriterMetadataMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/metadata_result_finalization.py",
+      "symbol": "_build_silver_write_result",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/metadata_write_models.py",
+      "symbol": "_SilverMetadataWriteRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/arrow_operations.py",
+      "symbol": "SilverArrowOperations",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "wrapper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/delta_operations.py",
+      "symbol": "_SilverDeltaOperationFacade",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/delta_operations.py",
+      "symbol": "SilverDeltaOperations",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "_SilverMaintenancePostwriteOps"
+      ],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/maintenance_operations.py",
+      "symbol": "SilverMaintenanceOperations",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "wrapper",
+      "implemented_ports": [
+        "SilverMergedWriteProtocol"
+      ],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/merged_operations.py",
+      "symbol": "_MergedWriteFacade",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "SilverMergedWriteProtocol"
+      ],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/merged_operations.py",
+      "symbol": "SilverMergedOperations",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_audit_operations.py",
+      "symbol": "log_silver_audit_via_support_request",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_audit_operations.py",
+      "symbol": "log_silver_audit_operation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_audit_operations.py",
+      "symbol": "log_internal_silver_audit_operation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "wrapper",
+      "implemented_ports": [
+        "_SilverMetadataContextHostProtocol",
+        "_SilverMetadataWriterProtocol"
+      ],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py",
+      "symbol": "_SilverMetadataContextFacade",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_dq_operations.py",
+      "symbol": "get_flat_structure",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_dq_operations.py",
+      "symbol": "get_transform_version",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_dq_operations.py",
+      "symbol": "get_transform_steps",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_dq_operations.py",
+      "symbol": "resolve_silver_manifest_id",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_dq_operations.py",
+      "symbol": "persist_silver_metadata_operation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_dq_operations.py",
+      "symbol": "resolve_finalization_dq_metrics_operation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_dq_operations.py",
+      "symbol": "resolve_version_after_operation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_dq_operations.py",
+      "symbol": "compute_silver_dq_metrics_operation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_dq_operations.py",
+      "symbol": "should_skip_silver_metadata_write_operation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_dq_operations.py",
+      "symbol": "write_silver_metadata_file_operation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_operations.py",
+      "symbol": "prepare_silver_write_finalization_context_with_default_perf_counter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_operations.py",
+      "symbol": "prepare_silver_write_finalization_context_operation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_operations.py",
+      "symbol": "finalize_silver_write_result_from_request",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_operations.py",
+      "symbol": "finalize_silver_write_result_operation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py",
+      "symbol": "_build_silver_write_result",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "_SilverMetadataContextHostProtocol",
+        "_BasePathMetadataWriter",
+        "_PositionalMetadataWriter",
+        "_SilverMetadataWriterProtocol",
+        "_TablePathMetadataWriter",
+        "_SilverMetadataPostwriteOps"
+      ],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_operations.py",
+      "symbol": "SilverMetadataOperations",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py",
+      "symbol": "resolve_flat_structure",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py",
+      "symbol": "resolve_transform_version",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py",
+      "symbol": "resolve_transform_steps",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py",
+      "symbol": "best_effort_log",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py",
+      "symbol": "resolve_manifest_id",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py",
+      "symbol": "persist_silver_metadata",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py",
+      "symbol": "resolve_finalization_dq_metrics",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py",
+      "symbol": "resolve_version_after",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py",
+      "symbol": "compute_dq_metrics_from_arrow_data",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py",
+      "symbol": "should_skip_silver_metadata_write",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py",
+      "symbol": "write_silver_metadata_file",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "wrapper",
+      "implemented_ports": [
+        "_SilverMetadataContextHostProtocol",
+        "_BasePathMetadataWriter",
+        "_PositionalMetadataWriter",
+        "_SilverMetadataWriterProtocol",
+        "_TablePathMetadataWriter",
+        "_SilverMetadataPostwriteOps"
+      ],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_write_facade.py",
+      "symbol": "_SilverMetadataWriteFacade",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_write_operations.py",
+      "symbol": "write_silver_metadata_via_support_request",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_write_operations.py",
+      "symbol": "write_internal_silver_metadata_operation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_write_operations.py",
+      "symbol": "write_silver_merged_metadata_operation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py",
+      "symbol": "_SilverAuditHost",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py",
+      "symbol": "_SilverMetadataWriteSupportRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py",
+      "symbol": "_SilverMetadataAuditSupportRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/postwrite_execution.py",
+      "symbol": "_SilverPostwriteExportHookRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/postwrite_execution.py",
+      "symbol": "_SilverPostwriteAuditHookRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/postwrite_execution.py",
+      "symbol": "_build_postwrite_export_hook_request",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/postwrite_execution.py",
+      "symbol": "_build_postwrite_audit_hook_request",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/postwrite_operations.py",
+      "symbol": "SilverPostwriteOperations",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "wrapper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/validation_operations.py",
+      "symbol": "_SilverValidationOperationFacade",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/validation_operations.py",
+      "symbol": "SilverValidationOperations",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/pipeline_helpers.py",
+      "symbol": "_SilverWriteExecutionContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/pipeline_helpers.py",
+      "symbol": "_SilverWriteInvocation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/pipeline_helpers.py",
+      "symbol": "set_silver_write_span_attributes",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/pipeline_helpers.py",
+      "symbol": "build_silver_write_execution_context",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/pipeline_helpers.py",
+      "symbol": "build_delta_write_request",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/pipeline_helpers.py",
+      "symbol": "dispatch_prepared_silver_write",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/pipeline_helpers.py",
+      "symbol": "execute_silver_write_pipeline",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/pipeline_helpers.py",
+      "symbol": "execute_silver_write_with_tracing",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/postwrite_mixin.py",
+      "symbol": "SilverWriterPostwriteMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/prepared_operation_models.py",
+      "symbol": "_PreparedSilverMetadataWriteOperation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/prepared_operation_models.py",
+      "symbol": "_ResolvedSilverMetadataContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/prepared_operation_models.py",
+      "symbol": "_PreparedSilverWriteFinalizationContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/prepared_operation_models.py",
+      "symbol": "_SilverMergedMetadataWriteRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/prepared_operation_models.py",
+      "symbol": "_build_silver_merged_metadata_write_request",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/runtime_helpers.py",
+      "symbol": "SilverWriterRuntimeServices",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [
+        "_SilverWriterMergedHostProtocol"
+      ],
+      "path": "src/bioetl/infrastructure/storage/silver/runtime_helpers.py",
+      "symbol": "SilverWriterRuntimeServicesRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [
+        "MetadataWriterPort",
+        "SilverValidatorPort",
+        "TracingPort"
+      ],
+      "path": "src/bioetl/infrastructure/storage/silver/runtime_helpers.py",
+      "symbol": "resolve_silver_writer_runtime",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/runtime_helpers.py",
+      "symbol": "_build_maintenance_operations",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/runtime_helpers.py",
+      "symbol": "_build_metadata_operations",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/runtime_helpers.py",
+      "symbol": "_build_validation_operations",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/runtime_helpers.py",
+      "symbol": "_build_delta_operations",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/runtime_helpers.py",
+      "symbol": "_build_merged_operations",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/runtime_helpers.py",
+      "symbol": "build_silver_writer_runtime_services",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/schema_drift_operations.py",
+      "symbol": "_SilverSchemaDriftDiff",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/schema_drift_operations.py",
+      "symbol": "_build_silver_schema_drift_diff",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/schema_drift_operations.py",
+      "symbol": "_build_schema_drift_info",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/support.py",
+      "symbol": "resolve_table_path",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/support.py",
+      "symbol": "get_table_schema",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/support.py",
+      "symbol": "prepare_arrow_data",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "mixin",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/validation_mixin.py",
+      "symbol": "SilverWriterValidationMixin",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/validation_operations.py",
+      "symbol": "_PreparedSilverWritePayload",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/validation_operations.py",
+      "symbol": "_ValidatedSilverWriteContext",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/validation_operations.py",
+      "symbol": "_SilverSchemaPolicyRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/validation_operations.py",
+      "symbol": "_SilverWritePreparationRequest",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/validation_operations.py",
+      "symbol": "_build_prepared_silver_write_payload",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "wrapper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/writer_metadata_facade.py",
+      "symbol": "SilverWriterMetadataFacade",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "wrapper",
+      "implemented_ports": [
+        "SilverMergedWriteProtocol"
+      ],
+      "path": "src/bioetl/infrastructure/storage/silver/writer_runtime_facade.py",
+      "symbol": "SilverWriterRuntimeFacade",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "wrapper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/silver/writer_runtime_validation_facade.py",
+      "symbol": "_SilverWriterRuntimeValidationFacade",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "SilverMergedWriteProtocol",
+        "SilverStoragePort"
+      ],
+      "path": "src/bioetl/infrastructure/storage/silver_writer.py",
+      "symbol": "SilverWriter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/_atomic_replace.py",
+      "symbol": "AtomicWriteError",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/atomic_group.py",
+      "symbol": "AtomicWriteGroup",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "callable_seam",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/atomic_ops.py",
+      "symbol": "__getattr__",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/atomic_ops.py",
+      "symbol": "atomic_write",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/atomic_ops.py",
+      "symbol": "atomic_write_bytes",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/atomic_ops.py",
+      "symbol": "atomic_write_text",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/checkpoint_writer.py",
+      "symbol": "CheckpointPathError",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/checkpoint_writer.py",
+      "symbol": "CheckpointSizeError",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [
+        "CompositeCheckpointPort"
+      ],
+      "path": "src/bioetl/infrastructure/storage/support/checkpoint_writer.py",
+      "symbol": "FileCompositeCheckpointWriter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/path_io.py",
+      "symbol": "path_exists_bounded",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/retention.py",
+      "symbol": "RetentionPolicy",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/retention_dedup.py",
+      "symbol": "resolve_test_mode_deduplication_timeout_seconds",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/retention_dedup.py",
+      "symbol": "resolve_deduplication_timeout_seconds",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/retention_dedup.py",
+      "symbol": "primary_key_tuple",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/retention_dedup.py",
+      "symbol": "primary_key_sort_key",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/retention_dedup.py",
+      "symbol": "content_identity",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/retention_dedup.py",
+      "symbol": "deduplicate_delta_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/retention_delta.py",
+      "symbol": "get_table_path",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/retention_delta.py",
+      "symbol": "load_delta_table",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/retention_delta.py",
+      "symbol": "build_table_info",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/support/retention_time_travel.py",
+      "symbol": "load_time_travel_table",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/versioned_table_resolver.py",
+      "symbol": "resolve_versioned_table_name",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/versioned_table_resolver.py",
+      "symbol": "resolve_read_candidates",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/versioned_table_resolver.py",
+      "symbol": "resolve_write_targets",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "ForeignKeyReconciliationPort",
+        "ReconciliationMutationHost",
+        "ForeignKeyReadsHost",
+        "SelectedSnapshotHost"
+      ],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py",
+      "symbol": "SilverForeignKeyReconciliationAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_identity.py",
+      "symbol": "canonical_reconciliation_value",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_identity.py",
+      "symbol": "build_quarantine_batch_id",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_identity.py",
+      "symbol": "coerce_optional_run_id",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_identity.py",
+      "symbol": "orphan_error_code",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py",
+      "symbol": "reconcile_loaded_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_normalization.py",
+      "symbol": "row_has_null_foreign_key",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_normalization.py",
+      "symbol": "normalize_row_key",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_normalization.py",
+      "symbol": "normalize_value",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
+      "symbol": "GoldExpiryCommit",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
+      "symbol": "ReconciliationMutationSummary",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
+      "symbol": "apply_reconciliation_mutation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
+      "symbol": "delete_silver_orphan_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
+      "symbol": "expire_gold_orphan_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
+      "symbol": "quarantine_orphan_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine_keys.py",
+      "symbol": "require_sql_identifier",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine_keys.py",
+      "symbol": "resolve_present_column",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine_keys.py",
+      "symbol": "resolve_mutation_identity_keys",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "factory",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine_keys.py",
+      "symbol": "build_orphan_key_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_reads.py",
+      "symbol": "filter_current_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_reads.py",
+      "symbol": "read_source_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_reads.py",
+      "symbol": "read_reference_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_reads.py",
+      "symbol": "read_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_reads.py",
+      "symbol": "filter_source_rows_to_current_run",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
+      "symbol": "filter_current_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
+      "symbol": "build_reconciliation_result",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
+      "symbol": "reference_value_set",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
+      "symbol": "partition_source_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
+      "symbol": "complete_without_mutation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
+      "symbol": "complete_dry_run",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
+      "symbol": "record_reconciliation_metrics",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
+      "symbol": "log_reconciliation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
+      "symbol": "log_reconciliation_started",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
+      "symbol": "emit_reconcile_debug_artifacts",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
+      "symbol": "complete_with_mutation",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_producer_ownership.py",
+      "symbol": "entity_hashes",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_producer_ownership.py",
+      "symbol": "capture_ownership",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_producer_ownership.py",
+      "symbol": "filter_owned_entities",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_producer_ownership.py",
+      "symbol": "selected_primary_keys",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "concrete_adapter",
+      "implemented_ports": [
+        "RowReconciliationPort"
+      ],
+      "path": "src/bioetl/infrastructure/storage/workflow_row_reconciliation.py",
+      "symbol": "StorageRowReconciliationAdapter",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_row_reconciliation_support.py",
+      "symbol": "reconcile_loaded_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_selected_snapshots.py",
+      "symbol": "capture_pipeline_snapshots",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_selected_snapshots.py",
+      "symbol": "validate_snapshot_versions",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_selected_snapshots.py",
+      "symbol": "read_selected_rows",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/workflow_selected_snapshots.py",
+      "symbol": "selected_result",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/writer_common.py",
+      "symbol": "validate_write_versions",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/writer_common.py",
+      "symbol": "get_write_targets",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "pure_helper",
+      "implemented_ports": [],
+      "path": "src/bioetl/infrastructure/storage/writer_common.py",
+      "symbol": "iterate_write_targets",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "GoldValidatorPort",
+        "SilverValidatorPort"
+      ],
+      "path": "src/bioetl/infrastructure/validation/contract_validator.py",
+      "symbol": "ContractAwareGoldValidator",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "GoldValidatorPort",
+        "SilverValidatorPort"
+      ],
+      "path": "src/bioetl/infrastructure/validation/contract_validator.py",
+      "symbol": "ContractAwareSilverValidator",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "abstract_base",
+      "implemented_ports": [
+        "GoldValidatorPort",
+        "SilverValidatorPort"
+      ],
+      "path": "src/bioetl/infrastructure/validation/pandera_validator.py",
+      "symbol": "BasePanderaValidator",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "GoldValidatorPort",
+        "SilverValidatorPort"
+      ],
+      "path": "src/bioetl/infrastructure/validation/pandera_validator.py",
+      "symbol": "PanderaSilverValidator",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "structural_candidate",
+      "implemented_ports": [
+        "GoldValidatorPort",
+        "SilverValidatorPort"
+      ],
+      "path": "src/bioetl/infrastructure/validation/pandera_validator.py",
+      "symbol": "PanderaGoldValidator",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "classification": "noop",
+      "implemented_ports": [
+        "GoldValidatorPort",
+        "SilverValidatorPort"
+      ],
+      "path": "src/bioetl/infrastructure/validation/pandera_validator.py",
+      "symbol": "NoOpValidator",
+      "verdict": "NOT_VERIFIABLE"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "basis": [
+    "docs/02-architecture/diagrams/descriptions/architecture/05b-adapter-hierarchy-providers.md header Owner: BioETL Team",
+    "docs/02-architecture/diagrams/descriptions/foundation/26-hexagonal-ports-adapters.md header Owner: BioETL Team",
+    "docs/02-architecture/diagrams/descriptions/foundation/30-port-adapter-mapping.md header Owner: BioETL Team",
+    "docs/02-architecture/diagrams/descriptions/views/26-hexagonal-ports-adapters-*.md header Owner: BioETL Team",
+    "docs/02-architecture/diagrams/descriptions/views/30-port-adapter-mapping-*.md header Owner: BioETL Team"
+  ],
+  "boundaries": [
+    "The role is tracking responsibility for unassigned concerns.",
+    "semantic_owner, composition_owner, and lifecycle_owner stay unassigned-tracking.",
+    "This record does not establish semantic, composition, or lifecycle ownership.",
+    "BioETL Team is a documented role, not a resolvable GitHub assignee.",
+    "Per-row *_tracking_responsibility strings in the frozen map remain trace pointers, not this role and not ownership.",
+    ".github/CODEOWNERS default @SatoryKono remains review ownership and is counted separately."
+  ],
+  "codeowners_review_owner": "@SatoryKono",
+  "metrics": {
+    "owner_coverage": "0/2046",
+    "owner_coverage_definition": "Rows whose semantic, composition, and lifecycle owners are all values other than unassigned-tracking. Tracking responsibility does not increment this numerator.",
+    "owner_coverage_numerator": 0,
+    "tracking_responsibility_coverage": "2046/2046",
+    "tracking_responsibility_coverage_definition": "Rows whose three unassigned concerns are covered by the BioETL Team tracking role in this decision. This is not owner coverage.",
+    "tracking_responsibility_numerator": 2046,
+    "trace_pointer_coverage": "2046/2046",
+    "trace_pointer_definition": "Frozen-map rows with non-empty semantic, composition, and lifecycle trace pointers.",
+    "universe_denominator": 2046
+  },
+  "named_person_per_row_required_by_issue": false,
+  "ownership_established": false,
+  "people_assigned": [],
+  "role": "BioETL Team",
+  "schema_version": 1,
+  "type": "tracking_responsibility"
+}

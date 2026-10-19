@@ -1,0 +1,153 @@
+{
+  "criteria": [
+    {
+      "criterion": "source revision and tree pin",
+      "evidence": {
+        "branch": "cursor_back/adapter-port-owner-map-4a22",
+        "head": "2c018779765294f6f61191e9f6ade860ada94861",
+        "origin_main": "2c018779765294f6f61191e9f6ade860ada94861",
+        "porcelain": "",
+        "source_tree_sha256": "6d24fa02c167aa32f697e19ff55580157b05013a7a45e02b03f0e39e33449bd0",
+        "tree": "2bcf21522cfc5f3e935a391276a3585400032108"
+      },
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "universe includes adapters, factories, callable seams, structural matches, provider variants, and runtime registrations",
+      "evidence": {
+        "candidate_roots": [
+          "src/bioetl/infrastructure/adapters/",
+          "src/bioetl/infrastructure/storage/",
+          "src/bioetl/infrastructure/quarantine/",
+          "src/bioetl/infrastructure/control_plane/",
+          "src/bioetl/infrastructure/checkpoint/",
+          "src/bioetl/infrastructure/observability/",
+          "src/bioetl/infrastructure/time/",
+          "src/bioetl/infrastructure/locking/",
+          "src/bioetl/infrastructure/export/",
+          "src/bioetl/infrastructure/compat/",
+          "src/bioetl/infrastructure/serialization/",
+          "src/bioetl/domain/ports/noop/",
+          "src/bioetl/composition/factories/",
+          "src/bioetl/composition/providers/",
+          "src/bioetl/application/core/data_sources/"
+        ],
+        "universe": "classes in candidate roots, token-named classes, structural Protocol matches, composition factory/register functions, provider-variant tuples, and composition/infrastructure/domain-port __getattr__ seams",
+        "verdict_rule": "bounded_structural_registration_architecture_assert: complete structural or explicit port match, composition/package/runtime reachability, and an architecture test function that both names the symbol and contains assert. This is not exhaustive semantic conformance."
+      },
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "every row has symbol, path, ports or internal contract, registration or discovery, reachability, three concerns, tests, verdict, and missing evidence",
+      "evidence": {
+        "blank_discovery": 0,
+        "blank_tests_and_missing_evidence": 0,
+        "missing_required_fields": 0,
+        "rows": 2046
+      },
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "one adapter to many ports and one port to many implementations are explicit",
+      "evidence": "reports/audit-runs/12107-r07/port-relationship-index.json",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "classifications and exclusions stay inside the denominator",
+      "evidence": {
+        "classified_coverage_pct": 100.0,
+        "histogram": {
+          "abstract_base": 11,
+          "callable_seam": 251,
+          "compatibility_export": 1,
+          "concrete_adapter": 309,
+          "factory": 304,
+          "mixin": 101,
+          "noop": 14,
+          "provider_variant": 8,
+          "pure_helper": 876,
+          "structural_candidate": 162,
+          "wrapper": 9
+        },
+        "unresolved_in_denominator": 0,
+        "universe_count": 2046
+      },
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "bounded runtime smoke is not treated as a complete AST-only universe",
+      "evidence": "AST plus bounded load_providers/list_pipeline_names/__all__ getattr smoke. Complete structural matches require a non-common member and, for private or non-port protocols, the same directory. Not a proof that every config-driven or entry-point load was executed. One test path is not behavioral conformance. Owners are not inferred from CODEOWNERS. Same-file name uses outside a definition count as references.",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "CODEOWNERS stays review ownership and the three concerns stay unassigned",
+      "evidence": "owner_coverage 0/2046; codeowner_is_not_semantic_owner on every row",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "missing owners have tracking responsibility without an invented ownership contract",
+      "evidence": "reports/audit-runs/12107-r07/tracking-responsibility-decision.json",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "classified, owner, and behavioral denominators stay separate and include unresolved rows",
+      "evidence": {
+        "behavioral_conformance_coverage_pct": 0.68,
+        "behavioral_definition": "VERIFIED rows / universe. Exclusions do not shrink this denominator.",
+        "classified_coverage_pct": 100.0,
+        "owner_coverage_pct": 0.0,
+        "verdict_histogram": {
+          "NOT_VERIFIABLE": 2031,
+          "UNREACHABLE": 1,
+          "VERIFIED": 14
+        }
+      },
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "adapters without conformance tests or owners are listed for follow-up",
+      "evidence": {
+        "defects": 0,
+        "defect_count_meaning": "The promotion rule did not fire. The count is not a claim that unchecked rows have no defects.",
+        "no_conformance_assert": 192,
+        "unassigned_owners": 2046,
+        "unreachable": 1
+      },
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "eight-provider behavior matrix does not replace the universe and its open cells stay follow-up",
+      "evidence": {
+        "inside_12109_count": 0,
+        "mandatory_not_verified": 13,
+        "matrix_acceptance": "NOT_ACCEPTED",
+        "r08_scope": "#12108 covers HTTP client policy, timeout, cancellation, generator close, executor lifecycle, and shared-client ownership. It does not accept provider payload parsing or HealthStatus mapping. R07 does not implement those #12108 tests.",
+        "r09": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12109"
+      },
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "R08 and R09 receive their inventories without new ratchet or debt-budget growth",
+      "evidence": {
+        "r08_rows": 148,
+        "r09_rows": 567,
+        "ratchet_added": false
+      },
+      "verdict": "PASS"
+    }
+  ],
+  "frozen_map_sha256": "44ce5e1207bcd9b1287427f925e0a4bf789c1547dc1ac2df15271fc0c986db55",
+  "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12107",
+  "issue_close_performed": false,
+  "map_source_pin": {
+    "branch": "cursor_back/adapter-port-owner-map-4a22",
+    "head": "2c018779765294f6f61191e9f6ade860ada94861",
+    "origin_main": "2c018779765294f6f61191e9f6ade860ada94861",
+    "porcelain": "",
+    "source_tree_sha256": "6d24fa02c167aa32f697e19ff55580157b05013a7a45e02b03f0e39e33449bd0",
+    "tree": "2bcf21522cfc5f3e935a391276a3585400032108"
+  },
+  "recommendation_ru": "карта соответствует всем acceptance criteria, оставшиеся поведенческие пробелы оформлены как follow-up",
+  "schema_version": 1,
+  "unmet_criteria": []
+}

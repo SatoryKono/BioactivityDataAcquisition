@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3824 |
-| Tracked doc-like files | 3824 |
+| Doc-like files | 3861 |
+| Tracked doc-like files | 3861 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 78 |
 | Generated without route or exception | 0 |
@@ -18,15 +18,15 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3824 |
+| tracked | 3861 |
 
 ## Lifecycle Counts
 
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
-| active_quality_baseline | 61 |
-| closeout_evidence | 165 |
+| active_quality_baseline | 68 |
+| closeout_evidence | 166 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 28 |
 | docs_reports_generated_or_route_owned | 7 |
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 130 |
+| working_report | 159 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -55,7 +55,7 @@
 | Archived | 1550 |
 | Canonical | 75 |
 | Generated | 1062 |
-| Working | 389 |
+| Working | 426 |
 
 ## Surface Families
 
@@ -65,15 +65,15 @@
 | archive | 1550 |
 | canonical | 75 |
 | generated | 1062 |
-| working | 389 |
+| working | 426 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 163 |
+| archive-after-migration | 192 |
 | generate-automatically | 1062 |
-| keep | 2599 |
+| keep | 2607 |
 
 ## Cleanup Candidates
 
@@ -120,6 +120,35 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/runtime-receipt.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/handoff.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/scan-manifest.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07-history/KIT-MANIFEST-acceptance.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07-history/KIT-MANIFEST-behavior.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07-history/KIT-MANIFEST.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/acceptance-review.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/adapter-owner-map.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/adapter-owner-map.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/behavior-followups.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/behavior-obligation-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/handoff.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/independent-review-0fd0768f.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/independent-review-6b1b10a7.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/independent-review-91f379.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/issue-12107-final-record.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/logs/pytest-24-on-80dfee.txt` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/logs/pytest-8-surface-on-80dfee.txt` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/logs/pytest-lifecycle-precommit.txt` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/map-acceptance-verdict.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/owner-decision-package.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/port-relationship-index.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/scan-manifest.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/telemetry-applicability.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/telemetry-historical/coverage-summary.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/telemetry-historical/slowest-tests.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/telemetry-historical/squash-provenance.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/tracking-responsibility-decision.json` | Working | 0 | archive-after-migration |
 | `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
 | `reports/docs-evidence/http-header-audit-and-provenance.md` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/security-ui-final-20261003/bioetl-scenes-app-gates.json` | Working | 0 | archive-after-migration |
@@ -130,35 +159,6 @@
 | `reports/observability/remediation/20260916/selected-run-status-acceptance.md` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_allowlist_review_5574.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_review.json` | Working | 0 | archive-after-migration |
-| `reports/observability/runtime_cardinality_review_pr.json` | Working | 0 | archive-after-migration |
-| `reports/performance/benchmark-summary.json` | Working | 0 | archive-after-migration |
-| `reports/performance/history/merger_input_8f9bd74269/merger_input_measurement.md` | Working | 0 | archive-after-migration |
-| `reports/performance/history/merger_input_8f9bd74269/merger_input_observations.json` | Working | 0 | archive-after-migration |
-| `reports/performance/history/merger_input_919147a/LIMITATIONS.md` | Working | 0 | archive-after-migration |
-| `reports/performance/history/merger_input_919147a/original-report.md` | Working | 0 | archive-after-migration |
-| `reports/performance/merger_input_measurement.md` | Working | 0 | archive-after-migration |
-| `reports/performance/merger_input_observations.json` | Working | 0 | archive-after-migration |
-| `reports/quality/adr-enforcement-matrix.json` | Working | 0 | archive-after-migration |
-| `reports/quality/adr-enforcement-matrix.md` | Working | 0 | archive-after-migration |
-| `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
-| `reports/quality/architecture_debt_execution_plan_2026-06-26-15-51.json` | Working | 0 | archive-after-migration |
-| `reports/quality/architecture_debt_execution_plan_2026-07-12-12-34.json` | Working | 0 | archive-after-migration |
-| `reports/quality/branch-coverage-gap-report.json` | Working | 0 | archive-after-migration |
-| `reports/quality/branch-coverage-gap-report.md` | Working | 0 | archive-after-migration |
-| `reports/quality/branch-coverage-gate-evidence.json` | Working | 0 | archive-after-migration |
-| `reports/quality/branch-coverage-tail-owner-map.json` | Working | 0 | archive-after-migration |
-| `reports/quality/cast-any-typing-census.json` | Working | 0 | archive-after-migration |
-| `reports/quality/cast-any-typing-census.md` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260805/01-scope-matrix.md` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/01-scope-matrix.json` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/01-scope-matrix.md` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260811/01-scope-matrix.json` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260811/01-scope-matrix.md` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260811/_S01-domain-aggregates.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260811/_S01-domain-registry.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260813/01-scope-matrix.json` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260813/01-scope-matrix.md` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260813/_S01-domain-aggregates.txt` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
