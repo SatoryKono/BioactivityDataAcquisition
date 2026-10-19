@@ -66,7 +66,9 @@ def record_workflow_started(
         context.ledger.record_force_requested(step_ids=force_steps)
     started_entry = context.ledger.record_workflow_started(resumed=resumed)
 
-    ambiguous_step_ids = _remove_step_ids(context.state.ambiguous_step_ids, repair_steps)
+    ambiguous_step_ids = _remove_step_ids(
+        context.state.ambiguous_step_ids, repair_steps
+    )
     repair_required = bool(ambiguous_step_ids)
 
     context.state = replace(
