@@ -25,6 +25,7 @@ INVENTORY_PATH = ROOT / "reports" / "quality" / "domain-io-taint-inventory.json"
 pytestmark = pytest.mark.architecture
 
 
+@pytest.mark.generated_artifact
 def test_domain_io_taint_inventory_artifact_matches_generator() -> None:
     """Committed Domain I/O taint evidence must match the current source tree."""
     expected = build_payload(ROOT)
@@ -33,6 +34,7 @@ def test_domain_io_taint_inventory_artifact_matches_generator() -> None:
     assert actual == expected
 
 
+@pytest.mark.generated_artifact
 def test_domain_io_taint_inventory_has_no_unreviewed_violations() -> None:
     payload = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
 
@@ -40,6 +42,7 @@ def test_domain_io_taint_inventory_has_no_unreviewed_violations() -> None:
     assert payload["violations"] == []
 
 
+@pytest.mark.generated_artifact
 def test_domain_io_taint_inventory_records_explicit_schema_boundary_exceptions() -> (
     None
 ):

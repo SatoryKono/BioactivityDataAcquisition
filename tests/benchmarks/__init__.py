@@ -27,8 +27,7 @@
 # PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
 """Performance benchmarks for BioETL critical paths.
 
-Run with the guard plugin before ``-p benchmark``. Default addopts keep
-``-p no:benchmark`` and skip this suite.
+Run with: bash scripts/engineering/dev/run_pytest.sh tests/benchmarks/ --benchmark-only
 """
 
 from __future__ import annotations

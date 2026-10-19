@@ -46,6 +46,7 @@ def _target_rows(payload: dict[str, object]) -> list[dict[str, object]]:
     return [row for row in rows if isinstance(row, dict)]
 
 
+@pytest.mark.generated_artifact
 def test_full_app_duplication_budgets_hold_reviewed_baseline() -> None:
     """Full-app duplication budgets must not grow past the reviewed baseline."""
     scorecard = _load_scorecard()

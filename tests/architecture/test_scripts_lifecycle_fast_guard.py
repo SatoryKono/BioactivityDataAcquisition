@@ -27,6 +27,7 @@ def _project_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+@pytest.mark.generated_artifact
 def test_lifecycle_registry_covers_non_active_inventory_scripts() -> None:
     """All non-active scripts in inventory must have lifecycle entries."""
     if sys.platform.startswith("win"):

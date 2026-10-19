@@ -130,6 +130,7 @@ def _reports_from_payload(payload: dict[str, object]) -> list[TargetDuplicationR
     return reports
 
 
+@pytest.mark.generated_artifact
 def test_specialized_duplication_reports_match_hotspot_baseline_targets() -> None:
     hotspot_payload = _load_json(HOTSPOT_BASELINE_JSON)
     hotspot_targets = {
@@ -174,6 +175,7 @@ def test_specialized_duplication_reports_match_hotspot_baseline_targets() -> Non
             )
 
 
+@pytest.mark.generated_artifact
 def test_specialized_duplication_markdown_matches_json_payload() -> None:
     for artifact in SPECIALIZED_DUPLICATION_ARTIFACTS:
         payload = _load_json(artifact["json_path"])
@@ -205,6 +207,7 @@ def test_specialized_duplication_markdown_matches_json_payload() -> None:
         )
 
 
+@pytest.mark.generated_artifact
 def test_hotspot_duplication_baseline_is_clean_zero_ratchet() -> None:
     payload = _load_json(HOTSPOT_BASELINE_JSON)
     summary = payload.get("summary", {})
@@ -218,6 +221,7 @@ def test_hotspot_duplication_baseline_is_clean_zero_ratchet() -> None:
     assert summary.get("total_raw_duplicate_clusters") == 7
 
 
+@pytest.mark.generated_artifact
 def test_full_app_duplication_baseline_covers_audit_visibility_scope() -> None:
     payload = _load_json(FULL_APP_DUPLICATION_ARTIFACT["json_path"])
     summary = payload.get("summary", {})
@@ -244,6 +248,7 @@ def test_full_app_duplication_baseline_covers_audit_visibility_scope() -> None:
     assert first_wave.get("target") in FULL_APP_DUPLICATION_ARTIFACT["targets"]
 
 
+@pytest.mark.generated_artifact
 def test_issue_5486_cli_first_wave_reduces_reviewed_duplication_leverage() -> None:
     """Issue #5486 keeps reviewed CLI duplication burned down and reclassified."""
     payload = _load_json(FULL_APP_DUPLICATION_ARTIFACT["json_path"])
@@ -289,6 +294,7 @@ def test_issue_5486_cli_first_wave_reduces_reviewed_duplication_leverage() -> No
     assert first_wave["duplicate_clusters"] >= cli_row["duplicate_count"]
 
 
+@pytest.mark.generated_artifact
 def test_full_app_duplication_markdown_matches_json_payload() -> None:
     payload = _load_json(FULL_APP_DUPLICATION_ARTIFACT["json_path"])
     normalization = payload.get("normalization", {})

@@ -39,6 +39,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+env:
+  BIOETL_ARTIFACT_TEST_SELECTION: ci
+
 jobs:
   classify-changes:
     name: Classify changes (decision matrix)
@@ -224,7 +227,7 @@ jobs:
       - name: Check documentation passports
         id: docs-passports
         if: needs['classify-changes'].outputs['docs-governance'] == 'required'
-        run: uv run --frozen --no-build python -m scripts.docs passports check
+        run: uv run --frozen --no-build python -m scripts.docs passports check-source
 
       - name: Check documentation links
         id: docs-links
@@ -234,7 +237,7 @@ jobs:
       - name: Verify documentation
         id: docs-verify
         if: needs['classify-changes'].outputs['docs-governance'] == 'required'
-        run: uv run --frozen --no-build python -m scripts.docs verify --skip-links
+        run: uv run --frozen --no-build python -m scripts.docs verify --skip-links --defer-generated-artifacts
 
       - name: Check MkDocs nav
         id: mkdocs-nav
@@ -391,7 +394,8 @@ jobs:
             echo "::error::tests gate has no affected pytest target"
             exit 1
           fi
-          uv run --frozen --no-build pytest "${targets[@]}" -q --tb=line
+          uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks ci \
+            --report reports/quality/affected-test-partition.json -- "${targets[@]}" -q --tb=line
 
       - name: Run mypy (strict mode, full gate)
         if: needs['classify-changes'].outputs['type-checking'] == 'required'
@@ -620,7 +624,7 @@ jobs:
       - name: Check generated schema artifacts
         id: schema-artifacts
         if: needs['classify-changes'].outputs['generated-artifacts'] == 'required'
-        run: uv run --frozen --no-build python -m scripts.schema generate-artifacts --check
+        run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts
 
       - name: Verify schema parity
         id: schema-parity

@@ -115,9 +115,15 @@ def build_legacy_completed_execution_context(
         "lineage_summary",
         "quarantine_payloads",
     }
-    merge_result = MergeResult(
-        **{key: value for key, value in payload.items() if key in merge_fields}
-    )
+    try:
+        merge_result = MergeResult(
+            **{key: value for key, value in payload.items() if key in merge_fields}
+        )
+    except (TypeError, ValueError) as error:
+        raise CheckpointConflictError(
+            state.composite_name,
+            "legacy cross_validation_completed checkpoint has invalid merge result evidence",
+        ) from error
     return CompositeExecutionContext(
         seed_result=state.seed_result,
         dependency_results=state.dependency_results,

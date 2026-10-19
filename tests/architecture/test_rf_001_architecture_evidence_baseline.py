@@ -44,6 +44,7 @@ def _read_yaml(path: Path) -> dict[str, object]:
     return payload
 
 
+@pytest.mark.generated_artifact
 def test_current_state_inventory_matches_full_app_duplication_baseline() -> None:
     """Inventory prose must not stale the actionable/raw duplication split."""
     baseline = _read_json(FULL_APP_DUPLICATION)

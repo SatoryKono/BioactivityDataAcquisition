@@ -290,6 +290,37 @@ async def test_legacy_cv_completed_without_merge_evidence_fails_closed() -> None
     assert host.order == []
 
 
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_legacy_cv_completed_invalid_merge_evidence_fails_closed() -> None:
+    state = CompositeCheckpointState.from_dict(
+        {
+            "composite_name": "legacy",
+            "run_id": "run-4",
+            "state": "cross_validation_completed",
+            "seed_completed": True,
+            "seed_result": {"pipeline_name": "seed", "records_extracted": 3},
+            "merge_result": {
+                "records_merged": 1,
+                "records_enriched": 2,
+                "records_fully_enriched": 0,
+            },
+        }
+    )
+    host = _ExecutionHost()
+
+    with pytest.raises(
+        CheckpointConflictError, match="invalid merge result evidence"
+    ) as caught:
+        await execute_locked_run_phases(
+            host,
+            CompositeLockedExecutionRequest(state=state),
+        )
+
+    assert isinstance(caught.value.__cause__, ValueError)
+    assert host.order == []
+
+
 class _FinalizationReceiptHost:
     def __init__(self) -> None:
         self.order: list[str] = []
