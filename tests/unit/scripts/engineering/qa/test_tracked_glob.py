@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from pathlib import Path
 from unittest.mock import ANY, patch
 
@@ -14,6 +15,50 @@ from scripts.engineering.qa._tracked_glob import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    "argument,expected", [("--help", 0), ("--check", 0), ("--check", 1)]
+)
+def test_suppression_inventory_standalone_without_pythonpath(
+    tmp_path: Path, argument: str, expected: int
+):
+    repo = Path(__file__).resolve().parents[5]
+    _git(tmp_path, "init")
+    product = tmp_path / "src/bioetl"
+    product.mkdir(parents=True)
+    (product / "fixture.py").write_text(
+        "# pyright: ignore[reportInvalidCast]\n" if expected else "# fixture\n"
+    )
+    _git(tmp_path, "add", ".")
+    baseline = tmp_path / "baseline.json"
+    baseline.write_text('{"files": 0, "total_rules": 0, "by_rule": {}}')
+    environment = git_discovery_environment()
+    environment.pop("PYTHONPATH", None)
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-S",
+            str(
+                repo
+                / "scripts/engineering/qa/report_basedpyright_suppression_inventory.py"
+            ),
+            argument,
+            "--root",
+            str(product),
+            "--baseline",
+            str(baseline),
+        ],
+        cwd=repo,
+        env=environment,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == expected, result.stdout + result.stderr
+    assert "ModuleNotFoundError" not in result.stderr
+    if expected:
+        assert "SHRINK-ONLY VIOLATION" in result.stdout
 
 
 def test_tracked_files_includes_tracked_and_excludes_untracked(tmp_path: Path):

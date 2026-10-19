@@ -24,8 +24,12 @@ import argparse
 import json
 import os
 import re
+import sys
 from collections import Counter
 from pathlib import Path
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from scripts.engineering.qa._tracked_glob import _find_repo_root, tracked_files
 

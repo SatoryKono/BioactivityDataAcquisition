@@ -1709,6 +1709,9 @@ def _controller_order_reasons(events: list[dict[str, Any]]) -> list[str]:
         return ["malformed_session_start"]
     if kinds[0] != "session_start" or kinds.count("session_finish") > 1:
         return ["malformed_session_order"]
+    if "collection_finished" in kinds and "outcome" in kinds:
+        if kinds.index("outcome") < kinds.index("collection_finished"):
+            return ["malformed_session_order"]
     if "session_finish" in kinds:
         tail = kinds[kinds.index("session_finish") + 1 :]
         if any(
@@ -1794,6 +1797,8 @@ _DAMAGE_REASONS = frozenset(
         "missing_cmdline_finish",
         "missing_worker_finish",
         "invalid_phase_order",
+        "cross_receipt_identity_mismatch",
+        "duplicate_worker_session",
         "unselected_outcome",
     }
 )
@@ -1972,6 +1977,25 @@ def _missing_origin_workers(
     return sorted(_outcome_origins(events) - _intact_worker_ids(receipts))
 
 
+def _worker_lifecycle_reasons(receipt: dict[str, Any]) -> list[str]:
+    kinds = [event.get("event") for event in receipt["events"]]
+    if kinds.count("session_start") != 1 or kinds[0] != "session_start":
+        return ["malformed_session_start"]
+    if "outcome" in kinds:
+        first = kinds.index("outcome")
+        if (
+            "collection_finished" not in kinds
+            or kinds.index("collection_finished") > first
+        ):
+            return ["malformed_session_order"]
+    if "session_finish" in kinds and any(
+        kind not in {"journal_finalized", "unconfigure_error", "cmdline_finish"}
+        for kind in kinds[kinds.index("session_finish") + 1 :]
+    ):
+        return ["malformed_session_order"]
+    return []
+
+
 def _worker_finish_reasons(receipts: list[dict[str, Any]]) -> list[str]:
     for receipt in receipts:
         worker = any(
@@ -1980,6 +2004,9 @@ def _worker_finish_reasons(receipts: list[dict[str, Any]]) -> list[str]:
         )
         if not worker:
             continue
+        lifecycle = _worker_lifecycle_reasons(receipt)
+        if lifecycle:
+            return lifecycle
         finishes = [
             event
             for event in receipt["events"]
@@ -1990,6 +2017,31 @@ def _worker_finish_reasons(receipts: list[dict[str, Any]]) -> list[str]:
         if len(finishes) != 1 or type(finishes[0].get("exitstatus")) is not int:
             return ["malformed_session_finish"]
     return []
+
+
+def _shared_receipt_identity_reasons(receipts: list[dict[str, Any]]) -> list[str]:
+    shared: dict[str, Any] | None = None
+    workers: set[tuple[str, str]] = set()
+    reasons: list[str] = []
+    for receipt in receipts:
+        if not receipt["events"]:
+            continue
+        identity = _event_identity(receipt["events"][0])
+        invariant = {
+            key: value
+            for key, value in identity.items()
+            if key not in {"role", "worker_id"}
+        }
+        if shared is None:
+            shared = invariant
+        elif invariant != shared:
+            reasons.append("cross_receipt_identity_mismatch")
+        if identity.get("role") == "worker":
+            key = (str(identity.get("invocation_id")), str(identity.get("worker_id")))
+            if key in workers:
+                reasons.append("duplicate_worker_session")
+            workers.add(key)
+    return reasons
 
 
 def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[str, Any]:
@@ -2003,6 +2055,7 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
         )
     reasons = _receipt_damage_reasons(receipts)
     reasons.extend(_worker_finish_reasons(receipts))
+    reasons.extend(_shared_receipt_identity_reasons(receipts))
     events = [event for item in receipts for event in item["events"]]
     flags = _session_flags(events)
     reasons.extend(_checkout_reasons(flags))
@@ -2225,6 +2278,7 @@ def reconcile_directory(
     *,
     executed_passes: list[str],
     expected_invocations: dict[str, str] | None = None,
+    expected_invocations_explicit: bool = True,
 ) -> dict[str, Any]:
     loaded = _group_receipts(journal_dir)
     unattributed = _has_unattributed_damage(loaded)
@@ -2272,6 +2326,19 @@ def reconcile_directory(
         status = "unknown"
         tests_passed = None
         reasons = sorted({*reasons, "unknown_executed_pass"})
+    ambiguous = any(
+        _receipt_is_damaged(item)
+        and not _session_started_at(item)
+        and not (
+            expected_invocations_explicit
+            and (expected_invocations or {}).get(_pass_of(item))
+        )
+        for item in loaded
+    )
+    if ambiguous:
+        status = "unknown"
+        tests_passed = None
+        reasons = sorted({*reasons, "ambiguous_damaged_invocation"})
     if unattributed:
         status = "unknown"
         tests_passed = None
@@ -2285,6 +2352,8 @@ def reconcile_directory(
         "superseded_passes": superseded,
         "executed_passes": executed_passes or names,
         "expected_invocations": _pinned_invocations(receipts, expected_invocations),
+        "expected_invocations_explicit": bool(expected_invocations)
+        and expected_invocations_explicit,
         "producer_scope": (
             "resilient-runner passes started by this process; "
             "other workflow jobs are outside this receipt"
@@ -2350,6 +2419,7 @@ def verify_directory(
     verdict_path = journal_dir / "journal-verdict.json"
     executed = executed_passes
     invocations: dict[str, str] | None = None
+    explicit = False
     if executed is None and verdict_path.exists() and not verdict_path.is_file():
         sys.stderr.write(
             "EventJournal completeness unknown: stored_verdict_unreadable\n"
@@ -2367,6 +2437,7 @@ def verify_directory(
             [str(item) for item in raw_passes] if isinstance(raw_passes, list) else []
         )
         invocations = _stored_expected_invocations(stored)
+        explicit = stored.get("expected_invocations_explicit") is True
         if invocations is None or (invocations and set(executed) != set(invocations)):
             sys.stderr.write(
                 "EventJournal completeness unknown: stored_verdict_unreadable\n"
@@ -2376,6 +2447,7 @@ def verify_directory(
         journal_dir,
         executed_passes=executed or [],
         expected_invocations=invocations,
+        expected_invocations_explicit=explicit,
     )
     if verdict["status"] != "complete":
         sys.stderr.write(
