@@ -1,0 +1,44 @@
+{
+  "timestamp": "2026-10-19T15:44:53.473200+00:00",
+  "task_issue": "#12102",
+  "description": "POSIX source-bound execution receipt for BronzeWriter/group-journal owning path on synthetic temp trees.",
+  "identity": {
+    "commit_sha": "e750ae40f408c540c355ec31de9034b141b96a94",
+    "tree_sha": "06c759420e8b99380faa2a04f930e1bc15a1af02",
+    "baseline": "e750ae40f408c540c355ec31de9034b141b96a94"
+  },
+  "environment": {
+    "os": "Linux 6.8.0 #1 SMP PREEMPT_DYNAMIC Fri Feb 20 20:38:43 UTC 2026",
+    "python": "3.13.14",
+    "filesystem": "overlayfs:/overlay/root overlay 102626232 3530168  93836800   4% /",
+    "capabilities": {
+      "dir_fd": true,
+      "O_NOFOLLOW": true,
+      "flock": true
+    },
+    "uid": 1001,
+    "user": "jules"
+  },
+  "execution": {
+    "command": "uv run pytest tests/integration/infrastructure/storage/test_bronze_writer_cleanup_safety.py tests/integration/infrastructure/storage/test_bronze_writer_cleanup_writer_races.py tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py tests/integration/infrastructure/storage/test_bronze_writer_cleanup.py tests/integration/infrastructure/storage/test_bronze_writer_cleanup_and_sidecar.py --junitxml=.jules/junit.xml --tb=short -q -k 'not flat_layout'",
+    "return_code": 0,
+    "hashes": {
+      "junit_xml_sha256": "3062e444ef2724cccae49335bedf924ee2c63e535679c5729800f8f318660622",
+      "log_sha256": "2fac0c508c04f3eb1854427388cfa596440c54c1a42f22ff378406448bdd646d"
+    }
+  },
+  "results": {
+    "collected": 196,
+    "run": 196,
+    "passed": 192,
+    "skipped": 4,
+    "failed": 0
+  },
+  "notes": [
+    "Executed on isolated synthetic tmp_path per test.",
+    "No production data affected.",
+    "Windows strategies explicitly marked as NOT_VERIFIABLE (skipped) since executed on POSIX.",
+    "Flat-layout tests explicitly excluded per session instructions.",
+    "Only trusted stable root/cooperative actor contract verified; no concurrent hostile same-UID guarantees."
+  ]
+}
