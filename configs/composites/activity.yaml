@@ -125,14 +125,10 @@ composite:
     output:
       silver: data/output/silver/composite/activity
       gold: data/output/gold/composite/activity
-    sort_by:
-      silver:
-      - entity_id
-      - activity_id
-      gold:
-      - entity_id
-      - activity_id
-
+    # Field-level priority overrides (when using explicit_rules)
+    # Maps field name to ordered list of source preferences
+    # NOTE: Currently conflict_resolution is seed_priority so these are ignored.
+    field_priorities:
     # -------------------------------------------------------------------------
     # Column Ordering by Semantic Categories
     # -------------------------------------------------------------------------
@@ -141,7 +137,6 @@ composite:
     # that would otherwise fall into the "remaining" bucket at the end.
       pii:
       - pubmed                   # PubMed Publisher Item Identifier
-
       polar_surface_area:
       - pubchem
       - chembl
@@ -152,16 +147,13 @@ composite:
       - chembl    # Seed primary_component_id is authoritative
       primary_topic:
       - openalex                 # OpenAlex-unique field
-
       publication_class:
       - chembl
       - pubmed
       - openalex
       - crossref
       - semanticscholar
-
             # === Author Metadata ===
-
       publication_subclass:
       - chembl
       - pubmed
@@ -176,37 +168,28 @@ composite:
       - semanticscholar
       publisher_id:
       - pubmed                   # PubMed publisher-specific ID
-
       qed_weighted:
       - chembl             # QED (Quantitative Estimate of Drug-likeness)
-
       references:
       - crossref                 # CrossRef-unique cited references
-
       rotatable_bond_count:
       - pubchem
       - chembl
       subject_fields:
       - semanticscholar            # S2-unique field
-
       subject_keywords:
       - crossref                 # CrossRef subjects -> subject_keywords
-
       - openalex
       - pubmed
       - semanticscholar
       subject_mesh:
       - pubmed                   # PubMed MeSH is authoritative
-
       - openalex                 # OpenAlex MeSH extraction (fallback)
-
       subject_topics:
       - openalex                 # OpenAlex hierarchical topics
-
       synonyms:
       - chembl             # Merge arrays from both
       - pubchem
-
       # === Clinical Data (ChEMBL only) ===
       # PubChem doesn't have clinical development data
       target_id:
@@ -217,11 +200,9 @@ composite:
       - chembl
       tissue_id:
       - chembl.assay
-
     # Field renaming for conflicts
       title:
       - chembl                   # ChEMBL title is authoritative
-
       - crossref
       - openalex
       withdrawn_flag:
@@ -229,6 +210,14 @@ composite:
     # -------------------------------------------------------------------------
     # Column Ordering by Semantic Categories
     # -------------------------------------------------------------------------
+    sort_by:
+      silver:
+      - entity_id
+      - activity_id
+      gold:
+      - entity_id
+      - activity_id
+
     column_groups:
       # === System / ETL metadata (MUST be first) ===
     - name: system

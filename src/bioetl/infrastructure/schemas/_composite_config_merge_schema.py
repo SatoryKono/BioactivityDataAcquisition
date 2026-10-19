@@ -29,6 +29,8 @@ class MergeOutputSchema(BaseModel):
 class MergeSortBySchema(BaseModel):
     """Deterministic sort policy for merged Silver/Gold outputs."""
 
+    model_config = ConfigDict(extra="forbid")
+
     silver: list[str] = Field(
         ..., min_length=1, description="Sort columns for merged Silver output"
     )
