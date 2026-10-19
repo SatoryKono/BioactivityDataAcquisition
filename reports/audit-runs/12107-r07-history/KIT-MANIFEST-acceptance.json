@@ -1,7 +1,7 @@
 {
-  "based_on_commit": "6b1b10a7bb5b688560dc0c799bc09be3c1c163d1",
-  "based_on_tree": "2140554cf887b81ed7849d459f57651873953c12",
-  "commit_note": "Post-review remediation of outside_12108 follow-ups. The commit that adds this manifest follows 6b1b10a7.",
+  "based_on_commit": "5a600bcb7422a405c5285343a07e8a245029f50d",
+  "based_on_tree": "be730c39faff2e52103adb1fe3d498aebcce2d47",
+  "commit_note": "Adds the delta review record. File hashes below exclude this manifest.",
   "files": [
     {
       "bytes": 24432,
@@ -42,6 +42,11 @@
       "bytes": 3004,
       "path": "reports/audit-runs/12107-r07/independent-review-91f379.json",
       "sha256": "94f762b0e5a90221ddf0f29f8405f4c66e043da784537e6aaef7d3e556d3487a"
+    },
+    {
+      "bytes": 2899,
+      "path": "reports/audit-runs/12107-r07/independent-review-6b1b10a7.json",
+      "sha256": "cefeac265422f32f1c3a7e7572fe133be7c1b74dcadb1612a1a7d97a1ad1b63d"
     },
     {
       "bytes": 9867,
@@ -131,7 +136,8 @@
   ],
   "frozen_map_sha256": "6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c",
   "historical_receipt_sha256": "1780547842c0057a68b90f39139ae7e1610d07049314b43a7f7ec8b6ae30abcc",
-  "prior_manifest_sha256": "c45e740263948d2c983e0fbcf067ef815bde2e25667f7256d33be537dfaa965e",
-  "reviewed_delta_parent": "91f3791066aebad1b8516969179da5e947e8f430",
-  "schema_version": 3
+  "prior_25_file_manifest_sha256": "c712251c46803d0fa07237cee2101226c536e52c796b10dbc1026a3b493c29d1",
+  "reviewed_delta": "91f3791066aebad1b8516969179da5e947e8f430..6b1b10a7bb5b688560dc0c799bc09be3c1c163d1",
+  "remediation_commit": "5a600bcb7422a405c5285343a07e8a245029f50d",
+  "schema_version": 4
 }
