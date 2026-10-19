@@ -417,6 +417,7 @@ class TestWithState:
             seed_result=_make_seed_result(),
             completed_enrichers=frozenset({"crossref"}),
             enrichment_results={"crossref": enricher},
+            legacy_cv_resume_blocked=True,
             created_at=created,
         )
         updated = initial.with_state(
@@ -428,6 +429,7 @@ class TestWithState:
         assert updated.run_id == "run-99"
         assert updated.seed_completed is True
         assert updated.completed_enrichers == frozenset({"crossref"})
+        assert updated.legacy_cv_resume_blocked is True
         assert updated.created_at == created
 
     def test_state_with_state__sets_updated_at__9e0e80ba(self) -> None:
@@ -578,6 +580,26 @@ class TestToDict:
             "updated_at",
         }
         assert expected_keys == set(d.keys())
+
+    def test_legacy_completion_marker_serializes_only_when_active(self) -> None:
+        state = CompositeCheckpointState(
+            composite_name="c",
+            run_id="r",
+            state=CompositePipelineState.MERGING,
+            legacy_cv_completion_pending=True,
+        )
+
+        assert state.to_dict()["legacy_cv_completion_pending"] is True
+
+    def test_legacy_running_marker_serializes_only_when_active(self) -> None:
+        state = CompositeCheckpointState(
+            composite_name="c",
+            run_id="r",
+            state=CompositePipelineState.ENRICHMENT_COMPLETED,
+            legacy_cv_resume_blocked=True,
+        )
+
+        assert state.to_dict()["legacy_cv_resume_blocked"] is True
 
     def test_state_serialized_as_string_value(self) -> None:
         """FSM state serialized as its StrEnum value."""
@@ -835,6 +857,105 @@ class TestFromDict:
         assert state.contract_version == ""
         assert state.merge_completed is False
         assert state.merge_result is None
+
+    @pytest.mark.parametrize(
+        ("legacy_state", "expected_state"),
+        [
+            (
+                "cross_validation_running",
+                CompositePipelineState.ENRICHMENT_COMPLETED,
+            ),
+            (
+                "cross_validation_completed",
+                CompositePipelineState.MERGING,
+            ),
+        ],
+    )
+    def test_legacy_cross_validation_checkpoint_preserves_progress(
+        self,
+        legacy_state: str,
+        expected_state: CompositePipelineState,
+    ) -> None:
+        """Old CV checkpoints retain their migration marker and stage evidence."""
+        data = {
+            "composite_name": "c",
+            "run_id": "r",
+            "state": legacy_state,
+            "seed_completed": True,
+            "completed_enrichers": ["already_done"],
+            "merge_completed": legacy_state == "cross_validation_completed",
+            "merge_result": {"records_merged": 3},
+        }
+
+        state = CompositeCheckpointState.from_dict(data)
+
+        assert state.state is expected_state
+        assert state.state is not CompositePipelineState.NOT_STARTED
+        assert state.seed_completed is True
+        assert state.completed_enrichers == frozenset({"already_done"})
+        assert state.merge_completed is (legacy_state == "cross_validation_completed")
+        assert state.legacy_cv_completion_pending is (
+            legacy_state == "cross_validation_completed"
+        )
+        assert state.merge_result == {"records_merged": 3}
+        assert state.legacy_cv_resume_blocked is (
+            legacy_state == "cross_validation_running"
+        )
+        restored = CompositeCheckpointState.from_dict(state.to_dict())
+        assert restored.legacy_cv_completion_pending is (
+            legacy_state == "cross_validation_completed"
+        )
+        assert restored.legacy_cv_resume_blocked is (
+            legacy_state == "cross_validation_running"
+        )
+        assert restored.merge_result == state.merge_result
+
+    def test_current_checkpoint_state_is_not_migrated(self) -> None:
+        state = CompositeCheckpointState.from_dict(
+            {
+                "composite_name": "c",
+                "run_id": "r",
+                "state": "merging",
+                "seed_completed": True,
+                "merge_result": {"records_merged": 3},
+            }
+        )
+
+        assert state.state is CompositePipelineState.MERGING
+        assert state.merge_completed is False
+        assert state.legacy_cv_completion_pending is False
+        assert state.legacy_cv_resume_blocked is False
+
+    @pytest.mark.parametrize("invalid_marker", ["true", 1, [], {}])
+    def test_non_bool_legacy_marker_is_ignored(self, invalid_marker: object) -> None:
+        state = CompositeCheckpointState.from_dict(
+            {
+                "composite_name": "c",
+                "run_id": "r",
+                "state": "failed",
+                "legacy_cv_completion_pending": invalid_marker,
+            }
+        )
+
+        assert state.state is CompositePipelineState.FAILED
+        assert state.legacy_cv_completion_pending is False
+
+    @pytest.mark.parametrize("invalid_marker", ["true", 1, [], {}])
+    def test_non_bool_legacy_running_marker_is_ignored(
+        self,
+        invalid_marker: object,
+    ) -> None:
+        state = CompositeCheckpointState.from_dict(
+            {
+                "composite_name": "c",
+                "run_id": "r",
+                "state": "merging",
+                "legacy_cv_resume_blocked": invalid_marker,
+            }
+        )
+
+        assert state.state is CompositePipelineState.MERGING
+        assert state.legacy_cv_resume_blocked is False
 
     def test_extra_fields_are_ignored(self) -> None:
         """from_dict ignores unknown fields in the dictionary (forward compat)."""

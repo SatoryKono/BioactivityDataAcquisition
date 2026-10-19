@@ -5,9 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
+    build_legacy_completed_execution_context,
+)
 from bioetl.application.composite.runtime_models import (
     CompositeExecutionContext,
 )
+from bioetl.domain.exceptions import CheckpointConflictError
 
 if TYPE_CHECKING:
     import polars as pl
@@ -174,6 +178,20 @@ class CompositeRunPhaseService:
         request: CompositeLockedExecutionContext,
     ) -> CompositeLockedExecutionResult:
         """Execute composite phases in the canonical lock-held order."""
+        if getattr(request.state, "legacy_cv_resume_blocked", False) is True:
+            raise CheckpointConflictError(
+                request.state.composite_name,
+                "legacy cross_validation_running checkpoint cannot resume safely: "
+                "the current merge service combines merge writes and cross-validation, "
+                "so replaying it would repeat completed merge writes",
+            )
+        if getattr(request.state, "legacy_cv_completion_pending", False) is True:
+            return CompositeLockedExecutionResult(
+                state=request.state,
+                execution_context=build_legacy_completed_execution_context(
+                    request.state
+                ),
+            )
         pre_merge_result = await self.execute_pre_merge(host, request)
         state, merge_result = await self.execute_merge(host, pre_merge_result)
         return CompositeLockedExecutionResult(
