@@ -231,7 +231,6 @@ def test_s7_package_cohesion_budgets_are_not_exceeded() -> None:
         assert loc <= int(row["max_package_loc"]), row["path"]
 
 
-@pytest.mark.generated_artifact
 def test_s8_domain_framework_import_ratchet() -> None:
     config = yaml.safe_load(
         (ROOT / "configs/quality/domain_dataframe_zoning.yaml").read_text(
@@ -262,6 +261,10 @@ def test_s8_domain_framework_import_ratchet() -> None:
     assert count == int(config["max_framework_imports"])
     assert str(config["linked_issue"]) == "9630"
     assert not pandas_in_forbidden
+
+
+@pytest.mark.generated_artifact
+def test_s8_documented_inventory_matches_generated_coverage() -> None:
     inventory = load_quality_json("module-coverage-inventory.json")
     summary = inventory["summary"]
     status = summary["status_counts"]

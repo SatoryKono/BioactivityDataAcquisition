@@ -239,7 +239,7 @@ are never converted into successful deferrals.
 
 Local pytest defaults to the complete selection. Use `--artifact-selection=ci`
 for PR-equivalent tests. Run the complete artifact test partition with
-`python -m scripts.engineering.ci.generated_artifact_checks daily --report /tmp/generated-artifact-selection.json`.
+`python -m scripts.engineering.ci.generated_artifact_checks daily --report reports/quality/generated-artifact-daily-selection.json`.
 
 The governance preflight fetches `origin/main` unconditionally, with full checkout
 history, before source comparisons. Missing refs or merge bases are errors; they
@@ -258,3 +258,14 @@ they collect current metric declarations/emissions, dashboard/rule references an
 source policy inputs and write fresh review evidence. The separate
 `--typed-observability-views` mode checks committed panel inventory drift; these
 ordinary workflow steps do not request that mode.
+
+Coverage-producing jobs use the same `ci` selection in PR/push and nightly runs.
+The separate daily artifact job supplies generated-evidence coverage without
+changing the test population used for coverage measurement.
+
+`python -m scripts.docs passports check-source` validates freshly projected
+schemas and blocking diagnostics in ordinary CI without comparing committed
+output bytes or orphan files. The full `passports check` remains a daily validator.
+Mixed architecture tests retain separate unmarked source assertions. The touched
+twin-family private-import gate compares live source with the PR base commit or
+push-before commit (local runs use the main merge base), never a generated census.

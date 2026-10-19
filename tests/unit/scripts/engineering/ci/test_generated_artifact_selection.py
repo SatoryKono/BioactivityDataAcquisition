@@ -430,6 +430,9 @@ def test_ordinary_observability_inventory_does_not_read_generated_reports(monkey
     assert all("--typed-observability-views" not in command for command in commands)
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="POSIX bash/shebang receipt fixture"
+)
 @pytest.mark.parametrize("generated,scope", [("false", "source"), ("true", "full")])
 def test_debt_receipt_records_executed_command_and_scope(tmp_path, generated, scope):
     import os
@@ -623,3 +626,142 @@ def test_docs_verify_preserves_failure_and_build_exit_codes(monkeypatch):
     assert verify.main([]) == 2
     monkeypatch.setattr(verify, "_require_docs_extra", lambda: 0)
     assert verify.main([]) == 9
+
+
+def test_source_checks_and_coverage_selection_survive_daily_partition():
+    nodes = {row["node"] for row in load_manifest()["tests"]}
+    retained = {
+        "test_arch_s4_s9_gates.py::test_s8_domain_framework_import_ratchet",
+        "test_domain_aggregate_classification.py::test_retired_batch_split_modules_are_absent",
+        "test_tech_debt_issues_5553_5558_closeout.py::test_issue_5554_interfaces_do_not_import_control_plane_facade",
+        "test_tech_debt_issues_6159_6169_closeout.py::test_issue_6163_live_source_hotspot_is_reduced",
+        "test_public_surface_importer_census_governance.py::test_touched_twin_family_files_do_not_grow_private_imports",
+    }
+    for relative in retained:
+        node = f"tests/architecture/{relative}"
+        assert node not in nodes
+        path, name = node.split("::")
+        function = next(
+            n
+            for n in ast.parse((ROOT / path).read_text()).body
+            if getattr(n, "name", None) == name
+        )
+        assert "pytest.mark.generated_artifact" not in {
+            ast.unparse(d) for d in function.decorator_list
+        }
+    workflow = yaml.safe_load((ROOT / ".github/workflows/tests.yml").read_text())
+    assert workflow["env"]["BIOETL_ARTIFACT_TEST_SELECTION"] == "ci"
+    for job in workflow["jobs"].values():
+        assert "BIOETL_ARTIFACT_TEST_SELECTION" not in job.get("env", {})
+        for step in job.get("steps", []):
+            assert "BIOETL_ARTIFACT_TEST_SELECTION" not in step.get("env", {})
+    steps = workflow["jobs"]["governance-preflight"]["steps"]
+    baseline = next(
+        i
+        for i, step in enumerate(steps)
+        if step["name"] == "Prepare source-governance comparison baseline"
+    )
+    twin = next(
+        i
+        for i, step in enumerate(steps)
+        if "test_public_surface_importer_census_governance.py" in step.get("run", "")
+    )
+    assert baseline < twin
+    inventory = next(
+        s
+        for s in steps
+        if s["name"] == "Validate scripts inventory + lifecycle governance"
+    )
+    assert "--check" not in inventory["run"].split()
+    daily = next(
+        row for row in load_manifest()["validators"] if row["id"] == "scripts-inventory"
+    )
+    assert "--check" in daily["argv"]
+    pr = yaml.safe_load((ROOT / ".github/workflows/pr-required.yml").read_text())
+    commands = [
+        step.get("run", "")
+        for job in pr["jobs"].values()
+        for step in job.get("steps", [])
+    ]
+    assert any(
+        "python -m scripts.docs passports check-source" in command
+        for command in commands
+    )
+
+
+@pytest.mark.parametrize("new_importer", [False, True])
+def test_twin_source_census_compares_base_ref_without_generated_reports(
+    tmp_path, monkeypatch, new_importer
+):
+    from tests.architecture import (
+        test_public_surface_importer_census_governance as gate,
+    )
+
+    def git(*args):
+        return subprocess.run(
+            ["git", *args], cwd=tmp_path, check=True, capture_output=True, text=True
+        ).stdout.strip()
+
+    git("init", "--initial-branch=main")
+    git("config", "user.email", "test@example.invalid")
+    git("config", "user.name", "Fixture")
+    package = tmp_path / "src/bioetl/core"
+    package.mkdir(parents=True)
+    for name in ("__init__", "helper", "_helper"):
+        (package / f"{name}.py").write_text("")
+    (package.parent / "__init__.py").write_text("")
+    git("add", ".")
+    git("commit", "-m", "fixture base")
+    git("checkout", "-b", "change")
+    family = {
+        "family_id": "fixture",
+        "public_module": "bioetl.core.helper",
+        "private_module": "bioetl.core._helper",
+        "max_public_src_importers": 2,
+        "max_private_src_importers": 2,
+    }
+    config = tmp_path / "ratchet.yaml"
+    config.write_text(yaml.safe_dump({"families": [family]}))
+    (package / "consumer.py").write_text(
+        "import bioetl.core._helper\n" if new_importer else "value = 1\n"
+    )
+    git("add", ".")
+    git("commit", "-m", "fixture change")
+    monkeypatch.setattr(gate, "ROOT", tmp_path)
+    monkeypatch.setattr(gate, "TWIN_RATCHET", config)
+    monkeypatch.delenv("GITHUB_EVENT_PATH", raising=False)
+    if new_importer:
+        with pytest.raises(AssertionError, match="private src importers grew"):
+            gate.test_touched_twin_family_files_do_not_grow_private_imports()
+    else:
+        gate.test_touched_twin_family_files_do_not_grow_private_imports()
+
+
+@pytest.mark.parametrize("event", ["pull_request", "push"])
+def test_twin_source_base_uses_event_commit_and_rejects_missing_base(
+    tmp_path, monkeypatch, event
+):
+    from tests.architecture import (
+        test_public_surface_importer_census_governance as gate,
+    )
+
+    payload = (
+        {"before": "abc", "pull_request": {"base": {"sha": "abc"}}}
+        if event == "pull_request"
+        else {"before": "abc"}
+    )
+    path = tmp_path / "event.json"
+    path.write_text(json.dumps(payload))
+    monkeypatch.setenv("GITHUB_EVENT_PATH", str(path))
+    monkeypatch.setenv("GITHUB_EVENT_NAME", event)
+    monkeypatch.setattr(
+        gate, "_git_command", lambda *a: subprocess.CompletedProcess([], 0, "abc\n", "")
+    )
+    assert gate._resolve_merge_base(tmp_path) == "abc"
+    monkeypatch.setattr(
+        gate,
+        "_git_command",
+        lambda *a: subprocess.CompletedProcess([], 1, "", "missing"),
+    )
+    with pytest.raises(AssertionError, match="base commit is unavailable"):
+        gate._resolve_merge_base(tmp_path)

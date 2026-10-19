@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-19T00:00:02.557663+00:00",
+  "generated_at": "2026-10-19T00:14:18.609657+00:00",
   "summary": {
     "total_scripts": 652,
     "status_counts": {
@@ -2446,7 +2446,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 341,
+          "line": 357,
           "source_group": "tests",
           "text": "\"scripts/ai/gemini/setup-bash-alias.sh\": \"legacy_manual_utility\","
         }
@@ -6072,7 +6072,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 490,
+          "line": 493,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/data_quality/run_silver_gold_filter_parity.py --check"
         },
@@ -8085,7 +8085,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 218,
+      "reference_count": 221,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -8490,7 +8490,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 608,
+          "line": 611,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
@@ -8896,7 +8896,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 343,
+          "line": 359,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/enrich_normalization_details.py\": \"compatibility_wrapper\","
         }
@@ -8933,7 +8933,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 344,
+          "line": 360,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/export_structural_contract.py\": \"compatibility_wrapper\","
         }
@@ -8970,7 +8970,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 345,
+          "line": 361,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/filter_rows.py\": \"compatibility_wrapper\","
         }
@@ -9007,7 +9007,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 346,
+          "line": 362,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/generate_field_matrix.py\": \"compatibility_wrapper\","
         },
@@ -9230,7 +9230,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 342,
+          "line": 358,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/structural_contract.py\": \"shared_helper_module\","
         },
@@ -9278,7 +9278,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-005-composition-layer-separation.md",
@@ -9949,7 +9949,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 347,
+          "line": 363,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/apply-ci-optimizations-fixed.ps1\": ("
         }
@@ -9974,7 +9974,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 350,
+          "line": 366,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/apply-ci-optimizations.ps1\": (\"legacy_manual_utility\"),"
         }
@@ -10160,7 +10160,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/nightly.yml",
@@ -10173,12 +10173,6 @@
           "line": 137,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks"
-        },
-        {
-          "path": ".github/workflows/pr-required.yml",
-          "line": 230,
-          "source_group": "ci",
-          "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator pipeline-passports"
         },
         {
           "path": ".github/workflows/pr-required.yml",
@@ -10196,7 +10190,7 @@
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
           "line": 242,
           "source_group": "docs",
-          "text": "`python -m scripts.engineering.ci.generated_artifact_checks daily --report /tmp/generated-artifact-selection.json`."
+          "text": "`python -m scripts.engineering.ci.generated_artifact_checks daily --report reports/quality/generated-artifact-daily-selection.json`."
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
@@ -10207,6 +10201,12 @@
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
           "line": 279,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci import generated_artifact_checks as checks"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
+          "line": 510,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import generated_artifact_checks as checks"
         }
@@ -13809,7 +13809,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 496,
+          "line": 499,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming-pkg --check"
         },
@@ -14136,7 +14136,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 425,
+          "line": 428,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/check_test_audit_preflight.py --strict"
         },
@@ -15302,7 +15302,7 @@
         },
         {
           "path": "tests/architecture/test_public_surface_importer_census_governance.py",
-          "line": 30,
+          "line": 34,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.import_graph_inventory import ("
         },
@@ -16214,7 +16214,7 @@
         },
         {
           "path": "tests/architecture/test_public_surface_importer_census_governance.py",
-          "line": 33,
+          "line": 38,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_compatibility_importer_census import ("
         },
@@ -17357,7 +17357,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 430,
+          "line": 433,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit \\"
         },
@@ -18468,7 +18468,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 351,
+          "line": 367,
           "source_group": "tests",
           "text": "\"scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh\": ("
         }
@@ -18812,7 +18812,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 422,
+          "line": 425,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml"
         },
@@ -18869,7 +18869,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 414,
+          "line": 417,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \\"
         },

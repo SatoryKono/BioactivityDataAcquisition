@@ -98,6 +98,8 @@ def test_issue_5554_control_plane_public_facade_has_zero_first_party_interface_i
     assert summary["control_plane_root_src_importer_count"] == 0
     assert summary["retained_public_export_facade_count"] <= 4
 
+
+def test_issue_5554_interfaces_do_not_import_control_plane_facade() -> None:
     interface_paths = sorted((ROOT / "src" / "bioetl" / "interfaces").rglob("*.py"))
     offenders = [
         path.relative_to(ROOT).as_posix()

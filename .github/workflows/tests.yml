@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  BIOETL_ARTIFACT_TEST_SELECTION: ${{ inputs.generated-artifacts && 'all' || 'ci' }}
+  BIOETL_ARTIFACT_TEST_SELECTION: ci
   # Use CI hypothesis profile for faster property-based tests (10 examples instead of 50)
   HYPOTHESIS_PROFILE: ci
   # Optimize Python for CI
@@ -378,6 +378,9 @@ jobs:
           lfs: false
           fetch-depth: 0
 
+      - name: Prepare source-governance comparison baseline
+        run: git fetch --no-tags origin main:refs/remotes/origin/main
+
       - name: Reject Git LFS pointer cassettes
         id: vcr_pointer_guard
         run: |
@@ -501,9 +504,6 @@ jobs:
       - name: Validate ADR enforcement matrix artifacts
         if: inputs.generated-artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-adr-enforcement-matrix --check
-
-      - name: Prepare source-governance comparison baseline
-        run: git fetch --no-tags origin main:refs/remotes/origin/main
 
       - name: Validate remote-main architecture debt baseline
         if: inputs.generated-artifacts

@@ -227,7 +227,7 @@ jobs:
       - name: Check documentation passports
         id: docs-passports
         if: needs['classify-changes'].outputs['docs-governance'] == 'required'
-        run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator pipeline-passports
+        run: uv run --frozen --no-build python -m scripts.docs passports check-source
 
       - name: Check documentation links
         id: docs-links

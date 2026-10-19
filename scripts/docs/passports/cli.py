@@ -68,7 +68,7 @@ def _orphan_outputs(outputs: dict[Path, bytes], output_root: Path) -> list[Path]
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", choices=("generate", "check"))
+    parser.add_argument("action", choices=("generate", "check", "check-source"))
     parser.add_argument("--configs-root", type=Path, default=Path("configs"))
     parser.add_argument(
         "--output-root", type=Path, default=Path("docs/04-reference/passports")
@@ -98,6 +98,9 @@ def main(argv: list[str] | None = None) -> int:
             f"{report['blocking_diagnostics']} diagnostics."
         )
         return 1
+    if args.action == "check-source":
+        print(f"Passport source contracts valid: {len(outputs)} projections")
+        return 0
     if args.action == "check":
         stale = [*check_outputs(outputs), *_orphan_outputs(outputs, args.output_root)]
         if stale:

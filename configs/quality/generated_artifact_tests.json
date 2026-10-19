@@ -26,7 +26,7 @@
       "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
     },
     {
-      "node": "tests/architecture/test_arch_s4_s9_gates.py::test_s8_domain_framework_import_ratchet",
+      "node": "tests/architecture/test_arch_s4_s9_gates.py::test_s8_documented_inventory_matches_generated_coverage",
       "artifacts": [
         "reports/quality/module-coverage-inventory.json"
       ],
@@ -387,7 +387,7 @@
       "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
     },
     {
-      "node": "tests/architecture/test_domain_aggregate_classification.py::test_retired_batch_split_modules_are_absent",
+      "node": "tests/architecture/test_domain_aggregate_classification.py::test_retired_batch_split_modules_are_absent_from_generated_registry",
       "artifacts": [
         "reports/quality/domain-aggregate-invariant-registry.json"
       ],
@@ -819,13 +819,6 @@
       "artifacts": [
         "reports/quality/compatibility-importer-census.json",
         "reports/quality/compatibility-importer-census.md"
-      ],
-      "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
-    },
-    {
-      "node": "tests/architecture/test_public_surface_importer_census_governance.py::test_touched_twin_family_files_do_not_grow_private_imports",
-      "artifacts": [
-        "reports/quality/compatibility-importer-census.json"
       ],
       "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
     },
