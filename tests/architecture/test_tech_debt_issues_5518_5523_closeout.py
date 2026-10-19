@@ -80,6 +80,7 @@ def test_issue_5518_cli_bootstrap_config_uses_owner_loader_seam() -> None:
     assert "def create_dq_config_loader(" in runtime_source
 
 
+@pytest.mark.generated_artifact
 def test_issue_5519_health_api_has_zero_src_importers() -> None:
     payload = _load_json(COMPATIBILITY_CENSUS)
     row = _retained_entrypoint(payload, "src/bioetl/composition/health_api.py")
@@ -89,6 +90,7 @@ def test_issue_5519_health_api_has_zero_src_importers() -> None:
     assert row["src_importers"] == []
 
 
+@pytest.mark.generated_artifact
 def test_issue_5520_domain_composite_config_root_facade_stays_zero_src_importers() -> (
     None
 ):
@@ -105,6 +107,7 @@ def test_issue_5520_domain_composite_config_root_facade_stays_zero_src_importers
     )
 
 
+@pytest.mark.generated_artifact
 def test_issue_5521_run_manifest_output_twin_pair_removed() -> None:
     payload = _load_json(COMPATIBILITY_CENSUS)
 
@@ -112,6 +115,7 @@ def test_issue_5521_run_manifest_output_twin_pair_removed() -> None:
     assert payload["summary"]["twin_pair_count"] == 0
 
 
+@pytest.mark.generated_artifact
 def test_issue_5522_entity_quality_metadata_registry_replaces_inline_duplicates() -> (
     None
 ):
@@ -137,6 +141,7 @@ def test_issue_5522_entity_quality_metadata_registry_replaces_inline_duplicates(
         assert "metadata" not in quality
 
 
+@pytest.mark.generated_artifact
 def test_issue_5523_observability_freshness_limit_is_tightened_and_passing() -> None:
     payload = _load_json(DEBT_GATES)
     gates = {row["name"]: row for row in payload["gates"] if isinstance(row, dict)}

@@ -22,6 +22,7 @@ from scripts.schema.analysis.generate_config_matrix import (
 pytestmark = [pytest.mark.architecture, pytest.mark.timeout(300)]
 
 
+@pytest.mark.generated_artifact
 def test_config_discrepancy_report_matches_deterministic_generator() -> None:
     """The config discrepancy report must be executable governance, not stale docs.
 

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Generate degradation reports for hotspot performance budgets.
+"""Validate benchmark evidence and report performance budget degradation.
+
+Independent raw validation, hotspot judgement, and baseline reduction are
+separate commands in the same performance-evidence owner. Validation never
+aggregates measurements or invokes/adopts a baseline.
 
 Consumes:
 - tests/performance/hotspot_budgets.json
@@ -33,6 +37,7 @@ from decimal import (
 from pathlib import Path
 from statistics import median
 from typing import Any
+from uuid import UUID
 
 
 @dataclass(frozen=True)
@@ -559,6 +564,215 @@ def gate_hotspot_report_main(argv: list[str] | None = None) -> int:
     status, reason = judge_hotspot_report(payload)
     print(json.dumps({"reason": reason, "status": status}, sort_keys=True))
     return 0 if status == "passed" else 1
+
+
+# Raw schema validation is independent of the reducer below.
+_EVIDENCE_SHA = re.compile(r"[0-9a-f]{40}")
+_EVIDENCE_TIMINGS = ("min", "max", "mean", "median", "stddev", "total")
+
+
+def _evidence_identity(value: object, label: str) -> str:
+    if not isinstance(value, str) or value.strip().lower() in {
+        "",
+        "unknown",
+        "unspecified",
+        "unversioned",
+    }:
+        raise ValueError(f"Missing or invalid {label}")
+    return value
+
+
+def _evidence_mapping(value: object, label: str) -> dict:
+    if not isinstance(value, dict) or not value:
+        raise ValueError(f"Missing or invalid {label}")
+    return value
+
+
+def _validate_benchmark_timing(number: object, key: str) -> None:
+    if type(number) not in (int, float):
+        raise ValueError(f"stats.{key} must be a finite number")
+    try:
+        finite = math.isfinite(number)
+    except OverflowError:
+        finite = False
+    if not finite or number < 0 or (key != "stddev" and number == 0):
+        raise ValueError(
+            f"stats.{key} must be finite and positive (stddev may be zero)"
+        )
+
+
+def _validate_benchmark_stats(stats: dict) -> None:
+    for key in ("rounds", "iterations"):
+        if type(stats.get(key)) is not int or stats[key] < 1:
+            raise ValueError(f"stats.{key} must be a positive integer")
+    for key in _EVIDENCE_TIMINGS:
+        _validate_benchmark_timing(stats.get(key), key)
+    if not stats["min"] <= stats["mean"] <= stats["max"] or not (
+        stats["min"] <= stats["median"] <= stats["max"]
+    ):
+        raise ValueError("Inconsistent timing range")
+
+
+def _validate_raw_benchmarks(value: object) -> int:
+    if not isinstance(value, list):
+        raise ValueError("benchmarks must be a list")
+    if not value:
+        raise ValueError("Zero execution or all-skipped (no benchmarks found)")
+    identities: set[str] = set()
+    for entry in value:
+        benchmark = _evidence_mapping(entry, "benchmark entry")
+        name = _evidence_identity(
+            benchmark.get("fullname") or benchmark.get("name"), "benchmark name"
+        )
+        if name in identities:
+            raise ValueError(f"Duplicate benchmark: {name}")
+        identities.add(name)
+        if benchmark.get("has_error", False) is not False:
+            raise ValueError(f"Failed benchmark detected: {name}")
+        _validate_benchmark_stats(
+            _evidence_mapping(benchmark.get("stats"), "benchmark stats")
+        )
+    return len(value)
+
+
+def _evidence_run_identity(env: Mapping[str, str], run: dict) -> dict:
+    measured_id = _evidence_identity(run.get("id"), "bioetl_run.id")
+    try:
+        UUID(measured_id)
+    except ValueError as exc:
+        raise ValueError("bioetl_run.id must be a UUID") from exc
+    if env.get("GITHUB_ACTIONS") != "true":
+        return {"environment": "local", "run_id": measured_id, "run_url": None}
+    run_id, attempt = env.get("GITHUB_RUN_ID", ""), env.get("GITHUB_RUN_ATTEMPT", "")
+    repository = env.get("GITHUB_REPOSITORY", "")
+    if (
+        not re.fullmatch(r"[1-9]\d*", run_id, flags=re.ASCII)
+        or not re.fullmatch(r"[1-9]\d*", attempt, flags=re.ASCII)
+        or not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository)
+        or env.get("GITHUB_SERVER_URL") != "https://github.com"
+    ):
+        raise ValueError("Missing or invalid GitHub run provenance")
+    return {
+        "environment": "github-actions",
+        "run_id": run_id,
+        "run_attempt": attempt,
+        "run_url": f"https://github.com/{repository}/actions/runs/{run_id}/attempts/{attempt}",
+    }
+
+
+def validate_evidence(
+    measurements_path: Path,
+    expected_sha: str | None,
+    *,
+    producer_outcome: str,
+    environ: Mapping[str, str] | None = None,
+    root: Path | None = None,
+) -> dict:
+    """Reject partial/failed producers and bind validated bytes to their identity."""
+    if producer_outcome != "success":
+        raise ValueError(f"Benchmark producer did not succeed: {producer_outcome}")
+    if (
+        not isinstance(expected_sha, str)
+        or _EVIDENCE_SHA.fullmatch(expected_sha) is None
+    ):
+        raise ValueError("expected_sha must be a full commit SHA")
+    from scripts.engineering.common.repo_paths import read_bytes_confined
+
+    try:
+        raw = read_bytes_confined(measurements_path, root=root)
+    except FileNotFoundError as exc:
+        raise ValueError(
+            f"Missing observations: {measurements_path} not found"
+        ) from exc
+    if not raw.strip():
+        raise ValueError(f"Empty JSON in {measurements_path}")
+    try:
+        data = json.loads(raw)
+    except (json.JSONDecodeError, UnicodeError) as exc:
+        raise ValueError(f"Malformed JSON in {measurements_path}") from exc
+    data = _evidence_mapping(data, "JSON structure")
+    count = _validate_raw_benchmarks(data.get("benchmarks"))
+    commit = _evidence_mapping(data.get("commit_info"), "commit_info")
+    if commit.get("id") != expected_sha:
+        raise ValueError(f"Wrong SHA. Expected {expected_sha}, got {commit.get('id')}")
+    source = _evidence_mapping(data.get("bioetl_source"), "bioetl_source")
+    if (
+        source.get("revision") != expected_sha
+        or source.get("revision_method") != "gitdir_head_file"
+    ):
+        raise ValueError("Missing or mismatched measured source revision")
+    machine = _evidence_mapping(data.get("machine_info"), "machine_info")
+    for key in ("node", "machine", "system", "python_version"):
+        _evidence_identity(machine.get(key), f"machine_info.{key}")
+    context = _evidence_mapping(data.get("bioetl_measurement"), "dataset provenance")
+    dataset = _evidence_identity(context.get("dataset"), "dataset identity")
+    run = _evidence_mapping(data.get("bioetl_run"), "bioetl_run")
+    identity = _evidence_run_identity(os.environ if environ is None else environ, run)
+    if context.get("environment") != identity["environment"]:
+        raise ValueError("Measurement environment does not match validator environment")
+    return {
+        "schema_version": 1,
+        "status": "validated",
+        "revision": expected_sha,
+        "checkout_sha": expected_sha,
+        "producer_outcome": producer_outcome,
+        "raw_sha256": hashlib.sha256(raw).hexdigest(),
+        "measured_run_id": run["id"],
+        **identity,
+        "environment_identity": machine,
+        "dataset_identity": dataset,
+        "benchmarks_count": count,
+    }
+
+
+def validate_benchmark_evidence_main(argv: list[str] | None = None) -> int:
+    """Write a separate atomic validation manifest; never overwrite reducer output."""
+    from scripts.engineering.common.repo_paths import (
+        REPO_ROOT,
+        confined_io_path,
+        write_text_confined,
+    )
+
+    parser = argparse.ArgumentParser(
+        description="Validate raw benchmark evidence independently of reduction."
+    )
+    parser.add_argument(
+        "--measurements",
+        type=Path,
+        default=Path("reports/performance/benchmark-measurements.json"),
+    )
+    parser.add_argument(
+        "--manifest-out",
+        type=Path,
+        default=Path("reports/performance/benchmark-validation-manifest.json"),
+    )
+    parser.add_argument("--expected-sha", default=os.environ.get("GITHUB_SHA"))
+    parser.add_argument("--producer-outcome", required=True)
+    parser.add_argument("--output-root", type=Path, default=REPO_ROOT)
+    args = parser.parse_args(argv)
+    try:
+        measurements = confined_io_path(args.measurements, root=args.output_root)
+        manifest_out = confined_io_path(args.manifest_out, root=args.output_root)
+        if measurements == manifest_out:
+            raise ValueError("Manifest must not overwrite measurements")
+        # A failed revalidation must not leave an earlier successful manifest.
+        manifest_out.unlink(missing_ok=True)
+        manifest = validate_evidence(
+            measurements,
+            args.expected_sha,
+            producer_outcome=args.producer_outcome,
+            root=args.output_root,
+        )
+        write_text_confined(
+            manifest_out,
+            json.dumps(manifest, indent=2, sort_keys=True, allow_nan=False) + "\n",
+            root=args.output_root,
+        )
+    except (ValueError, OSError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+    print(f"Validation successful. Manifest written to {manifest_out}")
+    return 0
 
 
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -1407,6 +1621,8 @@ def _reject_non_finite(value: str) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     args = list(argv) if argv is not None else sys.argv[1:]
+    if args and args[0] == "validate-benchmark-evidence":
+        return validate_benchmark_evidence_main(args[1:])
     if args and args[0] == "reduce-benchmark-evidence":
         return reduce_benchmark_evidence_main(args[1:])
     if args and args[0] == "gate-hotspot-report":

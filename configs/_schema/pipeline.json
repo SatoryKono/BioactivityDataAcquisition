@@ -1937,8 +1937,68 @@
       "$ref": "#/$defs/GoldFiltersConfig"
     },
     "sink": {
-      "additionalProperties": {
-        "$ref": "#/$defs/SinkLayerConfig"
+      "additionalProperties": false,
+      "properties": {
+        "bronze": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/SinkLayerConfig"
+            }
+          ],
+          "properties": {
+            "mode": {
+              "enum": [
+                "append",
+                null
+              ],
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "silver": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/SinkLayerConfig"
+            }
+          ],
+          "properties": {
+            "mode": {
+              "enum": [
+                "append",
+                "merge",
+                null
+              ],
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "gold": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/SinkLayerConfig"
+            }
+          ],
+          "properties": {
+            "mode": {
+              "enum": [
+                "append",
+                "overwrite",
+                "scd2",
+                null
+              ],
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
       },
       "title": "Sink",
       "type": "object"

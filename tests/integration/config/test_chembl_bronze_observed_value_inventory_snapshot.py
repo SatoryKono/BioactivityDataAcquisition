@@ -99,6 +99,7 @@ def _build_inventory_snapshot() -> dict[str, object]:
     return {"version": 1, "fixtures": fixtures}
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.integration
 def test_tracked_chembl_bronze_observed_value_inventory_matches_snapshot() -> None:
     snapshot_payload = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))

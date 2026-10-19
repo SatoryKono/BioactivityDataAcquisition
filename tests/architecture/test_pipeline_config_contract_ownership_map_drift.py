@@ -24,6 +24,7 @@ JSON_ARTIFACT = (
 )
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_pipeline_config_contract_ownership_map_is_current() -> None:
     """Ownership map JSON must match the generator output."""

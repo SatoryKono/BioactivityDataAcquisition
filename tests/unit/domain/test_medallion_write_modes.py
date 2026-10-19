@@ -178,24 +178,16 @@ class TestWriteModePolicy:
         with pytest.raises(PolicyViolationError, match="silver"):
             policy.validate(Layer.SILVER, WriteMode.OVERWRITE)
 
-    def test_gold_rejects_merge(self) -> None:
-        """Test that Gold layer rejects MERGE mode."""
+    @pytest.mark.parametrize(
+        "mode",
+        [WriteMode.APPEND, WriteMode.MERGE, WriteMode.OVERWRITE],
+    )
+    def test_gold_rejects_generic_write_modes(self, mode: WriteMode) -> None:
+        """Gold writes must use the dedicated GoldWriteMode type."""
         policy = WriteModePolicy()
-        with pytest.raises(PolicyViolationError, match="gold"):
-            policy.validate(Layer.GOLD, WriteMode.MERGE)
-        assert WriteMode.MERGE not in policy.ALLOWED_MODES[Layer.GOLD]
-
-    def test_gold_allows_overwrite(self) -> None:
-        """Test that Gold layer allows OVERWRITE mode."""
-        policy = WriteModePolicy()
-        policy.validate(Layer.GOLD, WriteMode.OVERWRITE)
-        assert WriteMode.OVERWRITE in policy.ALLOWED_MODES[Layer.GOLD]
-
-    def test_gold_allows_append(self) -> None:
-        """Test that Gold layer allows APPEND mode."""
-        policy = WriteModePolicy()
-        policy.validate(Layer.GOLD, WriteMode.APPEND)
-        assert WriteMode.APPEND in policy.ALLOWED_MODES[Layer.GOLD]
+        with pytest.raises(PolicyViolationError, match="generic write modes"):
+            policy.validate(Layer.GOLD, mode)
+        assert Layer.GOLD not in policy.ALLOWED_MODES
 
     def test_error_message_includes_allowed_modes(self) -> None:
         """Test that error message includes the allowed modes."""

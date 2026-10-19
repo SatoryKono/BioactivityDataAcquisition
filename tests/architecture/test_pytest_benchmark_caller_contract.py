@@ -308,6 +308,7 @@ def _probe_env(tmp_path: Path) -> tuple[dict[str, str], Path, Path | None]:
     env["PYTHONPATH"] = os.pathsep.join(pythonpath)
     env["BIOETL_VCS_PROBE_LOG"] = str(log_path)
     env["BIOETL_BENCHMARK_CALLER"] = "synthetic-proof"
+    env["BIOETL_BENCHMARK_DATASET"] = "bioetl-synthetic-benchmarks-v1"
     return env, log_path, locked_src
 
 
@@ -613,7 +614,10 @@ def test_workflow_enables_guard_before_benchmark_and_requires_hotspot_evidence()
         "Reduce benchmark evidence",
     ):
         step = next(item for item in _workflow_steps() if item.get("name") == name)
-        assert step.get("if") == "${{ always() && !cancelled() }}"
+        expected = "${{ always() && !cancelled() }}"
+        if name == "Reduce benchmark evidence":
+            expected = "${{ always() && !cancelled() && steps.benchmarks.outcome == 'success' && steps.validate-evidence.outcome == 'success' }}"
+        assert step.get("if") == expected
 
 
 @pytest.mark.timeout(180)
@@ -625,6 +629,8 @@ def test_default_pytest_skips_benchmark_and_does_not_probe(tmp_path: Path) -> No
             sys.executable,
             "-m",
             "pytest",
+            "-p",
+            "timeout",
             "--confcutdir",
             str(ROOT / "tests" / "benchmarks"),
             "tests/benchmarks/test_baseline_assertions.py::TestContentHashBaselines::test_small_record_baseline",
@@ -660,6 +666,8 @@ def test_explicit_caller_measures_case_without_vcs_probe(tmp_path: Path) -> None
             sys.executable,
             "-m",
             "pytest",
+            "-p",
+            "timeout",
             "--noconftest",
             "--confcutdir",
             str(tmp_path),
@@ -713,6 +721,8 @@ def test_guard_after_benchmark_records_probe_and_rejects_provenance(
             sys.executable,
             "-m",
             "pytest",
+            "-p",
+            "timeout",
             "--noconftest",
             "--confcutdir",
             str(tmp_path),
@@ -794,6 +804,8 @@ def test_collect_only_does_not_probe_before_execution(tmp_path: Path) -> None:
             sys.executable,
             "-m",
             "pytest",
+            "-p",
+            "timeout",
             "--noconftest",
             "--confcutdir",
             str(tmp_path),
@@ -935,5 +947,7 @@ def test_measurement_context_matches_reducer_contract(
     else:
         assert result[0:2] == ("bioetl-synthetic-benchmarks-v1", "github-actions")
     monkeypatch.delenv("BIOETL_BENCHMARK_DATASET")
-    guard.pytest_benchmark_update_json(None, [], payload)
-    assert _measurement_context(payload, []) == "incomplete_evidence"
+    with pytest.raises(
+        guard.BenchmarkMeasurementContractError, match="BIOETL_BENCHMARK_DATASET"
+    ):
+        guard.pytest_benchmark_update_json(None, [], payload)

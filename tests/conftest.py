@@ -252,6 +252,7 @@ def _restore_runtime_bootstrap_pipeline_after_repo_backed_tests(
 # `metadata_fixtures` currently depends on storage modules that are absent in this
 # checkout, so loading it eagerly would break unrelated suites at startup.
 pytest_plugins = (
+    "scripts.engineering.dev.pytest_artifact_selection",
     "tests.integration.chembl.extraction_params_support",
     "scripts.engineering.dev.pytest_junit_subtests",
 )

@@ -1131,11 +1131,11 @@
         "tests/architecture/test_test_governance_audit.py:150",
         "tests/architecture/test_test_governance_audit.py:169",
         "tests/architecture/test_test_governance_audit.py:180",
-        "tests/architecture/test_test_governance_audit.py:221",
-        "tests/architecture/test_test_governance_audit.py:284",
-        "tests/architecture/test_test_governance_audit.py:378",
-        "tests/architecture/test_test_governance_audit.py:406",
-        "tests/architecture/test_test_governance_audit.py:424"
+        "tests/architecture/test_test_governance_audit.py:222",
+        "tests/architecture/test_test_governance_audit.py:286",
+        "tests/architecture/test_test_governance_audit.py:381",
+        "tests/architecture/test_test_governance_audit.py:409",
+        "tests/architecture/test_test_governance_audit.py:428"
       ],
       "assertless_tests": [],
       "intentional_no_exception_tests": 0,
@@ -1182,10 +1182,10 @@
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 68,
+    "marked_test_files": 69,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 68,
+    "test_files": 69,
     "unmarked_test_files": []
   },
   "report": {
@@ -1982,11 +1982,11 @@
           "tests/architecture/test_test_governance_audit.py:150",
           "tests/architecture/test_test_governance_audit.py:169",
           "tests/architecture/test_test_governance_audit.py:180",
-          "tests/architecture/test_test_governance_audit.py:221",
-          "tests/architecture/test_test_governance_audit.py:284",
-          "tests/architecture/test_test_governance_audit.py:378",
-          "tests/architecture/test_test_governance_audit.py:406",
-          "tests/architecture/test_test_governance_audit.py:424"
+          "tests/architecture/test_test_governance_audit.py:222",
+          "tests/architecture/test_test_governance_audit.py:286",
+          "tests/architecture/test_test_governance_audit.py:381",
+          "tests/architecture/test_test_governance_audit.py:409",
+          "tests/architecture/test_test_governance_audit.py:428"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
@@ -2032,10 +2032,10 @@
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 68,
+      "marked_test_files": 69,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 68,
+      "test_files": 69,
       "unmarked_test_files": []
     },
     "root": ".",
@@ -2044,8 +2044,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3070,
-      "test_python_file_count": 3308,
+      "test_glob_file_count": 3075,
+      "test_python_file_count": 3314,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2086,13 +2086,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3070,
-    "total_test_functions": 30530,
+    "total_test_files": 3075,
+    "total_test_functions": 30614,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "05321be299b83dd22a96821a2aa34acd6ce3b93cb3f77e0d89934e36c94e4bd4",
+  "source_tree_sha256": "087e01c9bb557776e9477cf101b63c1e3166413b99c8431f90e253fa70fd92ae",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2112,8 +2112,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3070,
-    "test_python_file_count": 3308,
+    "test_glob_file_count": 3075,
+    "test_python_file_count": 3314,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2154,8 +2154,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3070,
-  "total_test_functions": 30530,
+  "total_test_files": 3075,
+  "total_test_functions": 30614,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
