@@ -36,6 +36,11 @@ The BioETL DQ Contract System defines four primary contract types that govern da
 - Composite configs: `configs/composites/{entity}.yaml` (field definitions)
 - Exported JSON: `docs/04-reference/contracts/gold/*.json` (for external consumers)
 
+
+**Validation vs Persisted Order**:
+- **Input Validation**: BioETL default schemas (`ETLRecordSchema`, `IDMappingSchema`) use `ordered=False` (order-agnostic validation). This allows the validation ports to accept valid records regardless of their column order (e.g. from shuffled dictionaries), as long as all required fields and types match. External or custom schemas can still use `ordered=True` if strict order validation is needed.
+- **Persisted Canonical Order**: The actual deterministic persisted order (e.g. Delta/Parquet output) is strictly enforced as a writer concern during the IO preparation path, mapping to the definitive `canonical_column_order`.
+
 **Source-of-truth routing**:
 
 - `src/bioetl/domain/schemas/` owns executable Pandera structural contracts.
@@ -357,6 +362,16 @@ graph TD
 1. **Consistency Compatibility**: Cross-entity rules validated in staging before promotion
 
 ## Contract Discovery & Navigation
+
+> **Implementation Status Note:** The
+> `ContractAwareGoldValidator.validate_with_outcomes()` and
+> `ContractAwareSilverValidator.validate_with_outcomes()` APIs remain
+> experimental placeholders without direct production callsites in
+> `src/bioetl`. Tests exercise these APIs, as tracked in
+> [#12095](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12095).
+> Their `validate()` methods provide fail-closed schema integration.
+> Production rule evaluation through `evaluate_dq_rules_for_record()` remains
+> active and applies quarantine, skip, fail, and warn dispositions.
 
 ### Canonical Entry Points
 

@@ -223,16 +223,7 @@
       ],
       "conflict_resolution": "seed_priority",
       "exclude_fields": [],
-      "output": {
-        "gold": "data/output/gold/composite/activity",
-        "silver": "data/output/silver/composite/activity"
-      },
-      "preserve_all_sources": false,
-      "sort_by": {
-        "gold": [
-          "entity_id",
-          "activity_id"
-        ],
+      "field_priorities": {
         "pii": [
           "pubmed"
         ],
@@ -284,10 +275,6 @@
           "pubchem",
           "chembl"
         ],
-        "silver": [
-          "entity_id",
-          "activity_id"
-        ],
         "subject_fields": [
           "semanticscholar"
         ],
@@ -327,6 +314,21 @@
         ],
         "withdrawn_flag": [
           "chembl"
+        ]
+      },
+      "output": {
+        "gold": "data/output/gold/composite/activity",
+        "silver": "data/output/silver/composite/activity"
+      },
+      "preserve_all_sources": false,
+      "sort_by": {
+        "gold": [
+          "entity_id",
+          "activity_id"
+        ],
+        "silver": [
+          "entity_id",
+          "activity_id"
         ]
       },
       "strategy": "left_outer"
@@ -458,8 +460,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.1.0",
-    "semantic_content_hash": "sha256:89722f5089d793afd9a25d7ae30c29f64a2d5f2364152ad906e8da78742e935a",
-    "source_revision": "sha256:dd465c828cf0a66accac266f54f813c14a59ac360de49ed2341e62411ba53f35"
+    "semantic_content_hash": "sha256:206380d66cf7264ce58a78c093eb952ca717b4f87bf4bd7edb799bd3fd134f8e",
+    "source_revision": "sha256:f819ff129268d5118075b9a9afc3e6f6d6c1ce6cf3974501f2252667f72885a9"
   },
   "silver": {
     "dq_execution": {
