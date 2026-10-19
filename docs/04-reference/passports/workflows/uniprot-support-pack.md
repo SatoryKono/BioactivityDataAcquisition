@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:uniprot_support_pack`
 - Schema: `1.0.0`
-- Source revision: `sha256:69a67a143f92206ef650d744e0204680897bb5a053d84d636d1270a3c5a638a7`
+- Source revision: `sha256:da46304576d285651b2123aa866d02b16157ee2f27e16696807228074092fca1`
 
 ## Evidence
 
@@ -81,7 +81,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:3047b05777e58b59403e1da784676283d545918b137d1b32a857513a3dcf10df",
-    "source_revision": "sha256:69a67a143f92206ef650d744e0204680897bb5a053d84d636d1270a3c5a638a7"
+    "source_revision": "sha256:da46304576d285651b2123aa866d02b16157ee2f27e16696807228074092fca1"
   },
   "source_references": [
     {
