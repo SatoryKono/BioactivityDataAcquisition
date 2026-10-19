@@ -113,6 +113,7 @@ def _calls_name(function: ast.FunctionDef, name: str) -> bool:
     return False
 
 
+@pytest.mark.generated_artifact
 def test_issue_5570_retained_entrypoints_are_external_breaking_change_only() -> None:
     census = _load_json(COMPATIBILITY_CENSUS)
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
@@ -140,6 +141,7 @@ def test_issue_5570_retained_entrypoints_are_external_breaking_change_only() -> 
         assert row["src_importer_count"] == 0
 
 
+@pytest.mark.generated_artifact
 def test_issue_5571_public_export_facades_have_symbol_budgets_and_zero_growth() -> None:
     census = _load_json(COMPATIBILITY_CENSUS)
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
@@ -231,6 +233,7 @@ def test_issue_5573_internal_storage_config_shims_are_removed_or_bounded() -> No
         assert len(actual) <= int(shim["max_src_importer_count"])
 
 
+@pytest.mark.generated_artifact
 def test_issue_5574_observability_allowlist_is_reviewed_and_drift_free() -> None:
     allowlist = _load_yaml(OBS_ALLOWLIST)
     review = _load_json(OBS_ALLOWLIST_REVIEW)
@@ -267,6 +270,7 @@ def test_issue_5574_observability_allowlist_is_reviewed_and_drift_free() -> None
             assert entry["metric"] in inventory["declared_risky_label_reviewed"]
 
 
+@pytest.mark.generated_artifact
 def test_issue_5575_hotspot_coverage_tails_have_owner_tests() -> None:
     coverage = _load_json(MODULE_COVERAGE)
     tail_map = _load_json(COVERAGE_TAIL_MAP)
@@ -300,6 +304,7 @@ def test_issue_5575_hotspot_coverage_tails_have_owner_tests() -> None:
     assert families_with_new_tests >= 1
 
 
+@pytest.mark.generated_artifact
 def test_issue_5576_zero_import_deadcode_candidates_have_owner_test_proof() -> None:
     dead_code = _load_json(DEAD_CODE_INVENTORY)
     summary = dead_code["summary"]
@@ -326,6 +331,7 @@ def test_issue_5576_zero_import_deadcode_candidates_have_owner_test_proof() -> N
             assert _test_path_exists(owner_test), owner_test
 
 
+@pytest.mark.generated_artifact
 def test_issue_5577_pipeline_config_contract_ownership_is_fail_fast() -> None:
     ownership = _load_json(CONTRACT_OWNERSHIP)
     workflow = (

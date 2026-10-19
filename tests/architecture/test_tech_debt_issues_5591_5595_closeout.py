@@ -98,6 +98,7 @@ def test_issue_5592_delta_read_harness_has_timeout_fallback_diagnostics() -> Non
     )
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_issue_5593_slow_architecture_generators_stay_isolated_from_fast_boundary() -> (
     None

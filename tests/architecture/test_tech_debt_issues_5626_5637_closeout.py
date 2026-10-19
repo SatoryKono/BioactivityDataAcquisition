@@ -164,6 +164,7 @@ def test_issue_5627_silver_metadata_request_reexport_shim_is_retired() -> None:
     )
 
 
+@pytest.mark.generated_artifact
 def test_issue_5628_runtime_cardinality_evidence_is_release_grade() -> None:
     review = _load_json(RUNTIME_CARDINALITY_REVIEW)
     inventory = _load_json(RUNTIME_CARDINALITY_INVENTORY)
@@ -200,6 +201,7 @@ def test_issue_5628_runtime_cardinality_evidence_is_release_grade() -> None:
     assert _gate(gates, "observability_release_review_freshness")["status"] == "pass"
 
 
+@pytest.mark.generated_artifact
 def test_issue_5629_cli_command_shell_duplication_is_below_opening_baseline() -> None:
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
@@ -208,6 +210,7 @@ def test_issue_5629_cli_command_shell_duplication_is_below_opening_baseline() ->
     assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] < 6
 
 
+@pytest.mark.generated_artifact
 def test_issue_5630_adapter_layer_duplication_is_below_opening_baseline() -> None:
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
@@ -216,6 +219,7 @@ def test_issue_5630_adapter_layer_duplication_is_below_opening_baseline() -> Non
     assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] < 72
 
 
+@pytest.mark.generated_artifact
 def test_issue_5631_pipeline_transformer_duplication_is_below_opening_baseline() -> (
     None
 ):
@@ -226,6 +230,7 @@ def test_issue_5631_pipeline_transformer_duplication_is_below_opening_baseline()
     assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] < 22
 
 
+@pytest.mark.generated_artifact
 def test_issue_5632_hotspot_warning_count_and_budget_are_ratcheted_down() -> None:
     baseline = _load_json(HOTSPOT_BASELINE)
     scorecard = _load_yaml(DEBT_SCORECARD)
@@ -247,6 +252,7 @@ def test_issue_5632_hotspot_warning_count_and_budget_are_ratcheted_down() -> Non
     assert scorecard_family["bounded_growth_budgets"]["files_ge_250_loc"] == 0
 
 
+@pytest.mark.generated_artifact
 def test_issue_5633_contract_and_dq_diagnostics_are_blocker_free() -> None:
     contract = _load_json(CONTRACT_DIAGNOSTICS)
     dq = build_diagnostics_payload(ROOT)
@@ -265,6 +271,7 @@ def test_issue_5633_contract_and_dq_diagnostics_are_blocker_free() -> None:
     assert _gate(gates, "dq_contract_registry_blocking_drift")["status"] == "pass"
 
 
+@pytest.mark.generated_artifact
 def test_issue_5634_retained_compatibility_test_inventory_is_reviewed() -> None:
     config = _load_yaml(TEST_GOVERNANCE_CONFIG)
     report_payload = _load_json(TEST_GOVERNANCE_REPORT)
@@ -283,6 +290,7 @@ def test_issue_5634_retained_compatibility_test_inventory_is_reviewed() -> None:
     assert inventory["entries"] == []
 
 
+@pytest.mark.generated_artifact
 def test_issue_5635_dead_code_inventory_review_window_is_current() -> None:
     inventory = _load_json(DEAD_CODE_INVENTORY)
     summary = inventory["summary"]
@@ -299,6 +307,7 @@ def test_issue_5635_dead_code_inventory_review_window_is_current() -> None:
         assert row["owner_test_count"] >= 1
 
 
+@pytest.mark.generated_artifact
 def test_issue_5636_public_lazy_export_facades_are_bounded_and_drift_free() -> None:
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
     census = _load_json(COMPATIBILITY_CENSUS)

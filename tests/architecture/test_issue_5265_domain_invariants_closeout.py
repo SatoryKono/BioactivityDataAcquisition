@@ -37,6 +37,7 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
+@pytest.mark.generated_artifact
 def test_issue_5265_closeout_matches_live_module_coverage_inventory() -> None:
     skip_if_artifact_is_not_authoritative(root=ROOT, artifact_path=CLOSEOUT)
     skip_if_module_coverage_inventory_is_dirty(root=ROOT, inventory_path=INVENTORY)

@@ -437,6 +437,7 @@ def test_inventory_doc_tables_match_yaml_registry() -> None:
         assert _normalize(doc_row["exit_criteria"]) == _normalize(row.exit_criteria)
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_generated_snapshot_companion_is_present_and_in_sync() -> None:
     """Generated compatibility snapshot must stay synchronized with YAML + code scan."""

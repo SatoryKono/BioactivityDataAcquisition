@@ -76,9 +76,7 @@ def test_tests_workflow_runs_debt_governance_closeout_gates() -> None:
     assert "Validate ADR enforcement matrix artifacts" in workflow
     assert "report-adr-enforcement-matrix --check" in workflow
     assert "Validate remote-main architecture debt baseline" in workflow
-    assert (
-        "git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main" in workflow
-    )
+    assert "git fetch --no-tags origin main:refs/remotes/origin/main" in workflow
     assert "report-architecture-debt-remote-main-baseline --check" in workflow
     assert "Validate debt-governance fail-fast gates" in workflow
     assert "report-debt-governance-gates --check" in workflow

@@ -222,6 +222,7 @@ def test_issue_5582_data_retention_families_are_inventory_classified() -> None:
         assert fragment in runbook
 
 
+@pytest.mark.generated_artifact
 def test_issue_5583_fixture_vcr_and_golden_pruning_remain_inventory_driven() -> None:
     fixture_duplication = _load_json(FIXTURE_DUPLICATION)
     vcr_catalog = _load_json(VCR_CATALOG)
