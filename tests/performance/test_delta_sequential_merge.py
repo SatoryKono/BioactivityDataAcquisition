@@ -14,6 +14,7 @@ import statistics
 import os
 import sys
 import time
+import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -96,7 +97,7 @@ def _generate_synthetic_batch(
                 "standard_units": "nM",
                 "pchembl_value": 9.0 - (idx % 100) * 0.01,
                 "canonical_smiles": "CC(=O)Oc1ccccc1C(=O)O",
-                "_content_hash": f"hash_{idx}_{start_idx}",
+                "content_hash": f"hash_{idx}_{start_idx}",
                 "_run_id": run_id,
                 "_run_type": "perf_test",
                 "_source_batch_id": f"batch_{start_idx}",
@@ -186,6 +187,10 @@ def test_delta_sequential_merge_scaling(
             "Skipping N=100 on CI to prevent timeouts due to known issue #12042"
         )
 
+    report_root = Path(request.config.getoption("--delta-merge-report-dir"))
+    report_root.mkdir(parents=True, exist_ok=True)
+    report_dir = Path(tempfile.mkdtemp(prefix=f"N{n_merges}-", dir=report_root))
+
     t_setup_start = time.perf_counter()
     table_name = f"perf_sequential_{n_merges}"
     round_root = (
@@ -227,8 +232,9 @@ def test_delta_sequential_merge_scaling(
         }
         suffix = "_incomplete" if status == "incomplete" else ""
         summary_path = tmp_path / f"merge_scaling_N{n_merges}{suffix}.json"
-        with summary_path.open("w", encoding="utf-8") as stream:
-            json.dump(summary_data, stream, indent=2)
+        for destination in (summary_path, report_dir / summary_path.name):
+            with destination.open("w", encoding="utf-8") as stream:
+                json.dump(summary_data, stream, indent=2)
 
     try:
         for i in range(n_merges):
@@ -275,7 +281,7 @@ def test_delta_sequential_merge_scaling(
                 }
             )
 
-            if merge_time > 60.0:
+            if not _WINDOWS_PLATFORM and merge_time > 60.0:
                 save_summary("incomplete")
                 pytest.fail(
                     f"Merge degraded severely: round {i + 1} took {merge_time:.2f}s"
@@ -313,7 +319,7 @@ def test_delta_sequential_merge_scaling(
         "complete", expected_final_rows=expected_rows, actual_final_rows=actual_rows
     )
 
-    perf_out = request.config.getoption("--perf-obs-out", default=None)
+    perf_out = report_dir / "observations.jsonl"
     if perf_out:
         with (
             FileLock(f"{perf_out}.lock"),

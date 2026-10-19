@@ -114,9 +114,7 @@ def _prepare_records_for_delta(
             "standard_units": record.get("standard_units", ""),
             "pchembl_value": record.get("pchembl_value"),
             "canonical_smiles": record.get("canonical_smiles", ""),
-            "_content_hash": deterministic_uuid_string_from_callsite(
-                "test_delta_write"
-            ),
+            "content_hash": deterministic_uuid_string_from_callsite("test_delta_write"),
             "_run_id": run_id,
             "_run_type": "benchmark",
             "_source_batch_id": "benchmark_batch_0001",

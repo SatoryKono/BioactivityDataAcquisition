@@ -17,7 +17,7 @@ def create_activity_schema() -> pa.Schema:
             pa.field("standard_units", pa.string()),
             pa.field("pchembl_value", pa.float64()),
             pa.field("canonical_smiles", pa.string()),
-            pa.field("_content_hash", pa.string()),
+            pa.field("content_hash", pa.string()),
             pa.field("_run_id", pa.string()),
             pa.field("_run_type", pa.string()),
             pa.field("_source_batch_id", pa.string()),

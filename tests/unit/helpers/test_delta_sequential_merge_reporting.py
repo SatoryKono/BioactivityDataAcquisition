@@ -19,7 +19,13 @@ pytestmark = [pytest.mark.unit, pytest.mark.fs_contract]
 
 def _request(output: Path) -> SimpleNamespace:
     return SimpleNamespace(
-        config=SimpleNamespace(getoption=lambda *a, **k: str(output))
+        config=SimpleNamespace(
+            getoption=lambda name, **k: (
+                str(output.parent / "details")
+                if name == "--delta-merge-report-dir"
+                else str(output)
+            )
+        )
     )
 
 
@@ -73,6 +79,9 @@ def test_writer_failure_preserves_completed_evidence(
     assert report["n_merges_completed"] == successful_merges
     assert len(report["merges"]) == successful_merges
     assert report["total_records_processed"] == successful_merges * 500
+    retained = next((tmp_path / "details").glob("*/merge_scaling_N2_incomplete.json"))
+    assert json.loads(retained.read_text()) == report
+    assert not list((tmp_path / "details").glob("*/observations.jsonl"))
     assert not output.exists()
     assert not (tmp_path / "merge_scaling_N2.json").exists()
 
@@ -115,7 +124,9 @@ def test_setup_includes_writer_schema_and_loop(
     ]
     assert report["setup_time_s"] == 10.0
     assert report["actual_final_rows"] == 500
-    assert _load_observations(output)["delta_sequential_merge_N1"][
+    assert not output.exists()
+    isolated = next((tmp_path / "details").glob("*/observations.jsonl"))
+    assert _load_observations(isolated)["delta_sequential_merge_N1"][
         0
     ].latency_ms == pytest.approx(100)
 
@@ -123,6 +134,7 @@ def test_setup_includes_writer_schema_and_loop(
 def test_slow_merge_keeps_existing_failure_guard(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    monkeypatch.setattr(harness, "_WINDOWS_PLATFORM", False)
     ticks = iter([0.0, 1.0, 2.0, 63.0])
     monkeypatch.setattr(
         harness, "time", SimpleNamespace(perf_counter=lambda: next(ticks))
@@ -171,3 +183,57 @@ def test_final_validation_failure_preserves_completed_evidence(
 
 def test_harness_has_both_performance_lane_markers() -> None:
     assert {"benchmark", "performance"} <= {mark.name for mark in harness.pytestmark}
+
+
+def test_windows_slow_merge_is_recorded_without_linux_abort(tmp_path, monkeypatch):
+    monkeypatch.setattr(harness, "_WINDOWS_PLATFORM", True)
+    ticks = iter([0.0, 1.0, 2.0, 63.0])
+    monkeypatch.setattr(
+        harness, "time", SimpleNamespace(perf_counter=lambda: next(ticks))
+    )
+    hotspot = tmp_path / "hotspot.jsonl"
+    hotspot.write_text("existing hotspot evidence\n")
+    harness.test_delta_sequential_merge_scaling(tmp_path, 1, _request(hotspot))
+    assert hotspot.read_text() == "existing hotspot evidence\n"
+    report = next((tmp_path / "details").glob("*/merge_scaling_N1.json"))
+    data = json.loads(report.read_text())
+    assert data["status"] == "complete"
+    assert data["merges"][0]["merge_time_raw_s"] == 61.0
+    assert (report.parent / "observations.jsonl").is_file()
+
+
+def test_schema_and_batches_use_canonical_content_hash():
+    schema = harness._create_activity_schema()
+    assert "content_hash" in schema.names
+    assert "_content_hash" not in schema.names
+    import pyarrow as pa
+    from tests.benchmarks.test_delta_write import _prepare_records_for_delta
+    from bioetl.infrastructure.storage.silver.delta_merge_helpers import (
+        build_replay_safe_rerun_contract,
+    )
+
+    records = harness._generate_synthetic_batch(0, 2)
+    for batch in [records, _prepare_records_for_delta(records)]:
+        table = pa.Table.from_pylist(batch, schema=schema)
+        assert table["content_hash"].null_count == 0
+        contract = build_replay_safe_rerun_contract(table)
+        assert contract.merge_update_policy == "content_hash_only"
+        assert contract.strict_replay_safe
+    assert all("content_hash" in row and "_content_hash" not in row for row in records)
+
+
+def test_workflow_uploads_isolated_detail_artifacts():
+    import yaml
+
+    workflow = yaml.safe_load(
+        Path(".github/workflows/performance-nightly.yml").read_text()
+    )
+    uploads = [
+        step["with"]["path"]
+        for job in workflow["jobs"].values()
+        for step in job["steps"]
+        if "upload-artifact@" in step.get("uses", "")
+    ]
+    assert any(
+        "reports/performance/delta-sequential-merge/" in paths for paths in uploads
+    )
