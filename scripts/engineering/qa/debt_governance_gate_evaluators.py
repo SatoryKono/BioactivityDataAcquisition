@@ -428,6 +428,8 @@ def _remote_main_baseline_artifact_matches_builder(*, repo_root: Path) -> bool |
         return False
     except Exception:
         return False
+    if live_payload.get("local_tracking_ref_matches_remote") is not True:
+        return False
     return (
         report_architecture_debt_remote_main_baseline.payloads_semantically_equivalent(
             committed, live_payload

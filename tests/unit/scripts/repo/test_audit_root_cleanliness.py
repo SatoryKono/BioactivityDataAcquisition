@@ -227,6 +227,22 @@ def test_unexpected_local_root_temp_files_reject_panel_inventory_artifacts(
     ]
 
 
+def test_unexpected_local_root_temp_files_reject_reintroduced_transient_candidates(
+    tmp_path: Path,
+) -> None:
+    """Issue #12080: exact transient names fail strict audit; MCP context stays."""
+    (tmp_path / ".tmp_health_check.ps1").write_text("helper\n", encoding="utf-8")
+    (tmp_path / "du.exe.stackdump").write_text("dump\n", encoding="utf-8")
+    (tmp_path / ".mcp-server-context.md").write_text("context\n", encoding="utf-8")
+
+    violations = module._unexpected_local_root_temp_files(
+        tmp_path,
+        tracked_root_files=set(),
+    )
+
+    assert violations == [".tmp_health_check.ps1", "du.exe.stackdump"]
+
+
 def test_unexpected_local_root_temp_files_detects_reserved_name_without_is_file() -> (
     None
 ):
