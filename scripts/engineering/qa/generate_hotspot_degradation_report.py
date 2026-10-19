@@ -853,6 +853,7 @@ def _write_validation_failure_archive(archived: Path, raw: bytes, root: Path) ->
 
 
 def _is_validation_failure(raw: bytes) -> bool:
+    """Return whether raw bytes are a validator-owned rejection document."""
     try:
         payload = json.loads(raw)
     except (ValueError, UnicodeError):
