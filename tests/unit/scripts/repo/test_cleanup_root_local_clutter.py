@@ -115,6 +115,33 @@ def _write_governance(tmp_path: Path) -> None:
                         ],
                     },
                     {
+                        "lane_id": "root_transient_helpers_and_outputs",
+                        "classification": "review_required",
+                        "candidates": [
+                            {
+                                "path": ".tmp_health_check.ps1",
+                                "current_live_state": "absent_from_root_baseline",
+                                "action_if_reintroduced": "delete_transient_root_health_check_helper",
+                            },
+                            {
+                                "path": "du.exe.stackdump",
+                                "current_live_state": "absent_from_root_baseline",
+                                "action_if_reintroduced": "delete_transient_windows_stackdump_artifact",
+                            },
+                        ],
+                    },
+                    {
+                        "lane_id": "root_ad_hoc_docs_and_diagnostics",
+                        "classification": "review_required",
+                        "candidates": [
+                            {
+                                "path": ".mcp-server-context.md",
+                                "current_live_state": "present_local_only_root_surface",
+                                "action_if_reintroduced": "retain_as_documented_machine_local_context_do_not_track_or_delete",
+                            },
+                        ],
+                    },
+                    {
                         "lane_id": "root_env_security",
                         "classification": "security_review_required",
                         "verification": ["git ls-files .env"],
@@ -219,6 +246,41 @@ def test_safe_paths_include_windows_nul_device_name() -> None:
     """Registry candidate nul must be selectable via SAFE_ROOT_LOCAL_PATHS (RH7-C2)."""
     assert "nul" in module.SAFE_ROOT_LOCAL_PATHS
     assert "NUL" in module.SAFE_ROOT_LOCAL_PATHS
+
+
+def test_safe_paths_include_reintroduced_transient_candidates_only() -> None:
+    """Issue #12080: delete-allowlist is exact, retain path stays outside it."""
+    assert ".tmp_health_check.ps1" in module.SAFE_ROOT_LOCAL_PATHS
+    assert "du.exe.stackdump" in module.SAFE_ROOT_LOCAL_PATHS
+    assert ".mcp-server-context.md" not in module.SAFE_ROOT_LOCAL_PATHS
+
+
+def test_collect_reintroduced_absent_baseline_candidates(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Absent baseline rows on the SAFE list are deleted when the files return."""
+    _write_governance(tmp_path)
+    (tmp_path / ".tmp_health_check.ps1").write_text("helper\n", encoding="utf-8")
+    (tmp_path / "du.exe.stackdump").write_text("dump\n", encoding="utf-8")
+    (tmp_path / ".mcp-server-context.md").write_text("context\n", encoding="utf-8")
+    monkeypatch.setattr(module, "_tracked_paths", lambda _repo_root: frozenset())
+
+    candidates = module.collect_root_local_cleanup_candidates(
+        tmp_path,
+        only_paths=frozenset(
+            {
+                ".tmp_health_check.ps1",
+                "du.exe.stackdump",
+                ".mcp-server-context.md",
+            }
+        ),
+    )
+
+    by_path = {candidate.rel_path: candidate for candidate in candidates}
+    assert set(by_path) == {".tmp_health_check.ps1", "du.exe.stackdump"}
+    assert by_path[".tmp_health_check.ps1"].category == "transient_helper"
+    assert by_path["du.exe.stackdump"].category == "crash_dump"
 
 
 def test_collect_includes_nul_only_when_listed_in_root_dir(

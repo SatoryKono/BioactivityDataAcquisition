@@ -52,7 +52,11 @@ def _apply_completed_step_state(
             step_id=result.step_id,
             fingerprint=fingerprint,
         )
-    return state if pending else _clear_ambiguous_step(state, result.step_id)
+    if pending:
+        return state
+    if result.status == "success":
+        return _clear_ambiguous_step(state, result.step_id)
+    return state
 
 
 def _retains_completed_evidence(
