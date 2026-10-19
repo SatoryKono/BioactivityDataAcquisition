@@ -1,7 +1,7 @@
 {
   "schema_version": "architecture-suite-burndown-inventory-v1",
   "linked_issue": "#8331",
-  "generated_at_utc": "2026-08-08T07:38:50.119215+00:00",
+  "generated_at_utc": "2026-10-17T21:34:08.150384+00:00",
   "local_lane_recommendation": {
     "pr_default": "architecture-fast-boundary",
     "full_audit": "architecture or architecture-slow-governance",
@@ -12,9 +12,9 @@
     ]
   },
   "scan": {
-    "file_count": 487,
-    "approx_loc": 94127,
-    "skip_xfail_pattern_hits": 116,
+    "file_count": 541,
+    "approx_loc": 109007,
+    "skip_xfail_pattern_hits": 141,
     "multi_file_families_count": 0,
     "duplicate_ratchet_candidates": {},
     "largest_files": [
@@ -23,16 +23,24 @@
         "loc": 1717
       },
       {
+        "path": "tests/architecture/test_docker_runtime_contracts.py",
+        "loc": 1666
+      },
+      {
         "path": "tests/architecture/test_config_ci_invariants.py",
-        "loc": 1389
+        "loc": 1504
       },
       {
         "path": "tests/architecture/test_test_governance_audit.py",
-        "loc": 1217
+        "loc": 1398
+      },
+      {
+        "path": "tests/architecture/test_github_actions_runtime_policy.py",
+        "loc": 1287
       },
       {
         "path": "tests/architecture/test_quality_debt_scorecard.py",
-        "loc": 1215
+        "loc": 1221
       },
       {
         "path": "tests/architecture/test_port_contracts.py",
@@ -44,79 +52,71 @@
       },
       {
         "path": "tests/architecture/test_strict_architecture_contracts.py",
-        "loc": 1017
+        "loc": 1051
       },
       {
         "path": "tests/architecture/test_regression_metrics.py",
-        "loc": 991
+        "loc": 992
+      },
+      {
+        "path": "tests/architecture/test_reduce_benchmark_evidence.py",
+        "loc": 971
       },
       {
         "path": "tests/architecture/test_adapter_contracts.py",
-        "loc": 959
-      },
-      {
-        "path": "tests/architecture/test_docker_runtime_contracts.py",
-        "loc": 942
-      },
-      {
-        "path": "tests/architecture/test_port_contracts_hypothesis.py",
-        "loc": 847
-      },
-      {
-        "path": "tests/architecture/test_forbidden_imports.py",
-        "loc": 842
+        "loc": 961
       },
       {
         "path": "tests/architecture/test_module_coverage_inventory.py",
-        "loc": 828
+        "loc": 859
+      },
+      {
+        "path": "tests/architecture/test_port_contracts_hypothesis.py",
+        "loc": 859
+      },
+      {
+        "path": "tests/architecture/test_forbidden_imports.py",
+        "loc": 839
       },
       {
         "path": "tests/architecture/test_public_facade_inventory.py",
-        "loc": 777
+        "loc": 802
       },
       {
         "path": "tests/architecture/test_layer_aware_suffix_policy.py",
-        "loc": 698
+        "loc": 703
       },
       {
         "path": "tests/architecture/test_documentation_sync.py",
-        "loc": 691
-      },
-      {
-        "path": "tests/architecture/test_port_contracts_resilience_concurrency.py",
-        "loc": 675
-      },
-      {
-        "path": "tests/architecture/test_root_hygiene_review_registry.py",
-        "loc": 665
+        "loc": 697
       },
       {
         "path": "tests/architecture/test_observability_metric_governance.py",
-        "loc": 617
+        "loc": 694
       },
       {
-        "path": "tests/architecture/test_transformer_signatures.py",
-        "loc": 608
+        "path": "tests/architecture/test_required_checks_prose_consistency.py",
+        "loc": 691
       },
       {
-        "path": "tests/architecture/test_aggregate_boundaries.py",
-        "loc": 600
+        "path": "tests/architecture/test_root_hygiene_review_registry.py",
+        "loc": 689
+      },
+      {
+        "path": "tests/architecture/test_circleci_migration_contract.py",
+        "loc": 688
+      },
+      {
+        "path": "tests/architecture/test_port_contracts_resilience_concurrency.py",
+        "loc": 676
       },
       {
         "path": "tests/architecture/test_di_compliance.py",
-        "loc": 582
-      },
-      {
-        "path": "tests/architecture/test_application_services_lazy_facade_governance.py",
-        "loc": 580
+        "loc": 653
       },
       {
         "path": "tests/architecture/test_interfaces_no_infrastructure.py",
-        "loc": 571
-      },
-      {
-        "path": "tests/architecture/test_code_metrics.py",
-        "loc": 564
+        "loc": 615
       }
     ]
   },

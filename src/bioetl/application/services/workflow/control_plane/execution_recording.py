@@ -65,17 +65,20 @@ def record_workflow_started(
     if force_steps:
         context.ledger.record_force_requested(step_ids=force_steps)
     started_entry = context.ledger.record_workflow_started(resumed=resumed)
+    ambiguous = _remove_step_ids(
+        context.state.ambiguous_step_ids,
+        (*repair_steps, *force_steps),
+    )
     context.state = replace(
         context.state,
         status="running",
         updated_at=started_entry.occurred_at,
         last_event_id=started_entry.entry_id,
-        repair_required=False,
-        repair_hint=None,
-        ambiguous_step_ids=_remove_step_ids(
-            context.state.ambiguous_step_ids,
-            repair_steps,
+        repair_required=bool(ambiguous) or any(
+            step.commit_pending_confirmation for step in context.state.steps
         ),
+        repair_hint=context.state.repair_hint if ambiguous else None,
+        ambiguous_step_ids=ambiguous,
     )
     context.state_port.save(context.state)
 
