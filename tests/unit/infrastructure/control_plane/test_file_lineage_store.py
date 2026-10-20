@@ -706,8 +706,11 @@ def test_file_lineage_store_concurrent_save_and_fail(tmp_path, monkeypatch) -> N
 
         original_append = lineage_store_module._append_jsonl_payload
         call_count = {"value": 0}
+        failing_thread = threading.current_thread()
 
         def _fail_on_second_append(path, payload) -> int:
+            if threading.current_thread() is not failing_thread:
+                return original_append(path, payload)
             call_count["value"] += 1
             if call_count["value"] == 2:
                 raise OSError("simulated lineage index append failure")
@@ -731,4 +734,4 @@ def test_file_lineage_store_concurrent_save_and_fail(tmp_path, monkeypatch) -> N
         f1.result()
         f2.result()
 
-    assert len(store1.list_by_run_id("run-shared")) >= 0 # Just verify it doesn't crash or hang, and leaves a clean state
+    assert len(store1.list_by_run_id("run-shared")) == 1
