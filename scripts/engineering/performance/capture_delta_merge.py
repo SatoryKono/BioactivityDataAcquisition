@@ -145,7 +145,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     revision = _git("rev-parse", "HEAD")
-    if _git("status", "--porcelain"):
+    if _git("status", "--porcelain", "--untracked-files=all"):
         parser.error("Benchmark source checkout must be clean")
     github_sha = os.environ.get("GITHUB_SHA")
     if github_sha and github_sha != revision:

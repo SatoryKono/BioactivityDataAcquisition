@@ -47,14 +47,14 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 | `BIOETL_METRICS_PORT` | Prometheus metrics endpoint port | `8000` | No |
 | `BIOETL_METRICS_ADDR` | Prometheus metrics endpoint address | `0.0.0.0` | No |
 | `BIOETL_PROMETHEUS_URL` | Optional Prometheus base URL for local HTTP probes | unset (`http://localhost:9090` loopback default in health/processed-records) | No |
-| `BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED` | Enable Prometheus metrics HTTP server | `True` | No |
-| `BIOETL_OBSERVABILITY__METRICS_FAIL_FAST` | If True, exit with error when metrics server fails to start | `False` in `ObservabilitySettings.metrics_fail_fast`; `True` for production launchers when unset | No |
-| `BIOETL_OBSERVABILITY__METRICS_RETRY_COUNT` | Number of retries for transient errors when starting metrics server | `3` | No |
-| `BIOETL_OBSERVABILITY__METRICS_RETRY_DELAY` | Delay between retries in seconds when starting metrics server | `1.0` | No |
+| `BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED` | Enable Prometheus metrics HTTP server (requires `metrics_enabled` to be active) | `True` | No |
+| `BIOETL_OBSERVABILITY__METRICS_FAIL_FAST` | If True, exit with error when the metrics server fails to start. `resolve_metrics_fail_fast` (used by `maybe_start_metrics_server`) automatically enables fail-fast only when `env` is `prod`, `test_mode` is not `True`, and the field was not set explicitly; explicit `True` and `False` are preserved. `bioetl health server` passes the declared value and does not apply that override | `False` | No |
+| `BIOETL_OBSERVABILITY__METRICS_RETRY_COUNT` | Total number of attempts (not additional retries) for transient errors when starting the metrics server | `3` | No |
+| `BIOETL_OBSERVABILITY__METRICS_RETRY_DELAY` | Base delay in seconds for exponential backoff (`retry_delay * 2**attempt`) when starting the metrics server. Defaults use at most 3 attempts and wait 1s then 2s after transient errors | `1.0` | No |
 | `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Enable OpenTelemetry tracing | `False` | No |
 | `BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD` | Allow NoOp observability in prod | `False` | No |
-| `BIOETL_OBSERVABILITY__AUDIT_ENABLED` | Enable file-backed audit logging for Medallion write operations | `False` | No |
-| `BIOETL_OBSERVABILITY__AUDIT_BASE_PATH` | Optional override path for audit JSONL files; without an override, uses `<BIOETL_DATA_DIR>/output/audit` (`data/output/audit` with the default `BIOETL_DATA_DIR`) | unset | No |
+| `BIOETL_OBSERVABILITY__AUDIT_ENABLED` | Enable file-backed audit logging for Medallion write operations (`FileAuditAdapter` instead of `NoOpAudit`). This variable is not the forensic-grade persistence profile. Profile `forensic_grade` separately requires real audit plus a structured logger, tracing, and metrics, including outside prod; `BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD` does not waive that check | `False` | No |
+| `BIOETL_OBSERVABILITY__AUDIT_BASE_PATH` | Optional override path for audit JSONL files. Unset (Python `None`) falls back to `<BIOETL_DATA_DIR>/output/audit` (`data/output/audit` with the default `BIOETL_DATA_DIR`). The environment string `None` is a path and does not select the fallback | unset | No |
 | `BIOETL_PUSHGATEWAY_URL` | Pushgateway address for terminal metrics publication | unset | No |
 
 ## Runtime Identity
