@@ -33,6 +33,7 @@ from bioetl.infrastructure.storage.bronze.cleanup_support import (
 
 from tests.integration.infrastructure.storage.test_bronze_writer_cleanup_safety import (
     ARTIFACT,
+    CUTOFF,
     JSON_COPY,
     OLD_DATE,
     SIDECAR,
@@ -188,3 +189,25 @@ def test_safe_unlink_refuses_outside_root(tmp_path: Path) -> None:
         with pytest.raises(NotImplementedError):
             safe_unlink(outside, tmp_path, tmp_path.resolve())
     assert outside.exists()
+
+
+async def test_flat_layout_rejects_scope_filters(tmp_path: Path) -> None:
+    """Flat layout refuses provider/entity filters before traversal or deletion."""
+    writer = _make_writer(tmp_path, flat=True)
+    retained = _date_dir(tmp_path)
+    (retained / ARTIFACT).write_bytes(b"x")
+
+    with pytest.raises(ValueError, match="Filters require a hierarchical"):
+        cleanup_support.find_old_date_dirs(
+            tmp_path,
+            flat_structure=True,
+            cutoff_str="2023-01-01",
+            provider="prov",
+        )
+    with pytest.raises(ValueError, match="Filters require a hierarchical"):
+        writer.preview_cleanup(entity="activity")
+    with pytest.raises(ValueError, match="Filters require a hierarchical"):
+        await writer.cleanup_old_files(CUTOFF, provider="prov", entity="activity")
+
+    assert retained.is_dir()
+    assert (retained / ARTIFACT).read_bytes() == b"x"

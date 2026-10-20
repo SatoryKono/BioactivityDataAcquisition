@@ -239,16 +239,23 @@ def _locked_packages(document: dict[str, Any]) -> dict[str, list[str]]:
 
 
 def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
-    """Find real imports, including consumers of reverse lock dependencies."""
+    """Find real imports, including consumers of reverse lock dependencies.
+
+    A transitive package with no installed import owner is confirmed only when
+    its lock family reaches a distribution declared in ``pyproject.toml`` and a
+    scanned file names that distribution in a literal ``distribution`` keyword.
+    """
     lock = tomllib.loads((root / PYTHON_LOCK).read_text(encoding="utf-8"))
     packages = lock.get("package", [])
     consumers: set[str] = set()
     unresolved: list[str] = []
-    imports = _source_imports(root)
+    declared = _declared_distributions(root)
+    imports, references = _source_index(root, declared)
     module_owners = packages_distributions()
     for dependency in sorted(changed):
         family = _lock_family(packages, dependency)
         selected = _import_consumers(imports, module_owners, family)
+        selected |= _declared_reference_consumers(references, declared, family)
         if selected:
             consumers.update(selected)
         else:
@@ -289,18 +296,59 @@ def _import_consumers(
     return {path for path, imported in imports.items() if imported & modules}
 
 
-def _source_imports(root: Path) -> dict[str, set[str]]:
-    result: dict[str, set[str]] = {}
+def _declared_distributions(root: Path) -> set[str]:
+    """Return normalized names declared in the working-tree manifest."""
+    manifest = root / PYTHON_MANIFEST
+    if not manifest.is_file():
+        return set()
+    document = tomllib.loads(manifest.read_text(encoding="utf-8"))
+    return set(_requirements(document))
+
+
+def _declared_reference_consumers(
+    references: Mapping[str, set[str]], declared: set[str], family: set[str]
+) -> set[str]:
+    """Files that name a manifest distribution reached through the lock family."""
+    anchored = declared & family
+    if not anchored:
+        return set()
+    return {path for path, names in references.items() if names & anchored}
+
+
+def _source_index(
+    root: Path, declared: set[str]
+) -> tuple[dict[str, set[str]], dict[str, set[str]]]:
+    imports: dict[str, set[str]] = {}
+    references: dict[str, set[str]] = {}
     for prefix in ("src/bioetl", "src/memory", "scripts", "tests"):
         for path in sorted((root / prefix).rglob("*.py")):
             tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-            modules: set[str] = set()
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
-                    modules.update(alias.name.split(".")[0] for alias in node.names)
-                elif (
-                    isinstance(node, ast.ImportFrom) and node.module and not node.level
-                ):
-                    modules.add(node.module.split(".")[0])
-            result[path.relative_to(root).as_posix()] = modules
-    return result
+            modules, names = _module_and_declared_names(tree, declared)
+            relative = path.relative_to(root).as_posix()
+            imports[relative] = modules
+            if names:
+                references[relative] = names
+    return imports, references
+
+
+def _module_and_declared_names(
+    tree: ast.AST, declared: set[str]
+) -> tuple[set[str], set[str]]:
+    modules: set[str] = set()
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            modules.update(alias.name.split(".")[0] for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module and not node.level:
+            modules.add(node.module.split(".")[0])
+        elif (
+            declared
+            and isinstance(node, ast.keyword)
+            and node.arg == "distribution"
+            and isinstance(node.value, ast.Constant)
+            and isinstance(node.value.value, str)
+        ):
+            normalized = _name(node.value.value)
+            if normalized in declared:
+                names.add(normalized)
+    return modules, names
