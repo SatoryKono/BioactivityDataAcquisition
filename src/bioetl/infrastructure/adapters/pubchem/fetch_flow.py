@@ -67,14 +67,15 @@ def coerce_timeout_state(value: object) -> ExecutorTimeoutState:
 
 async def wait_for_executor(
     pending: Awaitable[object],
-    timeout: float | None,
+    deadline_sec: float | None,
     state: ExecutorTimeoutState,
 ) -> object:
     """Bound one executor wait and record when that wait times out."""
-    if timeout is None:
+    if deadline_sec is None:
         return await pending
     try:
-        return await asyncio.wait_for(pending, timeout=timeout)
+        async with asyncio.timeout(deadline_sec):
+            return await pending
     except TimeoutError:
         state.note()
         raise
