@@ -79,6 +79,7 @@ class PipelineRunnerSupportMixin:
     )  # Any: host attr default (PD3)
     _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
     _executor: BatchExecutor = cast(Any, None)  # Any: host attr default (PD3)
+    _contract_evidence_context: PipelineRunContext | None = None
 
     def _update_manifest_context(
         self: _RunnerManifestContextHost,

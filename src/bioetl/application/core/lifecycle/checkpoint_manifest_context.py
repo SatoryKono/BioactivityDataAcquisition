@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import asdict, replace
-from typing import cast
 
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
@@ -16,10 +15,9 @@ def metadata_with_manifest(
 ) -> CheckpointMetadata:
     """Copy snapshot and execution identity from a committed manifest."""
     snapshots = tuple(s for ref in manifest.source_refs for s in ref.input_snapshots)
-    identity = cast(
-        CheckpointMetadata,
+    identity = _as_checkpoint_metadata(
         replace(
-            metadata or CheckpointMetadata(),
+            metadata or CheckpointMetadata(records_processed=0),
             manifest_id=manifest.manifest_id,
             execution_fingerprint=manifest.execution_fingerprint,
             input_snapshot_ids=tuple(snapshot.snapshot_id for snapshot in snapshots),
@@ -35,7 +33,7 @@ def metadata_with_manifest(
             input_snapshot_fingerprint=compute_input_snapshot_identity_fingerprint(
                 snapshots
             ),
-        ),
+        )
     )
     return rebind_checkpoint_metadata(identity, identity)
 
@@ -53,8 +51,7 @@ def rebind_checkpoint_metadata(
             "execution_fingerprint": identity.execution_fingerprint,
             "input_snapshot_fingerprint": identity.input_snapshot_fingerprint,
         }
-    return cast(
-        CheckpointMetadata,
+    return _as_checkpoint_metadata(
         replace(
             metadata,
             manifest_id=identity.manifest_id,
@@ -63,5 +60,12 @@ def rebind_checkpoint_metadata(
             input_snapshot_refs=identity.input_snapshot_refs,
             input_snapshot_fingerprint=identity.input_snapshot_fingerprint,
             run_context=run_context,
-        ),
+        )
     )
+
+
+def _as_checkpoint_metadata(value: object) -> CheckpointMetadata:
+    """Narrow a dataclass replace result for strict type checkers."""
+    if isinstance(value, CheckpointMetadata):
+        return value
+    raise TypeError("checkpoint metadata replace returned an unexpected type")
