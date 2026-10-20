@@ -1633,8 +1633,18 @@ def test_docker_build_metadata_is_part_of_reproducible_security_baseline() -> No
 
     assert metadata["env"]["BUILD_IMAGE_ID"] == "${{ steps.build.outputs.imageid }}"
     assert metadata["env"]["BUILD_DIGEST"] == "${{ steps.build.outputs.digest }}"
-    assert metadata["env"]["BUILD_METADATA"] == "${{ steps.build.outputs.metadata }}"
+    # Provenance metadata embeds full commit history and exceeds the runner
+    # exec env limit (E2BIG) when passed as BUILD_METADATA. The step must
+    # write steps.build.outputs.metadata to a file instead.
+    assert "BUILD_METADATA" not in metadata.get("env", {})
     rendered = metadata["run"]
+    assert "${{ steps.build.outputs.metadata }}" in rendered
+    assert 'metadata_file="$(mktemp)"' in rendered
+    assert 'python3 - "${metadata_file}"' in rendered
+    assert "DOCKER_BUILD_METADATA_HEREDOC_EOF" in rendered
+    assert "Path(sys.argv[1]).read_text" in rendered
+    assert 'os.environ.get("BUILD_METADATA")' not in rendered
+    assert 'os.environ["BUILD_METADATA"]' not in rendered
     assert "docker-build-action-metadata-v1" in rendered
     assert '"from": "type=gha"' in rendered
     assert '"to_policy": "main push only: type=gha,mode=max"' in rendered
