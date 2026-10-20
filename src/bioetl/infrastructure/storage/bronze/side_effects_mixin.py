@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-import os
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
@@ -99,27 +98,24 @@ class BronzeWriterSideEffectsMixin:
         ingestion_ts: datetime,
         duration: float,
         source_metadata: SourceMetadata | None,
-        locked_root: Path | None = None,
     ) -> None:
         """Create and persist Bronze metadata through the canonical coordinator path."""
         host = self
-        request = BronzeMetadataWriteRequest(
-            run_id=run_id,
-            run_type=run_type,
-            provider=provider,
-            entity=entity,
-            batch_id=batch_id,
-            record_count=record_count,
-            compressed_size=compressed_size,
-            relative_path=relative_path,
-            ingestion_ts=ingestion_ts,
-            duration=duration,
-            source_metadata=source_metadata,
-        )
-        prepared = (
-            prepare_bronze_metadata_write(host, request)
-            if locked_root is None
-            else prepare_bronze_metadata_write(host, request, locked_root=locked_root)
+        prepared = prepare_bronze_metadata_write(
+            host,
+            BronzeMetadataWriteRequest(
+                run_id=run_id,
+                run_type=run_type,
+                provider=provider,
+                entity=entity,
+                batch_id=batch_id,
+                record_count=record_count,
+                compressed_size=compressed_size,
+                relative_path=relative_path,
+                ingestion_ts=ingestion_ts,
+                duration=duration,
+                source_metadata=source_metadata,
+            ),
         )
         await host._metadata_writer.write_bronze_metadata(
             base_path=str(prepared.metadata_base_path),
@@ -155,22 +151,16 @@ class BronzeWriterSideEffectsMixin:
         compressed_size: int,
         span: Any,  # Any: OpenTelemetry span interface is runtime-dependent
         table_identity: tuple[str, str] | None = None,
-        locked_root: Path | None = None,
     ) -> BronzeWriteResult:
         """Build write result payload and include checksum."""
         host = self
         span.set_attribute("record_count", record_count)
         span.set_attribute("compressed_size", compressed_size)
         checksum = await host._calculate_checksum(prepared.full_path)
-        public_path = (
-            prepared.full_path
-            if locked_root is None
-            else Path(os.path.realpath(locked_root)) / prepared.relative_path
-        )
         return BronzeWriteResult(
             batch_id=batch_id,
             relative_path=prepared.relative_path,
-            absolute_path=str(public_path),
+            absolute_path=str(prepared.full_path),
             record_count=record_count,
             compressed_size=compressed_size,
             uncompressed_size=uncompressed_size,

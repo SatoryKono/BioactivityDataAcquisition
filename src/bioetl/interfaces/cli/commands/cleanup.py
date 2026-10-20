@@ -128,25 +128,10 @@ def bronze_cleanup_command(retention_days: int, dry_run: bool) -> None:
             )
         result = await service.cleanup(retention_days=retention_days, dry_run=dry_run)
         action = "Would remove" if dry_run else "Removed"
-        shown_files = result.files_planned if dry_run else result.files_removed
-        shown_bytes = result.bytes_planned if dry_run else result.bytes_freed
-        shown_dirs = (
-            result.directories_planned if dry_run else result.directories_removed
-        )
-        echo_info(f"{action} {shown_files} files ({format_bytes(shown_bytes)})")
-        echo_info(f"{action} {shown_dirs} empty directories")
         echo_info(
-            "Cleanup retained: "
-            f"files skipped={result.files_skipped}, conflicted={result.files_conflicted}, "
-            f"failed={result.files_failed}; directories skipped={result.directories_skipped}, "
-            f"conflicted={result.directories_conflicted}, failed={result.directories_failed}"
+            f"{action} {result.files_removed} files ({format_bytes(result.bytes_freed)})"
         )
-        echo_info(
-            "Retained bytes: "
-            f"skipped={format_bytes(result.bytes_skipped)}, "
-            f"conflicted={format_bytes(result.bytes_conflicted)}, "
-            f"failed={format_bytes(result.bytes_failed)}"
-        )
+        echo_info(f"{action} {result.directories_removed} empty directories")
 
     run_async_with_cli_failure_policy(
         _run(),

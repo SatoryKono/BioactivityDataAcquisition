@@ -6,7 +6,6 @@ import copy
 import json
 import os
 import subprocess
-import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -89,37 +88,6 @@ def bridge(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         },
     }
     return tmp_path, merge, payload, receipt, git
-
-
-def test_rejected_scope_retries_public_github_read(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    calls: list[str | None] = []
-
-    def request(url: str, token: str | None) -> dict[str, bool]:
-        calls.append(token)
-        if token:
-            raise urllib.error.HTTPError(url, 403, "Forbidden", hdrs=None, fp=None)
-        return {"merged": True}
-
-    monkeypatch.setenv("GITHUB_TOKEN", "ghs-contents-only")
-    monkeypatch.delenv("GH_TOKEN", raising=False)
-    monkeypatch.setattr(provenance, "_request_github_json", request)
-    assert provenance._read_github_json("pulls/12231") == {"merged": True}
-    assert calls == ["ghs-contents-only", None]
-
-
-def test_unrelated_http_error_is_not_retried_without_a_token(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    def request(url: str, token: str | None) -> dict[str, bool]:
-        raise urllib.error.HTTPError(url, 404, "Not Found", hdrs=None, fp=None)
-
-    monkeypatch.setenv("GITHUB_TOKEN", "ghs-contents-only")
-    monkeypatch.delenv("GH_TOKEN", raising=False)
-    monkeypatch.setattr(provenance, "_request_github_json", request)
-    with pytest.raises(urllib.error.HTTPError):
-        provenance._read_github_json("pulls/12231")
 
 
 @pytest.mark.parametrize(

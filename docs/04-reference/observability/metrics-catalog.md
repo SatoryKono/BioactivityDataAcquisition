@@ -2,7 +2,7 @@
 
 Complete catalog of all Prometheus metrics defined in BioETL observability system.
 
-**Runtime Metrics: 179** (excluding aliases; derived from
+**Runtime Metrics: 170** (excluding aliases; derived from
 `REGISTERED_PROMETHEUS_METRIC_NAMES`)
 **Governed Recording/Current-State Metrics: 41**
 
@@ -24,7 +24,7 @@ Canonical reconciliation command:
 - [Pipeline Replay Metrics](#pipeline-replay-metrics) - 4 metrics
 - [Pipeline Transform Metrics](#pipeline-transform-metrics) - 3 metrics
 - [Pipeline Workflow Metrics](#pipeline-workflow-metrics) - 13 metrics
-- [Storage Metrics](#storage-metrics) - 39 metrics
+- [Storage Metrics](#storage-metrics) - 30 metrics
 - [Governed Recording And Current-State Metrics](#governed-recording-and-current-state-metrics) - 41 metrics
 
 ---
@@ -302,15 +302,6 @@ Canonical reconciliation command:
 | `bioetl_bronze_bytes_written_total` | Counter | provider, entity | Total bytes written to bronze layer (compressed) |
 | `bioetl_bronze_files_removed_total` | Counter | operation | Total Bronze files removed by cleanup maintenance |
 | `bioetl_bronze_bytes_freed_total` | Counter | operation | Total Bronze bytes freed by cleanup maintenance |
-| `bioetl_bronze_cleanup_bytes_conflicted_total` | Counter | operation | Total Bronze cleanup bytes conflicted |
-| `bioetl_bronze_cleanup_bytes_failed_total` | Counter | operation | Total Bronze cleanup bytes failed |
-| `bioetl_bronze_cleanup_bytes_skipped_total` | Counter | operation | Total Bronze cleanup bytes skipped |
-| `bioetl_bronze_cleanup_directories_conflicted_total` | Counter | operation | Total Bronze cleanup directories conflicted |
-| `bioetl_bronze_cleanup_directories_failed_total` | Counter | operation | Total Bronze cleanup directories failed |
-| `bioetl_bronze_cleanup_directories_skipped_total` | Counter | operation | Total Bronze cleanup directories skipped |
-| `bioetl_bronze_cleanup_files_conflicted_total` | Counter | operation | Total Bronze cleanup files conflicted |
-| `bioetl_bronze_cleanup_files_failed_total` | Counter | operation | Total Bronze cleanup files failed |
-| `bioetl_bronze_cleanup_files_skipped_total` | Counter | operation | Total Bronze cleanup files skipped |
 | `bioetl_bronze_write_total_duration_seconds` | Histogram | provider, entity | Total Bronze write duration, including side effects and metadata writes |
 | `bioetl_policy_violations_total` | Counter | layer, mode | Total write policy violations |
 | `bioetl_silver_merge_retries_total` | Counter | pipeline, retry_type | Total Silver merge retry attempts emitted by storage resilience helpers |
@@ -422,13 +413,13 @@ separate from actual `record:` outputs and direct runtime collector families.
 
 ## Summary
 
-- **Runtime Metrics**: 179 (excluding aliases; canonical registry-backed count)
+- **Runtime Metrics**: 170 (excluding aliases; canonical registry-backed count)
 - **Governed Recording/Current-State Metrics**: 41
 - **Total Categories**: 15
 - **Metric Types Distribution**:
-  - Counter: 121 metrics
+  - Counter: 112 metrics
   - Histogram: 25 metrics
-  - Gauge: 33 metrics
+  - Gauge: 26 metrics
 
 ## Notes
 

@@ -9,12 +9,12 @@ are always executed as a dedicated serial pass.
 from __future__ import annotations
 
 import argparse
-import json
-import os
 import re
 import shlex
+import subprocess
 import sys
-from collections.abc import Mapping
+import uuid
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -22,43 +22,12 @@ _REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from scripts.engineering.ci.pytest_receipts import (
-    validate_receipt_ids,
-    write_runner_terminal_receipt,
-)
-
 _WORKER_CRASH_PATTERNS: tuple[re.Pattern[str], ...] = (
-    re.compile(r"^\[gw\d+\]\s+node down:\s+\S", re.IGNORECASE),
-    re.compile(r"^replacing crashed worker gw\d+\b", re.IGNORECASE),
-    re.compile(r"^worker gw\d+ crashed\b", re.IGNORECASE),
-    re.compile(r"^maximum crashed workers reached:", re.IGNORECASE),
-    re.compile(r"^xdist\.[\w.]*(?:internal error|Interrupted)\b", re.IGNORECASE),
+    re.compile(r"\[gw\d+\]\s+node down:\s+not properly terminated", re.IGNORECASE),
+    re.compile(r"worker.+(crash|terminated unexpectedly)", re.IGNORECASE),
+    re.compile(r"xdist.+(internal error|Interrupted)", re.IGNORECASE),
 )
-_MAXFAIL_INTERRUPT = re.compile(r"stopping after \d+ failures", re.IGNORECASE)
 SUMMARY_FILENAME = "summary.txt"
-
-
-@dataclass(frozen=True)
-class ReceiptInvocation:
-    """One resilient pytest invocation that must emit its own receipts."""
-
-    directory: Path
-    run_id: str
-    attempt: str
-    expected_sha: str | None
-
-    def pytest_args(self, pass_name: str) -> list[str]:
-        directory = self.directory.expanduser().resolve()
-        args = [
-            f"--receipt-dir={directory}",
-            f"--receipt-run-id={self.run_id}",
-            f"--receipt-attempt={self.attempt}",
-            f"--receipt-pass={pass_name}",
-            f"--receipt-repo-root={_REPO_ROOT}",
-        ]
-        if self.expected_sha:
-            args.append(f"--receipt-expected-sha={self.expected_sha}")
-        return args
 
 
 @dataclass(frozen=True)
@@ -74,8 +43,6 @@ class PassResult:
     failed_nodeids: list[str]
     worker_crash_detected: bool
     timed_out: bool
-    diagnostic_status: str = ""
-    diagnostic_manifest: Path | None = None
 
 
 def _split_args(raw_args: str) -> list[str]:
@@ -96,17 +63,8 @@ def _extract_failed_nodeids(output: str) -> list[str]:
 
 
 def _detect_worker_crash(output: str) -> bool:
-    """Return True if output indicates an xdist worker or node crash.
-
-    ``--maxfail`` stops with ``xdist.dsession.Interrupted: stopping after N
-    failures``. That line is an ordinary early stop, not a worker crash.
-    """
-    for line in output.splitlines():
-        if _MAXFAIL_INTERRUPT.search(line):
-            continue
-        if any(pattern.search(line) for pattern in _WORKER_CRASH_PATTERNS):
-            return True
-    return False
+    """Return True if output indicates xdist worker crash/termination."""
+    return any(pattern.search(output) for pattern in _WORKER_CRASH_PATTERNS)
 
 
 def _effective_exit_code(result: PassResult, *, allow_no_tests: bool = False) -> int:
@@ -122,121 +80,29 @@ def _merge_process_output(stdout: str, stderr: str) -> str:
     return f"{stdout}\n{stderr}" if stdout else stderr
 
 
-def _supervised_output(reports_dir: Path, stdout_file: str, stderr_file: str) -> str:
-    """Read supervisor logs. The diagnostic manifest is not pytest output."""
-    stdout = _read_supervised_log(reports_dir, stdout_file)
-    stderr = _read_supervised_log(reports_dir, stderr_file)
-    return _merge_process_output(stdout, stderr)
-
-
-def _read_supervised_log(reports_dir: Path, relative: str) -> str:
-    from scripts.engineering.common.repo_paths import read_text_confined
-
-    if not relative:
+def _decode_timeout_stream(stream: bytes | str | None) -> str:
+    if stream is None:
         return ""
-    try:
-        return read_text_confined(
-            reports_dir / relative,
-            root=reports_dir,
-            allow_external_absolute=False,
-        )
-    except (OSError, ValueError):
-        return ""
+    if isinstance(stream, bytes):
+        return stream.decode("utf-8", errors="replace")
+    return stream
 
 
-def _child_env() -> dict[str, str]:
-    """Give the pytest child the repo root without dropping PYTHONPATH."""
-    env = os.environ.copy()
-    root = str(_REPO_ROOT)
-    inherited = [part for part in env.get("PYTHONPATH", "").split(os.pathsep) if part]
-    if root not in inherited:
-        inherited.insert(0, root)
-    env["PYTHONPATH"] = os.pathsep.join(inherited)
-    return env
-
-
-def _result_records_failure(item: object) -> bool:
-    """True when a node outcome, or one duplicate occurrence, is not success."""
-    if isinstance(item, list):
-        return any(_result_records_failure(entry) for entry in item)
-    if not isinstance(item, dict):
-        return False
-    return item.get("terminal") not in {"passed", "skipped", "xfailed", "xpassed"}
-
-
-def _collection_failed(payload: Mapping[str, object]) -> bool:
-    collection = payload.get("collection")
-    return isinstance(collection, dict) and collection.get("status") == "error"
-
-
-def _payload_explains_failure(payload: object) -> bool:
-    """True when a worker receipt records a cause, not only a dirty tree.
-
-    A tracked file that changes during the run makes completeness incomplete
-    while every node still passes. That does not explain a later controller
-    failure such as a coverage gate.
-    """
-    if not isinstance(payload, dict):
-        return False
-    if payload.get("exit_code") not in (0, None):
-        return True
-    if payload.get("early_stop") is True or _collection_failed(payload):
-        return True
-    results = payload.get("results")
-    if not isinstance(results, dict):
-        return False
-    return any(_result_records_failure(item) for item in results.values())
-
-
-def _worker_failure_is_explained(receipt: ReceiptInvocation, pass_name: str) -> bool:
-    """True when a worker receipt already records the failing outcome."""
-    root = receipt.directory / receipt.run_id / receipt.attempt / pass_name
-    if not root.is_dir():
-        return False
-    for path in root.rglob("receipt.json"):
-        if path.parent.name == "runner":
-            continue
-        try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            return False
-        if _payload_explains_failure(payload):
-            return True
-    return False
-
-
-def _record_runner_terminal(
+def _timeout_output(
     *,
-    receipt: ReceiptInvocation | None,
+    exc: subprocess.TimeoutExpired,
     name: str,
-    return_code: int,
-    output: str,
-    timed_out: bool,
-    worker_crash: bool,
-) -> None:
-    """Persist a runner failure the worker receipts do not already explain."""
-    if receipt is None:
-        return
-    if return_code == 0:
-        worker_crash = False
-    if timed_out:
-        kind = "timeout"
-    elif worker_crash:
-        kind = "worker_crash"
-    elif return_code != 0 and not _worker_failure_is_explained(receipt, name):
-        kind = "aborted"
-    else:
-        return
-    write_runner_terminal_receipt(
-        receipt_dir=receipt.directory,
-        run_id=receipt.run_id,
-        attempt=receipt.attempt,
-        pass_name=name,
-        repo_root=_REPO_ROOT,
-        exit_code=return_code,
-        terminal_kind=kind,
-        observed_error=output,
+    timeout_seconds: float | None,
+) -> str:
+    output = _merge_process_output(
+        _decode_timeout_stream(exc.stdout),
+        _decode_timeout_stream(exc.stderr),
     )
+    timeout_note = (
+        f"\n[run_pytest_resilient] pass '{name}' timed out "
+        f"after {timeout_seconds:.0f}s."
+    )
+    return f"{output}{timeout_note}" if output else timeout_note.lstrip()
 
 
 def _run_pass(
@@ -248,8 +114,7 @@ def _run_pass(
     addopts: list[str],
     reports_dir: Path,
     timeout_seconds: float | None = None,
-    receipt: ReceiptInvocation | None = None,
-    child_env: dict[str, str] | None = None,
+    receipt_args: list[str] | None = None,
 ) -> PassResult:
     """Run pytest pass and persist logs/artifacts."""
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
@@ -268,98 +133,49 @@ def _run_pass(
         str(junit_path),
         *addopts,
     ]
-    if receipt is not None:
-        command.extend(receipt.pytest_args(name))
+    if receipt_args:
+        command.extend(receipt_args)
 
     sys.stdout.write(f"\n=== Running pytest pass: {name} ===\n")
     sys.stdout.write(f"Command: {' '.join(command)}\n")
-    from scripts.engineering.ci.pytest_abort_diagnostic_adapter import (
-        DIAGNOSTIC_DUMP_MARGIN_SECONDS,
-        PytestAbortDiagnosticAdapter,
-        child_watchdog_seconds,
-    )
-    from scripts.engineering.common.repo_paths import write_text_confined
-
+    timed_out = False
     try:
-        watchdog = (
-            None if timeout_seconds is None else child_watchdog_seconds(timeout_seconds)
-        )
-    except ValueError as exc:
-        output = f"[run_pytest_resilient] invalid timeout budget: {exc}\n"
-        write_text_confined(
-            log_path, output, root=reports_dir, allow_external_absolute=False
-        )
-        if receipt is not None:
-            write_runner_terminal_receipt(
-                receipt_dir=receipt.directory,
-                run_id=receipt.run_id,
-                attempt=receipt.attempt,
-                pass_name=name,
-                repo_root=_REPO_ROOT,
-                exit_code=2,
-                terminal_kind="invalid_invocation",
-                observed_error=output,
+        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+        completed = (
+            subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
+                ensure_safe_cli_argv([str(token) for token in command]),
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=timeout_seconds,
             )
-        return PassResult(
-            name=name,
-            command=command,
-            return_code=2,
-            output=output,
-            junit_path=junit_path,
-            log_path=log_path,
-            failed_nodeids=[],
-            worker_crash_detected=False,
-            timed_out=False,
-            diagnostic_status="INVALID_INVOCATION",
         )
-    manifest = PytestAbortDiagnosticAdapter(
-        timeout=watchdog,
-        dump_margin=DIAGNOSTIC_DUMP_MARGIN_SECONDS,
-        base=reports_dir,
-        child_env=child_env,
-    ).run(
-        command,
-        junit_path,
-        reports_dir / "diagnostics" / name,
-        base=reports_dir,
-    )
-    output = _supervised_output(reports_dir, manifest.stdout_file, manifest.stderr_file)
-    if manifest.status == "WATCHDOG_TIMEOUT":
-        elapsed = 0 if timeout_seconds is None else timeout_seconds
-        output = (
-            f"[run_pytest_resilient] pass '{name}' timed out "
-            f"after {elapsed:.0f}s.\n{output}"
-        ).lstrip("\n")
-    write_text_confined(
-        log_path, output, root=reports_dir, allow_external_absolute=False
-    )
+        return_code = completed.returncode
+        output = _merge_process_output(completed.stdout, completed.stderr)
+    except subprocess.TimeoutExpired as exc:
+        timed_out = True
+        return_code = 124
+        output = _timeout_output(
+            exc=exc,
+            name=name,
+            timeout_seconds=timeout_seconds,
+        )
+
+    log_path.write_text(output, encoding="utf-8")
     if output:
         sys.stdout.write(output)
-    worker_crash = _detect_worker_crash(output)
-    _record_runner_terminal(
-        receipt=receipt,
-        name=name,
-        return_code=manifest.wrapper_exit_code,
-        output=output,
-        timed_out=manifest.status == "WATCHDOG_TIMEOUT",
-        worker_crash=worker_crash,
-    )
-    diagnostic_manifest = None
-    if manifest.diagnostics_persisted and manifest.manifest_file:
-        diagnostic_manifest = reports_dir / manifest.manifest_file
 
     return PassResult(
         name=name,
         command=command,
-        return_code=manifest.wrapper_exit_code,
+        return_code=return_code,
         output=output,
         junit_path=junit_path,
         log_path=log_path,
         failed_nodeids=_extract_failed_nodeids(output),
-        worker_crash_detected=worker_crash,
-        timed_out=manifest.status == "WATCHDOG_TIMEOUT",
-        diagnostic_status=manifest.status,
-        diagnostic_manifest=diagnostic_manifest,
+        worker_crash_detected=_detect_worker_crash(output),
+        timed_out=timed_out,
     )
 
 
@@ -390,11 +206,6 @@ def _append_pass_summary(
         f"log={result.log_path} junit={result.junit_path}"
     )
     _append_failed_nodeids(summary_lines, result=result)
-    if result.diagnostic_manifest is not None:
-        summary_lines.append(
-            f"{result.name}_diagnostic: status={result.diagnostic_status} "
-            f"manifest={result.diagnostic_manifest}"
-        )
 
 
 def _summary_state_fields(result: PassResult) -> str:
@@ -422,8 +233,7 @@ def _run_named_pass(
     addopts: str,
     reports_dir: Path,
     timeout_seconds: float | None,
-    receipt: ReceiptInvocation | None = None,
-    child_env: dict[str, str] | None = None,
+    receipt_args: list[str] | None = None,
 ) -> PassResult:
     """Run a named pass using shell-split addopts."""
     return _run_pass(
@@ -434,8 +244,7 @@ def _run_named_pass(
         addopts=_split_args(addopts),
         reports_dir=reports_dir,
         timeout_seconds=timeout_seconds,
-        receipt=receipt,
-        child_env=child_env,
+        receipt_args=receipt_args,
     )
 
 
@@ -446,8 +255,7 @@ def _run_serial_pass(
     reports_dir: Path,
     serial_timeout: float | None,
     summary_lines: list[str],
-    receipt: ReceiptInvocation | None = None,
-    child_env: dict[str, str] | None = None,
+    receipt_args: list[str] | None = None,
 ) -> int:
     """Run dedicated serial marker pass and record the summary."""
     serial_result = _run_named_pass(
@@ -458,8 +266,7 @@ def _run_serial_pass(
         addopts=args.serial_addopts,
         reports_dir=reports_dir,
         timeout_seconds=serial_timeout,
-        receipt=receipt,
-        child_env=child_env,
+        receipt_args=receipt_args,
     )
     serial_rc = _effective_exit_code(serial_result, allow_no_tests=True)
     _append_pass_summary(summary_lines, result=serial_result, effective_rc=serial_rc)
@@ -539,14 +346,6 @@ def _create_parser() -> argparse.ArgumentParser:
         help="Skip dedicated serial-marker pass.",
     )
     parser.add_argument(
-        "--no-fallback",
-        action="store_true",
-        help=(
-            "Do not start a second pytest pass after a worker crash or watchdog "
-            "timeout. The parallel pass status is returned as-is."
-        ),
-    )
-    parser.add_argument(
         "--parallel-timeout-seconds",
         type=float,
         default=900.0,
@@ -589,56 +388,34 @@ def _create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--receipt-expected-sha",
         default=None,
-        help="Expected git SHA to enforce. Requires --receipt-dir.",
+        help="Expected git SHA to enforce",
     )
     return parser
 
 
-def _reject_unsafe_receipt_ids(args: argparse.Namespace) -> int | None:
-    """Reject ids that the receipt plugin cannot store as a path segment."""
-    if not args.receipt_dir:
-        return None
-    try:
-        validate_receipt_ids(str(args.receipt_run_id), str(args.receipt_attempt))
-    except ValueError as exc:
-        sys.stderr.write(f"[run_pytest_resilient] {exc}\n")
-        return 2
-    return None
+def main() -> int:
+    """CLI entrypoint."""
+    parser = _create_parser()
+    args = parser.parse_args()
 
-
-def _reject_invalid_invocation(args: argparse.Namespace) -> int | None:
-    rejected = _reject_sha_without_receipt_dir(args)
-    if rejected is not None:
-        return rejected
-    return _reject_unsafe_receipt_ids(args)
-
-
-def _reject_sha_without_receipt_dir(args: argparse.Namespace) -> int | None:
-    """Reject an expected SHA that nothing will enforce."""
-    if args.receipt_expected_sha and not args.receipt_dir:
-        sys.stderr.write(
-            "[run_pytest_resilient] --receipt-expected-sha requires --receipt-dir\n"
-        )
-        return 2
-    return None
-
-
-def _execute_passes(args: argparse.Namespace) -> int:
-    """Run the parallel, fallback, and serial passes."""
     reports_dir = Path(args.reports_dir)
     summary_lines: list[str] = []
 
-    base_command = [sys.executable, "-X", "faulthandler", "-m", "pytest"]
-    receipt: ReceiptInvocation | None = None
+    # We load our new plugin instead of rewriting pytest run loop
+    plugin_path = Path("scripts/engineering/ci/pytest_receipts.py").resolve()
+    base_command = [sys.executable, "-m", "pytest"]
+
+    receipt_args = []
     if args.receipt_dir:
+        # Load the module specifically via pythonpath and -p
         base_command.extend(["-p", "scripts.engineering.ci.pytest_receipts"])
-        receipt = ReceiptInvocation(
-            directory=Path(args.receipt_dir),
-            run_id=str(args.receipt_run_id),
-            attempt=str(args.receipt_attempt),
-            expected_sha=args.receipt_expected_sha,
-        )
-    child_env = _child_env()
+        receipt_args = [
+            f"--receipt-dir={args.receipt_dir}",
+            f"--receipt-run-id={args.receipt_run_id}",
+            f"--receipt-attempt={args.receipt_attempt}",
+        ]
+        if args.receipt_expected_sha:
+            receipt_args.append(f"--receipt-expected-sha={args.receipt_expected_sha}")
 
     parallel_timeout = args.parallel_timeout_seconds or None
     fallback_timeout = args.fallback_timeout_seconds or None
@@ -652,8 +429,7 @@ def _execute_passes(args: argparse.Namespace) -> int:
         addopts=_split_args(args.parallel_addopts),
         reports_dir=reports_dir,
         timeout_seconds=parallel_timeout,
-        receipt=receipt,
-        child_env=child_env,
+        receipt_args=receipt_args,
     )
 
     parallel_rc = _effective_exit_code(parallel_result)
@@ -676,21 +452,13 @@ def _execute_passes(args: argparse.Namespace) -> int:
             reports_dir=reports_dir,
             serial_timeout=serial_timeout,
             summary_lines=summary_lines,
-            receipt=receipt,
-            child_env=child_env,
+            receipt_args=receipt_args,
         )
         _write_summary(_summary_path(reports_dir), summary_lines)
         return serial_rc
 
-    if _parallel_failure_is_stable(parallel_result) or args.no_fallback:
-        if _parallel_failure_is_stable(parallel_result):
-            summary_lines.append("parallel_failed_without_worker_crash=true")
-        else:
-            _append_parallel_instability_markers(
-                summary_lines,
-                parallel_result=parallel_result,
-            )
-            summary_lines.append("fallback_skipped=true")
+    if _parallel_failure_is_stable(parallel_result):
+        summary_lines.append("parallel_failed_without_worker_crash=true")
         _write_summary(_summary_path(reports_dir), summary_lines)
         return parallel_rc
 
@@ -710,8 +478,7 @@ def _execute_passes(args: argparse.Namespace) -> int:
         addopts=args.fallback_addopts,
         reports_dir=reports_dir,
         timeout_seconds=fallback_timeout,
-        receipt=receipt,
-        child_env=child_env,
+        receipt_args=receipt_args,
     )
     fallback_rc = _effective_exit_code(fallback_result)
     _append_pass_summary(
@@ -731,24 +498,13 @@ def _execute_passes(args: argparse.Namespace) -> int:
             reports_dir=reports_dir,
             serial_timeout=serial_timeout,
             summary_lines=summary_lines,
-            receipt=receipt,
-            child_env=child_env,
+            receipt_args=receipt_args,
         )
         _write_summary(_summary_path(reports_dir), summary_lines)
         return serial_rc
 
     _write_summary(_summary_path(reports_dir), summary_lines)
     return 0
-
-
-def main(argv: list[str] | None = None) -> int:
-    """CLI entrypoint."""
-    parser = _create_parser()
-    args = parser.parse_args(argv)
-    rejected = _reject_invalid_invocation(args)
-    if rejected is not None:
-        return rejected
-    return _execute_passes(args)
 
 
 if __name__ == "__main__":

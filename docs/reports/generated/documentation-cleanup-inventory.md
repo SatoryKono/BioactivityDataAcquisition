@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3813 |
-| Tracked doc-like files | 3813 |
+| Doc-like files | 3812 |
+| Tracked doc-like files | 3812 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 78 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3813 |
+| tracked | 3812 |
 
 ## Lifecycle Counts
 
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 123 |
+| working_report | 122 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -55,7 +55,7 @@
 | Archived | 1546 |
 | Canonical | 75 |
 | Generated | 1062 |
-| Working | 382 |
+| Working | 381 |
 
 ## Surface Families
 
@@ -65,13 +65,13 @@
 | archive | 1546 |
 | canonical | 75 |
 | generated | 1062 |
-| working | 382 |
+| working | 381 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 156 |
+| archive-after-migration | 155 |
 | generate-automatically | 1062 |
 | keep | 2595 |
 
@@ -130,7 +130,6 @@
 | `reports/observability/runtime_cardinality_allowlist_review_5574.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_review.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_review_pr.json` | Working | 0 | archive-after-migration |
-| `reports/performance/benchmark-summary.json` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
@@ -159,6 +158,7 @@
 | `reports/quality/coderabbit/20260816/_S01-domain-registry.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260925_085141/scope_matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/_domain_aggregates_open.json` | Working | 0 | archive-after-migration |
+| `reports/quality/codex-local-state-audit.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

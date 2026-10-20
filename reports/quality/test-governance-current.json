@@ -1163,11 +1163,11 @@
     "max_group_size": 0,
     "scan_root": "tests/fixtures",
     "scope_file_counts": {
-      "fixture": 85,
+      "fixture": 84,
       "golden": 30,
       "vcr": 344
     },
-    "total_files": 459,
+    "total_files": 458,
     "tracked_extensions": [
       ".json",
       ".yaml",
@@ -2014,11 +2014,11 @@
       "max_group_size": 0,
       "scan_root": "tests/fixtures",
       "scope_file_counts": {
-        "fixture": 85,
+        "fixture": 84,
         "golden": 30,
         "vcr": 344
       },
-      "total_files": 459,
+      "total_files": 458,
       "tracked_extensions": [
         ".json",
         ".yaml",
@@ -2044,13 +2044,14 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3064,
-      "test_python_file_count": 3301,
+      "test_glob_file_count": 3050,
+      "test_python_file_count": 3286,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
         "tests/contract/",
         "tests/e2e/",
+        "tests/engineering/",
         "tests/fakes/",
         "tests/fixtures/",
         "tests/golden/",
@@ -2069,6 +2070,7 @@
         "tests/benchmarks/",
         "tests/contract/",
         "tests/e2e/",
+        "tests/engineering/",
         "tests/fakes/",
         "tests/fixtures/",
         "tests/golden/",
@@ -2082,17 +2084,17 @@
         "tests/testing_support/",
         "tests/unit/"
       ],
-      "top_level_directory_count": 16,
-      "top_level_directory_count_including_pycache": 16
+      "top_level_directory_count": 17,
+      "top_level_directory_count_including_pycache": 17
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3064,
-    "total_test_functions": 30339,
+    "total_test_files": 3050,
+    "total_test_functions": 29994,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "d11bd0c567b54cd8553bf4979637abdc3f9a0eb9739dbfa4c112d98fc63ca5df",
+  "source_tree_sha256": "e82340491b80916a14e4cdb0452ce71dd4001930c139064a1ca3ad5312f3142c",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2112,13 +2114,14 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3064,
-    "test_python_file_count": 3301,
+    "test_glob_file_count": 3050,
+    "test_python_file_count": 3286,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
       "tests/contract/",
       "tests/e2e/",
+      "tests/engineering/",
       "tests/fakes/",
       "tests/fixtures/",
       "tests/golden/",
@@ -2137,6 +2140,7 @@
       "tests/benchmarks/",
       "tests/contract/",
       "tests/e2e/",
+      "tests/engineering/",
       "tests/fakes/",
       "tests/fixtures/",
       "tests/golden/",
@@ -2150,12 +2154,12 @@
       "tests/testing_support/",
       "tests/unit/"
     ],
-    "top_level_directory_count": 16,
-    "top_level_directory_count_including_pycache": 16
+    "top_level_directory_count": 17,
+    "top_level_directory_count_including_pycache": 17
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3064,
-  "total_test_functions": 30339,
+  "total_test_files": 3050,
+  "total_test_functions": 29994,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
