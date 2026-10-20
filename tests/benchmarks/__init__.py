@@ -27,7 +27,7 @@
 # PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
 """Performance benchmarks for BioETL critical paths.
 
-Run with: pytest tests/benchmarks/ --benchmark-only
+Run with: bash scripts/engineering/dev/run_pytest.sh tests/benchmarks/ --benchmark-only
 """
 
 from __future__ import annotations

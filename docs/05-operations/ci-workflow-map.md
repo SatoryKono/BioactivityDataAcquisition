@@ -4,36 +4,31 @@ Version: 1.0.3
 Status: active
 Class: published
 Owner: BioETL Team
-Last verified: '2026-09-10'
+Last verified: '2026-10-18'
 
 ______________________________________________________________________
 
 # CI / GitHub Actions Workflow Map
 
-The active PR/default-main provider is CircleCI `.circleci/config.yml`, workflow
-`pr-gate`, with GitHub required context `ci/circleci: pr-gate-complete`.
-The canonical applicability catalog is `configs/quality/github_required_checks.yaml`.
-Its `deployment` block identifies GitHub Actions; retained `coordinator_workflow` and
-`owner_workflow` fields describe the legacy definitions kept after #11930.
-The owner cancelled deletion in #11930; its status is not_planned.
-GitHub Actions run the pull-request coordinator. Ruleset enforcement stays disabled.
+<!-- policy-anchor:deployment-provider -->
+The runnable pull-request coordinator is GitHub Actions (`deployment.provider=github_actions`). The canonical applicability catalog is `configs/quality/github_required_checks.yaml`. `.circleci/config.yml` remains historical configuration, not current merge protection. The owner cancelled deletion in #11930; its status is not_planned.
+
+<!-- policy-anchor:ruleset-enforcement-mode -->
+Rulesets `13643213` and `15730586` include `refs/heads/main` and are `enforcement: disabled` on the 2026-10-16 read-only GET. Ruleset `24517966` does not include `main`. <!-- policy-anchor:stored-ruleset-contexts --> The disabled main rulesets still store `ci/circleci: pr-gate-complete`; `15730586` also stores `ci/circleci: root-hygiene`. A stored context is not active CircleCI protection. <!-- policy-anchor:target-gha-context --> The target GitHub required context name is `pr-gate-complete`, and that name is not the context stored on the rulesets. <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge. An offline catalog match does not confirm live server rulesets.
+
+The 2026-10-05 record of pipelines 218–220 and PR #11954 is historical. It does not describe the 2026-10-16 enforcement mode.
 
 The legacy inventory below contains 54 tracked workflow files, including 13
 scheduled and 34 manual surfaces. These categories overlap. Retained YAML defines
 the behavior to preserve; presence in the repository does not prove a running lane.
 Optional CodeQL and inactive OpenCode stubs remain separate from required checks.
 
-Production rulesets `main` (13643213) and `root-hygiene-required-check` (15730586)
-are active as of 2026-10-05 after three consecutive successful main PR-gate
-pipelines 218, 219 and 220: all 81 jobs passed on source
-`a34558b918b56984a185c0e4956d735b43483780`. The main ruleset requires
-`ci/circleci: pr-gate-complete`; the companion also requires
-`ci/circleci: root-hygiene`. Both retain strict SHA freshness, main-only scope and
-no bypass actors; API readback matched the submitted settings exactly.
-The negative acceptance in isolated PR #11954 proved missing, failed, stale-SHA
-and canceled CircleCI workflow results block merge (HTTP 405); its test ruleset
-was disabled and the PR closed without merge. No App binding is claimed: this
-CircleCI integration publishes legacy commit statuses without an App identity.
+On 2026-10-05, rulesets `main` (13643213) and `root-hygiene-required-check` (15730586)
+were recorded with stored contexts `ci/circleci: pr-gate-complete` and
+`ci/circleci: root-hygiene` after pipelines 218, 219 and 220 on source
+`a34558b918b56984a185c0e4956d735b43483780`. That record is not the 2026-10-16
+enforcement mode. The negative acceptance in isolated PR #11954 belonged to that
+historical activation. No App binding is claimed for those legacy commit statuses.
 
 ## CircleCI migration preparation (#11929 / #11931)
 
@@ -57,8 +52,7 @@ This explicit lane runs the canonical 17-shard producer and Proof-or-Stop checks
 it is not part of a normal PR/default-main run. Do not rewrite source identity
 to a squash SHA or weaken the ancestor guard to avoid this measurement.
 
-The map above records the legacy Actions inventory. The pull-request coordinator
-runs in GitHub Actions. Ruleset enforcement stays disabled.
+The map above records the legacy Actions inventory. <!-- policy-anchor:deployment-provider --> The pull-request coordinator runs in GitHub Actions (`deployment.provider=github_actions`). <!-- policy-anchor:ruleset-enforcement-mode --> Rulesets `13643213` and `15730586` are `enforcement: disabled`. <!-- policy-anchor:stored-ruleset-contexts --> Stored `ci/circleci: pr-gate-complete` is not active CircleCI protection. <!-- policy-anchor:target-gha-context --> `pr-gate-complete` is not the context stored on the rulesets. <!-- policy-anchor:enforcement-verified-date --> `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge. An offline catalog match does not confirm live server rulesets.
 CodeQL is excluded from required checks; optional analysis and workflow retirement
 remain separate decisions. The CircleCI default-branch matrix reads the canonical
 required-check catalog instead of maintaining a second gate list.
@@ -78,16 +72,18 @@ registration was completed on 2026-10-05: `bioetl-github-read-only` is restricte
 to this project and `main`, excludes SSH and API config sources, and contains
 `GITHUB_TOKEN`. Token permissions and job authentication still require run evidence.
 Remaining event parity and external acceptance are pending.
-The prepared `performance` lane preserves benchmark budgets and the five-sample
-window, emits JUnit/observations/JSON/Markdown artifacts, and fails on missing,
-empty or over-budget evidence. Main job 3365 passed 70 tests and all five budgets.
-`bioetl-performance-nightly` is registered for 03:00–03:59 UTC daily. Its first
-scheduled pipeline 272 failed the CrossRef median budget (0.479 ms against
-0.4125 ms); a single diagnostic rerun on the same main SHA passed all 70 tests
-with CrossRef at 0.268 ms. Both attempts are retained; scheduling is demonstrated,
-but stable performance acceptance remains pending. The prepared evidence gate
-requires all five registered benchmarks, rejects duplicate/missing/failed rows,
-and records CPU identity, quota and throttling counters for diagnosis.
+Performance is manual-only: `.github/workflows/performance-nightly.yml`
+accepts `workflow_dispatch` and has no cron schedule. The selectable CircleCI
+`performance` lane has been removed; its workflow and `-p benchmark` are absent
+from `.circleci/config.yml`. The GitHub caller loads
+`tests.benchmarks.benchmark_vcs_guard` before `benchmark`, validates measurement
+JSON and retains the existing hotspot budgets and evidence gates.
+Historical CircleCI runs remain evidence of their original captures: main job
+3365 passed 70 tests and all five budgets; scheduled pipeline 272 failed the
+CrossRef median budget (0.479 ms against 0.4125 ms), while its diagnostic rerun
+passed with 0.268 ms. Those observations do not establish a currently runnable
+CircleCI lane or five independent successful samples. No external schedule was
+changed or verified by this local patch.
 The prepared `replay-parity` lane retains the determinism, idempotency, composite
 resume and independent determinism recheck, with nonempty checksum comparison
 and replay artifacts. `memory-freshness` checks and publishes evidence without
@@ -268,10 +264,10 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `no-partial-tree-commits.yml` | — | Full-tree guard in root governance | Integrated into root-hygiene; main jobs 3500, 3529, 3549 passed the full-tree guard alongside strict root checks |
 | `opencode-pr-review.yml` | — | Retain disabled review stub policy | Do not activate unpinned installer or write paths |
 | `opencode-triage.yml` | — | Retain disabled triage stub policy | Do not activate unpinned installer or write paths |
-| `performance-nightly.yml` | `0 3 * * *` | CircleCI performance | Scheduled pipeline 272 on 303ced3: job 4565 failed CrossRef latency; diagnostic4566 and manual361 pass. Scheduled370/job6640 on main ba9c80e7 passes70 tests/0 skips and all five unchanged budgets; all six artifacts verified, daily03UTC restored. Prior failed observation retained; this is not five independent samples |
+| `performance-nightly.yml` | manual `workflow_dispatch` only | GitHub Actions; CircleCI lane removed | Historical captures: Scheduled pipeline 272 on 303ced3: job 4565 failed CrossRef latency; diagnostic4566 and manual361 pass. Scheduled370/job6640 on main ba9c80e7 passes70 tests/0 skips and all five unchanged budgets; all six artifacts verified, daily03UTC restoration was historical; current YAML is manual-only. Prior failed observation retained; this is not five independent samples |
 | `port-contracts.yml` | — | CircleCI port-contracts | PR409 and main411 automatic gates accepted. Main7957 on005a7dc6 passes164 contract tests and24 Hypothesis cases, zero skips/errors; both JUnit artifacts independently hashed. Manual include-hypothesis=false remains accepted by4425/pipeline262 |
 | `pr-hygiene.yml` | — | Retain disabled PR maintenance | Preserve #10263; canonical 21-day draft/report-noise policy remains manual |
-| `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Main pipelines 218–220 pass all 81 jobs on a34558b918b5; both production rulesets active/read back; legacy owner references retained by the owner decision cancelling #11930 |
+| `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Main pipelines 218–220 passed all 81 jobs on a34558b918b5; both production rulesets were read back as active on that date, which is not the 2026-10-16 enforcement mode; legacy owner references retained by the owner decision cancelling #11930 |
 | `provider-contract-drift.yml` | — | CircleCI provider-contract-drift | PR409 and main411 automatic gates accepted. Main7931 on005a7dc6 passes48 replay tests with zero skips/errors plus matrix/xwalk and breaking-drift gates; both artifacts independently hashed,30-day retention preserved |
 | `quality-debt-weekly.yml` | — | Retain disabled debt review policy | Do not activate job with existing if:false; local audits retained |
 | `release.yml` | — | CircleCI release-validation plus protected promotion | Main pipeline339 on d9f5b026 SUCCESS, all five jobs: security6133, tests6136 (182 passed, no skips), build6134, install6135 and gate6137. Syft1.54.0 completes in1.556s; wheel/sdist/SPDX2.3 digests and source identity independently verified, install consumes the same archives. Signed provenance, TestPyPI/PyPI and release assets remain pending; published=false |
@@ -327,7 +323,7 @@ acceptance gates; workflow deletion is no longer a completion criterion.
 | `no-partial-tree-commits.yml` | No partial-tree commits | Reject incomplete Git trees (#11709) |
 | `opencode-pr-review.yml` | opencode-pr-review | Dispatch-only stub (#11012); remote OpenCode installer removed |
 | `opencode-triage.yml` | opencode-triage | Dispatch-only stub (#11012); remote OpenCode installer removed |
-| `pr-required.yml` | PR Gate Complete | Retained legacy coordinator; active CircleCI context `ci/circleci: pr-gate-complete` is enforced by rulesets 13643213 and 15730586 (#11928) |
+| `pr-required.yml` | PR Gate Complete | GitHub Actions coordinator. Target context `pr-gate-complete` is not the context stored on rulesets 13643213 and 15730586; those rulesets are `enforcement: disabled` (#12009, #12047) |
 | `root-hygiene.yml` | Root Hygiene | Root allowlist / clutter gates |
 | `router-v7-bridge.yml` | Router 7 bridge candidate | Candidate plugin, frontend and image parity checks; managed host acceptance remains separate |
 | `schema-governance.yml` | Schema Governance | Schema governance checks |

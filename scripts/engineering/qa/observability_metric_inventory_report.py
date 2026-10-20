@@ -23,6 +23,7 @@ from scripts.engineering.qa.observability_metric_inventory_scan import (
     _scan_canonical_metric_mentions,
     _scan_registered_metric_names,
 )
+from scripts.engineering.qa._tracked_glob import tracked_files
 from scripts.engineering.qa.observability_metric_inventory_shared import (
     _CANONICAL_METRIC_RE,
     _DOC_SCAN_ROOTS,
@@ -479,7 +480,7 @@ def _scan_typed_dashboard_targets(
     http_targets: list[dict[str, object]] = []
     run_id_selector_violations: list[str] = []
     dashboards_root = repo_root / "grafana" / "dashboards"
-    for dashboard_path in sorted(dashboards_root.glob("*.json")):
+    for dashboard_path in tracked_files(dashboards_root, "*.json"):
         payload = json.loads(
             dashboard_path.read_text(encoding="utf-8")
         )  # NOSONAR - path confined
@@ -520,7 +521,11 @@ def _scan_documented_metrics_from_docs(repo_root: Path) -> set[str]:
         if scan_root == Path("grafana/dashboards"):
             continue
         path = repo_root / scan_root
-        candidates = [path] if path.is_file() else sorted(path.rglob("*"))
+        candidates = (
+            tracked_files(path.parent, path.name)
+            if path.is_file()
+            else tracked_files(path, "**/*")
+        )
         for candidate in candidates:
             if not candidate.is_file() or candidate.suffix not in _TEXT_SUFFIXES:
                 continue

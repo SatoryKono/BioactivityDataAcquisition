@@ -64,6 +64,7 @@ def test_scripts_catalog_governance_check_passes() -> None:
     )
 
 
+@pytest.mark.generated_artifact
 def test_scripts_catalog_caps_active_script_surface() -> None:
     """Active script count must be governed by a no-growth lifecycle cap."""
     if sys.platform.startswith("win"):

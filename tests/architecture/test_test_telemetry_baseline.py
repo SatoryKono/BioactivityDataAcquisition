@@ -19,6 +19,7 @@ import subprocess
 import pytest
 import yaml
 
+from scripts.engineering.ci import test_telemetry_provenance as telemetry_provenance
 from scripts.engineering.ci.test_telemetry_provenance import (
     capture_metrics_are_bound,
     source_commit_is_reachable,
@@ -40,6 +41,7 @@ def _load_yaml(path: Path) -> dict[str, object]:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
+@pytest.mark.generated_artifact
 def test_test_telemetry_baseline_contract_is_present_and_scoped() -> None:
     payload = _load_yaml(BASELINE_YAML)
 
@@ -67,7 +69,9 @@ def test_test_telemetry_baseline_contract_is_present_and_scoped() -> None:
             head = subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
             ).strip()
-            assert source_commit_is_reachable(payload, ROOT, head)
+            assert source_commit_is_reachable(payload, ROOT, head), (
+                telemetry_provenance.LAST_REACHABILITY_REASON
+            )
         assert provenance["required_shards"] == [shard.name for shard in SHARDS]
         assert [row["name"] for row in provenance["shards"]] == provenance[
             "required_shards"
@@ -82,7 +86,8 @@ def test_test_telemetry_baseline_contract_is_present_and_scoped() -> None:
     else:
         assert source_event in {"pull_request", "push", "workflow_dispatch", "schedule"}
         if source_branch != "main":
-            assert source_event == "pull_request"
+            # A manually dispatched Nightly run may measure the PR branch.
+            assert source_event in {"pull_request", "workflow_dispatch"}
         assert source_run_url == (
             "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/"
             f"{source_run_id}"
@@ -103,12 +108,14 @@ def test_test_telemetry_baseline_doc_is_published_from_engineering_index() -> No
     assert "test-telemetry-baseline.md" in readme
 
 
+@pytest.mark.generated_artifact
 def test_branch_consumable_test_telemetry_reports_exist() -> None:
     assert SLOWEST_JSON.exists()
     assert SLOWEST_MD.exists()
     assert COVERAGE_SUMMARY_JSON.exists()
 
 
+@pytest.mark.generated_artifact
 def test_tests_workflow_and_baseline_contract_use_same_artifact_paths() -> None:
     payload = _load_yaml(BASELINE_YAML)
     workflow = WORKFLOW.read_text(encoding="utf-8")

@@ -428,6 +428,8 @@ def _remote_main_baseline_artifact_matches_builder(*, repo_root: Path) -> bool |
         return False
     except Exception:
         return False
+    if live_payload.get("local_tracking_ref_matches_remote") is not True:
+        return False
     return (
         report_architecture_debt_remote_main_baseline.payloads_semantically_equivalent(
             committed, live_payload
@@ -666,7 +668,9 @@ def _collect_changed_paths(
         check=False,
     )
     if result.returncode != 0:
-        return set()
+        raise ValueError(
+            f"Cannot collect changed paths from {ref!r}: {result.stderr.strip()}"
+        )
     return {line.strip() for line in result.stdout.splitlines() if line.strip()}
 
 

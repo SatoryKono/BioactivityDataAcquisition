@@ -25,30 +25,81 @@ jobs:
         with:
           uv-extras: "dev tracing performance"
 
-      - name: Run all performance benchmarks
+      # Suites under tests/benchmarks and tests/performance are deterministic
+      # fixtures. Their dataset id is synthetic. The reducer compares it and
+      # may write a proposed candidate; CI does not adopt the baseline.
+      - name: Clear stale performance evidence
+        run: |
+          rm -f reports/performance/benchmark-measurements.json \
+            reports/performance/benchmark-validation-manifest.json \
+            reports/performance/benchmark-manifest.json \
+            reports/performance/benchmark-gate.json \
+            reports/performance/hotspot-observations.jsonl \
+            reports/performance/hotspot-degradation.json \
+            reports/performance/hotspot-degradation.md
+
+      - name: Run hotspot performance tests
         run: |
           mkdir -p reports/performance
-          uv run --frozen --no-build pytest tests/performance/ tests/benchmarks/ \
+          uv run --frozen --no-build pytest tests/performance/ \
             -m "benchmark or performance" \
             -p no:xdist \
             -v --tb=short \
             --perf-obs-out reports/performance/hotspot-observations.jsonl \
             --junitxml=reports/performance/hotspot-budgets.xml
 
+      - name: Run pytest-benchmark cases
+        id: benchmarks
+        if: ${{ always() && !cancelled() }}
+        run: |
+          mkdir -p reports/performance
+          # addopts still injects -p no:benchmark. Load the guard first, then
+          # -p benchmark unblocks the plugin. The env label is run provenance,
+          # not the plugin switch.
+          BIOETL_BENCHMARK_CALLER=performance-nightly \
+          BIOETL_BENCHMARK_DATASET=bioetl-synthetic-benchmarks-v1 \
+          uv run --frozen --no-build pytest tests/benchmarks/ \
+            -m benchmark \
+            -p tests.benchmarks.benchmark_vcs_guard \
+            -p benchmark \
+            -p no:xdist \
+            -v --tb=short \
+            --benchmark-json=reports/performance/benchmark-measurements.json
+
+      - name: Require pytest-benchmark measurement JSON
+        id: measurement-contract
+        if: ${{ always() && !cancelled() }}
+        run: |
+          uv run --frozen --no-build python -m tests.benchmarks.benchmark_vcs_guard \
+            --validate-measurement-json reports/performance/benchmark-measurements.json
+
+      - name: Validate benchmark evidence
+        id: validate-evidence
+        if: ${{ always() && !cancelled() }}
+        env:
+          PRODUCER_OUTCOME: ${{ steps.benchmarks.outcome }}
+          CONTRACT_OUTCOME: ${{ steps.measurement-contract.outcome }}
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          uv run --frozen --no-build python -m scripts.engineering.qa validate-benchmark-evidence \
+            --measurements reports/performance/benchmark-measurements.json \
+            --manifest-out reports/performance/benchmark-validation-manifest.json \
+            --producer-outcome "$PRODUCER_OUTCOME" \
+            --contract-outcome "$CONTRACT_OUTCOME" \
+            --failure-manifest-out reports/performance/benchmark-manifest.json \
+            --failure-gate-out reports/performance/benchmark-gate.json \
+            --expected-sha "$EXPECTED_SHA"
+
       - name: Build hotspot degradation report
         if: ${{ always() && !cancelled() }}
         run: |
           mkdir -p reports/performance
-          if [ -f reports/performance/hotspot-observations.jsonl ]; then
-            uv run --frozen --no-build python -m scripts.engineering.qa report-hotspots \
-              --observations reports/performance/hotspot-observations.jsonl \
-              --budgets tests/performance/hotspot_budgets.json \
-              --window-size 5 \
-              --json-out reports/performance/hotspot-degradation.json \
-              --markdown-out reports/performance/hotspot-degradation.md
-          else
-            echo "No hotspot observations found; skipping report."
-          fi
+          uv run --frozen --no-build python -m scripts.engineering.qa report-hotspots \
+            --observations reports/performance/hotspot-observations.jsonl \
+            --budgets tests/performance/hotspot_budgets.json \
+            --window-size 5 \
+            --json-out reports/performance/hotspot-degradation.json \
+            --markdown-out reports/performance/hotspot-degradation.md
 
       - name: Publish degradation summary
         if: always()
@@ -58,18 +109,39 @@ jobs:
           fi
 
       - name: Gate on degradation report
-        if: always()
+        if: ${{ always() && !cancelled() }}
         run: |
-          if [ -f reports/performance/hotspot-degradation.json ]; then
-            python - <<'PY'
-          import json, sys
-          data = json.load(open('reports/performance/hotspot-degradation.json'))
-          failed = data.get('summary', {}).get('failed', 0)
-          print(f'Benchmarks over budget: {failed}')
-          sys.exit(1 if failed > 0 else 0)
-          PY
-          fi
+          uv run --frozen --no-build python -m scripts.engineering.qa gate-hotspot-report \
+            --report reports/performance/hotspot-degradation.json
 
+      - name: Reduce benchmark evidence
+        if: ${{ always() && !cancelled() && steps.benchmarks.outcome == 'success' && steps.measurement-contract.outcome == 'success' && steps.validate-evidence.outcome == 'success' }}
+        run: |
+          mkdir -p reports/performance
+          uv run --frozen --no-build python -m scripts.engineering.qa reduce-benchmark-evidence \
+            --raw-json reports/performance/benchmark-measurements.json \
+            --manifest-out reports/performance/benchmark-manifest.json \
+            --gate-out reports/performance/benchmark-gate.json \
+            --baseline reports/performance/benchmark-summary.json \
+            --evidence-dir reports/performance/evidence \
+            --checkout-sha "${{ github.sha }}"
+
+      - name: Require validated benchmark artifacts
+        if: ${{ always() && !cancelled() }}
+        env:
+          PRODUCER_OUTCOME: ${{ steps.benchmarks.outcome }}
+          CONTRACT_OUTCOME: ${{ steps.measurement-contract.outcome }}
+          VALIDATION_OUTCOME: ${{ steps.validate-evidence.outcome }}
+        run: |
+          test "$PRODUCER_OUTCOME" = success
+          test "$CONTRACT_OUTCOME" = success
+          test "$VALIDATION_OUTCOME" = success
+          test -s reports/performance/benchmark-measurements.json
+          test -s reports/performance/benchmark-validation-manifest.json
+          test -s reports/performance/benchmark-manifest.json
+          test -s reports/performance/benchmark-gate.json
+
+      # Raw files and failure reports remain available for diagnosis after failure.
       - name: Upload performance artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() && !cancelled() }}
@@ -80,5 +152,11 @@ jobs:
             reports/performance/hotspot-observations.jsonl
             reports/performance/hotspot-degradation.json
             reports/performance/hotspot-degradation.md
-          if-no-files-found: warn
+            reports/performance/benchmark-measurements.json
+            reports/performance/benchmark-manifest.json
+            reports/performance/benchmark-validation-manifest.json
+            reports/performance/benchmark-gate.json
+            reports/performance/evidence/
+            reports/performance/delta-sequential-merge/
+          if-no-files-found: error
           retention-days: 30

@@ -47,6 +47,7 @@ def _below_default_floor_count(inventory: dict[str, Any]) -> int:
     )
 
 
+@pytest.mark.generated_artifact
 def test_issue_5272_closeout_matches_live_module_coverage_inventory() -> None:
     skip_if_module_coverage_inventory_is_dirty(root=ROOT, inventory_path=INVENTORY)
     closeout = _load_json(CLOSEOUT)
@@ -75,7 +76,7 @@ def test_issue_5272_closeout_matches_live_module_coverage_inventory() -> None:
         == closeout["current_metrics"]["application_core_unmeasured_module_count"]
     )
     if closeout["status"] == "validated_local_closeable":
-        assert closeout["debt_outcome"] == "improved"
+        assert closeout["debt_outcome"] in {"improved", "unchanged"}
         # Application core metrics must be zero
         assert application_core["status_counts"]["uncovered"] == 0
         assert application_core["unmeasured_module_count"] == 0
@@ -85,15 +86,26 @@ def test_issue_5272_closeout_matches_live_module_coverage_inventory() -> None:
         )
         # Repo-level metrics may have unmeasured modules outside application_core
         # This is acceptable for local closeout
-    else:
-        assert closeout["debt_outcome"] == "current_inventory_regressed"
-        assert (
-            summary["status_counts"]["uncovered"] > 0
-            or summary["unmeasured_module_count"] > 0
-            or application_core["status_counts"]["uncovered"] > 0
-        )
+    # Trend is relative to the preceding accepted binding, not the old baseline.
+    history = closeout.get("previous_current_bindings", [])
+    previous = history[-1].get("current_metrics", {}) if history else {}
+    deltas = []
+    for key, value in closeout["current_metrics"].items():
+        reference = previous.get(key, closeout["baseline_metrics"].get(key, 0))
+        deltas.append((value - reference) * (1 if key.endswith("count") else -1))
+    expected = (
+        "current_inventory_regressed"
+        if any(delta > 0 for delta in deltas)
+        else "improved"
+        if any(delta < 0 for delta in deltas)
+        else "unchanged"
+    )
+    assert closeout["debt_outcome"] == expected
+    if expected == "current_inventory_regressed":
+        assert closeout["status"] != "validated_local_closeable"
 
 
+@pytest.mark.generated_artifact
 def test_issue_5244_parent_epic_stays_open_until_default_floor_is_zero() -> None:
     skip_if_module_coverage_inventory_is_dirty(root=ROOT, inventory_path=INVENTORY)
     closeout = _load_json(CLOSEOUT)

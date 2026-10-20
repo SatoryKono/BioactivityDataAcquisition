@@ -1381,6 +1381,7 @@ class _CorruptedStoreManifestService:
 class TestRunManifestErrorExitCodes:
     """#12019 (CF-015): run-manifest errors must exit non-zero."""
 
+    @pytest.mark.unit
     def test_show_missing_identifier_exits_fail(
         self,
         cli_runner: CliRunner,
@@ -1393,6 +1394,7 @@ class TestRunManifestErrorExitCodes:
         assert result.exit_code == 1
         assert "Run manifest not found" in (result.stderr or result.output)
 
+    @pytest.mark.unit
     def test_show_corrupted_store_exits_storage_error(
         self,
         cli_runner: CliRunner,
@@ -1405,6 +1407,7 @@ class TestRunManifestErrorExitCodes:
         assert result.exit_code == 85
         assert "corruption" in (result.stderr or result.output)
 
+    @pytest.mark.unit
     def test_score_missing_identifier_exits_fail(
         self,
         cli_runner: CliRunner,
@@ -1416,6 +1419,7 @@ class TestRunManifestErrorExitCodes:
 
         assert result.exit_code == 1
 
+    @pytest.mark.unit
     def test_diff_missing_identifier_exits_fail(
         self,
         cli_runner: CliRunner,
@@ -1429,6 +1433,7 @@ class TestRunManifestErrorExitCodes:
 
         assert result.exit_code == 1
 
+    @pytest.mark.unit
     def test_verify_corrupted_store_exits_storage_error(
         self,
         cli_runner: CliRunner,

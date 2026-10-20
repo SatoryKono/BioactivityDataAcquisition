@@ -30,7 +30,16 @@ def validate_single_write_mode(
     try:
         write_mode_policy.validate(layer, WriteMode(mode_value))
     except (PolicyViolationError, ValueError):
-        allowed = WriteModePolicy.ALLOWED_MODES[layer]
+        allowed = WriteModePolicy.ALLOWED_MODES.get(layer)
+        if allowed is None:
+            return [
+                ConfigValidationError(
+                    field=field,
+                    expected=f"supported layer for generic modes{expected_suffix}",
+                    actual=actual_mode or mode_value,
+                    rule=rule,
+                )
+            ]
         allowed_names = ", ".join(
             mode.value for mode in sorted(allowed, key=lambda item: item.value)
         )

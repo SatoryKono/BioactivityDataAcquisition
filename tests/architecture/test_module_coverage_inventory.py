@@ -183,6 +183,7 @@ def _write_minimal_coverage_xml(
     )
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
     assert INVENTORY_PATH.exists()
@@ -587,6 +588,7 @@ def test_existing_inventory_refresh_does_not_fabricate_source_module_evidence(
     }
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_module_coverage_inventory_reports_measured_hotspot_family_evidence() -> None:
     committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
@@ -615,6 +617,7 @@ def test_module_coverage_inventory_reports_measured_hotspot_family_evidence() ->
         ), family_name
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_retained_entrypoint_modules_have_measured_coverage() -> None:
     """Retained module entrypoints must not silently remain coverage-unmeasured."""
@@ -643,6 +646,7 @@ def test_retained_entrypoint_modules_have_measured_coverage() -> None:
     )
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_hotspot_refactor_targets_have_authoritative_module_coverage_gates() -> None:
     """Hotspot refactor families must have an explicit module-level coverage gate."""
@@ -671,6 +675,7 @@ def test_hotspot_refactor_targets_have_authoritative_module_coverage_gates() -> 
         ), family_name
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_issue_5376_coverage_tail_closeout_matches_live_inventory() -> None:
     """#5376 preserves historical shard evidence while exposing current regressions."""

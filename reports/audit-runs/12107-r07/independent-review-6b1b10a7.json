@@ -1,0 +1,65 @@
+{
+  "current_coverage": "NOT_VERIFIABLE",
+  "delta": {
+    "files": [
+      "reports/audit-runs/12107-r07-history/KIT-MANIFEST-acceptance.json",
+      "reports/audit-runs/12107-r07/behavior-followups.json",
+      "reports/audit-runs/12107-r07/build_map_acceptance.py",
+      "reports/audit-runs/12107-r07/independent-review-91f379.json",
+      "reports/audit-runs/12107-r07/map-acceptance-verdict.json"
+    ],
+    "from": "91f3791066aebad1b8516969179da5e947e8f430",
+    "to": "6b1b10a7bb5b688560dc0c799bc09be3c1c163d1",
+    "unchanged_map_reaudit": false
+  },
+  "findings": [
+    {
+      "id": "AUD-001",
+      "severity": "substantial",
+      "title": "outside_12108 had no durable follow-up",
+      "evidence": "At 6b1b10a7 the outside_12108 value was prose saying the work stays R07 missing evidence. It had no follow-up id, closure criterion, or tracking responsibility. Closing #12107 would leave that work without an owner record.",
+      "remediation_commit": "5a600bcb7422a405c5285343a07e8a245029f50d"
+    },
+    {
+      "id": "AUD-002",
+      "severity": "substantial",
+      "title": "HTTP health rows attributed the PubChem executor",
+      "evidence": "At 6b1b10a7 inside_12108 for Chembl, OpenAlex, CrossRef, and UniProt health said PubChem uses the sync_base executor.",
+      "remediation_commit": "5a600bcb7422a405c5285343a07e8a245029f50d"
+    }
+  ],
+  "manifest_at_6b1b10a7": {
+    "bytes": 5481,
+    "files": 25,
+    "mismatches": 0,
+    "sha256": "c45e740263948d2c983e0fbcf067ef815bde2e25667f7256d33be537dfaa965e"
+  },
+  "positive_review": {
+    "applies_to_commit": "5a600bcb7422a405c5285343a07e8a245029f50d",
+    "applies_to_tree": "be730c39faff2e52103adb1fe3d498aebcce2d47",
+    "behavior_followups_bytes": 19365,
+    "behavior_followups_sha256": "a31f45ef37b22f59a3394e24628f31f740b59d73010801a3111a747aac017cb3",
+    "manifest_bytes": 5581,
+    "manifest_files": 25,
+    "manifest_mismatches": 0,
+    "manifest_sha256": "c712251c46803d0fa07237cee2101226c536e52c796b10dbc1026a3b493c29d1",
+    "outside_follow_up_ids": [
+      "R07-FU-FETCH-PAYLOAD-CrossRefAdapter",
+      "R07-FU-FETCH-PAYLOAD-OpenAlexAdapter",
+      "R07-FU-FETCH-PAYLOAD-PubChemAdapter",
+      "R07-FU-FETCH-PAYLOAD-PubMedAdapter",
+      "R07-FU-FETCH-PAYLOAD-SemanticScholarAdapter",
+      "R07-FU-FETCH-PAYLOAD-UniProtAdapter",
+      "R07-FU-HEALTH-STATUS-ChemblAdapter",
+      "R07-FU-HEALTH-STATUS-CrossRefAdapter",
+      "R07-FU-HEALTH-STATUS-OpenAlexAdapter",
+      "R07-FU-HEALTH-STATUS-PubChemAdapter",
+      "R07-FU-HEALTH-STATUS-UniProtAdapter"
+    ],
+    "r08_r09_implementations_added": false,
+    "verdict": "positive",
+    "manifest_note": "manifest_sha256 is the 25-file manifest stored in commit 5a600bcb7422a405c5285343a07e8a245029f50d. The commit that adds this review file replaces that manifest with a 26-file list."
+  },
+  "schema_version": 1,
+  "verdict_of_6b1b10a7": "not_positive"
+}

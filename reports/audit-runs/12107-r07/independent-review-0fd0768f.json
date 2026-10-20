@@ -1,0 +1,21 @@
+{
+  "delta_files": [
+    "reports/audit-runs/12107-r07-history/KIT-MANIFEST-acceptance.json",
+    "reports/audit-runs/12107-r07/independent-review-6b1b10a7.json"
+  ],
+  "manifest": {
+    "bytes": 5853,
+    "files": 26,
+    "mismatches": 0,
+    "path": "reports/audit-runs/12107-r07-history/KIT-MANIFEST-acceptance.json",
+    "sha256": "3118b6ecec6f467da9075b440d03a3ab5aed90c114d87d7e72ece6b4467aa081"
+  },
+  "other_files_changed": false,
+  "parent_commit": "5a600bcb7422a405c5285343a07e8a245029f50d",
+  "parent_tree": "be730c39faff2e52103adb1fe3d498aebcce2d47",
+  "schema_version": 1,
+  "scope": "Narrow delta only. The 2046-row map and unchanged tests were not re-audited.",
+  "verdict": "positive",
+  "verified_commit": "0fd0768ff931724e61c1482cf981df896abe8e81",
+  "verified_tree": "36668affe9a8976a8e110f1c50a39348f0d89172"
+}

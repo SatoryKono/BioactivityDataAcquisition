@@ -9,6 +9,9 @@ from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID
 
 import pytest
+from tests.helpers.clock import fixed_test_clock
+
+
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.medallion import SilverWriteMode
@@ -107,7 +110,7 @@ class TestBronzeMixins:
         assert host._list_batches_sync("chembl", "activity") == []
         date_dir = tmp_path / "chembl" / "activity" / "2020-01-01"
         date_dir.mkdir(parents=True)
-        stale = date_dir / "batch.jsonl.zst"
+        stale = date_dir / "batch_2020-01-01_001.jsonl.zst"
         stale.write_bytes(b"x")
         assert host._is_old_date_dir(date_dir, "2021-01-01") is True
         previewed = host.preview_cleanup("chembl", "activity")
@@ -120,7 +123,10 @@ class TestBronzeMixins:
             provider="chembl",
             entity="activity",
         )
-        assert cleaned["files_removed"] == 1
+        assert cleaned["files_removed"] == 0
+        assert cleaned["files_planned"] == 0
+        assert cleaned["files_skipped"] == 1
+        assert stale.read_bytes() == b"x"
 
     def test_metadata_mixin_coordinator_and_legacy(self) -> None:
         mixin = BronzeWriterMetadataMixin()
@@ -248,6 +254,7 @@ class TestForeignKeyAdapter:
                 raise FileNotFoundError(table)
 
         missing = SilverForeignKeyReconciliationAdapter(
+            clock=fixed_test_clock(),
             silver_writer=_MissingSilver(),  # type: ignore[arg-type]
             logger=logger,
         )
@@ -259,6 +266,7 @@ class TestForeignKeyAdapter:
                 return []
 
         empty = SilverForeignKeyReconciliationAdapter(
+            clock=fixed_test_clock(),
             silver_writer=_EmptySilver(),  # type: ignore[arg-type]
             logger=logger,
         )
@@ -272,6 +280,7 @@ class TestForeignKeyAdapter:
                 return [{"id": "1", "parent_id": "x"}]
 
         blocked = SilverForeignKeyReconciliationAdapter(
+            clock=fixed_test_clock(),
             silver_writer=_Scoped(),  # type: ignore[arg-type]
             logger=logger,
         )
@@ -285,6 +294,7 @@ class TestForeignKeyAdapter:
                 return [{"id": "present"}]
 
         unproven = SilverForeignKeyReconciliationAdapter(
+            clock=fixed_test_clock(),
             silver_writer=_Rows(),  # type: ignore[arg-type]
             logger=logger,
         )
@@ -292,6 +302,7 @@ class TestForeignKeyAdapter:
         assert result.mutation_blocked_reason == "reference_completeness_unproven"
 
         gold = SilverForeignKeyReconciliationAdapter(
+            clock=fixed_test_clock(),
             silver_writer=_Rows(),  # type: ignore[arg-type]
             logger=logger,
             gold_writer=None,

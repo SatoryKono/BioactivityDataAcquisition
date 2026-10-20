@@ -30,6 +30,30 @@ SCORECARD_PATH = PROJECT_ROOT / "configs/quality/debt_scorecard.yaml"
 BASELINE_PATH = PROJECT_ROOT / "reports/quality/config-discrepancy-baseline.json"
 
 
+@pytest.mark.architecture
+def test_flatten_dict_counts_structural_containers_consistently() -> None:
+    """Both merge maps and their setting leaves stay in the config vocabulary."""
+    flattened = generator.flatten_dict(
+        {
+            "composite": {
+                "merge": {
+                    "sort_by": {"silver": ["entity_id"], "gold": ["entity_id"]},
+                    "field_priorities": {"activity_id": ["chembl", "pubmed"]},
+                }
+            }
+        }
+    )
+
+    assert flattened["composite.merge.sort_by"] == generator.DICT_SHAPE_MARKER
+    assert flattened["composite.merge.field_priorities"] == generator.DICT_SHAPE_MARKER
+    assert flattened["composite.merge.sort_by.silver"] == '["entity_id"]'
+    assert flattened["composite.merge.sort_by.gold"] == '["entity_id"]'
+    assert (
+        flattened["composite.merge.field_priorities.activity_id"]
+        == '["chembl", "pubmed"]'
+    )
+
+
 @cache
 def _load_scorecard() -> dict[str, object]:
     payload = yaml.safe_load(SCORECARD_PATH.read_text(encoding="utf-8"))
@@ -135,6 +159,7 @@ def test_config_discrepancy_evidence_scans_config_snapshot_once(
     generator._build_config_discrepancy_evidence_cached.cache_clear()
 
 
+@pytest.mark.generated_artifact
 @pytest.mark.architecture
 def test_config_discrepancy_baseline_matches_live_generator() -> None:
     """Committed config-surface baseline must match the deterministic generator."""

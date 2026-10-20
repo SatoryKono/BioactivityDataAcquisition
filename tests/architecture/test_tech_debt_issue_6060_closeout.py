@@ -72,6 +72,7 @@ def _live_family_fan_in(name: str) -> tuple[int, str | None]:
     return count_internal_fan_in(files=files)
 
 
+@pytest.mark.generated_artifact
 def test_issue_6060_composition_runtime_builder_fan_in_has_headroom() -> None:
     baseline = _hotspot_family_row(HOTSPOT_BASELINE, "composition_runtime_builders")
     scorecard = _scorecard_family_row("composition_runtime_builders")

@@ -210,7 +210,7 @@
         ".yml",
         ".json"
       ],
-      "files_scanned": 246,
+      "files_scanned": 248,
       "ignored_by_jscpd_patterns": [
         "**/configs/**",
         "**/*.yaml",
@@ -245,7 +245,7 @@
       "inconsistent_parameter_count": 0,
       "raw_inconsistent_parameter_count": 0,
       "sanctioned_partial_parameter_count": 0,
-      "unique_parameter_count": 157
+      "unique_parameter_count": 158
     },
     "entity_effective": {
       "config_count": 22,
@@ -261,5 +261,5 @@
     "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
     "Residual entity drift is limited to intentional entity-specific filters, metadata policy blocks, schema field-alias surfaces, and pipeline overrides."
   ],
-  "snapshot_date": "2026-10-15"
+  "snapshot_date": "2026-10-19"
 }

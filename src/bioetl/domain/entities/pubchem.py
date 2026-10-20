@@ -17,6 +17,7 @@ from dataclasses import dataclass
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from bioetl.domain.entities._validators import require_structure_identifier
 from bioetl.domain.entities.base import BaseEntity
 
 # === Pydantic DTO Model ===
@@ -292,11 +293,9 @@ class PubchemMolecule(BaseEntity):
         if not self.molecule_id:
             raise ValueError("PubchemMolecule molecule_id is required")
 
-        if not any((self.canonical_smiles, self.isomeric_smiles, self.inchi)):
-            raise ValueError(
-                "PubchemMolecule must have at least one structural identifier "
-                "(SMILES/InChI)"
-            )
+        require_structure_identifier(
+            self.canonical_smiles, self.isomeric_smiles, self.inchi, "PubchemMolecule"
+        )
 
 
 __all__ = [

@@ -40,6 +40,7 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+@pytest.mark.generated_artifact
 def test_publication_type_codegen_manifest_hashes() -> None:
     """Manifest hashes must match source CSV and JSON asset."""
 
@@ -65,6 +66,7 @@ def test_publication_type_codegen_manifest_hashes() -> None:
     assert artifact_info.get("sha256") == _sha256(PROJECT_ROOT / artifact_path)
 
 
+@pytest.mark.generated_artifact
 def test_publication_type_codegen_is_deterministic() -> None:
     """`--check` mode must pass (no stale generated artifacts)."""
     result = run_repo_python(str(GEN_SCRIPT), "--check", cwd=PROJECT_ROOT)

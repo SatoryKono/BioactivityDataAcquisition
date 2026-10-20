@@ -115,6 +115,7 @@ def _src_importers(module_name: str) -> set[str]:
     return importers
 
 
+@pytest.mark.generated_artifact
 def test_issues_5648_5649_5650_duplication_is_below_opening_baselines() -> None:
     duplication = _load_json(DUPLICATION_BASELINE)
 
@@ -133,6 +134,7 @@ def test_issues_5648_5649_5650_duplication_is_below_opening_baselines() -> None:
     assert bootstrap["duplicate_count"] == 0
 
 
+@pytest.mark.generated_artifact
 def test_issue_5650_contract_and_dq_diagnostics_remain_clean() -> None:
     gates = _load_json(DEBT_GATES)
     contract = _load_json(CONTRACT_DIAGNOSTICS)
@@ -146,6 +148,7 @@ def test_issue_5650_contract_and_dq_diagnostics_remain_clean() -> None:
     assert dq["blocking_issue_count"] == 0
 
 
+@pytest.mark.generated_artifact
 def test_issue_5651_public_compatibility_surfaces_are_fully_justified() -> None:
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
     census = _load_json(COMPATIBILITY_CENSUS)
@@ -198,6 +201,7 @@ def test_issue_5652_silver_filter_identity_facade_has_zero_src_importers() -> No
     assert actual == set()
 
 
+@pytest.mark.generated_artifact
 def test_issue_5653_dead_code_review_window_is_fully_triaged() -> None:
     inventory = _load_json(DEAD_CODE_INVENTORY)
     summary = inventory["summary"]
@@ -215,6 +219,7 @@ def test_issue_5653_dead_code_review_window_is_fully_triaged() -> None:
     assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
 
 
+@pytest.mark.generated_artifact
 def test_issue_5654_hotspot_warnings_are_reduced_without_budget_growth() -> None:
     baseline = _load_json(HOTSPOT_BASELINE)
     gates = _load_json(DEBT_GATES)

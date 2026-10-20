@@ -1,24 +1,24 @@
 {
   "summary": {
-    "scanned_modules": 2569,
-    "total_internal_imports": 8274,
+    "scanned_modules": 2581,
+    "total_internal_imports": 8320,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 329,
     "violations": 0,
-    "source_fingerprint": "80af4ec8d5b6cfa927205d645595edbd0357738f60a7178127f6ed6a952bc6be"
+    "source_fingerprint": "2a855b10ff153202f41890a1f30cd7b938b58c216d4c14560b995685e3a88a45"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1629,
+      "imports": 1631,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1103,
+      "imports": 1105,
       "allowed": true
     },
     {
@@ -48,19 +48,19 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1307,
+      "imports": 1308,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 801,
+      "imports": 803,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1271,
+      "imports": 1310,
       "allowed": true
     },
     {
@@ -117,12 +117,12 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.types",
-      "imports": 82
+      "imports": 83
     },
     {
       "source": "infrastructure.storage",
       "target": "domain.ports",
-      "imports": 66
+      "imports": 67
     },
     {
       "source": "application.pipelines",
@@ -160,14 +160,14 @@
       "imports": 37
     },
     {
-      "source": "infrastructure.storage",
-      "target": "domain.models",
+      "source": "application.composite",
+      "target": "domain.exceptions",
       "imports": 36
     },
     {
-      "source": "application.composite",
-      "target": "domain.exceptions",
-      "imports": 35
+      "source": "infrastructure.storage",
+      "target": "domain.models",
+      "imports": 36
     },
     {
       "source": "composition.bootstrap",

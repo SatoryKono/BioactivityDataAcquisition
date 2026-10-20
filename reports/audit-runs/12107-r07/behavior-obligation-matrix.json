@@ -1,0 +1,309 @@
+{
+  "acceptance": "NOT_ACCEPTED",
+  "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12107",
+  "live_network_used": false,
+  "rows": [
+    {
+      "adapter": "IDMappingDataSource",
+      "case": "normal",
+      "evidence": "test_idmapping_fetch_yields_mapped_record",
+      "operation": "fetch",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "IDMappingDataSource",
+      "case": "empty_input",
+      "evidence": "test_idmapping_fetch_yields_nothing_when_no_ids",
+      "operation": "fetch",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "IDMappingDataSource",
+      "case": "timeout",
+      "evidence": "TimeoutError propagates",
+      "operation": "fetch",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "IDMappingDataSource",
+      "case": "cancellation",
+      "evidence": "CancelledError propagates",
+      "operation": "fetch",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "IDMappingDataSource",
+      "case": "healthy",
+      "evidence": "existing input and healthy client",
+      "operation": "health_check",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "IDMappingDataSource",
+      "case": "missing_input",
+      "evidence": "UNHEALTHY",
+      "operation": "health_check",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "IDMappingDataSource",
+      "case": "downstream_degraded",
+      "evidence": "DEGRADED",
+      "operation": "health_check",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "IDMappingDataSource",
+      "case": "close_once",
+      "evidence": "client __aexit__ once after enter",
+      "operation": "aclose",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "IDMappingDataSource",
+      "case": "close_again",
+      "evidence": "second aclose does not exit again because the source is already closed",
+      "operation": "aclose",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "ChemblAdapter",
+      "case": "normal",
+      "evidence": "one activity record from a scripted response",
+      "operation": "fetch",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "ChemblAdapter",
+      "case": "timeout",
+      "evidence": "httpx.TimeoutException becomes ServiceUnavailableError",
+      "operation": "fetch",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "ChemblAdapter",
+      "case": "cancellation",
+      "evidence": "CancelledError propagates",
+      "operation": "fetch",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "ChemblAdapter",
+      "case": "normal_timeout_cancellation",
+      "evidence": "probe path was not executed in this change",
+      "operation": "health_check",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "ChemblAdapter",
+      "case": "resource_release",
+      "evidence": "DataSourcePort requires release; ChemblAdapter.aclose is the base no-op and the test records exit_calls == 0",
+      "operation": "aclose",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "ChemblAdapter",
+      "case": "idempotent_second_close",
+      "evidence": "the port text does not require idempotence; the no-op second call is only an observation",
+      "operation": "aclose",
+      "status": "not_applicable"
+    },
+    {
+      "adapter": "PubMedAdapter",
+      "case": "normal",
+      "evidence": "scripted HTTP 200 returns HEALTHY",
+      "operation": "health_check",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "PubMedAdapter",
+      "case": "timeout",
+      "evidence": "TimeoutException returns a non-HEALTHY HealthStatus",
+      "operation": "health_check",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "PubMedAdapter",
+      "case": "cancellation",
+      "evidence": "CancelledError propagates",
+      "operation": "health_check",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "PubMedAdapter",
+      "case": "normal_timeout_cancellation",
+      "evidence": "fetch transport was not executed",
+      "operation": "fetch",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "PubMedAdapter",
+      "case": "resource_release",
+      "evidence": "aclose awaits the injected client __aexit__",
+      "operation": "aclose",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "PubMedAdapter",
+      "case": "idempotent_second_close",
+      "evidence": "port text does not require a single exit; the second call exits again",
+      "operation": "aclose",
+      "status": "not_applicable"
+    },
+    {
+      "adapter": "SemanticScholarAdapter",
+      "case": "normal",
+      "evidence": "scripted HTTP 200 returns HEALTHY",
+      "operation": "health_check",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "SemanticScholarAdapter",
+      "case": "timeout",
+      "evidence": "TimeoutException returns a non-HEALTHY HealthStatus",
+      "operation": "health_check",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "SemanticScholarAdapter",
+      "case": "cancellation",
+      "evidence": "CancelledError propagates",
+      "operation": "health_check",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "SemanticScholarAdapter",
+      "case": "normal_timeout_cancellation",
+      "evidence": "fetch transport was not executed",
+      "operation": "fetch",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "SemanticScholarAdapter",
+      "case": "resource_release",
+      "evidence": "aclose awaits the injected client __aexit__",
+      "operation": "aclose",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "SemanticScholarAdapter",
+      "case": "idempotent_second_close",
+      "evidence": "port text does not require idempotence",
+      "operation": "aclose",
+      "status": "not_applicable"
+    },
+    {
+      "adapter": "OpenAlexAdapter",
+      "case": "normal_timeout_cancellation",
+      "evidence": "existing tests replace fetch methods; this change does not drive the transport",
+      "operation": "fetch",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "OpenAlexAdapter",
+      "case": "normal_timeout_cancellation",
+      "evidence": "probe helper was not executed",
+      "operation": "health_check",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "OpenAlexAdapter",
+      "case": "resource_release",
+      "evidence": "aclose awaits the injected client __aexit__",
+      "operation": "aclose",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "OpenAlexAdapter",
+      "case": "idempotent_second_close",
+      "evidence": "port text does not require idempotence",
+      "operation": "aclose",
+      "status": "not_applicable"
+    },
+    {
+      "adapter": "CrossRefAdapter",
+      "case": "normal_timeout_cancellation",
+      "evidence": "fetch transport was not executed",
+      "operation": "fetch",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "CrossRefAdapter",
+      "case": "normal_timeout_cancellation",
+      "evidence": "probe helper was not executed",
+      "operation": "health_check",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "CrossRefAdapter",
+      "case": "unentered_client",
+      "evidence": "enter depth 0 does not call __aexit__",
+      "operation": "aclose",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "CrossRefAdapter",
+      "case": "entered_client",
+      "evidence": "enter depth 1 calls __aexit__; a repeat also calls it",
+      "operation": "aclose",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "UniProtAdapter",
+      "case": "normal_timeout_cancellation",
+      "evidence": "existing tests replace fetch methods; transport was not executed",
+      "operation": "fetch",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "UniProtAdapter",
+      "case": "normal_timeout_cancellation",
+      "evidence": "probe helper was not executed",
+      "operation": "health_check",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "UniProtAdapter",
+      "case": "resource_release",
+      "evidence": "UniProtAdapter.aclose is the base no-op; exit_calls stays 0",
+      "operation": "aclose",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "PubChemAdapter",
+      "case": "normal_timeout_cancellation",
+      "evidence": "pubchempy transport was not executed",
+      "operation": "fetch",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "PubChemAdapter",
+      "case": "normal_timeout_cancellation",
+      "evidence": "pubchempy probe was not executed",
+      "operation": "health_check",
+      "status": "mandatory_not_verified"
+    },
+    {
+      "adapter": "PubChemAdapter",
+      "case": "borrowed_pool",
+      "evidence": "owns_thread_pool False leaves the pool running",
+      "operation": "aclose",
+      "status": "mandatory_verified"
+    },
+    {
+      "adapter": "PubChemAdapter",
+      "case": "owned_pool",
+      "evidence": "owns_thread_pool True shuts the pool down; the second call does not raise",
+      "operation": "aclose",
+      "status": "mandatory_verified"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "Eight providers returned by load_providers. Obligations are DataSourcePort fetch, health_check, and aclose.",
+  "status_vocabulary": {
+    "mandatory_not_verified": "The port requires this outcome and this change does not prove it.",
+    "mandatory_verified": "The port requires this outcome and a fixture test asserts it.",
+    "not_applicable": "The cited port text does not require this case."
+  },
+  "test_module": "tests/unit/infrastructure/adapters/test_registered_datasource_lifecycle_contracts.py"
+}

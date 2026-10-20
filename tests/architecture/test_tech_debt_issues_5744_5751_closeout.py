@@ -71,6 +71,7 @@ def _family_row(payload: dict[str, Any], family_name: str) -> dict[str, Any]:
     raise AssertionError(f"Missing hotspot family row: {family_name}")
 
 
+@pytest.mark.generated_artifact
 def test_issue_5744_architecture_audit_freshness_gates_are_passing() -> None:
     scorecard = _load_json(SCORECARD)
     gates = _load_json(ROOT / "reports" / "quality" / "debt-governance-gates.json")
@@ -91,6 +92,7 @@ def test_issue_5744_architecture_audit_freshness_gates_are_passing() -> None:
     assert scorecard["integral_score"] >= 8.92
 
 
+@pytest.mark.generated_artifact
 def test_issue_5745_adapter_duplication_is_reduced() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5745"]
@@ -129,6 +131,7 @@ def test_issue_5745_adapter_duplication_is_reduced() -> None:
     ).exists()
 
 
+@pytest.mark.generated_artifact
 def test_issue_5746_pipeline_duplication_is_reduced() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5746"]
@@ -148,6 +151,7 @@ def test_issue_5746_pipeline_duplication_is_reduced() -> None:
     ).exists()
 
 
+@pytest.mark.generated_artifact
 def test_issue_5747_compatibility_surfaces_are_reviewed() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5747"]
@@ -181,6 +185,7 @@ def test_issue_5747_compatibility_surfaces_are_reviewed() -> None:
         assert row["review_date"] == outcome["review_date"]
 
 
+@pytest.mark.generated_artifact
 def test_issue_5748_hotspot_pressure_is_reduced() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5748"]
@@ -213,6 +218,7 @@ def test_issue_5748_hotspot_pressure_is_reduced() -> None:
     )
 
 
+@pytest.mark.generated_artifact
 def test_issue_5749_test_debt_is_reduced() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5749"]

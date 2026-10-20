@@ -36,7 +36,8 @@ these tests FAIL if performance degrades below baseline thresholds.
 Part of architecture review refactoring plan (R5).
 
 Note: These tests are marked with @pytest.mark.benchmark and excluded from
-standard test runs. Run explicitly with: make bench or pytest -m benchmark
+standard test runs. Run explicitly with:
+bash scripts/engineering/dev/run_pytest.sh tests/benchmarks/test_baseline_assertions.py -m benchmark
 """
 
 from __future__ import annotations

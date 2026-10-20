@@ -1,0 +1,502 @@
+{
+  "acceptance": "NOT_ACCEPTED",
+  "acceptance_matrix": [
+    {
+      "evidence": "Historical bytes remain at reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.json sha256 6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c. The live map after the same-file reachability correction is sha256 44ce5e1207bcd9b1287427f925e0a4bf789c1547dc1ac2df15271fc0c986db55. The scan source pin is still HEAD 2c018779765294f6f61191e9f6ade860ada94861 tree 2bcf21522cfc5f3e935a391276a3585400032108.",
+      "item": "historical source pin and frozen map bytes",
+      "verdict": "PASS"
+    },
+    {
+      "evidence": "scan_adapter_owner_map.py rules and universe count 2046",
+      "item": "universe definition, inclusion, exclusion, and dedup",
+      "verdict": "PASS"
+    },
+    {
+      "evidence": "classified_coverage_pct 100 with unresolved class count 0; this is not behavioral or owner acceptance",
+      "item": "classification completeness",
+      "verdict": "PASS"
+    },
+    {
+      "evidence": "14 historical VERIFIED rows rechecked; none proves every public port method. Remaining rows were not promoted.",
+      "item": "behavioral conformance of the universe",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "evidence": "Historical DEFECT 0 only means the promotion rule did not fire.",
+      "item": "DEFECT count as absence of defects",
+      "verdict": "FAIL"
+    },
+    {
+      "evidence": "8 passed in test_registered_datasource_port_surface.py, exit 0",
+      "item": "registered provider surface and slug",
+      "verdict": "PASS"
+    },
+    {
+      "evidence": "surface test does not call those methods",
+      "item": "registered provider fetch, health, and close behavior",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "evidence": "runtime_smoke returncode 0; availability only",
+      "item": "smoke of 8 providers, 22 pipelines, 250 getattr",
+      "verdict": "PASS"
+    },
+    {
+      "evidence": "codeowner_is_not_semantic_owner true; semantic owner remains unassigned-tracking",
+      "item": "owner separation from CODEOWNERS",
+      "verdict": "PASS"
+    },
+    {
+      "evidence": "0/2046; gap is the missing ownership contract; resolution is a future explicit decision",
+      "item": "semantic owner assignment",
+      "verdict": "FAIL"
+    },
+    {
+      "evidence": "baseline scope core_active_ports is 10 rows and semantic_completeness is not_assessed",
+      "item": "TRACKED_PORTS equals the R07 universe",
+      "verdict": "FAIL"
+    },
+    {
+      "evidence": "no configs/quality ratchet added; inspected diffs change pins, counts, and fingerprints only",
+      "item": "new ratchet or debt-budget increase",
+      "verdict": "PASS"
+    },
+    {
+      "evidence": "r08-lifecycle-inventory.json 148 rows, consumer #12108; this does not close #12108",
+      "item": "R08 lifecycle inventory delivered as input",
+      "verdict": "PASS"
+    },
+    {
+      "evidence": "r09-storage-surface-inventory.json 567 rows, consumer #12109; this does not close #12109",
+      "item": "R09 storage inventory delivered as input",
+      "verdict": "PASS"
+    },
+    {
+      "evidence": "session 14271333931892187511 reported FAILED at 2026-10-19 21:09:55 MSK, last change 21:06:18 MSK. Issue comments and remote branch search returned no Jules artifact. No new Jules attempt was started.",
+      "item": "Jules session comparison",
+      "verdict": "NOT_VERIFIABLE"
+    },
+    {
+      "evidence": "behavioral conformance and owner assignment remain open",
+      "item": "close issue 12107",
+      "verdict": "FAIL"
+    }
+  ],
+  "commands": [
+    {
+      "command": "git fetch origin main",
+      "exit_code": 0,
+      "result": "origin/main=HEAD=2c018779765294f6f61191e9f6ade860ada94861 left-right 0 0"
+    },
+    {
+      "command": ".venv/bin/python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update",
+      "exit_code": 0,
+      "result": "fingerprint moved to 6fbeb275526966fa7234cbc9f3e7d7d4ea0990a9236df99da2f941c2c64d5fe9; no budget field changed"
+    },
+    {
+      "command": ".venv/bin/python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check",
+      "exit_code": 0,
+      "result": "after update"
+    },
+    {
+      "command": ".venv/bin/python -m scripts.engineering.qa refresh_governance_artifacts --check",
+      "exit_code": 1,
+      "result": "first check stopped at test-governance counts 3079/30683 versus 3080/30684"
+    },
+    {
+      "command": ".venv/bin/python -m scripts.engineering.qa refresh-ci-drift-families --update --test-gov",
+      "exit_code": 0,
+      "result": "counts 3080 files and 30684 functions; no budget field"
+    },
+    {
+      "command": ".venv/bin/python -m scripts.engineering.ci.update_test_telemetry_baseline --rebind-current-tree",
+      "exit_code": 0,
+      "result": "source_tree_sha256 only, now 9819dc0247783363664f1b43e5d60685a649fb212a1b194a9be1288578e31ab3; coverage metrics not remeasured"
+    },
+    {
+      "command": ".venv/bin/python -m scripts.engineering.qa report-debt-governance-gates --update",
+      "exit_code": 0,
+      "result": "remote-main fingerprint only; status remains pass"
+    },
+    {
+      "command": ".venv/bin/python -m scripts.engineering.qa refresh_governance_artifacts --check",
+      "exit_code": 0,
+      "result": "governance artifacts current; module coverage source_tree_sha256 remains 6d24fa02c167aa32f697e19ff55580157b05013a7a45e02b03f0e39e33449bd0"
+    },
+    {
+      "command": ".venv/bin/python -m scripts.engineering.qa refresh-ci-drift-families --check --evidence --dataflow",
+      "exit_code": 0,
+      "result": "evidence and chembl_activity dataflow current"
+    },
+    {
+      "command": ".venv/bin/python -m scripts.engineering.qa refresh-ci-drift-families --check --flaky-fingerprint --telemetry --evidence --dataflow",
+      "exit_code": 1,
+      "result": "flaky printed artifact is current and the cascade then failed telemetry source_tree_sha256; evidence and dataflow were checked later and exited 0"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/architecture/test_registered_datasource_port_surface.py tests/architecture/test_registry_contracts.py::TestRegistryRaiseOnMissingKey::test_pipeline_registry_raises_on_missing tests/architecture/test_registry_contracts.py::TestRegistryReturnTypes::test_pipeline_registry_list_returns_list tests/architecture/test_registry_contracts.py::TestRegistryRaiseOnMissingKey::test_provider_registry_raises_on_missing tests/architecture/test_registry_contracts.py::TestRegistryReturnTypes::test_provider_registry_list_returns_sorted_list tests/architecture/test_port_contracts.py::TestMemoryMonitorImplementationContract::test_noop_memory_monitor_implements_memory_monitor_port tests/architecture/test_port_contracts_hypothesis.py::TestMetricsPortProperties::test_noop_metrics_accepts_any_valid_input tests/architecture/test_port_contracts_hypothesis.py::TestTracingPortProperties::test_noop_tracing_accepts_valid_span_inputs tests/architecture/test_port_contracts.py::TestResilienceImplementationContract::test_circuit_breaker_implements_circuit_breaker_port tests/architecture/test_port_contracts.py::TestResilienceImplementationContract::test_token_bucket_implements_rate_limiter_port tests/architecture/test_port_contracts_resilience_concurrency.py::TestCheckpointPortErrorConditions::test_checkpoint_load_non_existent_returns_none tests/architecture/test_lock_safety_guard.py::TestLockSafetyGuard::test_validate_owner_returns_false_when_not_holding_lock tests/architecture/test_port_contracts.py::TestLoggerImplementationContract::test_structlog_logger_implements_logger_port tests/architecture/test_port_contracts.py::TestLoggerImplementationContract::test_noop_logger_implements_logger_port tests/architecture/test_adapter_port_conformance.py::test_runtime_checkable_observability_ports_accept_real_adapters tests/architecture/test_port_contracts.py::TestJsonEncoderImplementationContract::test_stdlib_encoder_implements_json_encoder_port tests/architecture/test_port_contracts.py::TestJsonEncoderImplementationContract::test_orjson_encoder_implements_json_encoder_port -q --tb=line",
+      "exit_code": 0,
+      "result": "24 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/architecture/test_registered_datasource_port_surface.py -q --tb=short",
+      "exit_code": 0,
+      "result": "8 passed after ruff fix"
+    },
+    {
+      "command": ".venv/bin/python -m scripts.engineering.qa report-flaky-test-burndown-review",
+      "exit_code": 0,
+      "result": "rebound test-governance hash and counts 3080/30684; no budget field"
+    },
+    {
+      "command": ".venv/bin/python -m scripts.engineering.qa report-flaky-test-burndown-review --check",
+      "exit_code": 0,
+      "result": "current after update"
+    },
+    {
+      "command": ".venv/bin/python -m scripts.engineering.qa report-debt-governance-gates --check",
+      "exit_code": 0,
+      "result": "still current after the flaky count rebind"
+    }
+  ],
+  "historical_map_rewritten": false,
+  "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12107",
+  "issue_state": "OPEN",
+  "jules": {
+    "checked_at_msk": "2026-10-19T21:09:55",
+    "comparison": "No Jules patch or comment was available to diff against the map. The new surface test covers a gap in PORT_ADAPTER_CASES and does not replace a retrieved implementation.",
+    "last_change_msk": "2026-10-19T21:06:18",
+    "new_attempt_started": false,
+    "retrieved_artifact": null,
+    "session_id": "14271333931892187511",
+    "status_reported": "FAILED"
+  },
+  "owners": {
+    "codeowners": "@SatoryKono is the default review owner in .github/CODEOWNERS and is not a semantic, composition, or lifecycle owner",
+    "gap": "No in-code contract assigns a semantic, composition, or lifecycle owner to these rows.",
+    "implementation_owner": "unassigned-tracking",
+    "owner_coverage": "0/2046",
+    "resolution": "A later explicit ownership decision can name those owners. This review does not invent people and does not assign @SatoryKono to every row.",
+    "verification_surface": "tests/architecture/test_registered_datasource_port_surface.py for the eight registered providers; existing architecture tests for the fourteen rechecked rows"
+  },
+  "owning_tests": {
+    "combined_command": ".venv/bin/python -m pytest tests/architecture/test_registered_datasource_port_surface.py tests/architecture/test_registry_contracts.py::TestRegistryRaiseOnMissingKey::test_pipeline_registry_raises_on_missing tests/architecture/test_registry_contracts.py::TestRegistryReturnTypes::test_pipeline_registry_list_returns_list tests/architecture/test_registry_contracts.py::TestRegistryRaiseOnMissingKey::test_provider_registry_raises_on_missing tests/architecture/test_registry_contracts.py::TestRegistryReturnTypes::test_provider_registry_list_returns_sorted_list tests/architecture/test_port_contracts.py::TestMemoryMonitorImplementationContract::test_noop_memory_monitor_implements_memory_monitor_port tests/architecture/test_port_contracts_hypothesis.py::TestMetricsPortProperties::test_noop_metrics_accepts_any_valid_input tests/architecture/test_port_contracts_hypothesis.py::TestTracingPortProperties::test_noop_tracing_accepts_valid_span_inputs tests/architecture/test_port_contracts.py::TestResilienceImplementationContract::test_circuit_breaker_implements_circuit_breaker_port tests/architecture/test_port_contracts.py::TestResilienceImplementationContract::test_token_bucket_implements_rate_limiter_port tests/architecture/test_port_contracts_resilience_concurrency.py::TestCheckpointPortErrorConditions::test_checkpoint_load_non_existent_returns_none tests/architecture/test_lock_safety_guard.py::TestLockSafetyGuard::test_validate_owner_returns_false_when_not_holding_lock tests/architecture/test_port_contracts.py::TestLoggerImplementationContract::test_structlog_logger_implements_logger_port tests/architecture/test_port_contracts.py::TestLoggerImplementationContract::test_noop_logger_implements_logger_port tests/architecture/test_adapter_port_conformance.py::test_runtime_checkable_observability_ports_accept_real_adapters tests/architecture/test_port_contracts.py::TestJsonEncoderImplementationContract::test_stdlib_encoder_implements_json_encoder_port tests/architecture/test_port_contracts.py::TestJsonEncoderImplementationContract::test_orjson_encoder_implements_json_encoder_port -q --tb=line",
+    "combined_exit_code": 0,
+    "combined_passed": 24,
+    "combined_tested_head": "2c018779765294f6f61191e9f6ade860ada94861",
+    "combined_tested_tree": "2bcf21522cfc5f3e935a391276a3585400032108",
+    "note": "Source under test is that HEAD. The new test file was uncommitted at execution time.",
+    "surface_rerun_command": ".venv/bin/python -m pytest tests/architecture/test_registered_datasource_port_surface.py -q --tb=short",
+    "surface_rerun_exit_code": 0,
+    "surface_rerun_passed": 8
+  },
+  "protocol_split": {
+    "domain_star_port": 89,
+    "domain_star_port_runtime_checkable": 89,
+    "note": "report-domain-ports-inventory counts the 89 domain *Port protocols. The other 546 Protocol classes are a catalog, not registered implementations.",
+    "other_protocol_classes": 542,
+    "other_star_port": 4,
+    "protocol_classes": 635
+  },
+  "rechecked_historically_verified_rows": [
+    {
+      "acceptance_verdict": "NOT_VERIFIABLE",
+      "bounded_evidence": "test_pipeline_registry_raises_on_missing asserts get(unknown) raises RuntimeError, ValueError, or KeyError. test_pipeline_registry_list_returns_list asserts list_pipelines returns list[str].",
+      "contract": "PipelineRegistryProtocol and PipelineRegistryPort",
+      "gap": "The executed nodes do not assert every public method of both ports.",
+      "historical_verdict": "VERIFIED",
+      "line": 37,
+      "path": "src/bioetl/composition/factories/pipeline/registry_core.py",
+      "symbol": "PipelineRegistry"
+    },
+    {
+      "acceptance_verdict": "NOT_VERIFIABLE",
+      "bounded_evidence": "test_provider_registry_raises_on_missing asserts KeyError. test_provider_registry_list_returns_sorted_list asserts list[str] and sorted order.",
+      "contract": "ProviderDataSourceAccessProtocol and ProviderRegistrarProtocol",
+      "gap": "Registry error and list behavior is not full protocol conformance.",
+      "historical_verdict": "VERIFIED",
+      "line": 69,
+      "path": "src/bioetl/composition/providers/provider_registry.py",
+      "symbol": "ProviderRegistry"
+    },
+    {
+      "acceptance_verdict": "NOT_VERIFIABLE",
+      "bounded_evidence": "test_noop_memory_monitor_implements_memory_monitor_port asserts isinstance(NoOpMemoryMonitor(), MemoryMonitorPort).",
+      "contract": "MemoryMonitorPort",
+      "gap": "runtime_checkable isinstance does not assert monitor outcomes.",
+      "historical_verdict": "VERIFIED",
+      "line": 20,
+      "path": "src/bioetl/domain/ports/noop/_memory_metadata.py",
+      "symbol": "NoOpMemoryMonitor"
+    },
+    {
+      "acceptance_verdict": "NOT_VERIFIABLE",
+      "bounded_evidence": "test_noop_metrics_accepts_any_valid_input calls increment_counter, set_gauge, and observe_histogram. The explicit assertion is only `assert metrics is not None`.",
+      "contract": "MetricsPort",
+      "gap": "Invocation without an outcome assertion is not MetricsPort conformance.",
+      "historical_verdict": "VERIFIED",
+      "line": 8,
+      "path": "src/bioetl/domain/ports/noop/_metrics.py",
+      "symbol": "NoOpMetrics"
+    },
+    {
+      "acceptance_verdict": "NOT_VERIFIABLE",
+      "bounded_evidence": "test_noop_tracing_accepts_valid_span_inputs asserts set_attribute and record_exception return None, isinstance TracingPort, and flush/close return None.",
+      "contract": "TracingPort",
+      "gap": "Those return values do not cover every TracingPort method.",
+      "historical_verdict": "VERIFIED",
+      "line": 107,
+      "path": "src/bioetl/domain/ports/noop/_tracing.py",
+      "symbol": "NoOpTracing"
+    },
+    {
+      "acceptance_verdict": "NOT_VERIFIABLE",
+      "bounded_evidence": "test_circuit_breaker_implements_circuit_breaker_port and test_runtime_checkable_observability_ports_accept_real_adapters assert isinstance. Signature conformance also lists this class in PORT_ADAPTER_CASES.",
+      "contract": "CircuitBreakerPort",
+      "gap": "The executed nodes do not assert open/half-open transition outcomes.",
+      "historical_verdict": "VERIFIED",
+      "line": 54,
+      "path": "src/bioetl/infrastructure/adapters/http/circuit_breaker.py",
+      "symbol": "CircuitBreakerGuard"
+    },
+    {
+      "acceptance_verdict": "NOT_VERIFIABLE",
+      "bounded_evidence": "test_token_bucket_implements_rate_limiter_port asserts isinstance(bucket, RateLimiterPort).",
+      "contract": "RateLimiterPort",
+      "gap": "isinstance does not assert acquire timing or token accounting.",
+      "historical_verdict": "VERIFIED",
+      "line": 22,
+      "path": "src/bioetl/infrastructure/adapters/http/rate_limiter.py",
+      "symbol": "TokenBucketRateLimiter"
+    },
+    {
+      "acceptance_verdict": "NOT_VERIFIABLE",
+      "bounded_evidence": "test_checkpoint_load_non_existent_returns_none asserts load(non_existent_pipeline) is None.",
+      "contract": "CheckpointPort",
+      "gap": "One load outcome does not prove save, delete, or the rest of CheckpointPort.",
+      "historical_verdict": "VERIFIED",
+      "line": 19,
+      "path": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
+      "symbol": "LocalCheckpointAdapter"
+    },
+    {
+      "acceptance_verdict": "NOT_VERIFIABLE",
+      "bounded_evidence": "test_validate_owner_returns_false_when_not_holding_lock asserts acquire succeeds and validate_owner for another run_id is False.",
+      "contract": "LockPort",
+      "gap": "validate_owner is one LockPort outcome, not the whole port.",
+      "historical_verdict": "VERIFIED",
+      "line": 41,
+      "path": "src/bioetl/infrastructure/locking/memory_lock.py",
+      "symbol": "MemoryLock"
+    },
+    {
+      "acceptance_verdict": "NOT_VERIFIABLE",
+      "bounded_evidence": "test_structlog_logger_implements_logger_port and the observability isinstance test assert isinstance LoggerPort. bind return is a separate existing test and was not the selected node.",
+      "contract": "LoggerPort",
+      "gap": "isinstance does not assert emitted log records.",
+      "historical_verdict": "VERIFIED",
+      "line": 72,
+      "path": "src/bioetl/infrastructure/observability/logging.py",
+      "symbol": "StructlogLogger"
+    },
+    {
+      "acceptance_verdict": "NOT_VERIFIABLE",
+      "bounded_evidence": "test_noop_logger_implements_logger_port and the observability isinstance test assert isinstance LoggerPort.",
+      "contract": "LoggerPort",
+      "gap": "isinstance does not assert logger call outcomes.",
+      "historical_verdict": "VERIFIED",
+      "line": 19,
+      "path": "src/bioetl/infrastructure/observability/noop_logger.py",
+      "symbol": "NoOpLogger"
+    },
+    {
+      "acceptance_verdict": "NOT_VERIFIABLE",
+      "bounded_evidence": "test_runtime_checkable_observability_ports_accept_real_adapters asserts isinstance(UnifiedLogger(...), LoggerPort).",
+      "contract": "LoggerPort",
+      "gap": "isinstance does not assert log output.",
+      "historical_verdict": "VERIFIED",
+      "line": 57,
+      "path": "src/bioetl/infrastructure/observability/unified_logger.py",
+      "symbol": "UnifiedLogger"
+    },
+    {
+      "acceptance_verdict": "NOT_VERIFIABLE",
+      "bounded_evidence": "test_stdlib_encoder_implements_json_encoder_port asserts isinstance(StdLibJsonEncoder(), JsonEncoderPort).",
+      "contract": "JsonEncoderPort",
+      "gap": "isinstance does not assert dumps/loads bytes.",
+      "historical_verdict": "VERIFIED",
+      "line": 62,
+      "path": "src/bioetl/infrastructure/serialization/encoders.py",
+      "symbol": "StdLibJsonEncoder"
+    },
+    {
+      "acceptance_verdict": "NOT_VERIFIABLE",
+      "bounded_evidence": "test_orjson_encoder_implements_json_encoder_port asserts isinstance when orjson is installed. This run passed, so the node did not skip.",
+      "contract": "JsonEncoderPort",
+      "gap": "isinstance does not assert a dumps round-trip.",
+      "historical_verdict": "VERIFIED",
+      "line": 130,
+      "path": "src/bioetl/infrastructure/serialization/encoders.py",
+      "symbol": "OrjsonEncoder"
+    }
+  ],
+  "registered_providers": {
+    "getattr_fail": 0,
+    "getattr_ok": 250,
+    "missing_behavioral_checks": [
+      "fetch is not executed, so yielded records, limit, offset, and filter_ids are unproven",
+      "health_check is not awaited and its payload is unproven",
+      "aclose is not awaited and transport closure is unproven",
+      "FilterableDataSourcePort.fetch_filtered outcomes are unproven",
+      "isinstance(instance, DataSourcePort) is not asserted; PORT_ADAPTER_CASES requires equal async/sync shape and the port stub is sync while HTTP adapters are async generators. That checker was not weakened."
+    ],
+    "pipeline_names": 22,
+    "smoke_meaning": "Availability of load_providers, pipeline name listing, and bounded __all__ getattr. Not behavioral conformance.",
+    "smoke_providers": [
+      "chembl",
+      "crossref",
+      "openalex",
+      "pubchem",
+      "pubmed",
+      "semanticscholar",
+      "uniprot",
+      "uniprot_idmapping"
+    ],
+    "smoke_returncode": 0,
+    "surface_asserts": [
+      "declared provider_name default or class string equals the registry slug",
+      "fetch, health_check, and aclose are callable",
+      "health_check, aclose, __aenter__, and __aexit__ are coroutine functions",
+      "fetch parameter names equal DataSourcePort.fetch names",
+      "HTTP adapters declare async-generator fetch",
+      "IDMappingDataSource.fetch is neither an async generator nor a coroutine"
+    ],
+    "surface_test": "tests/architecture/test_registered_datasource_port_surface.py"
+  },
+  "rows_outside_candidate_roots": {
+    "explanation": "The 162 rows are classes retained only by a scoped structural match. A one-method overlap on logger or load is rejected and does not create these rows. The other 264 outside-root rows enter through name tokens, composition seams, or __getattr__.",
+    "other_inclusion": {
+      "abstract_base": 4,
+      "callable_seam": 55,
+      "concrete_adapter": 37,
+      "factory": 80,
+      "mixin": 21,
+      "noop": 2,
+      "pure_helper": 65
+    },
+    "structural_candidate": 162,
+    "structural_candidate_rule": "class outside candidate roots kept because a scoped structural port matched",
+    "total": 426
+  },
+  "schema_version": 1,
+  "side_inventories": {
+    "r08": {
+      "closes_12108": false,
+      "path": "reports/audit-runs/12107-r07/r08-lifecycle-inventory.json",
+      "rows": 148
+    },
+    "r09": {
+      "closes_12109": false,
+      "path": "reports/audit-runs/12107-r07/r09-storage-surface-inventory.json",
+      "rows": 567
+    }
+  },
+  "source_pin_of_historical_map": {
+    "adapter_owner_map_sha256": "6b39eef8bf65aacbd63b165bbe2d5295d0ca3726a12410f97108e77b7844625c",
+    "branch": "cursor_back/adapter-port-owner-map-4a22",
+    "head": "2c018779765294f6f61191e9f6ade860ada94861",
+    "origin_main": "2c018779765294f6f61191e9f6ade860ada94861",
+    "source_tree_sha256": "6d24fa02c167aa32f697e19ff55580157b05013a7a45e02b03f0e39e33449bd0",
+    "tree": "2bcf21522cfc5f3e935a391276a3585400032108"
+  },
+  "tracked_ports": {
+    "names": [
+      "DataSourcePort",
+      "CheckpointPort",
+      "QuarantinePort",
+      "RunManifestPort",
+      "RunLedgerPort",
+      "MetricsPort",
+      "ClockPort",
+      "BronzeStoragePort",
+      "SilverStoragePort",
+      "GoldStoragePort"
+    ],
+    "relation_to_universe": "10 baseline rows do not enumerate the 2046-row universe, the 89 domain *Port protocols, or the 635 Protocol classes.",
+    "row_count": 10,
+    "scope": "core_active_ports",
+    "semantic_completeness": "not_assessed"
+  },
+  "universe": {
+    "behavioral_acceptance_after_recheck": "NOT_VERIFIABLE",
+    "behavioral_conformance_coverage_pct_historical": 0.68,
+    "candidate_roots": [
+      "src/bioetl/infrastructure/adapters/",
+      "src/bioetl/infrastructure/storage/",
+      "src/bioetl/infrastructure/quarantine/",
+      "src/bioetl/infrastructure/control_plane/",
+      "src/bioetl/infrastructure/checkpoint/",
+      "src/bioetl/infrastructure/observability/",
+      "src/bioetl/infrastructure/time/",
+      "src/bioetl/infrastructure/locking/",
+      "src/bioetl/infrastructure/export/",
+      "src/bioetl/infrastructure/compat/",
+      "src/bioetl/infrastructure/serialization/",
+      "src/bioetl/domain/ports/noop/",
+      "src/bioetl/composition/factories/",
+      "src/bioetl/composition/providers/",
+      "src/bioetl/application/core/data_sources/"
+    ],
+    "classification_histogram": {
+      "abstract_base": 11,
+      "callable_seam": 251,
+      "compatibility_export": 1,
+      "concrete_adapter": 309,
+      "factory": 304,
+      "mixin": 101,
+      "noop": 14,
+      "provider_variant": 8,
+      "pure_helper": 876,
+      "structural_candidate": 162,
+      "wrapper": 9
+    },
+    "classified_coverage_pct": 100.0,
+    "classified_meaning": "Every row received a classification. This is not behavioral acceptance and not owner assignment.",
+    "count": 2046,
+    "dedup_key": [
+      "path",
+      "line",
+      "symbol"
+    ],
+    "defect_zero_meaning": "No row met the scanner rule that promotes an explicit or baseline port with a resolved structural gap to DEFECT. This is not evidence that unchecked rows have no defects.",
+    "exclusion": [
+      "Protocol classes stay in the protocol catalog and are not implementation rows",
+      "private functions outside candidate roots and composition seams",
+      "a structural match is rejected when every matched member is in WEAK_MEMBER_NAMES, including logger and load",
+      "private or non-port protocols match only inside the same directory"
+    ],
+    "historical_verdict_histogram": {
+      "DEFECT": 0,
+      "NOT_VERIFIABLE": 2022,
+      "UNREACHABLE": 10,
+      "VERIFIED": 14
+    },
+    "live_verdict_histogram_after_same_file_fix": {
+      "DEFECT": 0,
+      "NOT_VERIFIABLE": 2031,
+      "UNREACHABLE": 1,
+      "VERIFIED": 14
+    },
+    "inclusion": [
+      "non-protocol classes under the 15 candidate roots",
+      "token-named classes Adapter Client Store Writer Reader Factory Registry Clock Lock",
+      "classes with a scoped complete or partial structural Protocol match",
+      "classes named by the baseline TRACKED_PORTS adapter symbols",
+      "functions in candidate roots",
+      "composition functions prefixed create_ build_ register_ load_ ensure_ or the private _create_ _build_ _register_",
+      "provider registration links whose slug matches [a-z][a-z0-9_]{2,} and whose symbol is class-like or create_/build_",
+      "__getattr__ modules under composition, infrastructure, or domain/ports"
+    ],
+    "owner_coverage_pct": 0.0
+  }
+}

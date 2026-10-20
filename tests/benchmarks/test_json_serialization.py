@@ -30,7 +30,7 @@
 Compares performance of stdlib json vs orjson for typical BioETL workloads.
 
 Run with:
-    pytest benchmarks/test_json_serialization.py -v --benchmark-only
+    bash scripts/engineering/dev/run_pytest.sh tests/benchmarks/test_json_serialization.py -v --benchmark-only
 
 Requirements:
     - pip install pytest-benchmark orjson

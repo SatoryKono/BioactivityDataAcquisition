@@ -81,6 +81,15 @@ budget_ratchet:
   expected_direction: downward
   refreshed_on: "2026-07-01"
   stream_g_owner_notes:
+    - issue: "#12119"
+      owner: test-governance
+      status: compatibility_inventory_reclassified_quarantine_partition_layouts_0
+      note:
+        Renamed the unified quarantine partition-layout integration guard out of a compatibility-style
+        filename because it validates active partition-pushdown behavior on both partitioned and legacy
+        non-partitioned Delta tables rather than preserving a deprecated import or compatibility path. The
+        live compatibility filename inventory returned to zero; compatibility_test_file_max stays
+        ratcheted at 0. No technical-debt budget was increased.
     - issue: "#5763"
       owner: test-governance
       status: telemetry_governance_baseline_refresh_then_duplicate_names_zeroed
@@ -1217,6 +1226,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/scripts/ops/test_windows_docker_mcp_bridge.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ops/runtime/mcp/windows_docker_mcp_bridge.py
+    - path: tests/unit/repo_backed/scripts/qa/test_validate_benchmark_evidence_repo.py
+      target_lane: repo-backed-unit
+      protected_surface: .github/workflows/performance-nightly.yml + .github/workflows/tests.yml + configs/quality/test_matrix.yaml benchmark evidence gate contracts
     - path: tests/unit/repo_backed/coverage_gap/test_unmeasured_module_smoke.py
       target_lane: repo-backed-unit
       protected_surface: src/bioetl modules missing from the committed coverage XML snapshot
