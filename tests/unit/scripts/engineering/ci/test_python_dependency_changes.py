@@ -174,6 +174,46 @@ def _consumer(root: Path, source: str, imported: str) -> None:
     path.write_text(f"import {imported}\n", encoding="utf-8")
 
 
+def _optional_distribution(root: Path, adapter: str) -> None:
+    script = root / "scripts/ai/agent_tools/__main__.py"
+    script.parent.mkdir(parents=True, exist_ok=True)
+    script.write_text(adapter, encoding="utf-8")
+    (root / "pyproject.toml").write_text(
+        "\n".join(
+            (
+                "[project]",
+                'name = "bioetl"',
+                "dependencies = []",
+                "[project.optional-dependencies]",
+                'proofagent = ["proofagent-harness==0.13.0"]',
+                "",
+            )
+        ),
+        encoding="utf-8",
+    )
+    (root / "uv.lock").write_text(
+        "\n".join(
+            (
+                "version = 1",
+                "[[package]]",
+                'name = "proofagent-harness"',
+                'dependencies = [{name = "litellm"}]',
+                "[[package]]",
+                'name = "litellm"',
+                'dependencies = [{name = "aiohttp"}]',
+                "[[package]]",
+                'name = "aiohttp"',
+                'dependencies = [{name = "yarl"}]',
+                "[[package]]",
+                'name = "yarl"',
+                'version = "1.25.1"',
+                "",
+            )
+        ),
+        encoding="utf-8",
+    )
+
+
 @pytest.mark.parametrize(
     "package,imported,owner",
     [
@@ -205,6 +245,45 @@ def test_transitive_dependency_selects_direct_consumer(tmp_path: Path) -> None:
     assert dependencies.dependency_consumers(tmp_path, {"httpcore"}) == [
         "src/bioetl/infrastructure/http/client.py"
     ]
+
+
+def test_transitive_optional_dependency_uses_declared_reference(
+    tmp_path: Path,
+) -> None:
+    _optional_distribution(tmp_path, 'DISTRIBUTION = "proofagent-harness"\n')
+    _consumer(
+        tmp_path,
+        "tests/unit/scripts/ai/agent_tools/test_cli.py",
+        "scripts.ai.agent_tools.__main__",
+    )
+    assert dependencies.dependency_consumers(tmp_path, {"aiohttp", "yarl"}) == [
+        "scripts/ai/agent_tools/__main__.py"
+    ]
+    assert lane.affected_pytest_targets(
+        ["uv.lock"],
+        repo_root=tmp_path,
+        changed_python_dependencies={"aiohttp", "yarl"},
+    ) == ["tests/unit/scripts/ai/agent_tools/test_cli.py"]
+
+
+def test_transitive_name_mention_without_declared_parent_fails_closed(
+    tmp_path: Path,
+) -> None:
+    _optional_distribution(tmp_path, 'CLIENT = "aiohttp"\n')
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "bioetl"\ndependencies = []\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="Unconfirmed.*aiohttp"):
+        dependencies.dependency_consumers(tmp_path, {"aiohttp"})
+
+
+def test_declared_distribution_without_source_reference_fails_closed(
+    tmp_path: Path,
+) -> None:
+    _optional_distribution(tmp_path, "EXECUTABLE = 'proof'\n")
+    with pytest.raises(ValueError, match="Unconfirmed.*aiohttp"):
+        dependencies.dependency_consumers(tmp_path, {"aiohttp"})
 
 
 def test_curated_http_owner_tests_are_required(tmp_path: Path) -> None:
