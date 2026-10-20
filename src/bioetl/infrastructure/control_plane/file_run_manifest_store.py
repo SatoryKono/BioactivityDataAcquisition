@@ -312,13 +312,40 @@ class FileRunManifestStore(RawRunManifestInspectionMixin, RunManifestPort):
             return None
         manifest = _decode_manifest(raw)
         indexed_manifest_id = self._load_manifest_id_for_run_id(manifest.run_id)
-        if indexed_manifest_id != manifest.manifest_id:
+        if indexed_manifest_id != manifest.manifest_id and (
+            indexed_manifest_id is None
+            or not self._is_predecessor_of_indexed(
+                manifest.manifest_id, indexed_manifest_id
+            )
+        ):
             raise RunManifestStoreCorruptionError(
                 "Run manifest index corruption: manifest file "
                 f"'{manifest.manifest_id}' declares run_id '{manifest.run_id}' "
                 f"but the run-id index maps to '{indexed_manifest_id}'"
             )
         return manifest
+
+    def _is_predecessor_of_indexed(
+        self, manifest_id: str, indexed_manifest_id: str
+    ) -> bool:
+        """Return whether ``manifest_id`` is a successor-chain predecessor.
+
+        A manifest that is no longer the run's current manifest stays
+        readable by ID only when the indexed (current) manifest links
+        back to it through ``predecessor_manifest_id`` (#12014).
+        """
+        seen: set[str] = set()
+        cursor: str | None = indexed_manifest_id
+        while cursor is not None and cursor not in seen:
+            seen.add(cursor)
+            try:
+                raw = catalog_text_index.read(self.base_path / f"{cursor}.json")
+            except FileNotFoundError:
+                return False
+            cursor = _decode_manifest(raw).predecessor_manifest_id
+            if cursor == manifest_id:
+                return True
+        return False
 
     def _load_manifest_id_for_run_id(self, run_id: RunID) -> str | None:
         """Return the indexed manifest identifier for one run when present."""

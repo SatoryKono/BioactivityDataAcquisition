@@ -1,0 +1,290 @@
+"""Successor semantics for Bronze snapshot attach (#12006 / #12014).
+
+Attach must not rewrite a persisted manifest in place: it creates a
+successor manifest (new ``manifest_id``, ``predecessor_manifest_id``
+pointing at the previous one) and recomputes ``execution_fingerprint``
+after the source-ref merge, so a replay-equivalent pair keeps equal
+fingerprints instead of degrading to ``semantic_drift``.
+"""
+
+from __future__ import annotations
+
+from dataclasses import replace
+from pathlib import Path
+from types import SimpleNamespace
+from uuid import UUID
+
+import pytest
+
+pytestmark = pytest.mark.unit
+
+from bioetl.application.services.control_plane.ledger._input_snapshot_manifest import (
+    persist_input_snapshots_on_manifest,
+)
+from bioetl.domain.config.runtime import (
+    CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE,
+)
+from bioetl.domain.control_plane import (
+    ReplayCapability,
+    RunInputSnapshotRef,
+    RunManifest,
+    RunSourceRef,
+)
+from bioetl.domain.control_plane.execution_identity import (
+    build_execution_identity_payload_from_code_provenance,
+)
+from bioetl.domain.normalization import (
+    compute_execution_identity_fingerprint,
+    compute_input_snapshot_identity_fingerprint,
+)
+from bioetl.domain.types import RunID, RunType
+from bioetl.infrastructure.control_plane.file_run_manifest_store import (
+    FileRunManifestStore,
+)
+
+_RUN_ID = RunID(UUID(int=12006))
+_SNAPSHOT = RunInputSnapshotRef(
+    snapshot_id="snap-1",
+    content_hash="sha256:snap-1",
+    immutable_uri="file:///bronze/chembl/activity/batch_1.jsonl.zst",
+    storage_provider="s3",
+    object_bucket="bioetl-bronze",
+    object_key="chembl/activity/batch_1.jsonl.zst",
+    object_version_id="snapshot-version-1",
+)
+_SECOND_SNAPSHOT = RunInputSnapshotRef(
+    snapshot_id="snap-2",
+    content_hash="sha256:snap-2",
+    immutable_uri="file:///bronze/chembl/activity/batch_2.jsonl.zst",
+    storage_provider="s3",
+    object_bucket="bioetl-bronze",
+    object_key="chembl/activity/batch_2.jsonl.zst",
+    object_version_id="snapshot-version-2",
+)
+
+
+def _creation_fingerprint(
+    manifest: RunManifest,
+    snapshots: tuple[RunInputSnapshotRef, ...],
+) -> str:
+    """Mirror the manifest-service creation fingerprint for one manifest."""
+    payload = build_execution_identity_payload_from_code_provenance(
+        pipeline_name=manifest.pipeline_name,
+        run_type=manifest.run_type.value,
+        code_provenance=manifest.code_provenance,
+        exact_replay=bool(manifest.launch_context.get("exact_replay")),
+        input_snapshot_fingerprint=compute_input_snapshot_identity_fingerprint(
+            snapshots
+        ),
+        silver_filter_compatibility_mode=str(
+            manifest.runtime_config.get(
+                "silver_filter_compatibility_mode",
+                CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE,
+            )
+        ),
+    )
+    return compute_execution_identity_fingerprint(payload)
+
+
+def _original_manifest(
+    *,
+    runtime_config: dict[str, object] | None = None,
+) -> RunManifest:
+    """Build the pre-attach manifest the way manifest creation persists it."""
+    manifest = RunManifest(
+        manifest_id="m1",
+        run_id=_RUN_ID,
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        runtime_config=runtime_config or {},
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+            ),
+        ),
+        replay_capability=ReplayCapability.REBUILD_ONLY,
+    )
+    return replace(
+        manifest,
+        execution_fingerprint=_creation_fingerprint(manifest, ()),
+    )
+
+
+def _service(
+    store: FileRunManifestStore,
+    *,
+    manifest_id: str = "m1",
+    next_id: str | None = "m2",
+) -> SimpleNamespace:
+    factory = (lambda: next_id) if next_id is not None else None
+    return SimpleNamespace(
+        manifest_port=store,
+        manifest_id=manifest_id,
+        _manifest_id_factory=factory,
+    )
+
+
+def _attach(
+    service: SimpleNamespace,
+    snapshot: RunInputSnapshotRef = _SNAPSHOT,
+) -> RunManifest | None:
+    return persist_input_snapshots_on_manifest(
+        service,  # type: ignore[arg-type]
+        snapshots=(snapshot,),
+        provider="chembl",
+        entity="activity",
+        pipeline_name="chembl_activity",
+    )
+
+
+def test_attach_creates_successor_with_predecessor_link(
+    tmp_path: Path,
+) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    original = _original_manifest()
+    store.save(original)
+
+    successor = _attach(_service(store))
+
+    assert successor is not None
+    assert successor.manifest_id == "m2"
+    assert successor.predecessor_manifest_id == "m1"
+    assert successor.source_refs[0].input_snapshots == (_SNAPSHOT,)
+    assert successor.replay_capability is ReplayCapability.EXACT_REPLAY_SUPPORTED
+    assert store.get("m2") == successor
+    current = store.get_by_run_id(_RUN_ID)
+    assert current is not None
+    assert current.manifest_id == "m2"
+
+
+def test_attach_leaves_original_manifest_immutable(tmp_path: Path) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    original = _original_manifest()
+    store.save(original)
+    original_bytes = (tmp_path / "m1.json").read_bytes()
+
+    _attach(_service(store))
+
+    assert (tmp_path / "m1.json").read_bytes() == original_bytes
+    persisted_original = store.get("m1")
+    assert persisted_original == original
+    assert persisted_original is not None
+    assert persisted_original.source_refs[0].input_snapshots == ()
+    assert persisted_original.predecessor_manifest_id is None
+
+
+def test_attach_recomputed_fingerprint_matches_creation_with_snapshots(
+    tmp_path: Path,
+) -> None:
+    """Equivalent pair: attach-after-create == create-with-snapshots (#12006)."""
+    store = FileRunManifestStore(base_path=tmp_path)
+    original = _original_manifest()
+    store.save(original)
+    pre_merge_fingerprint = original.execution_fingerprint
+
+    successor = _attach(_service(store))
+
+    assert successor is not None
+    expected = _creation_fingerprint(original, (_SNAPSHOT,))
+    assert successor.execution_fingerprint == expected
+    assert successor.execution_fingerprint != pre_merge_fingerprint
+
+
+def test_attach_recomputed_fingerprint_with_explicit_compat_mode(
+    tmp_path: Path,
+) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    original = _original_manifest(
+        runtime_config={
+            "silver_filter_compatibility_mode": (
+                CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
+            ),
+        },
+    )
+    store.save(original)
+
+    successor = _attach(_service(store))
+
+    assert successor is not None
+    assert successor.execution_fingerprint == _creation_fingerprint(
+        original, (_SNAPSHOT,)
+    )
+
+
+def test_second_attach_extends_chain_and_moves_current(
+    tmp_path: Path,
+) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    store.save(_original_manifest())
+
+    first = _attach(_service(store))
+    assert first is not None
+    second = _attach(
+        _service(store, manifest_id="m2", next_id="m3"),
+        snapshot=_SECOND_SNAPSHOT,
+    )
+
+    assert second is not None
+    assert second.manifest_id == "m3"
+    assert second.predecessor_manifest_id == "m2"
+    persisted_first = store.get("m2")
+    assert persisted_first is not None
+    assert persisted_first.predecessor_manifest_id == "m1"
+    assert persisted_first.source_refs[0].input_snapshots == (_SNAPSHOT,)
+    snapshot_ids = {
+        snap.snapshot_id for ref in second.source_refs for snap in ref.input_snapshots
+    }
+    assert snapshot_ids == {"snap-1", "snap-2"}
+    current = store.get_by_run_id(_RUN_ID)
+    assert current is not None
+    assert current.manifest_id == "m3"
+    assert {item.manifest_id for item in store.list_all()} == {"m1", "m2", "m3"}
+
+
+def test_attach_without_factory_returns_none_and_keeps_manifest(
+    tmp_path: Path,
+) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    original = _original_manifest()
+    store.save(original)
+
+    result = _attach(_service(store, next_id=None))
+
+    assert result is None
+    current = store.get_by_run_id(_RUN_ID)
+    assert current is not None
+    assert current.manifest_id == "m1"
+    assert store.get("m2") is None
+
+
+def test_attach_failure_keeps_original_manifest_current(
+    tmp_path: Path,
+) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    original = _original_manifest()
+    store.save(original)
+
+    class _FailingSavePort:
+        def get(self, manifest_id: str) -> RunManifest | None:
+            return store.get(manifest_id)
+
+        def save(self, manifest: RunManifest) -> None:
+            raise RuntimeError("injected save failure")
+
+    service = SimpleNamespace(
+        manifest_port=_FailingSavePort(),
+        manifest_id="m1",
+        _manifest_id_factory=lambda: "m2",
+    )
+    with pytest.raises(RuntimeError, match="injected save failure"):
+        _attach(service)
+
+    current = store.get_by_run_id(_RUN_ID)
+    assert current is not None
+    assert current.manifest_id == "m1"
+    assert current == original
+    assert store.get("m2") is None
