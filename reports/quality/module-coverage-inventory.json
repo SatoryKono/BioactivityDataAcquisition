@@ -554,9 +554,9 @@
       "covered_lines": 91,
       "executable_lines": 91,
       "missing_lines": 0,
-      "module": "bioetl.application.composite.enricher_fallback_join",
-      "path": "src/bioetl/application/composite/enricher_fallback_join.py",
-      "source_lines": 249
+      "module": "bioetl.application.composite.helpers.enricher_fallback_join",
+      "path": "src/bioetl/application/composite/helpers/enricher_fallback_join.py",
+      "source_lines": 246
     },
     {
       "coverage_percent": 100.0,
@@ -26396,9 +26396,9 @@
       "covered_lines": 91,
       "executable_lines": 91,
       "missing_lines": 0,
-      "module": "bioetl.application.composite.enricher_fallback_join",
-      "path": "src/bioetl/application/composite/enricher_fallback_join.py",
-      "source_lines": 249
+      "module": "bioetl.application.composite.helpers.enricher_fallback_join",
+      "path": "src/bioetl/application/composite/helpers/enricher_fallback_join.py",
+      "source_lines": 246
     },
     {
       "coverage_percent": 100.0,
@@ -51693,7 +51693,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "290cf9f83600faa36910eafdb4e25c1bfbc45392bd63e6939b176b92226d7705",
+  "source_tree_sha256": "ea7f4fc03639b32207c65410999bcc5b498dbfd6a0b7338064dceba6a2da32ca",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

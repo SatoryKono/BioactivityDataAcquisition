@@ -3,18 +3,15 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
 
 import polars as pl
 
+from bioetl.application.composite.deduplication import EnricherDeduplicatorService
 from bioetl.application.composite.join_execution import (
     JoinCardinalityError,
     JoinHow,
     RequiredJoinKeyError,
 )
-
-if TYPE_CHECKING:
-    from bioetl.application.composite.deduplication import EnricherDeduplicatorService
 
 _SEED_ROW_ID = "__bioetl_seed_row_id"
 _MATCH_MARKER = "__bioetl_join_matched"

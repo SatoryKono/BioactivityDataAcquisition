@@ -145,6 +145,7 @@ areas:
       - src/bioetl/application/composite/join_planner_helpers.py
       - src/bioetl/application/composite/key_extractor.py
       - src/bioetl/application/composite/enricher_join_execution.py
+      - src/bioetl/application/composite/helpers/enricher_fallback_join.py
       - src/bioetl/application/composite/helpers/join_planner_identity.py
   - name: columns
     responsibility: "Column services, ordering, renaming, layer filters."

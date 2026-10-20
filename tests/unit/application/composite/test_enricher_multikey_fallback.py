@@ -24,7 +24,7 @@ from bioetl.application.composite.coalesce_policy import CoalescePolicyService
 from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.deduplication import EnricherDeduplicatorService
 from bioetl.application.composite.join_execution import JoinHow, RequiredJoinKeyError
-from bioetl.domain.composite.config import EnricherConfig, MergeConfig
+from bioetl.domain.composite import EnricherConfig, MergeConfig
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from tests.unit.application.composite.merge_test_support import (
     build_join_planner_service,

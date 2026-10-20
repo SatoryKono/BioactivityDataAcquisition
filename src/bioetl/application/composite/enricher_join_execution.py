@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from bioetl.application.composite.enricher_fallback_join import (
+from bioetl.application.composite.helpers.enricher_fallback_join import (
     execute_fallback_enricher_join,
 )
 from bioetl.application.composite.join_execution import JoinHow
