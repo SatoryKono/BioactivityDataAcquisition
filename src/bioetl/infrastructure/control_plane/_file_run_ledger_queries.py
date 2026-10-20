@@ -250,22 +250,19 @@ class FileRunLedgerQueriesMixin:
         manifest_id: str,
         after_entry_id: str | None,
     ) -> list[RunLedgerEntry]:
-        """Return append-ordered entries strictly after one checkpoint watermark."""
+        """Return append-ordered entries strictly after one checkpoint watermark.
+
+        The suffix spans the predecessor chain and any published successors, so
+        a checkpoint that still names the predecessor does not drop events
+        written to the successor ledger file.
+        """
         started_at = perf_counter()
         status = "success"
         try:
-            chain = self._predecessor_chain(manifest_id)
-            entries = [
-                entry
-                for item_id in reversed(chain)
-                for entry in self._load_entries(item_id)
-            ]
+            entries = self._ledger_chain_entries(manifest_id)
             if not entries:
                 status = "miss"
                 return []
-            _ensure_entries_match_run_chain(
-                entries=entries, manifest_ids=set(chain), run_id=entries[0].run_id
-            )
             return list(slice_ledger_entries_after(entries, after_entry_id))
         except RunLedgerCorruptionError as error:
             status = "failed"
@@ -314,6 +311,43 @@ class FileRunLedgerQueriesMixin:
             entries=entries,
             manifest_id=manifest_id,
         )
+        return entries
+
+    def _direct_successor_id(self, manifest_id: str) -> str | None:
+        """Return the single successor that names this manifest, if any."""
+        pointer_dir = self.base_path / "_predecessors"
+        if not pointer_dir.is_dir():
+            return None
+        matches: list[str] = []
+        for pointer in sorted(pointer_dir.glob("*.txt")):
+            named = pointer.read_text(encoding="utf-8").strip()
+            if named == manifest_id:
+                matches.append(pointer.name.removesuffix(".txt"))
+        if len(matches) > 1:
+            raise RunLedgerCorruptionError(
+                f"manifest {manifest_id!r} has multiple successor pointers"
+            )
+        return matches[0] if matches else None
+
+    def _ledger_chain_entries(self, manifest_id: str) -> list[RunLedgerEntry]:
+        """Load oldest-first entries for one manifest, its past, and successors."""
+        oldest_first = list(reversed(self._predecessor_chain(manifest_id)))
+        seen = set(oldest_first)
+        cursor = manifest_id
+        while True:
+            successor = self._direct_successor_id(cursor)
+            if successor is None:
+                break
+            if successor in seen:
+                raise RunLedgerCorruptionError(
+                    f"successor pointer cycle includes manifest {successor!r}"
+                )
+            seen.add(successor)
+            oldest_first.append(successor)
+            cursor = successor
+        entries: list[RunLedgerEntry] = []
+        for item_id in oldest_first:
+            entries.extend(self._load_entries(item_id))
         return entries
 
     def _predecessor_chain(self, manifest_id: str) -> tuple[str, ...]:

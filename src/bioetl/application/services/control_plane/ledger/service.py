@@ -73,13 +73,12 @@ class RunLedgerService(RunLedgerRichEventRecordingMixin):
     manifest_successor_callbacks: list[Callable[[RunManifest], None]] = field(
         default_factory=list, repr=False
     )
+    manifest_successor_observer: Callable[[RunManifest], None] | None = None
 
     def record_manifest_created(self, manifest: RunManifest) -> RunLedgerEntry:
-        """Record manifest creation as the first control-plane event."""
         return _core_events.record_manifest_created(self, manifest)
 
     def record_run_started(self) -> RunLedgerEntry:
-        """Record the transition into active execution."""
         return self._append(event_type=RUN_STARTED_EVENT, status="running")
 
     def record_stage_started(
@@ -88,7 +87,6 @@ class RunLedgerService(RunLedgerRichEventRecordingMixin):
         stage: str,
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
-        """Record transition into one canonical execution stage."""
         return self._append(
             event_type=STAGE_STARTED_EVENT,
             status="running",
@@ -103,7 +101,6 @@ class RunLedgerService(RunLedgerRichEventRecordingMixin):
         metrics_snapshot: dict[str, int],
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
-        """Record successful completion of one execution stage."""
         return self._append(
             event_type=STAGE_COMPLETED_EVENT,
             status="completed",
@@ -118,7 +115,6 @@ class RunLedgerService(RunLedgerRichEventRecordingMixin):
         metrics_snapshot: dict[str, int],
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
-        """Record successful run completion."""
         return append_run_outcome(
             self,
             event_type=RUN_FINISHED_EVENT,

@@ -113,3 +113,24 @@ def test_show_rejects_corrupt_predecessor_read() -> None:
 
     with pytest.raises(RunManifestInspectionCorruptionError, match="index corruption"):
         service.show("manifest-next")
+
+
+def test_show_rejects_predecessor_from_another_run() -> None:
+    manifest_store = InMemoryRunManifestStore()
+    foreign = replace(_manifest("manifest-pred"), run_id=RunID(UUID(int=12318)))
+    successor = replace(
+        _manifest("manifest-next"),
+        predecessor_manifest_id="manifest-pred",
+    )
+    manifest_store.save(foreign)
+    manifest_store.save(successor)
+    service = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=InMemoryRunLedgerStore(),
+    )
+
+    with pytest.raises(
+        RunManifestInspectionCorruptionError,
+        match="crosses run_id ownership",
+    ):
+        service.show("manifest-next")

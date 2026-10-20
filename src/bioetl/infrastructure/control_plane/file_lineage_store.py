@@ -69,7 +69,7 @@ def _acquire_msvcrt_lock(
     locking: Callable[[int, int, int], object],
     lock_mode: int,
 ) -> None:
-    """Retry a blocking Windows byte lock only after CRT ``EDEADLOCK``.
+    """Retry a blocking Windows byte lock only after CRT ``EDEADLK``.
 
     ``LK_LOCK`` already waits about ten seconds. ``EACCES`` and every other
     locking error propagate immediately so a permission failure cannot spin.
@@ -78,7 +78,7 @@ def _acquire_msvcrt_lock(
         try:
             _lock_byte_range(lock_fd, locking=locking, mode=lock_mode)
         except OSError as error:
-            if error.errno != errno.EDEADLOCK:
+            if error.errno != errno.EDEADLK:
                 raise
             continue
         return
