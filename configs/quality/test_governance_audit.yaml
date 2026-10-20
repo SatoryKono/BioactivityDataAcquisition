@@ -1110,6 +1110,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/infrastructure/adapters/chembl/test_fetch_multi_filter_mixin.py
       target_lane: repo-backed-unit
       protected_surface: src/bioetl/infrastructure/adapters/chembl/fetch_multi_filter_mixin.py
+    - path: tests/unit/repo_backed/infrastructure/config/test_composite_sort_by_closure.py
+      target_lane: repo-backed-unit
+      protected_surface: configs/composites/{activity,assay,molecule,publication,target}.yaml merge.sort_by closure, configs/composites/field_groups/shared_policy.yaml field_priorities, and configs/_schema/composite.json MergeSortBySchema
     - path: tests/unit/repo_backed/infrastructure/test_cr_8917_wsl_secret_redaction.py
       target_lane: repo-backed-unit
       protected_surface: scripts/memory/setup/wsl_startup.sh secret-bearing value handoff contract
