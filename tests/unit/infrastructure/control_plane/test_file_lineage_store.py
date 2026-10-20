@@ -792,7 +792,7 @@ def test_msvcrt_lock_retries_only_deadlock(tmp_path: Path) -> None:
         calls["value"] += 1
         if calls["value"] == 1:
             error = OSError("deadlock")
-            error.errno = errno.EDEADLOCK
+            error.errno = errno.EDEADLK
             raise error
 
     try:

@@ -778,6 +778,8 @@ def test_file_store_successor_rebind_keeps_predecessor_events(tmp_path) -> None:
     assert store.list_entries("manifest-original") == [original]
     assert store.list_entries("manifest-successor") == [successor]
     assert store.list_entries_by_run_id(run_id) == [original, successor]
+    assert store.list_entries_after("manifest-original", "entry-1") == [successor]
+    assert store.list_entries_after("manifest-successor", "entry-1") == [successor]
 
     unrelated = RunLedgerEntry(
         entry_id="entry-3",

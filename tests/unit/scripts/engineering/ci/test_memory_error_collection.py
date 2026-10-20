@@ -1,7 +1,10 @@
-import pytest
+from __future__ import annotations
+
+import subprocess
 import sys
 from pathlib import Path
-import subprocess
+
+import pytest
 
 
 @pytest.mark.serial
@@ -12,17 +15,18 @@ def test_memory_error_during_collection(tmp_path: Path) -> None:
         "import pytest\n"
         "raise MemoryError('synthetic-collection-memory-error')\n"
         "def test_dummy():\n"
-        "    pass\n"
+        "    pass\n",
+        encoding="utf-8",
     )
 
-    # Run pytest directly. This test does not start pytest_abort_diagnostic_adapter.
+    # Run pytest directly. Collection MemoryError is a pytest exit 2.
+    # This test does not start pytest_abort_diagnostic_adapter.
     cmd = [sys.executable, "-m", "pytest", str(test_file)]
 
-    res = subprocess.run(cmd, capture_output=True, text=True)
+    res = subprocess.run(cmd, capture_output=True, text=True, check=False)
 
-    # Pytest returns 2 for collection errors.
+    # Pytest returns 2 for collection errors and names the collection frame.
+    combined = f"{res.stdout}\n{res.stderr}"
     assert res.returncode == 2
-    assert (
-        "MemoryError: synthetic-collection-memory-error" in res.stderr
-        or "MemoryError: synthetic-collection-memory-error" in res.stdout
-    )
+    assert "test_fake_memory_error.py" in combined
+    assert "MemoryError: synthetic-collection-memory-error" in combined
