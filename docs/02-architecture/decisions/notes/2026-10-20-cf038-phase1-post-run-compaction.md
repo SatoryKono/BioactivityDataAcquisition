@@ -56,14 +56,19 @@ Numbers below are from source revision
 capture `2026-10-20T12:48:01Z`, Python 3.13.15, Linux. They are not
 measurements of `main` `07482702d3bc9d6b742188400c371304f4881eb9`.
 
-The bytes live only in commit `0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1`.
-PR #12314 merge is `004e2913db6289fcca4c8f44de291899ff877bd7`. Commit
-`d48192563e10f9a3350280c10380243cd7f19dc9` (#12316) removes `run_2`, its
-provenance files, and the capture tool from `main`. Current `main`
-`07482702d3bc9d6b742188400c371304f4881eb9` does not contain those paths.
-Historical retention confirms the origin of the measurements. It does not
-put a required evidence surface in the current tree. The files were not
-copied onto current `main` and were not re-captured.
+The measurement bytes were recorded in commit
+`0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1`. PR #12314 merge is
+`004e2913db6289fcca4c8f44de291899ff877bd7`. Commit
+`d48192563e10f9a3350280c10380243cd7f19dc9` (#12316) removed `run_2`, its
+provenance files, and the capture tool from `main`. Commits
+`07482702d3bc9d6b742188400c371304f4881eb9` and
+`683c9a5d2608fb38d2674dfa36edc83eefa615a8` share tree
+`8619f6de8888155316088ac3df8e9c8d7be7b529` and do not contain those paths.
+Commit `4eb8417fa92066d6711e00ef5acac05d6233378d` (#12319) puts the same
+blobs back on `main`, including `run_2/manifest.json` blob
+`081010b92e3004279e5a5f7c9eb5576f2f590855`. Permalinks below stay on
+`0d7861219f`. This return is not a new capture and does not authorize
+production implementation.
 
 Harness workload, not a production `batch_size=1000` run: `batch_size=500`,
 `overlap_ratio=0.2`, primary key `id`, each round calls
@@ -145,7 +150,7 @@ separately from the following run. One new run compared with historical
 - Automatic `VACUUM` can delete files readers still need if retention is tightened. This direction does not tighten it.
 - The harness uses batch 500, overlap 0.2, and an empty table. Production batch 1000 is not in `run_2`.
 - Peak RSS is the whole pytest process, not Delta alone.
-- Current `main` has no `run_2` evidence surface. The `0d7861219f` permalinks above preserve provenance only.
+- `main` `4eb8417fa9` again contains the `run_2` blobs that #12316 had removed. The `0d7861219f` permalinks above remain the citation for those bytes. This note does not treat that tree as a new measurement.
 
 ## Acceptance
 

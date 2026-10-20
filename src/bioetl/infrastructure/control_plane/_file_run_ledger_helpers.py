@@ -7,6 +7,7 @@ import json
 import os
 from collections.abc import Callable
 from pathlib import Path
+from threading import RLock
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.control_plane import RunLedgerEntry
@@ -19,6 +20,10 @@ from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
+
+# Stores may share a ledger directory. Keep duplicate detection, append, index
+# publication and rollback in one process-local transaction across instances.
+LEDGER_APPEND_LOCK = RLock()
 
 
 class RunLedgerCorruptionError(ValueError):

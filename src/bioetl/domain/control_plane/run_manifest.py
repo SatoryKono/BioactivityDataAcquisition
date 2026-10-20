@@ -169,6 +169,7 @@ class RunManifest:
     """
 
     manifest_id: str = "legacy-manifest"
+    predecessor_manifest_id: str | None = None
     execution_fingerprint: str = "legacy-fingerprint"
     schema_version: str = "1.0"
     created_at: datetime = _DEFAULT_CREATED_AT
@@ -227,6 +228,9 @@ class RunManifest:
         """Hydrate a manifest from serialized JSON payload."""
         return cls(
             manifest_id=str(payload["manifest_id"]),
+            predecessor_manifest_id=_load_optional_str(
+                payload, "predecessor_manifest_id"
+            ),
             execution_fingerprint=str(payload["execution_fingerprint"]),
             schema_version=str(payload["schema_version"]),
             created_at=datetime.fromisoformat(str(payload["created_at"])),
