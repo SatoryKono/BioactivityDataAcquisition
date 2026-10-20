@@ -120,3 +120,58 @@ def test_selector_b_does_not_clear_or_replay_a() -> None:
     assert context.state.repair_required is True
     assert confirmed.commit_pending_confirmation is False
     assert confirmed.status == "success"
+
+def test_workflow_finishes_incomplete_if_ambiguous_step_remains() -> None:
+    context, _saved = _make_context()
+    context.state = replace(
+        context.state,
+        status="running",
+        execution_fingerprint=_FINGERPRINT,
+        selected_step_ids=("step_a", "step_b"),
+        steps=_ambiguous_steps(),
+        completed_transform_fingerprints={"step_a": "fp-a", "step_b": "fp-b"},
+        repair_required=True,
+        repair_hint="confirm destructive commits",
+        ambiguous_step_ids=("step_a", "step_b"),
+    )
+
+    execution_recording.record_step_completed(
+        context,
+        WorkflowStepExecutionResult(
+            step_id="step_b",
+            step_kind="transform",
+            status="success",
+            payload={"fingerprint": "fp-b-confirmed"},
+        ),
+    )
+
+    from bioetl.application.services.workflow.workflow_runner_service import WorkflowRunExecutionResult
+
+    execution_recording.record_workflow_finished(
+        context,
+        WorkflowRunExecutionResult(
+            workflow_name=context.state.workflow_name,
+            status="success",
+            steps=(
+                WorkflowStepExecutionResult(
+                    step_id="step_b",
+                    step_kind="transform",
+                    status="success",
+                    payload={"fingerprint": "fp-b-confirmed"},
+                ),
+                )
+        ),
+        completed_at=datetime(2026, 1, 1, 13, 0, tzinfo=UTC),
+    )
+
+    assert context.state.status == "incomplete"
+    assert context.state.ambiguous_step_ids == ("step_a",)
+
+    # Resume should be permitted
+    validate_resume_state(
+        latest_state=context.state,
+        workflow_name=context.state.workflow_name,
+        current_fingerprint=_FINGERPRINT,
+        force_steps=(),
+        repair_steps=("step_a",),
+    )
