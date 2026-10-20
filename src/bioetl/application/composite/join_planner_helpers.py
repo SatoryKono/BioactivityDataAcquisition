@@ -48,6 +48,7 @@ class EnricherJoinMetadataContext:
     seed_join_key: str
     enricher_join_key: str
     join_key_set: set[str]
+    key_pairs: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,6 +69,7 @@ class PrepareJoinFramesContext:
     drop_system_columns: Callable[[pl.DataFrame], pl.DataFrame]
     log_message: str
     log_field_name: str
+    dedup_keys: list[str] | None = None
 
 
 def count_qualified_columns(columns: list[str]) -> int:
@@ -106,11 +108,12 @@ def prepare_qualified_right_join_dataframe(
     drop_system_columns: Callable[[pl.DataFrame], pl.DataFrame],
     log_message: str,
     log_field_name: str,
+    dedup_keys: list[str] | None = None,
 ) -> pl.DataFrame:
     """Prepare a right-side join DataFrame for qualified join execution."""
     prepared_df = deduplicator.deduplicate(
         enricher_df=source_df,
-        join_keys=join_keys,
+        join_keys=dedup_keys if dedup_keys is not None else join_keys,
         enricher_name=pipeline,
     )
     prepared_df = join_key_resolver.normalize_join_key_columns(
@@ -155,6 +158,7 @@ def prepare_join_frames(
         drop_system_columns=request.drop_system_columns,
         log_message=request.log_message,
         log_field_name=request.log_field_name,
+        dedup_keys=request.dedup_keys,
     )
     return normalized_merged, prepared_right
 
@@ -221,17 +225,29 @@ def build_enricher_join_metadata(
         Populated ``EnricherJoinMetadataContext`` with all resolved key information.
     """
     join_keys_list = list(join_keys)
-    seed_join_key, enricher_join_key, join_key_set = build_enricher_join_key_set(
-        primary_key=primary_join_key,
-        seed_pipeline=seed_pipeline,
-        enricher_pipeline=enricher_pipeline,
-        merged_columns=merged_columns,
-        resolve_join_key_names=resolve_join_key_names,
-    )
+    key_pairs: list[tuple[str, str]] = []
+    join_key_set: set[str] = set()
+    for key in join_keys_list:
+        seed_key, enricher_key, key_set = build_enricher_join_key_set(
+            primary_key=key,
+            seed_pipeline=seed_pipeline,
+            enricher_pipeline=enricher_pipeline,
+            merged_columns=merged_columns,
+            resolve_join_key_names=resolve_join_key_names,
+        )
+        key_pairs.append((seed_key, enricher_key))
+        join_key_set.update(key_set)
+    if not key_pairs:
+        raise ValueError("enricher join_keys must not be empty")
+    seed_join_key, enricher_join_key = key_pairs[0]
+    if primary_join_key in join_keys_list:
+        primary_index = join_keys_list.index(primary_join_key)
+        seed_join_key, enricher_join_key = key_pairs[primary_index]
     return EnricherJoinMetadataContext(
         join_keys_list=join_keys_list,
         primary_key=primary_join_key,
         seed_join_key=seed_join_key,
         enricher_join_key=enricher_join_key,
         join_key_set=join_key_set,
+        key_pairs=tuple(key_pairs),
     )
