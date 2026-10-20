@@ -466,6 +466,135 @@ class TestUnifiedHTTPClientRequestMethods:
         assert req.headers["accept"] == "application/json"
         assert req.headers["x-correlation-id"] == "run-777"
 
+    @pytest.mark.asyncio
+    async def test_unified_http_client_outgoing_transport_headers_default_optional(
+        self, mock_rate_limiter
+    ):
+        """Regression test for default UA and optional correlation ID on transport."""
+        from unittest.mock import AsyncMock
+
+        mock_cb = AsyncMock()
+
+        async def _call_cb(req_coro, *args, **kwargs):
+            return await req_coro()
+
+        mock_cb.call.side_effect = _call_cb
+
+        client = UnifiedHTTPClient(
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_cb,
+            user_agent="BioETL/1.0",
+            contact_email=None,
+            run_id=None,
+            timeout=5.0,
+            provider="test",
+            trust_env=False,
+        )
+
+        transport_requests = []
+
+        async def mock_handler(request: httpx.Request):
+            transport_requests.append(request)
+            return httpx.Response(200, json={"status": "ok"})
+
+        transport = httpx.MockTransport(mock_handler)
+
+        async with client:
+            client._client._transport = transport
+            await client.get("https://example.com/test")
+
+        assert len(transport_requests) == 1
+        req = transport_requests[0]
+        assert req.headers["accept"] == "application/json"
+        assert "x-correlation-id" not in req.headers
+        assert req.headers["user-agent"] == "BioETL/1.0"
+
+    @pytest.mark.asyncio
+    async def test_unified_http_client_outgoing_transport_headers_no_correlation_id_custom_ua(
+        self, mock_rate_limiter
+    ):
+        """Regression test for custom UA and optional correlation ID on transport."""
+        from unittest.mock import AsyncMock
+
+        mock_cb = AsyncMock()
+
+        async def _call_cb(req_coro, *args, **kwargs):
+            return await req_coro()
+
+        mock_cb.call.side_effect = _call_cb
+
+        client = UnifiedHTTPClient(
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_cb,
+            user_agent="BioETL/1.0",
+            contact_email="test@example.com",
+            run_id=None,
+            timeout=5.0,
+            provider="test",
+            trust_env=False,
+        )
+
+        transport_requests = []
+
+        async def mock_handler(request: httpx.Request):
+            transport_requests.append(request)
+            return httpx.Response(200, json={"status": "ok"})
+
+        transport = httpx.MockTransport(mock_handler)
+
+        async with client:
+            client._client._transport = transport
+            await client.get("https://example.com/test")
+
+        assert len(transport_requests) == 1
+        req = transport_requests[0]
+        assert req.headers["accept"] == "application/json"
+        assert "x-correlation-id" not in req.headers
+        assert req.headers["user-agent"] == "BioETL/1.0 (test@example.com)"
+
+    @pytest.mark.asyncio
+    async def test_unified_http_client_outgoing_transport_headers_correlation_id_default_ua(
+        self, mock_rate_limiter
+    ):
+        """Regression test for default UA and presence of correlation ID on transport."""
+        from unittest.mock import AsyncMock
+
+        mock_cb = AsyncMock()
+
+        async def _call_cb(req_coro, *args, **kwargs):
+            return await req_coro()
+
+        mock_cb.call.side_effect = _call_cb
+
+        client = UnifiedHTTPClient(
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_cb,
+            user_agent="BioETL/1.0",
+            contact_email=None,
+            run_id="run-888",
+            timeout=5.0,
+            provider="test",
+            trust_env=False,
+        )
+
+        transport_requests = []
+
+        async def mock_handler(request: httpx.Request):
+            transport_requests.append(request)
+            return httpx.Response(200, json={"status": "ok"})
+
+        transport = httpx.MockTransport(mock_handler)
+
+        async with client:
+            client._client._transport = transport
+            await client.get("https://example.com/test")
+
+        assert len(transport_requests) == 1
+        req = transport_requests[0]
+        assert req.headers["accept"] == "application/json"
+        assert req.headers["x-correlation-id"] == "run-888"
+        assert req.headers["user-agent"] == "BioETL/1.0"
+
 
 @pytest.mark.unit
 class TestUnifiedHTTPClientObservability:
