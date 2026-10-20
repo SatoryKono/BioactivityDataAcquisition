@@ -37,13 +37,13 @@ from datetime import date
 
 import pytest
 
+from bioetl.domain.normalization.reference_ids import normalize_pmcid_reference_id
 from bioetl.domain.normalization import (
     extract_first_item,
     extract_first_string,
     format_date_parts,
     normalize_doi,
     normalize_partial_date,
-    normalize_pmc_id,
     normalize_pmid,
     normalize_string,
     normalize_to_string,
@@ -527,8 +527,8 @@ class TestNormalizePmcId:
         ],
     )
     def test_normalize_pmc_id(self, pmc_id: str | None, expected: str | None) -> None:
-        """Test PMC ID normalization."""
-        assert normalize_pmc_id(pmc_id) == expected
+        """Governed PMCID normalization keeps canonical uppercase digits."""
+        assert normalize_pmcid_reference_id(pmc_id) == expected
 
 
 class TestExtractFirstItem:

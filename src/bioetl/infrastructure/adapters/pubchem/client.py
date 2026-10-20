@@ -43,6 +43,10 @@ from bioetl.infrastructure.adapters.pubchem.client_model_mixin import (
     PubChemAdapterModelMixin,
 )
 from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
+from bioetl.infrastructure.adapters.pubchem.fetch_flow import (
+    coerce_executor_timeout,
+    coerce_timeout_state,
+)
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 if TYPE_CHECKING:
@@ -58,6 +62,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
         PubChemFetchStrategies,
     )
+
 
 PUBCHEM_HEALTH_ERRORS = (
     BioETLError,
@@ -132,6 +137,12 @@ class PubChemAdapter(
         fetch_strategies = legacy_runtime.pop("fetch_strategies", None)
         error_handler = legacy_runtime.pop("error_handler", None)
         request_collector = legacy_runtime.pop("request_collector", None)
+        self._executor_timeout_sec = coerce_executor_timeout(
+            legacy_runtime.pop("executor_timeout_sec", None)
+        )
+        self._executor_timeout_state = coerce_timeout_state(
+            legacy_runtime.pop("executor_timeout_state", None)
+        )
         if legacy_runtime:
             unexpected = ", ".join(sorted(str(k) for k in legacy_runtime))
             raise TypeError(

@@ -35,9 +35,11 @@ def _is_exact_replay_blocked(
     blocking_gaps: tuple[str, ...],
     exact_replay_requested: bool,
 ) -> bool:
+    # Any gap blocks EXACT_REPLAY_READY regardless of flags
+    if blocking_gaps:
+        return True
     return (strict_requirement_requested or exact_replay_requested) and (
-        bool(blocking_gaps)
-        or not strict_exact_replay_supported
+        not strict_exact_replay_supported
         or replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
     )
 

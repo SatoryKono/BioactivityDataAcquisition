@@ -114,9 +114,7 @@ def _clear_ambiguous_step(
     state: WorkflowExecutionState,
     step_id: str,
 ) -> WorkflowExecutionState:
-    ambiguous_step_ids = tuple(
-        current_id for current_id in state.ambiguous_step_ids if current_id != step_id
-    )
+    ambiguous_step_ids = _remove_step_ids(state.ambiguous_step_ids, (step_id,))
     return replace(
         state,
         repair_required=bool(ambiguous_step_ids),

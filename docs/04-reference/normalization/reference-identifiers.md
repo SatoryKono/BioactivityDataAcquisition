@@ -55,6 +55,13 @@ The only reviewed boundary is canonical form plus collection semantics.
 | `chembl` | `CHEMBL123` | scalar or set-like string array | `target_id`, `chembl_ids` |
 | `drugbank` | `DB00001` | set-like string array | `drugbank_ids` |
 | `pubchem_cid` | digits-only canonical CID text | scalar string | `pubchem_compound.molecule_id` |
+| `doi` | lowercase bare DOI | scalar string | publication DOI fields |
+| `pmid` | digits-only PMID | numeric string | publication PMID fields |
+| `pmcid` | uppercase `PMC` plus digits | scalar string | publication PMCID fields |
+| `mesh` | uppercase descriptor `D000001` | scalar string | MeSH descriptor fields |
+| `semantic_scholar_corpus` | positive integer corpusId | numeric scalar | Semantic Scholar `corpusId` |
+| `ncbi_taxonomy` | positive integer taxonomy id | numeric scalar | ChEMBL biological context fields |
+| `mixed_identifier_set` | mixed canonical identifiers | set-like JSON array | UniProt mapping outputs |
 
 ## Why This Is Not Enum Governance
 
