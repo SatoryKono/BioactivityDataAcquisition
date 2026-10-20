@@ -18,24 +18,30 @@ import pubchempy as pcp
 
 pytestmark = pytest.mark.no_api
 
+
 @pytest.mark.pubchem
 class TestPubChemResilienceContract:
-
     @pytest.mark.asyncio
     async def test_pubchem_429_burst_and_retry_after(self) -> None:
         """Verify PubChem SDK correctly handles 429 bursts and respects Retry-After."""
 
         # Fake SDK calls that throw 429 and finally succeed
         call_count = 0
+
         def fake_pubchem_call(*_args: object, **_kwargs: object) -> list[str]:
             nonlocal call_count
             call_count += 1
             if call_count < 3:
                 # Simulate a PubChemHTTPError with a 429 status and Retry-After
                 from urllib.error import HTTPError
-                error = pcp.PubChemHTTPError(Exception("Too Many Requests"), "Too Many Requests", "")
+
+                error = pcp.PubChemHTTPError(
+                    Exception("Too Many Requests"), "Too Many Requests", ""
+                )
                 error.code = 429
-                cause = HTTPError("url", 429, "Too Many Requests", {"Retry-After": "1"}, None)
+                cause = HTTPError(
+                    "url", 429, "Too Many Requests", {"Retry-After": "1"}, None
+                )
                 error.__cause__ = cause
                 raise error
             return ["success"]
@@ -44,7 +50,9 @@ class TestPubChemResilienceContract:
             return await asyncio.get_running_loop().run_in_executor(None, func, *args)
 
         rate_limiter = TokenBucketRateLimiter(rate=10.0, capacity=20)
-        circuit_breaker = CircuitBreakerGuard(provider="pubchem", failure_threshold=100, recovery_timeout=1.0)
+        circuit_breaker = CircuitBreakerGuard(
+            provider="pubchem", failure_threshold=100, recovery_timeout=1.0
+        )
         record_request = Mock()
 
         flow = PubChemFetchFlow(
@@ -53,14 +61,14 @@ class TestPubChemResilienceContract:
             run_in_executor=run_in_executor,
             record_request=record_request,
             normalize_results=lambda x: x,
-            retry_config=RetryConfig(max_attempts=3, base_delay=0.1, max_delay=10.0)
+            retry_config=RetryConfig(max_attempts=3, base_delay=0.1, max_delay=10.0),
         )
 
         start = time.time()
         result = await flow.execute(
             endpoint="offline_burst_test",
             pubchem_callable=fake_pubchem_call,
-            pubchem_args=("aspirin", "name")
+            pubchem_args=("aspirin", "name"),
         )
         duration = time.time() - start
 

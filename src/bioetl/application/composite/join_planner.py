@@ -168,6 +168,4 @@ class JoinPlannerService(JoinPlannerDelegationMixin):
             ),
             conflict_resolver=self._conflict_resolver,
             join_executor=self.execute_polars_join,
-            deduplicator=self._deduplicator,
-            output_how=self.get_polars_join_type(),
         )

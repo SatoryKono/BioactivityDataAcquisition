@@ -18,7 +18,6 @@ from bioetl.application.composite.helpers.dependency_join_service_ops import (
     prepare_dependency_join_context,
     resolve_composite_join_context_for_service,
 )
-from bioetl.application.composite.join_execution import RequiredJoinKeyError
 from bioetl.application.composite.protocols import (
     JoinExecutorProtocol,
     JoinKeyResolverProtocol,
@@ -139,11 +138,6 @@ def apply_composite_key_dependency_join(
         dependency=dep.pipeline,
     )
     if resolved_context is None:
-        if dep.required:
-            raise RequiredJoinKeyError(
-                "Required dependency "
-                f"{dep.pipeline} is missing composite join key columns"
-            )
         return merged_df
     return execute_composite_dependency_join(
         conflict_resolver=conflict_resolver,

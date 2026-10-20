@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-import errno
 import json
 import os
-import sys
-from collections.abc import Callable, Iterator, Sequence
-from contextlib import contextmanager, suppress
+from contextlib import suppress
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import TYPE_CHECKING, override
@@ -28,10 +25,7 @@ from bioetl.infrastructure.control_plane._file_lineage_index import (
 from bioetl.infrastructure.control_plane._file_lineage_queries import (
     FileLineageQueriesMixin,
 )
-from bioetl.infrastructure.storage.atomic import AtomicWriteError, atomic_write_text
-
-if sys.platform != "win32":
-    import fcntl
+from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 __all__ = ["FileLineageStore"]
 
@@ -41,96 +35,6 @@ if TYPE_CHECKING:
 
 _LINEAGE_APPEND_OPEN_FLAGS = os.O_APPEND | os.O_CREAT | os.O_WRONLY
 _LineageIndexCorruptionError = LineageIndexCorruptionError
-_SAVE_FAILURES = (AtomicWriteError, OSError, TypeError, ValueError)
-
-
-def _save_lock_path(base_path: Path) -> Path:
-    """Return the per-root lock path outside the lifecycle-managed lineage tree."""
-    return base_path.parent / f".{base_path.name}.save.lock"
-
-
-def _lock_byte_range(
-    lock_fd: int,
-    *,
-    locking: Callable[[int, int, int], object],
-    mode: int,
-) -> None:
-    """Lock one byte at the start of a lock file, initializing an empty file."""
-    os.lseek(lock_fd, 0, os.SEEK_SET)
-    if os.fstat(lock_fd).st_size < 1:
-        os.write(lock_fd, b"\0")
-        os.lseek(lock_fd, 0, os.SEEK_SET)
-    locking(lock_fd, mode, 1)
-
-
-def _acquire_msvcrt_lock(
-    lock_fd: int,
-    *,
-    locking: Callable[[int, int, int], object],
-    lock_mode: int,
-) -> None:
-    """Retry a blocking Windows byte lock only after CRT ``EDEADLOCK``.
-
-    ``LK_LOCK`` already waits about ten seconds. ``EACCES`` and every other
-    locking error propagate immediately so a permission failure cannot spin.
-    """
-    while True:
-        try:
-            _lock_byte_range(lock_fd, locking=locking, mode=lock_mode)
-        except OSError as error:
-            if error.errno != errno.EDEADLOCK:
-                raise
-            continue
-        return
-
-
-def _acquire_exclusive_lock(lock_fd: int) -> None:
-    """Take an interprocess exclusive lock for one lineage root."""
-    if sys.platform == "win32":
-        import msvcrt
-
-        _acquire_msvcrt_lock(
-            lock_fd,
-            locking=msvcrt.locking,
-            lock_mode=int(msvcrt.LK_LOCK),
-        )
-        return
-    fcntl.flock(lock_fd, fcntl.LOCK_EX)
-
-
-def _release_exclusive_lock(lock_fd: int) -> None:
-    """Release the lock acquired by ``_acquire_exclusive_lock``."""
-    if sys.platform == "win32":
-        import msvcrt
-
-        _lock_byte_range(lock_fd, locking=msvcrt.locking, mode=int(msvcrt.LK_UNLCK))
-        return
-    fcntl.flock(lock_fd, fcntl.LOCK_UN)
-
-
-@contextmanager
-def _exclusive_base_lock(lock_path: Path) -> Iterator[None]:
-    """Hold one exclusive per-root lock and always close its descriptor."""
-    lock_path.parent.mkdir(parents=True, exist_ok=True)
-    lock_fd = os.open(lock_path, os.O_CREAT | os.O_RDWR)
-    try:
-        _acquire_exclusive_lock(lock_fd)
-        try:
-            yield
-        finally:
-            with suppress(OSError):
-                _release_exclusive_lock(lock_fd)
-    finally:
-        os.close(lock_fd)
-
-
-def _attach_rollback_notes(
-    error: BaseException,
-    rollback_errors: Sequence[BaseException],
-) -> None:
-    """Record incomplete restorations on the original save error."""
-    for rollback_error in rollback_errors:
-        error.add_note(f"Incomplete lineage rollback: {rollback_error!r}")
 
 
 def _stable_key_filename(key: str) -> str:
@@ -181,36 +85,30 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
         """Persist one fragment JSON and maintain lightweight lookup indexes."""
         fragments_dir = self.base_path / "fragments"
         fragments_dir.mkdir(parents=True, exist_ok=True)
-
-        with _exclusive_base_lock(_save_lock_path(self.base_path)):
-            stored_fragment_id = (
-                fragment.stored_fragment_id or _build_stored_fragment_id(fragment)
+        stored_fragment_id = fragment.stored_fragment_id or _build_stored_fragment_id(
+            fragment
+        )
+        persisted_fragment = replace(fragment, stored_fragment_id=stored_fragment_id)
+        fragment_path = self._fragment_path(stored_fragment_id)
+        existing_fragment_payload = (
+            fragment_path.read_text(encoding="utf-8")
+            if fragment_path.exists()
+            else None
+        )
+        index_rollbacks: list[tuple[Path, int]] = []
+        try:
+            atomic_write_text(
+                fragment_path,
+                json.dumps(persisted_fragment.to_dict(), indent=2, sort_keys=True),
             )
-            persisted_fragment = replace(
-                fragment, stored_fragment_id=stored_fragment_id
+            self._fragment_indexes(fragment, stored_fragment_id, index_rollbacks)
+        except (OSError, TypeError, ValueError):
+            self._rollback_save(
+                fragment_path=fragment_path,
+                existing_fragment_payload=existing_fragment_payload,
+                index_rollbacks=index_rollbacks,
             )
-            fragment_path = self._fragment_path(stored_fragment_id)
-            existing_fragment_payload = (
-                fragment_path.read_text(encoding="utf-8")
-                if fragment_path.exists()
-                else None
-            )
-            index_rollbacks: list[tuple[Path, int]] = []
-            try:
-                atomic_write_text(
-                    fragment_path,
-                    json.dumps(persisted_fragment.to_dict(), indent=2, sort_keys=True),
-                )
-                self._fragment_indexes(fragment, stored_fragment_id, index_rollbacks)
-            except _SAVE_FAILURES as error:
-                rollback_errors = self._rollback_save(
-                    fragment_path=fragment_path,
-                    existing_fragment_payload=existing_fragment_payload,
-                    index_rollbacks=index_rollbacks,
-                )
-                if rollback_errors:
-                    _attach_rollback_notes(error, rollback_errors)
-                raise
+            raise
 
     def _fragment_indexes(
         self,
@@ -257,26 +155,18 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
         fragment_path: Path,
         existing_fragment_payload: str | None,
         index_rollbacks: list[tuple[Path, int]],
-    ) -> list[Exception]:
-        """Restore fragment and indexes after a failed save. Returns list of rollback errors if any."""
-        errors: list[Exception] = []
+    ) -> None:
+        """Restore fragment and indexes after a failed save."""
         for index_path, checkpoint_offset in reversed(index_rollbacks):
-            try:
+            with suppress(OSError):
                 _truncate_index_to_offset(index_path, offset=checkpoint_offset)
-            except OSError as e:
-                errors.append(e)
         if existing_fragment_payload is None:
-            try:
+            with suppress(OSError):
                 if fragment_path.exists():
                     fragment_path.unlink()
-            except OSError as e:
-                errors.append(e)
         else:
-            try:
+            with suppress(OSError):
                 atomic_write_text(fragment_path, existing_fragment_payload)
-            except (AtomicWriteError, OSError) as error:
-                errors.append(error)
-        return errors
 
     def _fragment_path(self, fragment_id: str) -> Path:
         """Resolve the fragment JSON path for one fragment identifier."""

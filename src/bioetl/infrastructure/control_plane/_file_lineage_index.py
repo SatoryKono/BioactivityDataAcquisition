@@ -116,15 +116,13 @@ def append_jsonl_payload(
             bytes_written += written
         flush_file_descriptor(file_descriptor)
         return checkpoint_size
-    except OSError as error:
+    except OSError:
         if bytes_written > 0:
             try:
                 os_module.ftruncate(file_descriptor, checkpoint_size)
                 flush_file_descriptor(file_descriptor)
-            except OSError as rollback_error:
-                error.add_note(
-                    f"Rollback failed during partial write: {rollback_error!r}"
-                )
+            except OSError:
+                pass
         raise
     finally:
         os_module.close(file_descriptor)

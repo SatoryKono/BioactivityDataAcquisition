@@ -69,7 +69,6 @@ class RunLedgerService(RunLedgerRichEventRecordingMixin):
     _occurred_at_factory: Callable[[], datetime] = field(
         default_factory=lambda: _missing_occurred_at_factory
     )
-    _manifest_id_factory: Callable[[], str] | None = None
 
     def record_manifest_created(self, manifest: RunManifest) -> RunLedgerEntry:
         """Record manifest creation as the first control-plane event."""
