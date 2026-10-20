@@ -29,6 +29,7 @@ from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane import file_run_manifest_store
 from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
+    RunManifestStoreCorruptionError,
 )
 
 _RUN_ID = RunID(UUID(int=12014))
@@ -100,6 +101,63 @@ def test_successor_save_keeps_predecessor_by_id_and_moves_current(
     assert latest is not None
     assert latest.manifest_id == "m2"
     assert {item.manifest_id for item in store.list_all()} == {"m1", "m2"}
+
+
+@pytest.mark.parametrize("broken_link", [None, "missing", "m3"])
+def test_predecessor_chain_requires_reachable_manifest(
+    tmp_path: Path, broken_link: str | None
+) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    original = _original()
+    successor = _successor(original)
+    for manifest in (
+        original,
+        successor,
+        replace(successor, manifest_id="m3", predecessor_manifest_id="m2"),
+    ):
+        store.save(manifest)
+
+    if broken_link is None:
+        assert store.get("m1") == original
+        return
+
+    path = tmp_path / "m2.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["predecessor_manifest_id"] = broken_link
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(RunManifestStoreCorruptionError, match="run-id index"):
+        store.get("m1")
+
+
+@pytest.mark.parametrize("corrupted_id", ["m2", "m3"])
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("run_id", str(UUID(int=12015))),
+        ("pipeline_name", "chembl_molecule"),
+        ("run_type", RunType.REBUILD.value),
+    ],
+)
+def test_predecessor_chain_rejects_mismatched_run_identity(
+    tmp_path: Path, corrupted_id: str, field: str, value: str
+) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    original = _original()
+    successor = _successor(original)
+    for manifest in (
+        original,
+        successor,
+        replace(successor, manifest_id="m3", predecessor_manifest_id="m2"),
+    ):
+        store.save(manifest)
+
+    path = tmp_path / f"{corrupted_id}.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload[field] = value
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(RunManifestStoreCorruptionError, match="run-id index"):
+        store.get("m1")
 
 
 def test_unlinked_manifest_id_for_same_run_is_rejected(
