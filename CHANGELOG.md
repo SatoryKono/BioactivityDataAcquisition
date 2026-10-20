@@ -68,10 +68,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Required composite joins (#12033, #12004):** a required enricher or
   dependency now uses an INNER join and fails closed when a join-key column
-  is missing or any seed row stays unmatched. Optional INNER and UNION joins
-  keep their configured row counts. Optional left joins still fail closed
-  when the seed height changes, and a missing key column returns the seed
-  frame. Enrichers with more than one `join_keys` entry dedupe on the key of
+  is missing or any seed row stays unmatched. Duplicate right-hand keys do not
+  hide an unmatched seed when the INNER result keeps the same height. Optional
+  INNER and UNION joins keep their configured row counts. Optional left joins
+  still fail closed when the seed height changes, and a missing key column
+  returns the seed frame. Enrichers with more than one `join_keys` entry dedupe on the key of
   each step and retry unmatched seed rows in order. The configured strategy
   is applied to that result: left keeps unmatched seed rows, inner drops
   them, and full also keeps unmatched enricher rows. Fallback frames with

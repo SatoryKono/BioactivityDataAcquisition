@@ -104,6 +104,37 @@ class JoinExecutorService:
                 f"from {left_height} to {result_height}"
             )
 
+    def _reject_required_coverage(
+        self,
+        *,
+        required: bool,
+        effective_how: JoinHow,
+        pipeline_name: str,
+        left_df: pl.DataFrame,
+        right_df: pl.DataFrame,
+        left_on: str | list[str],
+        right_on: str | list[str],
+    ) -> None:
+        """Fail a required INNER join when any seed key is absent from the right side.
+
+        Equal result height is not coverage: duplicate right keys can replace a
+        missing seed row and keep the row count unchanged.
+        """
+        if not required or effective_how != "inner":
+            return
+        left_keys = [left_on] if isinstance(left_on, str) else left_on
+        right_keys = [right_on] if isinstance(right_on, str) else right_on
+        unmatched = left_df.select(left_keys).join(
+            right_df.select(right_keys),
+            left_on=left_keys,
+            right_on=right_keys,
+            how="anti",
+        )
+        if unmatched.height:
+            raise RequiredJoinKeyError(
+                f"Required join for {pipeline_name} has unmatched seed rows"
+            )
+
     def execute_polars_join(
         self,
         left_df: pl.DataFrame,
@@ -149,24 +180,28 @@ class JoinExecutorService:
                 right_cast = right_cast.str.replace(r"\.0$", "", literal=False)
             right_df = right_df.with_columns(right_cast)
 
+        effective_right_key = right_key
         if left_key != right_key:
-            temp_join_col = f"__temp_join_{pipeline_name}"
-            right_df = right_df.with_columns(pl.col(right_key).alias(temp_join_col))
-            result = left_df.join(
-                right_df,
-                left_on=left_key,
-                right_on=temp_join_col,
-                how=how,
-                suffix=f"_{pipeline_name}",
+            effective_right_key = f"__temp_join_{pipeline_name}"
+            right_df = right_df.with_columns(
+                pl.col(right_key).alias(effective_right_key)
             )
-        else:
-            result = left_df.join(
-                right_df,
-                left_on=left_key,
-                right_on=right_key,
-                how=how,
-                suffix=f"_{pipeline_name}",
-            )
+        self._reject_required_coverage(
+            required=required,
+            effective_how=how,
+            pipeline_name=pipeline_name,
+            left_df=left_df,
+            right_df=right_df,
+            left_on=left_key,
+            right_on=effective_right_key,
+        )
+        result = left_df.join(
+            right_df,
+            left_on=left_key,
+            right_on=effective_right_key,
+            how=how,
+            suffix=f"_{pipeline_name}",
+        )
         self._reject_join_cardinality(
             required=required,
             join_how=join_how,
@@ -200,6 +235,25 @@ class JoinExecutorService:
         )
         if skipped is not None:
             return skipped
+        effective_right_keys = list(right_keys)
+        if left_keys != right_keys:
+            effective_right_keys = []
+            for left_key, right_key in zip(left_keys, right_keys, strict=True):
+                if left_key != right_key:
+                    temp_col = f"__temp_join_{pipeline_name}_{right_key}"
+                    right_df = right_df.with_columns(pl.col(right_key).alias(temp_col))
+                    effective_right_keys.append(temp_col)
+                else:
+                    effective_right_keys.append(right_key)
+        self._reject_required_coverage(
+            required=required,
+            effective_how=how,
+            pipeline_name=pipeline_name,
+            left_df=left_df,
+            right_df=right_df,
+            left_on=left_keys,
+            right_on=effective_right_keys,
+        )
         if left_keys == right_keys:
             result = left_df.join(
                 right_df,
@@ -208,19 +262,10 @@ class JoinExecutorService:
                 suffix=f"_{pipeline_name}",
             )
         else:
-            temp_cols: list[str] = []
-            for left_key, right_key in zip(left_keys, right_keys, strict=True):
-                if left_key != right_key:
-                    temp_col = f"__temp_join_{pipeline_name}_{right_key}"
-                    right_df = right_df.with_columns(pl.col(right_key).alias(temp_col))
-                    temp_cols.append(temp_col)
-                else:
-                    temp_cols.append(right_key)
-
             result = left_df.join(
                 right_df,
                 left_on=left_keys,
-                right_on=temp_cols,
+                right_on=effective_right_keys,
                 how=how,
                 suffix=f"_{pipeline_name}",
             )
