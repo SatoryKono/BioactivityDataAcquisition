@@ -250,7 +250,7 @@ def test_transitive_dependency_selects_direct_consumer(tmp_path: Path) -> None:
 def test_transitive_optional_dependency_uses_declared_reference(
     tmp_path: Path,
 ) -> None:
-    _optional_distribution(tmp_path, 'DISTRIBUTION = "proofagent-harness"\n')
+    _optional_distribution(tmp_path, 'Adapter(distribution="proofagent-harness")\n')
     _consumer(
         tmp_path,
         "tests/unit/scripts/ai/agent_tools/test_cli.py",
@@ -264,6 +264,60 @@ def test_transitive_optional_dependency_uses_declared_reference(
         repo_root=tmp_path,
         changed_python_dependencies={"aiohttp", "yarl"},
     ) == ["tests/unit/scripts/ai/agent_tools/test_cli.py"]
+
+
+@pytest.mark.parametrize("package", ["aiohttp", "yarl"])
+def test_import_and_declared_reference_consumers_are_combined(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, package: str
+) -> None:
+    _optional_distribution(tmp_path, 'Adapter(distribution="proofagent-harness")\n')
+    _consumer(tmp_path, "src/bioetl/infrastructure/client.py", "aiohttp")
+    _consumer(
+        tmp_path,
+        "tests/unit/scripts/ai/agent_tools/test_cli.py",
+        "scripts.ai.agent_tools.__main__",
+    )
+    (tmp_path / "tests/unit/infrastructure").mkdir(parents=True)
+    monkeypatch.setattr(
+        dependencies, "packages_distributions", lambda: {"aiohttp": ["aiohttp"]}
+    )
+
+    assert dependencies.dependency_consumers(tmp_path, {package}) == [
+        "scripts/ai/agent_tools/__main__.py",
+        "src/bioetl/infrastructure/client.py",
+    ]
+    assert lane.affected_pytest_targets(
+        ["uv.lock"], repo_root=tmp_path, changed_python_dependencies={package}
+    ) == [
+        "tests/unit/scripts/ai/agent_tools/test_cli.py",
+        "tests/unit/infrastructure",
+    ]
+
+
+@pytest.mark.parametrize(
+    "adapter",
+    [
+        '"""proofagent-harness"""\n',
+        'DISTRIBUTION = "proofagent-harness"\n',
+        'Adapter("proofagent-harness")\n',
+        'Adapter(name="proofagent-harness")\n',
+        "Adapter(distribution=42)\n",
+        'Adapter(distribution="aiohttp")\n',
+    ],
+)
+def test_unconfirmed_distribution_reference_fails_closed(
+    tmp_path: Path, adapter: str
+) -> None:
+    _optional_distribution(tmp_path, adapter)
+    _consumer(
+        tmp_path,
+        "tests/unit/scripts/ai/agent_tools/test_cli.py",
+        "scripts.ai.agent_tools.__main__",
+    )
+    with pytest.raises(ValueError, match="Unconfirmed.*aiohttp"):
+        lane.affected_pytest_targets(
+            ["uv.lock"], repo_root=tmp_path, changed_python_dependencies={"aiohttp"}
+        )
 
 
 def test_transitive_name_mention_without_declared_parent_fails_closed(

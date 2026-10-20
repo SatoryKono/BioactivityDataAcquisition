@@ -83,7 +83,7 @@
       "agent_usage": [
         "agent-debugging"
       ],
-      "reference_count": 12,
+      "reference_count": 15,
       "references": [
         {
           "path": ".codex/skills/agent-debugging/SKILL.md",

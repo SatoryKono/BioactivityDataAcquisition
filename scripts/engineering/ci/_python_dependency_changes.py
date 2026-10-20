@@ -243,7 +243,7 @@ def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
 
     A transitive package with no installed import owner is confirmed only when
     its lock family reaches a distribution declared in ``pyproject.toml`` and a
-    scanned file names that distribution with an exact string literal.
+    scanned file names that distribution in a literal ``distribution`` keyword.
     """
     lock = tomllib.loads((root / PYTHON_LOCK).read_text(encoding="utf-8"))
     packages = lock.get("package", [])
@@ -255,8 +255,7 @@ def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
     for dependency in sorted(changed):
         family = _lock_family(packages, dependency)
         selected = _import_consumers(imports, module_owners, family)
-        if not selected:
-            selected = _declared_reference_consumers(references, declared, family)
+        selected |= _declared_reference_consumers(references, declared, family)
         if selected:
             consumers.update(selected)
         else:
@@ -343,9 +342,13 @@ def _module_and_declared_names(
         elif isinstance(node, ast.ImportFrom) and node.module and not node.level:
             modules.add(node.module.split(".")[0])
         elif (
-            declared and isinstance(node, ast.Constant) and isinstance(node.value, str)
+            declared
+            and isinstance(node, ast.keyword)
+            and node.arg == "distribution"
+            and isinstance(node.value, ast.Constant)
+            and isinstance(node.value.value, str)
         ):
-            normalized = _name(node.value)
+            normalized = _name(node.value.value)
             if normalized in declared:
                 names.add(normalized)
     return modules, names
