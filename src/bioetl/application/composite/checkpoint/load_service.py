@@ -25,6 +25,9 @@ from bioetl.application.composite.checkpoint._checkpoint_warnings import (
 from bioetl.application.composite.checkpoint._load_validation import (
     validate_resume_compatibility,
 )
+from bioetl.application.composite.checkpoint._state_support import (
+    synchronize_manifest_successors,
+)
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.run_ledger import (
@@ -97,21 +100,7 @@ class CompositeCheckpointLoadService:
         self, state: CompositeCheckpointState
     ) -> CompositeCheckpointState:
         """Replace stale anchors only along a published successor chain."""
-        while (
-            manifest := self._manifest_successors.get(state.manifest_id)
-        ) is not None:
-            if str(manifest.run_id) != state.run_id:
-                break
-            state = replace(
-                state,
-                manifest_id=manifest.manifest_id,
-                execution_fingerprint=manifest.execution_fingerprint,
-                input_snapshot_fingerprint=compute_input_snapshot_identity_fingerprint(
-                    [s for ref in manifest.source_refs for s in ref.input_snapshots]
-                )
-                or "",
-            )
-        return state
+        return synchronize_manifest_successors(state, self._manifest_successors)
 
     def _emit_checkpoint_load_status(self, status: str) -> None:
         """Emit bounded composite checkpoint load outcome."""

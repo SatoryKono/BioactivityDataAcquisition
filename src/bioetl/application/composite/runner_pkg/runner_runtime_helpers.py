@@ -10,6 +10,9 @@ from uuid import UUID
 from bioetl.application.composite.lifecycle_observer_service import (
     CompositeLifecycleObserverService,
 )
+from bioetl.application.composite.runner_pkg.runner_support_runtime import (
+    resolve_original_run_id,
+)
 from bioetl.application.core.lifecycle.heartbeat import HeartbeatTask
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.application.runtime_clock import resolve_runtime_clock
@@ -154,18 +157,6 @@ def initialize_runner_runtime_state(host: object, run_id: str | None) -> None:
     runner_host._original_run_id = None
     runner_host._finished = False
     runner_host._final_state = None
-
-
-def resolve_original_run_id(
-    *,
-    runtime: CompositeRuntimeConfig,
-    state: CompositeCheckpointState,
-    current_run_id: str,
-) -> str | None:
-    """Resolve the original run ID retained for resumed composite diagnostics."""
-    if runtime.resume and state.is_resumable and state.run_id != current_run_id:
-        return state.run_id
-    return None
 
 
 def create_managed_lock_resources(

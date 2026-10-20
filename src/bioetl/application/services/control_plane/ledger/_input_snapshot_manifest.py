@@ -6,6 +6,9 @@ from collections.abc import Callable
 from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.services.control_plane.ledger.entry_support import (
+    rebind_ledger_successor,
+)
 from bioetl.domain.config.runtime import (
     CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE,
 )
@@ -129,27 +132,40 @@ def persist_input_snapshots_on_manifest(
     )
     if input_snapshot_verified is True:
         updated = _with_verified_snapshot_fingerprint(updated)
-    saver(updated)
+    _publish_manifest_successor(
+        service, saver=saver, predecessor=manifest, successor=updated
+    )
+    return updated
+
+
+def _publish_manifest_successor(
+    service: RunLedgerService,
+    *,
+    saver: Callable[[RunManifest], None],
+    predecessor: RunManifest,
+    successor: RunManifest,
+) -> None:
+    """Publish a successor and notify observers only after its ledger commits."""
+    saver(successor)
     try:
-        _rebind_ledger_successor(
+        rebind_ledger_successor(
             service,
-            run_id=manifest.run_id,
-            predecessor_manifest_id=manifest.manifest_id,
-            successor_manifest_id=updated.manifest_id,
+            run_id=predecessor.run_id,
+            predecessor_manifest_id=predecessor.manifest_id,
+            successor_manifest_id=successor.manifest_id,
         )
     except (OSError, TypeError, ValueError, InfrastructureError) as exc:
         restore_error = _restore_manifest_after_failed_rebind(
             service,
-            predecessor=manifest,
-            successor_manifest_id=updated.manifest_id,
+            predecessor=predecessor,
+            successor_manifest_id=successor.manifest_id,
         )
         if restore_error is not None:
             raise restore_error from exc
         raise
-    service.manifest_id = updated.manifest_id
+    service.manifest_id = successor.manifest_id
     for callback in getattr(service, "manifest_successor_callbacks", ()):
-        callback(updated)
-    return updated
+        callback(successor)
 
 
 def _restore_manifest_after_failed_rebind(
@@ -167,25 +183,6 @@ def _restore_manifest_after_failed_rebind(
     except (OSError, TypeError, ValueError, InfrastructureError) as restore_error:
         return restore_error
     return None
-
-
-def _rebind_ledger_successor(
-    service: RunLedgerService,
-    *,
-    run_id: object,
-    predecessor_manifest_id: str,
-    successor_manifest_id: str,
-) -> None:
-    """Point a ledger adapter at the successor when it knows that transition."""
-    port = getattr(service, "ledger_port", None)
-    rebind = getattr(port, "record_manifest_successor", None)
-    if not callable(rebind):
-        return
-    rebind(
-        run_id=run_id,
-        predecessor_manifest_id=predecessor_manifest_id,
-        successor_manifest_id=successor_manifest_id,
-    )
 
 
 def _ref_matches_owner(
