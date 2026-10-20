@@ -111,7 +111,7 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
                     json.dumps(persisted_fragment.to_dict(), indent=2, sort_keys=True),
                 )
                 self._fragment_indexes(fragment, stored_fragment_id, index_rollbacks)
-            except Exception as error:
+            except (OSError, TypeError, ValueError) as error:
                 rollback_errors = self._rollback_save(
                     fragment_path=fragment_path,
                     existing_fragment_payload=existing_fragment_payload,
