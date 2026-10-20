@@ -1413,7 +1413,9 @@ async def test_successor_updates_launch_context_and_checkpoint_metadata(runner):
     )
     port = AsyncMock()
     stale_metadata = CheckpointMetadata(
-        manifest_id="original", records_processed=7, run_context={"manifest_id": "original"}
+        manifest_id="original",
+        records_processed=7,
+        run_context={"manifest_id": "original"},
     )
     runner._checkpoint_manager = CheckpointRuntimeService(
         port,
