@@ -9,7 +9,7 @@ A `MemoryError` raised during module load (pytest collection phase) is correctly
 This directly satisfies the requirement to prove that an ordinary `MemoryError` during collection leaves a diagnostic trail and does not silently abort. The `pytest_abort_diagnostic_adapter` supervisor, which is now on `main` via #12240, intercepts this and appropriately saves the stderr containing the traceback as part of the `DiagnosticManifest`. It accurately labels it as a non-zero exit (`wrapper_exit_code = 1`) without incorrectly inferring an Out-Of-Memory (OOM) silent abort (`oom_inferred = False`).
 
 **Evidence (Added Test):**
-`tests/unit/scripts/engineering/ci/test_memory_error_collection.py` runs pytest directly against a temporary module that raises `MemoryError` at import time. It does not invoke `pytest_abort_diagnostic_adapter`; that wrapper is covered by `test_memory_error_keeps_traceback_without_claiming_oom`.
+`tests/unit/scripts/engineering/ci/test_memory_error_collection.py` runs pytest directly against a temporary module that raises `MemoryError` at import time. It does not invoke `pytest_abort_diagnostic_adapter`. `test_memory_error_keeps_traceback_without_claiming_oom` is a separate adapter test for a direct Python `MemoryError` (`python -c`), not for collection. That test records `wrapper_exit_code = 1` and `oom_inferred = False`. No adapter test confirms `wrapper_exit_code = 2` for a collection `MemoryError`.
 
 Command:
 
