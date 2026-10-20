@@ -44,6 +44,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     normalize_required_persistence_profile,
     resolve_effective_required_persistence_profile,
     resolve_replay_capability,
+    resolve_replay_readiness_verdict,
 )
 from bioetl.domain.control_plane.reproducibility_profiles import (
     build_replay_family_contract,
@@ -172,6 +173,45 @@ def test_replay_readiness_verdicts_keep_resume_rebuild_and_incremental_distinct(
         rebuild_assessment.replay_readiness_verdict
         == ReplayReadinessVerdict.REBUILD_ONLY
     )
+
+
+def test_blocking_gaps_block_exact_replay_ready_without_strict_or_exact_request() -> (
+    None
+):
+    """Any blocking gap vetoes EXACT_REPLAY_READY even for non-strict runs."""
+    verdict = resolve_replay_readiness_verdict(
+        replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+        strict_requirement_requested=False,
+        strict_exact_replay_supported=True,
+        blocking_gaps=("immutable_input_snapshots",),
+        exact_replay_requested=False,
+    )
+
+    assert verdict == ReplayReadinessVerdict.EXACT_REPLAY_BLOCKED
+
+
+def test_blocking_gaps_block_exact_replay_ready_for_strict_request() -> None:
+    verdict = resolve_replay_readiness_verdict(
+        replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+        strict_requirement_requested=True,
+        strict_exact_replay_supported=True,
+        blocking_gaps=("immutable_input_snapshots",),
+        exact_replay_requested=False,
+    )
+
+    assert verdict == ReplayReadinessVerdict.EXACT_REPLAY_BLOCKED
+
+
+def test_exact_replay_ready_without_blocking_gaps_stays_ready() -> None:
+    verdict = resolve_replay_readiness_verdict(
+        replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+        strict_requirement_requested=False,
+        strict_exact_replay_supported=True,
+        blocking_gaps=(),
+        exact_replay_requested=False,
+    )
+
+    assert verdict == ReplayReadinessVerdict.EXACT_REPLAY_READY
 
 
 def test_unsupported_family_verdict_is_debug_only_when_strict_replay_not_claimed() -> (
