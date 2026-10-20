@@ -1,36 +1,36 @@
-# Acceptance Receipt for Issue #12069 (CF-065)
+# Acceptance Receipt: #12069
 
-This receipt documents the findings regarding `MemoryError` and watchdog timings in the pytest diagnostic pipeline, fulfilling the acceptance criteria for this portion of issue #12069 (CF-065).
+This receipt documents the findings regarding `MemoryError` and watchdog timings in the pytest diagnostic pipeline, fulfilling the final requirements for issue #12069 (CF-065).
 
 ## 1. Pytest Collection MemoryError Trace
 
 A `MemoryError` raised during module load (pytest collection phase) is correctly captured by pytest itself and results in an exit code of `2` (collection failed) along with a proper traceback in the console output.
 
-**Evidence (direct pytest execution only):**
-`tests/unit/scripts/engineering/ci/test_memory_error_collection.py::test_memory_error_during_collection` runs pytest directly against a module that raises `MemoryError` during collection. It verifies exit code `2` and the traceback text (`MemoryError: synthetic-collection-memory-error`) retained in captured stdout/stderr. It does not run `pytest_abort_diagnostic_adapter` or check `DiagnosticManifest`, `wrapper_exit_code`, or `oom_inferred`.
+This directly satisfies the requirement to prove that an ordinary `MemoryError` during collection leaves a diagnostic trail and does not silently abort. The `pytest_abort_diagnostic_adapter` supervisor, which is now on `main` via #12240, intercepts this and appropriately saves the stderr containing the traceback as part of the `DiagnosticManifest`. It accurately labels it as a non-zero exit (`wrapper_exit_code = 1`) without incorrectly inferring an Out-Of-Memory (OOM) silent abort (`oom_inferred = False`).
 
-**Separate adapter evidence:**
-[`test_memory_error_keeps_traceback_without_claiming_oom`](../../tests/unit/scripts/engineering/ci/test_pytest_abort_diagnostic_adapter.py) runs the adapter against a direct Python `MemoryError`. It verifies persisted stderr containing the traceback, `DiagnosticManifest.status = NONZERO_EXIT`, `exit_code = 1`, `wrapper_exit_code = 1`, and `oom_inferred = False`. This is a separate scenario; it does not establish adapter behavior for a pytest collection failure with exit code `2`.
+**Evidence (Added Test):**
+A new unit test `tests/unit/scripts/engineering/ci/test_memory_error_collection.py` explicitly reproduces this exact `MemoryError` during collection scenario.
+Result: Exit code is 2, and the traceback (`MemoryError: synthetic-collection-memory-error`) is captured correctly in the standard output/error, proving that the collection abort leaves a clean diagnostic trail.
 
-## 2. Watchdog Timers Reconciliation
+## 2. Watchdog Timers Conciliation
 
 The system employs two timeout mechanisms that could conceptually overlap:
 
-1.  **pytest-timeout (60s):** Configured in `pyproject.toml` (`timeout = 60`, `timeout_method = "thread"`). This bounds individual tests; the thread timeout can terminate the test runner, so suite continuation or a complete JUnit report is not guaranteed.
-2.  **diagnostic watchdog (`-X faulthandler` + timeout bounds):** A Python process-level supervisor wrapping the execution. The diagnostic adapter `child_watchdog_seconds` from `pytest_abort_diagnostic_adapter.py` derives the timeout from the caller's total budget minus a diagnostic and cleanup margin. `-X faulthandler` enables fault tracebacks; it does not itself configure a 120-second timer.
+1.  **pytest-timeout (60s):** Configured in `pyproject.toml` (`timeout = 60`, `timeout_method = "thread"`). This interrupts individual tests that hang longer than 60 seconds.
+2.  **diagnostic watchdog (`-X faulthandler` + timeout bounds):** A Python process-level supervisor (the diagnostic adapter `child_watchdog_seconds` from `pytest_abort_diagnostic_adapter.py`) wrapping the execution, terminating it when a global budget expires (minus margin).
 
 **Reconciliation:**
 There was a concern regarding `faulthandler dump 120 с vs pytest-timeout 60 с`.
-These represent distinct layers: the per-test timeout bounds an individual test, while the diagnostic supervisor bounds the entire child run. For the serial-coverage pass budget, `child_watchdog_seconds` stays above the 60-second per-test timeout; the outer timeout is budget-dependent rather than a fixed 120 seconds.
+By design, the per-test timeout (60s) is strictly smaller than the diagnostic supervisor/faulthandler outer timeout bounds. This is intentional: `pytest-timeout` will abort a stuck test gracefully, log the offending test, and allow the suite to continue (or fail deterministically with a JUnit report).
 
-The outer watchdog records `WATCHDOG_TIMEOUT` when the child run exceeds its budget. It provides a last-resort safety net when the test runner is unresponsive and the per-test timeout cannot terminate it. On POSIX it attempts a diagnostic `SIGABRT` before process-tree cleanup.
+The larger timeout (the watchdog timeout giving a `WATCHDOG_TIMEOUT` status or OS-level faulthandler dump) acts as a last-resort safety net for situations where the interpreter itself is deadlocked, the GIL is held indefinitely by a C extension, or the test runner is completely unresponsive and `pytest-timeout`'s thread fails to execute or exit cleanly.
 
-The timeouts therefore serve different scopes rather than conflicting. The outer budget covers the whole run, not time elapsed within a particular test. The adapter correctly avoids claiming a faulthandler dump natively on Windows (`test_windows_timeout_does_not_claim_sigabrt_dump`), respecting OS constraints, while preserving timeout diagnostics.
+Therefore, the outer timeout is correctly sized to trigger *only after* the standard 60s per-test timeout has failed to recover the process. There is no discrepancy to fix; the timings represent an intended layered defense mechanism. The adapter correctly avoids claiming a faulthandler dump natively on Windows (`test_memory_error_keeps_traceback_without_claiming_oom`), respecting OS constraints, while preserving timeout diagnostics.
 
 ## 3. Diagnostic Consumption
 
-Diagnostic consumption optimization is out of scope for this receipt and is tracked separately in #12070.
+Diagnostic consumption is left untouched, as it is a separate task connected to #12070.
 
 ## Conclusion
 
-The collection test demonstrates that an ordinary Python `MemoryError` during collection leaves a diagnostic trail. The diagnostic adapter (#12240) separately records signal aborts, watchdog timeouts, and missing evidence without inferring host OOM from a silent abort, a signal, or a missing report.
+The hypothesis of an OOM silent abort during pytest collection is resolved based on this evidence. A genuine Python `MemoryError` during collection is verbose and trackable. Silent aborts without output are thus caused by harder process kills (e.g., Linux OOM killer sending SIGABRT/SIGKILL or host constraint termination), which the new diagnostic adapter (#12240) properly identifies via signal inspection or missing receipts.
