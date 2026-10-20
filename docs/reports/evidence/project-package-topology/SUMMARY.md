@@ -1,3 +1,5 @@
+Source-only refresh (2026-10-20, PR #12310 required-aware join propagation): the canonical module inventory records `source_tree_sha256=3247b34f8270bf36fad3707570471202d7f19e2f22d8bcc964649cb3aec47ba0` and `source_module_count=2585`. This binds the local working tree only; historical captures, measurements and their original hashes below are unchanged. It is not a new coverage capture or CI acceptance.
+
 Source-only refresh (2026-10-18, PR #12259 local clock-injection correction on head fae7565514272d9a3a304f5386a792a9335390ca): the canonical module inventory records `source_tree_sha256=9eba2ad964bf700fbce9cca0e7e05561b38e1564646d16dc906cdc233d8a7576` and `source_module_count=2583`. This binds the local working tree only; historical captures, measurements and their original hashes below are unchanged. It is not a new coverage capture or CI acceptance.
 
 Source-only refresh (2026-10-12, composite checkpoint persistence parameter bundle merged with origin/main fe524f074da5): the canonical module inventory records `source_tree_sha256=0d318c17dfd76032544e2e179569af53912aed1d409c2bf8f2725ee9ab589805` and `source_module_count=2566`. This binds the merged source tree; coverage measurements remain those of the last authoritative run recorded below.
@@ -438,10 +440,10 @@ it is not a new coverage measurement or a complete topology re-audit.
 
 ## Current source inventory binding
 
-- `source_tree_sha256=af968ee88cff2063c0be6d53045f8a1e321d6937730172ff4e2bde9129b6868b`
-- `source_module_count=2583`
-- Source modules: `2583`
-- `2529` fully covered
+- `source_tree_sha256=3247b34f8270bf36fad3707570471202d7f19e2f22d8bcc964649cb3aec47ba0`
+- `source_module_count=2585`
+- Source modules: `2585`
+- `2531` fully covered
 - `53` partially covered
 - Test inventory: `assertless_total_candidates=85`
 

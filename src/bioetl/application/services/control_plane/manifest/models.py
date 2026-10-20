@@ -24,6 +24,7 @@ class RunManifestCreateSpec:
     launch_context: dict[str, object]
     runtime_config: dict[str, object]
     resolved_config: dict[str, object]
+    predecessor_manifest_id: str | None = None
     replay_of_run_id: str | None = None
     replay_of_manifest_id: str | None = None
     workflow_run_id: str | None = None

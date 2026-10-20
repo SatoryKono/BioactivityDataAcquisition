@@ -6,8 +6,19 @@ from collections.abc import Callable
 from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 
+from bioetl.domain.config.runtime import (
+    CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE,
+)
 from bioetl.domain.control_plane import RunInputSnapshotRef, RunSourceRef
+from bioetl.domain.control_plane.execution_identity import (
+    build_execution_identity_payload_from_code_provenance,
+)
 from bioetl.domain.control_plane.reproducibility_policy import resolve_replay_capability
+from bioetl.domain.exceptions import InfrastructureError
+from bioetl.domain.normalization import (
+    compute_execution_identity_fingerprint,
+    compute_input_snapshot_identity_fingerprint,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.ledger.service import (
@@ -72,6 +83,12 @@ def persist_input_snapshots_on_manifest(
     if loaded is None:
         return None
     saver, manifest = loaded
+
+    manifest_id_factory = getattr(service, "_manifest_id_factory", None)
+    if manifest_id_factory is None:
+        return None
+
+    new_manifest_id = manifest_id_factory()
     new_refs = _merge_source_refs(
         getattr(manifest, "source_refs", ()) or (),
         snapshots,
@@ -83,15 +100,90 @@ def persist_input_snapshots_on_manifest(
         source_refs=new_refs,
         resume_requested=_resume_requested(manifest),
     )
+    input_snapshot_fingerprint = compute_input_snapshot_identity_fingerprint(
+        [s for ref in new_refs for s in ref.input_snapshots]
+    )
+
+    execution_payload = build_execution_identity_payload_from_code_provenance(
+        pipeline_name=manifest.pipeline_name,
+        run_type=manifest.run_type.value,
+        code_provenance=manifest.code_provenance,
+        exact_replay=bool(manifest.launch_context.get("exact_replay")),
+        input_snapshot_fingerprint=input_snapshot_fingerprint,
+        silver_filter_compatibility_mode=str(
+            manifest.runtime_config.get(
+                "silver_filter_compatibility_mode",
+                CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE,
+            )
+        ),
+    )
+    new_fingerprint = compute_execution_identity_fingerprint(execution_payload)
+
     updated = replace(
         manifest,
+        manifest_id=new_manifest_id,
+        predecessor_manifest_id=manifest.manifest_id,
+        execution_fingerprint=new_fingerprint,
         source_refs=new_refs,
         replay_capability=capability,
     )
     if input_snapshot_verified is True:
         updated = _with_verified_snapshot_fingerprint(updated)
     saver(updated)
+    try:
+        _rebind_ledger_successor(
+            service,
+            run_id=manifest.run_id,
+            predecessor_manifest_id=manifest.manifest_id,
+            successor_manifest_id=updated.manifest_id,
+        )
+    except (OSError, TypeError, ValueError, InfrastructureError) as exc:
+        restore_error = _restore_manifest_after_failed_rebind(
+            service,
+            predecessor=manifest,
+            successor_manifest_id=updated.manifest_id,
+        )
+        if restore_error is not None:
+            raise restore_error from exc
+        raise
+    service.manifest_id = updated.manifest_id
     return updated
+
+
+def _restore_manifest_after_failed_rebind(
+    service: RunLedgerService,
+    *,
+    predecessor: RunManifest,
+    successor_manifest_id: str,
+) -> BaseException | None:
+    """Drop the successor publication when the ledger rebind did not commit."""
+    port = getattr(service, "manifest_port", None)
+    restore = getattr(port, "restore_predecessor_publication", None)
+    try:
+        if callable(restore):
+            restore(predecessor, successor_manifest_id)
+    except (OSError, TypeError, ValueError, InfrastructureError) as restore_error:
+        return restore_error
+    return None
+
+
+def _rebind_ledger_successor(
+    service: RunLedgerService,
+    *,
+    run_id: object,
+    predecessor_manifest_id: str,
+    successor_manifest_id: str,
+) -> None:
+    """Point a ledger adapter at the successor when it knows that transition."""
+    port = getattr(service, "ledger_port", None)
+    rebind = getattr(port, "record_manifest_successor", None)
+    if not callable(rebind):
+        return
+    rebind(
+        run_id=run_id,
+        predecessor_manifest_id=predecessor_manifest_id,
+        successor_manifest_id=successor_manifest_id,
+    )
 
 
 def _ref_matches_owner(

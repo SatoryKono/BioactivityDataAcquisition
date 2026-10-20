@@ -933,11 +933,10 @@ class TestApplyJoinsSmartColumnRenaming:
 
     @pytest.mark.asyncio
     async def test_secondary_join_keys_are_prefixed(self, merge_service):
-        """Test secondary join keys (not used in actual join) are prefixed.
+        """Test secondary join keys stay qualified when the primary key matches.
 
-        When join_keys has multiple values, only the first (primary) key is used
-        for the actual join. Secondary keys should be prefixed to avoid Polars
-        adding its own suffix.
+        Fallback keys are used only for seed rows the primary key did not match.
+        A primary match still keeps the secondary column in qualified form.
         """
         import polars as pl
 
