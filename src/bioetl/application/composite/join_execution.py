@@ -43,24 +43,11 @@ class JoinExecutorService:
         self._join_type_resolver = join_type_resolver
 
     def get_polars_join_type(self) -> JoinHow:
-        """Resolve current join type from strategy resolver.
-
-        Returns:
-            Polars join type literal (e.g. ``"left"``, ``"inner"``, ``"full"``).
-        """
+        """Resolve the configured Polars join type."""
         return self._join_type_resolver()
 
-    def _resolve_how(
-        self,
-        *,
-        required: bool,
-        join_how: JoinHow | None,
-    ) -> JoinHow:
-        """Resolve Polars ``how`` for one join.
-
-        An explicit ``join_how`` wins. Otherwise ADR-026 maps a required source
-        to ``inner`` and leaves optional sources on the configured strategy.
-        """
+    def _resolve_how(self, *, required: bool, join_how: JoinHow | None) -> JoinHow:
+        """Prefer an explicit how, then required INNER, then the configured strategy."""
         if join_how is not None:
             return join_how
         if required:
@@ -76,10 +63,7 @@ class JoinExecutorService:
         missing_right: list[str],
         left_df: pl.DataFrame,
     ) -> pl.DataFrame | None:
-        """Return ``left_df`` when an optional join skips missing keys.
-
-        Required joins fail closed instead of returning the unjoined frame.
-        """
+        """Return the seed frame when an optional join skips missing keys."""
         if not missing_left and not missing_right:
             return None
         if required:
@@ -96,22 +80,29 @@ class JoinExecutorService:
         )
         return left_df
 
-    def _reject_required_cardinality(
+    def _reject_join_cardinality(
         self,
         *,
         required: bool,
         join_how: JoinHow | None,
+        resolved_how: JoinHow,
         pipeline_name: str,
         left_height: int,
         result_height: int,
     ) -> None:
-        """Fail a required join whose row count differs from the seed frame."""
-        if not required or join_how is not None or result_height == left_height:
+        """Fail required joins and optional left joins that change seed height."""
+        if result_height == left_height:
             return
-        raise RequiredJoinKeyError(
-            f"Required join for {pipeline_name} changed cardinality "
-            f"from {left_height} to {result_height}"
-        )
+        if required and join_how is None:
+            raise RequiredJoinKeyError(
+                f"Required join for {pipeline_name} changed cardinality "
+                f"from {left_height} to {result_height}"
+            )
+        if resolved_how == "left":
+            raise JoinCardinalityError(
+                f"Join for {pipeline_name} changed cardinality "
+                f"from {left_height} to {result_height}"
+            )
 
     def execute_polars_join(
         self,
@@ -123,22 +114,7 @@ class JoinExecutorService:
         required: bool = False,
         join_how: JoinHow | None = None,
     ) -> pl.DataFrame:
-        """Execute single-key join while preserving right join key as data column.
-
-        Args:
-            left_df: Left-side DataFrame (typically the merged seed output).
-            right_df: Right-side DataFrame (typically the enricher or dependency output).
-            left_key: Column name to join on from left_df.
-            right_key: Column name to join on from right_df.
-            pipeline_name: Pipeline name used for column suffixing and log context.
-            required: When true, missing keys and unmatched seed rows fail closed
-                and the join uses INNER semantics (ADR-026).
-            join_how: Optional explicit Polars join type. Used by fallback steps
-                that must stay LEFT even when the source is required.
-
-        Returns:
-            Joined DataFrame. Optional joins with a missing key return ``left_df``.
-        """
+        """Execute a single-key join and keep the right join key as a data column."""
         import polars as pl
 
         how = self._resolve_how(required=required, join_how=join_how)
@@ -191,9 +167,10 @@ class JoinExecutorService:
                 how=how,
                 suffix=f"_{pipeline_name}",
             )
-        self._reject_required_cardinality(
+        self._reject_join_cardinality(
             required=required,
             join_how=join_how,
+            resolved_how=how,
             pipeline_name=pipeline_name,
             left_height=left_df.height,
             result_height=result.height,
@@ -210,21 +187,7 @@ class JoinExecutorService:
         required: bool = False,
         join_how: JoinHow | None = None,
     ) -> pl.DataFrame:
-        """Execute multi-key join preserving right-side key columns.
-
-        Args:
-            left_df: Left-side DataFrame (typically the merged seed output).
-            right_df: Right-side DataFrame (typically the dependency output).
-            left_keys: List of column names to join on from left_df.
-            right_keys: List of column names to join on from right_df.
-            pipeline_name: Pipeline name used for column suffixing and log context.
-            required: When true, missing composite keys and unmatched seed rows
-                fail closed with INNER semantics (ADR-026).
-            join_how: Optional explicit Polars join type.
-
-        Returns:
-            Joined DataFrame using all provided composite key columns.
-        """
+        """Execute a multi-key join and keep the right-side key columns."""
         import polars as pl
 
         how = self._resolve_how(required=required, join_how=join_how)
@@ -261,9 +224,10 @@ class JoinExecutorService:
                 how=how,
                 suffix=f"_{pipeline_name}",
             )
-        self._reject_required_cardinality(
+        self._reject_join_cardinality(
             required=required,
             join_how=join_how,
+            resolved_how=how,
             pipeline_name=pipeline_name,
             left_height=left_df.height,
             result_height=result.height,

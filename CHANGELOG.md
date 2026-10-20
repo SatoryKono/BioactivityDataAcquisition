@@ -68,12 +68,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Required composite joins (#12033, #12004):** a required enricher or
   dependency now uses an INNER join and fails closed when a join-key column
-  is missing or any seed row stays unmatched. Optional sources keep the
-  configured left/full strategy and still return the seed frame when a key
-  column is absent. Enrichers with more than one `join_keys` entry dedupe on
-  the primary key and retry unmatched seed rows on each later key, so a
-  shared primary key no longer multiplies Gold rows. Seed cardinality is
-  preserved for optional left joins.
+  is missing or any seed row stays unmatched. Optional INNER and UNION joins
+  keep their configured row counts. Optional left joins still fail closed
+  when the seed height changes, and a missing key column returns the seed
+  frame. Enrichers with more than one `join_keys` entry dedupe on the key of
+  each step and retry unmatched seed rows in order. The configured strategy
+  is applied to that result: left keeps unmatched seed rows, inner drops
+  them, and full also keeps unmatched enricher rows. Fallback frames with
+  mixed dtypes concatenate with `diagonal_relaxed`. A multi-key enricher
+  with no matches still exposes the enricher columns as nulls.
 
 - **Provider DNS fail-closed:** `getaddrinfo` / errno 11001 on data-source health
   raises `NetworkError` (CLI 86) instead of `InfrastructureError`, and HTTP

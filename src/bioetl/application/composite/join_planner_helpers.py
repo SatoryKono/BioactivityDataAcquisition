@@ -211,19 +211,7 @@ def build_enricher_join_metadata(
         [str, str | None, str, list[str]], tuple[str, str, str | None]
     ],
 ) -> EnricherJoinMetadataContext:
-    """Build complete join metadata for a single enricher.
-
-    Args:
-        join_keys: Enricher join key field names.
-        primary_join_key: Primary join key field name.
-        enricher_pipeline: Enricher pipeline name.
-        seed_pipeline: Optional seed pipeline name for qualified key resolution.
-        merged_columns: Current merged DataFrame column names.
-        resolve_join_key_names: Callable that resolves join key names.
-
-    Returns:
-        Populated ``EnricherJoinMetadataContext`` with all resolved key information.
-    """
+    """Resolve every enricher key and keep the primary pair first in metadata."""
     join_keys_list = list(join_keys)
     key_pairs: list[tuple[str, str]] = []
     join_key_set: set[str] = set()
