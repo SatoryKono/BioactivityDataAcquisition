@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 from contextlib import suppress
+import fcntl
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import TYPE_CHECKING, override
@@ -85,30 +86,42 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
         """Persist one fragment JSON and maintain lightweight lookup indexes."""
         fragments_dir = self.base_path / "fragments"
         fragments_dir.mkdir(parents=True, exist_ok=True)
-        stored_fragment_id = fragment.stored_fragment_id or _build_stored_fragment_id(
-            fragment
-        )
-        persisted_fragment = replace(fragment, stored_fragment_id=stored_fragment_id)
-        fragment_path = self._fragment_path(stored_fragment_id)
-        existing_fragment_payload = (
-            fragment_path.read_text(encoding="utf-8")
-            if fragment_path.exists()
-            else None
-        )
-        index_rollbacks: list[tuple[Path, int]] = []
+
+        lock_path = self.base_path / "_save.lock"
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        lock_fd = os.open(lock_path, os.O_CREAT | os.O_RDWR)
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+
         try:
-            atomic_write_text(
-                fragment_path,
-                json.dumps(persisted_fragment.to_dict(), indent=2, sort_keys=True),
+            stored_fragment_id = fragment.stored_fragment_id or _build_stored_fragment_id(
+                fragment
             )
-            self._fragment_indexes(fragment, stored_fragment_id, index_rollbacks)
-        except (OSError, TypeError, ValueError):
-            self._rollback_save(
-                fragment_path=fragment_path,
-                existing_fragment_payload=existing_fragment_payload,
-                index_rollbacks=index_rollbacks,
+            persisted_fragment = replace(fragment, stored_fragment_id=stored_fragment_id)
+            fragment_path = self._fragment_path(stored_fragment_id)
+            existing_fragment_payload = (
+                fragment_path.read_text(encoding="utf-8")
+                if fragment_path.exists()
+                else None
             )
-            raise
+            index_rollbacks: list[tuple[Path, int]] = []
+            try:
+                atomic_write_text(
+                    fragment_path,
+                    json.dumps(persisted_fragment.to_dict(), indent=2, sort_keys=True),
+                )
+                self._fragment_indexes(fragment, stored_fragment_id, index_rollbacks)
+            except Exception as error:
+                rollback_errors = self._rollback_save(
+                    fragment_path=fragment_path,
+                    existing_fragment_payload=existing_fragment_payload,
+                    index_rollbacks=index_rollbacks,
+                )
+                if rollback_errors:
+                    raise RuntimeError(f"Rollback failed with errors: {rollback_errors}") from error
+                raise
+        finally:
+            fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            os.close(lock_fd)
 
     def _fragment_indexes(
         self,
@@ -155,18 +168,26 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
         fragment_path: Path,
         existing_fragment_payload: str | None,
         index_rollbacks: list[tuple[Path, int]],
-    ) -> None:
-        """Restore fragment and indexes after a failed save."""
+    ) -> list[Exception]:
+        """Restore fragment and indexes after a failed save. Returns list of rollback errors if any."""
+        errors: list[Exception] = []
         for index_path, checkpoint_offset in reversed(index_rollbacks):
-            with suppress(OSError):
+            try:
                 _truncate_index_to_offset(index_path, offset=checkpoint_offset)
+            except OSError as e:
+                errors.append(e)
         if existing_fragment_payload is None:
-            with suppress(OSError):
+            try:
                 if fragment_path.exists():
                     fragment_path.unlink()
+            except OSError as e:
+                errors.append(e)
         else:
-            with suppress(OSError):
+            try:
                 atomic_write_text(fragment_path, existing_fragment_payload)
+            except OSError as e:
+                errors.append(e)
+        return errors
 
     def _fragment_path(self, fragment_id: str) -> Path:
         """Resolve the fragment JSON path for one fragment identifier."""
