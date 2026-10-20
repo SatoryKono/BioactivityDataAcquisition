@@ -85,6 +85,10 @@ class StorageBundleMaintenanceMixin:
         await self.vacuum(table_name, retention_hours, dry_run)
         if "." not in table_name:
             return
+        # Flat Bronze cannot honor provider/entity filters. Skipping keeps
+        # Silver/Gold vacuum successful instead of raising after those steps.
+        if getattr(self.bronze, "_flat_structure", False) is True:
+            return
         provider, entity = table_name.split(".", 1)
         cutoff_date = current_utc_time() - timedelta(hours=retention_hours)
         await self.bronze.cleanup_old_files(
