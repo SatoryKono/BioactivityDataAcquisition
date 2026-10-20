@@ -14,6 +14,7 @@ from bioetl.domain.control_plane.execution_identity import (
     build_execution_identity_payload_from_code_provenance,
 )
 from bioetl.domain.control_plane.reproducibility_policy import resolve_replay_capability
+from bioetl.domain.exceptions import InfrastructureError
 from bioetl.domain.normalization import (
     compute_execution_identity_fingerprint,
     compute_input_snapshot_identity_fingerprint,
@@ -136,7 +137,7 @@ def persist_input_snapshots_on_manifest(
             predecessor_manifest_id=manifest.manifest_id,
             successor_manifest_id=updated.manifest_id,
         )
-    except Exception as exc:
+    except (OSError, TypeError, ValueError, InfrastructureError) as exc:
         restore_error = _restore_manifest_after_failed_rebind(
             service,
             predecessor=manifest,
@@ -161,7 +162,7 @@ def _restore_manifest_after_failed_rebind(
     try:
         if callable(restore):
             restore(predecessor, successor_manifest_id)
-    except Exception as restore_error:
+    except (OSError, TypeError, ValueError, InfrastructureError) as restore_error:
         return restore_error
     return None
 
@@ -173,11 +174,7 @@ def _rebind_ledger_successor(
     predecessor_manifest_id: str,
     successor_manifest_id: str,
 ) -> None:
-    """Point a ledger adapter at the successor when it knows that transition.
-
-    Adapters without ``record_manifest_successor`` keep the previous anchor.
-    The caller advances ``service.manifest_id`` only after this call returns.
-    """
+    """Point a ledger adapter at the successor when it knows that transition."""
     port = getattr(service, "ledger_port", None)
     rebind = getattr(port, "record_manifest_successor", None)
     if not callable(rebind):

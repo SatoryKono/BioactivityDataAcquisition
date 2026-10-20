@@ -23,7 +23,9 @@ from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
 )
 from bioetl.infrastructure.errors import build_storage_error
-from bioetl.infrastructure.storage.atomic import atomic_write_text
+from bioetl.infrastructure.storage.atomic import AtomicWriteError, atomic_write_text
+
+_SUCCESSOR_PUBLISH_ERRORS = (AtomicWriteError, OSError, TypeError, ValueError)
 
 _RUN_LEDGER_MESSAGE_PREFIX = "Run ledger"
 
@@ -161,8 +163,8 @@ class FileRunLedgerQueriesMixin:
                 created_predecessor_ledger = True
             atomic_write_text(pointer_path, predecessor)
             atomic_write_text(run_index_path, successor)
-        except Exception:
-            with suppress(Exception):
+        except _SUCCESSOR_PUBLISH_ERRORS:
+            with suppress(*_SUCCESSOR_PUBLISH_ERRORS):
                 _rollback_successor_ledger_publish(
                     pointer_path=pointer_path,
                     pointer_created=not pointer_existed,

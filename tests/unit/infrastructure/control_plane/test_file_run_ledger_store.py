@@ -50,7 +50,7 @@ from bioetl.domain.control_plane.run_ledger import (
 from bioetl.domain.exceptions import StorageError
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileRunLedgerStore
-from bioetl.infrastructure.storage.atomic import atomic_write_text
+from bioetl.infrastructure.storage.atomic import AtomicWriteError, atomic_write_text
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 pytestmark = pytest.mark.unit
@@ -920,14 +920,14 @@ def test_successor_rebind_rolls_back_pointer_when_index_write_fails(
         if path.parent.name == "_by_run_id" and not failed:
             failed = True
             path.write_text("manifest-successor-partial", encoding="utf-8")
-            raise OSError("injected index write failure")
+            raise AtomicWriteError(path, "injected index write failure")
         real_writer(path, text)
 
     monkeypatch.setattr(
         "bioetl.infrastructure.control_plane._file_run_ledger_queries.atomic_write_text",
         _failing_writer,
     )
-    with pytest.raises(OSError, match="injected index write failure"):
+    with pytest.raises(AtomicWriteError, match="injected index write failure"):
         store.record_manifest_successor(
             run_id=run_id,
             predecessor_manifest_id="manifest-original",
