@@ -1001,6 +1001,7 @@ def test_support_names_dates_and_nondestructive_candidates(tmp_path: Path) -> No
 
 
 def test_support_tree_walk_and_flat_filter(tmp_path: Path) -> None:
+    """Nested walk finds old dates; flat provider/entity filters refuse early."""
     root = _abs(tmp_path)
     date_dir = root / "prov" / "ent" / _DATE
     date_dir.mkdir(parents=True)
@@ -1331,6 +1332,7 @@ def test_planner_failed_directory_scan_and_snapshot(
 
 
 def test_preview_counts_old_and_sentinel_dates(tmp_path: Path) -> None:
+    """Preview counts nested dates and refuses flat provider/entity filters."""
     base = _abs(tmp_path)
     for name in (_DATE, "9999-12-31", "2099-01-01"):
         _touch(base / "prov" / "ent" / name / "row.txt")
@@ -1347,6 +1349,8 @@ def test_preview_counts_old_and_sentinel_dates(tmp_path: Path) -> None:
     assert flat._resolve_bronze_preview_root("prov", "ent") == base
     with pytest.raises(ValueError, match="Filters require a hierarchical"):
         flat.preview_cleanup(provider="prov")
+    with pytest.raises(ValueError, match="Filters require a hierarchical"):
+        flat.preview_cleanup(entity="ent")
 
 
 def test_preview_missing_invalid_and_unsafe_root(tmp_path: Path, monkeypatch) -> None:
