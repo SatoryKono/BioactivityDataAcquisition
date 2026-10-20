@@ -7383,7 +7383,7 @@
       "github_issue_url": null,
       "inbound_links": 1,
       "lifecycle": null,
-      "outbound_links": 52,
+      "outbound_links": 53,
       "owner": "BioETL Team",
       "path": "docs/00-project/extended-docs-index.md",
       "recommended_action": "keep",
@@ -10354,6 +10354,34 @@
       "outbound_links": 1,
       "owner": "BioETL Team",
       "path": "docs/02-architecture/decisions/notes/2026-07-27-composite-rebuild-only-replay-boundary.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "02-architecture",
+      "status": "Canonical",
+      "surface_family": "canonical",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": "published",
+      "declared_status": "active",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 1,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/02-architecture/decisions/notes/2026-10-20-cf038-phase1-post-run-compaction.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
       "section": "02-architecture",
@@ -97003,6 +97031,34 @@
       "duplicate_group": null,
       "duplicate_resolution": null,
       "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/acceptance/receipt-12069.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
       "freshness": "current",
       "generated_route": null,
       "generated_route_exception": null,
@@ -109358,18 +109414,18 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 26,
       "reports_workspace_entrypoint": 1,
-      "working_report": 174
+      "working_report": 175
     },
     "by_recommended_action": {
-      "archive-after-migration": 207,
+      "archive-after-migration": 208,
       "generate-automatically": 1062,
-      "keep": 2607
+      "keep": 2608
     },
     "by_section": {
       ".github": 6,
       "00-project": 273,
       "01-requirements": 4,
-      "02-architecture": 995,
+      "02-architecture": 996,
       "03-data-model": 2,
       "03-guides": 127,
       "04-reference": 334,
@@ -109387,25 +109443,25 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 474,
+      "reports": 475,
       "security": 2
     },
     "by_status": {
       "Active": 748,
       "Archived": 1550,
-      "Canonical": 75,
+      "Canonical": 76,
       "Generated": 1062,
-      "Working": 441
+      "Working": 442
     },
     "by_surface_family": {
       "active": 748,
       "archive": 1550,
-      "canonical": 75,
+      "canonical": 76,
       "generated": 1062,
-      "working": 441
+      "working": 442
     },
     "by_tracking_state": {
-      "tracked": 3876
+      "tracked": 3878
     },
     "docs_reports_local_count": 59,
     "duplicate_group_count": 78,
@@ -109418,8 +109474,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3876,
+    "total_doc_like": 3878,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3876
+    "total_doc_like_tracked": 3878
   }
 }
