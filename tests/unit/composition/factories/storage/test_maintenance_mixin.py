@@ -220,6 +220,27 @@ async def test_optimize_no_dot_in_table_name(tmp_path: Path) -> None:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
+async def test_optimize_skips_scoped_cleanup_for_flat_bronze(tmp_path: Path) -> None:
+    """Flat Bronze refuses provider/entity filters, so optimize must not call them."""
+    silver_path = tmp_path / "silver"
+    silver_path.mkdir()
+    delta_log = silver_path / "_delta_log"
+    delta_log.mkdir()
+    (delta_log / "commit.json").touch()
+
+    mixin = _make_mixin(silver_get_table_path=silver_path)
+    mixin.bronze._flat_structure = True
+    await mixin.optimize("chembl.activity", retention_hours=48, dry_run=True)
+    mixin.silver.vacuum.assert_awaited_once_with(
+        table_name="chembl.activity",
+        retention_hours=48,
+        dry_run=True,
+    )
+    mixin.bronze.cleanup_old_files.assert_not_called()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
 async def test_archive_silver_and_gold(tmp_path: Path) -> None:
     """archive copies silver and gold table directories to target."""
     silver_source = tmp_path / "silver_src"

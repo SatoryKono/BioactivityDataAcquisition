@@ -73,9 +73,9 @@ class StorageBundleMaintenanceMixin:
     ) -> None:
         """Optimize storage for a specific table/entity.
 
-        Performs Delta-table maintenance only. Bronze retention is an explicit
-        maintenance operation and must not run implicitly during postrun
-        compaction/vacuum flows for the active pipeline run.
+        Vacuums Delta tables, then applies scoped Bronze retention for a
+        ``provider.entity`` name. A flat Bronze writer refuses those filters,
+        so optimize skips that cleanup and leaves retention to an unscoped call.
 
         Args:
             table_name: Target identifier (e.g., 'provider.entity' for Delta/Bronze)
@@ -83,11 +83,10 @@ class StorageBundleMaintenanceMixin:
             dry_run: If True, only log what would be done without action
         """
         await self.vacuum(table_name, retention_hours, dry_run)
-        if "." not in table_name:
-            return
-        # Flat Bronze cannot honor provider/entity filters. Skipping keeps
-        # Silver/Gold vacuum successful instead of raising after those steps.
-        if getattr(self.bronze, "_flat_structure", False) is True:
+        if (
+            "." not in table_name
+            or getattr(self.bronze, "_flat_structure", False) is True
+        ):
             return
         provider, entity = table_name.split(".", 1)
         cutoff_date = current_utc_time() - timedelta(hours=retention_hours)
