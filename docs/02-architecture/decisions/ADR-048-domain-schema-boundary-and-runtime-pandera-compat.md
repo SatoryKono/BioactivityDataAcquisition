@@ -58,7 +58,7 @@ Domain behavior, services, entities, aggregates, value objects, ports, and
 normalization code must stay free of direct Pandera/Pandas imports unless a
 future ADR narrows and tests an explicit exception.
 
-**Note on exact serialization exceptions**: orjson and pyarrow are explicitly tracked via an exact serialization exception guard, controlled by configs/quality/domain_dataframe_zoning.yaml. These are tightly constrained structurally (e.g. TYPE_CHECKING or specific lazy functions).
+**Note on exact serialization exceptions**: orjson and pyarrow are explicitly tracked via an exact serialization exception guard, controlled by configs/quality/domain_dataframe_zoning.yaml. These are tightly constrained structurally (e.g. TYPE_CHECKING or specific lazy functions). The guard treats `TYPE_CHECKING` and `typing.TYPE_CHECKING` as type-checking only on the true branch. A function-scoped import is lazy even when it sits inside `try`. A module-level `try` import stays runtime.
 
 ### Runtime compatibility validation
 

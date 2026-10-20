@@ -254,22 +254,53 @@ def _ast_ancestors(
     return ancestors
 
 
+def _is_type_checking_test(test: ast.AST) -> bool:
+    if isinstance(test, ast.Name):
+        return test.id == "TYPE_CHECKING"
+    if isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING":
+        return isinstance(test.value, ast.Name) and test.value.id == "typing"
+    return False
+
+
+def _if_branch(
+    node: ast.AST,
+    if_node: ast.If,
+    parents: Mapping[ast.AST, ast.AST],
+) -> str | None:
+    current: ast.AST | None = node
+    while current is not None and current is not if_node:
+        parent = parents.get(current)
+        if parent is if_node:
+            if current in if_node.body:
+                return "body"
+            if current in if_node.orelse:
+                return "orelse"
+            return None
+        current = parent
+    return None
+
+
 def _serialization_import_context(
     node: ast.AST,
     parents: Mapping[ast.AST, ast.AST],
 ) -> tuple[str, str | None]:
-    """Classify an import as type-checking, try-wrapped runtime, lazy, or runtime."""
+    """Classify an import as type-checking, lazy, try-wrapped runtime, or runtime.
+
+    ``TYPE_CHECKING`` and ``typing.TYPE_CHECKING`` apply only to the true branch.
+    A function-scoped import is lazy even inside ``try``. Module-level ``try``
+    imports stay runtime.
+    """
     ancestors = _ast_ancestors(node, parents)
     for ancestor in ancestors:
-        if isinstance(ancestor, ast.If):
-            test = ancestor.test
-            if isinstance(test, ast.Name) and test.id == "TYPE_CHECKING":
+        if isinstance(ancestor, ast.If) and _is_type_checking_test(ancestor.test):
+            if _if_branch(node, ancestor, parents) == "body":
                 return "type_checking", None
-        elif isinstance(ancestor, ast.Try):
-            return "runtime", None
     for ancestor in reversed(ancestors):
         if isinstance(ancestor, ast.FunctionDef | ast.AsyncFunctionDef):
             return "lazy", ancestor.name
+    for ancestor in ancestors:
+        if isinstance(ancestor, ast.Try):
+            return "runtime", None
     return "runtime", None
 
 
@@ -369,6 +400,48 @@ def test_s8_domain_framework_import_ratchet() -> None:
         assert observed.lazy_functions == expected_lazy, (
             f"Mismatch in {lib} lazy functions"
         )
+
+
+def _context_for_library(source: str, library: str) -> tuple[str, str | None]:
+    tree = ast.parse(source)
+    parents = _ast_parent_map(tree)
+    for node in ast.walk(tree):
+        if library in _imported_top_level_names(node):
+            return _serialization_import_context(node, parents)
+    raise AssertionError(library)
+
+
+def test_s8_serialization_context_respects_branch_and_function_scope() -> None:
+    assert _context_for_library(
+        "try:\n    import orjson\nexcept ImportError:\n    orjson = None\n",
+        "orjson",
+    ) == ("runtime", None)
+    assert _context_for_library(
+        "if TYPE_CHECKING:\n    import pyarrow\n",
+        "pyarrow",
+    ) == ("type_checking", None)
+    assert _context_for_library(
+        "if typing.TYPE_CHECKING:\n    import pyarrow\n",
+        "pyarrow",
+    ) == ("type_checking", None)
+    assert _context_for_library(
+        "if TYPE_CHECKING:\n    pass\nelse:\n    import pyarrow\n",
+        "pyarrow",
+    ) == ("runtime", None)
+    assert _context_for_library(
+        "def flatten_arrow_table():\n    import pyarrow\n",
+        "pyarrow",
+    ) == ("lazy", "flatten_arrow_table")
+    assert _context_for_library(
+        "def flatten_arrow_table():\n    try:\n        import pyarrow\n"
+        "    except ImportError:\n        pyarrow = None\n",
+        "pyarrow",
+    ) == ("lazy", "flatten_arrow_table")
+    assert _context_for_library(
+        "if TYPE_CHECKING:\n    pass\nelse:\n"
+        "    def flatten_arrow_table():\n        import pyarrow\n",
+        "pyarrow",
+    ) == ("lazy", "flatten_arrow_table")
 
 
 @pytest.mark.generated_artifact
