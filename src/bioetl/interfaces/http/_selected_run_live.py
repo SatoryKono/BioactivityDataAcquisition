@@ -26,25 +26,6 @@ def pipeline_owners(selection: str) -> set[str] | None:
     return owners
 
 
-def _manifest_ids_for_ledger(port: object, manifest: object) -> set[object]:
-    """Return the current manifest id plus predecessor ids when they are strings."""
-    allowed: set[object] = set()
-    current: object | None = manifest
-    while current is not None:
-        manifest_id = getattr(current, "manifest_id", None)
-        if manifest_id in allowed:
-            break
-        allowed.add(manifest_id)
-        predecessor_id = getattr(current, "predecessor_manifest_id", None)
-        if not isinstance(predecessor_id, str) or not predecessor_id:
-            break
-        getter = getattr(port, "get", None)
-        if not callable(getter):
-            break
-        current = getter(predecessor_id)
-    return allowed
-
-
 def active_run_diagnostics(
     host: _HealthObservabilityRoutingHost, pipeline: str, run_id: str
 ) -> dict[str, object] | None:
@@ -63,8 +44,7 @@ def active_run_diagnostics(
         if host._run_ledger_port
         else []
     )
-    allowed_manifest_ids = _manifest_ids_for_ledger(host._run_manifest_port, manifest)
-    entries = [entry for entry in entries if entry.manifest_id in allowed_manifest_ids]
+    entries = [entry for entry in entries if entry.manifest_id == manifest.manifest_id]
     if not entries:
         return {"verdict": "INCOMPLETE", "reason": "ledger_missing"}
     if any(entry.occurred_at.utcoffset() is None for entry in entries):

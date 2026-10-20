@@ -2,29 +2,19 @@
 
 from __future__ import annotations
 
-__all__ = [
-    "JoinCardinalityError",
-    "JoinExecutorService",
-    "JoinHow",
-    "RequiredJoinKeyError",
-]
+__all__ = ["JoinExecutorService", "JoinHow"]
 
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
-
-from bioetl.application.composite.helpers.join_required_checks import (
-    JoinCardinalityError,
-    JoinHow,
-    RequiredJoinKeyError,
-    reject_join_cardinality,
-    reject_required_coverage,
-)
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.domain.ports import LoggerPort
+
+
+JoinHow = Literal["inner", "left", "right", "full", "semi", "anti", "cross"]
 
 
 class JoinExecutorService:
@@ -40,42 +30,12 @@ class JoinExecutorService:
         self._join_type_resolver = join_type_resolver
 
     def get_polars_join_type(self) -> JoinHow:
-        """Resolve the configured Polars join type."""
+        """Resolve current join type from strategy resolver.
+
+        Returns:
+            Polars join type literal (e.g. ``"left"``, ``"inner"``, ``"full"``).
+        """
         return self._join_type_resolver()
-
-    def _resolve_how(self, *, required: bool, join_how: JoinHow | None) -> JoinHow:
-        """Prefer an explicit how, then required INNER, then the configured strategy."""
-        if join_how is not None:
-            return join_how
-        if required:
-            return "inner"
-        return self.get_polars_join_type()
-
-    def _reject_missing_keys(
-        self,
-        *,
-        required: bool,
-        pipeline_name: str,
-        missing_left: list[str],
-        missing_right: list[str],
-        left_df: pl.DataFrame,
-    ) -> pl.DataFrame | None:
-        """Return the seed frame when an optional join skips missing keys."""
-        if not missing_left and not missing_right:
-            return None
-        if required:
-            raise RequiredJoinKeyError(
-                "Required join key columns are missing for "
-                f"{pipeline_name}: left={missing_left}, right={missing_right}"
-            )
-        self._logger.warning(
-            "Join skipped: key not found in columns",
-            pipeline=pipeline_name,
-            missing_left=missing_left,
-            missing_right=missing_right,
-            left_rows=left_df.height,
-        )
-        return left_df
 
     def execute_polars_join(
         self,
@@ -84,24 +44,37 @@ class JoinExecutorService:
         left_key: str,
         right_key: str,
         pipeline_name: str,
-        required: bool = False,
-        join_how: JoinHow | None = None,
     ) -> pl.DataFrame:
-        """Execute a single-key join and keep the right join key as a data column."""
+        """Execute single-key join while preserving right join key as data column.
+
+        Args:
+            left_df: Left-side DataFrame (typically the merged seed output).
+            right_df: Right-side DataFrame (typically the enricher or dependency output).
+            left_key: Column name to join on from left_df.
+            right_key: Column name to join on from right_df.
+            pipeline_name: Pipeline name used for column suffixing and log context.
+
+        Returns:
+            Joined DataFrame; returns left_df unchanged if a required join key is missing.
+        """
         import polars as pl
 
-        how = self._resolve_how(required=required, join_how=join_how)
-        missing_left = [] if left_key in left_df.columns else [left_key]
-        missing_right = [] if right_key in right_df.columns else [right_key]
-        skipped = self._reject_missing_keys(
-            required=required,
-            pipeline_name=pipeline_name,
-            missing_left=missing_left,
-            missing_right=missing_right,
-            left_df=left_df,
-        )
-        if skipped is not None:
-            return skipped
+        how = self.get_polars_join_type()
+
+        if left_key not in left_df.columns or right_key not in right_df.columns:
+            self._logger.warning(
+                "Join skipped: key not found in columns",
+                pipeline=pipeline_name,
+                left_key=left_key,
+                right_key=right_key,
+                left_columns=left_df.columns
+                if left_key not in left_df.columns
+                else None,
+                right_columns=right_df.columns
+                if right_key not in right_df.columns
+                else None,
+            )
+            return left_df
 
         if left_df[left_key].dtype != right_df[right_key].dtype:
             self._logger.debug(
@@ -122,37 +95,24 @@ class JoinExecutorService:
                 right_cast = right_cast.str.replace(r"\.0$", "", literal=False)
             right_df = right_df.with_columns(right_cast)
 
-        effective_right_key = right_key
         if left_key != right_key:
-            effective_right_key = f"__temp_join_{pipeline_name}"
-            right_df = right_df.with_columns(
-                pl.col(right_key).alias(effective_right_key)
+            temp_join_col = f"__temp_join_{pipeline_name}"
+            right_df = right_df.with_columns(pl.col(right_key).alias(temp_join_col))
+            return left_df.join(
+                right_df,
+                left_on=left_key,
+                right_on=temp_join_col,
+                how=how,
+                suffix=f"_{pipeline_name}",
             )
-        reject_required_coverage(
-            required=required,
-            effective_how=how,
-            pipeline_name=pipeline_name,
-            left_df=left_df,
-            right_df=right_df,
-            left_on=left_key,
-            right_on=effective_right_key,
-        )
-        result = left_df.join(
+
+        return left_df.join(
             right_df,
             left_on=left_key,
-            right_on=effective_right_key,
+            right_on=right_key,
             how=how,
             suffix=f"_{pipeline_name}",
         )
-        reject_join_cardinality(
-            required=required,
-            join_how=join_how,
-            resolved_how=how,
-            pipeline_name=pipeline_name,
-            left_height=left_df.height,
-            result_height=result.height,
-        )
-        return result
 
     def execute_composite_key_join(
         self,
@@ -161,62 +121,43 @@ class JoinExecutorService:
         left_keys: list[str],
         right_keys: list[str],
         pipeline_name: str,
-        required: bool = False,
-        join_how: JoinHow | None = None,
     ) -> pl.DataFrame:
-        """Execute a multi-key join and keep the right-side key columns."""
+        """Execute multi-key join preserving right-side key columns.
+
+        Args:
+            left_df: Left-side DataFrame (typically the merged seed output).
+            right_df: Right-side DataFrame (typically the dependency output).
+            left_keys: List of column names to join on from left_df.
+            right_keys: List of column names to join on from right_df.
+            pipeline_name: Pipeline name used for column suffixing and log context.
+
+        Returns:
+            Joined DataFrame using all provided composite key columns.
+        """
         import polars as pl
 
-        how = self._resolve_how(required=required, join_how=join_how)
-        skipped = self._reject_missing_keys(
-            required=required,
-            pipeline_name=pipeline_name,
-            missing_left=[key for key in left_keys if key not in left_df.columns],
-            missing_right=[key for key in right_keys if key not in right_df.columns],
-            left_df=left_df,
-        )
-        if skipped is not None:
-            return skipped
-        effective_right_keys = list(right_keys)
-        if left_keys != right_keys:
-            effective_right_keys = []
-            for left_key, right_key in zip(left_keys, right_keys, strict=True):
-                if left_key != right_key:
-                    temp_col = f"__temp_join_{pipeline_name}_{right_key}"
-                    right_df = right_df.with_columns(pl.col(right_key).alias(temp_col))
-                    effective_right_keys.append(temp_col)
-                else:
-                    effective_right_keys.append(right_key)
-        reject_required_coverage(
-            required=required,
-            effective_how=how,
-            pipeline_name=pipeline_name,
-            left_df=left_df,
-            right_df=right_df,
-            left_on=left_keys,
-            right_on=effective_right_keys,
-        )
+        how = self.get_polars_join_type()
         if left_keys == right_keys:
-            result = left_df.join(
+            return left_df.join(
                 right_df,
                 on=left_keys,
                 how=how,
                 suffix=f"_{pipeline_name}",
             )
-        else:
-            result = left_df.join(
-                right_df,
-                left_on=left_keys,
-                right_on=effective_right_keys,
-                how=how,
-                suffix=f"_{pipeline_name}",
-            )
-        reject_join_cardinality(
-            required=required,
-            join_how=join_how,
-            resolved_how=how,
-            pipeline_name=pipeline_name,
-            left_height=left_df.height,
-            result_height=result.height,
+
+        temp_cols: list[str] = []
+        for left_key, right_key in zip(left_keys, right_keys, strict=True):
+            if left_key != right_key:
+                temp_col = f"__temp_join_{pipeline_name}_{right_key}"
+                right_df = right_df.with_columns(pl.col(right_key).alias(temp_col))
+                temp_cols.append(temp_col)
+            else:
+                temp_cols.append(right_key)
+
+        return left_df.join(
+            right_df,
+            left_on=left_keys,
+            right_on=temp_cols,
+            how=how,
+            suffix=f"_{pipeline_name}",
         )
-        return result

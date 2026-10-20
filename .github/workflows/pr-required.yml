@@ -725,7 +725,7 @@ jobs:
   pr-gate-complete:
     name: pr-gate-complete
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     if: ${{ always() }}
     needs:
       - classify-changes

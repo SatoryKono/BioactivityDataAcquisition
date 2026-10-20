@@ -66,8 +66,6 @@ class JoinPlannerDelegationMixin:
         left_key: str,
         right_key: str,
         pipeline_name: str,
-        required: bool = False,
-        join_how: JoinHow | None = None,
     ) -> pl.DataFrame:
         """Execute a single-key join while preserving the right join key."""
         return self._join_executor.execute_polars_join(
@@ -76,8 +74,6 @@ class JoinPlannerDelegationMixin:
             left_key,
             right_key,
             pipeline_name,
-            required=required,
-            join_how=join_how,
         )
 
     def resolve_join_key_names(
@@ -134,8 +130,6 @@ class JoinPlannerDelegationMixin:
         left_keys: list[str],
         right_keys: list[str],
         pipeline_name: str,
-        required: bool = False,
-        join_how: JoinHow | None = None,
     ) -> pl.DataFrame:
         """Execute a multi-key join preserving right-side key columns."""
         return self._join_executor.execute_composite_key_join(
@@ -144,8 +138,6 @@ class JoinPlannerDelegationMixin:
             left_keys,
             right_keys,
             pipeline_name,
-            required=required,
-            join_how=join_how,
         )
 
     def get_polars_join_type(self) -> JoinHow:

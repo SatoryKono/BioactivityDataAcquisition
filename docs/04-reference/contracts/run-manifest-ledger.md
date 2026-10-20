@@ -737,10 +737,7 @@ Canonical identity roles are intentionally split:
 - `run_id` is the canonical occurrence anchor shared across manifest indexes,
   ledger indexes, checkpoints, and sidecars;
 - `manifest_id` is the immutable persisted manifest record key for one
-  persisted record and must not be rewritten in place. Snapshot attach may
-  publish a successor record for the same `run_id` when
-  `predecessor_manifest_id` equals the current indexed manifest; the run
-  index then moves to that successor and earlier records stay readable by id;
+  occurrence and must not drift for the same `run_id`;
 - `execution_fingerprint` remains the canonical semantic execution identity and
   may be shared by multiple occurrence records when the same computation is
   rerun.
@@ -748,7 +745,6 @@ Canonical identity roles are intentionally split:
 | Field                   | Type       | Required | Notes                                                                                                                                                                         |
 | ----------------------- | ---------- | -------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `manifest_id`           | `str`      |      yes | Stable identifier of the manifest record                                                                                                                                      |
-| `predecessor_manifest_id` | `str`    |       no | Prior manifest record for the same `run_id` when this record is a snapshot-attach successor; `null` on the original occurrence record                                          |
 | `execution_fingerprint` | `str`      |      yes | Canonical execution-identity fingerprint derived from normalized semantic anchors; occurrence-only values such as `manifest_id` and ledger history are intentionally excluded |
 | `schema_version`        | `str`      |      yes | Control-plane schema version                                                                                                                                                  |
 | `created_at`            | `datetime` |      yes | Manifest creation timestamp                                                                                                                                                   |
@@ -1134,8 +1130,8 @@ non-pipeline vocabulary such as artifact layer names in `stage`.
 1. `RunManifest` is immutable after persistence.
 1. `RunLedgerEntry` is append-only.
 1. Sidecars and runtime diagnostics reference `manifest_id` instead of embedding the full manifest payload.
-1. `run_id` lookup resolves to the current `manifest_id` through the file index.
-1. `run_id` lookup may move to a successor `manifest_id` only when that record's `predecessor_manifest_id` equals the current indexed manifest. An unrelated `manifest_id` remains a corruption error. Ledger files stay one manifest per file; run-level reads concatenate the successor chain from the oldest predecessor to the current manifest.
+1. `run_id` lookup resolves to one `manifest_id` through the file index.
+1. `run_id` lookup in both manifest and ledger stores must not be remapped to a different `manifest_id` after the first persisted occurrence anchor is established.
 1. One ledger file (`{manifest_id}.jsonl`) represents exactly one persisted `manifest_id` and one `run_id`; mixed identity anchors inside one file are corruption-visible.
 1. Composite resume reuses checkpoint snapshot data and only replays ledger
    events after the persisted watermark.

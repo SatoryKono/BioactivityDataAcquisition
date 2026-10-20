@@ -86,8 +86,6 @@ class JoinExecutorProtocol(Protocol):
         left_key: str,
         right_key: str,
         pipeline_name: str,
-        required: bool = False,
-        join_how: JoinHow | None = None,
     ) -> pl.DataFrame:
         """Execute single-key join."""
         ...
@@ -99,8 +97,6 @@ class JoinExecutorProtocol(Protocol):
         left_keys: list[str],
         right_keys: list[str],
         pipeline_name: str,
-        required: bool = False,
-        join_how: JoinHow | None = None,
     ) -> pl.DataFrame:
         """Execute multi-key join."""
         ...

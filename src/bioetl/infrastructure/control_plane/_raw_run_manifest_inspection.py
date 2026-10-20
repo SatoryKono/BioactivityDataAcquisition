@@ -42,7 +42,6 @@ _OPTIONAL_STRING_FIELDS = (
     "workflow_step_id",
     "replay_of_run_id",
     "replay_of_manifest_id",
-    "predecessor_manifest_id",
     "replay_capability",
 )
 _SCHEMA_VERSION_PATTERN = re.compile(r"\d+\.\d+(?:\.\d+)?")

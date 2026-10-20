@@ -1,24 +1,24 @@
 {
   "summary": {
-    "scanned_modules": 2583,
-    "total_internal_imports": 8338,
+    "scanned_modules": 2581,
+    "total_internal_imports": 8325,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 329,
     "violations": 0,
-    "source_fingerprint": "73602079649b8c20293a86f6af2594530733b62bcca24a60f829d1f6466d74d1"
+    "source_fingerprint": "1fdb9c61bff2b7fc8c233cf5e5620c8547de8f7e92a437c33c0ebd666a226f73"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1637,
+      "imports": 1631,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1109,
+      "imports": 1105,
       "allowed": true
     },
     {
@@ -60,7 +60,7 @@
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1316,
+      "imports": 1313,
       "allowed": true
     },
     {
@@ -92,7 +92,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 152
+      "imports": 151
     },
     {
       "source": "infrastructure.adapters",
@@ -240,18 +240,13 @@
       "imports": 24
     },
     {
-      "source": "application.services",
-      "target": "domain.exceptions",
-      "imports": 23
-    },
-    {
       "source": "application.pipelines",
       "target": "domain.entities",
       "imports": 22
     },
     {
       "source": "application.services",
-      "target": "domain.normalization",
+      "target": "domain.exceptions",
       "imports": 22
     },
     {
@@ -268,6 +263,11 @@
       "source": "interfaces.http",
       "target": "domain.control_plane",
       "imports": 22
+    },
+    {
+      "source": "application.services",
+      "target": "domain.normalization",
+      "imports": 21
     },
     {
       "source": "composition.factories",
