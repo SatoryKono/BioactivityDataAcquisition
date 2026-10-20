@@ -70,11 +70,6 @@ def _ledger_entries_for_manifest(
                 "predecessor chain contains a cycle",
             )
         seen.add(current.manifest_id)
-        if current.run_id != manifest.run_id:
-            raise RunManifestInspectionCorruptionError(
-                manifest.manifest_id,
-                "predecessor chain crosses run_id ownership",
-            )
         ordered.append(current)
         predecessor_id = current.predecessor_manifest_id
         if not predecessor_id:

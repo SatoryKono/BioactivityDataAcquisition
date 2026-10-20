@@ -319,7 +319,7 @@ by storage technology. Current owner boundaries:
 ## Open Questions
 
 - Module coverage currently has `0` unmeasured and `0` uncovered source modules
-  in `reports/quality/module-coverage-inventory.json`, while `53` modules remain
+  in `reports/quality/module-coverage-inventory.json`, while `7` modules remain
   partially covered. The inventory is current release evidence for module
   measurement status; do not describe it as complete line/branch coverage.
 - Hotspot family `application_services_control_plane` is below the

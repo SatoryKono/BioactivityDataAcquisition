@@ -166,13 +166,6 @@ regexTarget = "match"
 regexes = ['''^row_key: [0-9a-f]{16}[ \t\r\n]*$''']
 
 [[rules.allowlists]]
-description = "Public delta merge benchmark names in the reviewed performance observations"
-condition = "AND"
-paths = ['''^reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_[12]/N(?:10|50|100)/N(?:10|50|100)-[a-z0-9]{8}/observations\.jsonl$''']
-regexTarget = "match"
-regexes = ['''^"?benchmark_key"[ \t]*:[ \t]*"delta_sequential_merge_N(?:10|50|100)"[ \t\r\n]*$''']
-
-[[rules.allowlists]]
 description = "Parsed knowledge-graph metadata names"
 condition = "AND"
 paths = ['''^src/bioetl_knowledge_graph_expanded(?:_compact)?\.json$''']
@@ -213,20 +206,6 @@ condition = "AND"
 paths = ['''^docs/03-guides/github-setup-plan\.md$''']
 regexTarget = "secret"
 regexes = ['''^sk-1234567890$''']
-
-[[rules.allowlists]]
-description = "Delta-merge benchmark identifiers in reviewed performance observations"
-condition = "AND"
-paths = [
-    '''^reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_1/N10/N10-91g9jc6i/observations\.jsonl$''',
-    '''^reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_1/N50/N50-yekoujnh/observations\.jsonl$''',
-    '''^reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_1/N100/N100-usnmxiu3/observations\.jsonl$''',
-    '''^reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N10/N10-n1j0nze5/observations\.jsonl$''',
-    '''^reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N50/N50-9btidy6p/observations\.jsonl$''',
-    '''^reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N100/N100-yevzmbf8/observations\.jsonl$''',
-]
-regexTarget = "secret"
-regexes = ['''^delta_sequential_merge_N(?:100|50|10)$''']
 
 [[rules]]
 id = "curl-auth-header"

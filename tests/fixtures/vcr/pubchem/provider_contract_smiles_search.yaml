@@ -32,6 +32,10 @@ interactions:
       - upgrade-insecure-requests
       content-type:
       - application/json
+      date:
+      - Tue, 06 Oct 2026 04:11:33 GMT
+      expires:
+      - Tue, 06 Oct 2026 05:11:34 GMT
       ncbi-phid:
       - REDACTED
       ncbi-sid:
@@ -50,6 +54,8 @@ interactions:
       - Accept-Encoding
       via:
       - 1.1 google
+      x-throttling-control:
+      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
         status: Yellow (53%)'
       x-ua-compatible:
       - IE=Edge

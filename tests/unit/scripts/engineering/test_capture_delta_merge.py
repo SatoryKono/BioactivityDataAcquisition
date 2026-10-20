@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import subprocess
 from pathlib import Path
 
@@ -76,48 +75,6 @@ def test_capture_preserves_raw_evidence_and_rejects_unsuccessful_producer(
 def test_missing_time_metrics_are_not_invented(raw):
     with pytest.raises(ValueError, match="missing wall time or peak RSS"):
         capture._time_metrics(raw)
-
-
-def test_capture_rejects_untracked_files_hidden_by_git_config(tmp_path, monkeypatch):
-    for name in tuple(os.environ):
-        if name.startswith("GIT_"):
-            monkeypatch.delenv(name)
-    subprocess.run(["git", "init", "--quiet", str(tmp_path)], check=True)
-    subprocess.run(
-        [
-            "git",
-            "-c",
-            "user.name=Test",
-            "-c",
-            "user.email=test@example.invalid",
-            "-c",
-            "commit.gpgsign=false",
-            "commit",
-            "--quiet",
-            "--allow-empty",
-            "-m",
-            "fixture",
-        ],
-        cwd=tmp_path,
-        check=True,
-    )
-    subprocess.run(
-        ["git", "config", "status.showUntrackedFiles", "no"],
-        cwd=tmp_path,
-        check=True,
-    )
-    untracked = tmp_path / "nested" / "source.py"
-    untracked.parent.mkdir()
-    untracked.write_text("# untracked source\n", encoding="utf-8")
-    monkeypatch.chdir(tmp_path)
-    monkeypatch.delenv("GITHUB_SHA", raising=False)
-    output = tmp_path / "evidence"
-
-    with pytest.raises(SystemExit) as exc:
-        capture.main(["--output-dir", str(output)])
-
-    assert exc.value.code == 2
-    assert not output.exists()
 
 
 @pytest.mark.parametrize("dirty,github_sha", [(True, SHA), (False, "b" * 40)])

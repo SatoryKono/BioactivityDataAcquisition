@@ -144,31 +144,6 @@ def test_integrity_metrics_bool_parse_and_ledger_read_failure() -> None:
     assert integrity._ledger_matches_manifest(manifest, ledger) is False  # type: ignore[arg-type]
 
 
-def test_ledger_matches_manifest_accepts_successor_chain() -> None:
-    created = SimpleNamespace(
-        entry_id="e0",
-        manifest_id="m1",
-        run_id="r1",
-        event_type=integrity.MANIFEST_CREATED_EVENT,
-        occurred_at=1,
-    )
-    successor_event = SimpleNamespace(
-        entry_id="e1",
-        manifest_id="m2",
-        run_id="r1",
-        event_type="input_snapshot_published",
-        occurred_at=2,
-    )
-    manifest = SimpleNamespace(manifest_id="m2", run_id="r1")
-    ledger = SimpleNamespace(
-        list_entries=lambda manifest_id: (successor_event,)
-        if manifest_id == "m2"
-        else (),
-        list_entries_by_run_id=lambda _run_id: (created, successor_event),
-    )
-    assert integrity._ledger_matches_manifest(manifest, ledger) is True  # type: ignore[arg-type]
-
-
 @pytest.mark.asyncio
 async def test_process_stateful_batch_process_and_commit_failures() -> None:
     fsm = BatchExecutionFSM()

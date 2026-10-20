@@ -21,7 +21,6 @@ promoting every specialist page into the primary MkDocs navigation.
 - [ADR registry](../02-architecture/adr-registry/index.md)
 - [ADR status dashboard](../02-architecture/adr-registry/status-dashboard.md)
 - [Ledger resume spike](../02-architecture/decisions/notes/2026-04-07-ledger-based-resume-spike.md)
-- [CF-038 Phase-1 post-run compaction](../02-architecture/decisions/notes/2026-10-20-cf038-phase1-post-run-compaction.md)
 - [Governance audit evidence](../02-architecture/governance-audit-evidence.md)
 - [JSON field typing inventory](../03-data-model/json-field-typing-inventory.md)
 

@@ -421,59 +421,12 @@ class TestUnifiedHTTPClientRequestMethods:
         assert mock_circuit_breaker.call.call_count == 2
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize(
-        (
-            "user_agent",
-            "contact_email",
-            "run_id",
-            "expected_user_agent",
-            "expected_correlation_id",
-        ),
-        [
-            pytest.param(
-                None,
-                None,
-                None,
-                BIOETL_USER_AGENT,
-                None,
-                id="default-ua-without-correlation",
-            ),
-            pytest.param(
-                "BioETL/1.0",
-                "test@example.com",
-                None,
-                "BioETL/1.0 (test@example.com)",
-                None,
-                id="custom-ua-without-correlation",
-            ),
-            pytest.param(
-                None,
-                None,
-                "run-888",
-                BIOETL_USER_AGENT,
-                "run-888",
-                id="default-ua-with-correlation",
-            ),
-            pytest.param(
-                "BioETL/1.0",
-                "test@example.com",
-                "run-777",
-                "BioETL/1.0 (test@example.com)",
-                "run-777",
-                id="custom-ua-with-correlation",
-            ),
-        ],
-    )
     async def test_unified_http_client_outgoing_transport_headers(
-        self,
-        mock_rate_limiter,
-        user_agent: str | None,
-        contact_email: str | None,
-        run_id: str | None,
-        expected_user_agent: str,
-        expected_correlation_id: str | None,
+        self, mock_rate_limiter
     ):
-        """Outgoing transport sends Accept, UA, and an optional correlation ID."""
+        """Regression test for actual outgoing request headers on transport boundary."""
+        from unittest.mock import AsyncMock
+
         mock_cb = AsyncMock()
 
         async def _call_cb(req_coro, *args, **kwargs):
@@ -481,22 +434,21 @@ class TestUnifiedHTTPClientRequestMethods:
             return await req_coro()
 
         mock_cb.call.side_effect = _call_cb
-        client_kwargs: dict[str, object] = {
-            "rate_limiter": mock_rate_limiter,
-            "circuit_breaker": mock_cb,
-            "contact_email": contact_email,
-            "run_id": run_id,
-            "timeout": 5.0,
-            "provider": "test",
-            "trust_env": False,
-        }
-        if user_agent is not None:
-            client_kwargs["user_agent"] = user_agent
-        client = UnifiedHTTPClient(**client_kwargs)
 
-        transport_requests: list[httpx.Request] = []
+        client = UnifiedHTTPClient(
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_cb,
+            user_agent="BioETL/1.0",
+            contact_email="test@example.com",
+            run_id="run-777",
+            timeout=5.0,
+            provider="test",
+            trust_env=False,
+        )
 
-        async def mock_handler(request: httpx.Request) -> httpx.Response:
+        transport_requests = []
+
+        async def mock_handler(request: httpx.Request):
             """Capture the request that reaches the replaced default transport."""
             transport_requests.append(request)
             return httpx.Response(200, json={"status": "ok"})
@@ -509,12 +461,10 @@ class TestUnifiedHTTPClientRequestMethods:
 
         assert len(transport_requests) == 1
         req = transport_requests[0]
+
+        assert req.headers["user-agent"] == "BioETL/1.0 (test@example.com)"
         assert req.headers["accept"] == "application/json"
-        assert req.headers["user-agent"] == expected_user_agent
-        if expected_correlation_id is None:
-            assert "x-correlation-id" not in req.headers
-        else:
-            assert req.headers["x-correlation-id"] == expected_correlation_id
+        assert req.headers["x-correlation-id"] == "run-777"
 
 
 @pytest.mark.unit

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-20T18:57:33.309269+00:00",
+  "generated_at": "2026-10-20T12:51:24.745522+00:00",
   "summary": {
     "total_scripts": 655,
     "status_counts": {
@@ -10543,13 +10543,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_abort_diagnostic_adapter.py",
-          "line": 648,
+          "line": 647,
           "source_group": "tests",
           "text": "[\"scripts/engineering/ci/pytest_abort_diagnostic_adapter.py\"],"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_abort_diagnostic_adapter.py",
-          "line": 831,
+          "line": 830,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pytest_abort_diagnostic_adapter as owner"
         }
@@ -13256,7 +13256,7 @@
       "references": [
         {
           "path": "tests/unit/scripts/engineering/test_capture_delta_merge.py",
-          "line": 13,
+          "line": 12,
           "source_group": "tests",
           "text": "from scripts.engineering.performance import capture_delta_merge as capture"
         }

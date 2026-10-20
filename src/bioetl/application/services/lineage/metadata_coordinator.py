@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
 from datetime import datetime
 from functools import cached_property
 from typing import override
@@ -65,25 +64,6 @@ class MetadataCoordinator(MetadataCoordinatorPort):
     def run_context(self) -> RunContext:
         """Access the run context."""
         return self._context
-
-    def adopt_manifest_successor(
-        self,
-        *,
-        manifest_id: str,
-        execution_fingerprint: str,
-    ) -> None:
-        """Point later Silver and Gold metadata at a published successor."""
-        self._context = replace(
-            self._context,
-            manifest_id=manifest_id,
-            execution_fingerprint=execution_fingerprint,
-        )
-        for cached_name in (
-            "_metadata_assembler",
-            "_silver_metadata_service",
-            "_gold_metadata_service",
-        ):
-            self.__dict__.pop(cached_name, None)
 
     def _strict_manifest_id_required(self) -> bool:
         """Return whether sidecar lineage must close over manifest identity."""

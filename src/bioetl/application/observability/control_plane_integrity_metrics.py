@@ -119,42 +119,18 @@ def _ledger_matches_manifest(
         entries_by_run = tuple(ledger_port.list_entries_by_run_id(manifest.run_id))
     except _READ_FAILURES:
         return False
-    return _manifest_ledger_slice_matches(manifest, entries, entries_by_run)
-
-
-def _manifest_ledger_slice_matches(
-    manifest: RunManifest,
-    entries: tuple[RunLedgerEntry, ...],
-    entries_by_run: tuple[RunLedgerEntry, ...],
-) -> bool:
-    """Accept a successor file when the run chain still owns one created event."""
-    if not entries:
+    if not entries or entries[0].event_type != MANIFEST_CREATED_EVENT:
         return False
-    history = entries_by_run or entries
-    if not _chain_has_one_created_event(history, manifest.run_id):
+    if sum(entry.event_type == MANIFEST_CREATED_EVENT for entry in entries) != 1:
         return False
-    return _owned_slice_matches(manifest.manifest_id, entries, history)
-
-
-def _chain_has_one_created_event(
-    history: tuple[RunLedgerEntry, ...],
-    run_id: object,
-) -> bool:
-    if not history or history[0].event_type != MANIFEST_CREATED_EVENT:
+    if any(
+        entry.manifest_id != manifest.manifest_id or entry.run_id != manifest.run_id
+        for entry in entries
+    ):
         return False
-    created = sum(entry.event_type == MANIFEST_CREATED_EVENT for entry in history)
-    return created == 1 and all(entry.run_id == run_id for entry in history)
-
-
-def _owned_slice_matches(
-    manifest_id: str,
-    entries: tuple[RunLedgerEntry, ...],
-    history: tuple[RunLedgerEntry, ...],
-) -> bool:
-    if any(entry.manifest_id != manifest_id for entry in entries):
-        return False
-    owned = tuple(entry for entry in history if entry.manifest_id == manifest_id)
-    return tuple(map(_entry_identity, owned)) == tuple(map(_entry_identity, entries))
+    return tuple(map(_entry_identity, entries_by_run)) == tuple(
+        map(_entry_identity, entries)
+    )
 
 
 @dataclass(slots=True, kw_only=True)

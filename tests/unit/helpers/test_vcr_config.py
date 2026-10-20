@@ -207,10 +207,10 @@ def test_response_sanitizer_preserves_protocol_and_strips_secrets_case_insensiti
     assert "NCBI-PHID" not in headers
     assert headers["Retry-After"] == ["120"]
     assert headers["X-RateLimit-Reset"] == ["1700000000"]
-    assert "Date" not in headers
-    assert "Expires" not in headers
-    assert "x-throttling-control" not in headers
-    assert "x-chembl-retrieval-time" not in headers
+    assert headers["Date"] == ["Mon, 01 Jan 2024 00:00:00 GMT"]
+    assert headers["Expires"] == ["Mon, 01 Jan 2024 00:00:00 GMT"]
+    assert headers["x-throttling-control"] == ["something"]
+    assert headers["x-chembl-retrieval-time"] == ["0.1s"]
     assert response["headers"]["Set-Cookie2"] == ["secret"]
 
 

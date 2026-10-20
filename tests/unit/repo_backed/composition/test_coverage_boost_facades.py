@@ -1068,7 +1068,6 @@ def test_exact_replay_resolution_helpers_cover_parent_lookup_and_date_errors(
         "FileRunLedgerStore",
         lambda base_path: SimpleNamespace(
             list_entries=lambda manifest_id: [],
-            list_entries_by_run_id=lambda run_id: [],
         ),
     )
     with pytest.raises(RuntimeError, match="missing published Bronze input snapshot"):

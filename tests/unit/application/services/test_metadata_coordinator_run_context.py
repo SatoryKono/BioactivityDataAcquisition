@@ -33,11 +33,6 @@ from datetime import UTC, datetime
 
 import pytest
 
-from bioetl.application.services.lineage.manifest_successor import (
-    adopt_live_manifest_successor,
-)
-from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
-from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
@@ -119,35 +114,3 @@ class TestRunContext:
         """Test that RunContext is immutable (frozen)."""
         with pytest.raises(AttributeError):
             run_context.provider = "new_provider"  # type: ignore[misc]
-
-
-def test_adopt_manifest_successor_rebinds_coordinator_and_launch(
-    run_context: RunContext,
-) -> None:
-    coordinator = MetadataCoordinator(run_context)
-    launch = run_context
-    manifest = RunManifest(
-        manifest_id="manifest-successor",
-        execution_fingerprint="fp-successor",
-        run_id=run_context.run_id,
-        run_type=run_context.run_type,
-        pipeline_name=run_context.pipeline_name,
-        provider=run_context.provider,
-        entity=run_context.entity,
-    )
-
-    class _Services:
-        metadata_coordinator = coordinator
-
-    updated = adopt_live_manifest_successor(
-        launch_context=launch,
-        services=_Services(),
-        manifest=manifest,
-    )
-
-    assert updated is not None
-    assert updated.manifest_id == "manifest-successor"
-    assert updated.execution_fingerprint == "fp-successor"
-    assert coordinator.run_context.manifest_id == "manifest-successor"
-    assert coordinator.run_context.execution_fingerprint == "fp-successor"
-    assert run_context.manifest_id != "manifest-successor"
