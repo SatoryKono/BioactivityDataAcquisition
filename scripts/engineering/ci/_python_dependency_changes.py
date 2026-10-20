@@ -21,6 +21,7 @@ from packaging.requirements import Requirement
 
 PYTHON_MANIFEST = "pyproject.toml"
 PYTHON_LOCK = "uv.lock"
+_SOURCE_ROOTS = ("src/bioetl", "src/memory", "scripts", "tests")
 
 
 def _name(value: str) -> str:
@@ -246,9 +247,14 @@ def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
     unresolved: list[str] = []
     imports = _source_imports(root)
     module_owners = packages_distributions()
+    mentions: dict[str, set[str]] | None = None
     for dependency in sorted(changed):
         family = _lock_family(packages, dependency)
         selected = _import_consumers(imports, module_owners, family)
+        if not selected:
+            if mentions is None:
+                mentions = _optional_distribution_mentions(root)
+            selected = {path for path, names in mentions.items() if names & family}
         if selected:
             consumers.update(selected)
         else:
@@ -289,10 +295,65 @@ def _import_consumers(
     return {path for path, imported in imports.items() if imported & modules}
 
 
+def _declared_optional_distributions(root: Path) -> set[str]:
+    """Return normalized names declared in project.optional-dependencies."""
+    manifest = root / PYTHON_MANIFEST
+    if not manifest.is_file():
+        return set()
+    document = tomllib.loads(manifest.read_text(encoding="utf-8"))
+    optional = document.get("project", {}).get("optional-dependencies", {})
+    names: set[str] = set()
+    for values in optional.values():
+        if not isinstance(values, list):
+            continue
+        for raw in values:
+            if isinstance(raw, str):
+                names.add(_name(Requirement(raw).name))
+    return names
+
+
+def _literal_distribution_names(path: Path, declared: set[str]) -> set[str]:
+    """Return declared distribution names used as exact string literals."""
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    found: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Constant) or not isinstance(node.value, str):
+            continue
+        normalized = _name(node.value)
+        if normalized in declared:
+            found.add(normalized)
+    return found
+
+
+def _optional_distribution_mentions(root: Path) -> dict[str, set[str]]:
+    """Map sources to optional distributions they name as string literals.
+
+    A subprocess-only extra has no import. The route is confirmed only when
+    the lock family includes that declared distribution and a source literal
+    names it exactly.
+    """
+    declared = _declared_optional_distributions(root)
+    if not declared:
+        return {}
+    mentions: dict[str, set[str]] = {}
+    for prefix in _SOURCE_ROOTS:
+        base = root / prefix
+        if not base.is_dir():
+            continue
+        for path in sorted(base.rglob("*.py")):
+            names = _literal_distribution_names(path, declared)
+            if names:
+                mentions[path.relative_to(root).as_posix()] = names
+    return mentions
+
+
 def _source_imports(root: Path) -> dict[str, set[str]]:
     result: dict[str, set[str]] = {}
-    for prefix in ("src/bioetl", "src/memory", "scripts", "tests"):
-        for path in sorted((root / prefix).rglob("*.py")):
+    for prefix in _SOURCE_ROOTS:
+        base = root / prefix
+        if not base.is_dir():
+            continue
+        for path in sorted(base.rglob("*.py")):
             tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
             modules: set[str] = set()
             for node in ast.walk(tree):

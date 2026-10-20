@@ -355,6 +355,69 @@ def test_shared_helper_without_any_tests_fails_closed(tmp_path: Path) -> None:
         lane._consumer_targets("tests/helpers/control_plane_replay.py", tmp_path, {})
 
 
+def test_subprocess_optional_extra_confirms_transitive_lock_route(
+    tmp_path: Path,
+) -> None:
+    """A lock bump of an unimported extra dependency selects its owner script."""
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\n"
+        "name = 'demo'\n"
+        "[project.optional-dependencies]\n"
+        "proofagent = ['proofagent-harness==0.13.0']\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "uv.lock").write_text(
+        "version = 1\n"
+        '[[package]]\nname = "yarl"\nversion = "1"\n'
+        '[[package]]\nname = "aiohttp"\nversion = "1"\n'
+        "dependencies = [{name = 'yarl'}]\n"
+        '[[package]]\nname = "litellm"\nversion = "1"\n'
+        "dependencies = [{name = 'aiohttp'}]\n"
+        '[[package]]\nname = "proofagent-harness"\nversion = "1"\n'
+        "dependencies = [{name = 'litellm'}]\n",
+        encoding="utf-8",
+    )
+    owner = tmp_path / "scripts/ai/agent_tools/__main__.py"
+    owner.parent.mkdir(parents=True)
+    owner.write_text('distribution = "proofagent-harness"\n', encoding="utf-8")
+    consumer = tmp_path / "tests/unit/scripts/ai/agent_tools/test_cli.py"
+    consumer.parent.mkdir(parents=True)
+    consumer.write_text(
+        "from scripts.ai.agent_tools import __main__\n", encoding="utf-8"
+    )
+    assert dependencies.dependency_consumers(tmp_path, {"aiohttp", "yarl"}) == [
+        "scripts/ai/agent_tools/__main__.py"
+    ]
+    assert lane.affected_pytest_targets(
+        ["uv.lock"],
+        repo_root=tmp_path,
+        changed_python_dependencies={"aiohttp", "yarl"},
+    ) == ["tests/unit/scripts/ai/agent_tools/test_cli.py"]
+
+
+def test_optional_extra_without_literal_stays_unconfirmed(tmp_path: Path) -> None:
+    """Declaring an extra is not a route until some source names that distribution."""
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\n"
+        "name = 'demo'\n"
+        "[project.optional-dependencies]\n"
+        "proofagent = ['proofagent-harness==0.13.0']\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "uv.lock").write_text(
+        "version = 1\n"
+        '[[package]]\nname = "aiohttp"\nversion = "1"\n'
+        '[[package]]\nname = "proofagent-harness"\nversion = "1"\n'
+        "dependencies = [{name = 'aiohttp'}]\n",
+        encoding="utf-8",
+    )
+    denied = tmp_path / "scripts/engineering/qa/inventory.py"
+    denied.parent.mkdir(parents=True)
+    denied.write_text('FORBIDDEN = {"aiohttp": "network client"}\n', encoding="utf-8")
+    with pytest.raises(ValueError, match="Unconfirmed.*aiohttp"):
+        dependencies.dependency_consumers(tmp_path, {"aiohttp"})
+
+
 def test_native_cli_record_uses_workflow_owner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
