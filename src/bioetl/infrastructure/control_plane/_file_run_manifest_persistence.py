@@ -16,11 +16,13 @@ from bioetl.infrastructure.control_plane._run_manifest_scope_index import (
     LatestScopeIndexCatalog,
     LatestScopeIndexRecord,
     latest_scope_catalog_path,
+    load_latest_scope_index,
     read_optional_text,
     write_latest_scope_catalog,
     write_latest_scope_index,
 )
 from bioetl.infrastructure.errors import build_storage_error
+from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
@@ -173,6 +175,47 @@ def _write_manifest_files(
     write_latest_scope_catalog(catalog_path, updated_catalog)
 
 
+def restore_predecessor_publication(
+    store: FileRunManifestStore,
+    *,
+    predecessor: RunManifest,
+    successor_manifest_id: str,
+) -> None:
+    """Drop a successor publication after the ledger rebind did not commit.
+
+    The known-scope catalog stays. It records which scopes exist, not which
+    manifest is current.
+    """
+    successor_id = successor_manifest_id.strip()
+    run_index_path = store.base_path / "_by_run_id" / f"{predecessor.run_id}.txt"
+    if run_index_path.is_file():
+        current_id = run_index_path.read_text(encoding="utf-8").strip()
+        if current_id == successor_id:
+            atomic_write_text(run_index_path, predecessor.manifest_id)
+    scope_path = store._latest_scope_index_path(
+        predecessor.pipeline_name,
+        predecessor.run_type,
+    )
+    scope_record = load_latest_scope_index(
+        scope_path,
+        pipeline_name=predecessor.pipeline_name,
+        run_type=predecessor.run_type,
+    )
+    if scope_record is not None and scope_record.manifest_id == successor_id:
+        write_latest_scope_index(
+            scope_path,
+            LatestScopeIndexRecord(
+                pipeline_name=predecessor.pipeline_name,
+                run_type=predecessor.run_type,
+                manifest_id=predecessor.manifest_id,
+            ),
+        )
+    successor_manifest = store.base_path / f"{successor_id}.json"
+    successor_evidence = store.base_path / f"{successor_id}.contract-evidence.json"
+    successor_manifest.unlink(missing_ok=True)
+    successor_evidence.unlink(missing_ok=True)
+
+
 def persist_manifest(
     store: FileRunManifestStore,
     manifest: RunManifest,
@@ -275,4 +318,5 @@ __all__ = [
     "emit_manifest_write_duration_metric",
     "emit_manifest_write_metric",
     "persist_manifest",
+    "restore_predecessor_publication",
 ]

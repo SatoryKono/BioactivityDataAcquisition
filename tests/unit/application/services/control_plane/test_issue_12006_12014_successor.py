@@ -142,6 +142,15 @@ class _MemoryManifestPort:
     def list_all(self) -> tuple[RunManifest, ...]:
         return tuple(self._items.values())
 
+    def restore_predecessor_publication(
+        self,
+        predecessor: RunManifest,
+        successor_manifest_id: str,
+    ) -> None:
+        self._items.pop(successor_manifest_id, None)
+        if self._by_run.get(predecessor.run_id) == successor_manifest_id:
+            self._by_run[predecessor.run_id] = predecessor.manifest_id
+
 
 def _service(
     store: _MemoryManifestPort,
@@ -304,6 +313,26 @@ def test_attach_rebinds_ledger_then_advances_service_manifest_id() -> None:
             "successor_manifest_id": "m2",
         }
     ]
+
+
+def test_attach_rebind_failure_restores_predecessor_and_keeps_service_id() -> None:
+    store = _MemoryManifestPort()
+    store.save(_original_manifest())
+
+    class _Ledger:
+        def record_manifest_successor(self, **kwargs: object) -> None:
+            raise RuntimeError("injected rebind failure")
+
+    service = _service(store)
+    service.ledger_port = _Ledger()
+    with pytest.raises(RuntimeError, match="injected rebind failure"):
+        _attach(service)
+
+    assert service.manifest_id == "m1"
+    assert store.get("m2") is None
+    current = store.get_by_run_id(_RUN_ID)
+    assert current is not None
+    assert current.manifest_id == "m1"
 
 
 def test_attach_failure_keeps_original_manifest_current() -> None:

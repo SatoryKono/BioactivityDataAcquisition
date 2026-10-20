@@ -33,6 +33,7 @@ import json
 import os
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
+from pathlib import Path
 from threading import Barrier, BrokenBarrierError
 from unittest.mock import MagicMock, call
 
@@ -49,6 +50,7 @@ from bioetl.domain.control_plane.run_ledger import (
 from bioetl.domain.exceptions import StorageError
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileRunLedgerStore
+from bioetl.infrastructure.storage.atomic import atomic_write_text
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 pytestmark = pytest.mark.unit
@@ -787,3 +789,152 @@ def test_file_store_successor_rebind_keeps_predecessor_events(tmp_path) -> None:
     )
     with pytest.raises(StorageError, match="already mapped to a different manifest_id"):
         store.append(unrelated)
+
+
+def test_list_entries_by_run_id_allows_successor_without_its_own_ledger(
+    tmp_path,
+) -> None:
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
+    store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    original = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-original",
+        run_id=run_id,
+        event_type="manifest_created",
+        occurred_at=_FIXED_TIME,
+        status="created",
+    )
+    store.append(original)
+    store.record_manifest_successor(
+        run_id=run_id,
+        predecessor_manifest_id="manifest-original",
+        successor_manifest_id="manifest-successor",
+    )
+
+    assert store.list_entries_by_run_id(run_id) == [original]
+
+
+def test_list_entries_by_run_id_fails_when_predecessor_ledger_is_missing(
+    tmp_path,
+) -> None:
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
+    store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    original = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-original",
+        run_id=run_id,
+        event_type="manifest_created",
+        occurred_at=_FIXED_TIME,
+        status="created",
+    )
+    store.append(original)
+    store.record_manifest_successor(
+        run_id=run_id,
+        predecessor_manifest_id="manifest-original",
+        successor_manifest_id="manifest-successor",
+    )
+    (store.base_path / "manifest-original.jsonl").unlink()
+
+    with pytest.raises(StorageError, match="predecessor ledger file is missing"):
+        store.list_entries_by_run_id(run_id)
+
+
+def test_list_entries_by_run_id_fails_when_successor_pointer_is_empty(
+    tmp_path,
+) -> None:
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
+    store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    original = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-original",
+        run_id=run_id,
+        event_type="manifest_created",
+        occurred_at=_FIXED_TIME,
+        status="created",
+    )
+    store.append(original)
+    pointer = store.base_path / "_predecessors" / "manifest-original.txt"
+    pointer.parent.mkdir(parents=True, exist_ok=True)
+    pointer.write_text(" \n", encoding="utf-8")
+
+    with pytest.raises(StorageError, match="is empty"):
+        store.list_entries_by_run_id(run_id)
+
+
+def test_list_entries_by_run_id_fails_on_successor_pointer_cycle(tmp_path) -> None:
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
+    store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    original = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-original",
+        run_id=run_id,
+        event_type="manifest_created",
+        occurred_at=_FIXED_TIME,
+        status="created",
+    )
+    store.append(original)
+    store.record_manifest_successor(
+        run_id=run_id,
+        predecessor_manifest_id="manifest-original",
+        successor_manifest_id="manifest-successor",
+    )
+    store.append(
+        RunLedgerEntry(
+            entry_id="entry-2",
+            manifest_id="manifest-successor",
+            run_id=run_id,
+            event_type="run_finished",
+            occurred_at=_FIXED_TIME,
+            status="success",
+        )
+    )
+    (store.base_path / "_predecessors" / "manifest-original.txt").write_text(
+        "manifest-successor",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(StorageError, match="successor pointer cycle"):
+        store.list_entries_by_run_id(run_id)
+
+
+def test_successor_rebind_rolls_back_pointer_when_index_write_fails(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
+    store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    original = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-original",
+        run_id=run_id,
+        event_type="manifest_created",
+        occurred_at=_FIXED_TIME,
+        status="created",
+    )
+    store.append(original)
+    real_writer = atomic_write_text
+    failed = False
+
+    def _failing_writer(path: Path, text: str) -> None:
+        nonlocal failed
+        if path.parent.name == "_by_run_id" and not failed:
+            failed = True
+            path.write_text("manifest-successor-partial", encoding="utf-8")
+            raise OSError("injected index write failure")
+        real_writer(path, text)
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.control_plane._file_run_ledger_queries.atomic_write_text",
+        _failing_writer,
+    )
+    with pytest.raises(OSError, match="injected index write failure"):
+        store.record_manifest_successor(
+            run_id=run_id,
+            predecessor_manifest_id="manifest-original",
+            successor_manifest_id="manifest-successor",
+        )
+
+    pointer = store.base_path / "_predecessors" / "manifest-successor.txt"
+    assert not pointer.exists()
+    index = store.base_path / "_by_run_id" / f"{run_id}.txt"
+    assert index.read_text(encoding="utf-8").strip() == "manifest-original"

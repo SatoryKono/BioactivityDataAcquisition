@@ -172,6 +172,36 @@ def test_failed_successor_save_rolls_back_transaction(
     assert latest.manifest_id == "m1"
 
 
+def test_restore_predecessor_publication_returns_current_to_predecessor(
+    tmp_path: Path,
+) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    original = _original()
+    store.save(original)
+    evidence = '{"manifest_id":"m1"}\n'
+    (tmp_path / "m1.contract-evidence.json").write_text(evidence, encoding="utf-8")
+    store.save(_successor(original))
+    assert (tmp_path / "m2.contract-evidence.json").is_file()
+
+    store.restore_predecessor_publication(original, "m2")
+
+    assert store.get("m2") is None
+    assert not (tmp_path / "m2.json").exists()
+    assert not (tmp_path / "m2.contract-evidence.json").exists()
+    assert (tmp_path / "m1.contract-evidence.json").read_text(encoding="utf-8") == (
+        evidence
+    )
+    current = store.get_by_run_id(_RUN_ID)
+    assert current is not None
+    assert current.manifest_id == "m1"
+    latest = store.get_latest_for_scope("chembl_activity")
+    assert latest is not None
+    assert latest.manifest_id == "m1"
+    assert (tmp_path / "_by_run_id" / f"{_RUN_ID}.txt").read_text(
+        encoding="utf-8"
+    ).strip() == "m1"
+
+
 def test_lower_sorted_successor_becomes_latest_for_scope(tmp_path: Path) -> None:
     store = FileRunManifestStore(base_path=tmp_path)
     original = replace(_original(), manifest_id="m9")

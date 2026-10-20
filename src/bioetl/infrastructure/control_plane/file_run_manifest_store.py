@@ -17,6 +17,9 @@ from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane._file_run_manifest_persistence import (
     persist_manifest,
 )
+from bioetl.infrastructure.control_plane._file_run_manifest_persistence import (
+    restore_predecessor_publication as _restore_predecessor_publication,
+)
 from bioetl.infrastructure.control_plane._raw_run_manifest_inspection import (
     RawRunManifestInspectionMixin,
 )
@@ -174,6 +177,18 @@ class FileRunManifestStore(RawRunManifestInspectionMixin, RunManifestPort):
             manifest,
             atomic_writer=atomic_write_text,
             scope_index_writer=write_latest_scope_index,
+        )
+
+    def restore_predecessor_publication(
+        self,
+        predecessor: RunManifest,
+        successor_manifest_id: str,
+    ) -> None:
+        """Return current indexes to the predecessor and drop the successor."""
+        _restore_predecessor_publication(
+            self,
+            predecessor=predecessor,
+            successor_manifest_id=successor_manifest_id,
         )
 
     @override

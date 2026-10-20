@@ -129,14 +129,38 @@ def persist_input_snapshots_on_manifest(
     if input_snapshot_verified is True:
         updated = _with_verified_snapshot_fingerprint(updated)
     saver(updated)
-    _rebind_ledger_successor(
-        service,
-        run_id=manifest.run_id,
-        predecessor_manifest_id=manifest.manifest_id,
-        successor_manifest_id=updated.manifest_id,
-    )
+    try:
+        _rebind_ledger_successor(
+            service,
+            run_id=manifest.run_id,
+            predecessor_manifest_id=manifest.manifest_id,
+            successor_manifest_id=updated.manifest_id,
+        )
+    except Exception as exc:
+        try:
+            _restore_manifest_after_failed_rebind(
+                service,
+                predecessor=manifest,
+                successor_manifest_id=updated.manifest_id,
+            )
+        except Exception as restore_exc:
+            raise restore_exc from exc
+        raise
     service.manifest_id = updated.manifest_id
     return updated
+
+
+def _restore_manifest_after_failed_rebind(
+    service: RunLedgerService,
+    *,
+    predecessor: RunManifest,
+    successor_manifest_id: str,
+) -> None:
+    """Drop the successor publication when the ledger rebind did not commit."""
+    port = getattr(service, "manifest_port", None)
+    restore = getattr(port, "restore_predecessor_publication", None)
+    if callable(restore):
+        restore(predecessor, successor_manifest_id)
 
 
 def _rebind_ledger_successor(
@@ -149,7 +173,7 @@ def _rebind_ledger_successor(
     """Point a ledger adapter at the successor when it knows that transition.
 
     Adapters without ``record_manifest_successor`` keep the previous anchor.
-    The service id still advances so the next attach loads the successor.
+    The caller advances ``service.manifest_id`` only after this call returns.
     """
     port = getattr(service, "ledger_port", None)
     rebind = getattr(port, "record_manifest_successor", None)
