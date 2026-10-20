@@ -37,6 +37,7 @@
       "path": "silver/chembl/activity"
     }
   ],
+  "predecessor_manifest_id": null,
   "provider": "chembl",
   "replay_capability": "exact_replay_supported",
   "replay_of_manifest_id": null,

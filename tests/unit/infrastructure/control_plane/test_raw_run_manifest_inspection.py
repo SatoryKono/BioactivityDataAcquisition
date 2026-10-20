@@ -277,6 +277,20 @@ def test_raw_inspection_rejects_malformed_schema_version_syntax(tmp_path: Path) 
     assert inspection.schema_errors == ("manifest_schema_version_invalid",)
 
 
+def test_raw_inspection_rejects_non_string_predecessor_manifest_id(
+    tmp_path: Path,
+) -> None:
+    store = _saved_store(tmp_path)
+    path = _manifest_path(store, "manifest-raw")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["predecessor_manifest_id"] = {"bad": "type"}
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    inspection = store.inspect_raw_manifest("manifest-raw")
+
+    assert "manifest_predecessor_manifest_id_not_string" in inspection.schema_errors
+
+
 def test_missing_manifest_returns_bounded_diagnostic(tmp_path: Path) -> None:
     store = FileRunManifestStore(tmp_path / "run_manifest")
 

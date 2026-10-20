@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-20T07:38:48.354823+00:00",
+  "generated_at": "2026-10-20T17:59:09.554171+00:00",
   "summary": {
-    "total_scripts": 654,
+    "total_scripts": 655,
     "status_counts": {
       "active": 334,
-      "supporting": 320
+      "supporting": 321
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -15,7 +15,7 @@
       "other": 16,
       "scripts": 549,
       "skills": 13,
-      "tests": 475
+      "tests": 476
     }
   },
   "scripts": [
@@ -10543,13 +10543,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_abort_diagnostic_adapter.py",
-          "line": 647,
+          "line": 648,
           "source_group": "tests",
           "text": "[\"scripts/engineering/ci/pytest_abort_diagnostic_adapter.py\"],"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_abort_diagnostic_adapter.py",
-          "line": 830,
+          "line": 831,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pytest_abort_diagnostic_adapter as owner"
         }
@@ -11297,7 +11297,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -11322,6 +11322,12 @@
           "line": 17,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.platform import ("
+        },
+        {
+          "path": "scripts/engineering/performance/capture_delta_merge.py",
+          "line": 162,
+          "source_group": "scripts",
+          "text": "\"python_version\": platform.python_version(),"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_wrappers.py",
@@ -13240,6 +13246,25 @@
           "text": "\"find-complex-functions\": \"scripts.engineering.find_complex_functions\","
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/performance/capture_delta_merge.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/engineering/test_capture_delta_merge.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "from scripts.engineering.performance import capture_delta_merge as capture"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as a manual evidence-capture helper for sequential Delta merges from an isolated clean source checkout; preserve raw timing output and source identity alongside each result."
     },
     {
       "path": "scripts/engineering/performance/measure_merger_input.py",

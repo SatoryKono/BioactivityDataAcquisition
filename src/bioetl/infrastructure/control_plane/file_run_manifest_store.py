@@ -17,6 +17,9 @@ from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane._file_run_manifest_persistence import (
     persist_manifest,
 )
+from bioetl.infrastructure.control_plane._file_run_manifest_persistence import (
+    restore_predecessor_publication as _restore_predecessor_publication,
+)
 from bioetl.infrastructure.control_plane._raw_run_manifest_inspection import (
     RawRunManifestInspectionMixin,
 )
@@ -52,6 +55,43 @@ def _decode_manifest(raw: str) -> RunManifest:
     if not isinstance(payload, dict):
         raise ValueError("Manifest payload must be a JSON object")
     return RunManifest.from_dict(payload)
+
+
+def _manifest_is_predecessor_of_indexed(
+    base_path: Path,
+    manifest_id: str,
+    indexed_manifest_id: str,
+    *,
+    run_id: RunID,
+    pipeline_name: str,
+    run_type: RunType,
+) -> bool:
+    """Return whether ``manifest_id`` precedes the indexed manifest.
+
+    A record that is no longer current stays readable by ID when the
+    indexed manifest links back through ``predecessor_manifest_id``
+    (#12014). Cycles, missing files, and mismatched run identities are not
+    predecessors.
+    """
+    seen: set[str] = set()
+    cursor: str | None = indexed_manifest_id
+    while cursor is not None and cursor not in seen:
+        seen.add(cursor)
+        try:
+            raw = catalog_text_index.read(base_path / f"{cursor}.json")
+        except FileNotFoundError:
+            return False
+        manifest = _decode_manifest(raw)
+        if (
+            manifest.run_id != run_id
+            or manifest.pipeline_name != pipeline_name
+            or manifest.run_type != run_type
+        ):
+            return False
+        cursor = manifest.predecessor_manifest_id
+        if cursor == manifest_id:
+            return True
+    return False
 
 
 class RunManifestStoreCorruptionError(ValueError):
@@ -149,6 +189,18 @@ class FileRunManifestStore(RawRunManifestInspectionMixin, RunManifestPort):
             manifest,
             atomic_writer=atomic_write_text,
             scope_index_writer=write_latest_scope_index,
+        )
+
+    def restore_predecessor_publication(
+        self,
+        predecessor: RunManifest,
+        successor_manifest_id: str,
+    ) -> None:
+        """Return current indexes to the predecessor and drop the successor."""
+        _restore_predecessor_publication(
+            self,
+            predecessor=predecessor,
+            successor_manifest_id=successor_manifest_id,
         )
 
     @override
@@ -312,7 +364,17 @@ class FileRunManifestStore(RawRunManifestInspectionMixin, RunManifestPort):
             return None
         manifest = _decode_manifest(raw)
         indexed_manifest_id = self._load_manifest_id_for_run_id(manifest.run_id)
-        if indexed_manifest_id != manifest.manifest_id:
+        if indexed_manifest_id != manifest.manifest_id and (
+            indexed_manifest_id is None
+            or not _manifest_is_predecessor_of_indexed(
+                self.base_path,
+                manifest.manifest_id,
+                indexed_manifest_id,
+                run_id=manifest.run_id,
+                pipeline_name=manifest.pipeline_name,
+                run_type=manifest.run_type,
+            )
+        ):
             raise RunManifestStoreCorruptionError(
                 "Run manifest index corruption: manifest file "
                 f"'{manifest.manifest_id}' declares run_id '{manifest.run_id}' "

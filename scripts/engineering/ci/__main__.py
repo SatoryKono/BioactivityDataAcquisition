@@ -152,6 +152,51 @@ def _gitleaks_boundaries(argv: list[str]) -> int:
         "configs/field_registry/semantic_pair_matrix_budget.yaml",
         f"row_key: {'fc974cabe46e3021'}\n",
     )
+    benchmark_root = (
+        "reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_1/"
+    )
+    for size in (10, 50, 100):
+        path = benchmark_root + f"N{size}/N{size}-12345678/observations.jsonl"
+        observation = {"benchmark_key": f"delta_sequential_merge_N{size}"}
+        pair(f"benchmark-N{size}", path, json.dumps(observation) + "\n")
+        CASES.append(
+            (
+                f"benchmark-N{size}-adjacent-credential",
+                path,
+                json.dumps({**observation, "api_key": TOKEN}) + "\n",
+                True,
+            )
+        )
+    benchmark_path = benchmark_root + "N10/N10-12345678/observations.jsonl"
+    benchmark_name = "delta_sequential_merge_N10"
+    CASES.extend(
+        [
+            (
+                "benchmark-credential-value",
+                benchmark_path,
+                json.dumps({"benchmark_key": TOKEN}) + "\n",
+                True,
+            ),
+            (
+                "benchmark-unreviewed-size",
+                benchmark_path,
+                json.dumps({"benchmark_key": benchmark_name + "00"}) + "\n",
+                True,
+            ),
+            (
+                "benchmark-other-field",
+                benchmark_path,
+                json.dumps({"api_key": benchmark_name}) + "\n",
+                True,
+            ),
+            (
+                "benchmark-other-file",
+                benchmark_path.replace("observations.jsonl", "credentials.jsonl"),
+                json.dumps({"benchmark_key": benchmark_name}) + "\n",
+                True,
+            ),
+        ]
+    )
     pair(
         "graph",
         "src/bioetl_knowledge_graph_expanded.json",
