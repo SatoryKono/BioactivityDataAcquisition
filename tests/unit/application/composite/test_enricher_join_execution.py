@@ -153,4 +153,5 @@ def test_execute_prepared_enricher_join_resolves_conflicts_and_executes_join() -
         "chembl.publication.doi",
         "crossref.publication.doi",
         "crossref_publication",
+        required=False,
     )

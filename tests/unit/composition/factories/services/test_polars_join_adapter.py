@@ -110,4 +110,6 @@ def test_polars_join_adapter_delegates_composite_key_join() -> None:
         ["seed_id"],
         ["dep_id"],
         "pubmed_publication",
+        required=False,
+        join_how=None,
     )
