@@ -202,6 +202,12 @@ async def test_workflow_execution_partial_repair_incomplete():
         )
 
     state_after_fail = state_port.get_latest("chembl_repair_two_step")
+    # A crash leaves the last persisted running snapshot without a terminal event.
     assert state_after_fail.status == "running"
     assert state_after_fail.repair_required is True
     assert state_after_fail.ambiguous_step_ids == ("step_a",)
+
+    with pytest.raises(RuntimeError, match="explicit --repair-steps or --force-steps"):
+        await resume_service_fail.run_workflow(
+            _build_two_step_transform_config(), resume_last=True
+        )
