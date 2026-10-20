@@ -184,9 +184,11 @@ def validate_scope_filter(value: str | None, label: str) -> None:
 
 
 def validate_flat_scope_compatibility(
-    flat_structure: bool, provider: str | None, entity: str | None
+    flat_structure: bool,
+    provider: str | None,
+    entity: str | None,
 ) -> None:
-    """Reject provider/entity filters on flat storage."""
+    """Reject provider/entity filters on flat storage before any traversal."""
     if flat_structure and (provider or entity):
         raise ValueError("Filters require a hierarchical storage structure.")
 
@@ -295,9 +297,7 @@ def find_old_date_dirs(
         _notify_skip(on_skip, base_path, "link_or_reparse")
         return []
     if flat_structure:
-        return _flat_old_date_dirs(
-            base_path, cutoff_str, provider, entity, on_skip
-        )
+        return _flat_old_date_dirs(base_path, cutoff_str, on_skip)
     return _nested_old_date_dirs(
         base_path, real_root(base_path), cutoff_str, provider, entity, on_skip
     )
@@ -306,8 +306,6 @@ def find_old_date_dirs(
 def _flat_old_date_dirs(
     base_path: Path,
     cutoff_str: str,
-    provider: str | None,
-    entity: str | None,
     on_skip: Callable[[str, str], None] | None,
 ) -> list[Path]:
     return _old_date_children(base_path, cutoff_str, on_skip)

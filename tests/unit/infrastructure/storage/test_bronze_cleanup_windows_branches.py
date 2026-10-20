@@ -1024,6 +1024,16 @@ def test_support_tree_walk_and_flat_filter(tmp_path: Path) -> None:
             cutoff_str=_CUTOFF,
             provider="prov",
         )
+    with pytest.raises(ValueError, match="Filters require a hierarchical"):
+        support.find_old_date_dirs(
+            flat_root,
+            flat_structure=True,
+            cutoff_str=_CUTOFF,
+            entity="ent",
+        )
+    assert support.find_old_date_dirs(
+        flat_root, flat_structure=True, cutoff_str=_CUTOFF
+    ) == [flat_root / _DATE]
     assert (
         support.find_old_date_dirs(
             tmp_path / "absent", flat_structure=False, cutoff_str=_CUTOFF
