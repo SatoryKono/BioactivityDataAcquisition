@@ -103,9 +103,53 @@ These URLs are not links to current `main`.
 - [merge_scaling_N50.json](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N50/N50-9btidy6p/merge_scaling_N50.json)
 - [merge_scaling_N100.json](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N100/N100-yevzmbf8/merge_scaling_N100.json)
 
-On 2026-10-20 the 12 `artifacts_sha256` entries were recomputed with
-`git show 0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1:<path>` and SHA-256.
-Exit 0. Mismatches: 0.
+Run from the repository root with Python 3 and Git. The historical commit
+must be available in the local clone. This command reads the manifest and
+all 12 artifacts from that commit, hashes the raw bytes, and fails if the
+entry count differs or any hash mismatches:
+
+```bash
+python - <<'PYTHON'
+import hashlib
+import json
+import subprocess
+import sys
+
+revision = "0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1"
+base = "reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2"
+
+def read_blob(path):
+    return subprocess.check_output(["git", "show", f"{revision}:{path}"])
+
+manifest = json.loads(read_blob(f"{base}/manifest.json"))
+entries = [
+    (path, expected)
+    for run in manifest["runs"]
+    for path, expected in run["artifacts_sha256"].items()
+]
+if len(entries) != 12:
+    sys.exit(f"Expected 12 entries, found {len(entries)}")
+mismatches = 0
+for path, expected in entries:
+    actual = hashlib.sha256(read_blob(f"{base}/{path}")).hexdigest()
+    if actual != expected:
+        print(f"Mismatch: {path}: expected {expected}, got {actual}")
+        mismatches += 1
+exit_code = int(mismatches != 0)
+print(f"Checked: {len(entries)}")
+print(f"Mismatches: {mismatches}")
+print(f"Exit {exit_code}")
+sys.exit(exit_code)
+PYTHON
+```
+
+Actual output on 2026-10-20 (Python 3.14.4, Git 2.53.0; process exit code 0):
+
+```text
+Checked: 12
+Mismatches: 0
+Exit 0
+```
 
 | Path | SHA-256 |
 | --- | --- |
