@@ -207,6 +207,20 @@ paths = ['''^docs/03-guides/github-setup-plan\.md$''']
 regexTarget = "secret"
 regexes = ['''^sk-1234567890$''']
 
+[[rules.allowlists]]
+description = "Delta-merge benchmark identifiers in reviewed performance observations"
+condition = "AND"
+paths = [
+    '''^reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_1/N10/N10-91g9jc6i/observations\.jsonl$''',
+    '''^reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_1/N50/N50-yekoujnh/observations\.jsonl$''',
+    '''^reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_1/N100/N100-usnmxiu3/observations\.jsonl$''',
+    '''^reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N10/N10-n1j0nze5/observations\.jsonl$''',
+    '''^reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N50/N50-9btidy6p/observations\.jsonl$''',
+    '''^reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N100/N100-yevzmbf8/observations\.jsonl$''',
+]
+regexTarget = "secret"
+regexes = ['''^delta_sequential_merge_N(?:100|50|10)$''']
+
 [[rules]]
 id = "curl-auth-header"
 [[rules.allowlists]]
