@@ -29,6 +29,7 @@
     "objects": {},
     "pipeline_name": "unknown_pipeline",
     "planned_artifacts": [],
+    "predecessor_manifest_id": null,
     "provider": "unknown",
     "replay_capability": "rebuild_only",
     "replay_of_manifest_id": null,
@@ -184,6 +185,10 @@
       {
         "default": "literal",
         "name": "manifest_id"
+      },
+      {
+        "default": "literal",
+        "name": "predecessor_manifest_id"
       },
       {
         "default": "literal",
