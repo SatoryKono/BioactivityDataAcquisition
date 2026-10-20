@@ -188,3 +188,16 @@ def test_safe_unlink_refuses_outside_root(tmp_path: Path) -> None:
         with pytest.raises(NotImplementedError):
             safe_unlink(outside, tmp_path, tmp_path.resolve())
     assert outside.exists()
+
+
+def test_flat_layout_rejects_scope_filters(tmp_path: Path) -> None:
+    from bioetl.infrastructure.storage.bronze.cleanup_support import find_old_date_dirs
+    from datetime import datetime
+    import asyncio
+    writer = _make_writer(tmp_path, flat=True)
+    with pytest.raises(ValueError, match="Filters require a hierarchical"):
+        find_old_date_dirs(tmp_path, flat_structure=True, cutoff_str="2023-01-01", provider="prov")
+    with pytest.raises(ValueError, match="Filters require a hierarchical"):
+        writer.preview_cleanup(provider="prov")
+    with pytest.raises(ValueError, match="Filters require a hierarchical"):
+        asyncio.run(writer.cleanup_old_files(datetime(2023, 1, 1), provider="prov"))
