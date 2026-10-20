@@ -1102,6 +1102,7 @@
       "type": "object"
     },
     "MergeSortBySchema": {
+      "additionalProperties": false,
       "description": "Deterministic sort policy for merged Silver/Gold outputs.",
       "properties": {
         "silver": {
