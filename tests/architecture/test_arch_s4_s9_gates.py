@@ -238,29 +238,105 @@ def test_s8_domain_framework_import_ratchet() -> None:
         )
     )
     allowed = tuple(config["allowed_libraries"])
+    exceptions = config.get("exact_serialization_exceptions", {})
+
     domain = ROOT / "src/bioetl/domain"
     count = 0
     pandas_in_forbidden = []
-    forbidden = tuple(config["pandas_forbidden_path_prefixes"])
+    forbidden = tuple(config.get("pandas_forbidden_path_prefixes", []))
+
+    found_serialization_imports: list[dict[str, str | None]] = []
+
     for path in domain.rglob("*.py"):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         rel = path.resolve().relative_to(ROOT.resolve()).as_posix()
+
+        parent_map: dict[ast.AST, ast.AST] = {}
+        for node in ast.walk(tree):
+            for child in ast.iter_child_nodes(node):
+                parent_map[child] = node
+
+        def get_ancestors(n: ast.AST) -> list[ast.AST]:
+            ancestors: list[ast.AST] = []
+            curr = parent_map.get(n)
+            while curr:
+                ancestors.append(curr)
+                curr = parent_map.get(curr)
+            return ancestors[::-1]
+
+        def get_context(n: ast.AST) -> tuple[str, str | None]:
+            ancestors = get_ancestors(n)
+            for ancestor in ancestors:
+                if isinstance(ancestor, ast.If):
+                    if isinstance(ancestor.test, ast.Name) and ancestor.test.id == "TYPE_CHECKING":
+                        return "type_checking", None
+                elif isinstance(ancestor, ast.Try):
+                    return "runtime", None
+            for ancestor in reversed(ancestors):
+                if isinstance(ancestor, ast.FunctionDef | ast.AsyncFunctionDef):
+                    return "lazy", ancestor.name
+            return "runtime", None
+
         for node in ast.walk(tree):
             names: list[str] = []
             if isinstance(node, ast.Import):
                 names.extend(alias.name.split(".", 1)[0] for alias in node.names)
             elif isinstance(node, ast.ImportFrom) and node.module:
                 names.append(node.module.split(".", 1)[0])
+
             for name in names:
-                if name not in allowed:
-                    continue
-                count += 1
-                if name == "pandas" and rel.startswith(forbidden):
-                    pandas_in_forbidden.append(rel)
+                if name in allowed:
+                    count += 1
+                    if name == "pandas" and rel.startswith(forbidden):
+                        pandas_in_forbidden.append(rel)
+
+                if name in exceptions:
+                    ctx, fn = get_context(node)
+                    found_serialization_imports.append({
+                        "library": name,
+                        "file": rel,
+                        "context": ctx,
+                        "function": fn
+                    })
+
     assert count <= int(config["max_framework_imports"])
     assert count == int(config["max_framework_imports"])
     assert str(config["linked_issue"]) == "9630"
     assert not pandas_in_forbidden
+
+    actual: dict[str, dict[str, set[str] | dict[str, set[str]]]] = {}
+    for item in found_serialization_imports:
+        lib = str(item["library"])
+        ctx = str(item["context"])
+        file = str(item["file"])
+        fn = str(item["function"]) if item["function"] is not None else None
+
+        if lib not in actual:
+            actual[lib] = {"runtime_modules": set(), "type_checking_modules": set(), "lazy_functions": {}}
+
+        if ctx == "runtime":
+            # Type ignore since we constructed it heterogeneously above
+            actual[lib]["runtime_modules"].add(file)  # type: ignore[union-attr]
+        elif ctx == "type_checking":
+            actual[lib]["type_checking_modules"].add(file)  # type: ignore[union-attr]
+        elif ctx == "lazy" and fn:
+            lazy_dict = actual[lib]["lazy_functions"]
+            assert isinstance(lazy_dict, dict)
+            if file not in lazy_dict:
+                lazy_dict[file] = set()
+            lazy_dict[file].add(fn)
+
+    for lib, lib_rules in exceptions.items():
+        expected_runtime = set(lib_rules.get("runtime_modules", []))
+        expected_tc = set(lib_rules.get("type_checking_modules", []))
+        expected_lazy = {k: set(v) for k, v in lib_rules.get("lazy_functions", {}).items()}
+
+        actual_lib = actual.get(lib, {"runtime_modules": set(), "type_checking_modules": set(), "lazy_functions": {}})
+
+        assert actual_lib["runtime_modules"] == expected_runtime, f"Mismatch in {lib} runtime modules"
+        assert actual_lib["type_checking_modules"] == expected_tc, f"Mismatch in {lib} type_checking modules"
+        assert actual_lib["lazy_functions"] == expected_lazy, f"Mismatch in {lib} lazy functions"
+
 
 
 @pytest.mark.generated_artifact
