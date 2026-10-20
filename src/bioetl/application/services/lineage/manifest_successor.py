@@ -37,6 +37,13 @@ def bind_manifest_successor_observer(host: object, service: object) -> None:
     ledger.manifest_successor_observer = _adopt
 
 
+def notify_successor(service: object, manifest: object) -> None:
+    """Publish one successor to the runner observer when it is registered."""
+    observer = getattr(service, "manifest_successor_observer", None)
+    if callable(observer):
+        observer(manifest)
+
+
 def adopt_live_manifest_successor(
     *,
     launch_context: object | None,

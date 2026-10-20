@@ -6,6 +6,7 @@ from collections.abc import Callable
 from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.services.lineage.manifest_successor import notify_successor
 from bioetl.domain.config.runtime import (
     CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE,
 )
@@ -143,9 +144,7 @@ def persist_input_snapshots_on_manifest(
             raise restore_error from exc
         raise
     service.manifest_id = updated.manifest_id
-    observer = getattr(service, "manifest_successor_observer", None)
-    if callable(observer):
-        observer(updated)
+    notify_successor(service, updated)
     return updated
 
 

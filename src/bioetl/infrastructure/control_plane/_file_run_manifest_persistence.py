@@ -237,6 +237,24 @@ def restore_predecessor_publication(
     successor_evidence.unlink(missing_ok=True)
 
 
+def _require_same_run_predecessor(
+    store: FileRunManifestStore,
+    manifest: RunManifest,
+) -> None:
+    """Reject a missing predecessor or one that belongs to another run."""
+    predecessor_id = getattr(manifest, "predecessor_manifest_id", None)
+    if not isinstance(predecessor_id, str) or not predecessor_id.strip():
+        return
+    predecessor = store.get(predecessor_id)
+    if predecessor is None:
+        raise ValueError(f"predecessor manifest {predecessor_id!r} is missing")
+    if predecessor.run_id != manifest.run_id:
+        raise ValueError(
+            "predecessor_manifest_id belongs to a different run_id: "
+            f"{predecessor.run_id}"
+        )
+
+
 def persist_manifest(
     store: FileRunManifestStore,
     manifest: RunManifest,
@@ -257,16 +275,7 @@ def persist_manifest(
     try:
         store.base_path.mkdir(parents=True, exist_ok=True)
         run_index_path.parent.mkdir(parents=True, exist_ok=True)
-        predecessor_id = getattr(manifest, "predecessor_manifest_id", None)
-        if isinstance(predecessor_id, str) and predecessor_id.strip():
-            predecessor = store.get(predecessor_id)
-            if predecessor is None:
-                raise ValueError(f"predecessor manifest {predecessor_id!r} is missing")
-            if predecessor.run_id != manifest.run_id:
-                raise ValueError(
-                    "predecessor_manifest_id belongs to a different run_id: "
-                    f"{predecessor.run_id}"
-                )
+        _require_same_run_predecessor(store, manifest)
         existing_manifest_id = store._load_manifest_id_for_run_id(manifest.run_id)
         if (
             existing_manifest_id is not None
