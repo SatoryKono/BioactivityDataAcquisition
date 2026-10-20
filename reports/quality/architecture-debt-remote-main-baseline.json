@@ -6,7 +6,7 @@
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
       "required_on_remote": false,
-      "source_revision": "170874bdc604a3fb80069288545b6a433e80afc5",
+      "source_revision": "0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1",
       "summary": {
         "available": false
       }
@@ -17,7 +17,7 @@
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
       "required_on_remote": false,
-      "source_revision": "170874bdc604a3fb80069288545b6a433e80afc5",
+      "source_revision": "0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1",
       "summary": {
         "available": false
       }
@@ -28,7 +28,7 @@
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
       "required_on_remote": false,
-      "source_revision": "170874bdc604a3fb80069288545b6a433e80afc5",
+      "source_revision": "0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1",
       "summary": {
         "available": false
       }
@@ -39,7 +39,7 @@
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
       "required_on_remote": false,
-      "source_revision": "170874bdc604a3fb80069288545b6a433e80afc5",
+      "source_revision": "0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1",
       "summary": {
         "available": false
       }
@@ -50,7 +50,7 @@
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
       "required_on_remote": false,
-      "source_revision": "170874bdc604a3fb80069288545b6a433e80afc5",
+      "source_revision": "0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1",
       "summary": {
         "available": false
       }
@@ -61,7 +61,7 @@
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
       "required_on_remote": false,
-      "source_revision": "170874bdc604a3fb80069288545b6a433e80afc5",
+      "source_revision": "0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1",
       "summary": {
         "available": false
       }
@@ -87,9 +87,9 @@
   ],
   "local_tracking_ref": "origin/main",
   "local_tracking_ref_matches_remote": false,
-  "local_tracking_ref_sha": "93a0abf8b607c318aecaafca1dd6afedb3113d4c",
+  "local_tracking_ref_sha": "97bbfe43f430c8f9a13a3a7da7eede9a5696dad6",
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
-  "remote_main_sha": "170874bdc604a3fb80069288545b6a433e80afc5",
+  "remote_main_sha": "0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1",
   "schema_version": 1
 }
