@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "a813e238d5cb7aabd7dd80e1795d76d39211f3e446f7cf1ef67798267a024560",
-      "limit": "a813e238d5cb7aabd7dd80e1795d76d39211f3e446f7cf1ef67798267a024560",
+      "current": "b6537359d718a5a0bfc5040f64dc9573c65b9c6cb7de886241216b4938c6cc4e",
+      "limit": "b6537359d718a5a0bfc5040f64dc9573c65b9c6cb7de886241216b4938c6cc4e",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,13 +57,13 @@
     {
       "current": {
         "source_module_count": 2583,
-        "source_tree_sha256": "a813e238d5cb7aabd7dd80e1795d76d39211f3e446f7cf1ef67798267a024560",
+        "source_tree_sha256": "b6537359d718a5a0bfc5040f64dc9573c65b9c6cb7de886241216b4938c6cc4e",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2583,
-        "source_tree_sha256": "a813e238d5cb7aabd7dd80e1795d76d39211f3e446f7cf1ef67798267a024560",
+        "source_tree_sha256": "b6537359d718a5a0bfc5040f64dc9573c65b9c6cb7de886241216b4938c6cc4e",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -415,27 +415,25 @@
       "status": "pass"
     },
     {
-      "current": "db481facc9c4e5393c41a1d2cc0585f8c207fe7238e4aa6701ffbba07aebc2c0",
+      "current": "1cca4d056a7b71ee961115a379f21dcccdcd8c59b37229d89452f44398174165",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
       "remediation": "Fetch origin/main and regenerate the remote-main architecture debt baseline.",
       "source_artifact": "reports/quality/architecture-debt-remote-main-baseline.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": {
-        "artifacts": [
-          "remote_main_baseline"
-        ],
-        "count": 1
+        "artifacts": [],
+        "count": 0
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: remote_main_baseline",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: none",
       "source_artifact": "reports/quality/*.json",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -466,24 +464,21 @@
     "dq_contract_registry_diagnostics": false,
     "hotspot_family_baseline": false,
     "module_coverage_inventory": false,
-    "remote_main_baseline": true
+    "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 2,
-    "pass": 44,
+    "fail": 0,
+    "pass": 46,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 10.0,
     "architecture_quality_scorecard_interpretation": "excellent",
-    "fail_count": 2,
-    "failing_gates": [
-      "remote_main_architecture_debt_baseline",
-      "generated_artifact_drift"
-    ],
+    "fail_count": 0,
+    "failing_gates": [],
     "gate_count": 46,
-    "pass_count": 44,
-    "release_gate_status": "failing",
+    "pass_count": 46,
+    "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []
   }
