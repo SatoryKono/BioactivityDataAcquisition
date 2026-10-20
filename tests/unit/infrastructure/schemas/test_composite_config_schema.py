@@ -46,6 +46,7 @@ from bioetl.infrastructure.schemas.composite_config import (
     EnricherSchema,
     ExecutionSchema,
     MergeSchema,
+    MergeSortBySchema,
     SeedSchema,
 )
 
@@ -376,3 +377,9 @@ def test_merge_sort_by_schema_forbids_extra() -> None:
                 "sort_by": {"silver": ["id"], "gold": ["id"], "unknown_key": ["x"]},
             }
         )
+
+
+def test_merge_sort_by_json_schema_forbids_additional_properties() -> None:
+    """Published MergeSortBySchema must reject keys outside silver/gold."""
+    schema = MergeSortBySchema.model_json_schema()
+    assert schema["additionalProperties"] is False
