@@ -86,17 +86,35 @@ def _resolve_retry_config(provider: str) -> RetryConfig:
     )
 
 
+def _resolve_executor_timeout(provider: str) -> float:
+    """Read the provider SDK bridge timeout. Missing config keeps 30 seconds."""
+    try:
+        source_config = load_source_config(provider)
+    except ValueError:
+        return 30.0
+    return float(source_config.timeout_sec)
+
+
 def _create_executor_runner(
     thread_pool: ThreadPoolExecutor,
+    timeout_sec: float,
 ) -> Callable[..., Awaitable[object]]:
-    """Create an async executor bridge bound to one injected thread pool."""
+    """Create an async executor bridge bound to one injected thread pool.
+
+    ``asyncio.wait_for`` cancels the event-loop wait when ``timeout_sec``
+    elapses. The worker thread can continue the underlying urllib call after
+    that cancellation; this bridge does not set a process-wide socket timeout.
+    """
 
     async def run_in_executor(
         func: Callable[..., object],
         *args: object,
     ) -> object:
         loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(thread_pool, func, *args)
+        return await asyncio.wait_for(
+            loop.run_in_executor(thread_pool, func, *args),
+            timeout=timeout_sec,
+        )
 
     return run_in_executor
 
@@ -108,6 +126,7 @@ def _build_runtime_dependencies(
     rate_limiter: TokenBucketRateLimiter,
     circuit_breaker: CircuitBreakerGuard,
     thread_pool: ThreadPoolExecutor,
+    executor_timeout_sec: float,
     error_handler: ErrorHandlerPort | None,
     request_collector: APIRequestCollector | None,
     entity_mapper: PubChemEntityMapper | None,
@@ -136,7 +155,9 @@ def _build_runtime_dependencies(
             "logger": logger,
             "rate_limiter": rate_limiter,
             "circuit_breaker": circuit_breaker,
-            "run_in_executor": _create_executor_runner(thread_pool),
+            "run_in_executor": _create_executor_runner(
+                thread_pool, executor_timeout_sec
+            ),
         },
         provider_name=PubChemAdapter.provider_name,
         request_collector=request_collector,
@@ -202,6 +223,7 @@ def create_pubchem_adapter(
         metrics=metrics,
     )
     thread_pool = ThreadPoolExecutor(max_workers=max_workers)
+    executor_timeout_sec = _resolve_executor_timeout("pubchem")
     try:
         runtime_dependencies = _build_runtime_dependencies(
             logger=logger,
@@ -209,6 +231,7 @@ def create_pubchem_adapter(
             rate_limiter=rate_limiter,
             circuit_breaker=circuit_breaker,
             thread_pool=thread_pool,
+            executor_timeout_sec=executor_timeout_sec,
             error_handler=error_handler,
             request_collector=request_collector,
             entity_mapper=entity_mapper,
@@ -226,6 +249,7 @@ def create_pubchem_adapter(
             request_collector=runtime_dependencies.request_collector,
             entity_mapper=runtime_dependencies.entity_mapper,
             fetch_strategies=runtime_dependencies.fetch_strategies,
+            executor_timeout_sec=executor_timeout_sec,
         )
     except PUBCHEM_ASSEMBLY_ERRORS:
         # Composition owns the pool until the adapter is successfully constructed.

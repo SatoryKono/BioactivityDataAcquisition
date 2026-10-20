@@ -80,7 +80,11 @@ class PubChemFetchFlow:
         pubchem_callable: Callable[..., object],
         pubchem_args: tuple[object, ...],
     ) -> list[object]:
-        """Retry transient SDK HTTP failures within the configured request budget."""
+        """Retry transient SDK HTTP failures within the configured request budget.
+
+        A timeout is not retried. The worker may still be inside the SDK call,
+        so a second attempt would replay an operation whose completion is unknown.
+        """
         attempt = 0
         while True:
             await self.rate_limiter.acquire()
@@ -91,6 +95,13 @@ class PubChemFetchFlow:
                     pubchem_callable,
                     *pubchem_args,
                 )
+            except TimeoutError:
+                self.record_request(
+                    endpoint,
+                    (time.perf_counter() - start_time) * 1000,
+                    status_code=0,
+                )
+                raise
             except pcp.PubChemHTTPError as error:
                 self.record_request(
                     endpoint,
