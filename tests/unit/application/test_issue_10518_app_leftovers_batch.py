@@ -161,9 +161,9 @@ def test_ledger_matches_manifest_accepts_successor_chain() -> None:
     )
     manifest = SimpleNamespace(manifest_id="m2", run_id="r1")
     ledger = SimpleNamespace(
-        list_entries=lambda manifest_id: (successor_event,)
-        if manifest_id == "m2"
-        else (),
+        list_entries=lambda manifest_id: (
+            (successor_event,) if manifest_id == "m2" else ()
+        ),
         list_entries_by_run_id=lambda _run_id: (created, successor_event),
     )
     assert integrity._ledger_matches_manifest(manifest, ledger) is True  # type: ignore[arg-type]

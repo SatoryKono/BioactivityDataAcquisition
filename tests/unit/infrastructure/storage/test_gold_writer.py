@@ -885,7 +885,6 @@ class TestGoldWriterSCD2:
 class TestGoldWriterSchemaValidation:
     """Tests for schema validation."""
 
-
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_write_gold_ordinary_shuffled_columns_reordered_to_schema(
         self, mock_write_deltalake, gold_writer, strict_schema
@@ -919,14 +918,24 @@ class TestGoldWriterSchemaValidation:
             written_columns = list(written_data.columns)
         elif isinstance(written_data, pa.Table):
             written_columns = written_data.column_names
-        elif isinstance(written_data, list) and len(written_data) > 0 and isinstance(written_data[0], dict):
+        elif (
+            isinstance(written_data, list)
+            and len(written_data) > 0
+            and isinstance(written_data[0], dict)
+        ):
             written_columns = list(written_data[0].keys())
         else:
-            written_columns = list(written_data.keys()) if hasattr(written_data, 'keys') else getattr(written_data, 'columns', [])
+            written_columns = (
+                list(written_data.keys())
+                if hasattr(written_data, "keys")
+                else getattr(written_data, "columns", [])
+            )
 
         # The schema definition for strict_schema in conftest should dictate the canonical order
         expected_columns = list(strict_schema.columns.keys())
-        assert written_columns == expected_columns, f"Expected columns {expected_columns}, but got {written_columns}"
+        assert written_columns == expected_columns, (
+            f"Expected columns {expected_columns}, but got {written_columns}"
+        )
 
         # Data values should not be corrupted
         if isinstance(written_data, pd.DataFrame):
