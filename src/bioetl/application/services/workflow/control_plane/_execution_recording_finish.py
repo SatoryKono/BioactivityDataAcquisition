@@ -64,7 +64,9 @@ def _record_workflow_success(
         resolved_limit = cast("int | None", last_limit)
     context.state = replace(
         context.state,
-        status="incomplete" if context.state.ambiguous_step_ids or context.state.repair_required else "success",
+        status="incomplete"
+        if context.state.ambiguous_step_ids or context.state.repair_required
+        else "success",
         updated_at=entry.occurred_at,
         completed_at=completed_at,
         last_event_id=entry.entry_id,

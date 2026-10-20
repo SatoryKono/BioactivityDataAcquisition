@@ -121,6 +121,7 @@ def test_selector_b_does_not_clear_or_replay_a() -> None:
     assert confirmed.commit_pending_confirmation is False
     assert confirmed.status == "success"
 
+
 def test_workflow_finishes_incomplete_if_ambiguous_step_remains() -> None:
     context, _saved = _make_context()
     context.state = replace(
@@ -145,7 +146,9 @@ def test_workflow_finishes_incomplete_if_ambiguous_step_remains() -> None:
         ),
     )
 
-    from bioetl.application.services.workflow.workflow_runner_service import WorkflowRunExecutionResult
+    from bioetl.application.services.workflow.workflow_runner_service import (
+        WorkflowRunExecutionResult,
+    )
 
     execution_recording.record_workflow_finished(
         context,
@@ -159,7 +162,7 @@ def test_workflow_finishes_incomplete_if_ambiguous_step_remains() -> None:
                     status="success",
                     payload={"fingerprint": "fp-b-confirmed"},
                 ),
-                )
+            ),
         ),
         completed_at=datetime(2026, 1, 1, 13, 0, tzinfo=UTC),
     )
