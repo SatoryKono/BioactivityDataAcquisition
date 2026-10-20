@@ -335,6 +335,28 @@ def test_attach_rebind_failure_restores_predecessor_and_keeps_service_id() -> No
     assert current.manifest_id == "m1"
 
 
+def test_attach_restore_failure_chains_the_rebind_error() -> None:
+    store = _MemoryManifestPort()
+    store.save(_original_manifest())
+
+    class _Ledger:
+        def record_manifest_successor(self, **kwargs: object) -> None:
+            raise RuntimeError("injected rebind failure")
+
+    def _fail_restore(predecessor: RunManifest, successor_manifest_id: str) -> None:
+        raise RuntimeError("injected restore failure")
+
+    store.restore_predecessor_publication = _fail_restore  # type: ignore[method-assign]
+    service = _service(store)
+    service.ledger_port = _Ledger()
+    with pytest.raises(RuntimeError, match="injected restore failure") as caught:
+        _attach(service)
+
+    assert isinstance(caught.value.__cause__, RuntimeError)
+    assert "injected rebind failure" in str(caught.value.__cause__)
+    assert service.manifest_id == "m1"
+
+
 def test_attach_failure_keeps_original_manifest_current() -> None:
     store = _MemoryManifestPort()
     original = _original_manifest()

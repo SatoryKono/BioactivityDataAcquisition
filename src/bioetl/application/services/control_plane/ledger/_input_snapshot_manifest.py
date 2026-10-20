@@ -137,14 +137,13 @@ def persist_input_snapshots_on_manifest(
             successor_manifest_id=updated.manifest_id,
         )
     except Exception as exc:
-        try:
-            _restore_manifest_after_failed_rebind(
-                service,
-                predecessor=manifest,
-                successor_manifest_id=updated.manifest_id,
-            )
-        except Exception as restore_exc:
-            raise restore_exc from exc
+        restore_error = _restore_manifest_after_failed_rebind(
+            service,
+            predecessor=manifest,
+            successor_manifest_id=updated.manifest_id,
+        )
+        if restore_error is not None:
+            raise restore_error from exc
         raise
     service.manifest_id = updated.manifest_id
     return updated
@@ -155,12 +154,16 @@ def _restore_manifest_after_failed_rebind(
     *,
     predecessor: RunManifest,
     successor_manifest_id: str,
-) -> None:
+) -> BaseException | None:
     """Drop the successor publication when the ledger rebind did not commit."""
     port = getattr(service, "manifest_port", None)
     restore = getattr(port, "restore_predecessor_publication", None)
-    if callable(restore):
-        restore(predecessor, successor_manifest_id)
+    try:
+        if callable(restore):
+            restore(predecessor, successor_manifest_id)
+    except Exception as restore_error:
+        return restore_error
+    return None
 
 
 def _rebind_ledger_successor(
