@@ -22,6 +22,9 @@ from bioetl.application.core.runner_flow import record_run_failed, record_run_st
 from bioetl.application.services.export_lineage.debug_export_service import (
     DebugExportResult,
 )
+from bioetl.application.services.lineage.manifest_successor import (
+    bind_manifest_successor_observer,
+)
 from bioetl.domain.run_reports.context import get_stage_accounting
 from bioetl.domain.types import JsonDict
 
@@ -113,6 +116,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
     def attach_run_ledger_service(self, service: RunLedgerService) -> None:
         """Attach the run-ledger writer used after lock acquisition."""
         self._run_ledger_service = service
+        bind_manifest_successor_observer(self, service)
 
     def attach_contract_evidence_recorder(
         self,
@@ -183,14 +187,10 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             await self._run_pipeline_lifecycle()
         except (PipelineShutdownError, CancelledError) as exc:
             debug_export_status = "shutdown"
-            # Terminal shutdown is recorded only here (not inside lifecycle).
-            # Cooperative shutdown completes run() without re-raising.
             self._record_terminal_shutdown()
             if isinstance(exc, CancelledError):
                 raise
         except _RUN_FAILURE_EXCEPTIONS as exc:
-            # Terminal boundary must not finalize an unexpected adapter error
-            # as successful. Preserve the original exception for the caller.
             debug_export_status = "failed"
             record_run_failed(self, exc)
             raise

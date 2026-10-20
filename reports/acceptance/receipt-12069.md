@@ -9,8 +9,15 @@ A `MemoryError` raised during module load (pytest collection phase) is correctly
 This directly satisfies the requirement to prove that an ordinary `MemoryError` during collection leaves a diagnostic trail and does not silently abort. The `pytest_abort_diagnostic_adapter` supervisor, which is now on `main` via #12240, saves child stdout and stderr logs referenced by the `DiagnosticManifest`. It records a non-zero child exit without incorrectly inferring an Out-Of-Memory (OOM) silent abort (`oom_inferred = False`). With diagnostics persisted, the wrapper preserves the positive child exit code: `2` for the collection failure above. The adapter test `test_memory_error_keeps_traceback_without_claiming_oom` separately covers a direct Python `MemoryError`, for which `wrapper_exit_code = 1`.
 
 **Evidence (Added Test):**
-A new unit test `tests/unit/scripts/engineering/ci/test_memory_error_collection.py` explicitly reproduces this exact `MemoryError` during collection scenario.
-Result: Exit code is 2, and the traceback (`MemoryError: synthetic-collection-memory-error`) is captured correctly in the standard output/error, proving that the collection abort leaves a clean diagnostic trail.
+`tests/unit/scripts/engineering/ci/test_memory_error_collection.py` runs pytest directly against a temporary module that raises `MemoryError` at import time. It does not invoke `pytest_abort_diagnostic_adapter`; that wrapper is covered by `test_memory_error_keeps_traceback_without_claiming_oom`.
+
+Command:
+
+```text
+.venv/bin/python -m pytest -q tests/unit/scripts/engineering/ci/test_memory_error_collection.py --tb=short
+```
+
+Result: exit code `0`, one passed test. Inside that test, `sys.executable -m pytest` on the temporary module returns `2`, and combined stdout/stderr contains both the frame `test_fake_memory_error.py` and `MemoryError: synthetic-collection-memory-error`.
 
 ## 2. Watchdog Timers Reconciliation
 

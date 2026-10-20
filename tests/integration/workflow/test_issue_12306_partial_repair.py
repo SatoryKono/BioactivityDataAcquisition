@@ -1,18 +1,21 @@
-import pytest
-from uuid import UUID
+from __future__ import annotations
 
 from dataclasses import dataclass
+from uuid import UUID
+
+import pytest
+
+from bioetl.application.services.control_plane.workflow.manifest_service import (
+    WorkflowManifestService,
+)
 from bioetl.application.services.workflow.control_plane.execution_service import (
     WorkflowExecutionService,
 )
 from bioetl.application.services.workflow.workflow_runner_service import (
-    WorkflowRunExecutionResult,
     WorkflowTransformDestructiveCommit,
 )
-from bioetl.application.services.control_plane.workflow.manifest_service import WorkflowManifestService
-from bioetl.domain.workflow import WorkflowConfig, TransformStepConfig
 from bioetl.domain.types import RunID
-from bioetl.domain.control_plane import WorkflowExecutionState
+from bioetl.domain.workflow import TransformStepConfig, WorkflowConfig
 
 from tests.helpers.clock import FIXED_TEST_TIME
 from tests.unit.application.services.control_plane.test_workflow_execution_service import (
@@ -23,6 +26,7 @@ from tests.unit.application.services.control_plane.test_workflow_execution_servi
     _create_workflow_ledger_service,
     _FakeWorkflowRunner,
 )
+
 
 def _build_two_step_transform_config() -> WorkflowConfig:
     return WorkflowConfig(
@@ -40,6 +44,7 @@ def _build_two_step_transform_config() -> WorkflowConfig:
             ),
         ),
     )
+
 
 @pytest.mark.asyncio
 async def test_workflow_execution_partial_repair_incomplete():
@@ -126,6 +131,8 @@ async def test_workflow_execution_partial_repair_incomplete():
         repair_steps=("step_b",),
     )
 
+    assert result.status == "success"
+    assert result.resumed is True
     state_after_repair = state_port.get_latest("chembl_repair_two_step")
     assert state_after_repair.status == "incomplete"
     assert state_after_repair.repair_required is True
@@ -152,15 +159,17 @@ async def test_workflow_execution_partial_repair_incomplete():
     result3 = await resume_service3.run_workflow(
         _build_two_step_transform_config(),
         resume_last=True,
-        repair_steps=("step_a",)
+        repair_steps=("step_a",),
     )
 
+    assert result3.status == "success"
+    assert result3.resumed is True
     state_after_full_repair = state_port.get_latest("chembl_repair_two_step")
     assert state_after_full_repair.status == "success"
     assert not state_after_full_repair.ambiguous_step_ids
 
     # Scenario 3: failure after repair
-    state_port.save(state_after_repair) # revert back to incomplete state
+    state_port.save(state_after_repair)  # revert back to incomplete state
 
     @dataclass
     class _CrashAfterRepairRunner:
@@ -189,8 +198,10 @@ async def test_workflow_execution_partial_repair_incomplete():
         await resume_service_fail.run_workflow(
             _build_two_step_transform_config(),
             resume_last=True,
-            repair_steps=("step_a",)
+            repair_steps=("step_a",),
         )
 
     state_after_fail = state_port.get_latest("chembl_repair_two_step")
-    assert state_after_fail.status == "incomplete"
+    assert state_after_fail.status == "running"
+    assert state_after_fail.repair_required is True
+    assert state_after_fail.ambiguous_step_ids == ("step_a",)

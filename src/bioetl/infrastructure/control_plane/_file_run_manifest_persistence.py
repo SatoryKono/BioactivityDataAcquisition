@@ -125,6 +125,23 @@ def _should_update_scope_index(
     )
 
 
+def _rebind_contract_evidence_identity(text: str, manifest_id: str) -> str:
+    """Point a copied sidecar at the successor when it names a manifest."""
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        return text
+    if not isinstance(payload, dict) or "manifest_id" not in payload:
+        return text
+    if payload.get("manifest_id") == manifest_id:
+        return text
+    payload["manifest_id"] = manifest_id
+    rendered = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True)
+    if text.endswith("\n"):
+        rendered += "\n"
+    return rendered
+
+
 def _inherited_contract_evidence(
     base_path: Path,
     manifest: RunManifest,
@@ -137,7 +154,11 @@ def _inherited_contract_evidence(
     destination = base_path / f"{manifest.manifest_id}.contract-evidence.json"
     if destination.exists() or not source.is_file():
         return None
-    return destination, source.read_text(encoding="utf-8")
+    inherited = source.read_text(encoding="utf-8")
+    return destination, _rebind_contract_evidence_identity(
+        inherited,
+        manifest.manifest_id,
+    )
 
 
 def _write_manifest_files(
@@ -236,6 +257,16 @@ def persist_manifest(
     try:
         store.base_path.mkdir(parents=True, exist_ok=True)
         run_index_path.parent.mkdir(parents=True, exist_ok=True)
+        predecessor_id = getattr(manifest, "predecessor_manifest_id", None)
+        if isinstance(predecessor_id, str) and predecessor_id.strip():
+            predecessor = store.get(predecessor_id)
+            if predecessor is None:
+                raise ValueError(f"predecessor manifest {predecessor_id!r} is missing")
+            if predecessor.run_id != manifest.run_id:
+                raise ValueError(
+                    "predecessor_manifest_id belongs to a different run_id: "
+                    f"{predecessor.run_id}"
+                )
         existing_manifest_id = store._load_manifest_id_for_run_id(manifest.run_id)
         if (
             existing_manifest_id is not None

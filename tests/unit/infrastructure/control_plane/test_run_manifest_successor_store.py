@@ -9,6 +9,7 @@ rolls the whole transaction back.
 
 from __future__ import annotations
 
+import json
 from dataclasses import replace
 from pathlib import Path
 from uuid import UUID
@@ -129,13 +130,32 @@ def test_successor_with_wrong_predecessor_is_rejected(
         _successor(original),
         predecessor_manifest_id="someone-else",
     )
-    with pytest.raises(StorageError, match="already mapped"):
+    with pytest.raises(
+        StorageError, match="predecessor manifest 'someone-else' is missing"
+    ):
         store.save(impostor)
 
     current = store.get_by_run_id(_RUN_ID)
     assert current is not None
     assert current.manifest_id == "m1"
     assert store.get("m2") is None
+
+
+def test_successor_predecessor_from_another_run_is_rejected(tmp_path: Path) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    foreign = replace(_original(), run_id=RunID(UUID(int=12015)))
+    store.save(foreign)
+    borrowed = replace(
+        _original(),
+        manifest_id="m2",
+        predecessor_manifest_id="m1",
+        run_id=_RUN_ID,
+    )
+    with pytest.raises(StorageError, match="different run_id"):
+        store.save(borrowed)
+
+    assert store.get("m2") is None
+    assert store.get_by_run_id(_RUN_ID) is None
 
 
 def test_failed_successor_save_rolls_back_transaction(
@@ -236,3 +256,22 @@ def test_successor_inherits_contract_evidence_sidecar(tmp_path: Path) -> None:
     assert (tmp_path / "m1.contract-evidence.json").read_text(
         encoding="utf-8"
     ) == evidence
+
+
+def test_successor_rebinds_contract_evidence_manifest_id(tmp_path: Path) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    original = _original()
+    store.save(original)
+    evidence = '{"manifest_id":"m1","schema_version":"contract_evidence_v1"}\n'
+    (tmp_path / "m1.contract-evidence.json").write_text(evidence, encoding="utf-8")
+
+    store.save(_successor(original))
+
+    copied = json.loads(
+        (tmp_path / "m2.contract-evidence.json").read_text(encoding="utf-8")
+    )
+    assert copied["manifest_id"] == "m2"
+    assert copied["schema_version"] == "contract_evidence_v1"
+    assert (tmp_path / "m1.contract-evidence.json").read_text(encoding="utf-8") == (
+        evidence
+    )

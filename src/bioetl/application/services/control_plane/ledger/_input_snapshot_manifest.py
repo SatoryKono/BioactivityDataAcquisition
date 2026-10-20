@@ -83,11 +83,9 @@ def persist_input_snapshots_on_manifest(
     if loaded is None:
         return None
     saver, manifest = loaded
-
     manifest_id_factory = getattr(service, "_manifest_id_factory", None)
     if manifest_id_factory is None:
         return None
-
     new_manifest_id = manifest_id_factory()
     new_refs = _merge_source_refs(
         getattr(manifest, "source_refs", ()) or (),
@@ -103,7 +101,6 @@ def persist_input_snapshots_on_manifest(
     input_snapshot_fingerprint = compute_input_snapshot_identity_fingerprint(
         [s for ref in new_refs for s in ref.input_snapshots]
     )
-
     execution_payload = build_execution_identity_payload_from_code_provenance(
         pipeline_name=manifest.pipeline_name,
         run_type=manifest.run_type.value,
@@ -118,7 +115,6 @@ def persist_input_snapshots_on_manifest(
         ),
     )
     new_fingerprint = compute_execution_identity_fingerprint(execution_payload)
-
     updated = replace(
         manifest,
         manifest_id=new_manifest_id,
@@ -147,6 +143,9 @@ def persist_input_snapshots_on_manifest(
             raise restore_error from exc
         raise
     service.manifest_id = updated.manifest_id
+    observer = getattr(service, "manifest_successor_observer", None)
+    if callable(observer):
+        observer(updated)
     return updated
 
 
