@@ -1017,18 +1017,23 @@ def test_support_tree_walk_and_flat_filter(tmp_path: Path) -> None:
     assert skips
     flat_root = _abs(tmp_path / "flat")
     (flat_root / _DATE).mkdir(parents=True)
-    called: list[int] = []
-    assert (
+    with pytest.raises(ValueError, match="Filters require a hierarchical"):
         support.find_old_date_dirs(
             flat_root,
             flat_structure=True,
             cutoff_str=_CUTOFF,
             provider="prov",
-            on_flat_filter=lambda: called.append(1),
         )
-        == []
-    )
-    assert called == [1]
+    with pytest.raises(ValueError, match="Filters require a hierarchical"):
+        support.find_old_date_dirs(
+            flat_root,
+            flat_structure=True,
+            cutoff_str=_CUTOFF,
+            entity="ent",
+        )
+    assert support.find_old_date_dirs(
+        flat_root, flat_structure=True, cutoff_str=_CUTOFF
+    ) == [flat_root / _DATE]
     assert (
         support.find_old_date_dirs(
             tmp_path / "absent", flat_structure=False, cutoff_str=_CUTOFF
@@ -1340,9 +1345,8 @@ def test_preview_counts_old_and_sentinel_dates(tmp_path: Path) -> None:
     assert view._resolve_bronze_preview_root("prov", None) == base / "prov"
     flat = _Preview(base, True)
     assert flat._resolve_bronze_preview_root("prov", "ent") == base
-    early = flat.preview_cleanup(provider="prov")
-    assert early["file_count"] == 0
-    assert early["exists"] is False
+    with pytest.raises(ValueError, match="Filters require a hierarchical"):
+        flat.preview_cleanup(provider="prov")
 
 
 def test_preview_missing_invalid_and_unsafe_root(tmp_path: Path, monkeypatch) -> None:

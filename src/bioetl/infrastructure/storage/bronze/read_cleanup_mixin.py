@@ -42,6 +42,7 @@ from bioetl.infrastructure.storage.bronze.cleanup_support import (
     find_old_date_dirs,
     root_components_safe,
     safe_rmdir,
+    validate_flat_scope_compatibility,
     validate_scope_filter,
 )
 
@@ -178,11 +179,6 @@ class BronzeWriterReadCleanupMixin(
             provider=provider,
             entity=entity,
             on_skip=on_skip or self._log_cleanup_skip,
-            on_flat_filter=lambda: self._logger.warning(
-                "bronze_cleanup_flat_scope_filter",
-                provider=provider,
-                entity=entity,
-            ),
         )
 
     def _is_old_date_dir(self, path: Path, cutoff_str: str) -> bool:
@@ -353,6 +349,7 @@ class BronzeWriterReadCleanupMixin(
         entity: str | None = None,
     ) -> dict[str, int]:
         """Remove Bronze files older than cutoff date."""
+        validate_flat_scope_compatibility(self._flat_structure, provider, entity)
         validate_scope_filter(provider, "provider")
         validate_scope_filter(entity, "entity")
         cutoff_str = cutoff_date.strftime("%Y-%m-%d")
