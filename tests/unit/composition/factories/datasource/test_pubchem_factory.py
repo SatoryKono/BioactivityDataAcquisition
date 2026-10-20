@@ -70,7 +70,6 @@ class TestCreatePubChemAdapter:
             max_retries=5,
             retry_base_delay=7.0,
             retry_max_delay=21.0,
-            timeout_sec=30.0,
         )
         helper_bundle = MagicMock()
         helper_bundle.metrics = MagicMock(name="metrics")

@@ -308,7 +308,6 @@ def _flat_old_date_dirs(
     cutoff_str: str,
     on_skip: Callable[[str, str], None] | None,
 ) -> list[Path]:
-    """List level-1 date dirs. Scope filters are refused before this call."""
     return _old_date_children(base_path, cutoff_str, on_skip)
 
 

@@ -360,7 +360,7 @@ def test_runtime_hash_and_pubchem_executor(monkeypatch: pytest.MonkeyPatch) -> N
 
     async def _run_executor() -> int:
         with ThreadPoolExecutor(max_workers=1) as pool:
-            runner = _create_executor_runner(pool, timeout_sec=30.0)
+            runner = _create_executor_runner(pool)
             return await runner(lambda: 7)
 
     import asyncio

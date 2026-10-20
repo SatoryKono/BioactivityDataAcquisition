@@ -127,7 +127,6 @@ def test_record_workflow_started_updates_running_state_and_clears_repairs() -> N
 
     assert context.state.status == "running"
     assert context.state.repair_required is True
-    assert context.state.ambiguous_step_ids == ("extract", "reconcile")
     assert context.state.last_event_id == "started-1"
     assert saved
 

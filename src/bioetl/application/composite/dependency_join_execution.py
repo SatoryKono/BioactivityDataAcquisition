@@ -107,7 +107,10 @@ def build_composite_join_execution_plan(
     *,
     resolved_context: ResolvedCompositeJoinContext,
     dependency: str,
-    join_executor: Callable[..., pl.DataFrame],
+    join_executor: Callable[
+        [pl.DataFrame, pl.DataFrame, list[str], list[str], str, bool],
+        pl.DataFrame,
+    ],
     required: bool = False,
 ) -> DependencyJoinExecutionSpec:
     """Plan composite-key join execution after context resolution."""
@@ -120,7 +123,7 @@ def build_composite_join_execution_plan(
             resolved_context.left_keys,
             resolved_context.right_keys,
             dependency,
-            required=required,
+            required,
         ),
         log_message="Joined dependency with composite key",
         log_fields={
@@ -134,7 +137,7 @@ def build_single_key_join_execution_plan(
     *,
     resolved_context: ResolvedSingleKeyJoinContext,
     dependency: str,
-    join_executor: Callable[..., pl.DataFrame],
+    join_executor: Callable[[pl.DataFrame, pl.DataFrame, str, str, str, bool], pl.DataFrame],
     required: bool = False,
 ) -> DependencyJoinExecutionSpec:
     """Plan single-key join execution after context resolution."""
@@ -147,7 +150,7 @@ def build_single_key_join_execution_plan(
             resolved_context.seed_join_key,
             resolved_context.dep_join_key,
             dependency,
-            required=required,
+            required,
         ),
         log_message="Joined dependency",
         log_fields={

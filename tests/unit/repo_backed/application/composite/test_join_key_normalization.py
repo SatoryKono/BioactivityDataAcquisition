@@ -98,7 +98,7 @@ def test_normalize_join_key_dataframe_columns_covers_supported_mutating_families
         "doi": ["10.1000/abc"],
         "inchi_key": ["BSYNRYMUTXBXSQ-UHFFFAOYSA-N"],
         "pmid": ["12345"],
-        "pmc_id": ["PMC123"],
+        "pmc_id": ["pmc123"],
         "target_id": ["CHEMBL203"],
         "uniprot_accession": ["P12345"],
         "title": ["Mixed Case Title"],

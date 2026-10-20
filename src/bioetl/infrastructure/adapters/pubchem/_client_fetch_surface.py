@@ -6,15 +6,9 @@ from __future__ import annotations
 __all__ = ["_PubChemClientFetchMixin"]
 
 from collections.abc import Callable
-from concurrent.futures import ThreadPoolExecutor
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.adapters.pubchem.fetch_flow import (
-    ExecutorTimeoutState,
-    wait_for_executor,
-)
-from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -24,47 +18,12 @@ if TYPE_CHECKING:
     )
 
 
-class _PoolFinalizer(Protocol):
-    """Owned-pool finalizer surface used when a timed-out worker is abandoned."""
-
-    @property
-    def alive(self) -> bool: ...
-
-    def detach(self) -> None: ...
-
-
 class _PubChemClientFetchMixin:
     """Fetch routing and filtered dispatch for the PubChem adapter."""
 
     _strategies: PubChemFetchStrategies = cast(
         Any, None
     )  # Any: host attr default (PD3)
-    _executor_timeout_sec: float | None
-    _executor_timeout_state: ExecutorTimeoutState
-    _owns_thread_pool: bool
-    thread_pool: ThreadPoolExecutor
-
-    async def _run_in_executor(
-        self,
-        func: Callable[..., object],
-        *args: object,
-    ) -> object:
-        """Wait for one SDK call. A timeout leaves the worker thread running."""
-        return await wait_for_executor(
-            BaseSyncAdapter._run_in_executor(cast(BaseSyncAdapter, self), func, *args),
-            self._executor_timeout_sec,
-            self._executor_timeout_state,
-        )
-
-    async def close(self) -> None:
-        """Do not block the event loop on a worker that may still be in urllib."""
-        if self._executor_timeout_state.timed_out and self._owns_thread_pool:
-            finalizer = cast(_PoolFinalizer | None, getattr(self, "_finalizer", None))
-            if finalizer is not None and finalizer.alive:
-                finalizer.detach()
-            self.thread_pool.shutdown(wait=False, cancel_futures=True)
-            return
-        await BaseSyncAdapter.close(cast(BaseSyncAdapter, self))
 
     async def _fetch_compound(
         self, query: str | None, limit: int | None

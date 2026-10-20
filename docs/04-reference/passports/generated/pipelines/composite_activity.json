@@ -223,6 +223,99 @@
       ],
       "conflict_resolution": "seed_priority",
       "exclude_fields": [],
+      "field_priorities": {
+        "pii": [
+          "pubmed"
+        ],
+        "polar_surface_area": [
+          "pubchem",
+          "chembl"
+        ],
+        "pref_name": [
+          "chembl",
+          "pubchem"
+        ],
+        "primary_component_id": [
+          "chembl"
+        ],
+        "primary_topic": [
+          "openalex"
+        ],
+        "publication_class": [
+          "chembl",
+          "pubmed",
+          "openalex",
+          "crossref",
+          "semanticscholar"
+        ],
+        "publication_subclass": [
+          "chembl",
+          "pubmed",
+          "openalex",
+          "crossref",
+          "semanticscholar"
+        ],
+        "publication_type_unified": [
+          "chembl",
+          "pubmed",
+          "openalex",
+          "crossref",
+          "semanticscholar"
+        ],
+        "publisher_id": [
+          "pubmed"
+        ],
+        "qed_weighted": [
+          "chembl"
+        ],
+        "references": [
+          "crossref"
+        ],
+        "rotatable_bond_count": [
+          "pubchem",
+          "chembl"
+        ],
+        "subject_fields": [
+          "semanticscholar"
+        ],
+        "subject_keywords": [
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ],
+        "subject_mesh": [
+          "pubmed",
+          "openalex"
+        ],
+        "subject_topics": [
+          "openalex"
+        ],
+        "synonyms": [
+          "chembl",
+          "pubchem"
+        ],
+        "target_id": [
+          "chembl"
+        ],
+        "taxonomy_id": [
+          "chembl"
+        ],
+        "therapeutic_flag": [
+          "chembl"
+        ],
+        "tissue_id": [
+          "chembl.assay"
+        ],
+        "title": [
+          "chembl",
+          "crossref",
+          "openalex"
+        ],
+        "withdrawn_flag": [
+          "chembl"
+        ]
+      },
       "output": {
         "gold": "data/output/gold/composite/activity",
         "silver": "data/output/silver/composite/activity"
@@ -367,8 +460,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.1.0",
-    "semantic_content_hash": "sha256:2dfc9f3bdb8ecf9a2b887b06f9918a734dd3e6a781d425c0d8ba4976416a487c",
-    "source_revision": "sha256:a7f81346642457e6fa37ff65b1355da2ee5ea0d2977d587e6ace4635438bae6e"
+    "semantic_content_hash": "sha256:206380d66cf7264ce58a78c093eb952ca717b4f87bf4bd7edb799bd3fd134f8e",
+    "source_revision": "sha256:f819ff129268d5118075b9a9afc3e6f6d6c1ce6cf3974501f2252667f72885a9"
   },
   "silver": {
     "dq_execution": {

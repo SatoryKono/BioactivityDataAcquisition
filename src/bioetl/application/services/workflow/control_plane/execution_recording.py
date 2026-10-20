@@ -25,6 +25,7 @@ from bioetl.application.services.workflow.control_plane.execution_recording_stat
     _find_step_state,
     _record_completed_transform_fingerprint,
     _record_step_state,
+    _remove_step_ids,
 )
 from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowRunExecutionResult,
@@ -64,9 +65,10 @@ def record_workflow_started(
     if force_steps:
         context.ledger.record_force_requested(step_ids=force_steps)
     started_entry = context.ledger.record_workflow_started(resumed=resumed)
-    # Selectors name the steps that may run. They do not clear ambiguity
-    # before that step reaches a confirmed success.
-    ambiguous_step_ids = context.state.ambiguous_step_ids
+    ambiguous_step_ids = _remove_step_ids(
+        context.state.ambiguous_step_ids,
+        repair_steps,
+    )
     repair_required = bool(ambiguous_step_ids) or any(
         step.commit_pending_confirmation for step in context.state.steps
     )
@@ -76,7 +78,7 @@ def record_workflow_started(
         updated_at=started_entry.occurred_at,
         last_event_id=started_entry.entry_id,
         repair_required=repair_required,
-        repair_hint=context.state.repair_hint if repair_required else None,
+        repair_hint=context.state.repair_hint if ambiguous_step_ids else None,
         ambiguous_step_ids=ambiguous_step_ids,
     )
     context.state_port.save(context.state)

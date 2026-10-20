@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3864 |
-| Tracked doc-like files | 3864 |
+| Doc-like files | 3862 |
+| Tracked doc-like files | 3862 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 78 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3864 |
+| tracked | 3862 |
 
 ## Lifecycle Counts
 
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 162 |
+| working_report | 160 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -55,7 +55,7 @@
 | Archived | 1550 |
 | Canonical | 75 |
 | Generated | 1062 |
-| Working | 429 |
+| Working | 427 |
 
 ## Surface Families
 
@@ -65,13 +65,13 @@
 | archive | 1550 |
 | canonical | 75 |
 | generated | 1062 |
-| working | 429 |
+| working | 427 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 195 |
+| archive-after-migration | 193 |
 | generate-automatically | 1062 |
 | keep | 2607 |
 
@@ -120,8 +120,6 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/runtime-receipt.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | Working | 0 | archive-after-migration |
-| `reports/acceptance/P04-REM-R10-acceptance-matrix.json` | Working | 0 | archive-after-migration |
-| `reports/acceptance/P04-REM-R10-acceptance-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/handoff.md` | Working | 0 | archive-after-migration |
@@ -159,6 +157,8 @@
 | `reports/observability/grafana/selector-audit-2026-07-20/selector-evidence.json` | Working | 0 | archive-after-migration |
 | `reports/observability/remediation/20260817/trust_manifest_validation.json` | Working | 0 | archive-after-migration |
 | `reports/observability/remediation/20260916/grafana-visual-10496-10504.md` | Working | 0 | archive-after-migration |
+| `reports/observability/remediation/20260916/selected-run-status-acceptance.md` | Working | 0 | archive-after-migration |
+| `reports/observability/runtime_cardinality_allowlist_review_5574.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

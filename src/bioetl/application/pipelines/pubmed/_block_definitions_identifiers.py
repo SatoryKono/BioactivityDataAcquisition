@@ -12,18 +12,12 @@ from bioetl.application.pipelines.pubmed.extractors.identifier import (
     IdentifierExtractor,
 )
 from bioetl.application.pipelines.pubmed.xml_parser import get_text
-from bioetl.domain.normalization.reference_ids import normalize_pmcid_reference_id
+from bioetl.domain.normalization import normalize_pmc_id
 from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.domain.value_objects.publications import DOI, PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DataNormalizationPort
-
-
-def _canonical_pmc_id(value: object) -> str | None:
-    """Return governed PMCID text, preserving unknown strings."""
-    normalized = normalize_pmcid_reference_id(value)
-    return normalized if isinstance(normalized, str) else None
 
 
 class _PubMedIdentifierBlock(_PubMedXmlBlock):
@@ -59,7 +53,7 @@ class _PubMedIdentifierBlock(_PubMedXmlBlock):
             "publisher_id": self._data_normalizer.normalize_to_string(
                 identifiers["publisher_id"]
             ),
-            "pmc_id": _canonical_pmc_id(identifiers["pmc_id"]),
+            "pmc_id": normalize_pmc_id(identifiers["pmc_id"]),
         }
 
 

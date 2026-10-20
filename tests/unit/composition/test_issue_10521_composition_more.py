@@ -287,7 +287,7 @@ def test_factory_pubchem_and_registry_helpers(monkeypatch: pytest.MonkeyPatch) -
     assert _resolve_circuit_breaker("missing") == (5, 300)
 
     async def _probe() -> None:
-        runner = _create_executor_runner(MagicMock(), timeout_sec=30.0)
+        runner = _create_executor_runner(MagicMock())
         assert callable(runner)
 
     import asyncio

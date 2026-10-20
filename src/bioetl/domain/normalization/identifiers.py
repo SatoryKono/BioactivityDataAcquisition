@@ -10,6 +10,7 @@ __all__ = [
     "normalize_doi",
     "normalize_ontology_id",
     "normalize_ontology_id_strict",
+    "normalize_pmc_id",
     "normalize_pmid",
     "strip_doi_prefix",
 ]
@@ -77,6 +78,18 @@ def normalize_pmid(pmid: str | int | None) -> str | None:
 
     if isinstance(pmid, str):
         return _normalize_pmid_from_str(pmid)
+
+
+def normalize_pmc_id(pmc_id: str | None) -> str | None:
+    """Normalize PMC ID to uppercase with ``PMC`` prefix."""
+    if not pmc_id:
+        return None
+    stripped = pmc_id.strip()
+    if not stripped:
+        return None
+    if not stripped.upper().startswith("PMC"):
+        return f"PMC{stripped}"
+    return stripped.upper()
 
 
 ONTOLOGY_PREFIXES = {

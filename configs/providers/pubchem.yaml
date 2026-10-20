@@ -6,8 +6,6 @@ source:
     base_url: https://pubchem.ncbi.nlm.nih.gov/rest/pug
     auth_type: public
     client:
-      # Bounds the SDK executor bridge and the health probe via asyncio.wait_for.
-      # The worker thread may continue urllib after the wait is cancelled.
       timeout_sec: 30.0
       max_retries: 3
     pagination:

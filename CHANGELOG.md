@@ -9,12 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
-- **PMCID canonicalizer (#12027):** public `normalize_pmc_id` is removed.
-  PubMed extraction and `pmc_id` / `pmcid` join keys use
-  `normalize_pmcid_reference_id`. Canonical values stay uppercase `PMC` plus
-  digits (`PMCID:456` → `PMC456`). Unknown text is preserved (`abc` stays
-  `abc`) and is no longer rewritten to `PMCabc` or lowercased to `pmc123`.
-
 - **Silver quarantine CLI alias retirement (#12054):**
   `--silver-filter-only` is removed from `quarantine inspect`, `quarantine stats`
   and `diagnostics quarantine` after its 2026-09-30 sunset. Older invocations
@@ -65,15 +59,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   documented inspection paths.
 
 ### Fixed
-
-- **Required composite joins (#12033, #12004):** a required enricher or
-  dependency now uses an INNER join and fails closed when a join-key column
-  is missing or any seed row stays unmatched. Optional sources keep the
-  configured left/full strategy and still return the seed frame when a key
-  column is absent. Enrichers with more than one `join_keys` entry dedupe on
-  the primary key and retry unmatched seed rows on each later key, so a
-  shared primary key no longer multiplies Gold rows. Seed cardinality is
-  preserved for optional left joins.
 
 - **Provider DNS fail-closed:** `getaddrinfo` / errno 11001 on data-source health
   raises `NetworkError` (CLI 86) instead of `InfrastructureError`, and HTTP

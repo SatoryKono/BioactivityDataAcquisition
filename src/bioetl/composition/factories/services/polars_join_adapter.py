@@ -36,7 +36,6 @@ class PolarsJoinBridge:
         right_key: str,
         pipeline_name: str,
         required: bool = False,
-        join_how: JoinHow | None = None,
     ) -> pl.DataFrame:
         """Execute join through adapted service."""
         return self._join_service.execute_polars_join(
@@ -45,8 +44,7 @@ class PolarsJoinBridge:
             left_key,
             right_key,
             pipeline_name,
-            required=required,
-            join_how=join_how,
+            required,
         )
 
     def execute_composite_key_join(
@@ -57,7 +55,6 @@ class PolarsJoinBridge:
         right_keys: list[str],
         pipeline_name: str,
         required: bool = False,
-        join_how: JoinHow | None = None,
     ) -> pl.DataFrame:
         """Execute composite-key join through adapted service."""
         return self._join_service.execute_composite_key_join(
@@ -66,8 +63,7 @@ class PolarsJoinBridge:
             left_keys,
             right_keys,
             pipeline_name,
-            required=required,
-            join_how=join_how,
+            required,
         )
 
 

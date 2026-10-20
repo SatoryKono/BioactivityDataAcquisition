@@ -168,5 +168,5 @@ class JoinPlannerService(JoinPlannerDelegationMixin):
             ),
             conflict_resolver=self._conflict_resolver,
             join_executor=self.execute_polars_join,
-            deduplicator=self._deduplicator,
+            required=enricher.required,
         )

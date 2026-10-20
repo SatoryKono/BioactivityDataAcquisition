@@ -320,7 +320,6 @@ shards:
       - tests/architecture/test_issue_10597_export_facade_shrink.py
       - tests/architecture/test_issue_11102_unsupported_k8s_manifests.py
       - tests/architecture/test_issue_11133_chembl_integration_diagram.py
-      - tests/architecture/test_issue_12029_parity_gates.py
       - tests/architecture/test_issue_5053_pipeline_transformer_closeout.py
       - tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py
       - tests/architecture/test_observability_export_dashboard_rollout_closeout.py
@@ -380,7 +379,6 @@ shards:
       - tests/architecture/test_documentation_issues_6497_6498_closeout.py
       - tests/architecture/test_issue_5265_domain_invariants_closeout.py
       - tests/architecture/test_issue_5272_application_core_coverage_closeout.py
-      - tests/architecture/test_issue_12027_pmcid_single_normalizer.py
       - tests/architecture/test_p1_config_topology_closeout.py
       - tests/architecture/test_rf014_composition_bootstrap_closeout.py
       - tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py

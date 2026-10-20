@@ -72,6 +72,7 @@ class EnricherDeduplicatorService:
         if not non_key_columns:
             # OPTIMIZATION: maintain_order=False avoids high FFI overhead for large cardinality data.
             # We explicitly sort afterwards to ensure deterministic output.
+            # We can use unique() here because there are no non-key columns, so all rows with the same key are entirely identical.
             result = (
                 df.select(key_columns).unique(maintain_order=False).sort(key_columns)
             )
@@ -119,15 +120,14 @@ class EnricherDeduplicatorService:
 
     @staticmethod
     def _record_deduplicated(count: int) -> None:
-        """Record composite deduplication in the active pipeline report."""
-        accounting = get_stage_accounting()
-        if accounting is not None and count > 0:
-            accounting.record_removal(
-                StageId.SILVER.value,
-                outcome="deduplicated",
-                reason_code="DEDUP_KEY_COLLISION",
-                count=count,
-            )
+        if accounting := get_stage_accounting():
+            if count > 0:
+                accounting.record_removal(
+                    StageId.SILVER.value,
+                    outcome="deduplicated",
+                    reason_code="DEDUP_KEY_COLLISION",
+                    count=count,
+                )
 
     def _classify_columns(
         self,

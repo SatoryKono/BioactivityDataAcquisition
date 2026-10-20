@@ -1056,9 +1056,6 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/application/composite/test_publication_schema_columns.py
       target_lane: repo-backed-unit
       protected_surface: configs/composites/publication.yaml column groups
-    - path: tests/unit/repo_backed/application/composite/test_issue_12031_seed_priority_coalesce.py
-      target_lane: repo-backed-unit
-      protected_surface: configs/composites/{activity,assay,target}.yaml seed-priority coalesce for column groups of size 2, 3, and 4
     - path: tests/unit/repo_backed/application/pipelines/common/test_base_publication_transformer.py
       target_lane: repo-backed-unit
       protected_surface: configs/** publication controlled vocabulary bootstrap inputs
@@ -1110,9 +1107,6 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/infrastructure/adapters/chembl/test_fetch_multi_filter_mixin.py
       target_lane: repo-backed-unit
       protected_surface: src/bioetl/infrastructure/adapters/chembl/fetch_multi_filter_mixin.py
-    - path: tests/unit/repo_backed/infrastructure/config/test_composite_sort_by_closure.py
-      target_lane: repo-backed-unit
-      protected_surface: configs/composites/{activity,assay,molecule,publication,target}.yaml merge.sort_by closure, configs/composites/field_groups/shared_policy.yaml field_priorities, and configs/_schema/composite.json MergeSortBySchema
     - path: tests/unit/repo_backed/infrastructure/test_cr_8917_wsl_secret_redaction.py
       target_lane: repo-backed-unit
       protected_surface: scripts/memory/setup/wsl_startup.sh secret-bearing value handoff contract

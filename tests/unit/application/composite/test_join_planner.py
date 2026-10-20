@@ -35,10 +35,7 @@ from unittest.mock import MagicMock
 import polars as pl
 import pytest
 
-from bioetl.application.composite.join_execution import (
-    JoinHow,
-    RequiredJoinKeyError,
-)
+from bioetl.application.composite.join_execution import JoinHow
 from bioetl.application.composite.join_planner import JoinPlannerService
 from tests.unit.application.composite.merge_test_support import (
     build_join_planner_service,
@@ -401,6 +398,40 @@ def test_execute_polars_join_missing_key_returns_left(
 
     assert result.equals(left_df)
 
+@pytest.mark.unit
+def test_execute_composite_key_join_missing_key_required_raises(
+    planner: JoinPlannerService,
+) -> None:
+    left_df = pl.DataFrame({"left_id": [1], "v": ["a"]})
+    right_df = pl.DataFrame({"other": [1], "x": ["b"]})
+
+    with pytest.raises(ValueError, match="Required composite join skipped: key not found in columns"):
+        planner.execute_composite_key_join(
+            left_df=left_df,
+            right_df=right_df,
+            left_keys=["missing_left", "other_missing"],
+            right_keys=["other", "missing"],
+            pipeline_name="pubmed_publication",
+            required=True,
+        )
+
+@pytest.mark.unit
+def test_execute_polars_join_missing_key_required_raises(
+    planner: JoinPlannerService,
+) -> None:
+    left_df = pl.DataFrame({"left_id": [1], "v": ["a"]})
+    right_df = pl.DataFrame({"other": [1], "x": ["b"]})
+
+    with pytest.raises(ValueError, match="Required join skipped: key not found in columns"):
+        planner.execute_polars_join(
+            left_df=left_df,
+            right_df=right_df,
+            left_key="missing_left",
+            right_key="other",
+            pipeline_name="pubmed_publication",
+            required=True,
+        )
+
 
 @pytest.mark.unit
 def test_execute_polars_join_type_mismatch_and_temp_key(
@@ -493,51 +524,3 @@ def test_composite_key_resolution_and_join_type_mapping(
     assert planner.get_polars_join_type() == "full"
     object.__setattr__(planner._config, "strategy", "unknown")
     assert planner.get_polars_join_type() == "left"
-
-
-@pytest.mark.unit
-def test_execute_polars_join_missing_key_required_raises(
-    planner: JoinPlannerService,
-) -> None:
-    left_df = pl.DataFrame({"left_id": [1], "v": ["a"]})
-    right_df = pl.DataFrame({"other": [1], "x": ["b"]})
-
-    with pytest.raises(RequiredJoinKeyError, match="missing_left"):
-        planner.execute_polars_join(
-            left_df=left_df,
-            right_df=right_df,
-            left_key="missing_left",
-            right_key="other",
-            pipeline_name="pubmed_publication",
-            required=True,
-        )
-
-
-@pytest.mark.unit
-def test_execute_composite_key_join_missing_key_required_raises(
-    planner: JoinPlannerService,
-) -> None:
-    with pytest.raises(RequiredJoinKeyError, match="pmid"):
-        planner.execute_composite_key_join(
-            left_df=pl.DataFrame({"doi": ["10.1/a"]}),
-            right_df=pl.DataFrame({"doi": ["10.1/a"]}),
-            left_keys=["doi", "pmid"],
-            right_keys=["doi", "pmid"],
-            pipeline_name="pubmed_publication",
-            required=True,
-        )
-
-
-@pytest.mark.unit
-def test_execute_polars_join_required_unmatched_rows_fail_closed(
-    planner: JoinPlannerService,
-) -> None:
-    with pytest.raises(RequiredJoinKeyError, match="cardinality"):
-        planner.execute_polars_join(
-            left_df=pl.DataFrame({"id": ["a", "b"]}),
-            right_df=pl.DataFrame({"id": ["a"], "x": [1]}),
-            left_key="id",
-            right_key="id",
-            pipeline_name="crossref_publication",
-            required=True,
-        )

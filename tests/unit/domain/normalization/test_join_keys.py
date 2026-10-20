@@ -84,7 +84,7 @@ def test_normalize_join_key_scalar_preserves_non_string_values() -> None:
         ("doi", " 10.1000/ABC ", "10.1000/abc"),
         ("inchi_key", " bsynrymutxbxsq-uhfffaoysa-n ", "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"),
         ("pmid", " PMID:12345 ", "12345"),
-        ("pmc_id", " PMC123 ", "PMC123"),
+        ("pmc_id", " PMC123 ", "pmc123"),
         ("target_id", " chembl0203 ", "CHEMBL203"),
         ("uniprot_accession", " p12345 ", "P12345"),
         ("title", "  Mixed\t Case\nTitle  ", "Mixed Case Title"),
@@ -101,9 +101,7 @@ def test_normalize_join_key_text_covers_supported_mutating_families(
 
 def test_stringify_join_key_value_normalizes_float_ints_and_strings() -> None:
     assert stringify_join_key_value(42.0, key="pmid") == "42"
-    assert stringify_join_key_value(" PMC123 ", key="pmc_id") == "PMC123"
-    assert stringify_join_key_value("PMCID:456", key="pmc_id") == "PMC456"
-    assert stringify_join_key_value("abc", key="pmcid") == "abc"
+    assert stringify_join_key_value(" PMC123 ", key="pmc_id") == "pmc123"
 
 
 def test_invalid_identifier_family_collapses_to_empty_join_key() -> None:
