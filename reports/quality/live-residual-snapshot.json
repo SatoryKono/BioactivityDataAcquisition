@@ -41,9 +41,9 @@
     "application_services_control_plane": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 1,
-      "helper_function_ratio": 0.4,
+      "helper_function_ratio": 0.397,
       "files": 130,
-      "total_loc": 15442,
+      "total_loc": 15306,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
@@ -52,7 +52,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.345,
       "files": 55,
-      "total_loc": 6587,
+      "total_loc": 6585,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     }
