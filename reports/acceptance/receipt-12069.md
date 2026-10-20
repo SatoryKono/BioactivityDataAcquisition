@@ -14,14 +14,15 @@ Result: Exit code is 2, and the traceback (`MemoryError: synthetic-collection-me
 
 ## 2. Watchdog Timers Reconciliation
 
-The system employs two timeout mechanisms that could conceptually overlap:
+`run_pytest_resilient.py` enables Python's `faulthandler` with `-X faulthandler`. This enables fault tracebacks; it does not configure a separate 120-second timer or process termination.
+
+Timeout bounds are configured separately:
 
 1.  **pytest-timeout (60s):** Configured in `pyproject.toml` (`timeout = 60`, `timeout_method = "thread"`). This bounds individual tests; the thread timeout can terminate the test runner, so suite continuation or a complete JUnit report is not guaranteed.
-2.  **diagnostic watchdog (`-X faulthandler` + timeout bounds):** A Python process-level supervisor wrapping the execution. The diagnostic adapter `child_watchdog_seconds` from `pytest_abort_diagnostic_adapter.py` derives the timeout from the caller's total budget minus a diagnostic and cleanup margin. `-X faulthandler` enables fault tracebacks; it does not itself configure a 120-second timer.
+2.  **external diagnostic watchdog:** A Python process-level supervisor wrapping the execution. The diagnostic adapter `child_watchdog_seconds` from `pytest_abort_diagnostic_adapter.py` derives the timeout from the caller's total budget minus a diagnostic and cleanup margin.
 
 **Reconciliation:**
-There was a concern regarding `faulthandler dump 120 с vs pytest-timeout 60 с`.
-These represent distinct layers: the per-test timeout bounds an individual test, while the diagnostic supervisor bounds the entire child run. For the serial-coverage pass budget, `child_watchdog_seconds` stays above the 60-second per-test timeout; the outer timeout is budget-dependent rather than a fixed 120 seconds.
+The per-test timeout bounds an individual test, while the diagnostic supervisor bounds the entire child run. For the serial-coverage pass budget, `child_watchdog_seconds` stays above the 60-second per-test timeout; the outer timeout depends on the caller's budget.
 
 The outer watchdog records `WATCHDOG_TIMEOUT` when the child run exceeds its budget. It provides a last-resort safety net when the test runner is unresponsive and the per-test timeout cannot terminate it. On POSIX it attempts a diagnostic `SIGABRT` before process-tree cleanup.
 
