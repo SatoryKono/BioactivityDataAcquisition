@@ -171,6 +171,7 @@ def test_posix_signal_abort_wrapper_is_nonzero(tmp_path: Path) -> None:
     assert manifest.signal == -manifest.exit_code
     assert manifest.wrapper_exit_code == 128 + manifest.signal
     assert manifest.wrapper_exit_code != 0
+    assert manifest.oom_inferred is False
 
 
 def test_timeout_is_nonzero_and_does_not_invent_junit(tmp_path: Path) -> None:
