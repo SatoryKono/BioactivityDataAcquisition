@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 import os
-from contextlib import suppress
-import fcntl
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager, suppress
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import TYPE_CHECKING, override
@@ -26,7 +26,7 @@ from bioetl.infrastructure.control_plane._file_lineage_index import (
 from bioetl.infrastructure.control_plane._file_lineage_queries import (
     FileLineageQueriesMixin,
 )
-from bioetl.infrastructure.storage.atomic import atomic_write_text
+from bioetl.infrastructure.storage.atomic import AtomicWriteError, atomic_write_text
 
 __all__ = ["FileLineageStore"]
 
@@ -36,6 +36,60 @@ if TYPE_CHECKING:
 
 _LINEAGE_APPEND_OPEN_FLAGS = os.O_APPEND | os.O_CREAT | os.O_WRONLY
 _LineageIndexCorruptionError = LineageIndexCorruptionError
+
+
+def _lock_byte_range(
+    lock_fd: int,
+    *,
+    locking: Callable[[int, int, int], object],
+    mode: int,
+) -> None:
+    """Lock one byte at the start of a lock file, initializing an empty file."""
+    os.lseek(lock_fd, 0, os.SEEK_SET)
+    if os.fstat(lock_fd).st_size < 1:
+        os.write(lock_fd, b"\0")
+        os.lseek(lock_fd, 0, os.SEEK_SET)
+    locking(lock_fd, mode, 1)
+
+
+def _acquire_exclusive_lock(lock_fd: int) -> None:
+    """Take an interprocess exclusive lock, using msvcrt on native Windows."""
+    try:
+        import fcntl
+    except ImportError:
+        import msvcrt
+
+        _lock_byte_range(lock_fd, locking=msvcrt.locking, mode=msvcrt.LK_LOCK)
+        return
+    fcntl.flock(lock_fd, fcntl.LOCK_EX)
+
+
+def _release_exclusive_lock(lock_fd: int) -> None:
+    """Release the lock acquired by ``_acquire_exclusive_lock``."""
+    try:
+        import fcntl
+    except ImportError:
+        import msvcrt
+
+        _lock_byte_range(lock_fd, locking=msvcrt.locking, mode=msvcrt.LK_UNLCK)
+        return
+    fcntl.flock(lock_fd, fcntl.LOCK_UN)
+
+
+@contextmanager
+def _exclusive_base_lock(lock_path: Path) -> Iterator[None]:
+    """Hold one exclusive per-root lock and always close its descriptor."""
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    lock_fd = os.open(lock_path, os.O_CREAT | os.O_RDWR)
+    try:
+        _acquire_exclusive_lock(lock_fd)
+        try:
+            yield
+        finally:
+            with suppress(OSError):
+                _release_exclusive_lock(lock_fd)
+    finally:
+        os.close(lock_fd)
 
 
 def _stable_key_filename(key: str) -> str:
@@ -87,16 +141,13 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
         fragments_dir = self.base_path / "fragments"
         fragments_dir.mkdir(parents=True, exist_ok=True)
 
-        lock_path = self.base_path / "_save.lock"
-        lock_path.parent.mkdir(parents=True, exist_ok=True)
-        lock_fd = os.open(lock_path, os.O_CREAT | os.O_RDWR)
-        fcntl.flock(lock_fd, fcntl.LOCK_EX)
-
-        try:
-            stored_fragment_id = fragment.stored_fragment_id or _build_stored_fragment_id(
-                fragment
+        with _exclusive_base_lock(self.base_path / "_save.lock"):
+            stored_fragment_id = (
+                fragment.stored_fragment_id or _build_stored_fragment_id(fragment)
             )
-            persisted_fragment = replace(fragment, stored_fragment_id=stored_fragment_id)
+            persisted_fragment = replace(
+                fragment, stored_fragment_id=stored_fragment_id
+            )
             fragment_path = self._fragment_path(stored_fragment_id)
             existing_fragment_payload = (
                 fragment_path.read_text(encoding="utf-8")
@@ -117,11 +168,10 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
                     index_rollbacks=index_rollbacks,
                 )
                 if rollback_errors:
-                    raise RuntimeError(f"Rollback failed with errors: {rollback_errors}") from error
+                    raise RuntimeError(
+                        f"Rollback failed with errors: {rollback_errors}"
+                    ) from error
                 raise
-        finally:
-            fcntl.flock(lock_fd, fcntl.LOCK_UN)
-            os.close(lock_fd)
 
     def _fragment_indexes(
         self,
@@ -185,8 +235,8 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
         else:
             try:
                 atomic_write_text(fragment_path, existing_fragment_payload)
-            except OSError as e:
-                errors.append(e)
+            except (AtomicWriteError, OSError) as error:
+                errors.append(error)
         return errors
 
     def _fragment_path(self, fragment_id: str) -> Path:
