@@ -77,6 +77,43 @@ def test_missing_time_metrics_are_not_invented(raw):
         capture._time_metrics(raw)
 
 
+def test_capture_rejects_untracked_files_hidden_by_git_config(tmp_path, monkeypatch):
+    subprocess.run(["git", "init", "--quiet", str(tmp_path)], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.name=Test",
+            "-c",
+            "user.email=test@example.invalid",
+            "commit",
+            "--quiet",
+            "--allow-empty",
+            "-m",
+            "fixture",
+        ],
+        cwd=tmp_path,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "status.showUntrackedFiles", "no"],
+        cwd=tmp_path,
+        check=True,
+    )
+    untracked = tmp_path / "nested" / "source.py"
+    untracked.parent.mkdir()
+    untracked.write_text("# untracked source\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("GITHUB_SHA", raising=False)
+    output = tmp_path / "evidence"
+
+    with pytest.raises(SystemExit) as exc:
+        capture.main(["--output-dir", str(output)])
+
+    assert exc.value.code == 2
+    assert not output.exists()
+
+
 @pytest.mark.parametrize("dirty,github_sha", [(True, SHA), (False, "b" * 40)])
 def test_capture_rejects_unbound_source_before_creating_evidence(
     tmp_path, monkeypatch, dirty, github_sha
