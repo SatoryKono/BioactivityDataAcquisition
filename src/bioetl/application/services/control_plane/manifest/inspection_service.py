@@ -60,19 +60,35 @@ def _ledger_entries_for_manifest(
     ledger_port = service.ledger_port
     if ledger_port is None:
         return ()
-    ordered_ids: list[str] = []
+    ordered: list[RunManifest] = []
     seen: set[str] = set()
     current: RunManifest | None = manifest
-    while current is not None and current.manifest_id not in seen:
+    while current is not None:
+        if current.manifest_id in seen:
+            raise RunManifestInspectionCorruptionError(
+                manifest.manifest_id,
+                "predecessor chain contains a cycle",
+            )
         seen.add(current.manifest_id)
-        ordered_ids.append(current.manifest_id)
+        ordered.append(current)
         predecessor_id = current.predecessor_manifest_id
         if not predecessor_id:
             break
-        current = service.manifest_port.get(predecessor_id)
+        try:
+            current = service.manifest_port.get(predecessor_id)
+        except ValueError as exc:
+            raise RunManifestInspectionCorruptionError(
+                manifest.manifest_id,
+                str(exc),
+            ) from exc
+        if current is None:
+            raise RunManifestInspectionCorruptionError(
+                manifest.manifest_id,
+                f"predecessor manifest {predecessor_id!r} is missing",
+            )
     entries: list[RunLedgerEntry] = []
-    for manifest_id in reversed(ordered_ids):
-        entries.extend(ledger_port.list_entries(manifest_id))
+    for item in reversed(ordered):
+        entries.extend(ledger_port.list_entries(item.manifest_id))
     return tuple(entries)
 
 
