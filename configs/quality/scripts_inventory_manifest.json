@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-19T11:22:57.074158+00:00",
+  "generated_at": "2026-10-20T03:22:02.708541+00:00",
   "summary": {
     "total_scripts": 654,
     "status_counts": {
@@ -1467,7 +1467,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_review_registry.py",
-          "line": 548,
+          "line": 571,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.bat\": \"scripts/ai/codex/setup-codex-wsl.bat\","
         }
@@ -1536,7 +1536,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_review_registry.py",
-          "line": 549,
+          "line": 572,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.ps1\": \"scripts/ai/codex/setup.ps1\","
         },
@@ -11129,7 +11129,7 @@
         },
         {
           "path": "scripts/engineering/qa/debt_governance_gate_evaluators.py",
-          "line": 1102,
+          "line": 1104,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::\""
         },
@@ -13265,7 +13265,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 400,
+      "reference_count": 401,
       "references": [
         {
           "path": ".circleci/config.yml",
