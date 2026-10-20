@@ -27,7 +27,7 @@ class TestPubChemResilienceContract:
 
         # Fake SDK calls that throw 429 and finally succeed
         call_count = 0
-        def fake_pubchem_call(*args, **kwargs):
+        def fake_pubchem_call(*_args: object, **_kwargs: object) -> list[str]:
             nonlocal call_count
             call_count += 1
             if call_count < 3:

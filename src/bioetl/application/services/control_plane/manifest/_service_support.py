@@ -81,7 +81,6 @@ class RunManifestPayloadMixin:
             "entity": request.entity,
             "workflow_run_id": request.workflow_run_id,
             "workflow_name": request.workflow_name,
-            "predecessor_manifest_id": request.predecessor_manifest_id,
             "workflow_step_id": request.workflow_step_id,
             "launch_context": request.launch_context,
             "runtime_config": request.runtime_config,

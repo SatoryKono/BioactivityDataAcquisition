@@ -47,7 +47,6 @@ def test_bronze_snapshots_update_manifest_capability() -> None:
     service = MagicMock()
     service.manifest_port = port
     service.manifest_id = "m1"
-    service._manifest_id_factory = lambda: "m2"
     record_input_snapshots_from_artifact(
         service,
         layer="bronze",
@@ -68,8 +67,6 @@ def test_bronze_snapshots_update_manifest_capability() -> None:
     service.record_input_snapshot_published.assert_called_once()
     port.save.assert_called_once()
     saved = port.save.call_args[0][0]
-    assert saved.manifest_id == "m2"
-    assert saved.predecessor_manifest_id == "m1"
     assert saved.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
     assert saved.source_refs[0].input_snapshots[0].snapshot_id == "snap-1"
     assert saved.source_refs[0].input_snapshots[0].content_hash == "abc"
@@ -105,7 +102,6 @@ def test_bronze_attach_records_verified_snapshot_object(tmp_path) -> None:
     service = MagicMock()
     service.manifest_port = port
     service.manifest_id = "m1"
-    service._manifest_id_factory = lambda: "m2"
     record_input_snapshots_from_artifact(
         service,
         layer="bronze",
@@ -125,8 +121,6 @@ def test_bronze_attach_records_verified_snapshot_object(tmp_path) -> None:
     )
     port.save.assert_called_once()
     saved = port.save.call_args[0][0]
-    assert saved.manifest_id == "m2"
-    assert saved.predecessor_manifest_id == "m1"
     assert dict(saved.objects) == {"input_snapshot_fingerprint": True}
 
 
@@ -158,7 +152,6 @@ def test_bronze_attach_without_batch_file_leaves_objects_unset(tmp_path) -> None
     service = MagicMock()
     service.manifest_port = port
     service.manifest_id = "m1"
-    service._manifest_id_factory = lambda: "m2"
     record_input_snapshots_from_artifact(
         service,
         layer="bronze",
@@ -178,8 +171,6 @@ def test_bronze_attach_without_batch_file_leaves_objects_unset(tmp_path) -> None
     )
     port.save.assert_called_once()
     saved = port.save.call_args[0][0]
-    assert saved.manifest_id == "m2"
-    assert saved.predecessor_manifest_id == "m1"
     assert dict(saved.objects) == {}
 
 

@@ -118,7 +118,6 @@ def assemble_manifest_create_spec(
         launch_context=launch_context,
         runtime_config=runtime_config,
         resolved_config=to_serializable_mapping(inputs.yaml_config),
-        predecessor_manifest_id=None,
         replay_of_run_id=replay_of_run_id,
         replay_of_manifest_id=replay_of_manifest_id,
         workflow_run_id=ctx.workflow_run_id,
@@ -173,7 +172,6 @@ def create_ledger_service(
         run_id=ctx.run_id,
         _entry_id_factory=lambda: create_runtime_occurrence_id("run_ledger_entry"),
         _occurred_at_factory=SystemClock().now,
-        _manifest_id_factory=lambda: create_runtime_occurrence_id("run_manifest"),
     )
 
 
