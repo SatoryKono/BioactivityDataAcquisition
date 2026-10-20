@@ -189,77 +189,6 @@
       ],
       "conflict_resolution": "seed_priority",
       "exclude_fields": [],
-      "field_priorities": {
-        "pii": [
-          "pubmed"
-        ],
-        "primary_component_id": [
-          "chembl"
-        ],
-        "primary_topic": [
-          "openalex"
-        ],
-        "publication_class": [
-          "chembl",
-          "pubmed",
-          "openalex",
-          "crossref",
-          "semanticscholar"
-        ],
-        "publication_id": [
-          "chembl.activity"
-        ],
-        "publication_subclass": [
-          "chembl",
-          "pubmed",
-          "openalex",
-          "crossref",
-          "semanticscholar"
-        ],
-        "publication_type_unified": [
-          "chembl",
-          "pubmed",
-          "openalex",
-          "crossref",
-          "semanticscholar"
-        ],
-        "publisher_id": [
-          "pubmed"
-        ],
-        "references": [
-          "crossref"
-        ],
-        "subject_fields": [
-          "semanticscholar"
-        ],
-        "subject_keywords": [
-          "crossref",
-          "openalex",
-          "pubmed",
-          "semanticscholar"
-        ],
-        "subject_mesh": [
-          "pubmed",
-          "openalex"
-        ],
-        "subject_topics": [
-          "openalex"
-        ],
-        "target_id": [
-          "chembl"
-        ],
-        "taxonomy_id": [
-          "chembl"
-        ],
-        "tissue_id": [
-          "chembl.assay"
-        ],
-        "title": [
-          "chembl",
-          "crossref",
-          "openalex"
-        ]
-      },
       "output": {
         "gold": "data/output/gold/composite/molecule",
         "silver": "data/output/silver/composite/molecule"
@@ -403,8 +332,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.1.0",
-    "semantic_content_hash": "sha256:35a4d1a56cb89a74fc47523f38a5ce7c389ba79857d0ee81b2648dd56c6e723a",
-    "source_revision": "sha256:f819ff129268d5118075b9a9afc3e6f6d6c1ce6cf3974501f2252667f72885a9"
+    "semantic_content_hash": "sha256:fc014abd362c2143e93b84a368ed97ea90e0329a8286b225adeabfd72deafd36",
+    "source_revision": "sha256:a7f81346642457e6fa37ff65b1355da2ee5ea0d2977d587e6ace4635438bae6e"
   },
   "silver": {
     "dq_execution": {
