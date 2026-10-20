@@ -64,7 +64,6 @@ def bind_cached_bronze_context[T](
         if isinstance(ctx, type):
             raise TypeError("cached_bronze binding requires a dataclass instance")
         return replace(ctx, cached_bronze=cached_bronze)
-    # Bind in place so callers retain the original context type and methods.
     try:
         object.__setattr__(ctx, "cached_bronze", cached_bronze)
         return ctx
@@ -124,7 +123,8 @@ def _resolve_parent_bronze_date(*, manifest: RunManifest, settings: Settings) ->
     ledger_store = FileRunLedgerStore(
         base_path=control_plane_root(settings, "run_ledger")
     )
-    ledger_entries = tuple(ledger_store.list_entries(manifest.manifest_id))
+    selected = ledger_store.list_entries_by_run_id(manifest.run_id)
+    ledger_entries = tuple(selected or ledger_store.list_entries(manifest.manifest_id))
     bronze_dates = _collect_ledger_bronze_dates(
         manifest=manifest,
         ledger_entries=ledger_entries,
