@@ -10,7 +10,6 @@ fingerprints instead of degrading to ``semantic_drift``.
 from __future__ import annotations
 
 from dataclasses import replace
-from pathlib import Path
 from types import SimpleNamespace
 from uuid import UUID
 
@@ -33,12 +32,12 @@ from bioetl.domain.control_plane import (
 from bioetl.domain.control_plane.execution_identity import (
     build_execution_identity_payload_from_code_provenance,
 )
+from bioetl.domain.exceptions import InfrastructureError
 from bioetl.domain.normalization import (
     compute_execution_identity_fingerprint,
     compute_input_snapshot_identity_fingerprint,
 )
 from bioetl.domain.types import RunID, RunType
-from bioetl.infrastructure.storage.atomic import AtomicWriteError
 
 _RUN_ID = RunID(UUID(int=12006))
 _SNAPSHOT = RunInputSnapshotRef(
@@ -323,11 +322,11 @@ def test_attach_rebind_failure_restores_predecessor_and_keeps_service_id() -> No
 
     class _Ledger:
         def record_manifest_successor(self, **kwargs: object) -> None:
-            raise AtomicWriteError(Path("ledger-index"), "injected rebind failure")
+            raise InfrastructureError("injected rebind failure")
 
     service = _service(store)
     service.ledger_port = _Ledger()
-    with pytest.raises(AtomicWriteError, match="injected rebind failure"):
+    with pytest.raises(InfrastructureError, match="injected rebind failure"):
         _attach(service)
 
     assert service.manifest_id == "m1"
@@ -343,7 +342,7 @@ def test_attach_restore_failure_chains_the_rebind_error() -> None:
 
     class _Ledger:
         def record_manifest_successor(self, **kwargs: object) -> None:
-            raise AtomicWriteError(Path("ledger-index"), "injected rebind failure")
+            raise InfrastructureError("injected rebind failure")
 
     def _fail_restore(predecessor: RunManifest, successor_manifest_id: str) -> None:
         raise OSError("injected restore failure")
@@ -354,7 +353,7 @@ def test_attach_restore_failure_chains_the_rebind_error() -> None:
     with pytest.raises(OSError, match="injected restore failure") as caught:
         _attach(service)
 
-    assert isinstance(caught.value.__cause__, AtomicWriteError)
+    assert isinstance(caught.value.__cause__, InfrastructureError)
     assert "injected rebind failure" in str(caught.value.__cause__)
     assert service.manifest_id == "m1"
 
