@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-20T03:22:02.708541+00:00",
+  "generated_at": "2026-10-20T06:53:42.654954+00:00",
   "summary": {
     "total_scripts": 654,
     "status_counts": {
@@ -17067,7 +17067,7 @@
         },
         {
           "path": "tests/architecture/test_arch_s4_s9_gates.py",
-          "line": 13,
+          "line": 15,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_lazy_import_inventory import ("
         },
@@ -17446,7 +17446,7 @@
         },
         {
           "path": "tests/architecture/test_arch_s4_s9_gates.py",
-          "line": 107,
+          "line": 109,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_source_tree_manifest import build_manifest"
         }
