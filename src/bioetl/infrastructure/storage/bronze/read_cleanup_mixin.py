@@ -151,6 +151,7 @@ class BronzeWriterReadCleanupMixin(
     """Apply and report nonmutating Bronze cleanup plans."""
 
     _metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD3)
+    _root_identity: tuple[str, str] | None = None
     _resolve_bronze_path: Callable[[str, str, str, str], str] = cast(
         Any, None
     )  # Any: host method default (PD3)
@@ -230,7 +231,11 @@ class BronzeWriterReadCleanupMixin(
     ) -> dict[str, int]:
         stats = self._empty_cleanup_stats()
         group_cleanup = group_cleanup_for_lock(
-            locked_root, cutoff_str, self._flat_structure, self._log_cleanup_skip
+            locked_root,
+            cutoff_str,
+            self._flat_structure,
+            self._log_cleanup_skip,
+            root_identity=self._root_identity,
         )
         if (
             group_cleanup is not None

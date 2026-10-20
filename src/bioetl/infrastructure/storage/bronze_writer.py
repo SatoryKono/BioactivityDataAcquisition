@@ -215,6 +215,7 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         self._metadata_coordinator = services.metadata_coordinator
         self._lineage_store = services.lineage_store
         self._flat_structure = flat_structure
+        self._root_identity = services.root_identity
 
     async def write_bronze(
         self,
