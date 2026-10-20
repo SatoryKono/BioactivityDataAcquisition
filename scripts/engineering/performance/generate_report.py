@@ -1,6 +1,7 @@
 import os
 import re
 
+
 def parse_logs():
     sizes = [1000000, 2000000, 5000000]
     out_dir = "reports/performance/raw_logs"
@@ -12,7 +13,9 @@ def parse_logs():
         lazy_file = f"{out_dir}/lazy_{size}.txt"
         hash_file = f"{out_dir}/hash_{size}.txt"
 
-        file_size = os.path.getsize(f"/tmp/measure_merge_silver_{size}.parquet")
+        file_size = os.path.getsize(
+            f"reports/performance/raw_logs/measure_merge_silver_{size}.parquet"
+        )
 
         eager_wall = "N/A"
         eager_rss = "N/A"
@@ -38,14 +41,20 @@ def parse_logs():
                 if "EAGER_HASH:" in line:
                     hash_val = line.split(":")[1].strip()
 
-        table_rows.append(f"| {size:,} | {file_size:,} bytes | Eager | {eager_rss} | {eager_wall} | {size:,} | `{hash_val}` |")
-        table_rows.append(f"| {size:,} | {file_size:,} bytes | Lazy | {lazy_rss} | {lazy_wall} | {size:,} | `{hash_val}` |")
+        table_rows.append(
+            f"| {size:,} | {file_size:,} bytes | Eager | {eager_rss} | {eager_wall} | {size:,} | `{hash_val}` |"
+        )
+        table_rows.append(
+            f"| {size:,} | {file_size:,} bytes | Lazy | {lazy_rss} | {lazy_wall} | {size:,} | `{hash_val}` |"
+        )
 
     return "\n".join(table_rows)
+
 
 def get_env():
     with open("reports/performance/raw_logs/env.txt") as f:
         return f.read()
+
 
 output = f"""# MergeService Eager vs Lazy Reading Measurements
 

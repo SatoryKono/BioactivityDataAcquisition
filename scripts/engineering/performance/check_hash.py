@@ -2,11 +2,14 @@ import sys
 import polars as pl
 import hashlib
 
+
 def read_eager(path: str) -> pl.DataFrame:
     return pl.read_parquet(path)
 
+
 def read_lazy(path: str) -> pl.DataFrame:
     return pl.scan_parquet(path).collect()
+
 
 def get_hash(df: pl.DataFrame) -> str:
     m = hashlib.sha256()
@@ -17,6 +20,7 @@ def get_hash(df: pl.DataFrame) -> str:
         # It's a DataFrame, let's just hash the whole dataframe hash_rows result directly
     m.update(df.hash_rows().to_numpy().tobytes())
     return m.hexdigest()
+
 
 path = sys.argv[1]
 eager_hash = get_hash(read_eager(path))
