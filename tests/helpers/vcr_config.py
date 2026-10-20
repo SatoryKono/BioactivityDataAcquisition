@@ -51,6 +51,10 @@ CANONICAL_RESPONSE_FILTER_HEADERS: frozenset[str] = frozenset(
     (*CANONICAL_FILTER_HEADERS, "set-cookie", "set-cookie2")
 )
 
+VOLATILE_RESPONSE_FILTER_HEADERS: frozenset[str] = frozenset(
+    ("date", "expires", "x-throttling-control", "x-chembl-retrieval-time")
+)
+
 DEFAULT_VCR_MATCH_ON: tuple[str, ...] = (
     "method",
     "scheme",
@@ -340,6 +344,7 @@ def _build_before_record_response_filter() -> Callable[[Any], Any]:
                 key: value
                 for key, value in response["headers"].items()
                 if str(key).lower() not in CANONICAL_RESPONSE_FILTER_HEADERS
+                and str(key).lower() not in VOLATILE_RESPONSE_FILTER_HEADERS
             },
         }
 
