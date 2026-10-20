@@ -300,6 +300,20 @@ def test_live_catalog_classifies_grafana_reports_and_test_fixtures() -> None:
     assert matrix["decisions"]["docker"]["decision"] == REQUIRED
 
 
+def test_live_catalog_classifies_root_changelog() -> None:
+    catalog = load_catalog(
+        Path(__file__).resolve().parents[6]
+        / "configs/quality/github_required_checks.yaml"
+    )
+    matrix = classify_changes(catalog, ["CHANGELOG.md"], head_sha=HEAD_SHA)
+
+    assert matrix["unclassified_files"] == []
+    assert matrix["decisions"]["docs-governance"]["decision"] == REQUIRED
+    assert matrix["decisions"]["docs-governance"]["reason"] == "path_match"
+    assert matrix["decisions"]["generated-artifacts"]["decision"] == NOT_APPLICABLE
+    assert matrix["decisions"]["tests"]["decision"] == NOT_APPLICABLE
+
+
 @pytest.mark.parametrize(
     "changed_path",
     [

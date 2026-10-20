@@ -7,9 +7,9 @@ from dataclasses import dataclass
 
 from bioetl.domain.normalization.identifiers import (
     normalize_doi,
-    normalize_pmc_id,
     normalize_pmid,
 )
+from bioetl.domain.normalization.reference_ids import normalize_pmcid_reference_id
 from bioetl.domain.normalization.text import normalize_title
 from bioetl.domain.value_objects.identifiers import ChemblId, UniProtId
 
@@ -51,8 +51,13 @@ def _normalize_join_key_pmid(value: str) -> str | None:
 
 
 def _normalize_join_key_pmc_id(value: str) -> str | None:
-    """Normalize PMC join text through the domain identifier seam."""
-    return normalize_pmc_id(value)
+    """Normalize PMC join text through the governed PMCID canonicalizer.
+
+    Canonical values stay uppercase ``PMC`` digits. Unknown text is preserved
+    and is not case-folded.
+    """
+    normalized = normalize_pmcid_reference_id(value)
+    return normalized if isinstance(normalized, str) else None
 
 
 def _normalize_join_key_inchi_key(value: str) -> str | None:
@@ -102,12 +107,10 @@ JOIN_KEY_NORMALIZATION_POLICIES: Mapping[str, JoinKeyNormalizationPolicy] = {
     "molecule_id": _NOOP_POLICY,
     "pmc_id": JoinKeyNormalizationPolicy(
         trim=True,
-        lowercase=True,
         domain_canonicalizer=_normalize_join_key_pmc_id,
     ),
     "pmcid": JoinKeyNormalizationPolicy(
         trim=True,
-        lowercase=True,
         domain_canonicalizer=_normalize_join_key_pmc_id,
     ),
     "pmid": JoinKeyNormalizationPolicy(

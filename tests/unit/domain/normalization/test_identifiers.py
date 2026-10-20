@@ -34,13 +34,13 @@ from typing import Any, cast
 
 import pytest
 
+from bioetl.domain.normalization.reference_ids import normalize_pmcid_reference_id
 from bioetl.domain.normalization.identifiers import (
     get_ontology_prefix,
     is_valid_ontology_id,
     normalize_doi,
     normalize_ontology_id,
     normalize_ontology_id_strict,
-    normalize_pmc_id,
     normalize_pmid,
     strip_doi_prefix,
 )
@@ -155,29 +155,31 @@ class TestNormalizePMID:
 
 
 class TestNormalizePMCID:
-    """Test PMC ID normalization."""
+    """Test governed PMCID normalization."""
 
-    def test_normalize_pmc_id_basic(self) -> None:
-        """Test basic PMC ID normalization."""
-        assert normalize_pmc_id("PMC1234567") == "PMC1234567"
-        assert normalize_pmc_id("pmc1234567") == "PMC1234567"
-        assert normalize_pmc_id("1234567") == "PMC1234567"
-
-    def test_normalize_pmc_id_with_spaces(self) -> None:
-        """Test PMC ID normalization with whitespace."""
-        assert normalize_pmc_id("  PMC1234567  ") == "PMC1234567"
-        assert normalize_pmc_id("\t1234567\n") == "PMC1234567"
-
-    def test_normalize_pmc_id_none_and_empty(self) -> None:
-        """Test None and empty string handling."""
-        assert normalize_pmc_id(None) is None
-        assert normalize_pmc_id("") is None
-        assert normalize_pmc_id("   ") is None
-
-    def test_normalize_pmc_id_invalid(self) -> None:
-        """Test invalid PMC ID handling."""
-        assert normalize_pmc_id("invalid") == "PMCinvalid"
-        assert normalize_pmc_id("ABC123") == "PMCABC123"
+    @pytest.mark.parametrize(
+        ("raw", "expected"),
+        (
+            ("PMC1234567", "PMC1234567"),
+            ("pmc1234567", "PMC1234567"),
+            ("1234567", "PMC1234567"),
+            ("  PMC1234567  ", "PMC1234567"),
+            ("\t1234567\n", "PMC1234567"),
+            ("PMCID:456", "PMC456"),
+            ("pmc123", "PMC123"),
+            ("PMC123", "PMC123"),
+            (None, None),
+            ("", None),
+            ("   ", None),
+            ("invalid", "invalid"),
+            ("abc", "abc"),
+            ("ABC123", "ABC123"),
+        ),
+    )
+    def test_normalize_pmcid_reference_id(
+        self, raw: str | None, expected: str | None
+    ) -> None:
+        assert normalize_pmcid_reference_id(raw) == expected
 
 
 class TestNormalizeOntologyID:

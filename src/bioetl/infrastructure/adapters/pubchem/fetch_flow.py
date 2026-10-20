@@ -23,7 +23,62 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
-__all__ = ["PubChemFetchFlow"]
+__all__ = [
+    "ExecutorTimeoutState",
+    "PubChemFetchFlow",
+    "coerce_executor_timeout",
+    "coerce_timeout_state",
+    "wait_for_executor",
+]
+
+
+class ExecutorTimeoutState:
+    """Remember that an SDK wait timed out while its worker may still be running."""
+
+    __slots__ = ("timed_out",)
+
+    def __init__(self) -> None:
+        self.timed_out = False
+
+    def note(self) -> None:
+        self.timed_out = True
+
+
+def coerce_executor_timeout(value: object) -> float | None:
+    """Accept a positive provider timeout or an absent override."""
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        raise TypeError("executor_timeout_sec must be a positive number")
+    timeout = float(value)
+    if timeout <= 0:
+        raise ValueError("executor_timeout_sec must be positive")
+    return timeout
+
+
+def coerce_timeout_state(value: object) -> ExecutorTimeoutState:
+    """Reuse a composition-owned flag or create one for a standalone adapter."""
+    if value is None:
+        return ExecutorTimeoutState()
+    if isinstance(value, ExecutorTimeoutState):
+        return value
+    raise TypeError("executor_timeout_state must be ExecutorTimeoutState")
+
+
+async def wait_for_executor(
+    pending: Awaitable[object],
+    deadline_sec: float | None,
+    state: ExecutorTimeoutState,
+) -> object:
+    """Bound one executor wait and record when that wait times out."""
+    if deadline_sec is None:
+        return await pending
+    try:
+        async with asyncio.timeout(deadline_sec):
+            return await pending
+    except TimeoutError:
+        state.note()
+        raise
 
 
 class _RequestRecorder(Protocol):
@@ -80,7 +135,11 @@ class PubChemFetchFlow:
         pubchem_callable: Callable[..., object],
         pubchem_args: tuple[object, ...],
     ) -> list[object]:
-        """Retry transient SDK HTTP failures within the configured request budget."""
+        """Retry transient SDK HTTP failures within the configured request budget.
+
+        A timeout is not retried. The worker may still be inside the SDK call,
+        so a second attempt would replay an operation whose completion is unknown.
+        """
         attempt = 0
         while True:
             await self.rate_limiter.acquire()
@@ -91,6 +150,13 @@ class PubChemFetchFlow:
                     pubchem_callable,
                     *pubchem_args,
                 )
+            except TimeoutError:
+                self.record_request(
+                    endpoint,
+                    (time.perf_counter() - start_time) * 1000,
+                    status_code=0,
+                )
+                raise
             except pcp.PubChemHTTPError as error:
                 self.record_request(
                     endpoint,

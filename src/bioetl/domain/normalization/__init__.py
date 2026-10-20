@@ -41,7 +41,6 @@ from bioetl.domain.normalization.hash_identity import (
 )
 from bioetl.domain.normalization.identifiers import (
     normalize_doi,
-    normalize_pmc_id,
     normalize_pmid,
     strip_doi_prefix,
 )
@@ -95,7 +94,6 @@ __all__ = [
     "normalize_join_key_scalar",
     "normalize_join_key_text",
     "normalize_partial_date",
-    "normalize_pmc_id",
     "normalize_pmid",
     "normalize_run_ledger_payload",
     "normalize_run_manifest_spec",

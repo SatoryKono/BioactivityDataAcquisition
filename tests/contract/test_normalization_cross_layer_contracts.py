@@ -51,11 +51,11 @@ from bioetl.domain.normalization import (
     build_execution_identity_payload,
     compute_execution_identity_fingerprint,
     normalize_doi,
-    normalize_pmc_id,
     normalize_pmid,
     normalize_runtime_anchor_payload,
 )
 from bioetl.domain.normalization.json import canonicalize_json_string
+from bioetl.domain.normalization.reference_ids import normalize_pmcid_reference_id
 from bioetl.domain.normalization.profiles import (
     CHEMBL_ACTIVITY_PROFILE,
     NORMALIZATION_PROFILE_REGISTRY,
@@ -187,7 +187,7 @@ def test_doi_and_pmc_id_contracts_agree_across_active_layers(
 
     raw_pmc_id = " 12345 "
     expected_pmc_id = "PMC12345"
-    assert normalize_pmc_id(raw_pmc_id) == expected_pmc_id
+    assert normalize_pmcid_reference_id(raw_pmc_id) == expected_pmc_id
     assert normalize_profile_pmc_id(raw_pmc_id) == expected_pmc_id
     assert (
         crossref_processor.normalize_business_data({"pmc_id": raw_pmc_id})["pmc_id"]
@@ -198,6 +198,24 @@ def test_doi_and_pmc_id_contracts_agree_across_active_layers(
     pmc_df["pmc_id"] = expected_pmc_id
     pmc_validated = PublicationEnrichedSchema.validate(pmc_df)
     assert pmc_validated["pmc_id"].iloc[0] == expected_pmc_id
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    (
+        ("PMCID:456", "PMC456"),
+        ("abc", "abc"),
+        ("pmc123", "PMC123"),
+        ("PMC123", "PMC123"),
+        (None, None),
+    ),
+)
+def test_pmcid_reference_and_profile_agree(
+    raw: str | None, expected: str | None
+) -> None:
+    """Legacy and profile PMCID seams share the governed preserve-unknowns result."""
+    assert normalize_pmcid_reference_id(raw) == expected
+    assert normalize_profile_pmc_id(raw) == expected
 
 
 def test_checkpoint_execution_identity_payload_matches_domain_contract() -> None:
