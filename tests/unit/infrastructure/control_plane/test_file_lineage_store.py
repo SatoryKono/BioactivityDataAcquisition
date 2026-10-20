@@ -29,6 +29,11 @@
 
 from __future__ import annotations
 
+import errno
+import json
+import os
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
@@ -37,6 +42,7 @@ from unittest.mock import MagicMock
 import bioetl.infrastructure.control_plane._file_lineage_index as lineage_index_module
 import bioetl.infrastructure.control_plane.file_lineage_store as lineage_store_module
 import pytest
+from bioetl.domain.control_plane import ControlPlaneArtifactSurface
 from bioetl.domain.lineage import (
     DatasetRef,
     LineageEdge,
@@ -47,6 +53,10 @@ from bioetl.domain.lineage import (
 )
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileLineageStore
+from bioetl.infrastructure.control_plane._file_artifact_lifecycle_surfaces import (
+    iter_surface_files,
+)
+from bioetl.infrastructure.storage.atomic import AtomicWriteError
 from tests.helpers.deterministic_ids import deterministic_uuid_value
 
 pytestmark = pytest.mark.unit
@@ -562,6 +572,11 @@ class _PartialWriteFailingOs:
         self.closed.append(file_descriptor)
 
 
+class _PartialWriteRollbackFailingOs(_PartialWriteFailingOs):
+    def ftruncate(self, file_descriptor: int, offset: int) -> None:
+        raise OSError("simulated ftruncate failure")
+
+
 def test_lineage_index_append_jsonl_payload_rolls_back_partial_write(
     tmp_path,
 ) -> None:
@@ -580,3 +595,296 @@ def test_lineage_index_append_jsonl_payload_rolls_back_partial_write(
     assert fake_os.truncations == [(19, 5)]
     assert fake_os.closed == [19]
     assert flush_calls == [19]
+
+
+def test_lineage_index_append_jsonl_payload_rolls_back_partial_write_and_fails(
+    tmp_path,
+) -> None:
+    fake_os = _PartialWriteRollbackFailingOs()
+    flush_calls: list[int] = []
+
+    with pytest.raises(OSError, match="simulated write failure") as exc_info:
+        lineage_index_module.append_jsonl_payload(
+            tmp_path / "lineage" / "index.jsonl",
+            b"payload\n",
+            open_flags=0,
+            os_module=fake_os,
+            flush_file_descriptor=flush_calls.append,
+        )
+
+    assert any(
+        "simulated ftruncate failure" in note for note in exc_info.value.__notes__
+    )
+    assert fake_os.closed == [19]
+    assert flush_calls == []
+
+
+def _dataset_fragment(
+    *,
+    fragment_id: str,
+    node_id: str,
+    run_id: str,
+    manifest_id: str,
+    label: str,
+) -> LineageGraphFragment:
+    return LineageGraphFragment(
+        fragment_id=fragment_id,
+        nodes=(
+            LineageNodeRef(
+                node_type=LineageNodeType.DATASET,
+                node_id=node_id,
+                label=label,
+                attributes={},
+            ),
+        ),
+        edges=(),
+        run_id=run_id,
+        manifest_id=manifest_id,
+        created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+    )
+
+
+def _index_records(path: Path) -> list[dict[str, object]]:
+    return [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+
+def test_file_lineage_store_concurrent_save(tmp_path: Path) -> None:
+    store1 = FileLineageStore(base_path=tmp_path / "lineage")
+    store2 = FileLineageStore(base_path=tmp_path / "lineage")
+    shared_node_id = "silver:shared-node"
+
+    def save_fragment(store: FileLineageStore, prefix: str) -> None:
+        store.save(
+            _dataset_fragment(
+                fragment_id=f"silver:{prefix}-fragment-1",
+                node_id=shared_node_id,
+                run_id=f"run-{prefix}",
+                manifest_id=f"manifest-{prefix}",
+                label=f"dataset-{prefix}",
+            )
+        )
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        f1 = executor.submit(save_fragment, store1, "a")
+        f2 = executor.submit(save_fragment, store2, "b")
+        f1.result()
+        f2.result()
+
+    assert {item.fragment_id for item in store1.list_by_run_id("run-a")} == {
+        "silver:a-fragment-1"
+    }
+    assert {item.fragment_id for item in store2.list_by_run_id("run-b")} == {
+        "silver:b-fragment-1"
+    }
+    shared = store1.list_by_node_id(shared_node_id)
+    assert {item.fragment_id for item in shared} == {
+        "silver:a-fragment-1",
+        "silver:b-fragment-1",
+    }
+    records = _index_records(store1._node_index_path(shared_node_id))
+    assert len(records) == 2
+    assert all(record["key"] == shared_node_id for record in records)
+
+
+def test_file_lineage_store_concurrent_save_and_fail(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store1 = FileLineageStore(base_path=tmp_path / "lineage")
+    store2 = FileLineageStore(base_path=tmp_path / "lineage")
+    shared_node_id = "silver:shared-node-1"
+    barrier = threading.Barrier(2)
+    fragment = _dataset_fragment(
+        fragment_id="silver:shared-fragment-1",
+        node_id=shared_node_id,
+        run_id="run-shared",
+        manifest_id="manifest-shared",
+        label="dataset-shared",
+    )
+
+    def save_fragment_1(store: FileLineageStore) -> None:
+        barrier.wait()
+        store.save(fragment)
+
+    def save_fragment_2(store: FileLineageStore) -> None:
+        original_append = lineage_store_module._append_jsonl_payload
+        call_count = {"value": 0}
+        failing_thread = threading.current_thread()
+
+        def _fail_on_second_append(path: Path, payload: bytes) -> int:
+            if threading.current_thread() is not failing_thread:
+                return original_append(path, payload)
+            call_count["value"] += 1
+            if call_count["value"] == 2:
+                raise OSError("simulated lineage index append failure")
+            return original_append(path, payload)
+
+        monkeypatch.setattr(
+            lineage_store_module,
+            "_append_jsonl_payload",
+            _fail_on_second_append,
+        )
+        barrier.wait()
+        with pytest.raises(OSError, match="simulated lineage index append failure"):
+            store.save(fragment)
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        failed = executor.submit(save_fragment_2, store2)
+        succeeded = executor.submit(save_fragment_1, store1)
+        succeeded.result()
+        failed.result()
+
+    assert len(store1.list_by_run_id("run-shared")) == 1
+    assert len(store1.list_by_node_id(shared_node_id)) == 1
+    assert len(_index_records(store1._node_index_path(shared_node_id))) == 1
+
+
+def test_exclusive_lock_closes_descriptor_when_acquire_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fcntl = pytest.importorskip("fcntl")
+    closed: list[int] = []
+    real_close = os.close
+
+    def _close(file_descriptor: int) -> None:
+        closed.append(file_descriptor)
+        real_close(file_descriptor)
+
+    monkeypatch.setattr(os, "close", _close)
+
+    def _fail_lock(*_args: object, **_kwargs: object) -> None:
+        raise OSError("ENOLCK")
+
+    monkeypatch.setattr(fcntl, "flock", _fail_lock)
+    with pytest.raises(OSError, match="ENOLCK"):
+        with lineage_store_module._exclusive_base_lock(tmp_path / "_save.lock"):
+            pass
+    assert closed
+
+
+def test_windows_byte_lock_initializes_empty_lock_file(tmp_path: Path) -> None:
+    lock_path = tmp_path / "_save.lock"
+    lock_fd = os.open(lock_path, os.O_CREAT | os.O_RDWR)
+    calls: list[tuple[int, int, int, int]] = []
+
+    def locking(file_descriptor: int, mode: int, nbytes: int) -> None:
+        calls.append(
+            (file_descriptor, mode, nbytes, os.lseek(file_descriptor, 0, os.SEEK_CUR))
+        )
+
+    try:
+        lineage_store_module._lock_byte_range(lock_fd, locking=locking, mode=7)
+    finally:
+        os.close(lock_fd)
+
+    assert lock_path.stat().st_size == 1
+    assert calls == [(calls[0][0], 7, 1, 0)]
+
+
+def test_msvcrt_lock_retries_only_deadlock(tmp_path: Path) -> None:
+    lock_fd = os.open(tmp_path / "lock", os.O_CREAT | os.O_RDWR)
+    calls = {"value": 0}
+
+    def locking(file_descriptor: int, mode: int, nbytes: int) -> None:
+        calls["value"] += 1
+        if calls["value"] == 1:
+            error = OSError("deadlock")
+            error.errno = errno.EDEADLOCK
+            raise error
+
+    try:
+        lineage_store_module._acquire_msvcrt_lock(lock_fd, locking=locking, lock_mode=7)
+    finally:
+        os.close(lock_fd)
+
+    assert calls["value"] == 2
+
+
+def test_msvcrt_lock_propagates_eacces(tmp_path: Path) -> None:
+    lock_fd = os.open(tmp_path / "lock", os.O_CREAT | os.O_RDWR)
+    calls = {"value": 0}
+
+    def locking(file_descriptor: int, mode: int, nbytes: int) -> None:
+        calls["value"] += 1
+        error = OSError("access")
+        error.errno = errno.EACCES
+        raise error
+
+    try:
+        with pytest.raises(OSError, match="access"):
+            lineage_store_module._acquire_msvcrt_lock(
+                lock_fd, locking=locking, lock_mode=7
+            )
+    finally:
+        os.close(lock_fd)
+
+    assert calls["value"] == 1
+
+
+def test_rollback_save_collects_atomic_write_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store = FileLineageStore(base_path=tmp_path / "lineage")
+    fragment_path = tmp_path / "fragment.json"
+    fragment_path.write_text("{}", encoding="utf-8")
+
+    def _fail_restore(_path: Path, _payload: str) -> None:
+        raise AtomicWriteError(fragment_path, "restore failed")
+
+    monkeypatch.setattr(lineage_store_module, "atomic_write_text", _fail_restore)
+    errors = store._rollback_save(
+        fragment_path=fragment_path,
+        existing_fragment_payload='{"kept": true}',
+        index_rollbacks=[],
+    )
+    assert len(errors) == 1
+    assert isinstance(errors[0], AtomicWriteError)
+
+
+def test_save_keeps_original_error_when_rollback_is_incomplete(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store = FileLineageStore(base_path=tmp_path / "lineage")
+    fragment = _dataset_fragment(
+        fragment_id="silver:fragment-rollback",
+        node_id="silver:node-rollback",
+        run_id="run-rollback",
+        manifest_id="manifest-rollback",
+        label="dataset-rollback",
+    )
+
+    def _fail_append(_path: Path, _payload: bytes) -> int:
+        raise OSError("append failed")
+
+    def _failed_rollback(**_kwargs: object) -> list[OSError]:
+        return [OSError("index restore failed")]
+
+    monkeypatch.setattr(lineage_store_module, "_append_jsonl_payload", _fail_append)
+    monkeypatch.setattr(store, "_rollback_save", _failed_rollback)
+    with pytest.raises(OSError, match="append failed") as exc_info:
+        store.save(fragment)
+    assert any("index restore failed" in note for note in exc_info.value.__notes__)
+
+
+def test_save_lock_stays_outside_lineage_lifecycle_tree(tmp_path: Path) -> None:
+    control_root = tmp_path / "control"
+    base_path = control_root / "lineage"
+    store = FileLineageStore(base_path=base_path)
+    store.save(
+        _dataset_fragment(
+            fragment_id="silver:fragment-lock",
+            node_id="silver:node-lock",
+            run_id="run-lock",
+            manifest_id="manifest-lock",
+            label="dataset-lock",
+        )
+    )
+    lock_path = lineage_store_module._save_lock_path(base_path)
+    assert lock_path == control_root / ".lineage.save.lock"
+    assert lock_path.is_file()
+    assert base_path not in lock_path.parents
+    planned = iter_surface_files(control_root, ControlPlaneArtifactSurface.LINEAGE)
+    assert lock_path not in planned
