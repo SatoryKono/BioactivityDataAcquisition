@@ -25,13 +25,15 @@ proxy than file count.
 ## Decision
 
 1. Per-file layer LOC caps stay unchanged (no tech-debt budget growth).
-2. New shrink-only package budgets live in
+2. New hard shrink-only package budgets live in
    `configs/quality/package_cohesion_budget.yaml`:
-   `max_modules` and `max_package_loc` per package.
+   `max_modules` and `max_package_loc` per package. These govern strict program gates.
 3. `domain/aggregates` target is ≤8 modules; live `max_modules` ratchets
    down as private mixins are consolidated without exceeding 305 LOC.
    Hold-flat at the live ceiling until a merge fits under 305 LOC (#10552).
-4. `Batch` root imports go through `bioetl.domain.aggregates` (or
+4. Independent diagnostics: S7 hard assertions, the live ceiling, and utilization gates remain independent and strictly enforced.
+   The `composition_util > 0.95` threshold acts solely as a score diagnostic soft penalty and does not affect the independent hard limits.
+5. `Batch` root imports go through `bioetl.domain.aggregates` (or
    `_batch_aggregate`). The `batch.Batch` compatibility `__getattr__`
    shim was removed in #10552; `batch.py` keeps value objects and mixins.
 
