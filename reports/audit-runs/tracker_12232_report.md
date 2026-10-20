@@ -69,8 +69,8 @@
 
 
 ### Незамапленные открытые задачи (Unmapped Open Issues)
-- 12232 - [TRACKER] Параллельные потоки работ — 4 домена (Текущий трекер)
-- 12110 - [P04][TRACKER] Infrastructure/storage remediation (Отдельный трекер)
+- 12232 - \[TRACKER\] Параллельные потоки работ — 4 домена (Текущий трекер)
+- 12110 - \[P04\]\[TRACKER\] Infrastructure/storage remediation (Отдельный трекер)
 - 12266 - docs: уточнить runtime-семантику observability settings в PR #12265
 
 ### Сопоставление stale сведений
