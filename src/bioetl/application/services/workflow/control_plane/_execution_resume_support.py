@@ -220,13 +220,20 @@ def resolve_skipped_step_ids(
     force_steps: tuple[str, ...],
     repair_steps: tuple[str, ...],
 ) -> frozenset[str]:
-    """Preserve only successful steps that are not being forced or repaired."""
+    """Preserve steps that this resume must not replay.
+
+    A non-empty repair or force selector runs only those ids. Every other
+    step stays held, including an ambiguous sibling. An empty selector still
+    replays incomplete steps and skips only confirmed successes.
+    """
     forced_or_repaired = {*force_steps, *repair_steps}
-    return frozenset(
-        step.step_id
-        for step in state.steps
-        if step.status == "success" and step.step_id not in forced_or_repaired
-    )
+    if forced_or_repaired:
+        return frozenset(
+            step.step_id
+            for step in state.steps
+            if step.step_id not in forced_or_repaired
+        )
+    return frozenset(step.step_id for step in state.steps if step.status == "success")
 
 
 def resolve_completed_transform_fingerprints(
