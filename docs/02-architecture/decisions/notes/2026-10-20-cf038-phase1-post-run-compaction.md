@@ -56,12 +56,14 @@ Numbers below are from source revision
 capture `2026-10-20T12:48:01Z`, Python 3.13.15, Linux. They are not
 measurements of `main` `07482702d3bc9d6b742188400c371304f4881eb9`.
 
-The bytes live in commit `0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1`
-(tree of that commit contains `run_2`). PR #12314 merge is
-`004e2913db6289fcca4c8f44de291899ff877bd7`. Commit
-`d48192563e10f9a3350280c10380243cd7f19dc9` (#12316) removes this path from
-`main`; `07482702d3` does not contain the files. History still has them.
-They were not copied onto the new `main` and were not re-captured.
+The bytes live only in commit `0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1`.
+PR #12314 merge is `004e2913db6289fcca4c8f44de291899ff877bd7`. Commit
+`d48192563e10f9a3350280c10380243cd7f19dc9` (#12316) removes `run_2`, its
+provenance files, and the capture tool from `main`. Current `main`
+`07482702d3bc9d6b742188400c371304f4881eb9` does not contain those paths.
+Historical retention confirms the origin of the measurements. It does not
+put a required evidence surface in the current tree. The files were not
+copied onto current `main` and were not re-captured.
 
 Harness workload, not a production `batch_size=1000` run: `batch_size=500`,
 `overlap_ratio=0.2`, primary key `id`, each round calls
@@ -84,14 +86,17 @@ name those two extra files.
 
 ## Artifacts and hash check
 
-Manifest and provenance at `0d7861219f`:
+Permalink base, commit `0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1` only.
+These URLs are not links to current `main`.
 
 - [manifest.json](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/manifest.json)
 - [benchmark_provenance.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/benchmark_provenance.md)
-- `run_2/N10/time.txt`, `run_2/N50/time.txt`, `run_2/N100/time.txt`
-- `run_2/N10/N10-n1j0nze5/merge_scaling_N10.json`
-- `run_2/N50/N50-9btidy6p/merge_scaling_N50.json`
-- `run_2/N100/N100-yevzmbf8/merge_scaling_N100.json`
+- [N10/time.txt](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N10/time.txt)
+- [N50/time.txt](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N50/time.txt)
+- [N100/time.txt](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N100/time.txt)
+- [merge_scaling_N10.json](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N10/N10-n1j0nze5/merge_scaling_N10.json)
+- [merge_scaling_N50.json](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N50/N50-9btidy6p/merge_scaling_N50.json)
+- [merge_scaling_N100.json](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N100/N100-yevzmbf8/merge_scaling_N100.json)
 
 On 2026-10-20 the 12 `artifacts_sha256` entries were recomputed with
 `git show 0d7861219fb4b1ee1ef0e747ed281ac96fd5edb1:<path>` and SHA-256.
@@ -140,7 +145,7 @@ separately from the following run. One new run compared with historical
 - Automatic `VACUUM` can delete files readers still need if retention is tightened. This direction does not tighten it.
 - The harness uses batch 500, overlap 0.2, and an empty table. Production batch 1000 is not in `run_2`.
 - Peak RSS is the whole pytest process, not Delta alone.
-- `run_2` is absent from `main` `07482702d3`. Reproducible bytes are the `0d7861219f` blobs above.
+- Current `main` has no `run_2` evidence surface. The `0d7861219f` permalinks above preserve provenance only.
 
 ## Acceptance
 
