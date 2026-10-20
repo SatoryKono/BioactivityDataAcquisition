@@ -27,7 +27,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Tests for page parsing and PMC ID normalization domain functions.
 
-Tests the parse_page_range and normalize_pmc_id functions from domain/normalization.py
+Tests the parse_page_range and governed PMCID functions.
 that are used by PubMed and SemanticScholar transformers for parsing page strings
 and normalizing PMC IDs.
 
@@ -39,7 +39,8 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.normalization import normalize_pmc_id, parse_page_range
+from bioetl.domain.normalization import parse_page_range
+from bioetl.domain.normalization.reference_ids import normalize_pmcid_reference_id
 
 
 @pytest.mark.unit
@@ -205,7 +206,7 @@ class TestPmcIdNormalization:
         expected: str | None,
     ) -> None:
         """Domain function should normalize PMC IDs correctly."""
-        result = normalize_pmc_id(raw_pmc_id)
+        result = normalize_pmcid_reference_id(raw_pmc_id)
         assert result == expected
 
 
@@ -215,16 +216,16 @@ class TestPmcIdNormalizationEdgeCases:
 
     def test_only_whitespace_returns_none(self) -> None:
         """Only whitespace should return None."""
-        assert normalize_pmc_id("   ") is None
+        assert normalize_pmcid_reference_id("   ") is None
 
     def test_pmc_prefix_variations(self) -> None:
         """Test various PMC prefix capitalizations."""
-        assert normalize_pmc_id("PMC123") == "PMC123"
-        assert normalize_pmc_id("pmc123") == "PMC123"
-        assert normalize_pmc_id("Pmc123") == "PMC123"
-        assert normalize_pmc_id("pMc123") == "PMC123"
+        assert normalize_pmcid_reference_id("PMC123") == "PMC123"
+        assert normalize_pmcid_reference_id("pmc123") == "PMC123"
+        assert normalize_pmcid_reference_id("Pmc123") == "PMC123"
+        assert normalize_pmcid_reference_id("pMc123") == "PMC123"
 
     def test_numeric_only_input(self) -> None:
         """Numeric-only input should get PMC prefix added."""
-        assert normalize_pmc_id("123") == "PMC123"
-        assert normalize_pmc_id("1234567890") == "PMC1234567890"
+        assert normalize_pmcid_reference_id("123") == "PMC123"
+        assert normalize_pmcid_reference_id("1234567890") == "PMC1234567890"

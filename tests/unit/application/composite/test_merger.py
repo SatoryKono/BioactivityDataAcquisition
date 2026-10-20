@@ -354,8 +354,8 @@ class TestMergeServiceJoinKeyNormalization:
 
         assert result["pmid"].to_list() == ["12345678", None]
 
-    def test_normalize_pmc_id_to_lowercase(self, merge_service):
-        """Test PMC_ID column is normalized to lowercase."""
+    def test_normalize_pmc_id_keeps_canonical_uppercase(self, merge_service):
+        """Test PMC_ID column keeps the governed uppercase canonical form."""
         import polars as pl
 
         df = pl.DataFrame(
@@ -368,7 +368,7 @@ class TestMergeServiceJoinKeyNormalization:
             df, ["pmc_id"], None
         )
 
-        assert result["pmc_id"].to_list() == ["pmc1234567", "pmc7654321"]
+        assert result["pmc_id"].to_list() == ["PMC1234567", "PMC7654321"]
 
     def test_normalize_title_cleans_without_lowercasing(self, merge_service):
         """Test title join keys use canonical title cleanup but keep casing."""

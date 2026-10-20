@@ -4,7 +4,7 @@
   "source_run_id": "local-pr12231-local-coverage-8a4286d",
   "source_event": "local_coverage_verify",
   "source_run_url": null,
-  "source_tree_sha256": "7bfb9ff051abbae7dc54bd5770fbd341278487b758563468e41df50972e32c01",
+  "source_tree_sha256": "77dce7a8a897995d7aa4efe093288b46361057d26d56183a225f4cbc535b1119",
   "refreshed_at_utc": "2026-10-15T18:50:07.879352+00:00",
   "refresh_status": "captured",
   "total_cases": 34037,
