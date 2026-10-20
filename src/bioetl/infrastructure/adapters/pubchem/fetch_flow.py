@@ -23,7 +23,61 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
-__all__ = ["PubChemFetchFlow"]
+__all__ = [
+    "ExecutorTimeoutState",
+    "PubChemFetchFlow",
+    "coerce_executor_timeout",
+    "coerce_timeout_state",
+    "wait_for_executor",
+]
+
+
+class ExecutorTimeoutState:
+    """Remember that an SDK wait timed out while its worker may still be running."""
+
+    __slots__ = ("timed_out",)
+
+    def __init__(self) -> None:
+        self.timed_out = False
+
+    def note(self) -> None:
+        self.timed_out = True
+
+
+def coerce_executor_timeout(value: object) -> float | None:
+    """Accept a positive provider timeout or an absent override."""
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        raise TypeError("executor_timeout_sec must be a positive number")
+    timeout = float(value)
+    if timeout <= 0:
+        raise ValueError("executor_timeout_sec must be positive")
+    return timeout
+
+
+def coerce_timeout_state(value: object) -> ExecutorTimeoutState:
+    """Reuse a composition-owned flag or create one for a standalone adapter."""
+    if value is None:
+        return ExecutorTimeoutState()
+    if isinstance(value, ExecutorTimeoutState):
+        return value
+    raise TypeError("executor_timeout_state must be ExecutorTimeoutState")
+
+
+async def wait_for_executor(
+    pending: Awaitable[object],
+    timeout: float | None,
+    state: ExecutorTimeoutState,
+) -> object:
+    """Bound one executor wait and record when that wait times out."""
+    if timeout is None:
+        return await pending
+    try:
+        return await asyncio.wait_for(pending, timeout=timeout)
+    except TimeoutError:
+        state.note()
+        raise
 
 
 class _RequestRecorder(Protocol):

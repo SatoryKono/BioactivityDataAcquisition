@@ -25,8 +25,6 @@ from __future__ import annotations
 
 __all__ = ["PUBCHEM_HEALTH_ERRORS", "PubChemAdapter"]
 
-import asyncio
-from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, cast
 
@@ -45,6 +43,10 @@ from bioetl.infrastructure.adapters.pubchem.client_model_mixin import (
     PubChemAdapterModelMixin,
 )
 from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
+from bioetl.infrastructure.adapters.pubchem.fetch_flow import (
+    coerce_executor_timeout,
+    coerce_timeout_state,
+)
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 if TYPE_CHECKING:
@@ -60,18 +62,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
         PubChemFetchStrategies,
     )
-
-
-def _coerce_executor_timeout(value: object) -> float | None:
-    """Accept a positive provider timeout or an absent override."""
-    if value is None:
-        return None
-    if isinstance(value, bool) or not isinstance(value, int | float):
-        raise TypeError("executor_timeout_sec must be a positive number")
-    timeout = float(value)
-    if timeout <= 0:
-        raise ValueError("executor_timeout_sec must be positive")
-    return timeout
 
 
 PUBCHEM_HEALTH_ERRORS = (
@@ -147,8 +137,11 @@ class PubChemAdapter(
         fetch_strategies = legacy_runtime.pop("fetch_strategies", None)
         error_handler = legacy_runtime.pop("error_handler", None)
         request_collector = legacy_runtime.pop("request_collector", None)
-        self._executor_timeout_sec = _coerce_executor_timeout(
+        self._executor_timeout_sec = coerce_executor_timeout(
             legacy_runtime.pop("executor_timeout_sec", None)
+        )
+        self._executor_timeout_state = coerce_timeout_state(
+            legacy_runtime.pop("executor_timeout_state", None)
         )
         if legacy_runtime:
             unexpected = ", ".join(sorted(str(k) for k in legacy_runtime))
@@ -179,22 +172,6 @@ class PubChemAdapter(
             raise ValueError("PubChemAdapter requires request_collector")
         self._request_collector = cast("APIRequestCollector", request_collector_port)
         self._strategies = cast("PubChemFetchStrategies", fetch_strategies)
-
-    async def _run_in_executor(
-        self,
-        func: Callable[..., object],
-        *args: object,
-    ) -> object:
-        """Wait for one SDK call for at most the provider timeout.
-
-        Cancelling this wait does not stop the worker thread. urllib may
-        finish after the event loop has already moved on.
-        """
-        pending = super()._run_in_executor(func, *args)
-        timeout = self._executor_timeout_sec
-        if timeout is None:
-            return await pending
-        return await asyncio.wait_for(pending, timeout=timeout)
 
     # fetch_multi_filtered and fetch_filtered_with_fallback are provided
     # by FilterableStubMixin (see class inheritance)
