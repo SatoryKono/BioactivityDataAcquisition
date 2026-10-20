@@ -6,11 +6,11 @@ This receipt documents the findings regarding `MemoryError` and watchdog timings
 
 A `MemoryError` raised during module load (pytest collection phase) is correctly captured by pytest itself and results in an exit code of `2` (collection failed) along with a proper traceback in the console output.
 
-This directly satisfies the requirement to prove that an ordinary `MemoryError` during collection leaves a diagnostic trail and does not silently abort. The `pytest_abort_diagnostic_adapter` supervisor, which is now on `main` via #12240, saves child stdout and stderr logs referenced by the `DiagnosticManifest`. It records a non-zero child exit without incorrectly inferring an Out-Of-Memory (OOM) silent abort (`oom_inferred = False`). With diagnostics persisted, the wrapper preserves the positive child exit code: `2` for the collection failure above. The adapter test `test_memory_error_keeps_traceback_without_claiming_oom` separately covers a direct Python `MemoryError`, for which `wrapper_exit_code = 1`.
+**Evidence (direct pytest execution only):**
+`tests/unit/scripts/engineering/ci/test_memory_error_collection.py::test_memory_error_during_collection` runs pytest directly against a module that raises `MemoryError` during collection. It verifies exit code `2` and the traceback text (`MemoryError: synthetic-collection-memory-error`) retained in captured stdout/stderr. It does not run `pytest_abort_diagnostic_adapter` or check `DiagnosticManifest`, `wrapper_exit_code`, or `oom_inferred`.
 
-**Evidence (Added Test):**
-A new unit test `tests/unit/scripts/engineering/ci/test_memory_error_collection.py` explicitly reproduces this exact `MemoryError` during collection scenario.
-Result: Exit code is 2, and the traceback (`MemoryError: synthetic-collection-memory-error`) is captured correctly in the standard output/error, proving that the collection abort leaves a clean diagnostic trail.
+**Separate adapter evidence:**
+[`test_memory_error_keeps_traceback_without_claiming_oom`](../../tests/unit/scripts/engineering/ci/test_pytest_abort_diagnostic_adapter.py) runs the adapter against a direct Python `MemoryError`. It verifies persisted stderr containing the traceback, `DiagnosticManifest.status = NONZERO_EXIT`, `exit_code = 1`, `wrapper_exit_code = 1`, and `oom_inferred = False`. This is a separate scenario; it does not establish adapter behavior for a pytest collection failure with exit code `2`.
 
 ## 2. Watchdog Timers Reconciliation
 

@@ -147,6 +147,8 @@ def persist_input_snapshots_on_manifest(
             raise restore_error from exc
         raise
     service.manifest_id = updated.manifest_id
+    for callback in getattr(service, "manifest_successor_callbacks", ()):
+        callback(updated)
     return updated
 
 

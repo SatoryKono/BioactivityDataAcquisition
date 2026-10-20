@@ -134,6 +134,10 @@ def bind_runner_dependencies(host: object, deps: CompositeRunnerDependencies) ->
     runner_host._fsm = deps.fsm_state_helper
     runner_host._manifest_id = deps.manifest_id
     runner_host._run_ledger_service = deps.run_ledger_service
+    if deps.run_ledger_service is not None:
+        deps.run_ledger_service.manifest_successor_callbacks.append(
+            lambda manifest: setattr(runner_host, "_manifest_id", manifest.manifest_id)
+        )
     runner_host._clock = resolve_runtime_clock(getattr(deps, "clock", None))
 
 

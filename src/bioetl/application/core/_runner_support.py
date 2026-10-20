@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from bioetl.application.core._runner_dependency_support import load_runner_checkpoint
@@ -24,6 +25,7 @@ from bioetl.application.core.runner_flow import (
     resolve_execution_offset,
 )
 from bioetl.domain.mixin_host import as_mixin_host
+from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
@@ -35,6 +37,8 @@ if TYPE_CHECKING:
         _PipelineRunnerExecutionHostProtocol,
     )
     from bioetl.application.core.runner_flow import _PipelineRunnerFlowHostProtocol
+    from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.control_plane import RunManifest
     from bioetl.domain.ports import LoggerPort, TracingPort
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
@@ -61,6 +65,10 @@ class _PipelineRunnerCleanupHostProtocol(Protocol):
     def _close_metrics(self) -> None: ...
 
 
+class _RunnerManifestContextHost(Protocol):
+    _contract_evidence_context: PipelineRunContext | None
+
+
 class PipelineRunnerSupportMixin:
     """Delegate thin lifecycle helpers away from the main runner module."""
 
@@ -71,6 +79,21 @@ class PipelineRunnerSupportMixin:
     )  # Any: host attr default (PD3)
     _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
     _executor: BatchExecutor = cast(Any, None)  # Any: host attr default (PD3)
+
+    def _update_manifest_context(
+        self: _RunnerManifestContextHost,
+        manifest: RunManifest,
+    ) -> None:
+        """Replace the active launch context after a committed successor."""
+        if self._contract_evidence_context is not None:
+            self._contract_evidence_context = replace(
+                self._contract_evidence_context,
+                manifest_id=manifest.manifest_id,
+                execution_fingerprint=manifest.execution_fingerprint,
+                input_snapshot_fingerprint=compute_input_snapshot_identity_fingerprint(
+                    [s for ref in manifest.source_refs for s in ref.input_snapshots]
+                ),
+            )
 
     def _record_terminal_shutdown(self: _PipelineRunnerFlowHostProtocol) -> None:
         record_run_shutdown(self)

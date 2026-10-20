@@ -254,10 +254,18 @@ class FileRunLedgerQueriesMixin:
         started_at = perf_counter()
         status = "success"
         try:
-            entries = self._load_entries(manifest_id)
+            chain = self._predecessor_chain(manifest_id)
+            entries = [
+                entry
+                for item_id in reversed(chain)
+                for entry in self._load_entries(item_id)
+            ]
             if not entries:
                 status = "miss"
                 return []
+            _ensure_entries_match_run_chain(
+                entries=entries, manifest_ids=set(chain), run_id=entries[0].run_id
+            )
             return list(slice_ledger_entries_after(entries, after_entry_id))
         except RunLedgerCorruptionError as error:
             status = "failed"
