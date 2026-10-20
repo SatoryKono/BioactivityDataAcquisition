@@ -35,7 +35,10 @@ from unittest.mock import MagicMock
 import polars as pl
 import pytest
 
-from bioetl.application.composite.join_execution import JoinHow
+from bioetl.application.composite.join_execution import (
+    JoinHow,
+    RequiredJoinKeyError,
+)
 from bioetl.application.composite.join_planner import JoinPlannerService
 from tests.unit.application.composite.merge_test_support import (
     build_join_planner_service,
@@ -490,3 +493,175 @@ def test_composite_key_resolution_and_join_type_mapping(
     assert planner.get_polars_join_type() == "full"
     object.__setattr__(planner._config, "strategy", "unknown")
     assert planner.get_polars_join_type() == "left"
+
+
+@pytest.mark.unit
+def test_execute_polars_join_missing_key_required_raises(
+    planner: JoinPlannerService,
+) -> None:
+    left_df = pl.DataFrame({"left_id": [1], "v": ["a"]})
+    right_df = pl.DataFrame({"other": [1], "x": ["b"]})
+
+    with pytest.raises(RequiredJoinKeyError, match="missing_left"):
+        planner.execute_polars_join(
+            left_df=left_df,
+            right_df=right_df,
+            left_key="missing_left",
+            right_key="other",
+            pipeline_name="pubmed_publication",
+            required=True,
+        )
+
+
+@pytest.mark.unit
+def test_execute_composite_key_join_missing_key_required_raises(
+    planner: JoinPlannerService,
+) -> None:
+    with pytest.raises(RequiredJoinKeyError, match="pmid"):
+        planner.execute_composite_key_join(
+            left_df=pl.DataFrame({"doi": ["10.1/a"]}),
+            right_df=pl.DataFrame({"doi": ["10.1/a"]}),
+            left_keys=["doi", "pmid"],
+            right_keys=["doi", "pmid"],
+            pipeline_name="pubmed_publication",
+            required=True,
+        )
+
+
+@pytest.mark.unit
+def test_execute_polars_join_required_unmatched_rows_fail_closed(
+    planner: JoinPlannerService,
+) -> None:
+    with pytest.raises(RequiredJoinKeyError, match="unmatched seed rows"):
+        planner.execute_polars_join(
+            left_df=pl.DataFrame({"id": ["a", "b"]}),
+            right_df=pl.DataFrame({"id": ["a"], "x": [1]}),
+            left_key="id",
+            right_key="id",
+            pipeline_name="crossref_publication",
+            required=True,
+        )
+
+
+@pytest.mark.unit
+def test_execute_polars_join_required_duplicate_right_keys_fail_closed(
+    planner: JoinPlannerService,
+) -> None:
+    with pytest.raises(RequiredJoinKeyError, match="unmatched seed rows"):
+        planner.execute_polars_join(
+            left_df=pl.DataFrame({"id": ["a", "b"]}),
+            right_df=pl.DataFrame({"id": ["a", "a"], "x": [1, 2]}),
+            left_key="id",
+            right_key="id",
+            pipeline_name="crossref_publication",
+            required=True,
+        )
+
+
+@pytest.mark.unit
+def test_execute_polars_join_required_renamed_duplicate_right_keys_fail_closed(
+    planner: JoinPlannerService,
+) -> None:
+    with pytest.raises(RequiredJoinKeyError, match="unmatched seed rows"):
+        planner.execute_polars_join(
+            left_df=pl.DataFrame({"left_id": ["a", "b"]}),
+            right_df=pl.DataFrame({"right_id": ["a", "a"], "x": [1, 2]}),
+            left_key="left_id",
+            right_key="right_id",
+            pipeline_name="crossref_publication",
+            required=True,
+        )
+
+
+@pytest.mark.unit
+def test_execute_polars_join_required_coerced_duplicate_right_keys_fail_closed(
+    planner: JoinPlannerService,
+) -> None:
+    with pytest.raises(RequiredJoinKeyError, match="unmatched seed rows"):
+        planner.execute_polars_join(
+            left_df=pl.DataFrame({"id": [1, 2]}),
+            right_df=pl.DataFrame({"id": [1.0, 1.0], "x": [1, 2]}),
+            left_key="id",
+            right_key="id",
+            pipeline_name="crossref_publication",
+            required=True,
+        )
+
+
+@pytest.mark.unit
+def test_execute_polars_join_required_fanout_still_rejects_cardinality(
+    planner: JoinPlannerService,
+) -> None:
+    with pytest.raises(RequiredJoinKeyError, match="cardinality"):
+        planner.execute_polars_join(
+            left_df=pl.DataFrame({"id": ["a"]}),
+            right_df=pl.DataFrame({"id": ["a", "a"], "x": [1, 2]}),
+            left_key="id",
+            right_key="id",
+            pipeline_name="crossref_publication",
+            required=True,
+        )
+
+
+@pytest.mark.unit
+def test_execute_polars_join_optional_inner_allows_duplicate_right_keys(
+    planner: JoinPlannerService,
+) -> None:
+    result = planner.execute_polars_join(
+        left_df=pl.DataFrame({"id": ["a", "b"]}),
+        right_df=pl.DataFrame({"id": ["a", "a"], "x": [1, 2]}),
+        left_key="id",
+        right_key="id",
+        pipeline_name="crossref_publication",
+        required=False,
+        join_how="inner",
+    )
+    assert result.get_column("id").to_list() == ["a", "a"]
+
+
+@pytest.mark.unit
+def test_execute_polars_join_required_duplicate_left_keys_succeed(
+    planner: JoinPlannerService,
+) -> None:
+    result = planner.execute_polars_join(
+        left_df=pl.DataFrame({"id": ["a", "a"], "v": [1, 2]}),
+        right_df=pl.DataFrame({"id": ["a"], "x": [9]}),
+        left_key="id",
+        right_key="id",
+        pipeline_name="crossref_publication",
+        required=True,
+    )
+    assert result.height == 2
+    assert result.get_column("x").to_list() == [9, 9]
+
+
+@pytest.mark.unit
+def test_execute_composite_key_join_required_duplicate_right_keys_fail_closed(
+    planner: JoinPlannerService,
+) -> None:
+    with pytest.raises(RequiredJoinKeyError, match="unmatched seed rows"):
+        planner.execute_composite_key_join(
+            left_df=pl.DataFrame({"doi": ["10.1/a", "10.1/b"], "pmid": ["1", "2"]}),
+            right_df=pl.DataFrame(
+                {"doi": ["10.1/a", "10.1/a"], "pmid": ["1", "1"], "x": [1, 2]}
+            ),
+            left_keys=["doi", "pmid"],
+            right_keys=["doi", "pmid"],
+            pipeline_name="pubmed_publication",
+            required=True,
+        )
+
+
+@pytest.mark.unit
+def test_execute_composite_key_join_required_renamed_keys_fail_closed(
+    planner: JoinPlannerService,
+) -> None:
+    with pytest.raises(RequiredJoinKeyError, match="unmatched seed rows"):
+        planner.execute_composite_key_join(
+            left_df=pl.DataFrame({"left_doi": ["10.1/a", "10.1/b"]}),
+            right_df=pl.DataFrame({"right_doi": ["10.1/a", "10.1/a"], "x": [1, 2]}),
+            left_keys=["left_doi"],
+            right_keys=["right_doi"],
+            pipeline_name="pubmed_publication",
+            required=True,
+        )

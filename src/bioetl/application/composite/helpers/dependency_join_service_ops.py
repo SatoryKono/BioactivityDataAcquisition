@@ -127,6 +127,7 @@ def execute_composite_dependency_join(
             resolved_context=resolved_context,
             dependency=dep.pipeline,
             join_executor=join_executor.execute_composite_key_join,
+            required=dep.required,
         ),
     )
 
@@ -148,5 +149,6 @@ def execute_single_key_dependency_join(
             resolved_context=resolved_context,
             dependency=dep.pipeline,
             join_executor=join_executor.execute_polars_join,
+            required=dep.required,
         ),
     )
