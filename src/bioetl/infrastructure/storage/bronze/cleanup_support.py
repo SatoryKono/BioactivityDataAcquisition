@@ -172,6 +172,18 @@ def date_dir_name_is_older(name: str, cutoff_str: str) -> bool:
     return date_dir_name_is_canonical(name) and name < cutoff_str
 
 
+def validate_flat_scope_compatibility(
+    flat_structure: bool,
+    provider: str | None,
+    entity: str | None,
+) -> None:
+    """Reject scope filters that cannot be applied to a flat layout."""
+    if flat_structure and (provider or entity):
+        raise ValueError(
+            "Scope filters (provider/entity) are not supported with flat_structure=True"
+        )
+
+
 def validate_scope_filter(value: str | None, label: str) -> None:
     """Reject scope filters that could broaden cleanup beyond a named dir."""
     if value is None:
@@ -281,6 +293,7 @@ def find_old_date_dirs(
     """Find canonical date dirs older than cutoff in flat or nested layout."""
     validate_scope_filter(provider, "provider")
     validate_scope_filter(entity, "entity")
+    validate_flat_scope_compatibility(flat_structure, provider, entity)
     if not base_path.exists():
         return []
     if not root_components_safe(base_path):
@@ -303,10 +316,8 @@ def _flat_old_date_dirs(
     on_skip: Callable[[str, str], None] | None,
     on_flat_filter: Callable[[], None] | None,
 ) -> list[Path]:
-    if provider or entity:
-        if on_flat_filter is not None:
-            on_flat_filter()
-        return []
+    # Scope filters are rejected early by validate_flat_scope_compatibility,
+    # so we never reach here with provider or entity set.
     return _old_date_children(base_path, cutoff_str, on_skip)
 
 

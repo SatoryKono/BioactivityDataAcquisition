@@ -551,15 +551,11 @@ async def test_cleanup_flat_layout(tmp_path: Path) -> None:
 
 @_APPLY_POSIX
 async def test_cleanup_flat_layout_scope_filter_is_noop(tmp_path: Path) -> None:
-    """Provider/entity filters on flat storage cannot scope → refuse to broaden."""
+    """Provider/entity filters on flat storage cannot scope → refuse early."""
     writer = _make_writer(tmp_path, flat=True)
-    old_dir = _date_dir(tmp_path)
-    (old_dir / ARTIFACT).write_bytes(b"x")
-
-    result = await writer.cleanup_old_files(CUTOFF, provider="chembl")
-
-    assert result["files_removed"] == 0
-    assert old_dir.exists()
+    import pytest
+    with pytest.raises(ValueError, match="Scope filters \\(provider/entity\\) are not supported with flat_structure=True"):
+        await writer.cleanup_old_files(CUTOFF, provider="chembl")
 
 
 def test_iter_safe_child_dirs_skips_links(tmp_path: Path) -> None:

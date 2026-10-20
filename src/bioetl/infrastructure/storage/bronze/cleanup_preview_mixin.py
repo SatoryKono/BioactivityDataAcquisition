@@ -43,6 +43,8 @@ class BronzeCleanupPreviewMixin:
         """Preview direct date-partition files with bounded, no-follow traversal."""
         validate_scope_filter(provider, "provider")
         validate_scope_filter(entity, "entity")
+        from .cleanup_support import validate_flat_scope_compatibility
+        validate_flat_scope_compatibility(self._flat_structure, provider, entity)
         preview_root = self._resolve_bronze_preview_root(provider, entity)
         exists = self.base_path.exists()
         if not exists or (self._flat_structure and (provider or entity)):

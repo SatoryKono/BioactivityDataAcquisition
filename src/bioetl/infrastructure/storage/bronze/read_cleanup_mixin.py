@@ -355,6 +355,8 @@ class BronzeWriterReadCleanupMixin(
         """Remove Bronze files older than cutoff date."""
         validate_scope_filter(provider, "provider")
         validate_scope_filter(entity, "entity")
+        from .cleanup_support import validate_flat_scope_compatibility
+        validate_flat_scope_compatibility(self._flat_structure, provider, entity)
         cutoff_str = cutoff_date.strftime("%Y-%m-%d")
         cancel_requested = threading.Event()
         worker = asyncio.get_running_loop().run_in_executor(
