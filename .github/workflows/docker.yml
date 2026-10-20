@@ -146,15 +146,24 @@ jobs:
         env:
           BUILD_DIGEST: ${{ steps.build.outputs.digest }}
           BUILD_IMAGE_ID: ${{ steps.build.outputs.imageid }}
-          BUILD_METADATA: ${{ steps.build.outputs.metadata }}
           IMAGE_REF: bioetl:${{ github.sha }}
+        # The build metadata output embeds full provenance (git history with
+        # commit messages) and can exceed the runner exec env limit (E2BIG:
+        # "Argument list too long") when passed as an env var. Ship it through
+        # a heredoc into a temp file instead; the run script itself is written
+        # to disk by the runner, so size is not an issue there.
         run: |
-          python3 - <<'PY'
+          metadata_file="$(mktemp)"
+          cat > "${metadata_file}" <<'DOCKER_BUILD_METADATA_HEREDOC_EOF'
+          ${{ steps.build.outputs.metadata }}
+          DOCKER_BUILD_METADATA_HEREDOC_EOF
+          python3 - "${metadata_file}" <<'PY'
           import json
           import os
+          import sys
           from pathlib import Path
 
-          metadata_raw = os.environ.get("BUILD_METADATA") or "{}"
+          metadata_raw = Path(sys.argv[1]).read_text(encoding="utf-8").strip() or "{}"
           try:
               metadata = json.loads(metadata_raw)
           except json.JSONDecodeError as exc:

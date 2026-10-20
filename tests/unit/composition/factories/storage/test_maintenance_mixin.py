@@ -192,6 +192,25 @@ async def test_optimize_uses_sanctioned_time_for_cutoff(
 
 @pytest.mark.unit
 @pytest.mark.asyncio
+async def test_optimize_skips_scoped_bronze_cleanup_on_flat_layout(
+    tmp_path: Path,
+) -> None:
+    """Flat Bronze refuses scope filters, so optimize must not call them."""
+    silver_path = tmp_path / "silver"
+    silver_path.mkdir()
+    delta_log = silver_path / "_delta_log"
+    delta_log.mkdir()
+    (delta_log / "commit.json").touch()
+
+    mixin = _make_mixin(silver_get_table_path=silver_path)
+    mixin.bronze._flat_structure = True  # type: ignore[attr-defined]
+    await mixin.optimize("chembl.activity", retention_hours=48, dry_run=True)
+    mixin.bronze.cleanup_old_files.assert_not_called()
+    mixin.silver.vacuum.assert_awaited()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
 async def test_optimize_no_dot_in_table_name(tmp_path: Path) -> None:
     """optimize skips bronze cleanup when table_name has no dot."""
     mixin = _make_mixin()

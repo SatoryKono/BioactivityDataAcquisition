@@ -174,6 +174,46 @@ def _consumer(root: Path, source: str, imported: str) -> None:
     path.write_text(f"import {imported}\n", encoding="utf-8")
 
 
+def _optional_distribution(root: Path, adapter: str) -> None:
+    script = root / "scripts/ai/agent_tools/__main__.py"
+    script.parent.mkdir(parents=True, exist_ok=True)
+    script.write_text(adapter, encoding="utf-8")
+    (root / "pyproject.toml").write_text(
+        "\n".join(
+            (
+                "[project]",
+                'name = "bioetl"',
+                "dependencies = []",
+                "[project.optional-dependencies]",
+                'proofagent = ["proofagent-harness==0.13.0"]',
+                "",
+            )
+        ),
+        encoding="utf-8",
+    )
+    (root / "uv.lock").write_text(
+        "\n".join(
+            (
+                "version = 1",
+                "[[package]]",
+                'name = "proofagent-harness"',
+                'dependencies = [{name = "litellm"}]',
+                "[[package]]",
+                'name = "litellm"',
+                'dependencies = [{name = "aiohttp"}]',
+                "[[package]]",
+                'name = "aiohttp"',
+                'dependencies = [{name = "yarl"}]',
+                "[[package]]",
+                'name = "yarl"',
+                'version = "1.25.1"',
+                "",
+            )
+        ),
+        encoding="utf-8",
+    )
+
+
 @pytest.mark.parametrize(
     "package,imported,owner",
     [
@@ -205,6 +245,99 @@ def test_transitive_dependency_selects_direct_consumer(tmp_path: Path) -> None:
     assert dependencies.dependency_consumers(tmp_path, {"httpcore"}) == [
         "src/bioetl/infrastructure/http/client.py"
     ]
+
+
+def test_transitive_optional_dependency_uses_declared_reference(
+    tmp_path: Path,
+) -> None:
+    _optional_distribution(tmp_path, 'Adapter(distribution="proofagent-harness")\n')
+    _consumer(
+        tmp_path,
+        "tests/unit/scripts/ai/agent_tools/test_cli.py",
+        "scripts.ai.agent_tools.__main__",
+    )
+    assert dependencies.dependency_consumers(tmp_path, {"aiohttp", "yarl"}) == [
+        "scripts/ai/agent_tools/__main__.py"
+    ]
+    assert lane.affected_pytest_targets(
+        ["uv.lock"],
+        repo_root=tmp_path,
+        changed_python_dependencies={"aiohttp", "yarl"},
+    ) == ["tests/unit/scripts/ai/agent_tools/test_cli.py"]
+
+
+@pytest.mark.parametrize("package", ["aiohttp", "yarl"])
+def test_import_and_declared_reference_consumers_are_combined(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, package: str
+) -> None:
+    _optional_distribution(tmp_path, 'Adapter(distribution="proofagent-harness")\n')
+    _consumer(tmp_path, "src/bioetl/infrastructure/client.py", "aiohttp")
+    _consumer(
+        tmp_path,
+        "tests/unit/scripts/ai/agent_tools/test_cli.py",
+        "scripts.ai.agent_tools.__main__",
+    )
+    (tmp_path / "tests/unit/infrastructure").mkdir(parents=True)
+    monkeypatch.setattr(
+        dependencies, "packages_distributions", lambda: {"aiohttp": ["aiohttp"]}
+    )
+
+    assert dependencies.dependency_consumers(tmp_path, {package}) == [
+        "scripts/ai/agent_tools/__main__.py",
+        "src/bioetl/infrastructure/client.py",
+    ]
+    assert lane.affected_pytest_targets(
+        ["uv.lock"], repo_root=tmp_path, changed_python_dependencies={package}
+    ) == [
+        "tests/unit/scripts/ai/agent_tools/test_cli.py",
+        "tests/unit/infrastructure",
+    ]
+
+
+@pytest.mark.parametrize(
+    "adapter",
+    [
+        '"""proofagent-harness"""\n',
+        'DISTRIBUTION = "proofagent-harness"\n',
+        'Adapter("proofagent-harness")\n',
+        'Adapter(name="proofagent-harness")\n',
+        "Adapter(distribution=42)\n",
+        'Adapter(distribution="aiohttp")\n',
+    ],
+)
+def test_unconfirmed_distribution_reference_fails_closed(
+    tmp_path: Path, adapter: str
+) -> None:
+    _optional_distribution(tmp_path, adapter)
+    _consumer(
+        tmp_path,
+        "tests/unit/scripts/ai/agent_tools/test_cli.py",
+        "scripts.ai.agent_tools.__main__",
+    )
+    with pytest.raises(ValueError, match="Unconfirmed.*aiohttp"):
+        lane.affected_pytest_targets(
+            ["uv.lock"], repo_root=tmp_path, changed_python_dependencies={"aiohttp"}
+        )
+
+
+def test_transitive_name_mention_without_declared_parent_fails_closed(
+    tmp_path: Path,
+) -> None:
+    _optional_distribution(tmp_path, 'CLIENT = "aiohttp"\n')
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "bioetl"\ndependencies = []\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="Unconfirmed.*aiohttp"):
+        dependencies.dependency_consumers(tmp_path, {"aiohttp"})
+
+
+def test_declared_distribution_without_source_reference_fails_closed(
+    tmp_path: Path,
+) -> None:
+    _optional_distribution(tmp_path, "EXECUTABLE = 'proof'\n")
+    with pytest.raises(ValueError, match="Unconfirmed.*aiohttp"):
+        dependencies.dependency_consumers(tmp_path, {"aiohttp"})
 
 
 def test_curated_http_owner_tests_are_required(tmp_path: Path) -> None:
@@ -353,69 +486,6 @@ def test_shared_helper_without_any_tests_fails_closed(tmp_path: Path) -> None:
     _consumer(tmp_path, "tests/helpers/control_plane_replay.py", "yaml")
     with pytest.raises(ValueError, match="test-helper owner route"):
         lane._consumer_targets("tests/helpers/control_plane_replay.py", tmp_path, {})
-
-
-def test_subprocess_optional_extra_confirms_transitive_lock_route(
-    tmp_path: Path,
-) -> None:
-    """A lock bump of an unimported extra dependency selects its owner script."""
-    (tmp_path / "pyproject.toml").write_text(
-        "[project]\n"
-        "name = 'demo'\n"
-        "[project.optional-dependencies]\n"
-        "proofagent = ['proofagent-harness==0.13.0']\n",
-        encoding="utf-8",
-    )
-    (tmp_path / "uv.lock").write_text(
-        "version = 1\n"
-        '[[package]]\nname = "yarl"\nversion = "1"\n'
-        '[[package]]\nname = "aiohttp"\nversion = "1"\n'
-        "dependencies = [{name = 'yarl'}]\n"
-        '[[package]]\nname = "litellm"\nversion = "1"\n'
-        "dependencies = [{name = 'aiohttp'}]\n"
-        '[[package]]\nname = "proofagent-harness"\nversion = "1"\n'
-        "dependencies = [{name = 'litellm'}]\n",
-        encoding="utf-8",
-    )
-    owner = tmp_path / "scripts/ai/agent_tools/__main__.py"
-    owner.parent.mkdir(parents=True)
-    owner.write_text('distribution = "proofagent-harness"\n', encoding="utf-8")
-    consumer = tmp_path / "tests/unit/scripts/ai/agent_tools/test_cli.py"
-    consumer.parent.mkdir(parents=True)
-    consumer.write_text(
-        "from scripts.ai.agent_tools import __main__\n", encoding="utf-8"
-    )
-    assert dependencies.dependency_consumers(tmp_path, {"aiohttp", "yarl"}) == [
-        "scripts/ai/agent_tools/__main__.py"
-    ]
-    assert lane.affected_pytest_targets(
-        ["uv.lock"],
-        repo_root=tmp_path,
-        changed_python_dependencies={"aiohttp", "yarl"},
-    ) == ["tests/unit/scripts/ai/agent_tools/test_cli.py"]
-
-
-def test_optional_extra_without_literal_stays_unconfirmed(tmp_path: Path) -> None:
-    """Declaring an extra is not a route until some source names that distribution."""
-    (tmp_path / "pyproject.toml").write_text(
-        "[project]\n"
-        "name = 'demo'\n"
-        "[project.optional-dependencies]\n"
-        "proofagent = ['proofagent-harness==0.13.0']\n",
-        encoding="utf-8",
-    )
-    (tmp_path / "uv.lock").write_text(
-        "version = 1\n"
-        '[[package]]\nname = "aiohttp"\nversion = "1"\n'
-        '[[package]]\nname = "proofagent-harness"\nversion = "1"\n'
-        "dependencies = [{name = 'aiohttp'}]\n",
-        encoding="utf-8",
-    )
-    denied = tmp_path / "scripts/engineering/qa/inventory.py"
-    denied.parent.mkdir(parents=True)
-    denied.write_text('FORBIDDEN = {"aiohttp": "network client"}\n', encoding="utf-8")
-    with pytest.raises(ValueError, match="Unconfirmed.*aiohttp"):
-        dependencies.dependency_consumers(tmp_path, {"aiohttp"})
 
 
 def test_native_cli_record_uses_workflow_owner(

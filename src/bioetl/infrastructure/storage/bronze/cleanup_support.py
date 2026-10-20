@@ -172,21 +172,6 @@ def date_dir_name_is_older(name: str, cutoff_str: str) -> bool:
     return date_dir_name_is_canonical(name) and name < cutoff_str
 
 
-FLAT_SCOPE_FILTERS_UNSUPPORTED = (
-    "Scope filters (provider/entity) are not supported with flat_structure=True"
-)
-
-
-def validate_flat_scope_compatibility(
-    flat_structure: bool,
-    provider: str | None,
-    entity: str | None,
-) -> None:
-    """Reject scope filters that cannot be applied to a flat layout."""
-    if flat_structure and (provider or entity):
-        raise ValueError(FLAT_SCOPE_FILTERS_UNSUPPORTED)
-
-
 def validate_scope_filter(value: str | None, label: str) -> None:
     """Reject scope filters that could broaden cleanup beyond a named dir."""
     if value is None:
@@ -196,6 +181,16 @@ def validate_scope_filter(value: str | None, label: str) -> None:
             f"Invalid {label} filter for Bronze cleanup: {value!r}. "
             "Use alphanumeric characters and underscores only."
         )
+
+
+def validate_flat_scope_compatibility(
+    flat_structure: bool,
+    provider: str | None,
+    entity: str | None,
+) -> None:
+    """Reject provider/entity filters on flat storage before any traversal."""
+    if flat_structure and (provider or entity):
+        raise ValueError("Filters require a hierarchical storage structure.")
 
 
 def scan_dir_entries(parent: Path) -> list[os.DirEntry[str]] | None:
@@ -293,9 +288,9 @@ def find_old_date_dirs(
     on_skip: Callable[[str, str], None] | None = None,
 ) -> list[Path]:
     """Find canonical date dirs older than cutoff in flat or nested layout."""
+    validate_flat_scope_compatibility(flat_structure, provider, entity)
     validate_scope_filter(provider, "provider")
     validate_scope_filter(entity, "entity")
-    validate_flat_scope_compatibility(flat_structure, provider, entity)
     if not base_path.exists():
         return []
     if not root_components_safe(base_path):

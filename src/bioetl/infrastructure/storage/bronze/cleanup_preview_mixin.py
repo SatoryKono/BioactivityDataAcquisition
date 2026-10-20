@@ -42,11 +42,12 @@ class BronzeCleanupPreviewMixin:
         entity: str | None = None,
     ) -> JsonDict:  # Any: preview payload has heterogeneous values
         """Preview direct date-partition files with bounded, no-follow traversal."""
+        validate_flat_scope_compatibility(self._flat_structure, provider, entity)
         validate_scope_filter(provider, "provider")
         validate_scope_filter(entity, "entity")
-        validate_flat_scope_compatibility(self._flat_structure, provider, entity)
         preview_root = self._resolve_bronze_preview_root(provider, entity)
-        if not self.base_path.exists():
+        exists = self.base_path.exists()
+        if not exists:
             return {
                 "path": str(preview_root),
                 "file_count": 0,
