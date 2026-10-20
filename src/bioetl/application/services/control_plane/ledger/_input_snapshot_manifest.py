@@ -6,8 +6,18 @@ from collections.abc import Callable
 from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 
+from bioetl.domain.config.runtime import (
+    CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE,
+)
 from bioetl.domain.control_plane import RunInputSnapshotRef, RunSourceRef
+from bioetl.domain.control_plane.execution_identity import (
+    build_execution_identity_payload_from_code_provenance,
+)
 from bioetl.domain.control_plane.reproducibility_policy import resolve_replay_capability
+from bioetl.domain.normalization import (
+    compute_execution_identity_fingerprint,
+    compute_input_snapshot_identity_fingerprint,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.ledger.service import (
@@ -72,6 +82,12 @@ def persist_input_snapshots_on_manifest(
     if loaded is None:
         return None
     saver, manifest = loaded
+
+    manifest_id_factory = getattr(service, "_manifest_id_factory", None)
+    if manifest_id_factory is None:
+        return None
+
+    new_manifest_id = manifest_id_factory()
     new_refs = _merge_source_refs(
         getattr(manifest, "source_refs", ()) or (),
         snapshots,
@@ -83,8 +99,30 @@ def persist_input_snapshots_on_manifest(
         source_refs=new_refs,
         resume_requested=_resume_requested(manifest),
     )
+    input_snapshot_fingerprint = compute_input_snapshot_identity_fingerprint(
+        [s for ref in new_refs for s in ref.input_snapshots]
+    )
+
+    execution_payload = build_execution_identity_payload_from_code_provenance(
+        pipeline_name=manifest.pipeline_name,
+        run_type=manifest.run_type.value,
+        code_provenance=manifest.code_provenance,
+        exact_replay=bool(manifest.launch_context.get("exact_replay")),
+        input_snapshot_fingerprint=input_snapshot_fingerprint,
+        silver_filter_compatibility_mode=str(
+            manifest.runtime_config.get(
+                "silver_filter_compatibility_mode",
+                CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE,
+            )
+        ),
+    )
+    new_fingerprint = compute_execution_identity_fingerprint(execution_payload)
+
     updated = replace(
         manifest,
+        manifest_id=new_manifest_id,
+        predecessor_manifest_id=manifest.manifest_id,
+        execution_fingerprint=new_fingerprint,
         source_refs=new_refs,
         replay_capability=capability,
     )
