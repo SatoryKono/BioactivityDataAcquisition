@@ -129,7 +129,37 @@ def persist_input_snapshots_on_manifest(
     if input_snapshot_verified is True:
         updated = _with_verified_snapshot_fingerprint(updated)
     saver(updated)
+    _rebind_ledger_successor(
+        service,
+        run_id=manifest.run_id,
+        predecessor_manifest_id=manifest.manifest_id,
+        successor_manifest_id=updated.manifest_id,
+    )
+    service.manifest_id = updated.manifest_id
     return updated
+
+
+def _rebind_ledger_successor(
+    service: RunLedgerService,
+    *,
+    run_id: object,
+    predecessor_manifest_id: str,
+    successor_manifest_id: str,
+) -> None:
+    """Point a ledger adapter at the successor when it knows that transition.
+
+    Adapters without ``record_manifest_successor`` keep the previous anchor.
+    The service id still advances so the next attach loads the successor.
+    """
+    port = getattr(service, "ledger_port", None)
+    rebind = getattr(port, "record_manifest_successor", None)
+    if not callable(rebind):
+        return
+    rebind(
+        run_id=run_id,
+        predecessor_manifest_id=predecessor_manifest_id,
+        successor_manifest_id=successor_manifest_id,
+    )
 
 
 def _ref_matches_owner(

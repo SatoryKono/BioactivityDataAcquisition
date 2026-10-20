@@ -25,6 +25,25 @@ from bioetl.infrastructure.errors import build_storage_error
 _RUN_LEDGER_MESSAGE_PREFIX = "Run ledger"
 
 
+def _ensure_entries_match_run_chain(
+    *,
+    entries: list[RunLedgerEntry],
+    manifest_ids: set[str],
+    run_id: RunID,
+) -> None:
+    """Fail closed when a successor chain contains a foreign identity."""
+    if any(entry.manifest_id not in manifest_ids for entry in entries):
+        raise RunLedgerCorruptionError(
+            "Run ledger index corruption: run-id index chain contains "
+            "an entry whose manifest_id is outside the successor chain"
+        )
+    if any(entry.run_id != run_id for entry in entries):
+        raise RunLedgerCorruptionError(
+            "Run ledger index corruption: run-id index points to "
+            "ledger entries that belong to a different run_id"
+        )
+
+
 class FileRunLedgerQueriesMixin:
     """Query and load helpers for ``FileRunLedgerStore``."""
 
@@ -65,15 +84,25 @@ class FileRunLedgerQueriesMixin:
             if manifest_id is None:
                 status = "miss"
                 return []
-            entries = self._load_entries(manifest_id)
+            chain = self._predecessor_chain(manifest_id)
+            entries: list[RunLedgerEntry] = []
+            for item_id in reversed(chain):
+                entries.extend(self._load_entries(item_id))
             if not entries:
                 status = "miss"
                 return []
-            ensure_entries_match_run_index(
-                entries=entries,
-                manifest_id=manifest_id,
-                run_id=run_id,
-            )
+            if len(chain) == 1:
+                ensure_entries_match_run_index(
+                    entries=entries,
+                    manifest_id=manifest_id,
+                    run_id=run_id,
+                )
+            else:
+                _ensure_entries_match_run_chain(
+                    entries=entries,
+                    manifest_ids=set(chain),
+                    run_id=run_id,
+                )
             return entries
         except (OSError, TypeError, ValueError) as error:
             status = "failed"
@@ -153,6 +182,21 @@ class FileRunLedgerQueriesMixin:
             manifest_id=manifest_id,
         )
         return entries
+
+    def _predecessor_chain(self, manifest_id: str) -> tuple[str, ...]:
+        """Return newest-first manifest ids linked by successor pointer files."""
+        chain: list[str] = []
+        seen: set[str] = set()
+        cursor: str | None = manifest_id
+        while cursor and cursor not in seen:
+            seen.add(cursor)
+            chain.append(cursor)
+            pointer = self.base_path / "_predecessors" / f"{cursor}.txt"
+            if not pointer.is_file():
+                break
+            nxt = pointer.read_text(encoding="utf-8").strip()
+            cursor = nxt or None
+        return tuple(chain)
 
     def _load_manifest_id_for_run_id(self, run_id: RunID) -> str | None:
         """Return the indexed manifest identifier for one run when present."""

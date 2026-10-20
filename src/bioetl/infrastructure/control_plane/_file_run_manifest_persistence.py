@@ -103,6 +103,41 @@ def _emit_write_metrics(
     )
 
 
+def _should_update_scope_index(
+    manifest: RunManifest,
+    existing_latest: RunManifest | None,
+) -> bool:
+    """Return whether this save should move the latest-scope pointer.
+
+    A successor of the current latest record is newer even when its
+    manifest id sorts lower. ``created_at`` is copied from the
+    predecessor, and runtime ids are not time-ordered.
+    """
+    if existing_latest is None:
+        return True
+    if manifest.predecessor_manifest_id == existing_latest.manifest_id:
+        return True
+    return (manifest.created_at, manifest.manifest_id) >= (
+        existing_latest.created_at,
+        existing_latest.manifest_id,
+    )
+
+
+def _inherited_contract_evidence(
+    base_path: Path,
+    manifest: RunManifest,
+) -> tuple[Path, str] | None:
+    """Copy a predecessor sidecar onto a successor that does not have one."""
+    predecessor_id = manifest.predecessor_manifest_id
+    if not predecessor_id:
+        return None
+    source = base_path / f"{predecessor_id}.contract-evidence.json"
+    destination = base_path / f"{manifest.manifest_id}.contract-evidence.json"
+    if destination.exists() or not source.is_file():
+        return None
+    return destination, source.read_text(encoding="utf-8")
+
+
 def _write_manifest_files(
     manifest: RunManifest,
     *,
@@ -186,13 +221,15 @@ def persist_manifest(
         existing_latest = store._load_latest_scope_manifest(
             manifest.pipeline_name, manifest.run_type
         )
-        should_update_scope_index = existing_latest is None or (
-            manifest.created_at,
-            manifest.manifest_id,
-        ) >= (existing_latest.created_at, existing_latest.manifest_id)
+        should_update_scope_index = _should_update_scope_index(
+            manifest, existing_latest
+        )
         paths_to_write = [manifest_path, run_index_path, catalog_path]
         if should_update_scope_index:
             paths_to_write.append(scope_index_path)
+        inherited_evidence = _inherited_contract_evidence(store.base_path, manifest)
+        if inherited_evidence is not None:
+            paths_to_write.append(inherited_evidence[0])
         rollback_state = {path: read_optional_text(path) for path in paths_to_write}
         _write_manifest_files(
             manifest,
@@ -206,6 +243,10 @@ def persist_manifest(
             scope_index_writer=scope_index_writer,
             progress=progress,
         )
+        if inherited_evidence is not None:
+            evidence_path, evidence_text = inherited_evidence
+            progress.failed_path = evidence_path
+            atomic_writer(evidence_path, evidence_text)
     except (OSError, TypeError, ValueError) as error:
         store._restore_save_transaction(rollback_state)
         _emit_write_metrics(

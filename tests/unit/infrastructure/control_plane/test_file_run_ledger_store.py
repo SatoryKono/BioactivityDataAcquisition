@@ -743,3 +743,47 @@ def test_file_store_lists_entries_after_watermark(tmp_path) -> None:
     assert store.list_entries_after("manifest-1", "entry-3") == []
     with pytest.raises(ValueError):
         store.list_entries_after("manifest-1", "missing")
+
+
+def test_file_store_successor_rebind_keeps_predecessor_events(tmp_path) -> None:
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
+    store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    original = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-original",
+        run_id=run_id,
+        event_type="manifest_created",
+        occurred_at=_FIXED_TIME,
+        status="created",
+    )
+    store.append(original)
+
+    store.record_manifest_successor(
+        run_id=run_id,
+        predecessor_manifest_id="manifest-original",
+        successor_manifest_id="manifest-successor",
+    )
+    successor = RunLedgerEntry(
+        entry_id="entry-2",
+        manifest_id="manifest-successor",
+        run_id=run_id,
+        event_type="run_finished",
+        occurred_at=_FIXED_TIME,
+        status="success",
+    )
+    store.append(successor)
+
+    assert store.list_entries("manifest-original") == [original]
+    assert store.list_entries("manifest-successor") == [successor]
+    assert store.list_entries_by_run_id(run_id) == [original, successor]
+
+    unrelated = RunLedgerEntry(
+        entry_id="entry-3",
+        manifest_id="manifest-other",
+        run_id=run_id,
+        event_type="run_finished",
+        occurred_at=_FIXED_TIME,
+        status="success",
+    )
+    with pytest.raises(StorageError, match="already mapped to a different manifest_id"):
+        store.append(unrelated)

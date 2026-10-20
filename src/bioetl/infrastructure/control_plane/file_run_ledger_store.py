@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.ports import RunLedgerPort
+from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane._durability import (
     should_fsync_control_plane_writes,
 )
@@ -94,6 +95,60 @@ class FileRunLedgerStore(FileRunLedgerQueriesMixin, RunLedgerPort):
         """Append one JSONL ledger entry and maintain run-id index."""
         with _LEDGER_APPEND_LOCK:
             self._append_locked(entry)
+
+    def record_manifest_successor(
+        self,
+        *,
+        run_id: RunID,
+        predecessor_manifest_id: str,
+        successor_manifest_id: str,
+    ) -> None:
+        """Move the run index onto a successor and keep the predecessor link.
+
+        Later appends use the successor id. ``list_entries_by_run_id`` walks
+        the pointer files so earlier events stay visible for the same run.
+        """
+        with _LEDGER_APPEND_LOCK:
+            self._record_manifest_successor_locked(
+                run_id=run_id,
+                predecessor_manifest_id=predecessor_manifest_id,
+                successor_manifest_id=successor_manifest_id,
+            )
+
+    def _record_manifest_successor_locked(
+        self,
+        *,
+        run_id: RunID,
+        predecessor_manifest_id: str,
+        successor_manifest_id: str,
+    ) -> None:
+        """Publish one successor pointer while holding the writer lock."""
+        predecessor = predecessor_manifest_id.strip()
+        successor = successor_manifest_id.strip()
+        if not predecessor or not successor or predecessor == successor:
+            raise ValueError(
+                "successor ledger rebind requires two distinct manifest ids"
+            )
+        self.base_path.mkdir(parents=True, exist_ok=True)
+        indexed = self._load_manifest_id_for_run_id(run_id)
+        if indexed not in {None, predecessor, successor}:
+            raise RunLedgerCorruptionError(
+                f"run_id is already mapped to a different manifest_id: {indexed}"
+            )
+        pointer_dir = self.base_path / "_predecessors"
+        pointer_dir.mkdir(parents=True, exist_ok=True)
+        pointer_path = pointer_dir / f"{successor}.txt"
+        if pointer_path.is_file():
+            existing = pointer_path.read_text(encoding="utf-8").strip()
+            if existing != predecessor:
+                raise RunLedgerCorruptionError(
+                    "successor ledger pointer already names a different "
+                    f"predecessor: {existing}"
+                )
+        run_index_dir = self.base_path / "_by_run_id"
+        run_index_dir.mkdir(parents=True, exist_ok=True)
+        atomic_write_text(pointer_path, predecessor)
+        atomic_write_text(run_index_dir / f"{run_id}.txt", successor)
 
     def _append_locked(self, entry: RunLedgerEntry) -> None:
         """Publish or roll back an entry while holding the shared writer lock."""

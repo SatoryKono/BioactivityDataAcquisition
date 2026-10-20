@@ -10,7 +10,6 @@ fingerprints instead of degrading to ``semantic_drift``.
 from __future__ import annotations
 
 from dataclasses import replace
-from pathlib import Path
 from types import SimpleNamespace
 from uuid import UUID
 
@@ -38,9 +37,6 @@ from bioetl.domain.normalization import (
     compute_input_snapshot_identity_fingerprint,
 )
 from bioetl.domain.types import RunID, RunType
-from bioetl.infrastructure.control_plane.file_run_manifest_store import (
-    FileRunManifestStore,
-)
 
 _RUN_ID = RunID(UUID(int=12006))
 _SNAPSHOT = RunInputSnapshotRef(
@@ -114,8 +110,41 @@ def _original_manifest(
     )
 
 
+class _MemoryManifestPort:
+    """Port double that enforces the successor index rule without infrastructure."""
+
+    def __init__(self) -> None:
+        self._items: dict[str, RunManifest] = {}
+        self._by_run: dict[RunID, str] = {}
+
+    def get(self, manifest_id: str) -> RunManifest | None:
+        return self._items.get(manifest_id)
+
+    def save(self, manifest: RunManifest) -> None:
+        current_id = self._by_run.get(manifest.run_id)
+        if (
+            current_id is not None
+            and current_id != manifest.manifest_id
+            and manifest.predecessor_manifest_id != current_id
+        ):
+            raise ValueError(
+                f"run_id is already mapped to a different manifest_id: {current_id}"
+            )
+        self._items[manifest.manifest_id] = manifest
+        self._by_run[manifest.run_id] = manifest.manifest_id
+
+    def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
+        manifest_id = self._by_run.get(run_id)
+        if manifest_id is None:
+            return None
+        return self._items.get(manifest_id)
+
+    def list_all(self) -> tuple[RunManifest, ...]:
+        return tuple(self._items.values())
+
+
 def _service(
-    store: FileRunManifestStore,
+    store: _MemoryManifestPort,
     *,
     manifest_id: str = "m1",
     next_id: str | None = "m2",
@@ -141,16 +170,16 @@ def _attach(
     )
 
 
-def test_attach_creates_successor_with_predecessor_link(
-    tmp_path: Path,
-) -> None:
-    store = FileRunManifestStore(base_path=tmp_path)
+def test_attach_creates_successor_with_predecessor_link() -> None:
+    store = _MemoryManifestPort()
     original = _original_manifest()
     store.save(original)
 
-    successor = _attach(_service(store))
+    service = _service(store)
+    successor = _attach(service)
 
     assert successor is not None
+    assert service.manifest_id == "m2"
     assert successor.manifest_id == "m2"
     assert successor.predecessor_manifest_id == "m1"
     assert successor.source_refs[0].input_snapshots == (_SNAPSHOT,)
@@ -161,15 +190,13 @@ def test_attach_creates_successor_with_predecessor_link(
     assert current.manifest_id == "m2"
 
 
-def test_attach_leaves_original_manifest_immutable(tmp_path: Path) -> None:
-    store = FileRunManifestStore(base_path=tmp_path)
+def test_attach_leaves_original_manifest_immutable() -> None:
+    store = _MemoryManifestPort()
     original = _original_manifest()
     store.save(original)
-    original_bytes = (tmp_path / "m1.json").read_bytes()
 
     _attach(_service(store))
 
-    assert (tmp_path / "m1.json").read_bytes() == original_bytes
     persisted_original = store.get("m1")
     assert persisted_original == original
     assert persisted_original is not None
@@ -177,11 +204,9 @@ def test_attach_leaves_original_manifest_immutable(tmp_path: Path) -> None:
     assert persisted_original.predecessor_manifest_id is None
 
 
-def test_attach_recomputed_fingerprint_matches_creation_with_snapshots(
-    tmp_path: Path,
-) -> None:
+def test_attach_recomputed_fingerprint_matches_creation_with_snapshots() -> None:
     """Equivalent pair: attach-after-create == create-with-snapshots (#12006)."""
-    store = FileRunManifestStore(base_path=tmp_path)
+    store = _MemoryManifestPort()
     original = _original_manifest()
     store.save(original)
     pre_merge_fingerprint = original.execution_fingerprint
@@ -194,10 +219,8 @@ def test_attach_recomputed_fingerprint_matches_creation_with_snapshots(
     assert successor.execution_fingerprint != pre_merge_fingerprint
 
 
-def test_attach_recomputed_fingerprint_with_explicit_compat_mode(
-    tmp_path: Path,
-) -> None:
-    store = FileRunManifestStore(base_path=tmp_path)
+def test_attach_recomputed_fingerprint_with_explicit_compat_mode() -> None:
+    store = _MemoryManifestPort()
     original = _original_manifest(
         runtime_config={
             "silver_filter_compatibility_mode": (
@@ -215,18 +238,17 @@ def test_attach_recomputed_fingerprint_with_explicit_compat_mode(
     )
 
 
-def test_second_attach_extends_chain_and_moves_current(
-    tmp_path: Path,
-) -> None:
-    store = FileRunManifestStore(base_path=tmp_path)
+def test_second_attach_on_the_same_service_extends_chain() -> None:
+    store = _MemoryManifestPort()
     store.save(_original_manifest())
+    ids = iter(("m2", "m3"))
+    service = _service(store)
+    service._manifest_id_factory = lambda: next(ids)
 
-    first = _attach(_service(store))
+    first = _attach(service)
     assert first is not None
-    second = _attach(
-        _service(store, manifest_id="m2", next_id="m3"),
-        snapshot=_SECOND_SNAPSHOT,
-    )
+    assert service.manifest_id == "m2"
+    second = _attach(service, snapshot=_SECOND_SNAPSHOT)
 
     assert second is not None
     assert second.manifest_id == "m3"
@@ -245,10 +267,8 @@ def test_second_attach_extends_chain_and_moves_current(
     assert {item.manifest_id for item in store.list_all()} == {"m1", "m2", "m3"}
 
 
-def test_attach_without_factory_returns_none_and_keeps_manifest(
-    tmp_path: Path,
-) -> None:
-    store = FileRunManifestStore(base_path=tmp_path)
+def test_attach_without_factory_returns_none_and_keeps_manifest() -> None:
+    store = _MemoryManifestPort()
     original = _original_manifest()
     store.save(original)
 
@@ -261,10 +281,33 @@ def test_attach_without_factory_returns_none_and_keeps_manifest(
     assert store.get("m2") is None
 
 
-def test_attach_failure_keeps_original_manifest_current(
-    tmp_path: Path,
-) -> None:
-    store = FileRunManifestStore(base_path=tmp_path)
+def test_attach_rebinds_ledger_then_advances_service_manifest_id() -> None:
+    store = _MemoryManifestPort()
+    store.save(_original_manifest())
+    calls: list[dict[str, object]] = []
+
+    class _Ledger:
+        def record_manifest_successor(self, **kwargs: object) -> None:
+            calls.append(kwargs)
+
+    service = _service(store)
+    service.ledger_port = _Ledger()
+
+    successor = _attach(service)
+
+    assert successor is not None
+    assert service.manifest_id == "m2"
+    assert calls == [
+        {
+            "run_id": _RUN_ID,
+            "predecessor_manifest_id": "m1",
+            "successor_manifest_id": "m2",
+        }
+    ]
+
+
+def test_attach_failure_keeps_original_manifest_current() -> None:
+    store = _MemoryManifestPort()
     original = _original_manifest()
     store.save(original)
 

@@ -52,6 +52,30 @@ __all__ = [
 ]
 
 
+def _ledger_entries_for_manifest(
+    service: RunManifestInspectionService,
+    manifest: RunManifest,
+) -> tuple[RunLedgerEntry, ...]:
+    """Return oldest-first ledger events for a manifest and its predecessors."""
+    ledger_port = service.ledger_port
+    if ledger_port is None:
+        return ()
+    ordered_ids: list[str] = []
+    seen: set[str] = set()
+    current: RunManifest | None = manifest
+    while current is not None and current.manifest_id not in seen:
+        seen.add(current.manifest_id)
+        ordered_ids.append(current.manifest_id)
+        predecessor_id = current.predecessor_manifest_id
+        if not predecessor_id:
+            break
+        current = service.manifest_port.get(predecessor_id)
+    entries: list[RunLedgerEntry] = []
+    for manifest_id in reversed(ordered_ids):
+        entries.extend(ledger_port.list_entries(manifest_id))
+    return tuple(entries)
+
+
 class _HistoricalReplayUniverseReportLoader(Protocol):
     def load_latest_report(self) -> dict[str, object] | None: ...
 
@@ -73,9 +97,7 @@ class RunManifestInspectionService(
     def show(self, identifier: str) -> RunManifestInspectionResult:
         """Resolve one manifest by manifest_id or run_id."""
         manifest = self._resolve_manifest(identifier)
-        ledger_entries: tuple[RunLedgerEntry, ...] = ()
-        if self.ledger_port is not None:
-            ledger_entries = tuple(self.ledger_port.list_entries(manifest.manifest_id))
+        ledger_entries = _ledger_entries_for_manifest(self, manifest)
         diagnostics = build_diagnostics_summary(manifest, ledger_entries)
         self._attach_historical_replay_universe_claim(diagnostics)
         self._attach_reproducibility_claim_views(diagnostics)

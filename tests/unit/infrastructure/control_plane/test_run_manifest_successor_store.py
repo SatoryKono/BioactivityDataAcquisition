@@ -170,3 +170,39 @@ def test_failed_successor_save_rolls_back_transaction(
     latest = store.get_latest_for_scope("chembl_activity")
     assert latest is not None
     assert latest.manifest_id == "m1"
+
+
+def test_lower_sorted_successor_becomes_latest_for_scope(tmp_path: Path) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    original = replace(_original(), manifest_id="m9")
+    store.save(original)
+
+    successor = replace(
+        _successor(original),
+        manifest_id="m0",
+        predecessor_manifest_id="m9",
+    )
+    store.save(successor)
+
+    latest = store.get_latest_for_scope("chembl_activity")
+    assert latest is not None
+    assert latest.manifest_id == "m0"
+    current = store.get_by_run_id(_RUN_ID)
+    assert current is not None
+    assert current.manifest_id == "m0"
+
+
+def test_successor_inherits_contract_evidence_sidecar(tmp_path: Path) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    original = _original()
+    store.save(original)
+    evidence = '{"contract_comparison_status":"compatible"}\n'
+    (tmp_path / "m1.contract-evidence.json").write_text(evidence, encoding="utf-8")
+
+    store.save(_successor(original))
+
+    copied = tmp_path / "m2.contract-evidence.json"
+    assert copied.read_text(encoding="utf-8") == evidence
+    assert (tmp_path / "m1.contract-evidence.json").read_text(
+        encoding="utf-8"
+    ) == evidence
