@@ -212,6 +212,11 @@ async def test_optimize_skips_scoped_cleanup_for_flat_bronze(tmp_path: Path) -> 
     mixin = _make_mixin(silver_get_table_path=silver_path)
     mixin.bronze._flat_structure = True
     await mixin.optimize("chembl.activity", retention_hours=48, dry_run=True)
+    mixin.silver.vacuum.assert_awaited_once_with(
+        table_name="chembl.activity",
+        retention_hours=48,
+        dry_run=True,
+    )
     mixin.bronze.cleanup_old_files.assert_not_called()
 
 
