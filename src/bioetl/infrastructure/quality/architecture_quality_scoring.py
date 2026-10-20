@@ -256,6 +256,12 @@ def _score_ddd_invariants(metrics: dict[str, object]) -> float:
 
 
 def _score_composition_di(metrics: dict[str, object]) -> float:
+    """Score composition and dependency injection health.
+
+    The ``composition_util > 0.95`` penalty is purely a score diagnostic soft penalty.
+    It does not supersede or alter the independent hard program gates (S7),
+    the utilization gate, or the shrink-only ceiling enforced elsewhere.
+    """
     return _clamp_score(
         10.0
         - 1.5 * _metric_int(metrics, "layer_violations")
