@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-20T06:53:42.654954+00:00",
+  "generated_at": "2026-10-20T06:24:28.120171+00:00",
   "summary": {
     "total_scripts": 654,
     "status_counts": {
@@ -83,7 +83,7 @@
       "agent_usage": [
         "agent-debugging"
       ],
-      "reference_count": 12,
+      "reference_count": 15,
       "references": [
         {
           "path": ".codex/skills/agent-debugging/SKILL.md",
