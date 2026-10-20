@@ -211,72 +211,157 @@ def _execute_fallback_enricher_join(
     deduplicator: EnricherDeduplicatorService | None,
 ) -> pl.DataFrame:
     """Match seed rows on the primary key, then on each fallback key."""
-    row_id = _SEED_ROW_ID
-    marker = _MATCH_MARKER
-    working = left_df.with_columns(pl.Series(row_id, range(left_df.height)))
-    pending = working
-    original_columns = working.columns
+    pending = left_df.with_columns(pl.Series(_SEED_ROW_ID, range(left_df.height)))
+    original_columns = pending.columns
     matched_frames: list[pl.DataFrame] = []
     usable_keys = False
-
     for left_key, right_key in key_pairs:
-        if pending.height == 0:
-            break
-        if left_key not in pending.columns or right_key not in right_df.columns:
+        step = _join_fallback_key(
+            pending=pending,
+            right_df=right_df,
+            left_key=left_key,
+            right_key=right_key,
+            pipeline_name=pipeline_name,
+            original_columns=original_columns,
+            join_executor=join_executor,
+            deduplicator=deduplicator,
+        )
+        if step is None:
             continue
         usable_keys = True
-        step_right = right_df
-        if deduplicator is not None:
-            step_right = deduplicator.deduplicate(
-                enricher_df=right_df,
-                join_keys=[right_key],
-                enricher_name=pipeline_name,
-            )
-        step_right = step_right.with_columns(pl.lit(True).alias(marker))
-        joined = join_executor(
-            pending,
-            step_right,
-            left_key,
-            right_key,
-            pipeline_name,
-            required=False,
-            join_how=_optional_fallback_how(),
-        )
-        _assert_seed_cardinality(
-            left_height=pending.height,
-            result_height=joined.height,
-            pipeline_name=pipeline_name,
-            required=False,
-        )
-        if marker not in joined.columns:
-            continue
-        matched = joined.filter(pl.col(marker).fill_null(False))
-        pending = joined.filter(~pl.col(marker).fill_null(False)).select(
-            original_columns
-        )
+        matched, pending = step
         if matched.height:
             matched_frames.append(matched)
+    _raise_if_required_fallback_incomplete(
+        pipeline_name=pipeline_name,
+        required=required,
+        pending_height=pending.height,
+        usable_keys=usable_keys,
+    )
+    if not matched_frames:
+        return left_df
+    return _assemble_fallback_frames(
+        left_df=left_df,
+        pending=pending,
+        matched_frames=matched_frames,
+        pipeline_name=pipeline_name,
+        required=required,
+    )
 
-    if required and pending.height:
+
+def _join_fallback_key(
+    *,
+    pending: pl.DataFrame,
+    right_df: pl.DataFrame,
+    left_key: str,
+    right_key: str,
+    pipeline_name: str,
+    original_columns: list[str],
+    join_executor: Callable[..., pl.DataFrame],
+    deduplicator: EnricherDeduplicatorService | None,
+) -> tuple[pl.DataFrame, pl.DataFrame] | None:
+    """Join one fallback key and split matched rows from the remainder."""
+    if not _fallback_key_is_usable(
+        pending=pending,
+        right_df=right_df,
+        left_key=left_key,
+        right_key=right_key,
+    ):
+        return None
+    step_right = _dedupe_fallback_frame(
+        right_df=right_df,
+        right_key=right_key,
+        pipeline_name=pipeline_name,
+        deduplicator=deduplicator,
+    ).with_columns(pl.lit(True).alias(_MATCH_MARKER))
+    joined = join_executor(
+        pending,
+        step_right,
+        left_key,
+        right_key,
+        pipeline_name,
+        required=False,
+        join_how=_optional_fallback_how(),
+    )
+    _assert_seed_cardinality(
+        left_height=pending.height,
+        result_height=joined.height,
+        pipeline_name=pipeline_name,
+        required=False,
+    )
+    if _MATCH_MARKER not in joined.columns:
+        return None
+    matched = joined.filter(pl.col(_MATCH_MARKER).fill_null(False))
+    remainder = joined.filter(~pl.col(_MATCH_MARKER).fill_null(False)).select(
+        original_columns
+    )
+    return matched, remainder
+
+
+def _fallback_key_is_usable(
+    *,
+    pending: pl.DataFrame,
+    right_df: pl.DataFrame,
+    left_key: str,
+    right_key: str,
+) -> bool:
+    """Return whether this fallback key can be joined."""
+    if pending.height == 0:
+        return False
+    return left_key in pending.columns and right_key in right_df.columns
+
+
+def _dedupe_fallback_frame(
+    *,
+    right_df: pl.DataFrame,
+    right_key: str,
+    pipeline_name: str,
+    deduplicator: EnricherDeduplicatorService | None,
+) -> pl.DataFrame:
+    """Collapse duplicate right rows on the key used for this fallback step."""
+    if deduplicator is None:
+        return right_df
+    return deduplicator.deduplicate(
+        enricher_df=right_df,
+        join_keys=[right_key],
+        enricher_name=pipeline_name,
+    )
+
+
+def _raise_if_required_fallback_incomplete(
+    *,
+    pipeline_name: str,
+    required: bool,
+    pending_height: int,
+    usable_keys: bool,
+) -> None:
+    """Fail a required enricher that left seed rows unmatched."""
+    if not required:
+        return
+    if pending_height:
         raise RequiredJoinKeyError(
-            f"Required enricher {pipeline_name} left {pending.height} "
+            f"Required enricher {pipeline_name} left {pending_height} "
             "seed rows unmatched"
         )
-    if required and not usable_keys:
+    if not usable_keys:
         raise RequiredJoinKeyError(
             f"Required enricher {pipeline_name} has no usable join key columns"
         )
-    if not matched_frames:
-        return left_df
 
-    if pending.height == 0 and len(matched_frames) == 1:
-        result = matched_frames[0]
-    else:
-        frames: list[pl.DataFrame] = list(matched_frames)
-        if pending.height:
-            frames.append(pending)
-        result = pl.concat(frames, how="diagonal").sort(row_id)
-    drop_columns = [column for column in (row_id, marker) if column in result.columns]
+
+def _assemble_fallback_frames(
+    *,
+    left_df: pl.DataFrame,
+    pending: pl.DataFrame,
+    matched_frames: list[pl.DataFrame],
+    pipeline_name: str,
+    required: bool,
+) -> pl.DataFrame:
+    """Restore seed order and drop fallback bookkeeping columns."""
+    result = _concat_fallback_frames(pending=pending, matched_frames=matched_frames)
+    drop_columns = [
+        column for column in (_SEED_ROW_ID, _MATCH_MARKER) if column in result.columns
+    ]
     if drop_columns:
         result = result.drop(drop_columns)
     _assert_seed_cardinality(
@@ -286,6 +371,20 @@ def _execute_fallback_enricher_join(
         required=required,
     )
     return result
+
+
+def _concat_fallback_frames(
+    *,
+    pending: pl.DataFrame,
+    matched_frames: list[pl.DataFrame],
+) -> pl.DataFrame:
+    """Combine matched fallback frames with any still-unmatched seed rows."""
+    if pending.height == 0 and len(matched_frames) == 1:
+        return matched_frames[0]
+    frames = list(matched_frames)
+    if pending.height:
+        frames.append(pending)
+    return pl.concat(frames, how="diagonal").sort(_SEED_ROW_ID)
 
 
 def _optional_fallback_how() -> JoinHow:
