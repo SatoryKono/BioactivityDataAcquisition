@@ -52,6 +52,46 @@ __all__ = [
 ]
 
 
+def _ledger_entries_for_manifest(
+    service: RunManifestInspectionService,
+    manifest: RunManifest,
+) -> tuple[RunLedgerEntry, ...]:
+    """Return oldest-first ledger events for a manifest and its predecessors."""
+    ledger_port = service.ledger_port
+    if ledger_port is None:
+        return ()
+    ordered: list[RunManifest] = []
+    seen: set[str] = set()
+    current: RunManifest | None = manifest
+    while current is not None:
+        if current.manifest_id in seen:
+            raise RunManifestInspectionCorruptionError(
+                manifest.manifest_id,
+                "predecessor chain contains a cycle",
+            )
+        seen.add(current.manifest_id)
+        ordered.append(current)
+        predecessor_id = current.predecessor_manifest_id
+        if not predecessor_id:
+            break
+        try:
+            current = service.manifest_port.get(predecessor_id)
+        except ValueError as exc:
+            raise RunManifestInspectionCorruptionError(
+                manifest.manifest_id,
+                str(exc),
+            ) from exc
+        if current is None:
+            raise RunManifestInspectionCorruptionError(
+                manifest.manifest_id,
+                f"predecessor manifest {predecessor_id!r} is missing",
+            )
+    entries: list[RunLedgerEntry] = []
+    for item in reversed(ordered):
+        entries.extend(ledger_port.list_entries(item.manifest_id))
+    return tuple(entries)
+
+
 class _HistoricalReplayUniverseReportLoader(Protocol):
     def load_latest_report(self) -> dict[str, object] | None: ...
 
@@ -73,9 +113,7 @@ class RunManifestInspectionService(
     def show(self, identifier: str) -> RunManifestInspectionResult:
         """Resolve one manifest by manifest_id or run_id."""
         manifest = self._resolve_manifest(identifier)
-        ledger_entries: tuple[RunLedgerEntry, ...] = ()
-        if self.ledger_port is not None:
-            ledger_entries = tuple(self.ledger_port.list_entries(manifest.manifest_id))
+        ledger_entries = _ledger_entries_for_manifest(self, manifest)
         diagnostics = build_diagnostics_summary(manifest, ledger_entries)
         self._attach_historical_replay_universe_claim(diagnostics)
         self._attach_reproducibility_claim_views(diagnostics)

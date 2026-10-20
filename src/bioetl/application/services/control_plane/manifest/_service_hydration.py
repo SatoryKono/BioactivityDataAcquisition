@@ -139,6 +139,9 @@ class RunManifestHydrationMixin:
         )
         return RunManifest(
             manifest_id=self._manifest_id_factory(),
+            predecessor_manifest_id=_optional_payload_string(
+                normalized_payload, "predecessor_manifest_id"
+            ),
             execution_fingerprint=fingerprint,
             schema_version=self.schema_version,
             created_at=created_at,
