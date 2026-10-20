@@ -650,6 +650,13 @@
     },
     {
       "coverage_percent": 100.0,
+      "covered_lines": 1,
+      "missing_lines": 0,
+      "path": "src/bioetl/application/composite/helpers/enricher_fallback_join.py",
+      "total_lines": 1
+    },
+    {
+      "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 50,
       "executable_lines": 50,
@@ -657,6 +664,13 @@
       "module": "bioetl.application.composite.helpers.join_planner_identity",
       "path": "src/bioetl/application/composite/helpers/join_planner_identity.py",
       "source_lines": 108
+    },
+    {
+      "coverage_percent": 100.0,
+      "covered_lines": 1,
+      "missing_lines": 0,
+      "path": "src/bioetl/application/composite/helpers/join_required_checks.py",
+      "total_lines": 1
     },
     {
       "coverage_percent": 100.0,
@@ -7037,6 +7051,13 @@
       "module": "bioetl.application.services.lineage.lineage_inspection_service",
       "path": "src/bioetl/application/services/lineage/lineage_inspection_service.py",
       "source_lines": 203
+    },
+    {
+      "coverage_percent": 100.0,
+      "covered_lines": 1,
+      "missing_lines": 0,
+      "path": "src/bioetl/application/services/lineage/manifest_successor.py",
+      "total_lines": 1
     },
     {
       "coverage_percent": 100.0,
