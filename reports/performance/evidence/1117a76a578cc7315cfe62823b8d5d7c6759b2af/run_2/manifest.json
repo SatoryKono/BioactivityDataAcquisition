@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "source_revision": "1117a76a578cc7315cfe62823b8d5d7c6759b2af",
+  "github_sha": null,
+  "revision_method": "git_rev_parse_HEAD",
+  "source_worktree_clean": true,
+  "captured_at": "2026-10-20T12:48:01.855342+00:00",
+  "python_version": "3.13.15",
+  "platform": "Linux-6.18.49-x86_64-with-glibc2.43",
+  "capture_script_sha256": "b506454d276632fe128b5dc5ae745bd41b514bef0b3b3ce99244541c0f804b32",
+  "uv_lock_sha256": "8f98d2b192cb9b6c7885f8bbd188b7f577c8895285831db477bbe83f982df1de",
+  "runs": [
+    {
+      "n_merges": 10,
+      "source_revision": "1117a76a578cc7315cfe62823b8d5d7c6759b2af",
+      "command": [
+        "/usr/bin/time",
+        "-v",
+        "-o",
+        "/home/vercel-sandbox/workspace/repos/github.com/satorykono/bioactivitydataacquisition/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N10/time.txt",
+        "/tmp/bioetl-benchmark-source-1117a76/.venv/bin/python",
+        "-m",
+        "pytest",
+        "tests/performance/test_delta_sequential_merge.py::test_delta_sequential_merge_scaling[10]",
+        "--delta-merge-report-dir=/home/vercel-sandbox/workspace/repos/github.com/satorykono/bioactivitydataacquisition/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N10"
+      ],
+      "exit_code": 0,
+      "status": "complete",
+      "wall_time": "0:07.43",
+      "peak_rss_kb": 329056,
+      "merge_time_sum_s": 0.5746795510000027,
+      "final_rows": 4100,
+      "processed_rows": 5000,
+      "artifacts_sha256": {
+        "N10/N10-n1j0nze5/merge_scaling_N10.json": "da12950b0b068ed293d82d3d88031e5a11ec92a8abad2e1e0e97a4d94c24c35a",
+        "N10/N10-n1j0nze5/observations.jsonl": "16c27e17e0c9a2bbe47d0159459ecc587a9ff9b5f34593255789e6766fb4fbc8",
+        "N10/pytest.log": "338743c28809a8ea1a6b553211dd350d95af4e29c4f6afcb90584a4fabe5ef98",
+        "N10/time.txt": "83cc611c839087960d8bbef89f750a9fee6b5d9df9312265d199afa4498c1772"
+      }
+    },
+    {
+      "n_merges": 50,
+      "source_revision": "1117a76a578cc7315cfe62823b8d5d7c6759b2af",
+      "command": [
+        "/usr/bin/time",
+        "-v",
+        "-o",
+        "/home/vercel-sandbox/workspace/repos/github.com/satorykono/bioactivitydataacquisition/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N50/time.txt",
+        "/tmp/bioetl-benchmark-source-1117a76/.venv/bin/python",
+        "-m",
+        "pytest",
+        "tests/performance/test_delta_sequential_merge.py::test_delta_sequential_merge_scaling[50]",
+        "--delta-merge-report-dir=/home/vercel-sandbox/workspace/repos/github.com/satorykono/bioactivitydataacquisition/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N50"
+      ],
+      "exit_code": 0,
+      "status": "complete",
+      "wall_time": "0:05.13",
+      "peak_rss_kb": 359204,
+      "merge_time_sum_s": 2.811909058999902,
+      "final_rows": 20100,
+      "processed_rows": 25000,
+      "artifacts_sha256": {
+        "N50/N50-9btidy6p/merge_scaling_N50.json": "d998252f9d8238138a9b44310f6b7ac1cefd5b2c8f8f65c88284c2618666e23a",
+        "N50/N50-9btidy6p/observations.jsonl": "e6d0a5f7cdb3219de4f4ea2760b7ff67495e20742bb5a5fb7ef60794d5b974c3",
+        "N50/pytest.log": "6460136a355b3ee5168b4b9137f25e7d817397068bd8afdba7fd1d47a807130e",
+        "N50/time.txt": "7c5f52ebd205b736281f41306dd6c7e8133203b6d18dea7d89aa310175962831"
+      }
+    },
+    {
+      "n_merges": 100,
+      "source_revision": "1117a76a578cc7315cfe62823b8d5d7c6759b2af",
+      "command": [
+        "/usr/bin/time",
+        "-v",
+        "-o",
+        "/home/vercel-sandbox/workspace/repos/github.com/satorykono/bioactivitydataacquisition/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N100/time.txt",
+        "/tmp/bioetl-benchmark-source-1117a76/.venv/bin/python",
+        "-m",
+        "pytest",
+        "tests/performance/test_delta_sequential_merge.py::test_delta_sequential_merge_scaling[100]",
+        "--delta-merge-report-dir=/home/vercel-sandbox/workspace/repos/github.com/satorykono/bioactivitydataacquisition/reports/performance/evidence/1117a76a578cc7315cfe62823b8d5d7c6759b2af/run_2/N100"
+      ],
+      "exit_code": 0,
+      "status": "complete",
+      "wall_time": "0:10.44",
+      "peak_rss_kb": 478412,
+      "merge_time_sum_s": 7.728513414999895,
+      "final_rows": 40100,
+      "processed_rows": 50000,
+      "artifacts_sha256": {
+        "N100/N100-yevzmbf8/merge_scaling_N100.json": "18bcedb8d09b3519474f3e0da94fde490676a26fcda4948e5433c4181b138642",
+        "N100/N100-yevzmbf8/observations.jsonl": "e4033f9b54e6a62d03ddccc223fd8a707b4fc4e340011fb1bd9b82b1cf48274e",
+        "N100/pytest.log": "bfa68dd8e72f932f520c505123c95a2c72c3d2d8561ba47eb21b3eb8ec02fcfb",
+        "N100/time.txt": "07bbdbc42d09b2b233fff99719cf0284ff6ea75c297106aac84f45e58994f8e0"
+      }
+    }
+  ]
+}

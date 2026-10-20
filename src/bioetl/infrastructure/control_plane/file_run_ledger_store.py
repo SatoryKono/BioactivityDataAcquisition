@@ -7,7 +7,6 @@ import os
 from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
-from threading import RLock
 from time import perf_counter
 from typing import TYPE_CHECKING
 
@@ -17,6 +16,7 @@ from bioetl.infrastructure.control_plane._durability import (
     should_fsync_control_plane_writes,
 )
 from bioetl.infrastructure.control_plane._file_run_ledger_helpers import (
+    LEDGER_APPEND_LOCK,
     RunLedgerCorruptionError,
     append_jsonl_payload,
     emit_ledger_append_duration_metric,
@@ -41,9 +41,6 @@ if TYPE_CHECKING:
 _LEDGER_APPEND_OPEN_FLAGS = os.O_APPEND | os.O_CREAT | os.O_WRONLY
 _RUN_LEDGER_MESSAGE_PREFIX = "Run ledger"
 _RunLedgerCorruptionError = RunLedgerCorruptionError
-# Stores may share a ledger directory. Keep duplicate detection, append, index
-# publication and rollback in one process-local transaction across instances.
-_LEDGER_APPEND_LOCK = RLock()
 
 
 def _should_fsync_control_plane_writes() -> bool:
@@ -92,7 +89,7 @@ class FileRunLedgerStore(FileRunLedgerQueriesMixin, RunLedgerPort):
 
     def append(self, entry: RunLedgerEntry) -> None:
         """Append one JSONL ledger entry and maintain run-id index."""
-        with _LEDGER_APPEND_LOCK:
+        with LEDGER_APPEND_LOCK:
             self._append_locked(entry)
 
     def _append_locked(self, entry: RunLedgerEntry) -> None:
