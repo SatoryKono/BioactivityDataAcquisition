@@ -1017,16 +1017,26 @@ def test_support_tree_walk_and_flat_filter(tmp_path: Path) -> None:
     assert skips
     flat_root = _abs(tmp_path / "flat")
     (flat_root / _DATE).mkdir(parents=True)
-    called: list[int] = []
-    import pytest
-    with pytest.raises(ValueError, match="Scope filters \\(provider/entity\\) are not supported with flat_structure=True"):
+    with pytest.raises(ValueError, match="not supported with flat_structure=True"):
         support.find_old_date_dirs(
             flat_root,
             flat_structure=True,
             cutoff_str=_CUTOFF,
             provider="prov",
-            on_flat_filter=lambda: called.append(1),
-        ) == [1]
+        )
+    with pytest.raises(ValueError, match="not supported with flat_structure=True"):
+        support.find_old_date_dirs(
+            flat_root,
+            flat_structure=True,
+            cutoff_str=_CUTOFF,
+            entity="ent",
+        )
+    assert [
+        path.name
+        for path in support.find_old_date_dirs(
+            flat_root, flat_structure=True, cutoff_str=_CUTOFF
+        )
+    ] == [_DATE]
     assert (
         support.find_old_date_dirs(
             tmp_path / "absent", flat_structure=False, cutoff_str=_CUTOFF
@@ -1338,9 +1348,10 @@ def test_preview_counts_old_and_sentinel_dates(tmp_path: Path) -> None:
     assert view._resolve_bronze_preview_root("prov", None) == base / "prov"
     flat = _Preview(base, True)
     assert flat._resolve_bronze_preview_root("prov", "ent") == base
-    import pytest
-    with pytest.raises(ValueError, match="Scope filters \\(provider/entity\\) are not supported with flat_structure=True"):
+    with pytest.raises(ValueError, match="not supported with flat_structure=True"):
         flat.preview_cleanup(provider="prov")
+    with pytest.raises(ValueError, match="not supported with flat_structure=True"):
+        flat.preview_cleanup(entity="ent")
 
 
 def test_preview_missing_invalid_and_unsafe_root(tmp_path: Path, monkeypatch) -> None:

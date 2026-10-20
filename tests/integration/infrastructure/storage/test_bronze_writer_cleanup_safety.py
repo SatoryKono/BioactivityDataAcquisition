@@ -550,12 +550,23 @@ async def test_cleanup_flat_layout(tmp_path: Path) -> None:
 
 
 @_APPLY_POSIX
-async def test_cleanup_flat_layout_scope_filter_is_noop(tmp_path: Path) -> None:
-    """Provider/entity filters on flat storage cannot scope → refuse early."""
+async def test_cleanup_flat_layout_scope_filter_refuses(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Provider/entity filters on flat storage refuse before traversal."""
     writer = _make_writer(tmp_path, flat=True)
-    import pytest
-    with pytest.raises(ValueError, match="Scope filters \\(provider/entity\\) are not supported with flat_structure=True"):
+    discovery = Mock(side_effect=AssertionError("filesystem traversal started"))
+    preview_resolution = Mock(side_effect=AssertionError("preview traversal started"))
+    monkeypatch.setattr(writer, "_find_old_date_dirs", discovery)
+    monkeypatch.setattr(writer, "_resolve_bronze_preview_root", preview_resolution)
+    with pytest.raises(ValueError, match="not supported with flat_structure=True"):
         await writer.cleanup_old_files(CUTOFF, provider="chembl")
+    with pytest.raises(ValueError, match="not supported with flat_structure=True"):
+        await writer.cleanup_old_files(CUTOFF, entity="activity")
+    with pytest.raises(ValueError, match="not supported with flat_structure=True"):
+        writer.preview_cleanup(provider="chembl", entity="activity")
+    discovery.assert_not_called()
+    preview_resolution.assert_not_called()
 
 
 def test_iter_safe_child_dirs_skips_links(tmp_path: Path) -> None:

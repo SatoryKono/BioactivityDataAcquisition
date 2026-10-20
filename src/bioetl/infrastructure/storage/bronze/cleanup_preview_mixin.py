@@ -17,6 +17,7 @@ from .cleanup_support import (
     root_components_safe,
     safe_named_child_dir,
     stat_is_link_or_reparse,
+    validate_flat_scope_compatibility,
     validate_scope_filter,
 )
 
@@ -43,15 +44,13 @@ class BronzeCleanupPreviewMixin:
         """Preview direct date-partition files with bounded, no-follow traversal."""
         validate_scope_filter(provider, "provider")
         validate_scope_filter(entity, "entity")
-        from .cleanup_support import validate_flat_scope_compatibility
         validate_flat_scope_compatibility(self._flat_structure, provider, entity)
         preview_root = self._resolve_bronze_preview_root(provider, entity)
-        exists = self.base_path.exists()
-        if not exists or (self._flat_structure and (provider or entity)):
+        if not self.base_path.exists():
             return {
                 "path": str(preview_root),
                 "file_count": 0,
-                "exists": exists and not (provider or entity),
+                "exists": False,
             }
         if not root_components_safe(self.base_path):
             return {"path": str(preview_root), "file_count": 0, "exists": False}
