@@ -581,6 +581,7 @@ def test_lineage_index_append_jsonl_payload_rolls_back_partial_write(
     assert fake_os.closed == [19]
     assert flush_calls == [19]
 
+
 def test_lineage_index_append_jsonl_payload_rolls_back_partial_write_and_fails(
     tmp_path,
 ) -> None:
@@ -610,7 +611,10 @@ def test_lineage_index_append_jsonl_payload_rolls_back_partial_write_and_fails(
     fake_os = _PartialWriteAndRollbackFailingOs()
     flush_calls: list[int] = []
 
-    with pytest.raises(RuntimeError, match="Rollback failed during partial write: simulated ftruncate failure"):
+    with pytest.raises(
+        RuntimeError,
+        match="Rollback failed during partial write: simulated ftruncate failure",
+    ):
         lineage_index_module.append_jsonl_payload(
             tmp_path / "lineage" / "index.jsonl",
             b"payload\n",
@@ -621,6 +625,7 @@ def test_lineage_index_append_jsonl_payload_rolls_back_partial_write_and_fails(
 
     assert fake_os.closed == [19]
     assert flush_calls == []
+
 
 def test_file_lineage_store_concurrent_save(tmp_path) -> None:
     store1 = FileLineageStore(base_path=tmp_path / "lineage")
@@ -653,6 +658,7 @@ def test_file_lineage_store_concurrent_save(tmp_path) -> None:
 
     assert len(store1.list_by_run_id("run-a")) == 1
     assert len(store2.list_by_run_id("run-b")) == 1
+
 
 def test_file_lineage_store_concurrent_save_and_fail(tmp_path, monkeypatch) -> None:
     store1 = FileLineageStore(base_path=tmp_path / "lineage")
@@ -728,4 +734,6 @@ def test_file_lineage_store_concurrent_save_and_fail(tmp_path, monkeypatch) -> N
         f1.result()
         f2.result()
 
-    assert len(store1.list_by_run_id("run-shared")) >= 0 # Just verify it doesn't crash or hang, and leaves a clean state
+    assert (
+        len(store1.list_by_run_id("run-shared")) >= 0
+    )  # Just verify it doesn't crash or hang, and leaves a clean state

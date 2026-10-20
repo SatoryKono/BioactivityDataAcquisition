@@ -92,10 +92,12 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
         fcntl.flock(lock_fd, fcntl.LOCK_EX)
 
         try:
-            stored_fragment_id = fragment.stored_fragment_id or _build_stored_fragment_id(
-                fragment
+            stored_fragment_id = (
+                fragment.stored_fragment_id or _build_stored_fragment_id(fragment)
             )
-            persisted_fragment = replace(fragment, stored_fragment_id=stored_fragment_id)
+            persisted_fragment = replace(
+                fragment, stored_fragment_id=stored_fragment_id
+            )
             fragment_path = self._fragment_path(stored_fragment_id)
             existing_fragment_payload = (
                 fragment_path.read_text(encoding="utf-8")
@@ -116,7 +118,9 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
                     index_rollbacks=index_rollbacks,
                 )
                 if rollback_errors:
-                    raise RuntimeError(f"Rollback failed with errors: {rollback_errors}") from error
+                    raise RuntimeError(
+                        f"Rollback failed with errors: {rollback_errors}"
+                    ) from error
                 raise
         finally:
             fcntl.flock(lock_fd, fcntl.LOCK_UN)
