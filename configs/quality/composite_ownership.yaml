@@ -137,6 +137,7 @@ areas:
     depends_on: [columns]
     modules:
       - src/bioetl/application/composite/join_execution.py
+      - src/bioetl/application/composite/helpers/join_required_checks.py
       - src/bioetl/application/composite/join_key_normalization.py
       - src/bioetl/application/composite/join_key_resolution.py
       - src/bioetl/application/composite/join_key_resolution_helpers.py
