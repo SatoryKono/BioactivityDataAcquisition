@@ -151,7 +151,16 @@ test-profile:
 	$(RUN) pytest tests/ --durations=25 --durations-min=1.0 -q
 
 test-benchmark:
-	BIOETL_BENCHMARK_CALLER=local-makefile BIOETL_BENCHMARK_DATASET=bioetl-synthetic-benchmarks-v1 $(RUN) pytest tests/benchmarks/ -m benchmark -p tests.benchmarks.benchmark_vcs_guard -p benchmark -p no:xdist -v --tb=short --benchmark-json=reports/performance/benchmark-measurements.json
+	mkdir -p reports/performance
+	BIOETL_BENCHMARK_CALLER=local-makefile \
+	BIOETL_BENCHMARK_DATASET=bioetl-synthetic-benchmarks-v1 \
+	$(RUN) pytest tests/benchmarks/ \
+		-m benchmark \
+		-p tests.benchmarks.benchmark_vcs_guard \
+		-p benchmark \
+		-p no:xdist \
+		-v --tb=short \
+		--benchmark-json=reports/performance/benchmark-measurements.json
 
 run-local:
 	$(RUN) bioetl run --pipeline $(PIPELINE) --limit 10
