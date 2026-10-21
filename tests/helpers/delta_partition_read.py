@@ -27,6 +27,20 @@ def read_partitioned_delta_file(
     for name, value in partition_values.items():
         if name in table.column_names or (columns is not None and name not in columns):
             continue
-        values = pa.array([value] * table.num_rows).cast(schema.field(name).type)
-        table = table.append_column(name, values)
-    return table.select(columns if columns is not None else schema.names)
+        typed = schema.field(name).type
+        scalar = None if value is None or value == "" else value
+        if scalar is None:
+            column = pa.array([None] * table.num_rows, type=typed)
+        else:
+            column = pa.array([scalar] * table.num_rows).cast(typed)
+        table = table.append_column(name, column)
+    selected = list(columns) if columns is not None else list(schema.names)
+    for field in schema:
+        if field.name in table.column_names or field.name not in selected:
+            continue
+        if not field.nullable:
+            continue
+        table = table.append_column(
+            field.name, pa.array([None] * table.num_rows, type=field.type)
+        )
+    return table.select(selected)

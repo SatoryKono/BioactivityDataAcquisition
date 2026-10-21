@@ -230,3 +230,11 @@ def test_docs_governance_anchors_grafana_reports_and_tests() -> None:
     assert "grafana/**" in include
     assert "reports/**" in include
     assert "tests/**" in include
+
+
+def test_gitleaks_root_configs_are_security_paths() -> None:
+    data = _load_yaml(CATALOG)
+    security = next(gate for gate in data["gates"] if gate["id"] == "security")
+    include = security["paths"]["include"]
+    assert ".gitleaks.toml" in include
+    assert ".gitleaksignore" in include

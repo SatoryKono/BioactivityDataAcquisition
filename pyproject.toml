@@ -189,10 +189,6 @@ docs = [
     "pymdown-extensions>=10.8",
 ]
 
-[tool.uv]
-# pre-commit pulls virtualenv. Floor stays at the pip-audit/OSV fix release.
-constraint-dependencies = ["virtualenv>=21.14.7"]
-
 [tool.setuptools.packages.find]
 where = ["src"]
 
