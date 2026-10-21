@@ -113,6 +113,7 @@ def create_batch_processing_components(
             lock_validator=lock_validator,
             column_orderer=column_orderer,
             debug_export_service=debug_export_service,
+            gold_quarantine_port=services.quarantine,
         ),
     )
     return BatchProcessingComponents(

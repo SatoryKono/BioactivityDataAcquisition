@@ -15,6 +15,9 @@ from bioetl.application.core._batch_write_support import (
     safe_write_gold,
     safe_write_silver,
 )
+from bioetl.application.core._gold_outcome_disposition import (
+    bind_gold_quarantine_batch_if_supported,
+)
 from bioetl.application.services.batch_processing.operation_errors import (
     OPERATION_ERRORS as _OPERATION_ERRORS,
 )
@@ -121,6 +124,7 @@ async def write_gold_layer(
     silver_result = cast("SilverWriteResult | None", silver_outcome.write_result)
     silver_refs = [silver_result] if silver_result is not None else None
     if quarantine_manager is None:
+        bind_gold_quarantine_batch_if_supported(writer, batch_id)
         receipt = await span_executor.execute_with_span(
             "write_gold",
             writer.write_gold(result.gold_records, silver_refs=silver_refs),

@@ -105,21 +105,38 @@ class DQPolicyRef(NamedTuple):
 1. **Consistency Validation**: Cross-source data consistency checks
 1. **Provenance Validation**: Lineage and audit trail verification
 
-`ContractAwareGoldValidator.validate_with_outcomes()` returns an empty
-outcome list when no policy resolver is configured, when the input is
-empty, or when the schema is missing and the validator is not strict. A
-missing schema in strict mode yields one `schema.missing` outcome only for
-non-empty input. With a resolver, records, and a schema, the method turns
-Pandera schema failures into `DQRuleOutcome` values and then calls
-`_apply_contract_validations()`, which still returns no contract-rule
-outcomes. `ContractAwareSilverValidator.validate_with_outcomes()` still
-returns the basic validity flag and an empty outcome list. Neither method
-has a production callsite in `src/bioetl`: Gold batch writes call
-`validate()` and fail closed with `SchemaViolationError`. Tests exercise
-these APIs. Write-path consumption, record attribution, and per-record
-quarantine routing stay open in #12095. Production rule evaluation through
-`evaluate_dq_rules_for_record()` remains active and applies quarantine,
-skip, fail, and warn dispositions.
+The rule-level outcome channel is active.
+`ContractAwareGoldValidator.validate_with_outcomes()` and
+`ContractAwareSilverValidator.validate_with_outcomes()` return a
+`DQOutcomeChannel`. The channel unpacks as `(is_valid, outcomes)` and
+carries `AttributedDQViolation` values. Executable contract rules are loaded
+from the bound `DQConfig` by `load_executable_contract_rules()`.
+`DQPolicyResolver.resolve_disposition()` and `create_rule_outcome()` assign
+dispositions; the resolver does not load a rule bundle from
+`policy_ref.contract_ref`.
+
+Without a policy resolver both methods keep the basic `validate()` validity
+flag and an empty outcome list. With a resolver, an empty input yields a
+valid empty channel. A missing schema in strict mode yields one
+unattributable `schema.missing` outcome for non-empty input. Otherwise
+Pandera failures and contract-rule violations become `DQRuleOutcome` values.
+Record identity is separate from the rule outcome: `DQRecordIdentity` stores
+the post-normalization `source_index` and an optional canonical
+`record_key`. `affected_fields` is not a row selector. Schema-level errors
+without a failure-case row index stay unattributable.
+
+Gold `write_gold` consumes `validate_with_outcomes()` when the bound
+`DQConfig` has an explicit outcome policy (at least one executable rule or a
+disposition override). Attributable `QUARANTINE` business-rule violations,
+and schema violations whose rule id has an explicit `QUARANTINE` override,
+are accumulated synchronously and sent per record through
+`write_quarantine_requests()` with `rule_id`, `contract_ref`, and
+`config_path`. `FAIL`, `SKIP`, unattributable violations, schema violations
+without that override, and contracts without an explicit outcome policy stay
+on batch-level fail-closed `validate()` and `SchemaViolationError`. Silver
+production writes still call `validate()`.
+`evaluate_dq_rules_for_record()` remains the transformer runtime path and
+still applies quarantine, skip, fail, and warn dispositions before Gold.
 
 #### 2.3 Policy Resolution Strategy
 
