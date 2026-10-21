@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-21T13:01:31.209402+00:00",
+  "generated_at": "2026-10-21T13:21:12.413122+00:00",
   "summary": {
     "total_scripts": 659,
     "status_counts": {
@@ -17652,7 +17652,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_topology_source_binding.py",
-          "line": 149,
+          "line": 154,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_test_governance_audit import ("
         }
