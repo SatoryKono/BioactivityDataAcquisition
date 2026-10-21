@@ -26,11 +26,19 @@ def dataframe_sha256(frame: pl.DataFrame) -> str:
     return digest.hexdigest()
 
 
-def compare_reads(path: Path) -> str:
-    eager_hash = dataframe_sha256(read_eager(path))
-    lazy_hash = dataframe_sha256(read_lazy(path))
-    status = "HASHES_MATCH" if eager_hash == lazy_hash else "HASH_MISMATCH"
-    return f"EAGER_HASH: {eager_hash}\nLAZY_HASH: {lazy_hash}\n{status}\n"
+def format_hash_report(eager_hash: str, lazy_hash: str) -> tuple[str, int]:
+    """Return the hash log text and a non-zero code when the digests differ."""
+    matched = eager_hash == lazy_hash
+    status = "HASHES_MATCH" if matched else "HASH_MISMATCH"
+    report = f"EAGER_HASH: {eager_hash}\nLAZY_HASH: {lazy_hash}\n{status}\n"
+    return report, 0 if matched else 1
+
+
+def compare_reads(path: Path) -> tuple[str, int]:
+    return format_hash_report(
+        dataframe_sha256(read_eager(path)),
+        dataframe_sha256(read_lazy(path)),
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -38,8 +46,9 @@ def main(argv: list[str] | None = None) -> int:
     if len(args) != 1:
         print("usage: check_hash.py <parquet>", file=sys.stderr)
         return 1
-    sys.stdout.write(compare_reads(Path(args[0])))
-    return 0
+    report, code = compare_reads(Path(args[0]))
+    sys.stdout.write(report)
+    return code
 
 
 if __name__ == "__main__":

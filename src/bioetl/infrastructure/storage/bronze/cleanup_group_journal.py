@@ -60,8 +60,12 @@ __all__ = [
 @contextmanager
 def open_group_journal(root: Path) -> Iterator[GroupJournal]:
     """Hold the production cooperative exclusive lock for explicit operations."""
+    if not _platform_cleanup_supported():
+        raise NotImplementedError(
+            "durable Bronze group apply requires POSIX pinned handles"
+        )
     _require_unlinked_bronze_root(root)
-    if not _platform_cleanup_supported() or not _directory_xattr_supported(root):
+    if not _directory_xattr_supported(root):
         raise NotImplementedError(
             "durable Bronze group apply requires POSIX pinned handles"
         )

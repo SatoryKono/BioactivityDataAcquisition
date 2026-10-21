@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-15'
+  Last verified: '2026-10-21'
 
 ______________________________________________________________________
 
 # Политика файлов и директорий
 
-*Синхронизировано с RULES.md v6.1.3 | Последнее обновление: 2026-05-21*
+*Синхронизировано с RULES.md v6.1.3 | Последнее обновление: 2026-10-21*
 
 ______________________________________________________________________
 
@@ -170,9 +170,10 @@ Root allowlist интерпретируется как policy surface, а не �
 финального статуса волны, он не должен закрепляться в корне.
 
 `.codex_tmp/` is a local scratch/cache surface and MUST remain untracked.
-`.gemini/` may remain tracked only as the canonical Gemini runtime tree; local
-runtime state and generated artifacts under `.gemini/` MUST still stay
-untracked unless explicitly reclassified through structure governance.
+`.gemini/` is not a BioETL runtime. The only tracked file is
+`.gemini/config.yaml` (Gemini Code Assist on GitHub). Root `GEMINI.md`,
+`.gemini/agents/**`, `.gemini/skills/**`, and machine-local files such as
+`.gemini/settings.json` MUST stay untracked.
 `.jules/` is a local vendor workspace surface and MUST remain untracked unless
 explicitly reclassified through structure governance.
 `.vibe/` may remain tracked only for curated project-local Mistral Vibe
