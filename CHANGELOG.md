@@ -66,6 +66,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Lock release under repeated cancellation:** `release_lock` keeps the
+  cleanup task shielded until barriers, heartbeat shutdown, and lock release
+  finish, then re-raises the caller's cancellation. The eager/lazy measurement
+  report quotes a wall-time sample that clears both bottleneck thresholds, and
+  `run_measurements.sh` prints the hash log before exiting on `HASH_MISMATCH`.
+  Flat Bronze cleanup acceptance supplies `root_identity` for an unknown
+  owner, and the legacy `BronzeWriter` constructor accepts that argument.
+
 - **Required composite joins (#12033, #12004):** a required enricher or
   dependency now uses an INNER join and fails closed when a join-key column
   is missing or any seed row stays unmatched. Duplicate right-hand keys do not

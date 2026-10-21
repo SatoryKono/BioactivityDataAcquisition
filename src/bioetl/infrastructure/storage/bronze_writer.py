@@ -142,21 +142,26 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         save_metadata = legacy_runtime.pop("save_metadata", False)
         metadata_coordinator = legacy_runtime.pop("metadata_coordinator", None)
         lineage_store = legacy_runtime.pop("lineage_store", None)
+        root_identity = legacy_runtime.pop("root_identity", None)
         if legacy_runtime:
             unexpected = ", ".join(sorted(str(k) for k in legacy_runtime))
             raise TypeError(
                 f"BronzeWriter() got unexpected keyword argument(s): {unexpected}"
             )
-        legacy_provided = any(
-            value is not None
-            for value in (
-                tracing,
-                audit,
-                metadata_writer,
-                metadata_coordinator,
-                lineage_store,
+        legacy_provided = (
+            any(
+                value is not None
+                for value in (
+                    tracing,
+                    audit,
+                    metadata_writer,
+                    metadata_coordinator,
+                    lineage_store,
+                )
             )
-        ) or bool(save_metadata)
+            or bool(save_metadata)
+            or root_identity is not None
+        )
         if runtime_services is not None and legacy_provided:
             raise TypeError(
                 "BronzeWriter() accepts either runtime_services or legacy runtime "
@@ -175,6 +180,7 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
                 "MetadataCoordinatorPort | None", metadata_coordinator
             ),
             lineage_store=cast("LineageStorePort | None", lineage_store),
+            root_identity=cast("tuple[str, str] | None", root_identity),
         )
 
     def __init__(
