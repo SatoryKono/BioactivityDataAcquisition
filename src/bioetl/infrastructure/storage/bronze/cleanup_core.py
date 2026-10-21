@@ -89,12 +89,7 @@ def _verified_fd_path(fd: int) -> Path:
 
 
 def _fd_view_supported() -> bool:
-    """Require a verified pathname to an open directory for pinned writer I/O.
-
-    The probe calls ``_verified_fd_path`` directly. ``writer_path`` stays the
-    lock-time check, so a view lost after a successful probe still refuses
-    both shared and exclusive locks.
-    """
+    """Probe ``_verified_fd_path`` so a later ``writer_path`` miss still refuses locks."""
     try:
         fd = os.open("/", os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
     except OSError:

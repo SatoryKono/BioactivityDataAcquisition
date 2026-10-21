@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import inspect
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core._gold_outcome_disposition import (
@@ -12,6 +11,7 @@ from bioetl.application.core._gold_outcome_disposition import (
     supports_outcome_channel,
 )
 from bioetl.application.core._gold_outcome_quarantine_write import (
+    call_outcome_channel,
     empty_gold_receipt,
     flush_gold_outcome_quarantine,
     record_gold_outcome_quarantine_metrics,
@@ -22,7 +22,6 @@ from bioetl.domain.behavior.dq_contract_rule_source import (
 )
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.exceptions import SchemaViolationError
-from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_record_attribution import DQOutcomeChannel
 from bioetl.domain.types.gold_contracts import GoldWriteReceipt
 
@@ -115,8 +114,7 @@ def validate_gold_records(
     and validators without that policy stay on fail-closed ``.validate()``.
     ``apply_contract_rules=False`` is the structural re-check after column
     projection and does not reopen the outcome channel. ``contract_records``
-    are the pre-projection rows used for contract rules when gold publication
-    drops companion fields. Schema checks still run on ``records``.
+    are the pre-projection rows for contract rules. Schema checks use ``records``.
     """
     validator = writer._gold_validator
     target_schema = schema if schema is not None else writer._gold_schema
@@ -127,11 +125,7 @@ def validate_gold_records(
         )
 
     if apply_contract_rules and _use_outcome_channel(validator):
-        channel = _call_outcome_channel(
-            validator,
-            records,
-            contract_records=cast("list[JsonDict] | None", contract_records),
-        )
+        channel = call_outcome_channel(validator, records, contract_records)
         if isinstance(channel, DQOutcomeChannel):
             config = cast("DQConfig | None", getattr(validator, "_dq_config", None))
             plan = plan_gold_outcome_write(records, channel, config)
@@ -146,32 +140,6 @@ def validate_gold_records(
         _export_gold_failure(writer, records, list(result.errors))
         raise SchemaViolationError("gold", result.errors)
     return records, ()
-
-
-def _call_outcome_channel(
-    validator: object,
-    records: list[JsonDict],
-    *,
-    contract_records: list[JsonDict] | None = None,
-) -> object:
-    method = getattr(type(validator), "validate_with_outcomes", None)
-    if not callable(method):
-        return None
-    if contract_records is None or not _accepts_contract_records(method):
-        return method(validator, records)
-    return method(validator, records, contract_records=contract_records)
-
-
-def _accepts_contract_records(method: object) -> bool:
-    try:
-        signature = inspect.signature(method)
-    except (TypeError, ValueError):
-        return False
-    return any(
-        parameter.name == "contract_records"
-        or parameter.kind is inspect.Parameter.VAR_KEYWORD
-        for parameter in signature.parameters.values()
-    )
 
 
 def _use_outcome_channel(validator: object) -> bool:
@@ -245,13 +213,8 @@ def prepare_validated_gold_write(
     else:
         canonical_records = list(records)
         records, available_cols = prepare_gold_records(writer, records)
-        contract_records = (
-            canonical_records if len(canonical_records) == len(records) else None
-        )
         records, quarantined = validate_gold_records(
-            writer,
-            records,
-            contract_records=contract_records,
+            writer, records, contract_records=canonical_records
         )
         column_order_preview, _rename_preview = writer._resolve_layer_columns(
             "gold", available_cols

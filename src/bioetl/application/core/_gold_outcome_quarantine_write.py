@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -28,10 +29,36 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import QuarantinePort, QuarantineWriteRequest
 
 __all__ = [
+    "call_outcome_channel",
     "empty_gold_receipt",
     "flush_gold_outcome_quarantine",
     "record_gold_outcome_quarantine_metrics",
 ]
+
+
+def call_outcome_channel(
+    validator: object,
+    records: list[JsonDict],
+    contract_records: list[JsonDict] | None = None,
+) -> object:
+    """Call ``validate_with_outcomes`` with pre-projection rows when accepted."""
+    method = getattr(type(validator), "validate_with_outcomes", None)
+    if not callable(method):
+        return None
+    if contract_records is None or not _accepts_keyword(method, "contract_records"):
+        return method(validator, records)
+    return method(validator, records, contract_records=contract_records)
+
+
+def _accepts_keyword(method: object, name: str) -> bool:
+    try:
+        signature = inspect.signature(method)
+    except (TypeError, ValueError):
+        return False
+    return any(
+        parameter.name == name or parameter.kind is inspect.Parameter.VAR_KEYWORD
+        for parameter in signature.parameters.values()
+    )
 
 
 async def flush_gold_outcome_quarantine(
