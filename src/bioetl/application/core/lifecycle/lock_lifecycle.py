@@ -79,6 +79,7 @@ async def acquire_lock(host: _LockRuntimeHostProtocol) -> FencingToken | None:
 
 
 def _clear_task_cancellation() -> None:
+    """Drop cancellation requests so the current task can finish cleanup."""
     current = asyncio.current_task()
     if current is None:
         return
@@ -87,7 +88,11 @@ def _clear_task_cancellation() -> None:
 
 
 async def release_lock(host: _LockRuntimeHostProtocol) -> None:
-    """Release the lock after cleanup, including repeated cancellation."""
+    """Release the runtime lock, stop heartbeat, and clear context state.
+
+    Cancellation of the caller finishes the in-flight Delta barriers, stops
+    the heartbeat, and releases the lock before ``CancelledError`` propagates.
+    """
     barriers = take_lock_release_barriers()
 
     async def _cleanup() -> None:
@@ -111,13 +116,8 @@ async def release_lock(host: _LockRuntimeHostProtocol) -> None:
     try:
         await asyncio.shield(operation)
     except asyncio.CancelledError:
-        while not operation.done():
-            _clear_task_cancellation()
-            try:
-                await asyncio.shield(operation)
-            except asyncio.CancelledError:  # NOSONAR python:S7497 - re-raised below
-                continue
-        operation.result()
+        _clear_task_cancellation()
+        await operation
         raise
 
 

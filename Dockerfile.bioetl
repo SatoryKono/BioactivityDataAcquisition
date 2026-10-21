@@ -64,7 +64,6 @@ FROM chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440d
 USER 0
 RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
     && apk add --no-cache \
-        ca-certificates-bundle=20260909-r3 \
         glibc-2.44-locale-posix=2.44-r8 \
         glibc-2.44=2.44-r8 \
         ld-linux-2.44=2.44-r8 \
