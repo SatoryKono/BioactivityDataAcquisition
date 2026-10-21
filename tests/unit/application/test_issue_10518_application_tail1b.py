@@ -1036,6 +1036,7 @@ from bioetl.application.core.runner import PipelineRunner
 
 def _make_runner() -> PipelineRunner:
     runner = object.__new__(PipelineRunner)
+    runner._run_ledger_service = None
     runner._contract_evidence_context = None
     runner._context = SimpleNamespace(run_id="run-1", manifest_id="ctx-manifest")
     runner._contract_evidence_recorder = None
