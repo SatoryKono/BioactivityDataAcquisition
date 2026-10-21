@@ -4,8 +4,14 @@ from unittest.mock import Mock
 
 import pytest
 
-from bioetl.application.core.batch_metrics_accounting import _record_processed_stage_accounting, _record_stage_outcome_accounting
-from bioetl.domain.run_reports.context import bind_stage_accounting, reset_stage_accounting
+from bioetl.application.core.batch_metrics_accounting import (
+    _record_processed_stage_accounting,
+    _record_stage_outcome_accounting,
+)
+from bioetl.domain.run_reports.context import (
+    bind_stage_accounting,
+    reset_stage_accounting,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -15,7 +21,9 @@ def test_processed_skip_records_silver_removal_reason():
     token = bind_stage_accounting(accounting)
     try:
         _record_processed_stage_accounting("skipped", 2)
-        accounting.record_removal.assert_called_once_with("silver", outcome="skipped", reason_code="OPERATOR_SKIPPED", count=2)
+        accounting.record_removal.assert_called_once_with(
+            "silver", outcome="skipped", reason_code="OPERATOR_SKIPPED", count=2
+        )
     finally:
         reset_stage_accounting(token)
 

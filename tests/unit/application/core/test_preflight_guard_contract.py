@@ -29,10 +29,18 @@ def test_quarantine_rejects_unknown_stage_before_resolving_runtime_ports(stage):
 
 
 def test_gold_rejects_generic_write_mode_with_configuration_diagnostic():
-    from bioetl.application.core.preflight.medallion_validator_runtime import validate_single_write_mode
+    from bioetl.application.core.preflight.medallion_validator_runtime import (
+        validate_single_write_mode,
+    )
     from bioetl.domain.medallion import Layer, WriteModePolicy
 
-    errors = validate_single_write_mode(write_mode_policy=WriteModePolicy(), layer=Layer.GOLD, mode_value="append", field="gold.write_mode", rule="medallion")
+    errors = validate_single_write_mode(
+        write_mode_policy=WriteModePolicy(),
+        layer=Layer.GOLD,
+        mode_value="append",
+        field="gold.write_mode",
+        rule="medallion",
+    )
     assert len(errors) == 1
     assert errors[0].field == "gold.write_mode"
     assert errors[0].expected == "supported layer for generic modes"
