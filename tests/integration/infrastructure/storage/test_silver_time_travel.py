@@ -1,4 +1,13 @@
 # pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Integration tests for Silver maintenance time travel on real Delta tables."""
 
 from __future__ import annotations
@@ -13,7 +22,6 @@ from pathlib import Path
 
 import pyarrow as pa
 import pytest
-from deltalake import DeltaTable
 
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
@@ -44,6 +52,7 @@ def _records_v1() -> list[dict[str, str]]:
             "_ingestion_ts": "2026-01-01T00:00:00+00:00",
         }
     ]
+
 
 def _records_v2() -> list[dict[str, str]]:
     return [
@@ -96,7 +105,7 @@ async def test_silver_time_travel_returns_named_versions(
         schema=_schema(),
     )
 
-    # Version 0 should have 1 record, Version 1 should have 2 records (append mode)
+    # Version 0 has the first key. Version 1 merges the second distinct key.
     dt_v0 = await silver_writer.time_travel(table_name, version=0)
     assert len(dt_v0.to_pandas()) == 1
 

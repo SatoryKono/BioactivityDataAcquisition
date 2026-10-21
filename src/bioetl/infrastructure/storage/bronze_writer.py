@@ -113,9 +113,8 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
 
     COMPRESSION_CHUNK_SIZE = 256 * 1024
     COMPRESSION_LEVEL = 3
-    # Single-thread only. `threads=-1` (all cores) allocates a large zstd CCTX
-    # per worker and OOMs publication bronze batches on Windows:
-    # "zstd compress error: Allocation error : not enough memory".
+    # Single-thread only: `threads=-1` allocates a large zstd CCTX per worker
+    # and OOMs bronze batches ("zstd compress error: Allocation error").
     COMPRESSION_THREADS = 0
     BRONZE_PATH_FORMAT = "{provider}/{entity}/{date}/{filename}"
     BRONZE_FILE_SUFFIX = ".jsonl.zst"
@@ -142,6 +141,7 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         save_metadata = legacy_runtime.pop("save_metadata", False)
         metadata_coordinator = legacy_runtime.pop("metadata_coordinator", None)
         lineage_store = legacy_runtime.pop("lineage_store", None)
+        root_identity = legacy_runtime.pop("root_identity", None)
         if legacy_runtime:
             unexpected = ", ".join(sorted(str(k) for k in legacy_runtime))
             raise TypeError(
@@ -155,6 +155,7 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
                 metadata_writer,
                 metadata_coordinator,
                 lineage_store,
+                root_identity,
             )
         ) or bool(save_metadata)
         if runtime_services is not None and legacy_provided:
@@ -175,6 +176,7 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
                 "MetadataCoordinatorPort | None", metadata_coordinator
             ),
             lineage_store=cast("LineageStorePort | None", lineage_store),
+            root_identity=cast("tuple[str, str] | None", root_identity),
         )
 
     def __init__(

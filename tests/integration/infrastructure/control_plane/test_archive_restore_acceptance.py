@@ -112,7 +112,7 @@ def test_public_verify_cannot_read_archive_without_original_sources(
 def test_explicit_restore_readback_without_original_sources(
     tmp_path: Path,
 ) -> None:
-    store, manifest, plan, ledger_path = _acceptance_case(tmp_path)
+    store, manifest, plan, _ledger_path = _acceptance_case(tmp_path)
     pack = store.create(manifest=manifest, plan=plan)
 
     shutil.rmtree(store.data_root)
@@ -121,6 +121,7 @@ def test_explicit_restore_readback_without_original_sources(
     restored = pack / "restored" / "ledger.jsonl"
     assert restored.exists()
     assert restored.read_text(encoding="utf-8") == _LEDGER
+
 
 @pytest.mark.integration
 def test_concurrent_reference_creation_during_archive_is_preserved(
@@ -145,11 +146,12 @@ def test_concurrent_reference_creation_during_archive_is_preserved(
     restored = pack / "restored" / "ledger.jsonl"
     assert restored.read_text(encoding="utf-8") == _LEDGER
 
+
 @pytest.mark.integration
 def test_partial_archive_failure_preserves_sources(
     tmp_path: Path,
 ) -> None:
-    store, manifest, plan, ledger_path = _acceptance_case(tmp_path)
+    store, manifest, _plan, ledger_path = _acceptance_case(tmp_path)
 
     # Corrupt a source file before archive creation to trigger an error
     # Let's corrupt the plan to ask for a file that does not exist
@@ -171,7 +173,7 @@ def test_partial_archive_failure_preserves_sources(
         ),
     )
 
-    with pytest.raises(FileNotFoundError, match="[Nn]o such file or directory"):
+    with pytest.raises(FileNotFoundError, match="No such file or directory"):
         store.create(manifest=manifest, plan=bad_plan)
 
     # Verify original source still exists
