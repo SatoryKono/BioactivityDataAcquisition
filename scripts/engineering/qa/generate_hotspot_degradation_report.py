@@ -1407,7 +1407,12 @@ def _resolved_under_root(path: Path, root: Path) -> Path:
     return resolved
 
 
-def _confine_reducer_outputs(args: argparse.Namespace, root: Path) -> bool:
+def _confine_reducer_outputs(
+    args: argparse.Namespace,
+    root: Path,
+    *,
+    archive_paths: tuple[Path, ...] | None = None,
+) -> bool:
     from scripts.engineering.common.repo_paths import write_text_confined
 
     try:
@@ -1420,6 +1425,7 @@ def _confine_reducer_outputs(args: argparse.Namespace, root: Path) -> bool:
                 args.baseline,
                 args.evidence_dir,
                 args.validation_manifest,
+                *(archive_paths or ()),
             )
         ]
         if len(set(resolved)) != len(resolved):
@@ -1427,11 +1433,14 @@ def _confine_reducer_outputs(args: argparse.Namespace, root: Path) -> bool:
         for path in (resolved[1], resolved[2]):
             if path.exists() and not path.is_file():
                 raise ValueError("reducer output must be a file")
-        write_text_confined(
-            args.gate_out,
-            _dump({"reason": "in_progress", "status": "failed"}),
-            root=root,
-        )
+        # The initial call is read-only. Initialize only after the complete
+        # archive plan has also passed the same alias/confinement checks.
+        if archive_paths is not None:
+            write_text_confined(
+                args.gate_out,
+                _dump({"reason": "in_progress", "status": "failed"}),
+                root=root,
+            )
     except (ValueError, OSError):
         return False
     return True
@@ -1733,6 +1742,29 @@ def _bound_validation_manifest(
     return receipt_bytes
 
 
+def _reducer_archive_paths(
+    args: argparse.Namespace, raw_sha: str, decoded: object, repo: Path
+) -> tuple[Path, ...]:
+    """Plan every possible archive write before any control output is touched."""
+    revisions = [read_checkout_sha(repo)]
+    source = decoded.get("bioetl_source") if isinstance(decoded, dict) else None
+    if isinstance(source, dict):
+        revisions.append(source.get("revision"))
+    return tuple(
+        args.evidence_dir / revision / raw_sha / name
+        for revision in sorted(
+            {r for r in revisions if isinstance(r, str) and _SHA_RE.fullmatch(r)}
+        )
+        for name in (
+            "benchmark-measurements.json",
+            "benchmark-validation-manifest.json",
+            "benchmark-summary-candidate.json",
+            "benchmark-gate.json",
+            "benchmark-manifest.json",
+        )
+    )
+
+
 def reduce_benchmark_evidence_main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Reduce benchmark measurements into a fail-closed gate."
@@ -1767,11 +1799,19 @@ def reduce_benchmark_evidence_main(argv: list[str] | None = None) -> int:
         print("rejected_output_path", file=sys.stderr)
         return 2
     if isinstance(raw_bytes, str):
+        if not _confine_reducer_outputs(args, root, archive_paths=()):
+            print("rejected_output_path", file=sys.stderr)
+            return 2
         return _emit_reducer(args, root, "failed", raw_bytes)
     decoded = _decode_measurement_payload(raw_bytes)
+    raw_sha = hashlib.sha256(raw_bytes).hexdigest()
+    if not _confine_reducer_outputs(
+        args, root, archive_paths=_reducer_archive_paths(args, raw_sha, decoded, repo)
+    ):
+        print("rejected_output_path", file=sys.stderr)
+        return 2
     if isinstance(decoded, str):
         return _emit_reducer(args, root, "failed", decoded)
-    raw_sha = hashlib.sha256(raw_bytes).hexdigest()
     assessed = _assess_entries(decoded.get("benchmarks"))
     if isinstance(assessed, str):
         return _emit_reducer(args, root, "failed", assessed, {"raw_sha256": raw_sha})

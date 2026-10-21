@@ -267,6 +267,102 @@ def test_reduction_keeps_validated_pair_and_candidate_binding(tmp_path: Path) ->
     )
 
 
+@pytest.mark.parametrize("output", ["--manifest-out", "--gate-out"])
+@pytest.mark.parametrize(
+    "archive_name",
+    [
+        "benchmark-measurements.json",
+        "benchmark-validation-manifest.json",
+        "benchmark-summary-candidate.json",
+        "benchmark-gate.json",
+        "benchmark-manifest.json",
+    ],
+)
+def test_reduction_rejects_archive_collision_before_any_write(
+    tmp_path: Path, output: str, archive_name: str
+) -> None:
+    """Reject aliases before even an in-progress gate changes any bytes/mtime."""
+    _payload, validation = _validated_schema_fixture(tmp_path)
+    raw = tmp_path / "benchmark-measurements.json"
+    folder = (
+        tmp_path / "evidence" / _HEAD / hashlib.sha256(raw.read_bytes()).hexdigest()
+    )
+    folder.mkdir(parents=True)
+    for name in (
+        "benchmark-measurements.json",
+        "benchmark-validation-manifest.json",
+        "benchmark-summary-candidate.json",
+        "benchmark-gate.json",
+        "benchmark-manifest.json",
+    ):
+        (folder / name).write_bytes(b"preserve existing archive: " + name.encode())
+    manifest = tmp_path / "manifest.json"
+    gate = tmp_path / "gate.json"
+    manifest.write_bytes(b"preserve existing control manifest")
+    gate.write_bytes(b"preserve existing control gate")
+    baseline = tmp_path / "baseline.json"
+    baseline.write_text(json.dumps(_baseline()), encoding="utf-8")
+
+    def snapshot() -> dict:
+        return {
+            p.relative_to(tmp_path).as_posix(): (p.read_bytes(), p.stat().st_mtime_ns)
+            for p in tmp_path.rglob("*")
+            if p.is_file()
+        }
+
+    before = snapshot()
+    result = _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa",
+            "reduce-benchmark-evidence",
+            "--raw-json",
+            str(raw),
+            "--validation-manifest",
+            str(validation),
+            "--manifest-out",
+            str(manifest),
+            "--gate-out",
+            str(gate),
+            "--baseline",
+            str(baseline),
+            "--evidence-dir",
+            str(tmp_path / "evidence"),
+            "--output-root",
+            str(tmp_path),
+            "--checkout-sha",
+            _HEAD,
+            output,
+            str(folder / archive_name),
+        ],
+        env=_github_env(),
+    )
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert "rejected_output_path" in result.stderr
+    assert snapshot() == before
+
+
+@pytest.mark.parametrize("output", ["--manifest-out", "--gate-out"])
+def test_reduction_allows_distinct_control_path_inside_archive_folder(
+    tmp_path: Path, output: str
+) -> None:
+    """Reserve computed filenames, without forbidding the whole evidence namespace."""
+    payload, validation = _validated_schema_fixture(tmp_path)
+    raw = json.dumps(payload).encode()
+    receipt = validation.read_bytes()
+    folder = tmp_path / "evidence" / _HEAD / hashlib.sha256(raw).hexdigest()
+    custom = folder / f"custom-{output.removeprefix('--')}.json"
+    result, _gate_path, _manifest = _invoke(tmp_path, raw, extra=[output, str(custom)])
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert _gate(custom)["status"] == "passed"
+    assert (folder / "benchmark-validation-manifest.json").read_bytes() == receipt
+    candidate = _gate(folder / "benchmark-summary-candidate.json")
+    assert (
+        candidate["validation_manifest_sha256"] == hashlib.sha256(receipt).hexdigest()
+    )
+
+
 @pytest.mark.parametrize("escape", [False, True])
 def test_reduction_confines_and_protects_validation_input(
     tmp_path: Path, escape: bool
