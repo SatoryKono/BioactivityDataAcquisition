@@ -10,8 +10,8 @@
 
 | String | Scenario | Target Component | Status | Findings / Blockers |
 | :--- | :--- | :--- | :--- | :--- |
-| 5 | Crash during merge execution | `write_deltalake` (Merge) | `NOT_VERIFIABLE` | Delta-rs rust binding blocks thread/process fully during write, leaving no Python hook to reliably pause mid-commit. The validation phase constructs a full pyarrow Table and passes it to the rust layer, eliminating iterator generator gates. |
-| 5c | Crash during create | `write_deltalake` (Create) | `NOT_VERIFIABLE` | Same as string 5. The commit is an atomic filesystem operation in Rust without a Python phase boundary. |
-| 5d | Crash during append | `write_deltalake` (Append) | `NOT_VERIFIABLE` | Same as string 5. The commit is an atomic filesystem operation in Rust without a Python phase boundary. |
-| 6 | Crash post-commit, pre-cleanup | `write_deltalake` (Post-write) | `NOT_VERIFIABLE` | Delta Lake commit is a single atomic rename. There is no multi-step commit phase that allows a crash between state transitions. |
-| 7 | Mid-retry `commit_conflict` gate | `_handle_commit_retry` | `VERIFIED` | Blocking gate proved via custom logger inside `multiprocessing` child. Verified organic `CommitFailedError` by injecting concurrent `V1` competitor write. Blocked target verified. Release resumes retry to complete `V2`. |
+| 5 | Crash during merge execution | `dt.merge(...).execute()` | `NOT_VERIFIABLE` | `_build_merge_execute_callable` runs `dt.merge(...).execute()` for an existing table. That closure and the inline wrapper have no Python `yield`/`await` boundary, so a SIGKILL cannot be injected mid-commit. |
+| 5c | Crash during create | `write_deltalake` (Create) | `NOT_VERIFIABLE` | Inline create calls `write_deltalake(**kwargs)` with no Python phase boundary. |
+| 5d | Crash during append | `write_deltalake` (Append) | `NOT_VERIFIABLE` | Inline append uses the same uncancellable plain write. |
+| 6 | Crash post-commit, pre-cleanup | `dt.merge(...).execute()` / `write_deltalake` | `NOT_VERIFIABLE` | The native commit returns only after the atomic write. There is no post-commit Python hook between the rename and the return. |
+| 7 | Mid-retry `commit_conflict` gate | `_handle_commit_retry` | `VERIFIED` | Blocking gate proved via custom logger inside `multiprocessing` child. Competing `id=1` row matches `target.id = source.id`. While blocked the table stays at V1 with `V0` and `V1`. Release completes retry at V2 with both matched rows updated to the merge source. |

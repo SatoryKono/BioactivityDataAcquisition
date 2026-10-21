@@ -44,6 +44,41 @@ def test_resolve_archive_root_defaults_and_override(tmp_path: Path) -> None:
     assert resolve_control_plane_archive_root(custom) == custom
 
 
+def test_failed_assessment_refresh_never_claims_verified_archive(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    from unittest.mock import Mock
+
+    from bioetl.composition import control_plane_archive
+
+    manifest = SimpleNamespace(pipeline_name="chembl_assay")
+    store = SimpleNamespace(get_by_run_id=lambda run_id: manifest)
+    monkeypatch.setattr(
+        control_plane_archive, "FileRunManifestStore", lambda **kwargs: store
+    )
+    monkeypatch.setattr(
+        control_plane_archive,
+        "_create_or_verify_pack",
+        lambda **kwargs: (True, "verified"),
+    )
+    monkeypatch.setattr(
+        control_plane_archive,
+        "FileControlPlaneArtifactLifecycleStore",
+        lambda **kwargs: SimpleNamespace(
+            plan_for_manifest=lambda *args, **kwargs: object()
+        ),
+    )
+    refresh = Mock(side_effect=OSError("assessment unavailable"))
+    monkeypatch.setattr(control_plane_archive, "refresh_archived_assessment", refresh)
+    assert archive_successful_run(
+        result=_result(),
+        options=None,
+        data_root=tmp_path / "data",
+        archive_root=tmp_path / "archive",
+        report_root=tmp_path / "reports",
+    ) == (False, "archive_assessment_failed")
+    refresh.assert_called_once()
+
+
 def test_should_archive_skips_flag_dry_run_and_failures() -> None:
     success = _result()
     assert should_archive_control_plane(success, None) is True

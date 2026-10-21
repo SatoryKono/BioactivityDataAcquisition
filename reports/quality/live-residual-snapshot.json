@@ -14,9 +14,9 @@
     "application_core": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 5,
-      "helper_function_ratio": 0.386,
-      "files": 206,
-      "total_loc": 25857,
+      "helper_function_ratio": 0.384,
+      "files": 207,
+      "total_loc": 25909,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 7
     },
@@ -73,7 +73,7 @@
   "closeout_program": {
     "tech_debt_closeout_test_file_count": 51,
     "tech_debt_closeout_test_function_count": 265,
-    "tech_debt_closeout_test_loc": 10707,
+    "tech_debt_closeout_test_loc": 10708,
     "closeout_files_using_live_residual_helpers": 8,
     "fold_into_generic_inventory_count": 60,
     "retained_public_entrypoint_count": 12,
