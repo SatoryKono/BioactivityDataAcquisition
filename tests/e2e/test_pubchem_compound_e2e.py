@@ -95,10 +95,11 @@ async def test_pubchem_compound_full_cycle(e2e_data_dir: Path):
         ctx.run_id,
         expected_events=("manifest_created", "run_started", "run_finished"),
     )
-    assert all(
+    assert any(
         entry.get("manifest_id") == manifest_payload["manifest_id"]
         for entry in ledger_entries
     )
+    assert all(entry.get("run_id") == str(ctx.run_id) for entry in ledger_entries)
 
     # Assert - Bronze layer
     bronze_files = assert_bronze_files_exist(e2e_data_dir, "pubchem", "compound")

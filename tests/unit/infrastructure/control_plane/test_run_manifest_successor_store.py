@@ -316,6 +316,25 @@ def test_successor_inherits_contract_evidence_sidecar(tmp_path: Path) -> None:
     ) == evidence
 
 
+@pytest.mark.parametrize("successor_id", ("a-successor", "z-successor"))
+def test_latest_scope_rebuild_keeps_successor_regardless_of_id_order(
+    tmp_path: Path,
+    successor_id: str,
+) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    original = _original()
+    successor = replace(_successor(original), manifest_id=successor_id)
+    store.save(original)
+    store.save(successor)
+
+    report = store.plan_latest_scope_index_rebuild()
+
+    assert report["manifest_count"] == 2
+    assert report["entries"][0]["desired_manifest_id"] == successor_id
+    assert report["entries"][0]["action"] == "noop"
+    assert store.get(original.manifest_id) == original
+
+
 def test_successor_rebinds_contract_evidence_manifest_id(tmp_path: Path) -> None:
     store = FileRunManifestStore(base_path=tmp_path)
     original = _original()

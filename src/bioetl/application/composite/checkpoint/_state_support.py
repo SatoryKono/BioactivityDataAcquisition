@@ -4,11 +4,13 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import datetime
 from typing import TYPE_CHECKING, TypeVar
 
 from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 
 if TYPE_CHECKING:
     from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
@@ -17,6 +19,7 @@ if TYPE_CHECKING:
         EnrichmentResult,
         SeedResult,
     )
+    from bioetl.domain.control_plane import RunManifest
     from bioetl.domain.ports import ClockPort
     from bioetl.domain.types import JsonDict
 
@@ -187,3 +190,23 @@ def _replace_checkpoint_state[TCheckpointState: "CompositeCheckpointState"](
         updated_at=updated_at or _current_utc_now(clock),
     )
     return checkpoint_state_copy
+
+
+def synchronize_manifest_successors(
+    state: CompositeCheckpointState,
+    successors: dict[str, RunManifest],
+) -> CompositeCheckpointState:
+    """Replace stale checkpoint anchors only along a published successor chain."""
+    while (manifest := successors.get(state.manifest_id)) is not None:
+        if str(manifest.run_id) != state.run_id:
+            break
+        state = replace(
+            state,
+            manifest_id=manifest.manifest_id,
+            execution_fingerprint=manifest.execution_fingerprint,
+            input_snapshot_fingerprint=compute_input_snapshot_identity_fingerprint(
+                [s for ref in manifest.source_refs for s in ref.input_snapshots]
+            )
+            or "",
+        )
+    return state

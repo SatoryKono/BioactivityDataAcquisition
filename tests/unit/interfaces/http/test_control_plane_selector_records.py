@@ -844,3 +844,49 @@ async def test_timed_out_selector_stops_ledger_refill_and_releases_slot() -> Non
     await asyncio.wait_for(limiter.acquire(), 5)
     limiter.release()
     assert len(slow_ledger.lookups) == 4
+
+
+@pytest.mark.parametrize("with_terminal", (False, True))
+@pytest.mark.parametrize("reverse_catalog", (False, True))
+def test_latest_selector_keeps_chain_tip_and_other_runs(
+    with_terminal: bool,
+    reverse_catalog: bool,
+) -> None:
+    original = replace(_manifest(1), manifest_id="z-original")
+    successor = replace(
+        original,
+        manifest_id="m-successor",
+        predecessor_manifest_id=original.manifest_id,
+    )
+    tip = replace(
+        successor, manifest_id="a-tip", predecessor_manifest_id=successor.manifest_id
+    )
+    other = _manifest(0)
+    manifests = (original, successor, tip, other)
+    if reverse_catalog:
+        manifests = tuple(reversed(manifests))
+    ledger = (
+        _Ledger(
+            {
+                original.run_id: [
+                    _entry(
+                        tip, "terminal", RUN_FINISHED_EVENT, offset=2, status="success"
+                    )
+                ]
+            }
+        )
+        if with_terminal
+        else None
+    )
+
+    records = subject.build_selector_records(manifests, ledger)
+    assert {record.manifest_id for record in records} == {
+        tip.manifest_id,
+        other.manifest_id,
+    }
+    payload = selector_context.build_selector_context_payload(
+        manifests=manifests, ledger_port=ledger
+    )
+    assert payload["selected"]["manifest_id"] == tip.manifest_id
+    if ledger is not None:
+        assert ledger.lookups.count(original.run_id) == 2

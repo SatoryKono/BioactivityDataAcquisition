@@ -210,11 +210,13 @@ def test_scope_rebuild_create_update_noop_and_corrupt(tmp_path: Path) -> None:
         pipeline_name="chembl_activity",
         run_type=RunType.BACKFILL,
         manifest_id="m-new",
+        predecessor_manifest_id=None,
     )
     current = SimpleNamespace(
         pipeline_name="chembl_activity",
         run_type=RunType.BACKFILL,
         manifest_id="m-old",
+        predecessor_manifest_id=None,
     )
     store = _ScopeStore(tmp_path, (desired,))
     created = plan_latest_scope_index_rebuild(store)

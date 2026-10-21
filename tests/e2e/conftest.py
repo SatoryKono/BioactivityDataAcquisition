@@ -1472,15 +1472,16 @@ def assert_run_ledger_has_events(
     manifest_id = run_index_path.read_text(encoding="utf-8").strip()
     assert manifest_id, f"Run-ledger index empty for run_id={run_id}"
 
-    ledger_path = ledger_base / f"{manifest_id}.jsonl"
-    assert ledger_path.exists(), f"Run-ledger payload missing: {ledger_path}"
-
-    entries = [
-        json.loads(line)
-        for line in ledger_path.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
-    assert entries, f"Run-ledger is empty: {ledger_path}"
+    entries: list[dict[str, Any]] = []
+    for item_id in _ledger_chain_manifest_ids(ledger_base, manifest_id):
+        ledger_path = ledger_base / f"{item_id}.jsonl"
+        assert ledger_path.exists(), f"Run-ledger payload missing: {ledger_path}"
+        entries.extend(
+            json.loads(line)
+            for line in ledger_path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        )
+    assert entries, f"Run-ledger chain is empty for manifest_id={manifest_id}"
 
     observed_event_types = {
         str(entry.get("event_type")) for entry in entries if isinstance(entry, dict)
@@ -1491,6 +1492,31 @@ def assert_run_ledger_has_events(
         f"observed={sorted(observed_event_types)}"
     )
     return entries
+
+
+def _ledger_chain_manifest_ids(ledger_base: Path, manifest_id: str) -> list[str]:
+    """Return oldest-first ids linked by ``_predecessors/<successor>.txt``."""
+    newest_first: list[str] = []
+    seen: set[str] = set()
+    cursor: str | None = manifest_id
+    while cursor is not None:
+        if cursor in seen:
+            raise AssertionError(
+                f"Run-ledger successor pointer cycle includes manifest {cursor}"
+            )
+        seen.add(cursor)
+        newest_first.append(cursor)
+        pointer = ledger_base / "_predecessors" / f"{cursor}.txt"
+        if not pointer.is_file():
+            break
+        predecessor = pointer.read_text(encoding="utf-8").strip()
+        assert predecessor, f"Run-ledger successor pointer is empty: {pointer}"
+        predecessor_ledger = ledger_base / f"{predecessor}.jsonl"
+        assert predecessor_ledger.is_file(), (
+            f"Predecessor ledger missing: {predecessor_ledger}"
+        )
+        cursor = predecessor
+    return list(reversed(newest_first))
 
 
 def _build_table_name_variants(table_name: str) -> list[str]:

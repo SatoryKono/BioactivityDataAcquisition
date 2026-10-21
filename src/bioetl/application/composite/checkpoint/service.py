@@ -19,6 +19,7 @@ from bioetl.application.composite.checkpoint.persistence_service import (
     CompositeCheckpointPersistenceService,
 )
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
+from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.ports import (
     ClockPort,
     CompositeCheckpointPort,
@@ -171,10 +172,14 @@ class CompositeCheckpointService:
         await asyncio.sleep(0)
         return self._load_service.load()
 
+    def update_manifest(self, manifest: RunManifest) -> None:
+        """Advance expected anchors after a successful manifest publication."""
+        self._expected_checkpoint_context = self._load_service.update_manifest(manifest)
+
     async def save(self, state: CompositeCheckpointState) -> None:
         """Save checkpoint state to JSON atomically."""
         await asyncio.sleep(0)
-        self._persistence_service.save(state)
+        self._persistence_service.save(self._load_service.synchronize_manifest(state))
 
     async def delete(self) -> None:
         """Delete checkpoint file after successful completion."""
