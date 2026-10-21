@@ -60,6 +60,7 @@ RELEASE_REVIEW_MAX_AGE_DAYS = 21
 DEBT_GATE_INPUT_ARTIFACTS: tuple[str, ...] = (
     "configs/quality/debt_scorecard.yaml",
     "configs/quality/scripts_inventory_manifest.json",
+    "configs/quality/scripts_lifecycle_registry.json",
     "reports/quality/architecture-quality-scorecard.json",
     "reports/quality/hotspot-family-baseline.json",
     "reports/quality/module-coverage-inventory.json",
@@ -239,6 +240,7 @@ from scripts.engineering.qa.debt_governance_gate_evaluators import (
     _collect_budget_numbers,
     _budget_growth_increases,
     _debt_scorecard_budget_no_growth_gate,
+    _scripts_review_expiry_gate,
     _flaky_untriaged_entries,
     _hard_limit_gate,
     _warn_limit_gate,
@@ -447,6 +449,7 @@ def build_payload(
     gates.extend(_config_discrepancy_gates(config_discrepancy))
     gates.extend(_full_app_duplication_gates(repo_root=repo_root, scorecard=scorecard))
     gates.extend(_supporting_scripts_gates(repo_root=repo_root, scorecard=scorecard))
+    gates.append(_scripts_review_expiry_gate(repo_root=repo_root, scorecard=scorecard))
     gates.extend(
         _test_governance_and_flaky_gates(
             test_governance=test_governance,

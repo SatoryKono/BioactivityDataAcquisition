@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-21T09:13:23.942898+00:00",
+  "generated_at": "2026-10-21T10:06:50.731017+00:00",
   "summary": {
     "total_scripts": 659,
     "status_counts": {
@@ -11129,7 +11129,7 @@
         },
         {
           "path": "scripts/engineering/qa/debt_governance_gate_evaluators.py",
-          "line": 1104,
+          "line": 1174,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::\""
         },
@@ -11141,7 +11141,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 324,
+          "line": 326,
           "source_group": "scripts",
           "text": "source_artifact=\"scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload\","
         },
@@ -14545,7 +14545,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 236,
+          "line": 237,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
@@ -14563,7 +14563,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_report_debt_governance_gates.py",
-          "line": 23,
+          "line": 25,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_evaluators as gate_evaluators"
         }
@@ -14582,13 +14582,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 285,
+          "line": 287,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.debt_governance_gate_report import ("
         },
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 540,
+          "line": 543,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.debt_governance_gate_report import main as _gate_main"
         },
@@ -16135,7 +16135,7 @@
         },
         {
           "path": "scripts/engineering/qa/debt_governance_gate_evaluators.py",
-          "line": 21,
+          "line": 22,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import ("
         },
@@ -16196,7 +16196,7 @@
         },
         {
           "path": "scripts/engineering/qa/debt_governance_gate_evaluators.py",
-          "line": 21,
+          "line": 22,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import ("
         },
@@ -16527,7 +16527,7 @@
         },
         {
           "path": "scripts/engineering/qa/debt_governance_gate_evaluators.py",
-          "line": 27,
+          "line": 28,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_config_surface_backlog import build_backlog"
         },
@@ -17134,7 +17134,7 @@
         },
         {
           "path": "scripts/engineering/qa/debt_governance_gate_evaluators.py",
-          "line": 21,
+          "line": 22,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import ("
         },
@@ -17401,7 +17401,7 @@
         },
         {
           "path": "scripts/engineering/qa/debt_governance_gate_evaluators.py",
-          "line": 21,
+          "line": 22,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import ("
         },
@@ -19112,7 +19112,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 26,
       "references": [
         {
           "path": ".github/workflows/tests.yml",

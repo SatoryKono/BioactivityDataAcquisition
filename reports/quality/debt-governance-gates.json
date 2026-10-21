@@ -262,6 +262,18 @@
       "status": "pass"
     },
     {
+      "current": 172,
+      "limit": [
+        172,
+        172
+      ],
+      "metric": "expired_review_by_count",
+      "name": "scripts_review_expiry_ratchet",
+      "remediation": "Review lifecycle entries and lower both scorecard budgets together; do not raise budgets or extend dates without review. Missing/invalid dates and divergent budgets must be corrected.",
+      "source_artifact": "configs/quality/scripts_lifecycle_registry.json",
+      "status": "pass"
+    },
+    {
       "current": 0,
       "limit": 0,
       "metric": "budget_violations",
@@ -415,7 +427,7 @@
       "status": "pass"
     },
     {
-      "current": "d92b4fedea550c4ac532882fd55543eaaacea428a6ca10d03ae552d27d256b7e",
+      "current": "14100bf0e5eecdf976e23489b3c41120d39486459aeef3cbce397d3a4cf60d77",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -440,6 +452,7 @@
   "input_artifacts": [
     "configs/quality/debt_scorecard.yaml",
     "configs/quality/scripts_inventory_manifest.json",
+    "configs/quality/scripts_lifecycle_registry.json",
     "reports/quality/architecture-quality-scorecard.json",
     "reports/quality/hotspot-family-baseline.json",
     "reports/quality/module-coverage-inventory.json",
@@ -468,7 +481,7 @@
   },
   "status_counts": {
     "fail": 0,
-    "pass": 46,
+    "pass": 47,
     "warn": 0
   },
   "summary": {
@@ -476,8 +489,8 @@
     "architecture_quality_scorecard_interpretation": "excellent",
     "fail_count": 0,
     "failing_gates": [],
-    "gate_count": 46,
-    "pass_count": 46,
+    "gate_count": 47,
+    "pass_count": 47,
     "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []

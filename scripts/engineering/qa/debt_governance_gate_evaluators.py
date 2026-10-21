@@ -10,9 +10,10 @@ import json
 import os
 import subprocess
 import sys
+from copy import deepcopy
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +29,7 @@ from scripts.engineering.qa.report_config_surface_backlog import build_backlog
 from scripts.engineering.qa.report_module_coverage_inventory import (
     _refresh_existing_inventory_source_tree,
 )
+from scripts.engineering.repo.check_scripts_inventory import build_review_expiry_report
 
 try:
     from bioetl.infrastructure.quality.architecture_quality_scorecard import (
@@ -72,6 +74,11 @@ TEST_GOVERNANCE_CURRENT_JSON = "reports/quality/test-governance-current.json"
 RUNTIME_UUID_SEAMS_YAML = "configs/quality/runtime_uuid_seams.yaml"
 ADR_ENFORCEMENT_MATRIX_JSON = "reports/quality/adr-enforcement-matrix.json"
 SCRIPTS_INVENTORY_MANIFEST_JSON = "configs/quality/scripts_inventory_manifest.json"
+SCRIPTS_LIFECYCLE_REGISTRY_JSON = "configs/quality/scripts_lifecycle_registry.json"
+REVIEW_EXPIRY_METRIC_PATHS = (
+    "supporting_scripts_governance.metrics.expired_review_by_count",
+    "governance.coarse_budgets.expired_review_by_count",
+)
 BUDGET_KEY_NAMES = frozenset(
     {
         "budget",
@@ -281,9 +288,13 @@ def _debt_scorecard_budget_no_growth_gate(
             remediation=("Fetch the changed-from ref and rerun debt-governance gates."),
         )
 
+    current_payload = _load_yaml(repo_root, DEBT_SCORECARD_PATH)
+    baseline_payload = _review_expiry_initial_baseline(
+        repo_root=repo_root, ref=changed_from_ref,
+        baseline=baseline_payload, current=current_payload,
+    )
     increases = _budget_growth_increases(
-        baseline_payload=baseline_payload,
-        current_payload=_load_yaml(repo_root, DEBT_SCORECARD_PATH),
+        baseline_payload=baseline_payload, current_payload=current_payload,
     )
     return Gate(
         name="debt_scorecard_budget_no_growth",
@@ -296,6 +307,65 @@ def _debt_scorecard_budget_no_growth_gate(
             "Lower or revert increased scorecard budgets; debt budgets must be "
             "flat or decreasing."
         ),
+    )
+
+
+def _review_expiry_initial_baseline(
+    *, repo_root: Path, ref: str, baseline: dict[str, Any], current: dict[str, Any],
+) -> dict[str, Any]:
+    """Admit a first freeze only at the independently verified base/live count."""
+    new_paths = [path for path in REVIEW_EXPIRY_METRIC_PATHS
+                 if _lookup_number(baseline, f"{path}.max_count") is None
+                 and _lookup_number(current, f"{path}.max_count") is not None]
+    if not new_paths:
+        return baseline
+    registry = _load_yaml_from_git_ref(repo_root, ref, SCRIPTS_LIFECYCLE_REGISTRY_JSON)
+    if registry is None:
+        return baseline
+    today = datetime.now(UTC).date()
+    base_report = build_review_expiry_report(registry, today=today)
+    live_report = build_review_expiry_report(
+        _load_json(repo_root, SCRIPTS_LIFECYCLE_REGISTRY_JSON), today=today,
+    )
+    if any(report[key] for report in (base_report, live_report)
+           for key in ("missing_review_by", "invalid_review_by")):
+        return baseline
+    count = base_report["expired_review_by_count"]
+    if count != live_report["expired_review_by_count"]:
+        return baseline
+    seeded = deepcopy(baseline)
+    for path in new_paths:
+        if not (_lookup_number(current, f"{path}.max_count") == count
+                == _lookup_number(current, f"{path}.current_count")):
+            continue
+        node = seeded
+        for part in path.split("."):
+            node = node.setdefault(part, {})
+        node["current_count"] = count
+    return seeded
+
+
+def _scripts_review_expiry_gate(
+    *, repo_root: Path, scorecard: dict[str, Any], today: date | None = None,
+) -> Gate:
+    """Block expiry growth above the frozen budget, never nonzero debt alone."""
+    report = build_review_expiry_report(
+        _load_json(repo_root, SCRIPTS_LIFECYCLE_REGISTRY_JSON), today=today,
+    )
+    limits = [_lookup_number(scorecard, f"{path}.max_count")
+              for path in REVIEW_EXPIRY_METRIC_PATHS]
+    valid_limits = (all(type(value) is int and value >= 0 for value in limits)
+                    and limits[0] == limits[1])
+    count = report["expired_review_by_count"]
+    valid_dates = not (report["missing_review_by"] or report["invalid_review_by"])
+    passed = valid_limits and valid_dates and count <= limits[0]
+    return Gate(
+        name="scripts_review_expiry_ratchet", status="pass" if passed else "fail",
+        metric="expired_review_by_count", current=count, limit=limits,
+        source_artifact=SCRIPTS_LIFECYCLE_REGISTRY_JSON,
+        remediation=("Review lifecycle entries and lower both scorecard budgets together; "
+                     "do not raise budgets or extend dates without review. "
+                     "Missing/invalid dates and divergent budgets must be corrected."),
     )
 
 

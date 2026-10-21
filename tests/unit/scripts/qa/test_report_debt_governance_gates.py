@@ -12,7 +12,9 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
+from copy import deepcopy
+from types import SimpleNamespace
 import json
 from pathlib import Path
 import subprocess
@@ -23,6 +25,84 @@ from scripts.engineering.qa import report_debt_governance_gates as gates
 from scripts.engineering.qa import debt_governance_gate_evaluators as gate_evaluators
 
 pytestmark = pytest.mark.unit
+
+
+def _review_expiry_scorecard(count: int) -> dict:
+    return {
+        "supporting_scripts_governance": {"metrics": {
+            "expired_review_by_count": {"current_count": count, "max_count": count},
+        }},
+        "governance": {"coarse_budgets": {
+            "expired_review_by_count": {"current_count": count, "max_count": count},
+        }},
+    }
+
+
+@pytest.mark.parametrize(("count", "status"), [(1, "pass"), (2, "fail"), (0, "pass")])
+def test_review_expiry_gate_ratcheted_count(tmp_path, monkeypatch, count, status) -> None:
+    monkeypatch.setattr(gate_evaluators, "_load_json", lambda *args: {"entries": {
+        f"scripts/old{i}.py": {"review_by": "2026-10-20"} for i in range(count)
+    }})
+    gate = gate_evaluators._scripts_review_expiry_gate(
+        repo_root=tmp_path, scorecard=_review_expiry_scorecard(1), today=date(2026, 10, 21),
+    )
+    assert gate.status == status
+    assert gate.current == count
+
+
+@pytest.mark.parametrize("raw", [None, "2026-02-30", "20261020"])
+def test_review_expiry_gate_cannot_hide_debt_with_invalid_dates(tmp_path, monkeypatch, raw) -> None:
+    monkeypatch.setattr(gate_evaluators, "_load_json", lambda *args: {
+        "entries": {"scripts/old.py": {"review_by": raw}},
+    })
+    gate = gate_evaluators._scripts_review_expiry_gate(
+        repo_root=tmp_path, scorecard=_review_expiry_scorecard(1), today=date(2026, 10, 21),
+    )
+    assert gate.status == "fail"
+
+
+@pytest.mark.parametrize("limit", [None, True, 1.0, -1, 2])
+def test_review_expiry_gate_rejects_invalid_or_divergent_budgets(tmp_path, monkeypatch, limit) -> None:
+    monkeypatch.setattr(gate_evaluators, "_load_json", lambda *args: {"entries": {}})
+    scorecard = _review_expiry_scorecard(1)
+    scorecard["governance"]["coarse_budgets"]["expired_review_by_count"]["max_count"] = limit
+    assert gate_evaluators._scripts_review_expiry_gate(
+        repo_root=tmp_path, scorecard=scorecard, today=date(2026, 10, 21),
+    ).status == "fail"
+
+
+@pytest.mark.parametrize("raised_path", gate_evaluators.REVIEW_EXPIRY_METRIC_PATHS)
+def test_review_expiry_budget_increase_fails_even_if_count_unchanged(raised_path) -> None:
+    baseline = _review_expiry_scorecard(172)
+    current = deepcopy(baseline)
+    node = current
+    for part in raised_path.split("."):
+        node = node[part]
+    node["max_count"] = 173
+    assert gate_evaluators._budget_growth_increases(
+        baseline_payload=baseline, current_payload=current,
+    ) == {f"{raised_path}.max_count": {"from": 172, "to": 173}}
+
+
+@pytest.mark.parametrize(("base_count", "live_count", "budget", "status"), [
+    (1, 1, 1, "pass"), (1, 1, 2, "fail"), (1, 2, 2, "fail"),
+])
+def test_review_expiry_first_freeze_requires_base_and_live_fact(
+    tmp_path, monkeypatch, base_count, live_count, budget, status,
+) -> None:
+    monkeypatch.setattr(gate_evaluators, "datetime", SimpleNamespace(
+        now=lambda tz: datetime(2026, 10, 21, tzinfo=UTC),
+    ))
+    def registry(count):
+        return {"entries": {f"scripts/old{i}.py": {"review_by": "2000-01-01"}
+                            for i in range(count)}}
+    monkeypatch.setattr(gate_evaluators, "_load_yaml_from_git_ref", lambda root, ref, path:
+                        {} if path == gate_evaluators.DEBT_SCORECARD_PATH else registry(base_count))
+    monkeypatch.setattr(gate_evaluators, "_load_json", lambda *args: registry(live_count))
+    monkeypatch.setattr(gate_evaluators, "_load_yaml", lambda *args: _review_expiry_scorecard(budget))
+    assert gate_evaluators._debt_scorecard_budget_no_growth_gate(
+        repo_root=tmp_path, changed_from_ref="origin/main",
+    ).status == status
 
 
 def _patch_both(monkeypatch: pytest.MonkeyPatch, name: str, value: object) -> None:
