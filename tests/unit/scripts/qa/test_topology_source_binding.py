@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import pytest
+from defusedxml.common import EntitiesForbidden
 
 from scripts.engineering.qa.report_topology_source_binding import (
     END,
@@ -142,3 +143,24 @@ def test_bootstrap_binding_rejects_junit_path_escape(
         bind_bootstrap_profile(tmp_path, "a" * 64, "b" * 64, update=True)
     stored = json.loads((tmp_path / BOOTSTRAP_PROFILE).read_text(encoding="utf-8"))
     assert "current_source_binding" not in stored
+
+
+def test_bootstrap_binding_confines_capture_reference(tmp_path: Path):
+    historical = _bootstrap_profile(tmp_path)
+    historical["measurement_provenance"]["junit"] = "../outside.xml"
+    profile = tmp_path / BOOTSTRAP_PROFILE
+    profile.write_text(json.dumps(historical), encoding="utf-8")
+    before = profile.read_bytes()
+    with pytest.raises(ValueError):
+        bind_bootstrap_profile(tmp_path, "a" * 64, "b" * 64, update=True)
+    assert profile.read_bytes() == before
+
+
+def test_bootstrap_binding_rejects_xml_entities(tmp_path: Path):
+    _bootstrap_profile(tmp_path)
+    (tmp_path / "capture.xml").write_text(
+        '<!DOCTYPE testsuite [<!ENTITY hostile "expanded">]><testsuite>&hostile;</testsuite>',
+        encoding="utf-8",
+    )
+    with pytest.raises(EntitiesForbidden):
+        bind_bootstrap_profile(tmp_path, "a" * 64, "b" * 64, update=True)

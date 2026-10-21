@@ -25,9 +25,11 @@ Network evidence:
 - Windows HTTPS request to app.coderabbit.ai failed with a TLS handshake error.
 - No changes made to .env, system DNS, proxies, workflow activation, or secrets.
 
-Remaining checks after connectivity is restored. Before running, replace `<repository-root>` with the WSL path of the repository root:
-- `wsl -d Ubuntu --cd <repository-root> --exec bash scripts/ops/run-coderabbit-reviews.sh --preflight`
-- `wsl -d Ubuntu --cd <repository-root> --exec bash scripts/ops/run-coderabbit-reviews.sh changes --uncommitted`
+Remaining checks after connectivity is restored:
+Перед запуском замените `<repository-root>` на фактический путь к корню репозитория в WSL; кавычки сохраняйте.
+
+- `wsl -d Ubuntu --cd "<repository-root>" --exec bash scripts/ops/run-coderabbit-reviews.sh --preflight`
+- `wsl -d Ubuntu --cd "<repository-root>" --exec bash scripts/ops/run-coderabbit-reviews.sh changes --uncommitted`
 
 Scope and governance:
 - CLI reviews Git diffs. No completed CodeRabbit audit, no full-project coverage claim.

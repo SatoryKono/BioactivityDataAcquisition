@@ -99,7 +99,7 @@ as an explicit precondition.
 python -m json.tool .mcp.json >/dev/null
 python -m json.tool scripts/ai/.mcp.json >/dev/null
 python -m json.tool .devin/config.json >/dev/null  # if retained as tracked
-rg -n "/mnt/e/g-drive|/mnt/wsl/docker-desktop-bind-mounts|<workstation-checkout>|<docker-desktop-bind-mounts>|[A-Za-z]:\\\\" \
+rg -n '[/]mnt/(?:[a-z]/g-drive|wsl/docker-desktop-bind-mounts)|<workstation-checkout>|<docker-desktop-bind-mounts>|[A-Za-z]:\\\\' \
   .mcp.json scripts/ai/.mcp.json .devin/config.json
 uv run python -m pytest -q \
   tests/unit/scripts/test_setup_copilot_codex_mcp.py \

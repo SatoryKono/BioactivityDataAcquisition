@@ -10,8 +10,15 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import xml.etree.ElementTree as ET
 from pathlib import Path
+
+from defusedxml import ElementTree as ET
+
+from scripts.engineering.common.repo_paths import (
+    read_bytes_confined,
+    read_text_confined,
+    write_text_confined,
+)
 
 from scripts.engineering.qa.report_module_coverage_inventory import (
     compute_source_tree_sha256,
@@ -27,19 +34,17 @@ BOOTSTRAP_PROFILE = Path("reports/quality/test-bootstrap-fixture-scope-profile.j
 
 def _measured_bootstrap_file_count(root: Path, reference: object) -> int:
     """Count profiled modules from the original JUnit, preserving capture identity."""
-    from scripts.engineering.common.repo_paths import confined_io_path
-
     if not isinstance(reference, str) or not reference:
         raise ValueError("Bootstrap JUnit path must be a relative repository path")
-    path = confined_io_path(reference, root=root)
     modules = set()
-    for case in ET.parse(path).iter("testcase"):  # NOSONAR - rebuilt under root
+    for case in ET.fromstring(read_bytes_confined(reference, root=root)).iter(
+        "testcase"
+    ):
         parts = case.attrib.get("classname", "").split(".")
         if parts[:4] != ["tests", "unit", "composition", "bootstrap"]:
             raise ValueError("Foreign test in bootstrap profile JUnit")
         index = next(
-            (i for i, part in enumerate(parts) if part.startswith("test_")),
-            None,
+            (i for i, part in enumerate(parts) if part.startswith("test_")), None
         )
         if index is None:
             raise ValueError("Bootstrap profile JUnit lacks test module")
@@ -53,11 +58,6 @@ def bind_bootstrap_profile(
     root: Path, digest: str, test_digest: str, *, update: bool
 ) -> bool:
     """Add a live topology view without relabeling the historical timing profile."""
-    from scripts.engineering.common.repo_paths import (
-        read_text_confined,
-        write_text_confined,
-    )
-
     profile = json.loads(read_text_confined(BOOTSTRAP_PROFILE, root=root))
     if not isinstance(profile, dict):
         raise ValueError("Bootstrap profile must be a JSON object")
