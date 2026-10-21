@@ -10,8 +10,8 @@
 
 | String | Scenario | Target Component | Status | Findings / Blockers |
 | :--- | :--- | :--- | :--- | :--- |
-| 5 | Crash during merge execution | `write_deltalake` (Merge) | `NOT_VERIFIABLE` | `_execute_merge_inline_with_timeout` calls `merge_callable()` directly. The function has no `yield`/`await` boundary, so a SIGKILL cannot be injected inside the native commit. |
-| 5c | Crash during create | `write_deltalake` (Create) | `NOT_VERIFIABLE` | `_run_plain_delta_write_inline` calls `write_deltalake(**kwargs)` directly and has no Python phase boundary. |
-| 5d | Crash during append | `write_deltalake` (Append) | `NOT_VERIFIABLE` | Append uses the same inline `write_deltalake` path. The binding is not a generator or coroutine. |
-| 6 | Crash post-commit, pre-cleanup | `write_deltalake` (Post-write) | `NOT_VERIFIABLE` | Both inline write and inline merge return only after the native call. There is no yield gate between the atomic commit and the Python return. |
+| 5 | Crash during merge execution | `write_deltalake` (Merge) | `NOT_VERIFIABLE` | Delta-rs rust binding blocks thread/process fully during write, leaving no Python hook to reliably pause mid-commit. The validation phase constructs a full pyarrow Table and passes it to the rust layer, eliminating iterator generator gates. |
+| 5c | Crash during create | `write_deltalake` (Create) | `NOT_VERIFIABLE` | Same as string 5. The commit is an atomic filesystem operation in Rust without a Python phase boundary. |
+| 5d | Crash during append | `write_deltalake` (Append) | `NOT_VERIFIABLE` | Same as string 5. The commit is an atomic filesystem operation in Rust without a Python phase boundary. |
+| 6 | Crash post-commit, pre-cleanup | `write_deltalake` (Post-write) | `NOT_VERIFIABLE` | Delta Lake commit is a single atomic rename. There is no multi-step commit phase that allows a crash between state transitions. |
 | 7 | Mid-retry `commit_conflict` gate | `_handle_commit_retry` | `VERIFIED` | Blocking gate proved via custom logger inside `multiprocessing` child. Verified organic `CommitFailedError` by injecting concurrent `V1` competitor write. Blocked target verified. Release resumes retry to complete `V2`. |
