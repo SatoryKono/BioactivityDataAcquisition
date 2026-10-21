@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import ast
 import asyncio
+import inspect
 import multiprocessing
 import multiprocessing.synchronize
-import os
-import signal
+import textwrap
+import time
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
@@ -21,7 +23,13 @@ from bioetl.infrastructure.storage.delta.resilience import (
     AdaptiveRetryPolicy,
     SilverMergeResiliencePolicy,
 )
+from bioetl.infrastructure.storage.silver.delta_merge_helpers import (
+    _execute_merge_inline_with_timeout,
+)
 from bioetl.infrastructure.storage.silver.delta_request_models import _DeltaWriteRequest
+from bioetl.infrastructure.storage.silver.delta_write_execution import (
+    _run_plain_delta_write_inline,
+)
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServicesRequest,
 )
@@ -155,8 +163,6 @@ def test_silver_mid_retry_gate_string_7(tmp_path: Path) -> None:
         assert reach_event.wait(timeout=10), "Child never reached mid-retry gate"
 
         # Prove child is blocked by verifying no further commits occurred
-        import time
-
         time.sleep(1)
         dt = DeltaTable(str(table_path))
         assert dt.version() == 1, (
@@ -177,40 +183,45 @@ def test_silver_mid_retry_gate_string_7(tmp_path: Path) -> None:
 
     finally:
         if process.is_alive():
-            os.kill(process.pid, signal.SIGKILL)
-            process.join()
+            process.kill()
+            process.join(timeout=10)
+
+
+def _assert_no_python_phase_boundary(target: object) -> None:
+    """Fail when a native Delta call exposes a Python yield/await boundary."""
+    assert not inspect.isgeneratorfunction(target)
+    assert not inspect.isasyncgenfunction(target)
+    assert not inspect.iscoroutinefunction(target)
+    source = textwrap.dedent(inspect.getsource(target))
+    tree = ast.parse(source)
+    assert not any(
+        isinstance(node, (ast.Yield, ast.YieldFrom, ast.Await))
+        for node in ast.walk(tree)
+    )
 
 
 def test_silver_crash_create_string_5c() -> None:
-    """String 5c: crash during create. Not verifiable in pure Python.
-
-    Delta-rs uses an atomic rust function for writes. There is no iterator generator
-    gate within SilverWriter for the create phase, making it impossible to SIGKILL
-    exactly mid-commit.
-    """
-    pytest.skip(
-        "NOT_VERIFIABLE: delta-rs block Python execution during atomic filesystem commit"
+    """String 5c: inline create has no Python phase boundary inside the native write."""
+    _assert_no_python_phase_boundary(_run_plain_delta_write_inline)
+    assert "write_deltalake(**kwargs)" in inspect.getsource(
+        _run_plain_delta_write_inline
     )
 
 
 def test_silver_crash_append_string_5d() -> None:
-    """String 5d: crash during append. Not verifiable in pure Python."""
-    pytest.skip(
-        "NOT_VERIFIABLE: delta-rs block Python execution during atomic filesystem commit"
-    )
+    """String 5d: inline append uses the same uncancellable plain write."""
+    _assert_no_python_phase_boundary(_run_plain_delta_write_inline)
+    assert not inspect.isgeneratorfunction(write_deltalake)
+    assert not inspect.iscoroutinefunction(write_deltalake)
 
 
 def test_silver_crash_merge_string_5() -> None:
-    """String 5: crash during merge. Not verifiable in pure Python."""
-    pytest.skip(
-        "NOT_VERIFIABLE: delta-rs block Python execution during atomic filesystem commit"
-    )
+    """String 5: inline merge calls the native commit directly, without a yield gate."""
+    _assert_no_python_phase_boundary(_execute_merge_inline_with_timeout)
+    assert "merge_callable()" in inspect.getsource(_execute_merge_inline_with_timeout)
 
 
 def test_silver_crash_post_commit_string_6() -> None:
-    """String 6: crash post-commit. Not verifiable.
-
-    Delta commit is a single atomic rename without an extended Python post-commit
-    phase hook in SilverWriter.
-    """
-    pytest.skip("NOT_VERIFIABLE: Delta commit is a single atomic rename")
+    """String 6: the native commit returns only after the atomic write."""
+    _assert_no_python_phase_boundary(_run_plain_delta_write_inline)
+    _assert_no_python_phase_boundary(_execute_merge_inline_with_timeout)
