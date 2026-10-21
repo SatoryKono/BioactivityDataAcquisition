@@ -1,5 +1,7 @@
 """Real API shape and identity regressions for nested assay parameters."""
 
+from __future__ import annotations
+
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -11,6 +13,30 @@ from bioetl.domain.ports import FilterableDataSourcePort
 from bioetl.domain.types import HealthStatus
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.asyncio
+async def test_zero_derived_limit_never_opens_an_upstream_stream():
+    adapter = MagicMock()
+    source = AssayParametersDataSource(adapter)
+    assert [row async for row in source._fetch_target_records(limit=0)] == []
+    adapter.fetch.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_fallback_preserves_malformed_parameters_for_record_quarantine():
+    async def records():
+        yield "not-an-assay"
+        yield {"assay_chembl_id": "CHEMBL1", "assay_parameters": ["malformed"]}
+
+    source = AssayParametersDataSource(MagicMock())
+    rows = [
+        row
+        async for row in source._yield_target_records_from_fallback_source_records(
+            records(), None
+        )
+    ]
+    assert rows == [{"assay_id": "CHEMBL1", "invalid_parameter": "malformed"}]
 
 
 class _FilterableAssaySource:

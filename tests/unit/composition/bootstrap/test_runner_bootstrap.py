@@ -113,6 +113,31 @@ def test_bootstrap_passes_configured_report_root(
     assert service.report_root == settings.return_value.report_root
 
 
+@pytest.mark.unit
+def test_bootstrap_archive_callback_preserves_configured_roots(
+    bootstrap_with_light_observability, tmp_path
+):
+    from bioetl.composition.bootstrap.runtime import runner
+
+    settings, _, _ = bootstrap_with_light_observability
+    settings.return_value.data_dir = tmp_path / "data"
+    settings.return_value.archive_root = tmp_path / "archive"
+    settings.return_value.report_root = tmp_path / "reports"
+    result, options = object(), object()
+    with patch.object(
+        runner, "archive_successful_run", return_value=(True, "verified")
+    ) as archive:
+        service = bootstrap_pipeline_runner_service()
+        assert service.archive_control_plane(result, options) is None
+    archive.assert_called_once_with(
+        result=result,
+        options=options,
+        data_root=tmp_path / "data",
+        archive_root=tmp_path / "archive",
+        report_root=tmp_path / "reports",
+    )
+
+
 def _cached_bootstrapped_service() -> PipelineRunnerService:
     """Amortize full DI bootstrap for list-only integration checks (#8329)."""
     global _LIST_SERVICE_CACHE

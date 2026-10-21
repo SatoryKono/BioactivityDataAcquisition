@@ -30,6 +30,7 @@ __all__ = [
     "GoldWriteOutcome",
     "bind_gold_quarantine_batch_if_supported",
     "consume_gold_outcome_quarantine_count",
+    "has_explicit_outcome_channel",
     "plan_gold_outcome_write",
     "supports_outcome_channel",
 ]
@@ -72,6 +73,14 @@ def supports_outcome_channel(validator: object) -> bool:
     """
     method = getattr(type(validator), "validate_with_outcomes", None)
     return callable(method)
+
+
+def has_explicit_outcome_channel(validator: object) -> bool:
+    """Require both a real class capability and explicit DQ routing policy."""
+    if not supports_outcome_channel(validator):
+        return False
+    config = getattr(validator, "_dq_config", None)
+    return isinstance(config, DQConfig) and has_explicit_outcome_policy(config)
 
 
 def plan_gold_outcome_write(

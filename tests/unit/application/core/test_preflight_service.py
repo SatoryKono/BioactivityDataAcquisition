@@ -1109,6 +1109,28 @@ class TestValidatePreflight:
         mock_services.data_source.health_check.assert_awaited_once()
 
     @pytest.mark.asyncio
+    async def test_invalid_strict_configuration_does_not_probe_after_nonraising_policy_hook(
+        self, preflight_service, mock_services, strict_runtime, monkeypatch
+    ):
+        hook = MagicMock()
+        monkeypatch.setattr(preflight_service, "_raise_if_strict_blocking", hook)
+        preflight_service.validate_infrastructure = AsyncMock()
+        report = await preflight_service.validate_preflight(
+            services=mock_services,
+            runtime=strict_runtime,
+            bronze_path="/data/output/bronze",
+            silver_path="/data/output/silver",
+            gold_path="/data/output/gold",
+            silver_format="parquet",
+            gold_format="delta",
+        )
+        assert report.config_errors and not report.medallion_policy_valid
+        assert report.health_report.results == []
+        assert hook.call_count == 2
+        hook.assert_called_with(report, strict_runtime)
+        preflight_service.validate_infrastructure.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def test_validate_preflight_does_not_publish_service_local_metrics(
         self, preflight_service, mock_services, incremental_runtime, mock_metrics
     ):

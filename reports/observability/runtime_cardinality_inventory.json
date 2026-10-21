@@ -1575,6 +1575,7 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_dq_records_quarantined_total": [
+      "docs/02-architecture/decisions/ADR-045-dq-contract-system.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/03-guides/publication-validation-guide.md",
       "docs/03-guides/running-pipelines.md",
