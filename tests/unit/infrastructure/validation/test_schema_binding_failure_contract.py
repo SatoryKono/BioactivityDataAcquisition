@@ -8,11 +8,27 @@ from bioetl.infrastructure.validation.contract_validator import (
     ContractAwareGoldValidator,
 )
 from bioetl.infrastructure.validation.pandera_validator import (
+    BasePanderaValidator,
     PanderaGoldValidator,
     PanderaSilverValidator,
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_base_validator_normalizes_nullable_fields_and_retains_schema_failures():
+    schema = pa.DataFrameSchema(
+        {"id": pa.Column(int), "optional": pa.Column(str, nullable=True)}
+    )
+    validator = BasePanderaValidator(schema)
+    assert validator.validate([{"id": 1}]).valid
+    failure = validator.validate([{"id": "invalid"}])
+    assert not failure.valid and failure.errors
+
+
+def test_nullable_column_seeding_without_a_schema_preserves_input_identity():
+    frame = pd.DataFrame({"id": [1]})
+    assert BasePanderaValidator()._seed_missing_nullable_columns(frame) is frame
 
 
 def test_gold_validator_accepts_valid_values_and_rejects_schema_failure():

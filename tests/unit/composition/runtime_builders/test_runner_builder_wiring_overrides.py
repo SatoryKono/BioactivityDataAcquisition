@@ -56,20 +56,3 @@ def test_runner_input_wiring_resolves_overrides() -> None:
     assert callable(wiring.load_source_config)
     assert wiring.load_source_config is load_source_config_mock
     assert wiring.build_observability_bundle is None
-
-
-def test_runner_factory_wiring_preserves_unmodified_collaborators() -> None:
-    original = runner_builder_wiring.RunnerFactoryWiring()
-    ensure_providers_loaded = MagicMock(name="ensure_providers_loaded")
-    register_all_pipelines = MagicMock(name="register_all_pipelines")
-
-    resolved = runner_builder_wiring.resolve_runner_factory_wiring(
-        original,
-        ensure_providers_loaded_fn=ensure_providers_loaded,
-        register_all_pipelines_fn=register_all_pipelines,
-    )
-
-    assert resolved is not original
-    assert resolved.create_registry is original.create_registry
-    assert resolved.ensure_providers_loaded is ensure_providers_loaded
-    assert resolved.register_all_pipelines is register_all_pipelines

@@ -53,11 +53,15 @@ def test_unsupported_provider_lookup_does_not_invent_a_taxonomy():
     assert _get_lookup("unsupported-provider") is None
 
 
-def test_gold_similarity_dataframe_requires_complete_distinct_pairs():
+@pytest.mark.parametrize("layer", ["silver", "gold"])
+def test_similarity_dataframe_requires_complete_distinct_pairs(layer):
     import pandas as pd
 
     from bioetl.domain.contracts.gold._chembl_reference_publication_schemas import (
         ChEMBLPublicationSimilarityGoldSchema,
+    )
+    from bioetl.domain.schemas.chembl.publication_similarity import (
+        PublicationSimilaritySchema,
     )
 
     frame = pd.DataFrame(
@@ -67,6 +71,9 @@ def test_gold_similarity_dataframe_requires_complete_distinct_pairs():
             {"publication_id1": "CHEMBL1", "publication_id2": "CHEMBL1"},
         ]
     )
-    assert ChEMBLPublicationSimilarityGoldSchema.complete_document_pair(
-        frame
-    ).tolist() == [True, False, False]
+    schema = (
+        PublicationSimilaritySchema
+        if layer == "silver"
+        else ChEMBLPublicationSimilarityGoldSchema
+    )
+    assert schema.complete_document_pair(frame).tolist() == [True, False, False]

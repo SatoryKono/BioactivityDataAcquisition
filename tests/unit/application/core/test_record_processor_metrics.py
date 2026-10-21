@@ -176,6 +176,38 @@ def record_processor(
 class TestRecordProcessorMetrics:
     """Tests for RecordProcessor metrics logic."""
 
+    async def test_write_quarantine_counts_only_confirmed_quarantined_records(
+        self, record_processor, mock_metrics, monkeypatch
+    ):
+        from bioetl.application.core import record_processor as module
+        from bioetl.application.core._batch_write_support import LayerWriteOutcome
+
+        monkeypatch.setattr(
+            module,
+            "write_silver_layer",
+            AsyncMock(
+                return_value=LayerWriteOutcome(
+                    "silver", "quarantined", 1, quarantined_count=1
+                )
+            ),
+        )
+        record_processor._write_gold_layer = AsyncMock(
+            return_value=LayerWriteOutcome("gold", "blocked", 0)
+        )
+        result = await record_processor.process_batch(
+            [{"id": 1}],
+            deterministic_batch_uuid_from_callsite("quarantine_write_receipt"),
+        )
+        assert result.quarantined_count == 1
+        assert result.silver_count == result.gold_count == 0
+        calls = [
+            call
+            for call in mock_metrics.increment_counter.call_args_list
+            if call.args[0] == "bioetl_records_processed_total"
+            and call.args[2].get("stage") == "quarantined"
+        ]
+        assert sum(call.args[1] for call in calls) == 1
+
     def test_record_processor_uses_injected_span_executor_factory(
         self,
         mock_services,

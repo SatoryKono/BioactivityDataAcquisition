@@ -131,3 +131,22 @@ def test_selected_mode_requires_complete_request_binding(changes):
     bound = replace(request, source_scope="current_run", workflow_run_id="workflow")
     with pytest.raises(ValueError, match="selected-snapshot requires"):
         replace(bound, reconciliation_mode="selected-snapshot", **changes)
+
+
+@pytest.mark.asyncio
+async def test_pinned_table_with_inconsistent_row_identity_cannot_fall_back_to_whole_table(
+    monkeypatch,
+):
+    table = SimpleNamespace(
+        column_names=["run_id", "id"],
+        to_pylist=lambda: [{"id": "entity"}],
+    )
+    opened = Mock(return_value=SimpleNamespace(to_pyarrow_table=lambda: table))
+    monkeypatch.setattr(snapshots, "DeltaTable", opened)
+    writer = SimpleNamespace(_resolve_table_path=lambda name: name)
+    request = _request({"version": 1, "table_id": "table", "run_ids": ["run"]})
+    with pytest.raises(ValueError, match="selected snapshot row scope unbound"):
+        await snapshots.read_selected_rows(
+            SimpleNamespace(silver_writer=writer), request, reference=False
+        )
+    opened.assert_called_once_with("provider.source", version=1)

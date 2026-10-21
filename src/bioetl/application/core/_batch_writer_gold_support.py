@@ -105,6 +105,7 @@ def validate_gold_records(
     *,
     schema: object | None = None,
     apply_contract_rules: bool = True,
+    rule_records: list[GoldRecord] | None = None,
 ) -> tuple[list[GoldRecord], tuple[GoldQuarantineEntry, ...]]:
     """Validate Gold records and return the rows that may be written.
 
@@ -123,7 +124,7 @@ def validate_gold_records(
         )
 
     if apply_contract_rules and _use_outcome_channel(validator):
-        channel = _call_outcome_channel(validator, records)
+        channel = _call_outcome_channel(validator, records, rule_records=rule_records)
         if isinstance(channel, DQOutcomeChannel):
             config = cast("DQConfig | None", getattr(validator, "_dq_config", None))
             plan = plan_gold_outcome_write(records, channel, config)
@@ -140,7 +141,15 @@ def validate_gold_records(
     return records, ()
 
 
-def _call_outcome_channel(validator: object, records: list[JsonDict]) -> object:
+def _call_outcome_channel(
+    validator: object,
+    records: list[JsonDict],
+    *,
+    rule_records: list[JsonDict] | None = None,
+) -> object:
+    projected_method = getattr(type(validator), "validate_with_rule_inputs", None)
+    if rule_records is not None and callable(projected_method):
+        return projected_method(validator, records, rule_records)
     method = getattr(type(validator), "validate_with_outcomes", None)
     if not callable(method):
         return None
@@ -216,8 +225,11 @@ def prepare_validated_gold_write(
         available_cols = writer._collect_record_columns(records)
         schema_payload: object = writer._gold_schema_policy_by_version
     else:
+        rule_records = records
         records, available_cols = prepare_gold_records(writer, records)
-        records, quarantined = validate_gold_records(writer, records)
+        records, quarantined = validate_gold_records(
+            writer, records, rule_records=rule_records
+        )
         column_order_preview, _rename_preview = writer._resolve_layer_columns(
             "gold", available_cols
         )

@@ -15,8 +15,12 @@ async def test_no_task_cleanup_callback_does_not_raise_or_cancel_caller():
     completed = loop.create_future()
 
     def callback():
-        assert asyncio.current_task() is None
-        _clear_task_cancellation()
+        try:
+            assert asyncio.current_task() is None
+            _clear_task_cancellation()
+        except Exception as exc:
+            completed.set_exception(exc)
+            return
         completed.set_result(True)
 
     loop.call_soon(callback)

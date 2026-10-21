@@ -89,3 +89,63 @@ def test_invalid_workflow_run_id_never_queries_storage():
     service = WorkflowInspectionService(Mock(), Mock(), state)
     assert service.inspect_run_id("not-a-run-uuid") is None
     state.get_by_run_id.assert_not_called()
+
+
+def test_manifest_inspection_rejects_a_cyclic_predecessor_chain():
+    current = SimpleNamespace(
+        manifest_id="current", run_id="run", predecessor_manifest_id="current"
+    )
+    service = SimpleNamespace(
+        ledger_port=Mock(), manifest_port=SimpleNamespace(get=lambda identity: current)
+    )
+    with pytest.raises(RunManifestInspectionCorruptionError, match="cycle"):
+        _ledger_entries_for_manifest(service, current)
+    service.ledger_port.list_entries.assert_not_called()
+
+
+def test_published_snapshot_with_malformed_details_cannot_claim_identity():
+    from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_ledger import (
+        _published_details,
+    )
+    from bioetl.domain.control_plane.run_ledger import INPUT_SNAPSHOT_PUBLISHED_EVENT
+
+    assert (
+        _published_details(
+            SimpleNamespace(event_type=INPUT_SNAPSHOT_PUBLISHED_EVENT, details=[])
+        )
+        == {}
+    )
+
+
+def test_directory_named_like_cached_bronze_batch_is_not_an_artifact(tmp_path):
+    from bioetl.application.services.run_reports.enrichment import (
+        build_artifacts_from_result,
+    )
+
+    (tmp_path / "batch_fake.jsonl.zst").mkdir()
+    result = SimpleNamespace(debug_export_uri=None)
+    options = SimpleNamespace(
+        use_cached_bronze=True,
+        cached_bronze_path=str(tmp_path),
+        cached_bronze_date=None,
+    )
+    assert build_artifacts_from_result(result, options=options) == ()
+
+
+def test_historical_core_identity_serializes_without_inventing_certification():
+    from bioetl.application.services.control_plane.replay.historical_identity_models import (
+        HistoricalReplayRunIdentity,
+        build_historical_identity_core_payload,
+    )
+
+    identity = HistoricalReplayRunIdentity(
+        "manifest", "run", "chembl_assay", "chembl", "assay", "historical"
+    )
+    assert build_historical_identity_core_payload(identity) == {
+        "manifest_id": "manifest",
+        "run_id": "run",
+        "pipeline_name": "chembl_assay",
+        "provider": "chembl",
+        "entity": "assay",
+        "execution_context": "historical",
+    }

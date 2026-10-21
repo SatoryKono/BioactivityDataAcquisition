@@ -10,6 +10,18 @@ from bioetl.infrastructure.storage.gold.writer_implementation import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize(
+    "category", [GoldWriteCategory.NOT_COMMITTED, GoldWriteCategory.UNKNOWN]
+)
+def test_incomplete_target_receipt_is_not_promoted_to_success(category):
+    from bioetl.domain.exceptions.gold_write import GoldWriteFailure
+
+    receipt = GoldWriteReceipt("table", "1.0.0", category)
+    with pytest.raises(GoldWriteFailure) as caught:
+        _validate_target_receipt(receipt, "table", "1.0.0")
+    assert caught.value.receipt is receipt
+
+
 @pytest.mark.parametrize("receipt", [None, {}, True])
 def test_untyped_target_result_is_rejected(receipt):
     with pytest.raises(TypeError, match="GoldWriteReceipt"):

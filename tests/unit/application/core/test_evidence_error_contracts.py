@@ -99,16 +99,39 @@ def test_quarantine_error_counts_preserve_each_original_classification():
     from bioetl.application.core._quarantine_metrics_support import count_dq_error_types
     from bioetl.domain.types import ErrorType
 
-    records = [({}, ErrorType.INVALID_DATA, "first"), ({}, ErrorType.INVALID_DATA, "second"), ({}, ErrorType.DB_UNAVAILABLE, "storage")]
-    assert count_dq_error_types(records) == {ErrorType.INVALID_DATA: 2, ErrorType.DB_UNAVAILABLE: 1}
+    records = [
+        ({}, ErrorType.INVALID_DATA, "first"),
+        ({}, ErrorType.INVALID_DATA, "second"),
+        ({}, ErrorType.DB_UNAVAILABLE, "storage"),
+    ]
+    assert count_dq_error_types(records) == {
+        ErrorType.INVALID_DATA: 2,
+        ErrorType.DB_UNAVAILABLE: 1,
+    }
     assert count_dq_error_types([]) == {}
 
 
 def test_field_validation_error_retains_its_normalized_field_reason():
-    from bioetl.application.core.batch_transformer_attempt_failures import _resolve_quarantine_reason_code
+    from bioetl.application.core.batch_transformer_attempt_failures import (
+        _resolve_quarantine_reason_code,
+    )
     from bioetl.domain.types import ErrorType
 
     class FieldError(ValueError):
         field = " units "
 
-    assert _resolve_quarantine_reason_code(FieldError("invalid units"), error_type=ErrorType.INVALID_DATA) == f"{ErrorType.INVALID_DATA.value}:units"
+    assert (
+        _resolve_quarantine_reason_code(
+            FieldError("invalid units"), error_type=ErrorType.INVALID_DATA
+        )
+        == f"{ErrorType.INVALID_DATA.value}:units"
+    )
+
+
+@pytest.mark.parametrize("details", [None, [], "reason"])
+def test_nonmapping_filter_details_use_the_explicit_fallback(details):
+    from bioetl.application.core._quarantine_metrics_support import (
+        filtered_reason_code_from_details,
+    )
+
+    assert filtered_reason_code_from_details(details, fallback="filtered") == "filtered"
