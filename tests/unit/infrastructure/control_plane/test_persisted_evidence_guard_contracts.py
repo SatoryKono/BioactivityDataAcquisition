@@ -1,5 +1,7 @@
 """Persisted evidence must retain identity and rollback failed publication."""
 
+from __future__ import annotations
+
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import Mock

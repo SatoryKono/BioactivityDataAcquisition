@@ -1,5 +1,7 @@
 """A missing filtered publication cohort must not become an unfiltered read."""
 
+from __future__ import annotations
+
 from unittest.mock import Mock
 
 import pytest

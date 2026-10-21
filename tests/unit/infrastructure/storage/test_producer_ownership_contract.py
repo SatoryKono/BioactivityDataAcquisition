@@ -1,5 +1,7 @@
 """A selected producer may own only rows with a proven stable identity."""
 
+from __future__ import annotations
+
 from types import SimpleNamespace
 
 import pyarrow as pa

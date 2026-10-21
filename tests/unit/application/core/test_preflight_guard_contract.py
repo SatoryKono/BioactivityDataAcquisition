@@ -1,5 +1,7 @@
 """Malformed optional capabilities fail before any runtime work is attempted."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.application.core._quarantine_manager_support import (

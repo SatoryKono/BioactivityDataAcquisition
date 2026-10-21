@@ -1,5 +1,7 @@
 """A current-source projection must not impersonate or overwrite a capture."""
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
 

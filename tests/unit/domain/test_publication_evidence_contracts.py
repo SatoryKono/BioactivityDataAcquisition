@@ -1,5 +1,7 @@
 """Publication identity validation and caller-owned vocabularies stay explicit."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.domain.mapping.publication_controlled_vocabulary import (

@@ -1,5 +1,7 @@
 """Unsupported validators and empty fail-closed diagnostics never certify a write."""
 
+from __future__ import annotations
+
 from types import SimpleNamespace
 
 import pytest

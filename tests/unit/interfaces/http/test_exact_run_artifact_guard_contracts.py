@@ -1,5 +1,7 @@
 """Exact-run readers reject incomplete identity and changed child artifacts."""
 
+from __future__ import annotations
+
 import json
 from types import SimpleNamespace
 

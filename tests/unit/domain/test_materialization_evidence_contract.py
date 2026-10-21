@@ -1,5 +1,7 @@
 """Invalid saved snapshot entries cannot manufacture materialization evidence."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.domain.control_plane.snapshot_materialization import (

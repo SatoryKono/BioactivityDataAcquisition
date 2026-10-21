@@ -1,5 +1,7 @@
 """Governed input additions must fail closed until their contracts are complete."""
 
+from __future__ import annotations
+
 from enum import StrEnum
 from types import SimpleNamespace
 from unittest.mock import Mock

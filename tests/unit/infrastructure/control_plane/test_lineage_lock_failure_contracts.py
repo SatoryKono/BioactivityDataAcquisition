@@ -1,5 +1,7 @@
 """Windows locking retries only deadlock and preserves rollback failures."""
 
+from __future__ import annotations
+
 import errno
 import os
 import sys

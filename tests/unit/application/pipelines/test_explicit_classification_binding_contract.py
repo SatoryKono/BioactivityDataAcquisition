@@ -1,5 +1,7 @@
 """Publication and protein classification require explicit, caller-owned policies."""
 
+from __future__ import annotations
+
 from unittest.mock import Mock
 
 import polars as pl

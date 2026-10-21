@@ -1,5 +1,7 @@
 """Factory overrides preserve collaborators outside the requested replacement."""
 
+from __future__ import annotations
+
 from unittest.mock import MagicMock
 
 import pytest

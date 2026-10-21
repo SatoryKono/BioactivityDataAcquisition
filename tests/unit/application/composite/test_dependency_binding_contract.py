@@ -1,5 +1,7 @@
 """Required dependency joins cannot proceed without mapping or join-key proof."""
 
+from __future__ import annotations
+
 from unittest.mock import Mock
 
 import polars as pl

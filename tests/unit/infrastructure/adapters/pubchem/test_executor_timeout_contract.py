@@ -1,5 +1,7 @@
 """Reject malformed executor policies before starting a provider worker."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.infrastructure.adapters.pubchem.fetch_flow import (

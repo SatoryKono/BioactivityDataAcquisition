@@ -1,5 +1,7 @@
 """Incomplete workflow evidence cannot certify child ownership or measured totals."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.domain.run_reports import workflow_reasons as reasons

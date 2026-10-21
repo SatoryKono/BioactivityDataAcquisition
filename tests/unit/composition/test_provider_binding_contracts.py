@@ -1,5 +1,7 @@
 """Factory fallback and optional metadata binding preserve explicit dependencies."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from types import SimpleNamespace
 from unittest.mock import Mock

@@ -1,5 +1,7 @@
 """Lock cleanup may be invoked from an event-loop callback without a Task."""
 
+from __future__ import annotations
+
 import asyncio
 
 import pytest

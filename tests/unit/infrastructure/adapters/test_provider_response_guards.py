@@ -1,5 +1,7 @@
 """Provider adapters retain HTTP failures and reject incomplete page evidence."""
 
+from __future__ import annotations
+
 from contextlib import nullcontext
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock

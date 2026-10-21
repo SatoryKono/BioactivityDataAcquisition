@@ -1,5 +1,7 @@
 """Terminal observations preserve the primary write outcome and parent evidence."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.application.services.run_reports import observations

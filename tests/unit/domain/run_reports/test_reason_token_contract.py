@@ -1,5 +1,7 @@
 """Unbound reason tokens stay explicitly unknown rather than becoming field reasons."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.domain.run_reports.reason_catalog import (

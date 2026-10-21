@@ -1,5 +1,7 @@
 """Live diagnostics traverse bounded predecessor identities even on corrupt input."""
 
+from __future__ import annotations
+
 from types import SimpleNamespace
 from unittest.mock import Mock
 

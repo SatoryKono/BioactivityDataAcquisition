@@ -1,5 +1,7 @@
 """Schema-backed validators retain missing-column and invalid-value failures."""
 
+from __future__ import annotations
+
 import pandas as pd
 import pandera.pandas as pa
 import pytest

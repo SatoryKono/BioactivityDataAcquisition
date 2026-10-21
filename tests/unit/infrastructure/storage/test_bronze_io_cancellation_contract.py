@@ -1,5 +1,7 @@
 """Cancellation must wait for owned Bronze I/O before releasing its tree lock."""
 
+from __future__ import annotations
+
 import asyncio
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock

@@ -1,5 +1,7 @@
 """Composite execution remains available without the optional parent reporter."""
 
+from __future__ import annotations
+
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 

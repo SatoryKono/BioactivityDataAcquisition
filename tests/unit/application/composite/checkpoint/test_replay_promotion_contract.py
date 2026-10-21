@@ -1,5 +1,7 @@
 """Incomplete replay evidence cannot unlock a blocked legacy checkpoint."""
 
+from __future__ import annotations
+
 from dataclasses import replace
 
 import pytest

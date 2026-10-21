@@ -1,5 +1,7 @@
 """Selector caches retain bounded identity-checked snapshots without fabricating data."""
 
+from __future__ import annotations
+
 import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock

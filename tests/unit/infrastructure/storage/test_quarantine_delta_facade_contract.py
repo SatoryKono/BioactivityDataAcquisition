@@ -1,5 +1,7 @@
 """The compatibility Delta writer preserves the normalized quarantine row."""
 
+from __future__ import annotations
+
 from datetime import UTC, datetime
 
 import pytest

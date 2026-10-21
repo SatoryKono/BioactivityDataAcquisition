@@ -1,5 +1,7 @@
 """Resume consumes saved producer evidence and never captures a replacement run."""
 
+from __future__ import annotations
+
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock

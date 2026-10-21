@@ -1,5 +1,7 @@
 """Real API shape and identity regressions for nested assay parameters."""
 
+from __future__ import annotations
+
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest

@@ -1,5 +1,7 @@
 """Only missing molecule identifiers receive the catalog's missing-id reason."""
 
+from __future__ import annotations
+
 from unittest.mock import Mock
 
 import pytest

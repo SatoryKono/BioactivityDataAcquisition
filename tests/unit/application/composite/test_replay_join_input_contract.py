@@ -1,5 +1,7 @@
 """Incomplete replay clocks and missing join keys cannot produce executable plans."""
 
+from __future__ import annotations
+
 from types import SimpleNamespace
 from unittest.mock import Mock
 

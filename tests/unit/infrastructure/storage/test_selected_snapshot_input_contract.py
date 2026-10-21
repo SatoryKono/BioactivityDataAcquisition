@@ -1,5 +1,7 @@
 """Pinned reads reject unbound producer identity instead of reading latest data."""
 
+from __future__ import annotations
+
 from dataclasses import replace
 from types import SimpleNamespace
 from unittest.mock import Mock

@@ -1,5 +1,7 @@
 """Derived scans cannot silently certify a truncated source as complete."""
 
+from __future__ import annotations
+
 import asyncio
 
 import pytest

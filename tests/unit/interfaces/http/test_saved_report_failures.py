@@ -1,5 +1,7 @@
 """HTTP report evidence distinguishes absence from corrupt or unreadable data."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from pathlib import Path
 

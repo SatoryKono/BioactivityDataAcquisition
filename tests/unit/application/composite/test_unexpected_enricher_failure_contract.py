@@ -1,5 +1,7 @@
 """Unexpected provider errors retain optional/required enrichment semantics."""
 
+from __future__ import annotations
+
 from unittest.mock import Mock
 
 import polars as pl

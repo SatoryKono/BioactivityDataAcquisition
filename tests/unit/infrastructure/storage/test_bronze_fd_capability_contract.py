@@ -1,5 +1,7 @@
 """Capability discovery cannot hide loss of the actual writer's pinned view."""
 
+from __future__ import annotations
+
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock

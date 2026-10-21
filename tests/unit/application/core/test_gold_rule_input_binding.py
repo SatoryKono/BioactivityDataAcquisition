@@ -1,5 +1,7 @@
 """Gold renames retain pre-transform DQ values without leaking Silver-only keys."""
 
+from __future__ import annotations
+
 import json
 from unittest.mock import AsyncMock, Mock
 

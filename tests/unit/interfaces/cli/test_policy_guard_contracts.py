@@ -1,5 +1,7 @@
 """CLI output and startup errors retain the configured policy boundary."""
 
+from __future__ import annotations
+
 import json
 from unittest.mock import Mock
 

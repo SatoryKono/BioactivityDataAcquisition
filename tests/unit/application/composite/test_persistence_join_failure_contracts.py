@@ -1,5 +1,7 @@
 """Composite persistence and join edges reject unbound input identities."""
 
+from __future__ import annotations
+
 from types import SimpleNamespace
 from unittest.mock import Mock
 

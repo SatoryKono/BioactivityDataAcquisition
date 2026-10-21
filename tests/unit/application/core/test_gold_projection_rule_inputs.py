@@ -1,5 +1,7 @@
 """Gold rules see normalized companion fields before storage-schema projection."""
 
+from __future__ import annotations
+
 from unittest.mock import AsyncMock
 
 import pandera.pandas as pa

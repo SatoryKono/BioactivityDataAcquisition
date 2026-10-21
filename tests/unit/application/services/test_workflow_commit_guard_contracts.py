@@ -1,5 +1,7 @@
 """Pending mutations and restored outputs retain their durable workflow binding."""
 
+from __future__ import annotations
+
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock

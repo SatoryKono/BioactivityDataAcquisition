@@ -1,5 +1,7 @@
 """Saved provider facts must never turn missing or inapplicable probes into OK."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.domain.run_reports.selected_status import (

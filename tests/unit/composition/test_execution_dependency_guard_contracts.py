@@ -1,5 +1,7 @@
 """Composition binds real derived sources and rejects unsupported replay storage."""
 
+from __future__ import annotations
+
 from dataclasses import replace
 from types import SimpleNamespace
 from unittest.mock import Mock

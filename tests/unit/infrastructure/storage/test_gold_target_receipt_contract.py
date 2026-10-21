@@ -1,5 +1,7 @@
 """A target receipt cannot prove a commit for another table or contract."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt

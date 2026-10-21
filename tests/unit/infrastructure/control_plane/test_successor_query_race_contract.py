@@ -1,5 +1,7 @@
 """A pointer introduced during a successor read cannot create a silent cycle."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.infrastructure.control_plane.file_run_ledger_store import FileRunLedgerStore

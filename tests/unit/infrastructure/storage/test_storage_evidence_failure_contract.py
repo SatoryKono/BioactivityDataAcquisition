@@ -1,5 +1,7 @@
 """Unreadable paths and invalid sidecars never become trusted storage evidence."""
 
+from __future__ import annotations
+
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
