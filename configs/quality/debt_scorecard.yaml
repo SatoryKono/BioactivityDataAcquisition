@@ -469,10 +469,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 7
     metrics:
       duplication_clusters: 0
-      files: 207
-      total_loc: 25909
+      files: 206
+      total_loc: 25857
       files_ge_250_loc: 0
-      helper_function_ratio: 0.384
+      helper_function_ratio: 0.386
       max_internal_fan_in: 5
       max_internal_fan_in_module: bioetl.application.core.record_processor_config
     trend:

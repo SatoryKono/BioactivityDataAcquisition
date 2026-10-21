@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import math
-from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -19,52 +18,6 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support i
 
 
 pytestmark = pytest.mark.unit
-
-
-@pytest.mark.asyncio
-async def test_mutation_completion_retains_quarantine_receipt_and_debug_rows(
-    monkeypatch,
-):
-    from bioetl.infrastructure.storage import (
-        workflow_foreign_key_reconciliation_support as support,
-    )
-    from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantine import (
-        ReconciliationMutationSummary,
-    )
-
-    summary = ReconciliationMutationSummary(
-        mutation_mode="silver_rewrite",
-        quarantine_batch_id="batch",
-        quarantine_rows_written=1,
-        quarantine_error_code="orphan_foreign_key",
-    )
-    mutate = AsyncMock(return_value=summary)
-    monkeypatch.setattr(support, "apply_reconciliation_mutation", mutate)
-    host = Mock()
-    request = _request()
-    retained = [{"activity_id": "kept", "assay_id": "known"}]
-    orphans = [{"activity_id": "orphan", "assay_id": "missing"}]
-    result = await support.complete_with_mutation(
-        host,
-        request,
-        scanned_rows=2,
-        retained_rows_count=1,
-        orphan_rows_deleted=1,
-        retained_rows=retained,
-        orphan_rows=orphans,
-    )
-    mutate.assert_awaited_once_with(host, request, orphan_rows=orphans)
-    assert result.mutated and not result.would_mutate
-    assert (result.scanned_rows, result.retained_rows, result.orphan_rows_deleted) == (
-        2,
-        1,
-        1,
-    )
-    assert result.quarantine_batch_id == "batch" and result.quarantine_rows_written == 1
-    assert result.quarantine_error_code == "orphan_foreign_key"
-    host._write_debug_artifacts.assert_called_once_with(
-        request, result, retained_rows=retained, orphan_rows=orphans
-    )
 
 
 def _request(**overrides: object) -> ForeignKeyReconciliationRequest:

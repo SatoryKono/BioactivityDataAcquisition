@@ -315,13 +315,13 @@
       "runtime_checkable": true
     },
     {
-      "line": 109,
+      "line": 120,
       "name": "GoldDQAnalyzerPort",
       "path": "src/bioetl/domain/ports/quality/dq_report.py",
       "runtime_checkable": true
     },
     {
-      "line": 159,
+      "line": 170,
       "name": "DQReportWriterPort",
       "path": "src/bioetl/domain/ports/quality/dq_report.py",
       "runtime_checkable": true

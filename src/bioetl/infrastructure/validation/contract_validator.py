@@ -131,23 +131,6 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
         df_to_validate = self._normalize_nullable_integer_columns(df_to_validate)
         return self._normalize_nullable_boolean_columns(df_to_validate)
 
-    def validate_with_rule_inputs(
-        self, records: list[JsonDict], rule_records: list[JsonDict]
-    ) -> DQOutcomeChannel:
-        """Validate projected schema bytes against the full normalized rule inputs."""
-        if not self._policy_resolver:
-            return self.validate_with_outcomes(records)
-        return build_outcome_channel(
-            records=records,
-            schema=self._schema,
-            strict=self._strict,
-            dq_config=self._dq_config,
-            resolver=self._policy_resolver,
-            config_path=self._get_config_path(),
-            prepare_frame=self._prepare_df_for_validation,
-            rule_records=rule_records,
-        )
-
     def _convert_schema_errors_to_outcomes(
         self, error: Exception
     ) -> list[DQRuleOutcome]:

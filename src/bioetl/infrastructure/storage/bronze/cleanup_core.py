@@ -90,14 +90,8 @@ def _fd_view_supported() -> bool:
     except OSError:
         return False
     try:
-        opened = os.fstat(fd)
-        for directory in ("/proc/self/fd", "/dev/fd"):
-            try:
-                viewed = (Path(directory) / str(fd)).stat()
-            except OSError:
-                continue
-            if (viewed.st_dev, viewed.st_ino) == (opened.st_dev, opened.st_ino):
-                return True
+        return bool(BronzeRootLease(Path("/"), fd).writer_path)
+    except NotImplementedError:
         return False
     finally:
         os.close(fd)

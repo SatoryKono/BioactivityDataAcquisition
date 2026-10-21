@@ -309,29 +309,6 @@ def test_delta_log_fallback_reads_only_current_active_parquet(
     assert observed == [table_path / "active row.parquet"]
 
 
-def test_delta_log_fallback_restores_typed_and_null_partition_values(tmp_path: Path):
-    import pyarrow as pa
-    from deltalake import write_deltalake
-
-    table_path = tmp_path / "partitioned"
-    rows = [
-        {"entity_id": "one", "assay_type": "B", "year": 2026},
-        {"entity_id": "two", "assay_type": None, "year": 2025},
-    ]
-    write_deltalake(
-        str(table_path), pa.Table.from_pylist(rows), partition_by=["assay_type", "year"]
-    )
-    actual = e2e_conftest._read_active_parquet_records_from_delta_log(table_path)
-    assert sorted(actual, key=lambda row: row["entity_id"]) == rows
-    projected = e2e_conftest._read_active_parquet_records_from_delta_log(
-        table_path, columns=["entity_id", "year"]
-    )
-    assert sorted(projected, key=lambda row: row["entity_id"]) == [
-        {"entity_id": "one", "year": 2026},
-        {"entity_id": "two", "year": 2025},
-    ]
-
-
 def test_read_delta_records_timeout_surfaces_harness_context(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

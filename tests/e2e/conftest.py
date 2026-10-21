@@ -308,8 +308,6 @@ def _read_active_parquet_records_from_delta_log(
     """Read active parquet rows without invoking the native Delta scanner."""
     try:
         active_paths: dict[str, Path] = {}
-        partition_values: dict[str, dict[str, str | None]] = {}
-        schema_json = ""
         commit_paths = sorted((table_path / "_delta_log").glob("*.json"))
         if not commit_paths:
             raise ValueError("Delta log has no JSON commits")
@@ -319,13 +317,10 @@ def _read_active_parquet_records_from_delta_log(
                 if not line.strip():
                     continue
                 action = json.loads(line)
-                if "metaData" in action:
-                    schema_json = action["metaData"]["schemaString"]
                 add = action.get("add")
                 if isinstance(add, dict) and isinstance(add.get("path"), str):
                     relative_path = unquote(add["path"])
                     active_paths[relative_path] = table_path / relative_path
-                    partition_values[relative_path] = add.get("partitionValues", {})
                 remove = action.get("remove")
                 if isinstance(remove, dict) and isinstance(remove.get("path"), str):
                     active_paths.pop(unquote(remove["path"]), None)
@@ -334,16 +329,7 @@ def _read_active_parquet_records_from_delta_log(
         if not parquet_paths:
             return []
         pq = _load_pyarrow_parquet()
-        from tests.helpers.delta_partition_read import read_partitioned_delta_file
-
-        tables = [
-            read_partitioned_delta_file(
-                path, partition_values[key], schema_json, columns
-            )
-            if partition_values[key]
-            else pq.read_table(path, columns=columns)
-            for key, path in sorted(active_paths.items())
-        ]
+        tables = [pq.read_table(path, columns=columns) for path in parquet_paths]
         if len(tables) == 1:
             return cast(list[dict[str, Any]], tables[0].to_pylist())
 

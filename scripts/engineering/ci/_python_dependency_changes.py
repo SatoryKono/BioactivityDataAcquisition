@@ -43,28 +43,9 @@ def _read_revision(root: Path, revision: str, name: str) -> dict[str, Any]:
     return tomllib.loads(result.stdout)
 
 
-def _uv_constraint_dependencies(document: dict[str, Any]) -> list[str] | None:
-    """Return uv resolver constraints when they are a list of requirement strings.
-
-    Any other shape stays in the configuration diff and fails closed.
-    """
-    tool = document.get("tool")
-    if not isinstance(tool, dict):
-        return None
-    uv = tool.get("uv")
-    if not isinstance(uv, dict) or "constraint-dependencies" not in uv:
-        return None
-    constraints = uv["constraint-dependencies"]
-    if isinstance(constraints, list) and all(
-        isinstance(item, str) for item in constraints
-    ):
-        return constraints
-    return None
-
-
 def _requirements(document: dict[str, Any]) -> dict[str, list[str]]:
     project = document.get("project", {})
-    groups: list[tuple[str, Any]] = [
+    groups = [
         ("project", project.get("dependencies", [])),
         ("build-system", document.get("build-system", {}).get("requires", [])),
         *[
@@ -76,9 +57,6 @@ def _requirements(document: dict[str, Any]) -> dict[str, list[str]]:
             for name, values in document.get("dependency-groups", {}).items()
         ],
     ]
-    constraints = _uv_constraint_dependencies(document)
-    if constraints is not None:
-        groups.append(("uv-constraint", constraints))
     result: dict[str, list[str]] = {}
     for label, group in groups:
         for raw in group:
@@ -143,13 +121,6 @@ def _configuration(document: dict[str, Any]) -> dict[str, Any]:
     }
     if any(group_config.values()):
         remaining["dependency-groups"] = group_config
-    if _uv_constraint_dependencies(remaining) is not None:
-        uv = remaining["tool"]["uv"]
-        uv.pop("constraint-dependencies", None)
-        if not uv:
-            remaining["tool"].pop("uv")
-        if not remaining["tool"]:
-            remaining.pop("tool")
     return remaining
 
 

@@ -214,25 +214,3 @@ def test_mesh_terms_from_pubmed_headings_maps_descriptor_and_extra_qualifiers() 
         ("MESH_HEADING", "Humans"),
         ("KEYWORD", "bioactivity"),
     ]
-
-
-def test_mesh_object_headings_keep_qualifiers_and_discard_unknown_objects():
-    """Typed PubMed headings retain the same terms as wire dictionaries."""
-    from types import SimpleNamespace
-
-    headings = [
-        object(),
-        SimpleNamespace(descriptor_ui="D000000"),
-        SimpleNamespace(
-            descriptor_name=" Humans ",
-            descriptor_ui="D006801",
-            qualifiers=[" genetics ", SimpleNamespace(name=" metabolism "), object()],
-        ),
-    ]
-    terms, keywords = mesh_terms_from_pubmed_headings(headings)
-
-    assert keywords == []
-    assert terms == [
-        {"mesh_heading": "Humans", "mesh_id": "D006801", "mesh_qualifier": "genetics"},
-        {"mesh_heading": None, "mesh_id": "D006801", "mesh_qualifier": "metabolism"},
-    ]

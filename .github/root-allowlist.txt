@@ -12,8 +12,6 @@
 .gitattributes
 .gitignore
 .gitleaks.toml
-# Fingerprints for historical full-history findings. Not a new secret value.
-.gitleaksignore
 .importlinter
 .jscpd.json
 # Dockerfile lint policy (DL3008 exception for moving Debian security packages).

@@ -21,7 +21,6 @@ from scripts.engineering.common.repo_paths import (
 )
 
 from scripts.engineering.qa.report_module_coverage_inventory import (
-    _iter_source_modules,
     compute_source_tree_sha256,
 )
 
@@ -97,7 +96,6 @@ def render_binding(
     count: int,
     statuses: dict[str, int] | None = None,
     assertless: int | None = None,
-    coverage_inventory_count: int | None = None,
 ) -> str:
     """Keep historical bytes intact and replace only this producer's projection."""
     if not re.fullmatch(r"[0-9a-f]{64}", digest) or count < 0:
@@ -105,15 +103,10 @@ def render_binding(
     if text.count(START) != text.count(END) or text.count(START) > 1:
         raise ValueError("Ambiguous source binding delimiters")
     classifications = ""
-    if coverage_inventory_count is not None:
-        classifications = (
-            f"- `coverage_inventory_module_count={coverage_inventory_count}`\n"
-            f"- Accepted coverage inventory: `{coverage_inventory_count}` modules\n"
-        )
     if statuses is not None:
-        classifications += (
-            f"- Accepted inventory: `{statuses['fully_covered']}` fully covered\n"
-            f"- Accepted inventory: `{statuses['partially_covered']}` partially covered\n"
+        classifications = (
+            f"- `{statuses['fully_covered']}` fully covered\n"
+            f"- `{statuses['partially_covered']}` partially covered\n"
         )
     if assertless is not None:
         classifications += (
@@ -126,7 +119,7 @@ def render_binding(
         f"- Source modules: `{count}`\n"
         f"{classifications}\n"
         "Derived by scripts/engineering/qa/report_topology_source_binding.py from\n"
-        "the verified source tree and accepted inventory. This is a source-only projection, not a\n"
+        "the verified module inventory. This is a source-only projection, not a\n"
         "new coverage measurement or a complete topology re-audit. Historical raw\n"
         f"evidence and capture identity above remain unchanged.\n\n{END}"
     )
@@ -147,10 +140,10 @@ def main(argv: list[str] | None = None) -> int:
     root = args.root.resolve()
     payload = json.loads((root / INVENTORY).read_text(encoding="utf-8"))
     digest = compute_source_tree_sha256(repo_root=root)
-    coverage_count = len(payload["modules"])
+    count = len(payload["modules"])
     if (
         payload["source_tree_sha256"] != digest
-        or payload["summary"]["source_module_count"] != coverage_count
+        or payload["summary"]["source_module_count"] != count
     ):
         raise ValueError("Module inventory is stale; regenerate it before binding")
     governance = json.loads(
@@ -175,10 +168,9 @@ def main(argv: list[str] | None = None) -> int:
         expected = render_binding(
             existing,
             digest,
-            len(_iter_source_modules(root)),
+            count,
             payload["summary"]["status_counts"],
             governance["report"]["assertless_total_candidates"],
-            coverage_count,
         )
         current = current and existing == expected
         if args.update:

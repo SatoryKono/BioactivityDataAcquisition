@@ -6,7 +6,6 @@ from collections.abc import Sequence
 from inspect import isawaitable
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core._gold_rule_inputs import bind_gold_rule_inputs
 from bioetl.application.core.batch_transformer_state import (
     RecordTransformOutcome as RecordTransformOutcome,
 )
@@ -91,12 +90,11 @@ def _build_gold_record(
         return None, False, None
     if not gold_filter(context, silver_record):
         return None, True, _resolve_gold_filter_details(gold_filter, silver_record)
-    rule_inputs = dict(silver_record)
     gold_record = cast(
         dict[str, object] | None,
         gold_transform(context, silver_record),
     )
-    return bind_gold_rule_inputs(gold_record, rule_inputs), False, None
+    return gold_record, False, None
 
 
 def _outcome_dq_fields(outcome: object, disposition: object) -> list[str]:

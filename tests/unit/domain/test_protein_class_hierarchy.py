@@ -43,21 +43,6 @@ from bioetl.domain.value_objects.protein_class_hierarchy import (
 pytestmark = pytest.mark.unit
 
 
-def test_populated_projection_cannot_exceed_explicit_path():
-    root = ProteinClassLevel(id=1, name="Root", desc=None)
-    child = ProteinClassLevel(id=2, name="Child", desc=None)
-    with pytest.raises(ValueError, match="exceed path depth"):
-        ProteinClassHierarchy(
-            l1=root,
-            l2=child,
-            l3=ProteinClassLevel.empty(),
-            l4=ProteinClassLevel.empty(),
-            l5=ProteinClassLevel.empty(),
-            leaf_id=1,
-            path=(root,),
-        )
-
-
 def test_protein_class_hierarchy_is_immutable_and_exposes_level_ids() -> None:
     hierarchy = ProteinClassHierarchy(
         l1=ProteinClassLevel(id=1, name="Ion channel", desc="Root"),

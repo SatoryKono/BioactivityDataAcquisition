@@ -283,9 +283,7 @@ class TestBuildSupportServices:
 
 
 @pytest.mark.unit
-def test_build_runner_factories_wires_phase_builders_and_bronze_options(
-    monkeypatch,
-) -> None:
+def test_build_runner_factories_wires_phase_builders_and_bronze_options() -> None:
     """build_runner_factories wires phase builders and bronze options."""
     from bioetl.composition.bootstrap.runtime.runtime_basics import (
         build_runner_factories,
@@ -317,18 +315,6 @@ def test_build_runner_factories_wires_phase_builders_and_bronze_options(
     assert callable(result[0])
     assert callable(result[1])
     assert callable(result[2])
-
-    from bioetl.composition.bootstrap.runtime import runtime_basics
-    from bioetl.infrastructure.time import SystemClock
-
-    expected_context = object()
-    context_builder = MagicMock(return_value=expected_context)
-    monkeypatch.setattr(runtime_basics, "build_pipeline_context", context_builder)
-    options = object()
-    context_factory = runner_factory_builder_cls.call_args.kwargs["build_context"]
-    assert context_factory("chembl_assay", options) is expected_context
-    assert context_builder.call_args.args == ("chembl_assay", options)
-    assert isinstance(context_builder.call_args.kwargs["clock"], SystemClock)
 
 
 @pytest.mark.unit

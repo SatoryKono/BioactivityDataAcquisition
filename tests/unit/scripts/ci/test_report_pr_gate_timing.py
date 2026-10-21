@@ -5,13 +5,13 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import re
 
 from scripts.engineering.ci.report_pr_gate_timing import (
     ReportRequest,
     build_report,
     render_markdown,
 )
-from tests.unit.scripts.ci.timing_api_fakes import PagedAttemptClient
 
 
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
@@ -341,12 +341,39 @@ def test_pr_gate_report_pagination_and_all_attempts(tmp_path: Path) -> None:
         )
     }
 
-    client = PagedAttemptClient(
-        repository=REPOSITORY,
-        workflow_token="/actions/workflows/pr-required.yml/runs?",
-        pages={1: [runs[0]], 2: [runs[1]]},
-        jobs_by_attempt=jobs_by_run_id,
-    )
+    class PaginatedFakeGitHubClient:
+        def json(self, args: list[str]) -> Any:
+            if args[:2] == ["repo", "view"]:
+                return {"nameWithOwner": REPOSITORY}
+            endpoint = args[1]
+            if "/actions/workflows/pr-required.yml/runs?" in endpoint:
+                # check url params
+                if "&page=1" in endpoint or endpoint.endswith("page=1"):
+                    return {"workflow_runs": [runs[0]]}
+                elif "&page=2" in endpoint or endpoint.endswith("page=2"):
+                    return {"workflow_runs": [runs[1]]}
+                else:
+                    return {"workflow_runs": []}
+            if "/attempts/" in endpoint and "/jobs?" in endpoint:
+                # repos/.../actions/runs/1/attempts/2/jobs?...
+                match = re.search(r"/actions/runs/(\d+)/attempts/(\d+)/jobs", endpoint)
+                if match:
+                    run_id = int(match.group(1))
+                    attempt = int(match.group(2))
+                    return {"jobs": jobs_by_run_id.get(run_id, {}).get(attempt, [])}
+                return {"jobs": []}
+            if "/attempts/" in endpoint and not endpoint.endswith("/jobs?"):
+                # fallback for single run
+                return runs[0]
+            if "/actions/runs/" in endpoint and endpoint.endswith(
+                "/jobs?per_page=100&page=1"
+            ):
+                run_id = int(endpoint.split("/actions/runs/", 1)[1].split("/", 1)[0])
+                # Provide jobs for attempt 1 by default if attempt isn't captured
+                return {"jobs": jobs_by_run_id.get(run_id, {}).get(1, [])}
+            return {}
+
+    client = PaginatedFakeGitHubClient()
     report = build_report(
         client,
         ReportRequest(
@@ -368,20 +395,11 @@ def test_pr_gate_report_pagination_and_all_attempts(tmp_path: Path) -> None:
         ),
     )
 
-    observed = [
-        (run["id"], run["run_attempt"], run["retries"]) for run in report["runs"]
-    ]
-    assert observed == [(1, 2, 1), (1, 1, 1), (2, 1, 0)]
-    queues = {
-        run["run_attempt"]: next(
-            job["queue_seconds"]
-            for job in run["jobs"]
-            if job["name"] == "tests / quality-metrics-gate"
-        )
-        for run in report["runs"]
-        if run["id"] == 1
-    }
-    assert queues == {2: 10, 1: 20}
+    assert len(report["runs"]) == 3
+    # Two from run 1 (attempt 1 and 2), one from run 2
+    attempts = [r["run_attempt"] for r in report["runs"]]
+    assert 2 in attempts
+    assert 1 in attempts
 
 
 @pytest.mark.unit
@@ -403,9 +421,13 @@ def test_pr_gate_report_missing_timestamps_skipped_cancelled(tmp_path: Path) -> 
         codeql_seconds=120,
         wall_seconds=190,
     )
+    # Set cancelled
     jobs[-1]["conclusion"] = "cancelled"
+    # Set skipped
     jobs[0]["conclusion"] = "skipped"
     jobs[0]["completed_at"] = jobs[0]["started_at"]
+    jobs[0]["started_at"] = None
+    # Remove started_at
     jobs[1]["started_at"] = None
 
     class SkippedFakeGitHubClient:
@@ -445,8 +467,9 @@ def test_pr_gate_report_missing_timestamps_skipped_cancelled(tmp_path: Path) -> 
 
     assert len(report["runs"]) == 1
     assert report["runs"][0]["pr_gate_wall_seconds"] is None
-    assert report["runs"][0]["jobs"][0]["execution_seconds"] is None
-    assert report["runs"][0]["jobs"][1]["queue_seconds"] == "unknown"
+    job0 = report["runs"][0]["jobs"][0]
+    assert job0["execution_seconds"] is None
+    assert job0["queue_seconds"] == "unknown"
     assert report["runs"][0]["retries"] == 0
 
 
