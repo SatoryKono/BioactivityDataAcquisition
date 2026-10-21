@@ -13,6 +13,16 @@ import pytest
 from bioetl.infrastructure.quarantine import write_lock as locks
 
 
+def test_append_lock_owns_and_reuses_the_thread_lock(tmp_path):
+    base = str(tmp_path / "table")
+    with locks.quarantine_append_lock(base):
+        held = locks._thread_lock(base)
+        assert held.locked()
+        assert locks.quarantine_write_lock_path(base).is_file()
+    assert not held.locked()
+    assert locks._thread_lock(base) is held
+
+
 def test_windows_acquire_and_release_select_the_correct_byte_lock(monkeypatch):
     crt = SimpleNamespace(locking=Mock(), LK_LOCK=1, LK_UNLCK=2)
     monkeypatch.setitem(sys.modules, "msvcrt", crt)
