@@ -23,8 +23,14 @@ pytestmark = pytest.mark.unit
 
 def test_review_expiry_reports_all_decisions_at_fixed_boundary() -> None:
     entries = {
-        "scripts/old.py": {"review_by": "2026-10-20", "decision": "shared_helper_module"},
-        "scripts/temp.py": {"review_by": "2026-10-20", "decision": "temporary_diagnostic"},
+        "scripts/old.py": {
+            "review_by": "2026-10-20",
+            "decision": "shared_helper_module",
+        },
+        "scripts/temp.py": {
+            "review_by": "2026-10-20",
+            "decision": "temporary_diagnostic",
+        },
         "scripts/today.py": {"review_by": "2026-10-21"},
         "scripts/future.py": {"review_by": "2026-10-22"},
         "scripts/missing.py": {},
@@ -37,30 +43,61 @@ def test_review_expiry_reports_all_decisions_at_fixed_boundary() -> None:
     assert report["expired_review_by_count"] == 2
     assert report["total_entries"] == 7
     assert report["expired_by_decision"] == {
-        "shared_helper_module": 1, "temporary_diagnostic": 1,
+        "shared_helper_module": 1,
+        "temporary_diagnostic": 1,
     }
     assert [row["path"] for row in report["expired_entries"]] == [
-        "scripts/old.py", "scripts/temp.py",
+        "scripts/old.py",
+        "scripts/temp.py",
     ]
     assert report["missing_review_by"] == ["scripts/missing.py"]
-    assert report["invalid_review_by"] == ["scripts/invalid.py", "scripts/noncanonical.py"]
+    assert report["invalid_review_by"] == [
+        "scripts/invalid.py",
+        "scripts/noncanonical.py",
+    ]
 
 
 def test_review_expiry_cli_reports_nonzero_debt_without_failure(
-    tmp_path, monkeypatch, capsys,
+    tmp_path,
+    monkeypatch,
+    capsys,
 ) -> None:
     registry = tmp_path / "registry.json"
-    registry.write_text(json.dumps({"entries": {
-        "scripts/old.py": {"review_by": "2000-01-01", "decision": "shared_helper_module"},
-    }}), encoding="utf-8")
+    registry.write_text(
+        json.dumps(
+            {
+                "entries": {
+                    "scripts/old.py": {
+                        "review_by": "2000-01-01",
+                        "decision": "shared_helper_module",
+                    },
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
     monkeypatch.setattr(inventory, "_project_root", lambda: tmp_path)
-    monkeypatch.setattr(inventory, "datetime", SimpleNamespace(
-        now=lambda tz: datetime(2026, 10, 21, tzinfo=UTC),
-    ))
-    monkeypatch.setattr(inventory, "_build_inventory", lambda root: pytest.fail("Unneeded scan"))
-    assert inventory.main([
-        "--review-expiry", "report", "--lifecycle-registry", "registry.json",
-    ]) == 0
+    monkeypatch.setattr(
+        inventory,
+        "datetime",
+        SimpleNamespace(
+            now=lambda tz: datetime(2026, 10, 21, tzinfo=UTC),
+        ),
+    )
+    monkeypatch.setattr(
+        inventory, "_build_inventory", lambda root: pytest.fail("Unneeded scan")
+    )
+    assert (
+        inventory.main(
+            [
+                "--review-expiry",
+                "report",
+                "--lifecycle-registry",
+                "registry.json",
+            ]
+        )
+        == 0
+    )
     report = json.loads(capsys.readouterr().out)
     assert report["expired_review_by_count"] == 1
     assert report["expired_entries"][0]["path"] == "scripts/old.py"

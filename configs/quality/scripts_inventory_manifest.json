@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-21T10:06:50.731017+00:00",
+  "generated_at": "2026-10-21T10:13:39.439853+00:00",
   "summary": {
     "total_scripts": 659,
     "status_counts": {
@@ -11129,7 +11129,7 @@
         },
         {
           "path": "scripts/engineering/qa/debt_governance_gate_evaluators.py",
-          "line": 1174,
+          "line": 1204,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::\""
         },

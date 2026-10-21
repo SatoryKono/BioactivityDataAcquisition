@@ -1723,14 +1723,21 @@ def build_review_expiry_report(
             invalid.append(path)
             continue
         if review_by < as_of:
-            expired.append({"path": path, "review_by": raw,
-                            "decision": str(entry.get("decision", "")),
-                            "owner": str(entry.get("owner", ""))})
+            expired.append(
+                {
+                    "path": path,
+                    "review_by": raw,
+                    "decision": str(entry.get("decision", "")),
+                    "owner": str(entry.get("owner", "")),
+                }
+            )
     return {
         "as_of": as_of.isoformat(),
         "total_entries": len(entries),
         "expired_review_by_count": len(expired),
-        "expired_by_decision": dict(sorted(Counter(row["decision"] for row in expired).items())),
+        "expired_by_decision": dict(
+            sorted(Counter(row["decision"] for row in expired).items())
+        ),
         "expired_entries": expired,
         "missing_review_by": missing,
         "invalid_review_by": invalid,
@@ -1773,7 +1780,9 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="Path to lifecycle registry JSON for non-active scripts",
     )
     parser.add_argument(
-        "--review-expiry", choices=("off", "report"), default="off",
+        "--review-expiry",
+        choices=("off", "report"),
+        default="off",
         help="Report expired lifecycle review dates without failing on existing debt",
     )
     parser.add_argument(
@@ -1826,7 +1835,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.review_expiry == "report":
         report = build_review_expiry_report(_load_json(root / args.lifecycle_registry))
         _write_ascii_json_stdout(report)
-        if not (args.update or args.check or args.check_lifecycle or args.deprecation_report):
+        if not (
+            args.update or args.check or args.check_lifecycle or args.deprecation_report
+        ):
             return 0
     if _can_fast_path_json(args):
         _write_ascii_json_stdout(_build_fast_stdout_payload(root))

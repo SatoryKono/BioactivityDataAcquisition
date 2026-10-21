@@ -290,11 +290,14 @@ def _debt_scorecard_budget_no_growth_gate(
 
     current_payload = _load_yaml(repo_root, DEBT_SCORECARD_PATH)
     baseline_payload = _review_expiry_initial_baseline(
-        repo_root=repo_root, ref=changed_from_ref,
-        baseline=baseline_payload, current=current_payload,
+        repo_root=repo_root,
+        ref=changed_from_ref,
+        baseline=baseline_payload,
+        current=current_payload,
     )
     increases = _budget_growth_increases(
-        baseline_payload=baseline_payload, current_payload=current_payload,
+        baseline_payload=baseline_payload,
+        current_payload=current_payload,
     )
     return Gate(
         name="debt_scorecard_budget_no_growth",
@@ -311,12 +314,19 @@ def _debt_scorecard_budget_no_growth_gate(
 
 
 def _review_expiry_initial_baseline(
-    *, repo_root: Path, ref: str, baseline: dict[str, Any], current: dict[str, Any],
+    *,
+    repo_root: Path,
+    ref: str,
+    baseline: dict[str, Any],
+    current: dict[str, Any],
 ) -> dict[str, Any]:
     """Admit a first freeze only at the independently verified base/live count."""
-    new_paths = [path for path in REVIEW_EXPIRY_METRIC_PATHS
-                 if _lookup_number(baseline, f"{path}.max_count") is None
-                 and _lookup_number(current, f"{path}.max_count") is not None]
+    new_paths = [
+        path
+        for path in REVIEW_EXPIRY_METRIC_PATHS
+        if _lookup_number(baseline, f"{path}.max_count") is None
+        and _lookup_number(current, f"{path}.max_count") is not None
+    ]
     if not new_paths:
         return baseline
     registry = _load_yaml_from_git_ref(repo_root, ref, SCRIPTS_LIFECYCLE_REGISTRY_JSON)
@@ -325,18 +335,25 @@ def _review_expiry_initial_baseline(
     today = datetime.now(UTC).date()
     base_report = build_review_expiry_report(registry, today=today)
     live_report = build_review_expiry_report(
-        _load_json(repo_root, SCRIPTS_LIFECYCLE_REGISTRY_JSON), today=today,
+        _load_json(repo_root, SCRIPTS_LIFECYCLE_REGISTRY_JSON),
+        today=today,
     )
-    if any(report[key] for report in (base_report, live_report)
-           for key in ("missing_review_by", "invalid_review_by")):
+    if any(
+        report[key]
+        for report in (base_report, live_report)
+        for key in ("missing_review_by", "invalid_review_by")
+    ):
         return baseline
     count = base_report["expired_review_by_count"]
     if count != live_report["expired_review_by_count"]:
         return baseline
     seeded = deepcopy(baseline)
     for path in new_paths:
-        if not (_lookup_number(current, f"{path}.max_count") == count
-                == _lookup_number(current, f"{path}.current_count")):
+        if not (
+            _lookup_number(current, f"{path}.max_count")
+            == count
+            == _lookup_number(current, f"{path}.current_count")
+        ):
             continue
         node = seeded
         for part in path.split("."):
@@ -346,26 +363,39 @@ def _review_expiry_initial_baseline(
 
 
 def _scripts_review_expiry_gate(
-    *, repo_root: Path, scorecard: dict[str, Any], today: date | None = None,
+    *,
+    repo_root: Path,
+    scorecard: dict[str, Any],
+    today: date | None = None,
 ) -> Gate:
     """Block expiry growth above the frozen budget, never nonzero debt alone."""
     report = build_review_expiry_report(
-        _load_json(repo_root, SCRIPTS_LIFECYCLE_REGISTRY_JSON), today=today,
+        _load_json(repo_root, SCRIPTS_LIFECYCLE_REGISTRY_JSON),
+        today=today,
     )
-    limits = [_lookup_number(scorecard, f"{path}.max_count")
-              for path in REVIEW_EXPIRY_METRIC_PATHS]
-    valid_limits = (all(type(value) is int and value >= 0 for value in limits)
-                    and limits[0] == limits[1])
+    limits = [
+        _lookup_number(scorecard, f"{path}.max_count")
+        for path in REVIEW_EXPIRY_METRIC_PATHS
+    ]
+    valid_limits = (
+        all(type(value) is int and value >= 0 for value in limits)
+        and limits[0] == limits[1]
+    )
     count = report["expired_review_by_count"]
     valid_dates = not (report["missing_review_by"] or report["invalid_review_by"])
     passed = valid_limits and valid_dates and count <= limits[0]
     return Gate(
-        name="scripts_review_expiry_ratchet", status="pass" if passed else "fail",
-        metric="expired_review_by_count", current=count, limit=limits,
+        name="scripts_review_expiry_ratchet",
+        status="pass" if passed else "fail",
+        metric="expired_review_by_count",
+        current=count,
+        limit=limits,
         source_artifact=SCRIPTS_LIFECYCLE_REGISTRY_JSON,
-        remediation=("Review lifecycle entries and lower both scorecard budgets together; "
-                     "do not raise budgets or extend dates without review. "
-                     "Missing/invalid dates and divergent budgets must be corrected."),
+        remediation=(
+            "Review lifecycle entries and lower both scorecard budgets together; "
+            "do not raise budgets or extend dates without review. "
+            "Missing/invalid dates and divergent budgets must be corrected."
+        ),
     )
 
 
