@@ -25,7 +25,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.types import RunID, RunType
-from bioetl.infrastructure.control_plane import FileRunLedgerStore
+from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
 
 if TYPE_CHECKING:
     from bioetl.composition.bootstrap.composite_infrastructure_context import (
@@ -69,10 +69,17 @@ def build_run_ledger_service(
         dq_contract_compatibility_hash=dq_contract_compatibility_hash or None,
         effective_config_artifact_id=effective_config_artifact_id or None,
         composite_run_id=infra_context.run_id,
+        manifest_port=FileRunManifestStore(
+            base_path=control_plane_root(infra_context.settings, "run_manifest"),
+            metrics=infra_context.metrics,
+        ),
         _entry_id_factory=lambda: create_runtime_occurrence_id(
             "composite_run_ledger_entry"
         ),
         _occurred_at_factory=resolve_runtime_clock(infra_context.clock).now,
+        _manifest_id_factory=lambda: create_runtime_occurrence_id(
+            "composite_run_manifest"
+        ),
     )
 
 

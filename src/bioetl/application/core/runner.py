@@ -104,6 +104,8 @@ class PipelineRunner(PipelineRunnerSupportMixin):
 
     @property
     def manifest_id(self) -> str | None:
+        if self._run_ledger_service is not None:
+            return self._run_ledger_service.manifest_id
         if self._contract_evidence_context is not None:
             return self._contract_evidence_context.manifest_id
         manifest_id = getattr(self._context, "manifest_id", None)
@@ -117,6 +119,10 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         """Attach the run-ledger writer used after lock acquisition."""
         self._run_ledger_service = service
         bind_manifest_successor_observer(self, service)
+        service.manifest_successor_callbacks.append(self._update_manifest_context)
+        service.manifest_successor_callbacks.append(
+            self._checkpoint_manager.update_manifest
+        )
 
     def attach_contract_evidence_recorder(
         self,

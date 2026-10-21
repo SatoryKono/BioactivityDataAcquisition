@@ -165,5 +165,25 @@ __all__ = [
     "append_run_outcome",
     "build_run_ledger_diagnostic_details",
     "build_run_ledger_idempotency_key",
+    "rebind_ledger_successor",
     "validate_manifest_linkage",
 ]
+
+
+def rebind_ledger_successor(
+    service: _RunLedgerServiceEntryProtocol,
+    *,
+    run_id: object,
+    predecessor_manifest_id: str,
+    successor_manifest_id: str,
+) -> None:
+    """Point a ledger adapter at the successor when it knows that transition."""
+    port = getattr(service, "ledger_port", None)
+    rebind = getattr(port, "record_manifest_successor", None)
+    if not callable(rebind):
+        return
+    rebind(
+        run_id=run_id,
+        predecessor_manifest_id=predecessor_manifest_id,
+        successor_manifest_id=successor_manifest_id,
+    )

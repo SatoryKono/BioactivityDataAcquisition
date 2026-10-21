@@ -44,6 +44,7 @@ def test_post_lock_finalization_uses_launch_context(tmp_path, resume):
     runner._lock_runtime_service = SimpleNamespace(
         get_context=lambda: SimpleNamespace(owner_id="measured-lock-owner")
     )
+    runner._checkpoint_manager = SimpleNamespace(update_manifest=lambda _manifest: None)
     ledger = RunLedgerService(
         ledger_port=FileRunLedgerStore(base_path=tmp_path / "run_ledger"),
         manifest_id=manifest_id,
