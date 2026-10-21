@@ -1824,6 +1824,26 @@ def _build_fast_stdout_payload(root: Path) -> dict[str, object]:
     }
 
 
+def _run_review_expiry_request(
+    *, root: Path, args: argparse.Namespace
+) -> tuple[bool, int]:
+    """Emit a requested report and return its standalone flag and exit code."""
+    if args.review_expiry != "report":
+        return False, 0
+    try:
+        report = build_review_expiry_report(_load_json(root / args.lifecycle_registry))
+    except (OSError, ValueError) as exc:
+        print(f"[FAIL] Review expiry report: {exc}", file=sys.stderr)
+        result = 1
+    else:
+        _write_ascii_json_stdout(report)
+        result = 0
+    report_only = not (
+        args.update or args.check or args.check_lifecycle or args.deprecation_report
+    )
+    return report_only, result
+
+
 def main(argv: list[str] | None = None) -> int:
     for stream in (sys.stdout, sys.stderr):
         reconfigure = getattr(stream, "reconfigure", None)
@@ -1834,21 +1854,9 @@ def main(argv: list[str] | None = None) -> int:
                 pass
     args = parse_args(argv or sys.argv[1:])
     root = _project_root()
-    review_expiry_result = 0
-    if args.review_expiry == "report":
-        try:
-            report = build_review_expiry_report(
-                _load_json(root / args.lifecycle_registry)
-            )
-        except (OSError, ValueError) as exc:
-            print(f"[FAIL] Review expiry report: {exc}", file=sys.stderr)
-            review_expiry_result = 1
-        else:
-            _write_ascii_json_stdout(report)
-        if not (
-            args.update or args.check or args.check_lifecycle or args.deprecation_report
-        ):
-            return review_expiry_result
+    report_only, review_expiry_result = _run_review_expiry_request(root=root, args=args)
+    if report_only:
+        return review_expiry_result
     if _can_fast_path_json(args):
         _write_ascii_json_stdout(_build_fast_stdout_payload(root))
         return 0
