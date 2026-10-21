@@ -15,6 +15,7 @@ pytestmark = pytest.mark.repo_backed
 
 
 def test_benchmark_evidence_workflow_keeps_validator_and_main_gates_independent():
+    """Pass the validation manifest through while keeping the two gates independent."""
     root = Path(__file__).resolve().parents[5]
     workflow = yaml.safe_load(
         (root / ".github/workflows/performance-nightly.yml").read_text()

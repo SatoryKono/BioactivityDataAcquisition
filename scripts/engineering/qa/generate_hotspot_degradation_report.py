@@ -881,6 +881,8 @@ _RUN_ID_RE = re.compile(r"^[1-9]\d*$")
 _REPO_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 _REGRESSION_THRESHOLD = Decimal("0.1")
 _SCOPE_PREFIXES = ("tests/benchmarks/", "tests/performance/")
+_VALIDATION_MANIFEST_FILENAME = "benchmark-validation-manifest.json"
+_CANDIDATE_SUMMARY_FILENAME = "benchmark-summary-candidate.json"
 _Measurement = tuple[str, str, str, str, Decimal]
 
 
@@ -1362,6 +1364,7 @@ def _emit_reducer(
     reason: str,
     extra: dict[str, object] | None = None,
 ) -> int:
+    """Write the reducer manifest and gate, including a validation digest."""
     from scripts.engineering.common.repo_paths import write_text_confined
 
     body: dict[str, object] = {"reason": reason, "status": status}
@@ -1413,6 +1416,7 @@ def _confine_reducer_outputs(
     *,
     archive_paths: tuple[Path, ...] | None = None,
 ) -> bool:
+    """Reject aliased reducer paths and open the gate only after that check."""
     from scripts.engineering.common.repo_paths import write_text_confined
 
     try:
@@ -1493,6 +1497,7 @@ def _store_raw_evidence(
     raw_sha: str,
     raw_bytes: bytes,
 ) -> str | None:
+    """Store the verified raw bytes and validation receipt for one revision."""
     from scripts.engineering.common.repo_paths import write_bytes_confined
 
     try:
@@ -1502,10 +1507,7 @@ def _store_raw_evidence(
             root=root,
         )
         write_bytes_confined(
-            args.evidence_dir
-            / measured_sha
-            / raw_sha
-            / "benchmark-validation-manifest.json",
+            args.evidence_dir / measured_sha / raw_sha / _VALIDATION_MANIFEST_FILENAME,
             args.validated_manifest_bytes,
             root=root,
         )
@@ -1523,6 +1525,7 @@ def _candidate_summary(
     validation_sha: str,
     scopes: list[str],
 ) -> dict[str, object]:
+    """Build a proposed summary bound to the raw and validation digests."""
     return {
         "adoption": "proposed",
         "baseline_sha": measured_sha,
@@ -1559,6 +1562,7 @@ def _propose_initial_candidate(
     raw_bytes: bytes,
     raw_sha: str,
 ) -> int:
+    """Store the verified pair and a candidate when no baseline exists."""
     from scripts.engineering.common.repo_paths import write_text_confined
 
     stored = _store_raw_evidence(args, root, measured_sha, raw_sha, raw_bytes)
@@ -1566,7 +1570,7 @@ def _propose_initial_candidate(
         return _emit_reducer(args, root, "failed", stored, {"raw_sha256": raw_sha})
     scopes = sorted({item[1] for item in measurements})
     write_text_confined(
-        args.evidence_dir / measured_sha / raw_sha / "benchmark-summary-candidate.json",
+        args.evidence_dir / measured_sha / raw_sha / _CANDIDATE_SUMMARY_FILENAME,
         _dump(
             _candidate_summary(
                 measurements,
@@ -1600,6 +1604,7 @@ def _finish_reduction(
     raw_bytes: bytes,
     raw_sha: str,
 ) -> int:
+    """Compare measurements and record a candidate only when the gate passes."""
     from scripts.engineering.common.repo_paths import write_text_confined
 
     baseline_document = _read_baseline_document(args.baseline, root)
@@ -1648,10 +1653,7 @@ def _finish_reduction(
         return _emit_reducer(args, root, "failed", stored, {"raw_sha256": raw_sha})
     if status == "passed":
         write_text_confined(
-            args.evidence_dir
-            / measured_sha
-            / raw_sha
-            / "benchmark-summary-candidate.json",
+            args.evidence_dir / measured_sha / raw_sha / _CANDIDATE_SUMMARY_FILENAME,
             _dump(
                 _candidate_summary(
                     measurements,
@@ -1757,8 +1759,8 @@ def _reducer_archive_paths(
         )
         for name in (
             "benchmark-measurements.json",
-            "benchmark-validation-manifest.json",
-            "benchmark-summary-candidate.json",
+            _VALIDATION_MANIFEST_FILENAME,
+            _CANDIDATE_SUMMARY_FILENAME,
             "benchmark-gate.json",
             "benchmark-manifest.json",
         )
@@ -1766,6 +1768,7 @@ def _reducer_archive_paths(
 
 
 def reduce_benchmark_evidence_main(argv: list[str] | None = None) -> int:
+    """Reduce confined benchmark bytes into a gate bound to a validated receipt."""
     parser = argparse.ArgumentParser(
         description="Reduce benchmark measurements into a fail-closed gate."
     )
@@ -1785,7 +1788,7 @@ def reduce_benchmark_evidence_main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.validation_manifest is None:
         args.validation_manifest = args.raw_json.with_name(
-            "benchmark-validation-manifest.json"
+            _VALIDATION_MANIFEST_FILENAME
         )
     from scripts.engineering.common.repo_paths import REPO_ROOT
 

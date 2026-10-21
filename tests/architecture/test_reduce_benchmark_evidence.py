@@ -66,6 +66,7 @@ def _measurement(
     rounds: int | None = 5,
     include_stats: bool = True,
 ) -> dict[str, object]:
+    """Build one synthetic benchmark payload with source, run, and machine identity."""
     entry: dict[str, object] = {"fullname": test_id, "has_error": has_error}
     if include_stats:
         stats: dict[str, object] = {"rounds": rounds}
@@ -129,6 +130,7 @@ def _invoke(
     extra: list[str] | None = None,
     validation: bool = True,
 ) -> tuple[subprocess.CompletedProcess[str], Path, Path]:
+    """Run the reducer against raw bytes and a sibling validation receipt."""
     raw_path = tmp_path / "benchmark-measurements.json"
     if raw is not None:
         raw_path.write_bytes(raw)
@@ -228,6 +230,7 @@ def _validated_schema_fixture(tmp_path: Path) -> tuple[dict, Path]:
 def test_reduction_rejects_raw_replaced_after_validation(
     tmp_path: Path, tamper: str
 ) -> None:
+    """Reject reduction when raw bytes no longer match the saved receipt."""
     payload, validation = _validated_schema_fixture(tmp_path)
     saved_manifest = validation.read_bytes()
     # Preserve SHA/count and schema validity; even whitespace changes bytes.
@@ -244,6 +247,7 @@ def test_reduction_rejects_raw_replaced_after_validation(
 
 
 def test_reduction_keeps_validated_pair_and_candidate_binding(tmp_path: Path) -> None:
+    """Archive the verified raw bytes and receipt and bind the candidate digest."""
     payload, validation = _validated_schema_fixture(tmp_path)
     raw = json.dumps(payload).encode()
     manifest_bytes = validation.read_bytes()
@@ -304,6 +308,7 @@ def test_reduction_rejects_archive_collision_before_any_write(
     baseline.write_text(json.dumps(_baseline()), encoding="utf-8")
 
     def snapshot() -> dict:
+        """Record bytes and mtimes for every file under the temporary root."""
         return {
             p.relative_to(tmp_path).as_posix(): (p.read_bytes(), p.stat().st_mtime_ns)
             for p in tmp_path.rglob("*")
@@ -367,6 +372,7 @@ def test_reduction_allows_distinct_control_path_inside_archive_folder(
 def test_reduction_confines_and_protects_validation_input(
     tmp_path: Path, escape: bool
 ) -> None:
+    """Reject an escaping manifest path and a write onto the receipt itself."""
     payload, validation = _validated_schema_fixture(tmp_path)
     original = validation.read_bytes()
     extra = (
@@ -387,6 +393,7 @@ def test_reduction_confines_and_protects_validation_input(
 def test_reduction_requires_readable_validation_manifest(
     tmp_path: Path, contents: bytes | None
 ) -> None:
+    """Fail closed when the validation receipt is missing or unreadable."""
     payload, validation = _validated_schema_fixture(tmp_path)
     validation.unlink()
     if contents is not None:
@@ -420,6 +427,7 @@ def test_reduction_requires_readable_validation_manifest(
 def test_reduction_rejects_unvalidated_receipt(
     tmp_path: Path, field: str, value: object
 ) -> None:
+    """Reject a receipt that is not a successful schema-version-1 validation."""
     payload, validation = _validated_schema_fixture(tmp_path)
     receipt = _gate(validation)
     receipt[field] = value
@@ -447,6 +455,7 @@ def test_reduction_rejects_unvalidated_receipt(
 def test_reduction_rejects_validation_identity_mismatch(
     tmp_path: Path, field: str, value: object
 ) -> None:
+    """Reject a receipt whose identity fields do not match the raw snapshot."""
     payload, validation = _validated_schema_fixture(tmp_path)
     receipt = _gate(validation)
     receipt[field] = value
