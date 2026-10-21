@@ -49,12 +49,7 @@ def _anchored_parent(
         raise _CleanupConflict from exc
     if require_destructive_capability and not destructive_cleanup_supported(root_abs):
         raise NotImplementedError("Bronze destructive cleanup has no safe handle API")
-    try:
-        parts = Path(os.path.abspath(path)).relative_to(root_abs).parts  # noqa: PTH100
-    except ValueError as exc:
-        raise _CleanupConflict from exc
-    if not parts or any(part in ("", ".", "..") for part in parts):
-        raise _CleanupConflict
+    parts = _relative_parent_parts(path, root_abs)
     fds: list[int] = []
     chain: list[tuple[int, int, str]] = []
     try:
@@ -410,3 +405,14 @@ def safe_rmdir(
                 return True
     except (FileNotFoundError, NotADirectoryError, _CleanupConflict):
         return False
+
+
+def _relative_parent_parts(path: Path, root_abs: Path) -> tuple[str, ...]:
+    """Require a nonempty, traversal-free path relative to the pinned root."""
+    try:
+        parts = Path(os.path.abspath(path)).relative_to(root_abs).parts  # noqa: PTH100
+    except ValueError as exc:
+        raise _CleanupConflict from exc
+    if not parts or any(part in ("", ".", "..") for part in parts):
+        raise _CleanupConflict
+    return parts

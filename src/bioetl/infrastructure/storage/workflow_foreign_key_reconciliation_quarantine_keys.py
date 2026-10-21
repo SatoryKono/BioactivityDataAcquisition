@@ -85,8 +85,7 @@ def resolve_mutation_identity_keys(
                     "mutation blocked"
                 )
             continue
-        values = [row.get(column) for row in orphan_rows]
-        if any(value is None or not str(value).strip() for value in values):
+        if _blank_row_identity(orphan_rows, column):
             if source_scope == "current_run":
                 raise ValueError(
                     "workflow foreign-key reconciliation blank row identity; "
@@ -95,6 +94,12 @@ def resolve_mutation_identity_keys(
             continue
         extra.append(column)
     return primary_keys + tuple(extra)
+
+
+def _blank_row_identity(rows: list[dict[str, object]], column: str) -> bool:
+    """Reject null and whitespace-only identities after uniform column presence."""
+    values = [row.get(column) for row in rows]
+    return any(value is None or not str(value).strip() for value in values)
 
 
 def build_orphan_key_rows(

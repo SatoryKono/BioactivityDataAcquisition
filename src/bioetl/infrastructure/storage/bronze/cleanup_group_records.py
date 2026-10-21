@@ -86,11 +86,7 @@ class GroupRecordStore:
         except FileNotFoundError:
             return None
         st = os.fstat(fd)
-        if (
-            not stat.S_ISDIR(st.st_mode)
-            or st.st_uid != _effective_uid()
-            or stat.S_IMODE(st.st_mode) & 0o077
-        ):
+        if not _private_directory_is_trusted(st):
             os.close(fd)
             raise GroupJournalConflict("untrusted group journal/stage directory")
         if create:
@@ -273,3 +269,11 @@ class GroupRecordStore:
         body: dict[str, Any],  # Any: validated JSON.
     ) -> None:
         self._replace_record(journal_fd, operation_id, {**body, "state": "completed"})
+
+
+def _private_directory_is_trusted(st: os.stat_result) -> bool:
+    return (
+        stat.S_ISDIR(st.st_mode)
+        and st.st_uid == _effective_uid()
+        and not stat.S_IMODE(st.st_mode) & 0o077
+    )

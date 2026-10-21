@@ -14,7 +14,7 @@ Verified on tracked `main`:
   the canonical 17-server MCP set.
 - `.devin/config.json` exposes the same 17 servers, so server-set drift from the
   supplied audit is already remediated.
-- `.devin/config.json` still embeds `/mnt/e/g-drive/05_AI/github/` absolute paths
+- `.devin/config.json` still embeds `<workstation-checkout-parent>/` absolute paths
   in filesystem scope, wrapper arguments, memory paths, and cache paths.
 - `scripts/ai/codex/setup_mcp.py` intentionally generates `.devin/config.json`
   from the non-portable runtime projection used by local Codex settings.
@@ -99,7 +99,7 @@ as an explicit precondition.
 python -m json.tool .mcp.json >/dev/null
 python -m json.tool scripts/ai/.mcp.json >/dev/null
 python -m json.tool .devin/config.json >/dev/null  # if retained as tracked
-rg -n "/mnt/e/g-drive|/mnt/wsl/docker-desktop-bind-mounts|[A-Za-z]:\\\\" \
+rg -n '[/]mnt/(?:[a-z]/g-drive|wsl/docker-desktop-bind-mounts)|<workstation-checkout>|<docker-desktop-bind-mounts>|[A-Za-z]:\\\\' \
   .mcp.json scripts/ai/.mcp.json .devin/config.json
 uv run python -m pytest -q \
   tests/unit/scripts/test_setup_copilot_codex_mcp.py \

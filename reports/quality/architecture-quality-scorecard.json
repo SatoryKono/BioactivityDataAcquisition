@@ -51,7 +51,7 @@
     },
     {
       "evidence_metrics": {
-        "families_at_budget_count": 1,
+        "families_at_budget_count": 0,
         "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
         "lazy_util": 0.0,
@@ -59,9 +59,9 @@
       },
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
-      "score": 9.2,
+      "score": 10.0,
       "weight": 0.14,
-      "weighted_score": 1.288
+      "weighted_score": 1.4
     },
     {
       "evidence_metrics": {
@@ -170,10 +170,8 @@
     "composition_module_cap": 295,
     "composition_module_count": 279,
     "composition_util": 0.9458,
-    "families_at_budget": [
-      "application_services_control_plane"
-    ],
-    "families_at_budget_count": 1,
+    "families_at_budget": [],
+    "families_at_budget_count": 0,
     "grade_kind": "diagnostic_proxy",
     "lazy_import_cap": 0,
     "lazy_import_observed_count": 0,
@@ -185,7 +183,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.89,
+  "integral_score": 10.0,
   "interpretation": "excellent",
   "metrics": {
     "accepted_adr_count": 60,
@@ -200,10 +198,8 @@
     "dashboarded_without_emission_count": 0,
     "dq_blocking_issue_count": 0,
     "expired_compat_count": 0,
-    "families_at_budget": [
-      "application_services_control_plane"
-    ],
-    "families_at_budget_count": 1,
+    "families_at_budget": [],
+    "families_at_budget_count": 0,
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
@@ -254,7 +250,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "b33c018dc53339284d25bf782793620c14d3bc4b3cf4b673b8732ae154ee66cb"
+      "source_fingerprint": "2decd477f330a62abd95593a171221a728e06f8d3af41ca93e449d949835ec88"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -273,7 +269,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "621d25ddb9bc0a9825ba806bbb32c2dd3b1e87ce47e7934290482459d7f2fa56"
+      "source_tree_sha256": "efdb544d41f0096eb15d60f283cfe3b4df262473550888e7a565afbbaf77f0fe"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

@@ -369,4 +369,18 @@ def git_tracked_files(
     return tuple(files)
 
 
-__all__ = ["GitGrepMatch", "git_grep_fixed", "git_tracked_files"]
+def git_index_paths(*, root: Path) -> frozenset[str]:
+    """Return every tracked path, including absent files and embedded newlines."""
+    result = subprocess.run(
+        ["git", "ls-files", "-z"],
+        cwd=root,
+        capture_output=True,
+        check=True,
+        timeout=30,
+    )
+    return frozenset(
+        filter(None, result.stdout.decode("utf-8", errors="strict").split("\0"))
+    )
+
+
+__all__ = ["GitGrepMatch", "git_grep_fixed", "git_index_paths", "git_tracked_files"]
