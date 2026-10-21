@@ -117,9 +117,10 @@ Root env-like files are security-review surfaces, not cleanup targets:
 
 Root AI/editor/runtime tooling decisions live in
 `configs/quality/root_hygiene_review_registry.yaml`. Canonical runtime roots
-such as `.codex/**`, `.devin/**`, `.junie/**`, and `.gemini/**` are retained
+such as `.codex/**`, `.devin/**`, and `.junie/**` are retained
 (tracked by design) unless a separate runtime migration decision changes the
-source of truth. Local cache/editor/vendor roots such as `.agents`, `.ai`,
+source of truth. `.gemini/` is not a runtime root: only `.gemini/config.yaml`
+is tracked. Local cache/editor/vendor roots such as `.agents`, `.ai`,
 `.cache`, `.npm-cache`, `caddy`, `.sonarlint`, and `.windsurf` must remain
 untracked or be reclassified through the registry before any rehome/delete
 action.

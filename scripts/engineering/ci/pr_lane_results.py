@@ -46,6 +46,9 @@ TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".coderabbit.yaml": ("tests/architecture/test_coderabbit_config.py",),
+    "Makefile": (
+        "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
+    ),
     "tests/fixtures/contracts/coderabbit-schema.v2.json": (
         "tests/architecture/test_coderabbit_config.py",
     ),
