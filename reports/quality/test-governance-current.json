@@ -33,34 +33,6 @@
   "assertion_branch_reachability_percent": 100.0,
   "assertless_candidates": [
     {
-      "category": "weak_no_value",
-      "line": "167",
-      "path": "tests/integration/infrastructure/durability/test_crash_silver.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_silver_crash_create_string_5c"
-    },
-    {
-      "category": "weak_no_value",
-      "line": "176",
-      "path": "tests/integration/infrastructure/durability/test_crash_silver.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_silver_crash_append_string_5d"
-    },
-    {
-      "category": "weak_no_value",
-      "line": "180",
-      "path": "tests/integration/infrastructure/durability/test_crash_silver.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_silver_crash_merge_string_5"
-    },
-    {
-      "category": "weak_no_value",
-      "line": "184",
-      "path": "tests/integration/infrastructure/durability/test_crash_silver.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_silver_crash_post_commit_string_6"
-    },
-    {
       "category": "intentional_no_exception_contract",
       "line": "84",
       "path": "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py",
@@ -661,13 +633,9 @@
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
     "intentional_no_exception_contract": 85,
-    "weak_no_value": 4
+    "weak_no_value": 0
   },
   "assertless_examples": [
-    "tests/integration/infrastructure/durability/test_crash_silver.py:167",
-    "tests/integration/infrastructure/durability/test_crash_silver.py:176",
-    "tests/integration/infrastructure/durability/test_crash_silver.py:180",
-    "tests/integration/infrastructure/durability/test_crash_silver.py:184",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
     "tests/unit/application/test_issue_10518_app_leftovers_branches.py:100",
@@ -688,15 +656,13 @@
     "tests/unit/application/observability/test_pipeline_metrics.py:297",
     "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:326",
     "tests/unit/application/services/test_checkpoint_telemetry_helpers.py:68",
-    "tests/unit/composition/test_observability_contract.py:421"
+    "tests/unit/composition/test_observability_contract.py:421",
+    "tests/unit/composition/test_observability_contract.py:431",
+    "tests/unit/composition/factories/storage/test_health_mixin.py:72",
+    "tests/unit/composition/factories/storage/test_health_mixin.py:103",
+    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:623"
   ],
   "assertless_families": {
-    "tests/integration/infrastructure/durability/test_crash_silver.py": {
-      "assertless_tests": 4,
-      "categories": {
-        "weak_no_value": 4
-      }
-    },
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py": {
       "assertless_tests": 1,
       "categories": {
@@ -1034,15 +1000,8 @@
       }
     }
   },
-  "assertless_total_candidates": 89,
-  "budget_violations": [
-    {
-      "actual": 4,
-      "budget": "refined_assertless_max",
-      "expected_max": 0,
-      "metric": "refined_assertless_tests"
-    }
-  ],
+  "assertless_total_candidates": 85,
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1219,7 +1178,7 @@
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
-  "refined_assertless_tests": 4,
+  "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
@@ -1263,34 +1222,6 @@
     },
     "assertion_branch_reachability_percent": 100.0,
     "assertless_candidates": [
-      {
-        "category": "weak_no_value",
-        "line": "167",
-        "path": "tests/integration/infrastructure/durability/test_crash_silver.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_silver_crash_create_string_5c"
-      },
-      {
-        "category": "weak_no_value",
-        "line": "176",
-        "path": "tests/integration/infrastructure/durability/test_crash_silver.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_silver_crash_append_string_5d"
-      },
-      {
-        "category": "weak_no_value",
-        "line": "180",
-        "path": "tests/integration/infrastructure/durability/test_crash_silver.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_silver_crash_merge_string_5"
-      },
-      {
-        "category": "weak_no_value",
-        "line": "184",
-        "path": "tests/integration/infrastructure/durability/test_crash_silver.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_silver_crash_post_commit_string_6"
-      },
       {
         "category": "intentional_no_exception_contract",
         "line": "84",
@@ -1892,13 +1823,9 @@
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
       "intentional_no_exception_contract": 85,
-      "weak_no_value": 4
+      "weak_no_value": 0
     },
     "assertless_examples": [
-      "tests/integration/infrastructure/durability/test_crash_silver.py:167",
-      "tests/integration/infrastructure/durability/test_crash_silver.py:176",
-      "tests/integration/infrastructure/durability/test_crash_silver.py:180",
-      "tests/integration/infrastructure/durability/test_crash_silver.py:184",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
       "tests/unit/application/test_issue_10518_app_leftovers_branches.py:100",
@@ -1919,9 +1846,13 @@
       "tests/unit/application/observability/test_pipeline_metrics.py:297",
       "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:326",
       "tests/unit/application/services/test_checkpoint_telemetry_helpers.py:68",
-      "tests/unit/composition/test_observability_contract.py:421"
+      "tests/unit/composition/test_observability_contract.py:421",
+      "tests/unit/composition/test_observability_contract.py:431",
+      "tests/unit/composition/factories/storage/test_health_mixin.py:72",
+      "tests/unit/composition/factories/storage/test_health_mixin.py:103",
+      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:623"
     ],
-    "assertless_total_candidates": 89,
+    "assertless_total_candidates": 85,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2097,7 +2028,7 @@
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "parse_errors": [],
-    "refined_assertless_tests": 4,
+    "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
@@ -2161,10 +2092,10 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "afba547021666b8332b58b0de225b0a9a913230b251f83992f96231430b273c7",
+  "source_tree_sha256": "b4cb32ca24af1fef9318fbed4ac6db14bfb1b9fefbf12a7a013ab49ae512c41b",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 89,
+    "assertless_total_candidates": 85,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
@@ -2172,7 +2103,7 @@
     "intentional_no_exception_contract": 85,
     "markerless_examples": [],
     "markerless_test_functions": 0,
-    "refined_assertless_tests": 4,
+    "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
