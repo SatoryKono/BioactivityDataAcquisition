@@ -156,23 +156,20 @@ _REFERENCE_IDENTIFIER_FAMILY_SPECS: tuple[tuple[str, str, str, str, str], ...] =
 )
 
 
-def _validate_normalizer_keys(
-    normalizers: Mapping[str, ReferenceNormalizer | None],
-) -> None:
-    """Reject missing or extra normalizer keys before constructing families."""
-    unlabeled = sorted(
-        name
-        for name, _storage, _semantics, normalizer_key, _description in (
-            _REFERENCE_IDENTIFIER_FAMILY_SPECS
-        )
-        if not normalizer_key
+def _unlabeled_spec_names() -> list[str]:
+    return sorted(
+        spec[0] for spec in _REFERENCE_IDENTIFIER_FAMILY_SPECS if not spec[3]
     )
-    if unlabeled:
-        raise ValueError(f"SPECS rows missing normalizer mapping keys: {unlabeled}")
 
-    expected_keys = {spec[3] for spec in _REFERENCE_IDENTIFIER_FAMILY_SPECS}
-    provided_keys = set(normalizers.keys())
 
+def _expected_normalizer_keys() -> set[str]:
+    return {spec[3] for spec in _REFERENCE_IDENTIFIER_FAMILY_SPECS}
+
+
+def _raise_normalizer_key_mismatch(
+    expected_keys: set[str],
+    provided_keys: set[str],
+) -> None:
     missing_keys = expected_keys - provided_keys
     if missing_keys:
         raise ValueError(f"Missing required normalizer keys: {sorted(missing_keys)}")
@@ -180,6 +177,19 @@ def _validate_normalizer_keys(
     extra_keys = provided_keys - expected_keys
     if extra_keys:
         raise ValueError(f"Unexpected extra normalizer keys: {sorted(extra_keys)}")
+
+
+def _validate_normalizer_keys(
+    normalizers: Mapping[str, ReferenceNormalizer | None],
+) -> None:
+    """Reject missing or extra normalizer keys before constructing families."""
+    unlabeled = _unlabeled_spec_names()
+    if unlabeled:
+        raise ValueError(f"SPECS rows missing normalizer mapping keys: {unlabeled}")
+    _raise_normalizer_key_mismatch(
+        _expected_normalizer_keys(),
+        set(normalizers),
+    )
 
 
 def build_reference_identifier_families(
