@@ -17,10 +17,10 @@
         "src/bioetl/application/core/"
       ],
       "duplication_clusters": 0,
-      "files": 206,
-      "total_loc": 25866,
+      "files": 207,
+      "total_loc": 25908,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.385,
+      "helper_function_ratio": 0.384,
       "max_internal_fan_in": 5,
       "max_internal_fan_in_module": "bioetl.application.core.record_processor_config",
       "bounded_growth_budgets": {
@@ -31,7 +31,7 @@
         "distribution": {
           "0": 19,
           "1": 106,
-          "2": 43,
+          "2": 44,
           "3": 17,
           "4": 12,
           "5": 9
@@ -169,6 +169,14 @@
             "fan_in": 1,
             "runtime_importers": [
               "bioetl.application.core._batch_writer_gold_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._gold_rule_inputs",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core._batch_writer_gold_support",
+              "bioetl.application.core.batch_transformer_attempt_success"
             ]
           },
           {
