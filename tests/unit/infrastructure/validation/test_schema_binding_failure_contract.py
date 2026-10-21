@@ -6,6 +6,7 @@ import pytest
 
 from bioetl.infrastructure.validation.contract_validator import (
     ContractAwareGoldValidator,
+    ContractAwareSilverValidator,
 )
 from bioetl.infrastructure.validation.pandera_validator import (
     BasePanderaValidator,
@@ -14,6 +15,23 @@ from bioetl.infrastructure.validation.pandera_validator import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_non_strict_silver_outcomes_use_the_projected_schema_frame():
+    from bioetl.domain.config.dq import DQConfig
+
+    validator = ContractAwareSilverValidator(
+        pa.DataFrameSchema({"id": pa.Column(int)}, strict=True),
+        strict=False,
+        dq_config=DQConfig(),
+    )
+    assert validator.validate_with_outcomes(
+        [{"id": 1, "extra": "not-in-schema"}]
+    ).is_valid
+
+
+def test_silver_without_bound_policy_does_not_invent_a_contract_path():
+    assert ContractAwareSilverValidator()._silver_config_path() is None
 
 
 def test_base_validator_normalizes_nullable_fields_and_retains_schema_failures():

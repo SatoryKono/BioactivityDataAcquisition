@@ -15,6 +15,7 @@ from bioetl.application.core._gold_outcome_quarantine_write import (
     flush_gold_outcome_quarantine,
     record_gold_outcome_quarantine_metrics,
 )
+from bioetl.application.core._gold_rule_inputs import resolve_gold_rule_inputs
 from bioetl.application.services.run_reports.observations import record_gold_observation
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.exceptions import SchemaViolationError
@@ -213,7 +214,7 @@ def prepare_validated_gold_write(
         available_cols = writer._collect_record_columns(records)
         schema_payload: object = writer._gold_schema_policy_by_version
     else:
-        rule_records = records
+        rule_records = resolve_gold_rule_inputs(records)
         records, available_cols = prepare_gold_records(writer, records)
         records, quarantined = validate_gold_records(
             writer, records, rule_records=rule_records
