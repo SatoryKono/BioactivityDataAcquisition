@@ -23,14 +23,14 @@
     },
     "G2": {
       "description": "R03 — production resolver/owner/filter на обоих layouts; R04 — actual DI clock; R05 — Gold outcome fix/conclusion",
-      "status": "verified (declared scope)",
-      "evidence": "main f4cb8096cb0bf6c2c15b6a978307ef3db7ee5d81; https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12110#issuecomment-6316781831; R03 1a0c383c09ce047488217cb0effa3ddb8a7ee64f; R04 77e19b1f69b10786efedc5758bbecceb6b074710; R05 2a4e7cb2f136cddaccb5a1b109b8159a63655b48",
+      "status": "accepted declared scope; commands and independent review NOT_VERIFIABLE",
+      "evidence": "main f4cb8096cb0bf6c2c15b6a978307ef3db7ee5d81; https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12110#issuecomment-6316781831; R03 1a0c383c09ce047488217cb0effa3ddb8a7ee64f; R04 77e19b1f69b10786efedc5758bbecceb6b074710; R05 2a4e7cb2f136cddaccb5a1b109b8159a63655b48; declared-scope acceptance не является прогоном команд и не заменяет final independent review receipt",
       "owner_next_step": "Declared scope принят; отклонения R03 сохранены раздельно"
     },
     "G3": {
       "description": "R06/R07 concrete universe; interruption/lifecycle (R08); retention/archive (R09) policy apply",
       "status": "partial qualification",
-      "evidence": "main f4cb8096cb0bf6c2c15b6a978307ef3db7ee5d81; https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12110#issuecomment-6316781831; R06 OPEN / NOT_VERIFIABLE; R07 behavior NOT_VERIFIABLE; R08 verified; R09 closed-by-owner, residual NOT_VERIFIABLE",
+      "evidence": "main f4cb8096cb0bf6c2c15b6a978307ef3db7ee5d81; https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12110#issuecomment-6316781831; R06 OPEN / NOT_VERIFIABLE; R07 behavior NOT_VERIFIABLE; R08 accepted declared scope; R09 closed-by-owner, residual NOT_VERIFIABLE",
       "owner_next_step": "SatoryKono: отдельный #12106; R09 residual по решению владельца; R07 без retests"
     }
   },
@@ -52,66 +52,66 @@
       "id": "R01",
       "issue": "#12102",
       "finding": "FS-001 небезопасное удаление Bronze",
-      "status": "verified (declared POSIX scope)",
+      "status": "verified (declared POSIX scope; receipt commit is descendant of implementation commit; independent review NOT_VERIFIABLE)",
       "implementation_sha": "28e49957cd78c326397348a95f8f6000c3d6c3aa",
       "implementation_tree": "2614fc8bd279705511228dff7484c80285c685e2",
       "coverage_source_hash": "UNKNOWN/NOT_VERIFIABLE",
       "commands": "uv run pytest tests/integration/infrastructure/storage/test_bronze_writer_cleanup_safety.py tests/integration/infrastructure/storage/test_bronze_writer_cleanup_writer_races.py tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py tests/integration/infrastructure/storage/test_bronze_writer_cleanup.py tests/integration/infrastructure/storage/test_bronze_writer_cleanup_and_sidecar.py --junitxml=.jules/junit.xml --tb=short -q -k 'not flat_layout'; exit 0",
       "fixtures": "Synthetic tmp trees; trusted stable root/cooperative actors; flat-layout excluded; Windows NOT_VERIFIABLE (#12311), не зависимость трекера",
-      "readback": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12136; receipt PR https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12286; https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f4cb8096cb0bf6c2c15b6a978307ef3db7ee5d81/reports/governance/receipt-12102-bronze-writer-posix-2026-10-19.json; source e750ae40f408c540c355ec31de9034b141b96a94 / tree 06c759420e8b99380faa2a04f930e1bc15a1af02; 196 run / 192 passed / 4 Windows skipped; raw JUnit/log отсутствуют (сохранены только hashes); https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12102#issuecomment-6286392385; https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12102#issuecomment-6290071006; исторический receipt не перепривязан к main",
-      "independent_review": "UNKNOWN/NOT_VERIFIABLE"
+      "readback": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12136; receipt PR https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12286; https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f4cb8096cb0bf6c2c15b6a978307ef3db7ee5d81/reports/governance/receipt-12102-bronze-writer-posix-2026-10-19.json; source e750ae40f408c540c355ec31de9034b141b96a94 / tree 06c759420e8b99380faa2a04f930e1bc15a1af02; 196 run / 192 passed / 4 Windows skipped; raw JUnit/log отсутствуют (сохранены только hashes); https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12102#issuecomment-6286392385; https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12102#issuecomment-6290071006; исторический receipt не перепривязан к main; implementation 28e49957cd78c326397348a95f8f6000c3d6c3aa является предком receipt source e750ae40f408c540c355ec31de9034b141b96a94; receipt tree 06c759420e8b99380faa2a04f930e1bc15a1af02 не равен implementation tree 2614fc8bd279705511228dff7484c80285c685e2",
+      "independent_review": "NOT_VERIFIABLE; POSIX receipt не является final independent review"
     },
     {
       "id": "R02",
       "issue": "#12103",
       "finding": "CP-001 неполный rollback lineage",
-      "status": "verified (declared scope)",
+      "status": "accepted declared scope; commands NOT_VERIFIABLE; independent review NOT_VERIFIABLE",
       "implementation_sha": "0e3b7f05c4dcecf3f34e9cbd93e1d8cc1fd5c4f6",
       "implementation_tree": "0f87de3aa04373dba15998130dc4d02658c4ec0c",
       "coverage_source_hash": "UNKNOWN/NOT_VERIFIABLE",
       "commands": "UNKNOWN/NOT_VERIFIABLE",
       "fixtures": "Declared lineage rollback/concurrency scope; crash/restart исключён в R06; merge не заменяет final independent review receipt",
       "readback": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12312; https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12110#issuecomment-6316781831",
-      "independent_review": "UNKNOWN/NOT_VERIFIABLE"
+      "independent_review": "NOT_VERIFIABLE; declared-scope acceptance https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12110#issuecomment-6316781831 не является final independent review receipt"
     },
     {
       "id": "R03",
       "issue": "#12104",
       "finding": "RET-001 flat-layout cleanup",
-      "status": "verified (declared scope, accepted deviations)",
+      "status": "accepted declared scope, accepted deviations; commands NOT_VERIFIABLE; independent review NOT_VERIFIABLE",
       "implementation_sha": "1a0c383c09ce047488217cb0effa3ddb8a7ee64f",
       "implementation_tree": "24bcb5c0b84c26f3b4e0d6f5cd2bfb74ba2c3803",
       "coverage_source_hash": "UNKNOWN/NOT_VERIFIABLE",
       "commands": "UNKNOWN/NOT_VERIFIABLE",
       "fixtures": "UNKNOWN/NOT_VERIFIABLE",
       "readback": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12323; https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12104#issuecomment-6310489200; https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f4cb8096cb0bf6c2c15b6a978307ef3db7ee5d81/tests/integration/infrastructure/storage/test_bronze_cleanup_12104_posix_acceptance.py; receipts сохранены раздельно, неуниформны; accepted deviations: non-regressing refresh, upstream coverage inventory gap, Windows не входит в declared scope",
-      "independent_review": "UNKNOWN/NOT_VERIFIABLE"
+      "independent_review": "NOT_VERIFIABLE; declared-scope acceptance https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12104#issuecomment-6310489200 не является final independent review receipt"
     },
     {
       "id": "R04",
       "issue": "#12016",
       "finding": "DI-001 явный ClockPort (CF-012)",
-      "status": "verified (declared scope)",
+      "status": "accepted declared scope; commands NOT_VERIFIABLE; independent review NOT_VERIFIABLE",
       "implementation_sha": "77e19b1f69b10786efedc5758bbecceb6b074710",
       "implementation_tree": "8ee988ccc9492b413132868056570da61987af53",
       "coverage_source_hash": "UNKNOWN/NOT_VERIFIABLE",
       "commands": "UNKNOWN/NOT_VERIFIABLE",
       "fixtures": "UNKNOWN/NOT_VERIFIABLE",
       "readback": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12122; https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12110#issuecomment-6316781831; https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f4cb8096cb0bf6c2c15b6a978307ef3db7ee5d81/tests/integration/infrastructure/storage/test_cf_silver_delete_clock.py",
-      "independent_review": "UNKNOWN/NOT_VERIFIABLE"
+      "independent_review": "NOT_VERIFIABLE; declared-scope acceptance https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12110#issuecomment-6316781831 не является final independent review receipt"
     },
     {
       "id": "R05",
       "issue": "#12105",
       "finding": "STO-001 Gold commit outcome (LIKELY)",
-      "status": "verified (declared scope)",
+      "status": "accepted declared scope; commands NOT_VERIFIABLE; independent review NOT_VERIFIABLE",
       "implementation_sha": "2a4e7cb2f136cddaccb5a1b109b8159a63655b48",
       "implementation_tree": "1ba6cccfbe2361c3a2eee107cfa4bb28fd189c61",
       "coverage_source_hash": "UNKNOWN/NOT_VERIFIABLE",
       "commands": "UNKNOWN/NOT_VERIFIABLE",
       "fixtures": "UNKNOWN/NOT_VERIFIABLE",
       "readback": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12146; https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12110#issuecomment-6316781831; https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f4cb8096cb0bf6c2c15b6a978307ef3db7ee5d81/tests/unit/infrastructure/storage/test_step4_gold_outcome.py",
-      "independent_review": "UNKNOWN/NOT_VERIFIABLE"
+      "independent_review": "NOT_VERIFIABLE; declared-scope acceptance https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12110#issuecomment-6316781831 не является final independent review receipt"
     },
     {
       "id": "R06",
@@ -143,14 +143,14 @@
       "id": "R08",
       "issue": "#12108",
       "finding": "HTTP и lifecycle",
-      "status": "verified (declared scope, source-corrected)",
+      "status": "accepted declared scope, source-corrected; commands NOT_VERIFIABLE; independent review NOT_VERIFIABLE",
       "implementation_sha": "441f39c9a420bc09e82b92e103a31f7c8a86dac3",
       "implementation_tree": "8289d63ac498d5e94b59d9e268f248efa76fe47a",
       "coverage_source_hash": "UNKNOWN/NOT_VERIFIABLE",
       "commands": "UNKNOWN/NOT_VERIFIABLE",
       "fixtures": "UNKNOWN/NOT_VERIFIABLE",
       "readback": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12328; https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108#issuecomment-6309790645; https://github.com/SatoryKono/BioactivityDataAcquisition/blob/f4cb8096cb0bf6c2c15b6a978307ef3db7ee5d81/tests/integration/test_runner_lifecycle.py; https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12110#issuecomment-6316781831",
-      "independent_review": "UNKNOWN/NOT_VERIFIABLE"
+      "independent_review": "NOT_VERIFIABLE; declared-scope acceptance https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12108#issuecomment-6309790645 не является final independent review receipt"
     },
     {
       "id": "R09",
