@@ -28,6 +28,8 @@ __all__ = [
     "LockContextHolder",
     "LockNotHeldError",
     "register_lock_release_barrier",
+    "reset_lock_release_barriers",
+    "take_lock_release_barriers",
     "wait_lock_release_barriers",
 ]
 
@@ -221,19 +223,33 @@ _lock_release_barriers: ContextVar[list[Callable[[], Awaitable[None]]] | None] =
 )
 
 
+def reset_lock_release_barriers() -> None:
+    """Arm the current task to collect barriers for one lock hold."""
+    _lock_release_barriers.set([])
+
+
 def register_lock_release_barrier(barrier: Callable[[], Awaitable[None]]) -> None:
-    """Register an async barrier to be awaited before lock release."""
+    """Register a barrier awaited before the active lock is released.
+
+    Calls outside an armed lock hold are ignored so Delta timeouts that are
+    not covered by a pipeline lock do not join workers on the timeout path.
+    """
     barriers = _lock_release_barriers.get()
     if barriers is None:
-        barriers = []
-        _lock_release_barriers.set(barriers)
+        return
     barriers.append(barrier)
 
 
-async def wait_lock_release_barriers() -> None:
-    """Wait for all registered lock release barriers to complete."""
+def take_lock_release_barriers() -> tuple[Callable[[], Awaitable[None]], ...]:
+    """Detach barriers armed for this task and disarm the lock hold."""
     barriers = _lock_release_barriers.get()
-    if barriers:
-        for barrier in barriers:
-            await barrier()
-        barriers.clear()
+    _lock_release_barriers.set(None)
+    if not barriers:
+        return ()
+    return tuple(barriers)
+
+
+async def wait_lock_release_barriers() -> None:
+    """Await barriers armed for the current lock hold, then disarm the task."""
+    for barrier in take_lock_release_barriers():
+        await barrier()

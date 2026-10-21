@@ -29,6 +29,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import subprocess
 import tempfile
@@ -40,6 +41,11 @@ from types import SimpleNamespace
 import pyarrow as pa
 import pytest
 
+from bioetl.domain.locking import (
+    register_lock_release_barrier,
+    reset_lock_release_barriers,
+    wait_lock_release_barriers,
+)
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.storage.delta.table_ops import (
     normalize_delta_filesystem_path,
@@ -117,6 +123,60 @@ async def test_write_plain_delta_request_times_out_promptly_without_executor_joi
         assert not finished.is_set()
     finally:
         release.set()
+        await wait_lock_release_barriers()
+
+
+@pytest.mark.asyncio
+async def test_unarmed_lock_context_does_not_join_timed_out_worker() -> None:
+    """Without a lock hold, a timeout must not wait for the blocked worker."""
+    await wait_lock_release_barriers()
+    called = False
+
+    async def _barrier() -> None:
+        nonlocal called
+        called = True
+
+    register_lock_release_barrier(_barrier)
+    await wait_lock_release_barriers()
+    assert called is False
+
+
+@pytest.mark.asyncio
+async def test_timed_out_delta_write_is_joined_by_lock_release_barrier() -> None:
+    """Lock release must wait until a timed-out Delta worker finishes."""
+    request = _make_request()
+    release = threading.Event()
+    finished = threading.Event()
+
+    def _blocking_write(**_kwargs: object) -> None:
+        try:
+            release.wait(timeout=5)
+        finally:
+            finished.set()
+
+    module = SimpleNamespace(write_deltalake=_blocking_write)
+    reset_lock_release_barriers()
+    waiter: asyncio.Task[None] | None = None
+    try:
+        with pytest.raises(TimeoutError, match=r"Delta write timed out after 0\.05s"):
+            await _write_plain_delta_request(
+                load_module=lambda: module,
+                request=request,
+                mode="append",
+                timeout_seconds=0.05,
+            )
+        assert not finished.is_set()
+        waiter = asyncio.create_task(wait_lock_release_barriers())
+        await asyncio.sleep(0.05)
+        assert not waiter.done()
+        release.set()
+        await waiter
+        assert finished.is_set()
+    finally:
+        release.set()
+        if waiter is not None and not waiter.done():
+            await waiter
+        await wait_lock_release_barriers()
 
 
 @pytest.mark.asyncio

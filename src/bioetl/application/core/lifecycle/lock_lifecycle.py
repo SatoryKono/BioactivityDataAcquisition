@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
 import time
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from typing import Protocol
 
 from bioetl.application.core.config import LockConfig
@@ -16,8 +17,8 @@ from bioetl.domain.locking import (
     FencingToken,
     LockContext,
     LockContextHolder,
-    _lock_release_barriers,
-    wait_lock_release_barriers,
+    reset_lock_release_barriers,
+    take_lock_release_barriers,
 )
 from bioetl.domain.ports import LockPort, LoggerPort
 from bioetl.domain.types import RunID
@@ -77,22 +78,69 @@ async def acquire_lock(host: _LockRuntimeHostProtocol) -> FencingToken | None:
     return token
 
 
+def _clear_task_cancellation() -> None:
+    """Drop cancellation requests so the current task can finish cleanup."""
+    current = asyncio.current_task()
+    if current is None:
+        return
+    while current.uncancel():
+        pass
+
+
+async def _await_shielded[ResultT](
+    factory: Callable[[], Awaitable[ResultT]],
+    *,
+    cancelled: list[bool],
+) -> ResultT:
+    """Run one cleanup step to completion when the caller is cancelled."""
+    operation = asyncio.create_task(factory())
+    try:
+        return await asyncio.shield(operation)
+    except asyncio.CancelledError:
+        cancelled.append(True)
+        _clear_task_cancellation()
+        return await operation
+
+
 async def release_lock(host: _LockRuntimeHostProtocol) -> None:
-    """Release the runtime lock, stop heartbeat, and clear context state."""
-    await wait_lock_release_barriers()
-    if (heartbeat := host._heartbeat) is not None:
-        await heartbeat.stop()
+    """Release the runtime lock, stop heartbeat, and clear context state.
+
+    Cancellation of the caller finishes the in-flight Delta barriers, stops
+    the heartbeat, and releases the lock before ``CancelledError`` propagates.
+    """
+    cancelled: list[bool] = []
+    barriers = take_lock_release_barriers()
+
+    async def _join_barriers() -> None:
+        for barrier in barriers:
+            await barrier()
+
+    if barriers:
+        await _await_shielded(_join_barriers, cancelled=cancelled)
+    heartbeat = host._heartbeat
+    if heartbeat is not None:
+
+        async def _stop_heartbeat() -> None:
+            await heartbeat.stop()
+
+        await _await_shielded(_stop_heartbeat, cancelled=cancelled)
         host._heartbeat = None
-    await host._lock.release(
-        host._config.lock_key,
-        host._run_id,
-        exclusive=host._config.exclusive,
-    )
+
+    async def _release_port() -> None:
+        await host._lock.release(
+            host._config.lock_key,
+            host._run_id,
+            exclusive=host._config.exclusive,
+        )
+
+    await _await_shielded(_release_port, cancelled=cancelled)
     host._acquired_at = None
     host._fencing_token = None
     if host._context_holder is not None:
         host._context_holder.clear()
     host._logger.info("Lock released", stage="cleanup")
+    if cancelled:
+        raise asyncio.CancelledError
 
 
 async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
@@ -116,12 +164,10 @@ async def enter_lock_context[LockRuntimeHostT: _LockRuntimeHostProtocol](
     host: LockRuntimeHostT,
 ) -> LockRuntimeHostT:
     """Acquire the lock for async context-manager usage and start heartbeat."""
-    # Initialize the barriers list for this context to avoid propagation issues
-    # with asyncio Tasks
-    _lock_release_barriers.set([])
     token = await acquire_lock(host)
     if token is None:
         raise PipelineShutdownError(f"Lock acquisition failed: {host._config.lock_key}")
+    reset_lock_release_barriers()
     try:
         await start_heartbeat(host)
     except BaseException:
