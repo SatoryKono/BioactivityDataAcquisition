@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 from collections.abc import Callable
 from pathlib import Path
+from uuid import UUID
 
 import pytest
 import yaml
@@ -754,3 +756,104 @@ def test_resolve_e2e_temp_root_falls_back_when_posix_tmp_missing(
     )
 
     assert result == fallback
+
+
+def _append_ledger_event(
+    path: Path,
+    *,
+    event_type: str,
+    manifest_id: str,
+    run_id: str,
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(
+            json.dumps(
+                {
+                    "event_type": event_type,
+                    "manifest_id": manifest_id,
+                    "run_id": run_id,
+                }
+            )
+            + "\n"
+        )
+
+
+def test_assert_run_ledger_has_events_reads_predecessor_chain(
+    tmp_path: Path,
+) -> None:
+    from bioetl.domain.types import RunID
+
+    run_id = RunID(UUID("7dfbffc5-3df2-57ed-bcd7-03d243da0706"))
+    predecessor = "11111111-1111-4111-8111-111111111111"
+    successor = "22222222-2222-4222-8222-222222222222"
+    ledger_base = tmp_path / "output" / "control" / "run_ledger"
+    index = ledger_base / "_by_run_id" / f"{run_id}.txt"
+    index.parent.mkdir(parents=True)
+    index.write_text(f"{successor}\n", encoding="utf-8")
+    pointer = ledger_base / "_predecessors" / f"{successor}.txt"
+    pointer.parent.mkdir(parents=True)
+    pointer.write_text(f"{predecessor}\n", encoding="utf-8")
+    predecessor_path = ledger_base / f"{predecessor}.jsonl"
+    successor_path = ledger_base / f"{successor}.jsonl"
+    _append_ledger_event(
+        predecessor_path,
+        event_type="manifest_created",
+        manifest_id=predecessor,
+        run_id=str(run_id),
+    )
+    _append_ledger_event(
+        predecessor_path,
+        event_type="run_started",
+        manifest_id=predecessor,
+        run_id=str(run_id),
+    )
+    _append_ledger_event(
+        successor_path,
+        event_type="run_finished",
+        manifest_id=successor,
+        run_id=str(run_id),
+    )
+
+    entries = e2e_conftest.assert_run_ledger_has_events(
+        tmp_path,
+        run_id,
+        expected_events=("manifest_created", "run_started", "run_finished"),
+    )
+
+    assert [entry["event_type"] for entry in entries] == [
+        "manifest_created",
+        "run_started",
+        "run_finished",
+    ]
+    assert entries[0]["manifest_id"] == predecessor
+    assert entries[-1]["manifest_id"] == successor
+
+
+def test_ledger_chain_manifest_ids_stops_without_predecessor_pointer(
+    tmp_path: Path,
+) -> None:
+    manifest_id = "dddddddd-dddd-4ddd-8ddd-dddddddddddd"
+    ledger_base = tmp_path / "ledger"
+    (ledger_base / f"{manifest_id}.jsonl").parent.mkdir(parents=True)
+    (ledger_base / f"{manifest_id}.jsonl").write_text("{}\n", encoding="utf-8")
+
+    assert e2e_conftest._ledger_chain_manifest_ids(ledger_base, manifest_id) == [
+        manifest_id
+    ]
+
+
+def test_ledger_chain_manifest_ids_rejects_pointer_cycle(tmp_path: Path) -> None:
+    first = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+    second = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
+    ledger_base = tmp_path / "ledger"
+    ledger_base.mkdir()
+    (ledger_base / f"{first}.jsonl").write_text("{}\n", encoding="utf-8")
+    (ledger_base / f"{second}.jsonl").write_text("{}\n", encoding="utf-8")
+    pointers = ledger_base / "_predecessors"
+    pointers.mkdir()
+    (pointers / f"{second}.txt").write_text(first, encoding="utf-8")
+    (pointers / f"{first}.txt").write_text(second, encoding="utf-8")
+
+    with pytest.raises(AssertionError, match="cycle"):
+        e2e_conftest._ledger_chain_manifest_ids(ledger_base, second)

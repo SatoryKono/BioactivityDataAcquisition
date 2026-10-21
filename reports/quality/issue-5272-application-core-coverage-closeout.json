@@ -1288,94 +1288,10 @@
         "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
       },
       "notes": "Current metrics are rebound to the accepted module inventory. Historical measurements, baseline, and earlier closeout notes are preserved in previous_current_bindings. This does not claim fresh global measured nonregression."
-    },
-    {
-      "snapshot_date": "2026-08-17",
-      "current_metrics": {
-        "repo_uncovered_module_count": 0,
-        "repo_unmeasured_module_count": 0,
-        "application_core_covered_line_percent": 99.79,
-        "application_core_uncovered_module_count": 0,
-        "application_core_unmeasured_module_count": 0
-      },
-      "parent_epic_status": {
-        "status": "not_closeable_under_current_definition_of_done",
-        "remaining_below_85_module_count": 0,
-        "reason": "Live accepted-inventory floor count; this binding does not close the parent epic."
-      },
-      "current_binding_refresh": {
-        "source_tree_sha256": "fe8c0c2c6f075abb1df24b9447657eeafa49f053eddeea6a15823813a87f495e",
-        "evidence": "reports/quality/module-coverage-inventory.json",
-        "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
-      },
-      "notes": "Current metrics are rebound to the accepted module inventory. Historical measurements, baseline, and earlier closeout notes are preserved in previous_current_bindings. This does not claim fresh global measured nonregression."
-    },
-    {
-      "snapshot_date": "2026-08-17",
-      "current_metrics": {
-        "repo_uncovered_module_count": 0,
-        "repo_unmeasured_module_count": 0,
-        "application_core_covered_line_percent": 99.79,
-        "application_core_uncovered_module_count": 0,
-        "application_core_unmeasured_module_count": 0
-      },
-      "parent_epic_status": {
-        "status": "not_closeable_under_current_definition_of_done",
-        "remaining_below_85_module_count": 0,
-        "reason": "Live accepted-inventory floor count; this binding does not close the parent epic."
-      },
-      "current_binding_refresh": {
-        "source_tree_sha256": "ac387567848d73a27c9e1dc60c6f40c9c0e82184692937acbbcab544c7f8b606",
-        "evidence": "reports/quality/module-coverage-inventory.json",
-        "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
-      },
-      "notes": "Current metrics are rebound to the accepted module inventory. Historical measurements, baseline, and earlier closeout notes are preserved in previous_current_bindings. This does not claim fresh global measured nonregression."
-    },
-    {
-      "snapshot_date": "2026-08-17",
-      "current_metrics": {
-        "repo_uncovered_module_count": 0,
-        "repo_unmeasured_module_count": 0,
-        "application_core_covered_line_percent": 99.79,
-        "application_core_uncovered_module_count": 0,
-        "application_core_unmeasured_module_count": 0
-      },
-      "parent_epic_status": {
-        "status": "not_closeable_under_current_definition_of_done",
-        "remaining_below_85_module_count": 0,
-        "reason": "Live accepted-inventory floor count; this binding does not close the parent epic."
-      },
-      "current_binding_refresh": {
-        "source_tree_sha256": "39478b0552ca38f7561ba10ed81841028d5039c3f3ddfc99dab09475e2d14c6a",
-        "evidence": "reports/quality/module-coverage-inventory.json",
-        "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
-      },
-      "notes": "Current metrics are rebound to the accepted module inventory. Historical measurements, baseline, and earlier closeout notes are preserved in previous_current_bindings. This does not claim fresh global measured nonregression."
-    },
-    {
-      "snapshot_date": "2026-08-17",
-      "current_metrics": {
-        "repo_uncovered_module_count": 0,
-        "repo_unmeasured_module_count": 0,
-        "application_core_covered_line_percent": 99.79,
-        "application_core_uncovered_module_count": 0,
-        "application_core_unmeasured_module_count": 0
-      },
-      "parent_epic_status": {
-        "status": "not_closeable_under_current_definition_of_done",
-        "remaining_below_85_module_count": 0,
-        "reason": "Live accepted-inventory floor count; this binding does not close the parent epic."
-      },
-      "current_binding_refresh": {
-        "source_tree_sha256": "7315119d1d548b318ec734c4a87ec428fe7d33b75dbddcaaa50b59bcf1a722f5",
-        "evidence": "reports/quality/module-coverage-inventory.json",
-        "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
-      },
-      "notes": "Current metrics are rebound to the accepted module inventory. Historical measurements, baseline, and earlier closeout notes are preserved in previous_current_bindings. This does not claim fresh global measured nonregression."
     }
   ],
   "current_binding_refresh": {
-    "source_tree_sha256": "10646046694403b89101c5733c6e62659a01862be500864d743a4186a5b26ee6",
+    "source_tree_sha256": "8b9236f9fd8adf7c5f149e12782059abe46e2a8d5b629988083629aac81e4543",
     "evidence": "reports/quality/module-coverage-inventory.json",
     "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
   },

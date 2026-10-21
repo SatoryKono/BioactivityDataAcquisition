@@ -9,6 +9,7 @@ from itertools import islice
 from typing import Protocol
 
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest, WorkflowManifest
+from bioetl.domain.control_plane.manifest_selection import current_run_manifests
 from bioetl.domain.control_plane.run_ledger import (
     RUN_FAILED_EVENT,
     RUN_FINISHED_EVENT,
@@ -60,6 +61,7 @@ def build_selector_records(
     ledger_port: RunLedgerLookup | None,
     workflow_aliases: WorkflowAliasMap | None = None,
 ) -> tuple[SelectorRecord, ...]:
+    manifests = current_run_manifests(manifests)
     if ledger_port is None or len(manifests) < 2:
         return tuple(
             _build_selector_record(manifest, ledger_port, workflow_aliases)
@@ -136,6 +138,7 @@ def narrow_manifest_catalog(
     fail_open_when_empty: bool = True,
 ) -> tuple[RunManifest, ...]:
     """Prune manifest candidates before ledger lookups for selector endpoints."""
+    manifests = current_run_manifests(manifests)
     narrowed = tuple(
         manifest
         for manifest in manifests

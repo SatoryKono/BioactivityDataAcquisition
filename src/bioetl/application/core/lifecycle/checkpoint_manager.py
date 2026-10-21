@@ -12,6 +12,10 @@ from bioetl.application.core.lifecycle.checkpoint_load_validation import (
     resolve_checkpoint_metadata,
     validate_loaded_checkpoint,
 )
+from bioetl.application.core.lifecycle.checkpoint_manifest_context import (
+    metadata_with_manifest,
+    rebind_checkpoint_metadata,
+)
 from bioetl.application.core.lifecycle.checkpoint_runtime import (
     CheckpointCompatibilityPolicy,
     enrich_metadata_with_execution_identity,
@@ -24,6 +28,7 @@ from bioetl.application.core.lifecycle.checkpoint_saved_at import (
 from bioetl.application.services.batch_processing.operation_errors import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
+from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.ports import CheckpointPort, ClockPort, LoggerPort, MetricsPort
 from bioetl.domain.types import JsonDict, RunID
@@ -74,6 +79,7 @@ class CheckpointRuntimeService:
         self._clock = clock
         self._compatibility_service = checkpoint_compatibility_service
         self._current_metadata = identity.current_metadata
+        self._manifest_predecessor_ids: set[str] = set()
         self._compatibility_policy = validate_compatibility_policy(
             identity.compatibility_policy
         )
@@ -95,6 +101,14 @@ class CheckpointRuntimeService:
     def current_metadata(self) -> CheckpointMetadata | None:
         """Return execution identity metadata used for compatibility checks."""
         return self._current_metadata
+
+    def update_manifest(self, manifest: RunManifest) -> None:
+        """Advance checkpoint identity after publishing a manifest successor."""
+        if manifest.predecessor_manifest_id is not None:
+            self._manifest_predecessor_ids.add(manifest.predecessor_manifest_id)
+        self._current_metadata = metadata_with_manifest(
+            self._current_metadata, manifest
+        )
 
     def _resume_blocked_by_loading_strategy(self) -> bool:
         """Return whether the configured strategy forbids checkpoint resume."""
@@ -178,6 +192,12 @@ class CheckpointRuntimeService:
         """Save checkpoint metadata, accepting the legacy integer shorthand."""
         if isinstance(metadata, int):
             metadata = CheckpointMetadata(records_processed=metadata)
+        if (
+            metadata.manifest_id in self._manifest_predecessor_ids
+            and self._current_metadata is not None
+        ):
+            metadata = rebind_checkpoint_metadata(metadata, self._current_metadata)
+
         metadata = enrich_metadata_with_execution_identity(
             metadata, identity=self._current_metadata
         )
