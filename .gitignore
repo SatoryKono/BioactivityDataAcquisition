@@ -140,7 +140,8 @@ log_test.txt
 !/reports/performance/
 /reports/performance/*
 !/reports/performance/benchmark-summary.json
-!/reports/performance/benchmark-manifest.json
+# Root benchmark-manifest.json is a CI working artifact. Durable copies are
+# the evidence/<measured-sha>/<raw-sha>/ files below.
 !/reports/performance/evidence/
 /reports/performance/evidence/*
 !/reports/performance/evidence/*/

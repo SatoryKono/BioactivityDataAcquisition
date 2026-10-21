@@ -170,21 +170,46 @@ ______________________________________________________________________
 
 ### 3.3. Контракты Данных (Data Contracts)
 
-Gold слой имеет строгие публичные контракты. Fail-closed интеграция схемы
-работает в production: batch-запись вызывает `validate()` и при ошибке
-поднимает `SchemaViolationError`.
-`ContractAwareGoldValidator.validate_with_outcomes()` возвращает пустой
-список outcomes, если нет policy resolver, вход пуст или схема отсутствует
-при non-strict. При непустом входе отсутствующая схема в strict mode
-даёт один outcome `schema.missing`. При resolver, записях и схеме метод
-переводит ошибки Pandera в `DQRuleOutcome` и затем вызывает
-`_apply_contract_validations()`.
-Этот метод по-прежнему не возвращает outcomes уровня contract-rule.
-`ContractAwareSilverValidator.validate_with_outcomes()` возвращает флаг
-базовой проверки и пустой список outcomes. В `src/bioetl` нет production-вызовов
-ни одного из этих методов. Потребление на write path, атрибуция записи
-и per-record quarantine остаются открытыми
-([#12095](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12095)).
+Gold слой имеет строгие публичные контракты. Канал rule-level DQ outcome
+действует. `ContractAwareGoldValidator.validate_with_outcomes()` и
+`ContractAwareSilverValidator.validate_with_outcomes()` возвращают
+`DQOutcomeChannel`: канал распаковывается как `(is_valid, outcomes)` и
+несёт `AttributedDQViolation`. Исполняемые contract rules загружаются из
+связанного `DQConfig` через `load_executable_contract_rules()`.
+`DQPolicyResolver` назначает disposition и не читает rule bundle по
+`policy_ref.contract_ref`.
+
+Без policy resolver оба метода сохраняют флаг `validate()` и пустой список
+outcomes. С resolver пустой вход даёт валидный пустой канал. Отсутствующая
+схема в strict mode для непустого входа даёт один неатрибутируемый outcome
+`schema.missing`. Иначе ошибки Pandera и contract-rule становятся
+`DQRuleOutcome`. Идентичность записи отдельна от rule outcome:
+`DQRecordIdentity` хранит post-normalization `source_index` и необязательный
+канонический `record_key`. `affected_fields` не выбирает строки.
+Schema-level ошибки без индекса строки failure-case остаются
+неатрибутируемыми.
+
+`write_gold` потребляет `validate_with_outcomes()`, когда у `DQConfig` есть
+явная outcome-политика (хотя бы одно исполняемое правило или disposition
+override). Атрибутируемый `QUARANTINE` для business-rule и schema violation
+с явным override `QUARANTINE` накапливается синхронно и уходит per-record
+через `write_quarantine_requests()` с `rule_id`, `contract_ref`,
+стабильным `entry_id` (batch id, source index, rule ids) и
+`config_path`. Повторный append с тем же `entry_id` адаптер пропускает.
+Проверка сохранённых id и append идут под одним lock на путь таблицы:
+in-process `threading.Lock` и соседний lock-файл (`fcntl.flock` или
+`msvcrt.locking`) для других процессов на той же машине. Это локальная
+advisory-блокировка, не распределённый lock между хостами. Ошибка чтения
+сохранённых id валит запись; пустой набор id допустим только для
+отсутствующей таблицы.
+Override schema-правила `PASS` или `WARN` остаётся fail-closed.
+`FAIL`, `SKIP`, неатрибутируемые нарушения, schema violation
+без такого override и контракты без явной политики остаются на batch-level
+fail-closed `validate()` → `SchemaViolationError`. Production-запись Silver
+по-прежнему вызывает `validate()`.
+`evaluate_dq_rules_for_record()` остаётся runtime-путём трансформера.
+Follow-up:
+[#12095](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12095).
 
 - **Реестр**: JSON Schema файлы в `docs/04-reference/contracts/gold/`.
 - **Стабильность**: Любое изменение схемы в Gold требует:
