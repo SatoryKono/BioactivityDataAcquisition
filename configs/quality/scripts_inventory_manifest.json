@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-21T15:58:34.804572+00:00",
+  "generated_at": "2026-10-21T16:52:53.998515+00:00",
   "summary": {
     "total_scripts": 659,
     "status_counts": {
@@ -17677,13 +17677,13 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_topology_source_binding.py",
-          "line": 9,
+          "line": 11,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_topology_source_binding import ("
         },
         {
           "path": "tests/unit/scripts/qa/test_topology_source_binding.py",
-          "line": 88,
+          "line": 90,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import report_topology_source_binding as reporter"
         }

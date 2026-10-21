@@ -1001,16 +1001,8 @@
   ],
   "current_source_binding": {
     "kind": "source_topology_only",
-<<<<<<< HEAD
     "source_tree_sha256": "21b014bca81b47d34ffdadab771a06c1da071536752bb97aa71a984a747e8ac5",
-    "test_governance_source_tree_sha256": "ab6245261735d231d1f69c06ea6f2f04e05b57848870a96e88082ea8b3018d6c",
-||||||| b094f39a70222
-    "source_tree_sha256": "f52f7c4df3d398b66abfe0b34e57a64f5fa6dea18b780a0fda9ffafc2f0ef73f",
-    "test_governance_source_tree_sha256": "c4f6104c11c05e40b3800381d6e81a452246b12e3c042d6603c6114cd54f1bfa",
-=======
-    "source_tree_sha256": "f52f7c4df3d398b66abfe0b34e57a64f5fa6dea18b780a0fda9ffafc2f0ef73f",
-    "test_governance_source_tree_sha256": "287b5d8605faecba2547e3bdd3ce07c66ee6f176d2dbc8a4dab2d71432b3953f",
->>>>>>> origin/codex/ci-baseline-validation-followup-20261021
+    "test_governance_source_tree_sha256": "4dbac1e0c2eeddfcb53b0ce9bbc75cb9813fff16e4fd31bca2ef4a54628dc259",
     "test_file_count": 49,
     "test_files": [
       "tests/unit/composition/bootstrap/cli/test_config.py",
