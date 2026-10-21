@@ -47,12 +47,7 @@ def _resolve_artifact_path(
             return canonical, ""
     raw = Path(relative)
     if raw.is_absolute():
-        candidate = raw.resolve()
-        if kind in _LAYER_KINDS and candidate.is_file():
-            return candidate, ""
-        if not candidate.is_relative_to(root):
-            return None, "artifact_path_escape"
-        return candidate, ""
+        return _absolute_artifact_path(root, raw, kind)
     if len(raw.parts) == 1:
         candidate = (root / raw.name).resolve()
         if not candidate.is_relative_to(root):
@@ -61,6 +56,18 @@ def _resolve_artifact_path(
     if kind in _SELF_REPORT_KINDS:
         return None, "artifact_missing"
     candidate = (root / raw).resolve()
+    if not candidate.is_relative_to(root):
+        return None, "artifact_path_escape"
+    return candidate, ""
+
+
+def _absolute_artifact_path(
+    root: Path, raw: Path, kind: str
+) -> tuple[Path | None, str]:
+    """Only physical layer artifacts may resolve outside the selected run."""
+    candidate = raw.resolve()
+    if kind in _LAYER_KINDS and candidate.is_file():
+        return candidate, ""
     if not candidate.is_relative_to(root):
         return None, "artifact_path_escape"
     return candidate, ""
@@ -75,27 +82,10 @@ def _probe_composite_child(item: Mapping[str, object], root: Path) -> str:
         _load_report_assessment,
     )
 
+    candidate, error = _current_child_path(item, root)
+    if error or candidate is None:
+        return error
     pipeline, run_id = item.get("pipeline_name"), item.get("run_id")
-    if not all(
-        isinstance(value, str)
-        and value not in {"", ".", ".."}
-        and all(c.isalnum() or c in "._-" for c in value)
-        for value in (pipeline, run_id)
-    ):
-        return "child_identity_invalid"
-    tree = root.parents[1]
-    expected = tree / str(pipeline) / str(run_id) / _PIPELINE_REPORT_FILE
-    candidate = expected.resolve()
-    raw = item.get("ref")
-    portable = f"pipeline/{pipeline}/{run_id}/pipeline-run-report.json"
-    if (
-        not isinstance(raw, str)
-        or (raw.replace("\\", "/") != portable and Path(raw).resolve() != candidate)
-        or not candidate.is_relative_to(tree)
-    ):
-        return "artifact_path_escape"
-    if not candidate.is_file():
-        return "artifact_missing"
     digest = item.get("sha256")
     try:
         child_report, identity, assessment, availability, _revision = (
@@ -107,14 +97,50 @@ def _probe_composite_child(item: Mapping[str, object], root: Path) -> str:
         return "child_digest_mismatch"
     if identity.get("manifest_id") != item.get("manifest_id"):
         return "child_manifest_mismatch"
-    if (
-        availability != "AVAILABLE"
-        or identity.get("status") != "success"
-        or assessment.get("verdict") not in {"OK", "N/A"}
-        or assessment.get("evidence_completeness") != "COMPLETE"
-    ):
+    if not _child_evidence_is_green(identity, assessment, availability):
         return "child_evidence_not_green"
     return ""
+
+
+def _child_evidence_is_green(
+    identity: Mapping[str, object], assessment: Mapping[str, object], availability: str
+) -> bool:
+    return (
+        availability == "AVAILABLE"
+        and identity.get("status") == "success"
+        and assessment.get("verdict") in {"OK", "N/A"}
+        and assessment.get("evidence_completeness") == "COMPLETE"
+    )
+
+
+def _valid_current_child_identity(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and value not in {"", ".", ".."}
+        and all(c.isalnum() or c in "._-" for c in value)
+    )
+
+
+def _current_child_path(
+    item: Mapping[str, object], root: Path
+) -> tuple[Path | None, str]:
+    """Validate both child identity components before resolving the bound ref."""
+    pipeline, run_id = item.get("pipeline_name"), item.get("run_id")
+    if not all(_valid_current_child_identity(value) for value in (pipeline, run_id)):
+        return None, "child_identity_invalid"
+    tree = root.parents[1]
+    candidate = (tree / str(pipeline) / str(run_id) / _PIPELINE_REPORT_FILE).resolve()
+    raw = item.get("ref")
+    portable = f"pipeline/{pipeline}/{run_id}/pipeline-run-report.json"
+    if (
+        not isinstance(raw, str)
+        or (raw.replace("\\", "/") != portable and Path(raw).resolve() != candidate)
+        or not candidate.is_relative_to(tree)
+    ):
+        return None, "artifact_path_escape"
+    if not candidate.is_file():
+        return None, "artifact_missing"
+    return candidate, ""
 
 
 def _probe_digest(candidate: Path, kind: str) -> str:
@@ -142,13 +168,7 @@ def _child_path(
 ) -> tuple[Path | None, str]:
     """Rebase portable/legacy references without trusting their external prefix."""
     pipeline, run_id = item.get("pipeline_name"), item.get("run_id")
-    if any(
-        not isinstance(value, str)
-        or not value
-        or value in {".", ".."}
-        or any(char in value for char in "/\\:")
-        for value in (pipeline, run_id)
-    ):
+    if any(not _valid_legacy_child_identity(value) for value in (pipeline, run_id)):
         return None, "artifact_record_invalid"
     parts = PurePosixPath(reference.replace("\\", "/")).parts
     if ".." in parts:
@@ -161,6 +181,15 @@ def _child_path(
     if not candidate.is_relative_to(catalog):
         return None, "artifact_path_escape"
     return candidate, ""
+
+
+def _valid_legacy_child_identity(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and bool(value)
+        and value not in {".", ".."}
+        and not any(char in value for char in "/\\:")
+    )
 
 
 def probe_child_artifact(
@@ -186,18 +215,29 @@ def probe_child_artifact(
             and identity.get("manifest_id") != item["manifest_id"]
         ):
             return "fail", "artifact_record_invalid"
-        digest = item.get("sha256") or item.get("digest") or item.get("content_hash")
-        if isinstance(digest, str) and digest.strip():
-            if canonical_report_sha256(report) != digest.strip().lower():
-                return "fail", "digest_mismatch"
-            return "pass", "digest_matches"
-        if availability == "AVAILABLE":
-            return "pass", "snapshot_verified"
-        return "unknown", "digest_not_recorded"
+        return _probe_child_digest(report, item, availability)
     except FileNotFoundError:
         return "fail", "artifact_missing"
     except (OSError, ValueError, TypeError, LookupError):
         return "fail", "artifact_record_invalid"
+
+
+def _recorded_digest(item: Mapping[str, object]) -> object:
+    return item.get("sha256") or item.get("digest") or item.get("content_hash")
+
+
+def _probe_child_digest(
+    report: Mapping[str, object], item: Mapping[str, object], availability: str
+) -> tuple[str, str]:
+    """Require recorded digests, with the existing verified snapshot fallback."""
+    digest = _recorded_digest(item)
+    if isinstance(digest, str) and digest.strip():
+        if canonical_report_sha256(report) != digest.strip().lower():
+            return "fail", "digest_mismatch"
+        return "pass", "digest_matches"
+    if availability == "AVAILABLE":
+        return "pass", "snapshot_verified"
+    return "unknown", "digest_not_recorded"
 
 
 def _is_current_composite_child(item: Mapping[str, object], root: Path) -> bool:
@@ -269,19 +309,7 @@ def _probe_resolved_artifact(
             "evidence_ref": ref,
         }
     if not isinstance(digest, str) or not digest.strip():
-        if code in _SELF_REPORT_KINDS or kind in _SELF_REPORT_KINDS:
-            return {
-                "code": code,
-                "result": "pass",
-                "reason": "object_available",
-                "evidence_ref": ref,
-            }
-        return {
-            "code": code,
-            "result": "unknown",
-            "reason": "digest_not_recorded",
-            "evidence_ref": ref,
-        }
+        return _undigested_artifact_probe(code, kind, ref)
     actual = _probe_digest(candidate, kind)
     if actual != digest.strip().lower():
         return {
@@ -298,13 +326,30 @@ def _probe_resolved_artifact(
     }
 
 
+def _undigested_artifact_probe(code: str, kind: str, ref: str) -> Mapping[str, object]:
+    """Self reports may be present without a digest; other objects stay unknown."""
+    if code in _SELF_REPORT_KINDS or kind in _SELF_REPORT_KINDS:
+        return {
+            "code": code,
+            "result": "pass",
+            "reason": "object_available",
+            "evidence_ref": ref,
+        }
+    return {
+        "code": code,
+        "result": "unknown",
+        "reason": "digest_not_recorded",
+        "evidence_ref": ref,
+    }
+
+
 def _probe_named_artifact(
     item: Mapping[str, object], root: Path, ref: str, fallback_code: str
 ) -> Mapping[str, object]:
     name = item.get("name") or item.get("id") or item.get("kind") or fallback_code
     code = str(name)
     relative = item.get("path") or item.get("relative_path") or item.get("ref")
-    digest = item.get("sha256") or item.get("digest") or item.get("content_hash")
+    digest = _recorded_digest(item)
     if not isinstance(relative, str) or not relative.strip():
         return _missing_path_probe(code, ref, digest)
     kind = str(item.get("kind") or "")

@@ -60,7 +60,8 @@
       "metadata_writer",
       "save_metadata",
       "metadata_coordinator",
-      "lineage_store"
+      "lineage_store",
+      "root_identity"
     ]
   },
   "file_contract": {

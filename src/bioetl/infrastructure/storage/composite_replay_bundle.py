@@ -111,6 +111,17 @@ def verify_bundle(root: Path, envelope_digest: str) -> JsonDict:
     objects = envelope.get("objects")
     if not isinstance(objects, dict) or not objects:
         raise ValueError("composite_replay_objects_missing")
+    _verify_required_objects(envelope, objects, version)
+    _verify_objects(root, objects)
+    if envelope.get("implementation") != implementation_fingerprint():
+        raise ValueError("composite_replay_implementation_mismatch")
+    return envelope
+
+
+def _verify_required_objects(
+    envelope: JsonDict, objects: JsonDict, version: object
+) -> None:
+    """Require all family-specific replay inputs before reading sealed bytes."""
     required = {
         "config.json",
         "uv.lock",
@@ -127,10 +138,6 @@ def verify_bundle(root: Path, envelope_digest: str) -> JsonDict:
         "input_snapshot_fingerprint"
     ):
         raise ValueError("composite_replay_required_object_missing")
-    _verify_objects(root, objects)
-    if envelope.get("implementation") != implementation_fingerprint():
-        raise ValueError("composite_replay_implementation_mismatch")
-    return envelope
 
 
 def _verify_objects(root: Path, objects: JsonDict) -> None:

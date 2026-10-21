@@ -85,12 +85,7 @@ class BronzeGroupCleanup:
             self.on_skip(str(self.root), "invalid_pending_group")
             return False
         if any(
-            spec.flat_structure != self.flat
-            or not self._scope_allowed(spec.provider, spec.entity)
-            or (self.flat and (provider is not None or entity is not None))
-            or spec.date >= self.cutoff
-            or (provider is not None and provider != spec.provider)
-            or (entity is not None and entity != spec.entity)
+            self._outside_requested_scope(spec, provider, entity)
             for _operation, spec, _count, _size in pending
         ):
             stats["directories_skipped"] += 1
@@ -104,6 +99,20 @@ class BronzeGroupCleanup:
             ):
                 return False
         return True
+
+    def _outside_requested_scope(
+        self, spec: GroupSpec, provider: str | None, entity: str | None
+    ) -> bool:
+        """Recheck layout, configured owner, retention and explicit retry filters."""
+        if spec.flat_structure != self.flat or not self._scope_allowed(
+            spec.provider, spec.entity
+        ):
+            return True
+        if self.flat and (provider is not None or entity is not None):
+            return True
+        return spec.date >= self.cutoff or _requested_owner_mismatch(
+            spec, provider, entity
+        )
 
     def _recover(
         self, stats: dict[str, int], operation: str, count: int, size: int, path: str
@@ -271,3 +280,11 @@ def execute_cleanup_plan(
             group_cleanup.attest_plan(plan, stats)
         return
     host._apply_cleanup_plan(stats, plan, root_abs, root_real, root_fd, group_cleanup)
+
+
+def _requested_owner_mismatch(
+    spec: GroupSpec, provider: str | None, entity: str | None
+) -> bool:
+    return (provider is not None and provider != spec.provider) or (
+        entity is not None and entity != spec.entity
+    )

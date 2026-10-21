@@ -40,8 +40,13 @@ for size in "$SIZE_1" "$SIZE_2" "$SIZE_5"; do
   grep -F "Maximum resident set size" "$OUT_DIR/lazy_${size}.txt"
 
   echo "HASH CHECK:"
-  uv run --frozen --no-build python scripts/engineering/performance/check_hash.py "$parquet" >"$OUT_DIR/hash_${size}.txt"
-  cat "$OUT_DIR/hash_${size}.txt"
+  if uv run --frozen --no-build python scripts/engineering/performance/check_hash.py "$parquet" >"$OUT_DIR/hash_${size}.txt" 2>&1; then
+    cat "$OUT_DIR/hash_${size}.txt"
+  else
+    status=$?
+    cat "$OUT_DIR/hash_${size}.txt"
+    exit "$status"
+  fi
 done
 
 uv run --frozen --no-build python scripts/engineering/performance/generate_report.py
