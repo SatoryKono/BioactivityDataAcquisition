@@ -15,7 +15,6 @@ __all__ = ["UnifiedQuarantineAdapter"]
 
 
 import asyncio
-import threading
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -53,6 +52,7 @@ from bioetl.infrastructure.quarantine.status_events import (
 from bioetl.infrastructure.quarantine.write_dedup import (
     select_new_quarantine_requests,
 )
+from bioetl.infrastructure.quarantine.write_lock import quarantine_append_lock
 from bioetl.infrastructure.storage.delta.table_ops import read_delta_records
 
 if TYPE_CHECKING:
@@ -94,30 +94,16 @@ def _normalize_quarantine_record(record: QuarantineWriteRequest) -> JsonDict:
     }
 
 
-_APPEND_LOCKS: dict[str, threading.Lock] = {}
-_APPEND_LOCKS_GUARD = threading.Lock()
-
-
-def _append_lock(base_path: str) -> threading.Lock:
-    """Return the in-process lock that serializes one quarantine path."""
-    with _APPEND_LOCKS_GUARD:
-        lock = _APPEND_LOCKS.get(base_path)
-        if lock is None:
-            lock = threading.Lock()
-            _APPEND_LOCKS[base_path] = lock
-        return lock
-
-
 def _append_new_records(
     base_path: str,
     records: list[QuarantineWriteRequest],
 ) -> None:
     """Select unseen entry ids and append them under one path lock.
 
-    The lock covers writers in this process. Separate processes that share a
-    Delta path are not serialized here.
+    Threads in this process and other processes on the same machine share that
+    lock. Writers on other hosts do not.
     """
-    with _append_lock(base_path):
+    with quarantine_append_lock(base_path):
         fresh = select_new_quarantine_requests(base_path, records)
         if not fresh:
             return
@@ -221,7 +207,8 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
 
         Requests that carry ``entry_id`` are skipped when that id is already
         stored in metadata or repeats inside the same batch. The stored-id
-        check and the append share one in-process lock per table path.
+        check and the append share one lock per table path, including a
+        sibling lock file for other processes on the same machine.
         """
         if not records:
             return

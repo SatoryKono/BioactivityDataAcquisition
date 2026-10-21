@@ -134,9 +134,11 @@ are accumulated synchronously and sent per record through
 `config_path`. Each request carries a deterministic `entry_id` derived from
 the batch id, source index, and rule ids; the quarantine adapter stores that
 id in metadata and skips a later append of the same id. The stored-id read
-and the append share one in-process lock per table path. A read error fails
-the write; only a missing table is an empty id set. Writers in other
-processes are outside that lock. Schema violations
+and the append share one lock per table path: an in-process
+``threading.Lock`` and a sibling lock file (``fcntl.flock`` or
+``msvcrt.locking``) for other processes on the same machine. The file lock is
+local and advisory, not a multi-host distributed lock. A read error fails
+the write; only a missing table is an empty id set. Schema violations
 whose override is `PASS` or `WARN` stay fail-closed, the same as schema
 violations without an explicit `QUARANTINE` override. `FAIL`, `SKIP`,
 unattributable violations, and contracts without an explicit outcome policy
