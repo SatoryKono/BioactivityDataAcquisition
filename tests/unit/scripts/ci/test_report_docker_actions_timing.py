@@ -498,17 +498,25 @@ def test_docker_report_matches_reusable_caller_and_explicit_cache_label(
     started_at = next(
         job["started_at"] for job in jobs if job["name"] == "docker-build"
     )
+    started = datetime.fromisoformat(started_at.replace("Z", "+00:00"))
     for job in jobs:
         if job["name"] == "docker-build":
             job["name"] = "caller / docker-build"
             job["steps"] = [
                 {
-                    "name": "exact cache hit",
+                    "name": "cache miss",
                     "status": "completed",
                     "conclusion": "skipped",
                     "started_at": started_at,
                     "completed_at": started_at,
-                }
+                },
+                {
+                    "name": "exact cache hit",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "started_at": started_at,
+                    "completed_at": _iso(started + timedelta(seconds=5)),
+                },
             ]
     client = FakeGitHubClient([run], {1: jobs})
 
@@ -530,5 +538,6 @@ def test_docker_report_matches_reusable_caller_and_explicit_cache_label(
     assert report["runs"][0]["docker_build"]["name"] == "caller / docker-build"
     assert report["runs"][0]["cache_status"] == "exact_hit"
     assert report["runs"][0]["docker_build"]["queue_seconds"] == 10
-    step = report["runs"][0]["docker_build"]["steps"][0]
-    assert step["duration_seconds"] is None
+    skipped, hit = report["runs"][0]["docker_build"]["steps"]
+    assert skipped["duration_seconds"] is None
+    assert hit["duration_seconds"] == 5

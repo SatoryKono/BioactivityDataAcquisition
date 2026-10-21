@@ -274,7 +274,7 @@ def _cache_status(steps: object) -> str:
     if not isinstance(steps, list):
         return "unknown"
     for step in steps:
-        if not isinstance(step, dict):
+        if not isinstance(step, dict) or step.get("conclusion") != "success":
             continue
         name = str(step.get("name") or "").lower()
         for marker, status in _CACHE_MARKERS:
