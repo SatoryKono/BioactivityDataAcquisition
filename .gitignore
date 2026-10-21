@@ -374,7 +374,10 @@ reports/quality/coderabbit/**/auth.*
 !.codex/skills/*/agents/openai.yaml
 .devin/config.local.json
 .devin/mcp_config.local.json
-.gemini/
+# Gemini Code Assist reads the tracked repo file `.gemini/config.yaml`.
+# CLI settings, agents, skills, and other local state stay untracked.
+.gemini/**
+!.gemini/config.yaml
 .jules/
 # Kimi Code CLI runtime surface (mirror-level runtime like Muse): machine-local
 # config/MCP/skills only; no tracked `.kimi-code/**` behavior tree on `main`

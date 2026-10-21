@@ -46,7 +46,7 @@ root_tooling_roots:
     - path: .devin
       role: curated_project_wiki_surface
     - path: .gemini
-      role: curated_shared_agent_runtime_surface
+      role: tracked_gemini_code_assist_repository_config
     - path: .junie
       role: curated_shared_agent_runtime_surface
     - path: .opencode

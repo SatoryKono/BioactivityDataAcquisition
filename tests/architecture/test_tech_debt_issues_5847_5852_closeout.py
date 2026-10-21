@@ -140,10 +140,18 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
         ".circleci/config.yml"
     }
     # Catalog-approved runtime/CI roots are governed tooling, not root clutter.
+    # `.gemini` stays inside that set and does not raise tracked_root_dirs_after.
+    # Its tracked surface is the Code Assist repo file only.
     assert (
-        len(root_dirs - {".claude", ".devin", ".zed", ".opencode", ".circleci"})
+        len(
+            root_dirs
+            - {".claude", ".devin", ".zed", ".opencode", ".circleci", ".gemini"}
+        )
         == payload["outcomes"]["5847"]["tracked_root_dirs_after"]
     )
+    assert {path for path in tracked if path.startswith(".gemini/")} == {
+        ".gemini/config.yaml"
+    }
     assert (
         len(allowlist_entries) <= payload["outcomes"]["5847"]["allowlist_entries_after"]
     )

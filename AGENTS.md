@@ -135,8 +135,11 @@ Minimum expectation:
   to the repository-wide governance stack; it MUST NOT be silently replaced by
   a Codex-only profile.
 - Gemini is not a project runtime. Do not add root `GEMINI.md` or a tracked
-  `.gemini/agents/**` or `.gemini/skills/**` tree. A machine-local `.gemini/`
-  directory is not a BioETL source of truth.
+  `.gemini/agents/**` or `.gemini/skills/**` tree. The only tracked file under
+  `.gemini/` is `.gemini/config.yaml` (Gemini Code Assist on GitHub). It does
+  not configure the OpenCode Meta Model surface (`opencode.json`,
+  `.opencode/**`). Every other `.gemini/` file stays machine-local and is not
+  a BioETL source of truth.
 - `.claude/**` is not an active runtime source for Codex/Junie behavior in
   this change program and is treated as unavailable until a local checkout
   proves otherwise.

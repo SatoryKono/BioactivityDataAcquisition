@@ -1,3 +1,6 @@
+# Gemini Code Assist on GitHub reads this file.
+# It is not the OpenCode Meta Model surface (opencode.json, .opencode/**).
+# Schema: https://developers.google.com/gemini-code-assist/docs/customize-repo-review
 have_fun: false
 memory_config:
   disabled: false
