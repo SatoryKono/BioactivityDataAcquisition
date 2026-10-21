@@ -133,7 +133,10 @@ are accumulated synchronously and sent per record through
 `write_quarantine_requests()` with `rule_id`, `contract_ref`, and
 `config_path`. Each request carries a deterministic `entry_id` derived from
 the batch id, source index, and rule ids; the quarantine adapter stores that
-id in metadata and skips a later append of the same id. Schema violations
+id in metadata and skips a later append of the same id. The stored-id read
+and the append share one in-process lock per table path. A read error fails
+the write; only a missing table is an empty id set. Writers in other
+processes are outside that lock. Schema violations
 whose override is `PASS` or `WARN` stay fail-closed, the same as schema
 violations without an explicit `QUARANTINE` override. `FAIL`, `SKIP`,
 unattributable violations, and contracts without an explicit outcome policy

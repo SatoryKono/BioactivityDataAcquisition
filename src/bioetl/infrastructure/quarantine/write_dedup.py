@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, cast
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError
 
+from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.delta.table_ops import read_delta_records
 
 if TYPE_CHECKING:
@@ -70,30 +71,49 @@ def _with_metadata_entry_id(
 
 
 def _stored_entry_ids(base_path: str, batch_ids: set[str]) -> set[str]:
-    """Read entry ids already stored for the batches in this write."""
+    """Read entry ids already stored for the batches in this write.
+
+    A missing table yields an empty set. Any other read failure propagates so
+    a retry cannot append a duplicate while the stored ids are unknown.
+    """
+    found: set[str] = set()
+    for row in _read_stored_metadata_rows(base_path, batch_ids):
+        entry_id = _entry_id_for_batch(row, batch_ids)
+        if entry_id is not None:
+            found.add(entry_id)
+    return found
+
+
+def _read_stored_metadata_rows(
+    base_path: str,
+    batch_ids: set[str],
+) -> list[BronzeRecord]:
+    """Load batch id and metadata, or ``[]`` when the table is absent."""
     if not batch_ids or not DeltaTable.is_deltatable(base_path):
-        return set()
+        return []
     try:
-        rows = read_delta_records(
+        return read_delta_records(
             DeltaTable(base_path),
             columns=["bronze_batch_id", "metadata"],
         )
-    except (OSError, TableNotFoundError, ValueError, KeyError, TypeError):
-        return set()
-    found: set[str] = set()
-    for row in rows:
-        if str(row.get("bronze_batch_id", "")) not in batch_ids:
-            continue
-        raw = row.get("metadata")
-        if not isinstance(raw, str) or not raw:
-            continue
-        try:
-            meta = json.loads(raw)
-        except json.JSONDecodeError:
-            continue
-        if not isinstance(meta, dict):
-            continue
-        entry_id = meta.get("entry_id")
-        if isinstance(entry_id, str) and entry_id:
-            found.add(entry_id)
-    return found
+    except TableNotFoundError:
+        return []
+
+
+def _entry_id_for_batch(row: BronzeRecord, batch_ids: set[str]) -> str | None:
+    """Return a stored entry id when the row belongs to ``batch_ids``."""
+    if str(row.get("bronze_batch_id", "")) not in batch_ids:
+        return None
+    raw = row.get("metadata")
+    if not isinstance(raw, str) or not raw:
+        return None
+    try:
+        meta = json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(meta, dict):
+        return None
+    entry_id = meta.get("entry_id")
+    if isinstance(entry_id, str) and entry_id:
+        return entry_id
+    return None

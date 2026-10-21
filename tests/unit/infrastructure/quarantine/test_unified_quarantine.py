@@ -29,7 +29,9 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
+import threading
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
@@ -456,6 +458,117 @@ class TestUnifiedQuarantineWrite:
         records = _extract_records_from_call(mock_write_deltalake)
         assert len(records) == 1
         assert json.loads(records[0]["metadata"])["entry_id"] == "fresh-id"
+
+    @pytest.mark.asyncio
+    async def test_write_many_propagates_stored_id_read_errors(
+        self, quarantine, batch_id, mock_write_deltalake
+    ):
+        """A failed id read must not look like an empty table and append."""
+        with (
+            patch("bioetl.infrastructure.quarantine.write_dedup.DeltaTable") as delta,
+            patch(
+                "bioetl.infrastructure.quarantine.write_dedup.read_delta_records",
+                side_effect=OSError("unreadable"),
+            ),
+        ):
+            delta.is_deltatable.return_value = True
+            with pytest.raises(OSError, match="unreadable"):
+                await quarantine.write_many(
+                    [
+                        {
+                            "pipeline": "test",
+                            "error_code": "ERROR",
+                            "payload": {"id": 1},
+                            "bronze_batch_id": batch_id,
+                            "entry_id": "fresh-id",
+                            "ingestion_ts": TEST_INGESTION_TS,
+                        }
+                    ]
+                )
+        mock_write_deltalake.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_write_many_appends_when_stored_id_table_is_missing(
+        self, quarantine, batch_id, mock_write_deltalake
+    ):
+        """TableNotFoundError between the existence check and the read is empty."""
+        from deltalake.exceptions import TableNotFoundError
+
+        with (
+            patch("bioetl.infrastructure.quarantine.write_dedup.DeltaTable") as delta,
+            patch(
+                "bioetl.infrastructure.quarantine.write_dedup.read_delta_records",
+                side_effect=TableNotFoundError("gone"),
+            ),
+        ):
+            delta.is_deltatable.return_value = True
+            await quarantine.write_many(
+                [
+                    {
+                        "pipeline": "test",
+                        "error_code": "ERROR",
+                        "payload": {"id": 1},
+                        "bronze_batch_id": batch_id,
+                        "entry_id": "fresh-id",
+                        "ingestion_ts": TEST_INGESTION_TS,
+                    }
+                ]
+            )
+        mock_write_deltalake.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_write_many_holds_the_path_lock_across_select_and_append(
+        self, quarantine, batch_id, mock_write_deltalake
+    ):
+        """The second writer waits until the first select-and-append finishes."""
+        first_inside = threading.Event()
+        release_first = threading.Event()
+        second_entered = threading.Event()
+        calls = {"select": 0}
+
+        def _select(
+            base_path: str,
+            records: list[dict[str, object]],
+        ) -> list[dict[str, object]]:
+            del base_path
+            calls["select"] += 1
+            if calls["select"] == 1:
+                first_inside.set()
+                assert release_first.wait(timeout=2)
+                return records
+            second_entered.set()
+            return records
+
+        request = {
+            "pipeline": "test",
+            "error_code": "ERROR",
+            "payload": {"id": 1},
+            "bronze_batch_id": batch_id,
+            "entry_id": "race-id",
+            "ingestion_ts": TEST_INGESTION_TS,
+        }
+        with patch(
+            "bioetl.infrastructure.quarantine.unified.select_new_quarantine_requests",
+            side_effect=_select,
+        ):
+            first = asyncio.create_task(quarantine.write_many([request]))
+            for _ in range(200):
+                if first_inside.is_set() or first.done():
+                    break
+                await asyncio.sleep(0.01)
+            if first.done() and not first_inside.is_set():
+                await first
+            assert first_inside.is_set()
+            second = asyncio.create_task(quarantine.write_many([dict(request)]))
+            for _ in range(20):
+                await asyncio.sleep(0.01)
+                if second_entered.is_set() or second.done():
+                    break
+            assert not second_entered.is_set()
+            release_first.set()
+            await asyncio.gather(first, second)
+        assert calls["select"] == 2
+        assert mock_write_deltalake.call_count == 2
 
 
 @pytest.mark.unit

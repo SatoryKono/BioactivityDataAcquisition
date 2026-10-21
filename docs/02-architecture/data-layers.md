@@ -196,6 +196,10 @@ override). Атрибутируемый `QUARANTINE` для business-rule и sch
 через `write_quarantine_requests()` с `rule_id`, `contract_ref`,
 стабильным `entry_id` (batch id, source index, rule ids) и
 `config_path`. Повторный append с тем же `entry_id` адаптер пропускает.
+Проверка сохранённых id и append идут под одним in-process lock на путь
+таблицы. Ошибка чтения сохранённых id валит запись; пустой набор id
+допустим только для отсутствующей таблицы. Писатели в других процессах
+этим lock не покрыты.
 Override schema-правила `PASS` или `WARN` остаётся fail-closed.
 `FAIL`, `SKIP`, неатрибутируемые нарушения, schema violation
 без такого override и контракты без явной политики остаются на batch-level

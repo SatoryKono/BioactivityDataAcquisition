@@ -15,6 +15,7 @@ __all__ = ["UnifiedQuarantineAdapter"]
 
 
 import asyncio
+import threading
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -91,6 +92,39 @@ def _normalize_quarantine_record(record: QuarantineWriteRequest) -> JsonDict:
         "dq_status": QuarantineRecordStatus.NEW.value,
         "run_id": str(run_id) if run_id else "",
     }
+
+
+_APPEND_LOCKS: dict[str, threading.Lock] = {}
+_APPEND_LOCKS_GUARD = threading.Lock()
+
+
+def _append_lock(base_path: str) -> threading.Lock:
+    """Return the in-process lock that serializes one quarantine path."""
+    with _APPEND_LOCKS_GUARD:
+        lock = _APPEND_LOCKS.get(base_path)
+        if lock is None:
+            lock = threading.Lock()
+            _APPEND_LOCKS[base_path] = lock
+        return lock
+
+
+def _append_new_records(
+    base_path: str,
+    records: list[QuarantineWriteRequest],
+) -> None:
+    """Select unseen entry ids and append them under one path lock.
+
+    The lock covers writers in this process. Separate processes that share a
+    Delta path are not serialized here.
+    """
+    with _append_lock(base_path):
+        fresh = select_new_quarantine_requests(base_path, records)
+        if not fresh:
+            return
+        _write_records_to_delta(
+            base_path,
+            [_normalize_quarantine_record(record) for record in fresh],
+        )
 
 
 def _write_records_to_delta(base_path: str, records: list[JsonDict]) -> None:
@@ -186,19 +220,12 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
         """Write multiple quarantine records in one Delta append.
 
         Requests that carry ``entry_id`` are skipped when that id is already
-        stored in metadata or repeats inside the same batch.
+        stored in metadata or repeats inside the same batch. The stored-id
+        check and the append share one in-process lock per table path.
         """
         if not records:
             return
-        records = await asyncio.to_thread(
-            select_new_quarantine_requests,
-            self.base_path,
-            records,
-        )
-        if not records:
-            return
-        normalized_records = [self._normalize_record(record) for record in records]
-        await asyncio.to_thread(self._write_to_delta, normalized_records)
+        await asyncio.to_thread(_append_new_records, self.base_path, records)
 
     def _normalize_record(
         self,
