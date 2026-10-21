@@ -7,6 +7,7 @@ from ``affected_fields``.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 
@@ -136,7 +137,7 @@ def _canonical_record_key(record: Mapping[str, object]) -> str | None:
 def _identifier_text(value: object) -> str | None:
     if value is None or isinstance(value, bool):
         return None
-    if isinstance(value, float) and value != value:
+    if isinstance(value, float) and math.isnan(value):
         return None
     text = str(value).strip()
     if not text or text.lower() == "nan":

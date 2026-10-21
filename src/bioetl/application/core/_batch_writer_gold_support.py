@@ -110,23 +110,29 @@ def validate_gold_records(
             rebind_gold_validator_schema(validator, target_schema),
         )
 
-    normalized = cast("list[JsonDict]", records)
     if _use_outcome_channel(validator):
-        channel = validator.validate_with_outcomes(normalized)
+        channel = _call_outcome_channel(validator, records)
         if isinstance(channel, DQOutcomeChannel):
             config = cast("DQConfig | None", getattr(validator, "_dq_config", None))
-            plan = plan_gold_outcome_write(normalized, channel, config)
+            plan = plan_gold_outcome_write(records, channel, config)
             if not plan.fail_closed:
                 record_gold_observation(True, len(records))
                 kept = cast("list[GoldRecord]", list(plan.records_to_write))
                 return kept, plan.quarantine_items
             _raise_fail_closed(writer, records, validator, plan.fail_closed_reasons)
-    result = validator.validate(normalized)
+    result = validator.validate(records)
     record_gold_observation(result.valid, len(records))
     if not result.valid:
         _export_gold_failure(writer, records, list(result.errors))
         raise SchemaViolationError("gold", result.errors)
     return records, ()
+
+
+def _call_outcome_channel(validator: object, records: list[JsonDict]) -> object:
+    method = getattr(type(validator), "validate_with_outcomes", None)
+    if not callable(method):
+        return None
+    return method(validator, records)
 
 
 def _use_outcome_channel(validator: object) -> bool:

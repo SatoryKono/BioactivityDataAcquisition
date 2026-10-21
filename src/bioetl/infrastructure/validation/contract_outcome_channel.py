@@ -6,7 +6,8 @@ loaded contract-rule bundle into attributed ``DQRuleOutcome`` values.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+import math
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from bioetl.domain.behavior.dq_contract_rule_source import (
@@ -281,10 +282,7 @@ def _identity_for_index(
 ) -> DQRecordIdentity | None:
     if source_index is None or source_index >= len(records):
         return None
-    record = records[source_index]
-    if not isinstance(record, Mapping):
-        return None
-    return record_identity(record, source_index)
+    return record_identity(records[source_index], source_index)
 
 
 def _failure_row_indexes(failure_cases: object) -> list[int | None] | None:
@@ -306,7 +304,7 @@ def _coerce_row_index(value: object) -> int | None:
     if isinstance(value, int):
         return value
     if isinstance(value, float):
-        if value != value or not value.is_integer():
+        if math.isnan(value) or not value.is_integer():
             return None
         return int(value)
     item = getattr(value, "item", None)
