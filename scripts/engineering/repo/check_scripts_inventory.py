@@ -1704,6 +1704,8 @@ def build_review_expiry_report(
 ) -> dict[str, object]:
     """Report all lifecycle decisions against one UTC date, without enforcement."""
     as_of = today if today is not None else datetime.now(UTC).date()
+    if not isinstance(registry, dict):
+        raise ValueError("Lifecycle registry must be a mapping")
     entries = registry.get("entries")
     if not isinstance(entries, dict):
         raise ValueError("Lifecycle registry entries must be a mapping")
@@ -1832,13 +1834,21 @@ def main(argv: list[str] | None = None) -> int:
                 pass
     args = parse_args(argv or sys.argv[1:])
     root = _project_root()
+    review_expiry_result = 0
     if args.review_expiry == "report":
-        report = build_review_expiry_report(_load_json(root / args.lifecycle_registry))
-        _write_ascii_json_stdout(report)
+        try:
+            report = build_review_expiry_report(
+                _load_json(root / args.lifecycle_registry)
+            )
+        except (OSError, ValueError) as exc:
+            print(f"[FAIL] Review expiry report: {exc}", file=sys.stderr)
+            review_expiry_result = 1
+        else:
+            _write_ascii_json_stdout(report)
         if not (
             args.update or args.check or args.check_lifecycle or args.deprecation_report
         ):
-            return 0
+            return review_expiry_result
     if _can_fast_path_json(args):
         _write_ascii_json_stdout(_build_fast_stdout_payload(root))
         return 0
@@ -1876,7 +1886,7 @@ def main(argv: list[str] | None = None) -> int:
 
     _print_payload(args=args, payload=payload)
 
-    return 0
+    return review_expiry_result
 
 
 def _can_use_manifest_payload_for_lifecycle_check(

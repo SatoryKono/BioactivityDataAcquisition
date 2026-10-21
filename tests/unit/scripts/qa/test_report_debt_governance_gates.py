@@ -20,6 +20,7 @@ from pathlib import Path
 import subprocess
 
 import pytest
+import yaml
 
 from scripts.engineering.qa import report_debt_governance_gates as gates
 from scripts.engineering.qa import debt_governance_gate_evaluators as gate_evaluators
@@ -62,6 +63,73 @@ def test_review_expiry_gate_ratcheted_count(
     )
     assert gate.status == status
     assert gate.current == count
+    assert gate.limit == [1, 1]
+
+
+@pytest.mark.parametrize(
+    ("contents", "reason"),
+    [
+        (None, "missing"),
+        ("{", "invalid_json"),
+        ("[]", "invalid_structure"),
+        ('{"entries": []}', "invalid_structure"),
+    ],
+)
+def test_review_expiry_gate_reports_bad_registry_without_crashing(
+    tmp_path, contents, reason
+) -> None:
+    path = tmp_path / gate_evaluators.SCRIPTS_LIFECYCLE_REGISTRY_JSON
+    if contents is not None:
+        path.parent.mkdir(parents=True)
+        path.write_text(contents, encoding="utf-8")
+    gate = gate_evaluators._scripts_review_expiry_gate(
+        repo_root=tmp_path,
+        scorecard=_review_expiry_scorecard(1),
+        today=date(2026, 10, 21),
+    )
+    assert gate.status == "fail"
+    assert gate.metric == "required_json_input"
+    assert gate.current == reason
+
+
+def test_review_expiry_gate_reports_unreadable_registry(tmp_path, monkeypatch) -> None:
+    def unreadable(*args):
+        raise PermissionError("read denied")
+
+    monkeypatch.setattr(gate_evaluators, "_load_json", unreadable)
+    gate = gate_evaluators._scripts_review_expiry_gate(
+        repo_root=tmp_path,
+        scorecard=_review_expiry_scorecard(1),
+        today=date(2026, 10, 21),
+    )
+    assert gate.status == "fail"
+    assert gate.current == "unreadable"
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [ValueError("bad registry"), OSError("unreadable"), yaml.YAMLError("bad YAML")],
+)
+def test_bad_initial_registry_does_not_hide_other_budget_growth(
+    tmp_path, monkeypatch, failure
+) -> None:
+    def baseline(root, ref, path):
+        if path == gate_evaluators.DEBT_SCORECARD_PATH:
+            return {"family": {"max_count": 1}}
+        raise failure
+
+    current = _review_expiry_scorecard(1)
+    current["family"] = {"max_count": 2}
+    monkeypatch.setattr(gate_evaluators, "_load_yaml_from_git_ref", baseline)
+    monkeypatch.setattr(gate_evaluators, "_load_yaml", lambda *args: current)
+    gate = gate_evaluators._debt_scorecard_budget_no_growth_gate(
+        repo_root=tmp_path,
+        changed_from_ref="origin/main",
+    )
+    assert gate.status == "fail"
+    assert gate.current["family.max_count"] == {"from": 1, "to": 2}
+    for path in gate_evaluators.REVIEW_EXPIRY_METRIC_PATHS:
+        assert gate.current[f"{path}.max_count"] == {"from": None, "to": 1}
 
 
 @pytest.mark.parametrize("raw", [None, "2026-02-30", "20261020"])
@@ -181,6 +249,83 @@ def _patch_both(monkeypatch: pytest.MonkeyPatch, name: str, value: object) -> No
     """
     monkeypatch.setattr(gates, name, value, raising=False)
     monkeypatch.setattr(gate_evaluators, name, value, raising=False)
+
+
+@pytest.mark.parametrize(("expired", "exit_code"), [(1, 0), (2, 1)])
+def test_source_only_cli_checks_live_review_expiry_without_generated_inputs(
+    tmp_path,
+    monkeypatch,
+    expired,
+    exit_code,
+) -> None:
+    from scripts.engineering.qa import debt_governance_gate_report as cli
+    from scripts.engineering.repo import check_scripts_inventory as inventory
+
+    registry_path = tmp_path / gate_evaluators.SCRIPTS_LIFECYCLE_REGISTRY_JSON
+    registry_path.parent.mkdir(parents=True)
+    registry_path.write_text(
+        json.dumps(
+            {
+                "entries": {
+                    f"scripts/old{i}.py": {"review_by": "2026-10-20"}
+                    for i in range(expired)
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    def authored_json(root, path):
+        assert path == gate_evaluators.SCRIPTS_LIFECYCLE_REGISTRY_JSON
+        return json.loads((root / path).read_text(encoding="utf-8"))
+
+    _patch_both(monkeypatch, "_load_json", authored_json)
+    monkeypatch.setattr(
+        inventory,
+        "datetime",
+        SimpleNamespace(
+            now=lambda tz: datetime(2026, 10, 21, tzinfo=UTC),
+        ),
+    )
+    monkeypatch.setattr(
+        gates, "_collect_changed_paths", lambda *a, **k: {registry_path.name}
+    )
+    monkeypatch.setattr(gates, "_debt_scorecard_gates", lambda: [])
+    monkeypatch.setattr(
+        gates,
+        "_debt_scorecard_budget_no_growth_gate",
+        lambda **k: gates.Gate("no_growth", "pass", "count", 0, 0, "source", "none"),
+    )
+    monkeypatch.setattr(gates, "_load_yaml", lambda *a: _review_expiry_scorecard(1))
+    monkeypatch.setattr(gates, "_runtime_uuid_gates", lambda *a: [])
+    monkeypatch.setattr(
+        gates,
+        "build_contract_registry_dq_diagnostics",
+        lambda *a: {"blocking_issue_count": 0},
+    )
+    payload = gates.build_source_payload(
+        repo_root=tmp_path, changed_from_ref="origin/main"
+    )
+    expiry = next(
+        row for row in payload["gates"] if row["metric"] == "expired_review_by_count"
+    )
+    assert expiry["current"] == expired
+    assert payload["summary"]["failing_gates"] == (
+        ["scripts_review_expiry_ratchet"] if exit_code else []
+    )
+    assert (
+        cli.main(
+            [
+                "--source-only",
+                "--check",
+                "--changed-from-ref",
+                "origin/main",
+                "--repo-root",
+                str(tmp_path),
+            ]
+        )
+        == exit_code
+    )
 
 
 def test_release_review_freshness_gate_passes_for_recent_live_review() -> None:

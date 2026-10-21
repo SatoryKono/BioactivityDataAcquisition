@@ -315,6 +315,11 @@ def build_source_payload(
             changed_from_ref=changed_from_ref,
         )
     )
+    gates.append(
+        _scripts_review_expiry_gate(
+            repo_root=repo_root, scorecard=_load_yaml(repo_root, DEBT_SCORECARD_PATH)
+        )
+    )
     gates.extend(_runtime_uuid_gates(_load_yaml(repo_root, RUNTIME_UUID_SEAMS_YAML)))
     diagnostics = build_contract_registry_dq_diagnostics(repo_root)
     gates.append(

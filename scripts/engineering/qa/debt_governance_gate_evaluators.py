@@ -329,15 +329,20 @@ def _review_expiry_initial_baseline(
     ]
     if not new_paths:
         return baseline
-    registry = _load_yaml_from_git_ref(repo_root, ref, SCRIPTS_LIFECYCLE_REGISTRY_JSON)
-    if registry is None:
+    try:
+        registry = _load_yaml_from_git_ref(
+            repo_root, ref, SCRIPTS_LIFECYCLE_REGISTRY_JSON
+        )
+        if registry is None:
+            return baseline
+        today = datetime.now(UTC).date()
+        base_report = build_review_expiry_report(registry, today=today)
+        live_report = build_review_expiry_report(
+            _load_json(repo_root, SCRIPTS_LIFECYCLE_REGISTRY_JSON),
+            today=today,
+        )
+    except (OSError, ValueError, yaml.YAMLError):
         return baseline
-    today = datetime.now(UTC).date()
-    base_report = build_review_expiry_report(registry, today=today)
-    live_report = build_review_expiry_report(
-        _load_json(repo_root, SCRIPTS_LIFECYCLE_REGISTRY_JSON),
-        today=today,
-    )
     if any(
         report[key]
         for report in (base_report, live_report)
@@ -369,10 +374,29 @@ def _scripts_review_expiry_gate(
     today: date | None = None,
 ) -> Gate:
     """Block expiry growth above the frozen budget, never nonzero debt alone."""
-    report = build_review_expiry_report(
-        _load_json(repo_root, SCRIPTS_LIFECYCLE_REGISTRY_JSON),
-        today=today,
-    )
+    try:
+        report = build_review_expiry_report(
+            _load_json(repo_root, SCRIPTS_LIFECYCLE_REGISTRY_JSON),
+            today=today,
+        )
+    except (OSError, ValueError) as exc:
+        if isinstance(exc, FileNotFoundError):
+            reason = "missing"
+        elif isinstance(exc, (json.JSONDecodeError, UnicodeError)):
+            reason = "invalid_json"
+        elif isinstance(exc, OSError):
+            reason = "unreadable"
+        else:
+            reason = "invalid_structure"
+        return Gate(
+            name="scripts_review_expiry_ratchet",
+            status="fail",
+            metric="required_json_input",
+            current=reason,
+            limit="valid lifecycle registry",
+            source_artifact=SCRIPTS_LIFECYCLE_REGISTRY_JSON,
+            remediation="Restore the lifecycle registry and its entries mapping before rerunning.",
+        )
     limits = [
         _lookup_number(scorecard, f"{path}.max_count")
         for path in REVIEW_EXPIRY_METRIC_PATHS

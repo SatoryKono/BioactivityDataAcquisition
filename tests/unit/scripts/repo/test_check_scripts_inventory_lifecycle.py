@@ -108,6 +108,61 @@ def test_review_expiry_rejects_missing_registry_entries() -> None:
         inventory.build_review_expiry_report({})
 
 
+@pytest.mark.parametrize("contents", [None, "{", "[]", '{"entries": []}'])
+def test_review_expiry_cli_reports_invalid_registry(
+    tmp_path, monkeypatch, capsys, contents
+) -> None:
+    if contents is not None:
+        (tmp_path / "registry.json").write_text(contents, encoding="utf-8")
+    monkeypatch.setattr(inventory, "_project_root", lambda: tmp_path)
+    assert (
+        inventory.main(
+            [
+                "--review-expiry",
+                "report",
+                "--lifecycle-registry",
+                "registry.json",
+            ]
+        )
+        == 1
+    )
+    assert "[FAIL]" in capsys.readouterr().err
+
+
+def test_review_expiry_error_preserves_other_requested_checks(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    checks = []
+    monkeypatch.setattr(inventory, "_project_root", lambda: tmp_path)
+    monkeypatch.setattr(
+        inventory,
+        "_build_inventory",
+        lambda root: {
+            "summary": {"total_scripts": 0, "status_counts": {}},
+        },
+    )
+
+    def check(**kwargs):
+        checks.append(kwargs["args"].check)
+        return 0
+
+    monkeypatch.setattr(inventory, "_run_requested_checks", check)
+    assert (
+        inventory.main(
+            [
+                "--review-expiry",
+                "report",
+                "--lifecycle-registry",
+                "missing.json",
+                "--check",
+            ]
+        )
+        == 1
+    )
+    assert checks == [True]
+    assert "[FAIL]" in capsys.readouterr().err
+
+
 def test_load_json_rejects_duplicate_object_keys(tmp_path) -> None:
     registry_path = tmp_path / "registry.json"
     registry_path.write_text(
