@@ -86,3 +86,31 @@ def _readiness_fields(projection: Mapping[str, object]) -> dict[str, object]:
         "replay_readiness": [row],
         "replay_checks": checks if isinstance(checks, list) else [],
     }
+
+
+def _assessment_summary(
+    report: Mapping[str, object],
+    identity: Mapping[str, object],
+    assessment: Mapping[str, object],
+    availability: str,
+    revision: str,
+    pipeline: str,
+    run_id: str,
+    *,
+    heartbeat_now: str,
+) -> dict[str, object]:
+    """Project the saved assessment identity before probing current artifacts."""
+    return {
+        **{key: value for key, value in assessment.items() if key != "domains"},
+        "pipeline": pipeline,
+        "run_id": run_id,
+        "completed_at": identity.get("completed_at"),
+        "run_type": identity.get("run_type"),
+        "workflow_id": identity.get("workflow_id"),
+        "started_at": identity.get("started_at"),
+        "evaluation_at": report.get("assessment_at", identity.get("completed_at")),
+        "revision": revision,
+        "evidence_availability": availability,
+        "heartbeat_now": heartbeat_now,
+        "reason": "Saved run evidence; CURRENT and chart coverage are separate",
+    }

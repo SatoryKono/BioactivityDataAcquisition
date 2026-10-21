@@ -21,16 +21,9 @@ _STAGE_JOURNAL = "origin.json"
 _O_DIRECTORY = getattr(os, "O_DIRECTORY", 0)
 _O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
 _O_NONBLOCK = getattr(os, "O_NONBLOCK", 0)
-_ANCHORED_OPS = bool(
-    _O_DIRECTORY
-    and _O_NOFOLLOW
-    and _O_NONBLOCK
-    and os.unlink in os.supports_dir_fd
-    and os.stat in os.supports_dir_fd
-    and os.open in os.supports_dir_fd
-    and os.rename in os.supports_dir_fd
-    and os.rmdir in os.supports_dir_fd
-    and os.mkdir in os.supports_dir_fd
+_DIR_FD_OPS = (os.unlink, os.stat, os.open, os.rename, os.rmdir, os.mkdir)
+_ANCHORED_OPS = bool(_O_DIRECTORY and _O_NOFOLLOW and _O_NONBLOCK) and all(
+    op in os.supports_dir_fd for op in _DIR_FD_OPS
 )
 
 
