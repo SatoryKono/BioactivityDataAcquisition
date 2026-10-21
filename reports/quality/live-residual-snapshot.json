@@ -14,9 +14,9 @@
     "application_core": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 5,
-      "helper_function_ratio": 0.386,
+      "helper_function_ratio": 0.385,
       "files": 206,
-      "total_loc": 25857,
+      "total_loc": 25866,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 7
     },

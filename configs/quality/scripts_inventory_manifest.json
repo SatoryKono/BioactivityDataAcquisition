@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-21T15:16:07.079597+00:00",
+  "generated_at": "2026-10-21T15:58:34.804572+00:00",
   "summary": {
     "total_scripts": 659,
     "status_counts": {
@@ -17671,7 +17671,7 @@
       "references": [
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 345,
+          "line": 347,
           "source_group": "docs",
           "text": "Derived by scripts/engineering/qa/report_topology_source_binding.py from"
         },
