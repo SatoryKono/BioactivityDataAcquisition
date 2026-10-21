@@ -12,6 +12,8 @@ This module provides:
 from __future__ import annotations
 
 import time
+from collections.abc import Awaitable, Callable
+from contextvars import ContextVar
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -25,6 +27,8 @@ __all__ = [
     "LockContext",
     "LockContextHolder",
     "LockNotHeldError",
+    "register_lock_release_barrier",
+    "wait_lock_release_barriers",
 ]
 
 
@@ -210,3 +214,26 @@ class LockContextHolder:
         Called by the runtime lock owner after releasing the lock.
         """
         self._context = None
+
+
+_lock_release_barriers: ContextVar[list[Callable[[], Awaitable[None]]] | None] = (
+    ContextVar("lock_release_barriers", default=None)
+)
+
+
+def register_lock_release_barrier(barrier: Callable[[], Awaitable[None]]) -> None:
+    """Register an async barrier to be awaited before lock release."""
+    barriers = _lock_release_barriers.get()
+    if barriers is None:
+        barriers = []
+        _lock_release_barriers.set(barriers)
+    barriers.append(barrier)
+
+
+async def wait_lock_release_barriers() -> None:
+    """Wait for all registered lock release barriers to complete."""
+    barriers = _lock_release_barriers.get()
+    if barriers:
+        for barrier in barriers:
+            await barrier()
+        barriers.clear()

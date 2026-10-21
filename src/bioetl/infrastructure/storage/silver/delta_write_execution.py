@@ -111,6 +111,14 @@ async def _await_blocking_deltalake_call[BlockingResult](
     )
     worker.start()
 
+    async def _join_worker() -> None:
+        if worker.is_alive():
+            await asyncio.to_thread(worker.join, 60.0)
+
+    from bioetl.domain.locking import register_lock_release_barrier
+
+    register_lock_release_barrier(_join_worker)
+
     try:
         if timeout_seconds is None:
             return await result_future

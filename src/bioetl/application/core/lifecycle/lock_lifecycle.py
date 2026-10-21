@@ -12,7 +12,12 @@ from bioetl.application.core.lifecycle.shutdown import (
     PipelineShutdownError,
     ShutdownSignal,
 )
-from bioetl.domain.locking import FencingToken, LockContext, LockContextHolder
+from bioetl.domain.locking import (
+    FencingToken,
+    LockContext,
+    LockContextHolder,
+    wait_lock_release_barriers,
+)
 from bioetl.domain.ports import LockPort, LoggerPort
 from bioetl.domain.types import RunID
 
@@ -73,6 +78,7 @@ async def acquire_lock(host: _LockRuntimeHostProtocol) -> FencingToken | None:
 
 async def release_lock(host: _LockRuntimeHostProtocol) -> None:
     """Release the runtime lock, stop heartbeat, and clear context state."""
+    await wait_lock_release_barriers()
     if (heartbeat := host._heartbeat) is not None:
         await heartbeat.stop()
         host._heartbeat = None
@@ -105,10 +111,15 @@ async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
     await heartbeat.start()
 
 
+from bioetl.domain.locking import _lock_release_barriers
+
 async def enter_lock_context[LockRuntimeHostT: _LockRuntimeHostProtocol](
     host: LockRuntimeHostT,
 ) -> LockRuntimeHostT:
     """Acquire the lock for async context-manager usage and start heartbeat."""
+    # Initialize the barriers list for this context to avoid propagation issues
+    # with asyncio Tasks
+    _lock_release_barriers.set([])
     token = await acquire_lock(host)
     if token is None:
         raise PipelineShutdownError(f"Lock acquisition failed: {host._config.lock_key}")
