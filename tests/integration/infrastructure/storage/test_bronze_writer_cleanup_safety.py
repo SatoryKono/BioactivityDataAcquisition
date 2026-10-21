@@ -31,7 +31,7 @@ from unittest.mock import MagicMock, Mock
 from uuid import UUID
 
 import pytest
-from bioetl.domain.ports.noop import NoOpMetadataWriter, NoOpMetrics
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
@@ -51,12 +51,9 @@ from bioetl.infrastructure.storage.bronze.cleanup_support import (
     safe_rmdir,
     safe_unlink,
 )
-from bioetl.infrastructure.storage.bronze_writer import (
-    BronzeWriter,
-    BronzeWriterRuntimeServices,
-)
+from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
-from tests.helpers.bronze_cleanup import sidecar_bytes
+from tests.helpers.bronze_cleanup import flat_owner_services, sidecar_bytes
 
 pytestmark = pytest.mark.integration
 _APPLY_POSIX = pytest.mark.skipif(
@@ -85,15 +82,7 @@ def _make_writer(base_path: Path, *, flat: bool = False) -> BronzeWriter:
         logger=NoOpLogger(),
         metrics=NoOpMetrics(),
         flat_structure=flat,
-        runtime_services=BronzeWriterRuntimeServices(
-            tracing=None,
-            audit=None,
-            metadata_writer=NoOpMetadataWriter(),
-            save_metadata=False,
-            metadata_coordinator=None,
-            # Explicit synthetic deployment owner, independent of sidecars.
-            root_identity=("chembl", "activity") if flat else None,
-        ),
+        runtime_services=flat_owner_services() if flat else None,
     )
 
 

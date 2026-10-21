@@ -225,11 +225,7 @@ class BronzeWriterReadCleanupMixin(
     def _hierarchical_cleanup_scope(
         self, provider: str | None, entity: str | None
     ) -> tuple[str | None, str | None]:
-        """Bound an unfiltered hierarchical walk to the configured owner.
-
-        Explicit filters stay unchanged. Invalid identity is not promoted to a
-        path filter; ``_spec`` remains the fail-closed attestation.
-        """
+        """Use a valid configured owner when the hierarchical walk is unfiltered."""
         if (
             self._flat_structure
             or provider is not None
@@ -276,8 +272,7 @@ class BronzeWriterReadCleanupMixin(
         root_fd = locked_root.fd if locked_root is not None else None
 
         def on_discovery_skip(path: str, reason: str) -> None:
-            # An omitted filter now names the configured owner. A missing owner
-            # directory means there is nothing to delete, not a foreign conflict.
+            # A missing configured-owner directory is an empty scope, not a conflict.
             if implicit_owner_scope and reason == "missing_scope":
                 return
             self._record_cleanup_discovery_skip(stats, path, reason)
