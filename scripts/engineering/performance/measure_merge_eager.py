@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 import os
 import sys
 import time
+
 import polars as pl
-import hashlib
-from tempfile import TemporaryDirectory
 
 
 def create_dataset(path: str, rows: int):
