@@ -151,8 +151,8 @@ test-profile:
 	$(RUN) pytest tests/ --durations=25 --durations-min=1.0 -q
 
 test-benchmark:
-	mkdir -p reports/performance
 	rm -f reports/performance/benchmark-measurements.json
+	mkdir -p reports/performance
 	BIOETL_BENCHMARK_CALLER=local-makefile \
 	BIOETL_BENCHMARK_DATASET=bioetl-synthetic-benchmarks-v1 \
 	$(RUN) pytest tests/benchmarks/ \

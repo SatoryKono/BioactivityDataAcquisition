@@ -33,6 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- **Docker runtime certificates:** the Wolfi runtime stage installs
+  `ca-certificates-bundle=20260909-r3`, clearing Trivy CVE-2026-111943
+  (`ca-certificates-bundle` 20260611-r0).
+
 - **Code scanning #1464 / #1462:** `check_no_partial_tree._git` allowlists git
   verbs, verifies `--repo`/`--base`/`--tip` before `subprocess.run`, and
   resolves revisions with `--end-of-options`. `check_agent_headers.update_headers`
@@ -65,6 +69,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   documented inspection paths.
 
 ### Fixed
+
+- **Lock release under repeated cancellation:** `release_lock` keeps the
+  cleanup task shielded until barriers, heartbeat shutdown, and lock release
+  finish, then re-raises the caller's cancellation. The eager/lazy measurement
+  report keeps the absolute maximum wall-time reduction separate from the
+  sample that clears both bottleneck thresholds. `run_measurements.sh` prints
+  the hash log, including stderr, before exiting on `HASH_MISMATCH`.
+  Flat Bronze cleanup acceptance supplies `root_identity` for an unknown
+  owner, and the legacy `BronzeWriter` constructor accepts that argument.
 
 - **Required composite joins (#12033, #12004):** a required enricher or
   dependency now uses an INNER join and fails closed when a join-key column

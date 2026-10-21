@@ -51,7 +51,7 @@ def test_makefile_benchmark_target_loads_guard_before_plugin() -> None:
     assert "-m benchmark" in command
     assert "-p no:xdist" in command
     assert "--benchmark-json=reports/performance/benchmark-measurements.json" in command
+    assert "rm -f reports/performance/benchmark-measurements.json" in command
     assert "tests/performance/" not in command
     assert "-p no:benchmark" not in command
-    assert "rm -f reports/performance/benchmark-measurements.json" in command
     assert command.index(f"-p {GUARD_PLUGIN}") < command.index("-p benchmark")
