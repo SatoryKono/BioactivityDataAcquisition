@@ -17,9 +17,10 @@ name: PR Gate Complete
 # calls. fast-governance checks out the PR head and, after setup, runs the
 # repo-side pin checker. That checker is not an independent trust boundary:
 # a hostile PR can rewrite the coordinator, the checker, and the registry
-# together, and local action.yml existence does not prove content trust.
-# Residual risk remains until an org ruleset requires workflows from the
-# default branch. This does not close #12046.
+# together. The four setup-python-uv steps are pinned to trusted main SHA
+# d86bb7b8a4e8407c8bc35392cb52192137d649ca (#12046), so a PR head cannot
+# retarget those executions. Residual risk remains until an org ruleset
+# requires workflows from the default branch. This does not close #12046.
 # policy-anchor:deployment-provider deployment.provider=github_actions
 # policy-anchor:ruleset-enforcement-mode 13643213 and 15730586 enforcement: disabled
 # policy-anchor:stored-ruleset-contexts ci/circleci: pr-gate-complete is not active CircleCI protection
@@ -86,7 +87,7 @@ jobs:
           ref: ${{ github.event.pull_request.base.sha || github.sha }}
 
       - name: Set up Python + uv
-        uses: ./.github/actions/setup-python-uv
+        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@d86bb7b8a4e8407c8bc35392cb52192137d649ca # main
         with:
           python-version: "3.12"
           uv-extras: "dev"
@@ -153,7 +154,7 @@ jobs:
 
       - name: Set up Python + uv
         id: setup-python
-        uses: ./.github/actions/setup-python-uv
+        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@d86bb7b8a4e8407c8bc35392cb52192137d649ca # main
         with:
           python-version: "3.12"
           uv-extras: "dev docs"
@@ -334,7 +335,7 @@ jobs:
 
       - name: Set up Python + uv
         id: setup-python
-        uses: ./.github/actions/setup-python-uv
+        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@d86bb7b8a4e8407c8bc35392cb52192137d649ca # main
         with:
           python-version: "3.12"
           uv-extras: "dev"
@@ -742,7 +743,7 @@ jobs:
           ref: ${{ github.event.pull_request.base.sha || github.sha }}
 
       - name: Set up Python + uv
-        uses: ./.github/actions/setup-python-uv
+        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@d86bb7b8a4e8407c8bc35392cb52192137d649ca # main
         with:
           python-version: "3.12"
           uv-extras: "dev"
