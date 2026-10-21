@@ -352,7 +352,6 @@ tracked_suite_inventory:
     - tests/integration/infrastructure/storage/test_metadata_writer_filesystem.py
     - tests/integration/infrastructure/storage/test_retention_dedup.py
     - tests/integration/infrastructure/storage/test_silver_merge_replay.py
-    - tests/integration/infrastructure/storage/test_silver_time_travel.py
     - tests/integration/infrastructure/storage/test_silver_vacuum_optimize.py
     - tests/integration/infrastructure/storage/test_silver_writer.py
     - tests/integration/infrastructure/storage/test_silver_writer_filesystem.py

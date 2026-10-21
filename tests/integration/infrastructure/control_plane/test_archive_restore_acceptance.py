@@ -34,7 +34,7 @@ from bioetl.domain.control_plane import (
     RunManifest,
 )
 from bioetl.domain.types import RunID
-from bioetl.infrastructure.control_plane.file_archive_store import FileArchiveStore
+from bioetl.infrastructure.control_plane import file_archive_store
 
 _OBSERVED_AT = datetime(2026, 4, 28, 12, 0, tzinfo=UTC)
 _LEDGER = '{"event":"retain"}\n'
@@ -42,7 +42,12 @@ _LEDGER = '{"event":"retain"}\n'
 
 def _acceptance_case(
     tmp_path: Path,
-) -> tuple[FileArchiveStore, RunManifest, ControlPlaneArtifactLifecyclePlan, Path]:
+) -> tuple[
+    file_archive_store.FileArchiveStore,
+    RunManifest,
+    ControlPlaneArtifactLifecyclePlan,
+    Path,
+]:
     data_root = tmp_path / "data"
     data_root.mkdir()
     manifest = RunManifest(
@@ -75,7 +80,7 @@ def _acceptance_case(
         ),
     )
     return (
-        FileArchiveStore(data_root, tmp_path / "archive"),
+        file_archive_store.FileArchiveStore(data_root, tmp_path / "archive"),
         manifest,
         plan,
         ledger_path,
@@ -109,72 +114,69 @@ def test_public_verify_cannot_read_archive_without_original_sources(
 
 
 @pytest.mark.integration
-def test_explicit_restore_readback_without_original_sources(
+def test_verify_readback_when_data_root_directory_is_gone(
     tmp_path: Path,
 ) -> None:
+    """Public verify fails closed when the data root itself has been removed."""
     store, manifest, plan, _ledger_path = _acceptance_case(tmp_path)
     pack = store.create(manifest=manifest, plan=plan)
 
     shutil.rmtree(store.data_root)
 
-    # Verify that the explicit restored file still exists and matches expected content
-    restored = pack / "restored" / "ledger.jsonl"
-    assert restored.exists()
-    assert restored.read_text(encoding="utf-8") == _LEDGER
-
-
-@pytest.mark.integration
-def test_concurrent_reference_creation_during_archive_is_preserved(
-    tmp_path: Path,
-) -> None:
-    store, manifest, plan, ledger_path = _acceptance_case(tmp_path)
-
-    # We create the archive, but simulate a concurrent write by modifying the source after creation
-    pack = store.create(manifest=manifest, plan=plan)
-
-    # Concurrently write to source
-    new_ledger_content = '{"event":"concurrent_update"}\n'
-    ledger_path.write_text(new_ledger_content, encoding="utf-8")
-
-    # The archive verify will fail because the source has changed since the archive was created
     assert store.verify(manifest=manifest, plan=plan) == (
         False,
-        "archive_source_mismatch",
+        "archive_evidence_invalid",
     )
-
-    # The archive itself should still be the old content
-    restored = pack / "restored" / "ledger.jsonl"
-    assert restored.read_text(encoding="utf-8") == _LEDGER
+    assert (pack / "restored" / "ledger.jsonl").read_text(encoding="utf-8") == _LEDGER
 
 
 @pytest.mark.integration
-def test_partial_archive_failure_preserves_sources(
+def test_source_change_during_copy_does_not_publish_archive(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    store, manifest, _plan, ledger_path = _acceptance_case(tmp_path)
+    """A source rewrite between the two digests aborts archive publication."""
+    store, manifest, plan, ledger_path = _acceptance_case(tmp_path)
+    real_copy = file_archive_store.shutil.copyfile
 
-    # Corrupt a source file before archive creation to trigger an error
-    # Let's corrupt the plan to ask for a file that does not exist
-    bad_plan = ControlPlaneArtifactLifecyclePlan(
-        generated_at=_OBSERVED_AT,
-        cutoff=_OBSERVED_AT,
-        dry_run=True,
-        artifacts=tuple(
-            ControlPlaneArtifactRef(
-                surface=surface,
-                path=str(path) + "_nonexistent",
-                artifact_id="archive-acceptance",
-                decision=ControlPlaneArtifactLifecycleDecision.RETAIN,
-                reason="acceptance",
-            )
-            for path, surface in (
-                (ledger_path, ControlPlaneArtifactSurface.RUN_LEDGER),
-            )
-        ),
-    )
+    def copy_then_rewrite(source: Path, destination: Path) -> Path:
+        copied = real_copy(source, destination)
+        if source == ledger_path:
+            ledger_path.write_text('{"event":"concurrent"}\n', encoding="utf-8")
+        return copied
 
-    with pytest.raises(FileNotFoundError, match="No such file or directory"):
-        store.create(manifest=manifest, plan=bad_plan)
+    monkeypatch.setattr(file_archive_store.shutil, "copyfile", copy_then_rewrite)
 
-    # Verify original source still exists
-    assert ledger_path.exists()
+    with pytest.raises(ValueError, match="archive_source_changed"):
+        store.create(manifest=manifest, plan=plan)
+
+    assert ledger_path.is_file()
+    assert not (store._pack(manifest) / "index.json").exists()
+
+
+@pytest.mark.integration
+def test_copy_failure_preserves_source_bytes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A failure after copying has started leaves the live sources unchanged."""
+    store, manifest, plan, ledger_path = _acceptance_case(tmp_path)
+    manifest_path = ledger_path.parent / "manifest.json"
+    before = {path: path.read_bytes() for path in (ledger_path, manifest_path)}
+    real_copy = file_archive_store.shutil.copyfile
+    calls = {"count": 0}
+
+    def copy_then_fail(source: Path, destination: Path) -> Path:
+        calls["count"] += 1
+        if calls["count"] > 1:
+            raise OSError("injected copy failure")
+        return real_copy(source, destination)
+
+    monkeypatch.setattr(file_archive_store.shutil, "copyfile", copy_then_fail)
+
+    with pytest.raises(OSError, match="injected copy failure"):
+        store.create(manifest=manifest, plan=plan)
+
+    for path, payload in before.items():
+        assert path.read_bytes() == payload
+    assert not (store._pack(manifest) / "index.json").exists()
