@@ -252,7 +252,7 @@ gates:
     legacy_context: detect-secrets
     decision: path_scoped
     paths:
-      include: [src/**, pyproject.toml, uv.lock, .github/**, Dockerfile*, docker-compose*.yml, .github/workflows/security.yml]
+      include: [src/**, pyproject.toml, uv.lock, .gitleaks.toml, .gitleaksignore, .github/**, Dockerfile*, docker-compose*.yml, .github/workflows/security.yml]
     allowed_results: [success, not_applicable]
     not_applicable_allowed: true
     not_applicable_reason_required: true

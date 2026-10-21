@@ -7,21 +7,19 @@ from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core._gold_outcome_disposition import (
     GoldQuarantineEntry,
+    has_explicit_outcome_channel,
     plan_gold_outcome_write,
-    supports_outcome_channel,
 )
 from bioetl.application.core._gold_outcome_quarantine_write import (
-    call_outcome_channel,
     empty_gold_receipt,
     flush_gold_outcome_quarantine,
     record_gold_outcome_quarantine_metrics,
 )
+from bioetl.application.core._gold_rule_inputs import resolve_gold_rule_inputs
 from bioetl.application.services.run_reports.observations import record_gold_observation
-from bioetl.domain.behavior.dq_contract_rule_source import (
-    has_explicit_outcome_policy,
-)
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.exceptions import SchemaViolationError
+from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_record_attribution import DQOutcomeChannel
 from bioetl.domain.types.gold_contracts import GoldWriteReceipt
 
@@ -105,7 +103,7 @@ def validate_gold_records(
     *,
     schema: object | None = None,
     apply_contract_rules: bool = True,
-    contract_records: list[GoldRecord] | None = None,
+    rule_records: list[GoldRecord] | None = None,
 ) -> tuple[list[GoldRecord], tuple[GoldQuarantineEntry, ...]]:
     """Validate Gold records and return the rows that may be written.
 
@@ -113,8 +111,7 @@ def validate_gold_records(
     the returned accumulator. ``FAIL``, ``SKIP``, unattributable violations,
     and validators without that policy stay on fail-closed ``.validate()``.
     ``apply_contract_rules=False`` is the structural re-check after column
-    projection and does not reopen the outcome channel. ``contract_records``
-    are the pre-projection rows for contract rules. Schema checks use ``records``.
+    projection and does not reopen the outcome channel.
     """
     validator = writer._gold_validator
     target_schema = schema if schema is not None else writer._gold_schema
@@ -124,8 +121,8 @@ def validate_gold_records(
             rebind_gold_validator_schema(validator, target_schema),
         )
 
-    if apply_contract_rules and _use_outcome_channel(validator):
-        channel = call_outcome_channel(validator, records, contract_records)
+    if apply_contract_rules and has_explicit_outcome_channel(validator):
+        channel = _call_outcome_channel(validator, records, rule_records=rule_records)
         if isinstance(channel, DQOutcomeChannel):
             config = cast("DQConfig | None", getattr(validator, "_dq_config", None))
             plan = plan_gold_outcome_write(records, channel, config)
@@ -142,13 +139,19 @@ def validate_gold_records(
     return records, ()
 
 
-def _use_outcome_channel(validator: object) -> bool:
-    if not supports_outcome_channel(validator):
-        return False
-    config = getattr(validator, "_dq_config", None)
-    if not isinstance(config, DQConfig):
-        return False
-    return has_explicit_outcome_policy(config)
+def _call_outcome_channel(
+    validator: object,
+    records: list[JsonDict],
+    *,
+    rule_records: list[JsonDict] | None = None,
+) -> object:
+    projected_method = getattr(type(validator), "validate_with_rule_inputs", None)
+    if rule_records is not None and callable(projected_method):
+        return projected_method(validator, records, rule_records)
+    method = getattr(type(validator), "validate_with_outcomes", None)
+    if not callable(method):
+        return None
+    return method(validator, records)
 
 
 def _raise_fail_closed(
@@ -211,10 +214,10 @@ def prepare_validated_gold_write(
         available_cols = writer._collect_record_columns(records)
         schema_payload: object = writer._gold_schema_policy_by_version
     else:
-        canonical_records = list(records)
+        rule_records = resolve_gold_rule_inputs(records)
         records, available_cols = prepare_gold_records(writer, records)
         records, quarantined = validate_gold_records(
-            writer, records, contract_records=canonical_records
+            writer, records, rule_records=rule_records
         )
         column_order_preview, _rename_preview = writer._resolve_layer_columns(
             "gold", available_cols

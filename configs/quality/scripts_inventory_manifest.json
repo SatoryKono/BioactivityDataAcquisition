@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-21T13:21:12.413122+00:00",
+  "generated_at": "2026-10-21T17:03:53.386840+00:00",
   "summary": {
     "total_scripts": 659,
     "status_counts": {
@@ -11352,7 +11352,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 297,
+      "reference_count": 298,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -15332,7 +15332,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 21,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -15366,7 +15366,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 300,
+          "line": 309,
           "source_group": "scripts",
           "text": "`generate_hotspot_degradation_report.py` performance-evidence owner. It has a"
         },
@@ -17606,7 +17606,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 19,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -17652,7 +17652,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_topology_source_binding.py",
-          "line": 154,
+          "line": 161,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_test_governance_audit import ("
         }
@@ -17667,19 +17667,25 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 345,
+          "line": 347,
           "source_group": "docs",
           "text": "Derived by scripts/engineering/qa/report_topology_source_binding.py from"
         },
         {
           "path": "tests/unit/scripts/qa/test_topology_source_binding.py",
-          "line": 9,
+          "line": 11,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_topology_source_binding import ("
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_topology_source_binding.py",
+          "line": 90,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import report_topology_source_binding as reporter"
         }
       ],
       "owner": "@bioetl-platform",

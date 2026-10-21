@@ -37,7 +37,7 @@ from bioetl.domain.behavior.dq_contract_rule_source import (
     load_executable_contract_rules,
 )
 from bioetl.domain.config.dq import DQConfig
-from bioetl.domain.config.validation import CrossFieldValidation, FieldValidation
+from bioetl.domain.config.validation import FieldValidation
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.infrastructure.validation.contract_validator import (
     ContractAwareGoldValidator,
@@ -161,64 +161,6 @@ def test_strict_validate_parity_without_explicit_policy() -> None:
     assert channel.violations
     assert channel.violations[0].record is not None
     assert channel.violations[0].record.source_index == 0
-
-
-def test_published_gold_aliases_and_pre_projection_contract_records() -> None:
-    schema = pa.DataFrameSchema(
-        {
-            "assay_id": pa.Column(str),
-            "description": pa.Column(str, nullable=True),
-            "bao_format": pa.Column(str, nullable=True),
-        }
-    )
-    config = _policy(
-        field_validations=(),
-        cross_field_validations=(
-            CrossFieldValidation(
-                name="assay_identifiable",
-                fields=("assay_id", "assay_description"),
-                condition="all_present",
-            ),
-            CrossFieldValidation(
-                name="bao_format_requires_mapping_status",
-                fields=("bao_format", "bao_format_mapping_status"),
-                condition="conditional_required",
-                trigger_field="bao_format",
-                required_field="bao_format_mapping_status",
-            ),
-        ),
-    )
-    validator = ContractAwareGoldValidator(schema=schema, dq_config=config)
-    projected = {
-        "assay_id": "CHEMBL1",
-        "description": "Inhibition of X",
-        "bao_format": "BAO_0000221",
-    }
-    canonical = {
-        **projected,
-        "assay_description": "Inhibition of X",
-        "bao_format_mapping_status": "mapped",
-    }
-    aliased = validator.validate_with_outcomes([dict(projected)])
-    aliased_ids = {item.outcome.rule_id for item in aliased.violations}
-    assert "cross.assay_identifiable" not in aliased_ids
-    assert "cross.bao_format_requires_mapping_status" in aliased_ids
-    assert "assay_description" not in projected
-
-    kept = validator.validate_with_outcomes(
-        [dict(projected)],
-        contract_records=[canonical],
-    )
-    assert kept.violations == ()
-
-    mismatched = validator.validate_with_outcomes(
-        [dict(projected)],
-        contract_records=[],
-    )
-    assert any(
-        item.outcome.rule_id == "cross.bao_format_requires_mapping_status"
-        for item in mismatched.violations
-    )
 
 
 def test_silver_validate_with_outcomes_returns_contract_rules() -> None:

@@ -1,5 +1,7 @@
 """A current-source projection must not impersonate or overwrite a capture."""
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
 
@@ -79,6 +81,64 @@ def _bootstrap_profile(root: Path) -> dict[str, object]:
     test.parent.mkdir(parents=True)
     test.write_text("", encoding="utf-8")
     return profile
+
+
+def test_new_source_modules_do_not_relabel_accepted_coverage_measurement(
+    tmp_path, monkeypatch
+):
+    from scripts.engineering.qa import report_test_governance_audit as test_gov
+    from scripts.engineering.qa import report_topology_source_binding as reporter
+
+    historical_profile = _bootstrap_profile(tmp_path)
+    source = tmp_path / "src/bioetl"
+    source.mkdir(parents=True)
+    (source / "first.py").write_text("VALUE = 1\n", encoding="utf-8")
+    (source / "new.py").write_text("VALUE = 2\n", encoding="utf-8")
+    digest = reporter.compute_source_tree_sha256(repo_root=tmp_path)
+    inventory = {
+        "source_tree_sha256": digest,
+        "modules": [{"module": "bioetl.first"}],
+        "summary": {
+            "source_module_count": 1,
+            "status_counts": {"fully_covered": 1, "partially_covered": 0},
+        },
+    }
+    inventory_path = tmp_path / reporter.INVENTORY
+    inventory_path.write_text(json.dumps(inventory), encoding="utf-8")
+    original_inventory = inventory_path.read_bytes()
+    governance = {
+        "source_tree_sha256": "b" * 64,
+        "report": {"assertless_total_candidates": 0},
+    }
+    (tmp_path / "reports/quality/test-governance-current.json").write_text(
+        json.dumps(governance), encoding="utf-8"
+    )
+    monkeypatch.setattr(
+        test_gov, "_compute_test_governance_source_tree_sha256", lambda root: "b" * 64
+    )
+    targets = (
+        reporter.SUMMARY,
+        Path("docs/02-architecture/current-state-inventory.md"),
+    )
+    for target in targets:
+        path = tmp_path / target
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("Historical capture: original\n", encoding="utf-8")
+
+    assert reporter.main(["--root", str(tmp_path), "--update"]) == 0
+    assert reporter.main(["--root", str(tmp_path), "--check"]) == 0
+    for target in targets:
+        text = (tmp_path / target).read_text(encoding="utf-8")
+        assert text.startswith("Historical capture: original\n")
+        assert "`source_module_count=2`" in text
+        assert "`coverage_inventory_module_count=1`" in text
+        assert "Accepted inventory: `1` fully covered" in text
+    assert inventory_path.read_bytes() == original_inventory
+    updated_profile = json.loads(
+        (tmp_path / reporter.BOOTSTRAP_PROFILE).read_text(encoding="utf-8")
+    )
+    updated_profile.pop("current_source_binding")
+    assert updated_profile == historical_profile
 
 
 def test_bootstrap_binding_preserves_measured_profile_and_detects_new_topology(

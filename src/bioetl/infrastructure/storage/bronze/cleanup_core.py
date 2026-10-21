@@ -43,7 +43,16 @@ class BronzeRootLease:
         """Route writes through the locked inode, even if its name is replaced."""
         if self.fd is None:
             return self.path
-        return _verified_fd_path(self.fd)
+        locked = os.fstat(self.fd)
+        for directory in ("/proc/self/fd", "/dev/fd"):
+            candidate = Path(directory) / str(self.fd)
+            try:
+                opened = candidate.stat()
+            except OSError:
+                continue
+            if (opened.st_dev, opened.st_ino) == (locked.st_dev, locked.st_ino):
+                return candidate
+        raise NotImplementedError("Bronze writer requires a path to its locked root fd")
 
 
 def open_bronze_root_no_follow(base_path: Path) -> tuple[Path, int]:
@@ -74,29 +83,21 @@ def valid_bronze_scope_name(value: str) -> bool:
     return bool(value) and value.replace("_", "").isalnum()
 
 
-def _verified_fd_path(fd: int) -> Path:
-    """Return a pathname that still names the open directory inode."""
-    locked = os.fstat(fd)
-    for directory in ("/proc/self/fd", "/dev/fd"):
-        candidate = Path(directory) / str(fd)
-        try:
-            opened = candidate.stat()
-        except OSError:
-            continue
-        if (opened.st_dev, opened.st_ino) == (locked.st_dev, locked.st_ino):
-            return candidate
-    raise NotImplementedError("Bronze writer requires a path to its locked root fd")
-
-
 def _fd_view_supported() -> bool:
-    """Probe ``_verified_fd_path`` so a later ``writer_path`` miss still refuses locks."""
+    """Require a verified pathname to an open directory for pinned writer I/O."""
     try:
         fd = os.open("/", os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
     except OSError:
         return False
     try:
-        return bool(_verified_fd_path(fd))
-    except NotImplementedError:
+        opened = os.fstat(fd)
+        for directory in ("/proc/self/fd", "/dev/fd"):
+            try:
+                viewed = (Path(directory) / str(fd)).stat()
+            except OSError:
+                continue
+            if (viewed.st_dev, viewed.st_ino) == (opened.st_dev, opened.st_ino):
+                return True
         return False
     finally:
         os.close(fd)
