@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-15'
+  Last verified: '2026-10-21'
 
 ______________________________________________________________________
 
@@ -171,9 +171,15 @@ ______________________________________________________________________
 ### 3.3. Контракты Данных (Data Contracts)
 
 Gold слой имеет строгие публичные контракты. Fail-closed интеграция схемы
-работает в production. Экспериментальными плейсхолдерами остаются только
-`ContractAwareGoldValidator.validate_with_outcomes()` и
-`ContractAwareSilverValidator.validate_with_outcomes()`
+работает в production: batch-запись вызывает `validate()` и при ошибке
+поднимает `SchemaViolationError`.
+`ContractAwareGoldValidator.validate_with_outcomes()` переводит ошибки
+Pandera в `DQRuleOutcome`, после чего вызывает `_apply_contract_validations()`.
+Этот метод по-прежнему не возвращает outcomes уровня contract-rule.
+`ContractAwareSilverValidator.validate_with_outcomes()` возвращает флаг
+базовой проверки и пустой список outcomes. В `src/bioetl` нет production-вызовов
+ни одного из этих методов. Потребление на write path, атрибуция записи
+и per-record quarantine остаются открытыми
 ([#12095](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12095)).
 
 - **Реестр**: JSON Schema файлы в `docs/04-reference/contracts/gold/`.
