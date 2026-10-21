@@ -144,36 +144,33 @@ def normalize_pmid_reference_id(value: object) -> object:
     return value
 
 
-_REFERENCE_IDENTIFIER_NORMALIZERS: dict[str, ReferenceNormalizer | None] = {
-    "orcid": normalize_orcid_reference_id,
-    "issn": normalize_issn_reference_id,
-    "ror": normalize_ror_reference_id,
-    "openalex_author": _normalize_openalex_author_reference_id,
-    "openalex_institution": _normalize_openalex_institution_reference_id,
-    "openalex_topic": _normalize_openalex_topic_reference_id,
-    "openalex_work": _normalize_openalex_work_reference_id,
-    "semantic_scholar_author": normalize_semantic_scholar_reference_id,
-    "semantic_scholar_paper": normalize_semantic_scholar_reference_id,
-    # Numeric corpusId has no string canonicalizer; the mapping entry is explicit.
-    "semantic_scholar_corpus": None,
-    "ncbi_taxonomy": normalize_ncbi_taxonomy_reference_id,
-    "uniprot_accession": normalize_uniprot_accession_reference_id,
-    "mixed_identifier_set": normalize_uniprot_mixed_mapping_reference_id,
-    "go": normalize_go_reference_id,
-    "interpro": normalize_interpro_reference_id,
-    "pfam": normalize_pfam_reference_id,
-    "reactome": normalize_reactome_reference_id,
-    "pdb": normalize_pdb_reference_id,
-    "chembl": normalize_chembl_reference_id,
-    "pubchem_cid": normalize_pubchem_cid_reference_id,
-    "doi": normalize_doi_reference_id,
-    "pmid": normalize_pmid_reference_id,
-    "pmcid": normalize_pmcid_reference_id,
-    "mesh": normalize_mesh_reference_id,
-    "drugbank": normalize_drugbank_reference_id,
-}
 _REFERENCE_IDENTIFIER_FAMILIES = build_reference_identifier_families(
-    _REFERENCE_IDENTIFIER_NORMALIZERS
+    {
+        "orcid": normalize_orcid_reference_id,
+        "issn": normalize_issn_reference_id,
+        "ror": normalize_ror_reference_id,
+        "openalex_author": _normalize_openalex_author_reference_id,
+        "openalex_institution": _normalize_openalex_institution_reference_id,
+        "openalex_topic": _normalize_openalex_topic_reference_id,
+        "openalex_work": _normalize_openalex_work_reference_id,
+        "semantic_scholar_author": normalize_semantic_scholar_reference_id,
+        "semantic_scholar_paper": normalize_semantic_scholar_reference_id,
+        "ncbi_taxonomy": normalize_ncbi_taxonomy_reference_id,
+        "uniprot_accession": normalize_uniprot_accession_reference_id,
+        "mixed_identifier_set": normalize_uniprot_mixed_mapping_reference_id,
+        "go": normalize_go_reference_id,
+        "interpro": normalize_interpro_reference_id,
+        "pfam": normalize_pfam_reference_id,
+        "reactome": normalize_reactome_reference_id,
+        "pdb": normalize_pdb_reference_id,
+        "chembl": normalize_chembl_reference_id,
+        "pubchem_cid": normalize_pubchem_cid_reference_id,
+        "doi": normalize_doi_reference_id,
+        "pmid": normalize_pmid_reference_id,
+        "pmcid": normalize_pmcid_reference_id,
+        "mesh": normalize_mesh_reference_id,
+        "drugbank": normalize_drugbank_reference_id,
+    }
 )
 _REFERENCE_IDENTIFIER_FAMILY_BY_NAME = {
     family.name: family for family in _REFERENCE_IDENTIFIER_FAMILIES

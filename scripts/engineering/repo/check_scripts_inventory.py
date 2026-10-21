@@ -21,7 +21,7 @@ import time
 from collections import Counter, defaultdict
 from collections.abc import Set
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Final
 
@@ -1699,53 +1699,6 @@ def _print_lifecycle_validation_failures(
             print(f"    - {item}")
 
 
-def build_review_expiry_report(
-    registry: dict[str, object], *, today: date | None = None
-) -> dict[str, object]:
-    """Report all lifecycle decisions against one UTC date, without enforcement."""
-    as_of = today if today is not None else datetime.now(UTC).date()
-    if not isinstance(registry, dict):
-        raise ValueError("Lifecycle registry must be a mapping")
-    entries = registry.get("entries")
-    if not isinstance(entries, dict):
-        raise ValueError("Lifecycle registry entries must be a mapping")
-    expired: list[dict[str, str]] = []
-    missing: list[str] = []
-    invalid: list[str] = []
-    for path, entry in sorted(entries.items()):
-        raw = entry.get("review_by") if isinstance(entry, dict) else None
-        if raw is None or raw == "":
-            missing.append(path)
-            continue
-        try:
-            review_by = date.fromisoformat(raw)
-            if review_by.isoformat() != raw:
-                raise ValueError("Expected YYYY-MM-DD")
-        except (TypeError, ValueError):
-            invalid.append(path)
-            continue
-        if review_by < as_of:
-            expired.append(
-                {
-                    "path": path,
-                    "review_by": raw,
-                    "decision": str(entry.get("decision", "")),
-                    "owner": str(entry.get("owner", "")),
-                }
-            )
-    return {
-        "as_of": as_of.isoformat(),
-        "total_entries": len(entries),
-        "expired_review_by_count": len(expired),
-        "expired_by_decision": dict(
-            sorted(Counter(row["decision"] for row in expired).items())
-        ),
-        "expired_entries": expired,
-        "missing_review_by": missing,
-        "invalid_review_by": invalid,
-    }
-
-
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Scripts inventory drift checker")
     parser.add_argument(
@@ -1780,12 +1733,6 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "--lifecycle-registry",
         default=LIFECYCLE_REGISTRY_DEFAULT,
         help="Path to lifecycle registry JSON for non-active scripts",
-    )
-    parser.add_argument(
-        "--review-expiry",
-        choices=("off", "report"),
-        default="off",
-        help="Report expired lifecycle review dates without failing on existing debt",
     )
     parser.add_argument(
         "--check-lifecycle",
@@ -1824,26 +1771,6 @@ def _build_fast_stdout_payload(root: Path) -> dict[str, object]:
     }
 
 
-def _run_review_expiry_request(
-    *, root: Path, args: argparse.Namespace
-) -> tuple[bool, int]:
-    """Emit a requested report and return its standalone flag and exit code."""
-    if args.review_expiry != "report":
-        return False, 0
-    try:
-        report = build_review_expiry_report(_load_json(root / args.lifecycle_registry))
-    except (OSError, ValueError) as exc:
-        print(f"[FAIL] Review expiry report: {exc}", file=sys.stderr)
-        result = 1
-    else:
-        _write_ascii_json_stdout(report)
-        result = 0
-    report_only = not (
-        args.update or args.check or args.check_lifecycle or args.deprecation_report
-    )
-    return report_only, result
-
-
 def main(argv: list[str] | None = None) -> int:
     for stream in (sys.stdout, sys.stderr):
         reconfigure = getattr(stream, "reconfigure", None)
@@ -1854,9 +1781,6 @@ def main(argv: list[str] | None = None) -> int:
                 pass
     args = parse_args(argv or sys.argv[1:])
     root = _project_root()
-    report_only, review_expiry_result = _run_review_expiry_request(root=root, args=args)
-    if report_only:
-        return review_expiry_result
     if _can_fast_path_json(args):
         _write_ascii_json_stdout(_build_fast_stdout_payload(root))
         return 0
@@ -1894,7 +1818,7 @@ def main(argv: list[str] | None = None) -> int:
 
     _print_payload(args=args, payload=payload)
 
-    return review_expiry_result
+    return 0
 
 
 def _can_use_manifest_payload_for_lifecycle_check(

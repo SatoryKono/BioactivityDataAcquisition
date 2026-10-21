@@ -22,21 +22,13 @@ if TYPE_CHECKING:
     from bioetl.application.composite.column_service import ColumnOrderService
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.record_processor_config import RecordProcessorConfig
-    from bioetl.application.observability.domain_event_emitter import (
-        DomainEventEmitterProtocol,
-    )
     from bioetl.application.services.export_lineage.debug_export_service import (
         DebugExportService,
     )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.models.metadata import SourceMetadata
-    from bioetl.domain.ports import (
-        GoldValidatorPort,
-        QuarantinePort,
-        SilverWriteRequest,
-        TracingPort,
-    )
+    from bioetl.domain.ports import GoldValidatorPort, SilverWriteRequest, TracingPort
     from bioetl.domain.types import (
         BatchID,
         GoldRecord,
@@ -101,8 +93,6 @@ class BatchWriterOptions:
     data_schema_config: DataSchemaConfig | None = None
     column_orderer: ColumnOrderService | None = None
     debug_export_service: DebugExportService | None = None
-    gold_quarantine_port: QuarantinePort | None = None
-    gold_outcome_emitter: DomainEventEmitterProtocol | None = None
 
 
 class BatchWriter(BatchWriterTracingMixin, BatchWriterColumnsMixin, BatchWriterIOMixin):
@@ -141,12 +131,6 @@ class BatchWriter(BatchWriterTracingMixin, BatchWriterColumnsMixin, BatchWriterI
         self._tracer = opts.tracer
         self._lock_validator = opts.lock_validator
         self._debug_export_service = opts.debug_export_service
-        self._gold_quarantine_port = opts.gold_quarantine_port
-        self._gold_outcome_emitter = opts.gold_outcome_emitter
-        self._gold_quarantine_batch_id = None
-        self._pending_gold_outcome_quarantine = ()
-        self._last_gold_outcome_quarantine_count = 0
-        self._gold_outcome_quarantine_indexes: tuple[int, ...] = ()
         self._provider = config.provider
         self._entity_type = config.entity_type
         self._silver_schema = config.silver_schema

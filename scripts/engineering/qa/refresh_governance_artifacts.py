@@ -670,7 +670,6 @@ def _rewrite_current_audit_report(
         SEMANTIC_SUMMARY_END,
         SEMANTIC_SUMMARY_START,
         _headline_markers,
-        _score_narrative_marker,
         build_current_audit_semantic_summary,
         render_current_audit_semantic_summary,
     )
@@ -680,13 +679,6 @@ def _rewrite_current_audit_report(
     report = report.replace(
         f"Evidence surface SHA-256: `{old}`",
         f"Evidence surface SHA-256: `{live}`",
-    )
-    summary = build_current_audit_semantic_summary(ROOT, current)
-    report = re.sub(
-        r"(?m)^(Current result: debt-governance gates passing\. The current )architecture score `[^`]+`",
-        lambda match: match[1] + _score_narrative_marker(summary),
-        report,
-        count=1,
     )
     start = report.find(SEMANTIC_SUMMARY_START)
     end = report.find(SEMANTIC_SUMMARY_END, start + len(SEMANTIC_SUMMARY_START))
@@ -737,7 +729,6 @@ def _rebind_evidence_surface(*, check_only: bool) -> int:
         return 0
     old = current.evidence_surface_sha256
     if old == live:
-        _rewrite_current_audit_report(old=old, live=live, current=current)
         print("evidence_surface_sha256 already aligned")
         return 0
     if not isinstance(old, str) or not old:

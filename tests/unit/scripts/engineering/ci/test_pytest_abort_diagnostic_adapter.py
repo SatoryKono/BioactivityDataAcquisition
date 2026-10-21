@@ -239,9 +239,6 @@ def test_launcher_descendant_is_gone_after_cleanup(
     child_script = pid_dir / "child_sleep.py"
     child_script.write_text(
         "import os, pathlib, sys, time\n"
-        "if os.name == 'posix':\n"
-        "    import resource\n"
-        "    resource.setrlimit(resource.RLIMIT_CORE, (0, 0))\n"
         "pathlib.Path(sys.argv[1]).write_text(str(os.getpid()))\n"
         "time.sleep(60)\n",
         encoding="utf-8",

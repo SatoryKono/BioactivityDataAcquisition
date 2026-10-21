@@ -82,7 +82,13 @@ async def replay_assay(
         else None
     ):
         config = CompositeConfig.from_dict(verified_json("config.json"))
-        _validate_replay_config(config, envelope)
+        if (
+            config.name not in SUPPORTED_COMPOSITES
+            or config.name != envelope["pipeline"]
+        ):
+            raise ValueError("assay_replay_config_not_supported")
+        if envelope["version"] == "assay-parent-replay-v1" and config.dependencies:
+            raise ValueError("assay_replay_config_not_supported")
         reader = CompositeReplayInputReader(
             root / "inputs", envelope_sha256=envelope["input_snapshot_fingerprint"]
         )
@@ -152,11 +158,3 @@ async def replay_assay(
                 await storage.aclose()
             finally:
                 reset_run_observations(observation_token)
-
-
-def _validate_replay_config(config: CompositeConfig, envelope: JsonDict) -> None:
-    """Reject foreign families and legacy envelopes with uncaptured dependencies."""
-    if config.name not in SUPPORTED_COMPOSITES or config.name != envelope["pipeline"]:
-        raise ValueError("assay_replay_config_not_supported")
-    if envelope["version"] == "assay-parent-replay-v1" and config.dependencies:
-        raise ValueError("assay_replay_config_not_supported")

@@ -67,7 +67,13 @@ async def execute_timed_request(
     error_type = None
     phase = "admission"
     try:
-        await _await_admission(host)
+        while True:
+            delay = max(0.0, host._request_not_before - time.monotonic())
+            if delay:
+                await asyncio.sleep(delay)
+            await host.rate_limiter.acquire()
+            if time.monotonic() >= host._request_not_before:
+                break
         admitted = time.monotonic()
         phase = "transport"
 
@@ -112,14 +118,3 @@ async def execute_timed_request(
                     max(0.0, host._request_not_before - completed), 6
                 ),
             )
-
-
-async def _await_admission(host: RequestTimingHost) -> None:
-    """Recheck cooldown after each limiter acquisition before starting transport."""
-    while True:
-        delay = max(0.0, host._request_not_before - time.monotonic())
-        if delay:
-            await asyncio.sleep(delay)
-        await host.rate_limiter.acquire()
-        if time.monotonic() >= host._request_not_before:
-            return

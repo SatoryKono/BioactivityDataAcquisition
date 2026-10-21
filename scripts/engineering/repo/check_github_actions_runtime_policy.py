@@ -33,9 +33,6 @@ _COMPOSITE_ACTION_SKIP_DIRS = frozenset(
 )
 
 ALLOWED_USES: dict[str, set[str]] = {
-    "SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv": {
-        "d86bb7b8a4e8407c8bc35392cb52192137d649ca",  # main
-    },
     "actions/attest-build-provenance": {
         "977bb373ede98d70efdf65b84cb5f73e068dcc2a",  # v3
     },

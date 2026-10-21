@@ -44,7 +44,17 @@ def _evidence_status(assessment: dict[str, object]) -> str:
         and availability != "AVAILABLE"
     ):
         return str(assessment["verdict"])
-    artifacts = _artifact_checks(assessment.get("replay_checks"))
+    checks = assessment.get("replay_checks")
+    artifacts = (
+        [
+            item
+            for item in checks
+            if isinstance(item, dict)
+            and str(item.get("evidence_ref", "")).startswith("#/artifacts/")
+        ]
+        if isinstance(checks, list)
+        else []
+    )
     if any(
         item.get("reason")
         in {"digest_mismatch", "artifact_path_escape", "artifact_record_invalid"}
@@ -55,20 +65,6 @@ def _evidence_status(assessment: dict[str, object]) -> str:
         return "INCOMPLETE"
     return (
         "OK" if assessment.get("evidence_completeness") == "COMPLETE" else "INCOMPLETE"
-    )
-
-
-def _artifact_checks(checks: object) -> list[dict[str, object]]:
-    """Select artifact-backed checks from a verified assessment."""
-    return (
-        [
-            item
-            for item in checks
-            if isinstance(item, dict)
-            and str(item.get("evidence_ref", "")).startswith("#/artifacts/")
-        ]
-        if isinstance(checks, list)
-        else []
     )
 
 
@@ -96,27 +92,8 @@ def recent_run_presentation(
         root=root,
         manifest_port=manifest_port,
     )
-    quality = _quality_verdict(assessment.get("domains"))
-    provider = _assessed_provider(
-        assessment.get("provider_checks"), row.get("provider")
-    )
-    legacy = assessment.get("evidence_availability") == "legacy_no_snapshot"
-    replay = _replay_status(assessment)
-    return {
-        "provider": provider or "N/A",
-        "workflow_passport_url": _passport("workflows", row.get("workflow_id")),
-        "pipeline_passport_url": _passport("pipelines", row["pipeline"]),
-        "saved_evidence_status": _evidence_status(assessment),
-        "data_quality_status": "N/A"
-        if legacy and quality in {None, "UNKNOWN", "INCOMPLETE"}
-        else _status(quality),
-        "replay_readiness_status": "N/A" if legacy else replay,
-    }
-
-
-def _quality_verdict(domains: object) -> object:
-    """Find the saved Data Quality verdict without inventing a default."""
-    return (
+    domains = assessment.get("domains")
+    quality = (
         next(
             (
                 item.get("verdict")
@@ -128,10 +105,8 @@ def _quality_verdict(domains: object) -> object:
         if isinstance(domains, list)
         else None
     )
-
-
-def _assessed_provider(checks: object, provider: object) -> object:
-    """Prefer the first recorded provider to the catalog fallback."""
+    provider = row.get("provider")
+    checks = assessment.get("provider_checks")
     if isinstance(checks, list):
         provider = next(
             (
@@ -142,11 +117,7 @@ def _assessed_provider(checks: object, provider: object) -> object:
             ),
             provider,
         )
-    return provider
-
-
-def _replay_status(assessment: dict[str, object]) -> str:
-    """Map saved replay readiness and unavailable evidence to the table status."""
+    legacy = assessment.get("evidence_availability") == "legacy_no_snapshot"
     replay = {
         "READY": "OK",
         "BLOCKED": "ERROR",
@@ -159,4 +130,13 @@ def _replay_status(assessment: dict[str, object]) -> str:
         and assessment.get("evidence_availability") != "AVAILABLE"
     ):
         replay = "ERROR"
-    return replay
+    return {
+        "provider": provider or "N/A",
+        "workflow_passport_url": _passport("workflows", row.get("workflow_id")),
+        "pipeline_passport_url": _passport("pipelines", row["pipeline"]),
+        "saved_evidence_status": _evidence_status(assessment),
+        "data_quality_status": "N/A"
+        if legacy and quality in {None, "UNKNOWN", "INCOMPLETE"}
+        else _status(quality),
+        "replay_readiness_status": "N/A" if legacy else replay,
+    }

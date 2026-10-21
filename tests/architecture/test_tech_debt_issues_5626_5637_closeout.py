@@ -14,14 +14,13 @@ from __future__ import annotations
 
 import ast
 import json
+import subprocess
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
 import pytest
 import yaml
-
-from tests.helpers.git_index_scan import git_index_paths
 
 from scripts.engineering.ci.validate_registry_dq_refs import build_diagnostics_payload
 from scripts.engineering.qa.import_graph_inventory import (
@@ -103,11 +102,21 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 def _src_python_files() -> list[Path]:
-    return [
-        ROOT / path
-        for path in sorted(git_index_paths(root=ROOT))
-        if path.startswith("src/") and path.endswith(".py") and (ROOT / path).exists()
-    ]
+    result = subprocess.run(
+        ["git", "ls-files", "src"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    paths: list[Path] = []
+    for relative_path in result.stdout.splitlines():
+        if not relative_path.endswith(".py"):
+            continue
+        path = ROOT / relative_path
+        if path.exists():
+            paths.append(path)
+    return paths
 
 
 def _src_importers(module_name: str) -> set[str]:

@@ -364,28 +364,22 @@ graph TD
 ## Contract Discovery & Navigation
 
 > **Implementation Status Note:**
-> The rule-level outcome channel is active.
-> `ContractAwareGoldValidator.validate_with_outcomes()` and
-> `ContractAwareSilverValidator.validate_with_outcomes()` return a
-> `DQOutcomeChannel` that unpacks as `(is_valid, outcomes)` and carries
-> `AttributedDQViolation` values. Executable contract rules load from the
-> bound `DQConfig` via `load_executable_contract_rules()`.
-> `DQPolicyResolver` assigns dispositions and does not load a rule bundle
-> from `policy_ref.contract_ref`. Without a resolver both methods keep the
-> basic `validate()` flag and an empty outcome list. With a resolver, empty
-> input is a valid empty channel, and a missing strict schema yields one
-> unattributable `schema.missing` outcome. Record identity is
-> `DQRecordIdentity` (`source_index` after normalization, optional canonical
-> `record_key`). `affected_fields` does not select rows. Gold `write_gold`
-> consumes the channel when the `DQConfig` has an explicit outcome policy.
-> Attributable `QUARANTINE` rows are written per record through
-> `write_quarantine_requests()` with `rule_id`, `contract_ref`, and
-> `config_path`. `FAIL`, `SKIP`, unattributable violations, schema violations
-> without an explicit `QUARANTINE` override, and configs without an explicit
-> policy stay fail-closed on `validate()` / `SchemaViolationError`. Silver
-> production writes still call `validate()`. Follow-up:
+> `ContractAwareGoldValidator.validate_with_outcomes()` returns an empty
+> outcome list when no policy resolver is configured, when the input is
+> empty, or when the schema is missing and the validator is not strict. A
+> missing schema in strict mode yields one `schema.missing` outcome only for
+> non-empty input. With a resolver, records, and a schema, the method turns
+> Pandera schema failures into `DQRuleOutcome` values and then calls
+> `_apply_contract_validations()`, which still returns no contract-rule
+> outcomes. `ContractAwareSilverValidator.validate_with_outcomes()` still
+> returns the basic validity flag and an empty outcome list. Neither method
+> has a production callsite in `src/bioetl`: Gold batch writes call
+> `validate()` and fail closed with `SchemaViolationError`. Tests exercise
+> these APIs. Write-path consumption, record attribution, and per-record
+> quarantine routing stay open in
 > [#12095](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12095).
-> `evaluate_dq_rules_for_record()` remains the transformer runtime path.
+> Production rule evaluation through `evaluate_dq_rules_for_record()` remains
+> active and applies quarantine, skip, fail, and warn dispositions.
 
 ### Canonical Entry Points
 

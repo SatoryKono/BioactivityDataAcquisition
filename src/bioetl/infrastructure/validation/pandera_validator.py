@@ -50,16 +50,6 @@ def _materialize_pandera_schema(
     return schema
 
 
-def _seed_dq_defaults(frame: pd.DataFrame) -> pd.DataFrame:
-    """Seed only wholly missing DQ columns already present in the schema frame."""
-    for name, default in {"_dq_warn": False, "_dq_error": False, "_index": 0}.items():
-        if name not in frame.columns:
-            continue
-        if frame[name].isna().all():
-            frame[name] = default
-    return frame
-
-
 class BasePanderaValidator:
     """Base Pandera validator with common validation logic.
 
@@ -311,7 +301,13 @@ class PanderaSilverValidator(BasePanderaValidator):
             for name in missing:
                 if name not in df_to_validate.columns:
                     df_to_validate[name] = None
-        return _seed_dq_defaults(df_to_validate)
+        dq_defaults = {"_dq_warn": False, "_dq_error": False, "_index": 0}
+        for name, default in dq_defaults.items():
+            if name not in df_to_validate.columns:
+                continue
+            if df_to_validate[name].isna().all():
+                df_to_validate[name] = default
+        return df_to_validate
 
     def _validate_with_schema(self, df: pd.DataFrame) -> ValidationResult:
         """Validate Silver frames; non-strict mode ignores extra columns.

@@ -131,9 +131,13 @@ def push_metrics_to_gateway(
     if not getattr(observability, "metrics_enabled", True):
         return False
     gateway = getattr(settings, "pushgateway_url", None) or _PUSHGATEWAY_FALLBACK
-    grouping_key = _publication_grouping_key(
-        pipeline_name, run_type, grouping_key_extra
-    )
+    grouping_key: dict[str, str] = {}
+    if pipeline_name:
+        grouping_key["pipeline"] = pipeline_name
+    if run_type:
+        grouping_key["run_type"] = run_type
+    if grouping_key_extra:
+        grouping_key.update(grouping_key_extra)
     if metric_names is None:
         grouping_key = _ensure_publication_seeds(
             settings=settings,
@@ -169,20 +173,6 @@ def push_metrics_to_gateway(
             metric_names=metric_names,
         )
     return bool(result.success)
-
-
-def _publication_grouping_key(
-    pipeline_name: str | None, run_type: str | None, extra: Mapping[str, str] | None
-) -> dict[str, str]:
-    """Build explicit publication labels with caller overrides applied last."""
-    grouping_key: dict[str, str] = {}
-    if pipeline_name:
-        grouping_key["pipeline"] = pipeline_name
-    if run_type:
-        grouping_key["run_type"] = run_type
-    if extra:
-        grouping_key.update(extra)
-    return grouping_key
 
 
 def _seed_run_type(run_type: str | None, workflow_name: str | None) -> str:

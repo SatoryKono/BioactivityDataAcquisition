@@ -89,7 +89,6 @@ def composed_writer(
         metadata_coordinator=None,
         audit=NoOpAudit(),
         flat_structure=ctx.bronze_flat,
-        root_identity=(owner, "activity") if owner != "absent" else None,
     )
 
 

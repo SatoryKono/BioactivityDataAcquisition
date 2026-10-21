@@ -128,20 +128,7 @@ class SelectorOptionsCache:
             )
         if state == "stale":
             return self._response(query, entry)
-        await self._wait_for_refresh(
-            query, entry, timeout_seconds, queue_timeout_seconds
-        )
-        return self._response(query, entry)
-
-    async def _wait_for_refresh(
-        self,
-        query: Mapping[str, str],
-        entry: _Entry,
-        timeout_seconds: float,
-        queue_timeout_seconds: float,
-    ) -> None:
-        """Share the cold refresh deadline and preserve its recorded failure."""
-        task = self._tasks.get(selector_options_key(query))
+        task = self._tasks.get(key)
         if task is not None:
             try:
                 await asyncio.wait_for(
@@ -156,6 +143,7 @@ class SelectorOptionsCache:
                 reason=entry.error or "capacity_exhausted",
                 status_code=504 if entry.error == "deadline_exceeded" else 503,
             )
+        return self._response(query, entry)
 
     def _response(self, query: Mapping[str, str], entry: _Entry) -> dict[str, object]:
         payload = deepcopy(entry.payload or {})

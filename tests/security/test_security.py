@@ -14,8 +14,6 @@ from pathlib import Path
 
 import pytest
 
-from tests.helpers.code_execution_scan import execution_calls
-
 pytestmark = pytest.mark.security
 
 # Paths
@@ -535,10 +533,17 @@ class TestInputValidation:
     ) -> None:
         """Verify no dangerous eval/exec calls in source code."""
         violations = []
+        dangerous_patterns = [
+            (r"\beval\s*\(", "eval()"),
+            (r"\bexec\s*\(", "exec()"),
+            (r"\bcompile\s*\([^)]*\bexec\b", "compile() with exec mode"),
+        ]
+
         for py_file, content in source_contents:
-            for desc in execution_calls(content):
-                rel_path = py_file.relative_to(PROJECT_ROOT)
-                violations.append(f"{rel_path}: {desc}")
+            for pattern, desc in dangerous_patterns:
+                if re.search(pattern, content):
+                    rel_path = py_file.relative_to(PROJECT_ROOT)
+                    violations.append(f"{rel_path}: {desc}")
 
         assert not violations, "Dangerous code execution found:\n" + "\n".join(
             violations

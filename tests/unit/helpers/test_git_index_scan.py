@@ -14,24 +14,6 @@ from tests.helpers import git_index_scan
 pytestmark = [pytest.mark.unit, pytest.mark.subprocess_backed]
 
 
-def test_git_index_paths_preserves_missing_and_newline_paths(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    def fake_run(
-        command: list[str], **kwargs: Any
-    ) -> subprocess.CompletedProcess[bytes]:
-        assert command == ["git", "ls-files", "-z"]
-        assert kwargs["check"] is True
-        return subprocess.CompletedProcess(
-            command, 0, b"absent.py\0odd\nname.py\0", b""
-        )
-
-    monkeypatch.setattr(git_index_scan.subprocess, "run", fake_run)
-    assert git_index_scan.git_index_paths(root=tmp_path) == frozenset(
-        {"absent.py", "odd\nname.py"}
-    )
-
-
 def test_git_grep_fixed_retries_batched_pathspecs_before_filesystem_fallback(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

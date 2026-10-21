@@ -49,7 +49,6 @@ from bioetl.infrastructure.storage.workflow_row_reconciliation import (
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
-    import pyarrow as pa
     from bioetl.domain.workflow.config import WorkflowStepConfig
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.config.settings_api import Settings
@@ -159,7 +158,16 @@ class WorkflowCohortResolver:
         entry, expected_count = resolve_cohort_lineage(
             source, upstream, f"gold:{cohort.table}"
         )
-        entry = _validated_cohort_entry(entry, source)
+        if (
+            not isinstance(entry, Mapping)
+            or type(entry.get("version")) is not int
+            or cast(int, entry.get("version")) < 0
+            or not isinstance(entry.get("table_id"), str)
+            or not entry.get("table_id")
+            or entry.get("run_ids") != [source.run_id]
+            or entry.get("producer_pipeline") != source.pipeline_name
+        ):
+            raise ValueError("reference_cohort producer snapshot identity mismatch")
         try:
             table = await self.reader.read_table(
                 cohort.table.replace(".", "/", 1),
@@ -168,10 +176,31 @@ class WorkflowCohortResolver:
             )
         except (OSError, KeyError) as error:
             raise ValueError("reference_cohort source snapshot unavailable") from error
-        rows = _cohort_rows(table, entry, source.run_id)
+        current = filter_current_rows(
+            table.to_pylist(), current_only=True, layer="gold"
+        )
+        run_column = next(
+            (name for name in RUN_COLUMNS if name in table.column_names), None
+        )
+        if run_column is not None:
+            rows = [row for row in current if str(row[run_column]) == source.run_id]
+        else:
+            rows = filter_owned_entities(current, entry)
         if len(rows) != expected_count:
             raise ValueError("reference_cohort source count or run identity mismatch")
-        keys = _reference_keys(rows, cohort.column, step.run_options.limit)
+        keys = tuple(
+            sorted(
+                {
+                    str(row[cohort.column])
+                    for row in rows
+                    if row[cohort.column] is not None
+                }
+            )
+        )
+        if not keys:
+            raise ValueError("reference_cohort contains no reference keys")
+        if step.run_options.limit is not None and len(keys) > step.run_options.limit:
+            raise ValueError("reference_cohort exceeds the requested record limit")
         return replace(
             step,
             run_options=replace(
@@ -183,45 +212,3 @@ class WorkflowCohortResolver:
                 ignore_yaml_filter=True,
             ),
         )
-
-
-def _validated_cohort_entry(entry: object, source: RunResult) -> Mapping[str, object]:
-    """Require the exact producer run, table identity and pinned version."""
-    if (
-        not isinstance(entry, Mapping)
-        or type(entry.get("version")) is not int
-        or cast(int, entry.get("version")) < 0
-        or not isinstance(entry.get("table_id"), str)
-        or not entry.get("table_id")
-        or entry.get("run_ids") != [source.run_id]
-        or entry.get("producer_pipeline") != source.pipeline_name
-    ):
-        raise ValueError("reference_cohort producer snapshot identity mismatch")
-    return entry
-
-
-def _reference_keys(
-    rows: list[dict[str, object]], column: str, limit: int | None
-) -> tuple[str, ...]:
-    """Keep the complete nonblank reference key cohort inside the requested limit."""
-    keys = tuple(sorted({str(row[column]) for row in rows if row[column] is not None}))
-    if not keys:
-        raise ValueError("reference_cohort contains no reference keys")
-    if limit is not None and len(keys) > limit:
-        raise ValueError("reference_cohort exceeds the requested record limit")
-    return keys
-
-
-def _cohort_rows(
-    table: pa.Table, entry: Mapping[str, object], run_id: str
-) -> list[dict[str, object]]:
-    """Select only current rows owned by the pinned producer run."""
-    current = filter_current_rows(table.to_pylist(), current_only=True, layer="gold")
-    run_column = next(
-        (name for name in RUN_COLUMNS if name in table.column_names), None
-    )
-    if run_column is not None:
-        rows = [row for row in current if str(row[run_column]) == run_id]
-    else:
-        rows = filter_owned_entities(current, entry)
-    return rows

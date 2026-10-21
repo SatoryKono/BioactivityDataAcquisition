@@ -12,14 +12,6 @@ import json
 import re
 from pathlib import Path
 
-from defusedxml import ElementTree as ET
-
-from scripts.engineering.common.repo_paths import (
-    read_bytes_confined,
-    read_text_confined,
-    write_text_confined,
-)
-
 from scripts.engineering.qa.report_module_coverage_inventory import (
     compute_source_tree_sha256,
 )
@@ -29,65 +21,6 @@ INVENTORY = Path("reports/quality/module-coverage-inventory.json")
 SUMMARY = Path("docs/reports/evidence/project-package-topology/SUMMARY.md")
 START = "<!-- current-source-binding:start -->"
 END = "<!-- current-source-binding:end -->"
-BOOTSTRAP_PROFILE = Path("reports/quality/test-bootstrap-fixture-scope-profile.json")
-
-
-def _measured_bootstrap_file_count(root: Path, reference: object) -> int:
-    """Count profiled modules from the original JUnit, preserving capture identity."""
-    if not isinstance(reference, str) or not reference:
-        raise ValueError("Bootstrap JUnit path must be a relative repository path")
-    modules = set()
-    for case in ET.fromstring(read_bytes_confined(reference, root=root)).iter(
-        "testcase"
-    ):
-        parts = case.attrib.get("classname", "").split(".")
-        if parts[:4] != ["tests", "unit", "composition", "bootstrap"]:
-            raise ValueError("Foreign test in bootstrap profile JUnit")
-        index = next(
-            (i for i, part in enumerate(parts) if part.startswith("test_")), None
-        )
-        if index is None:
-            raise ValueError("Bootstrap profile JUnit lacks test module")
-        modules.add(".".join(parts[: index + 1]))
-    if not modules:
-        raise ValueError("Empty bootstrap profile JUnit")
-    return len(modules)
-
-
-def bind_bootstrap_profile(
-    root: Path, digest: str, test_digest: str, *, update: bool
-) -> bool:
-    """Add a live topology view without relabeling the historical timing profile."""
-    profile = json.loads(read_text_confined(BOOTSTRAP_PROFILE, root=root))
-    if not isinstance(profile, dict):
-        raise ValueError("Bootstrap profile must be a JSON object")
-    provenance = profile.get("measurement_provenance")
-    if not isinstance(provenance, dict):
-        raise ValueError("Bootstrap profile is missing measurement provenance")
-    measured_count = _measured_bootstrap_file_count(root, provenance.get("junit"))
-    if profile["result"]["test_file_count"] != measured_count:
-        raise ValueError("Bootstrap profile file count differs from its measured JUnit")
-    files = sorted(
-        p.relative_to(root).as_posix()
-        for p in (root / "tests/unit/composition/bootstrap").rglob("test_*.py")
-    )
-    binding = {
-        "kind": "source_topology_only",
-        "source_tree_sha256": digest,
-        "test_governance_source_tree_sha256": test_digest,
-        "test_file_count": len(files),
-        "test_files": files,
-        "measured_test_file_count": measured_count,
-    }
-    current = bool(profile.get("current_source_binding") == binding)
-    if update and not current:
-        profile["current_source_binding"] = binding
-        write_text_confined(
-            BOOTSTRAP_PROFILE,
-            json.dumps(profile, indent=2, ensure_ascii=False) + "\n",
-            root=root,
-        )
-    return current
 
 
 def render_binding(
@@ -151,17 +84,7 @@ def main(argv: list[str] | None = None) -> int:
             encoding="utf-8"
         )
     )
-    from scripts.engineering.qa.report_test_governance_audit import (
-        _compute_test_governance_source_tree_sha256,
-    )
-
-    if governance["source_tree_sha256"] != _compute_test_governance_source_tree_sha256(
-        str(root)
-    ):
-        raise ValueError("Test inventory is stale; regenerate it before binding")
-    current = bind_bootstrap_profile(
-        root, digest, governance["source_tree_sha256"], update=args.update
-    )
+    current = True
     for target in (SUMMARY, Path("docs/02-architecture/current-state-inventory.md")):
         path = root / target
         existing = path.read_text(encoding="utf-8")

@@ -77,21 +77,6 @@ class TestBronzeWriterConstruction:
         writer = BronzeWriter(tmp_path, logger, metrics)
         assert writer.validate_json is True
         assert writer._flat_structure is False
-        owned = BronzeWriter(
-            tmp_path,
-            logger,
-            metrics,
-            root_identity=("chembl", "activity"),
-        )
-        assert owned._root_identity == ("chembl", "activity")
-        with pytest.raises(TypeError, match="either runtime_services or legacy"):
-            BronzeWriter(
-                tmp_path,
-                logger,
-                metrics,
-                runtime_services=services,
-                root_identity=("chembl", "activity"),
-            )
         packed = BronzeWriter(
             tmp_path,
             logger,
