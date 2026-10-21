@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-21T05:24:06.202949+00:00",
+  "generated_at": "2026-10-21T06:14:28.007086+00:00",
   "summary": {
     "total_scripts": 659,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 16,
       "scripts": 553,
       "skills": 13,
-      "tests": 476
+      "tests": 478
     }
   },
   "scripts": [
@@ -13271,19 +13271,25 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/performance/generate_report.py",
-          "line": 77,
+          "line": 278,
           "source_group": "scripts",
           "text": "- Peak RSS was measured in an isolated run (without creating in-memory CSVs which polluted previous results). Hash checking was performed externally using `scripts/engineering/performance/check_hash.p"
         },
         {
           "path": "scripts/engineering/performance/run_measurements.sh",
-          "line": 39,
+          "line": 43,
           "source_group": "scripts",
           "text": "uv run --frozen --no-build python scripts/engineering/performance/check_hash.py \"$parquet\" >\"$OUT_DIR/hash_${size}.txt\""
+        },
+        {
+          "path": "tests/unit/scripts/engineering/test_eager_lazy_report.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.engineering.performance import check_hash, generate_report"
         }
       ],
       "owner": "@bioetl-platform",
@@ -13296,13 +13302,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/performance/run_measurements.sh",
-          "line": 43,
+          "line": 47,
           "source_group": "scripts",
           "text": "uv run --frozen --no-build python scripts/engineering/performance/generate_report.py"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/test_eager_lazy_report.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.engineering.performance import check_hash, generate_report"
         }
       ],
       "owner": "@bioetl-platform",
@@ -13319,7 +13331,7 @@
       "references": [
         {
           "path": "scripts/engineering/performance/generate_report.py",
-          "line": 76,
+          "line": 277,
           "source_group": "scripts",
           "text": "- **Measurement Tooling:** `scripts/engineering/performance/measure_merge_eager.py` and `scripts/engineering/performance/run_measurements.sh`."
         },
@@ -13337,7 +13349,7 @@
         },
         {
           "path": "scripts/engineering/performance/run_measurements.sh",
-          "line": 35,
+          "line": 37,
           "source_group": "scripts",
           "text": "/usr/bin/time -v uv run --frozen --no-build python scripts/engineering/performance/measure_merge_eager.py lazy \"$size\" >\"$OUT_DIR/lazy_${size}.txt\" 2>&1"
         }
@@ -13371,13 +13383,19 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/performance/generate_report.py",
-          "line": 76,
+          "line": 277,
           "source_group": "scripts",
           "text": "- **Measurement Tooling:** `scripts/engineering/performance/measure_merge_eager.py` and `scripts/engineering/performance/run_measurements.sh`."
+        },
+        {
+          "path": "scripts/engineering/performance/generate_report.py",
+          "line": 287,
+          "source_group": "scripts",
+          "text": "The raw logs are the immutable snapshot of that run. `/usr/bin/time` recorded the command that actually executed. Later hardening of `run_measurements.sh` to `uv run --frozen --no-build` does not rewr"
         }
       ],
       "owner": "@bioetl-platform",
