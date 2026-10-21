@@ -221,6 +221,8 @@ class TestCreateBatchProcessingComponents:
         assert result.transformer is tf
         assert result.writer is wr
         mock_column_order_service.assert_not_called()
+        options = mock_batch_writer.call_args.kwargs["options"]
+        assert options.gold_quarantine_port is services.quarantine
 
     @patch(
         "bioetl.composition.factories.services.pipeline_processing_components_builder.ColumnOrderService"

@@ -49,6 +49,10 @@ from bioetl.infrastructure.quarantine.status_events import (
 from bioetl.infrastructure.quarantine.status_events import (
     status_events_path as build_status_events_path,
 )
+from bioetl.infrastructure.quarantine.write_dedup import (
+    select_new_quarantine_requests,
+)
+from bioetl.infrastructure.quarantine.write_lock import quarantine_append_lock
 from bioetl.infrastructure.storage.delta.table_ops import read_delta_records
 
 if TYPE_CHECKING:
@@ -88,6 +92,25 @@ def _normalize_quarantine_record(record: QuarantineWriteRequest) -> JsonDict:
         "dq_status": QuarantineRecordStatus.NEW.value,
         "run_id": str(run_id) if run_id else "",
     }
+
+
+def _append_new_records(
+    base_path: str,
+    records: list[QuarantineWriteRequest],
+) -> None:
+    """Select unseen entry ids and append them under one path lock.
+
+    Threads in this process and other processes on the same machine share that
+    lock. Writers on other hosts do not.
+    """
+    with quarantine_append_lock(base_path):
+        fresh = select_new_quarantine_requests(base_path, records)
+        if not fresh:
+            return
+        _write_records_to_delta(
+            base_path,
+            [_normalize_quarantine_record(record) for record in fresh],
+        )
 
 
 def _write_records_to_delta(base_path: str, records: list[JsonDict]) -> None:
@@ -180,11 +203,16 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
         self,
         records: list[QuarantineWriteRequest],
     ) -> None:
-        """Write multiple quarantine records in one Delta append."""
+        """Write multiple quarantine records in one Delta append.
+
+        Requests that carry ``entry_id`` are skipped when that id is already
+        stored in metadata or repeats inside the same batch. The stored-id
+        check and the append share one lock per table path, including a
+        sibling lock file for other processes on the same machine.
+        """
         if not records:
             return
-        normalized_records = [self._normalize_record(record) for record in records]
-        await asyncio.to_thread(self._write_to_delta, normalized_records)
+        await asyncio.to_thread(_append_new_records, self.base_path, records)
 
     def _normalize_record(
         self,

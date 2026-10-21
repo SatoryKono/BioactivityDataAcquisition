@@ -15,6 +15,10 @@ from bioetl.application.core._batch_write_support import (
     safe_write_gold,
     safe_write_silver,
 )
+from bioetl.application.core._gold_outcome_disposition import (
+    bind_gold_quarantine_batch_if_supported,
+    consume_gold_outcome_quarantine_count,
+)
 from bioetl.application.services.batch_processing.operation_errors import (
     OPERATION_ERRORS as _OPERATION_ERRORS,
 )
@@ -121,6 +125,7 @@ async def write_gold_layer(
     silver_result = cast("SilverWriteResult | None", silver_outcome.write_result)
     silver_refs = [silver_result] if silver_result is not None else None
     if quarantine_manager is None:
+        bind_gold_quarantine_batch_if_supported(writer, batch_id)
         receipt = await span_executor.execute_with_span(
             "write_gold",
             writer.write_gold(result.gold_records, silver_refs=silver_refs),
@@ -129,12 +134,15 @@ async def write_gold_layer(
             on_error=lambda e: writer.log_and_track_write_error("gold", e, batch_id),
         )
         receipt = require_complete_gold_receipt(receipt)
+        quarantined = consume_gold_outcome_quarantine_count(writer)
+        confirmed = max(len(result.gold_records) - quarantined, 0)
         return LayerWriteOutcome(
             layer="gold",
             write_result=receipt,
-            status="written",
+            status="quarantined" if confirmed == 0 and quarantined else "written",
             candidate_count=len(result.gold_records),
-            confirmed_count=len(result.gold_records),
+            confirmed_count=confirmed,
+            quarantined_count=quarantined,
         )
     span_run = span_executor.execute_with_span
     write_context = LayerWriteContext(
