@@ -19,6 +19,10 @@ from typing import Any
 import pytest
 import yaml
 
+from scripts.schema.analysis.generate_config_matrix import (
+    build_config_discrepancy_evidence,
+)
+
 from bioetl.interfaces.http.control_plane_identity.types import (
     IDENTITY_EVIDENCE_CONTRACT,
     AnchorSpec,
@@ -312,7 +316,10 @@ def test_issue_5943_config_compatibility_and_contracts_are_clean() -> None:
 
     metrics = discrepancy["metrics"]
     assert metrics["config_count"] == 27
-    assert metrics["unique_parameter_count"] == 419
+    # Parameter paths evolve with the config contract; all discrepancy debt stays zero.
+    assert metrics == json.loads(
+        build_config_discrepancy_evidence().baseline_metrics_json
+    )
     assert metrics["inconsistent_parameter_count"] == 0
     assert metrics["raw_inconsistent_parameter_count"] == 0
     assert metrics["sanctioned_partial_parameter_count"] == 0

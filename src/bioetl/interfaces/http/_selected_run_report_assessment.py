@@ -11,7 +11,10 @@ from bioetl.application.observability.reason_aliases import display_reasons_text
 from bioetl.application.services.control_plane.manifest.diagnostics.selected_run_replay_readiness import (
     INSUFFICIENT,
 )
-from bioetl.application.services.run_reports.query import list_pipeline_reports
+from bioetl.application.services.run_reports.query import (
+    ReportIndexEntry,
+    list_pipeline_reports,
+)
 from bioetl.composition.observability_runtime import create_run_report_store
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.selected_status import (
@@ -101,13 +104,17 @@ def _selected_pipeline(
         store=store if store is not None else create_run_report_store(),
     )
     matches = [
-        entry.owner
-        for entry in entries
-        if entry.run_id == run_id and (owners is None or entry.owner in owners)
+        entry.owner for entry in entries if _entry_in_scope(entry, run_id, owners)
     ]
     if len(matches) > 1:
         raise ValueError("run_id_ambiguous")
     return matches[0] if matches else None
+
+
+def _entry_in_scope(
+    entry: ReportIndexEntry, run_id: str, owners: set[str] | None
+) -> bool:
+    return entry.run_id == run_id and (owners is None or entry.owner in owners)
 
 
 def _legacy_assessment(report: dict[str, object]) -> tuple[dict[str, object], str, str]:
@@ -254,25 +261,7 @@ def _manifest_snapshot(port: object, run_id: str) -> dict[str, object] | None:
     config_hash = getattr(provenance, "effective_config_hash", None)
     lock_hash = getattr(provenance, "dependency_lock_hash", None)
     fingerprint = ",".join(fingerprints) if fingerprints else None
-    recorded = _recorded_object_flags(manifest)
-    snapshot_verified = _verify_snapshot_objects(manifest)
-    objects = {
-        code: flag
-        for code, flag in (
-            ("effective_config_hash", recorded.get("effective_config_hash")),
-            ("dependency_lock_hash", recorded.get("dependency_lock_hash")),
-            (
-                "input_snapshot_fingerprint",
-                recorded.get("input_snapshot_fingerprint", snapshot_verified),
-            ),
-        )
-        if isinstance(flag, bool)
-    }
-    verify_objects = getattr(port, "verify_replay_objects", None)
-    if callable(verify_objects):
-        verified = verify_objects(manifest)
-        if isinstance(verified, dict):
-            objects = verified
+    objects = _manifest_object_flags(port, manifest)
     return {
         "effective_config_hash": config_hash,
         "dependency_lock_hash": lock_hash,
@@ -295,3 +284,27 @@ __all__ = [
     "_saved_trust",
     "_selected_pipeline",
 ]
+
+
+def _manifest_object_flags(port: object, manifest: object) -> dict[str, object]:
+    """Prefer verified replay objects while preserving recorded fallback flags."""
+    recorded = _recorded_object_flags(manifest)
+    snapshot_verified = _verify_snapshot_objects(manifest)
+    objects: dict[str, object] = {
+        code: flag
+        for code, flag in (
+            ("effective_config_hash", recorded.get("effective_config_hash")),
+            ("dependency_lock_hash", recorded.get("dependency_lock_hash")),
+            (
+                "input_snapshot_fingerprint",
+                recorded.get("input_snapshot_fingerprint", snapshot_verified),
+            ),
+        )
+        if isinstance(flag, bool)
+    }
+    verify_objects = getattr(port, "verify_replay_objects", None)
+    if callable(verify_objects):
+        verified = verify_objects(manifest)
+        if isinstance(verified, dict):
+            objects = verified
+    return objects

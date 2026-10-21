@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from scripts.engineering.qa.report_module_coverage_inventory import (
@@ -21,6 +22,56 @@ INVENTORY = Path("reports/quality/module-coverage-inventory.json")
 SUMMARY = Path("docs/reports/evidence/project-package-topology/SUMMARY.md")
 START = "<!-- current-source-binding:start -->"
 END = "<!-- current-source-binding:end -->"
+BOOTSTRAP_PROFILE = Path("reports/quality/test-bootstrap-fixture-scope-profile.json")
+
+
+def _measured_bootstrap_file_count(root: Path, reference: str) -> int:
+    """Count profiled modules from the original JUnit, preserving capture identity."""
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    path = resolve_output_path(reference, root=root)
+    modules = set()
+    for case in ET.parse(path).iter("testcase"):
+        parts = case.attrib["classname"].split(".")
+        if parts[:4] != ["tests", "unit", "composition", "bootstrap"]:
+            raise ValueError("Foreign test in bootstrap profile JUnit")
+        index = next(i for i, part in enumerate(parts) if part.startswith("test_"))
+        modules.add(".".join(parts[: index + 1]))
+    if not modules:
+        raise ValueError("Empty bootstrap profile JUnit")
+    return len(modules)
+
+
+def bind_bootstrap_profile(
+    root: Path, digest: str, test_digest: str, *, update: bool
+) -> bool:
+    """Add a live topology view without relabeling the historical timing profile."""
+    path = root / BOOTSTRAP_PROFILE
+    profile = json.loads(path.read_text(encoding="utf-8"))
+    measured_count = _measured_bootstrap_file_count(
+        root, profile["measurement_provenance"]["junit"]
+    )
+    if profile["result"]["test_file_count"] != measured_count:
+        raise ValueError("Bootstrap profile file count differs from its measured JUnit")
+    files = sorted(
+        p.relative_to(root).as_posix()
+        for p in (root / "tests/unit/composition/bootstrap").rglob("test_*.py")
+    )
+    binding = {
+        "kind": "source_topology_only",
+        "source_tree_sha256": digest,
+        "test_governance_source_tree_sha256": test_digest,
+        "test_file_count": len(files),
+        "test_files": files,
+        "measured_test_file_count": measured_count,
+    }
+    current = profile.get("current_source_binding") == binding
+    if update and not current:
+        profile["current_source_binding"] = binding
+        path.write_text(
+            json.dumps(profile, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        )
+    return current
 
 
 def render_binding(
@@ -84,7 +135,17 @@ def main(argv: list[str] | None = None) -> int:
             encoding="utf-8"
         )
     )
-    current = True
+    from scripts.engineering.qa.report_test_governance_audit import (
+        _compute_test_governance_source_tree_sha256,
+    )
+
+    if governance["source_tree_sha256"] != _compute_test_governance_source_tree_sha256(
+        str(root)
+    ):
+        raise ValueError("Test inventory is stale; regenerate it before binding")
+    current = bind_bootstrap_profile(
+        root, digest, governance["source_tree_sha256"], update=args.update
+    )
     for target in (SUMMARY, Path("docs/02-architecture/current-state-inventory.md")):
         path = root / target
         existing = path.read_text(encoding="utf-8")

@@ -1,10 +1,15 @@
 """A current-source projection must not impersonate or overwrite a capture."""
 
+import json
+from pathlib import Path
+
 import pytest
 
 from scripts.engineering.qa.report_topology_source_binding import (
     END,
     START,
+    BOOTSTRAP_PROFILE,
+    bind_bootstrap_profile,
     render_binding,
 )
 
@@ -54,3 +59,47 @@ def test_source_binding_rejects_ambiguous_history():
 def test_source_binding_rejects_invalid_inventory():
     with pytest.raises(ValueError, match="identity"):
         render_binding("historical", "unknown", 3)
+
+
+def _bootstrap_profile(root: Path) -> dict[str, object]:
+    profile = {
+        "result": {"test_file_count": 1, "test_count": 2, "duration_seconds": 1.5},
+        "measurement_provenance": {"junit": "capture.xml", "measured_head": "original"},
+    }
+    path = root / BOOTSTRAP_PROFILE
+    path.parent.mkdir(parents=True)
+    path.write_text(json.dumps(profile), encoding="utf-8")
+    (root / "capture.xml").write_text(
+        '<testsuite><testcase classname="tests.unit.composition.bootstrap.test_one.Class"/>'
+        '<testcase classname="tests.unit.composition.bootstrap.test_one.OtherClass"/></testsuite>',
+        encoding="utf-8",
+    )
+    test = root / "tests/unit/composition/bootstrap/test_one.py"
+    test.parent.mkdir(parents=True)
+    test.write_text("", encoding="utf-8")
+    return profile
+
+
+def test_bootstrap_binding_preserves_measured_profile_and_detects_new_topology(
+    tmp_path: Path,
+):
+    historical = _bootstrap_profile(tmp_path)
+    assert not bind_bootstrap_profile(tmp_path, "a" * 64, "b" * 64, update=False)
+    assert not bind_bootstrap_profile(tmp_path, "a" * 64, "b" * 64, update=True)
+    assert bind_bootstrap_profile(tmp_path, "a" * 64, "b" * 64, update=False)
+    (tmp_path / "tests/unit/composition/bootstrap/test_two.py").write_text(
+        "", encoding="utf-8"
+    )
+    assert not bind_bootstrap_profile(tmp_path, "a" * 64, "b" * 64, update=False)
+    bind_bootstrap_profile(tmp_path, "a" * 64, "b" * 64, update=True)
+    updated = json.loads((tmp_path / BOOTSTRAP_PROFILE).read_text(encoding="utf-8"))
+    assert updated.pop("current_source_binding")["test_file_count"] == 2
+    assert updated == historical
+
+
+def test_bootstrap_binding_rejects_mismatched_historical_capture(tmp_path: Path):
+    historical = _bootstrap_profile(tmp_path)
+    historical["result"]["test_file_count"] = 2
+    (tmp_path / BOOTSTRAP_PROFILE).write_text(json.dumps(historical), encoding="utf-8")
+    with pytest.raises(ValueError, match="measured JUnit"):
+        bind_bootstrap_profile(tmp_path, "a" * 64, "b" * 64, update=True)

@@ -50,17 +50,20 @@ _UNKNOWN_CHECK_LABELS = {
 }
 
 
+def _check_labels(value: object, *, translate: bool = False) -> str:
+    """Render a recorded check list, preserving its empty marker."""
+    if not isinstance(value, list) or not value:
+        return "—"
+    if translate:
+        return ", ".join(
+            _UNKNOWN_CHECK_LABELS.get(str(code), str(code)) for code in value
+        )
+    return ", ".join(value)
+
+
 def _readiness_fields(projection: Mapping[str, object]) -> dict[str, object]:
-    blockers = projection.get("blockers")
-    unknown = projection.get("unknown_checks")
-    blocker_text = (
-        ", ".join(blockers) if isinstance(blockers, list) and blockers else "—"
-    )
-    unknown_text = (
-        ", ".join(_UNKNOWN_CHECK_LABELS.get(str(code), str(code)) for code in unknown)
-        if isinstance(unknown, list) and unknown
-        else "—"
-    )
+    blocker_text = _check_labels(projection.get("blockers"))
+    unknown_text = _check_labels(projection.get("unknown_checks"), translate=True)
     row = {
         key: value
         for key, value in projection.items()

@@ -317,12 +317,7 @@ def _finish_private_stage(
     except OSError as exc:
         stage_error = exc
     try:
-        owned = os.fstat(stage_fd)
-        named = os.stat(name, dir_fd=root_fd, follow_symlinks=False)
-        if (owned.st_dev, owned.st_ino) != (named.st_dev, named.st_ino):
-            raise OSError("Bronze cleanup stage replaced before retirement")
-        os.rmdir(name, dir_fd=root_fd)
-        os.fsync(root_fd)
+        _retire_private_stage(root_fd, stage_fd, name)
     except OSError as exc:
         stage_error = stage_error or exc
     finally:
@@ -441,3 +436,13 @@ def _shared_lease_after_pending_check(
     ):
         raise OSError("Bronze writer refused while cleanup recovery is pending")
     return lease
+
+
+def _retire_private_stage(root_fd: int, stage_fd: int, name: str) -> None:
+    """Retire only the still-named pinned directory, then persist its removal."""
+    owned = os.fstat(stage_fd)
+    named = os.stat(name, dir_fd=root_fd, follow_symlinks=False)
+    if (owned.st_dev, owned.st_ino) != (named.st_dev, named.st_ino):
+        raise OSError("Bronze cleanup stage replaced before retirement")
+    os.rmdir(name, dir_fd=root_fd)
+    os.fsync(root_fd)

@@ -21,7 +21,7 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1643 OK| application
+    application -->|1642 OK| application
     application -->|1118 OK| domain
     composition -->|230 OK| application
     composition -->|649 OK| composition
@@ -32,7 +32,7 @@ flowchart LR
     infrastructure -->|1316 OK| infrastructure
     interfaces -->|72 OK| application
     interfaces -->|61 OK| composition
-    interfaces -->|86 OK| domain
+    interfaces -->|87 OK| domain
     interfaces -->|454 OK| interfaces
 ```
 
@@ -40,7 +40,7 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1643 | allowed |
+| `application`    | `application`    |    1642 | allowed |
 | `application`    | `domain`         |    1118 | allowed |
 | `composition`    | `application`    |     230 | allowed |
 | `composition`    | `composition`    |     649 | allowed |
@@ -51,7 +51,7 @@ flowchart LR
 | `infrastructure` | `infrastructure` |    1316 | allowed |
 | `interfaces`     | `application`    |      72 | allowed |
 | `interfaces`     | `composition`    |      61 | allowed |
-| `interfaces`     | `domain`         |      86 | allowed |
+| `interfaces`     | `domain`         |      87 | allowed |
 | `interfaces`     | `interfaces`     |     454 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
@@ -88,8 +88,8 @@ flowchart LR
 | `application.services`         | `domain.value_objects`                     |      25 |
 | `composition.bootstrap`        | `infrastructure.control_plane`             |      25 |
 | `infrastructure.adapters`      | `domain.exceptions`                        |      24 |
+| `interfaces.http`              | `domain.control_plane`                     |      24 |
 | `application.services`         | `domain.exceptions`                        |      23 |
-| `interfaces.http`              | `domain.control_plane`                     |      23 |
 | `application.core`             | `domain.normalization`                     |      22 |
 | `application.pipelines`        | `domain.entities`                          |      22 |
 | `application.services`         | `domain.normalization`                     |      22 |

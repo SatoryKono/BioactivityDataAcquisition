@@ -6,13 +6,13 @@
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "cc6f79f4567bb7cea47c6d96b7f7b8d3a98d57bca9ec31e18d2a5f004e53de63"
+    "source_fingerprint": "90b7d4a462f065dc9c2588635496ce16c423ed48aeeae442fb1480138a4a96e1"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1643,
+      "imports": 1642,
       "allowed": true
     },
     {
@@ -78,7 +78,7 @@
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 86,
+      "imports": 87,
       "allowed": true
     },
     {
@@ -240,13 +240,13 @@
       "imports": 24
     },
     {
-      "source": "application.services",
-      "target": "domain.exceptions",
-      "imports": 23
-    },
-    {
       "source": "interfaces.http",
       "target": "domain.control_plane",
+      "imports": 24
+    },
+    {
+      "source": "application.services",
+      "target": "domain.exceptions",
       "imports": 23
     },
     {
