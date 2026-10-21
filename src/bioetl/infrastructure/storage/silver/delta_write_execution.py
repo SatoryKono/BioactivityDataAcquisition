@@ -67,6 +67,39 @@ def _require_delta_write_request(value: object) -> _DeltaWriteRequest:
     return value
 
 
+def _create_publishers(
+    loop: asyncio.AbstractEventLoop, result_future: asyncio.Future[Any]
+) -> tuple[Callable[[Any], None], Callable[[BaseException], None]]:
+    def _publish_result(result: Any) -> None:
+        if not result_future.done():
+            result_future.set_result(result)
+
+    def _publish_exception(exc: BaseException) -> None:
+        if not result_future.done():
+            result_future.set_exception(exc)
+
+    return _publish_result, _publish_exception
+
+
+def _build_worker(
+    call: Callable[[], Any],
+    loop: asyncio.AbstractEventLoop,
+    publish_result: Callable[[Any], None],
+    publish_exception: Callable[[BaseException], None],
+) -> Callable[[], None]:
+    def _worker() -> None:
+        try:
+            result = call()
+        except Exception as exc:
+            with suppress(RuntimeError):
+                loop.call_soon_threadsafe(publish_exception, exc)
+            return
+        with suppress(RuntimeError):
+            loop.call_soon_threadsafe(publish_result, result)
+
+    return _worker
+
+
 async def _await_blocking_deltalake_call[BlockingResult](
     *,
     operation_name: str,
@@ -84,25 +117,8 @@ async def _await_blocking_deltalake_call[BlockingResult](
     loop = asyncio.get_running_loop()
     result_future: asyncio.Future[BlockingResult] = loop.create_future()
 
-    def _publish_result(result: BlockingResult) -> None:
-        if not result_future.done():
-            result_future.set_result(result)
-
-    def _publish_exception(exc: BaseException) -> None:
-        if not result_future.done():
-            result_future.set_exception(exc)
-
-    def _worker() -> None:
-        try:
-            result = call()
-        # pragma: no cover - surfaced through await
-        # NOSONAR python:S5754 - thread boundary must capture all call failures
-        except Exception as exc:
-            with suppress(RuntimeError):
-                loop.call_soon_threadsafe(_publish_exception, exc)
-            return
-        with suppress(RuntimeError):
-            loop.call_soon_threadsafe(_publish_result, result)
+    _publish_result, _publish_exception = _create_publishers(loop, result_future)
+    _worker = _build_worker(call, loop, _publish_result, _publish_exception)
 
     worker = threading.Thread(
         target=_worker,
