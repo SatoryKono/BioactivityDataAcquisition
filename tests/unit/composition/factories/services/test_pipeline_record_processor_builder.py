@@ -42,7 +42,6 @@ from bioetl.composition.factories.services.pipeline_record_processor_builder imp
     build_record_processor_config_and_validator,
     create_record_processor_from_pipeline,
 )
-from bioetl.infrastructure.validation import ContractAwareGoldValidator
 
 pytestmark = pytest.mark.unit
 
@@ -152,7 +151,6 @@ def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> Non
     assert request.gold_schema_policy_by_version is not None
     assert request.gold_schema_policy_by_version.active_schema is active_schema
     assert request.gold_schema_policy_by_version.for_version("1.0.0") is shadow_schema
-    assert request.gold_validator_factory is ContractAwareGoldValidator
 
 
 def test_build_record_processor_config_and_validator_forwards_paths_and_strict() -> (

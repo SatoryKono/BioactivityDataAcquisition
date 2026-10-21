@@ -93,11 +93,22 @@ class SilverDQAnalyzerPort(Protocol):
         """Analyze Silver data and generate DQ report.
 
         Args:
-            request: ``SilverDQAnalyzeRequest`` or the legacy tabular payload
-                accepted by ``coerce_silver_dq_analyze_request``. Payload fields
-                live on that request, not on this signature.
-            *args: Legacy positional payload fields coerced into the request.
-            **kwargs: Legacy keyword payload fields coerced into the request.
+            data: Opaque tabular payload with Silver data.
+            run_id: Pipeline run identifier.
+            pipeline: Pipeline name.
+            target_table: Silver target table reference.
+            source_batch_ids: List of Bronze batch IDs processed.
+            config: DQ report configuration.
+            timestamp: Report generation timestamp (UTC).
+            primary_keys: List of primary key columns.
+            soft_fail_threshold: Warning threshold for error rate.
+            hard_fail_threshold: Failure threshold for error rate.
+            input_record_count: Original record count before transforms.
+            quarantined_count: Number of quarantined records.
+            previous_schema: Previous schema for drift detection.
+            key_nullability_rules: Optional per-column nullability override rules
+                used to adjust DQ checks for columns that permit null primary keys
+                under specific conditions.
 
         Returns:
             SilverDQReport: Complete DQ report for Silver layer.

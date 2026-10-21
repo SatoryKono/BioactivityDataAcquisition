@@ -81,29 +81,24 @@ def restore_target_mapping(payload: JsonDict) -> ProteinClassTargetTypeMappingDa
         raise ValueError("composite_replay_target_mapping_invalid")
     restored = []
     for entry in entries:
-        restored.append(_restore_mapping_entry(entry))
+        if not isinstance(entry, dict) or set(entry) != {
+            "raw_label",
+            "canonical_l1",
+            "counts_for_target_type",
+        }:
+            raise ValueError("composite_replay_target_mapping_invalid")
+        raw, canonical, counting = (
+            entry["raw_label"],
+            entry["canonical_l1"],
+            entry["counts_for_target_type"],
+        )
+        if (
+            not isinstance(raw, str)
+            or not isinstance(canonical, str)
+            or not isinstance(counting, bool)
+        ):
+            raise ValueError("composite_replay_target_mapping_invalid")
+        restored.append(ProteinClassTopLevelMappingEntry(raw, canonical, counting))
     return ProteinClassTargetTypeMappingData(
         version, tuple(restored), frozenset(ignored)
     )
-
-
-def _restore_mapping_entry(entry: object) -> ProteinClassTopLevelMappingEntry:
-    """Validate the exact sealed entry shape before constructing its value object."""
-    if not isinstance(entry, dict) or set(entry) != {
-        "raw_label",
-        "canonical_l1",
-        "counts_for_target_type",
-    }:
-        raise ValueError("composite_replay_target_mapping_invalid")
-    raw, canonical, counting = (
-        entry["raw_label"],
-        entry["canonical_l1"],
-        entry["counts_for_target_type"],
-    )
-    if (
-        not isinstance(raw, str)
-        or not isinstance(canonical, str)
-        or not isinstance(counting, bool)
-    ):
-        raise ValueError("composite_replay_target_mapping_invalid")
-    return ProteinClassTopLevelMappingEntry(raw, canonical, counting)

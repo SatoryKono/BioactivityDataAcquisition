@@ -77,8 +77,6 @@ class JsonEncoderPort(Protocol):
 
         Args:
             obj: Dictionary to serialize
-            profile: Canonical JSON profile. Defaults to
-                ``CanonicalJsonProfile.PORT_V1``.
 
         Returns:
             Canonical JSON string

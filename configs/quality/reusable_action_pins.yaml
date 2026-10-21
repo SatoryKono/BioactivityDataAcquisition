@@ -17,5 +17,3 @@ pins:
     sha: "f87e5991a6d7451dcb8d9637bfbc97413f497069"
   - path: "actions/setup-node"
     sha: "249970729cb0ef3589644e2896645e5dc5ba9c38"
-  - path: "SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv"
-    sha: "d86bb7b8a4e8407c8bc35392cb52192137d649ca"

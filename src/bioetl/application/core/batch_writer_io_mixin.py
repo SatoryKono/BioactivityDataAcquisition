@@ -12,7 +12,6 @@ import orjson
 from bioetl.application.core._batch_writer_gold_support import (
     prepare_gold_records,
     prepare_validated_gold_write,
-    release_pending_gold_quarantine,
 )
 from bioetl.application.core.batch_processing_runtime import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
@@ -82,15 +81,6 @@ class BatchWriterIOMixin:
         tuple[list[GoldRecord], list[str] | None, object],
     ]
     _get_schema_columns: Callable[[object], set[str] | None]
-    _gold_quarantine_port: object
-    _gold_quarantine_batch_id: BatchID | None
-    _pending_gold_outcome_quarantine: tuple[object, ...]
-    _last_gold_outcome_quarantine_count: int
-    _gold_outcome_quarantine_indexes: tuple[int, ...]
-
-    def bind_gold_quarantine_batch(self, batch_id: BatchID | None) -> None:
-        """Remember the batch id for the next sync-accumulated quarantine flush."""
-        self._gold_quarantine_batch_id = batch_id
 
     def _resolve_gold_ingestion_ts(self) -> datetime:
         """Return the deterministic timestamp anchor for Gold write side effects."""
@@ -202,12 +192,6 @@ class BatchWriterIOMixin:
             records, available_cols, schema_payload = prepare_validated_gold_write(
                 self, records
             )
-            quarantined_receipt = await release_pending_gold_quarantine(
-                self, records, schema_payload
-            )
-            if quarantined_receipt is not None:
-                self._end_span(span)
-                return quarantined_receipt
 
             column_order, rename_map = self._resolve_layer_columns(
                 "gold", available_cols

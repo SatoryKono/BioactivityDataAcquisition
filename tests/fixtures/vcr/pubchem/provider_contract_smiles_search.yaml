@@ -50,6 +50,7 @@ interactions:
       - Accept-Encoding
       via:
       - 1.1 google
+        status: Yellow (53%)'
       x-ua-compatible:
       - IE=Edge
       x-xss-protection:

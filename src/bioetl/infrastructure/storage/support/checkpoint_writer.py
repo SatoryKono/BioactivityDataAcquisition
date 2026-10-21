@@ -123,7 +123,12 @@ class FileCompositeCheckpointWriter:
         identity = [
             state.get(key) for key in ("composite_name", "run_id", "manifest_id")
         ]
-        if not all(_safe_history_segment(value) for value in identity):
+        if not all(
+            isinstance(value, str)
+            and value not in {"", ".", ".."}
+            and all(c.isalnum() or c in "._-" for c in value)
+            for value in identity
+        ):
             raise CheckpointPathError(
                 "Composite checkpoint history requires safe identity segments"
             )
@@ -222,11 +227,3 @@ class FileCompositeCheckpointWriter:
         """Check if checkpoint file exists."""
         full = self._resolve_path(path)
         return self._ensure_contained(full, source=path).exists()
-
-
-def _safe_history_segment(value: object) -> bool:
-    return (
-        isinstance(value, str)
-        and value not in {"", ".", ".."}
-        and all(c.isalnum() or c in "._-" for c in value)
-    )

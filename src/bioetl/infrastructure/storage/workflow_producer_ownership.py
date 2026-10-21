@@ -60,22 +60,6 @@ async def capture_ownership(
     current = entity_hashes(rows)
     if before:
         return {"entity_hashes": current}
-    baseline = _ownership_baseline(previous, table_id)
-    assert previous is not None  # Validated by the baseline reader.
-    return {
-        "ownership": "producer_delta_entities",
-        "owned_entities": {
-            key: value for key, value in current.items() if baseline.get(key) != value
-        },
-        "producer_input_version": previous.get("version"),
-        "producer_input_table_id": previous.get("table_id"),
-    }
-
-
-def _ownership_baseline(
-    previous: Mapping[str, object] | None, table_id: str
-) -> Mapping[str, object]:
-    """Read a complete pre-execution baseline, resetting it only for a new table."""
     if previous is None:
         raise ValueError(
             "selected producer ownership requires a pre-execution snapshot"
@@ -87,7 +71,14 @@ def _ownership_baseline(
         baseline = {}
     if not isinstance(baseline, Mapping):
         raise ValueError("selected producer ownership baseline is invalid")
-    return baseline
+    return {
+        "ownership": "producer_delta_entities",
+        "owned_entities": {
+            key: value for key, value in current.items() if baseline.get(key) != value
+        },
+        "producer_input_version": previous.get("version"),
+        "producer_input_table_id": previous.get("table_id"),
+    }
 
 
 def filter_owned_entities(
@@ -101,7 +92,10 @@ def filter_owned_entities(
         raise ValueError(
             "selected snapshot has no row run identity or producer membership"
         )
-    if any(not _valid_owned_identity(key, value) for key, value in owned.items()):
+    if any(
+        not isinstance(key, str) or not key or not isinstance(value, str) or not value
+        for key, value in owned.items()
+    ):
         raise ValueError("selected producer membership is invalid")
     return [
         row
@@ -109,10 +103,6 @@ def filter_owned_entities(
         if owned.get(str(row.get("entity_id"))) == row.get("content_hash")
         and row.get("content_hash") is not None
     ]
-
-
-def _valid_owned_identity(key: object, value: object) -> bool:
-    return isinstance(key, str) and bool(key) and isinstance(value, str) and bool(value)
 
 
 def selected_primary_keys(request: ForeignKeyReconciliationRequest) -> tuple[str, ...]:

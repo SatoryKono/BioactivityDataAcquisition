@@ -284,7 +284,6 @@ def test_debt_scorecard_declares_explicit_coarse_budget_sync() -> None:
         "ruff_error_count",
         "mypy_error_count",
         "architecture_skip_count",
-        "expired_review_by_count",
     ):
         metric = coarse.get(metric_name)
         assert isinstance(metric, dict), (

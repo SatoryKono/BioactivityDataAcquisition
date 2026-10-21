@@ -247,7 +247,24 @@ def list_recent_pipeline_runs(
     )
     items = items[:limit]
     observed_at = now or current_utc_time()
-    _present_page(items, root, manifest_port, observed_at, selected_run_id)
+    for item in items:
+        item.update(_report_link(item, root))
+        item.update(
+            recent_run_presentation(item, root=root, manifest_port=manifest_port)
+        )
+        item.update(_timing_fields(item, observed_at))
+        run_identity = str(item["run_id"])
+        item["run_label"] = (
+            run_identity[:4] + "…" + run_identity[-4:]
+            if len(run_identity) > 16
+            else run_identity
+        )
+        item["selected"] = int(item["run_id"] == selected_run_id)
+        item["workflow_scope"] = _workflow_scope(item)
+        item["overview_handoff"] = "Open"
+        item["diagnostics_handoff"] = "Open"
+        item["provider_handoff"] = "Open"
+        item["quality_handoff"] = "Open"
     return {
         **payload,
         "items": items,
@@ -387,31 +404,3 @@ def _has_terminal_identity(row: dict[str, object]) -> bool:
         _timestamp(row.get("started_at")) != datetime.min.replace(tzinfo=UTC)
         and row.get("status") in _TERMINAL_STATUSES
     )
-
-
-def _present_page(
-    items: list[dict[str, object]],
-    root: Path | None,
-    manifest_port: RunManifestPort,
-    observed_at: datetime,
-    selected_run_id: str | None,
-) -> None:
-    """Enrich only the bounded page after filtering and ranking all identities."""
-    for item in items:
-        item.update(_report_link(item, root))
-        item.update(
-            recent_run_presentation(item, root=root, manifest_port=manifest_port)
-        )
-        item.update(_timing_fields(item, observed_at))
-        run_identity = str(item["run_id"])
-        item["run_label"] = (
-            run_identity[:4] + "…" + run_identity[-4:]
-            if len(run_identity) > 16
-            else run_identity
-        )
-        item["selected"] = int(item["run_id"] == selected_run_id)
-        item["workflow_scope"] = _workflow_scope(item)
-        item["overview_handoff"] = "Open"
-        item["diagnostics_handoff"] = "Open"
-        item["provider_handoff"] = "Open"
-        item["quality_handoff"] = "Open"

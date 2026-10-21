@@ -21,9 +21,16 @@ _STAGE_JOURNAL = "origin.json"
 _O_DIRECTORY = getattr(os, "O_DIRECTORY", 0)
 _O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
 _O_NONBLOCK = getattr(os, "O_NONBLOCK", 0)
-_DIR_FD_OPS = (os.unlink, os.stat, os.open, os.rename, os.rmdir, os.mkdir)
-_ANCHORED_OPS = bool(_O_DIRECTORY and _O_NOFOLLOW and _O_NONBLOCK) and all(
-    op in os.supports_dir_fd for op in _DIR_FD_OPS
+_ANCHORED_OPS = bool(
+    _O_DIRECTORY
+    and _O_NOFOLLOW
+    and _O_NONBLOCK
+    and os.unlink in os.supports_dir_fd
+    and os.stat in os.supports_dir_fd
+    and os.open in os.supports_dir_fd
+    and os.rename in os.supports_dir_fd
+    and os.rmdir in os.supports_dir_fd
+    and os.mkdir in os.supports_dir_fd
 )
 
 
@@ -90,8 +97,14 @@ def _fd_view_supported() -> bool:
     except OSError:
         return False
     try:
-        return bool(BronzeRootLease(Path("/"), fd).writer_path)
-    except NotImplementedError:
+        opened = os.fstat(fd)
+        for directory in ("/proc/self/fd", "/dev/fd"):
+            try:
+                viewed = (Path(directory) / str(fd)).stat()
+            except OSError:
+                continue
+            if (viewed.st_dev, viewed.st_ino) == (opened.st_dev, opened.st_ino):
+                return True
         return False
     finally:
         os.close(fd)
@@ -304,7 +317,12 @@ def _finish_private_stage(
     except OSError as exc:
         stage_error = exc
     try:
-        _retire_private_stage(root_fd, stage_fd, name)
+        owned = os.fstat(stage_fd)
+        named = os.stat(name, dir_fd=root_fd, follow_symlinks=False)
+        if (owned.st_dev, owned.st_ino) != (named.st_dev, named.st_ino):
+            raise OSError("Bronze cleanup stage replaced before retirement")
+        os.rmdir(name, dir_fd=root_fd)
+        os.fsync(root_fd)
     except OSError as exc:
         stage_error = stage_error or exc
     finally:
@@ -423,13 +441,3 @@ def _shared_lease_after_pending_check(
     ):
         raise OSError("Bronze writer refused while cleanup recovery is pending")
     return lease
-
-
-def _retire_private_stage(root_fd: int, stage_fd: int, name: str) -> None:
-    """Retire only the still-named pinned directory, then persist its removal."""
-    owned = os.fstat(stage_fd)
-    named = os.stat(name, dir_fd=root_fd, follow_symlinks=False)
-    if (owned.st_dev, owned.st_ino) != (named.st_dev, named.st_ino):
-        raise OSError("Bronze cleanup stage replaced before retirement")
-    os.rmdir(name, dir_fd=root_fd)
-    os.fsync(root_fd)

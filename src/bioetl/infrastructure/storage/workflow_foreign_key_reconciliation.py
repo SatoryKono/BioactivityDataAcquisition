@@ -194,14 +194,6 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             source_rows=source_rows,
             reference_rows=reference_rows,
         )
-        return await self._with_gold_snapshot(request, result)
-
-    async def _with_gold_snapshot(
-        self,
-        request: ForeignKeyReconciliationRequest,
-        result: ForeignKeyReconciliationResult,
-    ) -> ForeignKeyReconciliationResult:
-        """Attach the committed Gold snapshot, retaining primary reconciliation on read failure."""
         gold_reader: object = self.gold_writer
         if request.source_layer == "gold" and isinstance(
             gold_reader, GoldSnapshotReaderProtocol

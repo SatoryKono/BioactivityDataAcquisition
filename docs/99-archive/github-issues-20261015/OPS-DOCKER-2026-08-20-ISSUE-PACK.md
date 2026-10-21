@@ -6,8 +6,8 @@
 **ADR:** ADR-010 (Docker optional, local-only)
 
 Live recovery of `main` / `monitoring` / `neo4j` from a foreign
-`<legacy-checkout-name>` origin. Path-normalization for Windows vs
-`<wsl-drive-root>` `PROJECT_ORIGIN` is already on `origin/main`
+`BioactivityDataAcquisition2` origin. Path-normalization for Windows vs
+`/mnt/e` `PROJECT_ORIGIN` is already on `origin/main`
 (`normalize_runtime_path` remaps after relative join). These issues own the
 **remaining** defects. Do not treat deleting the second clone as sufficient.
 

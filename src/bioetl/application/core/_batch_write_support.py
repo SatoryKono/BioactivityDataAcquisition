@@ -15,10 +15,6 @@ from bioetl.application.core._batch_write_events import (
 from bioetl.application.core._batch_write_schema_quarantine import (
     quarantine_schema_violation,
 )
-from bioetl.application.core._gold_outcome_disposition import (
-    bind_gold_quarantine_batch_if_supported,
-    consume_gold_outcome_quarantine_count,
-)
 from bioetl.application.services.batch_processing.write_collaborators import (
     LayerWriteContext,
     LayerWriteOutcome,
@@ -65,7 +61,6 @@ async def _execute_layer_write(
             bronze_refs=bronze_refs,
         )
     else:
-        bind_gold_quarantine_batch_if_supported(writer, batch_id)
         operation = writer.write_gold(records, silver_refs=silver_refs)
 
     return await execute_with_span(
@@ -123,28 +118,13 @@ async def safe_write_layer(
         )
         if layer == "gold":
             write_result = require_complete_gold_receipt(write_result)
-        quarantined = (
-            consume_gold_outcome_quarantine_count(context.writer)
-            if layer == "gold"
-            else 0
-        )
-        confirmed = max(len(records) - quarantined, 0)
-        if confirmed == 0 and quarantined:
-            return LayerWriteOutcome(
-                layer=layer,
-                status="quarantined",
-                candidate_count=len(records),
-                quarantined_count=quarantined,
-                write_result=write_result,
-            )
-        context.writer.track_batch_written(stage=layer, count=confirmed)
-        event_context.emit_written(confirmed)
+        context.writer.track_batch_written(stage=layer, count=len(records))
+        event_context.emit_written(len(records))
         return LayerWriteOutcome(
             layer=layer,
             status="written",
             candidate_count=len(records),
-            confirmed_count=confirmed,
-            quarantined_count=quarantined,
+            confirmed_count=len(records),
             write_result=write_result,
         )
     except SchemaViolationError as error:

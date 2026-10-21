@@ -305,7 +305,24 @@ def _summary_rows_pipeline_run_report(
         payload
     )
     if status in {"unresolved_scope", "not_found"}:
-        return _unavailable_summary(payload, run_id, status)
+        state = "SELECT RUN" if status == "unresolved_scope" else "REPORT MISSING"
+        row = {
+            "run_id": run_id,
+            "status": state,
+            "coverage_chip": "N/A",
+            "covers_selected_run": (
+                "select_run" if status == "unresolved_scope" else "not_found"
+            ),
+            "range_action_status": "Choose a run in Run Explorer"
+            if status == "unresolved_scope"
+            else "No persisted report for this run",
+        }
+        return {
+            **payload,
+            "view": "summary",
+            "summary": [row],
+            "rows": [{"parameter": key, "value": value} for key, value in row.items()],
+        }
     gold_out, excluded = _funnel_gold_and_excluded(payload.get("funnel"))
     started_ms = _parse_iso_to_ms(started_at)
     completed_ms = _parse_iso_to_ms(completed_at)
@@ -352,27 +369,4 @@ def _summary_rows_pipeline_run_report(
         "status": status or "ok",
         "run_id": run_id,
         "pipeline": identity.get("pipeline_name") or payload.get("pipeline"),
-    }
-
-
-def _unavailable_summary(
-    payload: dict[str, object], run_id: str, status: str
-) -> dict[str, object]:
-    """Render the selection and missing-report states without a range action."""
-    row = {
-        "run_id": run_id,
-        "status": "SELECT RUN" if status == "unresolved_scope" else "REPORT MISSING",
-        "coverage_chip": "N/A",
-        "covers_selected_run": "select_run"
-        if status == "unresolved_scope"
-        else "not_found",
-        "range_action_status": "Choose a run in Run Explorer"
-        if status == "unresolved_scope"
-        else "No persisted report for this run",
-    }
-    return {
-        **payload,
-        "view": "summary",
-        "summary": [row],
-        "rows": [{"parameter": key, "value": value} for key, value in row.items()],
     }

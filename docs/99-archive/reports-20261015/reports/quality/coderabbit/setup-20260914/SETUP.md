@@ -26,10 +26,8 @@ Network evidence:
 - No changes made to .env, system DNS, proxies, workflow activation, or secrets.
 
 Remaining checks after connectivity is restored:
-Перед запуском замените `<repository-root>` на фактический путь к корню репозитория в WSL; кавычки сохраняйте.
-
-- `wsl -d Ubuntu --cd "<repository-root>" --exec bash scripts/ops/run-coderabbit-reviews.sh --preflight`
-- `wsl -d Ubuntu --cd "<repository-root>" --exec bash scripts/ops/run-coderabbit-reviews.sh changes --uncommitted`
+- `wsl -d Ubuntu --cd /mnt/e/github/BioactivityDataAcquisition --exec bash scripts/ops/run-coderabbit-reviews.sh --preflight`
+- `wsl -d Ubuntu --cd /mnt/e/github/BioactivityDataAcquisition --exec bash scripts/ops/run-coderabbit-reviews.sh changes --uncommitted`
 
 Scope and governance:
 - CLI reviews Git diffs. No completed CodeRabbit audit, no full-project coverage claim.
