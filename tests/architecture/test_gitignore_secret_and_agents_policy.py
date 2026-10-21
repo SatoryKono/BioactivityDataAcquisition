@@ -70,6 +70,7 @@ def test_gitignore_tracks_only_gemini_code_assist_config() -> None:
     assert "\n.gemini/\n" not in gitignore
 
     def _ignored(path: str) -> bool:
+        """Return whether gitignore excludes `path` even when it is untracked."""
         completed = subprocess.run(
             ["git", "check-ignore", "-q", "--no-index", path],
             cwd=ROOT,
@@ -84,6 +85,7 @@ def test_gitignore_tracks_only_gemini_code_assist_config() -> None:
 
 
 def test_gitignore_last_match_keeps_agents_skill_unignore() -> None:
+    """A later `.agents/` ignore rule must not hide the skill un-ignore."""
     gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
     marker = "!.agents/skills/*/SKILL.md"
     assert marker in gitignore

@@ -110,6 +110,7 @@ def _registry_candidates() -> dict[str, dict[str, Any]]:
 
 
 def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> None:
+    """Root-directory budget stays 11; `.gemini` may track only `config.yaml`."""
     payload = _load_json(CLOSEOUT)
     tracked = _git_ls_files()
     root_files = {path for path in tracked if "/" not in path}

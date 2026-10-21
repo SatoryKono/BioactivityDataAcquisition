@@ -119,6 +119,7 @@ def _root_evidence_rows() -> dict[str, dict[str, Any]]:
 def test_issue_5581_tooling_roots_have_owner_decisions_in_registry_and_evidence() -> (
     None
 ):
+    """Tooling roots keep owner decisions; `.gemini` is the curated Code Assist root."""
     candidates = _registry_candidates()
     evidence = _root_evidence_rows()
     root_evidence = _root_review_report()

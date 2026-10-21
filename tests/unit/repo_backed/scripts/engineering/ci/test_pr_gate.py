@@ -301,6 +301,7 @@ def test_live_catalog_classifies_grafana_reports_and_test_fixtures() -> None:
 
 
 def test_live_catalog_classifies_root_changelog() -> None:
+    """A root changelog change stays on docs-governance and does not force tests."""
     catalog = load_catalog(
         Path(__file__).resolve().parents[6]
         / "configs/quality/github_required_checks.yaml"
@@ -315,6 +316,7 @@ def test_live_catalog_classifies_root_changelog() -> None:
 
 
 def test_live_catalog_classifies_gemini_code_assist_config() -> None:
+    """`.gemini/config.yaml` is classified and does not fail-close the other lanes."""
     catalog = load_catalog(
         Path(__file__).resolve().parents[6]
         / "configs/quality/github_required_checks.yaml"
