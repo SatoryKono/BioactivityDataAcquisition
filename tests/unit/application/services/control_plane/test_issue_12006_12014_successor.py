@@ -383,3 +383,30 @@ def test_attach_failure_keeps_original_manifest_current() -> None:
     assert current.manifest_id == "m1"
     assert current == original
     assert store.get("m2") is None
+
+
+@pytest.mark.parametrize("fail_rebind", (False, True))
+def test_successor_callbacks_run_after_ledger_commit_only(fail_rebind: bool) -> None:
+    store = _MemoryManifestPort()
+    store.save(_original_manifest())
+    service = _service(store)
+    observed: list[RunManifest] = []
+    service.manifest_successor_callbacks = [observed.append]
+
+    class _Ledger:
+        def record_manifest_successor(self, **kwargs: object) -> None:
+            assert service.manifest_id == "m1"
+            assert observed == []
+            if fail_rebind:
+                raise InfrastructureError("injected rebind failure")
+
+    service.ledger_port = _Ledger()
+    if fail_rebind:
+        with pytest.raises(InfrastructureError):
+            _attach(service)
+        assert service.manifest_id == "m1"
+        assert observed == []
+    else:
+        successor = _attach(service)
+        assert service.manifest_id == "m2"
+        assert observed == [successor]

@@ -163,7 +163,15 @@ def _create_checkpoint_manager(
         metrics=metrics,
         clock=checkpoint_clock,
     )
-    return checkpoint_manager_cls(checkpoint_context)
+    checkpoint_manager = checkpoint_manager_cls(checkpoint_context)
+    if (
+        control_plane_bundle is not None
+        and control_plane_bundle.run_ledger_service is not None
+    ):
+        control_plane_bundle.run_ledger_service.manifest_successor_callbacks.append(
+            checkpoint_manager.update_manifest
+        )
+    return checkpoint_manager
 
 
 def _resolve_expected_effective_config_hash(

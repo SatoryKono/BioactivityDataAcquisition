@@ -1,24 +1,24 @@
 {
   "summary": {
-    "scanned_modules": 2582,
-    "total_internal_imports": 8334,
+    "scanned_modules": 2586,
+    "total_internal_imports": 8356,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 329,
     "violations": 0,
-    "source_fingerprint": "4d3f29e86cc76326262cba9f15277a0c6b67630b4f5427afad6086b655c5d5e2"
+    "source_fingerprint": "06b0641814b915fd2e2086b7f5db5dc00beda78a3046c1e1d8fee16e2008577c"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1633,
+      "imports": 1643,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1109,
+      "imports": 1118,
       "allowed": true
     },
     {
@@ -48,13 +48,13 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1309,
+      "imports": 1310,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 803,
+      "imports": 804,
       "allowed": true
     },
     {
@@ -78,7 +78,7 @@
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 85,
+      "imports": 86,
       "allowed": true
     },
     {
@@ -107,7 +107,7 @@
     {
       "source": "application.core",
       "target": "domain.types",
-      "imports": 97
+      "imports": 98
     },
     {
       "source": "application.services",
@@ -185,6 +185,11 @@
       "imports": 31
     },
     {
+      "source": "infrastructure.control_plane",
+      "target": "domain.control_plane",
+      "imports": 31
+    },
+    {
       "source": "infrastructure.storage",
       "target": "domain.medallion",
       "imports": 31
@@ -193,11 +198,6 @@
       "source": "interfaces.cli",
       "target": "application.services",
       "imports": 31
-    },
-    {
-      "source": "infrastructure.control_plane",
-      "target": "domain.control_plane",
-      "imports": 30
     },
     {
       "source": "composition.bootstrap",
@@ -245,6 +245,16 @@
       "imports": 23
     },
     {
+      "source": "interfaces.http",
+      "target": "domain.control_plane",
+      "imports": 23
+    },
+    {
+      "source": "application.core",
+      "target": "domain.normalization",
+      "imports": 22
+    },
+    {
       "source": "application.pipelines",
       "target": "domain.entities",
       "imports": 22
@@ -265,11 +275,6 @@
       "imports": 22
     },
     {
-      "source": "interfaces.http",
-      "target": "domain.control_plane",
-      "imports": 22
-    },
-    {
       "source": "composition.factories",
       "target": "application.services",
       "imports": 21
@@ -283,11 +288,6 @@
       "source": "interfaces.cli",
       "target": "composition.control_plane_service_access",
       "imports": 21
-    },
-    {
-      "source": "application.core",
-      "target": "domain.normalization",
-      "imports": 20
     },
     {
       "source": "composition.bootstrap",

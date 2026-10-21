@@ -1371,3 +1371,96 @@ async def test_cancelled_run_records_terminal_ledger_before_reraising(
     )
     ledger.record_run_finished.assert_not_called()
     ledger.record_run_failed.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_successor_updates_launch_context_and_checkpoint_metadata(runner):
+    from bioetl.application.core.lifecycle.checkpoint_manager import (
+        CheckpointRuntimeParams,
+    )
+    from bioetl.application.services.control_plane.ledger._input_snapshot_manifest import (
+        persist_input_snapshots_on_manifest,
+    )
+    from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.control_plane import (
+        RunInputSnapshotRef,
+        RunManifest,
+        RunSourceRef,
+    )
+    from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
+
+    original = RunManifest(
+        manifest_id="original",
+        run_id=runner._context.run_id,
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        source_refs=(
+            RunSourceRef(
+                provider="chembl", entity="activity", pipeline_name="chembl_activity"
+            ),
+        ),
+    )
+    manifest_port = MagicMock()
+    manifest_port.get.return_value = original
+    ledger = RunLedgerService(
+        ledger_port=MagicMock(),
+        manifest_id="original",
+        run_id=original.run_id,
+        manifest_port=manifest_port,
+        _manifest_id_factory=lambda: "successor",
+    )
+    port = AsyncMock()
+    stale_metadata = CheckpointMetadata(
+        manifest_id="original",
+        records_processed=7,
+        run_context={"manifest_id": "original"},
+    )
+    runner._checkpoint_manager = CheckpointRuntimeService(
+        port,
+        MagicMock(),
+        CheckpointRuntimeParams(
+            pipeline_name="chembl_activity",
+            run_id=original.run_id,
+            resume=False,
+            current_metadata=stale_metadata,
+        ),
+    )
+    launch = PipelineRunContext(
+        pipeline_name="chembl_activity",
+        run_id=original.run_id,
+        run_type=RunType.INCREMENTAL,
+        manifest_id="original",
+    )
+    runner.attach_contract_evidence_recorder(MagicMock(), launch_context=launch)
+    runner.attach_run_ledger_service(ledger)
+
+    successor = persist_input_snapshots_on_manifest(
+        ledger,
+        snapshots=(
+            RunInputSnapshotRef(
+                snapshot_id="snapshot",
+                content_hash="sha256:input",
+                immutable_uri="file:///bronze/input",
+            ),
+        ),
+        provider="chembl",
+        entity="activity",
+        pipeline_name="chembl_activity",
+    )
+
+    assert successor is not None
+    assert runner.manifest_id == "successor"
+    assert runner._contract_evidence_context.manifest_id == "successor"
+    assert (
+        runner._contract_evidence_context.execution_fingerprint
+        == successor.execution_fingerprint
+    )
+    assert launch.manifest_id == "original"
+    await runner._checkpoint_manager.save_checkpoint(stale_metadata)
+    saved = port.save.call_args.kwargs["metadata"]
+    assert saved["manifest_id"] == "successor"
+    assert saved["records_processed"] == 7
+    assert saved["input_snapshot_ids"] == ["snapshot"]
+    assert saved["run_context"]["manifest_id"] == "successor"
