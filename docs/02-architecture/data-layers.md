@@ -173,8 +173,11 @@ ______________________________________________________________________
 Gold слой имеет строгие публичные контракты. Fail-closed интеграция схемы
 работает в production: batch-запись вызывает `validate()` и при ошибке
 поднимает `SchemaViolationError`.
-`ContractAwareGoldValidator.validate_with_outcomes()` переводит ошибки
-Pandera в `DQRuleOutcome`, после чего вызывает `_apply_contract_validations()`.
+`ContractAwareGoldValidator.validate_with_outcomes()` возвращает пустой
+список outcomes, если нет policy resolver, вход пуст или схема отсутствует
+при non-strict. Отсутствующая схема в strict mode даёт один outcome
+`schema.missing`. При resolver, записях и схеме метод переводит ошибки
+Pandera в `DQRuleOutcome` и затем вызывает `_apply_contract_validations()`.
 Этот метод по-прежнему не возвращает outcomes уровня contract-rule.
 `ContractAwareSilverValidator.validate_with_outcomes()` возвращает флаг
 базовой проверки и пустой список outcomes. В `src/bioetl` нет production-вызовов

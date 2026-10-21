@@ -105,10 +105,13 @@ class DQPolicyRef(NamedTuple):
 1. **Consistency Validation**: Cross-source data consistency checks
 1. **Provenance Validation**: Lineage and audit trail verification
 
-`ContractAwareGoldValidator.validate_with_outcomes()` turns Pandera schema
-failures into `DQRuleOutcome` values and then calls
-`_apply_contract_validations()`, which still returns no contract-rule
-outcomes. `ContractAwareSilverValidator.validate_with_outcomes()` still
+`ContractAwareGoldValidator.validate_with_outcomes()` returns an empty
+outcome list when no policy resolver is configured, when the input is
+empty, or when the schema is missing and the validator is not strict. A
+missing schema in strict mode yields one `schema.missing` outcome. With a
+resolver, records, and a schema, the method turns Pandera schema failures
+into `DQRuleOutcome` values and then calls `_apply_contract_validations()`,
+which still returns no contract-rule outcomes. `ContractAwareSilverValidator.validate_with_outcomes()` still
 returns the basic validity flag and an empty outcome list. Neither method
 has a production callsite in `src/bioetl`: Gold batch writes call
 `validate()` and fail closed with `SchemaViolationError`. Tests exercise
