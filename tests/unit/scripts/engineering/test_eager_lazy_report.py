@@ -264,8 +264,8 @@ def test_verdict_quotes_a_wall_sample_that_clears_both_thresholds(
     )
     report = generate_report.render_report(log_dir=tmp_path)
     assert "A bottleneck has been proven." in report
-    assert "0.6000 s (12.0%)" in report
-    assert "1.0000 s (5.0%)" not in report
+    assert "Maximum lazy wall-time reduction: 1.0000 s (5.0%)." in report
+    assert "Threshold-clearing lazy wall-time reduction: 0.6000 s (12.0%)." in report
 
 
 def test_each_log_needs_a_timed_command(tmp_path: Path) -> None:

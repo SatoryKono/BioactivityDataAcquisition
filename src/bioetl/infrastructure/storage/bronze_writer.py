@@ -113,9 +113,8 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
 
     COMPRESSION_CHUNK_SIZE = 256 * 1024
     COMPRESSION_LEVEL = 3
-    # Single-thread only. `threads=-1` (all cores) allocates a large zstd CCTX
-    # per worker and OOMs publication bronze batches on Windows:
-    # "zstd compress error: Allocation error : not enough memory".
+    # Single-thread only: `threads=-1` allocates a large zstd CCTX per worker
+    # and OOMs bronze batches ("zstd compress error: Allocation error").
     COMPRESSION_THREADS = 0
     BRONZE_PATH_FORMAT = "{provider}/{entity}/{date}/{filename}"
     BRONZE_FILE_SUFFIX = ".jsonl.zst"
@@ -148,20 +147,17 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
             raise TypeError(
                 f"BronzeWriter() got unexpected keyword argument(s): {unexpected}"
             )
-        legacy_provided = (
-            any(
-                value is not None
-                for value in (
-                    tracing,
-                    audit,
-                    metadata_writer,
-                    metadata_coordinator,
-                    lineage_store,
-                )
+        legacy_provided = any(
+            value is not None
+            for value in (
+                tracing,
+                audit,
+                metadata_writer,
+                metadata_coordinator,
+                lineage_store,
+                root_identity,
             )
-            or bool(save_metadata)
-            or root_identity is not None
-        )
+        ) or bool(save_metadata)
         if runtime_services is not None and legacy_provided:
             raise TypeError(
                 "BronzeWriter() accepts either runtime_services or legacy runtime "

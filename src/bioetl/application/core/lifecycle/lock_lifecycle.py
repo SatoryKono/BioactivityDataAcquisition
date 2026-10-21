@@ -115,7 +115,7 @@ async def release_lock(host: _LockRuntimeHostProtocol) -> None:
             _clear_task_cancellation()
             try:
                 await asyncio.shield(operation)
-            except asyncio.CancelledError:
+            except asyncio.CancelledError:  # NOSONAR python:S7497 - re-raised below
                 continue
         operation.result()
         raise

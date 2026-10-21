@@ -174,6 +174,8 @@ def _rss_drop_percent(eager: _Side, lazy: _Side) -> float:
 class _Peaks(NamedTuple):
     wall_gain: float
     wall_percent: float
+    proven_gain: float
+    proven_percent: float
     rss_drop: float
     wall_proven: bool
 
@@ -212,8 +214,15 @@ def _metric_peaks(sides: list[tuple[_Side, _Side]]) -> _Peaks:
         if drop > max_rss_drop:
             max_rss_drop = drop
     if wall_proven:
-        return _Peaks(proven_gain, proven_percent, max_rss_drop, True)
-    return _Peaks(best_gain, best_percent, max_rss_drop, False)
+        return _Peaks(
+            best_gain,
+            best_percent,
+            proven_gain,
+            proven_percent,
+            max_rss_drop,
+            True,
+        )
+    return _Peaks(best_gain, best_percent, 0.0, 0.0, max_rss_drop, False)
 
 
 def _conclusion(proven: bool) -> str:
@@ -233,13 +242,22 @@ def _verdict(sides: list[tuple[_Side, _Side]]) -> str:
     peaks = _metric_peaks(sides)
     proven = peaks.wall_proven or peaks.rss_drop >= RSS_BOTTLENECK_PERCENT
     conclusion = _conclusion(proven)
+    clearing = ""
+    if peaks.wall_proven and (
+        peaks.proven_gain != peaks.wall_gain
+        or peaks.proven_percent != peaks.wall_percent
+    ):
+        clearing = (
+            "\n- Threshold-clearing lazy wall-time reduction: "
+            f"{peaks.proven_gain:.4f} s ({peaks.proven_percent:.1f}%)."
+        )
     return f"""## Verdict on DOMAIN_STOP
 The `DOMAIN_STOP` rule forbids lazy-refactoring without a measured bottleneck.
 
 Thresholds for a proven bottleneck: lazy wall time lower by at least {WALL_BOTTLENECK_SECONDS:.1f} s and {WALL_BOTTLENECK_PERCENT:.0f}%, or lazy peak RSS lower by at least {RSS_BOTTLENECK_PERCENT:.0f}%.
 
 Based on the measurements:
-- Maximum lazy wall-time reduction: {peaks.wall_gain:.4f} s ({peaks.wall_percent:.1f}%).
+- Maximum lazy wall-time reduction: {peaks.wall_gain:.4f} s ({peaks.wall_percent:.1f}%).{clearing}
 - Maximum lazy peak-RSS reduction: {peaks.rss_drop:.1f}%.
 - **Conclusion:** {conclusion}
 """
