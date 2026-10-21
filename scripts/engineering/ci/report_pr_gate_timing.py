@@ -185,6 +185,13 @@ def _elapsed_seconds(start: datetime | None, end: datetime | None) -> int | None
         return None
     return round((end - start).total_seconds())
 
+def _queue_seconds(job: dict[str, Any], created_at: datetime | None, started_at: datetime | None) -> int | str | None:
+    if job.get("status") == "queued" and not started_at:
+        return "unknown"
+    if created_at is None or started_at is None or started_at < created_at:
+        return "unknown"
+    return round((started_at - created_at).total_seconds())
+
 
 def _nearest_rank(values: Sequence[int], percentile: int) -> int | None:
     ordered = sorted(values)
@@ -249,11 +256,7 @@ def _run_endpoint(repository: str, run_id: str) -> str:
     return f"repos/{repository}/actions/runs/{quote(str(run_id), safe='')}"
 
 
-def _jobs_endpoint(repository: str, run_id: int, page: int) -> str:
-    return (
-        f"repos/{repository}/actions/runs/{run_id}/jobs?"
-        f"{urlencode({'per_page': 100, 'page': page})}"
-    )
+
 
 
 def _collect_runs(
@@ -300,8 +303,14 @@ def _collect_runs_by_id(
     runs: list[dict[str, Any]] = []
     for run_id in run_ids:
         run = client.json(["api", _run_endpoint(repository, run_id)])
-        if _is_selected_run(run, include_incomplete=include_incomplete):
-            runs.append(run)
+        if not run:
+            continue
+        max_attempt = run.get("run_attempt", 1)
+        for attempt in range(max_attempt, 0, -1):
+            attempt_run = run if attempt == max_attempt else client.json(["api", f"{_run_endpoint(repository, run_id)}/attempts/{attempt}"])
+            if _is_selected_run(attempt_run, include_incomplete=include_incomplete):
+                attempt_run["raw_api"] = dict(attempt_run)
+                runs.append(attempt_run)
     return runs
 
 
@@ -335,21 +344,32 @@ def _collect_workflow_runs(
         if not page_runs:
             break
         for run in page_runs:
-            if _is_selected_run(run, include_incomplete=include_incomplete):
-                runs.append(run)
-            if len(runs) >= limit:
-                return runs
+            max_attempt = run.get("run_attempt", 1)
+            for attempt in range(max_attempt, 0, -1):
+                attempt_run = run if attempt == max_attempt else client.json(["api", f"{_run_endpoint(repository, run.get('id', ''))}/attempts/{attempt}"])
+                if _is_selected_run(attempt_run, include_incomplete=include_incomplete):
+                    attempt_run["raw_api"] = dict(attempt_run)
+                    runs.append(attempt_run)
+                if len(runs) >= limit:
+                    return runs
     return runs
 
+
+def _jobs_endpoint(repository: str, run_id: int, attempt: int, page: int) -> str:
+    return (
+        f"repos/{repository}/actions/runs/{run_id}/attempts/{attempt}/jobs?"
+        f"{urlencode({'per_page': 100, 'page': page})}"
+    )
 
 def _collect_jobs(
     client: JsonGitHubClient,
     repository: str,
     run_id: int,
+    attempt: int = 1,
 ) -> list[dict[str, Any]]:
     jobs: list[dict[str, Any]] = []
     for page in range(1, 101):
-        payload = client.json(["api", _jobs_endpoint(repository, run_id, page)])
+        payload = client.json(["api", _jobs_endpoint(repository, run_id, attempt, page)])
         page_jobs = payload.get("jobs", [])
         if not page_jobs:
             break
@@ -365,6 +385,10 @@ def _job_record(job: dict[str, Any]) -> dict[str, Any]:
     completed_at = _parse_timestamp(job.get("completed_at"))
     runner_id = job.get("runner_id")
     runner_observed = isinstance(runner_id, int) and runner_id > 0
+    execution = _elapsed_seconds(started_at, completed_at)
+    if job.get("conclusion") in ("skipped", "cancelled") and execution == 0:
+        execution = None
+
     return {
         "id": job.get("id"),
         "name": job.get("name"),
@@ -373,8 +397,8 @@ def _job_record(job: dict[str, Any]) -> dict[str, Any]:
         "created_at": _iso(created_at),
         "started_at": _iso(started_at),
         "completed_at": _iso(completed_at),
-        "queue_seconds": _elapsed_seconds(created_at, started_at),
-        "execution_seconds": _elapsed_seconds(started_at, completed_at),
+        "queue_seconds": _queue_seconds(job, created_at, started_at),
+        "execution_seconds": execution,
         "labels": job.get("labels", []),
         "runner_id": runner_id,
         "runner_name": job.get("runner_name"),
@@ -458,15 +482,30 @@ def _summarize_run(
         "docker_complete": docker_complete,
         "codeql": codeql,
     }
+    pull_requests = run.get("pull_requests", [])
+    base_sha = None
+    tested_sha = None
+    if pull_requests:
+        base_sha = pull_requests[0].get("base", {}).get("sha")
+        tested_sha = pull_requests[0].get("head", {}).get("sha")
+        if not base_sha and "base_sha" in run:
+            base_sha = run["base_sha"]
+
     return {
         "id": run.get("id"),
         "run_number": run.get("run_number"),
         "run_attempt": run.get("run_attempt"),
+        "retries": max(0, run.get("run_attempt", 1) - 1),
         "event": run.get("event"),
         "head_branch": run.get("head_branch"),
         "head_sha": run.get("head_sha"),
+        "base_sha": base_sha,
+        "tested_sha": tested_sha,
+        "workflow_path": run.get("path"),
+        "workflow_code_sha": run.get("head_sha"),
         "status": run.get("status"),
         "conclusion": run.get("conclusion"),
+        "raw_api": run.get("raw_api"),
         "created_at": _iso(run_created_at),
         "updated_at": _iso(run_updated_at),
         "html_url": run.get("html_url"),
@@ -642,7 +681,7 @@ def build_report(client: JsonGitHubClient, request: ReportRequest) -> dict[str, 
     summarized_runs = [
         _summarize_run(
             run,
-            _collect_jobs(client, resolved_repository, int(run["id"])),
+            _collect_jobs(client, resolved_repository, int(run["id"]), run.get("run_attempt", 1)),
         )
         for run in collected_runs
     ]
