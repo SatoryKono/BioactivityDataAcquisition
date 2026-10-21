@@ -10,6 +10,12 @@ from bioetl.infrastructure.storage.gold.writer_implementation import (
 pytestmark = pytest.mark.unit
 
 
+def test_completed_receipt_cannot_prove_a_different_committed_target():
+    receipt = GoldWriteReceipt("table", "1.0.0", GoldWriteCategory.COMPLETE, ("other",))
+    with pytest.raises(TypeError, match="identity does not match"):
+        _validate_target_receipt(receipt, "table", "1.0.0")
+
+
 @pytest.mark.parametrize(
     "category", [GoldWriteCategory.NOT_COMMITTED, GoldWriteCategory.UNKNOWN]
 )

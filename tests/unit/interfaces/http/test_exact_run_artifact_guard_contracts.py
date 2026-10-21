@@ -12,6 +12,31 @@ from bioetl.interfaces.http import _report_selector_options as options
 pytestmark = pytest.mark.unit
 
 
+def test_plain_selector_shape_returns_the_checked_identity_value(tmp_path):
+    entry = SimpleNamespace(
+        owner="chembl_assay",
+        run_id="run",
+        schema_version="pipeline_run_report_v2",
+        identity_snapshot={
+            "pipeline_name": "chembl_assay",
+            "run_id": "run",
+            "provider": "chembl",
+        },
+    )
+    assert (
+        options._maybe_report_option(
+            entry=entry,
+            dimension="provider",
+            response_shape="values",
+            scopes={},
+            root=tmp_path,
+            timezone="UTC",
+            seen=set(),
+        )
+        == "chembl"
+    )
+
+
 @pytest.mark.parametrize("identity", [None, "..", "a/b"])
 def test_current_child_path_requires_concrete_identity_components(tmp_path, identity):
     root = tmp_path / "pipeline" / "parent" / "run"

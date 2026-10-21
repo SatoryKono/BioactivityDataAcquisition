@@ -29,13 +29,14 @@ pytestmark = pytest.mark.unit
 NOW = datetime(2026, 10, 21, tzinfo=UTC)
 
 
-def test_failed_pending_commit_keeps_repair_required_state():
+@pytest.mark.parametrize("pending_commit", [False, True])
+def test_failed_pending_commit_keeps_repair_required_state(pending_commit):
     pending = WorkflowStepState(
         "mutate",
         "transform",
         "running",
         destructive=True,
-        commit_pending_confirmation=True,
+        commit_pending_confirmation=pending_commit,
     )
     state = WorkflowExecutionState(
         "run",
@@ -67,7 +68,7 @@ def test_failed_pending_commit_keeps_repair_required_state():
         last_event_id="event",
     )
     assert updated.repair_required and updated.ambiguous_step_ids == ("mutate",)
-    assert updated.steps[0].commit_pending_confirmation
+    assert updated.steps[0].commit_pending_confirmation is pending_commit
     assert updated.last_error_message == "commit uncertain"
 
 

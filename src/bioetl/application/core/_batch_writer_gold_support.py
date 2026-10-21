@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core._gold_outcome_disposition import (
     GoldQuarantineEntry,
+    has_explicit_outcome_channel,
     plan_gold_outcome_write,
-    supports_outcome_channel,
 )
 from bioetl.application.core._gold_outcome_quarantine_write import (
     empty_gold_receipt,
@@ -16,9 +16,6 @@ from bioetl.application.core._gold_outcome_quarantine_write import (
     record_gold_outcome_quarantine_metrics,
 )
 from bioetl.application.services.run_reports.observations import record_gold_observation
-from bioetl.domain.behavior.dq_contract_rule_source import (
-    has_explicit_outcome_policy,
-)
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.exceptions import SchemaViolationError
 from bioetl.domain.types import JsonDict
@@ -123,7 +120,7 @@ def validate_gold_records(
             rebind_gold_validator_schema(validator, target_schema),
         )
 
-    if apply_contract_rules and _use_outcome_channel(validator):
+    if apply_contract_rules and has_explicit_outcome_channel(validator):
         channel = _call_outcome_channel(validator, records, rule_records=rule_records)
         if isinstance(channel, DQOutcomeChannel):
             config = cast("DQConfig | None", getattr(validator, "_dq_config", None))
@@ -154,15 +151,6 @@ def _call_outcome_channel(
     if not callable(method):
         return None
     return method(validator, records)
-
-
-def _use_outcome_channel(validator: object) -> bool:
-    if not supports_outcome_channel(validator):
-        return False
-    config = getattr(validator, "_dq_config", None)
-    if not isinstance(config, DQConfig):
-        return False
-    return has_explicit_outcome_policy(config)
 
 
 def _raise_fail_closed(

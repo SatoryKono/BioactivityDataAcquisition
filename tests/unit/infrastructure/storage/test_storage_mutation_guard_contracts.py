@@ -21,6 +21,25 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio
+async def test_silver_audit_normalizes_string_mode_for_metadata_operations():
+    from bioetl.domain.medallion import SilverWriteMode
+
+    writer = SilverWriterMetadataFacade()
+    audit = AsyncMock()
+    writer._metadata = SimpleNamespace(_log_silver_audit=audit)
+    await writer._log_silver_audit(
+        "table",
+        [],
+        "merge",
+        run_id=None,
+        run_type=None,
+        source_batch_id=None,
+        ingestion_ts=None,
+    )
+    assert audit.await_args.args[0].mode is SilverWriteMode.MERGE
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "helper", [bronze_writer._drain_shielded_task, cleanup._drain_cleanup_worker]
 )
