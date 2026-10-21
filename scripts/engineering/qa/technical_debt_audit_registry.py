@@ -286,6 +286,12 @@ def _headline_markers(summary: dict[str, Any]) -> tuple[str, ...]:
     )
 
 
+def _score_narrative_marker(summary: dict[str, Any]) -> str:
+    return (
+        f"architecture score `{summary['metrics']['architecture_integral_score']:.2f}`"
+    )
+
+
 def _validate_current_report_semantics(root: Path, current: Any) -> list[str]:
     report_path = root / current.report_path
     if not report_path.is_file():
@@ -302,6 +308,8 @@ def _validate_current_report_semantics(root: Path, current: Any) -> list[str]:
     for marker in _headline_markers(expected):
         if marker not in report:
             issues.append(f"current audit headline metric is stale: {marker}")
+    if "Current result:" in report and _score_narrative_marker(expected) not in report:
+        issues.append("current audit score narrative is stale")
     return issues
 
 

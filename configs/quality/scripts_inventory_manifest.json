@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-21T10:31:07.513089+00:00",
+  "generated_at": "2026-10-21T13:21:12.413122+00:00",
   "summary": {
     "total_scripts": 659,
     "status_counts": {
@@ -1548,7 +1548,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-          "line": 206,
+          "line": 196,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.ps1\": \"scripts/ai/codex/setup.ps1\","
         }
@@ -8339,7 +8339,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 235,
+          "line": 236,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json"
         },
@@ -9781,19 +9781,19 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 118,
+          "line": 119,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify \"${classify_args[@]}\""
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 302,
+          "line": 303,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results assert-steps \\"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 387,
+          "line": 388,
           "source_group": "ci",
           "text": "uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results affected-tests \\"
         }
@@ -10176,13 +10176,13 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 397,
+          "line": 398,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks ci \\"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 627,
+          "line": 628,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10402,7 +10402,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 762,
+          "line": 763,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10543,13 +10543,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_abort_diagnostic_adapter.py",
-          "line": 648,
+          "line": 651,
           "source_group": "tests",
           "text": "[\"scripts/engineering/ci/pytest_abort_diagnostic_adapter.py\"],"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_abort_diagnostic_adapter.py",
-          "line": 831,
+          "line": 834,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pytest_abort_diagnostic_adapter as owner"
         }
@@ -11159,7 +11159,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py",
-          "line": 25,
+          "line": 26,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.validate_registry_dq_refs import build_diagnostics_payload"
         }
@@ -11352,7 +11352,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 296,
+      "reference_count": 297,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -12922,7 +12922,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 189,
+          "line": 190,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.diagnostics audit-structure --path ."
         },
@@ -13740,7 +13740,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 363,
+          "line": 364,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -15561,7 +15561,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py",
-          "line": 26,
+          "line": 27,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.import_graph_inventory import ("
         },
@@ -16214,7 +16214,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
-          "line": 180,
+          "line": 184,
           "source_group": "tests",
           "text": "ROOT / \"scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py\""
         },
@@ -16888,7 +16888,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
-          "line": 183,
+          "line": 187,
           "source_group": "tests",
           "text": "ROOT / \"scripts/engineering/qa/report_debt_governance_gates.py\""
         },
@@ -17606,7 +17606,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -17651,9 +17651,9 @@
           "text": "from scripts.engineering.qa.report_test_governance_audit import ("
         },
         {
-          "path": "tests/architecture/conftest.py",
-          "line": 39,
-          "source_group": "tests",
+          "path": "scripts/engineering/qa/report_topology_source_binding.py",
+          "line": 154,
+          "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_test_governance_audit import ("
         }
       ],
@@ -17677,7 +17677,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_topology_source_binding.py",
-          "line": 5,
+          "line": 9,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_topology_source_binding import ("
         }
@@ -18118,7 +18118,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -18146,7 +18146,7 @@
         },
         {
           "path": "scripts/engineering/qa/refresh_governance_artifacts.py",
-          "line": 713,
+          "line": 721,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.technical_debt_audit_registry import ("
         },
@@ -18161,6 +18161,12 @@
           "line": 19,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.technical_debt_audit_registry import ("
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
+          "line": 32,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import technical_debt_audit_registry as registry"
         }
       ],
       "owner": "@bioetl-architecture",
@@ -18882,13 +18888,13 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 164,
+          "line": 165,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/repo/check_github_actions_runtime_policy.py --pr-required-pins --check"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 590,
+          "line": 591,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
@@ -19305,7 +19311,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-          "line": 170,
+          "line": 160,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"cleanup_root_local_clutter.py\""
         }
@@ -19381,7 +19387,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_github_actions_runtime_policy.py",
-          "line": 143,
+          "line": 146,
           "source_group": "scripts",
           "text": "vs this list is reviewed by `github_settings_review.py`, not here."
         },
@@ -24768,7 +24774,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": "scripts/engineering/qa/report_config_surface_backlog.py",

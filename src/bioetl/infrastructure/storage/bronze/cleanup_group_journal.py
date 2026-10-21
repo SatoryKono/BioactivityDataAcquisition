@@ -180,17 +180,7 @@ class GroupJournal(GroupRecoveryCoordinator):
         try:
             for name in self._directory_names(fd) if fd is not None else ():
                 assert fd is not None
-                if len(name) != 37 or not name.endswith(".json"):
-                    raise GroupJournalConflict("unknown pending journal entry")
-                operation_id = name.removesuffix(".json")
-                _require_operation_id(operation_id)
-                body = self._read_intent(fd, operation_id)
-                if body is None or body["root"] != _identity(self._root_fd):
-                    raise GroupJournalConflict("pending journal changed or is foreign")
-                count, size = self._pending_size(body)
-                operations.append(
-                    (operation_id, GroupSpec(**body["scope"]), count, size)
-                )
+                operations.append(self._pending_operation(fd, name))
         finally:
             if fd is not None:
                 os.close(fd)
@@ -202,6 +192,18 @@ class GroupJournal(GroupRecoveryCoordinator):
         ):
             raise GroupJournalConflict("group stage has no owned intent")
         return operations
+
+    def _pending_operation(self, fd: int, name: str) -> tuple[str, GroupSpec, int, int]:
+        """Read and attest one pending journal before counting its live members."""
+        if len(name) != 37 or not name.endswith(".json"):
+            raise GroupJournalConflict("unknown pending journal entry")
+        operation_id = name.removesuffix(".json")
+        _require_operation_id(operation_id)
+        body = self._read_intent(fd, operation_id)
+        if body is None or body["root"] != _identity(self._root_fd):
+            raise GroupJournalConflict("pending journal changed or is foreign")
+        count, size = self._pending_size(body)
+        return operation_id, GroupSpec(**body["scope"]), count, size
 
     @staticmethod
     def _directory_names(fd: int) -> list[str]:

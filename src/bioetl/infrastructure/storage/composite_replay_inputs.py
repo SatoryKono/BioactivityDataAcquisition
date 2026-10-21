@@ -134,23 +134,27 @@ class CompositeReplayInputReader(DeltaReaderPort):
         if payload.get("version") != "composite-inputs-v1":
             raise ValueError("composite_input_envelope_version_invalid")
         for item in payload["inputs"]:
-            name, filename = item["table"], item["file"]
-            candidate = (root / filename).resolve()
-            if (
-                not isinstance(name, str)
-                or not name
-                or name in self._tables
-                or Path(filename).name != filename
-                or not candidate.is_relative_to(root.resolve())
-            ):
-                raise ValueError("composite_input_reference_invalid")
-            content = candidate.read_bytes()
-            if _digest(content) != item["sha256"]:
-                raise ValueError("composite_input_digest_mismatch")
-            self._tables[name] = pa.ipc.open_file(pa.BufferReader(content)).read_all()
+            self._read_captured_input(root, item)
         required = payload["required_tables"]
         if not required or not set(required).issubset(self._tables):
             raise ValueError("composite_required_input_missing")
+
+    def _read_captured_input(self, root: Path, item: dict[str, str]) -> None:
+        """Validate a unique confined reference and its digest before loading Arrow."""
+        name, filename = item["table"], item["file"]
+        candidate = (root / filename).resolve()
+        if (
+            not isinstance(name, str)
+            or not name
+            or name in self._tables
+            or Path(filename).name != filename
+            or not candidate.is_relative_to(root.resolve())
+        ):
+            raise ValueError("composite_input_reference_invalid")
+        content = candidate.read_bytes()
+        if _digest(content) != item["sha256"]:
+            raise ValueError("composite_input_digest_mismatch")
+        self._tables[name] = pa.ipc.open_file(pa.BufferReader(content)).read_all()
 
     @override
     async def read_table(

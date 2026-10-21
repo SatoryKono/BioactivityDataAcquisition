@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 import pytest
 import yaml
+
+_MEASURED_SHA = "a" * 40
+_RAW_SHA = "b" * 64
 
 pytestmark = pytest.mark.repo_backed
 
@@ -77,6 +81,63 @@ def test_benchmark_evidence_validator_tests_are_collected_by_automatic_lanes():
     assert (
         root / "tests/unit/scripts/qa/test_validate_benchmark_evidence.py"
     ).is_file()
+
+
+def _git_check_ignore(
+    root: Path, relative: str, *, verbose: bool
+) -> subprocess.CompletedProcess[str]:
+    command = ["git", "check-ignore", "--no-index", "--", relative]
+    if verbose:
+        command.insert(2, "-v")
+    else:
+        command.insert(2, "-q")
+    return subprocess.run(
+        command,
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+
+def _ignore_pattern(root: Path, relative: str) -> str:
+    completed = _git_check_ignore(root, relative, verbose=True)
+    assert completed.returncode == 0, completed.stderr
+    pattern, _pathname = completed.stdout.rstrip("\n").split("\t", 1)
+    return pattern.rsplit(":", 1)[-1]
+
+
+def test_root_benchmark_manifest_stays_ignored_while_evidence_copy_is_tracked():
+    root = Path(__file__).resolve().parents[5]
+    evidence = f"reports/performance/evidence/{_MEASURED_SHA}/{_RAW_SHA}"
+    ignored = (
+        "reports/performance/benchmark-manifest.json",
+        "reports/performance/benchmark-measurements.json",
+        "reports/performance/benchmark-gate.json",
+        "reports/performance/benchmark-validation-manifest.json",
+        f"{evidence}/notes.txt",
+    )
+    tracked = (
+        "reports/performance/benchmark-summary.json",
+        f"{evidence}/benchmark-manifest.json",
+        f"{evidence}/benchmark-measurements.json",
+        f"{evidence}/benchmark-gate.json",
+        f"{evidence}/benchmark-summary-candidate.json",
+    )
+    for relative in ignored:
+        assert _git_check_ignore(root, relative, verbose=False).returncode == 0, (
+            relative
+        )
+    for relative in tracked:
+        assert _git_check_ignore(root, relative, verbose=False).returncode == 1, (
+            relative
+        )
+    assert _ignore_pattern(root, "reports/performance/benchmark-manifest.json") == (
+        "/reports/performance/*"
+    )
+    assert _ignore_pattern(root, f"{evidence}/benchmark-manifest.json") == (
+        "!/reports/performance/evidence/*/*/benchmark-manifest.json"
+    )
 
 
 def test_nightly_caller_declares_dataset_and_loads_guard_before_benchmark():

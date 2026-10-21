@@ -46,8 +46,12 @@ def test_issue_6042_bootstrap_profile_blocks_unproven_scope_widening() -> None:
     assert profile["debt_budget_policy"] == "flat_or_decreasing_only"
     assert profile["result"]["status"] == "pass"
     assert profile["result"]["test_count"] >= 300
-    assert profile["result"]["test_file_count"] == len(
-        list(bootstrap_root.rglob("test_*.py"))
+    binding = profile["current_source_binding"]
+    assert binding["kind"] == "source_topology_only"
+    assert profile["result"]["test_file_count"] == binding["measured_test_file_count"]
+    assert binding["test_file_count"] == len(list(bootstrap_root.rglob("test_*.py")))
+    assert binding["test_files"] == sorted(
+        p.relative_to(ROOT).as_posix() for p in bootstrap_root.rglob("test_*.py")
     )
 
     # Live topology parity: do not hard-code a stale local_conftest_present
