@@ -90,12 +90,7 @@ class GroupMemberRecovery(GroupRecordStore):
         name = body["names"][key]
         source = _exists(date_fd, name)
         staged = _exists(stage_fd, key)
-        if source and staged:
-            raise GroupJournalConflict(f"ambiguous duplicate {key}")
-        if source and key in body["staged"]:
-            raise GroupJournalConflict(f"staged {key} reappeared at source")
-        if not source and not staged and key not in body["staged"]:
-            raise GroupJournalConflict(f"unexplained absence of {key}")
+        _verify_member_presence(source, staged, key in body["staged"], key)
         if source and _fingerprint(date_fd, name) != body["members"][key]:
             raise GroupJournalConflict(f"replaced {key}")
         if staged and _fingerprint(stage_fd, key) != body["members"][key]:
@@ -204,9 +199,7 @@ class GroupMemberRecovery(GroupRecordStore):
         self._assert_stage_named(stage_fd, body)
         if key not in body["staged"]:
             progress.phase = f"{key}_staged_record"
-            body["staged"] = [
-                member for member in _ORDER if member in (*body["staged"], key)
-            ]
+            body["staged"] = _ordered_progress_keys(body["staged"], key)
             self._replace_record(journal_fd, operation_id, body)
             if hook:
                 hook(f"after_{key}_staged_record")
@@ -228,7 +221,23 @@ class GroupMemberRecovery(GroupRecordStore):
         progress.removed_bytes += body["members"][key]["size"]
         removed = body.setdefault("removed", [])
         body["schema"] = _SCHEMA_VERSION
-        body["removed"] = [member for member in _ORDER if member in (*removed, key)]
+        body["removed"] = _ordered_progress_keys(removed, key)
         self._replace_record(journal_fd, operation_id, body)
         if hook:
             hook(f"after_{key}_unlink")
+
+
+def _verify_member_presence(
+    source: bool, staged: bool, recorded: bool, key: str
+) -> None:
+    """Reject duplicate and unexplained presence before hashing any member."""
+    if source and staged:
+        raise GroupJournalConflict(f"ambiguous duplicate {key}")
+    if source and recorded:
+        raise GroupJournalConflict(f"staged {key} reappeared at source")
+    if not source and not staged and not recorded:
+        raise GroupJournalConflict(f"unexplained absence of {key}")
+
+
+def _ordered_progress_keys(existing: list[str], key: str) -> list[str]:
+    return [member for member in _ORDER if member in (*existing, key)]

@@ -107,11 +107,7 @@ class GoldOutcomeBoundary:
         if self._should_propagate(original):
             return False
         receipt = self._receipt(original) if callable(self._receipt) else self._receipt
-        cause: BaseException = original
-        if self._flatten_cause and isinstance(
-            original, (GoldWriteFailure, GoldWriteCancelled)
-        ):
-            cause = original.__cause__ or original
+        cause = _failure_cause(original, self._flatten_cause)
         if isinstance(original, asyncio.CancelledError):
             raise GoldWriteCancelled(receipt) from cause
         raise _failure_for(receipt, cause) from cause
@@ -180,3 +176,11 @@ def _failure_for(
     ):
         return GoldWriteValidationFailure(receipt, cause, diagnostic_error=diagnostic)
     return GoldWriteFailure(receipt, diagnostic_error=diagnostic)
+
+
+def _failure_cause(original: BaseException, flatten: bool) -> BaseException:
+    """Flatten only classified Gold outcomes, preserving the original otherwise."""
+    cause: BaseException = original
+    if flatten and isinstance(original, (GoldWriteFailure, GoldWriteCancelled)):
+        cause = original.__cause__ or original
+    return cause

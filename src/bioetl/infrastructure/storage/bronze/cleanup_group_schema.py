@@ -219,12 +219,16 @@ def _validate_stage(body: dict[str, Any]) -> None:  # Any: validated JSON.
         not isinstance(stage, dict)
         or set(stage) != {"dev", "ino", "token"}
         or any(
-            type(stage[key]) is not int or stage[key] < 0 for key in ("dev", "ino")
+            not _nonnegative_inode_field(stage[key]) for key in ("dev", "ino")
         )  # Any: validated JSON.
         or not isinstance(stage["token"], str)
         or UUID(hex=stage["token"]).hex != stage["token"]
     ):
         raise ValueError("stage association")
+
+
+def _nonnegative_inode_field(value: object) -> bool:
+    return type(value) is int and value >= 0
 
 
 def _decode_record(
@@ -347,14 +351,7 @@ def _validate_association(
     """
     association = metadata.get("cleanup_association")
     if (
-        any(  # Any: validated JSON.
-            metadata.get(key) != value
-            for key, value in (
-                ("provider", spec.provider),
-                ("entity", spec.entity),
-                ("batch_id", spec.batch_id),
-            )
-        )
+        not _association_owner_matches(metadata, spec)
         or not isinstance(association, dict)
         or set(association) != {"schema", "payload_sha256", "copy_sha256"}
         or type(association["schema"]) is not int
@@ -367,6 +364,17 @@ def _validate_association(
         )
     ):
         raise GroupJournalConflict("unassociated Bronze group content")
+
+
+def _association_owner_matches(metadata: dict[str, object], spec: GroupSpec) -> bool:
+    return all(
+        metadata.get(key) == value
+        for key, value in (
+            ("provider", spec.provider),
+            ("entity", spec.entity),
+            ("batch_id", spec.batch_id),
+        )
+    )
 
 
 def _optional_copy_digest_valid(value: Any) -> bool:  # Any: validated JSON.

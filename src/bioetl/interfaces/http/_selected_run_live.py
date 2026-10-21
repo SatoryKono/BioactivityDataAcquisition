@@ -6,6 +6,7 @@ from typing import cast
 from uuid import UUID
 
 from bioetl.application.runtime_clock import current_utc_time
+from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.types import RunID
 from bioetl.interfaces.http._health_server_observability_protocols import (
     _HealthObservabilityRoutingHost,
@@ -67,6 +68,13 @@ def active_run_diagnostics(
     entries = [entry for entry in entries if entry.manifest_id in allowed_manifest_ids]
     if not entries:
         return {"verdict": "INCOMPLETE", "reason": "ledger_missing"}
+    return _ledger_diagnostics(manifest, entries, run_id)
+
+
+def _ledger_diagnostics(
+    manifest: RunManifest, entries: list[RunLedgerEntry], run_id: str
+) -> dict[str, object]:
+    """Describe ledger recency without inferring worker activity from its age."""
     if any(entry.occurred_at.utcoffset() is None for entry in entries):
         raise ValueError("ledger_timestamp_timezone_missing")
     latest = max(entries, key=lambda entry: entry.occurred_at)

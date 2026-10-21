@@ -99,13 +99,7 @@ def _entry(
         raise ValueError(f"missing pinned producer snapshot: {layer}:{name}")
     if not isinstance(entry.get("table_id"), str) or not entry["table_id"]:
         raise ValueError(f"missing pinned table identity: {layer}:{name}")
-    run_ids = entry.get("run_ids")
-    if (
-        not isinstance(run_ids, list)
-        or not run_ids
-        or any(not isinstance(r, str) or not r for r in run_ids)
-    ):
-        raise ValueError(f"unbound pinned producer snapshot: {layer}:{name}")
+    run_ids = _snapshot_run_ids(entry.get("run_ids"), layer, name)
     if not set(run_ids).issubset(request.source_run_ids):
         raise ValueError(
             "selected snapshot is outside current workflow producer identities"
@@ -226,3 +220,14 @@ async def selected_result(
         input_snapshots=inputs,
         source_snapshot=source_snapshot,
     )
+
+
+def _snapshot_run_ids(run_ids: object, layer: str, name: str) -> list[str]:
+    """Require nonempty bound run identities before checking workflow membership."""
+    if (
+        not isinstance(run_ids, list)
+        or not run_ids
+        or any(not isinstance(r, str) or not r for r in run_ids)
+    ):
+        raise ValueError(f"unbound pinned producer snapshot: {layer}:{name}")
+    return run_ids

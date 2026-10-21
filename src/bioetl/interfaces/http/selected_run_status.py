@@ -41,6 +41,7 @@ from bioetl.interfaces.http._selected_run_live import (
     scope_matches,
 )
 from bioetl.interfaces.http._selected_run_presentation import (
+    _assessment_summary,
     _readiness_fields,
     presentation_rows,
 )
@@ -274,20 +275,16 @@ def load_selected_run_status(
     if isinstance(loaded, dict):
         return loaded
     report, identity, assessment, availability, revision = loaded
-    summary = {
-        **{key: value for key, value in assessment.items() if key != "domains"},
-        "pipeline": pipeline,
-        "run_id": run_id,
-        "completed_at": identity.get("completed_at"),
-        "run_type": identity.get("run_type"),
-        "workflow_id": identity.get("workflow_id"),
-        "started_at": identity.get("started_at"),
-        "evaluation_at": report.get("assessment_at", identity.get("completed_at")),
-        "revision": revision,
-        "evidence_availability": availability,
-        "heartbeat_now": _NOT_EVALUATED,
-        "reason": "Saved run evidence; CURRENT and chart coverage are separate",
-    }
+    summary = _assessment_summary(
+        report,
+        identity,
+        assessment,
+        availability,
+        revision,
+        pipeline,
+        run_id,
+        heartbeat_now=_NOT_EVALUATED,
+    )
     probes, inventory_present = _artifact_probes(report, path.parent)
     if assessment.get("evidence_completeness") != "COMPLETE":
         probes.append(

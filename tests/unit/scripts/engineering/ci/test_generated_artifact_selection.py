@@ -383,6 +383,7 @@ def test_missing_comparison_ref_fails_instead_of_empty_changed_paths(tmp_path):
         "debt_scorecard_budget_no_growth",
         "production_uuid4_seams",
         "dq_contract_registry_blocking_drift",
+        "scripts_review_expiry_ratchet",
     ],
 )
 def test_source_debt_failures_survive_without_generated_inputs(monkeypatch, failure):
@@ -399,6 +400,19 @@ def test_source_debt_failures_survive_without_generated_inputs(monkeypatch, fail
         gates, "_collect_changed_paths", lambda *a, **k: {"src/changed.py"}
     )
     monkeypatch.setattr(gates, "_debt_scorecard_gates", lambda: [])
+    monkeypatch.setattr(
+        gates,
+        "_scripts_review_expiry_gate",
+        lambda **k: gates.Gate(
+            "scripts_review_expiry_ratchet",
+            "fail" if failure == "scripts_review_expiry_ratchet" else "pass",
+            "expired_review_by_count",
+            2,
+            1,
+            "configs/quality/scripts_lifecycle_registry.json",
+            "review",
+        ),
+    )
     monkeypatch.setattr(
         gates,
         "_debt_scorecard_budget_no_growth_gate",

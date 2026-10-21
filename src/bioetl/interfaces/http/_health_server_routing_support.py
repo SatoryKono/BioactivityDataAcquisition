@@ -246,13 +246,20 @@ async def _filter_options_payload(
             scopes=scopes,
             entries=report_entries,
         )
+    _add_run_id_items(payload, response_shape=response_shape, dimension=dimension)
+    return payload
+
+
+def _add_run_id_items(
+    payload: dict[str, object], *, response_shape: str, dimension: str
+) -> None:
+    """Expose run IDs without the sentinel only in the object response shape."""
     if response_shape != "list" and dimension == "run_id":
         payload["run_ids"] = [
             value
             for value in _string_payload_items(payload.get("items"))
             if value != RUN_ID_NO_SELECTION
         ]
-    return payload
 
 
 def _string_payload_items(value: object) -> tuple[str, ...]:

@@ -166,21 +166,7 @@ def load_report_selector_entries(
     # Direct callers retain a bounded fallback; server readers inject their port.
     store = store if store is not None else create_run_report_store()
     pipelines = _allowed_scope(scopes.get("pipeline", ()))
-    owners: list[str | None] = []
-    owners.extend(sorted(pipelines))
-    if not pipelines:
-        base = root / "pipeline"
-        if not store.is_dir(str(base)):
-            return []
-        owners = [
-            Path(location).name
-            for location in store.iterdir(str(base))
-            if store.is_dir(location)
-        ]
-        # Preserve legacy enumeration semantics for names that a selected-owner
-        # lookup would normalize. Never silently omit unusual historical paths.
-        if any(not re.fullmatch(r"[A-Za-z0-9_-]+", owner or "") for owner in owners):
-            owners = [None]
+    owners = _catalog_owners(root, store, pipelines)
 
     def read_owner(pipeline: str | None) -> list[ReportIndexEntry]:
         return list_pipeline_reports(
@@ -205,3 +191,24 @@ def load_report_selector_entries(
     if not pipelines:
         entries.sort(key=lambda entry: entry.mtime, reverse=True)
     return entries
+
+
+def _catalog_owners(
+    root: Path, store: RunReportStorePort, pipelines: set[str]
+) -> list[str | None]:
+    """Preserve unusual historical owner names through legacy enumeration."""
+    if pipelines:
+        selected: list[str | None] = []
+        selected.extend(sorted(pipelines))
+        return selected
+    base = root / "pipeline"
+    if not store.is_dir(str(base)):
+        return []
+    owners = [
+        Path(location).name
+        for location in store.iterdir(str(base))
+        if store.is_dir(location)
+    ]
+    if any(not re.fullmatch(r"[A-Za-z0-9_-]+", owner or "") for owner in owners):
+        return [None]
+    return list(owners)
