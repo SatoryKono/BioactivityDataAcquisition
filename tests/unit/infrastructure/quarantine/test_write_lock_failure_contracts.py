@@ -12,6 +12,8 @@ import pytest
 
 from bioetl.infrastructure.quarantine import write_lock as locks
 
+pytestmark = pytest.mark.unit
+
 
 def test_append_lock_owns_and_reuses_the_thread_lock(tmp_path):
     base = str(tmp_path / "table")
