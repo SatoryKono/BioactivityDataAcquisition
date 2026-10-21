@@ -27,6 +27,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, Mock
 from uuid import UUID
 
@@ -41,7 +42,11 @@ from bioetl.application.core.lifecycle.shutdown import (
     PipelineShutdownError,
     ShutdownSignal,
 )
-from bioetl.domain.locking import FencingToken
+from bioetl.domain.locking import (
+    FencingToken,
+    register_lock_release_barrier,
+    reset_lock_release_barriers,
+)
 from bioetl.domain.ports import LockPort
 from bioetl.domain.types import RunID, RunType
 
@@ -239,6 +244,53 @@ class TestLockRuntimeService:
             async with lock_manager:
                 entered = True
         assert entered is False
+
+    async def test_context_manager_waits_for_barriers_before_release(
+        self, lock_manager: LockRuntimeService, mock_lock_port: AsyncMock
+    ) -> None:
+        """In-flight Delta barriers must finish before the lock port is released."""
+        mock_lock_port.acquire.return_value = _TEST_TOKEN
+        mock_lock_port.heartbeat.return_value = True
+        order: list[str] = []
+
+        def _release(*_args: object, **_kwargs: object) -> bool:
+            order.append("release")
+            return True
+
+        mock_lock_port.release.side_effect = _release
+
+        async with lock_manager:
+
+            async def _barrier() -> None:
+                order.append("barrier")
+
+            register_lock_release_barrier(_barrier)
+
+        assert order == ["barrier", "release"]
+
+    async def test_cancelled_release_still_drops_the_lock(
+        self, lock_manager: LockRuntimeService, mock_lock_port: AsyncMock
+    ) -> None:
+        """Cancellation during a barrier must still release the lock."""
+        mock_lock_port.release.return_value = True
+        entered = asyncio.Event()
+        gate = asyncio.Event()
+
+        async def _barrier() -> None:
+            entered.set()
+            await gate.wait()
+
+        reset_lock_release_barriers()
+        register_lock_release_barrier(_barrier)
+        release_task = asyncio.create_task(lock_manager.release())
+        await entered.wait()
+        release_task.cancel()
+        gate.set()
+        with pytest.raises(asyncio.CancelledError):
+            await release_task
+        mock_lock_port.release.assert_awaited_once_with(
+            "lock:test_pipeline", TEST_RUN_ID, exclusive=False
+        )
 
     async def test_validate_uses_fencing_token(
         self, lock_manager: LockRuntimeService, mock_lock_port: AsyncMock
