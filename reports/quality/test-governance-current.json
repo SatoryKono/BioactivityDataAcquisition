@@ -1001,14 +1001,7 @@
     }
   },
   "assertless_total_candidates": 85,
-  "budget_violations": [
-    {
-      "actual": 6,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1182,15 +1175,8 @@
     ]
   },
   "intentional_no_exception_contract": 85,
-  "markerless_examples": [
-    "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:16",
-    "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:26",
-    "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:39",
-    "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:48",
-    "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:56",
-    "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:66"
-  ],
-  "markerless_test_functions": 6,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2039,15 +2025,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:16",
-      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:26",
-      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:39",
-      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:48",
-      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:56",
-      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:66"
-    ],
-    "markerless_test_functions": 6,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2113,7 +2092,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "f5e7f5d907f9865cb0ae688e5877652589226f90be5e82fab2a4cd2b3b5678a7",
+  "source_tree_sha256": "515b9660be8bf977c4fd27e9fae58ff490ca6ccc71db7858b1231053f640c05c",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2122,15 +2101,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 85,
-    "markerless_examples": [
-      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:16",
-      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:26",
-      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:39",
-      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:48",
-      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:56",
-      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:66"
-    ],
-    "markerless_test_functions": 6,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
