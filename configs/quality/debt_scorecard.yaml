@@ -28,6 +28,13 @@ governance:
     registry_sync_source: baseline
     rationale: Stabilizing architecture metrics through baseline ratcheting.
   coarse_budgets:
+    expired_review_by_count:
+      current_count: 172
+      max_count: 172
+      owner: '@bioetl-platform'
+      linked_rf: CF-075
+      rationale: Freeze the independently counted 172 expired lifecycle reviews on 2026-10-21.
+      ratchet_policy: Shrink only; existing debt is report-only, growth fails. Enforce after zero debt.
     ruff_error_count:
       max_count: 0
       owner: '@bioetl-architecture'
@@ -637,6 +644,13 @@ full_app_duplication_ratchets:
 supporting_scripts_governance:
   inventory_source: configs/quality/scripts_inventory_manifest.json
   metrics:
+    expired_review_by_count:
+      current_count: 172
+      max_count: 172
+      measured_on: '2026-10-21'
+      owner: '@bioetl-platform'
+      linked_issue: '#12078'
+      ratchet_policy: Shrink only across all decisions; no mass review_by extension. Enforce after zero debt.
     zero_reference_supporting_script_count:
       current_count: 0
       max_count: 0
