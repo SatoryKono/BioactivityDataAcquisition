@@ -268,6 +268,15 @@ positive timings (`stddev` may be zero), with `min <= mean/median <= max`,
 positive integer rounds/iterations, machine identity, and raw
 `bioetl_measurement.dataset` / `bioetl_measurement.environment` provenance. The
 validator does not fill missing fields, aggregate measurements, or adopt baselines.
+Reduction requires this successful validation manifest through
+`--validation-manifest` (default: `benchmark-validation-manifest.json` beside the
+raw input). Before comparison or candidate creation, the reducer verifies the
+receipt's raw digest, measured and checkout SHA, run identity, dataset, machine,
+and environment against the exact bytes it read. Missing, failed, corrupted, or
+mismatched receipts fail closed. Durable evidence stores the original raw and
+validation manifest bytes together; candidates and gates include the validation
+manifest digest. Local validation still cannot establish CI provenance or adopt
+a baseline.
 It writes `benchmark-validation-manifest.json` atomically, binding the exact raw
 JSON SHA256 to source, dataset, machine, and run identity. Local UUIDs are not GitHub
 run IDs and local validation emits no GitHub URL. A failed validation atomically replaces stale success with a failure manifest.
