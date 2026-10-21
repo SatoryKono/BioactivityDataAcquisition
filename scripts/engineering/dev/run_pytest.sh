@@ -161,6 +161,17 @@ _enable_benchmark_plugin() {
     fi
     PYTEST_PLUGIN_ARGS+=(-p tests.benchmarks.benchmark_vcs_guard)
     PYTEST_PLUGIN_ARGS+=(-p benchmark)
+
+    local filtered_defaults=()
+    for f in "${DEFAULT_FLAGS[@]}"; do
+        if [[ "$f" == "no:benchmark" || "$f" == "-p no:benchmark" || "$f" == "no:benchmark" ]]; then
+            continue
+        fi
+        filtered_defaults+=("$f")
+    done
+    DEFAULT_FLAGS=("${filtered_defaults[@]}")
+    # explicitly override the pyproject.toml addopts
+    PYTEST_ARGS+=("-p" "benchmark")
 }
 
 _requests_explicit_benchmark_plugin() {

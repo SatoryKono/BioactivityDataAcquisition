@@ -88,6 +88,13 @@ function Enable-BenchmarkPlugin {
         "-p", "tests.benchmarks.benchmark_vcs_guard",
         "-p", "benchmark"
     )
+    $NewDefaultFlags = @()
+    foreach ($f in $script:DefaultFlags) {
+        if ($f -eq "no:benchmark" -or $f -eq "-p no:benchmark") { continue }
+        $NewDefaultFlags += $f
+    }
+    $script:DefaultFlags = $NewDefaultFlags
+    $script:PytestArgs += @("-p", "benchmark")
 }
 
 function Test-CoveragePluginNeeded {

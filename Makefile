@@ -152,6 +152,7 @@ test-profile:
 
 test-benchmark:
 	mkdir -p reports/performance
+	rm -f reports/performance/benchmark-measurements.json
 	BIOETL_BENCHMARK_CALLER=local-makefile \
 	BIOETL_BENCHMARK_DATASET=bioetl-synthetic-benchmarks-v1 \
 	$(RUN) pytest tests/benchmarks/ \
@@ -160,7 +161,7 @@ test-benchmark:
 		-p benchmark \
 		-p no:xdist \
 		-v --tb=short \
-		--benchmark-json=reports/performance/benchmark-measurements.json
+		--benchmark-json=reports/performance/benchmark-measurements.json || { rc=$$?; rm -f reports/performance/benchmark-measurements.json; exit $$rc; }
 
 run-local:
 	$(RUN) bioetl run --pipeline $(PIPELINE) --limit 10
