@@ -1365,6 +1365,10 @@ def _emit_reducer(
     from scripts.engineering.common.repo_paths import write_text_confined
 
     body: dict[str, object] = {"reason": reason, "status": status}
+    if getattr(args, "validated_manifest_bytes", None) is not None:
+        body["validation_manifest_sha256"] = hashlib.sha256(
+            args.validated_manifest_bytes
+        ).hexdigest()
     if extra:
         body.update(extra)
     text = _dump(body)
@@ -1415,6 +1419,7 @@ def _confine_reducer_outputs(args: argparse.Namespace, root: Path) -> bool:
                 args.gate_out,
                 args.baseline,
                 args.evidence_dir,
+                args.validation_manifest,
             )
         ]
         if len(set(resolved)) != len(resolved):
@@ -1487,6 +1492,14 @@ def _store_raw_evidence(
             raw_bytes,
             root=root,
         )
+        write_bytes_confined(
+            args.evidence_dir
+            / measured_sha
+            / raw_sha
+            / "benchmark-validation-manifest.json",
+            args.validated_manifest_bytes,
+            root=root,
+        )
     except (OSError, ValueError):
         return "rejected_output_path"
     return None
@@ -1498,6 +1511,7 @@ def _candidate_summary(
     *,
     measured_sha: str,
     raw_sha: str,
+    validation_sha: str,
     scopes: list[str],
 ) -> dict[str, object]:
     return {
@@ -1506,6 +1520,7 @@ def _candidate_summary(
         "dataset": measurements[0][2],
         "environment": identity["environment"],
         "raw_sha256": raw_sha,
+        "validation_manifest_sha256": validation_sha,
         "run_attempt": identity["run_attempt"],
         "run_id": identity["run_id"],
         "run_url": identity["run_url"],
@@ -1549,6 +1564,9 @@ def _propose_initial_candidate(
                 identity,
                 measured_sha=measured_sha,
                 raw_sha=raw_sha,
+                validation_sha=hashlib.sha256(
+                    args.validated_manifest_bytes
+                ).hexdigest(),
                 scopes=scopes,
             )
         ),
@@ -1631,6 +1649,9 @@ def _finish_reduction(
                     identity,
                     measured_sha=measured_sha,
                     raw_sha=raw_sha,
+                    validation_sha=hashlib.sha256(
+                        args.validated_manifest_bytes
+                    ).hexdigest(),
                     scopes=scopes,
                 )
             ),
@@ -1659,11 +1680,69 @@ def _finish_reduction(
     )
 
 
+def _bound_validation_manifest(
+    path: Path,
+    root: Path,
+    raw_sha: str,
+    payload: dict[str, Any],
+    measured_sha: str,
+) -> bytes | str:
+    """Bind the validator's receipt to this snapshot before any reduction writes."""
+    from scripts.engineering.common.repo_paths import read_bytes_confined
+
+    try:
+        receipt_bytes = read_bytes_confined(path, root=root)
+    except FileNotFoundError:
+        return "missing_validation_manifest"
+    except (OSError, ValueError):
+        return "invalid_validation_manifest"
+    receipt = _decode_measurement_payload(receipt_bytes)
+    if not isinstance(receipt, dict) or (
+        type(receipt.get("schema_version")) is not int
+        or receipt.get("schema_version") != 1
+        or receipt.get("status") != "validated"
+        or receipt.get("producer_outcome") != "success"
+        or receipt.get("contract_outcome") != "success"
+        or type(receipt.get("benchmarks_count")) is not int
+        or not isinstance(receipt.get("raw_sha256"), str)
+        or re.fullmatch(r"[0-9a-f]{64}", receipt["raw_sha256"]) is None
+    ):
+        return "invalid_validation_manifest"
+    if receipt["raw_sha256"] != raw_sha:
+        return "raw_digest_mismatch"
+    try:
+        machine = _evidence_mapping(payload.get("machine_info"), "machine_info")
+        for key in ("node", "machine", "system", "python_version"):
+            _evidence_identity(machine.get(key), f"machine_info.{key}")
+        run = _evidence_mapping(payload.get("bioetl_run"), "bioetl_run")
+        identity = _evidence_run_identity(os.environ, run)
+        context = _evidence_mapping(payload.get("bioetl_measurement"), "dataset")
+        expected = {
+            "revision": measured_sha,
+            "checkout_sha": measured_sha,
+            "measured_run_id": run["id"],
+            "dataset_identity": _evidence_identity(context.get("dataset"), "dataset"),
+            "environment_identity": machine,
+            "benchmarks_count": len(payload["benchmarks"]),
+            **identity,
+        }
+    except (KeyError, TypeError, ValueError):
+        return "validation_identity_mismatch"
+    if any(receipt.get(key) != value for key, value in expected.items()):
+        return "validation_identity_mismatch"
+    return receipt_bytes
+
+
 def reduce_benchmark_evidence_main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Reduce benchmark measurements into a fail-closed gate."
     )
     parser.add_argument("--raw-json", type=Path, required=True)
+    parser.add_argument(
+        "--validation-manifest",
+        type=Path,
+        help="Required validator receipt; defaults to the raw file's sibling manifest.",
+    )
     parser.add_argument("--manifest-out", type=Path, required=True)
     parser.add_argument("--gate-out", type=Path, required=True)
     parser.add_argument("--baseline", type=Path, required=True)
@@ -1672,6 +1751,10 @@ def reduce_benchmark_evidence_main(argv: list[str] | None = None) -> int:
     parser.add_argument("--checkout-sha", default="")
     parser.add_argument("--repo", type=Path, default=None)
     args = parser.parse_args(argv)
+    if args.validation_manifest is None:
+        args.validation_manifest = args.raw_json.with_name(
+            "benchmark-validation-manifest.json"
+        )
     from scripts.engineering.common.repo_paths import REPO_ROOT
 
     root = args.output_root or REPO_ROOT
@@ -1705,6 +1788,12 @@ def reduce_benchmark_evidence_main(argv: list[str] | None = None) -> int:
     if isinstance(provenance, str):
         return _emit_reducer(args, root, "failed", provenance, {"raw_sha256": raw_sha})
     measured_sha, identity = provenance
+    validation = _bound_validation_manifest(
+        args.validation_manifest, root, raw_sha, decoded, measured_sha
+    )
+    if isinstance(validation, str):
+        return _emit_reducer(args, root, "failed", validation, {"raw_sha256": raw_sha})
+    args.validated_manifest_bytes = validation
     return _finish_reduction(
         args,
         root,

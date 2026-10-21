@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import subprocess
@@ -83,6 +84,12 @@ def _measurement(
             "revision_method": "gitdir_head_file",
         },
         "commit_info": {"dirty": None, "id": _HEAD},
+        "machine_info": {
+            "node": "synthetic-reducer-fixture",
+            "system": "Linux",
+            "machine": "x86_64",
+            "python_version": "3.12",
+        },
     }
     return payload
 
@@ -120,10 +127,14 @@ def _invoke(
     env: dict[str, str] | None = None,
     gate_name: str = "gate.json",
     extra: list[str] | None = None,
+    validation: bool = True,
 ) -> tuple[subprocess.CompletedProcess[str], Path, Path]:
     raw_path = tmp_path / "benchmark-measurements.json"
     if raw is not None:
         raw_path.write_bytes(raw)
+    validation_path = tmp_path / "benchmark-validation-manifest.json"
+    if validation and raw is not None and not validation_path.exists():
+        _write_reducer_validation_fixture(validation_path, raw)
     gate = tmp_path / gate_name
     manifest = tmp_path / "manifest.json"
     baseline_path = tmp_path / "benchmark-summary.json"
@@ -157,6 +168,197 @@ def _invoke(
 
 def _gate(path: Path) -> dict[str, object]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _write_reducer_validation_fixture(path: Path, raw: bytes) -> None:
+    """Synthetic receipts isolate reducer math; real validator controls follow below."""
+    from scripts.engineering.qa.generate_hotspot_degradation_report import (
+        _evidence_run_identity,
+    )
+
+    try:
+        payload = json.loads(raw)
+        receipt = {
+            "schema_version": 1,
+            "status": "validated",
+            "producer_outcome": "success",
+            "contract_outcome": "success",
+            "raw_sha256": hashlib.sha256(raw).hexdigest(),
+            "revision": payload["bioetl_source"]["revision"],
+            "checkout_sha": _HEAD,
+            "measured_run_id": payload["bioetl_run"]["id"],
+            "dataset_identity": payload["bioetl_measurement"]["dataset"],
+            "environment_identity": payload["machine_info"],
+            "benchmarks_count": len(payload["benchmarks"]),
+            **_evidence_run_identity(_github_env(), payload["bioetl_run"]),
+        }
+    except (KeyError, TypeError, ValueError):
+        return  # Malformed-raw tests fail before receipt binding.
+    path.write_text(json.dumps(receipt), encoding="utf-8")
+
+
+def _validated_schema_fixture(tmp_path: Path) -> tuple[dict, Path]:
+    """Synthetic schema/control bytes, never a benchmark measurement capture."""
+    from scripts.engineering.qa.generate_hotspot_degradation_report import (
+        validate_evidence,
+    )
+
+    payload = _measurement(100)
+    payload["benchmarks"][0]["stats"].update(
+        min=90, max=110, median=100, stddev=1, total=500, iterations=1
+    )
+    payload["machine_info"] = {
+        "node": "synthetic-fixture-host",
+        "system": "Linux",
+        "machine": "x86_64",
+        "python_version": "3.12",
+    }
+    raw = tmp_path / "benchmark-measurements.json"
+    raw.write_bytes(json.dumps(payload).encode())
+    validation = validate_evidence(
+        raw, _HEAD, producer_outcome="success", root=tmp_path, environ=_github_env()
+    )
+    validation["contract_outcome"] = "success"
+    manifest = tmp_path / "benchmark-validation-manifest.json"
+    manifest.write_text(json.dumps(validation), encoding="utf-8")
+    return payload, manifest
+
+
+@pytest.mark.parametrize("tamper", ["runner", "timing", "whitespace"])
+def test_reduction_rejects_raw_replaced_after_validation(
+    tmp_path: Path, tamper: str
+) -> None:
+    payload, validation = _validated_schema_fixture(tmp_path)
+    saved_manifest = validation.read_bytes()
+    # Preserve SHA/count and schema validity; even whitespace changes bytes.
+    if tamper == "runner":
+        payload["machine_info"]["node"] = "synthetic-replacement-host"
+    elif tamper == "timing":
+        payload["benchmarks"][0]["stats"]["mean"] = 101
+    raw = json.dumps(payload).encode() + (b"\n" if tamper == "whitespace" else b"")
+    result, gate, _manifest = _invoke(tmp_path, raw)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert _gate(gate)["reason"] == "raw_digest_mismatch"
+    assert validation.read_bytes() == saved_manifest
+    assert not any((tmp_path / "evidence").rglob("benchmark-summary-candidate.json"))
+
+
+def test_reduction_keeps_validated_pair_and_candidate_binding(tmp_path: Path) -> None:
+    payload, validation = _validated_schema_fixture(tmp_path)
+    raw = json.dumps(payload).encode()
+    manifest_bytes = validation.read_bytes()
+    result, gate, _manifest = _invoke(
+        tmp_path, raw, extra=["--validation-manifest", str(validation)]
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    folder = tmp_path / "evidence" / _HEAD / hashlib.sha256(raw).hexdigest()
+    assert (folder / "benchmark-measurements.json").read_bytes() == raw
+    assert (
+        folder / "benchmark-validation-manifest.json"
+    ).read_bytes() == manifest_bytes
+    candidate = _gate(folder / "benchmark-summary-candidate.json")
+    assert (
+        candidate["validation_manifest_sha256"]
+        == hashlib.sha256(manifest_bytes).hexdigest()
+    )
+    assert (
+        _gate(gate)["validation_manifest_sha256"]
+        == candidate["validation_manifest_sha256"]
+    )
+
+
+@pytest.mark.parametrize("escape", [False, True])
+def test_reduction_confines_and_protects_validation_input(
+    tmp_path: Path, escape: bool
+) -> None:
+    payload, validation = _validated_schema_fixture(tmp_path)
+    original = validation.read_bytes()
+    extra = (
+        ["--validation-manifest", str(tmp_path.parent / "outside-validation.json")]
+        if escape
+        else ["--manifest-out", str(validation)]
+    )
+    result, _gate_path, _manifest = _invoke(
+        tmp_path, json.dumps(payload).encode(), extra=extra
+    )
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert "rejected_output_path" in result.stderr
+    assert validation.read_bytes() == original
+    assert not any((tmp_path / "evidence").rglob("benchmark-summary-candidate.json"))
+
+
+@pytest.mark.parametrize("contents", [None, b"", b"{", b"\xff", b"[]", b"{}"])
+def test_reduction_requires_readable_validation_manifest(
+    tmp_path: Path, contents: bytes | None
+) -> None:
+    payload, validation = _validated_schema_fixture(tmp_path)
+    validation.unlink()
+    if contents is not None:
+        validation.write_bytes(contents)
+    gate = tmp_path / "gate.json"
+    gate.write_text('{"status":"passed"}', encoding="utf-8")
+    result, gate, _manifest = _invoke(
+        tmp_path, json.dumps(payload).encode(), validation=False
+    )
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert _gate(gate)["reason"] == (
+        "missing_validation_manifest"
+        if contents is None
+        else "invalid_validation_manifest"
+    )
+    assert _gate(gate)["status"] == "failed"
+    assert not any((tmp_path / "evidence").rglob("benchmark-summary-candidate.json"))
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("schema_version", True),
+        ("status", "failed"),
+        ("producer_outcome", "failure"),
+        ("contract_outcome", "skipped"),
+        ("benchmarks_count", True),
+        ("raw_sha256", None),
+    ],
+)
+def test_reduction_rejects_unvalidated_receipt(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    payload, validation = _validated_schema_fixture(tmp_path)
+    receipt = _gate(validation)
+    receipt[field] = value
+    validation.write_text(json.dumps(receipt), encoding="utf-8")
+    result, gate, _manifest = _invoke(tmp_path, json.dumps(payload).encode())
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert _gate(gate)["reason"] == "invalid_validation_manifest"
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("revision", "a" * 40),
+        ("checkout_sha", "a" * 40),
+        ("measured_run_id", "22222222-2222-4222-8222-222222222222"),
+        ("run_id", "42"),
+        ("run_attempt", "2"),
+        ("run_url", "https://example.invalid/synthetic-replacement"),
+        ("environment", "local"),
+        ("dataset_identity", "synthetic-other-dataset"),
+        ("environment_identity", {"node": "synthetic-other-host"}),
+        ("benchmarks_count", 2),
+    ],
+)
+def test_reduction_rejects_validation_identity_mismatch(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    payload, validation = _validated_schema_fixture(tmp_path)
+    receipt = _gate(validation)
+    receipt[field] = value
+    validation.write_text(json.dumps(receipt), encoding="utf-8")
+    result, gate, _manifest = _invoke(tmp_path, json.dumps(payload).encode())
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert _gate(gate)["reason"] == "validation_identity_mismatch"
+    assert not any((tmp_path / "evidence").rglob("benchmark-summary-candidate.json"))
 
 
 def test_missing_empty_encoding_and_malformed_json(tmp_path: Path) -> None:

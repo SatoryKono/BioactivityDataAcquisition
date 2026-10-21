@@ -61,6 +61,10 @@ def test_benchmark_evidence_workflow_keeps_validator_and_main_gates_independent(
     )
     assert "reduce-benchmark-evidence" in steps["Reduce benchmark evidence"]["run"]
     assert (
+        "--validation-manifest reports/performance/benchmark-validation-manifest.json"
+        in steps["Reduce benchmark evidence"]["run"]
+    )
+    assert (
         "test -s reports/performance/benchmark-validation-manifest.json"
         in steps["Require validated benchmark artifacts"]["run"]
     )

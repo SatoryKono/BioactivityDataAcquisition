@@ -120,6 +120,7 @@ jobs:
           mkdir -p reports/performance
           uv run --frozen --no-build python -m scripts.engineering.qa reduce-benchmark-evidence \
             --raw-json reports/performance/benchmark-measurements.json \
+            --validation-manifest reports/performance/benchmark-validation-manifest.json \
             --manifest-out reports/performance/benchmark-manifest.json \
             --gate-out reports/performance/benchmark-gate.json \
             --baseline reports/performance/benchmark-summary.json \
