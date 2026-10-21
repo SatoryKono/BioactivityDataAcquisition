@@ -11,10 +11,16 @@ from typing import TYPE_CHECKING
 from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import (
-    DQDisposition,
     DQPolicyRef,
     DQRuleOutcome,
-    DQViolationKind,
+)
+from bioetl.domain.types.dq_record_attribution import DQOutcomeChannel
+from bioetl.infrastructure.validation.contract_outcome_channel import (
+    attribute_contract_rules,
+    build_outcome_channel,
+    schema_error_field_name,
+    schema_error_severity,
+    schema_violations_from_error,
 )
 from bioetl.infrastructure.validation.pandera_validator import (
     PanderaGoldValidator,
@@ -77,82 +83,35 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
     def validate_with_outcomes(
         self,
         records: list[JsonDict],
-    ) -> tuple[bool, list[DQRuleOutcome]]:
+    ) -> DQOutcomeChannel:
         """Validate records and return rule-level DQ outcomes.
 
-        Note: This experimental API is tracked in #12095. Tests exercise it,
-        but it has no direct production callsites in src/bioetl.
-        The working fail-closed schema integration is handled by validate().
+        The channel unpacks as ``(is_valid, outcomes)``. Violations carry the
+        record-attribution contract. Gold ``write_gold`` consumes this method.
+        Batch ``validate()`` remains the fail-closed fallback.
 
         Args:
             records: List of record dictionaries to validate
 
         Returns:
-            tuple: (is_valid, rule_outcomes) where is_valid indicates overall validity
-                   and rule_outcomes contains individual rule evaluation results
+            DQOutcomeChannel: validity, sorted outcomes, and attributed violations
         """
         if not self._policy_resolver:
-            # Fallback to basic validation if no DQ config provided
             basic_result = super().validate(records)
-            return basic_result.valid, []
-
-        if not records:
-            return True, []
-
-        if not self._schema:
-            if self._strict:
-                outcome = self._create_schema_missing_outcome()
-                return False, [outcome]
-            return True, []
-
-        import pandas as pd
-
-        df = pd.DataFrame(records)
-        return self._validate_with_schema_and_policies(df)
-
-    def _validate_with_schema_and_policies(
-        self, df: pd.DataFrame
-    ) -> tuple[bool, list[DQRuleOutcome]]:
-        """Validate DataFrame with schema and apply DQ policies.
-
-        Args:
-            df: Pandas DataFrame to validate
-
-        Returns:
-            tuple: (is_valid, rule_outcomes)
-        """
-        assert self._schema is not None
-        assert self._policy_resolver is not None
-
-        from pandera.errors import SchemaError, SchemaErrors
-
-        rule_outcomes = []
-        is_valid = True
-
-        try:
-            # Apply Gold-specific validation logic
-            df_to_validate = self._prepare_df_for_validation(df)
-            self._schema.validate(df_to_validate, lazy=True)
-
-        except (SchemaError, SchemaErrors, KeyError, TypeError, ValueError) as e:
-            is_valid = False
-            # Convert schema errors to DQ rule outcomes
-            error_outcomes = self._convert_schema_errors_to_outcomes(e)
-            rule_outcomes.extend(error_outcomes)
-
-        # Add any contract-specific validation outcomes
-        contract_outcomes = self._apply_contract_validations(df)
-        rule_outcomes.extend(contract_outcomes)
-
-        # Update overall validity based on rule outcomes
-        if rule_outcomes:
-            has_failures = any(
-                outcome.disposition in (DQDisposition.QUARANTINE, DQDisposition.FAIL)
-                for outcome in rule_outcomes
+            return DQOutcomeChannel(
+                is_valid=basic_result.valid,
+                outcomes=(),
+                violations=(),
             )
-            is_valid = is_valid and not has_failures
-
-        return is_valid, rule_outcomes
+        return build_outcome_channel(
+            records=records,
+            schema=self._schema,
+            strict=self._strict,
+            dq_config=self._dq_config,
+            resolver=self._policy_resolver,
+            config_path=self._get_config_path(),
+            prepare_frame=self._prepare_df_for_validation,
+        )
 
     def _prepare_df_for_validation(self, df: pd.DataFrame) -> pd.DataFrame:
         """Prepare DataFrame for validation with Gold-specific handling."""
@@ -183,73 +142,26 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
         Returns:
             List of DQRuleOutcome objects
         """
-        from pandera.errors import SchemaErrors
-
-        outcomes: list[DQRuleOutcome] = []
         policy_resolver = self._policy_resolver
         assert policy_resolver is not None
-
-        if isinstance(error, SchemaErrors):
-            # Pandera exposes the collected lazy-validation items via
-            # ``schema_errors`` on current versions.
-            for schema_error in error.schema_errors:
-                field_name = self._extract_schema_error_field_name(schema_error)
-                outcome = policy_resolver.create_rule_outcome(
-                    rule_id=f"schema.{field_name or 'unknown'}",
-                    violation_kind=DQViolationKind.SCHEMA_VIOLATION,
-                    severity=self._determine_severity(schema_error),
-                    affected_fields=[field_name] if field_name else None,
-                    config_path=self._get_config_path(),
-                    threshold_breach=False,
-                    anomaly_signal=False,
-                )
-                outcomes.append(outcome)
-        else:
-            # Handle single error
-            field_name = self._extract_schema_error_field_name(error)
-            outcome = policy_resolver.create_rule_outcome(
-                rule_id=f"schema.{field_name or 'unknown'}",
-                violation_kind=DQViolationKind.SCHEMA_VIOLATION,
-                severity="high",  # Default high severity for schema errors
-                affected_fields=[field_name] if field_name else None,
-                config_path=self._get_config_path(),
-                threshold_breach=False,
-                anomaly_signal=False,
-            )
-            outcomes.append(outcome)
-
-        return outcomes
+        violations = schema_violations_from_error(
+            error,
+            records=[],
+            resolver=policy_resolver,
+            config_path=self._get_config_path(),
+        )
+        return [violation.outcome for violation in violations]
 
     def _extract_schema_error_field_name(self, error: Exception) -> str | None:
         """Best-effort extraction of the affected field from a Pandera error."""
-        column_name = getattr(error, "column_name", None)
-        if isinstance(column_name, str) and column_name:
-            return column_name
-
-        failure_cases = getattr(error, "failure_cases", None)
-        if isinstance(failure_cases, str) and failure_cases:
-            return failure_cases
-
-        loc = getattr(error, "loc", None)
-        if loc:
-            if isinstance(loc, str):
-                return loc
-            return ".".join(str(item) for item in loc)
-
-        message = str(error)
-        marker = "column '"
-        if marker in message:
-            _, _, tail = message.partition(marker)
-            column_name, _, _ = tail.partition("'")
-            if column_name:
-                return column_name
-        return None
+        return schema_error_field_name(error)
 
     def _apply_contract_validations(self, df: pd.DataFrame) -> list[DQRuleOutcome]:
-        """Apply additional contract-specific validations.
+        """Evaluate executable contract rules loaded from the bound DQConfig.
 
-        Note: This experimental placeholder is tracked in #12095.
-        validate_with_outcomes() invokes it; it returns no additional outcomes.
+        The rule bundle is not loaded from ``policy_ref.contract_ref``.
+        ``load_executable_contract_rules`` is the explicit owning-source step
+        inside ``attribute_contract_rules``.
 
         Args:
             df: DataFrame being validated
@@ -257,45 +169,18 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
         Returns:
             List of DQRuleOutcome objects from contract validations
         """
-        del df
-        outcomes: list[DQRuleOutcome] = []
-
-        # Example: Check for required fields specified in contract
-        if self._policy_ref and "gold" in self._policy_ref.contract_ref.lower():
-            # Add Gold-specific contract validations here
-            # For now, this is a placeholder for future contract-specific rules
-            pass
-
-        return outcomes
-
-    def _create_schema_missing_outcome(self) -> DQRuleOutcome:
-        """Create outcome for missing schema in strict mode."""
-        assert self._policy_resolver is not None
-
-        return self._policy_resolver.create_rule_outcome(
-            rule_id="schema.missing",
-            violation_kind=DQViolationKind.SCHEMA_VIOLATION,
-            severity="high",
-            affected_fields=None,
-            config_path=self._get_config_path(),
-            threshold_breach=False,
-            anomaly_signal=False,
-        )
+        records = [
+            {str(key): value for key, value in row.items()}
+            for row in df.to_dict(orient="records")
+        ]
+        return [
+            violation.outcome
+            for violation in attribute_contract_rules(records, self._dq_config)
+        ]
 
     def _determine_severity(self, schema_error: Exception) -> str:
         """Determine severity level for a schema error."""
-        if "null" in str(schema_error).lower():
-            return "high"  # Null violations are severe
-        elif "type" in str(schema_error).lower():
-            return "high"  # Type mismatches are severe
-        elif "regex" in str(schema_error).lower():
-            return "medium"  # Regex failures are medium severity
-        elif any(
-            marker in str(schema_error).lower() for marker in ("range", "min", "max")
-        ):
-            return "medium"  # Range violations are medium severity
-        else:
-            return "high"  # Default to high severity
+        return schema_error_severity(schema_error)
 
     def _get_config_path(self) -> str | None:
         """Get configuration path for outcomes."""
@@ -311,11 +196,7 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
 
 
 class ContractAwareSilverValidator(PanderaSilverValidator):
-    """Silver validator with contract-based DQ policy integration.
-
-    Placeholder for future Silver contract validation.
-    Currently delegates to basic Silver validator.
-    """
+    """Silver validator with contract-based DQ policy integration."""
 
     def __init__(
         self,
@@ -340,19 +221,48 @@ class ContractAwareSilverValidator(PanderaSilverValidator):
     def validate_with_outcomes(
         self,
         records: list[JsonDict],
-    ) -> tuple[bool, list[DQRuleOutcome]]:
+    ) -> DQOutcomeChannel:
         """Validate records and return rule-level DQ outcomes.
 
-        Note: This experimental API is tracked in #12095. Tests exercise it,
-        but it has no direct production callsites in src/bioetl.
-        The working fail-closed schema integration is handled by validate().
+        The channel unpacks as ``(is_valid, outcomes)``. Silver production
+        writes still use ``validate()``; this method is the outcome source
+        shared with Gold.
         """
-        # Basic validation
-        basic_result = self.validate(records)
+        if not self._policy_resolver:
+            basic_result = self.validate(records)
+            return DQOutcomeChannel(
+                is_valid=basic_result.valid,
+                outcomes=(),
+                violations=(),
+            )
+        return build_outcome_channel(
+            records=records,
+            schema=self._schema,
+            strict=self._strict,
+            dq_config=self._dq_config,
+            resolver=self._policy_resolver,
+            config_path=self._silver_config_path(),
+            prepare_frame=self._prepare_df_for_validation,
+        )
 
-        # For now, return basic result with empty outcomes
-        # Future implementation will add Silver-specific contract validation
-        return basic_result.valid, []
+    def _prepare_df_for_validation(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Prepare a Silver frame the same way ``validate()`` does."""
+        if (
+            not self._strict
+            and self._schema is not None
+            and hasattr(self._schema, "columns")
+        ):
+            prepared = self._reindex_non_strict(df)
+        else:
+            prepared = self._seed_missing_nullable_columns(df)
+        prepared = self._normalize_nullable_integer_columns(prepared)
+        prepared = self._normalize_nullable_boolean_columns(prepared)
+        return self._reorder_to_schema(prepared)
+
+    def _silver_config_path(self) -> str | None:
+        if self._policy_ref:
+            return f"contracts/{self._policy_ref.contract_ref}/dq_rules.yaml"
+        return None
 
     def get_policy_summary(self) -> JsonDict:
         """Get summary of effective DQ policy."""

@@ -455,6 +455,8 @@ def test_s8_documented_inventory_matches_generated_coverage() -> None:
     assert f"`{summary['source_module_count']}`" in doc
     assert f"`{status['fully_covered']}` fully covered" in doc
     assert f"`{status['partially_covered']}` partially covered" in doc
+    count = len(list((ROOT / "src/bioetl").rglob("*.py")))
+    assert f"`source_module_count={count}`" in doc
 
 
 @pytest.mark.generated_artifact

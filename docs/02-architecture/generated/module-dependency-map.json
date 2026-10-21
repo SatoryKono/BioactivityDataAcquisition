@@ -1,24 +1,24 @@
 {
   "summary": {
-    "scanned_modules": 2586,
-    "total_internal_imports": 8357,
+    "scanned_modules": 2593,
+    "total_internal_imports": 8390,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "6c2ceac50d1fb3311c9274c131f12c7dfb775470bd5d2042a6343b400a338d95"
+    "source_fingerprint": "220f897652b81604ce4ef80590ee48ea5cd4a85ea6536339997d2c331c7c2ee3"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1642,
+      "imports": 1648,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1118,
+      "imports": 1132,
       "allowed": true
     },
     {
@@ -48,19 +48,19 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1310,
+      "imports": 1313,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 805,
+      "imports": 811,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1316,
+      "imports": 1320,
       "allowed": true
     },
     {
@@ -107,7 +107,7 @@
     {
       "source": "application.core",
       "target": "domain.types",
-      "imports": 98
+      "imports": 106
     },
     {
       "source": "application.services",
@@ -307,7 +307,7 @@
     {
       "source": "application.core",
       "target": "domain.exceptions",
-      "imports": 18
+      "imports": 19
     },
     {
       "source": "application.observability",

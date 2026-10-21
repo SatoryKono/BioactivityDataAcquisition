@@ -438,15 +438,17 @@ it is not a new coverage measurement or a complete topology re-audit.
 
 ## Current source inventory binding
 
-- `source_tree_sha256=2b2131af9644f3baeb95d4cd2f5df7cce2a42637350a120ad145c5ad7c555b9c`
-- `source_module_count=2588`
-- Source modules: `2588`
-- `2531` fully covered
-- `56` partially covered
+- `source_tree_sha256=be19a2812b8da14c7e575db2db1fff639bcbd979dea76d2b36cb07519c7068d5`
+- `source_module_count=2595`
+- Source modules: `2595`
+- `coverage_inventory_module_count=2588`
+- Accepted coverage inventory: `2588` modules
+- Accepted inventory: `2531` fully covered
+- Accepted inventory: `56` partially covered
 - Test inventory: `assertless_total_candidates=85`
 
 Derived by scripts/engineering/qa/report_topology_source_binding.py from
-the verified module inventory. This is a source-only projection, not a
+the verified source tree and accepted inventory. This is a source-only projection, not a
 new coverage measurement or a complete topology re-audit. Historical raw
 evidence and capture identity above remain unchanged.
 

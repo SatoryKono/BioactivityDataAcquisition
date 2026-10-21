@@ -17,10 +17,10 @@
         "src/bioetl/application/core/"
       ],
       "duplication_clusters": 0,
-      "files": 204,
-      "total_loc": 25239,
+      "files": 206,
+      "total_loc": 25857,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.379,
+      "helper_function_ratio": 0.386,
       "max_internal_fan_in": 5,
       "max_internal_fan_in_module": "bioetl.application.core.record_processor_config",
       "bounded_growth_budgets": {
@@ -31,9 +31,9 @@
         "distribution": {
           "0": 19,
           "1": 106,
-          "2": 42,
+          "2": 43,
           "3": 17,
-          "4": 11,
+          "4": 12,
           "5": 9
         },
         "modules": [
@@ -155,6 +155,23 @@
             ]
           },
           {
+            "module": "bioetl.application.core._gold_outcome_disposition",
+            "fan_in": 4,
+            "runtime_importers": [
+              "bioetl.application.core._batch_write_support",
+              "bioetl.application.core._batch_writer_gold_support",
+              "bioetl.application.core._gold_outcome_quarantine_write",
+              "bioetl.application.core._record_processor_write_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._gold_outcome_quarantine_write",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core._batch_writer_gold_support"
+            ]
+          },
+          {
             "module": "bioetl.application.core._quarantine_entries",
             "fan_in": 4,
             "runtime_importers": [
@@ -197,8 +214,9 @@
           },
           {
             "module": "bioetl.application.core._quarantine_write_support",
-            "fan_in": 1,
+            "fan_in": 2,
             "runtime_importers": [
+              "bioetl.application.core._gold_outcome_quarantine_write",
               "bioetl.application.core._quarantine_support"
             ]
           },

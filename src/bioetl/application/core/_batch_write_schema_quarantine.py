@@ -25,11 +25,14 @@ async def quarantine_schema_violation(
     error: SchemaViolationError,
 ) -> None:
     layer = event_context.layer
-    writer.track_batch_failed(stage=layer, count=len(records))
+    remaining = _records_without_outcome_quarantine(writer, records, layer)
     event_context.emit_failed(error)
     event_context.logger.warning(
         "schema_violation_quarantined", layer=layer, errors=error.errors
     )
+    if not remaining:
+        return
+    writer.track_batch_failed(stage=layer, count=len(remaining))
     reason_code = (
         "gold_contract_schema_failure"
         if layer == "gold"
@@ -43,9 +46,29 @@ async def quarantine_schema_violation(
                 error_details=f"Schema violation in {layer}: {error.errors}",
                 reason_code=reason_code,
             )
-            for record in records
+            for record in remaining
         ],
         event_context.batch_id,
         ingestion_ts=event_context.occurred_at,
         stage=layer,
     )
+
+
+def _records_without_outcome_quarantine(
+    writer: BatchWriter,
+    records: list[dict[str, object]],
+    layer: str,
+) -> list[dict[str, object]]:
+    """Drop rows already flushed by the Gold outcome channel."""
+    if layer != "gold":
+        return records
+    raw = getattr(writer, "_gold_outcome_quarantine_indexes", ())
+    writer._gold_outcome_quarantine_indexes = ()
+    if not isinstance(raw, tuple):
+        return records
+    indexes = {
+        index for index in raw if isinstance(index, int) and not isinstance(index, bool)
+    }
+    if not indexes:
+        return records
+    return [record for index, record in enumerate(records) if index not in indexes]
