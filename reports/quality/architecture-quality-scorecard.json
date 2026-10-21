@@ -267,7 +267,7 @@
       "snapshot_date": "2026-09-11"
     },
     "module_coverage_inventory": {
-      "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
+      "coverage_xml_sha256": "e004119066477ae9ee490d667644da12496fde6d6b4e5b2ba73c424efb99f7b9",
       "path": "reports/quality/module-coverage-inventory.json",
       "source_tree_sha256": "7b2eef170a4bae2b7f641a614f552b749b830b219d74b8661287bc1c4e927c51"
     },
