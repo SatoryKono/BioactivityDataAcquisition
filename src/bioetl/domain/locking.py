@@ -12,6 +12,8 @@ This module provides:
 from __future__ import annotations
 
 import time
+from collections.abc import Awaitable, Callable
+from contextvars import ContextVar
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -25,6 +27,10 @@ __all__ = [
     "LockContext",
     "LockContextHolder",
     "LockNotHeldError",
+    "register_lock_release_barrier",
+    "reset_lock_release_barriers",
+    "take_lock_release_barriers",
+    "wait_lock_release_barriers",
 ]
 
 
@@ -210,3 +216,40 @@ class LockContextHolder:
         Called by the runtime lock owner after releasing the lock.
         """
         self._context = None
+
+
+_lock_release_barriers: ContextVar[list[Callable[[], Awaitable[None]]] | None] = (
+    ContextVar("lock_release_barriers", default=None)
+)
+
+
+def reset_lock_release_barriers() -> None:
+    """Arm the current task to collect barriers for one lock hold."""
+    _lock_release_barriers.set([])
+
+
+def register_lock_release_barrier(barrier: Callable[[], Awaitable[None]]) -> None:
+    """Register a barrier awaited before the active lock is released.
+
+    Calls outside an armed lock hold are ignored so Delta timeouts that are
+    not covered by a pipeline lock do not join workers on the timeout path.
+    """
+    barriers = _lock_release_barriers.get()
+    if barriers is None:
+        return
+    barriers.append(barrier)
+
+
+def take_lock_release_barriers() -> tuple[Callable[[], Awaitable[None]], ...]:
+    """Detach barriers armed for this task and disarm the lock hold."""
+    barriers = _lock_release_barriers.get()
+    _lock_release_barriers.set(None)
+    if not barriers:
+        return ()
+    return tuple(barriers)
+
+
+async def wait_lock_release_barriers() -> None:
+    """Await barriers armed for the current lock hold, then disarm the task."""
+    for barrier in take_lock_release_barriers():
+        await barrier()
