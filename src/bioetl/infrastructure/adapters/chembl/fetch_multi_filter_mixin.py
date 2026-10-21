@@ -164,10 +164,7 @@ class ChemblFetchMultiFilterMixin:
             as_mixin_host(self)._normalize_filter_field(entity_type, k)
             for k in filter_keys  # Any: mixin host
         ]
-        if entity_type == "compound_record" and set(api_filter_keys) == {
-            "molecule_chembl_id",
-            "document_chembl_id",
-        }:
+        if _is_compound_record_intersection(entity_type, api_filter_keys):
             normalized_filters = dict(
                 zip(api_filter_keys, (filters[key] for key in filter_keys), strict=True)
             )
@@ -198,8 +195,20 @@ class ChemblFetchMultiFilterMixin:
             ):
                 yield record
                 total_fetched += 1
-                if limit and total_fetched >= limit:
+                if _limit_reached(limit, total_fetched):
                     return
+
+
+def _is_compound_record_intersection(entity_type: str, fields: list[str]) -> bool:
+    return entity_type == "compound_record" and set(fields) == {
+        "molecule_chembl_id",
+        "document_chembl_id",
+    }
+
+
+def _limit_reached(limit: int | None, total_fetched: int) -> bool:
+    """Treat an absent or zero limit as unbounded after empty-selection handling."""
+    return limit is not None and limit != 0 and total_fetched >= limit
 
 
 def _empty_multi_filter_selection(

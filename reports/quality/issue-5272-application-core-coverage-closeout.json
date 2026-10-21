@@ -1493,7 +1493,7 @@
         "reason": "Live accepted-inventory floor count; this binding does not close the parent epic."
       },
       "current_binding_refresh": {
-        "source_tree_sha256": "787752494e4aa4578b981fde4f4d05a215aef269c823e0e4f06a4eb9dd7bff2d",
+        "source_tree_sha256": "fe3b594651d0120ff14fb6c95df4f4e9d619de0a9ac4dbc2fbe0e0e298ffa134",
         "evidence": "reports/quality/module-coverage-inventory.json",
         "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
       },
@@ -1514,7 +1514,28 @@
         "reason": "Live accepted-inventory floor count; this binding does not close the parent epic."
       },
       "current_binding_refresh": {
-        "source_tree_sha256": "ebec99183878bec08a051dabd3f70e1c0e7f259ecc27160b776baae224e50786",
+        "source_tree_sha256": "b1cc753c97390020810e537baf306c995cc1608e7235f37c611f0f314b8bc360",
+        "evidence": "reports/quality/module-coverage-inventory.json",
+        "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
+      },
+      "notes": "Current metrics are rebound to the accepted module inventory. Historical measurements, baseline, and earlier closeout notes are preserved in previous_current_bindings. This does not claim fresh global measured nonregression."
+    },
+    {
+      "snapshot_date": "2026-08-17",
+      "current_metrics": {
+        "repo_uncovered_module_count": 0,
+        "repo_unmeasured_module_count": 0,
+        "application_core_covered_line_percent": 99.77,
+        "application_core_uncovered_module_count": 0,
+        "application_core_unmeasured_module_count": 0
+      },
+      "parent_epic_status": {
+        "status": "not_closeable_under_current_definition_of_done",
+        "remaining_below_85_module_count": 0,
+        "reason": "Live accepted-inventory floor count; this binding does not close the parent epic."
+      },
+      "current_binding_refresh": {
+        "source_tree_sha256": "5b1ac64efad865d0566271b21c9d36256c6c8ad861a3decee730fd5e447bab69",
         "evidence": "reports/quality/module-coverage-inventory.json",
         "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
       },
@@ -1522,7 +1543,7 @@
     }
   ],
   "current_binding_refresh": {
-    "source_tree_sha256": "17ca1eaeff7101cb24eec2e8e35e4341fb1bd0e439129883bfadc154b150d958",
+    "source_tree_sha256": "84fc690fbfdd10f434b8ef02d4893641c6f18325035e6cc2d2f24b8e3b1b42a1",
     "evidence": "reports/quality/module-coverage-inventory.json",
     "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
   },

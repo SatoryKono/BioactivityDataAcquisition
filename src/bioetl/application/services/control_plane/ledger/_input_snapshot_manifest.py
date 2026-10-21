@@ -6,9 +6,6 @@ from collections.abc import Callable
 from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.services.control_plane.ledger.entry_support import (
-    rebind_ledger_successor,
-)
 from bioetl.application.services.lineage.manifest_successor import notify_successor
 from bioetl.domain.config.runtime import (
     CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE,
@@ -145,12 +142,15 @@ def _publish_manifest_successor(
     """Publish a successor and notify observers only after its ledger commits."""
     saver(successor)
     try:
-        rebind_ledger_successor(
-            service,
-            run_id=predecessor.run_id,
-            predecessor_manifest_id=predecessor.manifest_id,
-            successor_manifest_id=successor.manifest_id,
+        rebind = getattr(
+            getattr(service, "ledger_port", None), "record_manifest_successor", None
         )
+        if callable(rebind):
+            rebind(
+                run_id=predecessor.run_id,
+                predecessor_manifest_id=predecessor.manifest_id,
+                successor_manifest_id=successor.manifest_id,
+            )
     except (OSError, TypeError, ValueError, InfrastructureError) as exc:
         restore_error = _restore_manifest_after_failed_rebind(
             service,

@@ -26,6 +26,33 @@ def test_local_telemetry_refresh_uses_verified_manifest_only(monkeypatch) -> Non
     ]
 
 
+def test_audit_rewrite_refreshes_score_narrative_without_relabeling_history(
+    tmp_path, monkeypatch
+):
+    from scripts.engineering.qa import technical_debt_audit_registry as registry
+
+    report = tmp_path / "report.md"
+    report.write_text(
+        "Audited commit SHA: `original`\n"
+        "Current result: debt-governance gates passing. The current architecture score `9.89`\n"
+        "replaces the historical score `9.47`; the audited SHA and date remain historical.\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(refresh, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        registry,
+        "build_current_audit_semantic_summary",
+        lambda *_: {"metrics": {"architecture_integral_score": 10.0}},
+    )
+    refresh._rewrite_current_audit_report(
+        old="same", live="same", current=SimpleNamespace(report_path="report.md")
+    )
+    updated = report.read_text(encoding="utf-8")
+    assert "architecture score `10.00`" in updated
+    assert "historical score `9.47`" in updated
+    assert "Audited commit SHA: `original`" in updated
+
+
 @pytest.mark.parametrize(
     "override",
     ["coverage_percent", "source_commit", "source_run_id", "source_run_url", "junit"],

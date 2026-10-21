@@ -112,16 +112,9 @@ def project_assay_replay(
         envelope = verify_bundle(root, envelope_hash)
         if envelope["run_id"] != run_id:
             raise ValueError("assay_replay_identity_mismatch")
-        receipts = [
-            item
-            for item in items
-            if isinstance(item, dict)
-            and item.get("ref") == "replay/verification/verification.json"
-        ]
-        if len(receipts) != 1:
-            raise ValueError("assay_replay_verification_missing")
+        receipt_artifact = _verification_artifact(items)
         receipt = load_verified_json(
-            root, _VERIFICATION_RECEIPT_FILE, receipts[0]["sha256"]
+            root, _VERIFICATION_RECEIPT_FILE, receipt_artifact["sha256"]
         )
         _verify_receipt(root, envelope_hash, run_id, receipt)
         upgraded = {
@@ -139,6 +132,19 @@ def project_assay_replay(
         return upgraded, probe
     except (OSError, ValueError, KeyError, TypeError):
         return manifest, probe
+
+
+def _verification_artifact(items: list[JsonDict]) -> JsonDict:
+    """Require exactly one recorded verification receipt, never choose a subset."""
+    receipts = [
+        item
+        for item in items
+        if isinstance(item, dict)
+        and item.get("ref") == "replay/verification/verification.json"
+    ]
+    if len(receipts) != 1:
+        raise ValueError("assay_replay_verification_missing")
+    return receipts[0]
 
 
 async def verify_replay_outputs(

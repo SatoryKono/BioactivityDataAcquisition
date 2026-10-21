@@ -498,9 +498,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 49
-      total_loc: 6465
+      total_loc: 6467
       files_ge_250_loc: 0
-      helper_function_ratio: 0.284
+      helper_function_ratio: 0.288
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
@@ -552,11 +552,11 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 130
-      total_loc: 15463
+      total_loc: 15443
       files_ge_250_loc: 0
       helper_function_ratio: 0.4
-      max_internal_fan_in: 2
-      max_internal_fan_in_module: bioetl.application.services.control_plane.ledger.entry_support
+      max_internal_fan_in: 1
+      max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
       status: reduced_2026-09-16_issue_10468_coupling_closeout
       next_action: '2026-09-16 #10468/#10472-#10475: control-plane max_internal_fan_in 2->1 and files
@@ -650,7 +650,8 @@ supporting_scripts_governance:
       measured_on: '2026-10-21'
       owner: '@bioetl-platform'
       linked_issue: '#12078'
-      ratchet_policy: Shrink only across all decisions; no mass review_by extension. Enforce after zero debt.
+      ratchet_policy: Shrink only across all decisions; no mass review_by extension. Enforce after zero
+        debt.
     zero_reference_supporting_script_count:
       current_count: 0
       max_count: 0
