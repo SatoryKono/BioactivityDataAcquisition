@@ -241,11 +241,7 @@ def _same_existing_association(
     if not isinstance(association, dict):
         return False
     copy_digest = association.get("copy_sha256")
-    if copy_digest is not None and not (
-        isinstance(copy_digest, str)
-        and len(copy_digest) == 64
-        and all(char in "0123456789abcdef" for char in copy_digest)
-    ):
+    if not _valid_copy_digest(copy_digest):
         return False
     if (
         requested_copy_digest is not None
@@ -263,6 +259,14 @@ def _same_existing_association(
     }
     # Exact canonical bytes reject ambiguous/foreign lineage, keys and schema.
     return raw == orjson.dumps(expected, option=orjson.OPT_SORT_KEYS)
+
+
+def _valid_copy_digest(value: object) -> bool:
+    return value is None or (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(char in "0123456789abcdef" for char in value)
+    )
 
 
 __all__ = [

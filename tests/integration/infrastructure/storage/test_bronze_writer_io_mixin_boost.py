@@ -421,12 +421,14 @@ class TestPreviewCleanupBronze:
         assert result["path"] == str(tmp_path)
 
     def test_preview_cleanup_flat_structure_returns_base(self, tmp_path: Path) -> None:
-        """Line 287: flat_structure=True returns base_path."""
+        """An unfiltered flat preview returns base_path; filters fail closed."""
         mixin = _ConcreteBronzeMixin(tmp_path, flat_structure=True)
 
-        result = mixin.preview_cleanup(provider="chembl", entity="activity")
+        result = mixin.preview_cleanup()
 
         assert result["path"] == str(tmp_path)
+        with pytest.raises(ValueError, match="Filters require a hierarchical"):
+            mixin.preview_cleanup(provider="chembl", entity="activity")
 
     def test_preview_cleanup_nonexistent_returns_zero_files(
         self, tmp_path: Path

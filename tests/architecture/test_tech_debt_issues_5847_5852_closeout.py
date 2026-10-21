@@ -13,12 +13,13 @@
 from __future__ import annotations
 
 import json
-import subprocess
 from pathlib import Path
 from typing import Any
 
 import pytest
 import yaml
+
+from tests.helpers.git_index_scan import git_index_paths
 
 pytestmark = pytest.mark.architecture
 
@@ -83,17 +84,6 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
-def _git_ls_files() -> set[str]:
-    completed = subprocess.run(
-        ["git", "ls-files", "-z"],
-        cwd=ROOT,
-        capture_output=True,
-        check=True,
-    )
-    paths = completed.stdout.decode("utf-8", errors="replace").split("\0")
-    return set(paths) - {""}
-
-
 def _registry_candidates() -> dict[str, dict[str, Any]]:
     registry = _load_yaml(ROOT_REGISTRY)
     result: dict[str, dict[str, Any]] = {}
@@ -112,7 +102,7 @@ def _registry_candidates() -> dict[str, dict[str, Any]]:
 def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> None:
     """Root-directory budget stays 11; `.gemini` may track only `config.yaml`."""
     payload = _load_json(CLOSEOUT)
-    tracked = _git_ls_files()
+    tracked = git_index_paths(root=ROOT)
     root_files = {path for path in tracked if "/" not in path}
     root_dirs = {
         path.split("/", maxsplit=1)[0].strip('"') for path in tracked if "/" in path
@@ -192,7 +182,7 @@ def test_issue_5848_root_local_clutter_cleanup_command_is_bounded() -> None:
 
 def test_issue_5849_legacy_codex_root_aliases_are_retired() -> None:
     payload = _load_json(CLOSEOUT)
-    tracked = _git_ls_files()
+    tracked = git_index_paths(root=ROOT)
     candidates = _registry_candidates()
     allowlist_text = ROOT_ALLOWLIST.read_text(encoding="utf-8")
 
@@ -222,7 +212,7 @@ def test_issue_5849_legacy_codex_root_aliases_are_retired() -> None:
 
 def test_issue_5850_compose_adjuncts_are_rehomed_and_contract_backed() -> None:
     payload = _load_json(CLOSEOUT)
-    tracked = _git_ls_files()
+    tracked = git_index_paths(root=ROOT)
     candidates = _registry_candidates()
     contracts = _load_yaml(DOCKER_CONTRACTS)
     allowlist_text = ROOT_ALLOWLIST.read_text(encoding="utf-8")
@@ -251,7 +241,7 @@ def test_issue_5850_compose_adjuncts_are_rehomed_and_contract_backed() -> None:
 
 def test_issue_5851_helper_images_and_grafana_provisioning_are_rehomed() -> None:
     payload = _load_json(CLOSEOUT)
-    tracked = _git_ls_files()
+    tracked = git_index_paths(root=ROOT)
     candidates = _registry_candidates()
     root_compose = (ROOT / "docker-compose.yml").read_text(encoding="utf-8")
 
