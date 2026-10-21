@@ -53,7 +53,7 @@ from bioetl.infrastructure.storage.bronze.cleanup_support import (
 )
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
-from tests.helpers.bronze_cleanup import sidecar_bytes
+from tests.helpers.bronze_cleanup import flat_owner_services, sidecar_bytes
 
 pytestmark = pytest.mark.integration
 _APPLY_POSIX = pytest.mark.skipif(
@@ -82,6 +82,7 @@ def _make_writer(base_path: Path, *, flat: bool = False) -> BronzeWriter:
         logger=NoOpLogger(),
         metrics=NoOpMetrics(),
         flat_structure=flat,
+        runtime_services=flat_owner_services() if flat else None,
     )
 
 
