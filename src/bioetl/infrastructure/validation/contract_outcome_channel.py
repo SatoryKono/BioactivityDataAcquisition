@@ -130,6 +130,7 @@ def build_outcome_channel(
     resolver: DQPolicyResolver | None,
     config_path: str | None,
     prepare_frame: Callable[[object], object],
+    rule_records: list[JsonDict] | None = None,
 ) -> DQOutcomeChannel:
     """Run schema and contract rules and return a sorted outcome channel."""
     if resolver is None or dq_config is None:
@@ -147,9 +148,15 @@ def build_outcome_channel(
 
     import pandas as pd
 
+    if rule_records is not None and len(rule_records) != len(records):
+        raise ValueError("Gold rule inputs must retain projected row alignment")
     frame = pd.DataFrame(records)
     prepared = prepare_frame(frame)
-    violations = list(attribute_contract_rules(records, dq_config))
+    violations = list(
+        attribute_contract_rules(
+            records if rule_records is None else rule_records, dq_config
+        )
+    )
     schema_error = _collect_schema_error(schema, prepared)
     if schema_error is not None:
         violations.extend(

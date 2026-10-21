@@ -9,6 +9,45 @@ from bioetl.domain.run_reports.stage_diagnostics import project_stage_diagnostic
 pytestmark = pytest.mark.unit
 
 
+def test_absent_report_never_invents_stage_success():
+    payload = project_stage_diagnostics(None)
+    assert payload["diagnostic_coverage"] == "INCOMPLETE"
+    assert payload["stage_diagnostics"][0]["reason"] == "terminal_event_missing"
+
+
+def test_unknown_balance_and_malformed_counts_remain_unconfirmed():
+    payload = project_stage_diagnostics(
+        {
+            "identity": {"status": "success"},
+            "funnel": [
+                {
+                    "stage_id": "silver",
+                    "balance_status": "future-status",
+                    "records_in": True,
+                    "records_out": "4",
+                }
+            ],
+            "stage_timings": {
+                "silver": {"duration_seconds": True},
+                "gold": "unmeasured",
+            },
+        },
+        ledger_events=[
+            {"event_type": "unrelated"},
+            {"event_type": "stage_started", "stage_id": "bronze", "records_in": False},
+            {"event_type": "stage_completed", "stage_id": "silver"},
+        ],
+    )
+    rows = {row["stage_id"]: row for row in payload["stage_diagnostics"]}
+    assert rows["silver"]["reason"] == "stage_balance_unknown"
+    assert rows["silver"]["records_in"] is None
+    assert rows["silver"]["records_out"] is None
+    assert rows["silver"]["duration_seconds"] is None
+    assert rows["gold"]["duration_seconds"] is None
+    assert rows["bronze"]["state"] == "UNFINISHED"
+    assert payload["diagnostic_coverage"] == "INCOMPLETE"
+
+
 def test_success_with_balanced_funnel_keeps_zero_and_coverage() -> None:
     payload = project_stage_diagnostics(
         {
