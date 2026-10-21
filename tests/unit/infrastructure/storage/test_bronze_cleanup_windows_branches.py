@@ -482,6 +482,7 @@ def _cleanup(journal: _Journal, root: Path, *, flat: bool = False):
     obj.root = root
     obj.cutoff = _CUTOFF
     obj.flat = flat
+    obj.root_identity = ("prov", "ent") if flat else None
     obj.on_skip = lambda path, reason: skips.append((path, reason))
     obj.skips = skips
     return obj

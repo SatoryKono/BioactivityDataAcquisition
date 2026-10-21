@@ -23,7 +23,14 @@ from bioetl.application.composite.conflict_resolver import ConflictResolverServi
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
 from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.deduplication import EnricherDeduplicatorService
-from bioetl.application.composite.join_execution import JoinHow, RequiredJoinKeyError
+from bioetl.application.composite.helpers.enricher_fallback_join import (
+    execute_fallback_enricher_join,
+)
+from bioetl.application.composite.join_execution import (
+    JoinCardinalityError,
+    JoinHow,
+    RequiredJoinKeyError,
+)
 from bioetl.domain.composite import EnricherConfig, MergeConfig
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from tests.unit.application.composite.merge_test_support import (
@@ -276,3 +283,75 @@ async def test_optional_inner_multikey_drops_unmatched_seed() -> None:
     assert result.height == 1
     assert result["doi"].to_list() == ["10.1/a"]
     assert result["crossref.publication.citation_count"][0] == 6
+
+
+def _probe_join(
+    left: pl.DataFrame,
+    right: pl.DataFrame,
+    left_key: str,
+    right_key: str,
+    _pipeline_name: str,
+    *,
+    required: bool,
+    join_how: JoinHow,
+) -> pl.DataFrame:
+    del required
+    return left.join(right, left_on=left_key, right_on=right_key, how=join_how)
+
+
+@pytest.mark.unit
+def test_direct_fallback_covers_required_inner_full_and_fanout() -> None:
+    left = pl.DataFrame({"doi": ["10.1/a", "10.1/missing"], "title": ["A", "B"]})
+    right = pl.DataFrame({"doi": ["10.1/a", "10.9/extra"], "citation_count": [1, 8]})
+
+    with pytest.raises(RequiredJoinKeyError, match="unmatched"):
+        execute_fallback_enricher_join(
+            left_df=left,
+            right_df=right,
+            key_pairs=(("doi", "doi"),),
+            pipeline_name="pubchem_compound",
+            required=True,
+            output_how="left",
+            join_executor=_probe_join,
+            deduplicator=None,
+        )
+
+    inner = execute_fallback_enricher_join(
+        left_df=pl.DataFrame({"doi": ["10.1/missing"]}),
+        right_df=pl.DataFrame({"doi": ["10.9/extra"], "citation_count": [8]}),
+        key_pairs=(("doi", "doi"),),
+        pipeline_name="pubchem_compound",
+        required=False,
+        output_how="inner",
+        join_executor=_probe_join,
+        deduplicator=None,
+    )
+    assert inner.height == 0
+    assert "citation_count" in inner.columns
+
+    full = execute_fallback_enricher_join(
+        left_df=left,
+        right_df=right,
+        key_pairs=(("doi", "doi"), ("absent", "doi")),
+        pipeline_name="pubchem_compound",
+        required=False,
+        output_how="full",
+        join_executor=_probe_join,
+        deduplicator=None,
+    )
+    assert full.height == 3
+    assert 8 in full["citation_count"].to_list()
+
+    with pytest.raises(JoinCardinalityError, match="cardinality"):
+        execute_fallback_enricher_join(
+            left_df=pl.DataFrame({"doi": ["10.1/a"]}),
+            right_df=pl.DataFrame(
+                {"doi": ["10.1/a", "10.1/a"], "citation_count": [1, 2]}
+            ),
+            key_pairs=(("doi", "doi"),),
+            pipeline_name="pubchem_compound",
+            required=False,
+            output_how="left",
+            join_executor=_probe_join,
+            deduplicator=None,
+        )

@@ -19,6 +19,7 @@ from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage.bronze.cleanup_core import (
     BronzeRootLease,
     _platform_cleanup_supported,
+    valid_bronze_scope_name,
 )
 from bioetl.infrastructure.storage.bronze.cleanup_group_apply import (
     BronzeGroupCleanup,
@@ -151,6 +152,7 @@ class BronzeWriterReadCleanupMixin(
     """Apply and report nonmutating Bronze cleanup plans."""
 
     _metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD3)
+    _root_identity: tuple[str, str] | None = None
     _resolve_bronze_path: Callable[[str, str, str, str], str] = cast(
         Any, None
     )  # Any: host method default (PD3)
@@ -220,6 +222,27 @@ class BronzeWriterReadCleanupMixin(
                 cutoff_str, dry_run, provider, entity, locked_root
             )
 
+    def _hierarchical_cleanup_scope(
+        self, provider: str | None, entity: str | None
+    ) -> tuple[str | None, str | None]:
+        """Use a valid configured owner when the hierarchical walk is unfiltered."""
+        if (
+            self._flat_structure
+            or provider is not None
+            or entity is not None
+            or self._root_identity is None
+        ):
+            return provider, entity
+        configured_provider, configured_entity = self._root_identity
+        if not (
+            isinstance(configured_provider, str)
+            and isinstance(configured_entity, str)
+            and valid_bronze_scope_name(configured_provider)
+            and valid_bronze_scope_name(configured_entity)
+        ):
+            return provider, entity
+        return configured_provider, configured_entity
+
     def _cleanup_old_files_locked_sync(
         self,
         cutoff_str: str,
@@ -229,8 +252,15 @@ class BronzeWriterReadCleanupMixin(
         locked_root: BronzeRootLease | None = None,
     ) -> dict[str, int]:
         stats = self._empty_cleanup_stats()
+        requested = (provider, entity)
+        provider, entity = self._hierarchical_cleanup_scope(provider, entity)
+        implicit_owner_scope = (provider, entity) != requested
         group_cleanup = group_cleanup_for_lock(
-            locked_root, cutoff_str, self._flat_structure, self._log_cleanup_skip
+            locked_root,
+            cutoff_str,
+            self._flat_structure,
+            self._log_cleanup_skip,
+            root_identity=self._root_identity,
         )
         if (
             group_cleanup is not None
@@ -240,11 +270,18 @@ class BronzeWriterReadCleanupMixin(
             return stats
         root_abs, root_real = cleanup_roots(locked_root, self.base_path)
         root_fd = locked_root.fd if locked_root is not None else None
+
+        def on_discovery_skip(path: str, reason: str) -> None:
+            # A missing configured-owner directory is an empty scope, not a conflict.
+            if implicit_owner_scope and reason == "missing_scope":
+                return
+            self._record_cleanup_discovery_skip(stats, path, reason)
+
         for date_dir in self._find_old_date_dirs(
             cutoff_str,
             provider,
             entity,
-            on_skip=partial(self._record_cleanup_discovery_skip, stats),
+            on_skip=on_discovery_skip,
             base_path=locked_root.path if locked_root is not None else None,
         ):
             plan = self._plan_old_dir_files(

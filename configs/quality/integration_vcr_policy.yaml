@@ -327,6 +327,7 @@ tracked_suite_inventory:
     - tests/integration/infrastructure/storage/test_atomic.py
     - tests/integration/infrastructure/storage/test_atomic_boost.py
     - tests/integration/infrastructure/storage/test_base_delta_writer_filesystem.py
+    - tests/integration/infrastructure/storage/test_bronze_cleanup_12104_posix_acceptance.py
     - tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py
     - tests/integration/infrastructure/storage/test_bronze_cleanup_platform_and_stages.py
     - tests/integration/infrastructure/storage/test_bronze_group_association.py
