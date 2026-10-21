@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-21T13:21:12.413122+00:00",
+  "generated_at": "2026-10-21T14:40:55.669009+00:00",
   "summary": {
     "total_scripts": 659,
     "status_counts": {
@@ -18900,7 +18900,7 @@
         },
         {
           "path": ".github/workflows/security.yml",
-          "line": 123,
+          "line": 126,
           "source_group": "ci",
           "text": "run: python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },

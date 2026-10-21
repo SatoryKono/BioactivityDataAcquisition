@@ -42,16 +42,19 @@ def test_runner_input_wiring_resolves_overrides() -> None:
     """Input wiring should resolve optional active overrides correctly."""
     get_settings_mock = MagicMock(name="get_settings")
     load_pipeline_config_mock = MagicMock(name="load_pipeline_config")
+    load_source_config_mock = MagicMock(name="load_source_config")
 
     wiring = runner_builder_wiring.resolve_runner_input_wiring(
         runner_builder_wiring.RunnerInputWiring(),
         get_settings_fn=get_settings_mock,
         load_pipeline_config_fn=load_pipeline_config_mock,
+        load_source_config_fn=load_source_config_mock,
     )
 
     assert wiring.get_settings is get_settings_mock
     assert wiring.load_pipeline_config is load_pipeline_config_mock
     assert callable(wiring.load_source_config)
+    assert wiring.load_source_config is load_source_config_mock
     assert wiring.build_observability_bundle is None
 
 

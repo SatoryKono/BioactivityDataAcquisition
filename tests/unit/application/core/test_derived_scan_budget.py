@@ -186,3 +186,44 @@ async def test_cancellation_propagates_and_closes_source():
     with pytest.raises(asyncio.CancelledError):
         await task
     assert closed == [True]
+
+
+@pytest.mark.parametrize(
+    "options, message",
+    [
+        ({"filter_id_count": -1}, "count must be >= 0"),
+        ({"max_records": 0}, "max_records must be >= 1"),
+    ],
+)
+def test_invalid_scan_window_is_rejected_before_fetch(options, message):
+    with pytest.raises(ValueError, match=message):
+        resolve_derived_upstream_limit(None, multiplier=1, **options)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("options", [{"max_records": 0}, {"timeout_seconds": 0}])
+async def test_invalid_scan_budget_never_consumes_source(options):
+    consumed = []
+
+    async def source():
+        consumed.append(True)
+        yield 1
+
+    with pytest.raises(ValueError, match="scan budgets must be positive"):
+        await anext(bounded_source_records(source(), **options))
+    assert consumed == []
+
+
+@pytest.mark.asyncio
+async def test_invalid_batch_size_never_consumes_source():
+    from bioetl.application.core.derived_scan_budget import batched_source_records
+
+    consumed = []
+
+    async def source():
+        consumed.append(True)
+        yield 1
+
+    with pytest.raises(ValueError, match="batch_size must be >= 1"):
+        await anext(batched_source_records(source(), batch_size=0))
+    assert consumed == []
