@@ -1327,7 +1327,7 @@ async def test_late_commit_prevention_on_timeout() -> None:
     from types import SimpleNamespace
     import pyarrow as pa
 
-    from bioetl.domain.locking import FencingToken
+    from bioetl.domain.locking import FencingToken  # noqa: F401
     from bioetl.domain.types import RunID
     from bioetl.domain.medallion import SilverWriteMode
     from bioetl.infrastructure.locking.memory_lock import MemoryLock
@@ -1335,7 +1335,7 @@ async def test_late_commit_prevention_on_timeout() -> None:
     from bioetl.infrastructure.storage.silver.delta_write_execution import _write_plain_delta_request
     from bioetl.application.core.lifecycle.lock_runtime_service import LockRuntimeService, LockRuntimeServiceCreateContext
     from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort  # noqa: F401
 
     class MockLogger:
         def info(self, *args, **kwargs): pass

@@ -16,6 +16,7 @@ from bioetl.domain.locking import (
     FencingToken,
     LockContext,
     LockContextHolder,
+    _lock_release_barriers,
     wait_lock_release_barriers,
 )
 from bioetl.domain.ports import LockPort, LoggerPort
@@ -111,7 +112,6 @@ async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
     await heartbeat.start()
 
 
-from bioetl.domain.locking import _lock_release_barriers
 
 async def enter_lock_context[LockRuntimeHostT: _LockRuntimeHostProtocol](
     host: LockRuntimeHostT,
