@@ -33,6 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- **Docker runtime certificates:** the Wolfi runtime stage installs
+  `ca-certificates-bundle=20260909-r3`, clearing Trivy CVE-2026-111943
+  (`ca-certificates-bundle` 20260611-r0).
+
 - **Code scanning #1464 / #1462:** `check_no_partial_tree._git` allowlists git
   verbs, verifies `--repo`/`--base`/`--tip` before `subprocess.run`, and
   resolves revisions with `--end-of-options`. `check_agent_headers.update_headers`
