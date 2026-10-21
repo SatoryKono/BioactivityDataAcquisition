@@ -24,7 +24,7 @@ This is a metadata rebind, not a new repository-wide audit. The audited SHA
 and audit date above remain historical. Earlier conflicting headline values
 are retained in Git history, not presented as current conclusions here.
 
-Current result: debt-governance gates passing. The current architecture score `10.00`
+Current result: debt-governance gates passing. The current architecture score `9.89`
 replaces the historical score `9.47`; the audited SHA and date remain historical.
 
 Coverage measurements require the complete local 17-shard producer (#11745).
