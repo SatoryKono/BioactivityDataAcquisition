@@ -179,6 +179,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Gemini Code Assist repo config:** `.gemini/config.yaml` enables review and
+  summary on pull request open, including drafts, with severity `MEDIUM` and
+  no comment cap. The file is not a BioETL runtime and does not configure the
+  OpenCode Meta Model surface. The root-directory budget stays 11.
+
 - **Bounded pipeline smoke runbook:** sequential `--limit 100` launch of all
   22 registered entity pipelines and five composite packs, with CSV
   preconditions, wave order, exit-code routing, and run-report verification

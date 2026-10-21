@@ -4,6 +4,8 @@
 
 Gemini CLI is not a supported runtime in this repository. There is no root
 `GEMINI.md` and no tracked `.gemini/agents/**` or `.gemini/skills/**` tree.
+`.gemini/config.yaml` is the tracked Gemini Code Assist on GitHub config. It
+is not a runtime source and does not configure the OpenCode Meta Model surface.
 
 Read first, in this order:
 

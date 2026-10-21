@@ -25,6 +25,7 @@ ______________________________________________________________________
 | `.codex/**` | Codex runtime surface | Canonical for tracked runtime behavior on `main` | Yes | portable `.codex/config.toml`, native `.codex/agents/*.toml`, behavioral `.codex/agents/*.md`, skills, and Codex orchestration |
 | `.junie/**` | JetBrains Junie runtime surface | Canonical for tracked runtime behavior on `main` (equal peer to `.codex/**`) | Yes, keeping parity with `.codex/**` | `.junie/guidelines.md` (root contract), `.junie/agents/**` (JUNIE-RUNTIME + 6 py-* profiles + README/ORCHESTRATION mirrors), `.junie/skills/**` (mirror of `.codex/skills/**`), `.junie/plans/**` |
 | `.devin/agents/**`, `.devin/skills/**` | Devin runtime surface | Canonical for tracked Devin-specific runtime behavior | Yes, subject to Codex–Devin skill parity contracts | `DEVIN-RUNTIME`, custom profile entrypoints, orchestration, and Devin skill adaptations |
+| `.gemini/config.yaml` | Gemini Code Assist on GitHub | Tracked repository review config; not a BioETL runtime and not the OpenCode Meta Model surface | Yes, for that app's review settings only | `have_fun`, `memory_config`, `code_review`, `ignore_patterns` |
 | `.gemini/settings.json` | Gemini local config surface | Local-only runtime config; not a tracked behavior tree on `main` | Yes, for machine-local settings only | optional local checkout settings with machine-specific paths |
 | `.gemini/agents/**`, `.gemini/skills/**` | Gemini runtime behavior tree | Not present in the current `main` checkout | No tracked source on `main` today | if a future task adds them, they must be verified and documented in the same change |
 | `docs/00-project/ai/**` | Published/internal mirror surface | Not canonical for runtime behavior | Only for mirror/index/guidance updates | curated mirrors, navigation, contributor guidance, memory entrypoints, prompt and skill indexes |
@@ -53,7 +54,8 @@ ______________________________________________________________________
    Devin-specific runtime behavior. Shared skill structure remains governed by
    the Codex–Devin mirror contract; Devin-native profile and invocation details
    remain owned by the Devin runtime tree.
-1. `.gemini/settings.json` and other optional Gemini local config files are
+1. `.gemini/config.yaml` is the tracked Gemini Code Assist on GitHub config.
+   `.gemini/settings.json` and other optional Gemini local config files are
    machine-local config surfaces, not proof of a tracked Gemini behavior tree
    on `main`.
 1. `docs/00-project/ai/**` is a repo-only or internal-published mirror layer for

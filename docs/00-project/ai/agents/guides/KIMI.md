@@ -59,8 +59,9 @@ Kimi Code CLI хранит настройки в TOML/JSON вне репозит
   (`additional_dir`), пишется автоматически (`/add-dir`), gated доверием
   workspace. Machine-local, в `.gitignore`.
 - **В репозитории tracked-поверхностей Kimi нет.** `.kimi-code/**`
-  gitignored целиком (как `.gemini/`); локальные файлы могут содержать
-  machine-local absolute paths.
+  gitignored целиком. Локальные файлы могут содержать machine-local absolute
+  paths. `.gemini/` устроен иначе: tracked только `.gemini/config.yaml`,
+  остальные файлы этого каталога остаются machine-local.
 
 ## 3. Skills
 

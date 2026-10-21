@@ -63,7 +63,29 @@ def test_gitignore_grafana_reviewer_zips_are_ignored() -> None:
     assert tracked.strip() == ""
 
 
+def test_gitignore_tracks_only_gemini_code_assist_config() -> None:
+    """`.gemini/config.yaml` is the Code Assist repo file; other paths stay ignored."""
+    gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
+    assert "!.gemini/config.yaml" in gitignore
+    assert "\n.gemini/\n" not in gitignore
+
+    def _ignored(path: str) -> bool:
+        """Return whether gitignore excludes `path` even when it is untracked."""
+        completed = subprocess.run(
+            ["git", "check-ignore", "-q", "--no-index", path],
+            cwd=ROOT,
+            check=False,
+        )
+        return completed.returncode == 0
+
+    assert not _ignored(".gemini/config.yaml")
+    assert _ignored(".gemini/settings.json")
+    assert _ignored(".gemini/agents/GEMINI-RUNTIME.md")
+    assert _ignored(".gemini/skills/new-pipeline/SKILL.md")
+
+
 def test_gitignore_last_match_keeps_agents_skill_unignore() -> None:
+    """A later `.agents/` ignore rule must not hide the skill un-ignore."""
     gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
     marker = "!.agents/skills/*/SKILL.md"
     assert marker in gitignore
