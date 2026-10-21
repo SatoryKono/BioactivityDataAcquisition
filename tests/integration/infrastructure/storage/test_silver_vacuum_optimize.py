@@ -42,16 +42,26 @@ def _schema() -> pa.Schema:
     )
 
 
-def _records() -> list[dict[str, str]]:
+def _records(*rows: tuple[str, str, str, str]) -> list[dict[str, str]]:
+    if not rows:
+        rows = (
+            (
+                "1",
+                "A",
+                "00000000-0000-4000-8000-000000000001",
+                "2026-01-01T00:00:00+00:00",
+            ),
+        )
     return [
         {
-            "id": "1",
-            "val": "A",
-            "_run_id": "00000000-0000-4000-8000-000000000001",
+            "id": row_id,
+            "val": value,
+            "_run_id": run_id,
             "_run_type": "incremental",
-            "_source_batch_id": "batch-1",
-            "_ingestion_ts": "2026-01-01T00:00:00+00:00",
+            "_source_batch_id": f"batch-{row_id}",
+            "_ingestion_ts": ingested_at,
         }
+        for row_id, value, run_id, ingested_at in rows
     ]
 
 
@@ -110,3 +120,44 @@ async def test_silver_optimize_returns_metrics_on_materialized_table(
     metrics = await silver_writer.optimize(table_name)
 
     assert isinstance(metrics, dict)
+
+
+@pytest.mark.asyncio
+@pytest.mark.timeout(120)
+async def test_silver_time_travel_survives_retention_vacuum(
+    silver_writer: SilverWriter,
+) -> None:
+    """Named versions stay readable after a real vacuum inside the retention window."""
+    table_name = "maintenance_time_travel"
+    await silver_writer.write_silver(
+        table_name=table_name,
+        records=_records(),
+        primary_keys=["id"],
+        schema=_schema(),
+    )
+    await silver_writer.write_silver(
+        table_name=table_name,
+        records=_records(
+            (
+                "2",
+                "B",
+                "00000000-0000-4000-8000-000000000002",
+                "2026-01-02T00:00:00+00:00",
+            ),
+        ),
+        primary_keys=["id"],
+        schema=_schema(),
+    )
+
+    version_0 = await silver_writer.time_travel(table_name, version=0)
+    version_1 = await silver_writer.time_travel(table_name, version=1)
+    assert set(version_0.to_pandas()["id"]) == {"1"}
+    assert set(version_1.to_pandas()["id"]) == {"1", "2"}
+
+    removed = await silver_writer.vacuum(table_name, retention_hours=168, dry_run=False)
+    assert isinstance(removed, list)
+
+    version_0_after = await silver_writer.time_travel(table_name, version=0)
+    version_1_after = await silver_writer.time_travel(table_name, version=1)
+    assert set(version_0_after.to_pandas()["id"]) == {"1"}
+    assert set(version_1_after.to_pandas()["id"]) == {"1", "2"}

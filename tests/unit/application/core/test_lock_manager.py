@@ -292,6 +292,38 @@ class TestLockRuntimeService:
             "lock:test_pipeline", TEST_RUN_ID, exclusive=False
         )
 
+    async def test_second_cancellation_still_finishes_lock_cleanup(
+        self, lock_manager: LockRuntimeService, mock_lock_port: AsyncMock
+    ) -> None:
+        """A second cancellation during cleanup must not skip lock release."""
+        mock_lock_port.release.return_value = True
+        entered = asyncio.Event()
+        gate = asyncio.Event()
+
+        async def _barrier() -> None:
+            entered.set()
+            await gate.wait()
+
+        reset_lock_release_barriers()
+        register_lock_release_barrier(_barrier)
+        release_task = asyncio.create_task(lock_manager.release())
+        await entered.wait()
+        release_task.cancel()
+        settled = False
+        for _ in range(100):
+            if release_task.cancelling() == 0 and not release_task.done():
+                settled = True
+                break
+            await asyncio.sleep(0)
+        assert settled, "cleanup did not reach the shielded wait"
+        release_task.cancel()
+        gate.set()
+        with pytest.raises(asyncio.CancelledError):
+            await release_task
+        mock_lock_port.release.assert_awaited_once_with(
+            "lock:test_pipeline", TEST_RUN_ID, exclusive=False
+        )
+
     async def test_validate_uses_fencing_token(
         self, lock_manager: LockRuntimeService, mock_lock_port: AsyncMock
     ) -> None:
