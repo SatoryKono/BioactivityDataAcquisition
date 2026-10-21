@@ -29,12 +29,15 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import UTC, datetime
 
 import pytest
 
 from bioetl.application.services.lineage.manifest_successor import (
     adopt_live_manifest_successor,
+    bind_manifest_successor_observer,
+    notify_successor,
 )
 from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 from bioetl.domain.control_plane import RunManifest
@@ -151,3 +154,67 @@ def test_adopt_manifest_successor_rebinds_coordinator_and_launch(
     assert coordinator.run_context.manifest_id == "manifest-successor"
     assert coordinator.run_context.execution_fingerprint == "fp-successor"
     assert run_context.manifest_id != "manifest-successor"
+
+
+def _successor_manifest(run_context: RunContext) -> RunManifest:
+    return RunManifest(
+        manifest_id="manifest-successor",
+        execution_fingerprint="fp-successor",
+        run_id=run_context.run_id,
+        run_type=run_context.run_type,
+        pipeline_name=run_context.pipeline_name,
+        provider=run_context.provider,
+        entity=run_context.entity,
+    )
+
+
+def test_bind_and_notify_successor_rebinds_only_registered_runner(
+    run_context: RunContext,
+) -> None:
+    coordinator = MetadataCoordinator(run_context)
+
+    class _Services:
+        metadata_coordinator = coordinator
+
+    class _Host:
+        _contract_evidence_context = run_context
+        _services = _Services()
+
+    class _Ledger:
+        manifest_successor_observer = None
+
+    host = _Host()
+    ledger = _Ledger()
+    bind_manifest_successor_observer(host, ledger)
+    manifest = _successor_manifest(run_context)
+    notify_successor(ledger, manifest)
+    notify_successor(object(), manifest)
+
+    assert host._contract_evidence_context.manifest_id == "manifest-successor"
+    assert coordinator.run_context.execution_fingerprint == "fp-successor"
+
+
+def test_adopt_manifest_successor_ignores_unbound_context(
+    run_context: RunContext,
+) -> None:
+    @dataclass
+    class _Launch:
+        manifest_id: str
+
+    class _Services:
+        metadata_coordinator = object()
+
+    updated = adopt_live_manifest_successor(
+        launch_context=None,
+        services=_Services(),
+        manifest=_successor_manifest(run_context),
+    )
+    ignored = adopt_live_manifest_successor(
+        launch_context=_Launch("previous"),
+        services=_Services(),
+        manifest=_successor_manifest(run_context),
+    )
+
+    assert updated is None
+    assert ignored.manifest_id == "manifest-successor"
+    assert not hasattr(ignored, "execution_fingerprint")

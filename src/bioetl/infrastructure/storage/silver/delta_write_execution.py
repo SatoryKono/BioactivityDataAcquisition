@@ -9,7 +9,7 @@ import subprocess  # nosec B404 - see suppression registry
 import sys
 import tempfile
 import threading
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from contextlib import suppress
 from dataclasses import replace
 from pathlib import Path
@@ -18,6 +18,7 @@ from typing import Any, Protocol, cast
 import pyarrow as pa
 from deltalake import DeltaTable as DeltaTableType
 
+from bioetl.domain.locking import register_lock_release_barrier
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.storage.delta.table_ops import (
     normalize_delta_filesystem_path,
@@ -67,6 +68,62 @@ def _require_delta_write_request(value: object) -> _DeltaWriteRequest:
     return value
 
 
+def _build_result_publishers[BlockingResult](
+    result_future: asyncio.Future[BlockingResult],
+) -> tuple[Callable[[BlockingResult], None], Callable[[BaseException], None]]:
+    """Publish a daemon-thread result onto the awaiting event loop."""
+
+    def _publish_result(result: BlockingResult) -> None:
+        if not result_future.done():
+            result_future.set_result(result)
+
+    def _publish_exception(exc: BaseException) -> None:
+        if not result_future.done():
+            result_future.set_exception(exc)
+
+    return _publish_result, _publish_exception
+
+
+def _build_blocking_worker[BlockingResult](
+    *,
+    call: Callable[[], BlockingResult],
+    loop: asyncio.AbstractEventLoop,
+    publish_result: Callable[[BlockingResult], None],
+    publish_exception: Callable[[BaseException], None],
+) -> Callable[[], None]:
+    """Run one blocking Delta call and publish its outcome to the loop."""
+
+    def _worker() -> None:
+        try:
+            result = call()
+        # pragma: no cover - surfaced through await
+        # NOSONAR python:S5754 - thread boundary must capture all call failures
+        except Exception as exc:
+            with suppress(RuntimeError):
+                loop.call_soon_threadsafe(publish_exception, exc)
+            return
+        with suppress(RuntimeError):
+            loop.call_soon_threadsafe(publish_result, result)
+
+    return _worker
+
+
+def _lock_release_join_barrier(
+    worker: threading.Thread,
+) -> Callable[[], Awaitable[None]]:
+    """Return a barrier that joins a Delta worker before lock release.
+
+    The join has no timeout. ``release_lock`` must not drop the lock while
+    this thread can still commit. A stuck native call holds the lock until
+    the thread returns; the caller-facing timeout still completes immediately.
+    """
+
+    async def _join_worker() -> None:
+        await asyncio.to_thread(worker.join)
+
+    return _join_worker
+
+
 async def _await_blocking_deltalake_call[BlockingResult](
     *,
     operation_name: str,
@@ -80,36 +137,25 @@ async def _await_blocking_deltalake_call[BlockingResult](
     stall pytest/loop shutdown long after the inner timeout has fired. A
     dedicated daemon thread keeps the timeout bounded without coupling loop
     teardown to the blocked native call.
+
+    When a lock hold has armed release barriers, the worker is joined before
+    that lock is released. The timeout itself still returns without waiting.
     """
     loop = asyncio.get_running_loop()
     result_future: asyncio.Future[BlockingResult] = loop.create_future()
-
-    def _publish_result(result: BlockingResult) -> None:
-        if not result_future.done():
-            result_future.set_result(result)
-
-    def _publish_exception(exc: BaseException) -> None:
-        if not result_future.done():
-            result_future.set_exception(exc)
-
-    def _worker() -> None:
-        try:
-            result = call()
-        # pragma: no cover - surfaced through await
-        # NOSONAR python:S5754 - thread boundary must capture all call failures
-        except Exception as exc:
-            with suppress(RuntimeError):
-                loop.call_soon_threadsafe(_publish_exception, exc)
-            return
-        with suppress(RuntimeError):
-            loop.call_soon_threadsafe(_publish_result, result)
-
+    publish_result, publish_exception = _build_result_publishers(result_future)
     worker = threading.Thread(
-        target=_worker,
+        target=_build_blocking_worker(
+            call=call,
+            loop=loop,
+            publish_result=publish_result,
+            publish_exception=publish_exception,
+        ),
         name=f"bioetl-deltalake-{operation_name}",
         daemon=True,
     )
     worker.start()
+    register_lock_release_barrier(_lock_release_join_barrier(worker))
 
     try:
         if timeout_seconds is None:
