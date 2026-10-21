@@ -19,6 +19,7 @@ from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage.bronze.cleanup_core import (
     BronzeRootLease,
     _platform_cleanup_supported,
+    valid_bronze_scope_name,
 )
 from bioetl.infrastructure.storage.bronze.cleanup_group_apply import (
     BronzeGroupCleanup,
@@ -221,6 +222,31 @@ class BronzeWriterReadCleanupMixin(
                 cutoff_str, dry_run, provider, entity, locked_root
             )
 
+    def _hierarchical_cleanup_scope(
+        self, provider: str | None, entity: str | None
+    ) -> tuple[str | None, str | None]:
+        """Bound an unfiltered hierarchical walk to the configured owner.
+
+        Explicit filters stay unchanged. Invalid identity is not promoted to a
+        path filter; ``_spec`` remains the fail-closed attestation.
+        """
+        if (
+            self._flat_structure
+            or provider is not None
+            or entity is not None
+            or self._root_identity is None
+        ):
+            return provider, entity
+        configured_provider, configured_entity = self._root_identity
+        if not (
+            isinstance(configured_provider, str)
+            and isinstance(configured_entity, str)
+            and valid_bronze_scope_name(configured_provider)
+            and valid_bronze_scope_name(configured_entity)
+        ):
+            return provider, entity
+        return configured_provider, configured_entity
+
     def _cleanup_old_files_locked_sync(
         self,
         cutoff_str: str,
@@ -230,6 +256,9 @@ class BronzeWriterReadCleanupMixin(
         locked_root: BronzeRootLease | None = None,
     ) -> dict[str, int]:
         stats = self._empty_cleanup_stats()
+        requested = (provider, entity)
+        provider, entity = self._hierarchical_cleanup_scope(provider, entity)
+        implicit_owner_scope = (provider, entity) != requested
         group_cleanup = group_cleanup_for_lock(
             locked_root,
             cutoff_str,
@@ -245,11 +274,19 @@ class BronzeWriterReadCleanupMixin(
             return stats
         root_abs, root_real = cleanup_roots(locked_root, self.base_path)
         root_fd = locked_root.fd if locked_root is not None else None
+
+        def on_discovery_skip(path: str, reason: str) -> None:
+            # An omitted filter now names the configured owner. A missing owner
+            # directory means there is nothing to delete, not a foreign conflict.
+            if implicit_owner_scope and reason == "missing_scope":
+                return
+            self._record_cleanup_discovery_skip(stats, path, reason)
+
         for date_dir in self._find_old_date_dirs(
             cutoff_str,
             provider,
             entity,
-            on_skip=partial(self._record_cleanup_discovery_skip, stats),
+            on_skip=on_discovery_skip,
             base_path=locked_root.path if locked_root is not None else None,
         ):
             plan = self._plan_old_dir_files(

@@ -32,7 +32,14 @@ from tests.unit.composition.factories.storage.test_storage_factory import (
     _make_sink_layer,
 )
 
-pytestmark = [pytest.mark.integration, pytest.mark.asyncio]
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.asyncio,
+    pytest.mark.skipif(
+        not destructive_cleanup_supported(),
+        reason="POSIX anchored destructive capability required",
+    ),
+]
 CUTOFF = datetime(2024, 6, 1, tzinfo=UTC)
 DATES = (datetime(2024, 2, 29, tzinfo=UTC), CUTOFF, datetime(2024, 6, 2, tzinfo=UTC))
 
@@ -238,7 +245,49 @@ async def test_hierarchical_configured_owner_refuses_foreign_group(
     snapshot = {p: p.read_bytes() for p in members}
     result = await writer.cleanup_old_files(CUTOFF)
     assert result["files_removed"] == 0
+    assert result["files_planned"] == 0
+    assert result["files_conflicted"] == 0
+    assert result["directories_conflicted"] == 0
     assert all(p.exists() and p.read_bytes() == value for p, value in snapshot.items())
+
+
+async def test_hierarchical_unfiltered_cleanup_drops_owned_keeps_foreign(
+    tmp_path: Path,
+) -> None:
+    writer = composed_writer(tmp_path, flat=False)
+    foreign = await write_group(writer, DATES[0], 1)
+    owned = await write_group(writer, DATES[0], 2, provider="chembl", entity="activity")
+    foreign_bytes = {path: path.read_bytes() for path in foreign}
+    dry = await writer.cleanup_old_files(CUTOFF, dry_run=True)
+    assert dry["files_planned"] == 3
+    assert dry["files_removed"] == 0
+    assert dry["files_conflicted"] == 0
+    actual = await writer.cleanup_old_files(CUTOFF)
+    assert actual["files_removed"] == 3
+    assert actual["files_conflicted"] == 0
+    assert actual["bytes_conflicted"] == 0
+    assert actual["directories_conflicted"] == 0
+    assert not any(path.exists() for path in owned)
+    assert all(
+        path.exists() and path.read_bytes() == data
+        for path, data in foreign_bytes.items()
+    )
+
+
+async def test_hierarchical_explicit_foreign_filter_stays_fail_closed(
+    tmp_path: Path,
+) -> None:
+    writer = composed_writer(tmp_path, flat=False)
+    members = await write_group(writer, DATES[0], 3)
+    before = {path: path.read_bytes() for path in members}
+    result = await writer.cleanup_old_files(
+        CUTOFF, provider="pubchem", entity="compound"
+    )
+    assert result["files_removed"] == 0
+    assert result["files_conflicted"] >= 1
+    assert all(
+        path.exists() and path.read_bytes() == data for path, data in before.items()
+    )
 
 
 @pytest.mark.parametrize("flat", [False, True], ids=["hierarchical", "flat"])

@@ -40,7 +40,8 @@ class BronzeWriterRuntimeServices:
     metadata_coordinator: MetadataCoordinatorPort | None
     lineage_store: LineageStorePort | None = None
     # Configured deployment owner, never inferred from batch metadata. Flat
-    # destructive cleanup requires this independent scope; hierarchy can use paths.
+    # destructive cleanup requires this scope. An unfiltered hierarchical walk
+    # is bounded to it; path attestation stays fail-closed.
     root_identity: tuple[str, str] | None = None
 
 
