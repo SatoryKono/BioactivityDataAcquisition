@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import NamedTuple
 
 LOG_DIR = Path("reports/performance/raw_logs")
 REPORT_PATH = Path("reports/performance/merge_service_eager_vs_lazy_measurements.md")
@@ -11,6 +12,14 @@ DATASET_SIZES = (1_000_000, 2_000_000, 5_000_000)
 WALL_BOTTLENECK_SECONDS = 0.5
 WALL_BOTTLENECK_PERCENT = 10.0
 RSS_BOTTLENECK_PERCENT = 10.0
+PEAK_RSS_MARKER = "Maximum resident set size"
+
+
+class _Side(NamedTuple):
+    rss: str
+    wall: str
+    rows: str
+    digest: str
 
 
 def _marked_value(path: Path, marker: str) -> str:
@@ -71,51 +80,68 @@ def _table_row(
 
 
 def _side(
-    path: Path, *, wall_marker: str, rows_marker: str, expected_rows: int
-) -> tuple[str, str, str]:
-    return (
-        _require(path, "Maximum resident set size"),
-        _require(path, wall_marker),
-        _require_row_count(path, rows_marker, expected=expected_rows),
+    path: Path,
+    *,
+    wall_marker: str,
+    rows_marker: str,
+    expected_rows: int,
+    digest: str,
+) -> _Side:
+    return _Side(
+        rss=_require(path, PEAK_RSS_MARKER),
+        wall=_require(path, wall_marker),
+        rows=_require_row_count(path, rows_marker, expected=expected_rows),
+        digest=digest,
     )
 
 
-def measurement_rows(size: int, *, log_dir: Path = LOG_DIR) -> list[str]:
-    """Return the eager and lazy table rows for one dataset size."""
+def _load_size(size: int, log_dir: Path) -> tuple[int, _Side, _Side]:
     file_size = (log_dir / f"measure_merge_silver_{size}.parquet").stat().st_size
     eager_digest, lazy_digest = _require_matching_hashes(log_dir / f"hash_{size}.txt")
-    eager_rss, eager_wall, eager_rows = _side(
+    eager = _side(
         log_dir / f"eager_{size}.txt",
         wall_marker="EAGER_WALL_TIME:",
         rows_marker="EAGER_ROWS:",
         expected_rows=size,
+        digest=eager_digest,
     )
-    lazy_rss, lazy_wall, lazy_rows = _side(
+    lazy = _side(
         log_dir / f"lazy_{size}.txt",
         wall_marker="LAZY_WALL_TIME:",
         rows_marker="LAZY_ROWS:",
         expected_rows=size,
+        digest=lazy_digest,
     )
+    return file_size, eager, lazy
+
+
+def _rows_for(size: int, file_size: int, eager: _Side, lazy: _Side) -> list[str]:
     return [
         _table_row(
             size=size,
             file_size=file_size,
             strategy="Eager",
-            rss=eager_rss,
-            wall=eager_wall,
-            rows_read=eager_rows,
-            digest=eager_digest,
+            rss=eager.rss,
+            wall=eager.wall,
+            rows_read=eager.rows,
+            digest=eager.digest,
         ),
         _table_row(
             size=size,
             file_size=file_size,
             strategy="Lazy",
-            rss=lazy_rss,
-            wall=lazy_wall,
-            rows_read=lazy_rows,
-            digest=lazy_digest,
+            rss=lazy.rss,
+            wall=lazy.wall,
+            rows_read=lazy.rows,
+            digest=lazy.digest,
         ),
     ]
+
+
+def measurement_rows(size: int, *, log_dir: Path = LOG_DIR) -> list[str]:
+    """Return the eager and lazy table rows for one dataset size."""
+    file_size, eager, lazy = _load_size(size, log_dir)
+    return _rows_for(size, file_size, eager, lazy)
 
 
 def _wall_gain(eager_wall: str, lazy_wall: str) -> tuple[float, float]:
@@ -135,67 +161,110 @@ def _rss_drop_percent(eager_rss: str, lazy_rss: str) -> float:
     return 100.0 * (eager - lazy) / eager
 
 
-def _metric_peaks(log_dir: Path) -> tuple[float, float, float]:
-    max_gain = 0.0
-    max_percent = 0.0
+class _Peaks(NamedTuple):
+    wall_gain: float
+    wall_percent: float
+    rss_drop: float
+    wall_proven: bool
+
+
+def _prefer_wall(
+    gain: float, percent: float, best_gain: float, best_percent: float
+) -> bool:
+    if gain > best_gain:
+        return True
+    return gain == best_gain and percent > best_percent
+
+
+def _wall_clears(gain: float, percent: float) -> bool:
+    return gain >= WALL_BOTTLENECK_SECONDS and percent >= WALL_BOTTLENECK_PERCENT
+
+
+def _metric_peaks(sides: list[tuple[_Side, _Side]]) -> _Peaks:
+    best_gain = 0.0
+    best_percent = 0.0
     max_rss_drop = 0.0
-    for size in DATASET_SIZES:
-        eager_wall = _require(log_dir / f"eager_{size}.txt", "EAGER_WALL_TIME:")
-        lazy_wall = _require(log_dir / f"lazy_{size}.txt", "LAZY_WALL_TIME:")
-        gain, percent = _wall_gain(eager_wall, lazy_wall)
-        if gain > max_gain:
-            max_gain = gain
-        if percent > max_percent:
-            max_percent = percent
-        drop = _rss_drop_percent(
-            _require(log_dir / f"eager_{size}.txt", "Maximum resident set size"),
-            _require(log_dir / f"lazy_{size}.txt", "Maximum resident set size"),
-        )
+    wall_proven = False
+    for eager, lazy in sides:
+        gain, percent = _wall_gain(eager.wall, lazy.wall)
+        if _prefer_wall(gain, percent, best_gain, best_percent):
+            best_gain = gain
+            best_percent = percent
+        wall_proven = wall_proven or _wall_clears(gain, percent)
+        drop = _rss_drop_percent(eager.rss, lazy.rss)
         if drop > max_rss_drop:
             max_rss_drop = drop
-    return max_gain, max_percent, max_rss_drop
+    return _Peaks(best_gain, best_percent, max_rss_drop, wall_proven)
 
 
-def _verdict(log_dir: Path) -> str:
-    max_gain, max_percent, max_rss_drop = _metric_peaks(log_dir)
-    proven = (
-        max_gain >= WALL_BOTTLENECK_SECONDS and max_percent >= WALL_BOTTLENECK_PERCENT
-    ) or max_rss_drop >= RSS_BOTTLENECK_PERCENT
+def _conclusion(proven: bool) -> str:
     if proven:
-        conclusion = "A bottleneck has been proven."
-    else:
-        conclusion = "A bottleneck has **not been proven**."
+        return (
+            "A bottleneck has been proven. "
+            "Eager mode is no longer required by DOMAIN_STOP."
+        )
+    return (
+        "A bottleneck has **not been proven**. "
+        "The eager execution mode remains the default until a reduction "
+        "clears those thresholds."
+    )
+
+
+def _verdict(sides: list[tuple[_Side, _Side]]) -> str:
+    peaks = _metric_peaks(sides)
+    proven = peaks.wall_proven or peaks.rss_drop >= RSS_BOTTLENECK_PERCENT
+    conclusion = _conclusion(proven)
     return f"""## Verdict on DOMAIN_STOP
 The `DOMAIN_STOP` rule forbids lazy-refactoring without a measured bottleneck.
 
 Thresholds for a proven bottleneck: lazy wall time lower by at least {WALL_BOTTLENECK_SECONDS:.1f} s and {WALL_BOTTLENECK_PERCENT:.0f}%, or lazy peak RSS lower by at least {RSS_BOTTLENECK_PERCENT:.0f}%.
 
 Based on the measurements:
-- Maximum lazy wall-time reduction: {max_gain:.4f} s ({max_percent:.1f}%).
-- Maximum lazy peak-RSS reduction: {max_rss_drop:.1f}%.
-- **Conclusion:** {conclusion} The eager execution mode remains the default until a reduction clears those thresholds.
+- Maximum lazy wall-time reduction: {peaks.wall_gain:.4f} s ({peaks.wall_percent:.1f}%).
+- Maximum lazy peak-RSS reduction: {peaks.rss_drop:.1f}%.
+- **Conclusion:** {conclusion}
 """
+
+
+def _expected_logs(log_dir: Path) -> list[Path]:
+    return sorted(
+        log_dir / f"{kind}_{size}.txt"
+        for size in DATASET_SIZES
+        for kind in ("eager", "lazy")
+    )
+
+
+def _timed_lines(path: Path) -> list[str]:
+    if not path.is_file():
+        return []
+    return [
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if "Command being timed:" in line
+    ]
 
 
 def _timed_commands(log_dir: Path) -> str:
     commands: list[str] = []
-    for path in sorted(log_dir.glob("*_*.txt")):
-        for line in path.read_text(encoding="utf-8").splitlines():
-            if "Command being timed:" in line:
-                commands.append(f"- `{path.name}`: {line.strip()}")
-    if not commands:
-        raise ValueError(f"No timed commands recorded under {log_dir}")
+    for path in _expected_logs(log_dir):
+        matches = _timed_lines(path)
+        if not matches:
+            raise ValueError(f"Missing timed command in {path}")
+        commands.extend(f"- `{path.name}`: {line}" for line in matches)
     return "\n".join(commands)
 
 
 def render_report(*, log_dir: Path = LOG_DIR) -> str:
     """Render the measurement report from raw logs and parquet sizes."""
+    loaded = [_load_size(size, log_dir) for size in DATASET_SIZES]
     rows: list[str] = []
-    for size in DATASET_SIZES:
-        rows.extend(measurement_rows(size, log_dir=log_dir))
+    sides: list[tuple[_Side, _Side]] = []
+    for size, (file_size, eager, lazy) in zip(DATASET_SIZES, loaded, strict=True):
+        sides.append((eager, lazy))
+        rows.extend(_rows_for(size, file_size, eager, lazy))
     environment = (log_dir / "env.txt").read_text(encoding="utf-8").strip()
     table = "\n".join(rows)
-    verdict = _verdict(log_dir).rstrip()
+    verdict = _verdict(sides).rstrip()
     timed = _timed_commands(log_dir)
     return f"""# MergeService Eager vs Lazy Reading Measurements
 
