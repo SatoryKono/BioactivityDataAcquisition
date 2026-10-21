@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from typing import Protocol
 
 from bioetl.application.core.config import LockConfig
@@ -83,23 +83,8 @@ def _clear_task_cancellation() -> None:
     current = asyncio.current_task()
     if current is None:
         return
-    while current.uncancel():
-        pass
-
-
-async def _await_shielded[ResultT](
-    factory: Callable[[], Awaitable[ResultT]],
-    *,
-    cancelled: list[bool],
-) -> ResultT:
-    """Run one cleanup step to completion when the caller is cancelled."""
-    operation = asyncio.create_task(factory())
-    try:
-        return await asyncio.shield(operation)
-    except asyncio.CancelledError:
-        cancelled.append(True)
-        _clear_task_cancellation()
-        return await operation
+    while current.cancelling():
+        current.uncancel()
 
 
 async def release_lock(host: _LockRuntimeHostProtocol) -> None:
@@ -108,39 +93,32 @@ async def release_lock(host: _LockRuntimeHostProtocol) -> None:
     Cancellation of the caller finishes the in-flight Delta barriers, stops
     the heartbeat, and releases the lock before ``CancelledError`` propagates.
     """
-    cancelled: list[bool] = []
     barriers = take_lock_release_barriers()
 
-    async def _join_barriers() -> None:
+    async def _cleanup() -> None:
         for barrier in barriers:
             await barrier()
-
-    if barriers:
-        await _await_shielded(_join_barriers, cancelled=cancelled)
-    heartbeat = host._heartbeat
-    if heartbeat is not None:
-
-        async def _stop_heartbeat() -> None:
+        if (heartbeat := host._heartbeat) is not None:
             await heartbeat.stop()
-
-        await _await_shielded(_stop_heartbeat, cancelled=cancelled)
-        host._heartbeat = None
-
-    async def _release_port() -> None:
+            host._heartbeat = None
         await host._lock.release(
             host._config.lock_key,
             host._run_id,
             exclusive=host._config.exclusive,
         )
+        host._acquired_at = None
+        host._fencing_token = None
+        if host._context_holder is not None:
+            host._context_holder.clear()
+        host._logger.info("Lock released", stage="cleanup")
 
-    await _await_shielded(_release_port, cancelled=cancelled)
-    host._acquired_at = None
-    host._fencing_token = None
-    if host._context_holder is not None:
-        host._context_holder.clear()
-    host._logger.info("Lock released", stage="cleanup")
-    if cancelled:
-        raise asyncio.CancelledError
+    operation = asyncio.create_task(_cleanup())
+    try:
+        await asyncio.shield(operation)
+    except asyncio.CancelledError:
+        _clear_task_cancellation()
+        await operation
+        raise
 
 
 async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
