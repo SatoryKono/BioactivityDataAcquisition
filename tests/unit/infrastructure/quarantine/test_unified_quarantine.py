@@ -363,11 +363,18 @@ class TestUnifiedQuarantineWrite:
     ):
         """A retry with the same entry id must not append another row."""
         stored = serialize_to_json({"entry_id": "same-id"})
+        batch_key = str(batch_id)
         with (
-            patch("bioetl.infrastructure.quarantine.unified.DeltaTable") as delta,
+            patch("bioetl.infrastructure.quarantine.write_dedup.DeltaTable") as delta,
             patch(
-                "bioetl.infrastructure.quarantine.unified.read_delta_records",
-                return_value=[{"metadata": stored}],
+                "bioetl.infrastructure.quarantine.write_dedup.read_delta_records",
+                return_value=[
+                    {"bronze_batch_id": batch_key, "metadata": stored},
+                    {
+                        "bronze_batch_id": "other-batch",
+                        "metadata": serialize_to_json({"entry_id": "fresh-other"}),
+                    },
+                ],
             ),
         ):
             delta.is_deltatable.return_value = True
@@ -384,6 +391,40 @@ class TestUnifiedQuarantineWrite:
                 ]
             )
         mock_write_deltalake.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_write_many_keeps_entry_id_from_another_batch(
+        self, quarantine, batch_id, mock_write_deltalake
+    ):
+        """An entry id stored for a different batch does not suppress this write."""
+        with (
+            patch("bioetl.infrastructure.quarantine.write_dedup.DeltaTable") as delta,
+            patch(
+                "bioetl.infrastructure.quarantine.write_dedup.read_delta_records",
+                return_value=[
+                    {
+                        "bronze_batch_id": "other-batch",
+                        "metadata": serialize_to_json({"entry_id": "shared"}),
+                    }
+                ],
+            ),
+        ):
+            delta.is_deltatable.return_value = True
+            await quarantine.write_many(
+                [
+                    {
+                        "pipeline": "test",
+                        "error_code": "ERROR",
+                        "payload": {"id": 1},
+                        "bronze_batch_id": batch_id,
+                        "entry_id": "shared",
+                        "ingestion_ts": TEST_INGESTION_TS,
+                    }
+                ]
+            )
+        mock_write_deltalake.assert_called_once()
+        records = _extract_records_from_call(mock_write_deltalake)
+        assert json.loads(records[0]["metadata"])["entry_id"] == "shared"
 
     @pytest.mark.asyncio
     async def test_write_many_stores_entry_id_in_metadata(
