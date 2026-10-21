@@ -1,6 +1,6 @@
 # BioETL local-first Makefile
 
-.PHONY: help install test lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-confidence-local test-confidence-unit test-confidence-contract test-profile test-deps setup-plugins run-local sync-windsurf-rules devin devin-setup devin-check devin-mcp-start devin-fix-bug devin-add-feature devin-update-docs devin-audit-config devin-workflows devin-select-profile devin-mcp-start-minimal devin-mcp-start-standard devin-mcp-start-full deepwiki-backup deepwiki-update deepwiki-validate
+.PHONY: help install test test-benchmark lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-confidence-local test-confidence-unit test-confidence-contract test-profile test-deps setup-plugins run-local sync-windsurf-rules devin devin-setup devin-check devin-mcp-start devin-fix-bug devin-add-feature devin-update-docs devin-audit-config devin-workflows devin-select-profile devin-mcp-start-minimal devin-mcp-start-standard devin-mcp-start-full deepwiki-backup deepwiki-update deepwiki-validate
 .PHONY: docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check docker-ensure-networks
 .PHONY: clean clean-all clean-local-artifacts clean-preflight precommit-install qa-arch-fast qa-debt security-check quarantine-inspect quarantine-replay quarantine-purge release-lock
 
@@ -35,6 +35,7 @@ help:
 	@echo "  make test-ci-local         Run local CI-oriented test subset"
 	@echo "  make test-confidence-local Run pure unit, fast architecture, offline contracts, and 85% coverage"
 	@echo "  make test-profile          Run pytest duration profiling"
+	@echo "  make test-benchmark        Run performance benchmark tests"
 	@echo "  make test-deps             Verify test dependencies import"
 	@echo "  make run-local             Run sample local pipeline"
 	@echo "  make devin                 Launch Devin CLI with BioETL runtime config"
@@ -148,6 +149,18 @@ test-confidence-local:
 
 test-profile:
 	$(RUN) pytest tests/ --durations=25 --durations-min=1.0 -q
+
+test-benchmark:
+	mkdir -p reports/performance
+	BIOETL_BENCHMARK_CALLER=local-makefile \
+	BIOETL_BENCHMARK_DATASET=bioetl-synthetic-benchmarks-v1 \
+	$(RUN) pytest tests/benchmarks/ \
+		-m benchmark \
+		-p tests.benchmarks.benchmark_vcs_guard \
+		-p benchmark \
+		-p no:xdist \
+		-v --tb=short \
+		--benchmark-json=reports/performance/benchmark-measurements.json
 
 run-local:
 	$(RUN) bioetl run --pipeline $(PIPELINE) --limit 10

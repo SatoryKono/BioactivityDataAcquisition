@@ -200,6 +200,14 @@ def test_affected_targets_fail_closed_without_memory_test(tmp_path: Path) -> Non
         affected_pytest_targets(["src/memory/rag/chunking.py"], repo_root=tmp_path)
 
 
+def test_affected_targets_map_makefile_benchmark_contract() -> None:
+    """Makefile edits select the benchmark-target contract, not an empty lane."""
+    repo_root = Path(__file__).resolve().parents[5]
+    assert affected_pytest_targets(["Makefile"], repo_root=repo_root) == [
+        "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
+    ]
+
+
 def test_affected_targets_map_root_npm_only_and_deduplicate() -> None:
     """Manifest-only tooling updates execute their existing runtime contract."""
     repo_root = Path(__file__).resolve().parents[5]

@@ -300,6 +300,31 @@ def test_live_catalog_classifies_grafana_reports_and_test_fixtures() -> None:
     assert matrix["decisions"]["docker"]["decision"] == REQUIRED
 
 
+def test_live_catalog_classifies_makefile_benchmark_surface() -> None:
+    """A Makefile-only diff stays on the tests gate and does not fail closed."""
+    catalog = load_catalog(
+        Path(__file__).resolve().parents[6]
+        / "configs/quality/github_required_checks.yaml"
+    )
+    matrix = classify_changes(catalog, ["Makefile"], head_sha=HEAD_SHA)
+
+    assert matrix["unclassified_files"] == []
+    assert matrix["decisions"]["tests"] == {
+        "decision": REQUIRED,
+        "reason": "path_match",
+    }
+    for gate_id in (
+        "lint-arch",
+        "type-checking",
+        "security",
+        "docker",
+        "duplication",
+        "generated-artifacts",
+        "docs-governance",
+    ):
+        assert matrix["decisions"][gate_id]["decision"] == NOT_APPLICABLE
+
+
 def test_live_catalog_classifies_root_changelog() -> None:
     """A root changelog change stays on docs-governance and does not force tests."""
     catalog = load_catalog(
