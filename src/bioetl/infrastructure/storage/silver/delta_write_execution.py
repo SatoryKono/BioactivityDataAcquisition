@@ -117,8 +117,7 @@ async def _await_blocking_deltalake_call[BlockingResult](
     loop = asyncio.get_running_loop()
     result_future: asyncio.Future[BlockingResult] = loop.create_future()
 
-    _publish_result, _publish_exception = _create_publishers(loop, result_future)
-    _worker = _build_worker(call, loop, _publish_result, _publish_exception)
+    _worker = _build_worker(call, loop, result_future)
 
     worker = threading.Thread(
         target=_worker,
