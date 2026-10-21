@@ -157,9 +157,7 @@ _REFERENCE_IDENTIFIER_FAMILY_SPECS: tuple[tuple[str, str, str, str, str], ...] =
 
 
 def _unlabeled_spec_names() -> list[str]:
-    return sorted(
-        spec[0] for spec in _REFERENCE_IDENTIFIER_FAMILY_SPECS if not spec[3]
-    )
+    return sorted(spec[0] for spec in _REFERENCE_IDENTIFIER_FAMILY_SPECS if not spec[3])
 
 
 def _expected_normalizer_keys() -> set[str]:
