@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from types import MappingProxyType
 
 from bioetl.domain.types import JsonDict
@@ -12,9 +13,9 @@ class _GoldRuleInputRecord(dict[str, object]):
 
     __slots__ = ("_rule_inputs",)
 
-    def __init__(self, record: JsonDict, rule_inputs: JsonDict) -> None:
+    def __init__(self, record: JsonDict, rule_inputs: Mapping[str, object]) -> None:
         super().__init__(record)
-        self._rule_inputs = MappingProxyType(dict(rule_inputs))
+        self._rule_inputs = rule_inputs
 
 
 def bind_gold_rule_inputs(
@@ -26,7 +27,7 @@ def bind_gold_rule_inputs(
     source_id, target_id = rule_inputs.get("entity_id"), record.get("entity_id")
     if source_id is not None and target_id is not None and source_id != target_id:
         raise ValueError("Gold transform changed record identity")
-    return _GoldRuleInputRecord(record, rule_inputs)
+    return _GoldRuleInputRecord(record, MappingProxyType(dict(rule_inputs)))
 
 
 def resolve_gold_rule_inputs(records: list[JsonDict]) -> list[JsonDict]:
