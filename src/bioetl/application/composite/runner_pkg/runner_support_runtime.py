@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["run_seed", "save_checkpoint_safe"]
+__all__ = ["resolve_original_run_id", "run_seed", "save_checkpoint_safe"]
 
 import time
 from typing import TYPE_CHECKING
@@ -30,6 +30,7 @@ from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
     from bioetl.application.composite.checkpoint import CompositeCheckpointState
+    from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 
 
 async def save_checkpoint_safe(
@@ -153,3 +154,15 @@ async def run_seed(host: _CompositeRunnerSupportHostProtocol) -> SeedResult:
         started_at=started_at,
         completed_at=completed_at,
     )
+
+
+def resolve_original_run_id(
+    *,
+    runtime: CompositeRuntimeConfig,
+    state: CompositeCheckpointState,
+    current_run_id: str,
+) -> str | None:
+    """Resolve the original run ID retained for resumed composite diagnostics."""
+    if runtime.resume and state.is_resumable and state.run_id != current_run_id:
+        return state.run_id
+    return None

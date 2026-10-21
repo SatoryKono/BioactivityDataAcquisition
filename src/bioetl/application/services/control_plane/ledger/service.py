@@ -70,6 +70,9 @@ class RunLedgerService(RunLedgerRichEventRecordingMixin):
         default_factory=lambda: _missing_occurred_at_factory
     )
     _manifest_id_factory: Callable[[], str] | None = None
+    manifest_successor_callbacks: list[Callable[[RunManifest], None]] = field(
+        default_factory=list, repr=False
+    )
     manifest_successor_observer: Callable[[RunManifest], None] | None = None
 
     def record_manifest_created(self, manifest: RunManifest) -> RunLedgerEntry:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,
@@ -25,12 +25,17 @@ from bioetl.application.composite.checkpoint._checkpoint_warnings import (
 from bioetl.application.composite.checkpoint._load_validation import (
     validate_resume_compatibility,
 )
+from bioetl.application.composite.checkpoint._state_support import (
+    synchronize_manifest_successors,
+)
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
+from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.run_ledger import (
     RunLedgerReplayProjection,
     project_run_ledger_replay,
 )
 from bioetl.domain.exceptions import CheckpointConflictError
+from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.ports import (
     ClockPort,
     CompositeCheckpointPort,
@@ -74,6 +79,28 @@ class CompositeCheckpointLoadService:
         self._run_ledger_port = params.run_ledger_port
         self._metrics = params.metrics
         self._clock = params.clock
+        self._manifest_successors: dict[str, RunManifest] = {}
+
+    def update_manifest(self, manifest: RunManifest) -> ExpectedCheckpointContext:
+        """Track a committed successor before checkpoint persistence or replay."""
+        if manifest.predecessor_manifest_id is not None:
+            self._manifest_successors[manifest.predecessor_manifest_id] = manifest
+        self._expected_context = replace(
+            self._expected_context,
+            manifest_id=manifest.manifest_id,
+            execution_fingerprint=manifest.execution_fingerprint,
+            input_snapshot_fingerprint=compute_input_snapshot_identity_fingerprint(
+                [s for ref in manifest.source_refs for s in ref.input_snapshots]
+            )
+            or "",
+        )
+        return self._expected_context
+
+    def synchronize_manifest(
+        self, state: CompositeCheckpointState
+    ) -> CompositeCheckpointState:
+        """Replace stale anchors only along a published successor chain."""
+        return synchronize_manifest_successors(state, self._manifest_successors)
 
     def _emit_checkpoint_load_status(self, status: str) -> None:
         """Emit bounded composite checkpoint load outcome."""
@@ -124,6 +151,7 @@ class CompositeCheckpointLoadService:
         if state is None:
             return None
 
+        state = self.synchronize_manifest(state)
         try:
             validate_resume_compatibility(
                 state=state,
@@ -163,6 +191,7 @@ class CompositeCheckpointLoadService:
         self,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
+        state = self.synchronize_manifest(state)
         if self._run_ledger_port is None:
             return state
         if not state.manifest_id:
