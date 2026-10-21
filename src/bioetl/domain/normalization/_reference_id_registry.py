@@ -75,7 +75,7 @@ _REFERENCE_IDENTIFIER_FAMILY_SPECS: tuple[tuple[str, str, str, str, str], ...] =
         "semantic_scholar_corpus",
         "numeric_scalar",
         "scalar",
-        "",
+        "semantic_scholar_corpus",
         "Semantic Scholar corpusId is numeric, not a string-like reference ID.",
     ),
     (
@@ -160,7 +160,17 @@ def _validate_normalizer_keys(
     normalizers: Mapping[str, ReferenceNormalizer | None],
 ) -> None:
     """Reject missing or extra normalizer keys before constructing families."""
-    expected_keys = {spec[3] for spec in _REFERENCE_IDENTIFIER_FAMILY_SPECS if spec[3]}
+    unlabeled = sorted(
+        name
+        for name, _storage, _semantics, normalizer_key, _description in (
+            _REFERENCE_IDENTIFIER_FAMILY_SPECS
+        )
+        if not normalizer_key
+    )
+    if unlabeled:
+        raise ValueError(f"SPECS rows missing normalizer mapping keys: {unlabeled}")
+
+    expected_keys = {spec[3] for spec in _REFERENCE_IDENTIFIER_FAMILY_SPECS}
     provided_keys = set(normalizers.keys())
 
     missing_keys = expected_keys - provided_keys
