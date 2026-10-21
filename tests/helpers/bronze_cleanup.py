@@ -3,6 +3,11 @@
 import hashlib
 import json
 
+from bioetl.domain.ports.noop import NoOpMetadataWriter
+from bioetl.infrastructure.storage.bronze.facade_contracts import (
+    BronzeWriterRuntimeServices,
+)
+
 
 def sidecar_bytes(
     data: bytes,
@@ -27,3 +32,15 @@ def sidecar_bytes(
         },
         sort_keys=True,
     ).encode()
+
+
+def flat_owner_services() -> BronzeWriterRuntimeServices:
+    """Synthetic flat-cleanup owner, independent of sidecar metadata."""
+    return BronzeWriterRuntimeServices(
+        tracing=None,
+        audit=None,
+        metadata_writer=NoOpMetadataWriter(),
+        save_metadata=False,
+        metadata_coordinator=None,
+        root_identity=("chembl", "activity"),
+    )

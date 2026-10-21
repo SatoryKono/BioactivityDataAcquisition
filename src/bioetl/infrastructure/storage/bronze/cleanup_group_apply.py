@@ -8,7 +8,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Protocol
 
-from .cleanup_core import BronzeRootLease
+from .cleanup_core import BronzeRootLease, valid_bronze_scope_name
 from .cleanup_group_journal import GroupJournal
 from .cleanup_group_schema import (
     _FILE_FLAGS,
@@ -44,12 +44,28 @@ class BronzeGroupCleanup:
         cutoff: str,
         flat: bool,
         on_skip: Callable[[str, str], None],
+        root_identity: tuple[str, str] | None = None,
     ) -> None:
         self.journal = GroupJournal(lease)
         self.root = lease.path
         self.cutoff = cutoff
         self.flat = flat
         self.on_skip = on_skip
+        self.root_identity = root_identity
+
+    def _scope_allowed(self, provider: str, entity: str) -> bool:
+        """Use only configured ownership or an independent hierarchical path."""
+        if self.root_identity is None:
+            return not self.flat
+        return (
+            isinstance(self.root_identity, tuple)
+            and len(self.root_identity) == 2
+            and all(
+                isinstance(value, str) and valid_bronze_scope_name(value)
+                for value in self.root_identity
+            )
+            and self.root_identity == (provider, entity)
+        )
 
     @staticmethod
     def _record_progress(
@@ -70,6 +86,7 @@ class BronzeGroupCleanup:
             return False
         if any(
             spec.flat_structure != self.flat
+            or not self._scope_allowed(spec.provider, spec.entity)
             or (self.flat and (provider is not None or entity is not None))
             or spec.date >= self.cutoff
             or (provider is not None and provider != spec.provider)
@@ -180,6 +197,11 @@ class BronzeGroupCleanup:
         relative = plan.path.relative_to(self.root)
         batch = group.removeprefix(f"batch_{plan.path.name}_")
         if self.flat:
+            if self.root_identity is None or not self._scope_allowed(
+                *self.root_identity
+            ):
+                raise GroupJournalConflict("missing configured Bronze root identity")
+            provider, entity = self.root_identity
             # The bounded read is under the pinned date handle; begin then
             # verifies the complete sidecar, hashes, and original planned inode.
             with self.journal._date(relative.as_posix()) as (date_fd, _chain):
@@ -195,11 +217,14 @@ class BronzeGroupCleanup:
             metadata = json.loads(raw, object_pairs_hook=_unique_pairs)
             if not isinstance(metadata, dict):
                 raise GroupJournalConflict("invalid sidecar scope")
-            provider, entity = metadata.get("provider"), metadata.get("entity")
-            if not isinstance(provider, str) or not isinstance(entity, str):
-                raise GroupJournalConflict("missing sidecar scope")
+            if (metadata.get("provider"), metadata.get("entity")) != (provider, entity):
+                raise GroupJournalConflict(
+                    "sidecar differs from configured root identity"
+                )
         else:
             provider, entity, _date = relative.parts
+            if not self._scope_allowed(provider, entity):
+                raise GroupJournalConflict("path differs from configured root identity")
         return GroupSpec(
             provider, entity, plan.path.name, batch, self.cutoff, self.flat
         )
@@ -210,11 +235,12 @@ def group_cleanup_for_lock(
     cutoff_str: str,
     flat: bool,
     on_skip: Callable[[str, str], None],
+    root_identity: tuple[str, str] | None = None,
 ) -> BronzeGroupCleanup | None:
     """Build a journal-backed group cleaner only when the root fd is pinned."""
     if locked_root is None or locked_root.fd is None:
         return None
-    return BronzeGroupCleanup(locked_root, cutoff_str, flat, on_skip)
+    return BronzeGroupCleanup(locked_root, cutoff_str, flat, on_skip, root_identity)
 
 
 def cleanup_roots(

@@ -31,6 +31,7 @@ def create_bronze_writer(
     audit: AuditPort,
     flat_structure: bool,
     lineage_base_path: Path | None = None,
+    root_identity: tuple[str, str] | None = None,
 ) -> BronzeWriter:
     """Create configured Bronze writer.
 
@@ -43,6 +44,8 @@ def create_bronze_writer(
         tracing: TracingPort resolved by composition bootstrap.
         metadata_coordinator: Optional coordinator for metadata side-effects.
         flat_structure: If True, writes files without provider/entity subdirectories.
+        root_identity: Configured pipeline provider/entity for cleanup attestation.
+            None leaves flat destructive cleanup fail-closed.
 
     Returns:
         Configured BronzeWriter instance for the Bronze storage layer.
@@ -80,6 +83,7 @@ def create_bronze_writer(
             save_metadata=save_metadata,
             metadata_coordinator=metadata_coordinator,
             lineage_store=lineage_store,
+            root_identity=root_identity,
         ),
         flat_structure=flat_structure,
     )
