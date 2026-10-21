@@ -1331,18 +1331,34 @@ async def test_late_commit_prevention_on_timeout() -> None:
     from bioetl.domain.types import RunID
     from bioetl.domain.medallion import SilverWriteMode
     from bioetl.infrastructure.locking.memory_lock import MemoryLock
-    from bioetl.infrastructure.storage.silver.delta_request_models import _DeltaWriteRequest
-    from bioetl.infrastructure.storage.silver.delta_write_execution import _write_plain_delta_request
-    from bioetl.application.core.lifecycle.lock_runtime_service import LockRuntimeService, LockRuntimeServiceCreateContext
+    from bioetl.infrastructure.storage.silver.delta_request_models import (
+        _DeltaWriteRequest,
+    )
+    from bioetl.infrastructure.storage.silver.delta_write_execution import (
+        _write_plain_delta_request,
+    )
+    from bioetl.application.core.lifecycle.lock_runtime_service import (
+        LockRuntimeService,
+        LockRuntimeServiceCreateContext,
+    )
     from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
     from bioetl.domain.ports import LoggerPort  # noqa: F401
 
     class MockLogger:
-        def info(self, *args, **kwargs): pass
-        def warning(self, *args, **kwargs): pass
-        def error(self, *args, **kwargs): pass
-        def exception(self, *args, **kwargs): pass
-        def debug(self, *args, **kwargs): pass
+        def info(self, *args, **kwargs):
+            pass
+
+        def warning(self, *args, **kwargs):
+            pass
+
+        def error(self, *args, **kwargs):
+            pass
+
+        def exception(self, *args, **kwargs):
+            pass
+
+        def debug(self, *args, **kwargs):
+            pass
 
     lock_port = MemoryLock()
     run_id = RunID("test-run-1")
@@ -1358,8 +1374,8 @@ async def test_late_commit_prevention_on_timeout() -> None:
             wait_timeout=0,
             wait_for_lock=False,
             heartbeat_interval=1.0,
-            logger=MockLogger(), # type: ignore
-            shutdown_signal=ShutdownSignal(), # type: ignore
+            logger=MockLogger(),  # type: ignore
+            shutdown_signal=ShutdownSignal(),  # type: ignore
         )
     )
 

@@ -112,7 +112,6 @@ async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
     await heartbeat.start()
 
 
-
 async def enter_lock_context[LockRuntimeHostT: _LockRuntimeHostProtocol](
     host: LockRuntimeHostT,
 ) -> LockRuntimeHostT:
