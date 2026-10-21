@@ -1001,7 +1001,14 @@
     }
   },
   "assertless_total_candidates": 85,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 6,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1175,8 +1182,15 @@
     ]
   },
   "intentional_no_exception_contract": 85,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "markerless_examples": [
+    "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:16",
+    "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:26",
+    "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:39",
+    "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:48",
+    "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:56",
+    "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:66"
+  ],
+  "markerless_test_functions": 6,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2025,8 +2039,15 @@
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:16",
+      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:26",
+      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:39",
+      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:48",
+      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:56",
+      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:66"
+    ],
+    "markerless_test_functions": 6,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2044,8 +2065,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3162,
-      "test_python_file_count": 3408,
+      "test_glob_file_count": 3163,
+      "test_python_file_count": 3409,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2086,13 +2107,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3162,
-    "total_test_functions": 31166,
+    "total_test_files": 3163,
+    "total_test_functions": 31173,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "b6a796d518343934a645c600940e4d7ebc2c70396e7fd38bcc931973c65a9f9b",
+  "source_tree_sha256": "f5e7f5d907f9865cb0ae688e5877652589226f90be5e82fab2a4cd2b3b5678a7",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2101,8 +2122,15 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 85,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:16",
+      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:26",
+      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:39",
+      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:48",
+      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:56",
+      "tests/unit/infrastructure/quarantine/test_write_lock_failure_contracts.py:66"
+    ],
+    "markerless_test_functions": 6,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -2112,8 +2140,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3162,
-    "test_python_file_count": 3408,
+    "test_glob_file_count": 3163,
+    "test_python_file_count": 3409,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2154,8 +2182,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3162,
-  "total_test_functions": 31166,
+  "total_test_files": 3163,
+  "total_test_functions": 31173,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
