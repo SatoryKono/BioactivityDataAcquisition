@@ -25,17 +25,24 @@ END = "<!-- current-source-binding:end -->"
 BOOTSTRAP_PROFILE = Path("reports/quality/test-bootstrap-fixture-scope-profile.json")
 
 
-def _measured_bootstrap_file_count(root: Path, reference: str) -> int:
+def _measured_bootstrap_file_count(root: Path, reference: object) -> int:
     """Count profiled modules from the original JUnit, preserving capture identity."""
-    from scripts.engineering.common.repo_paths import resolve_output_path
+    from scripts.engineering.common.repo_paths import confined_io_path
 
-    path = resolve_output_path(reference, root=root)
+    if not isinstance(reference, str) or not reference:
+        raise ValueError("Bootstrap JUnit path must be a relative repository path")
+    path = confined_io_path(reference, root=root)
     modules = set()
-    for case in ET.parse(path).iter("testcase"):
-        parts = case.attrib["classname"].split(".")
+    for case in ET.parse(path).iter("testcase"):  # NOSONAR - rebuilt under root
+        parts = case.attrib.get("classname", "").split(".")
         if parts[:4] != ["tests", "unit", "composition", "bootstrap"]:
             raise ValueError("Foreign test in bootstrap profile JUnit")
-        index = next(i for i, part in enumerate(parts) if part.startswith("test_"))
+        index = next(
+            (i for i, part in enumerate(parts) if part.startswith("test_")),
+            None,
+        )
+        if index is None:
+            raise ValueError("Bootstrap profile JUnit lacks test module")
         modules.add(".".join(parts[: index + 1]))
     if not modules:
         raise ValueError("Empty bootstrap profile JUnit")
@@ -46,11 +53,18 @@ def bind_bootstrap_profile(
     root: Path, digest: str, test_digest: str, *, update: bool
 ) -> bool:
     """Add a live topology view without relabeling the historical timing profile."""
-    path = root / BOOTSTRAP_PROFILE
-    profile = json.loads(path.read_text(encoding="utf-8"))
-    measured_count = _measured_bootstrap_file_count(
-        root, profile["measurement_provenance"]["junit"]
+    from scripts.engineering.common.repo_paths import (
+        read_text_confined,
+        write_text_confined,
     )
+
+    profile = json.loads(read_text_confined(BOOTSTRAP_PROFILE, root=root))
+    if not isinstance(profile, dict):
+        raise ValueError("Bootstrap profile must be a JSON object")
+    provenance = profile.get("measurement_provenance")
+    if not isinstance(provenance, dict):
+        raise ValueError("Bootstrap profile is missing measurement provenance")
+    measured_count = _measured_bootstrap_file_count(root, provenance.get("junit"))
     if profile["result"]["test_file_count"] != measured_count:
         raise ValueError("Bootstrap profile file count differs from its measured JUnit")
     files = sorted(
@@ -65,11 +79,13 @@ def bind_bootstrap_profile(
         "test_files": files,
         "measured_test_file_count": measured_count,
     }
-    current = profile.get("current_source_binding") == binding
+    current = bool(profile.get("current_source_binding") == binding)
     if update and not current:
         profile["current_source_binding"] = binding
-        path.write_text(
-            json.dumps(profile, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        write_text_confined(
+            BOOTSTRAP_PROFILE,
+            json.dumps(profile, indent=2, ensure_ascii=False) + "\n",
+            root=root,
         )
     return current
 

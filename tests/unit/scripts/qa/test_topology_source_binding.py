@@ -97,9 +97,48 @@ def test_bootstrap_binding_preserves_measured_profile_and_detects_new_topology(
     assert updated == historical
 
 
+def test_bootstrap_binding_rejects_junit_without_classname(tmp_path: Path):
+    _bootstrap_profile(tmp_path)
+    (tmp_path / "capture.xml").write_text(
+        "<testsuite><testcase name='x'/></testsuite>",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="Foreign test"):
+        bind_bootstrap_profile(tmp_path, "a" * 64, "b" * 64, update=True)
+
+
+def test_bootstrap_binding_rejects_junit_without_test_module(tmp_path: Path):
+    _bootstrap_profile(tmp_path)
+    (tmp_path / "capture.xml").write_text(
+        "<testsuite><testcase "
+        'classname="tests.unit.composition.bootstrap.helper.Class"/></testsuite>',
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="test module"):
+        bind_bootstrap_profile(tmp_path, "a" * 64, "b" * 64, update=True)
+
+
 def test_bootstrap_binding_rejects_mismatched_historical_capture(tmp_path: Path):
     historical = _bootstrap_profile(tmp_path)
     historical["result"]["test_file_count"] = 2
     (tmp_path / BOOTSTRAP_PROFILE).write_text(json.dumps(historical), encoding="utf-8")
     with pytest.raises(ValueError, match="measured JUnit"):
         bind_bootstrap_profile(tmp_path, "a" * 64, "b" * 64, update=True)
+
+
+@pytest.mark.parametrize(
+    "junit_path",
+    ["../outside.xml", "/tmp/outside.xml", "", 12],
+)
+def test_bootstrap_binding_rejects_junit_path_escape(
+    tmp_path: Path, junit_path: object
+):
+    historical = _bootstrap_profile(tmp_path)
+    historical["measurement_provenance"]["junit"] = junit_path
+    (tmp_path / BOOTSTRAP_PROFILE).write_text(json.dumps(historical), encoding="utf-8")
+    outside = tmp_path.parent / "outside.xml"
+    outside.write_text("<testsuite/>", encoding="utf-8")
+    with pytest.raises(ValueError):
+        bind_bootstrap_profile(tmp_path, "a" * 64, "b" * 64, update=True)
+    stored = json.loads((tmp_path / BOOTSTRAP_PROFILE).read_text(encoding="utf-8"))
+    assert "current_source_binding" not in stored
