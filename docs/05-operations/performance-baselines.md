@@ -71,13 +71,16 @@ Performance baselines ensure that:
 `tests/benchmarks/` cases that use the `benchmark` fixture are measured with
 `pytest-benchmark` only when that plugin is explicitly enabled. Default
 `addopts` keeps `-p no:benchmark`, so a normal pytest run skips those cases.
-The dispatch-only Performance Nightly workflow is the shipped caller that
+The dispatch-only Performance Nightly workflow is the shipped CI caller that
 passes `-p tests.benchmarks.benchmark_vcs_guard` before `-p benchmark` and
-writes `reports/performance/benchmark-measurements.json`. The local
-`run_pytest.sh` and `run_pytest.ps1` wrappers prepend that same guard before
-`-p benchmark` when the selection is a benchmark path, a benchmark marker, or
-an explicit `-p` / `--plugins` benchmark request, including
-`BIOETL_PYTEST_AUTOLOAD=1`. That guard blocks
+writes `reports/performance/benchmark-measurements.json`. The local caller is
+`make test-benchmark`: it creates that directory, labels the run
+`BIOETL_BENCHMARK_CALLER=local-makefile` with dataset
+`bioetl-synthetic-benchmarks-v1`, and loads the same guard before
+`-p benchmark`. The local `run_pytest.sh` and `run_pytest.ps1` wrappers
+prepend that same guard before `-p benchmark` when the selection is a
+benchmark path, a benchmark marker, or an explicit `-p` / `--plugins`
+benchmark request, including `BIOETL_PYTEST_AUTOLOAD=1`. That guard blocks
 the plugin's git/hg probes and records the checkout HEAD from the gitdir.
 `dirty_state` stays `unknown`. The run id is not a commit SHA. Hotspot
 reporting and gating run after failures, except cancellation, and reject missing
@@ -92,6 +95,8 @@ Measurement settings when the plugin is on:
 ## Running Benchmarks
 
 ```bash
+make test-benchmark
+
 # Explicit local caller. Guard first, then -p benchmark.
 mkdir -p reports/performance
 BIOETL_BENCHMARK_CALLER=local \

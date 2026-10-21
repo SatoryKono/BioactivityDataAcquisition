@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-25'
+  Last verified: '2026-10-21'
 
 ______________________________________________________________________
 
@@ -105,12 +105,21 @@ class DQPolicyRef(NamedTuple):
 1. **Consistency Validation**: Cross-source data consistency checks
 1. **Provenance Validation**: Lineage and audit trail verification
 
-Only the `ContractAwareGoldValidator.validate_with_outcomes()` and
-`ContractAwareSilverValidator.validate_with_outcomes()` APIs remain
-experimental placeholders without direct production callsites in
-`src/bioetl`. Tests exercise these APIs, as tracked in #12095. Production
-rule evaluation through `evaluate_dq_rules_for_record()` remains active and
-applies quarantine, skip, fail, and warn dispositions.
+`ContractAwareGoldValidator.validate_with_outcomes()` returns an empty
+outcome list when no policy resolver is configured, when the input is
+empty, or when the schema is missing and the validator is not strict. A
+missing schema in strict mode yields one `schema.missing` outcome only for
+non-empty input. With a resolver, records, and a schema, the method turns
+Pandera schema failures into `DQRuleOutcome` values and then calls
+`_apply_contract_validations()`, which still returns no contract-rule
+outcomes. `ContractAwareSilverValidator.validate_with_outcomes()` still
+returns the basic validity flag and an empty outcome list. Neither method
+has a production callsite in `src/bioetl`: Gold batch writes call
+`validate()` and fail closed with `SchemaViolationError`. Tests exercise
+these APIs. Write-path consumption, record attribution, and per-record
+quarantine routing stay open in #12095. Production rule evaluation through
+`evaluate_dq_rules_for_record()` remains active and applies quarantine,
+skip, fail, and warn dispositions.
 
 #### 2.3 Policy Resolution Strategy
 

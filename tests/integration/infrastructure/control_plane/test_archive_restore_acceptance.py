@@ -106,3 +106,73 @@ def test_public_verify_cannot_read_archive_without_original_sources(
         "archive_evidence_invalid",
     )
     assert restored.read_text(encoding="utf-8") == _LEDGER
+
+
+@pytest.mark.integration
+def test_explicit_restore_readback_without_original_sources(
+    tmp_path: Path,
+) -> None:
+    store, manifest, plan, ledger_path = _acceptance_case(tmp_path)
+    pack = store.create(manifest=manifest, plan=plan)
+
+    shutil.rmtree(store.data_root)
+
+    # Verify that the explicit restored file still exists and matches expected content
+    restored = pack / "restored" / "ledger.jsonl"
+    assert restored.exists()
+    assert restored.read_text(encoding="utf-8") == _LEDGER
+
+@pytest.mark.integration
+def test_concurrent_reference_creation_during_archive_is_preserved(
+    tmp_path: Path,
+) -> None:
+    store, manifest, plan, ledger_path = _acceptance_case(tmp_path)
+
+    # We create the archive, but simulate a concurrent write by modifying the source after creation
+    pack = store.create(manifest=manifest, plan=plan)
+
+    # Concurrently write to source
+    new_ledger_content = '{"event":"concurrent_update"}\n'
+    ledger_path.write_text(new_ledger_content, encoding="utf-8")
+
+    # The archive verify will fail because the source has changed since the archive was created
+    assert store.verify(manifest=manifest, plan=plan) == (
+        False,
+        "archive_source_mismatch",
+    )
+
+    # The archive itself should still be the old content
+    restored = pack / "restored" / "ledger.jsonl"
+    assert restored.read_text(encoding="utf-8") == _LEDGER
+
+@pytest.mark.integration
+def test_partial_archive_failure_preserves_sources(
+    tmp_path: Path,
+) -> None:
+    store, manifest, plan, ledger_path = _acceptance_case(tmp_path)
+
+    # Corrupt a source file before archive creation to trigger an error
+    # Let's corrupt the plan to ask for a file that does not exist
+    bad_plan = ControlPlaneArtifactLifecyclePlan(
+        generated_at=_OBSERVED_AT,
+        cutoff=_OBSERVED_AT,
+        dry_run=True,
+        artifacts=tuple(
+            ControlPlaneArtifactRef(
+                surface=surface,
+                path=str(path) + "_nonexistent",
+                artifact_id="archive-acceptance",
+                decision=ControlPlaneArtifactLifecycleDecision.RETAIN,
+                reason="acceptance",
+            )
+            for path, surface in (
+                (ledger_path, ControlPlaneArtifactSurface.RUN_LEDGER),
+            )
+        ),
+    )
+
+    with pytest.raises(FileNotFoundError, match="[Nn]o such file or directory"):
+        store.create(manifest=manifest, plan=bad_plan)
+
+    # Verify original source still exists
+    assert ledger_path.exists()

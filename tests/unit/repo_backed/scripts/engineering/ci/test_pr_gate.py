@@ -300,7 +300,33 @@ def test_live_catalog_classifies_grafana_reports_and_test_fixtures() -> None:
     assert matrix["decisions"]["docker"]["decision"] == REQUIRED
 
 
+def test_live_catalog_classifies_makefile_benchmark_surface() -> None:
+    """A Makefile-only diff stays on the tests gate and does not fail closed."""
+    catalog = load_catalog(
+        Path(__file__).resolve().parents[6]
+        / "configs/quality/github_required_checks.yaml"
+    )
+    matrix = classify_changes(catalog, ["Makefile"], head_sha=HEAD_SHA)
+
+    assert matrix["unclassified_files"] == []
+    assert matrix["decisions"]["tests"] == {
+        "decision": REQUIRED,
+        "reason": "path_match",
+    }
+    for gate_id in (
+        "lint-arch",
+        "type-checking",
+        "security",
+        "docker",
+        "duplication",
+        "generated-artifacts",
+        "docs-governance",
+    ):
+        assert matrix["decisions"][gate_id]["decision"] == NOT_APPLICABLE
+
+
 def test_live_catalog_classifies_root_changelog() -> None:
+    """A root changelog change stays on docs-governance and does not force tests."""
     catalog = load_catalog(
         Path(__file__).resolve().parents[6]
         / "configs/quality/github_required_checks.yaml"
@@ -312,6 +338,24 @@ def test_live_catalog_classifies_root_changelog() -> None:
     assert matrix["decisions"]["docs-governance"]["reason"] == "path_match"
     assert matrix["decisions"]["generated-artifacts"]["decision"] == NOT_APPLICABLE
     assert matrix["decisions"]["tests"]["decision"] == NOT_APPLICABLE
+
+
+def test_live_catalog_classifies_gemini_code_assist_config() -> None:
+    """`.gemini/config.yaml` is classified and does not fail-close the other lanes."""
+    catalog = load_catalog(
+        Path(__file__).resolve().parents[6]
+        / "configs/quality/github_required_checks.yaml"
+    )
+    matrix = classify_changes(catalog, [".gemini/config.yaml"], head_sha=HEAD_SHA)
+
+    assert matrix["unclassified_files"] == []
+    assert matrix["decisions"]["docs-governance"]["decision"] == REQUIRED
+    assert matrix["decisions"]["docs-governance"]["reason"] == "path_match"
+    assert matrix["decisions"]["commit-governance"]["decision"] == REQUIRED
+    assert matrix["decisions"]["lint-arch"]["decision"] == NOT_APPLICABLE
+    assert matrix["decisions"]["tests"]["decision"] == NOT_APPLICABLE
+    assert matrix["decisions"]["docker"]["decision"] == NOT_APPLICABLE
+    assert matrix["decisions"]["security"]["decision"] == NOT_APPLICABLE
 
 
 @pytest.mark.parametrize(
