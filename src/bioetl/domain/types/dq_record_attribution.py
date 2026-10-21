@@ -105,14 +105,14 @@ def attributed_violation_sort_key(
     record = violation.record
     outcome = violation.outcome
     return (
-        0 if record is None else 1,
-        -1 if record is None else record.source_index,
+        _attribution_rank(record),
+        _sort_source_index(record),
         outcome.rule_id,
         outcome.violation_kind.value,
         outcome.severity,
         ",".join(outcome.affected_fields),
         outcome.config_path or "",
-        "" if record is None or record.record_key is None else record.record_key,
+        _sort_record_key(record),
     )
 
 
@@ -134,12 +134,40 @@ def _canonical_record_key(record: Mapping[str, object]) -> str | None:
     return None
 
 
-def _identifier_text(value: object) -> str | None:
+def _attribution_rank(record: DQRecordIdentity | None) -> int:
+    if record is None:
+        return 0
+    return 1
+
+
+def _sort_source_index(record: DQRecordIdentity | None) -> int:
+    if record is None:
+        return -1
+    return record.source_index
+
+
+def _sort_record_key(record: DQRecordIdentity | None) -> str:
+    if record is None or record.record_key is None:
+        return ""
+    return record.record_key
+
+
+def _rejected_identifier(value: object) -> bool:
     if value is None or isinstance(value, bool):
-        return None
-    if isinstance(value, float) and math.isnan(value):
+        return True
+    return isinstance(value, float) and math.isnan(value)
+
+
+def _blank_identifier(text: str) -> bool:
+    if not text:
+        return True
+    return text.lower() == "nan"
+
+
+def _identifier_text(value: object) -> str | None:
+    if _rejected_identifier(value):
         return None
     text = str(value).strip()
-    if not text or text.lower() == "nan":
+    if _blank_identifier(text):
         return None
     return text

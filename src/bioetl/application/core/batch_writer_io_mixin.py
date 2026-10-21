@@ -86,6 +86,7 @@ class BatchWriterIOMixin:
     _gold_quarantine_batch_id: BatchID | None
     _pending_gold_outcome_quarantine: tuple[object, ...]
     _last_gold_outcome_quarantine_count: int
+    _gold_outcome_quarantine_indexes: tuple[int, ...]
 
     def bind_gold_quarantine_batch(self, batch_id: BatchID | None) -> None:
         """Remember the batch id for the next sync-accumulated quarantine flush."""

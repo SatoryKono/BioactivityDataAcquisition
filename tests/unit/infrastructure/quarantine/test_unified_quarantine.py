@@ -357,6 +357,65 @@ class TestUnifiedQuarantineWrite:
 
         write_mock.assert_called_once()
 
+    @pytest.mark.asyncio
+    async def test_write_many_skips_a_stored_entry_id(
+        self, quarantine, batch_id, mock_write_deltalake
+    ):
+        """A retry with the same entry id must not append another row."""
+        stored = serialize_to_json({"entry_id": "same-id"})
+        with (
+            patch("bioetl.infrastructure.quarantine.unified.DeltaTable") as delta,
+            patch(
+                "bioetl.infrastructure.quarantine.unified.read_delta_records",
+                return_value=[{"metadata": stored}],
+            ),
+        ):
+            delta.is_deltatable.return_value = True
+            await quarantine.write_many(
+                [
+                    {
+                        "pipeline": "test",
+                        "error_code": "ERROR",
+                        "payload": {"id": 1},
+                        "bronze_batch_id": batch_id,
+                        "entry_id": "same-id",
+                        "ingestion_ts": TEST_INGESTION_TS,
+                    }
+                ]
+            )
+        mock_write_deltalake.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_write_many_stores_entry_id_in_metadata(
+        self, quarantine, batch_id, mock_write_deltalake
+    ):
+        """New entry ids are stamped into metadata and appended once."""
+        await quarantine.write_many(
+            [
+                {
+                    "pipeline": "test",
+                    "error_code": "ERROR",
+                    "payload": {"id": 1},
+                    "bronze_batch_id": batch_id,
+                    "entry_id": "fresh-id",
+                    "metadata": {"classification": "dq_rule_outcome"},
+                    "ingestion_ts": TEST_INGESTION_TS,
+                },
+                {
+                    "pipeline": "test",
+                    "error_code": "ERROR",
+                    "payload": {"id": 1},
+                    "bronze_batch_id": batch_id,
+                    "entry_id": "fresh-id",
+                    "ingestion_ts": TEST_INGESTION_TS,
+                },
+            ]
+        )
+        mock_write_deltalake.assert_called_once()
+        records = _extract_records_from_call(mock_write_deltalake)
+        assert len(records) == 1
+        assert json.loads(records[0]["metadata"])["entry_id"] == "fresh-id"
+
 
 @pytest.mark.unit
 class TestUnifiedQuarantineInspect:

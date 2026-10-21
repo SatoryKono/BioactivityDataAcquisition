@@ -15,8 +15,9 @@ __all__ = ["UnifiedQuarantineAdapter"]
 
 
 import asyncio
+import json
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
@@ -88,6 +89,75 @@ def _normalize_quarantine_record(record: QuarantineWriteRequest) -> JsonDict:
         "dq_status": QuarantineRecordStatus.NEW.value,
         "run_id": str(run_id) if run_id else "",
     }
+
+
+def _request_entry_id(record: QuarantineWriteRequest) -> str | None:
+    """Return a non-empty entry id when the request carries one."""
+    raw = record.get("entry_id")
+    if isinstance(raw, str) and raw.strip():
+        return raw
+    return None
+
+
+def _with_metadata_entry_id(
+    record: QuarantineWriteRequest,
+    entry_id: str,
+) -> QuarantineWriteRequest:
+    """Copy ``entry_id`` into metadata so append-only storage can see it."""
+    metadata = dict(record.get("metadata") or {})
+    if metadata.get("entry_id") == entry_id:
+        return record
+    metadata["entry_id"] = entry_id
+    updated = dict(record)
+    updated["metadata"] = metadata
+    return cast("QuarantineWriteRequest", updated)
+
+
+def _stored_entry_ids(base_path: str) -> set[str]:
+    """Read entry ids already stored in quarantine metadata."""
+    if not DeltaTable.is_deltatable(base_path):
+        return set()
+    try:
+        rows = read_delta_records(DeltaTable(base_path), columns=["metadata"])
+    except (OSError, TableNotFoundError, ValueError, KeyError, TypeError):
+        return set()
+    found: set[str] = set()
+    for row in rows:
+        raw = row.get("metadata")
+        if not isinstance(raw, str) or not raw:
+            continue
+        try:
+            meta = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(meta, dict):
+            continue
+        entry_id = meta.get("entry_id")
+        if isinstance(entry_id, str) and entry_id:
+            found.add(entry_id)
+    return found
+
+
+def _select_new_quarantine_requests(
+    base_path: str,
+    records: list[QuarantineWriteRequest],
+) -> list[QuarantineWriteRequest]:
+    """Drop requests whose entry id was already appended or repeats in-batch."""
+    if not any(_request_entry_id(record) for record in records):
+        return records
+    known = _stored_entry_ids(base_path)
+    kept: list[QuarantineWriteRequest] = []
+    seen: set[str] = set()
+    for record in records:
+        entry_id = _request_entry_id(record)
+        if entry_id is None:
+            kept.append(record)
+            continue
+        if entry_id in known or entry_id in seen:
+            continue
+        seen.add(entry_id)
+        kept.append(_with_metadata_entry_id(record, entry_id))
+    return kept
 
 
 def _write_records_to_delta(base_path: str, records: list[JsonDict]) -> None:
@@ -180,7 +250,18 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
         self,
         records: list[QuarantineWriteRequest],
     ) -> None:
-        """Write multiple quarantine records in one Delta append."""
+        """Write multiple quarantine records in one Delta append.
+
+        Requests that carry ``entry_id`` are skipped when that id is already
+        stored in metadata or repeats inside the same batch.
+        """
+        if not records:
+            return
+        records = await asyncio.to_thread(
+            _select_new_quarantine_requests,
+            self.base_path,
+            records,
+        )
         if not records:
             return
         normalized_records = [self._normalize_record(record) for record in records]

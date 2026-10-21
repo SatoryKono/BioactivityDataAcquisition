@@ -37,20 +37,23 @@ import pandera.pandas as pa
 import pytest
 
 from bioetl.application.core._gold_outcome_disposition import plan_gold_outcome_write
+from bioetl.application.core._record_processor_write_support import write_gold_layer
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
+from bioetl.application.core.batch_transformer_state import TransformResult
 from bioetl.application.core.batch_writer import BatchWriter, BatchWriterOptions
 from bioetl.application.core.config import RecordProcessorConfig
+from bioetl.application.services.batch_processing.write_collaborators import (
+    LayerWriteOutcome,
+)
+from bioetl.domain.composite import DataSchemaConfig, LayerColumnConfig
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.config.validation import FieldValidation
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import SchemaViolationError
-from bioetl.domain.types import RunType
+from bioetl.domain.types import ErrorType, RunType
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
-from bioetl.infrastructure.validation.contract_validator import (
-    ContractAwareGoldValidator,
-)
 from tests.helpers.deterministic_ids import (
     deterministic_batch_uuid_from_callsite,
     deterministic_uuid_from_callsite,
@@ -66,6 +69,17 @@ _SCHEMA = pa.DataFrameSchema(
 )
 
 
+def _gold_validator(
+    schema: pa.DataFrameSchema,
+    dq_config: DQConfig,
+) -> object:
+    from bioetl.infrastructure.validation.contract_validator import (
+        ContractAwareGoldValidator,
+    )
+
+    return ContractAwareGoldValidator(schema=schema, dq_config=dq_config)
+
+
 def _config(**kwargs: object) -> DQConfig:
     base: dict[str, object] = {
         "contract_ref": "gold.molecule",
@@ -77,7 +91,7 @@ def _config(**kwargs: object) -> DQConfig:
 
 
 def _writer(
-    validator: ContractAwareGoldValidator,
+    validator: object,
     quarantine: AsyncMock,
     *,
     schema: pa.DataFrameSchema | None = None,
@@ -120,7 +134,7 @@ def _writer(
 
 def test_parity_fail_closed_matches_strict_validate() -> None:
     schema = pa.DataFrameSchema({"field": pa.Column(str, nullable=False)})
-    validator = ContractAwareGoldValidator(schema=schema, dq_config=DQConfig())
+    validator = _gold_validator(schema=schema, dq_config=DQConfig())
     writer, storage = _writer(validator, AsyncMock())
     records = [{"field": None}]
     direct = validator.validate(records)
@@ -136,7 +150,7 @@ def test_parity_fail_closed_matches_strict_validate() -> None:
 
 
 def test_fail_disposition_stays_batch_fail_closed() -> None:
-    validator = ContractAwareGoldValidator(
+    validator = _gold_validator(
         schema=_SCHEMA,
         dq_config=_config(
             field_validations=(
@@ -163,7 +177,7 @@ def test_fail_disposition_stays_batch_fail_closed() -> None:
 
 def test_unattributable_schema_error_stays_fail_closed() -> None:
     strict = pa.DataFrameSchema({"name": pa.Column(str, nullable=True)}, strict=True)
-    validator = ContractAwareGoldValidator(
+    validator = _gold_validator(
         schema=strict,
         dq_config=_config(
             field_validations=(
@@ -193,7 +207,7 @@ def test_schema_override_quarantines_only_failing_row() -> None:
             "name": pa.Column(str, nullable=False),
         }
     )
-    validator = ContractAwareGoldValidator(
+    validator = _gold_validator(
         schema=schema,
         dq_config=_config(
             disposition_overrides=(("schema.name", DQDisposition.QUARANTINE),),
@@ -231,7 +245,7 @@ async def test_write_gold_routes_one_request_per_record_with_rule_metadata() -> 
             "smiles": pa.Column(str, nullable=True),
         }
     )
-    validator = ContractAwareGoldValidator(
+    validator = _gold_validator(
         schema=schema,
         dq_config=_config(
             field_validations=(
@@ -273,6 +287,16 @@ async def test_write_gold_routes_one_request_per_record_with_rule_metadata() -> 
     ]
     assert requests[0]["payload"]["entity_id"] == "drop"
     assert requests[0]["bronze_batch_id"] == batch_id
+    assert isinstance(requests[0]["entry_id"], str) and requests[0]["entry_id"]
+    writer._batch_metrics.track_quarantined_records.assert_called_once_with(
+        ErrorType.DATA_QUALITY,
+        1,
+        stage="gold",
+        reason_code="gold_rule_outcome",
+    )
+    await writer.write_gold(records)
+    replayed = quarantine.write_many.await_args.args[0][0]["entry_id"]
+    assert replayed == requests[0]["entry_id"]
     written = storage.write_gold.await_args.kwargs["records"]
     assert [row["entity_id"] for row in written] == ["keep"]
     replay = validator.validate_with_outcomes(records)
@@ -284,7 +308,7 @@ async def test_write_gold_routes_one_request_per_record_with_rule_metadata() -> 
 
 def test_affected_fields_do_not_select_other_rows() -> None:
     schema = pa.DataFrameSchema({"name": pa.Column(str, nullable=False)})
-    validator = ContractAwareGoldValidator(
+    validator = _gold_validator(
         schema=schema,
         dq_config=_config(
             disposition_overrides=(("schema.name", DQDisposition.QUARANTINE),),
@@ -296,3 +320,130 @@ def test_affected_fields_do_not_select_other_rows() -> None:
     assert [row["name"] for row in plan.records_to_write] == ["ok"]
     assert plan.quarantine_items[0].source_index == 1
     assert plan.quarantine_items[0].record_key is None
+
+
+@pytest.mark.parametrize("disposition", [DQDisposition.WARN, DQDisposition.PASS])
+def test_schema_pass_or_warn_override_stays_fail_closed(
+    disposition: DQDisposition,
+) -> None:
+    schema = pa.DataFrameSchema({"name": pa.Column(str, nullable=False)})
+    validator = _gold_validator(
+        schema=schema,
+        dq_config=_config(
+            disposition_overrides=(("schema.name", disposition),),
+        ),
+    )
+    records = [{"name": None}]
+    direct = validator.validate(records)
+    writer, _storage = _writer(validator, AsyncMock(), schema=schema)
+    with pytest.raises(SchemaViolationError) as caught:
+        from bioetl.application.core._batch_writer_gold_support import (
+            validate_gold_records,
+        )
+
+        validate_gold_records(writer, records)
+    assert caught.value.errors == list(direct.errors)
+
+
+@pytest.mark.asyncio
+async def test_projected_gold_columns_do_not_recheck_contract_rules() -> None:
+    schema = pa.DataFrameSchema(
+        {
+            "entity_id": pa.Column(str),
+            "name": pa.Column(str, nullable=True),
+        }
+    )
+    validator = _gold_validator(
+        schema=schema,
+        dq_config=_config(
+            field_validations=(
+                FieldValidation(
+                    field="name",
+                    validation_type="required",
+                    severity="error",
+                ),
+            )
+        ),
+    )
+    quarantine = AsyncMock()
+    quarantine.write_many = AsyncMock()
+    writer, storage = _writer(validator, quarantine, schema=schema)
+    writer._data_schema = DataSchemaConfig(
+        gold=LayerColumnConfig(columns=("entity_id",))
+    )
+    await writer.write_gold([{"entity_id": "keep", "name": "ok"}])
+    quarantine.write_many.assert_not_awaited()
+    written = storage.write_gold.await_args.kwargs["records"]
+    assert [row["entity_id"] for row in written] == ["keep"]
+    assert "name" not in written[0]
+
+
+@pytest.mark.asyncio
+async def test_direct_gold_path_consumes_outcome_quarantine_count() -> None:
+    receipt = GoldWriteReceipt(
+        "synthetic",
+        "1.0.0",
+        GoldWriteCategory.COMPLETE,
+        ("synthetic",),
+    )
+
+    class _Writer:
+        def __init__(self, quarantined: int) -> None:
+            self._last_gold_outcome_quarantine_count = quarantined
+
+        async def write_gold(
+            self,
+            records: list[dict[str, object]],
+            silver_refs: object = None,
+        ) -> GoldWriteReceipt:
+            del records, silver_refs
+            return receipt
+
+        def log_and_track_write_error(self, *_args: object, **_kwargs: object) -> None:
+            return None
+
+    class _Spans:
+        async def execute_with_span(
+            self,
+            _name: str,
+            coro: object,
+            _batch_id: object,
+            _count: int,
+            on_error: object = None,
+        ) -> object:
+            del on_error
+            return await coro  # type: ignore[misc]
+
+    async def _outcome(quarantined: int) -> LayerWriteOutcome:
+        return await write_gold_layer(
+            span_executor=_Spans(),  # type: ignore[arg-type]
+            writer=_Writer(quarantined),  # type: ignore[arg-type]
+            quarantine_manager=None,
+            logger=MagicMock(),
+            run_id=None,
+            domain_event_emitter=None,
+            result=TransformResult(
+                silver_records=[],
+                gold_records=[{"entity_id": "a"}, {"entity_id": "b"}],
+                quarantined_count=0,
+            ),
+            batch_id=deterministic_batch_uuid_from_callsite(
+                "test_direct_gold_path_consumes_outcome_quarantine_count"
+            ),
+            ingestion_ts=datetime(2026, 10, 21, tzinfo=UTC),
+            silver_outcome=LayerWriteOutcome(
+                layer="silver",
+                status="written",
+                candidate_count=2,
+                confirmed_count=2,
+            ),
+        )
+
+    partial = await _outcome(1)
+    assert partial.status == "written"
+    assert partial.confirmed_count == 1
+    assert partial.quarantined_count == 1
+    blocked = await _outcome(2)
+    assert blocked.status == "quarantined"
+    assert blocked.confirmed_count == 0
+    assert blocked.quarantined_count == 2

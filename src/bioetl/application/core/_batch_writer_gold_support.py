@@ -6,13 +6,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core._gold_outcome_disposition import (
-    GoldOutcomeQuarantineItem,
+    GoldQuarantineEntry,
     plan_gold_outcome_write,
     supports_outcome_channel,
 )
 from bioetl.application.core._gold_outcome_quarantine_write import (
     empty_gold_receipt,
     flush_gold_outcome_quarantine,
+    record_gold_outcome_quarantine_metrics,
 )
 from bioetl.application.services.run_reports.observations import record_gold_observation
 from bioetl.domain.behavior.dq_contract_rule_source import (
@@ -83,8 +84,16 @@ async def release_pending_gold_quarantine(
         batch_id=batch_id,
         run_id=writer._context.run_id,
         ingestion_ts=writer._resolve_gold_ingestion_ts(),
+        emitter=getattr(writer, "_gold_outcome_emitter", None),
     )
     writer._last_gold_outcome_quarantine_count = len(pending)
+    indexes: list[int] = []
+    for item in pending:
+        source_index = getattr(item, "source_index", None)
+        if isinstance(source_index, int) and not isinstance(source_index, bool):
+            indexes.append(source_index)
+    writer._gold_outcome_quarantine_indexes = tuple(indexes)
+    record_gold_outcome_quarantine_metrics(writer, pending)  # type: ignore[arg-type]
     if records or not pending:
         return None
     return empty_gold_receipt(schema_payload, writer._gold_table_name)
@@ -95,12 +104,15 @@ def validate_gold_records(
     records: list[GoldRecord],
     *,
     schema: object | None = None,
-) -> tuple[list[GoldRecord], tuple[GoldOutcomeQuarantineItem, ...]]:
+    apply_contract_rules: bool = True,
+) -> tuple[list[GoldRecord], tuple[GoldQuarantineEntry, ...]]:
     """Validate Gold records and return the rows that may be written.
 
     Explicit outcome policy routes attributable ``QUARANTINE`` violations into
     the returned accumulator. ``FAIL``, ``SKIP``, unattributable violations,
     and validators without that policy stay on fail-closed ``.validate()``.
+    ``apply_contract_rules=False`` is the structural re-check after column
+    projection and does not reopen the outcome channel.
     """
     validator = writer._gold_validator
     target_schema = schema if schema is not None else writer._gold_schema
@@ -110,7 +122,7 @@ def validate_gold_records(
             rebind_gold_validator_schema(validator, target_schema),
         )
 
-    if _use_outcome_channel(validator):
+    if apply_contract_rules and _use_outcome_channel(validator):
         channel = _call_outcome_channel(validator, records)
         if isinstance(channel, DQOutcomeChannel):
             config = cast("DQConfig | None", getattr(validator, "_dq_config", None))
@@ -199,6 +211,7 @@ def prepare_validated_gold_write(
 ) -> tuple[list[GoldRecord], list[str], object]:
     """Prepare one Gold write, retaining storage-owned versioned validation."""
     writer._pending_gold_outcome_quarantine = ()
+    writer._gold_outcome_quarantine_indexes = ()
     if should_defer_gold_validation_to_storage(writer):
         available_cols = writer._collect_record_columns(records)
         schema_payload: object = writer._gold_schema_policy_by_version
@@ -220,7 +233,10 @@ def prepare_validated_gold_write(
                 schema=schema_payload,
             )
             records, more = validate_gold_records(
-                writer, records, schema=schema_payload
+                writer,
+                records,
+                schema=schema_payload,
+                apply_contract_rules=False,
             )
             quarantined = (*quarantined, *more)
         writer._pending_gold_outcome_quarantine = quarantined

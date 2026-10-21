@@ -131,10 +131,17 @@ disposition override). Attributable `QUARANTINE` business-rule violations,
 and schema violations whose rule id has an explicit `QUARANTINE` override,
 are accumulated synchronously and sent per record through
 `write_quarantine_requests()` with `rule_id`, `contract_ref`, and
-`config_path`. `FAIL`, `SKIP`, unattributable violations, schema violations
-without that override, and contracts without an explicit outcome policy stay
-on batch-level fail-closed `validate()` and `SchemaViolationError`. Silver
-production writes still call `validate()`.
+`config_path`. Each request carries a deterministic `entry_id` derived from
+the batch id, source index, and rule ids; the quarantine adapter stores that
+id in metadata and skips a later append of the same id. Schema violations
+whose override is `PASS` or `WARN` stay fail-closed, the same as schema
+violations without an explicit `QUARANTINE` override. `FAIL`, `SKIP`,
+unattributable violations, and contracts without an explicit outcome policy
+stay on batch-level fail-closed `validate()` and `SchemaViolationError`.
+When the writer has a batch-metrics recorder, the flush increments
+`bioetl_dq_records_quarantined_total` through that recorder. A domain-event
+emitter wired on the writer publishes the companion quarantine events.
+Silver production writes still call `validate()`.
 `evaluate_dq_rules_for_record()` remains the transformer runtime path and
 still applies quarantine, skip, fail, and warn dispositions before Gold.
 

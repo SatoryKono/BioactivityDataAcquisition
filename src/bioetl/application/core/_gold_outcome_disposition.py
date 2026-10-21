@@ -25,9 +25,9 @@ from bioetl.domain.types.dq_record_attribution import (
 )
 
 __all__ = [
-    "GoldOutcomeQuarantineItem",
-    "GoldOutcomeQuarantineRule",
-    "GoldOutcomeWritePlan",
+    "GoldQuarantineEntry",
+    "GoldQuarantineRuleRecord",
+    "GoldWriteOutcome",
     "bind_gold_quarantine_batch_if_supported",
     "consume_gold_outcome_quarantine_count",
     "plan_gold_outcome_write",
@@ -36,7 +36,7 @@ __all__ = [
 
 
 @dataclass(frozen=True, slots=True)
-class GoldOutcomeQuarantineRule:
+class GoldQuarantineRuleRecord:
     """Rule metadata stored on one per-record quarantine request."""
 
     rule_id: str
@@ -46,22 +46,22 @@ class GoldOutcomeQuarantineRule:
 
 
 @dataclass(frozen=True, slots=True)
-class GoldOutcomeQuarantineItem:
+class GoldQuarantineEntry:
     """One normalized record routed to quarantine with its rule metadata."""
 
     source_index: int
     record_key: str | None
     record: JsonDict
-    rules: tuple[GoldOutcomeQuarantineRule, ...]
+    rules: tuple[GoldQuarantineRuleRecord, ...]
 
 
 @dataclass(frozen=True, slots=True)
-class GoldOutcomeWritePlan:
+class GoldWriteOutcome:
     """Sync decision for one Gold validation batch."""
 
     fail_closed: bool
     records_to_write: tuple[JsonDict, ...]
-    quarantine_items: tuple[GoldOutcomeQuarantineItem, ...]
+    quarantine_items: tuple[GoldQuarantineEntry, ...]
     fail_closed_reasons: tuple[str, ...]
 
 
@@ -78,7 +78,7 @@ def plan_gold_outcome_write(
     records: list[JsonDict],
     channel: DQOutcomeChannel,
     config: DQConfig | None,
-) -> GoldOutcomeWritePlan:
+) -> GoldWriteOutcome:
     """Split a batch into Gold rows and per-record quarantine items."""
     if not has_explicit_outcome_policy(config):
         return _fail_closed(
@@ -94,7 +94,7 @@ def plan_gold_outcome_write(
     items = _quarantine_items(records, channel.violations, config)
     dropped = {item.source_index for item in items}
     kept = tuple(record for index, record in enumerate(records) if index not in dropped)
-    return GoldOutcomeWritePlan(
+    return GoldWriteOutcome(
         fail_closed=False,
         records_to_write=kept,
         quarantine_items=items,
@@ -131,8 +131,8 @@ def _fail_closed(
     reasons: tuple[str, ...],
     *,
     fail_closed: bool,
-) -> GoldOutcomeWritePlan:
-    return GoldOutcomeWritePlan(
+) -> GoldWriteOutcome:
+    return GoldWriteOutcome(
         fail_closed=fail_closed,
         records_to_write=tuple(records),
         quarantine_items=(),
@@ -153,7 +153,12 @@ def _fail_closed_reasons(
 ) -> tuple[str, ...]:
     reasons: list[str] = []
     for violation in violations:
-        if violation.outcome.disposition in (DQDisposition.PASS, DQDisposition.WARN):
+        outcome = violation.outcome
+        is_schema = outcome.violation_kind == DQViolationKind.SCHEMA_VIOLATION
+        if not is_schema and outcome.disposition in (
+            DQDisposition.PASS,
+            DQDisposition.WARN,
+        ):
             continue
         if _route_allowed(violation, config):
             continue
@@ -177,19 +182,19 @@ def _quarantine_items(
     records: list[JsonDict],
     violations: tuple[AttributedDQViolation, ...],
     config: DQConfig | None,
-) -> tuple[GoldOutcomeQuarantineItem, ...]:
+) -> tuple[GoldQuarantineEntry, ...]:
     grouped: dict[int, list[AttributedDQViolation]] = {}
     for violation in violations:
         if not _route_allowed(violation, config) or violation.record is None:
             continue
         grouped.setdefault(violation.record.source_index, []).append(violation)
-    items: list[GoldOutcomeQuarantineItem] = []
+    items: list[GoldQuarantineEntry] = []
     for source_index in sorted(grouped):
         group = sorted(grouped[source_index], key=_violation_rule_key)
         record = records[source_index]
         identity = group[0].record
         items.append(
-            GoldOutcomeQuarantineItem(
+            GoldQuarantineEntry(
                 source_index=source_index,
                 record_key=None if identity is None else identity.record_key,
                 record=dict(record),
@@ -208,10 +213,10 @@ def _violation_rule_key(violation: AttributedDQViolation) -> tuple[str, str, str
     )
 
 
-def _rule_metadata(violation: AttributedDQViolation) -> GoldOutcomeQuarantineRule:
+def _rule_metadata(violation: AttributedDQViolation) -> GoldQuarantineRuleRecord:
     outcome = violation.outcome
     policy = outcome.policy_ref
-    return GoldOutcomeQuarantineRule(
+    return GoldQuarantineRuleRecord(
         rule_id=outcome.rule_id,
         contract_ref=None if policy is None else policy.contract_ref,
         config_path=outcome.config_path,

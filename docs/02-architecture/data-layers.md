@@ -193,8 +193,11 @@ Schema-level ошибки без индекса строки failure-case ост
 явная outcome-политика (хотя бы одно исполняемое правило или disposition
 override). Атрибутируемый `QUARANTINE` для business-rule и schema violation
 с явным override `QUARANTINE` накапливается синхронно и уходит per-record
-через `write_quarantine_requests()` с `rule_id`, `contract_ref` и
-`config_path`. `FAIL`, `SKIP`, неатрибутируемые нарушения, schema violation
+через `write_quarantine_requests()` с `rule_id`, `contract_ref`,
+стабильным `entry_id` (batch id, source index, rule ids) и
+`config_path`. Повторный append с тем же `entry_id` адаптер пропускает.
+Override schema-правила `PASS` или `WARN` остаётся fail-closed.
+`FAIL`, `SKIP`, неатрибутируемые нарушения, schema violation
 без такого override и контракты без явной политики остаются на batch-level
 fail-closed `validate()` → `SchemaViolationError`. Production-запись Silver
 по-прежнему вызывает `validate()`.
