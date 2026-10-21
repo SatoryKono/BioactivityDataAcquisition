@@ -1,5 +1,5 @@
 {
-  "additive_coverage_xml_path": "reports/local/pr12323-missing-modules-coverage.xml",
+  "additive_coverage_xml_path": "reports/coverage/pr12323-missing-modules-coverage.xml",
   "additive_coverage_xml_sha256": "167dbd8ac40a95d7b44af7b0c0e4a2807c97c7af94fb34e4c4b336a0a9756f67",
   "additive_measured_module_count": 5,
   "canonical_coverage_lane": "coverage-verify",
