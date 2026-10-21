@@ -309,6 +309,16 @@ entries:
     vcr_related: false
     review_date: "2026-07-30"
     rationale: Windows lock-stress contracts are meaningful only on Windows and remain explicitly platform-conditional.
+  - path: tests/integration/infrastructure/storage/test_bronze_cleanup_12104_posix_acceptance.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-storage"
+    linked_issue: "#12104"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-10-21"
+    rationale: POSIX anchored destructive capability is required for configured-owner acceptance; Windows refusal stays outside this module.
   - path: tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py
     suite: integration
     category: conditional_environment_guard
