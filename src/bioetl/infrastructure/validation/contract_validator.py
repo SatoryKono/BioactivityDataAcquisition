@@ -83,6 +83,8 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
     def validate_with_outcomes(
         self,
         records: list[JsonDict],
+        *,
+        contract_records: list[JsonDict] | None = None,
     ) -> DQOutcomeChannel:
         """Validate records and return rule-level DQ outcomes.
 
@@ -91,7 +93,9 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
         Batch ``validate()`` remains the fail-closed fallback.
 
         Args:
-            records: List of record dictionaries to validate
+            records: Projected gold rows for schema validation.
+            contract_records: Optional pre-projection rows for contract rules.
+                Ignored unless the list is the same length as ``records``.
 
         Returns:
             DQOutcomeChannel: validity, sorted outcomes, and attributed violations
@@ -111,6 +115,7 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
             resolver=self._policy_resolver,
             config_path=self._get_config_path(),
             prepare_frame=self._prepare_df_for_validation,
+            contract_records=contract_records,
         )
 
     def _prepare_df_for_validation(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -221,6 +226,8 @@ class ContractAwareSilverValidator(PanderaSilverValidator):
     def validate_with_outcomes(
         self,
         records: list[JsonDict],
+        *,
+        contract_records: list[JsonDict] | None = None,
     ) -> DQOutcomeChannel:
         """Validate records and return rule-level DQ outcomes.
 
@@ -243,6 +250,7 @@ class ContractAwareSilverValidator(PanderaSilverValidator):
             resolver=self._policy_resolver,
             config_path=self._silver_config_path(),
             prepare_frame=self._prepare_df_for_validation,
+            contract_records=contract_records,
         )
 
     def _prepare_df_for_validation(self, df: pd.DataFrame) -> pd.DataFrame:

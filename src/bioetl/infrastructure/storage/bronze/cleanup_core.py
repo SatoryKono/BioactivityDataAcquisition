@@ -43,16 +43,7 @@ class BronzeRootLease:
         """Route writes through the locked inode, even if its name is replaced."""
         if self.fd is None:
             return self.path
-        locked = os.fstat(self.fd)
-        for directory in ("/proc/self/fd", "/dev/fd"):
-            candidate = Path(directory) / str(self.fd)
-            try:
-                opened = candidate.stat()
-            except OSError:
-                continue
-            if (opened.st_dev, opened.st_ino) == (locked.st_dev, locked.st_ino):
-                return candidate
-        raise NotImplementedError("Bronze writer requires a path to its locked root fd")
+        return _verified_fd_path(self.fd)
 
 
 def open_bronze_root_no_follow(base_path: Path) -> tuple[Path, int]:
@@ -83,14 +74,33 @@ def valid_bronze_scope_name(value: str) -> bool:
     return bool(value) and value.replace("_", "").isalnum()
 
 
+def _verified_fd_path(fd: int) -> Path:
+    """Return a pathname that still names the open directory inode."""
+    locked = os.fstat(fd)
+    for directory in ("/proc/self/fd", "/dev/fd"):
+        candidate = Path(directory) / str(fd)
+        try:
+            opened = candidate.stat()
+        except OSError:
+            continue
+        if (opened.st_dev, opened.st_ino) == (locked.st_dev, locked.st_ino):
+            return candidate
+    raise NotImplementedError("Bronze writer requires a path to its locked root fd")
+
+
 def _fd_view_supported() -> bool:
-    """Require a verified pathname to an open directory for pinned writer I/O."""
+    """Require a verified pathname to an open directory for pinned writer I/O.
+
+    The probe calls ``_verified_fd_path`` directly. ``writer_path`` stays the
+    lock-time check, so a view lost after a successful probe still refuses
+    both shared and exclusive locks.
+    """
     try:
         fd = os.open("/", os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
     except OSError:
         return False
     try:
-        return bool(BronzeRootLease(Path("/"), fd).writer_path)
+        return bool(_verified_fd_path(fd))
     except NotImplementedError:
         return False
     finally:

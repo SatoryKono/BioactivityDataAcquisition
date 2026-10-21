@@ -40,6 +40,15 @@ __all__ = [
     "schema_violations_from_error",
 ]
 
+# Gold publication renames these canonical contract fields. Rules still name
+# the canonical field; fill it only when the published column is the sole copy.
+_PUBLISHED_GOLD_FIELD_ALIASES: tuple[tuple[str, str], ...] = (
+    ("assay_description", "description"),
+    ("activity_type", "type"),
+    ("activity_relation", "relation"),
+    ("activity_value", "value"),
+)
+
 
 def schema_error_severity(error: Exception) -> str:
     """Map a Pandera error message onto the resolver severity scale."""
@@ -74,6 +83,15 @@ def schema_error_field_name(error: Exception) -> str | None:
     return None
 
 
+def _contract_rule_record(record: JsonDict) -> JsonDict:
+    """Copy a row and restore canonical names hidden by gold publication."""
+    view = dict(record)
+    for canonical, published in _PUBLISHED_GOLD_FIELD_ALIASES:
+        if view.get(canonical) is None and view.get(published) is not None:
+            view[canonical] = view[published]
+    return view
+
+
 def attribute_contract_rules(
     records: list[JsonDict],
     dq_config: DQConfig | None,
@@ -85,7 +103,8 @@ def attribute_contract_rules(
     violations: list[AttributedDQViolation] = []
     for source_index, record in enumerate(records):
         identity = record_identity(record, source_index)
-        for outcome in evaluate_dq_rules_for_record(record, dq_config):
+        evaluated = _contract_rule_record(record)
+        for outcome in evaluate_dq_rules_for_record(evaluated, dq_config):
             violations.append(AttributedDQViolation(outcome=outcome, record=identity))
     return sort_attributed_violations(violations)
 
@@ -130,8 +149,14 @@ def build_outcome_channel(
     resolver: DQPolicyResolver | None,
     config_path: str | None,
     prepare_frame: Callable[[object], object],
+    contract_records: list[JsonDict] | None = None,
 ) -> DQOutcomeChannel:
-    """Run schema and contract rules and return a sorted outcome channel."""
+    """Run schema and contract rules and return a sorted outcome channel.
+
+    Schema checks use the projected ``records``. Contract rules use
+    ``contract_records`` when that list is aligned 1:1, so companion fields
+    dropped by gold projection stay visible to the rule bundle.
+    """
     if resolver is None or dq_config is None:
         return DQOutcomeChannel(is_valid=True, outcomes=(), violations=())
     if not records:
@@ -149,7 +174,10 @@ def build_outcome_channel(
 
     frame = pd.DataFrame(records)
     prepared = prepare_frame(frame)
-    violations = list(attribute_contract_rules(records, dq_config))
+    rule_records = records
+    if contract_records is not None and len(contract_records) == len(records):
+        rule_records = contract_records
+    violations = list(attribute_contract_rules(rule_records, dq_config))
     schema_error = _collect_schema_error(schema, prepared)
     if schema_error is not None:
         violations.extend(
