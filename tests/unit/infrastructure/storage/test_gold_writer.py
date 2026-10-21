@@ -886,6 +886,70 @@ class TestGoldWriterSchemaValidation:
     """Tests for schema validation."""
 
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
+    async def test_write_gold_ordinary_shuffled_columns_reordered_to_schema(
+        self, mock_write_deltalake, gold_writer, strict_schema
+    ):
+        """Test write_gold reorders shuffled columns to match the target schema's canonical order before validation and writing."""
+        import pandas as pd
+        import pyarrow as pa
+
+        # Original canonical order from schema is ['entity_id', 'value']
+        # Provide records with shuffled columns
+        shuffled_records = [
+            {"value": 10.5, "entity_id": "CHEMBL1"},
+            {"value": 20.0, "entity_id": "CHEMBL2"},
+        ]
+
+        receipt = await gold_writer.write_gold(
+            table_name="test.table",
+            records=shuffled_records,
+            schema=strict_schema,
+            mode="overwrite",
+        )
+
+        mock_write_deltalake.assert_called_once()
+
+        # Verify the data passed to write_deltalake has canonical column order
+        args, kwargs = mock_write_deltalake.call_args
+        written_data = kwargs.get("data") if "data" in kwargs else args[1]
+
+        # It could be a list of dicts, a pandas DataFrame, or pyarrow Table
+        if isinstance(written_data, pd.DataFrame):
+            written_columns = list(written_data.columns)
+        elif isinstance(written_data, pa.Table):
+            written_columns = written_data.column_names
+        elif (
+            isinstance(written_data, list)
+            and len(written_data) > 0
+            and isinstance(written_data[0], dict)
+        ):
+            written_columns = list(written_data[0].keys())
+        else:
+            written_columns = (
+                list(written_data.keys())
+                if hasattr(written_data, "keys")
+                else getattr(written_data, "columns", [])
+            )
+
+        # The schema definition for strict_schema in conftest should dictate the canonical order
+        expected_columns = list(strict_schema.columns.keys())
+        assert written_columns == expected_columns, (
+            f"Expected columns {expected_columns}, but got {written_columns}"
+        )
+
+        # Data values should not be corrupted
+        if isinstance(written_data, pd.DataFrame):
+            assert written_data.iloc[0]["entity_id"] == "CHEMBL1"
+            assert written_data.iloc[0]["value"] == 10.5
+        elif isinstance(written_data, pa.Table):
+            df = written_data.to_pandas()
+            assert df.iloc[0]["entity_id"] == "CHEMBL1"
+            assert df.iloc[0]["value"] == 10.5
+        elif isinstance(written_data, list):
+            assert written_data[0]["entity_id"] == "CHEMBL1"
+            assert written_data[0]["value"] == 10.5
+
+    @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_write_gold_with_valid_schema(
         self, mock_write_deltalake, gold_writer, strict_schema, valid_records
     ):
