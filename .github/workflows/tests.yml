@@ -1596,6 +1596,7 @@ jobs:
         run: |
           uv run --frozen --no-build python -m coverage combine --keep reports/coverage
           uv run --frozen --no-build python -m coverage xml -o reports/coverage/coverage.xml
+          uv run --frozen --no-build python -m coverage html -d reports/coverage/html
           uv run --frozen --no-build python -m scripts.engineering.qa report-module-coverage \
             --coverage-xml reports/coverage/coverage.xml \
             --json-out reports/quality/module-coverage-inventory.candidate.json \
@@ -1618,6 +1619,7 @@ jobs:
           name: coverage-report
           path: |
             reports/coverage/coverage.xml
+            reports/coverage/html/
             reports/quality/module-coverage-inventory.json
             reports/quality/module-coverage-inventory.candidate.json
           retention-days: 7

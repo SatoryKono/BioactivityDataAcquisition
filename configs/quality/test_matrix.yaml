@@ -184,6 +184,11 @@ test_lanes:
             path: tests/unit/repo_backed/scripts/ tests/unit/repo_backed/tools/ --ignore=tests/unit/repo_backed/scripts/ops/
           - name: ops
             path: tests/unit/repo_backed/scripts/ops/
+      serial-coverage:
+        coverage_producer: true
+        shards:
+          - name: serial
+            path: tests/
       unit-scripts-tooling:
         coverage_producer: true
         shards:
@@ -580,7 +585,6 @@ test_lanes:
       expected_artifacts:
         junit_xml: false
         json_summary: false
-
     e2e:
       suite_name: e2e
       description: "Slow end-to-end lane; kept separate from fast feedback and coverage verification."

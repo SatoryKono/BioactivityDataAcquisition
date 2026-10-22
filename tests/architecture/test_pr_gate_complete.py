@@ -205,13 +205,10 @@ def test_only_osv_scanner_uses_continue_on_error_before_severity_gate() -> None:
 
 
 def test_aggregator_does_not_use_continue_on_error() -> None:
-    workflow = yaml.safe_load(COORDINATOR.read_text(encoding="utf-8"))
-    aggregator = workflow["jobs"]["pr-gate-complete"]
-    assert "continue-on-error" not in aggregator, (
-        "pr-gate-complete must not use job-level continue-on-error"
-    )
-    steps = aggregator["steps"]
-    assert all("continue-on-error" not in step for step in steps)
+    coordinator = _load_yaml(COORDINATOR)
+    aggregator = coordinator["jobs"]["pr-gate-complete"]
+    assert "continue-on-error" not in aggregator
+    assert all("continue-on-error" not in step for step in aggregator.get("steps", []))
 
 
 def test_called_owner_workflows_reject_duplicate_yaml_keys() -> None:
