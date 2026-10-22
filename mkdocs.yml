@@ -195,6 +195,7 @@ nav:
       - "Data Flow": 02-architecture/diagrams/guide/data-flow-reference.md
       - "Data Layers": 02-architecture/data-layers.md
       - "Observability Layers": 02-architecture/observability-layers.md
+      - "GitHub Billing": 02-architecture/finances_github_billing.md
       - "Domain Deep Dives":
           - "Composite Domain": 02-architecture/domain-composite.md
           - "Control Plane Domain": 02-architecture/domain-control-plane.md
