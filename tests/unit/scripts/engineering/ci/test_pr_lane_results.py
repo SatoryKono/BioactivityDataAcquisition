@@ -217,6 +217,15 @@ def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
     assert targets == ["tests/unit/domain"]
 
 
+def test_affected_targets_map_integration_vcr_policy() -> None:
+    """VCR policy edits select the inventory architecture test."""
+    repo_root = Path(__file__).resolve().parents[5]
+    assert affected_pytest_targets(
+        ["configs/quality/integration_vcr_policy.yaml"],
+        repo_root=repo_root,
+    ) == ["tests/architecture/test_integration_vcr_policy.py"]
+
+
 def test_affected_targets_map_telemetry_baseline(tmp_path: Path) -> None:
     """Telemetry edits select both baseline guards and leave other configs unmapped."""
     governance = tmp_path / "tests/architecture/test_test_telemetry_governance.py"

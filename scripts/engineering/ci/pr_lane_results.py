@@ -75,6 +75,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/engineering/ci/pr_lane_results.py": (
         "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
     ),
+    "configs/quality/integration_vcr_policy.yaml": (
+        "tests/architecture/test_integration_vcr_policy.py",
+    ),
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
     "configs/quality/scripts_inventory_manifest.json": (
         "tests/architecture/test_scripts_inventory_manifest.py",
