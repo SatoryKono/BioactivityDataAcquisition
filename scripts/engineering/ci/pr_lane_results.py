@@ -83,6 +83,15 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_scripts_inventory_manifest.py",
     ),
     "docs/05-engineering/test-telemetry-baseline.md": TELEMETRY_BASELINE_TESTS,
+    ".github/workflows/pr-required.yml": (
+        "tests/architecture/test_github_actions_runtime_policy.py",
+    ),
+    "configs/quality/reusable_action_pins.yaml": (
+        "tests/architecture/test_github_actions_runtime_policy.py",
+    ),
+    "scripts/engineering/repo/check_github_actions_runtime_policy.py": (
+        "tests/architecture/test_github_actions_runtime_policy.py",
+    ),
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
