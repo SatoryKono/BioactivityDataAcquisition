@@ -35637,7 +35637,7 @@
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
-      "path": "docs/02-architecture/finances_github_billing.md",
+      "path": "docs/02-architecture/finances-github-billing.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
       "section": "02-architecture",

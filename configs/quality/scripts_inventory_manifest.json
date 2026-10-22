@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-22T19:56:32.728358+00:00",
+  "generated_at": "2026-10-22T20:18:13.852783+00:00",
   "summary": {
     "total_scripts": 664,
     "status_counts": {
@@ -13314,7 +13314,7 @@
       "reference_count": 2,
       "references": [
         {
-          "path": "docs/02-architecture/finances_github_billing.md",
+          "path": "docs/02-architecture/finances-github-billing.md",
           "line": 44,
           "source_group": "docs",
           "text": "- `scripts/engineering/finances/github_billing_pipeline.py`"
@@ -13339,7 +13339,7 @@
       "reference_count": 4,
       "references": [
         {
-          "path": "docs/02-architecture/finances_github_billing.md",
+          "path": "docs/02-architecture/finances-github-billing.md",
           "line": 42,
           "source_group": "docs",
           "text": "- `scripts/engineering/finances/github_billing_schema.py`"
@@ -13376,7 +13376,7 @@
       "reference_count": 2,
       "references": [
         {
-          "path": "docs/02-architecture/finances_github_billing.md",
+          "path": "docs/02-architecture/finances-github-billing.md",
           "line": 43,
           "source_group": "docs",
           "text": "- `scripts/engineering/finances/github_billing_validator.py`"
