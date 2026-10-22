@@ -14,7 +14,19 @@ TOTAL_KEYS = (
     "other",
 )
 _RUNNER_SKU_MARKERS = ("linux", "windows", "macos")
+_SHARED_STORAGE_SKUS = frozenset({"actions storage", "packages storage"})
+_SEPARATE_STORAGE_SKUS = frozenset(
+    {
+        "actions cache storage",
+        "actions custom image storage",
+    }
+)
 WorkflowAttributionKey = tuple[str | None, str]
+
+
+def _normalized_sku(sku: str) -> str:
+    """Collapse report labels and API identifiers onto one SKU key."""
+    return " ".join(sku.casefold().replace("_", " ").split())
 
 
 def _require_report_currency(
@@ -50,12 +62,26 @@ def is_actions_compute(record: GitHubBillingRecord) -> bool:
     return any(marker in sku for marker in _RUNNER_SKU_MARKERS)
 
 
+def _is_shared_storage(record: GitHubBillingRecord) -> bool:
+    """Return whether the row belongs in the shared artifact/package pool.
+
+    Actions artifact storage and Packages storage share that pool. Actions
+    cache storage and custom-image storage stay outside it.
+    """
+    if "shared storage" in record.product.casefold():
+        return True
+    sku = _normalized_sku(record.sku)
+    if sku in _SEPARATE_STORAGE_SKUS:
+        return False
+    return sku in _SHARED_STORAGE_SKUS
+
+
 def _category(record: GitHubBillingRecord) -> str:
     """Map one row onto a total bucket."""
     product = record.product.casefold()
     if is_actions_compute(record):
         return "actions_compute"
-    if "shared storage" in product:
+    if _is_shared_storage(record):
         return "shared_storage"
     if "copilot" in product:
         return "copilot"

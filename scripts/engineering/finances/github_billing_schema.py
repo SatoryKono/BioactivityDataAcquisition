@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, model_validator
 
 MONEY_FIELDS = ("gross_amount", "discount_amount", "net_amount")
 
@@ -49,3 +49,14 @@ class GitHubBillingRecord(BaseModel):
         if not text:
             raise ValueError("currency is required")
         return text
+
+    @model_validator(mode="after")
+    def net_equals_gross_minus_discount(self) -> GitHubBillingRecord:
+        """Enforce the usage-report identity before any total is computed."""
+        expected = self.gross_amount - self.discount_amount
+        if self.net_amount != expected:
+            raise ValueError(
+                "gross_amount - discount_amount must equal net_amount "
+                f"({self.gross_amount} - {self.discount_amount} != {self.net_amount})"
+            )
+        return self

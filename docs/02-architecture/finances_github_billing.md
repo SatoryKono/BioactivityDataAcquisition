@@ -7,6 +7,9 @@
 - After-период: `2026-10-01..2026-10-19` (ОЖИДАЕТСЯ)
 Данные периоды должны быть выгружены без изменений фильтров или параметров тарификации (Copilot/LFS).
 ## Схема выгрузки
+Для атрибуции по workflow нужен Detailed usage report из веб-интерфейса GitHub.
+Сводный отчёт (Summarized usage report) не содержит `workflow_path`, и валидатор его отклоняет.
+Столбец `workflow_path` обязателен; в отдельной строке он может быть пустым.
 Выгрузка должна представлять собой CSV-файл с обязательными полями:
 - `date`
 - `product`
@@ -22,12 +25,16 @@
 `currency` обязателен в каждой строке. Отсутствие столбца не подставляется как USD.
 Денежные поля `gross_amount`, `discount_amount` и `net_amount` читаются как `Decimal`.
 `float` для этих полей отклоняется.
+Для каждой строки должно выполняться `gross_amount - discount_amount = net_amount`.
+Повторяющиеся имена столбцов и лишние ячейки в строке отклоняются.
 Пустой файл и CSV только с заголовком отклоняются: это не нулевые расходы.
 `calculate_totals` и `extract_workflow_attribution` суммируют строки только когда валюта
 каждой строки совпадает с явной валютой отчёта.
 Расходы Actions на runner попадают в `actions_compute`, если SKU содержит `compute`
 или официальное имя runner (`Actions Linux`, `Actions Windows`, `Actions macOS`).
 SKU со `storage` в эту категорию не входит.
+`Actions storage` и `Packages storage` попадают в `shared_storage`.
+`Actions cache storage` и `Actions custom image storage` в этот пул не входят.
 Атрибуция workflow использует пару `(repository, workflow_path)`. Одинаковый путь
 workflow в разных репозиториях учитывается раздельно. Пустой `repository` не
 смешивается с названным репозиторием.

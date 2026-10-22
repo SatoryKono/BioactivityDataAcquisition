@@ -121,8 +121,46 @@ def test_official_actions_runner_sku_is_compute() -> None:
     attribution = extract_workflow_attribution([record, storage], "USD")
 
     assert totals["actions_compute"] == Decimal("0.80")
-    assert totals["other"] == Decimal("0.20")
+    assert totals["shared_storage"] == Decimal("0.20")
+    assert totals["other"] == Decimal("0")
     assert attribution[(record.repository, record.workflow_path)] == Decimal("0.80")
+
+
+def test_cache_and_custom_image_storage_stay_outside_shared_pool() -> None:
+    """Artifact and package storage share a pool; cache and images do not."""
+    records = [
+        _record(
+            product="Packages",
+            sku="Packages storage",
+            net_amount=Decimal("1"),
+            gross_amount=Decimal("1"),
+        ),
+        _record(
+            sku="Actions cache storage",
+            net_amount=Decimal("2"),
+            gross_amount=Decimal("2"),
+        ),
+        _record(
+            sku="actions_custom_image_storage",
+            net_amount=Decimal("3"),
+            gross_amount=Decimal("3"),
+        ),
+    ]
+
+    totals = calculate_totals(records, "USD")
+
+    assert totals["shared_storage"] == Decimal("1")
+    assert totals["other"] == Decimal("5")
+
+
+def test_net_must_equal_gross_minus_discount() -> None:
+    """A row cannot report a net amount that disagrees with gross and discount."""
+    with pytest.raises(ValidationError, match="must equal net_amount"):
+        _record(
+            gross_amount=Decimal("10"),
+            discount_amount=Decimal("0"),
+            net_amount=Decimal("0"),
+        )
 
 
 def test_decimal_totals_do_not_use_binary_float() -> None:
@@ -149,11 +187,22 @@ def test_extract_workflow_attribution_splits_repositories() -> None:
     """The same workflow path in two repositories stays two buckets."""
     records = [
         _record(repository="org/one", net_amount=Decimal("10")),
-        _record(repository="org/two", sku="Compute - Windows", net_amount=Decimal("5")),
-        _record(repository=None, workflow_path=None, net_amount=Decimal("1")),
+        _record(
+            repository="org/two",
+            sku="Compute - Windows",
+            gross_amount=Decimal("5"),
+            net_amount=Decimal("5"),
+        ),
+        _record(
+            repository=None,
+            workflow_path=None,
+            gross_amount=Decimal("1"),
+            net_amount=Decimal("1"),
+        ),
         _record(
             repository=None,
             workflow_path=".github/workflows/ci.yml",
+            gross_amount=Decimal("2"),
             net_amount=Decimal("2"),
         ),
     ]
@@ -209,3 +258,23 @@ def test_validate_billing_report_rejects_empty_and_header_only(tmp_path: Path) -
         validate_billing_report(str(header_only))
     with pytest.raises(ValueError, match="currency"):
         validate_billing_report(str(missing_currency))
+
+    duplicate_header = tmp_path / "duplicate-header.csv"
+    extra_cell = tmp_path / "extra-cell.csv"
+    duplicate_header.write_text(
+        "date,product,sku,repository,workflow_path,quantity,unit_type,"
+        "gross_amount,discount_amount,net_amount,net_amount,currency\n"
+        "2026-09-15,Actions,Actions Linux,org/one,.github/workflows/ci.yml,"
+        "1,minutes,1,0,1,0,USD\n",
+        encoding="utf-8",
+    )
+    extra_cell.write_text(
+        _HEADER + "\n"
+        "2026-09-15,Actions,Actions Linux,org/one,.github/workflows/ci.yml,"
+        "1,minutes,1,0,1,USD,extra\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="repeats columns"):
+        validate_billing_report(str(duplicate_header))
+    with pytest.raises(ValueError, match="more cells"):
+        validate_billing_report(str(extra_cell))
