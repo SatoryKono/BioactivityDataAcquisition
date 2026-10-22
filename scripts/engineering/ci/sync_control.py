@@ -12,8 +12,8 @@ import subprocess
 import sys
 
 _ALLOWED_ARGV = ("sync", "--frozen", "--only-group", "ci-control")
-# UV_PYTHON is pinned by the action. UV_CACHE_DIR is exported by setup-uv.
-_ALLOWED_UV_ENV = frozenset({"UV_CACHE_DIR", "UV_PYTHON"})
+# setup-uv sets the interpreter, Python install directory, and cache.
+_ALLOWED_UV_ENV = frozenset({"UV_CACHE_DIR", "UV_PYTHON", "UV_PYTHON_INSTALL_DIR"})
 
 
 def run_sync(args: list[str]) -> None:
