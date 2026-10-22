@@ -1,20 +1,40 @@
-"""Local presubmit gate for Ruff and strict mypy before push."""
+"""Local presubmit gate for Ruff, strict mypy, affected tests, and fast architecture.
+
+The command resolves refs to exact SHAs, then reuses the canonical classify and
+affected-test seams. An unknown path or an empty test selection fails closed.
+"""
 
 from __future__ import annotations
 
 import argparse
+import re
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
 from scripts.engineering.ci.pr_gate import (
-    load_catalog,
+    CatalogError,
     classify_changes,
+    collect_changed_files,
+    load_catalog,
 )
+from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+from scripts.engineering.repo.check_no_partial_tree import resolve_revision
+
+_SHA_RE = re.compile(r"^[0-9a-f]{40}(?:[0-9a-f]{24})?$")
+_RUFF_TREES = ("src", "tests", "scripts")
+_MYPY_TREES = ("src/bioetl", "src/memory")
+_FAST_ARCHITECTURE_MARK = "not slow and not benchmark and not memory"
+_AFFECTED_REPORT = "reports/quality/affected-test-partition.json"
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the presubmit CLI."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", required=True, help="Base ref (e.g. origin/main)")
     parser.add_argument("--head", required=True, help="Head ref (e.g. HEAD)")
@@ -27,184 +47,239 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-import re
-
-
-def resolve_ref(ref: str) -> str:
-    """Resolve a git ref to a complete SHA-1 hash."""
-    if not re.match(r"^[a-zA-Z0-9_./-]+$", ref):
-        print(f"::error::Invalid characters in ref {ref!r}", file=sys.stderr)
-        sys.exit(1)
+def resolve_ref(ref: str, *, repo: Path | None = None) -> str:
+    """Resolve a git ref to a commit SHA after rejecting flag injection."""
     try:
-        process = subprocess.run(
-            ["git", "rev-parse", "--verify", f"{ref}^{{commit}}"],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        return process.stdout.strip()
-    except subprocess.CalledProcessError as err:
-        print(
-            f"::error::Failed to resolve ref {ref!r}: {err.stderr.strip()}",
-            file=sys.stderr,
-        )
-        sys.exit(1)
+        resolved = resolve_revision(repo or Path.cwd(), ref)
+    except SystemExit as exc:
+        detail = exc.code if isinstance(exc.code, str) else repr(ref)
+        raise ValueError(f"invalid git ref: {detail}") from exc
+    matched = _SHA_RE.fullmatch(resolved)
+    if matched is None:
+        raise ValueError(f"git ref did not resolve to a commit SHA: {ref!r}")
+    return matched.group(0)
 
 
-def collect_changed_files(base_sha: str, head_sha: str) -> list[str]:
-    """Collect the exact list of changed files between base and head."""
-    try:
-        process = subprocess.run(
-            ["git", "diff", "--name-only", "-z", f"{base_sha}...{head_sha}"],
-            check=True,
-            capture_output=True,
-        )
-        if not process.stdout:
-            return []
+def _run(command: list[str]) -> int:
+    """Run a static argv command and return its exit code."""
+    return subprocess.run(command, check=False).returncode
 
-        tokens = process.stdout.split(b"\0")
-        if tokens and tokens[-1] == b"":
-            tokens.pop()
-        import os
 
-        return [os.fsdecode(t) for t in tokens]
-    except subprocess.CalledProcessError as err:
-        print(
-            f"::error::Failed to compute diff between {base_sha} and {head_sha}",
-            file=sys.stderr,
-        )
-        sys.exit(1)
+def _capture(command: list[str]) -> subprocess.CompletedProcess[str]:
+    """Run a static argv command and capture text output."""
+    return subprocess.run(
+        command,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
 
 
 def run_ruff() -> bool:
-    """Run ruff check and ruff format on src tests scripts."""
+    """Run ruff check and format on the same trees as CI."""
     print("Running ruff check src tests scripts...", flush=True)
-    check_run = subprocess.run(
-        ["uv", "run", "ruff", "check", "src", "tests", "scripts"],
-        capture_output=False,
-    )
-    if check_run.returncode != 0:
+    check_command = [
+        "uv",
+        "run",
+        "--frozen",
+        "--no-build",
+        "ruff",
+        "check",
+        *_RUFF_TREES,
+    ]
+    if _run(check_command) != 0:
         print("::error::Ruff check failed.", file=sys.stderr)
         return False
-
     print("Running ruff format --check src tests scripts...", flush=True)
-    format_run = subprocess.run(
-        ["uv", "run", "ruff", "format", "--check", "src", "tests", "scripts"],
-        capture_output=False,
-    )
-    if format_run.returncode != 0:
+    format_command = [
+        "uv",
+        "run",
+        "--frozen",
+        "--no-build",
+        "ruff",
+        "format",
+        "--check",
+        *_RUFF_TREES,
+    ]
+    if _run(format_command) != 0:
         print("::error::Ruff format failed.", file=sys.stderr)
         return False
-
     return True
 
 
 def run_mypy() -> bool:
     """Run strict incremental mypy on src/bioetl and src/memory."""
     print("Running strict mypy gate on src/bioetl + src/memory...", flush=True)
-    mypy_run = subprocess.run(
-        [
-            "uv",
-            "run",
-            "mypy",
-            "--config-file",
-            "pyproject.toml",
-            "--strict",
-            "--incremental",
-            "src/bioetl",
-            "src/memory",
-        ],
-        capture_output=False,
-    )
-    if mypy_run.returncode != 0:
+    command = [
+        "uv",
+        "run",
+        "--frozen",
+        "--no-build",
+        "mypy",
+        "--config-file",
+        "pyproject.toml",
+        "--strict",
+        "--incremental",
+        *_MYPY_TREES,
+    ]
+    if _run(command) != 0:
         print("::error::Mypy strict gate failed.", file=sys.stderr)
         return False
     return True
 
 
-def evaluate_fast_architecture(matrix: dict[str, Any]) -> bool:
-    """Evaluate fast architecture checks if required."""
-    print(
-        "Classifying fast architecture checks based on decision matrix...", flush=True
+def affected_tests_command(
+    base_sha: str,
+    head_sha: str,
+    changed: list[str],
+) -> list[str]:
+    """Build the canonical affected-test selector command for one diff."""
+    command = [
+        sys.executable,
+        "-m",
+        "scripts.engineering.ci",
+        "pr-lane-results",
+        "affected-tests",
+        "--repo-root",
+        ".",
+        "--base-sha",
+        base_sha,
+        "--head-sha",
+        head_sha,
+    ]
+    for path in changed:
+        if path.startswith("-"):
+            raise ValueError(f"unsafe changed path: {path!r}")
+        command.extend(["--changed-file", path])
+    return ensure_safe_cli_argv(command)
+
+
+def _pytest_command(targets: list[str]) -> list[str]:
+    """Run selected tests through the CI generated-artifact scheduler."""
+    return ensure_safe_cli_argv(
+        [
+            "uv",
+            "run",
+            "--frozen",
+            "--no-build",
+            "python",
+            "-m",
+            "scripts.engineering.ci.generated_artifact_checks",
+            "ci",
+            "--report",
+            _AFFECTED_REPORT,
+            "--",
+            *targets,
+            "-q",
+            "--tb=line",
+        ]
     )
-    success = True
-
-    # Check if fast architecture checks are required based on decision matrix
-    if matrix.get("lint-arch") == "required":
-        print("Running audit root cleanliness...", flush=True)
-        repo_run = subprocess.run(
-            [
-                "uv",
-                "run",
-                "python",
-                "-m",
-                "scripts.engineering.repo",
-                "check-cleanliness",
-            ],
-            capture_output=False,
-        )
-        if repo_run.returncode != 0:
-            print("::error::Audit root cleanliness failed.", file=sys.stderr)
-            success = False
-
-    # affected tests validation
-    if matrix.get("tests") == "required":
-        # Just simulating affected tests for now or checking we reached here
-        print("Tests are required based on changed files.", flush=True)
-    return success
 
 
-def is_python_scope(changed_files: list[str]) -> bool:
-    """Return True if any python file was modified."""
-    return any(f.endswith(".py") or f.endswith(".pyi") for f in changed_files)
+def run_affected_tests(base_sha: str, head_sha: str, changed: list[str]) -> bool:
+    """Select affected tests with the canonical CLI and fail on an empty set."""
+    select = _capture(affected_tests_command(base_sha, head_sha, changed))
+    if select.returncode != 0:
+        detail = (select.stderr or select.stdout).strip()
+        print(f"::error::affected-test selection failed: {detail}", file=sys.stderr)
+        return False
+    targets = [line.strip() for line in select.stdout.splitlines() if line.strip()]
+    if not targets:
+        print("::error::tests gate has no affected pytest target", file=sys.stderr)
+        return False
+    print("Running affected pytest targets...", flush=True)
+    if _run(_pytest_command(targets)) != 0:
+        print("::error::Affected pytest failed.", file=sys.stderr)
+        return False
+    return True
+
+
+def fast_architecture_command() -> list[str]:
+    """Return the class-lane fast architecture pytest command."""
+    return [
+        "uv",
+        "run",
+        "--frozen",
+        "--no-build",
+        "pytest",
+        "tests/architecture",
+        "-m",
+        _FAST_ARCHITECTURE_MARK,
+        "-q",
+        "--tb=line",
+    ]
+
+
+def run_fast_architecture() -> bool:
+    """Run the fast architecture slice used by the class lane."""
+    print("Running fast architecture checks...", flush=True)
+    if _run(fast_architecture_command()) != 0:
+        print("::error::Fast architecture checks failed.", file=sys.stderr)
+        return False
+    return True
+
+
+def _python_scope(changed: list[str]) -> bool:
+    """Return True when the diff contains Python sources."""
+    return any(path.endswith((".py", ".pyi")) for path in changed)
+
+
+def _required(matrix: dict[str, Any], gate_id: str) -> bool:
+    """Return whether one classified gate is required."""
+    decisions = matrix.get("decisions")
+    if not isinstance(decisions, dict):
+        raise CatalogError("decision matrix decisions must be a mapping")
+    decision = decisions.get(gate_id)
+    if not isinstance(decision, dict):
+        raise CatalogError(f"missing decision for {gate_id}")
+    kind = decision.get("decision")
+    if kind == "required":
+        return True
+    if kind == "not_applicable":
+        return False
+    raise CatalogError(f"{gate_id}: unknown decision={kind!r}")
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run the presubmit contract and return a process exit code."""
     args = build_parser().parse_args(argv)
-
-    # 1. Resolve exact SHAs
-    base_sha = resolve_ref(args.base)
-    head_sha = resolve_ref(args.head)
+    try:
+        base_sha = resolve_ref(args.base)
+        head_sha = resolve_ref(args.head)
+    except ValueError as exc:
+        print(f"::error::{exc}", file=sys.stderr)
+        return 1
 
     print(f"Presubmit check: base={base_sha}, head={head_sha}", flush=True)
+    try:
+        changed = collect_changed_files(
+            event_name="pull_request",
+            base_sha=base_sha,
+            before_sha="",
+            head_sha=head_sha,
+        )
+    except (subprocess.CalledProcessError, CatalogError, OSError) as exc:
+        print(f"::error::Failed to compute diff: {exc}", file=sys.stderr)
+        return 1
 
-    # 2. Collect diff
-    changed_files = collect_changed_files(base_sha, head_sha)
-
-    # If no files changed, exit early?
-    if not changed_files:
-        print("No files changed. Presubmit successful.", flush=True)
-        return 0
-
-    python_scope = is_python_scope(changed_files)
-
-    success = True
-
-    # 3. Ruff check/format
-    if not run_ruff():
+    success = run_ruff()
+    if _python_scope(changed) and not run_mypy():
         success = False
-
-    # 4. Strict mypy
-    if python_scope:
-        if not run_mypy():
-            success = False
-
-    # 5. Classify & affected tests
     try:
         catalog = load_catalog(args.catalog)
-        matrix = classify_changes(catalog, changed_files, head_sha=head_sha)
-
-        if not evaluate_fast_architecture(matrix):
+        matrix = classify_changes(catalog, changed, head_sha=head_sha)
+        if _required(matrix, "tests") and not run_affected_tests(
+            base_sha, head_sha, changed
+        ):
             success = False
-
-    except Exception as err:
-        print(f"::error::Classification failed: {err}", file=sys.stderr)
-        success = False
-
+        if _required(matrix, "lint-arch") and not run_fast_architecture():
+            success = False
+    except (CatalogError, OSError, ValueError) as exc:
+        print(f"::error::Classification failed: {exc}", file=sys.stderr)
+        return 1
     if not success:
         print("::error::Presubmit checks failed.", file=sys.stderr)
-        sys.exit(1)
-
+        return 1
     print("Presubmit checks passed successfully.", flush=True)
     return 0
 

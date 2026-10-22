@@ -306,10 +306,13 @@ uv run python -m scripts.engineering.ci presubmit --base origin/main --head HEAD
 ```
 
 **Контракт проверки:**
-1. Вычисление точных SHA-1 для `base` и `head`.
-2. Получение `git diff` измененных файлов.
-3. Обязательный прогон `ruff check src tests scripts` и `ruff format --check src tests scripts`.
-4. Если изменены Python-файлы — инкрементальный прогон `mypy --strict` для `src/bioetl` и `src/memory`.
-5. Классификация изменений и быстрые архитектурные проверки.
 
-Любая обязательная ошибка завершит процесс с ненулевым кодом (`exit 1`). Не используйте флаг `--no-verify` (bypass) без аварийной необходимости; аварийное исключение требует согласованной процедуры и записи причины.
+1. Разрешение `base` и `head` в точные SHA. Флаги и метасимволы в ref отклоняются.
+2. Diff через канонический сборщик PR-gate (`--name-status`, `--find-renames`): при переименовании в список попадают и старый, и новый путь.
+3. Обязательные `ruff check` и `ruff format --check` для `src tests scripts` — те же деревья, что в CI.
+4. Если изменены Python-файлы — `mypy --strict --incremental` для `src/bioetl` и `src/memory`. Серверный прогон остаётся `--no-incremental` на том же scope.
+5. Классификация каталогом required checks. Решение читается из `decisions[gate_id].decision`.
+6. Если gate `tests` обязателен — канонический `pr-lane-results affected-tests`, затем pytest. Пустой selection завершается ошибкой.
+7. Если gate `lint-arch` обязателен — быстрый срез `tests/architecture` (`not slow and not benchmark and not memory`), тот же маркер, что у class lane.
+
+Неизвестный путь и пустой diff не дают пустой успех: классификация fail-closed, затем полная обязательная проверка либо ненулевой код. Любая обязательная ошибка завершает процесс с `exit 1`. `--no-verify` не штатный путь; аварийное исключение требует согласованной процедуры и записи причины.
