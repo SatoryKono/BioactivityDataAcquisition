@@ -248,7 +248,7 @@ def test_pr_gate_coordinator_materializes_on_every_pr_without_duplicate_owners()
     catalog = _load_yaml(ROOT / "configs" / "quality" / "github_required_checks.yaml")
     gate_ids = {gate["id"] for gate in catalog["gates"]}
     aggregate_needs = set(coordinator["jobs"]["pr-gate-complete"]["needs"])
-    assert aggregate_needs == {"classify-changes", "fast-governance", "class-lane"}
+    assert aggregate_needs == {"classify-changes", "fast-governance", "class-lane", "docker-lane"}
     assert gate_ids
     assert {"commit-governance", "docs-governance"} <= gate_ids
     assert "pr-gate-complete" in policy_doc
