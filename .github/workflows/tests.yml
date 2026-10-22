@@ -1444,19 +1444,21 @@ jobs:
             --parallel-timeout-seconds 660 \
             --no-fallback \
             --parallel-marker "serial and not e2e and not benchmark and not memory" \
-            --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
+            --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report= --junitxml=reports/test-telemetry/junit-serial-coverage.xml" \
             --skip-serial-pass
           TEST_EXIT=$?
           if [ ! -s "$COVERAGE_FILE" ]; then
             echo "::error::Serial coverage shard was not produced."
             exit 1
           fi
-          if [ ! -s reports/pytest/serial-coverage/junit_parallel.xml ]; then
+          if [ ! -s reports/pytest/serial-coverage/junit_parallel.xml ] && [ ! -s reports/test-telemetry/junit-serial-coverage.xml ]; then
             echo "::error::Serial coverage JUnit telemetry was not produced."
             exit 1
           fi
-          cp reports/pytest/serial-coverage/junit_parallel.xml \
-            reports/test-telemetry/junit-serial-coverage.xml
+          if [ -s reports/pytest/serial-coverage/junit_parallel.xml ]; then
+            cp reports/pytest/serial-coverage/junit_parallel.xml \
+              reports/test-telemetry/junit-serial-coverage.xml
+          fi
           # This receipt covers resilient-runner passes of serial-coverage
           # only. Other pytest jobs in this workflow are separate producers.
           uv run --frozen --no-build python -m scripts.engineering.ci.pytest_event_journal \
@@ -1590,6 +1592,7 @@ jobs:
         run: |
           uv run --frozen --no-build python -m coverage combine --keep reports/coverage
           uv run --frozen --no-build python -m coverage xml -o reports/coverage/coverage.xml
+          uv run --frozen --no-build python -m coverage html -d reports/coverage/html
           uv run --frozen --no-build python -m scripts.engineering.qa report-module-coverage \
             --coverage-xml reports/coverage/coverage.xml \
             --json-out reports/quality/module-coverage-inventory.candidate.json \
@@ -1612,6 +1615,7 @@ jobs:
           name: coverage-report
           path: |
             reports/coverage/coverage.xml
+            reports/coverage/html/
             reports/quality/module-coverage-inventory.json
             reports/quality/module-coverage-inventory.candidate.json
           retention-days: 7
