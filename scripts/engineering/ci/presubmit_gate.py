@@ -31,6 +31,7 @@ _RUFF_TREES = ("src", "tests", "scripts")
 _MYPY_TREES = ("src/bioetl", "src/memory")
 _FAST_ARCHITECTURE_MARK = "not slow and not benchmark and not memory"
 _AFFECTED_REPORT = "reports/quality/affected-test-partition.json"
+_SELECT_TIMEOUT_SECONDS = 300
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -66,13 +67,27 @@ def _run(command: list[str]) -> int:
 
 
 def _capture(command: list[str]) -> subprocess.CompletedProcess[str]:
-    """Run a static argv command and capture text output."""
-    return subprocess.run(
-        command,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    """Run a sanitized argv command and capture text output.
+
+    A stuck affected-test selector must fail the gate instead of blocking
+    presubmit. The command list is already passed through
+    ``ensure_safe_cli_argv``.
+    """
+    try:
+        return subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=_SELECT_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return subprocess.CompletedProcess(
+            command,
+            124,
+            stdout="",
+            stderr=f"affected-test selection timed out: {exc}",
+        )
 
 
 def run_ruff() -> bool:

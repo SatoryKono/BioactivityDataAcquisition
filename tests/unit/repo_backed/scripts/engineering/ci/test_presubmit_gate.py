@@ -200,6 +200,22 @@ def test_rename_paths_reach_affected_selector() -> None:
     assert changed == ["src/bioetl/old_name.py", "src/bioetl/new_name.py"]
 
 
+def test_affected_selector_timeout_fails_closed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A stuck affected-test selector is a failed stage, not a hang."""
+
+    def expire(
+        command: list[str],
+        **kwargs: object,
+    ) -> subprocess.CompletedProcess[str]:
+        assert kwargs["timeout"] == gate._SELECT_TIMEOUT_SECONDS
+        raise subprocess.TimeoutExpired(cmd=command, timeout=kwargs["timeout"])
+
+    monkeypatch.setattr(gate.subprocess, "run", expire)
+    assert gate.run_affected_tests(_BASE, _HEAD, ["src/bioetl/sample.py"]) is False
+
+
 def test_empty_selection_fails(monkeypatch: pytest.MonkeyPatch) -> None:
     """Selector success with no targets is not an empty success."""
 
