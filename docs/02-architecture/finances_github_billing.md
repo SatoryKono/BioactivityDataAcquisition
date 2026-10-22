@@ -19,6 +19,18 @@
 - `discount_amount`
 - `net_amount`
 - `currency`
+`currency` обязателен в каждой строке. Отсутствие столбца не подставляется как USD.
+Денежные поля `gross_amount`, `discount_amount` и `net_amount` читаются как `Decimal`.
+`float` для этих полей отклоняется.
+Пустой файл и CSV только с заголовком отклоняются: это не нулевые расходы.
+`calculate_totals` и `extract_workflow_attribution` суммируют строки только когда валюта
+каждой строки совпадает с явной валютой отчёта.
+Расходы Actions на runner попадают в `actions_compute`, если SKU содержит `compute`
+или официальное имя runner (`Actions Linux`, `Actions Windows`, `Actions macOS`).
+SKU со `storage` в эту категорию не входит.
+Атрибуция workflow использует пару `(repository, workflow_path)`. Одинаковый путь
+workflow в разных репозиториях учитывается раздельно. Пустой `repository` не
+смешивается с названным репозиторием.
 Для программного валидатора и обработки этих данных смотрите:
 - `scripts/engineering/finances/github_billing_schema.py`
 - `scripts/engineering/finances/github_billing_validator.py`

@@ -1,39 +1,96 @@
-from typing import List, Dict, Tuple
-from .github_billing_schema import GitHubBillingRecord
+"""Category totals and workflow attribution for GitHub billing rows."""
 
-def calculate_totals(records: List[GitHubBillingRecord]) -> Dict[str, float]:
-    """Calculate the total net amount for different billing categories."""
-    totals = {
-        "actions_compute": 0.0,
-        "shared_storage": 0.0,
-        "copilot": 0.0,
-        "lfs": 0.0,
-        "other": 0.0
-    }
+from __future__ import annotations
 
+from decimal import Decimal
+
+from scripts.engineering.finances.github_billing_schema import GitHubBillingRecord
+
+TOTAL_KEYS = (
+    "actions_compute",
+    "shared_storage",
+    "copilot",
+    "lfs",
+    "other",
+)
+_RUNNER_SKU_MARKERS = ("linux", "windows", "macos")
+WorkflowAttributionKey = tuple[str | None, str]
+
+
+def _require_report_currency(
+    records: list[GitHubBillingRecord],
+    report_currency: str,
+) -> None:
+    """Refuse an empty report or rows that do not match one explicit currency."""
+    expected = report_currency.strip()
+    if not expected:
+        raise ValueError("report currency must be explicit")
+    if not records:
+        raise ValueError("billing report has no records")
+    found = sorted({record.currency for record in records})
+    if found != [expected]:
+        raise ValueError(
+            "billing records must use the report currency "
+            f"{expected}; found {', '.join(found)}"
+        )
+
+
+def is_actions_compute(record: GitHubBillingRecord) -> bool:
+    """Return whether the row is Actions runner usage rather than storage.
+
+    Official usage-report SKUs look like ``Actions Linux``. Older normalized
+    rows use a ``Compute - ...`` SKU. Storage SKUs stay out of this bucket.
+    """
+    product = record.product.casefold()
+    sku = record.sku.casefold()
+    if "actions" not in product or "storage" in sku:
+        return False
+    if "compute" in sku:
+        return True
+    return any(marker in sku for marker in _RUNNER_SKU_MARKERS)
+
+
+def _category(record: GitHubBillingRecord) -> str:
+    """Map one row onto a total bucket."""
+    product = record.product.casefold()
+    if is_actions_compute(record):
+        return "actions_compute"
+    if "shared storage" in product:
+        return "shared_storage"
+    if "copilot" in product:
+        return "copilot"
+    if "lfs" in product:
+        return "lfs"
+    return "other"
+
+
+def calculate_totals(
+    records: list[GitHubBillingRecord],
+    report_currency: str,
+) -> dict[str, Decimal]:
+    """Sum net amounts by category for one explicit report currency."""
+    _require_report_currency(records, report_currency)
+    totals = {key: Decimal("0") for key in TOTAL_KEYS}
     for record in records:
-        product_lower = record.product.lower()
-        if "actions" in product_lower and "compute" in record.sku.lower():
-             totals["actions_compute"] += record.net_amount
-        elif "shared storage" in product_lower:
-             totals["shared_storage"] += record.net_amount
-        elif "copilot" in product_lower:
-             totals["copilot"] += record.net_amount
-        elif "lfs" in product_lower:
-             totals["lfs"] += record.net_amount
-        else:
-             totals["other"] += record.net_amount
-
+        totals[_category(record)] += record.net_amount
     return totals
 
-def extract_workflow_attribution(records: List[GitHubBillingRecord]) -> Dict[str, float]:
-    """Attribute Actions compute net amount to specific workflows."""
-    attribution = {}
-    for record in records:
-         if "actions" in record.product.lower() and "compute" in record.sku.lower():
-             if record.workflow_path:
-                 attribution[record.workflow_path] = attribution.get(record.workflow_path, 0.0) + record.net_amount
-             else:
-                 attribution["unattributed"] = attribution.get("unattributed", 0.0) + record.net_amount
 
+def extract_workflow_attribution(
+    records: list[GitHubBillingRecord],
+    report_currency: str,
+) -> dict[WorkflowAttributionKey, Decimal]:
+    """Attribute Actions compute net amount to ``(repository, workflow)``.
+
+    A missing repository stays ``None`` and is not merged with a named
+    repository that uses the same workflow path. Rows without a workflow path
+    use the ``unattributed`` label.
+    """
+    _require_report_currency(records, report_currency)
+    attribution: dict[WorkflowAttributionKey, Decimal] = {}
+    for record in records:
+        if not is_actions_compute(record):
+            continue
+        key = (record.repository, record.workflow_path or "unattributed")
+        attribution[key] = attribution.get(key, Decimal("0")) + record.net_amount
     return attribution
