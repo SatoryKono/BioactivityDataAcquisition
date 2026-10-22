@@ -37,6 +37,7 @@ This suite provides one smoke E2E case per entity pipeline declared in
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Generator
 import os
 import sys
 from dataclasses import dataclass
@@ -67,6 +68,7 @@ from .conftest import (
     create_test_context,
     is_external_healthcheck_playback_failure,
     run_pipeline_or_skip_transient,
+    _clear_runtime_config_caches,
     _resolve_e2e_pipeline_matrix_execution_timeout_seconds,
 )
 
@@ -414,6 +416,27 @@ def pipeline_case(request: pytest.FixtureRequest) -> PipelineE2ECase:
 
 
 @pytest.fixture
+def semanticscholar_playback_rate_limit(
+    pipeline_case: PipelineE2ECase,
+    monkeypatch: pytest.MonkeyPatch,
+) -> Generator[None, None, None]:
+    """Use the provider's authenticated replay rate when no network is used.
+
+    Anonymous Semantic Scholar traffic is capped at one request per 100 seconds.
+    The VCR-backed matrix smoke performs both health-check and search requests,
+    so applying the live anonymous interval to cassette playback exhausts the
+    bounded pipeline timeout despite making no network calls.
+    """
+    if pipeline_case.provider != "semanticscholar" or _is_vcr_recording_enabled():
+        yield
+        return
+    monkeypatch.setenv("BIOETL_SEMANTICSCHOLAR_API_KEY", "vcr-playback-only")
+    _clear_runtime_config_caches()
+    yield
+    _clear_runtime_config_caches()
+
+
+@pytest.fixture
 def vcr_cassette_dir(pipeline_case: PipelineE2ECase) -> Path:
     cassette_dir = CASSETTE_ROOT / pipeline_case.provider
     cassette_dir.mkdir(parents=True, exist_ok=True)
@@ -473,6 +496,7 @@ async def test_pipeline_matrix_smoke(
     e2e_data_dir: Path,
     pipeline_case: PipelineE2ECase,
     vcr_cassette_name: str,
+    semanticscholar_playback_rate_limit: None,
 ) -> None:
     """Run one smoke E2E per entity pipeline.
 
