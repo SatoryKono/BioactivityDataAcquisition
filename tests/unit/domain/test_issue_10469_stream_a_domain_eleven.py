@@ -252,12 +252,7 @@ def test_target_protein_classification_requires_target_id() -> None:
 def test_redaction_url_errors_and_structured_passthrough() -> None:
     assert _redact_url("not-a-url") == "not-a-url"
     assert _redact_url("http:") == "http:"
-    redacted_bad_port = _redact_url("http://example.com:999999/path")
-    import urllib.parse
-    assert redacted_bad_port in {
-        "[REDACTED URL]",
-        "http://example.com:999999/path",
-    } or urllib.parse.urlparse(redacted_bad_port).hostname == "example.com"
+    assert _redact_url("http://example.com:999999/path") == "[REDACTED URL]"
     assert _redact_structured(object(), "", seen=set()) is not None
 
 
