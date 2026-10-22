@@ -2092,7 +2092,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "9a1343fa6aab47476ef852f6f5872e2db18fc8de761f8b5cba4263e9f3ce4b99",
+  "source_tree_sha256": "a685061189738e61d633894e26b1cebc51a6359153814ee19e0051a4edc66b58",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
