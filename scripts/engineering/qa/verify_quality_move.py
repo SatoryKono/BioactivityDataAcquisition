@@ -8,6 +8,7 @@ accepted only as explicit operator or pytest destinations.
 from __future__ import annotations
 
 import argparse
+import ast
 import csv
 import hashlib
 import io
@@ -50,7 +51,8 @@ _DECISION_FIELDS = (
 )
 _BLOB_SHA = re.compile(r"[0-9a-f]{40}")
 _REVIEW_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
-_IMPORT_LINE = re.compile(r"(?m)^[ \t]*(?:from|import)[ \t]+([A-Za-z_][\w.]*)")
+_SOURCE_PREFIX = "src/"
+_TARGET_PREFIX = "scripts/"
 _GIT_LOCATION_VARS = {
     "GIT_COMMON_DIR",
     "GIT_DIR",
@@ -153,8 +155,8 @@ def _duplicate_or_prefix_error(
     if target in targets:
         return f"Duplicate target_path: {target}"
     try:
-        _normalized_rel(repo, source, "src/")
-        _normalized_rel(repo, target, "scripts/")
+        _normalized_rel(repo, source, _SOURCE_PREFIX)
+        _normalized_rel(repo, target, _TARGET_PREFIX)
     except ValueError:
         return "Path traversal detected in manifest rows"
     sources.add(source)
@@ -181,7 +183,7 @@ def _blob_error(repo: Path, row: _Row) -> str | None:
     if _BLOB_SHA.fullmatch(commit) is None:
         return f"base_commit must be 40 hex characters: {source}"
     try:
-        normalized = _normalized_rel(repo, source, "src/")
+        normalized = _normalized_rel(repo, source, _SOURCE_PREFIX)
     except ValueError:
         return f"Path traversal detected in {source}"
     spec = f"{commit}:{normalized}"
@@ -231,7 +233,10 @@ def _review_date_error(item: dict[str, object]) -> str | None:
     raw = str(item.get("review_by", ""))
     if _REVIEW_DATE.fullmatch(raw) is None:
         return None
-    reviewed = datetime.strptime(raw, "%Y-%m-%d").date()
+    try:
+        reviewed = datetime.strptime(raw, "%Y-%m-%d").date()
+    except ValueError:
+        return f"Decision review_by is not a valid date: {raw}"
     if reviewed < datetime.now(UTC).date():
         return f"Decision review_by is expired: {raw}"
     return None
@@ -361,9 +366,10 @@ def write_evidence(
 
 def _tracked(repo: Path, relative: str) -> bool:
     try:
-        normalized = _normalized_rel(
-            repo, relative, "src/" if relative.startswith("src/") else "scripts/"
+        prefix = (
+            _SOURCE_PREFIX if relative.startswith(_SOURCE_PREFIX) else _TARGET_PREFIX
         )
+        normalized = _normalized_rel(repo, relative, prefix)
     except ValueError:
         return False
     try:
@@ -383,8 +389,8 @@ def _row_presence_error(
     source = row["source_path"]
     target = row["target_path"]
     try:
-        _normalized_rel(repo, source, "src/")
-        _normalized_rel(repo, target, "scripts/")
+        _normalized_rel(repo, source, _SOURCE_PREFIX)
+        _normalized_rel(repo, target, _TARGET_PREFIX)
     except ValueError:
         return "Path traversal detected in manifest rows"
     source_exists = _tracked(repo, source)
@@ -401,9 +407,9 @@ def _row_presence_error(
 
 
 def _moved_module(source: str) -> str | None:
-    if not source.startswith("src/") or not source.endswith(".py"):
+    if not source.startswith(_SOURCE_PREFIX) or not source.endswith(".py"):
         return None
-    return source[len("src/") : -3].replace("/", ".")
+    return source[len(_SOURCE_PREFIX) : -3].replace("/", ".")
 
 
 def _import_exempt(item: dict[str, object], path: str, module: str) -> bool:
@@ -424,37 +430,81 @@ def _matching_module(imported: str, modules: list[str]) -> str | None:
     return None
 
 
-def _leftover_import_error(
-    repo: Path, rows: list[_Row], decisions_path: str
+def _node_import_names(node: ast.AST) -> list[str]:
+    if isinstance(node, ast.Import):
+        return [alias.name for alias in node.names]
+    if not isinstance(node, ast.ImportFrom) or node.level != 0 or not node.module:
+        return []
+    names = [node.module]
+    names.extend(
+        f"{node.module}.{alias.name}" for alias in node.names if alias.name != "*"
+    )
+    return names
+
+
+def _parse_python_imports(text: str) -> list[str] | str:
+    try:
+        tree = ast.parse(text)
+    except SyntaxError as exc:
+        return str(exc)
+    names: list[str] = []
+    for node in ast.walk(tree):
+        names.extend(_node_import_names(node))
+    return names
+
+
+def _decision_exempt(decisions: list[object], path: str, imported: str) -> bool:
+    return any(
+        isinstance(item, dict) and _import_exempt(item, path, imported)
+        for item in decisions
+    )
+
+
+def _leftover_in_text(
+    relative: str, text: str, modules: list[str], decisions: list[object]
 ) -> str | None:
-    modules = [module for row in rows if (module := _moved_module(row["source_path"]))]
-    if not modules:
-        return None
+    parsed = _parse_python_imports(text)
+    if isinstance(parsed, str):
+        return f"Could not parse Python file {relative}: {parsed}"
+    for imported in parsed:
+        if _matching_module(imported, modules) is None:
+            continue
+        if _decision_exempt(decisions, relative, imported):
+            continue
+        return f"Phase after: leftover import {imported} in {relative}"
+    return None
+
+
+def _scan_inputs(repo: Path, decisions_path: str) -> tuple[str, list[object]] | str:
     try:
         listed = _git_stdout(repo, ["ls-files", "-z"])
         payload = json.loads(_read_external_text(decisions_path))
     except (OSError, RuntimeError, ValueError, json.JSONDecodeError) as exc:
         return f"Could not scan leftover imports: {exc}"
     items = _decision_items(payload)
-    decisions = items if isinstance(items, list) else []
-    targets = {row["target_path"] for row in rows}
+    return listed, items if isinstance(items, list) else []
+
+
+def _leftover_import_error(
+    repo: Path, rows: list[_Row], decisions_path: str
+) -> str | None:
+    modules = [module for row in rows if (module := _moved_module(row["source_path"]))]
+    if not modules:
+        return None
+    loaded = _scan_inputs(repo, decisions_path)
+    if isinstance(loaded, str):
+        return loaded
+    listed, decisions = loaded
     for relative in listed.split("\0"):
-        if not relative or relative in targets:
+        if not relative.endswith(".py"):
             continue
         try:
             text = read_text_confined(relative, root=repo)
-        except (OSError, UnicodeError, ValueError):
-            continue
-        for match in _IMPORT_LINE.finditer(text):
-            imported = match.group(1)
-            if _matching_module(imported, modules) is None:
-                continue
-            exempt = any(
-                isinstance(item, dict) and _import_exempt(item, relative, imported)
-                for item in decisions
-            )
-            if not exempt:
-                return f"Phase after: leftover import {imported} in {relative}"
+        except (OSError, UnicodeError, ValueError) as exc:
+            return f"Could not read Python file {relative}: {exc}"
+        error = _leftover_in_text(relative, text, modules, decisions)
+        if error:
+            return error
     return None
 
 

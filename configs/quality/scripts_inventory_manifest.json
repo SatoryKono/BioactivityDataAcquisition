@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-22T13:42:00.120124+00:00",
+  "generated_at": "2026-10-22T14:20:33.101628+00:00",
   "summary": {
     "total_scripts": 664,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 16,
       "scripts": 555,
       "skills": 13,
-      "tests": 481
+      "tests": 482
     }
   },
   "scripts": [
@@ -18704,8 +18704,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.verify_quality_move import main as verify_quality_move_main"
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-11-30",

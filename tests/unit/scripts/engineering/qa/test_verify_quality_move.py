@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import hashlib
 import json
 import os
@@ -8,6 +10,8 @@ from collections.abc import Generator
 from pathlib import Path
 
 import pytest
+
+from scripts.engineering.qa.verify_quality_move import main as verify_quality_move_main
 
 _GIT_LOCATION_VARS = frozenset(
     {
@@ -653,6 +657,7 @@ def test_valid_before(
     evidence = tmp_path / "evidence.json"
     _write_evidence(evidence, repo, "before")
     res = _invoke(run_scanner, repo, tmp_path, "before", manifest, decisions, evidence)
+    assert callable(verify_quality_move_main)
     assert res.returncode == 0, res.stdout + res.stderr
     assert "Verification PASS" in res.stdout
     written = json.loads(
@@ -819,3 +824,79 @@ def test_outdated_addressable_decision(
     )
     assert res.returncode == 1
     assert "Hash mismatch" in res.stdout
+
+
+@pytest.mark.unit
+def test_invalid_review_by_date(
+    run_scanner: Runner,
+    committed_sources: tuple[Path, str],
+    tmp_path: Path,
+) -> None:
+    repo, commit = committed_sources
+    manifest = tmp_path / "manifest.csv"
+    _write_bound_manifest(manifest, repo, commit)
+    decisions = tmp_path / "decisions.json"
+    _write_json(decisions, [{**_removed_decision(), "review_by": "2026-13-45"}])
+    evidence = tmp_path / "evidence.json"
+    _write_evidence(evidence, repo, "before")
+    res = _invoke(run_scanner, repo, tmp_path, "before", manifest, decisions, evidence)
+    assert res.returncode == 1
+    assert "Decision review_by is not a valid date: 2026-13-45" in res.stdout
+    assert (tmp_path / "out" / "execution_evidence.json").is_file()
+
+
+@pytest.mark.unit
+def test_after_from_import_name(
+    run_scanner: Runner,
+    committed_sources: tuple[Path, str],
+    tmp_path: Path,
+) -> None:
+    repo, commit = committed_sources
+    _commit_move(repo, extra={"scripts/consumer.py": "from bioetl import test0\n"})
+    manifest = tmp_path / "manifest.csv"
+    _write_bound_manifest(manifest, repo, commit)
+    decisions = _removed(tmp_path / "decisions.json")
+    evidence = tmp_path / "evidence.json"
+    _write_evidence(evidence, repo, "after")
+    res = _invoke(run_scanner, repo, tmp_path, "after", manifest, decisions, evidence)
+    assert res.returncode == 1
+    assert (
+        "Phase after: leftover import bioetl.test0 in scripts/consumer.py" in res.stdout
+    )
+
+
+@pytest.mark.unit
+def test_after_target_keeps_old_import(
+    run_scanner: Runner,
+    committed_sources: tuple[Path, str],
+    tmp_path: Path,
+) -> None:
+    repo, commit = committed_sources
+    target = _target(0)
+    _commit_move(repo, extra={target: "from bioetl import test0\n"})
+    manifest = tmp_path / "manifest.csv"
+    _write_bound_manifest(manifest, repo, commit)
+    decisions = _removed(tmp_path / "decisions.json")
+    evidence = tmp_path / "evidence.json"
+    _write_evidence(evidence, repo, "after")
+    res = _invoke(run_scanner, repo, tmp_path, "after", manifest, decisions, evidence)
+    assert res.returncode == 1
+    assert f"Phase after: leftover import bioetl.test0 in {target}" in res.stdout
+
+
+@pytest.mark.unit
+def test_after_unparseable_python(
+    run_scanner: Runner,
+    committed_sources: tuple[Path, str],
+    tmp_path: Path,
+) -> None:
+    repo, commit = committed_sources
+    _commit_move(repo, extra={"scripts/broken.py": "def (\n"})
+    manifest = tmp_path / "manifest.csv"
+    _write_bound_manifest(manifest, repo, commit)
+    decisions = _removed(tmp_path / "decisions.json")
+    evidence = tmp_path / "evidence.json"
+    _write_evidence(evidence, repo, "after")
+    res = _invoke(run_scanner, repo, tmp_path, "after", manifest, decisions, evidence)
+    assert res.returncode == 1
+    assert "Could not parse Python file scripts/broken.py" in res.stdout
