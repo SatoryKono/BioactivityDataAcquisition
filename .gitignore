@@ -168,6 +168,8 @@ log_test.txt
 !/reports/test-swarm/SWARM-001/flakiness-database.json
 !/reports/quality/
 /reports/quality/*
+!/reports/quality/quality-move-qm01/
+!/reports/quality/quality-move-qm01/**
 !/reports/quality/ci-family-refresh-evidence-20261012.json
 
 # Sonar residual ledgers (SNR-R / SNR-R2)
