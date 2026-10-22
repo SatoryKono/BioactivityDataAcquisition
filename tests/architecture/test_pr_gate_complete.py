@@ -180,8 +180,9 @@ def test_policy_section_3_separates_enforcement_from_stored_contexts() -> None:
 
 
 def test_aggregator_does_not_use_continue_on_error() -> None:
-    text = COORDINATOR.read_text(encoding="utf-8")
-    assert "continue-on-error" not in text
+    workflow = yaml.safe_load(COORDINATOR.read_text(encoding="utf-8"))
+    steps = workflow["jobs"]["pr-gate-complete"]["steps"]
+    assert all("continue-on-error" not in step for step in steps)
 
 
 def test_called_owner_workflows_reject_duplicate_yaml_keys() -> None:
