@@ -1,16 +1,29 @@
 """Construction smoke for the S1 durability-sweep denominator.
 
 These tests prove each concrete store can be assembled under an isolated
-root and that the child-process harness reports exit codes. They do not
-interrupt a write, restart a worker, or record a durability verdict.
+root and that the child-process harness reports exit codes. The Gold case
+also reads back one dual-write. They do not interrupt a write or record a
+crash verdict.
 """
 
 from __future__ import annotations
 
 from datetime import UTC
 from pathlib import Path
+from typing import cast
 
 import pytest
+from pandera.pandas import Column, DataFrameSchema
+
+from bioetl.domain.types.gold_schema_policy import (
+    GoldSchemaPolicyByVersion,
+    GoldSchemaVersionPolicy,
+)
+from bioetl.infrastructure.storage.delta.table_ops import (
+    load_delta_table,
+    read_delta_records,
+)
+from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 from tests.integration.infrastructure.durability._child_runner import (
     child_exit_failure,
@@ -106,3 +119,56 @@ def test_harness_reports_child_exit_codes() -> None:
     harness = DurabilityHarness()
     assert harness.run_isolated(child_exit_success, ()) == 0
     assert harness.run_isolated(child_exit_failure, ()) == CHILD_FAILURE_CODE
+
+
+async def test_gold_dual_write_smoke(
+    tmp_path: Path,
+    durability_collaborators: DurabilityCollaborators,
+) -> None:
+    """Gold builder dual-write projects each contract version on readback."""
+    root = isolated_store_root(tmp_path, "g1_gold")
+    assembly = assemble_store("g1_gold", root, durability_collaborators)
+    writer = cast(GoldWriter, assembly.instance)
+    legacy_schema = DataFrameSchema(
+        {
+            "entity_id": Column(str, nullable=False),
+            "legacy_value": Column(str, nullable=False),
+        },
+        strict=True,
+    )
+    strict_schema = DataFrameSchema(
+        {
+            "entity_id": Column(str, nullable=False),
+            "value": Column(float, nullable=False),
+        },
+        strict=True,
+    )
+    schema_policy = GoldSchemaPolicyByVersion(
+        active_version="2.0.0",
+        policies=(
+            GoldSchemaVersionPolicy(version="1.0.0", schema=legacy_schema),
+            GoldSchemaVersionPolicy(version="2.0.0", schema=strict_schema),
+        ),
+    )
+
+    await writer.write_gold(
+        table_name="chembl.activity",
+        records=[
+            {
+                "entity_id": "CHEMBL123",
+                "legacy_value": "old-shape",
+                "value": 5.5,
+            }
+        ],
+        schema=schema_policy,
+        mode="append",
+    )
+
+    def _load_delta_rows(table_path: Path) -> list[dict[str, object]]:
+        table = load_delta_table(str(table_path))
+        return cast(list[dict[str, object]], read_delta_records(table))
+
+    v1_rows = _load_delta_rows(root / "chembl" / "activity__v1_0_0")
+    v2_rows = _load_delta_rows(root / "chembl" / "activity__v2_0_0")
+    assert v1_rows == [{"entity_id": "CHEMBL123", "legacy_value": "old-shape"}]
+    assert v2_rows == [{"entity_id": "CHEMBL123", "value": 5.5}]

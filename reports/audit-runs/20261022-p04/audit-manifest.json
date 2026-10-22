@@ -1,0 +1,41 @@
+{
+  "audited_revision": "ee83860e7902adcd5eebff163514df97a6c5f5f4",
+  "ci_failure": {
+    "detail": "review_plan_script.py is a tracked root script outside the root allowlist and fails test_no_tracked_repository_root_scripts_remain.",
+    "reason": "root_script_outside_allowlist",
+    "run": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/39736306466"
+  },
+  "coderabbit": {
+    "inline_comments": 0,
+    "state": "skipped_draft"
+  },
+  "concern": "infrastructure adapters, storage atomicity, lifecycle ownership",
+  "counts": {
+    "direct_port_subclasses": 19,
+    "infrastructure_python_files": 682,
+    "port_adapter_cases": 7,
+    "registered_datasource_rows": 8,
+    "root_scripts_on_origin_main": 0
+  },
+  "exclusions": [
+    "port suite expansion",
+    "process-crash campaign",
+    "composition-root lifecycle matrix",
+    "tech-debt budget changes"
+  ],
+  "findings_sha256": "043ec6e3c92c9c9d506b6dfc4d9b6efad540dbbb8826d9be910f830c8da779ad",
+  "historical_adapter_owner_map": "reports/audit-runs/12107-r07/adapter-owner-map.md",
+  "merge": {
+    "conflicts": 0,
+    "main_revision": "ee83860e7902adcd5eebff163514df97a6c5f5f4",
+    "pr_head_before_merge": "d1f4bb351cca664c8057d97f201b4c1426a65927"
+  },
+  "mode": "READ_ONLY_REVALIDATION",
+  "observed_at": "2026-10-22T07:26:37Z",
+  "predecessor_commit": "d1f4bb351cca664c8057d97f201b4c1426a65927",
+  "predecessor_added_root_script": "review_plan_script.py",
+  "run_id": "20261022-p04",
+  "schema_version": 1,
+  "scope": "src/bioetl/infrastructure/**/*.py",
+  "stage": "P04"
+}

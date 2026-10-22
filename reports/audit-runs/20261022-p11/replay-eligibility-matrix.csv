@@ -1,0 +1,5 @@
+capability,static_condition,runtime_verified,source
+exact_replay_supported,full_snapshot_envelope is true,false,src/bioetl/domain/control_plane/_reproducibility_policy_profiles.py
+rebuild_only,snapshot envelope is incomplete and resume was not requested,false,src/bioetl/domain/control_plane/_reproducibility_policy_profiles.py
+resume_only,resume_requested and snapshot envelope is incomplete,false,src/bioetl/domain/control_plane/_reproducibility_policy_profiles.py
+strict_profile_without_snapshots,require_input_snapshots raises RuntimeError,false,src/bioetl/domain/control_plane/_reproducibility_policy_persistence.py
