@@ -38,6 +38,7 @@ from scripts.engineering.common.cli_dispatch import (
 
 COMMANDS = {
     "run-tests": "run_pytest_resilient.py",
+    "presubmit": "presubmit_gate.py",
     "quality-gate": "quality_integral_gate.py",
     "architecture-junit-skips": "quality_integral_gate.py",
     "e2e-skip-rate": "check_e2e_matrix_skip_rate.py",

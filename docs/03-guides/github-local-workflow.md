@@ -296,3 +296,20 @@ git push origin --delete <branch-name>
 - For branch consolidation, prefer selective cherry-pick over merging noisy automation branches.
 - In mixed Windows + WSL work, do not share the same `.venv`; use `.venv-win`
   in PowerShell and `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` in WSL.
+
+## Локальная предварительная проверка (presubmit)
+
+Перед отправкой изменений в репозиторий рекомендуется (а для автоматических систем — требуется) запускать единый процесс локальной предварительной проверки. Это позволяет отловить ошибки форматирования (Ruff) и строгой типизации (mypy) до затратного запуска серверных пайплайнов.
+
+```bash
+uv run python -m scripts.engineering.ci presubmit --base origin/main --head HEAD
+```
+
+**Контракт проверки:**
+1. Вычисление точных SHA-1 для `base` и `head`.
+2. Получение `git diff` измененных файлов.
+3. Обязательный прогон `ruff check src tests scripts` и `ruff format --check src tests scripts`.
+4. Если изменены Python-файлы — инкрементальный прогон `mypy --strict` для `src/bioetl` и `src/memory`.
+5. Классификация изменений и быстрые архитектурные проверки.
+
+Любая обязательная ошибка завершит процесс с ненулевым кодом (`exit 1`). Не используйте флаг `--no-verify` (bypass) без аварийной необходимости; аварийное исключение требует согласованной процедуры и записи причины.
