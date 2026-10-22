@@ -761,7 +761,7 @@ jobs:
           set -euo pipefail
           test "${{ needs['classify-changes'].result }}" = "success"
           mkdir -p reports/quality
-          uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \
+          uv run --with packaging==26.3 --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \
             --decision-matrix DECISION_MATRIX \
             --decision-matrix-env \
             --head-sha "${EXPECTED_HEAD_SHA}" \
@@ -770,7 +770,7 @@ jobs:
             --output reports/quality/pr-gate-aggregate-results.json
           AGGREGATE_RESULTS="$(tr -d '\r\n' < reports/quality/pr-gate-aggregate-results.json)"
           export AGGREGATE_RESULTS
-          uv run --frozen --no-build python -m scripts.engineering.ci pr-gate aggregate \
+          uv run --with packaging==26.3 --frozen --no-build python -m scripts.engineering.ci pr-gate aggregate \
             --catalog configs/quality/github_required_checks.yaml \
             --decision-matrix-env DECISION_MATRIX \
             --results-env AGGREGATE_RESULTS \

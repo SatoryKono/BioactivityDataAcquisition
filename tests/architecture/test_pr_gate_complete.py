@@ -179,9 +179,20 @@ def test_policy_section_3_separates_enforcement_from_stored_contexts() -> None:
     assert "2026-10-16" in current
 
 
-def test_aggregator_does_not_use_continue_on_error() -> None:
+def test_only_osv_scanner_uses_continue_on_error_before_severity_gate() -> None:
     text = COORDINATOR.read_text(encoding="utf-8")
-    assert "continue-on-error" not in text
+    workflow = yaml.safe_load(text)
+    steps = workflow["jobs"]["class-lane"]["steps"]
+    continuing_steps = [step for step in steps if step.get("continue-on-error")]
+    assert len(continuing_steps) == 1
+    assert continuing_steps[0]["name"] == "Run OSV-Scanner"
+    osv_gate = next(
+        step
+        for step in steps
+        if step.get("name") == "Fail on HIGH/CRITICAL OSV findings"
+    )
+    assert steps.index(osv_gate) > steps.index(continuing_steps[0])
+    assert "--osv-json osv-results.json" in osv_gate["run"]
 
 
 def test_called_owner_workflows_reject_duplicate_yaml_keys() -> None:
