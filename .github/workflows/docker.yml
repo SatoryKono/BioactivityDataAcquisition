@@ -5,6 +5,21 @@ permissions:
 
 on:
   workflow_call:
+    inputs:
+      cache-write:
+        description: "Permit writing to the max cache (trusted contexts only)"
+        type: boolean
+        required: false
+        default: false
+      caller-sha:
+        description: "Explicit tested SHA (if caller wraps multiple revisions)"
+        type: string
+        required: false
+        default: ""
+    outputs:
+      image-digest:
+        description: "Published GHCR image digest"
+        value: ${{ jobs.docker-push.outputs.digest }}
   push:
     branches-ignore:
       - main
@@ -37,6 +52,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.caller-sha || github.sha }}
           persist-credentials: false
 
       - name: Set up Python + uv
@@ -70,6 +86,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.caller-sha || github.sha }}
           persist-credentials: false
 
       - name: Run Hadolint (Dockerfile linting)
@@ -88,10 +105,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.caller-sha || github.sha }}
           persist-credentials: false
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
       - name: Validate docker-compose.yml syntax
         env:
@@ -115,11 +130,13 @@ jobs:
       security-events: write
     env:
       TRIVY_CACHE_DIR: .trivycache
+      TESTED_SHA: ${{ inputs.caller-sha || github.sha }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.caller-sha || github.sha }}
           persist-credentials: false
 
       - name: Set up Docker Buildx
@@ -133,11 +150,16 @@ jobs:
           file: Dockerfile.bioetl
           push: false
           load: true
-          tags: "bioetl:${{ github.sha }}"
+          tags: "bioetl:${{ inputs.caller-sha || github.sha }}"
           cache-from: type=gha
-          # PRs consume the trusted default-branch cache but do not spend the
-          # critical path exporting a branch-local max cache. Main refreshes it.
-          cache-to: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'type=gha,mode=max' || '' }}
+          # Caller github.event_name is preserved (push, schedule,
+          # workflow_dispatch), not rewritten to workflow_call. cache-write
+          # is required but not sufficient: the ref must be main or nightly,
+          # the repository must not be a fork, and caller-sha must be empty
+          # or equal to github.sha. The reachable caller is main-integrity.
+          # Keep the predicate inside `condition && 'mode' || ''` so a true
+          # arm yields the cache mode instead of boolean true.
+          cache-to: ${{ (inputs.cache-write == true && github.event.repository.fork == false && (github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/nightly') && (inputs.caller-sha == '' || inputs.caller-sha == github.sha)) && 'type=gha,mode=max' || '' }}
 
       - name: Prepare security reports directory
         run: mkdir -p reports/security
@@ -146,7 +168,7 @@ jobs:
         env:
           BUILD_DIGEST: ${{ steps.build.outputs.digest }}
           BUILD_IMAGE_ID: ${{ steps.build.outputs.imageid }}
-          IMAGE_REF: bioetl:${{ github.sha }}
+          IMAGE_REF: bioetl:${{ inputs.caller-sha || github.sha }}
         # The build metadata output embeds full provenance (git history with
         # commit messages) and can exceed the runner exec env limit (E2BIG:
         # "Argument list too long") when passed as an env var. Ship it through
@@ -171,7 +193,7 @@ jobs:
 
           payload = {
               "schema_version": "docker-build-action-metadata-v1",
-              "source_sha": os.environ["GITHUB_SHA"],
+              "source_sha": os.environ["TESTED_SHA"],
               "run_id": os.environ.get("GITHUB_RUN_ID", ""),
               "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", ""),
               "image_ref": os.environ["IMAGE_REF"],
@@ -180,7 +202,7 @@ jobs:
               "metadata": metadata,
               "cache": {
                   "from": "type=gha",
-                  "to_policy": "main push only: type=gha,mode=max",
+                  "to_policy": "trusted main/nightly only: type=gha,mode=max",
               },
           }
           if not payload["image_id"]:
@@ -193,11 +215,11 @@ jobs:
 
       - name: Capture image and runtime provenance
         env:
-          IMAGE_REF: bioetl:${{ github.sha }}
+          IMAGE_REF: bioetl:${{ inputs.caller-sha || github.sha }}
         run: |
           set -euo pipefail
           {
-            echo "source_sha=${GITHUB_SHA}"
+            echo "source_sha=${TESTED_SHA}"
             echo "wolfi_base_image=chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
             echo "runtime_python=python-3.13=3.13.16_git20261002-r2"
             echo "builder_uv=uv=0.11.26-r0"
@@ -213,7 +235,7 @@ jobs:
 
       - name: Prove default image health contract
         env:
-          IMAGE_REF: bioetl:${{ github.sha }}
+          IMAGE_REF: bioetl:${{ inputs.caller-sha || github.sha }}
         run: |
           set -euo pipefail
           container_id="$(docker run --detach --rm "${IMAGE_REF}")"
@@ -246,7 +268,7 @@ jobs:
 
       - name: Run full Trivy JSON evidence scan
         env:
-          IMAGE_REF: bioetl:${{ github.sha }}
+          IMAGE_REF: bioetl:${{ inputs.caller-sha || github.sha }}
         run: |
           set -euo pipefail
           trivy image \
@@ -272,7 +294,7 @@ jobs:
       - name: Generate SBOM for the scanned local image
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
         with:
-          image: "bioetl:${{ github.sha }}"
+          image: "bioetl:${{ inputs.caller-sha || github.sha }}"
           format: spdx-json
           output-file: reports/security/bioetl.spdx.json
           upload-artifact: false
@@ -338,7 +360,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always() && !cancelled() && steps.validate-baseline.outcome == 'success'
         with:
-          name: bioetl-security-baseline-${{ github.sha }}
+          name: bioetl-security-baseline-${{ inputs.caller-sha || github.sha }}
           path: |
             reports/security/bioetl-image-id.txt
             reports/security/bioetl-image-provenance.txt
@@ -366,14 +388,14 @@ jobs:
       - name: Export exact scanned image for publication
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_call')
         env:
-          IMAGE_REF: bioetl:${{ github.sha }}
+          IMAGE_REF: bioetl:${{ inputs.caller-sha || github.sha }}
         run: docker save "${IMAGE_REF}" | zstd -T0 -10 -o reports/security/bioetl-scanned-image.tar.zst
 
       - name: Transfer exact scanned image to publish job
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_call')
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: bioetl-scanned-image-${{ github.sha }}
+          name: bioetl-scanned-image-${{ inputs.caller-sha || github.sha }}
           path: |
             reports/security/bioetl-scanned-image.tar.zst
             reports/security/bioetl-image-id.txt
@@ -420,8 +442,12 @@ jobs:
     needs:
       - docker-build
       - docker-complete
+    outputs:
+      digest: ${{ steps.publish.outputs.digest }}
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_call')
     environment: ghcr-publish
+    env:
+      TESTED_SHA: ${{ inputs.caller-sha || github.sha }}
     concurrency:
       group: docker-ghcr-push-${{ github.run_id }}
       cancel-in-progress: false
@@ -437,7 +463,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          SOURCE_SHA: ${{ github.sha }}
+          SOURCE_SHA: ${{ inputs.caller-sha || github.sha }}
         run: |
           set -euo pipefail
           current_sha="$(gh api "/repos/${REPOSITORY}/branches/main" --jq '.commit.sha')"
@@ -454,13 +480,13 @@ jobs:
         if: steps.head-guard.outputs.stale != 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: bioetl-scanned-image-${{ github.sha }}
+          name: bioetl-scanned-image-${{ inputs.caller-sha || github.sha }}
           path: scanned-image
 
       - name: Load exact scanned image
         if: steps.head-guard.outputs.stale != 'true'
         env:
-          IMAGE_REF: bioetl:${{ github.sha }}
+          IMAGE_REF: bioetl:${{ inputs.caller-sha || github.sha }}
         run: |
           set -euo pipefail
           zstd -d -c scanned-image/bioetl-scanned-image.tar.zst | docker load
@@ -490,12 +516,12 @@ jobs:
         if: steps.head-guard.outputs.stale != 'true'
         id: publish
         env:
-          IMAGE_REF: bioetl:${{ github.sha }}
+          IMAGE_REF: bioetl:${{ inputs.caller-sha || github.sha }}
           IMAGE_BASE: ${{ steps.ghcr.outputs.image_base }}
         run: |
           set -euo pipefail
           expected_id="$(cat scanned-image/bioetl-image-id.txt)"
-          sha_ref="${IMAGE_BASE}:${GITHUB_SHA}"
+          sha_ref="${IMAGE_BASE}:${TESTED_SHA}"
           branch_ref="${IMAGE_BASE}:${GITHUB_REF_NAME}"
           docker tag "${IMAGE_REF}" "${sha_ref}"
           docker tag "${IMAGE_REF}" "${branch_ref}"
@@ -511,7 +537,7 @@ jobs:
         if: steps.head-guard.outputs.stale != 'true'
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
         with:
-          image: ${{ steps.ghcr.outputs.image_base }}:${{ github.sha }}
+          image: ${{ steps.ghcr.outputs.image_base }}:${{ inputs.caller-sha || github.sha }}
           format: spdx-json
           output-file: bioetl-ghcr.spdx.json
           artifact-name: bioetl-ghcr-sbom
