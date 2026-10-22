@@ -853,6 +853,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/ci/sync_control.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the ci-control uv sync wrapper invoked by setup-python-uv. Keep it supporting so the active script budget does not grow; it is not a separate router command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
     "scripts/engineering/ci/test_telemetry_provenance.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the imported squash-provenance validation library used by telemetry governance tests; its standalone CLI builds a reviewed receipt from a validated local capture and merged PR. Keep it as supporting code behind the owning checks.",
@@ -972,6 +978,24 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-05",
       "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
+    },
+    "scripts/engineering/finances/github_billing_pipeline.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the test-imported GitHub billing aggregator from #12412. Keep it supporting so the active script budget does not grow; promote only if it becomes a governed router command and an active slot is free.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
+    "scripts/engineering/finances/github_billing_schema.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the test-imported GitHub billing schema helper from #12412. Keep it supporting so the active script budget does not grow.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
+    "scripts/engineering/finances/github_billing_validator.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the test-imported GitHub billing validator from #12412. Keep it supporting so the active script budget does not grow.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
     },
     "scripts/engineering/performance/capture_delta_merge.py": {
       "decision": "legacy_manual_utility",
@@ -1392,6 +1416,12 @@
       "next_step": "Retain as the test-imported content-contract checker; promote to an active QA router command only after it is owned by scripts.engineering.qa __main__ and a matching active slot is freed.",
       "owner": "@bioetl-observability",
       "review_by": "2026-09-30"
+    },
+    "scripts/engineering/qa/verify_quality_move.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the QM-02 before/after verifier invoked by its unit tests. Keep it supporting so the active script budget does not grow; promote only after a router slot is freed.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
     },
     "scripts/engineering/repo/_branch_cleanup_policy.py": {
       "decision": "shared_helper_module",
