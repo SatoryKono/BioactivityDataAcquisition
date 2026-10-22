@@ -1956,6 +1956,30 @@
       "next_step": "Retain as the imported Git-index discovery helper shared by QA collectors. It has no standalone CLI; keep execution routed through the owning collector entrypoints.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
+    },
+    "scripts/engineering/ci/sync_control.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the fixed-argv backend invoked by the setup-python-uv composite action; keep it supporting because CI callers use the governed action rather than a standalone command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
+    "scripts/engineering/finances/github_billing_pipeline.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal aggregation module behind the GitHub billing workflow; keep it supporting because it has no standalone invocation surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
+    "scripts/engineering/finances/github_billing_schema.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the shared billing record schema imported by the pipeline and validator; keep it supporting because it is a library module.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
+    "scripts/engineering/finances/github_billing_validator.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal billing validation module used by the workflow and tests; keep it supporting because it has no standalone invocation surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
     }
   },
   "schema_version": "1.0"

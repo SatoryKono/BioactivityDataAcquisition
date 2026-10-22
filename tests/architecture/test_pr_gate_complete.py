@@ -179,9 +179,36 @@ def test_policy_section_3_separates_enforcement_from_stored_contexts() -> None:
     assert "2026-10-16" in current
 
 
-def test_aggregator_does_not_use_continue_on_error() -> None:
+def test_only_osv_scanner_uses_continue_on_error_before_severity_gate() -> None:
     text = COORDINATOR.read_text(encoding="utf-8")
-    assert "continue-on-error" not in text
+    workflow = yaml.safe_load(text)
+    steps = workflow["jobs"]["class-lane"]["steps"]
+    continuing_steps = [step for step in steps if step.get("continue-on-error")]
+    assert len(continuing_steps) == 1
+    assert continuing_steps[0]["name"] == "Run OSV-Scanner"
+    osv_gate = next(
+        step
+        for step in steps
+        if step.get("name") == "Fail on HIGH/CRITICAL OSV findings"
+    )
+    assert steps.index(osv_gate) > steps.index(continuing_steps[0])
+    assert "--osv-json osv-results.json" in osv_gate["run"]
+    record_step = next(
+        step for step in steps if step.get("name") == "Record required step outcomes"
+    )
+    record_run = str(record_step["run"])
+    assert 'result_key = "conclusion" if key == "osv-scan" else "outcome"' in record_run
+    assert 'raw.get("osv-scan")' in record_run
+    assert 'raw.get("osv-gate")' in record_run
+    assert 'osv_scan.get("outcome", "")).lower() == "failure"' in record_run
+    assert 'osv_gate.get("outcome", "")).lower() == "success"' in record_run
+
+
+def test_aggregator_does_not_use_continue_on_error() -> None:
+    coordinator = _load_yaml(COORDINATOR)
+    aggregator = coordinator["jobs"]["pr-gate-complete"]
+    assert "continue-on-error" not in aggregator
+    assert all("continue-on-error" not in step for step in aggregator.get("steps", []))
 
 
 def test_called_owner_workflows_reject_duplicate_yaml_keys() -> None:
