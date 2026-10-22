@@ -30,6 +30,12 @@ from tests.integration.infrastructure.durability.data_factories import (
 )
 from tests.integration.infrastructure.durability.harness import DurabilityHarness
 
+import asyncio
+from typing import cast
+from pandera import DataFrameSchema, Column
+from bioetl.domain.types.gold_schema_policy import GoldSchemaPolicyByVersion, GoldSchemaVersionPolicy
+from bioetl.infrastructure.storage.delta.table_ops import load_delta_table, read_delta_records
+
 pytestmark = pytest.mark.integration
 
 
@@ -106,3 +112,45 @@ def test_harness_reports_child_exit_codes() -> None:
     harness = DurabilityHarness()
     assert harness.run_isolated(child_exit_success, ()) == 0
     assert harness.run_isolated(child_exit_failure, ()) == CHILD_FAILURE_CODE
+
+@pytest.mark.asyncio
+async def test_gold_dual_write_smoke(
+    tmp_path: Path,
+    durability_collaborators: DurabilityCollaborators,
+) -> None:
+    root = isolated_store_root(tmp_path, "g1_gold")
+    assembly = assemble_store("g1_gold", root, durability_collaborators)
+    writer = assembly.instance
+
+    legacy_schema = DataFrameSchema({"entity_id": Column(str, nullable=False), "legacy_value": Column(str, nullable=True)}, strict=True)
+    strict_schema = DataFrameSchema({"entity_id": Column(str, nullable=False), "value": Column(float, nullable=False)}, strict=True)
+
+    schema_policy = GoldSchemaPolicyByVersion(
+        active_version="2.0.0",
+        policies=(
+            GoldSchemaVersionPolicy(version="1.0.0", schema=legacy_schema),
+            GoldSchemaVersionPolicy(version="2.0.0", schema=strict_schema),
+        ),
+    )
+
+    records = [{"entity_id": "CHEMBL123", "legacy_value": "old-shape", "value": 5.5}]
+
+    await writer.write_gold(
+        table_name="chembl.activity",
+        records=records,
+        schema=schema_policy,
+        mode="append"
+    )
+
+    def _load_delta_rows(table_path: Path) -> list[dict[str, object]]:
+        table = load_delta_table(str(table_path))
+        return cast(list[dict[str, object]], read_delta_records(table))
+
+    v1_rows = _load_delta_rows(root / "chembl" / "activity__v1_0_0")
+    v2_rows = _load_delta_rows(root / "chembl" / "activity__v2_0_0")
+
+    assert len(v1_rows) == 1
+    assert v1_rows[0]["entity_id"] == "CHEMBL123"
+
+    assert len(v2_rows) == 1
+    assert v2_rows[0]["entity_id"] == "CHEMBL123"

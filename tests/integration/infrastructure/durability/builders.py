@@ -66,6 +66,12 @@ from tests.integration.infrastructure.durability.data_factories import (
     STORE_NAMES,
 )
 
+from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
+from bioetl.domain.types.gold_schema_policy import GoldSchemaPolicyByVersion, GoldSchemaVersionPolicy
+from bioetl.infrastructure.storage.gold.runtime_helpers import GoldWriterRuntimeServices
+from bioetl.domain.ports.noop import NoOpMetadataWriter
+
+
 
 @dataclass(frozen=True, slots=True)
 class DurabilityCollaborators:
@@ -162,7 +168,27 @@ def _silver(root: Path, deps: DurabilityCollaborators) -> StoreAssembly:
 
 
 def _gold(root: Path, deps: DurabilityCollaborators) -> StoreAssembly:
-    writer = GoldWriter(root, deps.logger)
+    runtime_services = GoldWriterRuntimeServices(
+        csv_exporter=None,
+        tracing=None,
+        metrics=deps.metrics,
+        audit=None,
+        metadata_writer=NoOpMetadataWriter(),
+        metadata_coordinator=None,
+        lineage_store=None,
+        contract_rollout_policy=ContractRolloutPolicy(
+            contract_ref="chembl.activity",
+            active_version="2.0.0",
+            mode="dual_write",
+            read_order=("2.0.0", "1.0.0"),
+            write_versions=("1.0.0", "2.0.0"),
+        ),
+    )
+    writer = GoldWriter(
+        root,
+        deps.logger,
+        runtime_services=runtime_services
+    )
     return _assembly("g1_gold", GoldWriter, writer, writer.base_path)
 
 

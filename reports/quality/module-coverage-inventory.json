@@ -1670,6 +1670,24 @@
     },
     {
       "coverage_percent": 100.0,
+      "coverage_status": "measured",
+      "coverage_status_reason": "clean",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing": 0,
+      "path": "src/bioetl/application/core/_gold_outcome_disposition.py"
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "measured",
+      "coverage_status_reason": "clean",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing": 0,
+      "path": "src/bioetl/application/core/_gold_outcome_quarantine_write.py"
+    },
+    {
+      "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 13,
       "executable_lines": 13,
@@ -11450,6 +11468,15 @@
     },
     {
       "coverage_percent": 100.0,
+      "coverage_status": "measured",
+      "coverage_status_reason": "clean",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing": 0,
+      "path": "src/bioetl/domain/behavior/dq_contract_rule_source.py"
+    },
+    {
+      "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 51,
       "executable_lines": 51,
@@ -16617,6 +16644,15 @@
       "module": "bioetl.domain.types.dq_contracts",
       "path": "src/bioetl/domain/types/dq_contracts.py",
       "source_lines": 138
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "measured",
+      "coverage_status_reason": "clean",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing": 0,
+      "path": "src/bioetl/domain/types/dq_record_attribution.py"
     },
     {
       "coverage_percent": 100.0,
@@ -22000,6 +22036,24 @@
     },
     {
       "coverage_percent": 100.0,
+      "coverage_status": "measured",
+      "coverage_status_reason": "clean",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing": 0,
+      "path": "src/bioetl/infrastructure/quarantine/write_dedup.py"
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "measured",
+      "coverage_status_reason": "clean",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing": 0,
+      "path": "src/bioetl/infrastructure/quarantine/write_lock.py"
+    },
+    {
+      "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 7,
       "executable_lines": 7,
@@ -24097,6 +24151,15 @@
       "module": "bioetl.infrastructure.validation",
       "path": "src/bioetl/infrastructure/validation/__init__.py",
       "source_lines": 25
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "measured",
+      "coverage_status_reason": "clean",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing": 0,
+      "path": "src/bioetl/infrastructure/validation/contract_outcome_channel.py"
     },
     {
       "coverage_percent": 100.0,
@@ -27552,6 +27615,24 @@
     },
     {
       "coverage_percent": 100.0,
+      "coverage_status": "measured",
+      "coverage_status_reason": "clean",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing": 0,
+      "path": "src/bioetl/application/core/_gold_outcome_disposition.py"
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "measured",
+      "coverage_status_reason": "clean",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing": 0,
+      "path": "src/bioetl/application/core/_gold_outcome_quarantine_write.py"
+    },
+    {
+      "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 13,
       "executable_lines": 13,
@@ -37332,6 +37413,15 @@
     },
     {
       "coverage_percent": 100.0,
+      "coverage_status": "measured",
+      "coverage_status_reason": "clean",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing": 0,
+      "path": "src/bioetl/domain/behavior/dq_contract_rule_source.py"
+    },
+    {
+      "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 51,
       "executable_lines": 51,
@@ -42499,6 +42589,15 @@
       "module": "bioetl.domain.types.dq_contracts",
       "path": "src/bioetl/domain/types/dq_contracts.py",
       "source_lines": 138
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "measured",
+      "coverage_status_reason": "clean",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing": 0,
+      "path": "src/bioetl/domain/types/dq_record_attribution.py"
     },
     {
       "coverage_percent": 100.0,
@@ -47882,6 +47981,24 @@
     },
     {
       "coverage_percent": 100.0,
+      "coverage_status": "measured",
+      "coverage_status_reason": "clean",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing": 0,
+      "path": "src/bioetl/infrastructure/quarantine/write_dedup.py"
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "measured",
+      "coverage_status_reason": "clean",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing": 0,
+      "path": "src/bioetl/infrastructure/quarantine/write_lock.py"
+    },
+    {
+      "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 7,
       "executable_lines": 7,
@@ -49982,6 +50099,15 @@
     },
     {
       "coverage_percent": 100.0,
+      "coverage_status": "measured",
+      "coverage_status_reason": "clean",
+      "covered_lines": 1,
+      "executable_lines": 1,
+      "missing": 0,
+      "path": "src/bioetl/infrastructure/validation/contract_outcome_channel.py"
+    },
+    {
+      "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 138,
       "executable_lines": 138,
@@ -51785,11 +51911,12 @@
         "covered_line_percent": 99.77,
         "covered_module_count": 204,
         "measured_module_count": 204,
-        "measured_percent": 100.0,
-        "module_count": 204,
+        "measured_percent": 99.03,
+        "module_count": 206,
         "status_counts": {
           "coverage_xml_missing": 0,
           "fully_covered": 199,
+          "measured": 2,
           "no_executable_lines": 0,
           "partially_covered": 5,
           "uncovered": 0,
@@ -51928,10 +52055,11 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2588,
+    "source_module_count": 2595,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 2531,
+      "measured": 7,
       "no_executable_lines": 1,
       "partially_covered": 56,
       "uncovered": 0,
