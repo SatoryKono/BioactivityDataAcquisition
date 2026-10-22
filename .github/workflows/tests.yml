@@ -1444,7 +1444,7 @@ jobs:
             --parallel-timeout-seconds 660 \
             --no-fallback \
             --parallel-marker "serial and not e2e and not benchmark and not memory" \
-            --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report= --junitxml=reports/test-telemetry/junit-serial-coverage.xml" \
+            --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
             --skip-serial-pass
           TEST_EXIT=$?
           if [ ! -s "$COVERAGE_FILE" ]; then

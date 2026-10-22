@@ -587,25 +587,6 @@ test_lanes:
         json_summary: false
 
 
-    serial-coverage:
-      suite_name: serial-coverage
-      description: "Serial-only coverage producer lane."
-      runner_backend: run_pytest_resilient
-      runner: scripts/engineering/ci/run_pytest_resilient.py
-      paths:
-        - tests/
-      marker_expression: "serial and not e2e and not benchmark and not memory"
-      pytest_args:
-        - tests/
-        - -m
-        - serial and not e2e and not benchmark and not memory
-        - -p
-        - no:xdist
-      replay_mode: not_applicable
-      coverage_gate: none
-      expected_artifacts:
-        junit_xml: true
-        json_summary: true
     e2e:
       suite_name: e2e
       description: "Slow end-to-end lane; kept separate from fast feedback and coverage verification."
