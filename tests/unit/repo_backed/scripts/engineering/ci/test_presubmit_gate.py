@@ -269,9 +269,9 @@ def test_resolve_ref_rejects_injection_and_keeps_sha(
         "scripts.engineering.repo.check_no_partial_tree.subprocess.run",
         refuse_git,
     )
-    with pytest.raises(ValueError, match="invalid git ref"):
+    with pytest.raises(SystemExit, match="invalid git revision"):
         gate.resolve_ref("--upload-pack=evil")
-    with pytest.raises(ValueError, match="invalid git ref"):
+    with pytest.raises(SystemExit, match="invalid git revision"):
         gate.resolve_ref("HEAD;rm -rf")
 
     def git_failed(repo: Path, ref: str) -> str:
@@ -279,7 +279,7 @@ def test_resolve_ref_rejects_injection_and_keeps_sha(
         raise SystemExit("git rev-parse failed: fatal: bad object")
 
     monkeypatch.setattr(gate, "resolve_revision", git_failed)
-    with pytest.raises(ValueError, match="bad object"):
+    with pytest.raises(SystemExit, match="bad object"):
         gate.resolve_ref("HEAD")
 
     monkeypatch.setattr(gate, "resolve_revision", lambda repo, ref: "DEADBEEF")
@@ -307,7 +307,7 @@ def test_cli_rejects_flag_ref() -> None:
         text=True,
     )
     assert completed.returncode == 1
-    assert "invalid git ref" in completed.stderr
+    assert "invalid git revision" in completed.stderr
 
 
 def test_unsafe_changed_path_is_rejected() -> None:

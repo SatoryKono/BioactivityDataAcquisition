@@ -86,12 +86,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_scripts_inventory_manifest.py",
     ),
     "docs/05-engineering/test-telemetry-baseline.md": TELEMETRY_BASELINE_TESTS,
-    ".github/workflows/pr-required.yml": (
-        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
-    ),
-    "configs/quality/reusable_action_pins.yaml": (
-        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
-    ),
+    ".github/workflows/pr-required.yml": (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
+    "configs/quality/reusable_action_pins.yaml": (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
     "scripts/engineering/repo/check_github_actions_runtime_policy.py": (
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
     ),
