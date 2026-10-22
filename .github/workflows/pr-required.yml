@@ -90,7 +90,8 @@ jobs:
         uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@d86bb7b8a4e8407c8bc35392cb52192137d649ca # main
         with:
           python-version: "3.12"
-          uv-extras: "dev"
+          dependency-profile: "ci-control"
+          uv-extras: ""
 
       - name: Decide required / not_applicable per gate
         id: decide
@@ -116,7 +117,7 @@ jobs:
           if [[ -n "${BEFORE_SHA}" ]]; then
             classify_args+=(--before-sha "${BEFORE_SHA}")
           fi
-          uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify "${classify_args[@]}"
+          uv run --no-sync --frozen --no-build python -m scripts.engineering.ci pr-gate classify "${classify_args[@]}"
           echo "base_sha=${base_sha}" >> "$GITHUB_OUTPUT"
 
       - name: Publish decision matrix summary
@@ -746,7 +747,8 @@ jobs:
         uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@d86bb7b8a4e8407c8bc35392cb52192137d649ca # main
         with:
           python-version: "3.12"
-          uv-extras: "dev"
+          dependency-profile: "ci-control"
+          uv-extras: ""
 
       - name: Validate aggregator (fail-closed)
         env:
@@ -760,7 +762,7 @@ jobs:
           set -euo pipefail
           test "${{ needs['classify-changes'].result }}" = "success"
           mkdir -p reports/quality
-          uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \
+          uv run --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \
             --decision-matrix DECISION_MATRIX \
             --decision-matrix-env \
             --head-sha "${EXPECTED_HEAD_SHA}" \
@@ -769,7 +771,7 @@ jobs:
             --output reports/quality/pr-gate-aggregate-results.json
           AGGREGATE_RESULTS="$(tr -d '\r\n' < reports/quality/pr-gate-aggregate-results.json)"
           export AGGREGATE_RESULTS
-          uv run --frozen --no-build python -m scripts.engineering.ci pr-gate aggregate \
+          uv run --no-sync --frozen --no-build python -m scripts.engineering.ci pr-gate aggregate \
             --catalog configs/quality/github_required_checks.yaml \
             --decision-matrix-env DECISION_MATRIX \
             --results-env AGGREGATE_RESULTS \
