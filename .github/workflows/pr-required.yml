@@ -87,7 +87,7 @@ jobs:
           ref: ${{ github.event.pull_request.base.sha || github.sha }}
 
       - name: Set up Python + uv
-        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@e891aaaca5ecd2f1d7abae4c423ee1cbb89e9892 # CP-A
+        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@51e9de20a18226d9b1c2fb72a5c582aac38d7253 # CP-A
         with:
           python-version: "3.12"
           dependency-profile: "ci-control"
@@ -155,7 +155,7 @@ jobs:
 
       - name: Set up Python + uv
         id: setup-python
-        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@e891aaaca5ecd2f1d7abae4c423ee1cbb89e9892 # CP-A
+        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@51e9de20a18226d9b1c2fb72a5c582aac38d7253 # CP-A
         with:
           python-version: "3.12"
           uv-extras: "dev docs"
@@ -336,7 +336,7 @@ jobs:
 
       - name: Set up Python + uv
         id: setup-python
-        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@e891aaaca5ecd2f1d7abae4c423ee1cbb89e9892 # CP-A
+        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@51e9de20a18226d9b1c2fb72a5c582aac38d7253 # CP-A
         with:
           python-version: "3.12"
           uv-extras: "dev"
@@ -744,7 +744,7 @@ jobs:
           ref: ${{ github.event.pull_request.base.sha || github.sha }}
 
       - name: Set up Python + uv
-        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@e891aaaca5ecd2f1d7abae4c423ee1cbb89e9892 # CP-A
+        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@51e9de20a18226d9b1c2fb72a5c582aac38d7253 # CP-A
         with:
           python-version: "3.12"
           dependency-profile: "ci-control"

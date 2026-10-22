@@ -36,6 +36,7 @@ ALLOWED_USES: dict[str, set[str]] = {
     "SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv": {
         "d86bb7b8a4e8407c8bc35392cb52192137d649ca",  # main
         "e891aaaca5ecd2f1d7abae4c423ee1cbb89e9892",  # CP-A
+        "51e9de20a18226d9b1c2fb72a5c582aac38d7253",  # CI-control UV environment fix
     },
     "actions/attest-build-provenance": {
         "977bb373ede98d70efdf65b84cb5f73e068dcc2a",  # v3
