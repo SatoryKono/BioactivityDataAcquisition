@@ -34,7 +34,7 @@ trend evidence only.
 - Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/39826845973`
 - Source tree sha256: `d1506a23ad2fd536f5be25f68c119629018d6474362763dd370ddac30137eec8`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-22T18:21:30.586341+00:00`
+- Refreshed at (UTC): `2026-10-22T18:27:27.525063+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -75,6 +75,14 @@ trend evidence only.
 - GitHub evidence from a non-main branch requires `pull_request`;
   a manually dispatched Nightly run may instead use `workflow_dispatch`.
   Its run URL and id remain independently auditable.
+- Use `workflow_dispatch` only for a manually started `Nightly` run on the
+  PR branch. Start it with `gh workflow run nightly.yml --ref <branch>`,
+  then download both source artifacts from that exact run:
+  `gh run download <run-id> --name coverage-report --dir reports` and
+  `gh run download <run-id> --name test-duration-telemetry
+  --dir reports/test-telemetry`. Confirm the run's head SHA and use it
+  as `--source-commit`; keep `--source-event workflow_dispatch` and the
+  matching `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/<run-id>` URL.
 - `--local-manifest <path>` accepts only a complete canonical 17-shard run
   with matching source/test hashes, reachable commit, XML/JUnit digests,
   zero failures/errors and both 85% gates passed. Identity and inputs
@@ -82,10 +90,14 @@ trend evidence only.
 - Local captures use `source_event: local_coverage_verify`, a `local-` run
   id and no GitHub run URL. Trust remains `local_single_host`;
   `CI=BLOCKED_EXTERNAL_PERMANENT` never becomes CI PASS or lifecycle ADMIT.
-- Refresh command:
-  `python -m scripts.engineering.ci.update_test_telemetry_baseline`
-  `--source-commit <sha> --source-run-id <run-id>`
-  `--source-event <event> --source-run-url <url>`.
+- Refresh a non-local capture with its recorded identity:
+  `python -m scripts.engineering.ci.update_test_telemetry_baseline
+  --coverage-xml reports/coverage/coverage.xml
+  --slowest-json reports/test-telemetry/slowest-tests.json
+  --source-branch <branch> --source-commit <sha>
+  --source-run-id <run-id> --source-event <event>
+  --source-run-url <url>`. Use `workflow_dispatch` only for the
+  manually started Nightly workflow described above.
 
 ## Coverage
 
