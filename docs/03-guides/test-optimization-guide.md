@@ -323,7 +323,6 @@ The shared `.github/actions/setup-python-uv` action keeps environment cache
 reuse deterministic by hashing the environment-shaping inputs separately from
 test-result cache inputs. The uv/virtualenv cache is invalidated by changes to
 `uv.lock`, `pyproject.toml`, `.github/actions/setup-python-uv/action.yml`,
-`scripts/engineering/ci/sync_control.py`, `dependency-profile`,
 `uv-extras`, `uv-sync-args`, or the Python version. The pytest cache remains a
 separate lane-specific cache controlled by `pytest-cache-fingerprint`; do not
 fold pytest cache inputs into the uv environment cache key.

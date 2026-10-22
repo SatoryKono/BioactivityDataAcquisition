@@ -56,33 +56,13 @@ def test_environment_cache_fingerprint_includes_all_environment_inputs() -> None
         assert token in script
 
 
-def test_ci_control_profile_is_cache_isolated_and_does_not_expand_sync_args() -> None:
-    fingerprint = _step_by_name("Compute environment cache fingerprint")
-    script = cast(str, fingerprint["run"])
-
-    assert "INPUT_DEPENDENCY_PROFILE" in script
-    assert "scripts/engineering/ci/sync_control.py" in script
-    assert ".github/actions/setup-python-uv/sync_control.py" not in script
-
-    install = _step_by_name("Install dependencies")
-    install_script = cast(str, install["run"])
-    assert (
-        "python scripts/engineering/ci/sync_control.py "
-        "sync --frozen --only-group ci-control"
-    ) in install_script
-    assert "ci-control $SYNC_ARGS" not in install_script
-    assert '[ "$SYNC_ARGS" != "--frozen" ]' in install_script
-
-
 def test_uv_virtualenv_cache_uses_environment_fingerprint_not_only_lockfile() -> None:
     step = _step_by_name("Cache uv and virtualenv")
     with_block = cast(dict[str, str], step["with"])
 
-    assert "inputs.dependency-profile" in with_block["key"]
     assert "steps.environment-cache.outputs.python-fragment" in with_block["key"]
     assert "steps.environment-cache.outputs.fingerprint" in with_block["key"]
     assert "hashFiles('uv.lock')" not in with_block["key"]
-    assert "inputs.dependency-profile" in with_block["restore-keys"]
     assert (
         "steps.environment-cache.outputs.python-fragment" in with_block["restore-keys"]
     )
