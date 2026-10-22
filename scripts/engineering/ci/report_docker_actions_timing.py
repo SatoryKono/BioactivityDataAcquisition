@@ -579,7 +579,7 @@ def build_report(
         },
         "cache_evidence": {
             "workflow_cache_from": "type=gha",
-            "workflow_cache_to_policy": "trusted main/nightly only: type=gha,mode=max",
+            "workflow_cache_to_policy": "main push only: type=gha,mode=max",
             "build_action_outputs": ["imageid", "digest", "metadata"],
             "note": (
                 "BuildKit cache-hit detail is exposed through Docker build "
