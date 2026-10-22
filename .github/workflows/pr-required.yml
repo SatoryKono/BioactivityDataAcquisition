@@ -288,6 +288,17 @@ jobs:
           import os
           from pathlib import Path
           raw = json.loads(os.environ["STEPS_JSON"])
+          osv_scan = raw.get("osv-scan")
+          osv_gate = raw.get("osv-gate")
+          if (
+              isinstance(osv_scan, dict)
+              and isinstance(osv_gate, dict)
+              and str(osv_scan.get("outcome", "")).lower() == "failure"
+              and str(osv_gate.get("outcome", "")).lower() == "success"
+          ):
+              normalized_osv_scan = dict(osv_scan)
+              normalized_osv_scan["outcome"] = "success"
+              raw["osv-scan"] = normalized_osv_scan
           flat = {}
           for key, value in raw.items():
               if isinstance(value, dict):

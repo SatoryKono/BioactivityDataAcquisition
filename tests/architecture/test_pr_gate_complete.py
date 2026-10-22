@@ -193,6 +193,14 @@ def test_only_osv_scanner_uses_continue_on_error_before_severity_gate() -> None:
     )
     assert steps.index(osv_gate) > steps.index(continuing_steps[0])
     assert "--osv-json osv-results.json" in osv_gate["run"]
+    record_step = next(
+        step for step in steps if step.get("name") == "Record required step outcomes"
+    )
+    record_run = str(record_step["run"])
+    assert 'raw.get("osv-scan")' in record_run
+    assert 'raw.get("osv-gate")' in record_run
+    assert 'osv_scan.get("outcome", "")).lower() == "failure"' in record_run
+    assert 'osv_gate.get("outcome", "")).lower() == "success"' in record_run
 
 
 def test_called_owner_workflows_reject_duplicate_yaml_keys() -> None:
