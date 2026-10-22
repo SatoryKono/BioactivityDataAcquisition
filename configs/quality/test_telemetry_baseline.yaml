@@ -2,7 +2,7 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: fix/coverage-html-junit-shards-17089069319766676508
-refreshed_at_utc: '2026-10-22T18:06:23.452699+00:00'
+refreshed_at_utc: '2026-10-22T18:21:30.586341+00:00'
 refresh_status: captured
 source_commit: e6d65fbfc7365af055ea70759be90365931a2773
 source_run_id: '39826845973'

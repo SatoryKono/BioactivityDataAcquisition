@@ -34,7 +34,7 @@ trend evidence only.
 - Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/39826845973`
 - Source tree sha256: `d1506a23ad2fd536f5be25f68c119629018d6474362763dd370ddac30137eec8`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-22T18:06:23.452699+00:00`
+- Refreshed at (UTC): `2026-10-22T18:21:30.586341+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -73,7 +73,8 @@ trend evidence only.
   vendor attestations or CI execution receipts. Exact `source_commit == HEAD`
   remains opt-in via `BIOETL_REQUIRE_TELEMETRY_SOURCE_COMMIT_EQUALS_HEAD=1`.
 - GitHub evidence from a non-main branch requires `pull_request`;
-  its run URL and id remain independently auditable.
+  a manually dispatched Nightly run may instead use `workflow_dispatch`.
+  Its run URL and id remain independently auditable.
 - `--local-manifest <path>` accepts only a complete canonical 17-shard run
   with matching source/test hashes, reachable commit, XML/JUnit digests,
   zero failures/errors and both 85% gates passed. Identity and inputs
