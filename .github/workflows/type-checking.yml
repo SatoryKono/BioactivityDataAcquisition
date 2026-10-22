@@ -51,7 +51,7 @@ jobs:
 
           set +e
           timeout --signal=TERM --kill-after=30s 30m \
-            uv run --frozen --no-build mypy --config-file pyproject.toml --strict src/bioetl src/memory \
+            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory \
             2>&1 | tee -a reports/mypy_strict.log
           status=${PIPESTATUS[0]}
           set -e
@@ -67,7 +67,7 @@ jobs:
 
 
       - name: Save mypy cache
-        if: ${{ always() && (inputs.save_cache == true || github.event_name == 'workflow_dispatch') }}
+        if: ${{ always() && (inputs.save_cache == true || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) }}
         uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .mypy_cache

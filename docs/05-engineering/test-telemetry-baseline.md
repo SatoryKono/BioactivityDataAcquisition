@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `fix/coverage-html-junit-shards-17089069319766676508`
-- Source commit: `0d227a53a9cf0194e77cb514ede9ca217e40f465`
-- Source run id: `39846202084`
-- Source event: `workflow_dispatch`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/39846202084`
-- Source tree sha256: `5cdc3ae5d0645dc2a31a6dcbffd40824eb72fbf9a62f603c597ad4ea4254b1f5`
+- Source branch: `main`
+- Source commit: `pending`
+- Source run id: `pending`
+- Source event: `push`
+- Source run URL: `pending`
+- Source tree sha256: `a97012bd4dc4edb8ec048578581d0a17d06db6a40659c22598390ef266fb4dfb`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-22T20:25:11.574757+00:00`
+- Refreshed at (UTC): `2026-10-22T23:33:08.250829+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -102,8 +102,8 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `99.81%`
-- Threshold satisfied: `True`
+- Actual coverage: `pending`
+- Threshold satisfied: `None`
 
 ## Duration Telemetry
 
