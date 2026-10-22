@@ -1241,6 +1241,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/coverage_gap/test_unmeasured_module_smoke.py
       target_lane: repo-backed-unit
       protected_surface: src/bioetl modules missing from the committed coverage XML snapshot
+    - path: tests/unit/repo_backed/scripts/ci/test_sync_control.py
+      target_lane: repo-backed-unit
+      protected_surface: scripts/engineering/ci/sync_control.py exact argv allowlist, environment overrides, and subprocess contract
 mixed_scope_unit_path_policy:
   issue_ref: "#4665"
   decision: logical_unit_ownership_with_dedicated_repo_backed_subtree
