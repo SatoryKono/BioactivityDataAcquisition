@@ -183,10 +183,7 @@ def test_aggregator_does_not_use_continue_on_error() -> None:
     coordinator = _load_yaml(COORDINATOR)
     aggregator = coordinator["jobs"]["pr-gate-complete"]
     assert "continue-on-error" not in aggregator
-    assert all(
-        "continue-on-error" not in step
-        for step in aggregator.get("steps", [])
-    )
+    assert all("continue-on-error" not in step for step in aggregator.get("steps", []))
 
 
 def test_called_owner_workflows_reject_duplicate_yaml_keys() -> None:
