@@ -14,7 +14,7 @@ from scripts.engineering.ci import sync_control
 
 pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
-_ALLOWED_UV_ENV = {"UV_CACHE_DIR", "UV_PYTHON"}
+_ALLOWED_UV_ENV = {"UV_CACHE_DIR", "UV_PYTHON", "UV_PYTHON_INSTALL_DIR"}
 
 
 def _clear_blocked_uv(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -27,6 +27,7 @@ def test_sync_control_valid_args(monkeypatch: pytest.MonkeyPatch) -> None:
     _clear_blocked_uv(monkeypatch)
     monkeypatch.setenv("UV_PYTHON", "3.12")
     monkeypatch.setenv("UV_CACHE_DIR", "/tmp/uv-cache")
+    monkeypatch.setenv("UV_PYTHON_INSTALL_DIR", "/tmp/uv-python")
     with patch("subprocess.run") as mock_run:
         sync_control.run_sync(["sync", "--frozen", "--only-group", "ci-control"])
         mock_run.assert_called_once_with(
