@@ -49,6 +49,9 @@ jobs:
     needs: integrity
     if: github.ref == 'refs/heads/main'
     uses: ./.github/workflows/docker.yml
+    with:
+      cache-write: true
+      caller-sha: ${{ github.sha }}
     permissions:
       contents: read
       packages: write
