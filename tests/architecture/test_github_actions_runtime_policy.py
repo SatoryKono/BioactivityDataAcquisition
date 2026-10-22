@@ -255,11 +255,7 @@ def test_pr_gate_coordinator_materializes_on_every_pr_without_duplicate_owners()
     osv_step = next(step for step in class_lane_steps if step.get("id") == "osv-scan")
     assert osv_step.get("continue-on-error") is True
     osv_step_index = class_lane_steps.index(osv_step)
-    osv_gate = next(
-        step
-        for step in class_lane_steps
-        if step.get("id") == "osv-gate"
-    )
+    osv_gate = next(step for step in class_lane_steps if step.get("id") == "osv-gate")
     assert class_lane_steps.index(osv_gate) > osv_step_index
     assert "--osv-json osv-results.json" in str(osv_gate.get("run", ""))
     assert "secrets: inherit" not in coordinator_path.read_text(encoding="utf-8")
