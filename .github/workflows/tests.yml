@@ -64,7 +64,7 @@ jobs:
           } 2>&1 | tee reports/ci/dependency-preflight.log
 
       - name: Upload dependency preflight diagnostics
-        if: ${{ always() && !cancelled() }}
+        if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dependency-preflight
@@ -77,7 +77,13 @@ jobs:
         run: |
           {
             echo "## Dependency preflight"
-            echo "Diagnostic artifact: dependency-preflight/reports/ci/dependency-preflight.log"
+            if [ "${{ job.status }}" = "success" ]; then
+              echo "Status: Success"
+              echo "Version: $(uv --version)"
+              echo "Run: ${{ github.run_id }}-${{ github.run_attempt }}"
+            else
+              echo "Diagnostic artifact: dependency-preflight/reports/ci/dependency-preflight.log"
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
   # Minimal dependency smoke: keep test lanes unblocked by unrelated governance checks
   smoke-check:
