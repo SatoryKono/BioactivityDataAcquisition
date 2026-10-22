@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3893 |
-| Tracked doc-like files | 3893 |
+| Doc-like files | 3894 |
+| Tracked doc-like files | 3894 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3893 |
+| tracked | 3894 |
 
 ## Lifecycle Counts
 
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 187 |
+| working_report | 188 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -55,7 +55,7 @@
 | Archived | 1553 |
 | Canonical | 76 |
 | Generated | 1062 |
-| Working | 454 |
+| Working | 455 |
 
 ## Surface Families
 
@@ -65,13 +65,13 @@
 | archive | 1553 |
 | canonical | 76 |
 | generated | 1062 |
-| working | 454 |
+| working | 455 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 220 |
+| archive-after-migration | 221 |
 | generate-automatically | 1062 |
 | keep | 2611 |
 
@@ -123,6 +123,7 @@
 | `reports/acceptance/P04-REM-R10-acceptance-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/acceptance/P04-REM-R10-acceptance-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/acceptance/receipt-12069.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12106-s4-crash-silver/evidence.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/handoff.md` | Working | 0 | archive-after-migration |
@@ -158,7 +159,6 @@
 | `reports/docs-evidence/http-header-audit-and-provenance.md` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/security-ui-final-20261003/bioetl-scenes-app-gates.json` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/security-ui-final-20261003/bioetl-selectorshell-panel-gates.json` | Working | 0 | archive-after-migration |
-| `reports/observability/grafana/selector-audit-2026-07-20/selector-evidence.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
