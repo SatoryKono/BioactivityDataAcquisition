@@ -1,0 +1,92 @@
+{
+  "application_layer_edges": [
+    {
+      "allowed": true,
+      "imports": 1650,
+      "source": "application",
+      "target": "application"
+    },
+    {
+      "allowed": true,
+      "imports": 1132,
+      "source": "application",
+      "target": "domain"
+    }
+  ],
+  "audited_revision": "f9d1a55ddf14256fdc1936db2177633f1aa1e724",
+  "audited_tree_matches_origin_main": true,
+  "campaign_p02_handoffs": [],
+  "cancelled_error_sites": [
+    {
+      "line": 86,
+      "path": "src/bioetl/application/core/batch_execution/run_service.py"
+    },
+    {
+      "line": 86,
+      "path": "src/bioetl/application/core/derived_scan_budget.py"
+    },
+    {
+      "line": 89,
+      "path": "src/bioetl/application/core/lifecycle/heartbeat.py"
+    },
+    {
+      "line": 113,
+      "path": "src/bioetl/application/core/lifecycle/lock_lifecycle.py"
+    },
+    {
+      "line": 145,
+      "path": "src/bioetl/application/core/pipeline_services.py"
+    },
+    {
+      "line": 81,
+      "path": "src/bioetl/application/core/preflight/health_aggregator.py"
+    },
+    {
+      "line": 5,
+      "path": "src/bioetl/application/core/runner.py"
+    },
+    {
+      "line": 226,
+      "path": "src/bioetl/application/services/execution/pipeline_runner_service.py"
+    },
+    {
+      "line": 79,
+      "path": "src/bioetl/application/services/run_reports/composite.py"
+    }
+  ],
+  "ci_failure": {
+    "detail": "Commit 8bdedf27 has the same tree as 88101d7, so the pull request diff is empty and path-scoped gates are required but skipped.",
+    "reason": "fail_closed_empty_diff",
+    "run": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/39732860020"
+  },
+  "concern": "application orchestration",
+  "counts": {
+    "application_classdef_nodes": 848,
+    "application_infrastructure_import_hits": 0,
+    "application_python_files": 819,
+    "cancelled_error_files": 9,
+    "dependency_map_source_fingerprint": "7274aefc0fa32a40f0315a7f40205cae58ae6883d754a782fe56fdaf5f95f6f7",
+    "dependency_map_violations": 0
+  },
+  "exclusions": [
+    "domain layer invariants",
+    "infrastructure client implementation",
+    "code remediation",
+    "P20 reconciliation"
+  ],
+  "findings_sha256": "2d03b452880344315804fe20c1729bd66c6b549ed35bd9087b93e24db0b0fa83",
+  "mode": "READ_ONLY_REVALIDATION",
+  "observed_at": "2026-10-22T06:40:00Z",
+  "parent_revision": "88101d7ee82a4822ea7cce8710663abece5619f4",
+  "predecessor_commit": "8bdedf27de2006058bd735f10a810cf27f6a30da",
+  "predecessor_tree_equals_parent": true,
+  "run_id": "20261022-p03",
+  "schema_version": 1,
+  "scope": "src/bioetl/application/**/*.py",
+  "stage": "P03",
+  "standing_port_inventory": "reports/quality/domain-ports-inventory.md",
+  "symbols_absent": [
+    "AppLifecycleManager",
+    "graceful_shutdown"
+  ]
+}

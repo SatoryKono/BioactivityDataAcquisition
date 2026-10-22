@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -129,6 +130,69 @@ def test_assert_steps_fails_on_unrelated_step_failure() -> None:
     )
 
     assert "step:checkout=failure" in failures
+
+
+def test_empty_diff_selects_full_python_suite() -> None:
+    """An empty diff still has a required tests gate, so run the whole suite."""
+    repo_root = Path(__file__).resolve().parents[5]
+    assert affected_pytest_targets([], repo_root=repo_root) == ["tests"]
+    assert affected_pytest_targets(["   "], repo_root=repo_root) == ["tests"]
+
+
+def test_empty_diff_fails_closed_when_suite_root_is_missing(tmp_path: Path) -> None:
+    """A missing tests tree cannot satisfy the empty-diff tests gate."""
+    with pytest.raises(ValueError, match="Missing mandatory mapped test targets"):
+        affected_pytest_targets([], repo_root=tmp_path)
+
+
+def test_empty_diff_cli_prints_full_suite(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The lane command must emit the full suite when git reports no paths."""
+    from scripts.engineering.ci import pr_lane_results as lane
+
+    def _empty_diff(
+        *_args: object, **_kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(args=["git"], returncode=0, stdout="")
+
+    monkeypatch.setattr(lane.subprocess, "run", _empty_diff)
+    repo_root = Path(__file__).resolve().parents[5]
+    assert (
+        lane_main(
+            [
+                "affected-tests",
+                "--repo-root",
+                str(repo_root),
+                "--base-sha",
+                HEAD,
+                "--head-sha",
+                HEAD,
+            ]
+        )
+        == 0
+    )
+    assert capsys.readouterr().out.splitlines() == ["tests"]
+
+
+def test_unmapped_path_still_has_no_pytest_target(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A real unmapped path stays fail-closed and does not expand to every test."""
+    repo_root = Path(__file__).resolve().parents[5]
+    assert (
+        lane_main(
+            [
+                "affected-tests",
+                "--repo-root",
+                str(repo_root),
+                "--changed-file",
+                "docs/readme.md",
+            ]
+        )
+        == 1
+    )
+    assert "tests gate has no affected pytest target" in capsys.readouterr().err
 
 
 def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:

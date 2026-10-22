@@ -1,0 +1,158 @@
+{
+  "findings": [
+    {
+      "actual": "Нормативный единый обработчик в этом прогоне не найден. Обработка разнесена по модулям. Runtime-утечка не воспроизводилась.",
+      "attempted_disproof": "Поиск AppLifecycleManager и graceful_shutdown по src/bioetl/application не дал совпадений; отдельного runtime-прогона отмены не было, поэтому утечка не утверждается.",
+      "automated_fix_possible": false,
+      "category": "application-lifecycle",
+      "confidence": "medium",
+      "confidence_score": 0.62,
+      "dependencies": [],
+      "effort": "M",
+      "evidence": [
+        {
+          "command": "literal scan CancelledError",
+          "line": 86,
+          "observation": "Первое вхождение CancelledError в модуле.",
+          "observed_at": "2026-10-22T06:40:00Z",
+          "path": "src/bioetl/application/core/batch_execution/run_service.py",
+          "source_revision": "f9d1a55ddf14256fdc1936db2177633f1aa1e724"
+        },
+        {
+          "command": "literal scan CancelledError",
+          "line": 86,
+          "observation": "Первое вхождение CancelledError в модуле.",
+          "observed_at": "2026-10-22T06:40:00Z",
+          "path": "src/bioetl/application/core/derived_scan_budget.py",
+          "source_revision": "f9d1a55ddf14256fdc1936db2177633f1aa1e724"
+        },
+        {
+          "command": "literal scan CancelledError",
+          "line": 89,
+          "observation": "Первое вхождение CancelledError в модуле.",
+          "observed_at": "2026-10-22T06:40:00Z",
+          "path": "src/bioetl/application/core/lifecycle/heartbeat.py",
+          "source_revision": "f9d1a55ddf14256fdc1936db2177633f1aa1e724"
+        },
+        {
+          "command": "literal scan CancelledError",
+          "line": 113,
+          "observation": "Первое вхождение CancelledError в модуле.",
+          "observed_at": "2026-10-22T06:40:00Z",
+          "path": "src/bioetl/application/core/lifecycle/lock_lifecycle.py",
+          "source_revision": "f9d1a55ddf14256fdc1936db2177633f1aa1e724"
+        },
+        {
+          "command": "literal scan CancelledError",
+          "line": 145,
+          "observation": "Первое вхождение CancelledError в модуле.",
+          "observed_at": "2026-10-22T06:40:00Z",
+          "path": "src/bioetl/application/core/pipeline_services.py",
+          "source_revision": "f9d1a55ddf14256fdc1936db2177633f1aa1e724"
+        },
+        {
+          "command": "literal scan CancelledError",
+          "line": 81,
+          "observation": "Первое вхождение CancelledError в модуле.",
+          "observed_at": "2026-10-22T06:40:00Z",
+          "path": "src/bioetl/application/core/preflight/health_aggregator.py",
+          "source_revision": "f9d1a55ddf14256fdc1936db2177633f1aa1e724"
+        },
+        {
+          "command": "literal scan CancelledError",
+          "line": 5,
+          "observation": "Первое вхождение CancelledError в модуле.",
+          "observed_at": "2026-10-22T06:40:00Z",
+          "path": "src/bioetl/application/core/runner.py",
+          "source_revision": "f9d1a55ddf14256fdc1936db2177633f1aa1e724"
+        },
+        {
+          "command": "literal scan CancelledError",
+          "line": 226,
+          "observation": "Первое вхождение CancelledError в модуле.",
+          "observed_at": "2026-10-22T06:40:00Z",
+          "path": "src/bioetl/application/services/execution/pipeline_runner_service.py",
+          "source_revision": "f9d1a55ddf14256fdc1936db2177633f1aa1e724"
+        },
+        {
+          "command": "literal scan CancelledError",
+          "line": 79,
+          "observation": "Первое вхождение CancelledError в модуле.",
+          "observed_at": "2026-10-22T06:40:00Z",
+          "path": "src/bioetl/application/services/run_reports/composite.py",
+          "source_revision": "f9d1a55ddf14256fdc1936db2177633f1aa1e724"
+        }
+      ],
+      "evidence_freshness": "CURRENT",
+      "exception_ref": null,
+      "expected": "Единый нормативный обработчик отмены, если такой контракт зафиксирован, и воспроизводимое доказательство утечки.",
+      "id": "AUDIT-20261022-APP-001",
+      "impact": "При обрыве задачи освобождение ресурсов зависит от локальных веток. Утечка на этом прогоне не доказана.",
+      "method": "AST ClassDef walk plus literal scan of src/bioetl/application/**/*.py for CancelledError, AppLifecycleManager, graceful_shutdown",
+      "observation": "asyncio.CancelledError встречается в 9 модулях application, а символы AppLifecycleManager и graceful_shutdown в src/bioetl/application отсутствуют. Это децентрализованная обработка отмены, а не доказанная утечка ресурсов.",
+      "path": "src/bioetl/application",
+      "priority": "P2",
+      "remediation": "Не менять код в этом PR. Следующий шаг — сверить обработчики с нормативным контрактом отмены и только потом решать, нужен ли общий владелец.",
+      "requirement_id": "GAP",
+      "review_verdict": "NOT_VERIFIABLE",
+      "root_cause": "Отмена обрабатывается в конкретных сервисах, общего символа жизненного цикла нет.",
+      "root_cause_id": "APP-LIFECYCLE-CANCEL",
+      "severity": "Medium",
+      "status": "NOT_PROVEN",
+      "validation": [
+        "rg -n CancelledError src/bioetl/application --glob '*.py'",
+        "rg -n 'AppLifecycleManager|graceful_shutdown' src/bioetl/application --glob '*.py'"
+      ]
+    },
+    {
+      "actual": "Инвентарь портов есть. Campaign handoff P02 для 20261022 отсутствует. Зависимость application -> infrastructure по карте слоёв не обнаружена.",
+      "attempted_disproof": "Проверен постоянный инвентарь портов и рёбра application на карте зависимостей. Отсутствие campaign handoff не трактуется как отсутствие портов.",
+      "automated_fix_possible": false,
+      "category": "audit-precondition",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "dependencies": [
+        "P02"
+      ],
+      "effort": "S",
+      "evidence": [
+        {
+          "command": "test -f reports/quality/domain-ports-inventory.md",
+          "line": 1,
+          "observation": "Постоянный инвентарь портов домена присутствует.",
+          "observed_at": "2026-10-22T06:40:00Z",
+          "path": "reports/quality/domain-ports-inventory.md",
+          "source_revision": "f9d1a55ddf14256fdc1936db2177633f1aa1e724"
+        },
+        {
+          "command": "read summary.violations and layer_edges where source=application",
+          "line": 7,
+          "observation": "violations=0; рёбра application ведут только в application и domain.",
+          "observed_at": "2026-10-22T06:40:00Z",
+          "path": "docs/02-architecture/generated/module-dependency-map.json",
+          "source_revision": "f9d1a55ddf14256fdc1936db2177633f1aa1e724"
+        }
+      ],
+      "evidence_freshness": "CURRENT",
+      "exception_ref": null,
+      "expected": "Handoff P02 этой кампании доступен как предусловие P03, либо проверка явно помечена незавершённой.",
+      "id": "AUDIT-20261022-APP-002",
+      "impact": "Полная трассировка владельцев портов для этого прогона не завершена. Это не доказательство обхода портов.",
+      "method": "Path search for reports/audit-runs/**/*20261022*p02* and read of reports/quality/domain-ports-inventory.md",
+      "observation": "Постоянный инвентарь портов reports/quality/domain-ports-inventory.md существует. Отдельного handoff P02 кампании 20261022 в reports/audit-runs нет, поэтому проверка 'use case зависит только от портов' для этого прогона не закрыта.",
+      "path": "reports/quality/domain-ports-inventory.md",
+      "priority": "P2",
+      "remediation": "Сохранить handoff P02 отдельным прогоном. Код application в этом PR не менять.",
+      "requirement_id": "GAP",
+      "review_verdict": "NOT_VERIFIABLE",
+      "root_cause": "Кампания 20261022 не сохранила handoff P02 до этого P03.",
+      "root_cause_id": "APP-P02-MISSING",
+      "severity": "Low",
+      "status": "PROVEN",
+      "validation": [
+        "test -f reports/quality/domain-ports-inventory.md",
+        "python -c \"import json; d=json.load(open('docs/02-architecture/generated/module-dependency-map.json')); print(d['summary']['violations'])\""
+      ]
+    }
+  ]
+}

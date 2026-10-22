@@ -258,8 +258,14 @@ def affected_pytest_targets(
     changed_python_dependencies: set[str] | None = None,
     require_all_python_tests: bool = False,
 ) -> list[str]:
-    """Map a diff to tests; validate all declared targets before selection."""
+    """Map a diff to tests; validate all declared targets before selection.
+
+    An empty diff has no path mapping. Classification still requires the tests
+    gate (``fail_closed_empty_diff``), so the full Python suite is the target.
+    """
     paths = [path for raw in changed_files if (path := raw.strip().replace("\\", "/"))]
+    if not paths:
+        return [_python_suite_root(repo_root)]
     mapped = {path: _mapped_targets(path) for path in paths}
     _require_targets(
         [target for values in mapped.values() for target in values], repo_root
@@ -273,17 +279,20 @@ def affected_pytest_targets(
         if require_all_python_tests or _global_dependency_lane(
             repo_root, changed_python_dependencies
         ):
-            if not (repo_root / PYTEST_ALL_ROOT).is_dir():
-                raise ValueError(
-                    "Missing mandatory mapped test targets: " + PYTEST_ALL_ROOT
-                )
-            targets.append(PYTEST_ALL_ROOT.rstrip("/"))
+            targets.append(_python_suite_root(repo_root))
         else:
             targets.extend(_dependency_targets(repo_root, changed_python_dependencies))
     for path in paths:
         targets.extend(mapped[path])
         targets.extend(_path_targets(path, repo_root))
     return _deduplicate_targets(targets, repo_root)
+
+
+def _python_suite_root(repo_root: Path) -> str:
+    """Return the full Python suite, or fail closed when that tree is absent."""
+    if not (repo_root / PYTEST_ALL_ROOT).is_dir():
+        raise ValueError("Missing mandatory mapped test targets: " + PYTEST_ALL_ROOT)
+    return PYTEST_ALL_ROOT.rstrip("/")
 
 
 def _deduplicate_targets(targets: list[str], root: Path) -> list[str]:
