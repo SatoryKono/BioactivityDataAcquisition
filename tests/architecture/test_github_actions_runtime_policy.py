@@ -584,6 +584,23 @@ def test_security_workflow_runs_gitleaks_and_osv_scanner() -> None:
     assert "#9853" in pip_audit_run or "9853" in pip_audit_run
     assert not (ROOT / "osv-scanner.toml").exists()
 
+    coordinator = _load_yaml(ROOT / ".github/workflows/pr-required.yml")
+    class_lane = cast(dict[str, Any], coordinator["jobs"]["class-lane"])
+    lane_osv_step = next(
+        step
+        for step in class_lane["steps"]
+        if str(step.get("uses", "")).startswith(
+            "google/osv-scanner-action/osv-scanner-action@"
+        )
+    )
+    lane_recorder = next(
+        str(step.get("run", ""))
+        for step in class_lane["steps"]
+        if step.get("id") == "record"
+    )
+    assert lane_osv_step.get("continue-on-error") is True
+    assert '"conclusion" if key == "osv-scan" else "outcome"' in lane_recorder
+
 
 def test_codeql_workflow_covers_python_and_actions_and_is_sha_pinned() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/codeql.yml")
