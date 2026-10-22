@@ -17,7 +17,7 @@ Auto-generated from `scripts/check_scripts_inventory.py`.
 | Script Path | Type | Reference Count | Owner | Lifecycle Decision | Suggested Next Step |
 |---|---|---:|---|---|---|
 
-## supporting (325)
+## supporting (326)
 
 | Script Path | Type | Reference Count | Owner | Lifecycle Decision | Suggested Next Step |
 |---|---|---:|---|---|---|
@@ -148,6 +148,7 @@ Auto-generated from `scripts/check_scripts_inventory.py`.
 | `scripts/engineering/ci/_compatibility_registry.py` | `py` | 6 | @bioetl-platform | `shared_helper_module` | Retain as the internal compatibility-registry loader imported by telemetry and reporting modules; keep it supporting because it has no standalone command surface. |
 | `scripts/engineering/ci/_compatibility_telemetry.py` | `py` | 8 | @bioetl-platform | `shared_helper_module` | Retain as the internal compatibility telemetry library imported by governed CI reports; keep it supporting because it has no standalone command surface. |
 | `scripts/engineering/ci/_python_dependency_changes.py` | `py` | 2 | @bioetl-platform | `shared_helper_module` | Retain as the private diff/ownership analysis backend of pr_lane_results.py; it has no standalone runner or public CLI. All test execution stays with the governed existing affected-tests lane. |
+| `scripts/engineering/ci/actions_timing_common.py` | `py` | 2 | @bioetl-platform | `shared_helper_module` | Retain as the shared GitHub Actions attempt collector imported by the Docker and PR-gate timing reports. It has no standalone command surface; keep it supporting so active_script_count_max does not grow. |
 | `scripts/engineering/ci/apply-ci-optimizations-fixed.ps1` | `ps1` | 2 | @bioetl-platform | `legacy_manual_utility` | Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow. |
 | `scripts/engineering/ci/apply-ci-optimizations.ps1` | `ps1` | 2 | @bioetl-platform | `legacy_manual_utility` | Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow. |
 | `scripts/engineering/ci/generated_artifact_checks.py` | `py` | 15 | @bioetl-platform | `shared_helper_module` | Retain as the internal CI scheduling/receipt adapter used by pr-required and nightly workflows. Its bounded CLI delegates to pytest and existing validators; it is not a new independent operator or validation entrypoint. Keep policy ownership with the test matrix and existing producer commands. |
