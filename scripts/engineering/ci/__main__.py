@@ -270,6 +270,41 @@ def _gitleaks_boundaries(argv: list[str]) -> int:
         )
     )
 
+    public_sha1 = "00097313addec8974656" + "81955d57c936f62fc8c3"
+    fresh_sha1 = hashlib.sha256(b"nonfunctional boundary sentinel").hexdigest()[:40]
+    for scope in ("selector-reactivity", "scope-repair"):
+        for kind in ("syft", "spdx"):
+            path = f"reports/observability/grafana/{scope}-acceptance-20261004/image.{kind}.json"
+            pair(
+                f"sbom-{scope}-{kind}",
+                path,
+                '{"sourcegraph":"package","checksumValue":"' + public_sha1 + '"}\n',
+                'sourcegraph_token="' + fresh_sha1 + '"\n',
+            )
+            CASES.append(
+                (
+                    f"sbom-{scope}-{kind}-prefixed-token",
+                    path,
+                    'sourcegraph_token="sgp_' + public_sha1 + '"\n',
+                    True,
+                )
+            )
+            CASES.append(
+                (
+                    f"sbom-{scope}-{kind}-other-credential",
+                    path,
+                    'api_key="' + TOKEN + '"\n',
+                    True,
+                )
+            )
+    pair(
+        "join-normalization-expression",
+        "tests/unit/application/test_issue_10518_application_compwf_b.py",
+        'build_join_key_normalization_expr(\n column="mykey", key="mykey", '
+        + "=".join(("normalization_policies", "policies"))
+        + "\n)\n",
+    )
+
     parser = argparse.ArgumentParser(
         description="Check Gitleaks exception boundaries with the pinned scanner"
     )

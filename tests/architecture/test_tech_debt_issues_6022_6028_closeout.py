@@ -169,7 +169,8 @@ def test_issue_6027_pandera_and_topology_docs_match_current_runtime() -> None:
     # REQUIREMENTS.md was removed, so we only check topology and coverage
     coverage_summary = coverage["summary"]
     assert (
-        f"`source_module_count={coverage_summary['source_module_count']}`" in topology
+        f"`coverage_inventory_module_count={coverage_summary['source_module_count']}`"
+        in topology
     )
     current_hash = coverage["source_tree_sha256"]
     assert current_hash in topology, (

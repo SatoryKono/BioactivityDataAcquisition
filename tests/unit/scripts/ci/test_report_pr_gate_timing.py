@@ -11,6 +11,7 @@ from scripts.engineering.ci.report_pr_gate_timing import (
     build_report,
     render_markdown,
 )
+from tests.unit.scripts.ci.timing_api_fakes import PagedAttemptClient
 
 
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
@@ -33,6 +34,9 @@ def _run(run_id: int, created_at: datetime, updated_at: datetime) -> dict[str, A
         "created_at": _iso(created_at),
         "updated_at": _iso(updated_at),
         "html_url": f"https://github.test/{run_id}",
+        "pull_requests": [
+            {"base": {"sha": f"{run_id:040x}"}, "head": {"sha": f"{run_id:040x}"}}
+        ],
     }
 
 
@@ -278,3 +282,226 @@ def test_pr_gate_report_marks_acceptance_only_after_full_measured_sample(
     assert report["acceptance"]["architecture_owner_p95_le_budget"] is True
     assert report["acceptance"]["docker_owner_p95_le_budget"] is True
     assert report["acceptance"]["codeql_p95_le_budget"] is True
+
+
+@pytest.mark.unit
+def test_pr_gate_report_pagination_and_all_attempts(tmp_path: Path) -> None:
+    base = datetime(2026, 9, 3, tzinfo=UTC)
+    runs = []
+    jobs_by_run_id = {}
+
+    # 2 runs: one is attempt 2, one is attempt 1
+    # For pagination, we'll configure FakeGitHubClient to return runs differently
+
+    # Run 1: attempt 2 (latest)
+    r1 = _run(1, base, base + timedelta(minutes=1))
+    r1["run_attempt"] = 2
+    runs.append(r1)
+
+    # Run 2: attempt 1
+    r2 = _run(2, base + timedelta(minutes=2), base + timedelta(minutes=3))
+    r2["run_attempt"] = 1
+    runs.append(r2)
+
+    # Run 1, attempt 2 jobs
+    jobs_by_run_id[1] = {
+        2: _pr_gate_jobs(
+            base,
+            queue_seconds=10,
+            quality_metrics_seconds=90,
+            neo4j_seconds=80,
+            architecture_seconds=100,
+            docker_seconds=110,
+            codeql_seconds=120,
+            wall_seconds=190,
+        ),
+        1: _pr_gate_jobs(
+            base,
+            queue_seconds=20,
+            quality_metrics_seconds=90,
+            neo4j_seconds=80,
+            architecture_seconds=100,
+            docker_seconds=110,
+            codeql_seconds=120,
+            wall_seconds=200,
+        ),
+    }
+
+    # Run 2, attempt 1 jobs
+    jobs_by_run_id[2] = {
+        1: _pr_gate_jobs(
+            base + timedelta(minutes=2),
+            queue_seconds=30,
+            quality_metrics_seconds=90,
+            neo4j_seconds=80,
+            architecture_seconds=100,
+            docker_seconds=110,
+            codeql_seconds=120,
+            wall_seconds=210,
+        )
+    }
+
+    client = PagedAttemptClient(
+        repository=REPOSITORY,
+        workflow_token="/actions/workflows/pr-required.yml/runs?",
+        pages={1: [runs[0]], 2: [runs[1]]},
+        jobs_by_attempt=jobs_by_run_id,
+    )
+    report = build_report(
+        client,
+        ReportRequest(
+            repo_root=tmp_path,
+            repository=None,
+            workflow="pr-required.yml",
+            branch=None,
+            event="pull_request",
+            limit=20,
+            run_ids=[],
+            include_incomplete=False,
+            wall_budget_seconds=300,
+            queue_budget_seconds=20,
+            tests_budget_seconds=245,
+            architecture_budget_seconds=210,
+            docker_budget_seconds=240,
+            codeql_budget_seconds=240,
+            generated_at=base,
+        ),
+    )
+
+    observed = [
+        (run["id"], run["run_attempt"], run["retries"]) for run in report["runs"]
+    ]
+    assert observed == [(1, 2, 1), (1, 1, 1), (2, 1, 0)]
+    queues = {
+        run["run_attempt"]: next(
+            job["queue_seconds"]
+            for job in run["jobs"]
+            if job["name"] == "tests / quality-metrics-gate"
+        )
+        for run in report["runs"]
+        if run["id"] == 1
+    }
+    assert queues == {2: 10, 1: 20}
+
+
+@pytest.mark.unit
+def test_pr_gate_report_missing_timestamps_skipped_cancelled(tmp_path: Path) -> None:
+    # Also verify that queue_seconds is unknown and skipped doesn't result in 0 exec seconds.
+    base = datetime(2026, 9, 3, tzinfo=UTC)
+    run = _run(1, base, base)
+    # Remove created_at / updated_at
+    run["created_at"] = None
+    run["updated_at"] = None
+
+    jobs = _pr_gate_jobs(
+        base,
+        queue_seconds=10,
+        quality_metrics_seconds=90,
+        neo4j_seconds=80,
+        architecture_seconds=100,
+        docker_seconds=110,
+        codeql_seconds=120,
+        wall_seconds=190,
+    )
+    jobs[-1]["conclusion"] = "cancelled"
+    jobs[0]["conclusion"] = "skipped"
+    jobs[0]["completed_at"] = jobs[0]["started_at"]
+    jobs[1]["started_at"] = None
+
+    class SkippedFakeGitHubClient:
+        def json(self, args: list[str]) -> Any:
+            if args[:2] == ["repo", "view"]:
+                return {"nameWithOwner": REPOSITORY}
+            endpoint = args[1]
+            if "/actions/workflows/pr-required.yml/runs?" in endpoint:
+                if "&page=1" in endpoint or endpoint.endswith("page=1"):
+                    return {"workflow_runs": [run]}
+                return {"workflow_runs": []}
+            if "/jobs?" in endpoint:
+                return {"jobs": jobs}
+            return {}
+
+    client = SkippedFakeGitHubClient()
+    report = build_report(
+        client,
+        ReportRequest(
+            repo_root=tmp_path,
+            repository=None,
+            workflow="pr-required.yml",
+            branch=None,
+            event="pull_request",
+            limit=20,
+            run_ids=[],
+            include_incomplete=False,
+            wall_budget_seconds=300,
+            queue_budget_seconds=20,
+            tests_budget_seconds=245,
+            architecture_budget_seconds=210,
+            docker_budget_seconds=240,
+            codeql_budget_seconds=240,
+            generated_at=base,
+        ),
+    )
+
+    assert len(report["runs"]) == 1
+    assert report["runs"][0]["pr_gate_wall_seconds"] is None
+    assert report["runs"][0]["jobs"][0]["execution_seconds"] is None
+    assert report["runs"][0]["jobs"][1]["queue_seconds"] == "unknown"
+    assert report["runs"][0]["retries"] == 0
+
+
+@pytest.mark.unit
+def test_pr_gate_report_base_change_same_head(tmp_path: Path) -> None:
+    base = datetime(2026, 9, 3, tzinfo=UTC)
+    runs = []
+
+    r1 = _run(1, base, base)
+    r1["head_sha"] = "samehead"
+    r1["pull_requests"][0]["base"]["sha"] = "base1"
+
+    r2 = _run(2, base, base)
+    r2["head_sha"] = "samehead"
+    r2["pull_requests"][0]["base"]["sha"] = "base2"
+
+    runs = [r1, r2]
+
+    class BaseChangeFakeGitHubClient:
+        def json(self, args: list[str]) -> Any:
+            if args[:2] == ["repo", "view"]:
+                return {"nameWithOwner": REPOSITORY}
+            endpoint = args[1]
+            if "/actions/workflows/pr-required.yml/runs?" in endpoint:
+                if "&page=1" in endpoint or endpoint.endswith("page=1"):
+                    return {"workflow_runs": runs}
+                return {"workflow_runs": []}
+            if "/jobs?" in endpoint:
+                return {"jobs": []}
+            return {}
+
+    client = BaseChangeFakeGitHubClient()
+    report = build_report(
+        client,
+        ReportRequest(
+            repo_root=tmp_path,
+            repository=None,
+            workflow="pr-required.yml",
+            branch=None,
+            event="pull_request",
+            limit=20,
+            run_ids=[],
+            include_incomplete=False,
+            wall_budget_seconds=300,
+            queue_budget_seconds=20,
+            tests_budget_seconds=245,
+            architecture_budget_seconds=210,
+            docker_budget_seconds=240,
+            codeql_budget_seconds=240,
+            generated_at=base,
+        ),
+    )
+
+    assert len(report["runs"]) == 2
+    assert report["runs"][0]["base_sha"] == "base1"
+    assert report["runs"][1]["base_sha"] == "base2"
+    assert report["runs"][0]["head_sha"] == "samehead"
+    assert report["runs"][1]["head_sha"] == "samehead"

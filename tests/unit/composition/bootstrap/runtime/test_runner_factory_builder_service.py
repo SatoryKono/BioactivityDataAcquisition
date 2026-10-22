@@ -77,6 +77,33 @@ def _make_runtime(**overrides: object) -> CompositeRuntimeConfig:
 
 
 @pytest.mark.unit
+def test_reported_seed_runner_receives_context_and_its_exact_options():
+    recorder = _RunOptionsRecorder()
+    expected = object()
+    reporting_builder = MagicMock(return_value=expected)
+    direct_builder = MagicMock(side_effect=AssertionError("unreported runner created"))
+    builder = RunnerFactoryBuilder(
+        logger=MagicMock(),
+        run_options_cls=recorder,
+        build_context=_build_context,
+        pipeline_runner_builder=direct_builder,
+        reporting_runner_builder=reporting_builder,
+        filter_extraction_service=CompositeFilterExtractor(),
+    )
+    factory = builder.build_seed_factory(
+        seed_pipeline="chembl_publication",
+        seed_limit=1,
+        bronze_opts=resolve_bronze_opts(_make_runtime(), phase_override=None),
+    )
+    assert factory() is expected
+    reporting_builder.assert_called_once()
+    context, options = reporting_builder.call_args.args
+    assert context == {"pipeline": "chembl_publication", "options": options}
+    assert options.limit == 1
+    direct_builder.assert_not_called()
+
+
+@pytest.mark.unit
 def test_seed_runoptions_snapshot() -> None:
     recorder = _RunOptionsRecorder()
     builder = RunnerFactoryBuilder(
