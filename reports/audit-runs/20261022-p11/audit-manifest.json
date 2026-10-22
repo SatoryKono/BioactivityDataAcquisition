@@ -1,0 +1,48 @@
+{
+  "audited_revision": "ee83860e7902adcd5eebff163514df97a6c5f5f4",
+  "audited_tree_matches_origin_main": true,
+  "ci_failure": {
+    "detail": "Commit 6f33814261f159ad9567e066009e62fb9e8466bc has the same tree as 626e2661761a713039d42dfd00b6893814b4fd20, so the pull request diff is empty and path-scoped gates are required but skipped.",
+    "reason": "fail_closed_empty_diff",
+    "run": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/39734948232"
+  },
+  "concern": "reproducibility and replay",
+  "equivalence_labels_absent": [
+    "BYTE_EQUIVALENT",
+    "NOT_EQUIVALENT",
+    "OCCURRENCE_ONLY_DIFFERENT",
+    "SEMANTIC_EQUIVALENT"
+  ],
+  "exclusions": [
+    "src/memory mutation ledger",
+    "runtime two-pass replay",
+    "code remediation",
+    "P20 reconciliation"
+  ],
+  "findings_sha256": "e91610032588c0de69e5f61e90e8546f11f3f4bbd3f8f222bac2184130e71f7e",
+  "mode": "READ_ONLY_REVALIDATION",
+  "observed_at": "2026-10-22T07:30:00Z",
+  "parent_revision": "626e2661761a713039d42dfd00b6893814b4fd20",
+  "predecessor_commit": "6f33814261f159ad9567e066009e62fb9e8466bc",
+  "predecessor_tree_equals_parent": true,
+  "prerequisite_handoffs": {
+    "P07": [],
+    "P08": [],
+    "P10": []
+  },
+  "replay_capability_values": [
+    "exact_replay_supported",
+    "rebuild_only",
+    "resume_only"
+  ],
+  "run_id": "20261022-p11",
+  "schema_version": 1,
+  "scope": [
+    "src/bioetl/domain/control_plane/",
+    "src/bioetl/application/services/control_plane/",
+    "src/bioetl/application/composite/checkpoint/",
+    "src/bioetl/infrastructure/control_plane/",
+    "src/bioetl/composition/runtime_builders/run_manifest_builder.py"
+  ],
+  "stage": "P11"
+}
