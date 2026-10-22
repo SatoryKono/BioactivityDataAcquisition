@@ -1406,6 +1406,15 @@ def test_main_docker_validation_only_decouples_main_push_from_publish_approval()
         )
 
 
+_TRUSTED_CACHE_TO = (
+    "${{ (inputs.cache-write == true && github.event.repository.fork == false && "
+    "(github.event_name == 'push' || github.event_name == 'schedule' || "
+    "github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/main' || "
+    "github.ref == 'refs/heads/nightly') && (inputs.caller-sha == '' || "
+    "inputs.caller-sha == github.sha)) && 'type=gha,mode=max' || '' }}"
+)
+
+
 def test_docker_pr_build_reads_main_cache_without_exporting_branch_cache() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     steps = workflow["jobs"]["docker-build"]["steps"]
@@ -1414,10 +1423,48 @@ def test_docker_pr_build_reads_main_cache_without_exporting_branch_cache() -> No
     assert build["id"] == "build"
     assert build["with"]["cache-from"] == "type=gha"
     cache_to = str(build["with"]["cache-to"])
-    assert "github.event_name == 'push'" in cache_to
-    assert "github.ref == 'refs/heads/main'" in cache_to
-    assert "type=gha,mode=max" in cache_to
+    assert cache_to == _TRUSTED_CACHE_TO
+    assert "github.event_name == 'workflow_call'" not in cache_to
     assert "pull_request" not in cache_to
+
+
+def test_docker_workflow_call_checks_out_caller_sha_and_limits_cache_write() -> None:
+    workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    trigger = workflow.get("on", workflow.get(True))
+    assert isinstance(trigger, dict)
+    inputs = trigger["workflow_call"]["inputs"]
+    assert inputs["cache-write"]["type"] == "boolean"
+    assert inputs["cache-write"]["default"] is False
+    assert inputs["caller-sha"]["type"] == "string"
+    assert inputs["caller-sha"]["default"] == ""
+    assert (
+        trigger["workflow_call"]["outputs"]["image-digest"]["value"]
+        == "${{ jobs.docker-push.outputs.digest }}"
+    )
+
+    tested_ref = "${{ inputs.caller-sha || github.sha }}"
+    for job in workflow["jobs"].values():
+        for step in job.get("steps") or []:
+            if step.get("name") != "Checkout code":
+                continue
+            assert step["with"]["ref"] == tested_ref
+            assert step["with"]["persist-credentials"] is False
+
+    compose_steps = workflow["jobs"]["docker-compose-validate"]["steps"]
+    compose_uses = "\n".join(str(step.get("uses", "")) for step in compose_steps)
+    compose_runs = "\n".join(str(step.get("run", "")) for step in compose_steps)
+    assert "setup-buildx-action" not in compose_uses
+    assert "docker compose config" in compose_runs
+    assert "docker compose -f docker-compose.monitoring.yml config" in compose_runs
+    build_uses = "\n".join(
+        str(step.get("uses", "")) for step in workflow["jobs"]["docker-build"]["steps"]
+    )
+    assert "docker/setup-buildx-action@" in build_uses
+
+    caller = _load_yaml(ROOT / ".github/workflows/main-integrity.yml")["jobs"]["docker"]
+    assert caller["if"] == "github.ref == 'refs/heads/main'"
+    assert caller["with"]["cache-write"] is True
+    assert caller["with"]["caller-sha"] == "${{ github.sha }}"
 
 
 def test_docker_push_uses_environment_and_does_not_publish_latest_on_main() -> None:
@@ -1476,7 +1523,9 @@ def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_
     )
     evidence_run = str(evidence["run"])
     assert "trivy image" in evidence_run
-    assert "bioetl:${{ inputs.caller-sha || github.sha }}" in str(evidence.get("env", {}))
+    assert "bioetl:${{ inputs.caller-sha || github.sha }}" in str(
+        evidence.get("env", {})
+    )
     assert "--format json" in evidence_run
     assert "--output reports/security/trivy-results.json" in evidence_run
     assert "--exit-code 0" in evidence_run
@@ -1647,7 +1696,7 @@ def test_docker_build_metadata_is_part_of_reproducible_security_baseline() -> No
     assert 'os.environ["BUILD_METADATA"]' not in rendered
     assert "docker-build-action-metadata-v1" in rendered
     assert '"from": "type=gha"' in rendered
-    assert '"to_policy": "main push only: type=gha,mode=max"' in rendered
+    assert '"to_policy": "trusted main/nightly only: type=gha,mode=max"' in rendered
     assert "docker build action did not emit imageid" in rendered
     assert "reports/security/docker-build-metadata.json" in validate["run"]
     assert "reports/security/docker-build-metadata.json" in upload["with"]["path"]
