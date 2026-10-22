@@ -17,8 +17,8 @@ name: PR Gate Complete
 # calls. fast-governance checks out the PR head and, after setup, runs the
 # repo-side pin checker. That checker is not an independent trust boundary:
 # a hostile PR can rewrite the coordinator, the checker, and the registry
-# together. The four setup-python-uv steps are pinned to trusted main SHA
-# d86bb7b8a4e8407c8bc35392cb52192137d649ca (#12046), so a PR head cannot
+# together. The four setup-python-uv steps are pinned to trusted SHA
+# 4d46594b319b39d24f0bb239b699362d7f4288bb (#12425), so a PR head cannot
 # retarget those executions. Residual risk remains until an org ruleset
 # requires workflows from the default branch. This does not close #12046.
 # policy-anchor:deployment-provider deployment.provider=github_actions
@@ -288,17 +288,6 @@ jobs:
           import os
           from pathlib import Path
           raw = json.loads(os.environ["STEPS_JSON"])
-          osv_scan = raw.get("osv-scan")
-          osv_gate = raw.get("osv-gate")
-          if (
-              isinstance(osv_scan, dict)
-              and isinstance(osv_gate, dict)
-              and str(osv_scan.get("outcome", "")).lower() == "failure"
-              and str(osv_gate.get("outcome", "")).lower() == "success"
-          ):
-              normalized_osv_scan = dict(osv_scan)
-              normalized_osv_scan["outcome"] = "success"
-              raw["osv-scan"] = normalized_osv_scan
           flat = {}
           for key, value in raw.items():
               if isinstance(value, dict):
@@ -716,6 +705,17 @@ jobs:
           import os
           from pathlib import Path
           raw = json.loads(os.environ["STEPS_JSON"])
+          osv_scan = raw.get("osv-scan")
+          osv_gate = raw.get("osv-gate")
+          if (
+              isinstance(osv_scan, dict)
+              and isinstance(osv_gate, dict)
+              and str(osv_scan.get("outcome", "")).lower() == "failure"
+              and str(osv_gate.get("outcome", "")).lower() == "success"
+          ):
+              normalized_osv_scan = dict(osv_scan)
+              normalized_osv_scan["outcome"] = "success"
+              raw["osv-scan"] = normalized_osv_scan
           flat = {}
           for key, value in raw.items():
               if isinstance(value, dict):
