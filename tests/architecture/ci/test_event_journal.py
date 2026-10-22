@@ -1972,3 +1972,60 @@ def test_late_session_finish_status_change_is_not_complete(tmp_path: Path) -> No
     verdict = _live_verdict(tmp_path / "run")
     assert verdict["status"] != "complete"
     assert verdict["tests_passed"] is not True
+
+def test_record_redacts_nested_secrets_in_payload() -> None:
+    from scripts.engineering.ci.pytest_event_journal import (
+        EventJournalPlugin,
+    )
+    import io
+
+    # Mock context or identity
+    identity = _identity(role="worker", worker_id="gw0")
+
+    # We create a pseudo-plugin instance with the right state
+    class MockFile(io.StringIO):
+        def fileno(self):
+            return 1
+
+    plugin = EventJournalPlugin(
+        config=None,
+        path=Path("/tmp/foo"),
+        identity=identity,
+    )
+    plugin.secrets = ("supersecret", "swordfish")
+    plugin._file = MockFile()
+    plugin._closed = False
+
+    import os
+    from unittest import mock
+
+    with mock.patch("os.fsync", return_value=None):
+        # Send a payload with nested structures and secrets
+        plugin.record(
+            "custom_event",
+            {
+                "string": "this is a supersecret string",
+                "nested": {
+                    "safe_key": "safe value",
+                    "nested_password": "swordfish",
+                    "list": [
+                        "supersecret",
+                        "safe",
+                    ]
+                }
+            }
+        )
+
+        out = plugin._file.getvalue()
+
+    assert "supersecret" not in out
+    assert "swordfish" not in out
+    assert "[redacted:" in out
+
+    # Verify the structure remains somewhat intact and was JSON encoded
+    import json
+    parsed = json.loads(out)
+    assert parsed["event"] == "custom_event"
+    assert "nested" in parsed
+    assert parsed["nested"]["safe_key"] == "safe value"
+    assert "[redacted:" in parsed["nested"]["nested_password"]

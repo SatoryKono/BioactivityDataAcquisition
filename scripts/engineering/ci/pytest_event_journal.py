@@ -409,10 +409,7 @@ class EventJournalPlugin:
             "identity": _redact_structured(self.identity, self.secrets),
         }
         for key, value in data.items():
-            if isinstance(value, str):
-                payload[key] = _redact_text(value, self.secrets)
-            else:
-                payload[key] = value
+            payload[key] = _redact_structured(value, self.secrets)
         line = json.dumps(payload, sort_keys=True, ensure_ascii=True) + "\n"
         try:
             self._file.write(line)
