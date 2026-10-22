@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3897 |
-| Tracked doc-like files | 3897 |
+| Doc-like files | 3900 |
+| Tracked doc-like files | 3900 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3897 |
+| tracked | 3900 |
 
 ## Lifecycle Counts
 
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 191 |
+| working_report | 194 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -55,7 +55,7 @@
 | Archived | 1553 |
 | Canonical | 76 |
 | Generated | 1062 |
-| Working | 458 |
+| Working | 461 |
 
 ## Surface Families
 
@@ -65,13 +65,13 @@
 | archive | 1553 |
 | canonical | 76 |
 | generated | 1062 |
-| working | 458 |
+| working | 461 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 224 |
+| archive-after-migration | 227 |
 | generate-automatically | 1062 |
 | keep | 2611 |
 
@@ -157,8 +157,8 @@
 | `reports/audit-runs/20261022-p03/audit-manifest.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20261022-p03/findings.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20261022-p03/handoff.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/tracker_12232_report.md` | Working | 0 | archive-after-migration |
-| `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
+| `reports/audit-runs/20261022-p04/audit-manifest.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20261022-p04/findings.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
