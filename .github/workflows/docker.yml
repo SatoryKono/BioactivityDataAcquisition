@@ -60,7 +60,7 @@ jobs:
         with:
           python-version: "3.12"
           uv-extras: "dev"
-          enable-pytest-cache: "false"
+          enable-pytest-cache: "true"
           pytest-cache-prefix: "docker-runtime-contracts"
           pytest-cache-fingerprint: ${{ hashFiles('tests/architecture/test_docker_runtime_contracts.py', 'tests/unit/repo_backed/scripts/ops/docker/**', 'tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py', 'scripts/ops/runtime/docker/**', 'scripts/engineering/qa/docker_stability_campaign/**', 'configs/quality/docker_runtime_contracts.yaml') }}
 

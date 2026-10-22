@@ -41,7 +41,7 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    enable-pytest-cache: "false"
+                    enable-pytest-cache: "true"
                     pytest-cache-prefix: "arch-metrics"
                     pytest-cache-fingerprint: ${{ hashFiles('tests/architecture/**/*.py', 'tests/conftest.py', 'Makefile', 'pyproject.toml') }}
 
@@ -69,7 +69,7 @@ jobs:
                 uses: ./.github/actions/setup-python-uv
                 with:
                     uv-extras: "dev tracing performance"
-                    enable-pytest-cache: "false"
+                    enable-pytest-cache: "true"
                     pytest-cache-prefix: "arch-metrics-nightly"
                     pytest-cache-fingerprint: ${{ hashFiles('tests/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
