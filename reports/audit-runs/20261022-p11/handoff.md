@@ -39,7 +39,7 @@ PR не содержал ни одного изменённого файла. К
 | Composite resume | checkpoint, затем suffix после `last_event_id` |
 | Handoff P07, P08, P10 кампании `20261022` | отсутствуют |
 | Двухпроходный replay | не выполнялся |
-| `findings_sha256` | `e91610032588c0de69e5f61e90e8546f11f3f4bbd3f8f222bac2184130e71f7e` |
+| `findings_sha256` | `3a0c89907dfead59f50184c71dcbd1f7b56a21eb0275eef6159c543e5ec4714f` |
 
 `occurrence_only` не сводится к byte equivalence: ключ истинен только вместе с `semantic_equivalent` и непустым `occurrence_only_artifacts`, а `raw_byte_equivalent` считается отдельно.
 
@@ -47,7 +47,7 @@ PR не содержал ни одного изменённого файла. К
 
 ## Findings
 
-1. `AUDIT-20261022-P11-001` / `MANIFEST_FILE_REWRITE`. Статус `PROVEN`, вердикт `CONFIRMED`. Другой payload с тем же `manifest_id` перезаписывает файл. Повтор того же объекта тестом разрешён.
+1. `AUDIT-20261022-P11-001` / `MANIFEST_FILE_REWRITE`. Статус `PROVEN`, вердикт `CONFIRMED`. На ревизии `1d1878e5d6c72b061b9bf01d93495923f3058541` два `FileRunManifestStore.save` с `manifest_id=manifest-same-id` и `execution_fingerprint` `fingerprint-a`, затем `fingerprint-b`, после `store.get` дали `{"replaced": true, "second_fingerprint": "fingerprint-b"}` (`2026-10-22T10:10:40Z`). Команда записана в `findings.json`. Повтор того же объекта тестом разрешён.
 2. `AUDIT-20261022-P11-002` / `REPLAY_RUNTIME_UNVERIFIED`. Статус `NOT_PROVEN`, вердикт `NOT_VERIFIABLE`. Нет handoff P07, P08 и P10, runtime A/B не запускался.
 3. `AUDIT-20261022-P11-003` / `HYBRID_REPLAY_MODEL`. Статус `PROVEN`, вердикт `DOWNGRADED`. Граница checkpoint и ledger записана в ADR-046. Это не дефект, требующий ledger-only resume.
 
@@ -65,6 +65,8 @@ PR не содержал ни одного изменённого файла. К
 ## Повтор
 
 ```text
+# AUDIT-20261022-P11-001, result {"replaced": true, "second_fingerprint": "fingerprint-b"}
+# command: reports/audit-runs/20261022-p11/findings.json evidence[0].command
 rg -n "class RunManifest" src/bioetl/domain/control_plane/run_manifest.py
 rg -n "def persist_manifest" src/bioetl/infrastructure/control_plane/_file_run_manifest_persistence.py
 rg -n "list_entries_after" src/bioetl/application/composite/checkpoint/load_service.py
