@@ -1428,7 +1428,7 @@ def test_docker_push_uses_environment_and_does_not_publish_latest_on_main() -> N
     assert job.get("environment") == "ghcr-publish"
     assert ":latest" not in rendered
     assert "docker/build-push-action@" not in rendered
-    assert "bioetl-scanned-image-${{ github.sha }}" in rendered
+    assert "bioetl-scanned-image-${{ inputs.caller-sha || github.sha }}" in rendered
     assert "docker manifest inspect" in rendered
 
 
@@ -1476,7 +1476,7 @@ def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_
     )
     evidence_run = str(evidence["run"])
     assert "trivy image" in evidence_run
-    assert "bioetl:${{ github.sha }}" in str(evidence.get("env", {}))
+    assert "bioetl:${{ inputs.caller-sha || github.sha }}" in str(evidence.get("env", {}))
     assert "--format json" in evidence_run
     assert "--output reports/security/trivy-results.json" in evidence_run
     assert "--exit-code 0" in evidence_run

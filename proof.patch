@@ -1,0 +1,659 @@
+From 35f896ec97d999953d05d2077b84beada3328aad Mon Sep 17 00:00:00 2001
+From: "google-labs-jules[bot]"
+ <161369871+google-labs-jules[bot]@users.noreply.github.com>
+Date: Thu, 22 Oct 2026 10:53:54 +0000
+Subject: [PATCH] fix(ci): define caller-sha inputs for docker workflow_call
+
+---
+ .github/workflows/docker.yml                  |  59 +++++---
+ configs/quality/test_telemetry_baseline.yaml  |   2 +-
+ .../05-engineering/test-telemetry-baseline.md |   2 +-
+ .../documentation-cleanup-inventory.json      | 128 ++++++++++++++++--
+ .../documentation-cleanup-inventory.md        |  14 +-
+ ...rchitecture-debt-remote-main-baseline.json |  16 +--
+ .../quality/flaky-test-burndown-review.json   |   6 +-
+ reports/quality/test-governance-current.json  |   6 +-
+ reports/test-telemetry/coverage-summary.json  |   2 +-
+ reports/test-telemetry/slowest-tests.json     |   2 +-
+ .../test_docker_runtime_contracts.py          |   4 +-
+ 11 files changed, 185 insertions(+), 56 deletions(-)
+
+diff --git a/.github/workflows/docker.yml b/.github/workflows/docker.yml
+index 54156fcb13..8534739545 100644
+--- a/.github/workflows/docker.yml
++++ b/.github/workflows/docker.yml
+@@ -5,6 +5,21 @@ permissions:
+
+ on:
+   workflow_call:
++    inputs:
++      cache-write:
++        description: "Permit writing to the max cache (trusted contexts only)"
++        type: boolean
++        required: false
++        default: false
++      caller-sha:
++        description: "Explicit tested SHA (if caller wraps multiple revisions)"
++        type: string
++        required: false
++        default: ""
++    outputs:
++      image-digest:
++        description: "Published GHCR image digest"
++        value: ${{ jobs.docker-push.outputs.digest }}
+   push:
+     branches-ignore:
+       - main
+@@ -90,9 +105,6 @@ jobs:
+         with:
+           persist-credentials: false
+
+-      - name: Set up Docker Buildx
+-        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+-
+       - name: Validate docker-compose.yml syntax
+         env:
+           # Placeholder only for `compose config` interpolation; not a real secret.
+@@ -115,6 +127,7 @@ jobs:
+       security-events: write
+     env:
+       TRIVY_CACHE_DIR: .trivycache
++      TESTED_SHA: ${{ inputs.caller-sha || github.sha }}
+
+     steps:
+       - name: Checkout code
+@@ -133,11 +146,11 @@ jobs:
+           file: Dockerfile.bioetl
+           push: false
+           load: true
+-          tags: "bioetl:${{ github.sha }}"
++          tags: "bioetl:${{ inputs.caller-sha || github.sha }}"
+           cache-from: type=gha
+           # PRs consume the trusted default-branch cache but do not spend the
+           # critical path exporting a branch-local max cache. Main refreshes it.
+-          cache-to: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'type=gha,mode=max' || '' }}
++          cache-to: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (inputs.cache-write == true && github.event_name == 'workflow_call' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/nightly')) && 'type=gha,mode=max' || '' }}
+
+       - name: Prepare security reports directory
+         run: mkdir -p reports/security
+@@ -146,7 +159,7 @@ jobs:
+         env:
+           BUILD_DIGEST: ${{ steps.build.outputs.digest }}
+           BUILD_IMAGE_ID: ${{ steps.build.outputs.imageid }}
+-          IMAGE_REF: bioetl:${{ github.sha }}
++          IMAGE_REF: bioetl:${{ inputs.caller-sha || github.sha }}
+         # The build metadata output embeds full provenance (git history with
+         # commit messages) and can exceed the runner exec env limit (E2BIG:
+         # "Argument list too long") when passed as an env var. Ship it through
+@@ -171,7 +184,7 @@ jobs:
+
+           payload = {
+               "schema_version": "docker-build-action-metadata-v1",
+-              "source_sha": os.environ["GITHUB_SHA"],
++              "source_sha": os.environ["TESTED_SHA"],
+               "run_id": os.environ.get("GITHUB_RUN_ID", ""),
+               "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", ""),
+               "image_ref": os.environ["IMAGE_REF"],
+@@ -193,11 +206,11 @@ jobs:
+
+       - name: Capture image and runtime provenance
+         env:
+-          IMAGE_REF: bioetl:${{ github.sha }}
++          IMAGE_REF: bioetl:${{ inputs.caller-sha || github.sha }}
+         run: |
+           set -euo pipefail
+           {
+-            echo "source_sha=${GITHUB_SHA}"
++            echo "source_sha=${TESTED_SHA}"
+             echo "wolfi_base_image=chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
+             echo "runtime_python=python-3.13=3.13.16_git20261002-r2"
+             echo "builder_uv=uv=0.11.26-r0"
+@@ -213,7 +226,7 @@ jobs:
+
+       - name: Prove default image health contract
+         env:
+-          IMAGE_REF: bioetl:${{ github.sha }}
++          IMAGE_REF: bioetl:${{ inputs.caller-sha || github.sha }}
+         run: |
+           set -euo pipefail
+           container_id="$(docker run --detach --rm "${IMAGE_REF}")"
+@@ -246,7 +259,7 @@ jobs:
+
+       - name: Run full Trivy JSON evidence scan
+         env:
+-          IMAGE_REF: bioetl:${{ github.sha }}
++          IMAGE_REF: bioetl:${{ inputs.caller-sha || github.sha }}
+         run: |
+           set -euo pipefail
+           trivy image \
+@@ -272,7 +285,7 @@ jobs:
+       - name: Generate SBOM for the scanned local image
+         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+         with:
+-          image: "bioetl:${{ github.sha }}"
++          image: "bioetl:${{ inputs.caller-sha || github.sha }}"
+           format: spdx-json
+           output-file: reports/security/bioetl.spdx.json
+           upload-artifact: false
+@@ -338,7 +351,7 @@ jobs:
+         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+         if: always() && !cancelled() && steps.validate-baseline.outcome == 'success'
+         with:
+-          name: bioetl-security-baseline-${{ github.sha }}
++          name: bioetl-security-baseline-${{ inputs.caller-sha || github.sha }}
+           path: |
+             reports/security/bioetl-image-id.txt
+             reports/security/bioetl-image-provenance.txt
+@@ -366,14 +379,14 @@ jobs:
+       - name: Export exact scanned image for publication
+         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_call')
+         env:
+-          IMAGE_REF: bioetl:${{ github.sha }}
++          IMAGE_REF: bioetl:${{ inputs.caller-sha || github.sha }}
+         run: docker save "${IMAGE_REF}" | zstd -T0 -10 -o reports/security/bioetl-scanned-image.tar.zst
+
+       - name: Transfer exact scanned image to publish job
+         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_call')
+         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+         with:
+-          name: bioetl-scanned-image-${{ github.sha }}
++          name: bioetl-scanned-image-${{ inputs.caller-sha || github.sha }}
+           path: |
+             reports/security/bioetl-scanned-image.tar.zst
+             reports/security/bioetl-image-id.txt
+@@ -420,8 +433,12 @@ jobs:
+     needs:
+       - docker-build
+       - docker-complete
++    outputs:
++      digest: ${{ steps.publish.outputs.digest }}
+     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_call')
+     environment: ghcr-publish
++    env:
++      TESTED_SHA: ${{ inputs.caller-sha || github.sha }}
+     concurrency:
+       group: docker-ghcr-push-${{ github.run_id }}
+       cancel-in-progress: false
+@@ -437,7 +454,7 @@ jobs:
+         env:
+           GH_TOKEN: ${{ github.token }}
+           REPOSITORY: ${{ github.repository }}
+-          SOURCE_SHA: ${{ github.sha }}
++          SOURCE_SHA: ${{ inputs.caller-sha || github.sha }}
+         run: |
+           set -euo pipefail
+           current_sha="$(gh api "/repos/${REPOSITORY}/branches/main" --jq '.commit.sha')"
+@@ -454,13 +471,13 @@ jobs:
+         if: steps.head-guard.outputs.stale != 'true'
+         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+         with:
+-          name: bioetl-scanned-image-${{ github.sha }}
++          name: bioetl-scanned-image-${{ inputs.caller-sha || github.sha }}
+           path: scanned-image
+
+       - name: Load exact scanned image
+         if: steps.head-guard.outputs.stale != 'true'
+         env:
+-          IMAGE_REF: bioetl:${{ github.sha }}
++          IMAGE_REF: bioetl:${{ inputs.caller-sha || github.sha }}
+         run: |
+           set -euo pipefail
+           zstd -d -c scanned-image/bioetl-scanned-image.tar.zst | docker load
+@@ -490,12 +507,12 @@ jobs:
+         if: steps.head-guard.outputs.stale != 'true'
+         id: publish
+         env:
+-          IMAGE_REF: bioetl:${{ github.sha }}
++          IMAGE_REF: bioetl:${{ inputs.caller-sha || github.sha }}
+           IMAGE_BASE: ${{ steps.ghcr.outputs.image_base }}
+         run: |
+           set -euo pipefail
+           expected_id="$(cat scanned-image/bioetl-image-id.txt)"
+-          sha_ref="${IMAGE_BASE}:${GITHUB_SHA}"
++          sha_ref="${IMAGE_BASE}:${TESTED_SHA}"
+           branch_ref="${IMAGE_BASE}:${GITHUB_REF_NAME}"
+           docker tag "${IMAGE_REF}" "${sha_ref}"
+           docker tag "${IMAGE_REF}" "${branch_ref}"
+@@ -511,7 +528,7 @@ jobs:
+         if: steps.head-guard.outputs.stale != 'true'
+         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+         with:
+-          image: ${{ steps.ghcr.outputs.image_base }}:${{ github.sha }}
++          image: ${{ steps.ghcr.outputs.image_base }}:${{ inputs.caller-sha || github.sha }}
+           format: spdx-json
+           output-file: bioetl-ghcr.spdx.json
+           artifact-name: bioetl-ghcr-sbom
+diff --git a/configs/quality/test_telemetry_baseline.yaml b/configs/quality/test_telemetry_baseline.yaml
+index 51fbef7581..a016f9e918 100644
+--- a/configs/quality/test_telemetry_baseline.yaml
++++ b/configs/quality/test_telemetry_baseline.yaml
+@@ -8,7 +8,7 @@ source_commit: 8a4286d21becf1fe183acfaf3f051bc6f7916038
+ source_run_id: local-pr12231-local-coverage-8a4286d
+ source_event: local_coverage_verify
+ source_run_url: null
+-source_tree_sha256: 8754022775a780ef28e45367ff15ca41c67fa64e4ce58e38658f126bb6967e05
++source_tree_sha256: 8d8eafcddd3956db2f7be7c2b823344ebe8012598475fdf3d80ac1cf6328bf3e
+ freshness_guard:
+   timestamp_field: refreshed_at_utc
+   max_age_days: 45
+diff --git a/docs/05-engineering/test-telemetry-baseline.md b/docs/05-engineering/test-telemetry-baseline.md
+index a5e82fb61e..8c1f3cb2aa 100644
+--- a/docs/05-engineering/test-telemetry-baseline.md
++++ b/docs/05-engineering/test-telemetry-baseline.md
+@@ -32,7 +32,7 @@ trend evidence only.
+ - Source run id: `local-pr12231-local-coverage-8a4286d`
+ - Source event: `local_coverage_verify`
+ - Source run URL: `pending`
+-- Source tree sha256: `8754022775a780ef28e45367ff15ca41c67fa64e4ce58e38658f126bb6967e05`
++- Source tree sha256: `8d8eafcddd3956db2f7be7c2b823344ebe8012598475fdf3d80ac1cf6328bf3e`
+ - Refresh status: `captured`
+ - Refreshed at (UTC): `2026-10-15T18:50:07.879352+00:00`
+
+diff --git a/docs/reports/generated/documentation-cleanup-inventory.json b/docs/reports/generated/documentation-cleanup-inventory.json
+index 244a7254a5..fe754f9589 100644
+--- a/docs/reports/generated/documentation-cleanup-inventory.json
++++ b/docs/reports/generated/documentation-cleanup-inventory.json
+@@ -107129,6 +107129,118 @@
+       "surface_family": "working",
+       "tracking_state": "tracked"
+     },
++    {
++      "canonical_successor": null,
++      "catalog_lifecycle": null,
++      "commit_policy": null,
++      "declared_class": null,
++      "declared_status": null,
++      "diagram_kind": null,
++      "duplicate_group": null,
++      "duplicate_resolution": null,
++      "extension": ".csv",
++      "freshness": "review-required",
++      "generated_route": null,
++      "generated_route_exception": null,
++      "generator": null,
++      "github_issue_number": null,
++      "github_issue_url": null,
++      "inbound_links": 0,
++      "lifecycle": "working_report",
++      "outbound_links": 0,
++      "owner": "BioETL Team",
++      "path": "reports/quality/quality-move-qm01/consumer_edit_plan.csv",
++      "recommended_action": "archive-after-migration",
++      "root_doc_kind": null,
++      "section": "reports",
++      "status": "Working",
++      "surface_family": "working",
++      "tracking_state": "tracked"
++    },
++    {
++      "canonical_successor": null,
++      "catalog_lifecycle": null,
++      "commit_policy": null,
++      "declared_class": null,
++      "declared_status": null,
++      "diagram_kind": null,
++      "duplicate_group": null,
++      "duplicate_resolution": null,
++      "extension": ".csv",
++      "freshness": "review-required",
++      "generated_route": null,
++      "generated_route_exception": null,
++      "generator": null,
++      "github_issue_number": null,
++      "github_issue_url": null,
++      "inbound_links": 0,
++      "lifecycle": "working_report",
++      "outbound_links": 0,
++      "owner": "BioETL Team",
++      "path": "reports/quality/quality-move-qm01/file_move_plan.csv",
++      "recommended_action": "archive-after-migration",
++      "root_doc_kind": null,
++      "section": "reports",
++      "status": "Working",
++      "surface_family": "working",
++      "tracking_state": "tracked"
++    },
++    {
++      "canonical_successor": null,
++      "catalog_lifecycle": null,
++      "commit_policy": null,
++      "declared_class": null,
++      "declared_status": null,
++      "diagram_kind": null,
++      "duplicate_group": null,
++      "duplicate_resolution": null,
++      "extension": ".json",
++      "freshness": "review-required",
++      "generated_route": null,
++      "generated_route_exception": null,
++      "generator": null,
++      "github_issue_number": null,
++      "github_issue_url": null,
++      "inbound_links": 0,
++      "lifecycle": "working_report",
++      "outbound_links": 0,
++      "owner": "BioETL Team",
++      "path": "reports/quality/quality-move-qm01/metadata.json",
++      "recommended_action": "archive-after-migration",
++      "root_doc_kind": null,
++      "section": "reports",
++      "status": "Working",
++      "surface_family": "working",
++      "tracking_state": "tracked"
++    },
++    {
++      "canonical_successor": null,
++      "catalog_lifecycle": null,
++      "commit_policy": null,
++      "declared_class": null,
++      "declared_status": null,
++      "diagram_kind": null,
++      "duplicate_group": null,
++      "duplicate_resolution": null,
++      "extension": ".json",
++      "freshness": "review-required",
++      "generated_route": null,
++      "generated_route_exception": null,
++      "generator": null,
++      "github_issue_number": null,
++      "github_issue_url": null,
++      "inbound_links": 0,
++      "lifecycle": "working_report",
++      "outbound_links": 0,
++      "owner": "BioETL Team",
++      "path": "reports/quality/quality-move-qm01/reference_decisions.json",
++      "recommended_action": "archive-after-migration",
++      "root_doc_kind": null,
++      "section": "reports",
++      "status": "Working",
++      "surface_family": "working",
++      "tracking_state": "tracked"
++    },
+     {
+       "canonical_successor": null,
+       "catalog_lifecycle": null,
+@@ -110282,10 +110394,10 @@
+       "plans_governance_entrypoint": 1,
+       "published_skill_reference_redirect": 26,
+       "reports_workspace_entrypoint": 1,
+-      "working_report": 203
++      "working_report": 207
+     },
+     "by_recommended_action": {
+-      "archive-after-migration": 236,
++      "archive-after-migration": 240,
+       "generate-automatically": 1062,
+       "keep": 2611
+     },
+@@ -110311,7 +110423,7 @@
+       "filters": 4,
+       "mkdocs.yml": 1,
+       "plans": 2,
+-      "reports": 503,
++      "reports": 507,
+       "security": 2
+     },
+     "by_status": {
+@@ -110319,17 +110431,17 @@
+       "Archived": 1553,
+       "Canonical": 76,
+       "Generated": 1062,
+-      "Working": 470
++      "Working": 474
+     },
+     "by_surface_family": {
+       "active": 748,
+       "archive": 1553,
+       "canonical": 76,
+       "generated": 1062,
+-      "working": 470
++      "working": 474
+     },
+     "by_tracking_state": {
+-      "tracked": 3909
++      "tracked": 3913
+     },
+     "docs_reports_local_count": 59,
+     "duplicate_group_count": 80,
+@@ -110342,8 +110454,8 @@
+     },
+     "scan_error_count": 0,
+     "scan_errors": [],
+-    "total_doc_like": 3909,
++    "total_doc_like": 3913,
+     "total_doc_like_ignored_local": 0,
+-    "total_doc_like_tracked": 3909
++    "total_doc_like_tracked": 3913
+   }
+ }
+diff --git a/docs/reports/generated/documentation-cleanup-inventory.md b/docs/reports/generated/documentation-cleanup-inventory.md
+index 84b4bf03e5..4aef4a6e18 100644
+--- a/docs/reports/generated/documentation-cleanup-inventory.md
++++ b/docs/reports/generated/documentation-cleanup-inventory.md
+@@ -7,8 +7,8 @@
+
+ | Metric | Value |
+ | --- | --- |
+-| Doc-like files | 3909 |
+-| Tracked doc-like files | 3909 |
++| Doc-like files | 3913 |
++| Tracked doc-like files | 3913 |
+ | Ignored local docs/reports files | 0 |
+ | Duplicate groups | 80 |
+ | Generated without route or exception | 0 |
+@@ -18,7 +18,7 @@
+
+ | Tracking State | Count |
+ | --- | --- |
+-| tracked | 3909 |
++| tracked | 3913 |
+
+ ## Lifecycle Counts
+
+@@ -38,7 +38,7 @@
+ | plans_governance_entrypoint | 1 |
+ | published_skill_reference_redirect | 26 |
+ | reports_workspace_entrypoint | 1 |
+-| working_report | 203 |
++| working_report | 207 |
+
+ ## GitHub Issue Drafts And Packs
+
+@@ -55,7 +55,7 @@
+ | Archived | 1553 |
+ | Canonical | 76 |
+ | Generated | 1062 |
+-| Working | 470 |
++| Working | 474 |
+
+ ## Surface Families
+
+@@ -65,13 +65,13 @@
+ | archive | 1553 |
+ | canonical | 76 |
+ | generated | 1062 |
+-| working | 470 |
++| working | 474 |
+
+ ## Recommended Actions
+
+ | Action | Count |
+ | --- | --- |
+-| archive-after-migration | 236 |
++| archive-after-migration | 240 |
+ | generate-automatically | 1062 |
+ | keep | 2611 |
+
+diff --git a/reports/quality/architecture-debt-remote-main-baseline.json b/reports/quality/architecture-debt-remote-main-baseline.json
+index 513118bfd2..08950ca886 100644
+--- a/reports/quality/architecture-debt-remote-main-baseline.json
++++ b/reports/quality/architecture-debt-remote-main-baseline.json
+@@ -6,7 +6,7 @@
+       "path": "reports/quality/architecture-quality-scorecard.json",
+       "required": true,
+       "required_on_remote": true,
+-      "source_revision": "4c8d32d602d758764d8e9d760b5fc91981ffee49",
++      "source_revision": "1d1878e5d6c72b061b9bf01d93495923f3058541",
+       "summary": {
+         "available": true,
+         "integral_score": 10.0,
+@@ -20,7 +20,7 @@
+       "path": "reports/quality/module-coverage-inventory.json",
+       "required": true,
+       "required_on_remote": true,
+-      "source_revision": "4c8d32d602d758764d8e9d760b5fc91981ffee49",
++      "source_revision": "1d1878e5d6c72b061b9bf01d93495923f3058541",
+       "summary": {
+         "available": true,
+         "coverage_xml_sha256": "e004119066477ae9ee490d667644da12496fde6d6b4e5b2ba73c424efb99f7b9",
+@@ -37,7 +37,7 @@
+       "path": "reports/quality/compatibility-importer-census.json",
+       "required": true,
+       "required_on_remote": true,
+-      "source_revision": "4c8d32d602d758764d8e9d760b5fc91981ffee49",
++      "source_revision": "1d1878e5d6c72b061b9bf01d93495923f3058541",
+       "summary": {
+         "available": true,
+         "retained_entrypoint_count": 12,
+@@ -50,7 +50,7 @@
+       "path": "reports/quality/dead-code-inventory.json",
+       "required": true,
+       "required_on_remote": true,
+-      "source_revision": "4c8d32d602d758764d8e9d760b5fc91981ffee49",
++      "source_revision": "1d1878e5d6c72b061b9bf01d93495923f3058541",
+       "summary": {
+         "available": true,
+         "repo_wide_untriaged_zero_import_candidate_count": 0,
+@@ -63,7 +63,7 @@
+       "path": "reports/quality/contract-registry-diagnostics.json",
+       "required": true,
+       "required_on_remote": true,
+-      "source_revision": "4c8d32d602d758764d8e9d760b5fc91981ffee49",
++      "source_revision": "1d1878e5d6c72b061b9bf01d93495923f3058541",
+       "summary": {
+         "available": true,
+         "blocking_issue_count": 0,
+@@ -76,7 +76,7 @@
+       "path": "reports/observability/runtime_cardinality_inventory.json",
+       "required": false,
+       "required_on_remote": false,
+-      "source_revision": "4c8d32d602d758764d8e9d760b5fc91981ffee49",
++      "source_revision": "1d1878e5d6c72b061b9bf01d93495923f3058541",
+       "summary": {
+         "available": true
+       }
+@@ -102,9 +102,9 @@
+   ],
+   "local_tracking_ref": "origin/main",
+   "local_tracking_ref_matches_remote": true,
+-  "local_tracking_ref_sha": "4c8d32d602d758764d8e9d760b5fc91981ffee49",
++  "local_tracking_ref_sha": "1d1878e5d6c72b061b9bf01d93495923f3058541",
+   "remote": "origin",
+   "remote_main_ref": "refs/heads/main",
+-  "remote_main_sha": "4c8d32d602d758764d8e9d760b5fc91981ffee49",
++  "remote_main_sha": "1d1878e5d6c72b061b9bf01d93495923f3058541",
+   "schema_version": 1
+ }
+diff --git a/reports/quality/flaky-test-burndown-review.json b/reports/quality/flaky-test-burndown-review.json
+index d52e12e93c..a638f16f96 100644
+--- a/reports/quality/flaky-test-burndown-review.json
++++ b/reports/quality/flaky-test-burndown-review.json
+@@ -41,7 +41,7 @@
+   ],
+   "source_fingerprints": {
+     "curated_inventory_sha256": "0d698b73cd22ee00bb4afbb96cb166c3f7c7a6da809fe5e05931b3f3dc3dad04",
+-    "test_governance_source_tree_sha256": "936559fdff22a5b0058448659121180e680254a125a872e4d0c0f1d148b176dd"
++    "test_governance_source_tree_sha256": "15dd77d1846537c84f9170a0ce1f547d1b3d413e952da23ce35d4455f251855e"
+   },
+   "summary": {
+     "by_alert_level": {
+@@ -75,9 +75,9 @@
+       "quarantined": 0
+     },
+     "test_governance_budget_violation_count": 0,
+-    "test_governance_source_tree_sha256": "936559fdff22a5b0058448659121180e680254a125a872e4d0c0f1d148b176dd",
++    "test_governance_source_tree_sha256": "15dd77d1846537c84f9170a0ce1f547d1b3d413e952da23ce35d4455f251855e",
+     "total_flaky": 0,
+     "total_test_files": 3166,
+-    "total_tests_analyzed": 31203
++    "total_tests_analyzed": 31204
+   }
+ }
+diff --git a/reports/quality/test-governance-current.json b/reports/quality/test-governance-current.json
+index 402927c5bd..4ea0510fd9 100644
+--- a/reports/quality/test-governance-current.json
++++ b/reports/quality/test-governance-current.json
+@@ -2087,12 +2087,12 @@
+     },
+     "top_duplicate_test_names": [],
+     "total_test_files": 3166,
+-    "total_test_functions": 31203,
++    "total_test_functions": 31204,
+     "unreviewed_assertion_bypass_count": 0,
+     "uuid4_call_sites": 0
+   },
+   "root": ".",
+-  "source_tree_sha256": "936559fdff22a5b0058448659121180e680254a125a872e4d0c0f1d148b176dd",
++  "source_tree_sha256": "15dd77d1846537c84f9170a0ce1f547d1b3d413e952da23ce35d4455f251855e",
+   "summary": {
+     "assertion_branch_reachability_percent": 100.0,
+     "assertless_total_candidates": 85,
+@@ -2155,7 +2155,7 @@
+   },
+   "top_duplicate_test_names": [],
+   "total_test_files": 3166,
+-  "total_test_functions": 31203,
++  "total_test_functions": 31204,
+   "unreviewed_assertion_bypass_count": 0,
+   "uuid4_call_sites": 0
+ }
+diff --git a/reports/test-telemetry/coverage-summary.json b/reports/test-telemetry/coverage-summary.json
+index b8dd528912..01ca3cd464 100644
+--- a/reports/test-telemetry/coverage-summary.json
++++ b/reports/test-telemetry/coverage-summary.json
+@@ -4,7 +4,7 @@
+   "source_run_id": "local-pr12231-local-coverage-8a4286d",
+   "source_event": "local_coverage_verify",
+   "source_run_url": null,
+-  "source_tree_sha256": "8754022775a780ef28e45367ff15ca41c67fa64e4ce58e38658f126bb6967e05",
++  "source_tree_sha256": "8d8eafcddd3956db2f7be7c2b823344ebe8012598475fdf3d80ac1cf6328bf3e",
+   "refreshed_at_utc": "2026-10-15T18:50:07.879352+00:00",
+   "refresh_status": "captured",
+   "coverage_percent": 99.66,
+diff --git a/reports/test-telemetry/slowest-tests.json b/reports/test-telemetry/slowest-tests.json
+index b4a7df0cd3..ac06033ca9 100644
+--- a/reports/test-telemetry/slowest-tests.json
++++ b/reports/test-telemetry/slowest-tests.json
+@@ -4,7 +4,7 @@
+   "source_run_id": "local-pr12231-local-coverage-8a4286d",
+   "source_event": "local_coverage_verify",
+   "source_run_url": null,
+-  "source_tree_sha256": "8754022775a780ef28e45367ff15ca41c67fa64e4ce58e38658f126bb6967e05",
++  "source_tree_sha256": "8d8eafcddd3956db2f7be7c2b823344ebe8012598475fdf3d80ac1cf6328bf3e",
+   "refreshed_at_utc": "2026-10-15T18:50:07.879352+00:00",
+   "refresh_status": "captured",
+   "total_cases": 34037,
+diff --git a/tests/architecture/test_docker_runtime_contracts.py b/tests/architecture/test_docker_runtime_contracts.py
+index b643d61a22..40dfcb9392 100644
+--- a/tests/architecture/test_docker_runtime_contracts.py
++++ b/tests/architecture/test_docker_runtime_contracts.py
+@@ -1428,7 +1428,7 @@ def test_docker_push_uses_environment_and_does_not_publish_latest_on_main() -> N
+     assert job.get("environment") == "ghcr-publish"
+     assert ":latest" not in rendered
+     assert "docker/build-push-action@" not in rendered
+-    assert "bioetl-scanned-image-${{ github.sha }}" in rendered
++    assert "bioetl-scanned-image-${{ inputs.caller-sha || github.sha }}" in rendered
+     assert "docker manifest inspect" in rendered
+
+
+@@ -1476,7 +1476,7 @@ def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_
+     )
+     evidence_run = str(evidence["run"])
+     assert "trivy image" in evidence_run
+-    assert "bioetl:${{ github.sha }}" in str(evidence.get("env", {}))
++    assert "bioetl:${{ inputs.caller-sha || github.sha }}" in str(evidence.get("env", {}))
+     assert "--format json" in evidence_run
+     assert "--output reports/security/trivy-results.json" in evidence_run
+     assert "--exit-code 0" in evidence_run
+--
+2.53.0
