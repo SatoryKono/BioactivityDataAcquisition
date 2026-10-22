@@ -71,7 +71,7 @@ runs:
           printf 'dependency-profile=%s\n' "$INPUT_DEPENDENCY_PROFILE"
           sha256sum uv.lock pyproject.toml \
             .github/actions/setup-python-uv/action.yml \
-            .github/actions/setup-python-uv/sync_control.py
+            scripts/engineering/ci/sync_control.py
         } | sha256sum | awk '{print "fingerprint="$1}' >> "$GITHUB_OUTPUT"
         printf 'python-fragment=py%s\n' "$python_fragment" >> "$GITHUB_OUTPUT"
 
@@ -114,7 +114,7 @@ runs:
             echo "ci-control accepts only uv-sync-args '--frozen'" >&2
             exit 1
           fi
-          python .github/actions/setup-python-uv/sync_control.py sync --frozen --only-group ci-control
+          python scripts/engineering/ci/sync_control.py sync --frozen --only-group ci-control
         elif [ "$PROFILE" = "legacy" ]; then
           CMD="uv sync ${SYNC_ARGS}"
           for extra in $EXTRAS; do

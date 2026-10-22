@@ -61,13 +61,13 @@ def test_ci_control_profile_is_cache_isolated_and_does_not_expand_sync_args() ->
     script = cast(str, fingerprint["run"])
 
     assert "INPUT_DEPENDENCY_PROFILE" in script
-    assert ".github/actions/setup-python-uv/sync_control.py" in script
-    assert "if [ -f .github/actions/setup-python-uv/sync_control.py ]" not in script
+    assert "scripts/engineering/ci/sync_control.py" in script
+    assert ".github/actions/setup-python-uv/sync_control.py" not in script
 
     install = _step_by_name("Install dependencies")
     install_script = cast(str, install["run"])
     assert (
-        "python .github/actions/setup-python-uv/sync_control.py "
+        "python scripts/engineering/ci/sync_control.py "
         "sync --frozen --only-group ci-control"
     ) in install_script
     assert "ci-control $SYNC_ARGS" not in install_script

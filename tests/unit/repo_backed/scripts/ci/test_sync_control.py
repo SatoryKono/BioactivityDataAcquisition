@@ -2,31 +2,18 @@
 
 from __future__ import annotations
 
-import importlib.util
 import os
 import subprocess
 import sys
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
+from scripts.engineering.ci import sync_control
+
 pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 _ALLOWED_UV_ENV = {"UV_CACHE_DIR", "UV_PYTHON"}
-
-
-def load_sync_control():
-    path = Path(".github/actions/setup-python-uv/sync_control.py")
-    spec = importlib.util.spec_from_file_location("sync_control", path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"cannot load {path}")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-sync_control = load_sync_control()
 
 
 def _clear_blocked_uv(monkeypatch: pytest.MonkeyPatch) -> None:
