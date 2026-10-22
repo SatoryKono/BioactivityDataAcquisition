@@ -265,7 +265,7 @@ jobs:
         uses: ./.github/actions/setup-python-uv
         with:
           python-version: "3.12"
-          enable-pytest-cache: "true"
+          enable-pytest-cache: "false"
           pytest-cache-prefix: "pytest-contract-confidence"
           pytest-cache-fingerprint: ${{ hashFiles('tests/contract/**/*.py', 'tests/unit/contracts/**/*.py', 'tests/conftest.py', 'tests/contract/conftest.py', 'pyproject.toml') }}
 
@@ -880,7 +880,7 @@ jobs:
         uses: ./.github/actions/setup-python-uv
         with:
           python-version: "3.12"
-          enable-pytest-cache: "true"
+          enable-pytest-cache: "false"
           pytest-cache-prefix: "pytest-fast-${{ matrix.test-group.name }}"
           pytest-cache-fingerprint: ${{ hashFiles('tests/unit/**/*.py', 'tests/conftest.py', 'pyproject.toml', 'configs/quality/test_matrix.yaml') }}
 
@@ -934,7 +934,7 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          enable-pytest-cache: "true"
+          enable-pytest-cache: "false"
           pytest-cache-prefix: "pytest-repo-backed-unit-${{ matrix.test-group.name }}"
           pytest-cache-fingerprint: ${{ hashFiles('tests/unit/repo_backed/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
@@ -1005,7 +1005,7 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          enable-pytest-cache: "true"
+          enable-pytest-cache: "false"
           pytest-cache-prefix: "pytest-unit-scripts-tooling-${{ matrix.test-group.name }}"
           pytest-cache-fingerprint: ${{ hashFiles('tests/unit/scripts/**/*.py', 'tests/conftest.py', 'pyproject.toml', 'configs/quality/test_matrix.yaml') }}
 
@@ -1068,7 +1068,7 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          enable-pytest-cache: "true"
+          enable-pytest-cache: "false"
           pytest-cache-prefix: "pytest-unit-filesystem-contracts"
           pytest-cache-fingerprint: ${{ hashFiles('tests/unit/infrastructure/**/*.py', 'tests/conftest.py', 'pyproject.toml', 'configs/quality/test_matrix.yaml') }}
 
@@ -1129,7 +1129,7 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          enable-pytest-cache: "true"
+          enable-pytest-cache: "false"
           pytest-cache-prefix: "pytest-unit-subprocess-backed"
           pytest-cache-fingerprint: ${{ hashFiles('tests/unit/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
@@ -1226,7 +1226,7 @@ jobs:
         uses: ./.github/actions/setup-python-uv
         with:
           python-version: ${{ matrix.python-version }}
-          enable-pytest-cache: "true"
+          enable-pytest-cache: "false"
           pytest-cache-prefix: "pytest-${{ matrix.python-version }}-${{ matrix.test-group.name }}"
           pytest-cache-fingerprint: ${{ hashFiles(matrix.test-group.cache_glob, 'tests/conftest.py', 'pyproject.toml') }}
 
@@ -1289,7 +1289,7 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          enable-pytest-cache: "true"
+          enable-pytest-cache: "false"
           pytest-cache-prefix: "pytest-memory"
           pytest-cache-fingerprint: ${{ hashFiles('tests/smoke/test_neo4j_memory*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
@@ -1410,7 +1410,7 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          enable-pytest-cache: "true"
+          enable-pytest-cache: "false"
           pytest-cache-prefix: "pytest-serial-coverage"
           pytest-cache-fingerprint: ${{ hashFiles('tests/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
@@ -1545,7 +1545,7 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          enable-pytest-cache: "true"
+          enable-pytest-cache: "false"
           pytest-cache-prefix: "pytest-coverage"
           pytest-cache-fingerprint: ${{ hashFiles('tests/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
