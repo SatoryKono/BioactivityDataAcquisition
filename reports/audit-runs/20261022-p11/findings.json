@@ -11,12 +11,12 @@
       "effort": "M",
       "evidence": [
         {
-          "command": "FileRunManifestStore.save twice with the same manifest_id and different execution_fingerprint",
+          "command": ".venv/bin/python -c 'import json, tempfile; from datetime import UTC, datetime; from pathlib import Path; from uuid import UUID; from bioetl.domain.control_plane.run_manifest import RunCodeProvenance, RunManifest; from bioetl.domain.types import RunID, RunType; from bioetl.infrastructure.control_plane.file_run_manifest_store import FileRunManifestStore\ndef manifest(fingerprint):\n    return RunManifest(manifest_id=\"manifest-same-id\", execution_fingerprint=fingerprint, schema_version=\"1.0\", created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC), run_id=RunID(UUID(int=1)), run_type=RunType.INCREMENTAL, pipeline_name=\"chembl_activity\", provider=\"chembl\", entity=\"activity\", launch_context={}, runtime_config={}, resolved_config={}, code_provenance=RunCodeProvenance())\nwith tempfile.TemporaryDirectory(prefix=\"manifest-repro-\") as raw:\n    store = FileRunManifestStore(base_path=Path(raw) / \"run_manifest\")\n    store.save(manifest(\"fingerprint-a\"))\n    store.save(manifest(\"fingerprint-b\"))\n    second = store.get(\"manifest-same-id\")\n    print(json.dumps({\"replaced\": second is not None and second.execution_fingerprint == \"fingerprint-b\", \"second_fingerprint\": None if second is None else second.execution_fingerprint}, sort_keys=True))\n'",
           "line": 317,
-          "observation": "persist_manifest вызывает запись без сравнения уже сохранённого payload.",
-          "observed_at": "2026-10-22T07:30:00Z",
+          "observation": "Два save с manifest_id manifest-same-id и execution_fingerprint fingerprint-a, затем fingerprint-b. Повторное чтение store.get вернуло {\"replaced\": true, \"second_fingerprint\": \"fingerprint-b\"}.",
+          "observed_at": "2026-10-22T10:10:40Z",
           "path": "src/bioetl/infrastructure/control_plane/_file_run_manifest_persistence.py",
-          "source_revision": "ee83860e7902adcd5eebff163514df97a6c5f5f4"
+          "source_revision": "1d1878e5d6c72b061b9bf01d93495923f3058541"
         },
         {
           "command": "inspect atomic_writer call",
@@ -60,8 +60,10 @@
       "severity": "Medium",
       "status": "PROVEN",
       "validation": [
-        "rg -n \"def persist_manifest\" src/bioetl/infrastructure/control_plane/_file_run_manifest_persistence.py",
-        "rg -n \"test_file_store_allows_idempotent_retry_for_same_run_id_mapping\" tests/unit/infrastructure/control_plane/test_file_run_manifest_store.py"
+        "evidence[0].command: two FileRunManifestStore.save calls, manifest_id manifest-same-id, execution_fingerprint fingerprint-a then fingerprint-b",
+        "store.get result: {\"replaced\": true, \"second_fingerprint\": \"fingerprint-b\"}",
+        "source_revision: 1d1878e5d6c72b061b9bf01d93495923f3058541",
+        "observed_at: 2026-10-22T10:10:40Z"
       ]
     },
     {
