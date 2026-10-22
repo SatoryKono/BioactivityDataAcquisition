@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-22T18:45:18.484321+00:00",
+  "generated_at": "2026-10-22T19:37:09.245025+00:00",
   "summary": {
     "total_scripts": 664,
     "status_counts": {
-      "active": 338,
-      "supporting": 326
+      "active": 334,
+      "supporting": 330
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -10207,7 +10207,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 628,
+          "line": 629,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10427,7 +10427,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 763,
+          "line": 764,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10931,7 +10931,7 @@
     {
       "path": "scripts/engineering/ci/sync_control.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 6,
       "references": [
@@ -10957,7 +10957,7 @@
           "path": "tests/architecture/test_setup_python_uv_cache_policy.py",
           "line": 70,
           "source_group": "tests",
-          "text": "\"python scripts/engineering/ci/sync_control.py \""
+          "text": "'python \"$GITHUB_ACTION_PATH/../../../scripts/engineering/ci/sync_control.py\" '"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ci/test_sync_control.py",
@@ -10967,11 +10967,15 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ci/test_sync_control.py",
-          "line": 140,
+          "line": 141,
           "source_group": "tests",
           "text": "argv = [\"sync_control.py\", \"sync\", \"--frozen\", \"--only-group\", \"ci-control\"]"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the fixed-argv backend invoked by the setup-python-uv composite action; keep it supporting because CI callers use the governed action rather than a standalone command."
     },
     {
       "path": "scripts/engineering/ci/test_telemetry_provenance.py",
@@ -11067,13 +11071,13 @@
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 85,
+          "line": 94,
           "source_group": "docs",
-          "text": "`python -m scripts.engineering.ci.update_test_telemetry_baseline`"
+          "text": "`python -m scripts.engineering.ci.update_test_telemetry_baseline"
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 139,
+          "line": 152,
           "source_group": "docs",
           "text": "3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline --source-commit <sha> --source-run-id <run-id> ...` with either direct artifacts or fallback diagnostics inputs."
         },
@@ -13305,7 +13309,7 @@
     {
       "path": "scripts/engineering/finances/github_billing_pipeline.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -13321,12 +13325,16 @@
           "source_group": "tests",
           "text": "from scripts.engineering.finances.github_billing_pipeline import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the internal aggregation module behind the GitHub billing workflow; keep it supporting because it has no standalone invocation surface."
     },
     {
       "path": "scripts/engineering/finances/github_billing_schema.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 4,
       "references": [
@@ -13354,12 +13362,16 @@
           "source_group": "tests",
           "text": "from scripts.engineering.finances.github_billing_schema import GitHubBillingRecord"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the shared billing record schema imported by the pipeline and validator; keep it supporting because it is a library module."
     },
     {
       "path": "scripts/engineering/finances/github_billing_validator.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -13375,7 +13387,11 @@
           "source_group": "tests",
           "text": "from scripts.engineering.finances.github_billing_validator import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the internal billing validation module used by the workflow and tests; keep it supporting because it has no standalone invocation surface."
     },
     {
       "path": "scripts/engineering/find_complex_functions.py",
@@ -19045,7 +19061,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 591,
+          "line": 592,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
