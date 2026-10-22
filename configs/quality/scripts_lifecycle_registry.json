@@ -763,6 +763,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-10-31"
     },
+    "scripts/engineering/ci/actions_timing_common.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the shared GitHub Actions attempt collector imported by the Docker and PR-gate timing reports. It has no standalone command surface; keep it supporting so active_script_count_max does not grow.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-10-31"
+    },
     "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow.",

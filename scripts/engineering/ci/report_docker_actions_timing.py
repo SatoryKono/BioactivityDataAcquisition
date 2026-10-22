@@ -23,6 +23,13 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if __package__ in {None, ""}:
     sys.path.insert(0, str(REPO_ROOT))
 
+from scripts.engineering.ci.actions_timing_common import (
+    collect_selected_runs,
+    job_timing,
+    jobs_for_run,
+    recorded_seconds,
+    run_context_fields,
+)
 from scripts.engineering.common.repo_paths import (
     ensure_path_within_root,
     resolve_cli_path,
@@ -208,120 +215,6 @@ def _workflow_runs_endpoint(
     )
 
 
-def _run_endpoint(repository: str, run_id: str) -> str:
-    return f"repos/{repository}/actions/runs/{quote(str(run_id), safe='')}"
-
-
-def _jobs_endpoint(repository: str, run_id: int, page: int) -> str:
-    return (
-        f"repos/{repository}/actions/runs/{run_id}/jobs?"
-        f"{urlencode({'per_page': 100, 'page': page})}"
-    )
-
-
-def _collect_runs(
-    client: JsonGitHubClient,
-    repository: str,
-    *,
-    workflow: str,
-    branch: str,
-    event: str | None,
-    limit: int,
-    run_ids: Sequence[str],
-    include_incomplete: bool,
-) -> list[dict[str, Any]]:
-    if run_ids:
-        return _collect_runs_by_id(
-            client,
-            repository,
-            run_ids=run_ids,
-            include_incomplete=include_incomplete,
-        )
-
-    return _collect_workflow_runs(
-        client,
-        repository,
-        workflow=workflow,
-        branch=branch,
-        event=event,
-        limit=limit,
-        include_incomplete=include_incomplete,
-    )
-
-
-def _is_selected_run(run: dict[str, Any], *, include_incomplete: bool) -> bool:
-    return include_incomplete or run.get("status") == "completed"
-
-
-def _collect_runs_by_id(
-    client: JsonGitHubClient,
-    repository: str,
-    *,
-    run_ids: Sequence[str],
-    include_incomplete: bool,
-) -> list[dict[str, Any]]:
-    runs: list[dict[str, Any]] = []
-    for run_id in run_ids:
-        run = client.json(["api", _run_endpoint(repository, run_id)])
-        if _is_selected_run(run, include_incomplete=include_incomplete):
-            runs.append(run)
-    return runs
-
-
-def _collect_workflow_runs(
-    client: JsonGitHubClient,
-    repository: str,
-    *,
-    workflow: str,
-    branch: str,
-    event: str | None,
-    limit: int,
-    include_incomplete: bool,
-) -> list[dict[str, Any]]:
-    runs: list[dict[str, Any]] = []
-    page_size = min(max(limit, 1), 100)
-    for page in range(1, 101):
-        payload = client.json(
-            [
-                "api",
-                _workflow_runs_endpoint(
-                    repository,
-                    workflow,
-                    branch=branch,
-                    event=event,
-                    page=page,
-                    page_size=page_size,
-                ),
-            ]
-        )
-        page_runs = payload.get("workflow_runs", [])
-        if not page_runs:
-            break
-        for run in page_runs:
-            if _is_selected_run(run, include_incomplete=include_incomplete):
-                runs.append(run)
-            if len(runs) >= limit:
-                return runs
-    return runs
-
-
-def _collect_jobs(
-    client: JsonGitHubClient,
-    repository: str,
-    run_id: int,
-) -> list[dict[str, Any]]:
-    jobs: list[dict[str, Any]] = []
-    for page in range(1, 101):
-        payload = client.json(["api", _jobs_endpoint(repository, run_id, page)])
-        page_jobs = payload.get("jobs", [])
-        if not page_jobs:
-            break
-        jobs.extend(page_jobs)
-        if len(page_jobs) < 100:
-            break
-    return jobs
-
-
 def _job_record(job: dict[str, Any]) -> dict[str, Any]:
     created_at = _parse_timestamp(job.get("created_at"))
     started_at = _parse_timestamp(job.get("started_at"))
@@ -329,6 +222,8 @@ def _job_record(job: dict[str, Any]) -> dict[str, Any]:
     runner_id = job.get("runner_id")
     runner_observed = isinstance(runner_id, int) and runner_id > 0
     steps = [_step_record(job, step) for step in job.get("steps", [])]
+    timing = job_timing(job, created_at, started_at, completed_at, _elapsed_seconds)
+
     return {
         "id": job.get("id"),
         "name": job.get("name"),
@@ -337,8 +232,7 @@ def _job_record(job: dict[str, Any]) -> dict[str, Any]:
         "created_at": _iso(created_at),
         "started_at": _iso(started_at),
         "completed_at": _iso(completed_at),
-        "queue_seconds": _elapsed_seconds(created_at, started_at),
-        "execution_seconds": _elapsed_seconds(started_at, completed_at),
+        **timing,
         "labels": job.get("labels", []),
         "runner_id": runner_id,
         "runner_name": job.get("runner_name"),
@@ -359,12 +253,54 @@ def _step_record(job: dict[str, Any], step: dict[str, Any]) -> dict[str, Any]:
         "conclusion": step.get("conclusion"),
         "started_at": _iso(started_at),
         "completed_at": _iso(completed_at),
-        "duration_seconds": _elapsed_seconds(started_at, completed_at),
+        "duration_seconds": recorded_seconds(
+            step.get("conclusion"),
+            _elapsed_seconds(started_at, completed_at),
+        ),
+    }
+
+
+_CACHE_MARKERS = (
+    ("exact cache hit", "exact_hit"),
+    ("prefix restore", "prefix_restore"),
+    ("cache miss", "miss"),
+    ("cache disabled", "disabled"),
+)
+
+
+def _cache_status(steps: object) -> str:
+    """Classify an explicit step label. The jobs API has no BuildKit cache record."""
+
+    if not isinstance(steps, list):
+        return "unknown"
+    for step in steps:
+        if not isinstance(step, dict) or step.get("conclusion") != "success":
+            continue
+        name = str(step.get("name") or "").lower()
+        for marker, status in _CACHE_MARKERS:
+            if marker in name:
+                return status
+    return "unknown"
+
+
+def _docker_cache_fields(docker_build: dict[str, Any] | None) -> dict[str, Any]:
+    steps = docker_build.get("steps", []) if isinstance(docker_build, dict) else []
+    labels = docker_build.get("labels") if isinstance(docker_build, dict) else None
+    cache_env = list(labels) if isinstance(labels, list) else None
+    return {
+        "cache_status": _cache_status(steps),
+        "cache_key": None,
+        "cache_env": cache_env,
     }
 
 
 def _find_job(records: Sequence[dict[str, Any]], name: str) -> dict[str, Any] | None:
-    return next((record for record in records if record.get("name") == name), None)
+    for record in records:
+        record_name = record.get("name") or ""
+        # Match exact name, or name inside reusable caller (e.g., "caller / name")
+        if record_name == name or record_name.endswith(f" / {name}"):
+            return record
+    return None
 
 
 def _timestamp_from_record(record: dict[str, Any], key: str) -> datetime | None:
@@ -423,14 +359,10 @@ def _summarize_run(
             step_metrics[metric_name] = step.get("duration_seconds")
 
     return {
-        "id": run.get("id"),
-        "run_number": run.get("run_number"),
-        "run_attempt": run.get("run_attempt"),
-        "event": run.get("event"),
-        "head_branch": run.get("head_branch"),
-        "head_sha": run.get("head_sha"),
-        "status": run.get("status"),
-        "conclusion": run.get("conclusion"),
+        **run_context_fields(run),
+        **_docker_cache_fields(
+            docker_build if isinstance(docker_build, dict) else None
+        ),
         "created_at": _iso(run_created_at),
         "updated_at": _iso(run_updated_at),
         "html_url": run.get("html_url"),
@@ -483,7 +415,10 @@ def _metric_from_job(
             continue
         if runner_only and not job.get("runner_observed"):
             continue
-        values.append(job.get(field))
+        raw = job.get(field)
+        values.append(
+            raw if isinstance(raw, int) and not isinstance(raw, bool) else None
+        )
     return values
 
 
@@ -567,7 +502,7 @@ def build_report(
     generated_at: datetime | None = None,
 ) -> dict[str, Any]:
     resolved_repository = _repository_name(client, repository)
-    collected_runs = _collect_runs(
+    collected_runs = collect_selected_runs(
         client,
         resolved_repository,
         workflow=workflow,
@@ -576,12 +511,10 @@ def build_report(
         limit=limit,
         run_ids=run_ids,
         include_incomplete=include_incomplete,
+        workflow_runs_endpoint=_workflow_runs_endpoint,
     )
     summarized_runs = [
-        _summarize_run(
-            run,
-            _collect_jobs(client, resolved_repository, int(run["id"])),
-        )
+        _summarize_run(run, jobs_for_run(client, resolved_repository, run))
         for run in collected_runs
     ]
     completed_owner_runs = [

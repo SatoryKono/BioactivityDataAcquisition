@@ -10,6 +10,7 @@ from scripts.engineering.ci.report_docker_actions_timing import (
     build_report,
     render_markdown,
 )
+from tests.unit.scripts.ci.timing_api_fakes import PagedAttemptClient
 
 
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
@@ -32,6 +33,9 @@ def _run(run_id: int, created_at: datetime, updated_at: datetime) -> dict[str, A
         "created_at": _iso(created_at),
         "updated_at": _iso(updated_at),
         "html_url": f"https://github.test/{run_id}",
+        "pull_requests": [
+            {"base": {"sha": f"{run_id:040x}"}, "head": {"sha": f"{run_id:040x}"}}
+        ],
     }
 
 
@@ -215,6 +219,9 @@ def test_report_separates_docker_validation_path_from_publish_wait(
     assert report["acceptance"]["docker_build_queue_p95_le_budget"] is False
     assert report["acceptance"]["publish_digest_proof_available"] is False
     assert report["runs"][0]["docker_publish"]["conclusion"] == "cancelled"
+    assert report["runs"][0]["cache_status"] == "unknown"
+    assert report["runs"][0]["cache_key"] is None
+    assert report["runs"][0]["cache_env"] == ["ubuntu-latest"]
 
 
 @pytest.mark.unit
@@ -286,3 +293,251 @@ def test_write_text_confines_relative_output(tmp_path: Path) -> None:
     _write_text("out/report.json", "{}\n", root=tmp_path)
     written = tmp_path / "out" / "report.json"
     assert written.read_text(encoding="utf-8") == "{}\n"
+
+
+@pytest.mark.unit
+def test_docker_report_pagination_and_all_attempts(tmp_path: Path) -> None:
+    base = datetime(2026, 9, 3, tzinfo=UTC)
+    runs = []
+    jobs_by_run_id = {}
+
+    # 2 runs: one is attempt 2, one is attempt 1
+    # Run 1: attempt 2 (latest)
+    r1 = _run(1, base, base + timedelta(minutes=1))
+    r1["run_attempt"] = 2
+    runs.append(r1)
+
+    # Run 2: attempt 1
+    r2 = _run(2, base + timedelta(minutes=2), base + timedelta(minutes=3))
+    r2["run_attempt"] = 1
+    runs.append(r2)
+
+    # Run 1, attempt 2 jobs
+    jobs_by_run_id[1] = {
+        2: _docker_jobs(
+            base,
+            build_queue_seconds=10,
+            build_execution_seconds=120,
+            owner_elapsed_seconds=190,
+            publish_conclusion="success",
+        ),
+        1: _docker_jobs(
+            base,
+            build_queue_seconds=20,
+            build_execution_seconds=120,
+            owner_elapsed_seconds=200,
+            publish_conclusion="skipped",
+        ),
+    }
+
+    # Run 2, attempt 1 jobs
+    jobs_by_run_id[2] = {
+        1: _docker_jobs(
+            base + timedelta(minutes=2),
+            build_queue_seconds=30,
+            build_execution_seconds=120,
+            owner_elapsed_seconds=210,
+            publish_conclusion="success",
+        )
+    }
+
+    client = PagedAttemptClient(
+        repository=REPOSITORY,
+        workflow_token="/actions/workflows/docker.yml/runs?",
+        pages={1: [runs[0]], 2: [runs[1]]},
+        jobs_by_attempt=jobs_by_run_id,
+    )
+    report = build_report(
+        client,
+        repo_root=tmp_path,
+        repository=None,
+        workflow="docker.yml",
+        branch="main",
+        event=None,
+        limit=20,
+        run_ids=[],
+        include_incomplete=False,
+        owner_budget_seconds=240,
+        queue_budget_seconds=20,
+        generated_at=base,
+    )
+
+    observed = [
+        (run["id"], run["run_attempt"], run["retries"]) for run in report["runs"]
+    ]
+    assert observed == [(1, 2, 1), (1, 1, 1), (2, 1, 0)]
+    by_attempt = {run["run_attempt"]: run for run in report["runs"] if run["id"] == 1}
+    assert by_attempt[2]["docker_build"]["queue_seconds"] == 10
+    assert by_attempt[1]["docker_build"]["queue_seconds"] == 20
+
+
+@pytest.mark.unit
+def test_docker_report_missing_timestamps_skipped_cancelled(tmp_path: Path) -> None:
+    # Also verify that queue_seconds is unknown and skipped doesn't result in 0 exec seconds.
+    base = datetime(2026, 9, 3, tzinfo=UTC)
+    run = _run(1, base, base)
+    # Remove created_at / updated_at
+    run["created_at"] = None
+    run["updated_at"] = None
+
+    jobs = _docker_jobs(
+        base,
+        build_queue_seconds=10,
+        build_execution_seconds=120,
+        owner_elapsed_seconds=190,
+        publish_conclusion="success",
+    )
+    jobs[-1]["conclusion"] = "cancelled"
+    jobs[0]["conclusion"] = "skipped"
+    jobs[0]["completed_at"] = jobs[0]["started_at"]
+    build = next(job for job in jobs if job["name"] == "docker-build")
+    build["started_at"] = None
+
+    class SkippedFakeGitHubClient:
+        def json(self, args: list[str]) -> Any:
+            if args[:2] == ["repo", "view"]:
+                return {"nameWithOwner": REPOSITORY}
+            endpoint = args[1]
+            if "/actions/workflows/docker.yml/runs?" in endpoint:
+                if "&page=1" in endpoint or endpoint.endswith("page=1"):
+                    return {"workflow_runs": [run]}
+                return {"workflow_runs": []}
+            if "/jobs?" in endpoint:
+                return {"jobs": jobs}
+            return {}
+
+    client = SkippedFakeGitHubClient()
+    report = build_report(
+        client,
+        repo_root=tmp_path,
+        repository=None,
+        workflow="docker.yml",
+        branch="main",
+        event=None,
+        limit=20,
+        run_ids=[],
+        include_incomplete=False,
+        owner_budget_seconds=240,
+        queue_budget_seconds=20,
+        generated_at=base,
+    )
+
+    assert len(report["runs"]) == 1
+    assert report["runs"][0]["docker_owner_elapsed_seconds"] is None
+    assert report["runs"][0]["jobs"][0]["execution_seconds"] is None
+    build_record = report["runs"][0]["docker_build"]
+    assert build_record["queue_seconds"] == "unknown"
+    assert report["metrics"]["docker_build_queue_seconds"]["n"] == 0
+    assert report["runs"][0]["retries"] == 0
+
+
+@pytest.mark.unit
+def test_docker_report_reusable_docker_base_change(tmp_path: Path) -> None:
+    base = datetime(2026, 9, 3, tzinfo=UTC)
+    runs = []
+
+    r1 = _run(1, base, base)
+    r1["head_sha"] = "samehead"
+    r1["pull_requests"] = [{"base": {"sha": "base1"}, "head": {"sha": "samehead"}}]
+
+    r2 = _run(2, base, base)
+    r2["head_sha"] = "samehead"
+    r2["pull_requests"] = [{"base": {"sha": "base2"}, "head": {"sha": "samehead"}}]
+
+    runs = [r1, r2]
+
+    class BaseChangeFakeGitHubClient:
+        def json(self, args: list[str]) -> Any:
+            if args[:2] == ["repo", "view"]:
+                return {"nameWithOwner": REPOSITORY}
+            endpoint = args[1]
+            if "/actions/workflows/docker.yml/runs?" in endpoint:
+                if "&page=1" in endpoint or endpoint.endswith("page=1"):
+                    return {"workflow_runs": runs}
+                return {"workflow_runs": []}
+            if "/jobs?" in endpoint:
+                return {"jobs": []}
+            return {}
+
+    client = BaseChangeFakeGitHubClient()
+    report = build_report(
+        client,
+        repo_root=tmp_path,
+        repository=None,
+        workflow="docker.yml",
+        branch="main",
+        event=None,
+        limit=20,
+        run_ids=[],
+        include_incomplete=False,
+        owner_budget_seconds=240,
+        queue_budget_seconds=20,
+        generated_at=base,
+    )
+
+    assert len(report["runs"]) == 2
+    assert report["runs"][0]["base_sha"] == "base1"
+    assert report["runs"][1]["base_sha"] == "base2"
+    assert report["runs"][0]["head_sha"] == "samehead"
+    assert report["runs"][1]["head_sha"] == "samehead"
+
+
+@pytest.mark.unit
+def test_docker_report_matches_reusable_caller_and_explicit_cache_label(
+    tmp_path: Path,
+) -> None:
+    base = datetime(2026, 9, 3, tzinfo=UTC)
+    run = _run(1, base, base + timedelta(minutes=4))
+    jobs = _docker_jobs(
+        base,
+        build_queue_seconds=10,
+        build_execution_seconds=120,
+        owner_elapsed_seconds=190,
+        publish_conclusion="success",
+    )
+    started_at = next(
+        job["started_at"] for job in jobs if job["name"] == "docker-build"
+    )
+    started = datetime.fromisoformat(started_at.replace("Z", "+00:00"))
+    for job in jobs:
+        if job["name"] == "docker-build":
+            job["name"] = "caller / docker-build"
+            job["steps"] = [
+                {
+                    "name": "cache miss",
+                    "status": "completed",
+                    "conclusion": "skipped",
+                    "started_at": started_at,
+                    "completed_at": started_at,
+                },
+                {
+                    "name": "exact cache hit",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "started_at": started_at,
+                    "completed_at": _iso(started + timedelta(seconds=5)),
+                },
+            ]
+    client = FakeGitHubClient([run], {1: jobs})
+
+    report = build_report(
+        client,
+        repo_root=tmp_path,
+        repository=None,
+        workflow="docker.yml",
+        branch="main",
+        event=None,
+        limit=20,
+        run_ids=[],
+        include_incomplete=False,
+        owner_budget_seconds=240,
+        queue_budget_seconds=20,
+        generated_at=base,
+    )
+
+    assert report["runs"][0]["docker_build"]["name"] == "caller / docker-build"
+    assert report["runs"][0]["cache_status"] == "exact_hit"
+    assert report["runs"][0]["docker_build"]["queue_seconds"] == 10
+    skipped, hit = report["runs"][0]["docker_build"]["steps"]
+    assert skipped["duration_seconds"] is None
+    assert hit["duration_seconds"] == 5
