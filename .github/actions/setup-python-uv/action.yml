@@ -81,9 +81,9 @@ runs:
         path: |
           ~/.cache/uv
           .venv
-        key: uv-${{ runner.os }}-${{ steps.environment-cache.outputs.python-fragment }}-${{ steps.environment-cache.outputs.fingerprint }}
+        key: uv-${{ runner.os }}-${{ inputs.dependency-profile }}-${{ steps.environment-cache.outputs.python-fragment }}-${{ steps.environment-cache.outputs.fingerprint }}
         restore-keys: |
-          uv-${{ runner.os }}-${{ steps.environment-cache.outputs.python-fragment }}-
+          uv-${{ runner.os }}-${{ inputs.dependency-profile }}-${{ steps.environment-cache.outputs.python-fragment }}-
 
     - name: Pin UV_PYTHON for subsequent steps
       shell: bash

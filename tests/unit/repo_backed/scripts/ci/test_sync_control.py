@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import runpy
 import subprocess
 import sys
 from unittest.mock import patch
@@ -120,11 +121,30 @@ def test_sync_control_subprocess_failure(
         assert "uv sync failed" in capsys.readouterr().err
 
 
+def test_sync_control_missing_uv(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _clear_blocked_uv(monkeypatch)
+    with patch("subprocess.run", side_effect=FileNotFoundError):
+        with pytest.raises(SystemExit) as exc:
+            sync_control.run_sync(["sync", "--frozen", "--only-group", "ci-control"])
+    assert exc.value.code == 127
+    assert "uv executable not found" in capsys.readouterr().err
+
+
 def test_sync_control_module_entrypoint_uses_argv(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _clear_blocked_uv(monkeypatch)
-    with patch.object(sys, "argv", ["sync_control.py", "sync", "--frozen"]):
-        with pytest.raises(SystemExit) as exc:
-            sync_control.run_sync(sys.argv[1:])
-    assert exc.value.code == 1
+    argv = ["sync_control.py", "sync", "--frozen", "--only-group", "ci-control"]
+    with (
+        patch.object(sys, "argv", argv),
+        patch("subprocess.run") as mock_run,
+    ):
+        runpy.run_path(str(sync_control.__file__), run_name="__main__")
+    mock_run.assert_called_once_with(
+        ["uv", "sync", "--frozen", "--only-group", "ci-control"],
+        check=True,
+        shell=False,
+    )

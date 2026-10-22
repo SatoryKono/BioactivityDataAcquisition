@@ -78,9 +78,11 @@ def test_uv_virtualenv_cache_uses_environment_fingerprint_not_only_lockfile() ->
     step = _step_by_name("Cache uv and virtualenv")
     with_block = cast(dict[str, str], step["with"])
 
+    assert "inputs.dependency-profile" in with_block["key"]
     assert "steps.environment-cache.outputs.python-fragment" in with_block["key"]
     assert "steps.environment-cache.outputs.fingerprint" in with_block["key"]
     assert "hashFiles('uv.lock')" not in with_block["key"]
+    assert "inputs.dependency-profile" in with_block["restore-keys"]
     assert (
         "steps.environment-cache.outputs.python-fragment" in with_block["restore-keys"]
     )

@@ -59,6 +59,9 @@ def run_sync(args: list[str]) -> None:
     print("Running securely: " + " ".join(command))
     try:
         subprocess.run(command, check=True, shell=False)
+    except FileNotFoundError:
+        print("Error: uv executable not found in PATH.", file=sys.stderr)
+        sys.exit(127)
     except subprocess.CalledProcessError as exc:
         print(
             f"uv sync failed with exit code {exc.returncode}",
