@@ -114,8 +114,7 @@ runs:
             echo "ci-control accepts only uv-sync-args '--frozen'" >&2
             exit 1
           fi
-          # Resolve the guard from this pinned action checkout, not the caller workspace.
-          python "$GITHUB_ACTION_PATH/../../../scripts/engineering/ci/sync_control.py" sync --frozen --only-group ci-control
+          python scripts/engineering/ci/sync_control.py sync --frozen --only-group ci-control
         elif [ "$PROFILE" = "legacy" ]; then
           CMD="uv sync ${SYNC_ARGS}"
           for extra in $EXTRAS; do

@@ -1199,9 +1199,6 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ai/mcp/mcp_memory_wrapper.sh
-    - path: tests/unit/repo_backed/scripts/ci/test_sync_control.py
-      target_lane: repo-backed-unit
-      protected_surface: scripts/engineering/ci/sync_control.py exact argv and environment validation
     - path: tests/unit/repo_backed/scripts/test_zed_workspace_config.py
       target_lane: repo-backed-unit
       protected_surface: .zed/{settings.json,tasks.json,mcp.json,snippets/**}
