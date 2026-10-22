@@ -347,6 +347,10 @@ class TestCanonicalTestLanes:
 
         assert explicit_parallel.isdisjoint(serial_or_bounded)
         assert explicit_parallel | serial_or_bounded == set(lanes)
+        assert "serial-coverage" not in lanes
+        serial_coverage = test_lanes["ci_fixed_shards"]["lanes"]["serial-coverage"]
+        assert serial_coverage["coverage_producer"] is True
+        assert serial_coverage["shards"] == [{"name": "serial", "path": "tests/"}]
         for lane_name in explicit_parallel:
             lane = lanes[lane_name]
             assert lane["runner_backend"] == "run_pytest_sharded"
@@ -395,6 +399,7 @@ class TestCanonicalTestLanes:
             str(step.get("run") or "") for step in jobs["coverage-verify"]["steps"]
         )
         assert "run_pytest_resilient.py" in serial_runs
+        assert "--junitxml=" not in serial_runs
         assert ".coverage.serial" in str(jobs["serial-coverage"])
         assert "serial-coverage" in jobs["coverage-verify"]["needs"]
         assert "run_pytest_resilient.py" not in coverage_runs
