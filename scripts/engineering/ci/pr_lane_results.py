@@ -18,6 +18,14 @@ from typing import Any, cast
 
 import yaml
 
+from scripts.engineering.ci._python_dependency_changes import (
+    changed_dependencies,
+    dependency_consumers,
+    pytest_configuration_changed,
+    pytest_framework_affected,
+    removed_dependencies,
+    repository_cli_affected,
+)
 
 SUCCESS = "success"
 FAILURE = "failure"
@@ -58,15 +66,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/ai/mcp/check.sh": (
         NPM_RUNTIME_TEST,
         "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-    ),
-    ".github/workflows/pr-required.yml": (
-        "tests/architecture/test_github_actions_runtime_policy.py",
-    ),
-    "configs/quality/reusable_action_pins.yaml": (
-        "tests/architecture/test_github_actions_runtime_policy.py",
-    ),
-    "scripts/engineering/repo/check_github_actions_runtime_policy.py": (
-        "tests/architecture/test_github_actions_runtime_policy.py",
     ),
     ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
     "src/memory/rag/chunking.py": ("tests/unit/memory/test_rag_indexing.py",),
@@ -312,11 +311,6 @@ def _deduplicate_targets(targets: list[str], root: Path) -> list[str]:
 
 def _global_dependency_lane(root: Path, dependencies: set[str]) -> bool:
     """Return whether a dependency diff selects the full Python test lane."""
-    from scripts.engineering.ci._python_dependency_changes import (
-        pytest_framework_affected,
-        repository_cli_affected,
-    )
-
     return pytest_framework_affected(root, dependencies) or repository_cli_affected(
         root, dependencies
     )
@@ -388,8 +382,6 @@ def _importing_script_tests(roots: tuple[Path, Path], module: str) -> set[Path]:
 
 def _dependency_targets(repo_root: Path, dependencies: set[str]) -> list[str]:
     """Reuse source routing and canonical owners for actual dependency consumers."""
-    from scripts.engineering.ci._python_dependency_changes import dependency_consumers
-
     inventory = repo_root / "configs/quality/source_test_owner_inventory.yaml"
     owners: dict[str, list[str]] = {}
     if inventory.is_file():
@@ -564,12 +556,6 @@ def _affected_command(args: argparse.Namespace) -> int:
         dependencies = None
         all_tests = False
         if {"pyproject.toml", "uv.lock"} & set(changed):
-            from scripts.engineering.ci._python_dependency_changes import (
-                changed_dependencies,
-                pytest_configuration_changed,
-                removed_dependencies,
-            )
-
             all_tests = pytest_configuration_changed(
                 args.repo_root, args.base_sha, args.head_sha
             )
