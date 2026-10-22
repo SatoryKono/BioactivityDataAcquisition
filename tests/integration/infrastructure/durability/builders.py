@@ -6,7 +6,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from bioetl.domain.ports.noop import NoOpMetrics
+from bioetl.domain.ports.noop import NoOpMetadataWriter, NoOpMetrics
+from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.control_plane.file_archive_store import FileArchiveStore
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_store import (
@@ -50,6 +51,9 @@ from bioetl.infrastructure.control_plane.file_workflow_transform_artifact_store 
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.quarantine.unified import UnifiedQuarantineAdapter
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+from bioetl.infrastructure.storage.gold.runtime_helpers import (
+    GoldWriterRuntimeServices,
+)
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.run_report_store_adapter import (
     FileRunReportStoreAdapter,
@@ -162,7 +166,27 @@ def _silver(root: Path, deps: DurabilityCollaborators) -> StoreAssembly:
 
 
 def _gold(root: Path, deps: DurabilityCollaborators) -> StoreAssembly:
-    writer = GoldWriter(root, deps.logger)
+    runtime_services = GoldWriterRuntimeServices(
+        csv_exporter=None,
+        tracing=None,
+        metrics=deps.metrics,
+        audit=None,
+        metadata_writer=NoOpMetadataWriter(),
+        metadata_coordinator=None,
+        lineage_store=None,
+        contract_rollout_policy=ContractRolloutPolicy(
+            contract_ref="chembl.activity",
+            active_version="2.0.0",
+            mode="dual_write",
+            read_order=("2.0.0", "1.0.0"),
+            write_versions=("1.0.0", "2.0.0"),
+        ),
+    )
+    writer = GoldWriter(
+        root,
+        deps.logger,
+        runtime_services=runtime_services,
+    )
     return _assembly("g1_gold", GoldWriter, writer, writer.base_path)
 
 
