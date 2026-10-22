@@ -6,7 +6,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from bioetl.domain.ports.noop import NoOpMetrics
+from bioetl.domain.ports.noop import NoOpMetadataWriter, NoOpMetrics
+from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.control_plane.file_archive_store import FileArchiveStore
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_store import (
@@ -50,6 +51,9 @@ from bioetl.infrastructure.control_plane.file_workflow_transform_artifact_store 
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.quarantine.unified import UnifiedQuarantineAdapter
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+from bioetl.infrastructure.storage.gold.runtime_helpers import (
+    GoldWriterRuntimeServices,
+)
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.run_report_store_adapter import (
     FileRunReportStoreAdapter,
@@ -65,12 +69,6 @@ from tests.integration.infrastructure.durability.data_factories import (
     RUN_REPORT_MARKER,
     STORE_NAMES,
 )
-
-from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
-from bioetl.domain.types.gold_schema_policy import GoldSchemaPolicyByVersion, GoldSchemaVersionPolicy
-from bioetl.infrastructure.storage.gold.runtime_helpers import GoldWriterRuntimeServices
-from bioetl.domain.ports.noop import NoOpMetadataWriter
-
 
 
 @dataclass(frozen=True, slots=True)
@@ -187,7 +185,7 @@ def _gold(root: Path, deps: DurabilityCollaborators) -> StoreAssembly:
     writer = GoldWriter(
         root,
         deps.logger,
-        runtime_services=runtime_services
+        runtime_services=runtime_services,
     )
     return _assembly("g1_gold", GoldWriter, writer, writer.base_path)
 
