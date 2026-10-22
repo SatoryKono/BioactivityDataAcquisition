@@ -19,7 +19,7 @@
     "code remediation",
     "P20 reconciliation"
   ],
-  "findings_sha256": "e91610032588c0de69e5f61e90e8546f11f3f4bbd3f8f222bac2184130e71f7e",
+  "findings_sha256": "3a0c89907dfead59f50184c71dcbd1f7b56a21eb0275eef6159c543e5ec4714f",
   "mode": "READ_ONLY_REVALIDATION",
   "observed_at": "2026-10-22T07:30:00Z",
   "parent_revision": "626e2661761a713039d42dfd00b6893814b4fd20",

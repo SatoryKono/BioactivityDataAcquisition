@@ -4,6 +4,10 @@ description: >
   and installs project packages. Replaces duplicated setup steps across workflows.
 
 inputs:
+  dependency-profile:
+    description: "Profile for dependencies (legacy|ci-control)"
+    required: false
+    default: "legacy"
   python-version:
     description: >
       Python version to install. Default 3.12 is the BioETL baseline
@@ -52,6 +56,7 @@ runs:
         INPUT_PYTHON_VERSION: ${{ inputs.python-version }}
         INPUT_UV_EXTRAS: ${{ inputs.uv-extras }}
         INPUT_UV_SYNC_ARGS: ${{ inputs.uv-sync-args }}
+        INPUT_DEPENDENCY_PROFILE: ${{ inputs.dependency-profile }}
       run: |
         # Environment cache invalidates on dependency, extras, Python, or action
         # setup semantics. Pytest cache fingerprinting remains separate below.
@@ -60,7 +65,11 @@ runs:
           printf 'python-version=%s\n' "$INPUT_PYTHON_VERSION"
           printf 'uv-extras=%s\n' "$INPUT_UV_EXTRAS"
           printf 'uv-sync-args=%s\n' "$INPUT_UV_SYNC_ARGS"
+          printf 'dependency-profile=%s\n' "$INPUT_DEPENDENCY_PROFILE"
           sha256sum uv.lock pyproject.toml .github/actions/setup-python-uv/action.yml
+          if [ -f .github/actions/setup-python-uv/sync_control.py ]; then
+            sha256sum .github/actions/setup-python-uv/sync_control.py
+          fi
         } | sha256sum | awk '{print "fingerprint="$1}' >> "$GITHUB_OUTPUT"
         printf 'python-fragment=py%s\n' "$python_fragment" >> "$GITHUB_OUTPUT"
 
@@ -92,13 +101,25 @@ runs:
       env:
         EXTRAS: ${{ inputs.uv-extras }}
         SYNC_ARGS: ${{ inputs.uv-sync-args }}
+        PROFILE: ${{ inputs.dependency-profile }}
       run: |
-        CMD="uv sync ${SYNC_ARGS}"
-        for extra in $EXTRAS; do
-          CMD="${CMD} --extra ${extra}"
-        done
-        echo "Running: ${CMD}"
-        ${CMD}
+        if [ "$PROFILE" = "ci-control" ]; then
+          if [ -n "$EXTRAS" ]; then
+            echo "uv-extras must be empty for ci-control profile" >&2
+            exit 1
+          fi
+          python .github/actions/setup-python-uv/sync_control.py sync --only-group ci-control $SYNC_ARGS
+        elif [ "$PROFILE" = "legacy" ]; then
+          CMD="uv sync ${SYNC_ARGS}"
+          for extra in $EXTRAS; do
+            CMD="${CMD} --extra ${extra}"
+          done
+          echo "Running: ${CMD}"
+          ${CMD}
+        else
+          echo "Unknown dependency profile: $PROFILE" >&2
+          exit 1
+        fi
 
     - name: Pin locked/no-build/no-sync defaults for subsequent uv run steps
       shell: bash
