@@ -59,8 +59,8 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 | `BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED` | Enable data quality monitoring | `True` | No |
 | `BIOETL_OBSERVABILITY__DQ_BASELINE_WINDOW` | Number of recent runs to use for baseline calculation | `7` | No |
 | `BIOETL_OBSERVABILITY__DQ_Z_SCORE_THRESHOLD` | Z-score threshold for anomaly detection | `2.5` | No |
-| `BIOETL_OBSERVABILITY__DQ_MIN_BASELINE_SAMPLES` | Minimum samples before anomaly detection activates | `3` | No |
-| `BIOETL_OBSERVABILITY__DQ_COLD_START_RUNS` | Skip first N runs while building baseline | `5` | No |
+| `BIOETL_OBSERVABILITY__DQ_MIN_BASELINE_SAMPLES` | Minimum stored baseline length before z-score detection runs (`AnomalyDetector.detect`). Integer, range 1–10. Absolute thresholds are checked first and do not wait for this count. `bootstrap_dq_monitor()` assigns the value after the monitor is created | `3` | No |
+| `BIOETL_OBSERVABILITY__DQ_COLD_START_RUNS` | Stored on `ObservabilitySettings` only (integer, range 0–20). `bootstrap_dq_monitor()` leaves the value unused, so early runs still emit absolute-threshold anomalies from `DQ_ERROR_RATE_MAX` and `DQ_QUALITY_SCORE_MIN`. Z-score detection waits on `DQ_MIN_BASELINE_SAMPLES` | `5` | No |
 | `BIOETL_OBSERVABILITY__DQ_ERROR_RATE_MAX` | Maximum allowed error rate | `0.10` | No |
 | `BIOETL_OBSERVABILITY__DQ_QUALITY_SCORE_MIN` | Minimum quality score threshold | `0.8` | No |
 
