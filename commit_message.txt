@@ -1,0 +1,1 @@
+fix: finalize missing scope B0 for CI baseline snapshot (#12350)

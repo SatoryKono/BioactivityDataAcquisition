@@ -1,0 +1,163 @@
+{
+  "findings": [
+    {
+      "actual": "Сигнатурный набор уже есть: tests/architecture/test_adapter_port_conformance.py содержит 7 пар порт-адаптер. Отдельный tests/architecture/test_registered_datasource_port_surface.py проверяет fetch у 8 зарегистрированных источников. Прямых наследников *Port в src/bioetl/infrastructure — 19, и этот кортеж из 7 пар их не перечисляет.",
+      "attempted_disproof": "Прочитан PORT_ADAPTER_CASES и AST-обход class-баз, оканчивающихся на Port. Утверждение Jules об отсутствии conformance-набора не подтверждается.",
+      "automated_fix_possible": false,
+      "category": "adapter-conformance",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "dependencies": [],
+      "effort": "S",
+      "evidence": [
+        {
+          "command": "read PORT_ADAPTER_CASES",
+          "line": 60,
+          "observation": "Семь пар: три writer (Bronze, Silver, Gold), три logger и CircuitBreakerGuard.",
+          "observed_at": "2026-10-22T07:26:37Z",
+          "path": "tests/architecture/test_adapter_port_conformance.py",
+          "source_revision": "ee83860e7902adcd5eebff163514df97a6c5f5f4"
+        },
+        {
+          "command": "read _REGISTERED_ADAPTERS",
+          "line": 35,
+          "observation": "Восемь строк зарегистрированных источников, семь из них в infrastructure.adapters.",
+          "observed_at": "2026-10-22T07:26:37Z",
+          "path": "tests/architecture/test_registered_datasource_port_surface.py",
+          "source_revision": "ee83860e7902adcd5eebff163514df97a6c5f5f4"
+        },
+        {
+          "command": "AST class bases ending with Port under src/bioetl/infrastructure",
+          "line": 41,
+          "observation": "Пример прямого наследника вне PORT_ADAPTER_CASES: MemoryLock(LockPort). Всего таких классов 19.",
+          "observed_at": "2026-10-22T07:26:37Z",
+          "path": "src/bioetl/infrastructure/locking/memory_lock.py",
+          "source_revision": "ee83860e7902adcd5eebff163514df97a6c5f5f4"
+        }
+      ],
+      "evidence_freshness": "CURRENT",
+      "exception_ref": null,
+      "expected": "Явный conformance-набор для адаптеров доменных портов.",
+      "id": "AUDIT-20261022-INFRA-001",
+      "impact": "Риск дрейфа остаётся только для адаптеров вне существующего кортежа. Отсутствия набора нет.",
+      "method": "Read of tests/architecture/test_adapter_port_conformance.py and AST scan of src/bioetl/infrastructure/**/*.py",
+      "observation": "Jules пометил отсутствие conformance-набора как CONFIRMED. На ревизии ee83860e79 набор уже есть и покрывает сигнатуры семи пар плюс fetch восьми зарегистрированных источников. Полного перечисления 19 прямых наследников *Port в этом кортеже нет.",
+      "path": "tests/architecture/test_adapter_port_conformance.py",
+      "priority": "P2",
+      "remediation": "Код и тесты в этом PR не расширять. Исходный статус CONFIRMED снят.",
+      "requirement_id": "GAP",
+      "review_verdict": "ABSENCE_DISPROVEN",
+      "root_cause": "Прогон Jules не учёл уже существующий архитектурный тест сигнатур.",
+      "root_cause_id": "INFRA-ADAPTER-CONFORMANCE",
+      "severity": "Low",
+      "status": "NOT_PROVEN",
+      "validation": [
+        "rg -n \"PORT_ADAPTER_CASES\" tests/architecture/test_adapter_port_conformance.py",
+        "rg -n \"_REGISTERED_ADAPTERS\" tests/architecture/test_registered_datasource_port_surface.py"
+      ]
+    },
+    {
+      "actual": "atomic_write и _replace_with_retry есть. Юнит-тесты замены и ошибок записи есть. Отдельный прогон обрыва процесса для Bronze, Silver и Gold в этом PR не выполнялся.",
+      "attempted_disproof": "Файлы support/atomic_ops.py и support/_atomic_replace.py прочитаны. Поиск тестов по atomic_ops и _atomic_replace дал совпадения в tests/unit/infrastructure.",
+      "automated_fix_possible": false,
+      "category": "storage-atomicity",
+      "confidence": "medium",
+      "confidence_score": 0.7,
+      "dependencies": [],
+      "effort": "S",
+      "evidence": [
+        {
+          "command": "read def atomic_write",
+          "line": 60,
+          "observation": "Запись идёт во временный файл в каталоге цели и завершается атомарной заменой.",
+          "observed_at": "2026-10-22T07:26:37Z",
+          "path": "src/bioetl/infrastructure/storage/support/atomic_ops.py",
+          "source_revision": "ee83860e7902adcd5eebff163514df97a6c5f5f4"
+        },
+        {
+          "command": "read def _replace_with_retry",
+          "line": 73,
+          "observation": "Общий примитив замены с повтором для устойчивых ошибок ФС.",
+          "observed_at": "2026-10-22T07:26:37Z",
+          "path": "src/bioetl/infrastructure/storage/support/_atomic_replace.py",
+          "source_revision": "ee83860e7902adcd5eebff163514df97a6c5f5f4"
+        },
+        {
+          "command": "read test_atomic_ops_unlink_oserror",
+          "line": 56,
+          "observation": "Юнит-тест обрабатывает сбой замены в atomic_ops.",
+          "observed_at": "2026-10-22T07:26:37Z",
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_storage.py",
+          "source_revision": "ee83860e7902adcd5eebff163514df97a6c5f5f4"
+        }
+      ],
+      "evidence_freshness": "CURRENT",
+      "exception_ref": null,
+      "expected": "Доказательство восстановления Bronze/Silver/Gold после обрыва записи.",
+      "id": "AUDIT-20261022-INFRA-002",
+      "impact": "Хелперы атомарной замены и их юнит-тесты на месте. Полный crash-сценарий слоёв этим прогоном не закрыт.",
+      "method": "Static read of atomic write helpers and unit-test names under tests/unit/infrastructure",
+      "observation": "Атомарная публикация реализована через временный файл и Path.replace. Это не равно прогнанному сценарию kill -9 по Bronze, Silver и Gold.",
+      "path": "src/bioetl/infrastructure/storage/support/atomic_ops.py",
+      "priority": "P2",
+      "remediation": "Оставить хелперы и текущие тесты. Новый crash-прогон в этот PR не добавлять.",
+      "requirement_id": "GAP",
+      "review_verdict": "NOT_VERIFIABLE",
+      "root_cause": "Наличие хелперов не заменяет исполнимый след обрыва процесса по всем слоям.",
+      "root_cause_id": "INFRA-STORAGE-CRASH-RECOVERY",
+      "severity": "Low",
+      "status": "NOT_PROVEN",
+      "validation": [
+        "rg -n \"def atomic_write\" src/bioetl/infrastructure/storage/support/atomic_ops.py",
+        "rg -n \"def _replace_with_retry\" src/bioetl/infrastructure/storage/support/_atomic_replace.py"
+      ]
+    },
+    {
+      "actual": "Историческая карта владельцев есть в reports/audit-runs/12107-r07/adapter-owner-map.md. Свежей матрицы create/close для кампании 20261022 и полного обхода composition root в этом прогоне нет.",
+      "attempted_disproof": "Поиск lifecycle ownership и adapter-owner-map по docs и reports. Найден только исторический пакет 12107-r07, не прогон 20261022.",
+      "automated_fix_possible": false,
+      "category": "lifecycle-ownership",
+      "confidence": "medium",
+      "confidence_score": 0.55,
+      "dependencies": [],
+      "effort": "M",
+      "evidence": [
+        {
+          "command": "path exists reports/audit-runs/12107-r07/adapter-owner-map.md",
+          "line": 1,
+          "observation": "Историческая карта владельцев адаптеров сохранена в пакете 12107-r07.",
+          "observed_at": "2026-10-22T07:26:37Z",
+          "path": "reports/audit-runs/12107-r07/adapter-owner-map.md",
+          "source_revision": "ee83860e7902adcd5eebff163514df97a6c5f5f4"
+        },
+        {
+          "command": "AST count of direct *Port subclasses",
+          "line": 58,
+          "observation": "В infrastructure 682 Python-файла и 19 прямых наследников *Port. Это не матрица владельцев жизненного цикла.",
+          "observed_at": "2026-10-22T07:26:37Z",
+          "path": "src/bioetl/infrastructure/adapters/base.py",
+          "source_revision": "ee83860e7902adcd5eebff163514df97a6c5f5f4"
+        }
+      ],
+      "evidence_freshness": "CURRENT",
+      "exception_ref": null,
+      "expected": "Свежая матрица create/close от composition root до клиентов, хранилищ, файлов и блокировок.",
+      "id": "AUDIT-20261022-INFRA-003",
+      "impact": "Границы владения ресурсами для этой кампании остаются непрослеженными. Утечка этим прогоном не показана.",
+      "method": "Path search for adapter-owner-map and lifecycle ownership plus AST count of infrastructure Port subclasses",
+      "observation": "Jules оставил INFRA-003 как NOT_VERIFIABLE. Повторный поиск не строит матрицу create/close и не подменяет её исторической картой 12107-r07.",
+      "path": "src/bioetl/infrastructure",
+      "priority": "P2",
+      "remediation": "Не документировать вымышленную матрицу. Следующий прогон может снять create/close от composition root отдельно.",
+      "requirement_id": "GAP",
+      "review_verdict": "NOT_VERIFIABLE",
+      "root_cause": "Владение жизненным циклом распределено, а кампания 20261022 не сохранила свежий обход composition root.",
+      "root_cause_id": "INFRA-LIFECYCLE-OWNERSHIP",
+      "severity": "Low",
+      "status": "NOT_PROVEN",
+      "validation": [
+        "test -f reports/audit-runs/12107-r07/adapter-owner-map.md"
+      ]
+    }
+  ]
+}
