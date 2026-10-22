@@ -497,9 +497,6 @@ tracing = [
 ]
 
 [package.dev-dependencies]
-ci-control = [
-    { name = "pyyaml" },
-]
 dev = [
     { name = "bioetl", extra = ["dev"] },
 ]
@@ -602,7 +599,6 @@ requires-dist = [
 provides-extras = ["agentdebugx", "proofagent", "agent-tools", "tracing", "performance", "export", "tests", "tests-full", "dev", "docs"]
 
 [package.metadata.requires-dev]
-ci-control = [{ name = "pyyaml", specifier = ">=6.0.3" }]
 dev = [{ name = "bioetl", extras = ["dev"] }]
 
 [[package]]

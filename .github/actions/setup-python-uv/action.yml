@@ -4,13 +4,6 @@ description: >
   and installs project packages. Replaces duplicated setup steps across workflows.
 
 inputs:
-  dependency-profile:
-    description: >
-      Dependency install profile. legacy keeps uv sync with uv-extras.
-      ci-control installs only the ci-control group and requires uv-extras
-      to be empty and uv-sync-args to stay "--frozen".
-    required: false
-    default: "legacy"
   python-version:
     description: >
       Python version to install. Default 3.12 is the BioETL baseline
@@ -59,7 +52,6 @@ runs:
         INPUT_PYTHON_VERSION: ${{ inputs.python-version }}
         INPUT_UV_EXTRAS: ${{ inputs.uv-extras }}
         INPUT_UV_SYNC_ARGS: ${{ inputs.uv-sync-args }}
-        INPUT_DEPENDENCY_PROFILE: ${{ inputs.dependency-profile }}
       run: |
         # Environment cache invalidates on dependency, extras, Python, or action
         # setup semantics. Pytest cache fingerprinting remains separate below.
@@ -68,10 +60,7 @@ runs:
           printf 'python-version=%s\n' "$INPUT_PYTHON_VERSION"
           printf 'uv-extras=%s\n' "$INPUT_UV_EXTRAS"
           printf 'uv-sync-args=%s\n' "$INPUT_UV_SYNC_ARGS"
-          printf 'dependency-profile=%s\n' "$INPUT_DEPENDENCY_PROFILE"
-          sha256sum uv.lock pyproject.toml \
-            .github/actions/setup-python-uv/action.yml \
-            scripts/engineering/ci/sync_control.py
+          sha256sum uv.lock pyproject.toml .github/actions/setup-python-uv/action.yml
         } | sha256sum | awk '{print "fingerprint="$1}' >> "$GITHUB_OUTPUT"
         printf 'python-fragment=py%s\n' "$python_fragment" >> "$GITHUB_OUTPUT"
 
@@ -81,9 +70,9 @@ runs:
         path: |
           ~/.cache/uv
           .venv
-        key: uv-${{ runner.os }}-${{ inputs.dependency-profile }}-${{ steps.environment-cache.outputs.python-fragment }}-${{ steps.environment-cache.outputs.fingerprint }}
+        key: uv-${{ runner.os }}-${{ steps.environment-cache.outputs.python-fragment }}-${{ steps.environment-cache.outputs.fingerprint }}
         restore-keys: |
-          uv-${{ runner.os }}-${{ inputs.dependency-profile }}-${{ steps.environment-cache.outputs.python-fragment }}-
+          uv-${{ runner.os }}-${{ steps.environment-cache.outputs.python-fragment }}-
 
     - name: Pin UV_PYTHON for subsequent steps
       shell: bash
@@ -103,30 +92,13 @@ runs:
       env:
         EXTRAS: ${{ inputs.uv-extras }}
         SYNC_ARGS: ${{ inputs.uv-sync-args }}
-        PROFILE: ${{ inputs.dependency-profile }}
       run: |
-        if [ "$PROFILE" = "ci-control" ]; then
-          if [ -n "$EXTRAS" ]; then
-            echo "uv-extras must be empty for ci-control profile" >&2
-            exit 1
-          fi
-          if [ "$SYNC_ARGS" != "--frozen" ]; then
-            echo "ci-control accepts only uv-sync-args '--frozen'" >&2
-            exit 1
-          fi
-          # Resolve the guard from this pinned action checkout, not the caller workspace.
-          python "$GITHUB_ACTION_PATH/../../../scripts/engineering/ci/sync_control.py" sync --frozen --only-group ci-control
-        elif [ "$PROFILE" = "legacy" ]; then
-          CMD="uv sync ${SYNC_ARGS}"
-          for extra in $EXTRAS; do
-            CMD="${CMD} --extra ${extra}"
-          done
-          echo "Running: ${CMD}"
-          ${CMD}
-        else
-          echo "Unknown dependency profile: $PROFILE" >&2
-          exit 1
-        fi
+        CMD="uv sync ${SYNC_ARGS}"
+        for extra in $EXTRAS; do
+          CMD="${CMD} --extra ${extra}"
+        done
+        echo "Running: ${CMD}"
+        ${CMD}
 
     - name: Pin locked/no-build/no-sync defaults for subsequent uv run steps
       shell: bash

@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-22T19:37:09.245025+00:00",
+  "generated_at": "2026-10-22T18:14:56.591651+00:00",
   "summary": {
-    "total_scripts": 664,
+    "total_scripts": 663,
     "status_counts": {
-      "active": 334,
-      "supporting": 330
+      "active": 337,
+      "supporting": 326
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
       "ci": 73,
-      "docs": 287,
+      "docs": 286,
       "other": 16,
       "scripts": 555,
       "skills": 13,
-      "tests": 482
+      "tests": 481
     }
   },
   "scripts": [
@@ -2708,7 +2708,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1947,
+          "line": 1949,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check >> \"$log\" 2>&1"
         },
@@ -10024,7 +10024,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"apply-ci-fixes\": \"apply_ci_fixes.py\","
         },
@@ -10081,7 +10081,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"e2e-skip-rate\": \"check_e2e_matrix_skip_rate.py\","
         },
@@ -10126,7 +10126,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"e2e-rerun\": \"check_e2e_rerun_stability.py\","
         },
@@ -10159,7 +10159,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"neo4j-memory-live\": \"check_neo4j_memory_live_audit.py\","
         }
@@ -10174,7 +10174,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"neo4j-memory\": \"check_neo4j_memory_ontology.py\","
         }
@@ -10207,7 +10207,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 629,
+          "line": 628,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10250,7 +10250,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1837,
+          "line": 1839,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.junit_duration_summary"
         },
@@ -10317,7 +10317,7 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 1014,
+          "line": 1001,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.local_test_telemetry import build_local_baseline"
         },
@@ -10372,9 +10372,9 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 55,
+          "line": 43,
           "source_group": "scripts",
-          "text": "\"pr-gate\": module_command(\"scripts.engineering.ci.pr_gate\"),"
+          "text": "\"pr-gate\": \"pr_gate.py\","
         },
         {
           "path": "tests/architecture/test_circleci_migration_contract.py",
@@ -10427,7 +10427,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 764,
+          "line": 763,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10593,7 +10593,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1462,
+          "line": 1464,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pytest_event_journal \\"
         },
@@ -10685,7 +10685,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2039,
+          "line": 2041,
           "source_group": "ci",
           "text": "\"python -m scripts.engineering.ci.quality_integral_gate\" \\"
         },
@@ -10779,7 +10779,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"docker-timing\": \"report_docker_actions_timing.py\","
         },
@@ -10822,7 +10822,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"pr-gate-timing\": \"report_pr_gate_timing.py\","
         },
@@ -10859,7 +10859,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"debt-report\": \"report_quality_debt_weekly.py\","
         },
@@ -10929,55 +10929,6 @@
       ]
     },
     {
-      "path": "scripts/engineering/ci/sync_control.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 6,
-      "references": [
-        {
-          "path": "docs/03-guides/test-optimization-guide.md",
-          "line": 326,
-          "source_group": "docs",
-          "text": "`scripts/engineering/ci/sync_control.py`, `dependency-profile`,"
-        },
-        {
-          "path": "tests/architecture/test_setup_python_uv_cache_policy.py",
-          "line": 64,
-          "source_group": "tests",
-          "text": "assert \"scripts/engineering/ci/sync_control.py\" in script"
-        },
-        {
-          "path": "tests/architecture/test_setup_python_uv_cache_policy.py",
-          "line": 65,
-          "source_group": "tests",
-          "text": "assert \".github/actions/setup-python-uv/sync_control.py\" not in script"
-        },
-        {
-          "path": "tests/architecture/test_setup_python_uv_cache_policy.py",
-          "line": 70,
-          "source_group": "tests",
-          "text": "'python \"$GITHUB_ACTION_PATH/../../../scripts/engineering/ci/sync_control.py\" '"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/ci/test_sync_control.py",
-          "line": 13,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci import sync_control"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/ci/test_sync_control.py",
-          "line": 141,
-          "source_group": "tests",
-          "text": "argv = [\"sync_control.py\", \"sync\", \"--frozen\", \"--only-group\", \"ci-control\"]"
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-11-30",
-      "next_step": "Retain as the fixed-argv backend invoked by the setup-python-uv composite action; keep it supporting because CI callers use the governed action rather than a standalone command."
-    },
-    {
       "path": "scripts/engineering/ci/test_telemetry_provenance.py",
       "type": "py",
       "status": "supporting",
@@ -10998,7 +10949,7 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 950,
+          "line": 937,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.test_telemetry_provenance import ("
         },
@@ -11071,13 +11022,13 @@
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 94,
+          "line": 85,
           "source_group": "docs",
-          "text": "`python -m scripts.engineering.ci.update_test_telemetry_baseline"
+          "text": "`python -m scripts.engineering.ci.update_test_telemetry_baseline`"
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 152,
+          "line": 139,
           "source_group": "docs",
           "text": "3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline --source-commit <sha> --source-run-id <run-id> ...` with either direct artifacts or fallback diagnostics inputs."
         },
@@ -11783,7 +11734,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2025,
+          "line": 2027,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -13309,7 +13260,7 @@
     {
       "path": "scripts/engineering/finances/github_billing_pipeline.py",
       "type": "py",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -13325,16 +13276,12 @@
           "source_group": "tests",
           "text": "from scripts.engineering.finances.github_billing_pipeline import ("
         }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-11-30",
-      "next_step": "Retain as the internal aggregation module behind the GitHub billing workflow; keep it supporting because it has no standalone invocation surface."
+      ]
     },
     {
       "path": "scripts/engineering/finances/github_billing_schema.py",
       "type": "py",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
       "reference_count": 4,
       "references": [
@@ -13362,16 +13309,12 @@
           "source_group": "tests",
           "text": "from scripts.engineering.finances.github_billing_schema import GitHubBillingRecord"
         }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-11-30",
-      "next_step": "Retain as the shared billing record schema imported by the pipeline and validator; keep it supporting because it is a library module."
+      ]
     },
     {
       "path": "scripts/engineering/finances/github_billing_validator.py",
       "type": "py",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -13387,11 +13330,7 @@
           "source_group": "tests",
           "text": "from scripts.engineering.finances.github_billing_validator import ("
         }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-11-30",
-      "next_step": "Retain as the internal billing validation module used by the workflow and tests; keep it supporting because it has no standalone invocation surface."
+      ]
     },
     {
       "path": "scripts/engineering/find_complex_functions.py",
@@ -18007,7 +17946,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_lane_policy.py",
-          "line": 502,
+          "line": 497,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/run_architecture_audit_read_only.py\""
         },
@@ -19061,7 +19000,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 592,
+          "line": 591,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },

@@ -243,20 +243,7 @@ def test_pr_gate_coordinator_materializes_on_every_pr_without_duplicate_owners()
     assert not {"paths", "paths-ignore"}.intersection(pull_request)
     assert "pr-gate-complete" in coordinator["jobs"]
     assert coordinator["permissions"] == {"contents": "read"}
-    class_lane_steps = coordinator["jobs"]["class-lane"]["steps"]
-    continuing_steps = [
-        step for step in class_lane_steps if step.get("continue-on-error") is True
-    ]
-    assert len(continuing_steps) == 1
-    assert continuing_steps[0]["name"] == "Run OSV-Scanner"
-    osv_step_index = class_lane_steps.index(continuing_steps[0])
-    osv_gate = next(
-        step
-        for step in class_lane_steps
-        if step.get("name") == "Fail on HIGH/CRITICAL OSV findings"
-    )
-    assert class_lane_steps.index(osv_gate) > osv_step_index
-    assert "--osv-json osv-results.json" in str(osv_gate.get("run", ""))
+    assert "continue-on-error" not in coordinator_path.read_text(encoding="utf-8")
     assert "secrets: inherit" not in coordinator_path.read_text(encoding="utf-8")
     catalog = _load_yaml(ROOT / "configs" / "quality" / "github_required_checks.yaml")
     gate_ids = {gate["id"] for gate in catalog["gates"]}
