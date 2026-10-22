@@ -56,6 +56,13 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 | `BIOETL_OBSERVABILITY__AUDIT_ENABLED` | Enable file-backed audit logging for Medallion write operations (`FileAuditAdapter` instead of `NoOpAudit`). This variable is not the forensic-grade persistence profile. Profile `forensic_grade` separately requires real audit plus a structured logger, tracing, and metrics, including outside prod; `BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD` does not waive that check | `False` | No |
 | `BIOETL_OBSERVABILITY__AUDIT_BASE_PATH` | Optional override path for audit JSONL files. Unset (Python `None`) falls back to `<BIOETL_DATA_DIR>/output/audit` (`data/output/audit` with the default `BIOETL_DATA_DIR`). The environment string `None` is a path and does not select the fallback | unset | No |
 | `BIOETL_PUSHGATEWAY_URL` | Pushgateway address for terminal metrics publication | unset | No |
+| `BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED` | Enable data quality monitoring | `True` | No |
+| `BIOETL_OBSERVABILITY__DQ_BASELINE_WINDOW` | Number of recent runs to use for baseline calculation | `7` | No |
+| `BIOETL_OBSERVABILITY__DQ_Z_SCORE_THRESHOLD` | Z-score threshold for anomaly detection | `2.5` | No |
+| `BIOETL_OBSERVABILITY__DQ_MIN_BASELINE_SAMPLES` | Minimum samples before anomaly detection activates | `3` | No |
+| `BIOETL_OBSERVABILITY__DQ_COLD_START_RUNS` | Skip first N runs while building baseline | `5` | No |
+| `BIOETL_OBSERVABILITY__DQ_ERROR_RATE_MAX` | Maximum allowed error rate | `0.10` | No |
+| `BIOETL_OBSERVABILITY__DQ_QUALITY_SCORE_MIN` | Minimum quality score threshold | `0.8` | No |
 
 ## Runtime Identity
 
