@@ -1476,7 +1476,9 @@ def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_
     )
     evidence_run = str(evidence["run"])
     assert "trivy image" in evidence_run
-    assert "bioetl:${{ inputs.caller-sha || github.sha }}" in str(evidence.get("env", {}))
+    assert "bioetl:${{ inputs.caller-sha || github.sha }}" in str(
+        evidence.get("env", {})
+    )
     assert "--format json" in evidence_run
     assert "--output reports/security/trivy-results.json" in evidence_run
     assert "--exit-code 0" in evidence_run
