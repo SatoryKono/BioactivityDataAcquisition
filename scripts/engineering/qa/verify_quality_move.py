@@ -7,6 +7,7 @@ import sys
 import hashlib
 from pathlib import Path
 
+
 def _secure_path(base: str, subpath: str) -> str:
     """Resolves a subpath against a base and ensures it does not escape the base directory."""
     base_path = Path(base).resolve()
@@ -15,9 +16,11 @@ def _secure_path(base: str, subpath: str) -> str:
         raise ValueError(f"Path traversal detected: {subpath}")
     return str(target_path)
 
+
 def _secure_file_path(path: str) -> str:
     """Resolves an absolute file path and returns it. If it is relative, it resolves against cwd."""
     return str(Path(path).resolve())
+
 
 def _hash_file(path: str) -> str:
     try:
@@ -27,14 +30,14 @@ def _hash_file(path: str) -> str:
     except Exception:
         return ""
 
+
 def _run_git_command(args: list[str], repo: str) -> str:
     safe_repo = _secure_file_path(repo)
     # strictly avoid shell=True, arguments are already a list
     result = subprocess.run(
         ["git"] + args,
         cwd=safe_repo,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         text=True,
     )
     if result.returncode != 0:
@@ -51,33 +54,60 @@ def verify_manifest(manifest_path: str, repo: str) -> dict:
             if reader.fieldnames is None:
                 return {"status": "ERROR", "reason": "Empty manifest"}
 
-            required_cols = {"source_path", "target_path", "blob_sha", "base_commit", "snapshot_relation_prior", "evidence_status", "required_changes", "acceptance"}
+            required_cols = {
+                "source_path",
+                "target_path",
+                "blob_sha",
+                "base_commit",
+                "snapshot_relation_prior",
+                "evidence_status",
+                "required_changes",
+                "acceptance",
+            }
             if not required_cols.issubset(set(reader.fieldnames)):
-                return {"status": "ERROR", "reason": f"Missing columns. Expected at least {required_cols}"}
+                return {
+                    "status": "ERROR",
+                    "reason": f"Missing columns. Expected at least {required_cols}",
+                }
 
             rows = list(reader)
     except Exception as e:
         return {"status": "ERROR", "reason": f"Could not read manifest: {e}"}
 
     if len(rows) != 30:
-        return {"status": "ERROR", "reason": f"Expected exactly 30 rows, found {len(rows)}"}
+        return {
+            "status": "ERROR",
+            "reason": f"Expected exactly 30 rows, found {len(rows)}",
+        }
 
     sources = set()
     targets = set()
 
     for row in rows:
         if row["source_path"] in sources:
-            return {"status": "ERROR", "reason": f"Duplicate source_path: {row['source_path']}"}
+            return {
+                "status": "ERROR",
+                "reason": f"Duplicate source_path: {row['source_path']}",
+            }
         if row["target_path"] in targets:
-            return {"status": "ERROR", "reason": f"Duplicate target_path: {row['target_path']}"}
+            return {
+                "status": "ERROR",
+                "reason": f"Duplicate target_path: {row['target_path']}",
+            }
 
         sources.add(row["source_path"])
         targets.add(row["target_path"])
 
         if not row["source_path"].startswith("src/"):
-            return {"status": "ERROR", "reason": f"Invalid source_path prefix: {row['source_path']}"}
+            return {
+                "status": "ERROR",
+                "reason": f"Invalid source_path prefix: {row['source_path']}",
+            }
         if not row["target_path"].startswith("scripts/"):
-            return {"status": "ERROR", "reason": f"Invalid target_path prefix: {row['target_path']}"}
+            return {
+                "status": "ERROR",
+                "reason": f"Invalid target_path prefix: {row['target_path']}",
+            }
 
         # Optional blob check (if the file exists)
         try:
@@ -86,11 +116,14 @@ def verify_manifest(manifest_path: str, repo: str) -> dict:
                 try:
                     blob_out = _run_git_command(["hash-object", target_file], safe_repo)
                     if blob_out != row["blob_sha"]:
-                         pass
+                        pass
                 except Exception:
                     pass
         except ValueError:
-             return {"status": "ERROR", "reason": "Path traversal detected in target_path"}
+            return {
+                "status": "ERROR",
+                "reason": "Path traversal detected in target_path",
+            }
 
     return {"status": "PASS", "rows": rows}
 
@@ -105,33 +138,53 @@ def verify_decisions(decisions_path: str, repo_path: str) -> dict:
         return {"status": "ERROR", "reason": f"Could not read decisions: {e}"}
 
     for item in data:
-        for field in ["path", "literal", "context", "purpose", "owner", "reviewed_content_sha256", "review_by"]:
+        for field in [
+            "path",
+            "literal",
+            "context",
+            "purpose",
+            "owner",
+            "reviewed_content_sha256",
+            "review_by",
+        ]:
             if field not in item:
                 return {"status": "ERROR", "reason": f"Decision missing field {field}"}
 
         # "Blanket excludes целого scripts/src и исключения executable old imports запрещены"
         if item.get("literal") in ("scripts", "src"):
-            return {"status": "ERROR", "reason": "Blanket excludes of src or scripts are not allowed"}
+            return {
+                "status": "ERROR",
+                "reason": "Blanket excludes of src or scripts are not allowed",
+            }
         if item.get("exception_allowed") and item.get("executable_import"):
-            return {"status": "ERROR", "reason": "Executable old imports cannot be excepted"}
+            return {
+                "status": "ERROR",
+                "reason": "Executable old imports cannot be excepted",
+            }
 
         # "собственные scanner constants" in literal is not allowed
         if "verify_quality_move" in item.get("literal", ""):
-             return {"status": "ERROR", "reason": "Cannot exclude scanner constants"}
+            return {"status": "ERROR", "reason": "Cannot exclude scanner constants"}
 
         # "Изменение содержимого либо срока решения инвалидирует его"
         # We need to hash the file in the repo and compare
         try:
             file_path = _secure_path(safe_repo_path, item["path"])
             if not os.path.exists(file_path):
-                 # allow it to pass if file doesn't exist (e.g. synthetic test)
-                 pass
+                # allow it to pass if file doesn't exist (e.g. synthetic test)
+                pass
             else:
-                 actual_hash = _hash_file(file_path)
-                 if actual_hash != item["reviewed_content_sha256"]:
-                      return {"status": "ERROR", "reason": f"Hash mismatch for {item['path']}"}
+                actual_hash = _hash_file(file_path)
+                if actual_hash != item["reviewed_content_sha256"]:
+                    return {
+                        "status": "ERROR",
+                        "reason": f"Hash mismatch for {item['path']}",
+                    }
         except ValueError:
-            return {"status": "ERROR", "reason": "Path traversal detected in decision path"}
+            return {
+                "status": "ERROR",
+                "reason": "Path traversal detected in decision path",
+            }
 
     return {"status": "PASS"}
 
@@ -142,7 +195,12 @@ def write_evidence(out_dir: str, status: str, repo: str) -> None:
     try:
         commit = _run_git_command(["rev-parse", "HEAD"], safe_repo)
         tree = _run_git_command(["rev-parse", "HEAD^{tree}"], safe_repo)
-        status_out = subprocess.run(["git", "status", "--porcelain"], cwd=safe_repo, capture_output=True, text=True)
+        status_out = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=safe_repo,
+            capture_output=True,
+            text=True,
+        )
         dirty = bool(status_out.stdout.strip())
     except Exception:
         commit = "unknown"
@@ -165,7 +223,9 @@ def write_evidence(out_dir: str, status: str, repo: str) -> None:
     }
 
     os.makedirs(safe_out_dir, exist_ok=True)
-    with open(os.path.join(safe_out_dir, "execution_evidence.json"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(safe_out_dir, "execution_evidence.json"), "w", encoding="utf-8"
+    ) as f:
         json.dump(evidence, f, indent=2)
 
 
@@ -223,7 +283,9 @@ def main():
 
     if evidence_data.get("tree") != current_tree:
         write_evidence(safe_out, "BLOCKED", safe_repo)
-        print(f"Evidence tree {evidence_data.get('tree')} does not match current tree {current_tree}")
+        print(
+            f"Evidence tree {evidence_data.get('tree')} does not match current tree {current_tree}"
+        )
         sys.exit(1)
 
     if args.phase == "before":
@@ -233,9 +295,9 @@ def main():
                 src = _secure_path(safe_repo, row["source_path"])
                 tgt = _secure_path(safe_repo, row["target_path"])
             except ValueError:
-                 write_evidence(safe_out, "ERROR", safe_repo)
-                 print(f"Path traversal detected in manifest rows")
-                 sys.exit(1)
+                write_evidence(safe_out, "ERROR", safe_repo)
+                print(f"Path traversal detected in manifest rows")
+                sys.exit(1)
 
             if not os.path.exists(src):
                 write_evidence(safe_out, "ERROR", safe_repo)
@@ -253,9 +315,9 @@ def main():
                 src = _secure_path(safe_repo, row["source_path"])
                 tgt = _secure_path(safe_repo, row["target_path"])
             except ValueError:
-                 write_evidence(safe_out, "ERROR", safe_repo)
-                 print(f"Path traversal detected in manifest rows")
-                 sys.exit(1)
+                write_evidence(safe_out, "ERROR", safe_repo)
+                print(f"Path traversal detected in manifest rows")
+                sys.exit(1)
 
             if os.path.exists(src):
                 write_evidence(safe_out, "ERROR", safe_repo)
@@ -269,6 +331,7 @@ def main():
     write_evidence(safe_out, "PASS", safe_repo)
     print("Verification PASS")
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()
