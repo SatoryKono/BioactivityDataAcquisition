@@ -38,6 +38,9 @@ TEST_FILE_GLOB = "test_*.py"
 from scripts.engineering.dev.run_tests import TESTS_ROOT as PYTEST_ALL_ROOT
 
 NPM_RUNTIME_TEST = "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py"
+GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
+    "tests/architecture/test_github_actions_runtime_policy.py"
+)
 
 TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_telemetry_baseline.py",
@@ -84,13 +87,13 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/05-engineering/test-telemetry-baseline.md": TELEMETRY_BASELINE_TESTS,
     ".github/workflows/pr-required.yml": (
-        "tests/architecture/test_github_actions_runtime_policy.py",
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
     ),
     "configs/quality/reusable_action_pins.yaml": (
-        "tests/architecture/test_github_actions_runtime_policy.py",
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
     ),
     "scripts/engineering/repo/check_github_actions_runtime_policy.py": (
-        "tests/architecture/test_github_actions_runtime_policy.py",
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
     ),
 }
 
