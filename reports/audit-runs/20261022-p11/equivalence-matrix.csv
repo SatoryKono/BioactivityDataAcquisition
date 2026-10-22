@@ -1,0 +1,20 @@
+kind,name,symbol_present,notes
+comparison,occurrence_only,true,true only when semantic_equivalent is true and occurrence_only_artifacts is non-empty
+comparison,raw_byte_equivalent,true,byte identity of compared artifact bytes
+comparison,semantic_equivalent,true,match after occurrence-only fields are removed; result key equivalent aliases it
+named_label,BYTE_EQUIVALENT,false,not an identifier under src/bioetl
+named_label,NOT_EQUIVALENT,false,no identifier; mismatch is semantic_equivalent false or mismatched_artifacts
+named_label,OCCURRENCE_ONLY_DIFFERENT,false,not an identifier; nearest key is occurrence_only
+named_label,SEMANTIC_EQUIVALENT,false,not an identifier; nearest key is semantic_equivalent
+occurrence_field,composite_run_id,true,DATASET_CONTENT_HASH_OCCURRENCE_ONLY_FIELDS
+occurrence_field,content_hash,true,DATASET_CONTENT_HASH_OCCURRENCE_ONLY_FIELDS
+occurrence_field,created_at,true,DATASET_CONTENT_HASH_OCCURRENCE_ONLY_FIELDS
+occurrence_field,lineage_created_at,true,DATASET_CONTENT_HASH_OCCURRENCE_ONLY_FIELDS
+occurrence_field,manifest_id,true,dataset field and artifact comparison union
+occurrence_field,run_id,true,dataset field and artifact comparison union
+occurrence_field,updated_at,true,DATASET_CONTENT_HASH_OCCURRENCE_ONLY_FIELDS
+occurrence_field,write_completed_at,true,DATASET_CONTENT_HASH_OCCURRENCE_ONLY_FIELDS
+occurrence_field,write_started_at,true,DATASET_CONTENT_HASH_OCCURRENCE_ONLY_FIELDS
+replay_capability,exact_replay_supported,true,full snapshot envelope
+replay_capability,rebuild_only,true,default when the snapshot envelope is incomplete and resume was not requested
+replay_capability,resume_only,true,resume requested without a full snapshot envelope
