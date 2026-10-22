@@ -350,9 +350,7 @@ class TestCanonicalTestLanes:
         assert "serial-coverage" not in lanes
         serial_coverage = test_lanes["ci_fixed_shards"]["lanes"]["serial-coverage"]
         assert serial_coverage["coverage_producer"] is True
-        assert serial_coverage["shards"] == [
-            {"name": "serial", "path": "tests/"}
-        ]
+        assert serial_coverage["shards"] == [{"name": "serial", "path": "tests/"}]
         for lane_name in explicit_parallel:
             lane = lanes[lane_name]
             assert lane["runner_backend"] == "run_pytest_sharded"
