@@ -26,7 +26,7 @@
 
 ## CodeRabbit
 
-PR был draft. CodeRabbit ревью не запускал и inline-замечаний не оставил. Исправлять нечего.
+Первый проход пропустил draft. После снятия draft ревью на `6e875ddf98` оставило два замечания: счётчик `PORT_ADAPTER_CASES` был 8 при семи элементах кортежа, а раздел «Повтор» не отделял выполненные проверки от команд повтора. Оба замечания закрыты в этом handoff.
 
 ## Проверенные факты
 
@@ -34,7 +34,7 @@ PR был draft. CodeRabbit ревью не запускал и inline-заме�
 | --- | ---: |
 | Python-файлы `src/bioetl/infrastructure` | 682 |
 | Прямые наследники `*Port` | 19 |
-| Пары в `PORT_ADAPTER_CASES` | 8 |
+| Пары в `PORT_ADAPTER_CASES` | 7 |
 | Строки `_REGISTERED_ADAPTERS` | 8 |
 | Корневые скрипты на `origin/main` | 0 |
 
@@ -56,7 +56,33 @@ PR был draft. CodeRabbit ревью не запускал и inline-заме�
 - Crash-кампания слоёв хранения.
 - Матрица create/close и смена бюджетов технического долга.
 
-## Повтор
+## Выполненные проверки
+
+Команды ниже запускались локально на дереве с отчётом P04. Это не вывод GitHub Actions.
+
+| Команда | Результат |
+| --- | --- |
+| `.venv/bin/python -m scripts.docs generate-cleanup-inventory --check` | exit 0, inventory is synchronized |
+| `.venv/bin/python -m scripts.docs check-links --report-json reports/docs-link-check-report.json` | exit 0, All checks passed |
+| `.venv/bin/python -m pytest tests/architecture/test_root_hygiene_review_registry.py::test_no_tracked_repository_root_scripts_remain tests/architecture/test_documentation_cleanup_inventory.py::test_documentation_cleanup_inventory_check_passes -q --tb=short` | exit 0, две точки |
+| `.venv/bin/python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD` | exit 0, no partial-tree commits |
+| `.venv/bin/python scripts/engineering/ci/pr_gate.py classify` для diff `origin/main...HEAD` | `unclassified_files` пуст |
+
+Прогон `39736306466` на коммите с `review_plan_script.py` завершился с `failure`. Это прошлый красный CI, не проверка этого handoff.
+
+## Не запускались
+
+- `pytest tests/unit/`
+- `mypy --strict src/bioetl/`
+- Crash-прогон Bronze, Silver и Gold
+- Полный обход composition root
+- Повторный `coderabbit review --agent`
+
+GitHub PR Gate на head после merge `main` в момент этой правки ещё не был принят как доказательство: локальные команды выше его не заменяют.
+
+## Команды повтора фактов
+
+Эти команды не входили в таблицу выполненных проверок. Они заново читают те же источники.
 
 ```text
 rg -n "PORT_ADAPTER_CASES" tests/architecture/test_adapter_port_conformance.py

@@ -13,7 +13,7 @@
   "counts": {
     "direct_port_subclasses": 19,
     "infrastructure_python_files": 682,
-    "port_adapter_cases": 8,
+    "port_adapter_cases": 7,
     "registered_datasource_rows": 8,
     "root_scripts_on_origin_main": 0
   },
@@ -23,7 +23,7 @@
     "composition-root lifecycle matrix",
     "tech-debt budget changes"
   ],
-  "findings_sha256": "ce45d027e2ea533da9dcd66b5b55b135d8f5ef35a14234087658276f1a765cbb",
+  "findings_sha256": "043ec6e3c92c9c9d506b6dfc4d9b6efad540dbbb8826d9be910f830c8da779ad",
   "historical_adapter_owner_map": "reports/audit-runs/12107-r07/adapter-owner-map.md",
   "merge": {
     "conflicts": 0,

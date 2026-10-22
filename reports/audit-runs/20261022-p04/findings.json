@@ -1,7 +1,7 @@
 {
   "findings": [
     {
-      "actual": "Сигнатурный набор уже есть: tests/architecture/test_adapter_port_conformance.py содержит 8 пар порт-адаптер. Отдельный tests/architecture/test_registered_datasource_port_surface.py проверяет fetch у 8 зарегистрированных источников. Прямых наследников *Port в src/bioetl/infrastructure — 19, и этот кортеж из 8 пар их не перечисляет.",
+      "actual": "Сигнатурный набор уже есть: tests/architecture/test_adapter_port_conformance.py содержит 7 пар порт-адаптер. Отдельный tests/architecture/test_registered_datasource_port_surface.py проверяет fetch у 8 зарегистрированных источников. Прямых наследников *Port в src/bioetl/infrastructure — 19, и этот кортеж из 7 пар их не перечисляет.",
       "attempted_disproof": "Прочитан PORT_ADAPTER_CASES и AST-обход class-баз, оканчивающихся на Port. Утверждение Jules об отсутствии conformance-набора не подтверждается.",
       "automated_fix_possible": false,
       "category": "adapter-conformance",
@@ -13,7 +13,7 @@
         {
           "command": "read PORT_ADAPTER_CASES",
           "line": 60,
-          "observation": "Восемь пар: Bronze/Silver/Gold writers, три logger-адаптера, CircuitBreakerGuard.",
+          "observation": "Семь пар: три writer (Bronze, Silver, Gold), три logger и CircuitBreakerGuard.",
           "observed_at": "2026-10-22T07:26:37Z",
           "path": "tests/architecture/test_adapter_port_conformance.py",
           "source_revision": "ee83860e7902adcd5eebff163514df97a6c5f5f4"
@@ -41,7 +41,7 @@
       "id": "AUDIT-20261022-INFRA-001",
       "impact": "Риск дрейфа остаётся только для адаптеров вне существующего кортежа. Отсутствия набора нет.",
       "method": "Read of tests/architecture/test_adapter_port_conformance.py and AST scan of src/bioetl/infrastructure/**/*.py",
-      "observation": "Jules пометил отсутствие conformance-набора как CONFIRMED. На ревизии ee83860e79 набор уже есть и покрывает сигнатуры восьми пар плюс fetch зарегистрированных источников. Полного перечисления 19 прямых наследников *Port в этом кортеже нет.",
+      "observation": "Jules пометил отсутствие conformance-набора как CONFIRMED. На ревизии ee83860e79 набор уже есть и покрывает сигнатуры семи пар плюс fetch восьми зарегистрированных источников. Полного перечисления 19 прямых наследников *Port в этом кортеже нет.",
       "path": "tests/architecture/test_adapter_port_conformance.py",
       "priority": "P2",
       "remediation": "Код и тесты в этом PR не расширять. Исходный статус CONFIRMED снят.",
