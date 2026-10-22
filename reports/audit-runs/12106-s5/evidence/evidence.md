@@ -19,10 +19,12 @@
 
 ## Строки 8, 9, 10, 11b, 11c - NOT_VERIFIABLE
 
-Физический commit Gold — синхронный `module.write_deltalake(...)` в
-`_write_prepared_simple_delta`. В этой функции нет `await`/`yield`, поэтому
-SIGKILL нельзя поставить внутрь native commit (строки 8, 9, 11b) и между
-возвратом `write_deltalake` и возвратом helper-а (строка 11c).
+`_write_prepared_simple_delta` вызывает `module.write_deltalake(...)` и не
+содержит `await`/`yield`. Это проверка Python-границы, а не crash внутри
+native commit. Отсутствие yield не исключает `SIGKILL` во время
+`write_deltalake`, поэтому сбой внутри native commit (строки 8, 9, 11b)
+остаётся `NOT_VERIFIABLE`. После вызова в helper нет отдельного Python-шва
+для детерминированного барьера (строка 11c).
 
 `_write_single_target_impl` вызывает `_post_write_gold` сразу после
 `COMMITTED_POSTWRITE_PENDING`. Отдельного pre-entry gate в этом шве нет

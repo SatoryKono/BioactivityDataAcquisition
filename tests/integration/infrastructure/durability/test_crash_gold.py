@@ -219,7 +219,11 @@ def test_row_11a_dual_write_crash_before_commit(tmp_path: Path) -> None:
 
 
 def test_row_8_crash_during_normal_commit() -> None:
-    """Row 8: simple Gold commit is one uncancellable ``write_deltalake``."""
+    """Row 8: the simple-commit helper has no Python yield or await boundary.
+
+    The check does not interrupt ``write_deltalake``. A crash inside that
+    native call stays ``NOT_VERIFIABLE``.
+    """
     _assert_no_python_phase_boundary(_write_prepared_simple_delta)
     source = inspect.getsource(_write_prepared_simple_delta)
     assert "module.write_deltalake(" in source
@@ -241,7 +245,12 @@ def test_row_10_crash_during_postwrite_pre_entry_gate() -> None:
 
 
 def test_row_11b_dual_write_crash_during_commit() -> None:
-    """Row 11b: a dual-write target cannot be killed inside the native commit."""
+    """Row 11b: the dual-write commit helper has no Python phase boundary.
+
+    Absence of ``await`` or ``yield`` does not show that ``SIGKILL`` cannot
+    land inside ``write_deltalake``. That native-commit crash stays
+    ``NOT_VERIFIABLE``.
+    """
     _assert_no_python_phase_boundary(_write_prepared_simple_delta)
     source = inspect.getsource(_write_prepared_simple_delta)
     assert source.strip().endswith(")")
