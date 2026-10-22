@@ -571,6 +571,9 @@ jobs:
       - name: Run OSV-Scanner
         id: osv-scan
         if: needs['classify-changes'].outputs['security'] == 'required'
+        # OSV findings are evaluated by the explicit policy gate below.
+        # Keep the scan result file available so documented residuals do not
+        # skip the gate and required-step assertion.
         continue-on-error: true
         uses: google/osv-scanner-action/osv-scanner-action@a345acffa64b0eaede81a3d9aae6141214d9c8fc # v2.6.0
         with:
@@ -707,7 +710,11 @@ jobs:
           flat = {}
           for key, value in raw.items():
               if isinstance(value, dict):
-                  flat[key] = str(value.get("outcome") or value.get("conclusion") or "")
+                  # OSV findings are allowed to make the scan step return 1;
+                  # the following osv-gate determines whether they are allowed.
+                  result_key = "conclusion" if key == "osv-scan" else "outcome"
+                  result = value.get(result_key) or value.get("outcome") or value.get("conclusion") or ""
+                  flat[key] = str(result)
               else:
                   flat[key] = str(value)
           Path("reports/quality/lane-step-outcomes.json").write_text(

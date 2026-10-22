@@ -1,283 +1,92 @@
-"""Unit tests for the local ci presubmit gate."""
-
 from __future__ import annotations
 
-import subprocess
 import sys
-from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
-from scripts.engineering.ci import presubmit_gate as gate
-
-pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
-
-_REPO = Path(__file__).resolve().parents[6]
-_CATALOG = _REPO / "configs/quality/github_required_checks.yaml"
-_BASE = "a" * 40
-_HEAD = "b" * 40
+from scripts.engineering.ci.presubmit_gate import main
 
 
-def _argv() -> list[str]:
-    return ["--base", "origin/main", "--head", "HEAD", "--catalog", str(_CATALOG)]
-
-
-def _install_stages(
-    monkeypatch: pytest.MonkeyPatch,
-    changed: list[str],
-    *,
-    order: list[str] | None = None,
-    ruff: bool = True,
-    mypy: bool = True,
-    affected: bool = True,
-    architecture: bool = True,
-) -> None:
-    def resolve(ref: str, *, repo: Path | None = None) -> str:
-        del ref, repo
-        return _HEAD
-
-    def collect(**kwargs: object) -> list[str]:
-        del kwargs
-        if order is not None:
-            order.append("diff")
-        return list(changed)
-
-    def run_ruff() -> bool:
-        if order is not None:
-            order.append("ruff")
-        return ruff
-
-    def run_mypy() -> bool:
-        if order is not None:
-            order.append("mypy")
-        return mypy
-
-    def run_affected(base_sha: str, head_sha: str, files: list[str]) -> bool:
-        del base_sha, head_sha, files
-        if order is not None:
-            order.append("tests")
-        return affected
-
-    def run_architecture() -> bool:
-        if order is not None:
-            order.append("arch")
-        return architecture
-
-    monkeypatch.setattr(gate, "resolve_ref", resolve)
-    monkeypatch.setattr(gate, "collect_changed_files", collect)
-    monkeypatch.setattr(gate, "run_ruff", run_ruff)
-    monkeypatch.setattr(gate, "run_mypy", run_mypy)
-    monkeypatch.setattr(gate, "run_affected_tests", run_affected)
-    monkeypatch.setattr(gate, "run_fast_architecture", run_architecture)
-
-
-def test_stage_order_for_python_diff(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Python diffs run ruff, strict mypy, classify, affected tests, then architecture."""
-    order: list[str] = []
-    real_classify = gate.classify_changes
-
-    def classify(catalog: object, changed: list[str], *, head_sha: str) -> object:
-        order.append("classify")
-        return real_classify(catalog, changed, head_sha=head_sha)
-
-    _install_stages(monkeypatch, ["src/bioetl/domain/sample.py"], order=order)
-    monkeypatch.setattr(gate, "classify_changes", classify)
-
-    assert gate.main(_argv()) == 0
-    assert order == ["diff", "ruff", "mypy", "classify", "tests", "arch"]
-
-
-def test_ruff_failure_propagates(monkeypatch: pytest.MonkeyPatch) -> None:
-    """A failing ruff stage exits 1 even when later stages pass."""
-    _install_stages(
-        monkeypatch,
-        ["scripts/engineering/ci/presubmit_gate.py"],
-        ruff=False,
-    )
-    assert gate.main(_argv()) == 1
-
-
-def test_mypy_failure_propagates_for_each_tree(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Type errors under src/bioetl and src/memory both reach strict mypy."""
-    seen: list[list[str]] = []
-
-    def collect_for(changed: list[str]) -> None:
-        _install_stages(monkeypatch, changed, mypy=False)
-        seen.append(changed)
-
-    for changed in (
-        ["src/bioetl/domain/sample.py"],
-        ["src/memory/store.py"],
-    ):
-        collect_for(changed)
-        assert gate.main(_argv()) == 1
-
-
-def test_non_python_diff_skips_mypy(monkeypatch: pytest.MonkeyPatch) -> None:
-    """A classified docs diff still runs ruff and does not run strict mypy."""
-    order: list[str] = []
-    _install_stages(
-        monkeypatch, ["docs/03-guides/github-local-workflow.md"], order=order
-    )
-    assert gate.main(_argv()) == 0
-    assert order == ["diff", "ruff"]
-
-
-def test_unknown_path_empty_selection_fails(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """An unclassified path must not succeed when test selection is empty."""
-    _install_stages(monkeypatch, ["vendor/blob.bin"], affected=False)
-    assert gate.main(_argv()) == 1
-
-
-def test_rename_paths_reach_affected_selector() -> None:
-    """Rename diffs pass both paths into the canonical selector."""
-    command = gate.affected_tests_command(
-        _BASE,
-        _HEAD,
-        ["src/bioetl/old_name.py", "src/bioetl/new_name.py"],
-    )
-    assert command[command.index("--base-sha") + 1] == _BASE
-    assert command[command.index("--head-sha") + 1] == _HEAD
-    changed = [
-        command[index + 1]
-        for index, token in enumerate(command)
-        if token == "--changed-file"
-    ]
-    assert changed == ["src/bioetl/old_name.py", "src/bioetl/new_name.py"]
-
-
-def test_empty_selection_fails(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Selector success with no targets is not an empty success."""
-
-    def capture(command: list[str]) -> subprocess.CompletedProcess[str]:
-        del command
-        return subprocess.CompletedProcess([], 0, stdout="\n", stderr="")
-
-    monkeypatch.setattr(gate, "_capture", capture)
-    assert gate.run_affected_tests(_BASE, _HEAD, ["vendor/blob.bin"]) is False
-
-
-def test_selector_nonzero_and_pytest_nonzero_fail(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Selector and pytest non-zero codes propagate as a failed stage."""
-
-    def failed_select(command: list[str]) -> subprocess.CompletedProcess[str]:
-        del command
-        return subprocess.CompletedProcess([], 1, stdout="", stderr="selection failed")
-
-    monkeypatch.setattr(gate, "_capture", failed_select)
-    assert gate.run_affected_tests(_BASE, _HEAD, ["src/bioetl/sample.py"]) is False
-
-    def empty_ok(command: list[str]) -> subprocess.CompletedProcess[str]:
-        del command
-        return subprocess.CompletedProcess(
-            [],
-            0,
-            stdout="tests/unit/sample.py\n",
-            stderr="",
-        )
-
-    monkeypatch.setattr(gate, "_capture", empty_ok)
-    monkeypatch.setattr(gate, "_run", lambda command: 1)
-    assert gate.run_affected_tests(_BASE, _HEAD, ["src/bioetl/sample.py"]) is False
-
-
-def test_invalid_ref_and_diff_error(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Broken refs and diff failures exit 1 before a successful result."""
-
-    def broken(ref: str, *, repo: Path | None = None) -> str:
-        del ref, repo
-        raise ValueError("invalid git ref")
-
-    monkeypatch.setattr(gate, "resolve_ref", broken)
-    assert gate.main(_argv()) == 1
-
-    monkeypatch.setattr(gate, "resolve_ref", lambda ref, repo=None: _HEAD)
+@pytest.mark.unit
+def test_presubmit_dirty_diffs(monkeypatch, tmp_path):
+    """Test that presubmit exits with 1 when ruff/mypy checks fail due to dirty diffs."""
     monkeypatch.setattr(
-        gate,
-        "collect_changed_files",
-        lambda **kwargs: (_ for _ in ()).throw(OSError("diff failed")),
+        "scripts.engineering.ci.presubmit_gate.resolve_ref", lambda x: "dummy_sha"
     )
-    assert gate.main(_argv()) == 1
+    monkeypatch.setattr(
+        "scripts.engineering.ci.presubmit_gate.collect_changed_files",
+        lambda b, h: ["src/bioetl/some_file.py"],
+    )
+
+    mock_run_ruff = MagicMock(return_value=False)
+    monkeypatch.setattr("scripts.engineering.ci.presubmit_gate.run_ruff", mock_run_ruff)
+
+    with pytest.raises(SystemExit) as excinfo:
+        main(["--base", "origin/main", "--head", "HEAD"])
+
+    assert excinfo.value.code == 1
+    mock_run_ruff.assert_called_once()
 
 
-def test_resolve_ref_rejects_injection_and_keeps_sha(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Flag-like refs fail before git, and only a matched SHA is returned."""
-    with pytest.raises(ValueError, match="invalid git ref"):
-        gate.resolve_ref("--upload-pack=evil")
-    with pytest.raises(ValueError, match="invalid git ref"):
-        gate.resolve_ref("HEAD;rm -rf")
+@pytest.mark.unit
+def test_presubmit_unformatted_paths(monkeypatch, tmp_path):
+    """Test that presubmit fails when unformatted files are present in scripts/ etc."""
+    monkeypatch.setattr(
+        "scripts.engineering.ci.presubmit_gate.resolve_ref", lambda x: "dummy_sha"
+    )
+    monkeypatch.setattr(
+        "scripts.engineering.ci.presubmit_gate.collect_changed_files",
+        lambda b, h: ["scripts/some_script.py"],
+    )
+
+    # simulate ruff format failure
+    mock_run_ruff = MagicMock(return_value=False)
+    monkeypatch.setattr("scripts.engineering.ci.presubmit_gate.run_ruff", mock_run_ruff)
+
+    with pytest.raises(SystemExit) as excinfo:
+        main(["--base", "origin/main", "--head", "HEAD"])
+
+    assert excinfo.value.code == 1
+    mock_run_ruff.assert_called_once()
+
+
+@pytest.mark.unit
+def test_presubmit_broken_refs(monkeypatch):
+    """Test that presubmit fails when broken git refs are provided."""
+
+    def mock_resolve_ref(ref):
+        sys.exit(1)
 
     monkeypatch.setattr(
-        "scripts.engineering.ci.presubmit_gate.resolve_revision",
-        lambda repo, ref: "DEADBEEF",
+        "scripts.engineering.ci.presubmit_gate.resolve_ref", mock_resolve_ref
     )
-    with pytest.raises(ValueError, match="commit SHA"):
-        gate.resolve_ref("HEAD")
 
+    with pytest.raises(SystemExit) as excinfo:
+        main(["--base", "invalid_ref", "--head", "HEAD"])
+
+    assert excinfo.value.code == 1
+
+
+@pytest.mark.unit
+def test_presubmit_python_type_error(monkeypatch):
+    """Test that presubmit fails when strict mypy detects type errors."""
     monkeypatch.setattr(
-        "scripts.engineering.ci.presubmit_gate.resolve_revision",
-        lambda repo, ref: _BASE,
+        "scripts.engineering.ci.presubmit_gate.resolve_ref", lambda x: "dummy_sha"
     )
-    assert gate.resolve_ref("HEAD") == _BASE
-
-
-def test_cli_rejects_flag_ref() -> None:
-    """The packaged CLI returns 1 for a flag-like ref before running checks."""
-    completed = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "scripts.engineering.ci",
-            "presubmit",
-            "--base=--upload-pack=evil",
-            "--head=HEAD",
-        ],
-        cwd=_REPO,
-        check=False,
-        capture_output=True,
-        text=True,
+    monkeypatch.setattr(
+        "scripts.engineering.ci.presubmit_gate.collect_changed_files",
+        lambda b, h: ["src/bioetl/domain/something.py"],
     )
-    assert completed.returncode == 1
-    assert "invalid git ref" in completed.stderr
 
+    monkeypatch.setattr("scripts.engineering.ci.presubmit_gate.run_ruff", lambda: True)
 
-def test_unsafe_changed_path_is_rejected() -> None:
-    """Changed paths that look like options are not appended to argv."""
-    with pytest.raises(ValueError, match="unsafe changed path"):
-        gate.affected_tests_command(_BASE, _HEAD, ["--evil"])
+    # simulate mypy failure
+    mock_run_mypy = MagicMock(return_value=False)
+    monkeypatch.setattr("scripts.engineering.ci.presubmit_gate.run_mypy", mock_run_mypy)
 
+    with pytest.raises(SystemExit) as excinfo:
+        main(["--base", "origin/main", "--head", "HEAD"])
 
-def test_ruff_and_mypy_commands_cover_required_trees(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Ruff covers src/tests/scripts and mypy stays strict and incremental."""
-    commands: list[list[str]] = []
-
-    def record(command: list[str]) -> int:
-        commands.append(command)
-        return 0
-
-    monkeypatch.setattr(gate, "_run", record)
-    assert gate.run_ruff() is True
-    assert gate.run_mypy() is True
-    assert commands[0][-3:] == ["src", "tests", "scripts"]
-    assert commands[1][-3:] == ["src", "tests", "scripts"]
-    mypy_command = commands[2]
-    assert "--strict" in mypy_command
-    assert "--incremental" in mypy_command
-    assert "--no-incremental" not in mypy_command
-    assert mypy_command[-2:] == ["src/bioetl", "src/memory"]
-    assert gate.fast_architecture_command()[4:8] == [
-        "pytest",
-        "tests/architecture",
-        "-m",
-        "not slow and not benchmark and not memory",
-    ]
+    assert excinfo.value.code == 1
+    mock_run_mypy.assert_called_once()

@@ -7,7 +7,6 @@ Usage:
 
 Commands:
     run-tests       Run pytest with resilient retry logic
-    presubmit       Local Ruff, mypy, affected-test, and architecture gate
     quality-gate    Integral quality gate for CI
     architecture-junit-skips  Fail closed on empty/skipped architecture JUnit
     pr-gate         Classify and aggregate required PR checks

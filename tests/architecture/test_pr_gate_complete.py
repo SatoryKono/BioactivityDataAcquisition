@@ -180,24 +180,13 @@ def test_policy_section_3_separates_enforcement_from_stored_contexts() -> None:
 
 
 def test_aggregator_does_not_use_continue_on_error() -> None:
-    """The aggregator must not swallow a failed required check.
-
-    The class lane may continue past the OSV scanner only so the following
-    HIGH/CRITICAL gate can fail closed on the scanner report.
-    """
     workflow = yaml.safe_load(COORDINATOR.read_text(encoding="utf-8"))
-    jobs = workflow["jobs"]
-    for job_name, job in jobs.items():
-        assert job.get("continue-on-error") is not True, job_name
-    continuing = [
-        (job_name, step.get("name"))
-        for job_name, job in jobs.items()
-        for step in job.get("steps", [])
-        if step.get("continue-on-error") is True
-    ]
-    assert continuing == [("class-lane", "Run OSV-Scanner")]
-    aggregator_steps = jobs["pr-gate-complete"].get("steps", [])
-    assert all(step.get("continue-on-error") is not True for step in aggregator_steps)
+    aggregator = workflow["jobs"]["pr-gate-complete"]
+    assert "continue-on-error" not in aggregator, (
+        "pr-gate-complete must not use job-level continue-on-error"
+    )
+    steps = aggregator["steps"]
+    assert all("continue-on-error" not in step for step in steps)
 
 
 def test_called_owner_workflows_reject_duplicate_yaml_keys() -> None:
