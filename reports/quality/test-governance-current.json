@@ -1182,13 +1182,11 @@
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 73,
+    "marked_test_files": 74,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
     "test_files": 74,
-    "unmarked_test_files": [
-      "tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py"
-    ]
+    "unmarked_test_files": []
   },
   "report": {
     "assertion_branch_reachability": {
@@ -2034,13 +2032,11 @@
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 73,
+      "marked_test_files": 74,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
       "test_files": 74,
-      "unmarked_test_files": [
-        "tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py"
-      ]
+      "unmarked_test_files": []
     },
     "root": ".",
     "test_file_inventory": {
@@ -2091,12 +2087,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3169,
-    "total_test_functions": 31235,
+    "total_test_functions": 31249,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "cae2a31cbed35ff41adead53e6fa66b434b02b35f557029109ecb50d00a7bf21",
+  "source_tree_sha256": "ff63f0d7bbd42bbbc4976564f688c66edd3f858ed434edd76e09a7579dd05338",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2159,7 +2155,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3169,
-  "total_test_functions": 31235,
+  "total_test_functions": 31249,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
