@@ -32,6 +32,7 @@ from scripts.engineering.common.repo_paths import (
     ensure_path_within_root,
     rebuild_confined_path,
     resolve_cli_path,
+    write_bytes_confined,
 )
 from scripts.engineering.repo.github_settings_review import (
     GitHubReviewError,
@@ -588,7 +589,7 @@ def _atomic_create(path: Path, payload: bytes, *, root: Path) -> None:
     if safe.exists():
         raise ArchiveError(f"refusing to overwrite {safe}")
     temporary = rebuild_confined_path(safe.with_suffix(safe.suffix + ".tmp"), root=root)
-    temporary.write_bytes(payload)
+    write_bytes_confined(temporary, payload, root=root)
     try:
         os.replace(temporary, safe)
     except OSError:
