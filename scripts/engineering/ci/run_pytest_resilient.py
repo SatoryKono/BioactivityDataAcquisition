@@ -147,6 +147,19 @@ def _read_supervised_log(reports_dir: Path, relative: str) -> str:
         return ""
 
 
+_PARENT_XDIST_ENV = (
+    "PYTEST_XDIST_WORKER",
+    "PYTEST_XDIST_WORKER_COUNT",
+    "PYTEST_XDIST_TESTRUNUID",
+)
+
+
+def _drop_parent_xdist(env: dict[str, str]) -> None:
+    """A fresh pytest must not look like a worker of the parent xdist session."""
+    for key in _PARENT_XDIST_ENV:
+        env.pop(key, None)
+
+
 def _journal_child_env(
     pass_name: str,
     invocation_id: str,
@@ -158,6 +171,7 @@ def _journal_child_env(
     from scripts.engineering.ci.pytest_event_journal import ensure_redaction_key
 
     child_env = (os.environ if base_env is None else base_env).copy()
+    _drop_parent_xdist(child_env)
     child_env["BIOETL_JOURNAL_REDACTION_KEY"] = ensure_redaction_key()
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = invocation_id
     child_env["BIOETL_JOURNAL_PASS"] = pass_name
@@ -178,6 +192,7 @@ def _journal_child_env(
 def _child_env() -> dict[str, str]:
     """Give the pytest child the repo root without dropping PYTHONPATH."""
     env = os.environ.copy()
+    _drop_parent_xdist(env)
     root = str(_REPO_ROOT)
     inherited = [part for part in env.get("PYTHONPATH", "").split(os.pathsep) if part]
     if root not in inherited:
