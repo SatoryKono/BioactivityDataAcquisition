@@ -1,197 +1,387 @@
-From a354d90ff750165213687c99c08553b5a3a82174 Mon Sep 17 00:00:00 2001
+From 1abe6cf814bca8bb08fb6277d96a337445537559 Mon Sep 17 00:00:00 2001
 From: "google-labs-jules[bot]"
  <161369871+google-labs-jules[bot]@users.noreply.github.com>
-Date: Fri, 23 Oct 2026 02:31:54 +0000
-Subject: [PATCH] =?UTF-8?q?=E2=9A=A1=20Bolt:=20=D0=92=D1=81=D1=82=D1=80?=
- =?UTF-8?q?=D0=B0=D0=B8=D0=B2=D0=B0=D0=BD=D0=B8=D0=B5=20=D0=BE=D1=87=D0=B8?=
- =?UTF-8?q?=D1=81=D1=82=D0=BA=D0=B8=20=D1=81=D1=82=D1=80=D0=BE=D0=BA=20?=
- =?UTF-8?q?=D0=B2=20=D0=BF=D1=80=D0=B0=D0=B2=D0=B8=D0=BB=D0=B0=20=D0=BD?=
- =?UTF-8?q?=D0=BE=D1=80=D0=BC=D0=B0=D0=BB=D0=B8=D0=B7=D0=B0=D1=86=D0=B8?=
- =?UTF-8?q?=D0=B8?=
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Date: Fri, 23 Oct 2026 03:58:40 +0000
+Subject: [PATCH] chore: deprecate CI fixes utilities (#12365)
 
 ---
- src/bioetl/domain/normalization/rules.py | 102 +++++++++--------------
- 1 file changed, 41 insertions(+), 61 deletions(-)
+ .../quality/scripts_inventory_manifest.json    | 18 +++++++++---------
+ .../quality/scripts_lifecycle_registry.json    |  4 ++--
+ docs/05-engineering/test-telemetry-baseline.md |  2 +-
+ ...architecture-debt-remote-main-baseline.json | 16 ++++++++--------
+ reports/quality/config-surface-backlog.json    |  2 +-
+ .../quality/flaky-test-burndown-review.json    |  4 ++--
+ reports/quality/live-residual-snapshot.json    |  2 +-
+ reports/quality/scripts_deprecation_backlog.md |  4 ++--
+ .../tech-debt-issues-6159-6169-closeout.json   |  4 ++--
+ reports/quality/test-governance-current.json   |  2 +-
+ scripts/engineering/ci/README.md               |  3 ---
+ scripts/engineering/ci/__main__.py             |  2 --
+ .../apply-ci-optimizations-fixed.ps1           |  0
+ .../apply-ci-optimizations.ps1                 |  0
+ .../ci_optimizations}/apply_ci_fixes.py        |  0
+ .../test_docker_runtime_contracts.py           |  2 +-
+ ...test_tech_debt_issues_6159_6169_closeout.py |  4 ++--
+ 17 files changed, 32 insertions(+), 37 deletions(-)
+ rename scripts/{engineering/ci => migrations/archive/ci_optimizations}/apply-ci-optimizations-fixed.ps1 (100%)
+ rename scripts/{engineering/ci => migrations/archive/ci_optimizations}/apply-ci-optimizations.ps1 (100%)
+ rename scripts/{engineering/ci => migrations/archive/ci_optimizations}/apply_ci_fixes.py (100%)
 
-diff --git a/src/bioetl/domain/normalization/rules.py b/src/bioetl/domain/normalization/rules.py
-index 2df90a632..e4c9ac99f 100644
---- a/src/bioetl/domain/normalization/rules.py
-+++ b/src/bioetl/domain/normalization/rules.py
-@@ -11,7 +11,6 @@ from bioetl.domain.normalization._chembl_units import (
- from bioetl.domain.normalization._chembl_units import (
-     normalize_standard_unit as normalize_chembl_standard_unit,
- )
--from bioetl.domain.normalization.text import normalize_string
+diff --git a/configs/quality/scripts_inventory_manifest.json b/configs/quality/scripts_inventory_manifest.json
+index 50f7c67f9a..750189adfb 100644
+--- a/configs/quality/scripts_inventory_manifest.json
++++ b/configs/quality/scripts_inventory_manifest.json
+@@ -9960,7 +9960,7 @@
+       "next_step": "Retain as the shared GitHub Actions attempt collector imported by the Docker and PR-gate timing reports. It has no standalone command surface; keep it supporting so active_script_count_max does not grow."
+     },
+     {
+-      "path": "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1",
++      "path": "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1",
+       "type": "ps1",
+       "status": "supporting",
+       "agent_usage": [],
+@@ -9970,13 +9970,13 @@
+           "path": "scripts/engineering/ci/README.md",
+           "line": 59,
+           "source_group": "scripts",
+-          "text": "| `scripts/engineering/ci/apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization                                              |"
++          "text": "| `scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization                                              |"
+         },
+         {
+           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
+           "line": 363,
+           "source_group": "tests",
+-          "text": "\"scripts/engineering/ci/apply-ci-optimizations-fixed.ps1\": ("
++          "text": "\"scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1\": ("
+         }
+       ],
+       "owner": "@bioetl-platform",
+@@ -9985,7 +9985,7 @@
+       "next_step": "Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow."
+     },
+     {
+-      "path": "scripts/engineering/ci/apply-ci-optimizations.ps1",
++      "path": "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1",
+       "type": "ps1",
+       "status": "supporting",
+       "agent_usage": [],
+@@ -9995,13 +9995,13 @@
+           "path": "scripts/engineering/ci/README.md",
+           "line": 58,
+           "source_group": "scripts",
+-          "text": "| `scripts/engineering/ci/apply-ci-optimizations.ps1`       | PowerShell CI optimization script                                             |"
++          "text": "| `scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1`       | PowerShell CI optimization script                                             |"
+         },
+         {
+           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
+           "line": 366,
+           "source_group": "tests",
+-          "text": "\"scripts/engineering/ci/apply-ci-optimizations.ps1\": (\"legacy_manual_utility\"),"
++          "text": "\"scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1\": (\"legacy_manual_utility\"),"
+         }
+       ],
+       "owner": "@bioetl-platform",
+@@ -10010,7 +10010,7 @@
+       "next_step": "Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow."
+     },
+     {
+-      "path": "scripts/engineering/ci/apply_ci_fixes.py",
++      "path": "scripts/migrations/archive/ci_optimizations/apply_ci_fixes.py",
+       "type": "py",
+       "status": "active",
+       "agent_usage": [],
+@@ -10020,7 +10020,7 @@
+           "path": "scripts/engineering/ci/README.md",
+           "line": 32,
+           "source_group": "scripts",
+-          "text": "| `apply-ci-fixes` | `scripts/engineering/ci/apply_ci_fixes.py`             | One-off GitHub-hosted workflow repair helper requiring explicit token input |"
++          "text": "| `apply-ci-fixes` | `scripts/migrations/archive/ci_optimizations/apply_ci_fixes.py`             | One-off GitHub-hosted workflow repair helper requiring explicit token input |"
+         },
+         {
+           "path": "scripts/engineering/ci/__main__.py",
+@@ -10032,7 +10032,7 @@
+           "path": "tests/architecture/test_docker_runtime_contracts.py",
+           "line": 1028,
+           "source_group": "tests",
+-          "text": "helper = (ROOT / \"scripts/engineering/ci/apply_ci_fixes.py\").read_text("
++          "text": "helper = (ROOT / \"scripts/migrations/archive/ci_optimizations/apply_ci_fixes.py\").read_text("
+         }
+       ]
+     },
+diff --git a/configs/quality/scripts_lifecycle_registry.json b/configs/quality/scripts_lifecycle_registry.json
+index b5181c7cc0..5eb4f19519 100644
+--- a/configs/quality/scripts_lifecycle_registry.json
++++ b/configs/quality/scripts_lifecycle_registry.json
+@@ -769,13 +769,13 @@
+       "owner": "@bioetl-platform",
+       "review_by": "2026-10-31"
+     },
+-    "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1": {
++    "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1": {
+       "decision": "legacy_manual_utility",
+       "next_step": "Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow.",
+       "owner": "@bioetl-platform",
+       "review_by": "2026-09-30"
+     },
+-    "scripts/engineering/ci/apply-ci-optimizations.ps1": {
++    "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1": {
+       "decision": "legacy_manual_utility",
+       "next_step": "Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow.",
+       "owner": "@bioetl-platform",
+diff --git a/docs/05-engineering/test-telemetry-baseline.md b/docs/05-engineering/test-telemetry-baseline.md
+index b9ba06d844..c84e928a70 100644
+--- a/docs/05-engineering/test-telemetry-baseline.md
++++ b/docs/05-engineering/test-telemetry-baseline.md
+@@ -32,7 +32,7 @@ trend evidence only.
+ - Source run id: `local-pr12231-local-coverage-8a4286d`
+ - Source event: `local_coverage_verify`
+ - Source run URL: `pending`
+-- Source tree sha256: `9e2a30a9d35076d3bb03511796393aa1274b5082bd77de5fb21dbae7fd9c67b0`
++- Source tree sha256: `80024e1ca68747b7797ca5a296d849a39f1c847e8bef3893942c1efcd73b24a1`
+ - Refresh status: `captured`
+ - Refreshed at (UTC): `2026-10-15T18:50:07.879352+00:00`
 
- __all__ = [
-     "BINARY_FLAG_MAPPING",
-@@ -128,8 +127,9 @@ OPERATOR_MAPPING: dict[str, str] = {
+diff --git a/reports/quality/architecture-debt-remote-main-baseline.json b/reports/quality/architecture-debt-remote-main-baseline.json
+index c844b5f413..c7063cf231 100644
+--- a/reports/quality/architecture-debt-remote-main-baseline.json
++++ b/reports/quality/architecture-debt-remote-main-baseline.json
+@@ -6,7 +6,7 @@
+       "path": "reports/quality/architecture-quality-scorecard.json",
+       "required": true,
+       "required_on_remote": true,
+-      "source_revision": "eae239aa9b68137c606569df15a581c08bbf4f70",
++      "source_revision": "59d4aab769c0d7047b54c9206d15ed50e236f768",
+       "summary": {
+         "available": true,
+         "integral_score": 10.0,
+@@ -20,7 +20,7 @@
+       "path": "reports/quality/module-coverage-inventory.json",
+       "required": true,
+       "required_on_remote": true,
+-      "source_revision": "eae239aa9b68137c606569df15a581c08bbf4f70",
++      "source_revision": "59d4aab769c0d7047b54c9206d15ed50e236f768",
+       "summary": {
+         "available": true,
+         "coverage_xml_sha256": "e004119066477ae9ee490d667644da12496fde6d6b4e5b2ba73c424efb99f7b9",
+@@ -37,7 +37,7 @@
+       "path": "reports/quality/compatibility-importer-census.json",
+       "required": true,
+       "required_on_remote": true,
+-      "source_revision": "eae239aa9b68137c606569df15a581c08bbf4f70",
++      "source_revision": "59d4aab769c0d7047b54c9206d15ed50e236f768",
+       "summary": {
+         "available": true,
+         "retained_entrypoint_count": 12,
+@@ -50,7 +50,7 @@
+       "path": "reports/quality/dead-code-inventory.json",
+       "required": true,
+       "required_on_remote": true,
+-      "source_revision": "eae239aa9b68137c606569df15a581c08bbf4f70",
++      "source_revision": "59d4aab769c0d7047b54c9206d15ed50e236f768",
+       "summary": {
+         "available": true,
+         "repo_wide_untriaged_zero_import_candidate_count": 0,
+@@ -63,7 +63,7 @@
+       "path": "reports/quality/contract-registry-diagnostics.json",
+       "required": true,
+       "required_on_remote": true,
+-      "source_revision": "eae239aa9b68137c606569df15a581c08bbf4f70",
++      "source_revision": "59d4aab769c0d7047b54c9206d15ed50e236f768",
+       "summary": {
+         "available": true,
+         "blocking_issue_count": 0,
+@@ -76,7 +76,7 @@
+       "path": "reports/observability/runtime_cardinality_inventory.json",
+       "required": false,
+       "required_on_remote": false,
+-      "source_revision": "eae239aa9b68137c606569df15a581c08bbf4f70",
++      "source_revision": "59d4aab769c0d7047b54c9206d15ed50e236f768",
+       "summary": {
+         "available": true
+       }
+@@ -102,9 +102,9 @@
+   ],
+   "local_tracking_ref": "origin/main",
+   "local_tracking_ref_matches_remote": true,
+-  "local_tracking_ref_sha": "eae239aa9b68137c606569df15a581c08bbf4f70",
++  "local_tracking_ref_sha": "59d4aab769c0d7047b54c9206d15ed50e236f768",
+   "remote": "origin",
+   "remote_main_ref": "refs/heads/main",
+-  "remote_main_sha": "eae239aa9b68137c606569df15a581c08bbf4f70",
++  "remote_main_sha": "59d4aab769c0d7047b54c9206d15ed50e236f768",
+   "schema_version": 1
+ }
+diff --git a/reports/quality/config-surface-backlog.json b/reports/quality/config-surface-backlog.json
+index 7663aaa504..731e99e444 100644
+--- a/reports/quality/config-surface-backlog.json
++++ b/reports/quality/config-surface-backlog.json
+@@ -261,5 +261,5 @@
+     "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
+     "Residual entity drift is limited to intentional entity-specific filters, metadata policy blocks, schema field-alias surfaces, and pipeline overrides."
+   ],
+-  "snapshot_date": "2026-10-22"
++  "snapshot_date": "2026-10-23"
+ }
+diff --git a/reports/quality/flaky-test-burndown-review.json b/reports/quality/flaky-test-burndown-review.json
+index b52ed4bfc4..05bb86070f 100644
+--- a/reports/quality/flaky-test-burndown-review.json
++++ b/reports/quality/flaky-test-burndown-review.json
+@@ -41,7 +41,7 @@
+   ],
+   "source_fingerprints": {
+     "curated_inventory_sha256": "0d698b73cd22ee00bb4afbb96cb166c3f7c7a6da809fe5e05931b3f3dc3dad04",
+-    "test_governance_source_tree_sha256": "c465befe8cd088f18a20d6b2d64d81627adaceef5caa93c86ccf533157725225"
++    "test_governance_source_tree_sha256": "51ab6764d0ebfb4098b5dd177d40e31206e7e97103a2e45b172b0bdfae4992bc"
+   },
+   "summary": {
+     "by_alert_level": {
+@@ -75,7 +75,7 @@
+       "quarantined": 0
+     },
+     "test_governance_budget_violation_count": 0,
+-    "test_governance_source_tree_sha256": "c465befe8cd088f18a20d6b2d64d81627adaceef5caa93c86ccf533157725225",
++    "test_governance_source_tree_sha256": "51ab6764d0ebfb4098b5dd177d40e31206e7e97103a2e45b172b0bdfae4992bc",
+     "total_flaky": 0,
+     "total_test_files": 3170,
+     "total_tests_analyzed": 31281
+diff --git a/reports/quality/live-residual-snapshot.json b/reports/quality/live-residual-snapshot.json
+index 1a4a448a90..fa4dded13d 100644
+--- a/reports/quality/live-residual-snapshot.json
++++ b/reports/quality/live-residual-snapshot.json
+@@ -3,7 +3,7 @@
+   "linked_issue": "#6891",
+   "follow_up_issue": "#7464",
+   "parent_epic": "#6890",
+-  "snapshot_date": "2026-10-22",
++  "snapshot_date": "2026-10-23",
+   "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
+   "policy": {
+     "direction": "shrink_only",
+diff --git a/reports/quality/scripts_deprecation_backlog.md b/reports/quality/scripts_deprecation_backlog.md
+index dba14b7cb6..9cbfaa12e5 100644
+--- a/reports/quality/scripts_deprecation_backlog.md
++++ b/reports/quality/scripts_deprecation_backlog.md
+@@ -149,8 +149,8 @@ Auto-generated from `scripts/check_scripts_inventory.py`.
+ | `scripts/engineering/ci/_compatibility_telemetry.py` | `py` | 8 | @bioetl-platform | `shared_helper_module` | Retain as the internal compatibility telemetry library imported by governed CI reports; keep it supporting because it has no standalone command surface. |
+ | `scripts/engineering/ci/_python_dependency_changes.py` | `py` | 2 | @bioetl-platform | `shared_helper_module` | Retain as the private diff/ownership analysis backend of pr_lane_results.py; it has no standalone runner or public CLI. All test execution stays with the governed existing affected-tests lane. |
+ | `scripts/engineering/ci/actions_timing_common.py` | `py` | 2 | @bioetl-platform | `shared_helper_module` | Retain as the shared GitHub Actions attempt collector imported by the Docker and PR-gate timing reports. It has no standalone command surface; keep it supporting so active_script_count_max does not grow. |
+-| `scripts/engineering/ci/apply-ci-optimizations-fixed.ps1` | `ps1` | 2 | @bioetl-platform | `legacy_manual_utility` | Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow. |
+-| `scripts/engineering/ci/apply-ci-optimizations.ps1` | `ps1` | 2 | @bioetl-platform | `legacy_manual_utility` | Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow. |
++| `scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1` | `ps1` | 2 | @bioetl-platform | `legacy_manual_utility` | Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow. |
++| `scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1` | `ps1` | 2 | @bioetl-platform | `legacy_manual_utility` | Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow. |
+ | `scripts/engineering/ci/generated_artifact_checks.py` | `py` | 15 | @bioetl-platform | `shared_helper_module` | Retain as the internal CI scheduling/receipt adapter used by pr-required and nightly workflows. Its bounded CLI delegates to pytest and existing validators; it is not a new independent operator or validation entrypoint. Keep policy ownership with the test matrix and existing producer commands. |
+ | `scripts/engineering/ci/junit_duration_summary.py` | `py` | 10 | @bioetl-platform | `shared_helper_module` | Retain as the shared JUnit record-accounting backend imported by update_test_telemetry_baseline and invoked internally by the tests workflow. Its CLI has no operator inputs and only adapts CI environment/artifact paths; the owning tests workflow remains the public execution surface. |
+ | `scripts/engineering/ci/local_test_telemetry.py` | `py` | 7 | @bioetl-quality | `shared_helper_module` | Internal evidence-validation functions imported by the canonical telemetry updater and local coverage producer; no CLI, main, or direct invocation exists. Retain as supporting code and expose operations only through those existing entrypoints. |
+diff --git a/reports/quality/tech-debt-issues-6159-6169-closeout.json b/reports/quality/tech-debt-issues-6159-6169-closeout.json
+index 52e514459a..ef0cc1845d 100644
+--- a/reports/quality/tech-debt-issues-6159-6169-closeout.json
++++ b/reports/quality/tech-debt-issues-6159-6169-closeout.json
+@@ -66,8 +66,8 @@
+         "scripts/docs/matrix/export_structural_contract.py",
+         "scripts/docs/matrix/filter_rows.py",
+         "scripts/docs/matrix/generate_field_matrix.py",
+-        "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1",
+-        "scripts/engineering/ci/apply-ci-optimizations.ps1",
++        "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1",
++        "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1",
+         "scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh"
+       ],
+       "untriaged_zero_reference_supporting_script_count": 0,
+diff --git a/reports/quality/test-governance-current.json b/reports/quality/test-governance-current.json
+index 839ad14180..2a3f377909 100644
+--- a/reports/quality/test-governance-current.json
++++ b/reports/quality/test-governance-current.json
+@@ -2092,7 +2092,7 @@
+     "uuid4_call_sites": 0
+   },
+   "root": ".",
+-  "source_tree_sha256": "c465befe8cd088f18a20d6b2d64d81627adaceef5caa93c86ccf533157725225",
++  "source_tree_sha256": "51ab6764d0ebfb4098b5dd177d40e31206e7e97103a2e45b172b0bdfae4992bc",
+   "summary": {
+     "assertion_branch_reachability_percent": 100.0,
+     "assertless_total_candidates": 85,
+diff --git a/scripts/engineering/ci/README.md b/scripts/engineering/ci/README.md
+index 3be49c42af..aa83a6cc63 100644
+--- a/scripts/engineering/ci/README.md
++++ b/scripts/engineering/ci/README.md
+@@ -29,7 +29,6 @@ python -m scripts.engineering.ci <command> [args...]
+ | `docker-timing`  | `scripts/engineering/ci/report_docker_actions_timing.py` | Collect read-only Docker Actions timing and runner-capacity evidence      |
+ | `pr-gate-timing` | `scripts/engineering/ci/report_pr_gate_timing.py`        | Collect read-only PR Gate Complete wall-clock, queue, and owner-path evidence |
+ | `debt-report`    | `scripts/engineering/ci/report_quality_debt_weekly.py` | Generate weekly quality debt report                                         |
+-| `apply-ci-fixes` | `scripts/engineering/ci/apply_ci_fixes.py`             | One-off GitHub-hosted workflow repair helper requiring explicit token input |
 
- def _find_case_match(normalized: str, allowed_values: frozenset[str]) -> str | None:
-     """Find case-insensitive match in allowed values."""
-+    norm_upper = normalized.upper()
-     for allowed_value in allowed_values:
--        if normalized.upper() == allowed_value.upper():
-+        if norm_upper == allowed_value.upper():
-             # Return the allowed value's original case to preserve enum casing
-             return allowed_value
-     return None
-@@ -140,78 +140,62 @@ def normalize_case(
-     allowed_values: frozenset[str] | None = None,
- ) -> str | None:
-     """Normalize case for enum-like fields."""
--    if value is None or not isinstance(value, str):
-+    if not isinstance(value, str):
-         return None
--    normalized = normalize_string(value)
--    if normalized is None:
-+    stripped = value.strip()
-+    if not stripped:
-         return None
-     if allowed_values is not None:
--        return _find_case_match(normalized, allowed_values)
--    return normalized
-+        return _find_case_match(stripped, allowed_values)
-+    return stripped
+ ## When to Use
+
+@@ -55,8 +54,6 @@ Canonical taxonomy:
+
+ | File                                                      | Description                                                                   |
+ | --------------------------------------------------------- | ----------------------------------------------------------------------------- |
+-| `scripts/engineering/ci/apply-ci-optimizations.ps1`       | PowerShell CI optimization script                                             |
+-| `scripts/engineering/ci/apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization                                              |
+ | `scripts/engineering/ci/_compatibility_registry.py`       | Shared compatibility registry loader used by telemetry/reporting helpers      |
+ | `scripts/engineering/ci/_compatibility_telemetry.py`      | Compatibility inventory telemetry helper used by architecture reporting flows |
+ | `scripts/engineering/ci/pytest_abort_diagnostic_adapter.py` | Isolated abort supervisor used by `run_pytest_resilient.py`. Sidecar manifest only; it does not replace JUnit completeness. |
+diff --git a/scripts/engineering/ci/__main__.py b/scripts/engineering/ci/__main__.py
+index c3e34f70b0..a6e68d112d 100644
+--- a/scripts/engineering/ci/__main__.py
++++ b/scripts/engineering/ci/__main__.py
+@@ -20,7 +20,6 @@ Commands:
+     docker-timing   Report Docker workflow timing and capacity evidence
+     pr-gate-timing  Report PR Gate Complete timing and capacity evidence
+     debt-report     Generate weekly quality debt report
+-    apply-ci-fixes  Apply one-off hosted GitHub workflow fixes
+     publish-scorecard  Publish approved source-bound Scorecard SARIF
+     publish-docker  Publish the approved same-workflow scanned image
+ """
+@@ -49,7 +48,6 @@ COMMANDS = {
+     "docker-timing": "report_docker_actions_timing.py",
+     "pr-gate-timing": "report_pr_gate_timing.py",
+     "debt-report": "report_quality_debt_weekly.py",
+-    "apply-ci-fixes": "apply_ci_fixes.py",
+ }
+ COMMAND_SPECS = {name: python_command(script) for name, script in COMMANDS.items()}
+ COMMAND_SPECS.update(
+diff --git a/scripts/engineering/ci/apply-ci-optimizations-fixed.ps1 b/scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1
+similarity index 100%
+rename from scripts/engineering/ci/apply-ci-optimizations-fixed.ps1
+rename to scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1
+diff --git a/scripts/engineering/ci/apply-ci-optimizations.ps1 b/scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1
+similarity index 100%
+rename from scripts/engineering/ci/apply-ci-optimizations.ps1
+rename to scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1
+diff --git a/scripts/engineering/ci/apply_ci_fixes.py b/scripts/migrations/archive/ci_optimizations/apply_ci_fixes.py
+similarity index 100%
+rename from scripts/engineering/ci/apply_ci_fixes.py
+rename to scripts/migrations/archive/ci_optimizations/apply_ci_fixes.py
+diff --git a/tests/architecture/test_docker_runtime_contracts.py b/tests/architecture/test_docker_runtime_contracts.py
+index 425c47ed56..d3b9cbecaa 100644
+--- a/tests/architecture/test_docker_runtime_contracts.py
++++ b/tests/architecture/test_docker_runtime_contracts.py
+@@ -1025,7 +1025,7 @@ def test_retained_services_use_immutable_images_and_complete_envelopes() -> None
 
 
- def normalize_unit(
-     value: Any,  # Any: Generic input value from various sources
- ) -> str | None:
-     """Canonicalize unit strings to standard format."""
--    if value is None:
--        return None
-     if not isinstance(value, str):
-         return None
--    normalized = normalize_string(value)
--    if normalized is None:
-+    stripped = value.strip()
-+    if not stripped:
-         return None
--    chembl_standard_unit = normalize_chembl_standard_unit(normalized)
-+    chembl_standard_unit = normalize_chembl_standard_unit(stripped)
-     if chembl_standard_unit in CHEMBL_STANDARD_UNIT_CANONICALS:
-         return chembl_standard_unit
--    return UNIT_MAPPING.get(normalized, normalized)
--
--
--def _normalize_int_boolean(value: int) -> bool | None:
--    if value in {0, 1}:
--        return bool(value)
--    return None
--
--
--def _normalize_float_boolean(value: float) -> bool | None:
--    if value in {0.0, 1.0}:
--        return bool(int(value))
--    return None
--
--
--def _normalize_str_boolean(value: str) -> bool | None:
--    normalized = normalize_string(value)
--    if normalized is None:
--        return None
--    return BINARY_FLAG_MAPPING.get(normalized.lower())
--
--
--_BOOLEAN_NORMALIZERS = {
--    bool: lambda value: value,
--    int: _normalize_int_boolean,
--    float: _normalize_float_boolean,
--    str: _normalize_str_boolean,
--}
-+    return UNIT_MAPPING.get(stripped, stripped)
+ def test_retired_ci_helper_cannot_replace_canonical_docker_workflow() -> None:
+-    helper = (ROOT / "scripts/engineering/ci/apply_ci_fixes.py").read_text(
++    helper = (ROOT / "scripts/migrations/archive/ci_optimizations/apply_ci_fixes.py").read_text(
+         encoding="utf-8"
+     )
 
-
- def normalize_boolean(
-     value: Any,  # Any: Accepts various input types for boolean conversion
- ) -> bool | None:
-     """Coerce common source-system boolean encodings to canonical bool."""
--    if value is None:
--        return None
--    normalizer = _BOOLEAN_NORMALIZERS.get(type(value))
--    return normalizer(value) if normalizer is not None else None
-+    vt = type(value)
-+    if vt is bool:
-+        return value
-+    if vt is str:
-+        return BINARY_FLAG_MAPPING.get(value.strip().lower()) if value else None
-+    if vt is int:
-+        return bool(value) if value in (0, 1) else None
-+    if vt is float:
-+        return bool(int(value)) if value in (0.0, 1.0) else None
-+    return None
-
-
- def normalize_binary_flag(
-     value: Any,  # Any: Handles various input representations for binary flags
- ) -> int | None:
-     """Coerce common boolean-like values to the canonical 0/1 flag contract."""
--    normalized = normalize_boolean(value)
--    if normalized is None:
--        return None
--    return int(normalized)
-+    vt = type(value)
-+    if vt is bool:
-+        return int(value)
-+    if vt is int:
-+        return value if value in (0, 1) else None
-+    if vt is str:
-+        b = BINARY_FLAG_MAPPING.get(value.strip().lower()) if value else None
-+        return int(b) if b is not None else None
-+    if vt is float:
-+        return int(value) if value in (0.0, 1.0) else None
-+    return None
-
-
- def normalize_operator(
-@@ -221,10 +205,10 @@ def normalize_operator(
-     """Canonicalize comparison operators, including Unicode variants."""
-     if value is None:
-         return None
--    normalized = normalize_string(str(value))
--    if normalized is None:
-+    stripped = str(value).strip()
-+    if not stripped:
-         return None
--    operator = OPERATOR_MAPPING.get(normalized.lower(), normalized)
-+    operator = OPERATOR_MAPPING.get(stripped.lower(), stripped)
-     if allowed_values is not None and operator not in allowed_values:
-         return None
-     return operator
-@@ -234,14 +218,10 @@ def normalize_null(
-     value: Any,  # Any: Generic input value from various sources
- ) -> Any:  # Any: Generic return type to preserve original value type
-     """Convert pseudo-null values to proper None values."""
--    if value is None:
--        return None
-     if not isinstance(value, str):
-         return value
--    normalized = normalize_string(value)
--    if normalized is None:
--        return None
--    if normalized.upper() in _NULL_PATTERNS_UPPER:
-+    stripped = value.strip()
-+    if not stripped or stripped.upper() in _NULL_PATTERNS_UPPER:
-         return None
-     return value
-
-@@ -270,9 +250,9 @@ def normalize_cross_pipeline_case(
-     value: object, strategy: str = "uppercase"
- ) -> str | None:
-     """Normalize case using one consistent strategy across pipelines."""
--    if value is None or not isinstance(value, str):
-+    if not isinstance(value, str):
-         return None
--    normalized = normalize_string(value)
--    if normalized is None:
-+    stripped = value.strip()
-+    if not stripped:
-         return None
--    return _apply_case_strategy(normalized, strategy)
-+    return _apply_case_strategy(stripped, strategy)
+diff --git a/tests/architecture/test_tech_debt_issues_6159_6169_closeout.py b/tests/architecture/test_tech_debt_issues_6159_6169_closeout.py
+index fc66ecb09b..855adbf6c8 100644
+--- a/tests/architecture/test_tech_debt_issues_6159_6169_closeout.py
++++ b/tests/architecture/test_tech_debt_issues_6159_6169_closeout.py
+@@ -360,10 +360,10 @@ def test_issue_6169_script_governance_ratchet_has_headroom() -> None:
+         "scripts/docs/matrix/export_structural_contract.py": "compatibility_wrapper",
+         "scripts/docs/matrix/filter_rows.py": "compatibility_wrapper",
+         "scripts/docs/matrix/generate_field_matrix.py": "compatibility_wrapper",
+-        "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1": (
++        "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1": (
+             "legacy_manual_utility"
+         ),
+-        "scripts/engineering/ci/apply-ci-optimizations.ps1": ("legacy_manual_utility"),
++        "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1": ("legacy_manual_utility"),
+         "scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh": (
+             "legacy_manual_utility"
+         ),
 --
 2.53.0
