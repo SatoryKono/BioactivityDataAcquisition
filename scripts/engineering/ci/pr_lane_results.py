@@ -551,6 +551,27 @@ def _assert_command(args: argparse.Namespace) -> int:
     return 0
 
 
+def _changed_paths(changed_files: list[str]) -> list[str]:
+    """Return normalized non-empty paths from a diff."""
+    return [path for raw in changed_files if (path := raw.strip().replace("\\", "/"))]
+
+
+def _has_selection_route(path: str, root: Path) -> bool:
+    """Return whether one path has an explicit impact-selection route."""
+    if path in {"pyproject.toml", "uv.lock"}:
+        return True
+    if _mapped_targets(path):
+        return True
+    if path.startswith(TESTS_PREFIX) and path.endswith(".py"):
+        return True
+    if path.startswith("src/bioetl/") and path.endswith(".py"):
+        first = path.removeprefix("src/bioetl/").split("/", 1)[0]
+        return (root / "tests" / "unit" / first).is_dir()
+    if path.startswith("scripts/") and path.endswith(".py"):
+        return bool(_script_targets(path, root))
+    return False
+
+
 def build_shadow_compare(
     changed_files: list[str],
     *,
@@ -561,8 +582,18 @@ def build_shadow_compare(
     """Record the impact selection without changing the executed suite.
 
     ``affected-pytest`` remains the tests that run. Rollback is to stop
-    calling ``shadow-compare``. An empty selection fails closed.
+    calling ``shadow-compare``. An empty selection or any path without a
+    route fails closed.
     """
+    unmapped = sorted(
+        path
+        for path in _changed_paths(changed_files)
+        if not _has_selection_route(path, repo_root)
+    )
+    if unmapped:
+        raise ValueError(
+            "shadow compare refused unmapped paths: " + ", ".join(unmapped)
+        )
     selected = affected_pytest_targets(
         changed_files,
         repo_root=repo_root,

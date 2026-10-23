@@ -201,6 +201,24 @@ def test_shadow_compare_records_selection_without_activation(tmp_path: Path) -> 
     }
 
 
+def test_shadow_compare_rejects_mixed_diff_with_unmapped_path(
+    tmp_path: Path,
+) -> None:
+    """One unmapped path fails the report even when another path selects tests."""
+    unit_domain = tmp_path / "tests" / "unit" / "domain"
+    unit_domain.mkdir(parents=True)
+    (unit_domain / "test_sample.py").write_text(
+        "def test_sample():\n    assert True\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="unmapped paths: docs/readme.md"):
+        build_shadow_compare(
+            ["tests/unit/domain/test_sample.py", "docs/readme.md"],
+            repo_root=tmp_path,
+        )
+
+
 def test_shadow_compare_marks_full_suite_for_empty_diff(tmp_path: Path) -> None:
     """An empty diff is recorded as the full suite and still stays observational."""
     (tmp_path / "tests").mkdir()
@@ -229,7 +247,7 @@ def test_shadow_compare_cli_fails_closed_on_unmapped_path(
         )
         == 1
     )
-    assert "shadow compare refused an empty selection" in capsys.readouterr().err
+    assert "unmapped paths: docs/readme.md" in capsys.readouterr().err
 
 
 def test_shadow_compare_cli_writes_canonical_json(tmp_path: Path) -> None:
