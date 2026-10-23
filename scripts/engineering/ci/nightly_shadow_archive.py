@@ -333,7 +333,7 @@ def write_snapshot(
         return destination
     destination.mkdir(parents=True, exist_ok=True)
     for name, payload in files.items():
-        _atomic_create(destination / name, payload)
+        _atomic_create(destination / name, payload, root=root)
     return destination
 
 
@@ -474,7 +474,7 @@ def archive_runs(
     if index_path.exists() and index_path.read_bytes() != payload:
         raise ArchiveError(f"index already exists: {index_path}")
     if not index_path.exists():
-        _atomic_create(index_path, payload)
+        _atomic_create(index_path, payload, root=output)
     return {"snapshot_count": len(index), "index": str(index_path)}
 
 
@@ -582,13 +582,14 @@ def _same_snapshot(destination: Path, files: Mapping[str, bytes]) -> bool:
     return True
 
 
-def _atomic_create(path: Path, payload: bytes) -> None:
-    if path.exists():
-        raise ArchiveError(f"refusing to overwrite {path}")
-    temporary = path.with_suffix(path.suffix + ".tmp")
+def _atomic_create(path: Path, payload: bytes, *, root: Path) -> None:
+    safe = ensure_path_within_root(path, root)
+    if safe.exists():
+        raise ArchiveError(f"refusing to overwrite {safe}")
+    temporary = ensure_path_within_root(safe.with_suffix(safe.suffix + ".tmp"), root)
     temporary.write_bytes(payload)
     try:
-        os.replace(temporary, path)
+        os.replace(temporary, safe)
     except OSError:
         temporary.unlink(missing_ok=True)
         raise
@@ -736,7 +737,7 @@ def _command_partition(argv: Sequence[str]) -> int:
         raise ArchiveError(f"refusing to overwrite {destination}")
     if not destination.exists():
         destination.parent.mkdir(parents=True, exist_ok=True)
-        _atomic_create(destination, encoded)
+        _atomic_create(destination, encoded, root=REPO_ROOT)
     _emit_github_output("class", kind)
     _emit_github_output("bucket", bucket)
     print(bucket)
@@ -933,10 +934,16 @@ def _command_record_window(argv: Sequence[str]) -> int:
             "actions_cancellation_retention_days": DIAGNOSTIC_RETENTION_DAYS,
             "actions_service_cap_days": ACTIONS_RETENTION_CAP_DAYS,
             "git_path": "reports/governance/n1-shadow-window",
-            "policy": "append-only git snapshots; an existing run/attempt is not overwritten",
+            "policy": (
+                "Append-only git snapshots under reports/governance/n1-shadow-window. "
+                "An existing run/attempt is not overwritten. Presence in git is the "
+                "storage location, not proof that the bytes survive or were restored."
+            ),
             "minimum_days": 90,
             "elapsed_age_is_90_days": False,
             "independent_restore": False,
+            "acceptance": "not_pass",
+            "local_verify_archive_is_author_check_only": True,
         },
         "window_protocol": _window_protocol(),
         "next_window": {
@@ -960,7 +967,7 @@ def _command_record_window(argv: Sequence[str]) -> int:
         raise ArchiveError(f"refusing to overwrite {destination}")
     if not destination.exists():
         destination.parent.mkdir(parents=True, exist_ok=True)
-        _atomic_create(destination, encoded)
+        _atomic_create(destination, encoded, root=REPO_ROOT)
     print(historical["status"])
     return 0
 

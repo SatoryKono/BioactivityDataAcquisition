@@ -4,6 +4,7 @@
   "baseline_sha": "ce050a180ffea36a2ff1400e3d66c4ebcc3bcaaf",
   "decision_owner": "CI",
   "durable_archive": {
+    "acceptance": "not_pass",
     "actions_cancellation_retention_days": 90,
     "actions_failure_retention_days": 90,
     "actions_service_cap_days": 90,
@@ -11,8 +12,9 @@
     "elapsed_age_is_90_days": false,
     "git_path": "reports/governance/n1-shadow-window",
     "independent_restore": false,
+    "local_verify_archive_is_author_check_only": true,
     "minimum_days": 90,
-    "policy": "append-only git snapshots; an existing run/attempt is not overwritten"
+    "policy": "Append-only git snapshots under reports/governance/n1-shadow-window. An existing run/attempt is not overwritten. Presence in git is the storage location, not proof that the bytes survive or were restored."
   },
   "frequency_change_pr": 12452,
   "historical_window": {
@@ -42,7 +44,7 @@
     "status": "not_started"
   },
   "personal_assignees": [],
-  "recorded_at": "2026-10-23T16:01:04Z",
+  "recorded_at": "2026-10-23T16:17:52Z",
   "restored_daily_jobs": [
     "tests",
     "e2e",
