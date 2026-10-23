@@ -93,7 +93,7 @@ ______________________________________________________________________
 
 ## 2. CI/CD Workflows
 
-BioETL uses **55 GitHub Actions workflows** (including reusable helper workflows).
+BioETL uses **54 GitHub Actions workflows** (including reusable helper workflows).
 That number is the tracked `.github/workflows/*.yml` inventory, not GitHub's
 `GET /actions/workflows` `total_count` (live GET `2026-09-17`: **79** objects =
 50 tracked files + hosted `dynamic/**` workflows + GitHub-only orphan/residual

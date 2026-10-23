@@ -118,7 +118,7 @@ canonical_checks:
   - id: mypy
     owner_workflow: .github/workflows/type-checking.yml
     owner_jobs: [type-check]
-    selectors: [mypy --strict --incremental src/bioetl]
+    selectors: [mypy --strict --no-incremental src/bioetl]
     events: [coordinator_pull_request, default_branch_push, workflow_call, workflow_dispatch]
     artifacts: [type-checking-reports-on-failure]
     status: blocking

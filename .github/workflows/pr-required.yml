@@ -397,15 +397,6 @@ jobs:
           fi
           uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target "${targets[@]}" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-marker "not serial_or_bounded" --parallel-addopts "-n auto --dist loadfile --max-worker-restart=0 -q --tb=line" --serial-marker "serial_or_bounded" --serial-addopts "-p no:xdist -q --tb=line" --no-fallback
 
-      - name: Restore mypy cache
-        if: needs['classify-changes'].outputs['type-checking'] == 'required'
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: .mypy_cache
-          key: ${{ runner.os }}-${{ runner.arch }}-python-${{ env.pythonLocation }}-mypy-${{ hashFiles('pyproject.toml', 'uv.lock') }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-python-${{ env.pythonLocation }}-mypy-${{ hashFiles('pyproject.toml', 'uv.lock') }}-
-
       - name: Run mypy (strict mode, full gate)
         if: needs['classify-changes'].outputs['type-checking'] == 'required'
         id: mypy
@@ -414,13 +405,14 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p reports
+          rm -rf .mypy_cache
 
           echo "Running full mypy strict gate on src/bioetl + src/memory..."
           echo "Event: $EVENT_NAME" | tee reports/mypy_strict.log
 
           set +e
           timeout --signal=TERM --kill-after=30s 30m \
-            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory \
+            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --no-incremental src/bioetl src/memory \
             2>&1 | tee -a reports/mypy_strict.log
           status=${PIPESTATUS[0]}
           set -e
