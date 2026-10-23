@@ -2,6 +2,8 @@
 
 Architecture and quality-gate checks, debt telemetry, and code hygiene audits.
 
+`scripts/engineering/qa/build_pytest_nodeid_inventory.py` collects the canonical pytest nodeid inventory and lane ownership for #12368. It stays a supporting helper so the active script budget does not grow.
+
 ## Unified Entry Point
 
 ```bash

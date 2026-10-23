@@ -1,155 +1,459 @@
+#!/usr/bin/env python3
+"""Build a pytest nodeid inventory with one canonical lane owner per node.
+
+Collection uses pytest's own session, not a text scan for ``::``. Lane
+membership comes from ``configs/quality/test_matrix.yaml`` path prefixes,
+``--ignore`` entries, and marker expressions. The output path is fixed so
+CLI arguments cannot choose a filesystem sink.
+"""
+
+from __future__ import annotations
+
 import argparse
+import io
 import json
 import subprocess
 import sys
+from contextlib import redirect_stderr, redirect_stdout
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Final
+
+import pytest
 import yaml
-from collections import defaultdict
 
-def _load_test_matrix():
-    with open("configs/quality/test_matrix.yaml") as f:
-        return yaml.safe_load(f)
+from scripts.engineering.common.repo_paths import (
+    REPO_ROOT,
+    ensure_safe_cli_argv,
+    read_text_confined,
+    write_text_confined,
+)
 
-def run_all_collection():
-    cmd = ["uv", "run", "pytest", "--collect-only", "-q", "-p", "pytest_nodeid_plugin", "--disable-warnings", "--nodeid-out", ".nodeid_inventory_all.json"]
-    paths = ["tests/", ".github/workflows/", ".github/actions/", "scripts/", "configs/quality/"]
-    for p in paths:
-        if Path(p).exists():
-            cmd.append(p)
+_MATRIX_PATH: Final[str] = "configs/quality/test_matrix.yaml"
+_OUTPUT_PATH: Final[str] = "reports/quality/pytest-nodeid-inventory.json"
+_COLLECT_ROOTS: Final[tuple[str, ...]] = ("tests",)
+_UMBRELLA_LANES: Final[frozenset[str]] = frozenset({"coverage-verify"})
+_OWNER_PRIORITY: Final[tuple[str, ...]] = (
+    "AgentMemory",
+    "Agent",
+    "Docs",
+    "Diagram",
+    "FullOnly",
+    "Core",
+)
+_LANE_OWNER: Final[dict[str, str]] = {
+    "smoke": "FullOnly",
+    "unit-fast": "Core",
+    "unit-filesystem-contracts": "Core",
+    "repo-backed-unit": "Core",
+    "unit-scripts-tooling": "Core",
+    "unit-parallel-safe": "Core",
+    "integration-replay": "Core",
+    "integration-determinism": "Core",
+    "integration-idempotency": "Core",
+    "integration-composite-resume": "Core",
+    "security": "Core",
+    "contracts": "Core",
+    "architecture": "Core",
+    "architecture-fast-boundary": "Core",
+    "architecture-slow-governance": "Core",
+    "architecture-read-only-audit": "Core",
+    "e2e": "FullOnly",
+    "e2e-smoke": "FullOnly",
+    "e2e-nightly-full": "FullOnly",
+    "e2e-nightly-live": "FullOnly",
+    "prompt-tests-nightly": "Agent",
+    "memory": "AgentMemory",
+    "performance": "FullOnly",
+    "coverage-verify": "Core",
+}
+_WORKFLOW_BY_OWNER: Final[dict[str, str]] = {
+    "Core": "tests",
+    "AgentMemory": "tests",
+    "Agent": "tests",
+    "Docs": "docs",
+    "Diagram": "docs",
+    "FullOnly": "nightly",
+    "unowned": "unassigned",
+}
 
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    out_file = Path(".nodeid_inventory_all.json")
-    if not out_file.exists():
-        print(f"Failed to collect: {result.stderr}\n{result.stdout}", file=sys.stderr)
-        return []
 
-    with open(out_file) as f:
-        collected = json.load(f)
-    out_file.unlink()
+@dataclass(frozen=True)
+class LaneRule:
+    """One test-matrix lane reduced to the fields the inventory matches on."""
 
-    return collected
+    name: str
+    prefixes: tuple[str, ...]
+    ignores: tuple[str, ...]
+    marker_expression: str
 
-def match_marker_expr(markers, expr):
-    if not expr:
+
+@dataclass(frozen=True)
+class CollectedNode:
+    """One pytest item captured at collection finish."""
+
+    nodeid: str
+    file: str
+    type_name: str
+    markers: tuple[str, ...]
+    fixtures: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class OwnerDecision:
+    """Canonical owner plus the lanes that produced it."""
+
+    canonical_owner: str
+    overlap_rationale: str | None
+    lanes: tuple[str, ...]
+
+
+def _normalize_prefix(prefix: str) -> str:
+    text = prefix.replace("\\", "/").lstrip("./")
+    if text.endswith(".py"):
+        return text
+    return text if text.endswith("/") else f"{text}/"
+
+
+def marker_expression_matches(markers: set[str], expression: str) -> bool:
+    """Match a conjunction of ``marker`` / ``not marker`` tokens.
+
+    Lane expressions in the committed matrix are ``and`` chains only.
+    """
+
+    if not expression.strip():
         return True
-    parts = expr.split(" and ")
-    for part in parts:
-        part = part.strip()
-        if part.startswith("not "):
-            m = part[4:]
-            if m in markers:
+    for part in expression.split(" and "):
+        token = part.strip()
+        if token.startswith("not "):
+            if token.removeprefix("not ").strip() in markers:
                 return False
-        else:
-            if part not in markers:
-                return False
+            continue
+        if token not in markers:
+            return False
     return True
 
-def get_canonical_owner(owners, file):
-    path = file.lower()
-    if "agentmemory" in path or "memory" in path:
-        return "AgentMemory"
-    if "agent" in path or "ai" in path or "codex" in path or "junie" in path:
-        return "Agent"
-    if "doc" in path or "markdown" in path:
-        return "Docs"
-    if "diagram" in path:
-        return "Diagram"
-    if "e2e" in path or "performance" in path or "smoke" in path or "integration" in path:
-        return "FullOnly"
-    return "Core"
 
-def get_semantic_production_criticality(file, markers, canonical_owner):
-    if canonical_owner in ("Core", "FullOnly"):
+def _ignored(file_name: str, ignores: tuple[str, ...]) -> bool:
+    for ignore in ignores:
+        needle = _normalize_prefix(ignore)
+        if file_name == needle.rstrip("/") or file_name.startswith(needle):
+            return True
+    return False
+
+
+def _prefix_matches(file_name: str, prefixes: tuple[str, ...]) -> bool:
+    for prefix in prefixes:
+        needle = _normalize_prefix(prefix)
+        if needle.endswith(".py"):
+            if file_name == needle:
+                return True
+            continue
+        if file_name.startswith(needle):
+            return True
+    return False
+
+
+def lane_matches(rule: LaneRule, file_name: str, markers: set[str]) -> bool:
+    """Return whether one collected file belongs to ``rule``."""
+
+    if _ignored(file_name, rule.ignores):
+        return False
+    if not _prefix_matches(file_name, rule.prefixes):
+        return False
+    return marker_expression_matches(markers, rule.marker_expression)
+
+
+def load_lane_rules(matrix: Mapping[str, object]) -> tuple[LaneRule, ...]:
+    """Read lane path, ignore, and marker rules from the test matrix."""
+
+    test_lanes = matrix.get("test_lanes")
+    if not isinstance(test_lanes, Mapping):
+        raise ValueError("test_matrix.yaml is missing test_lanes")
+    lanes = test_lanes.get("lanes")
+    if not isinstance(lanes, Mapping):
+        raise ValueError("test_matrix.yaml is missing test_lanes.lanes")
+    rules: list[LaneRule] = []
+    for name, info in lanes.items():
+        if not isinstance(name, str) or not isinstance(info, Mapping):
+            raise ValueError(f"invalid lane entry: {name!r}")
+        rules.append(
+            LaneRule(
+                name=name,
+                prefixes=_string_tuple(info.get("paths")),
+                ignores=_ignore_args(info.get("pytest_args")),
+                marker_expression=_marker_expression(info.get("marker_expression")),
+            )
+        )
+    missing = [rule.name for rule in rules if rule.name not in _LANE_OWNER]
+    if missing:
+        raise ValueError(f"unmapped test lanes: {missing}")
+    return tuple(rules)
+
+
+def _string_tuple(value: object) -> tuple[str, ...]:
+    if not isinstance(value, Sequence) or isinstance(value, str):
+        return ()
+    return tuple(str(item) for item in value)
+
+
+def _marker_expression(value: object) -> str:
+    if value is None:
+        return ""
+    return str(value)
+
+
+def _ignore_args(value: object) -> tuple[str, ...]:
+    if not isinstance(value, Sequence) or isinstance(value, str):
+        return ()
+    ignores: list[str] = []
+    tokens = [str(item) for item in value]
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+        if token.startswith("--ignore="):
+            ignores.append(token.split("=", 1)[1])
+        elif token == "--ignore" and index + 1 < len(tokens):
+            index += 1
+            ignores.append(tokens[index])
+        index += 1
+    return tuple(ignores)
+
+
+def decide_owner(lane_names: Sequence[str]) -> OwnerDecision:
+    """Pick one canonical owner. Smoke overlap is the only allowed duplicate."""
+
+    substantive = tuple(name for name in lane_names if name not in _UMBRELLA_LANES)
+    if not substantive:
+        return OwnerDecision("unowned", None, ())
+    owners = {_LANE_OWNER[name] for name in substantive}
+    if len(owners) == 1:
+        rationale = None
+        if "smoke" in substantive and len(substantive) > 1:
+            rationale = "intentional smoke execution"
+        return OwnerDecision(next(iter(owners)), rationale, substantive)
+    if "smoke" in substantive:
+        chosen = next(owner for owner in _OWNER_PRIORITY if owner in owners)
+        return OwnerDecision(chosen, "intentional smoke execution", substantive)
+    return OwnerDecision("unowned", "multiple canonical owners", substantive)
+
+
+def semantic_criticality(canonical_owner: str) -> str:
+    """Map a canonical owner to production criticality."""
+
+    if canonical_owner in {"Core", "FullOnly"}:
         return "critical"
     return "non-critical"
 
-def get_workflow_job(canonical_owner):
-    return "tests"
 
-def main():
-    parser = argparse.ArgumentParser(description="Build pytest nodeid inventory.")
-    parser.add_argument("--output", default="reports/quality/pytest-nodeid-inventory.json")
-    parser.add_argument("--check", action="store_true")
-    parser.add_argument("--update", action="store_true")
-    args = parser.parse_args()
+def workflow_job(canonical_owner: str) -> str:
+    """Map a canonical owner to the workflow job that executes it."""
 
-    matrix = _load_test_matrix()
-    lanes = matrix.get("test_lanes", {}).get("lanes", {})
+    return _WORKFLOW_BY_OWNER.get(canonical_owner, "unassigned")
 
-    collected = run_all_collection()
 
-    nodes_out = []
+def matching_lanes(
+    rules: Sequence[LaneRule],
+    file_name: str,
+    markers: set[str],
+) -> tuple[str, ...]:
+    """Return lane names whose path and marker rules accept this file."""
 
-    for item in collected:
-        nodeid = item["nodeid"]
-        file = item["file"]
-        type_ = item["type"]
-        markers = item["markers"]
-        fixtures = item["fixtures"]
+    return tuple(rule.name for rule in rules if lane_matches(rule, file_name, markers))
 
-        owners = []
-        for lane_name, lane_info in lanes.items():
-            lane_paths = lane_info.get("paths", [])
-            in_path = False
-            for p in lane_paths:
-                if file.startswith(p):
-                    in_path = True
-                    break
 
-            if not in_path:
-                continue
+def build_record(
+    node: CollectedNode,
+    rules: Sequence[LaneRule],
+) -> dict[str, object]:
+    """Turn one collected node into a deterministic inventory record."""
 
-            if match_marker_expr(markers, lane_info.get("marker_expression", "")):
-                owners.append(lane_name)
-
-        canonical_owner = get_canonical_owner(owners, file)
-
-        overlap_rationale = None
-        if len(owners) > 1:
-            overlap_rationale = "intentional smoke execution"
-
-        execution_policy = owners[0] if owners else "TBD"
-
-        node_out = {
-            "nodeid": nodeid,
-            "file": file,
-            "type": type_,
-            "semantic_production_criticality": get_semantic_production_criticality(file, markers, canonical_owner),
-            "canonical_owner": canonical_owner,
-            "execution_policy": execution_policy,
-            "fixtures": fixtures,
-            "workflow_job": get_workflow_job(canonical_owner),
-            "overlap_rationale": overlap_rationale
-        }
-        nodes_out.append(node_out)
-
-    inventory = {
-        "schema_version": 1,
-        "nodes": sorted(nodes_out, key=lambda x: x["nodeid"]),
-        "count": len(nodes_out)
+    decision = decide_owner(matching_lanes(rules, node.file, set(node.markers)))
+    return {
+        "canonical_owner": decision.canonical_owner,
+        "execution_policy": ",".join(decision.lanes) if decision.lanes else "unowned",
+        "file": node.file,
+        "fixtures": list(node.fixtures),
+        "nodeid": node.nodeid,
+        "overlap_rationale": decision.overlap_rationale,
+        "semantic_production_criticality": semantic_criticality(
+            decision.canonical_owner
+        ),
+        "type": node.type_name,
+        "workflow_job": workflow_job(decision.canonical_owner),
     }
 
-    output_path = Path(args.output)
 
-    if args.check:
-        if not output_path.exists():
-            print(f"Inventory {output_path} does not exist for check.", file=sys.stderr)
-            return 1
-        with open(output_path) as f:
-            existing = json.load(f)
+def _node_from_item(item: pytest.Item, root: Path) -> CollectedNode:
+    candidate = Path(str(item.path))
+    try:
+        relative = candidate.resolve().relative_to(root).as_posix()
+    except ValueError:
+        relative = candidate.as_posix()
+    markers = tuple(sorted({mark.name for mark in item.iter_markers()}))
+    names = getattr(item, "fixturenames", ())
+    fixtures = tuple(sorted(str(name) for name in names))
+    return CollectedNode(
+        nodeid=item.nodeid,
+        file=relative,
+        type_name=type(item).__name__,
+        markers=markers,
+        fixtures=fixtures,
+    )
 
-        if existing.get("count") != inventory["count"]:
-            print(f"Inventory count mismatch: existing={existing.get('count')}, new={inventory['count']}", file=sys.stderr)
-            return 1
-        print("Inventory matches.")
-        return 0
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(inventory, f, indent=2, sort_keys=True)
+def collect_nodes(
+    paths: Sequence[str] = _COLLECT_ROOTS,
+    *,
+    root: Path = REPO_ROOT,
+) -> tuple[int, tuple[CollectedNode, ...]]:
+    """Collect pytest items and preserve pytest's exit status."""
 
-    print(f"Wrote {len(nodes_out)} nodeids to {output_path}.")
+    found: list[CollectedNode] = []
+
+    class _InventoryPlugin:
+        def pytest_collection_finish(self, session: pytest.Session) -> None:
+            found.extend(_node_from_item(item, root) for item in session.items)
+
+    stdout_buffer = io.StringIO()
+    stderr_buffer = io.StringIO()
+    with redirect_stdout(stdout_buffer), redirect_stderr(stderr_buffer):
+        exit_code = int(
+            pytest.main(
+                [
+                    "--collect-only",
+                    "-p",
+                    "no:cacheprovider",
+                    *paths,
+                ],
+                plugins=[_InventoryPlugin()],
+            )
+        )
+    if exit_code != 0:
+        sys.stderr.write(stdout_buffer.getvalue())
+        sys.stderr.write(stderr_buffer.getvalue())
+    return exit_code, tuple(found)
+
+
+def _head_sha() -> str:
+    completed = subprocess.run(
+        ensure_safe_cli_argv(["git", "rev-parse", "HEAD"]),
+        check=False,
+        capture_output=True,
+        text=True,
+        cwd=REPO_ROOT,
+    )
+    if completed.returncode != 0:
+        return ""
+    return completed.stdout.strip()
+
+
+def build_inventory(
+    nodes: Sequence[CollectedNode],
+    rules: Sequence[LaneRule],
+    *,
+    source_commit: str,
+) -> dict[str, object]:
+    """Assemble the sorted inventory document."""
+
+    records = [build_record(node, rules) for node in nodes]
+    records.sort(key=lambda record: str(record["nodeid"]))
+    nodeids = [str(record["nodeid"]) for record in records]
+    duplicates = sorted({nodeid for nodeid in nodeids if nodeids.count(nodeid) > 1})
+    unowned = [
+        str(record["nodeid"])
+        for record in records
+        if record["canonical_owner"] == "unowned"
+    ]
+    return {
+        "count": len(records),
+        "duplicate_nodeids": duplicates,
+        "nodes": records,
+        "schema_version": 1,
+        "source_commit": source_commit,
+        "unowned_count": len(unowned),
+        "unowned_nodeids": unowned,
+    }
+
+
+def _dumps(payload: Mapping[str, object]) -> str:
+    return json.dumps(payload, indent=2, sort_keys=True) + "\n"
+
+
+def _problems(payload: Mapping[str, object], *, head: str) -> list[str]:
+    problems: list[str] = []
+    if payload.get("source_commit") != head or not head:
+        problems.append(
+            f"source_commit {payload.get('source_commit')!r} != HEAD {head!r}"
+        )
+    duplicates = payload.get("duplicate_nodeids")
+    if isinstance(duplicates, list) and duplicates:
+        problems.append(f"duplicate nodeids: {len(duplicates)}")
+    unowned = payload.get("unowned_count")
+    if unowned != 0:
+        problems.append(f"unowned nodeids: {unowned}")
+    return problems
+
+
+def _check(expected: Mapping[str, object]) -> int:
+    try:
+        existing_text = read_text_confined(_OUTPUT_PATH)
+    except (OSError, ValueError) as exc:
+        print(f"inventory read failed: {exc}", file=sys.stderr)
+        return 1
+    existing = json.loads(existing_text)
+    if not isinstance(existing, dict):
+        print("inventory payload must be an object", file=sys.stderr)
+        return 1
+    if existing.get("nodes") != expected.get("nodes"):
+        print("inventory nodes differ from the committed manifest", file=sys.stderr)
+        return 1
+    problems = _problems(existing, head=_head_sha())
+    if problems:
+        print("\n".join(problems), file=sys.stderr)
+        return 1
+    print(f"Inventory matches {_OUTPUT_PATH}.")
     return 0
+
+
+def _load_matrix() -> dict[str, object]:
+    loaded = yaml.safe_load(read_text_confined(_MATRIX_PATH))
+    if not isinstance(loaded, dict):
+        raise ValueError("test matrix must be a mapping")
+    return loaded
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """Collect nodeids and either write the fixed manifest or check it."""
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true")
+    parser.add_argument("--update", action="store_true")
+    args = parser.parse_args(list(argv) if argv is not None else None)
+    if args.check and args.update:
+        print("pass only one of --check or --update", file=sys.stderr)
+        return 2
+
+    rules = load_lane_rules(_load_matrix())
+    exit_code, nodes = collect_nodes()
+    if exit_code != 0:
+        print(f"pytest collection failed with exit {exit_code}", file=sys.stderr)
+        return exit_code
+
+    head = _head_sha()
+    inventory = build_inventory(nodes, rules, source_commit=head)
+    if args.check:
+        return _check(inventory)
+
+    write_text_confined(_OUTPUT_PATH, _dumps(inventory))
+    print(f"Wrote {inventory['count']} nodeids to {_OUTPUT_PATH}.")
+    problems = _problems(inventory, head=head)
+    if problems:
+        print("\n".join(problems), file=sys.stderr)
+        return 1
+    return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1033,6 +1033,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
+    "scripts/engineering/qa/build_pytest_nodeid_inventory.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the pytest nodeid inventory helper for #12368. Keep it supporting so active_script_count_max does not grow; do not promote it to a QA router command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
     "scripts/engineering/qa/check_duplication_complexity_exemptions.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the governed duplication/complexity exemption registry validator behind the QA router and CI workflow; keep it supporting unless it is promoted to an operator-facing command.",
