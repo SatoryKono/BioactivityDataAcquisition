@@ -9960,7 +9960,7 @@
       "next_step": "Retain as the shared GitHub Actions attempt collector imported by the Docker and PR-gate timing reports. It has no standalone command surface; keep it supporting so active_script_count_max does not grow."
     },
     {
-      "path": "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1",
+      "path": "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1",
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
@@ -9970,13 +9970,13 @@
           "path": "scripts/engineering/ci/README.md",
           "line": 59,
           "source_group": "scripts",
-          "text": "| `scripts/engineering/ci/apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization                                              |"
+          "text": "| `scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization                                              |"
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
           "line": 363,
           "source_group": "tests",
-          "text": "\"scripts/engineering/ci/apply-ci-optimizations-fixed.ps1\": ("
+          "text": "\"scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1\": ("
         }
       ],
       "owner": "@bioetl-platform",
@@ -9985,7 +9985,7 @@
       "next_step": "Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow."
     },
     {
-      "path": "scripts/engineering/ci/apply-ci-optimizations.ps1",
+      "path": "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1",
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
@@ -9995,13 +9995,13 @@
           "path": "scripts/engineering/ci/README.md",
           "line": 58,
           "source_group": "scripts",
-          "text": "| `scripts/engineering/ci/apply-ci-optimizations.ps1`       | PowerShell CI optimization script                                             |"
+          "text": "| `scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1`       | PowerShell CI optimization script                                             |"
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
           "line": 366,
           "source_group": "tests",
-          "text": "\"scripts/engineering/ci/apply-ci-optimizations.ps1\": (\"legacy_manual_utility\"),"
+          "text": "\"scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1\": (\"legacy_manual_utility\"),"
         }
       ],
       "owner": "@bioetl-platform",
@@ -10010,7 +10010,7 @@
       "next_step": "Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow."
     },
     {
-      "path": "scripts/engineering/ci/apply_ci_fixes.py",
+      "path": "scripts/migrations/archive/ci_optimizations/apply_ci_fixes.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -10020,7 +10020,7 @@
           "path": "scripts/engineering/ci/README.md",
           "line": 32,
           "source_group": "scripts",
-          "text": "| `apply-ci-fixes` | `scripts/engineering/ci/apply_ci_fixes.py`             | One-off GitHub-hosted workflow repair helper requiring explicit token input |"
+          "text": "| `apply-ci-fixes` | `scripts/migrations/archive/ci_optimizations/apply_ci_fixes.py`             | One-off GitHub-hosted workflow repair helper requiring explicit token input |"
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
@@ -10032,7 +10032,7 @@
           "path": "tests/architecture/test_docker_runtime_contracts.py",
           "line": 1028,
           "source_group": "tests",
-          "text": "helper = (ROOT / \"scripts/engineering/ci/apply_ci_fixes.py\").read_text("
+          "text": "helper = (ROOT / \"scripts/migrations/archive/ci_optimizations/apply_ci_fixes.py\").read_text("
         }
       ]
     },
