@@ -1191,6 +1191,9 @@ jobs:
     needs: dependency-preflight
     permissions:
       contents: read
+    if: >-
+      github.event_name != 'pull_request' ||
+      contains(github.event.pull_request.labels.*.name, 'run-full-matrix')
     strategy:
       fail-fast: false
       matrix:

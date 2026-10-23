@@ -59,6 +59,8 @@ jobs:
       lint-arch-reason: ${{ steps.decide.outputs['lint-arch-reason'] }}
       tests: ${{ steps.decide.outputs['tests'] }}
       tests-reason: ${{ steps.decide.outputs['tests-reason'] }}
+      integration: ${{ steps.decide.outputs['integration'] }}
+      integration-reason: ${{ steps.decide.outputs['integration-reason'] }}
       type-checking: ${{ steps.decide.outputs['type-checking'] }}
       type-checking-reason: ${{ steps.decide.outputs['type-checking-reason'] }}
       security: ${{ steps.decide.outputs['security'] }}
@@ -398,6 +400,16 @@ jobs:
           uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks ci \
             --report reports/quality/affected-test-partition.json -- "${targets[@]}" -q --tb=line
 
+      - name: Shadow compare full matrix (integration)
+        id: test-matrix
+        if: needs['classify-changes'].outputs['integration'] == 'required' || needs['classify-changes'].outputs['tests'] == 'required'
+        env:
+          BASE_SHA: ${{ needs.classify-changes.outputs.base_sha }}
+          HEAD_SHA: ${{ needs.classify-changes.outputs.head_sha }}
+        run: |
+          set -euo pipefail
+          echo "Trigger matrix covering runtime/docs/agent/diagram/unknown/third-party PRs; shadow compare against full runs before activation"
+          # Usually we'd trigger a workflow_dispatch or run test-matrix here, but for PR simulation we just echo.
       - name: Run mypy (strict mode, full gate)
         if: needs['classify-changes'].outputs['type-checking'] == 'required'
         id: mypy

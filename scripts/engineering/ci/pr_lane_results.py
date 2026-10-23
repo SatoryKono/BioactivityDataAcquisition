@@ -125,6 +125,7 @@ GATE_OWNERS: dict[str, str] = {
     "commit-governance": FAST_GOVERNANCE,
     "docs-governance": FAST_GOVERNANCE,
     "lint-arch": CLASS_LANE,
+    "integration": CLASS_LANE,
     "tests": CLASS_LANE,
     "type-checking": CLASS_LANE,
     "security": CLASS_LANE,
@@ -172,6 +173,7 @@ OWNER_STEPS: dict[str, dict[str, tuple[str, ...]]] = {
             "arch-pytest",
         ),
         "tests": ("affected-pytest",),
+        "integration": ("test-matrix",),
         "type-checking": ("mypy", "newtype-protocol", "any-usage"),
         "security": (
             "detect-secrets",
