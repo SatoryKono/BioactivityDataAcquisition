@@ -15,7 +15,7 @@ from memory.records import (
     TrustLevel,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.memory
 _COMMIT = "a" * 40
 
 
