@@ -1033,6 +1033,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
+    "scripts/engineering/qa/build_pytest_nodeid_inventory.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the pytest nodeid inventory builder imported by its unit test. It is not routed through python -m scripts.engineering.qa and has no workflow entrypoint. Keep it supporting so active_script_count_max does not grow; promote only after an active slot is freed and the command is on the QA router.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
+    },
     "scripts/engineering/qa/check_duplication_complexity_exemptions.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the governed duplication/complexity exemption registry validator behind the QA router and CI workflow; keep it supporting unless it is promoted to an operator-facing command.",

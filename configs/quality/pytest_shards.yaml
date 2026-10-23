@@ -530,7 +530,6 @@ shards:
   - tests/unit/infrastructure/factories
   - tests/unit/infrastructure/locking
   - tests/unit/infrastructure/observability
-  - tests/unit/infrastructure/quality
   - tests/unit/infrastructure/quarantine
   - tests/unit/infrastructure/schemas
   - tests/unit/infrastructure/security

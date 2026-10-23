@@ -44,7 +44,7 @@ from bioetl.infrastructure.quality import (
     architecture_quality_scoring as scoring_module,
 )
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[5]
 
 pytestmark = pytest.mark.unit
 
