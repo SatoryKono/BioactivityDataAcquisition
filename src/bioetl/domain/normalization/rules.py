@@ -11,7 +11,6 @@ from bioetl.domain.normalization._chembl_units import (
 from bioetl.domain.normalization._chembl_units import (
     normalize_standard_unit as normalize_chembl_standard_unit,
 )
-from bioetl.domain.normalization.text import normalize_string
 
 __all__ = [
     "BINARY_FLAG_MAPPING",
@@ -128,8 +127,9 @@ OPERATOR_MAPPING: dict[str, str] = {
 
 def _find_case_match(normalized: str, allowed_values: frozenset[str]) -> str | None:
     """Find case-insensitive match in allowed values."""
+    norm_upper = normalized.upper()
     for allowed_value in allowed_values:
-        if normalized.upper() == allowed_value.upper():
+        if norm_upper == allowed_value.upper():
             # Return the allowed value's original case to preserve enum casing
             return allowed_value
     return None
@@ -140,78 +140,105 @@ def normalize_case(
     allowed_values: frozenset[str] | None = None,
 ) -> str | None:
     """Normalize case for enum-like fields."""
-    if value is None or not isinstance(value, str):
+    if not isinstance(value, str):
         return None
-    normalized = normalize_string(value)
-    if normalized is None:
+    stripped = value.strip()
+    if not stripped:
         return None
     if allowed_values is not None:
-        return _find_case_match(normalized, allowed_values)
-    return normalized
+        return _find_case_match(stripped, allowed_values)
+    return stripped
 
 
 def normalize_unit(
     value: Any,  # Any: Generic input value from various sources
 ) -> str | None:
     """Canonicalize unit strings to standard format."""
-    if value is None:
-        return None
     if not isinstance(value, str):
         return None
-    normalized = normalize_string(value)
-    if normalized is None:
+    stripped = value.strip()
+    if not stripped:
         return None
-    chembl_standard_unit = normalize_chembl_standard_unit(normalized)
+    chembl_standard_unit = normalize_chembl_standard_unit(stripped)
     if chembl_standard_unit in CHEMBL_STANDARD_UNIT_CANONICALS:
         return chembl_standard_unit
-    return UNIT_MAPPING.get(normalized, normalized)
+    return UNIT_MAPPING.get(stripped, stripped)
 
 
-def _normalize_int_boolean(value: int) -> bool | None:
-    if value in {0, 1}:
+def _mapped_binary_flag(value: str) -> bool | None:
+    if not value:
+        return None
+    return BINARY_FLAG_MAPPING.get(value.strip().lower())
+
+
+def _boolean_from_text(value: str) -> bool | None:
+    text = value.strip().lower()
+    if not text:
+        return None
+    return BINARY_FLAG_MAPPING.get(text)
+
+
+def _boolean_from_int(value: int) -> bool | None:
+    if value in (0, 1):
         return bool(value)
     return None
 
 
-def _normalize_float_boolean(value: float) -> bool | None:
-    if value in {0.0, 1.0}:
+def _boolean_from_float(value: float) -> bool | None:
+    if value in (0.0, 1.0):
         return bool(int(value))
     return None
-
-
-def _normalize_str_boolean(value: str) -> bool | None:
-    normalized = normalize_string(value)
-    if normalized is None:
-        return None
-    return BINARY_FLAG_MAPPING.get(normalized.lower())
-
-
-_BOOLEAN_NORMALIZERS = {
-    bool: lambda value: value,
-    int: _normalize_int_boolean,
-    float: _normalize_float_boolean,
-    str: _normalize_str_boolean,
-}
 
 
 def normalize_boolean(
     value: Any,  # Any: Accepts various input types for boolean conversion
 ) -> bool | None:
     """Coerce common source-system boolean encodings to canonical bool."""
-    if value is None:
+    vt = type(value)
+    if vt is bool:
+        return bool(value)
+    if vt is str:
+        return _boolean_from_text(value)
+    if vt is int:
+        return _boolean_from_int(value)
+    if vt is float:
+        return _boolean_from_float(value)
+    return None
+
+
+def _flag_from_text(value: str) -> int | None:
+    mapped = _mapped_binary_flag(value)
+    if mapped is None:
         return None
-    normalizer = _BOOLEAN_NORMALIZERS.get(type(value))
-    return normalizer(value) if normalizer is not None else None
+    return int(mapped)
+
+
+def _flag_from_int(value: int) -> int | None:
+    if value in (0, 1):
+        return value
+    return None
+
+
+def _flag_from_float(value: float) -> int | None:
+    if value in (0.0, 1.0):
+        return int(value)
+    return None
 
 
 def normalize_binary_flag(
     value: Any,  # Any: Handles various input representations for binary flags
 ) -> int | None:
     """Coerce common boolean-like values to the canonical 0/1 flag contract."""
-    normalized = normalize_boolean(value)
-    if normalized is None:
-        return None
-    return int(normalized)
+    vt = type(value)
+    if vt is bool:
+        return int(value)
+    if vt is int:
+        return _flag_from_int(value)
+    if vt is str:
+        return _flag_from_text(value)
+    if vt is float:
+        return _flag_from_float(value)
+    return None
 
 
 def normalize_operator(
@@ -221,10 +248,10 @@ def normalize_operator(
     """Canonicalize comparison operators, including Unicode variants."""
     if value is None:
         return None
-    normalized = normalize_string(str(value))
-    if normalized is None:
+    stripped = str(value).strip()
+    if not stripped:
         return None
-    operator = OPERATOR_MAPPING.get(normalized.lower(), normalized)
+    operator = OPERATOR_MAPPING.get(stripped.lower(), stripped)
     if allowed_values is not None and operator not in allowed_values:
         return None
     return operator
@@ -234,14 +261,10 @@ def normalize_null(
     value: Any,  # Any: Generic input value from various sources
 ) -> Any:  # Any: Generic return type to preserve original value type
     """Convert pseudo-null values to proper None values."""
-    if value is None:
-        return None
     if not isinstance(value, str):
         return value
-    normalized = normalize_string(value)
-    if normalized is None:
-        return None
-    if normalized.upper() in _NULL_PATTERNS_UPPER:
+    stripped = value.strip()
+    if not stripped or stripped.upper() in _NULL_PATTERNS_UPPER:
         return None
     return value
 
@@ -270,9 +293,9 @@ def normalize_cross_pipeline_case(
     value: object, strategy: str = "uppercase"
 ) -> str | None:
     """Normalize case using one consistent strategy across pipelines."""
-    if value is None or not isinstance(value, str):
+    if not isinstance(value, str):
         return None
-    normalized = normalize_string(value)
-    if normalized is None:
+    stripped = value.strip()
+    if not stripped:
         return None
-    return _apply_case_strategy(normalized, strategy)
+    return _apply_case_strategy(stripped, strategy)

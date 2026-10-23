@@ -4,7 +4,7 @@ name: PR Gate Complete
 # Target GitHub Actions context is job name pr-gate-complete
 # (catalog deployment.required_context). That name is not the context stored
 # on repository rulesets.
-# Read-only GET 2026-10-16 (one ruleset page, includes_parents=true): rulesets
+# Read-only GET 2026-10-22 (one ruleset page, includes_parents=true): rulesets
 # that include refs/heads/main were enforcement=disabled and still stored
 # ci/circleci contexts. A stored context on a disabled ruleset is not active CircleCI protection
 # and is not configured GitHub Actions enforcement.
@@ -13,8 +13,9 @@ name: PR Gate Complete
 # Each pull request has one owner invocation per gate and one fail-closed result.
 # Classify and aggregate check out the base ref. The PR head SHA is only a
 # diff argument (#11181). Leaf reusable workflows are pinned to a full commit
-# SHA of trusted main (#11232). This coordinator has no job-level reusable-workflow
-# calls. fast-governance checks out the PR head and, after setup, runs the
+# SHA of trusted main (#11232). docker-lane is the only job-level reusable
+# workflow call, and its SHA is in the pin registry. fast-governance checks
+# out the PR head and, after setup, runs the
 # repo-side pin checker. That checker is not an independent trust boundary:
 # a hostile PR can rewrite the coordinator, the checker, and the registry
 # together. The four setup-python-uv steps are pinned to trusted SHA
@@ -59,8 +60,6 @@ jobs:
       lint-arch-reason: ${{ steps.decide.outputs['lint-arch-reason'] }}
       tests: ${{ steps.decide.outputs['tests'] }}
       tests-reason: ${{ steps.decide.outputs['tests-reason'] }}
-      integration: ${{ steps.decide.outputs['integration'] }}
-      integration-reason: ${{ steps.decide.outputs['integration-reason'] }}
       type-checking: ${{ steps.decide.outputs['type-checking'] }}
       type-checking-reason: ${{ steps.decide.outputs['type-checking-reason'] }}
       security: ${{ steps.decide.outputs['security'] }}
@@ -376,7 +375,7 @@ jobs:
       - name: Architecture pytest slice
         id: arch-pytest
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
-        run: uv run --frozen --no-build pytest tests/architecture -m "not slow and not benchmark and not memory" -q --tb=line
+        run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-marker "not slow and not benchmark and not memory and not serial" --parallel-addopts "-n auto --dist loadscope --max-worker-restart=0 -q --tb=line" --serial-marker "serial and not slow and not benchmark and not memory" --serial-addopts "-p no:xdist -q --tb=line" --fallback-addopts "-p no:xdist -q --tb=line"
 
       - name: Affected pytest
         id: affected-pytest
@@ -397,19 +396,34 @@ jobs:
             echo "::error::tests gate has no affected pytest target"
             exit 1
           fi
-          uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks ci \
-            --report reports/quality/affected-test-partition.json -- "${targets[@]}" -q --tb=line
+          uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target "${targets[@]}" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-marker "not serial" --parallel-addopts "-n auto --dist loadfile --max-worker-restart=0 -q --tb=line" --serial-marker "serial" --serial-addopts "-p no:xdist -q --tb=line" --no-fallback --prove-artifact-deferral
 
-      - name: Shadow compare full matrix (integration)
-        id: test-matrix
-        if: needs['classify-changes'].outputs['integration'] == 'required' || needs['classify-changes'].outputs['tests'] == 'required'
+      - name: Shadow compare impact selection
+        id: impact-shadow-compare
+        if: needs['classify-changes'].outputs['tests'] == 'required'
         env:
           BASE_SHA: ${{ needs.classify-changes.outputs.base_sha }}
           HEAD_SHA: ${{ needs.classify-changes.outputs.head_sha }}
         run: |
           set -euo pipefail
-          echo "Trigger matrix covering runtime/docs/agent/diagram/unknown/third-party PRs; shadow compare against full runs before activation"
-          # Usually we'd trigger a workflow_dispatch or run test-matrix here, but for PR simulation we just echo.
+          mkdir -p reports/quality
+          # Observational only. affected-pytest remains the executed set.
+          # Nightly test-matrix is unchanged. Rollback: delete this step.
+          uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results shadow-compare \
+            --repo-root . \
+            --base-sha "$BASE_SHA" \
+            --head-sha "$HEAD_SHA" \
+            --output reports/quality/impact-shadow-compare.json
+
+      - name: Restore mypy cache
+        if: needs['classify-changes'].outputs['type-checking'] == 'required'
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: .mypy_cache
+          key: ${{ runner.os }}-${{ runner.arch }}-python-${{ env.pythonLocation }}-mypy-${{ hashFiles('pyproject.toml', 'uv.lock') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-python-${{ env.pythonLocation }}-mypy-${{ hashFiles('pyproject.toml', 'uv.lock') }}-
+
       - name: Run mypy (strict mode, full gate)
         if: needs['classify-changes'].outputs['type-checking'] == 'required'
         id: mypy
@@ -418,14 +432,13 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p reports
-          rm -rf .mypy_cache
 
           echo "Running full mypy strict gate on src/bioetl + src/memory..."
           echo "Event: $EVENT_NAME" | tee reports/mypy_strict.log
 
           set +e
           timeout --signal=TERM --kill-after=30s 30m \
-            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --no-incremental src/bioetl src/memory \
+            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory \
             2>&1 | tee -a reports/mypy_strict.log
           status=${PIPESTATUS[0]}
           set -e
@@ -727,6 +740,15 @@ jobs:
     name: Docker lane
     needs: classify-changes
     if: needs['classify-changes'].outputs['docker'] == 'required'
+    # GitHub validates nested job permissions at startup. docker-build asks for
+    # security-events, and docker-push asks for packages, id-token, and
+    # attestations, even when the publish job is skipped on pull requests.
+    permissions:
+      contents: read
+      security-events: write
+      packages: write
+      id-token: write
+      attestations: write
     uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@843eb3f1c9410df7eccfebf3c8a810cc897ed0e9
     with:
       caller-sha: ${{ needs.classify-changes.outputs.head_sha }}

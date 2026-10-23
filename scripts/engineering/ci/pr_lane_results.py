@@ -125,7 +125,6 @@ GATE_OWNERS: dict[str, str] = {
     "commit-governance": FAST_GOVERNANCE,
     "docs-governance": FAST_GOVERNANCE,
     "lint-arch": CLASS_LANE,
-    "integration": CLASS_LANE,
     "tests": CLASS_LANE,
     "type-checking": CLASS_LANE,
     "security": CLASS_LANE,
@@ -172,8 +171,7 @@ OWNER_STEPS: dict[str, dict[str, tuple[str, ...]]] = {
             "lint-imports",
             "arch-pytest",
         ),
-        "tests": ("affected-pytest",),
-        "integration": ("test-matrix",),
+        "tests": ("affected-pytest", "impact-shadow-compare"),
         "type-checking": ("mypy", "newtype-protocol", "any-usage"),
         "security": (
             "detect-secrets",
@@ -553,40 +551,92 @@ def _assert_command(args: argparse.Namespace) -> int:
     return 0
 
 
+def build_shadow_compare(
+    changed_files: list[str],
+    *,
+    repo_root: Path,
+    changed_python_dependencies: set[str] | None = None,
+    require_all_python_tests: bool = False,
+) -> dict[str, Any]:
+    """Record the impact selection without changing the executed suite.
+
+    ``affected-pytest`` remains the tests that run. Rollback is to stop
+    calling ``shadow-compare``. An empty selection fails closed.
+    """
+    selected = affected_pytest_targets(
+        changed_files,
+        repo_root=repo_root,
+        changed_python_dependencies=changed_python_dependencies,
+        require_all_python_tests=require_all_python_tests,
+    )
+    if not selected:
+        raise ValueError("shadow compare refused an empty selection")
+    full_suite = _python_suite_root(repo_root)
+    normalized = [target.rstrip("/") for target in selected]
+    return {
+        "activation": "not_applied",
+        "covers_full_suite": full_suite in normalized,
+        "full_suite_root": full_suite,
+        "mode": "shadow",
+        "selected": normalized,
+        "selected_count": len(normalized),
+    }
+
+
+def _write_json(path: Path, payload: str) -> None:
+    """Atomically replace one JSON artifact."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(payload, encoding="utf-8")
+    os.replace(temporary, path)
+
+
+def _changed_files(args: argparse.Namespace) -> list[str]:
+    """Return explicit paths or the git diff between the two SHAs."""
+    if args.changed_file:
+        return list(args.changed_file)
+    completed = subprocess.run(
+        [
+            "git",
+            "diff",
+            "--name-only",
+            f"{args.base_sha}...{args.head_sha}",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        cwd=args.repo_root,
+    )
+    return [line for line in completed.stdout.splitlines() if line.strip()]
+
+
+def _dependency_selection(
+    args: argparse.Namespace,
+    changed: list[str],
+) -> tuple[set[str] | None, bool]:
+    """Return dependency consumers and the full-suite flag for a diff."""
+    if not {"pyproject.toml", "uv.lock"} & set(changed):
+        return None, False
+    all_tests = pytest_configuration_changed(
+        args.repo_root, args.base_sha, args.head_sha
+    )
+    dependencies = changed_dependencies(
+        args.repo_root,
+        args.base_sha,
+        args.head_sha,
+        allow_configuration=all_tests,
+    )
+    all_tests = all_tests or removed_dependencies(
+        args.repo_root, args.base_sha, args.head_sha
+    )
+    return dependencies, all_tests
+
+
 def _affected_command(args: argparse.Namespace) -> int:
     """Print pytest targets for the changed files."""
-    if args.changed_file:
-        changed = list(args.changed_file)
-    else:
-        completed = subprocess.run(
-            [
-                "git",
-                "diff",
-                "--name-only",
-                f"{args.base_sha}...{args.head_sha}",
-            ],
-            check=True,
-            capture_output=True,
-            text=True,
-            cwd=args.repo_root,
-        )
-        changed = [line for line in completed.stdout.splitlines() if line.strip()]
+    changed = _changed_files(args)
     try:
-        dependencies = None
-        all_tests = False
-        if {"pyproject.toml", "uv.lock"} & set(changed):
-            all_tests = pytest_configuration_changed(
-                args.repo_root, args.base_sha, args.head_sha
-            )
-            dependencies = changed_dependencies(
-                args.repo_root,
-                args.base_sha,
-                args.head_sha,
-                allow_configuration=all_tests,
-            )
-            all_tests = all_tests or removed_dependencies(
-                args.repo_root, args.base_sha, args.head_sha
-            )
+        dependencies, all_tests = _dependency_selection(args, changed)
         targets = affected_pytest_targets(
             changed,
             repo_root=args.repo_root,
@@ -600,6 +650,28 @@ def _affected_command(args: argparse.Namespace) -> int:
         print("tests gate has no affected pytest target", file=sys.stderr)
         return 1
     print("\n".join(targets))
+    return 0
+
+
+def _shadow_command(args: argparse.Namespace) -> int:
+    """Write the observational impact report and fail closed when empty."""
+    changed = _changed_files(args)
+    try:
+        dependencies, all_tests = _dependency_selection(args, changed)
+        report = build_shadow_compare(
+            changed,
+            repo_root=args.repo_root,
+            changed_python_dependencies=dependencies,
+            require_all_python_tests=all_tests,
+        )
+    except (ValueError, OSError) as error:
+        print(f"shadow compare failed: {error}", file=sys.stderr)
+        return 1
+    payload = json.dumps(report, sort_keys=True, separators=(",", ":")) + "\n"
+    if args.output is None:
+        sys.stdout.write(payload)
+        return 0
+    _write_json(args.output, payload)
     return 0
 
 
@@ -635,6 +707,14 @@ def build_parser() -> argparse.ArgumentParser:
     affected.add_argument("--head-sha", default="HEAD")
     affected.add_argument("--changed-file", action="append", default=[])
     affected.set_defaults(handler=_affected_command)
+
+    shadow = subparsers.add_parser("shadow-compare")
+    shadow.add_argument("--repo-root", type=Path, default=Path("."))
+    shadow.add_argument("--base-sha", default="")
+    shadow.add_argument("--head-sha", default="HEAD")
+    shadow.add_argument("--changed-file", action="append", default=[])
+    shadow.add_argument("--output", type=Path)
+    shadow.set_defaults(handler=_shadow_command)
     return parser
 
 

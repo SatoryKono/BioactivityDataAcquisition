@@ -19,7 +19,7 @@ from memory.proof_cli import main
 from tests.helpers.clock import FIXED_TEST_TIME
 from tests.helpers.isolated_git import init_tracked_fixture_repo
 
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.memory
 
 
 def _artifacts(tmp_path: Path) -> tuple[Path, Path, Path]:

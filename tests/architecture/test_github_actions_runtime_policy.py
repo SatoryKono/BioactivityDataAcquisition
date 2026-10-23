@@ -96,6 +96,10 @@ def test_selected_actions_patterns_cover_third_party_allowed_uses_only() -> None
     assert "google/osv-scanner-action@*" in patterns
     assert "google/osv-scanner-action/osv-scanner-action@*" in patterns
     assert "docker/build-push-action@*" in patterns
+    assert (
+        "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@*"
+        not in patterns
+    )
     owners_repos = {
         "/".join(action.split("/")[:2])
         for action in policy.ALLOWED_USES
@@ -267,6 +271,13 @@ def test_pr_gate_coordinator_materializes_on_every_pr_without_duplicate_owners()
         "fast-governance",
         "class-lane",
         "docker-lane",
+    }
+    assert coordinator["jobs"]["docker-lane"]["permissions"] == {
+        "contents": "read",
+        "security-events": "write",
+        "packages": "write",
+        "id-token": "write",
+        "attestations": "write",
     }
     assert gate_ids
     assert {"commit-governance", "docs-governance"} <= gate_ids

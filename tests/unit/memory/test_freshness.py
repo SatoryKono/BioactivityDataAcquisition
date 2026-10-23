@@ -8,7 +8,7 @@ from memory.freshness import FreshnessStatus, evaluate_freshness
 from memory.records import ActorIdentity, RecordEnvelope, RecordScope, RecordType
 from memory.scope import RepositoryScope
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.memory
 
 
 def _envelope(**overrides: str) -> RecordEnvelope:

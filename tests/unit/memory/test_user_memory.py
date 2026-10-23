@@ -23,7 +23,7 @@ from memory.user_memory import (
 )
 from memory.scope import RepositoryScope
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.memory
 
 _ALL_GRANTS = frozenset(AccessAction)
 

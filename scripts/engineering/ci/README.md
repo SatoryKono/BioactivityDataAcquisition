@@ -5,9 +5,9 @@ CI orchestration, resiliency runners, and periodic quality reports.
 CircleCI migration (#11929): CodeQL is excluded from the canonical required-check
 catalog. Default-branch classification reads that catalog; the retained Actions
 coordinator no longer invokes CodeQL. Historical timing reports may still contain
-CodeQL owner paths and must not be rewritten as current evidence. Actions remain
-disabled. This preparation is isolated from the architecture/coverage acceptance
-branch; remote runs and workflow retirement are separate acceptance steps.
+CodeQL owner paths and must not be rewritten as current evidence. The pull-request
+coordinator runs in GitHub Actions (`.github/workflows/pr-required.yml`). Rulesets
+`13643213` and `15730586` stay `enforcement: disabled`; `.circleci/config.yml` is not merge protection.
 
 ## Unified Entry Point
 
@@ -29,7 +29,6 @@ python -m scripts.engineering.ci <command> [args...]
 | `docker-timing`  | `scripts/engineering/ci/report_docker_actions_timing.py` | Collect read-only Docker Actions timing and runner-capacity evidence      |
 | `pr-gate-timing` | `scripts/engineering/ci/report_pr_gate_timing.py`        | Collect read-only PR Gate Complete wall-clock, queue, and owner-path evidence |
 | `debt-report`    | `scripts/engineering/ci/report_quality_debt_weekly.py` | Generate weekly quality debt report                                         |
-| `apply-ci-fixes` | `scripts/engineering/ci/apply_ci_fixes.py`             | One-off GitHub-hosted workflow repair helper requiring explicit token input |
 
 ## When to Use
 
@@ -55,8 +54,6 @@ Canonical taxonomy:
 
 | File                                                      | Description                                                                   |
 | --------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `scripts/engineering/ci/apply-ci-optimizations.ps1`       | PowerShell CI optimization script                                             |
-| `scripts/engineering/ci/apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization                                              |
 | `scripts/engineering/ci/_compatibility_registry.py`       | Shared compatibility registry loader used by telemetry/reporting helpers      |
 | `scripts/engineering/ci/_compatibility_telemetry.py`      | Compatibility inventory telemetry helper used by architecture reporting flows |
 | `scripts/engineering/ci/pytest_abort_diagnostic_adapter.py` | Isolated abort supervisor used by `run_pytest_resilient.py`. Sidecar manifest only; it does not replace JUnit completeness. |

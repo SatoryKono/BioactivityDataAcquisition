@@ -37,6 +37,9 @@ ALLOWED_USES: dict[str, set[str]] = {
         "d86bb7b8a4e8407c8bc35392cb52192137d649ca",  # main
         "4d46594b319b39d24f0bb239b699362d7f4288bb",  # PR #12425
     },
+    "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml": {
+        "843eb3f1c9410df7eccfebf3c8a810cc897ed0e9",  # #12417
+    },
     "actions/attest-build-provenance": {
         "977bb373ede98d70efdf65b84cb5f73e068dcc2a",  # v3
     },
@@ -136,6 +139,7 @@ ALLOWED_DOCKER_IMAGES: dict[str, set[str]] = {
     },
 }
 _GITHUB_OWNED_ACTION_OWNERS = frozenset({"actions", "github"})
+_OWN_REPO_WORKFLOW_PREFIX = "SatoryKono/BioactivityDataAcquisition/.github/workflows/"
 
 
 def selected_actions_patterns(
@@ -152,6 +156,9 @@ def selected_actions_patterns(
     uses = ALLOWED_USES if allowed_uses is None else allowed_uses
     patterns: set[str] = set()
     for action in uses:
+        # Same-repo reusable workflows are not third-party actions (#11232).
+        if action.startswith(_OWN_REPO_WORKFLOW_PREFIX):
+            continue
         parts = action.split("/")
         owner = parts[0]
         if owner in _GITHUB_OWNED_ACTION_OWNERS:
@@ -215,9 +222,6 @@ def _parsed_uses_reference(line: str) -> tuple[str, str] | None:
     if uses_ref.startswith(("./", "../")):
         return None
     return uses_ref, uses_ref.partition("@")[0]
-
-
-_OWN_REPO_WORKFLOW_PREFIX = "SatoryKono/BioactivityDataAcquisition/.github/workflows/"
 
 
 def _is_own_repo_reusable_workflow(action: str) -> bool:
