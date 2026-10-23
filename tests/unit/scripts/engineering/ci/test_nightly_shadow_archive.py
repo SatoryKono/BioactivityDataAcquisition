@@ -391,6 +391,10 @@ def test_committed_gap_ledger_is_not_the_shadow_window() -> None:
     assert ledger["durable_archive"]["minimum_days"] == 90
     assert ledger["durable_archive"]["elapsed_age_is_90_days"] is False
     assert ledger["durable_archive"]["independent_restore"] is False
+    assert ledger["durable_archive"]["acceptance"] == "not_pass"
+    assert (
+        ledger["durable_archive"]["local_verify_archive_is_author_check_only"] is True
+    )
     assert "14 full UTC days" in ledger["window_protocol"]["minimum_span"]
     assert any("Do not delete" in item for item in ledger["window_protocol"]["gaps"])
     assert (
