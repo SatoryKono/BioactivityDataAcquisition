@@ -297,6 +297,25 @@ def test_validate_billing_report_accepts_cr_only_line_endings(tmp_path: Path) ->
     assert records[0].net_amount == Decimal("1")
 
 
+@pytest.mark.parametrize("amount", ["", "SECRET_AMOUNT_777"])
+def test_invalid_money_cell_is_redacted(tmp_path: Path, amount: str) -> None:
+    """Blank and malformed money cells become redacted validation errors."""
+    csv_file = tmp_path / "invalid-money.csv"
+    csv_file.write_text(
+        _HEADER
+        + "\n"
+        + "2026-09-15,Actions,Actions Linux,org/one,.github/workflows/ci.yml,"
+        + f"1,minutes,{amount},0,0,USD\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="failed validation") as exc:
+        validate_billing_report(str(csv_file))
+
+    if amount:
+        assert amount not in str(exc.value)
+
+
 def test_cache_sku_stays_outside_shared_pool_when_product_says_shared() -> None:
     """A shared-storage product label does not absorb cache or custom images."""
     records = [
@@ -474,6 +493,8 @@ def test_schema_and_csv_errors_do_not_echo_money(tmp_path: Path) -> None:
     malformed = tmp_path / "nul.csv"
     non_utf8 = tmp_path / "latin.csv"
     blank_currency = tmp_path / "blank-currency.csv"
+    blank_amount = tmp_path / "blank-amount.csv"
+    nonnumeric_amount = tmp_path / "nonnumeric-amount.csv"
     mismatch.write_text(
         _HEADER + "\n"
         "2026-09-15,Actions,Actions Linux,org/one,.github/workflows/ci.yml,"
@@ -494,6 +515,18 @@ def test_schema_and_csv_errors_do_not_echo_money(tmp_path: Path) -> None:
         "1,minutes,4.50,0,4.50,   \n",
         encoding="utf-8",
     )
+    blank_amount.write_text(
+        _HEADER + "\n"
+        "2026-09-15,Actions,Actions Linux,org/one,.github/workflows/ci.yml,"
+        "1,minutes,,0,0,USD\n",
+        encoding="utf-8",
+    )
+    nonnumeric_amount.write_text(
+        _HEADER + "\n"
+        "2026-09-15,Actions,Actions Linux,org/one,.github/workflows/ci.yml,"
+        "1,minutes,SECRET_AMOUNT_777,0,0,USD\n",
+        encoding="utf-8",
+    )
 
     with pytest.raises(ValueError, match="failed validation") as mismatch_exc:
         validate_billing_report(str(mismatch))
@@ -505,6 +538,10 @@ def test_schema_and_csv_errors_do_not_echo_money(tmp_path: Path) -> None:
         validate_billing_report(str(non_utf8))
     with pytest.raises(ValueError, match="failed validation") as blank_exc:
         validate_billing_report(str(blank_currency))
+    with pytest.raises(ValueError, match="failed validation") as blank_amount_exc:
+        validate_billing_report(str(blank_amount))
+    with pytest.raises(ValueError, match="failed validation") as nonnumeric_exc:
+        validate_billing_report(str(nonnumeric_amount))
 
     leaked_tokens = ("12.34", "1.11", "9.99", "77.77", "4.50")
     messages = (
@@ -514,11 +551,14 @@ def test_schema_and_csv_errors_do_not_echo_money(tmp_path: Path) -> None:
         str(malformed_exc.value),
         str(utf8_exc.value),
         str(blank_exc.value),
+        str(blank_amount_exc.value),
+        str(nonnumeric_exc.value),
     )
     for message in messages:
         for token in leaked_tokens:
             assert token not in message
     assert "USD" not in str(blank_exc.value)
+    assert "SECRET_AMOUNT_777" not in str(nonnumeric_exc.value)
 
 
 def test_awaiting_manifest_does_not_claim_currency_or_filters() -> None:

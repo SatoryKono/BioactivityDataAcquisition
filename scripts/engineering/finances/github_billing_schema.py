@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import date
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
@@ -40,7 +40,10 @@ class GitHubBillingRecord(BaseModel):
         if isinstance(value, int) and not isinstance(value, bool):
             return Decimal(value)
         if isinstance(value, str):
-            return Decimal(value.strip())
+            try:
+                return Decimal(value.strip())
+            except InvalidOperation:
+                raise ValueError("money field is not a decimal number") from None
         raise ValueError("unsupported money value")
 
     @field_validator("currency")
