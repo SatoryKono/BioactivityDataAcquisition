@@ -282,6 +282,8 @@ def test_real_daily_caller_and_command_partition_are_complete() -> None:
     assert '--parallel-marker "not serial"' in pr
     assert '--serial-marker "serial"' in pr
     assert "--prove-artifact-deferral" in pr
+    assert '--fallback-addopts "-p no:xdist -q --tb=line"' in pr
+    assert "cov-fail-under" not in pr
     assert "exit 5" not in pr
 
 
@@ -966,11 +968,11 @@ def test_runner_runs_serial_marker_and_accepts_only_proven_deferral(
 ):
     from scripts.engineering.ci import run_pytest_resilient as runner
 
-    calls: list[tuple[str, list[str] | None]] = []
+    calls: list[tuple[str, list[str]]] = []
     plan: dict[str, tuple[int, bool]] = {}
 
-    def fake_run_pass(*, name, extra_pytest_args=None, **kwargs):
-        calls.append((name, extra_pytest_args))
+    def fake_run_pass(*, name, addopts=None, **kwargs):
+        calls.append((name, list(addopts or [])))
         return_code, _proven = plan[name]
         return _runner_pass_result(name, return_code, tmp_path)
 
@@ -998,7 +1000,7 @@ def test_runner_runs_serial_marker_and_accepts_only_proven_deferral(
     code, seen = run([], {"parallel": (5, False), "serial": (0, False)})
     assert code == 0
     assert [name for name, _args in seen] == ["parallel", "serial"]
-    assert seen[0][1] is None
+    assert not any(arg.startswith("--artifact-selection-report=") for arg in seen[0][1])
 
     code, seen = run(
         ["--no-fallback"],

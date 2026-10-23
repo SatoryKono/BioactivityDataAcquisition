@@ -375,7 +375,7 @@ jobs:
       - name: Architecture pytest slice
         id: arch-pytest
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
-        run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-marker "not slow and not benchmark and not memory and not serial" --parallel-addopts "-n auto --dist loadscope --max-worker-restart=0 -q --tb=line" --serial-marker "serial and not slow and not benchmark and not memory" --serial-addopts "-p no:xdist -q --tb=line"
+        run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-marker "not slow and not benchmark and not memory and not serial" --parallel-addopts "-n auto --dist loadscope --max-worker-restart=0 -q --tb=line" --serial-marker "serial and not slow and not benchmark and not memory" --serial-addopts "-p no:xdist -q --tb=line" --fallback-addopts "-p no:xdist -q --tb=line"
 
       - name: Affected pytest
         id: affected-pytest
