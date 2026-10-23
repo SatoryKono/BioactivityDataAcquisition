@@ -243,7 +243,7 @@ def test_local_action_yaml_suffix_passes_and_escape_fails(tmp_path: Path) -> Non
     assert not pins.check_pins(registry, [missing], repo_root=tmp_path)
 
 
-def test_current_coordinator_job_calls_match_registry() -> None:
+def test_current_coordinator_job_level_calls_match_registry() -> None:
     """The coordinator's only reusable call is the pinned docker-lane workflow."""
     document = yaml.safe_load(COORDINATOR.read_text(encoding="utf-8"))
     jobs = document["jobs"]

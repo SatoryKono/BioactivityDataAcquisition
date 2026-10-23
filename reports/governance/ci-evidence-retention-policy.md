@@ -16,7 +16,7 @@ This policy defines the retention and immutability requirements for CI timing te
   - Historical Archive copies (for baseline measurement regressions) must be retained for **≥90 days**. If platform constraints force shorter retention, the historical dossier must be securely committed to an external permanent storage layer or an isolated branch prior to eviction.
 
 - **Stakeholder Transparency (Receivers):**
-  Evidence outputs are distributed to the CI Governance Owner, Security Auditors, and Tech Debt Reviewers. The verification baseline snapshot is self-contained and allows an independent verifier to pull the JSON manifest, match the source hash, and recompute the timings if needed.
+  Evidence outputs are distributed to the CI Governance Owner, Security Auditors, and Tech Debt Reviewers. `reports/governance/ci-baseline.json` records tool versions and SHA-256 hashes of the workflow inventory. It does not store timing measurements, so those hashes do not recompute timings. Duration evidence stays in `reports/test-telemetry/`.
 
 ## 3. Schema Enforcement
 The structure of the `ci-baseline` artifact is governed by its explicit JSON Schema (`reports/governance/ci-baseline.schema.json`), capturing execution environment tool versions and exact pipeline topologies.
