@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-22T23:06:42.185807+00:00",
+  "generated_at": "2026-10-23T00:07:39.524315+00:00",
   "summary": {
-    "total_scripts": 664,
+    "total_scripts": 665,
     "status_counts": {
       "active": 334,
-      "supporting": 330
+      "supporting": 331
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -15,7 +15,7 @@
       "other": 16,
       "scripts": 555,
       "skills": 13,
-      "tests": 482
+      "tests": 483
     }
   },
   "scripts": [
@@ -9793,7 +9793,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 389,
+          "line": 388,
           "source_group": "ci",
           "text": "uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results affected-tests \\"
         }
@@ -10201,13 +10201,13 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 399,
+          "line": 398,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks ci \\"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 633,
+          "line": 600,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10427,7 +10427,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 784,
+          "line": 762,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -11426,7 +11426,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 298,
+      "reference_count": 299,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -13901,7 +13901,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 365,
+          "line": 364,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -18749,6 +18749,25 @@
       ]
     },
     {
+      "path": "scripts/engineering/qa/verify_quality_move.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.verify_quality_move import main as verify_quality_move_main"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the QM-02 before/after verifier invoked by its unit tests. Keep it supporting so the active script budget does not grow; promote only after a router slot is freed."
+    },
+    {
       "path": "scripts/engineering/repo/__main__.py",
       "type": "py",
       "status": "active",
@@ -19061,7 +19080,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 596,
+          "line": 595,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
