@@ -254,6 +254,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Deterministic nightly lanes (#12363):** `nightly.yml` still cron-runs daily
+  at 03:00 UTC. `tests`, `e2e`, `duplication`, `import-linter`, and
+  `generated-artifact-daily` run on Monday or `workflow_dispatch`. Security
+  and zizmor stay daily. CodeQL, Scorecard, and Sunday mutation are unchanged.
+
 - **VCR cassettes leave GitHub LFS:** `tests/fixtures/vcr/**/*.yaml` are stored
   as regular git blobs. Required CI lanes no longer call `git lfs pull`; they
   fail closed on leftover pointer files. GitHub LFS quota will not be increased.
