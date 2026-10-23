@@ -14,8 +14,9 @@ import io
 import json
 import subprocess
 import sys
-from contextlib import redirect_stderr, redirect_stdout
+from collections import Counter
 from collections.abc import Mapping, Sequence
+from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
@@ -239,6 +240,24 @@ def decide_owner(lane_names: Sequence[str]) -> OwnerDecision:
     return OwnerDecision("unowned", "multiple canonical owners", substantive)
 
 
+def fallback_owner(file_name: str, markers: set[str]) -> OwnerDecision | None:
+    """Own tests that PR lanes exclude on purpose.
+
+    ``coverage-verify`` is an umbrella rerun, so a slow or benchmark node that
+    matches only that lane would otherwise stay unowned.
+    """
+
+    if file_name.startswith("tests/benchmarks/") or "benchmark" in markers:
+        return OwnerDecision("FullOnly", None, ("benchmarks",))
+    if "performance" in markers:
+        return OwnerDecision("FullOnly", None, ("performance",))
+    if "slow" in markers:
+        return OwnerDecision("FullOnly", None, ("slow",))
+    if "memory" in markers:
+        return OwnerDecision("AgentMemory", None, ("memory",))
+    return None
+
+
 def semantic_criticality(canonical_owner: str) -> str:
     """Map a canonical owner to production criticality."""
 
@@ -269,7 +288,10 @@ def build_record(
 ) -> dict[str, object]:
     """Turn one collected node into a deterministic inventory record."""
 
-    decision = decide_owner(matching_lanes(rules, node.file, set(node.markers)))
+    markers = set(node.markers)
+    decision = decide_owner(matching_lanes(rules, node.file, markers))
+    if decision.canonical_owner == "unowned":
+        decision = fallback_owner(node.file, markers) or decision
     return {
         "canonical_owner": decision.canonical_owner,
         "execution_policy": ",".join(decision.lanes) if decision.lanes else "unowned",
@@ -323,6 +345,7 @@ def collect_nodes(
             pytest.main(
                 [
                     "--collect-only",
+                    "--artifact-selection=all",
                     "-p",
                     "no:cacheprovider",
                     *paths,
@@ -359,8 +382,8 @@ def build_inventory(
 
     records = [build_record(node, rules) for node in nodes]
     records.sort(key=lambda record: str(record["nodeid"]))
-    nodeids = [str(record["nodeid"]) for record in records]
-    duplicates = sorted({nodeid for nodeid in nodeids if nodeids.count(nodeid) > 1})
+    counts = Counter(str(record["nodeid"]) for record in records)
+    duplicates = sorted(nodeid for nodeid, count in counts.items() if count > 1)
     unowned = [
         str(record["nodeid"])
         for record in records
@@ -381,12 +404,15 @@ def _dumps(payload: Mapping[str, object]) -> str:
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
 
 
-def _problems(payload: Mapping[str, object], *, head: str) -> list[str]:
+def _problems(payload: Mapping[str, object]) -> list[str]:
+    """Fail on duplicate or unowned nodes.
+
+    ``source_commit`` records the HEAD that generated the file. Comparing it
+    with the commit that contains the file can never succeed, so freshness is
+    the collected ``nodes`` list.
+    """
+
     problems: list[str] = []
-    if payload.get("source_commit") != head or not head:
-        problems.append(
-            f"source_commit {payload.get('source_commit')!r} != HEAD {head!r}"
-        )
     duplicates = payload.get("duplicate_nodeids")
     if isinstance(duplicates, list) and duplicates:
         problems.append(f"duplicate nodeids: {len(duplicates)}")
@@ -409,7 +435,7 @@ def _check(expected: Mapping[str, object]) -> int:
     if existing.get("nodes") != expected.get("nodes"):
         print("inventory nodes differ from the committed manifest", file=sys.stderr)
         return 1
-    problems = _problems(existing, head=_head_sha())
+    problems = _problems(existing)
     if problems:
         print("\n".join(problems), file=sys.stderr)
         return 1
@@ -448,7 +474,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     write_text_confined(_OUTPUT_PATH, _dumps(inventory))
     print(f"Wrote {inventory['count']} nodeids to {_OUTPUT_PATH}.")
-    problems = _problems(inventory, head=head)
+    problems = _problems(inventory)
     if problems:
         print("\n".join(problems), file=sys.stderr)
         return 1
