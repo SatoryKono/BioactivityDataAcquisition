@@ -284,10 +284,14 @@ def _remember_journal_invocation(
 
 
 def _pytest_targets(target: str | Sequence[str]) -> list[str]:
-    """Normalize one path or several pytest targets into argv items."""
+    """Return every pytest path from one string or from repeated CLI values."""
     if isinstance(target, str):
-        return [target]
-    return [str(item) for item in target]
+        paths = [target]
+    else:
+        paths = [str(item) for item in target if item]
+    if not paths:
+        raise ValueError("pytest target must not be empty")
+    return paths
 
 
 def _run_pass(
@@ -656,7 +660,10 @@ def _create_parser() -> argparse.ArgumentParser:
         "--target",
         nargs="+",
         default=["tests/"],
-        help="Pytest target paths or nodeids (default: tests/).",
+        help=(
+            "Pytest target paths or nodeids (default: tests/). "
+            "Extra values are one pytest invocation."
+        ),
     )
     parser.add_argument(
         "--reports-dir",

@@ -261,10 +261,12 @@ def test_current_coordinator_job_level_calls_match_registry() -> None:
     }
     assert reusable == {"docker-lane": DOCKER_LANE_PIN}
     for name, job in jobs.items():
+        assert isinstance(job, dict)
         if name in reusable:
             assert "steps" not in job, name
             continue
-        assert isinstance(job.get("steps"), list), name
+        assert "uses" not in job, name
+        assert isinstance(job.get("steps"), list)
     assert pins.check_pins(
         REGISTRY,
         [COORDINATOR],

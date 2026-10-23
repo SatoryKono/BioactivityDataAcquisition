@@ -165,21 +165,26 @@ def normalize_unit(
     return UNIT_MAPPING.get(stripped, stripped)
 
 
-def _boolean_from_str(value: str) -> bool | None:
-    """Map a source string to a bool. Blank input stays unset."""
+def _mapped_binary_flag(value: str) -> bool | None:
     if not value:
         return None
     return BINARY_FLAG_MAPPING.get(value.strip().lower())
 
 
-def _boolean_from_scalar(value: bool | int | float) -> bool | None:
-    """Map an exact bool, 0/1 int, or 0.0/1.0 float to a bool."""
-    if type(value) is bool:
-        return bool(value)
-    if type(value) is int:
-        if value in (0, 1):
-            return bool(value)
+def _boolean_from_text(value: str) -> bool | None:
+    text = value.strip().lower()
+    if not text:
         return None
+    return BINARY_FLAG_MAPPING.get(text)
+
+
+def _boolean_from_int(value: int) -> bool | None:
+    if value in (0, 1):
+        return bool(value)
+    return None
+
+
+def _boolean_from_float(value: float) -> bool | None:
     if value in (0.0, 1.0):
         return bool(int(value))
     return None
@@ -189,11 +194,34 @@ def normalize_boolean(
     value: Any,  # Any: Accepts various input types for boolean conversion
 ) -> bool | None:
     """Coerce common source-system boolean encodings to canonical bool."""
-    kind = type(value)
-    if kind is str:
-        return _boolean_from_str(value)
-    if kind in {bool, int, float}:
-        return _boolean_from_scalar(value)
+    vt = type(value)
+    if vt is bool:
+        return bool(value)
+    if vt is str:
+        return _boolean_from_text(value)
+    if vt is int:
+        return _boolean_from_int(value)
+    if vt is float:
+        return _boolean_from_float(value)
+    return None
+
+
+def _flag_from_text(value: str) -> int | None:
+    mapped = _mapped_binary_flag(value)
+    if mapped is None:
+        return None
+    return int(mapped)
+
+
+def _flag_from_int(value: int) -> int | None:
+    if value in (0, 1):
+        return value
+    return None
+
+
+def _flag_from_float(value: float) -> int | None:
+    if value in (0.0, 1.0):
+        return int(value)
     return None
 
 
@@ -201,10 +229,16 @@ def normalize_binary_flag(
     value: Any,  # Any: Handles various input representations for binary flags
 ) -> int | None:
     """Coerce common boolean-like values to the canonical 0/1 flag contract."""
-    normalized = normalize_boolean(value)
-    if normalized is None:
-        return None
-    return int(normalized)
+    vt = type(value)
+    if vt is bool:
+        return int(value)
+    if vt is int:
+        return _flag_from_int(value)
+    if vt is str:
+        return _flag_from_text(value)
+    if vt is float:
+        return _flag_from_float(value)
+    return None
 
 
 def normalize_operator(

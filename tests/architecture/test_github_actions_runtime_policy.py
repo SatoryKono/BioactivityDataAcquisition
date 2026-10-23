@@ -272,6 +272,13 @@ def test_pr_gate_coordinator_materializes_on_every_pr_without_duplicate_owners()
         "class-lane",
         "docker-lane",
     }
+    assert coordinator["jobs"]["docker-lane"]["permissions"] == {
+        "contents": "read",
+        "security-events": "write",
+        "packages": "write",
+        "id-token": "write",
+        "attestations": "write",
+    }
     assert gate_ids
     assert {"commit-governance", "docs-governance"} <= gate_ids
     assert "pr-gate-complete" in policy_doc
