@@ -13,8 +13,9 @@ name: PR Gate Complete
 # Each pull request has one owner invocation per gate and one fail-closed result.
 # Classify and aggregate check out the base ref. The PR head SHA is only a
 # diff argument (#11181). Leaf reusable workflows are pinned to a full commit
-# SHA of trusted main (#11232). This coordinator has no job-level reusable-workflow
-# calls. fast-governance checks out the PR head and, after setup, runs the
+# SHA of trusted main (#11232). docker-lane is the only job-level reusable
+# workflow call, and its SHA is in the pin registry. fast-governance checks
+# out the PR head and, after setup, runs the
 # repo-side pin checker. That checker is not an independent trust boundary:
 # a hostile PR can rewrite the coordinator, the checker, and the registry
 # together. The four setup-python-uv steps are pinned to trusted SHA
