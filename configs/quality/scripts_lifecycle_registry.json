@@ -805,6 +805,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-12-01"
     },
+    "scripts/engineering/ci/presubmit_gate.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the local Ruff, mypy, and affected-test implementation behind the canonical `python -m scripts.engineering.ci presubmit` router command. Keep it supporting so active_script_count_max does not grow; promote only after an active slot is freed.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-01"
+    },
     "scripts/engineering/ci/pytest_event_journal.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the pytest receipt helper imported by run_pytest_resilient.py and verified from the serial-coverage job. The resilient runner stays the public entrypoint; do not promote this module to active or raise active_script_count_max.",
