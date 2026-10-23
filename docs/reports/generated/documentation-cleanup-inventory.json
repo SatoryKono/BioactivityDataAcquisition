@@ -7777,6 +7777,34 @@
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
+      "path": "docs/00-project/governance/pr-required-check-crosswalk.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "00-project",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
       "path": "docs/00-project/governance/qodo/README.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
@@ -110735,11 +110763,11 @@
     "by_recommended_action": {
       "archive-after-migration": 246,
       "generate-automatically": 1062,
-      "keep": 2617
+      "keep": 2618
     },
     "by_section": {
       ".github": 6,
-      "00-project": 273,
+      "00-project": 274,
       "01-requirements": 4,
       "02-architecture": 997,
       "03-data-model": 2,
@@ -110763,21 +110791,21 @@
       "security": 2
     },
     "by_status": {
-      "Active": 750,
+      "Active": 751,
       "Archived": 1553,
       "Canonical": 76,
       "Generated": 1062,
       "Working": 484
     },
     "by_surface_family": {
-      "active": 750,
+      "active": 751,
       "archive": 1553,
       "canonical": 76,
       "generated": 1062,
       "working": 484
     },
     "by_tracking_state": {
-      "tracked": 3925
+      "tracked": 3926
     },
     "docs_reports_local_count": 59,
     "duplicate_group_count": 80,
@@ -110790,8 +110818,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3925,
+    "total_doc_like": 3926,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3925
+    "total_doc_like_tracked": 3926
   }
 }

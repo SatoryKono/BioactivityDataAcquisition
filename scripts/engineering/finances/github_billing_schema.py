@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 from datetime import date
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 MONEY_FIELDS = ("gross_amount", "discount_amount", "net_amount")
 
 
 class GitHubBillingRecord(BaseModel):
     """One billing row. Money stays decimal and currency is never implied."""
+
+    model_config = ConfigDict(hide_input_in_errors=True)
 
     date: date
     product: str
@@ -38,7 +40,10 @@ class GitHubBillingRecord(BaseModel):
         if isinstance(value, int) and not isinstance(value, bool):
             return Decimal(value)
         if isinstance(value, str):
-            return Decimal(value.strip())
+            try:
+                return Decimal(value.strip())
+            except InvalidOperation:
+                raise ValueError("money field is not a decimal number") from None
         raise ValueError("unsupported money value")
 
     @field_validator("currency")
@@ -55,8 +60,5 @@ class GitHubBillingRecord(BaseModel):
         """Enforce the usage-report identity before any total is computed."""
         expected = self.gross_amount - self.discount_amount
         if self.net_amount != expected:
-            raise ValueError(
-                "gross_amount - discount_amount must equal net_amount "
-                f"({self.gross_amount} - {self.discount_amount} != {self.net_amount})"
-            )
+            raise ValueError("gross_amount - discount_amount must equal net_amount")
         return self
