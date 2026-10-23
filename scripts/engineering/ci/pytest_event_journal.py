@@ -413,8 +413,9 @@ class EventJournalPlugin:
             "event": event_type,
             "identity": _redact_structured(self.identity, self.secrets),
         }
-        for key, value in data.items():
-            payload[key] = _redact_structured(value, self.secrets)
+        redacted_data = _redact_structured(data, self.secrets)
+        if isinstance(redacted_data, dict):
+            payload.update(redacted_data)
         line = json.dumps(payload, sort_keys=True, ensure_ascii=True) + "\n"
         try:
             self._file.write(line)

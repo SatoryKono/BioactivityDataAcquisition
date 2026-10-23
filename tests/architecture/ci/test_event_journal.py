@@ -1986,6 +1986,7 @@ def test_record_redacts_nested_secrets_in_payload(tmp_path: Path) -> None:
         "custom_event",
         {
             "string": "this is a supersecret string",
+            "password": "hunter2",
             "nested": {
                 "safe_key": "safe value",
                 "nested_password": "swordfish",
@@ -2002,6 +2003,7 @@ def test_record_redacts_nested_secrets_in_payload(tmp_path: Path) -> None:
 
     assert "supersecret" not in out
     assert "swordfish" not in out
+    assert "hunter2" not in out
     assert "[redacted:" in out
 
     parsed = json.loads(out)
@@ -2009,6 +2011,7 @@ def test_record_redacts_nested_secrets_in_payload(tmp_path: Path) -> None:
     assert "nested" in parsed
     assert parsed["nested"]["safe_key"] == "safe value"
     assert "[redacted:" in parsed["nested"]["nested_password"]
+    assert parsed["password"].startswith("[redacted:")
 
 
 def test_parametrized_assignment_nodeid_stays_reconciled(tmp_path: Path) -> None:
