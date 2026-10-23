@@ -714,6 +714,15 @@ jobs:
     name: Docker lane
     needs: classify-changes
     if: needs['classify-changes'].outputs['docker'] == 'required'
+    # GitHub validates nested job permissions at startup. docker-build asks for
+    # security-events, and docker-push asks for packages, id-token, and
+    # attestations, even when the publish job is skipped on pull requests.
+    permissions:
+      contents: read
+      security-events: write
+      packages: write
+      id-token: write
+      attestations: write
     uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@843eb3f1c9410df7eccfebf3c8a810cc897ed0e9
     with:
       caller-sha: ${{ needs.classify-changes.outputs.head_sha }}
