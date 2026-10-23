@@ -38,6 +38,9 @@ TEST_FILE_GLOB = "test_*.py"
 from scripts.engineering.dev.run_tests import TESTS_ROOT as PYTEST_ALL_ROOT
 
 NPM_RUNTIME_TEST = "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py"
+GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
+    "tests/architecture/test_github_actions_runtime_policy.py"
+)
 
 TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_telemetry_baseline.py",
@@ -75,11 +78,23 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/engineering/ci/pr_lane_results.py": (
         "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
     ),
+    "configs/quality/integration_vcr_policy.yaml": (
+        "tests/architecture/test_integration_vcr_policy.py",
+    ),
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
     "configs/quality/scripts_inventory_manifest.json": (
         "tests/architecture/test_scripts_inventory_manifest.py",
     ),
     "docs/05-engineering/test-telemetry-baseline.md": TELEMETRY_BASELINE_TESTS,
+    ".github/workflows/pr-required.yml": (
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
+    "configs/quality/reusable_action_pins.yaml": (
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
+    "scripts/engineering/repo/check_github_actions_runtime_policy.py": (
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
@@ -106,6 +121,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
 
 FAST_GOVERNANCE = "fast-governance"
 CLASS_LANE = "class-lane"
+DOCKER_LANE = "docker-lane"
 
 GATE_OWNERS: dict[str, str] = {
     "root-hygiene": FAST_GOVERNANCE,
@@ -116,7 +132,7 @@ GATE_OWNERS: dict[str, str] = {
     "tests": CLASS_LANE,
     "type-checking": CLASS_LANE,
     "security": CLASS_LANE,
-    "docker": CLASS_LANE,
+    "docker": DOCKER_LANE,
     "generated-artifacts": CLASS_LANE,
     "duplication": CLASS_LANE,
 }
@@ -141,6 +157,15 @@ OWNER_STEPS: dict[str, dict[str, tuple[str, ...]]] = {
             "prose-consistency",
         ),
     },
+    DOCKER_LANE: {
+        "docker": (
+            "docker-build",
+            "docker-compose-validate",
+            "docker-lint",
+            "docker-runtime-contracts",
+            "docker-complete",
+        ),
+    },
     CLASS_LANE: {
         "lint-arch": (
             "ruff",
@@ -159,7 +184,6 @@ OWNER_STEPS: dict[str, dict[str, tuple[str, ...]]] = {
             "gitleaks",
             "osv-gate",
         ),
-        "docker": ("docker-compose", "docker-monitoring-compose", "docker-contracts"),
         "generated-artifacts": ("schema-artifacts", "schema-parity"),
         "duplication": (
             "duplication-exemptions",

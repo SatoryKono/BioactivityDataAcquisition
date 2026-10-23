@@ -1,0 +1,9 @@
+{
+  "closed_runs": [],
+  "static_anchors": [
+    "RunLedgerEntry.lineage_fragment_id",
+    "RunLedgerEntry.manifest_id",
+    "RunManifest.manifest_id"
+  ],
+  "status": "NOT_RUN"
+}

@@ -595,3 +595,7 @@ skips = ["*/domain/*"]
 dev = [
     "bioetl[dev]",
 ]
+ci-control = [
+    "packaging>=26.3",
+    "pyyaml>=6.0.3",
+]

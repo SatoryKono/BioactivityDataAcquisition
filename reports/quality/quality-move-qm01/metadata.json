@@ -1,0 +1,94 @@
+{
+  "acceptance": {
+    "g_a": "BLOCKED",
+    "move": "NOT_RUN",
+    "script_invocation": "NOT_RUN"
+  },
+  "base_commit": "daaf6fef51ff3f502c2a46121d1dffe2f6555a7c",
+  "baseline_worktree": "read-only git objects at base_commit; the census does not mutate a baseline worktree",
+  "candidate_worktree": "not created; QM-01 does not move the package",
+  "compatibility_decision": {
+    "blocks_g_a": true,
+    "namespace_policy": null,
+    "owner": null,
+    "reason": "No API/release owner has chosen internal-only retention or a breaking change with changelog and version policy. Missing first-party src imports do not prove there are no external users. A compatibility shim is not introduced. G-A stays blocked.",
+    "review_by": null,
+    "shim": "not_introduced",
+    "status": "BLOCKED"
+  },
+  "dependency_lock_sha256": "5a17d238a61cdf18e6b4cc1b9834ce5245a12425ad3f0c2b685498f4d61a2fcd",
+  "historical_plan_base": "d0d167cf3d6bb90ef5a2feff35751a1b8f1c34d9",
+  "issue": "12382",
+  "literals": [
+    "bioetl.infrastructure.quality",
+    "src/bioetl/infrastructure/quality",
+    "src\\bioetl\\infrastructure\\quality",
+    "bioetl/infrastructure/quality"
+  ],
+  "mechanical_move_blocked_by_runtime_src": false,
+  "other_source_tree_entries": [],
+  "pyproject_sha256": "cb7b33703848f56b5da5532deee5adf1e36e344997c5b4da4d7ecaebacc610d9",
+  "python_source_file_count": 30,
+  "role_vocabulary": [
+    "CLI",
+    "library",
+    "oneoff",
+    "test",
+    "config",
+    "ci",
+    "docs",
+    "report",
+    "historical_evidence",
+    "intra_package",
+    "runtime",
+    "unknown"
+  ],
+  "runtime_src_consumers_outside_package": [],
+  "scan": {
+    "binary_namespace_matches": [],
+    "circleci_paths_scanned": [
+      ".circleci/config.yml"
+    ],
+    "extensionless_tracked_count": 8,
+    "hidden_tracked_count": 416,
+    "ignored_but_tracked_count": 2293,
+    "namespace_match_file_count": 138,
+    "read_errors": [],
+    "submodule_count": 0,
+    "symlink_count": 0,
+    "tracked_file_count": 13949
+  },
+  "schema_version": 1,
+  "scope": "QM-01",
+  "test_catalog_paths": [
+    "tests/unit/infrastructure/quality/__init__.py",
+    "tests/unit/infrastructure/quality/test_architecture_debt_reduction.py",
+    "tests/unit/infrastructure/quality/test_architecture_debt_task_generation.py",
+    "tests/unit/infrastructure/quality/test_architecture_quality_scorecard.py",
+    "tests/unit/infrastructure/quality/test_baseline_validation.py",
+    "tests/unit/infrastructure/quality/test_budget_evaluator.py",
+    "tests/unit/infrastructure/quality/test_debt_scorecard.py",
+    "tests/unit/infrastructure/quality/test_debt_scorecard_validation.py",
+    "tests/unit/infrastructure/quality/test_decomposition_validation.py",
+    "tests/unit/infrastructure/quality/test_exemptions_registry.py",
+    "tests/unit/infrastructure/quality/test_exemptions_registry_paths.py",
+    "tests/unit/infrastructure/quality/test_exemptions_registry_validation.py",
+    "tests/unit/infrastructure/quality/test_governance_and_task_support_boost.py",
+    "tests/unit/infrastructure/quality/test_governance_validation.py",
+    "tests/unit/infrastructure/quality/test_grace_windows_validation.py",
+    "tests/unit/infrastructure/quality/test_inventory.py",
+    "tests/unit/infrastructure/quality/test_primitives.py",
+    "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py",
+    "tests/unit/infrastructure/quality/test_registry_sync_service.py",
+    "tests/unit/infrastructure/quality/test_report_formatter.py",
+    "tests/unit/infrastructure/quality/test_scoring.py"
+  ],
+  "tool_revision": {
+    "git": "git version 2.43.0",
+    "platform": "Linux-6.12.94+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "python_implementation": "CPython",
+    "uv": "uv 0.12.23 (x86_64-unknown-linux-gnu)"
+  },
+  "unique_target_count": 30
+}

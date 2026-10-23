@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3897 |
-| Tracked doc-like files | 3897 |
+| Doc-like files | 3916 |
+| Tracked doc-like files | 3916 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3897 |
+| tracked | 3916 |
 
 ## Lifecycle Counts
 
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 191 |
+| working_report | 208 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -51,29 +51,29 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 748 |
+| Active | 750 |
 | Archived | 1553 |
 | Canonical | 76 |
 | Generated | 1062 |
-| Working | 458 |
+| Working | 475 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 748 |
+| active | 750 |
 | archive | 1553 |
 | canonical | 76 |
 | generated | 1062 |
-| working | 458 |
+| working | 475 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 224 |
+| archive-after-migration | 241 |
 | generate-automatically | 1062 |
-| keep | 2611 |
+| keep | 2613 |
 
 ## Cleanup Candidates
 
@@ -124,6 +124,8 @@
 | `reports/acceptance/P04-REM-R10-acceptance-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/acceptance/receipt-12069.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12106-s4-crash-silver/evidence.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12106-s5/evidence/evidence.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12106-s5/matrix.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/handoff.md` | Working | 0 | archive-after-migration |
@@ -157,8 +159,6 @@
 | `reports/audit-runs/20261022-p03/audit-manifest.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20261022-p03/findings.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20261022-p03/handoff.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/tracker_12232_report.md` | Working | 0 | archive-after-migration |
-| `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
 
 ## Generated Artifact Examples
 

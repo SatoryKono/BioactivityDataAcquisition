@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-21'
+  Last verified: '2026-10-22'
 
 ______________________________________________________________________
 
@@ -32,7 +32,7 @@ trend evidence only.
 - Source run id: `local-pr12231-local-coverage-8a4286d`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `54cedc5944a59eeeb88afe74b63e0f68013e98c58580832ee71488f7ce219bd0`
+- Source tree sha256: `cee2e3dd786725cf84a77d92183422fba5f8fd00d2bce0280c754f03dc6d0b13`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-15T18:50:07.879352+00:00`
 
@@ -73,7 +73,16 @@ trend evidence only.
   vendor attestations or CI execution receipts. Exact `source_commit == HEAD`
   remains opt-in via `BIOETL_REQUIRE_TELEMETRY_SOURCE_COMMIT_EQUALS_HEAD=1`.
 - GitHub evidence from a non-main branch requires `pull_request`;
-  its run URL and id remain independently auditable.
+  a manually dispatched Nightly run may instead use `workflow_dispatch`.
+  Its run URL and id remain independently auditable.
+- Use `workflow_dispatch` only for a manually started `Nightly` run on the
+  PR branch. Start it with `gh workflow run nightly.yml --ref <branch>`,
+  then download both source artifacts from that exact run:
+  `gh run download <run-id> --name coverage-report --dir reports` and
+  `gh run download <run-id> --name test-duration-telemetry
+  --dir reports/test-telemetry`. Confirm the run's head SHA and use it
+  as `--source-commit`; keep `--source-event workflow_dispatch` and the
+  matching `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/<run-id>` URL.
 - `--local-manifest <path>` accepts only a complete canonical 17-shard run
   with matching source/test hashes, reachable commit, XML/JUnit digests,
   zero failures/errors and both 85% gates passed. Identity and inputs
@@ -81,10 +90,14 @@ trend evidence only.
 - Local captures use `source_event: local_coverage_verify`, a `local-` run
   id and no GitHub run URL. Trust remains `local_single_host`;
   `CI=BLOCKED_EXTERNAL_PERMANENT` never becomes CI PASS or lifecycle ADMIT.
-- Refresh command:
-  `python -m scripts.engineering.ci.update_test_telemetry_baseline`
-  `--source-commit <sha> --source-run-id <run-id>`
-  `--source-event <event> --source-run-url <url>`.
+- Refresh a non-local capture with its recorded identity:
+  `python -m scripts.engineering.ci.update_test_telemetry_baseline
+  --coverage-xml reports/coverage/coverage.xml
+  --slowest-json reports/test-telemetry/slowest-tests.json
+  --source-branch <branch> --source-commit <sha>
+  --source-run-id <run-id> --source-event <event>
+  --source-run-url <url>`. Use `workflow_dispatch` only for the
+  manually started Nightly workflow described above.
 
 ## Coverage
 
