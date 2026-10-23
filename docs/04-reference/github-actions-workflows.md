@@ -34,7 +34,7 @@ Live GET `2026-09-17`: API `total_count` is **79**.
 
 | Bucket | Count | Meaning |
 | --- | --- | --- |
-| Tracked `.github/workflows/*.yml` | 54 | Canonical inventory on `main`; this page |
+| Tracked `.github/workflows/*.yml` | 55 | Canonical inventory on `main`; this page |
 | GitHub-hosted `dynamic/**` | 10 | Dependabot, CodeQL default, agent reviewers; not PR gates |
 | GitHub-only orphan temp/codex IDs | 16 | Files left `main`; `disabled_manually` after #10265 |
 | GitHub-only residual deleted files | 3 | Former tracked workflows; `disabled_manually`; not gates |
@@ -104,7 +104,7 @@ new spend/safety decision.
 | `skills-consistency.yml` | `Skills Consistency` | `push`, `pull_request`, `workflow_dispatch` | `active` | `active` | Path-filtered local skill mirrors plus Codex–Junie runtime parity |
 | `tests.yml` | `Tests` | `workflow_call` | `active` | `active` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
 | `type-checking-cold.yml` | `Type Checking (Strict Cold Control)` | `schedule`, `workflow_dispatch` | `active` | `active` | Strict mypy cold control without cache |
-| `type-checking.yml` | `Type Checking (Strict)` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Strict mypy lane |
+| `type-checking.yml` | `Type Checking (Strict)` | `workflow_call`, `push`, `workflow_dispatch` | `active` | `active` | Strict mypy lane; push to `main` saves the incremental cache |
 | `validate-vendored-mermaid-assets.yml` | `Validate vendored Mermaid assets` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Vendored Mermaid asset presence check |
 | `coderabbit.yml` | `CodeRabbit` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | CodeRabbit CLI automated code review |
 
