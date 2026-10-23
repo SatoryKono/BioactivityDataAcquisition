@@ -402,7 +402,7 @@ jobs:
 
       - name: Shadow compare impact selection
         id: impact-shadow-compare
-        if: needs['classify-changes'].outputs['tests'] == 'required'
+        if: needs['classify-changes'].outputs['tests'] == 'required' && !cancelled()
         env:
           BASE_SHA: ${{ needs.classify-changes.outputs.base_sha }}
           HEAD_SHA: ${{ needs.classify-changes.outputs.head_sha }}
@@ -410,12 +410,28 @@ jobs:
           set -euo pipefail
           mkdir -p reports/quality
           # Observational only. affected-pytest remains the executed set.
-          # Nightly test-matrix is unchanged. Rollback: delete this step.
+          # A path with no route fails closed. Nightly test-matrix is unchanged.
+          # Rollback: delete this step and the upload below.
           uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results shadow-compare \
             --repo-root . \
             --base-sha "$BASE_SHA" \
             --head-sha "$HEAD_SHA" \
             --output reports/quality/impact-shadow-compare.json
+          {
+            echo "## Impact shadow compare"
+            echo '```json'
+            cat reports/quality/impact-shadow-compare.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload impact shadow compare
+        if: always() && !cancelled() && needs['classify-changes'].outputs['tests'] == 'required' && hashFiles('reports/quality/impact-shadow-compare.json') != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: impact-shadow-compare-${{ github.sha }}
+          path: reports/quality/impact-shadow-compare.json
+          if-no-files-found: error
+          retention-days: 3
 
       - name: Restore mypy cache
         if: needs['classify-changes'].outputs['type-checking'] == 'required'

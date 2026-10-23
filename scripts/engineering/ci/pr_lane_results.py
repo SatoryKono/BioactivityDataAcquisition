@@ -33,6 +33,11 @@ SKIPPED = "skipped"
 REQUIRED = "required"
 NOT_APPLICABLE = "not_applicable"
 TESTS_PREFIX = "tests/"
+SRC_BIOETL_PREFIX = "src/bioetl/"
+SCRIPTS_PREFIX = "scripts/"
+PYPROJECT_TOML = "pyproject.toml"
+UV_LOCK = "uv.lock"
+PYTHON_DEPENDENCY_FILES = frozenset({PYPROJECT_TOML, UV_LOCK})
 TEST_FILE_GLOB = "test_*.py"
 
 from scripts.engineering.dev.run_tests import TESTS_ROOT as PYTEST_ALL_ROOT
@@ -291,7 +296,7 @@ def affected_pytest_targets(
         [target for values in mapped.values() for target in values], repo_root
     )
     targets: list[str] = []
-    if {"pyproject.toml", "uv.lock"} & set(paths):
+    if PYTHON_DEPENDENCY_FILES & set(paths):
         if changed_python_dependencies is None:
             raise ValueError(
                 "Python dependency route requires verified dependency diff"
@@ -353,18 +358,18 @@ def _path_targets(path: str, root: Path) -> list[str]:
     """Return the test path or unit directory implied by one changed path."""
     if path.startswith(TESTS_PREFIX) and path.endswith(".py"):
         return [path] if (root / path).is_file() else []
-    if path.startswith("src/bioetl/") and path.endswith(".py"):
-        first = path.removeprefix("src/bioetl/").split("/", 1)[0]
+    if path.startswith(SRC_BIOETL_PREFIX) and path.endswith(".py"):
+        first = path.removeprefix(SRC_BIOETL_PREFIX).split("/", 1)[0]
         candidate = root / "tests" / "unit" / first
         return [candidate.relative_to(root).as_posix()] if candidate.is_dir() else []
-    if path.startswith("scripts/") and path.endswith(".py"):
+    if path.startswith(SCRIPTS_PREFIX) and path.endswith(".py"):
         return _script_targets(path, root)
     return []
 
 
 def _script_targets(path: str, root: Path) -> list[str]:
     """Return direct or importing tests for one scripts path."""
-    relative = Path(path.removeprefix("scripts/"))
+    relative = Path(path.removeprefix(SCRIPTS_PREFIX))
     test_roots = (root / "tests/unit/scripts", root / "tests/unit/repo_backed/scripts")
     direct_dirs = [test_root / relative.parent for test_root in test_roots]
     if relative.parts[0] == "engineering":
@@ -551,6 +556,20 @@ def _assert_command(args: argparse.Namespace) -> int:
     return 0
 
 
+def _changed_paths(changed_files: list[str]) -> list[str]:
+    """Return normalized non-empty paths from a diff."""
+    return [path for raw in changed_files if (path := raw.strip().replace("\\", "/"))]
+
+
+def _has_selection_route(path: str, root: Path) -> bool:
+    """Return whether one path has an explicit impact-selection route."""
+    if path in PYTHON_DEPENDENCY_FILES or _mapped_targets(path):
+        return True
+    if path.startswith(TESTS_PREFIX) and path.endswith(".py"):
+        return True
+    return bool(_path_targets(path, root))
+
+
 def build_shadow_compare(
     changed_files: list[str],
     *,
@@ -561,8 +580,18 @@ def build_shadow_compare(
     """Record the impact selection without changing the executed suite.
 
     ``affected-pytest`` remains the tests that run. Rollback is to stop
-    calling ``shadow-compare``. An empty selection fails closed.
+    calling ``shadow-compare``. An empty selection or any path without a
+    route fails closed.
     """
+    unmapped = sorted(
+        path
+        for path in _changed_paths(changed_files)
+        if not _has_selection_route(path, repo_root)
+    )
+    if unmapped:
+        raise ValueError(
+            "shadow compare refused unmapped paths: " + ", ".join(unmapped)
+        )
     selected = affected_pytest_targets(
         changed_files,
         repo_root=repo_root,
@@ -615,7 +644,7 @@ def _dependency_selection(
     changed: list[str],
 ) -> tuple[set[str] | None, bool]:
     """Return dependency consumers and the full-suite flag for a diff."""
-    if not {"pyproject.toml", "uv.lock"} & set(changed):
+    if not PYTHON_DEPENDENCY_FILES & set(changed):
         return None, False
     all_tests = pytest_configuration_changed(
         args.repo_root, args.base_sha, args.head_sha
