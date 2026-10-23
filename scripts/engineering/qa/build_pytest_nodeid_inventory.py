@@ -3,19 +3,28 @@
 
 Collection uses pytest's own session, not a text scan for ``::``. Lane
 membership comes from ``configs/quality/test_matrix.yaml`` path prefixes,
-``--ignore`` entries, and marker expressions. The output path is fixed so
-CLI arguments cannot choose a filesystem sink.
+``--ignore`` entries, and marker expressions. Sharded lanes use the shard
+paths and ignores selected by ``runner_options``, not the lane's broad
+``paths`` list. The output path is fixed so CLI arguments cannot choose a
+filesystem sink.
+
+``source_commit`` records the HEAD used at ``--update`` time. ``--check``
+does not require that field to equal the current HEAD: the committed file
+cannot contain the SHA of the commit that adds it. Freshness is the
+collected document with ``source_commit`` removed.
 """
 
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import io
 import json
 import subprocess
 import sys
-from contextlib import redirect_stderr, redirect_stdout
+from collections import Counter
 from collections.abc import Mapping, Sequence
+from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
@@ -31,8 +40,11 @@ from scripts.engineering.common.repo_paths import (
 )
 
 _MATRIX_PATH: Final[str] = "configs/quality/test_matrix.yaml"
+_SHARDS_PATH: Final[str] = "configs/quality/pytest_shards.yaml"
 _OUTPUT_PATH: Final[str] = "reports/quality/pytest-nodeid-inventory.json"
 _COLLECT_ROOTS: Final[tuple[str, ...]] = ("tests",)
+_RESIDUAL_LANE: Final[str] = "full-only-residual"
+_CHECK_IGNORED_FIELDS: Final[frozenset[str]] = frozenset({"source_commit"})
 _UMBRELLA_LANES: Final[frozenset[str]] = frozenset({"coverage-verify"})
 _OWNER_PRIORITY: Final[tuple[str, ...]] = (
     "AgentMemory",
@@ -80,6 +92,15 @@ _WORKFLOW_BY_OWNER: Final[dict[str, str]] = {
 
 
 @dataclass(frozen=True)
+class ShardScope:
+    """Paths and ignores for one concrete pytest shard."""
+
+    prefixes: tuple[str, ...]
+    ignores: tuple[str, ...]
+    ignore_globs: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class LaneRule:
     """One test-matrix lane reduced to the fields the inventory matches on."""
 
@@ -87,6 +108,7 @@ class LaneRule:
     prefixes: tuple[str, ...]
     ignores: tuple[str, ...]
     marker_expression: str
+    shard_scopes: tuple[ShardScope, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -109,11 +131,24 @@ class OwnerDecision:
     lanes: tuple[str, ...]
 
 
-def _normalize_prefix(prefix: str) -> str:
-    text = prefix.replace("\\", "/").lstrip("./")
-    if text.endswith(".py"):
-        return text
-    return text if text.endswith("/") else f"{text}/"
+def _normalize_token(prefix: str) -> str:
+    return prefix.replace("\\", "/").lstrip("./")
+
+
+def glob_match(path: str, pattern: str) -> bool:
+    """Match a repo-relative path with the same ``fnmatch`` rules pytest uses."""
+
+    return fnmatch.fnmatchcase(_normalize_token(path), _normalize_token(pattern))
+
+
+def _path_token_matches(file_name: str, raw: str) -> bool:
+    needle = _normalize_token(raw)
+    if any(char in needle for char in "*?["):
+        return glob_match(file_name, needle)
+    if needle.endswith(".py"):
+        return file_name == needle
+    directory = needle if needle.endswith("/") else f"{needle}/"
+    return file_name == directory.rstrip("/") or file_name.startswith(directory)
 
 
 def marker_expression_matches(markers: set[str], expression: str) -> bool:
@@ -136,37 +171,47 @@ def marker_expression_matches(markers: set[str], expression: str) -> bool:
 
 
 def _ignored(file_name: str, ignores: tuple[str, ...]) -> bool:
-    for ignore in ignores:
-        needle = _normalize_prefix(ignore)
-        if file_name == needle.rstrip("/") or file_name.startswith(needle):
-            return True
-    return False
+    return any(_path_token_matches(file_name, ignore) for ignore in ignores)
+
+
+def _glob_ignored(file_name: str, patterns: tuple[str, ...]) -> bool:
+    return any(glob_match(file_name, pattern) for pattern in patterns)
 
 
 def _prefix_matches(file_name: str, prefixes: tuple[str, ...]) -> bool:
-    for prefix in prefixes:
-        needle = _normalize_prefix(prefix)
-        if needle.endswith(".py"):
-            if file_name == needle:
-                return True
-            continue
-        if file_name.startswith(needle):
-            return True
-    return False
+    return any(_path_token_matches(file_name, prefix) for prefix in prefixes)
+
+
+def _scope_matches(scope: ShardScope, file_name: str) -> bool:
+    if _ignored(file_name, scope.ignores) or _glob_ignored(
+        file_name, scope.ignore_globs
+    ):
+        return False
+    return _prefix_matches(file_name, scope.prefixes)
 
 
 def lane_matches(rule: LaneRule, file_name: str, markers: set[str]) -> bool:
     """Return whether one collected file belongs to ``rule``."""
 
+    if not marker_expression_matches(markers, rule.marker_expression):
+        return False
+    if rule.shard_scopes:
+        return any(_scope_matches(scope, file_name) for scope in rule.shard_scopes)
     if _ignored(file_name, rule.ignores):
         return False
-    if not _prefix_matches(file_name, rule.prefixes):
-        return False
-    return marker_expression_matches(markers, rule.marker_expression)
+    return _prefix_matches(file_name, rule.prefixes)
 
 
-def load_lane_rules(matrix: Mapping[str, object]) -> tuple[LaneRule, ...]:
-    """Read lane path, ignore, and marker rules from the test matrix."""
+def load_lane_rules(
+    matrix: Mapping[str, object],
+    shards: Mapping[str, object] | None = None,
+) -> tuple[LaneRule, ...]:
+    """Read lane path, ignore, and marker rules from the test matrix.
+
+    Sharded lanes replace ``paths`` with the concrete shard scopes named by
+    ``runner_options``. ``coverage-verify`` stays an umbrella and is not
+    expanded.
+    """
 
     test_lanes = matrix.get("test_lanes")
     if not isinstance(test_lanes, Mapping):
@@ -174,6 +219,10 @@ def load_lane_rules(matrix: Mapping[str, object]) -> tuple[LaneRule, ...]:
     lanes = test_lanes.get("lanes")
     if not isinstance(lanes, Mapping):
         raise ValueError("test_matrix.yaml is missing test_lanes.lanes")
+    aliases: dict[str, tuple[str, ...]] = {}
+    scopes: dict[str, ShardScope] = {}
+    if shards is not None:
+        aliases, scopes = load_shard_catalog(shards)
     rules: list[LaneRule] = []
     for name, info in lanes.items():
         if not isinstance(name, str) or not isinstance(info, Mapping):
@@ -184,6 +233,13 @@ def load_lane_rules(matrix: Mapping[str, object]) -> tuple[LaneRule, ...]:
                 prefixes=_string_tuple(info.get("paths")),
                 ignores=_ignore_args(info.get("pytest_args")),
                 marker_expression=_marker_expression(info.get("marker_expression")),
+                shard_scopes=_shard_scopes_for_lane(
+                    name,
+                    info,
+                    aliases=aliases,
+                    scopes=scopes,
+                    catalog_loaded=shards is not None,
+                ),
             )
         )
     missing = [rule.name for rule in rules if rule.name not in _LANE_OWNER]
@@ -221,12 +277,133 @@ def _ignore_args(value: object) -> tuple[str, ...]:
     return tuple(ignores)
 
 
+def _ignore_glob_args(value: object) -> tuple[str, ...]:
+    if not isinstance(value, Sequence) or isinstance(value, str):
+        return ()
+    patterns: list[str] = []
+    tokens = [str(item) for item in value]
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+        if token.startswith("--ignore-glob="):
+            patterns.append(token.split("=", 1)[1])
+        elif token == "--ignore-glob" and index + 1 < len(tokens):
+            index += 1
+            patterns.append(tokens[index])
+        index += 1
+    return tuple(patterns)
+
+
+def _option_values(value: object, flag: str) -> tuple[str, ...]:
+    if not isinstance(value, Sequence) or isinstance(value, str):
+        return ()
+    tokens = [str(item) for item in value]
+    names: list[str] = []
+    index = 0
+    while index < len(tokens):
+        if tokens[index] == flag and index + 1 < len(tokens):
+            index += 1
+            names.append(tokens[index])
+        index += 1
+    return tuple(names)
+
+
+def load_shard_catalog(
+    payload: Mapping[str, object],
+) -> tuple[dict[str, tuple[str, ...]], dict[str, ShardScope]]:
+    """Read alias expansion and concrete shard scopes."""
+
+    raw_aliases = payload.get("aliases")
+    aliases: dict[str, tuple[str, ...]] = {}
+    if isinstance(raw_aliases, Mapping):
+        for name, info in raw_aliases.items():
+            if not isinstance(name, str) or not isinstance(info, Mapping):
+                raise ValueError(f"invalid shard alias: {name!r}")
+            aliases[name] = _string_tuple(info.get("expands_to"))
+    raw_shards = payload.get("shards")
+    if not isinstance(raw_shards, Sequence) or isinstance(raw_shards, str):
+        raise ValueError("pytest_shards.yaml is missing shards")
+    scopes: dict[str, ShardScope] = {}
+    for entry in raw_shards:
+        if not isinstance(entry, Mapping):
+            raise ValueError("invalid shard entry")
+        name = entry.get("name")
+        if not isinstance(name, str):
+            raise ValueError("shard name must be a string")
+        extra = entry.get("extra_pytest_args")
+        scopes[name] = ShardScope(
+            prefixes=_string_tuple(entry.get("paths")),
+            ignores=_ignore_args(extra),
+            ignore_globs=_ignore_glob_args(extra),
+        )
+    return aliases, scopes
+
+
+def expand_shard_names(
+    names: Sequence[str],
+    aliases: Mapping[str, Sequence[str]],
+) -> tuple[str, ...]:
+    """Expand alias names to concrete shard names, preserving first-seen order."""
+
+    resolved: list[str] = []
+    seen: set[str] = set()
+    visiting: set[str] = set()
+
+    def walk(name: str) -> None:
+        if name in seen or name in visiting:
+            if name in visiting:
+                raise ValueError(f"shard alias cycle: {name}")
+            return
+        children = aliases.get(name)
+        if children:
+            visiting.add(name)
+            for child in children:
+                walk(str(child))
+            visiting.remove(name)
+            seen.add(name)
+            return
+        seen.add(name)
+        resolved.append(name)
+
+    for name in names:
+        walk(name)
+    return tuple(resolved)
+
+
+def _shard_scopes_for_lane(
+    name: str,
+    info: Mapping[str, object],
+    *,
+    aliases: Mapping[str, Sequence[str]],
+    scopes: Mapping[str, ShardScope],
+    catalog_loaded: bool,
+) -> tuple[ShardScope, ...]:
+    if info.get("runner_backend") != "run_pytest_sharded":
+        return ()
+    selected = _option_values(info.get("runner_options"), "--shard")
+    if not selected:
+        if name in _UMBRELLA_LANES:
+            return ()
+        raise ValueError(f"sharded lane {name} has no --shard selection")
+    if not catalog_loaded:
+        raise ValueError(f"sharded lane {name} requires the pytest shard catalog")
+    expanded = expand_shard_names(selected, aliases)
+    missing = [item for item in expanded if item not in scopes]
+    if missing:
+        raise ValueError(f"unknown shards for {name}: {missing}")
+    return tuple(scopes[item] for item in expanded)
+
+
 def decide_owner(lane_names: Sequence[str]) -> OwnerDecision:
     """Pick one canonical owner. Smoke overlap is the only allowed duplicate."""
 
     substantive = tuple(name for name in lane_names if name not in _UMBRELLA_LANES)
     if not substantive:
-        return OwnerDecision("unowned", None, ())
+        return OwnerDecision(
+            "FullOnly",
+            "outside configured lanes",
+            (_RESIDUAL_LANE,),
+        )
     owners = {_LANE_OWNER[name] for name in substantive}
     if len(owners) == 1:
         rationale = None
@@ -303,6 +480,18 @@ def _node_from_item(item: pytest.Item, root: Path) -> CollectedNode:
     )
 
 
+def collect_pytest_args(paths: Sequence[str] = _COLLECT_ROOTS) -> list[str]:
+    """Return the fixed pytest invocation used for a complete inventory."""
+
+    return [
+        "--collect-only",
+        "-p",
+        "no:cacheprovider",
+        "--artifact-selection=all",
+        *paths,
+    ]
+
+
 def collect_nodes(
     paths: Sequence[str] = _COLLECT_ROOTS,
     *,
@@ -321,12 +510,7 @@ def collect_nodes(
     with redirect_stdout(stdout_buffer), redirect_stderr(stderr_buffer):
         exit_code = int(
             pytest.main(
-                [
-                    "--collect-only",
-                    "-p",
-                    "no:cacheprovider",
-                    *paths,
-                ],
+                collect_pytest_args(paths),
                 plugins=[_InventoryPlugin()],
             )
         )
@@ -360,7 +544,8 @@ def build_inventory(
     records = [build_record(node, rules) for node in nodes]
     records.sort(key=lambda record: str(record["nodeid"]))
     nodeids = [str(record["nodeid"]) for record in records]
-    duplicates = sorted({nodeid for nodeid in nodeids if nodeids.count(nodeid) > 1})
+    counts = Counter(nodeids)
+    duplicates = sorted(nodeid for nodeid, count in counts.items() if count > 1)
     unowned = [
         str(record["nodeid"])
         for record in records
@@ -381,12 +566,16 @@ def _dumps(payload: Mapping[str, object]) -> str:
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
 
 
-def _problems(payload: Mapping[str, object], *, head: str) -> list[str]:
+def comparable_inventory(payload: Mapping[str, object]) -> dict[str, object]:
+    """Return the manifest fields that must match across commits."""
+
+    return {
+        key: value for key, value in payload.items() if key not in _CHECK_IGNORED_FIELDS
+    }
+
+
+def _problems(payload: Mapping[str, object]) -> list[str]:
     problems: list[str] = []
-    if payload.get("source_commit") != head or not head:
-        problems.append(
-            f"source_commit {payload.get('source_commit')!r} != HEAD {head!r}"
-        )
     duplicates = payload.get("duplicate_nodeids")
     if isinstance(duplicates, list) and duplicates:
         problems.append(f"duplicate nodeids: {len(duplicates)}")
@@ -394,6 +583,21 @@ def _problems(payload: Mapping[str, object], *, head: str) -> list[str]:
     if unowned != 0:
         problems.append(f"unowned nodeids: {unowned}")
     return problems
+
+
+def _check_payloads(
+    existing: Mapping[str, object],
+    expected: Mapping[str, object],
+) -> int:
+    if comparable_inventory(existing) != comparable_inventory(expected):
+        print("inventory differs from the committed manifest", file=sys.stderr)
+        return 1
+    problems = _problems(existing)
+    if problems:
+        print("\n".join(problems), file=sys.stderr)
+        return 1
+    print(f"Inventory matches {_OUTPUT_PATH}.")
+    return 0
 
 
 def _check(expected: Mapping[str, object]) -> int:
@@ -406,21 +610,13 @@ def _check(expected: Mapping[str, object]) -> int:
     if not isinstance(existing, dict):
         print("inventory payload must be an object", file=sys.stderr)
         return 1
-    if existing.get("nodes") != expected.get("nodes"):
-        print("inventory nodes differ from the committed manifest", file=sys.stderr)
-        return 1
-    problems = _problems(existing, head=_head_sha())
-    if problems:
-        print("\n".join(problems), file=sys.stderr)
-        return 1
-    print(f"Inventory matches {_OUTPUT_PATH}.")
-    return 0
+    return _check_payloads(existing, expected)
 
 
-def _load_matrix() -> dict[str, object]:
-    loaded = yaml.safe_load(read_text_confined(_MATRIX_PATH))
+def _load_mapping(path: str) -> dict[str, object]:
+    loaded = yaml.safe_load(read_text_confined(path))
     if not isinstance(loaded, dict):
-        raise ValueError("test matrix must be a mapping")
+        raise ValueError(f"{path} must be a mapping")
     return loaded
 
 
@@ -435,7 +631,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("pass only one of --check or --update", file=sys.stderr)
         return 2
 
-    rules = load_lane_rules(_load_matrix())
+    rules = load_lane_rules(_load_mapping(_MATRIX_PATH), _load_mapping(_SHARDS_PATH))
     exit_code, nodes = collect_nodes()
     if exit_code != 0:
         print(f"pytest collection failed with exit {exit_code}", file=sys.stderr)
@@ -448,7 +644,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     write_text_confined(_OUTPUT_PATH, _dumps(inventory))
     print(f"Wrote {inventory['count']} nodeids to {_OUTPUT_PATH}.")
-    problems = _problems(inventory, head=head)
+    problems = _problems(inventory)
     if problems:
         print("\n".join(problems), file=sys.stderr)
         return 1
