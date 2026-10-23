@@ -1973,7 +1973,7 @@ def test_late_session_finish_status_change_is_not_complete(tmp_path: Path) -> No
     assert verdict["status"] != "complete"
     assert verdict["tests_passed"] is not True
 
-def test_record_redacts_nested_secrets_in_payload() -> None:
+def test_record_redacts_nested_secrets_in_payload(tmp_path: Path) -> None:
     from scripts.engineering.ci.pytest_event_journal import (
         EventJournalPlugin,
     )
@@ -1989,7 +1989,7 @@ def test_record_redacts_nested_secrets_in_payload() -> None:
 
     plugin = EventJournalPlugin(
         config=None,
-        path=Path("/tmp/foo"),
+        path=tmp_path / "foo.jsonl",
         identity=identity,
     )
     plugin.secrets = ("supersecret", "swordfish")

@@ -21,7 +21,11 @@ on:
         description: "Published GHCR image digest"
         value: ${{ jobs.docker-push.outputs.digest }}
   push:
+<<<<<<< HEAD
+    branches:
+=======
     branches-ignore:
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
       - main
     paths:
       - "Dockerfile.bioetl"

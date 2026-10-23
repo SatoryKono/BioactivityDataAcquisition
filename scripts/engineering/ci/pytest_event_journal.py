@@ -452,11 +452,11 @@ class EventJournalPlugin:
         return True
 
     def record_selected(self, items: list[Any]) -> None:
-        nodeids = sorted(_redact_text(str(item.nodeid), self.secrets) for item in items)
+        nodeids = sorted(str(item.nodeid) for item in items)
         self.record("collection_finished", {"nodeids": nodeids})
 
     def pytest_deselected(self, items: list[Any]) -> None:
-        nodeids = sorted(_redact_text(str(item.nodeid), self.secrets) for item in items)
+        nodeids = sorted(str(item.nodeid) for item in items)
         self.record("deselected", {"nodeids": nodeids})
 
     def pytest_collectreport(self, report: Any) -> None:

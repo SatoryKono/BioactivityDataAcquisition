@@ -1,6 +1,10 @@
 name: Type Checking (Strict)
 permissions:
   contents: read
+<<<<<<< HEAD
+  actions: write
+=======
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -8,6 +12,18 @@ concurrency:
 
 on:
   workflow_call:
+<<<<<<< HEAD
+    inputs:
+      save_cache:
+        description: "Whether to save mypy cache (trusted callers only)"
+        type: boolean
+        required: false
+        default: false
+  push:
+    branches:
+      - main
+=======
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
   workflow_dispatch:
 
 jobs:
@@ -25,20 +41,38 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
 
+<<<<<<< HEAD
+      - name: Restore mypy cache
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: .mypy_cache
+          key: ${{ runner.os }}-${{ runner.arch }}-python-${{ env.pythonLocation }}-mypy-${{ hashFiles('pyproject.toml', 'uv.lock') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-python-${{ env.pythonLocation }}-mypy-${{ hashFiles('pyproject.toml', 'uv.lock') }}-
+
+=======
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
       - name: Run mypy (strict mode, full gate)
         env:
           EVENT_NAME: ${{ github.event_name }}
         run: |
           set -o pipefail
           mkdir -p reports
+<<<<<<< HEAD
+=======
           rm -rf .mypy_cache
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
 
           echo "Running full mypy strict gate on src/bioetl + src/memory..."
           echo "Event: $EVENT_NAME" | tee reports/mypy_strict.log
 
           set +e
           timeout --signal=TERM --kill-after=30s 30m \
+<<<<<<< HEAD
+            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory \
+=======
             uv run --frozen --no-build mypy --config-file pyproject.toml --strict --no-incremental src/bioetl src/memory \
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
             2>&1 | tee -a reports/mypy_strict.log
           status=${PIPESTATUS[0]}
           set -e
@@ -52,6 +86,20 @@ jobs:
 
           exit "$status"
 
+<<<<<<< HEAD
+
+      - name: Save mypy cache
+        if: ${{ always() && (inputs.save_cache == true || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) }}
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: .mypy_cache
+          key: ${{ runner.os }}-${{ runner.arch }}-python-${{ env.pythonLocation }}-mypy-${{ hashFiles('pyproject.toml', 'uv.lock') }}-${{ github.sha }}
+
+      - name: Verify Domain Type Policy
+        run: |
+          echo "Checking domain type policy (NewType, Protocol, Any)..."
+          uv run --frozen --no-build python -m scripts.engineering.qa.check_architecture domain-type-policy
+=======
       - name: Verify NewType and Protocol usage in domain layer
         run: |
           echo "Checking for proper type definitions in domain layer..."
@@ -154,6 +202,7 @@ jobs:
           else:
               print("✅ No problematic Any type usage found")
           PY
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
 
       - name: Upload type checking reports
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

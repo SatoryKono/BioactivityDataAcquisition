@@ -319,7 +319,10 @@ jobs:
         needs['classify-changes'].outputs['tests'] == 'required' ||
         needs['classify-changes'].outputs['type-checking'] == 'required' ||
         needs['classify-changes'].outputs['security'] == 'required' ||
+<<<<<<< HEAD
+=======
         needs['classify-changes'].outputs['docker'] == 'required' ||
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
         needs['classify-changes'].outputs['generated-artifacts'] == 'required' ||
         needs['classify-changes'].outputs['duplication'] == 'required'
       }}
@@ -344,17 +347,29 @@ jobs:
       - name: Ruff check
         id: ruff
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
+<<<<<<< HEAD
+        run: uv run --frozen --no-build ruff check src tests scripts --output-format=github
+=======
         run: uv run --frozen --no-build ruff check src tests --output-format=github
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
 
       - name: Ruff format
         id: ruff-format
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
+<<<<<<< HEAD
+        run: uv run --frozen --no-build ruff format --check src tests scripts
+=======
         run: uv run --frozen --no-build ruff format --check src tests
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
 
       - name: Ruff isort
         id: ruff-isort
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
+<<<<<<< HEAD
+        run: uv run --frozen --no-build ruff check --select I src tests scripts --output-format=github
+=======
         run: uv run --frozen --no-build ruff check --select I src tests --output-format=github
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
 
       - name: C901 governance
         id: c901
@@ -375,7 +390,11 @@ jobs:
       - name: Architecture pytest slice
         id: arch-pytest
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
+<<<<<<< HEAD
+        run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-marker "not slow and not benchmark and not memory and not serial_or_bounded" --parallel-addopts "-n auto --dist loadscope --max-worker-restart=0 -q --tb=line" --serial-marker "serial_or_bounded and not slow and not benchmark and not memory" --serial-addopts "-p no:xdist -q --tb=line"
+=======
         run: uv run --frozen --no-build pytest tests/architecture -m "not slow and not benchmark and not memory" -q --tb=line
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
 
       - name: Affected pytest
         id: affected-pytest
@@ -396,8 +415,21 @@ jobs:
             echo "::error::tests gate has no affected pytest target"
             exit 1
           fi
+<<<<<<< HEAD
+          uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target "${targets[@]}" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-marker "not serial_or_bounded" --parallel-addopts "-n auto --dist loadfile --max-worker-restart=0 -q --tb=line" --serial-marker "serial_or_bounded" --serial-addopts "-p no:xdist -q --tb=line" --no-fallback
+
+      - name: Restore mypy cache
+        if: needs['classify-changes'].outputs['type-checking'] == 'required'
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: .mypy_cache
+          key: ${{ runner.os }}-${{ runner.arch }}-python-${{ env.pythonLocation }}-mypy-${{ hashFiles('pyproject.toml', 'uv.lock') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-python-${{ env.pythonLocation }}-mypy-${{ hashFiles('pyproject.toml', 'uv.lock') }}-
+=======
           uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks ci \
             --report reports/quality/affected-test-partition.json -- "${targets[@]}" -q --tb=line
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
 
       - name: Run mypy (strict mode, full gate)
         if: needs['classify-changes'].outputs['type-checking'] == 'required'
@@ -407,14 +439,21 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p reports
+<<<<<<< HEAD
+=======
           rm -rf .mypy_cache
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
 
           echo "Running full mypy strict gate on src/bioetl + src/memory..."
           echo "Event: $EVENT_NAME" | tee reports/mypy_strict.log
 
           set +e
           timeout --signal=TERM --kill-after=30s 30m \
+<<<<<<< HEAD
+            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory \
+=======
             uv run --frozen --no-build mypy --config-file pyproject.toml --strict --no-incremental src/bioetl src/memory \
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
             2>&1 | tee -a reports/mypy_strict.log
           status=${PIPESTATUS[0]}
           set -e
@@ -595,6 +634,8 @@ jobs:
         if: needs['classify-changes'].outputs['security'] == 'required'
         run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json
 
+<<<<<<< HEAD
+=======
       - name: Set up Docker Buildx
         id: setup-buildx
         if: needs['classify-changes'].outputs['docker'] == 'required'
@@ -627,6 +668,7 @@ jobs:
             tests/unit/repo_backed/scripts/ops/docker/test_docker_runtime_probe.py \
             tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py
 
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
       - name: Check generated schema artifacts
         id: schema-artifacts
         if: needs['classify-changes'].outputs['generated-artifacts'] == 'required'
@@ -743,6 +785,18 @@ jobs:
             --outcomes-env \
             --owner "$LANE_OWNER"
 
+<<<<<<< HEAD
+
+  docker-lane:
+    name: Docker lane
+    needs: classify-changes
+    if: needs['classify-changes'].outputs['docker'] == 'required'
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@843eb3f1c9410df7eccfebf3c8a810cc897ed0e9
+    with:
+      caller-sha: ${{ needs.classify-changes.outputs.head_sha }}
+
+=======
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
   pr-gate-complete:
     name: pr-gate-complete
     runs-on: ubuntu-latest
@@ -752,6 +806,10 @@ jobs:
       - classify-changes
       - fast-governance
       - class-lane
+<<<<<<< HEAD
+      - docker-lane
+=======
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
     permissions:
       contents: read
     steps:
@@ -774,6 +832,10 @@ jobs:
           DECISION_MATRIX: ${{ needs.classify-changes.outputs.decision_matrix }}
           FAST_RESULT: ${{ needs.fast-governance.result }}
           CLASS_RESULT: ${{ needs.class-lane.result }}
+<<<<<<< HEAD
+          DOCKER_RESULT: ${{ needs.docker-lane.result }}
+=======
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
           EXPECTED_HEAD_SHA: ${{ needs.classify-changes.outputs.head_sha }}
           OBSERVED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -787,6 +849,10 @@ jobs:
             --head-sha "${EXPECTED_HEAD_SHA}" \
             --job-result "fast-governance=${FAST_RESULT}" \
             --job-result "class-lane=${CLASS_RESULT}" \
+<<<<<<< HEAD
+            --job-result "docker-lane=${DOCKER_RESULT}" \
+=======
+>>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
             --output reports/quality/pr-gate-aggregate-results.json
           AGGREGATE_RESULTS="$(tr -d '\r\n' < reports/quality/pr-gate-aggregate-results.json)"
           export AGGREGATE_RESULTS
