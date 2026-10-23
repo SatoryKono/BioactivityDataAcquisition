@@ -244,6 +244,7 @@ def test_local_action_yaml_suffix_passes_and_escape_fails(tmp_path: Path) -> Non
 
 
 def test_current_coordinator_job_calls_match_registry() -> None:
+    """The coordinator's only reusable call is the pinned docker-lane workflow."""
     document = yaml.safe_load(COORDINATOR.read_text(encoding="utf-8"))
     jobs = document["jobs"]
     assert isinstance(jobs, dict)
