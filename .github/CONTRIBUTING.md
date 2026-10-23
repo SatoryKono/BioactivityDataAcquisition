@@ -119,7 +119,7 @@ rules and local/CI command paths, is documented in
 
 Do not push or merge directly to `main`.
 
-<!-- policy-anchor:deployment-provider --> `deployment.provider` is `github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Rulesets `13643213` and `15730586` are `enforcement: disabled`. <!-- policy-anchor:stored-ruleset-contexts --> Stored `ci/circleci: pr-gate-complete` is not active CircleCI protection. <!-- policy-anchor:target-gha-context --> Target `pr-gate-complete` is not the context stored on those rulesets. <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge. An offline catalog match does not confirm live server rulesets.
+<!-- policy-anchor:deployment-provider --> `deployment.provider` is `github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Rulesets `13643213` and `15730586` are `enforcement: disabled`. <!-- policy-anchor:stored-ruleset-contexts --> Stored `ci/circleci: pr-gate-complete` is not active CircleCI protection. <!-- policy-anchor:target-gha-context --> Target `pr-gate-complete` is not the context stored on those rulesets. <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` `2026-10-23` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge. An offline catalog match does not confirm live server rulesets.
 
 The coordinator job is `pr-gate-complete` (`.github/workflows/pr-required.yml`),
 a fail-closed aggregator. Rulesets `13643213` and `15730586` are

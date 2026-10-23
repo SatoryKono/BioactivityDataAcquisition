@@ -58,7 +58,7 @@ state.
    <!-- policy-anchor:ruleset-enforcement-mode --> Record `enforcement` for every ruleset returned by the paginated list. On 2026-10-16, `13643213` and `15730586` were `enforcement: disabled`.
    <!-- policy-anchor:stored-ruleset-contexts --> Record stored contexts even when enforcement is disabled. Those rulesets store `ci/circleci: pr-gate-complete`; that stored context is not active CircleCI protection.
    <!-- policy-anchor:target-gha-context --> Catalog target `pr-gate-complete` is not the context stored on the rulesets.
-   <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` `2026-10-09` is not proof of active merge protection.
+   <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` `2026-10-23` is not proof of active merge protection.
    <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge when classic branch protection is absent and the applicable rulesets are disabled. An offline catalog match does not confirm live server rulesets.
    Do not change settings from this runbook. The 2026-10-05 receipt remains historical evidence only.
 1. Review every control: rulesets, merge settings, Actions SHA policy,

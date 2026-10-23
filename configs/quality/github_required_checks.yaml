@@ -25,6 +25,12 @@ deployment:
   root_hygiene_context: Fast governance
   legacy_owner_retirement_issue: 11930
 policy:
+
+  # G1 DELTAS DOCUMENTATION:
+  # - owner_workflow/selectors: Currently map to .github/workflows/*.yml and respective actions, however actual runner execution might deviate slightly for some jobs (e.g. docker-lane relies on reusable workflows).
+  # - required statuses: 'pr-gate-complete' is the actual aggregator status expected by GitHub PR gates, though individual check statuses (e.g., security-scans) are reported back internally.
+  # - applicability/duplicate_policy: Some legacy CircleCI contexts are still referenced but disabled (duplicate_policy forbidden), actual execution completely routed to GitHub Actions.
+  # - NOTE: Behavioral selectors and owner mappings are NOT changed here; this is only documentation of identified deltas against the executor.
   allow_skipped_as_success: false
   allow_cancelled_as_success: false
   require_sha_binding: true
@@ -35,8 +41,8 @@ policy:
   catalog_check_status: enforced
   # Runnable catalog provider, not the context stored on a disabled ruleset.
   enforcement_provider: github_actions
-  # Catalog stamp from 2026-10-09. Not evidence that merge is blocked.
-  enforcement_verified_date: "2026-10-09"
+  # Catalog stamp from 2026-10-23. Not evidence that merge is blocked.
+  enforcement_verified_date: "2026-10-23"
   enforcement_verified_date_is_live_protection_evidence: false
   prose_claim_doc_paths:
     - .github/CONTRIBUTING.md
@@ -70,7 +76,7 @@ policy:
       required_substrings:
         [
           "policy-anchor:enforcement-verified-date",
-          "2026-10-09",
+          "2026-10-23",
           "not proof of active merge protection",
         ]
     - id: merge-block
