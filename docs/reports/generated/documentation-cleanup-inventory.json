@@ -98777,6 +98777,90 @@
       "lifecycle": "active_quality_baseline",
       "outbound_links": 0,
       "owner": "BioETL Team",
+      "path": "reports/governance/ci-baseline.json",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "active_quality_baseline",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/governance/ci-baseline.schema.json",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "active_quality_baseline",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/governance/ci-evidence-retention-policy.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "active_quality_baseline",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
       "path": "reports/governance/receipt-12102-bronze-writer-posix-2026-10-19.json",
       "recommended_action": "keep",
       "root_doc_kind": null,
@@ -110437,7 +110521,7 @@
   "summary": {
     "by_lifecycle": {
       "active_backlog": 1,
-      "active_quality_baseline": 68,
+      "active_quality_baseline": 71,
       "closeout_evidence": 166,
       "docs_reports_curated_entrypoint": 2,
       "docs_reports_curated_or_historical_report": 28,
@@ -110455,7 +110539,7 @@
     "by_recommended_action": {
       "archive-after-migration": 241,
       "generate-automatically": 1062,
-      "keep": 2612
+      "keep": 2615
     },
     "by_section": {
       ".github": 6,
@@ -110479,7 +110563,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 508,
+      "reports": 511,
       "security": 2
     },
     "by_status": {
@@ -110487,17 +110571,17 @@
       "Archived": 1553,
       "Canonical": 76,
       "Generated": 1062,
-      "Working": 475
+      "Working": 478
     },
     "by_surface_family": {
       "active": 749,
       "archive": 1553,
       "canonical": 76,
       "generated": 1062,
-      "working": 475
+      "working": 478
     },
     "by_tracking_state": {
-      "tracked": 3915
+      "tracked": 3918
     },
     "docs_reports_local_count": 59,
     "duplicate_group_count": 80,
@@ -110510,8 +110594,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3915,
+    "total_doc_like": 3918,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3915
+    "total_doc_like_tracked": 3918
   }
 }
