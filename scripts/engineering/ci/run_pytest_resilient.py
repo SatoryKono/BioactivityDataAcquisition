@@ -288,7 +288,7 @@ def _pytest_targets(target: str | Sequence[str]) -> list[str]:
     if isinstance(target, str):
         paths = [target]
     else:
-        paths = [item for item in target if item]
+        paths = [str(item) for item in target if item]
     if not paths:
         raise ValueError("pytest target must not be empty")
     return paths

@@ -866,3 +866,12 @@ def test_disappearing_leaves_really_fall_back_to_launcher(monkeypatch) -> None:
     result = owner._deliver_diagnostic_signal(SimpleNamespace(pid=101), {202, 203})
     assert result == ("process_group", signal.SIGABRT)
     assert delivered == [(101, signal.SIGABRT)]
+
+
+def test_runner_accepts_multiple_pytest_targets() -> None:
+    from scripts.engineering.ci.run_pytest_resilient import _create_parser
+
+    parsed = _create_parser().parse_args(
+        ["--target", "tests/a.py", "tests/b.py", "--no-fallback"]
+    )
+    assert parsed.target == ["tests/a.py", "tests/b.py"]
