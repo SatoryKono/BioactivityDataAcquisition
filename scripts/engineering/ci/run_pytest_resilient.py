@@ -309,6 +309,7 @@ def _run_pass(
     allow_no_tests: bool = False,
     receipt: ReceiptInvocation | None = None,
     child_env: dict[str, str] | None = None,
+    extra_pytest_args: Sequence[str] | None = None,
 ) -> PassResult:
     """Run pytest pass and persist logs/artifacts."""
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
@@ -325,6 +326,7 @@ def _run_pass(
         marker_expr,
         "--junitxml",
         str(junit_path),
+        *(extra_pytest_args or []),
         *addopts,
     ]
     invocation_id = ""
@@ -585,6 +587,7 @@ def _run_named_pass(
     allow_no_tests: bool = False,
     receipt: ReceiptInvocation | None = None,
     child_env: dict[str, str] | None = None,
+    extra_pytest_args: Sequence[str] | None = None,
 ) -> PassResult:
     """Run a named pass using shell-split addopts."""
     return _run_pass(
@@ -601,7 +604,52 @@ def _run_named_pass(
         allow_no_tests=allow_no_tests,
         receipt=receipt,
         child_env=child_env,
+        extra_pytest_args=extra_pytest_args,
     )
+
+
+def _collected_nothing(result: PassResult) -> bool:
+    """True when pytest collected no tests and the pass itself did not crash."""
+    return (
+        result.return_code == 5
+        and not result.timed_out
+        and not result.worker_crash_detected
+    )
+
+
+def _artifact_report_path(reports_dir: Path, pass_name: str) -> Path:
+    """Return the per-pass artifact-selection proof written by pytest."""
+    return reports_dir / f"artifact-selection-{pass_name}.json"
+
+
+def _deferral_pytest_args(report_path: Path | None) -> list[str] | None:
+    """Ask pytest to write a fresh selection report for this pass."""
+    if report_path is None:
+        return None
+    report_path.unlink(missing_ok=True)
+    return [f"--artifact-selection-report={report_path.as_posix()}"]
+
+
+def _pass_is_proven_deferral(result: PassResult, report_path: Path | None) -> bool:
+    """Accept exit 5 only when every collected node is owned by Nightly."""
+    if report_path is None or not _collected_nothing(result):
+        return False
+    if not report_path.is_file():
+        return False
+    try:
+        payload = json.loads(report_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    if not isinstance(payload, dict):
+        return False
+    exit_code = payload.get("pytest_exit_code")
+    if not isinstance(exit_code, int):
+        return False
+    from scripts.engineering.ci.generated_artifact_checks import proven_deferral
+    from scripts.engineering.dev.pytest_artifact_selection import load_manifest
+
+    selectors = {row["node"] for row in load_manifest()["tests"]}
+    return proven_deferral(payload, exit_code, selectors)
 
 
 def _run_serial_pass(
@@ -616,6 +664,9 @@ def _run_serial_pass(
     expected_invocations: dict[str, str] | None = None,
     receipt: ReceiptInvocation | None = None,
     child_env: dict[str, str] | None = None,
+    allow_no_tests: bool = True,
+    extra_pytest_args: Sequence[str] | None = None,
+    deferral_report: Path | None = None,
 ) -> int:
     """Run dedicated serial marker pass and record the summary."""
     serial_result = _run_named_pass(
@@ -629,11 +680,17 @@ def _run_serial_pass(
         timeout_seconds=serial_timeout,
         executed_passes=executed_passes,
         expected_invocations=expected_invocations,
-        allow_no_tests=True,
+        allow_no_tests=allow_no_tests,
         receipt=receipt,
         child_env=child_env,
+        extra_pytest_args=extra_pytest_args,
     )
-    serial_rc = _effective_exit_code(serial_result, allow_no_tests=True)
+    accept_empty = allow_no_tests or _pass_is_proven_deferral(
+        serial_result, deferral_report
+    )
+    if accept_empty and not allow_no_tests:
+        summary_lines.append("serial_proven_artifact_deferral=true")
+    serial_rc = _effective_exit_code(serial_result, allow_no_tests=accept_empty)
     _append_pass_summary(summary_lines, result=serial_result, effective_rc=serial_rc)
     return serial_rc
 
@@ -728,6 +785,15 @@ def _create_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--prove-artifact-deferral",
+        action="store_true",
+        help=(
+            "When every affected node is deferred to Nightly, accept pytest "
+            "exit 5 only if the artifact-selection report proves that deferral. "
+            "An empty selection that is not fully deferred still fails."
+        ),
+    )
+    parser.add_argument(
         "--parallel-timeout-seconds",
         type=float,
         default=900.0,
@@ -804,6 +870,87 @@ def _reject_sha_without_receipt_dir(args: argparse.Namespace) -> int | None:
     return None
 
 
+def _finish_unmatched_parallel(
+    *,
+    args: argparse.Namespace,
+    base_command: list[str],
+    reports_dir: Path,
+    journal_dir: Path | None,
+    serial_timeout: float | None,
+    summary_lines: list[str],
+    executed_passes: list[str],
+    expected_invocations: dict[str, str],
+    receipt: ReceiptInvocation | None,
+    child_env: dict[str, str],
+    prove_deferral: bool,
+) -> int:
+    """Run serial tests when the parallel marker matched nothing.
+
+    Exit 5 stays a failure unless the artifact report proves every collected
+    node was deferred to Nightly. A mixed serial/non-serial deferral is proven
+    by one extra pass that does not split those markers.
+    """
+    summary_lines.append("parallel_collected_no_tests=true")
+    serial_report = (
+        _artifact_report_path(reports_dir, "serial") if prove_deferral else None
+    )
+    serial_rc = _run_serial_pass(
+        base_command=base_command,
+        args=args,
+        reports_dir=reports_dir,
+        journal_dir=journal_dir,
+        serial_timeout=serial_timeout,
+        summary_lines=summary_lines,
+        executed_passes=executed_passes,
+        expected_invocations=expected_invocations,
+        receipt=receipt,
+        child_env=child_env,
+        allow_no_tests=False,
+        extra_pytest_args=_deferral_pytest_args(serial_report),
+        deferral_report=serial_report,
+    )
+    if serial_rc != 5 or not prove_deferral:
+        return _finish_run(
+            reports_dir=reports_dir,
+            summary_lines=summary_lines,
+            journal_dir=journal_dir,
+            executed_passes=executed_passes,
+            test_rc=serial_rc,
+            expected_invocations=expected_invocations,
+        )
+
+    proof_report = _artifact_report_path(reports_dir, "deferral-proof")
+    proof_result = _run_pass(
+        name="deferral-proof",
+        base_command=base_command,
+        target=args.target,
+        marker_expr="serial or not serial",
+        addopts=["-q", "--tb=line", "-p", "no:xdist"],
+        reports_dir=reports_dir,
+        journal_dir=journal_dir,
+        timeout_seconds=serial_timeout,
+        executed_passes=executed_passes,
+        expected_invocations=expected_invocations,
+        allow_no_tests=False,
+        receipt=receipt,
+        child_env=child_env,
+        extra_pytest_args=_deferral_pytest_args(proof_report),
+    )
+    proof_proven = _pass_is_proven_deferral(proof_result, proof_report)
+    if proof_proven:
+        summary_lines.append("deferral_proof_proven=true")
+    proof_rc = 0 if proof_proven else _effective_exit_code(proof_result)
+    _append_pass_summary(summary_lines, result=proof_result, effective_rc=proof_rc)
+    return _finish_run(
+        reports_dir=reports_dir,
+        summary_lines=summary_lines,
+        journal_dir=journal_dir,
+        executed_passes=executed_passes,
+        test_rc=proof_rc,
+        expected_invocations=expected_invocations,
+    )
+
+
 def _execute_passes(args: argparse.Namespace) -> int:
     """Run the parallel, fallback, and serial passes."""
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
@@ -832,6 +979,10 @@ def _execute_passes(args: argparse.Namespace) -> int:
     parallel_timeout = args.parallel_timeout_seconds or None
     fallback_timeout = args.fallback_timeout_seconds or None
     serial_timeout = args.serial_timeout_seconds or None
+    prove_deferral = bool(args.prove_artifact_deferral)
+    parallel_report = (
+        _artifact_report_path(reports_dir, "parallel") if prove_deferral else None
+    )
 
     parallel_result = _run_pass(
         name="parallel",
@@ -846,9 +997,13 @@ def _execute_passes(args: argparse.Namespace) -> int:
         expected_invocations=expected_invocations,
         receipt=receipt,
         child_env=child_env,
+        extra_pytest_args=_deferral_pytest_args(parallel_report),
     )
 
-    parallel_rc = _effective_exit_code(parallel_result)
+    parallel_proven = _pass_is_proven_deferral(parallel_result, parallel_report)
+    if parallel_proven:
+        summary_lines.append("parallel_proven_artifact_deferral=true")
+    parallel_rc = 0 if parallel_proven else _effective_exit_code(parallel_result)
     _append_pass_summary(
         summary_lines,
         result=parallel_result,
@@ -887,6 +1042,21 @@ def _execute_passes(args: argparse.Namespace) -> int:
             executed_passes=executed_passes,
             test_rc=serial_rc,
             expected_invocations=expected_invocations,
+        )
+
+    if _collected_nothing(parallel_result) and not args.skip_serial_pass:
+        return _finish_unmatched_parallel(
+            args=args,
+            base_command=base_command,
+            reports_dir=reports_dir,
+            journal_dir=journal_dir,
+            serial_timeout=serial_timeout,
+            summary_lines=summary_lines,
+            executed_passes=executed_passes,
+            expected_invocations=expected_invocations,
+            receipt=receipt,
+            child_env=child_env,
+            prove_deferral=prove_deferral,
         )
 
     if _parallel_failure_is_stable(parallel_result) or args.no_fallback:

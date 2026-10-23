@@ -278,6 +278,10 @@ def test_real_daily_caller_and_command_partition_are_complete() -> None:
     assert "BIOETL_ARTIFACT_TEST_SELECTION: ci" in pr
     # #12440 replaced the ci partition driver with the resilient runner.
     assert "scripts.engineering.ci.run_pytest_resilient" in pr
+    assert "serial_or_bounded" not in pr
+    assert '--parallel-marker "not serial"' in pr
+    assert '--serial-marker "serial"' in pr
+    assert "--prove-artifact-deferral" in pr
     assert "exit 5" not in pr
 
 
@@ -909,3 +913,148 @@ def test_symlink_setup_skips_only_unsupported_creation(tmp_path, monkeypatch, fa
     expected = OSError if failure == "disk_full" else pytest.skip.Exception
     with pytest.raises(expected):
         _symlink_or_skip(tmp_path / "link", tmp_path / "target")
+
+
+def _runner_pass_result(name: str, return_code: int, tmp_path: Path):
+    from scripts.engineering.ci.run_pytest_resilient import PassResult
+
+    return PassResult(
+        name=name,
+        command=["pytest", name],
+        return_code=return_code,
+        output="",
+        junit_path=tmp_path / f"junit_{name}.xml",
+        log_path=tmp_path / f"{name}.log",
+        failed_nodeids=[],
+        worker_crash_detected=False,
+        timed_out=False,
+    )
+
+
+def test_proven_deferral_requires_a_complete_selection_report(tmp_path, monkeypatch):
+    from scripts.engineering.ci import run_pytest_resilient as runner
+
+    node = "tests/test_a.py::test_a"
+    payload = {
+        "status": "deferred-to-daily",
+        "selection": "ci",
+        "pytest_exit_code": 5,
+        "collection_errors": 0,
+        "collected": [node],
+        "deferred": [node],
+        "selected": [],
+        "other_deselected": [],
+    }
+    report = tmp_path / "artifact-selection-parallel.json"
+    report.write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(
+        "scripts.engineering.dev.pytest_artifact_selection.load_manifest",
+        lambda: {"tests": [{"node": node}]},
+    )
+    result = _runner_pass_result("parallel", 5, tmp_path)
+    assert runner._pass_is_proven_deferral(result, report)
+    assert not runner._pass_is_proven_deferral(result, None)
+    assert not runner._pass_is_proven_deferral(
+        _runner_pass_result("parallel", 1, tmp_path), report
+    )
+    report.write_text(json.dumps({**payload, "selected": [node]}), encoding="utf-8")
+    assert not runner._pass_is_proven_deferral(result, report)
+
+
+def test_runner_runs_serial_marker_and_accepts_only_proven_deferral(
+    tmp_path, monkeypatch
+):
+    from scripts.engineering.ci import run_pytest_resilient as runner
+
+    calls: list[tuple[str, list[str] | None]] = []
+    plan: dict[str, tuple[int, bool]] = {}
+
+    def fake_run_pass(*, name, extra_pytest_args=None, **kwargs):
+        calls.append((name, extra_pytest_args))
+        return_code, _proven = plan[name]
+        return _runner_pass_result(name, return_code, tmp_path)
+
+    def fake_proven(result, report):
+        return plan[result.name][1]
+
+    monkeypatch.setattr(runner, "_run_pass", fake_run_pass)
+    monkeypatch.setattr(runner, "_pass_is_proven_deferral", fake_proven)
+
+    def run(extra: list[str], outcomes: dict[str, tuple[int, bool]]):
+        calls.clear()
+        plan.clear()
+        plan.update(outcomes)
+        args = runner._create_parser().parse_args(
+            [
+                "--target",
+                "tests/example.py",
+                "--reports-dir",
+                str(tmp_path / "reports"),
+                *extra,
+            ]
+        )
+        return runner._execute_passes(args), list(calls)
+
+    code, seen = run([], {"parallel": (5, False), "serial": (0, False)})
+    assert code == 0
+    assert [name for name, _args in seen] == ["parallel", "serial"]
+    assert seen[0][1] is None
+
+    code, seen = run(
+        ["--no-fallback"],
+        {"parallel": (1, False)},
+    )
+    assert code == 1
+    assert [name for name, _args in seen] == ["parallel"]
+
+    code, seen = run([], {"parallel": (5, False), "serial": (5, False)})
+    assert code == 5
+    assert [name for name, _args in seen] == ["parallel", "serial"]
+
+    code, seen = run(
+        ["--prove-artifact-deferral"],
+        {
+            "parallel": (5, False),
+            "serial": (5, False),
+            "deferral-proof": (5, True),
+        },
+    )
+    assert code == 0
+    assert [name for name, _args in seen] == ["parallel", "serial", "deferral-proof"]
+    assert all(
+        args is not None
+        and any(arg.startswith("--artifact-selection-report=") for arg in args)
+        for _name, args in seen
+    )
+
+    code, seen = run(
+        ["--prove-artifact-deferral"],
+        {
+            "parallel": (5, False),
+            "serial": (5, False),
+            "deferral-proof": (5, False),
+        },
+    )
+    assert code == 5
+    assert [name for name, _args in seen] == ["parallel", "serial", "deferral-proof"]
+
+    code, seen = run(
+        ["--prove-artifact-deferral"],
+        {"parallel": (5, True), "serial": (5, False)},
+    )
+    assert code == 0
+    assert [name for name, _args in seen] == ["parallel", "serial"]
+
+    code, seen = run(
+        ["--prove-artifact-deferral"],
+        {"parallel": (5, False), "serial": (5, True)},
+    )
+    assert code == 0
+    assert [name for name, _args in seen] == ["parallel", "serial"]
+
+    code, seen = run(
+        ["--prove-artifact-deferral", "--skip-serial-pass"],
+        {"parallel": (5, False)},
+    )
+    assert code == 5
+    assert [name for name, _args in seen] == ["parallel"]
