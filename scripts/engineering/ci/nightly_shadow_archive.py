@@ -11,9 +11,10 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import sys
 from collections.abc import Mapping, Sequence
-from datetime import datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote, urlencode
@@ -282,8 +283,7 @@ def assess_shadow_window(
         reasons.append("mixed_tested_sha")
     if candidate_pairs < 1:
         reasons.append("no_parallel_candidate_arm")
-    if not _span_covers_14_days(runs):
-        reasons.append("shorter_than_14_utc_days")
+    reasons.extend(_window_observation_reason_codes(runs))
     if artifact_retention_days < SUCCESS_RETENTION_DAYS:
         reasons.append("success_retention_below_30")
     if actions_retention_cap_days < DIAGNOSTIC_RETENTION_DAYS:
@@ -465,19 +465,98 @@ def archive_runs(
         include_incomplete=True,
         workflow_runs_endpoint=_workflow_endpoint,
     )
-    index: list[dict[str, Any]] = []
+    index_path = ensure_path_within_root(output / "index.json", output)
+    index, previous_index_bytes = _existing_archive_index(output, index_path)
+    index, snapshots = _collect_archive_snapshots(client, repository, runs, index)
+    _persist_archive_snapshots(
+        output, index_path, index, previous_index_bytes, snapshots
+    )
+    return {"snapshot_count": len(index), "index": str(index_path)}
+
+
+def _existing_archive_index(
+    output: Path,
+    index_path: Path,
+) -> tuple[list[dict[str, Any]], bytes | None]:
+    if index_path.exists():
+        verify_archive(output)
+        return _load_index(index_path), index_path.read_bytes()
+    if list(output.glob("run-*/attempt-*/manifest.json")):
+        raise ArchiveError("archive snapshots exist without an index")
+    return [], None
+
+
+def _collect_archive_snapshots(
+    client: JsonGitHubClient,
+    repository: str,
+    runs: Sequence[Mapping[str, Any]],
+    existing_index: Sequence[dict[str, Any]],
+) -> tuple[
+    list[dict[str, Any]],
+    list[tuple[Mapping[str, Any], Mapping[str, Any], dict[str, Any]]],
+]:
+    index_by_key: dict[tuple[int, int], dict[str, Any]] = {}
+    for row in existing_index:
+        key = _snapshot_key(row)
+        if key in index_by_key:
+            raise ArchiveError(f"duplicate snapshot in archive index: {key}")
+        index_by_key[key] = row
+    snapshots: list[tuple[Mapping[str, Any], Mapping[str, Any], dict[str, Any]]] = []
     for run in runs:
         raw, outcomes, manifest = build_attempt_archive(client, repository, run)
         _bind_hashes(raw, outcomes, manifest)
-        write_snapshot(output, raw=raw, outcomes=outcomes, manifest=manifest)
-        index.append(_index_row(manifest))
-    index_path = ensure_path_within_root(output / "index.json", output)
+        row = _index_row(manifest)
+        key = _snapshot_key(row)
+        previous = index_by_key.get(key)
+        if previous is not None and previous != row:
+            raise ArchiveError(
+                f"indexed snapshot changed: run {key[0]} attempt {key[1]}"
+            )
+        index_by_key[key] = row
+        snapshots.append((raw, outcomes, manifest))
+    return list(index_by_key.values()), snapshots
+
+
+def _persist_archive_snapshots(
+    output: Path,
+    index_path: Path,
+    index: Sequence[Mapping[str, Any]],
+    previous_index_bytes: bytes | None,
+    snapshots: Sequence[tuple[Mapping[str, Any], Mapping[str, Any], dict[str, Any]]],
+) -> None:
     payload = canonical_bytes(index)
-    if index_path.exists() and index_path.read_bytes() != payload:
-        raise ArchiveError(f"index already exists: {index_path}")
-    if not index_path.exists():
-        _atomic_create(index_path, payload, root=output)
-    return {"snapshot_count": len(index), "index": str(index_path)}
+    new_directories: list[Path] = []
+    try:
+        for raw, outcomes, manifest in snapshots:
+            run_id = _positive_int(raw.get("id"), "run id")
+            attempt = _positive_int(raw.get("run_attempt"), "run attempt")
+            destination = ensure_path_within_root(
+                output / f"run-{run_id}" / f"attempt-{attempt}", output
+            )
+            if not destination.exists():
+                new_directories.append(destination)
+            write_snapshot(output, raw=raw, outcomes=outcomes, manifest=manifest)
+        _write_archive_index(index_path, payload, previous_index_bytes, output)
+    except BaseException:
+        for directory in reversed(new_directories):
+            if directory.exists():
+                shutil.rmtree(directory)
+        raise
+
+
+def _write_archive_index(
+    index_path: Path,
+    payload: bytes,
+    previous_index_bytes: bytes | None,
+    root: Path,
+) -> None:
+    if index_path.exists():
+        if index_path.read_bytes() != previous_index_bytes:
+            raise ArchiveError(f"index changed during archive update: {index_path}")
+        if payload != previous_index_bytes:
+            write_bytes_confined(index_path, payload, root=root)
+        return
+    _atomic_create(index_path, payload, root=root)
 
 
 def _bind_hashes(
@@ -554,6 +633,42 @@ def _span_covers_14_days(runs: Sequence[Mapping[str, object]]) -> bool:
     except ValueError:
         return False
     return (closed - opened).total_seconds() >= 14 * 24 * 60 * 60
+
+
+def _window_observation_reason_codes(
+    runs: Sequence[Mapping[str, object]],
+) -> list[str]:
+    reasons: list[str] = []
+    if not _span_covers_14_days(runs):
+        reasons.append("shorter_than_14_utc_days")
+    if _missing_utc_days(runs):
+        reasons.append("missing_daily_attempts")
+    return reasons
+
+
+def _missing_utc_days(runs: Sequence[Mapping[str, object]]) -> list[str]:
+    days: set[date] = set()
+    for run in runs:
+        created_at = run.get("created_at")
+        if not isinstance(created_at, str):
+            return ["unknown"]
+        try:
+            stamp = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+        except ValueError:
+            return ["unknown"]
+        if stamp.tzinfo is None:
+            return ["unknown"]
+        days.add(stamp.astimezone(UTC).date())
+    if not days:
+        return ["unknown"]
+    missing: list[str] = []
+    current = min(days)
+    end = max(days)
+    while current <= end:
+        if current not in days:
+            missing.append(current.isoformat())
+        current += timedelta(days=1)
+    return missing
 
 
 def _created_bounds(
@@ -639,10 +754,19 @@ def _require_index_coverage(
             raise ArchiveError(
                 f"indexed snapshot missing: run {key[0]} attempt {key[1]}"
             )
-        if snapshot.get("raw_sha256") != row.get("raw_sha256"):
-            raise ArchiveError(
-                f"indexed checksum mismatch: run {key[0]} attempt {key[1]}"
-            )
+        for field in (
+            "head_sha",
+            "event",
+            "conclusion",
+            "created_at",
+            "pagination_status",
+            "raw_sha256",
+        ):
+            if snapshot.get(field) != row.get(field):
+                raise ArchiveError(
+                    f"indexed metadata mismatch ({field}): "
+                    f"run {key[0]} attempt {key[1]}"
+                )
         indexed.add(key)
     extras = set(found) - indexed
     if extras:
@@ -668,11 +792,7 @@ def _verify_one(manifest_path: Path) -> dict[str, Any]:
     if oracle_sha256(outcomes_bytes) != manifest.get("outcomes_sha256"):
         raise ArchiveError(f"checksum mismatch: {destination / 'outcomes.json'}")
     _verify_identity(destination, manifest, raw, outcomes)
-    return {
-        "run_id": manifest.get("run_id"),
-        "run_attempt": manifest.get("run_attempt"),
-        "raw_sha256": manifest.get("raw_sha256"),
-    }
+    return _index_row(manifest)
 
 
 def _verify_identity(
@@ -692,6 +812,14 @@ def _verify_identity(
         raise ArchiveError(f"attempt mismatch: {destination}")
     if manifest.get("head_sha") != raw.get("head_sha"):
         raise ArchiveError(f"head sha mismatch: {destination}")
+    timestamps = manifest.get("timestamps")
+    if (
+        not isinstance(timestamps, Mapping)
+        or timestamps.get("created_at") != raw.get("created_at")
+        or manifest.get("event") != raw.get("event")
+        or manifest.get("conclusion") != raw.get("conclusion")
+    ):
+        raise ArchiveError(f"run metadata mismatch: {destination}")
     pagination = outcomes.get("pagination") if isinstance(outcomes, dict) else None
     if not isinstance(pagination, dict):
         raise ArchiveError(f"pagination missing: {destination}")
@@ -894,9 +1022,7 @@ def _command_record_window(argv: Sequence[str]) -> int:
     parser.add_argument("--cadence-changed-before-acceptance", action="store_true")
     args = parser.parse_args(argv)
     index_path = resolve_cli_path(args.index, root=REPO_ROOT)
-    runs = json.loads(index_path.read_text(encoding="utf-8"))
-    if not isinstance(runs, list):
-        raise ArchiveError("run index must be a list")
+    runs = verify_archive(index_path.parent)["snapshots"]
     historical = assess_shadow_window(
         runs,
         candidate_pairs=args.candidate_pairs,
