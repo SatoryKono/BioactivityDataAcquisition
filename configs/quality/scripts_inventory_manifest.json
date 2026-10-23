@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-23T12:25:58.901365+00:00",
+  "generated_at": "2026-10-23T13:40:43.472461+00:00",
   "summary": {
     "total_scripts": 667,
     "status_counts": {
-      "active": 335,
-      "supporting": 332
+      "active": 334,
+      "supporting": 333
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -13741,7 +13741,7 @@
     {
       "path": "scripts/engineering/qa/build_pytest_nodeid_inventory.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -13751,7 +13751,11 @@
           "source_group": "tests",
           "text": "from scripts.engineering.qa.build_pytest_nodeid_inventory import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the pytest nodeid inventory builder imported by its unit test. It is not routed through python -m scripts.engineering.qa and has no workflow entrypoint. Keep it supporting so active_script_count_max does not grow; promote only after an active slot is freed and the command is on the QA router."
     },
     {
       "path": "scripts/engineering/qa/calibrate_hotspot_budgets.py",
