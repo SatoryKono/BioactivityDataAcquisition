@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-23T13:40:43.472461+00:00",
+  "generated_at": "2026-10-23T14:17:08.749938+00:00",
   "summary": {
     "total_scripts": 667,
     "status_counts": {
@@ -9747,7 +9747,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 29,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -9793,7 +9793,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 389,
+          "line": 391,
           "source_group": "ci",
           "text": "uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results affected-tests \\"
         }
@@ -10124,7 +10124,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 608,
+          "line": 627,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10350,7 +10350,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 779,
+          "line": 798,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10380,19 +10380,19 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 9,
+          "line": 10,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_lane_results import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 152,
+          "line": 154,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 361,
+          "line": 463,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         }
@@ -10834,13 +10834,13 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 378,
+          "line": 380,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-mar"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 399,
+          "line": 401,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target \"${targets[@]}\" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-marker "
         },
@@ -13892,7 +13892,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 365,
+          "line": 367,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -19071,7 +19071,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 603,
+          "line": 622,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },

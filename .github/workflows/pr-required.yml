@@ -152,7 +152,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Set up Python + uv
         id: setup-python
@@ -332,6 +332,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          # Affected pytest runs `git diff base...head`, and gitleaks scans
+          # commits. fetch-depth 1 makes that diff exit 128.
           fetch-depth: 0
 
       - name: Set up Python + uv
@@ -397,6 +399,23 @@ jobs:
             exit 1
           fi
           uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target "${targets[@]}" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-marker "not serial" --parallel-addopts "-n auto --dist loadfile --max-worker-restart=0 -q --tb=line" --serial-marker "serial" --serial-addopts "-p no:xdist -q --tb=line" --no-fallback --prove-artifact-deferral
+
+      - name: Shadow compare impact selection
+        id: impact-shadow-compare
+        if: needs['classify-changes'].outputs['tests'] == 'required'
+        env:
+          BASE_SHA: ${{ needs.classify-changes.outputs.base_sha }}
+          HEAD_SHA: ${{ needs.classify-changes.outputs.head_sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p reports/quality
+          # Observational only. affected-pytest remains the executed set.
+          # Nightly test-matrix is unchanged. Rollback: delete this step.
+          uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results shadow-compare \
+            --repo-root . \
+            --base-sha "$BASE_SHA" \
+            --head-sha "$HEAD_SHA" \
+            --output reports/quality/impact-shadow-compare.json
 
       - name: Restore mypy cache
         if: needs['classify-changes'].outputs['type-checking'] == 'required'
@@ -753,7 +772,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 0
+          fetch-depth: 1
           ref: ${{ github.event.pull_request.base.sha || github.sha }}
 
       - name: Set up Python + uv
