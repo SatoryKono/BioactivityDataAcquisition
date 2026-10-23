@@ -175,7 +175,7 @@ def _boolean_from_str(value: str) -> bool | None:
 def _boolean_from_scalar(value: bool | int | float) -> bool | None:
     """Map an exact bool, 0/1 int, or 0.0/1.0 float to a bool."""
     if type(value) is bool:
-        return value
+        return bool(value)
     if type(value) is int:
         if value in (0, 1):
             return bool(value)

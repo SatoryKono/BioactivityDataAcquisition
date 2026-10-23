@@ -229,6 +229,7 @@ reports/quality/coderabbit/**/auth.*
 !/reports/quality/dead-code-inventory.md
 !/reports/quality/source-tree-manifest.json
 !/reports/quality/module-coverage-inventory.json
+!/reports/quality/pytest-nodeid-inventory.json
 !/reports/quality/architecture-quality-scorecard.json
 !/reports/quality/adr-enforcement-matrix.json
 !/reports/quality/adr-enforcement-matrix.md
@@ -725,5 +726,3 @@ _fail_*.txt
 !/docs/99-archive/skills-2026-09/**
 !/docs/99-archive/prompts-2026-09/
 !/docs/99-archive/prompts-2026-09/**
-
-reports/quality/pytest-nodeid-inventory.json
