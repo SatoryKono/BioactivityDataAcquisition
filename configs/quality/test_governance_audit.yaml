@@ -1089,6 +1089,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py
       target_lane: repo-backed-unit
       protected_surface: scripts/engineering/ci/pr_gate.py + configs/quality/github_required_checks.yaml fail-closed PR classifier and aggregator contract
+    - path: tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py
+      target_lane: repo-backed-unit
+      protected_surface: scripts/engineering/ci/presubmit_gate.py local Ruff, strict mypy, affected-test, and fast architecture gate
     - path: tests/unit/repo_backed/application/services/test_config_dq_service.py
       target_lane: repo-backed-unit
       protected_surface: src/bioetl/application/services/config_dq_service.py
