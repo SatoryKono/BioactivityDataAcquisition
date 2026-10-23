@@ -165,19 +165,35 @@ def normalize_unit(
     return UNIT_MAPPING.get(stripped, stripped)
 
 
+def _boolean_from_str(value: str) -> bool | None:
+    """Map a source string to a bool. Blank input stays unset."""
+    if not value:
+        return None
+    return BINARY_FLAG_MAPPING.get(value.strip().lower())
+
+
+def _boolean_from_scalar(value: bool | int | float) -> bool | None:
+    """Map an exact bool, 0/1 int, or 0.0/1.0 float to a bool."""
+    if type(value) is bool:
+        return value
+    if type(value) is int:
+        if value in (0, 1):
+            return bool(value)
+        return None
+    if value in (0.0, 1.0):
+        return bool(int(value))
+    return None
+
+
 def normalize_boolean(
     value: Any,  # Any: Accepts various input types for boolean conversion
 ) -> bool | None:
     """Coerce common source-system boolean encodings to canonical bool."""
-    vt = type(value)
-    if vt is bool:
-        return value
-    if vt is str:
-        return BINARY_FLAG_MAPPING.get(value.strip().lower()) if value else None
-    if vt is int:
-        return bool(value) if value in (0, 1) else None
-    if vt is float:
-        return bool(int(value)) if value in (0.0, 1.0) else None
+    kind = type(value)
+    if kind is str:
+        return _boolean_from_str(value)
+    if kind in {bool, int, float}:
+        return _boolean_from_scalar(value)
     return None
 
 
@@ -185,17 +201,10 @@ def normalize_binary_flag(
     value: Any,  # Any: Handles various input representations for binary flags
 ) -> int | None:
     """Coerce common boolean-like values to the canonical 0/1 flag contract."""
-    vt = type(value)
-    if vt is bool:
-        return int(value)
-    if vt is int:
-        return value if value in (0, 1) else None
-    if vt is str:
-        b = BINARY_FLAG_MAPPING.get(value.strip().lower()) if value else None
-        return int(b) if b is not None else None
-    if vt is float:
-        return int(value) if value in (0.0, 1.0) else None
-    return None
+    normalized = normalize_boolean(value)
+    if normalized is None:
+        return None
+    return int(normalized)
 
 
 def normalize_operator(

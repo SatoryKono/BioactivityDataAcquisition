@@ -75,7 +75,17 @@ def test_json_blob_summary_extracts_keys_from_valid_json_blob() -> None:
 def test_json_blob_summary_rejects_git_conflict_markers() -> None:
     """_json_blob_summary should reject conflict-marker-contaminated blobs."""
     conflict_blob_text = """\
+<<<<<<< HEAD
 |||||||
+=======
+{
+  "schema_version": 1,
+  "integral_score": 99,
+  "summary": {
+    "source_module_count": 200
+  }
+}
+>>>>>>> branch-name
 """
     blob = conflict_blob_text.encode("utf-8")
 

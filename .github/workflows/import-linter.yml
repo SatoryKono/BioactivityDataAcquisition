@@ -38,7 +38,6 @@ jobs:
                 run: uv run --frozen --no-build ruff check src/bioetl/infrastructure --output-format=github
 
             -   name: Ruff format (strict full gate - src + tests)
-<<<<<<< HEAD
                 run: uv run --frozen --no-build ruff format --check src tests scripts
 
             -   name: Ruff isort (strict full gate - src + tests)
@@ -46,15 +45,6 @@ jobs:
 
             -   name: Ruff (strict full gate - src + tests)
                 run: uv run --frozen --no-build ruff check src tests scripts --output-format=github
-=======
-                run: uv run --frozen --no-build ruff format --check src tests
-
-            -   name: Ruff isort (strict full gate - src + tests)
-                run: uv run --frozen --no-build ruff check --select I src tests --output-format=github
-
-            -   name: Ruff (strict full gate - src + tests)
-                run: uv run --frozen --no-build ruff check src tests --output-format=github
->>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
 
             -   name: Detect changed Python files
                 id: changed-python
@@ -123,11 +113,7 @@ jobs:
                     # Large restore merges / full-tree diffs: avoid per-path argv.
                     if [[ "$file_count" -gt 400 ]]; then
                       echo "Large change set (${file_count}); using directory-level ruff format --check."
-<<<<<<< HEAD
                       uv run --frozen --no-build ruff format --check src tests scripts
-=======
-                      uv run --frozen --no-build ruff format --check src tests
->>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
                       exit 0
                     fi
 

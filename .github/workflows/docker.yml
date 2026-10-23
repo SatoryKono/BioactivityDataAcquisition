@@ -20,27 +20,15 @@ on:
       image-digest:
         description: "Published GHCR image digest"
         value: ${{ jobs.docker-push.outputs.digest }}
-  push:
-<<<<<<< HEAD
-    branches:
-=======
-    branches-ignore:
->>>>>>> 575c3e88f (fix(codeql): redact nested structures in pytest_event_journal payload (#1583))
-      - main
-    paths:
-      - "Dockerfile.bioetl"
-      - "pyproject.toml"
-      - "uv.lock"
-      - "src/**"
-      - "configs/**"
-      - ".dockerignore"
-      - ".github/actions/install-trivy/**"
-  # Manual runs validate the Docker lane only. Publishing remains guarded below
-  # by push-to-main plus the protected ghcr-publish environment.
+  # Direct push is off. main-integrity.yml is the only main invocation and
+  # runs this workflow after integrity. Pull requests use pr-required.yml
+  # docker-lane. Manual runs validate the lane only; publishing stays behind
+  # main plus workflow_call and the ghcr-publish environment.
   workflow_dispatch:
 concurrency:
-  # Only main push validation is run-scoped so protected publish approval cannot
-  # block newer main SHA checks. PR and non-main pushes remain ref-scoped.
+  # A direct main push is not a trigger. workflow_call from main-integrity
+  # stays ref-scoped with the caller. The push clause remains so a protected
+  # publish approval cannot cancel a newer main SHA if push is restored.
   group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.run_id || github.ref }}
   cancel-in-progress: "${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}"
 

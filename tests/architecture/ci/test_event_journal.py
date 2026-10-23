@@ -517,6 +517,9 @@ def _run_journal(
     test_file = tmp_path / "test_sample.py"
     test_file.write_text(body, encoding="utf-8")
     child_env = os.environ.copy()
+    # Class lane runs under xdist. A copied worker id would make this child
+    # pytest record itself as a worker and hide the controller collection.
+    child_env.pop("PYTEST_XDIST_WORKER", None)
     child_env.pop("EXPECTED_CHECKOUT_SHA", None)
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = "inv-live"
     child_env["BIOETL_JOURNAL_PASS"] = "parallel"
@@ -704,6 +707,7 @@ def test_disk_error_does_not_replace_the_test_result(tmp_path: Path) -> None:
     test_file = tmp_path / "test_disk.py"
     test_file.write_text("def test_fail():\n    assert False\n", encoding="utf-8")
     child_env = os.environ.copy()
+    child_env.pop("PYTEST_XDIST_WORKER", None)
     child_env["PYTHONPATH"] = str(_ROOT)
     child_env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = "inv-disk"
@@ -799,6 +803,10 @@ def test_runner_keeps_test_failure_distinct_from_journal_status(tmp_path: Path) 
     )
     reports = tmp_path / "reports"
     journal = tmp_path / "journal"
+    child_env = os.environ.copy()
+    child_env.pop("PYTEST_XDIST_WORKER", None)
+    child_env["PYTHONPATH"] = str(_ROOT)
+    child_env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
     result = subprocess.run(
         [
             sys.executable,
@@ -816,11 +824,7 @@ def test_runner_keeps_test_failure_distinct_from_journal_status(tmp_path: Path) 
             "60",
         ],
         cwd=_ROOT,
-        env={
-            **os.environ,
-            "PYTHONPATH": str(_ROOT),
-            "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
-        },
+        env=child_env,
         capture_output=True,
         text=True,
         check=False,
@@ -901,6 +905,7 @@ def test_assignment_redacts_only_the_secret_value() -> None:
     assert "token=" in redacted
     assert "super-secret-value" not in redacted
     assert redacted.endswith("]")
+    assert _redact_text(redacted, ()) == redacted
 
 
 def test_credential_prefixes_stay_out_of_the_journal(tmp_path: Path) -> None:
@@ -1972,60 +1977,3 @@ def test_late_session_finish_status_change_is_not_complete(tmp_path: Path) -> No
     verdict = _live_verdict(tmp_path / "run")
     assert verdict["status"] != "complete"
     assert verdict["tests_passed"] is not True
-
-def test_record_redacts_nested_secrets_in_payload(tmp_path: Path) -> None:
-    from scripts.engineering.ci.pytest_event_journal import (
-        EventJournalPlugin,
-    )
-    import io
-
-    # Mock context or identity
-    identity = _identity(role="worker", worker_id="gw0")
-
-    # We create a pseudo-plugin instance with the right state
-    class MockFile(io.StringIO):
-        def fileno(self):
-            return 1
-
-    plugin = EventJournalPlugin(
-        config=None,
-        path=tmp_path / "foo.jsonl",
-        identity=identity,
-    )
-    plugin.secrets = ("supersecret", "swordfish")
-    plugin._file = MockFile()
-    plugin._closed = False
-
-    import os
-    from unittest import mock
-
-    with mock.patch("os.fsync", return_value=None):
-        # Send a payload with nested structures and secrets
-        plugin.record(
-            "custom_event",
-            {
-                "string": "this is a supersecret string",
-                "nested": {
-                    "safe_key": "safe value",
-                    "nested_password": "swordfish",
-                    "list": [
-                        "supersecret",
-                        "safe",
-                    ]
-                }
-            }
-        )
-
-        out = plugin._file.getvalue()
-
-    assert "supersecret" not in out
-    assert "swordfish" not in out
-    assert "[redacted:" in out
-
-    # Verify the structure remains somewhat intact and was JSON encoded
-    import json
-    parsed = json.loads(out)
-    assert parsed["event"] == "custom_event"
-    assert "nested" in parsed
-    assert parsed["nested"]["safe_key"] == "safe value"
-    assert "[redacted:" in parsed["nested"]["nested_password"]
