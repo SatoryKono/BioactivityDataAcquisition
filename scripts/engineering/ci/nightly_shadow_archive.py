@@ -465,7 +465,10 @@ def archive_runs(
         event=event,
         limit=limit,
         run_ids=(),
-        include_incomplete=True,
+        # Attempt snapshots are immutable. Do not archive a run until GitHub
+        # reports its final conclusion, or a later collection would conflict
+        # with the already stored snapshot for the same run/attempt.
+        include_incomplete=False,
         workflow_runs_endpoint=_workflow_endpoint,
     )
     index_path = ensure_path_within_root(output / "index.json", output)
