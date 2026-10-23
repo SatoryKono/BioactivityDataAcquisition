@@ -121,7 +121,7 @@ new spend/safety decision.
 | `memory-freshness.yml` | `Memory freshness` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Repository memory freshness and contract checks |
 | `memory-retention.yml` | `Memory Retention Policy` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly and change-triggered non-destructive episodic-memory retention policy check |
 | `mutation-testing.yml` | `Mutation Testing` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Sole Sunday mutation owner (#10263 exception); push and pull_request stay off |
-| `nightly.yml` | `Nightly` | `schedule`, `workflow_dispatch` | `active` | `active` | Daily 03:00 UTC. Monday or `workflow_dispatch`: tests, E2E, duplication, import-linter, generated artifacts. Security and zizmor stay daily. CodeQL and Scorecard stay Monday. Mutation stays Sunday |
+| `nightly.yml` | `Nightly` | `schedule`, `workflow_dispatch` | `active` | `active` | Daily 03:00 UTC, including tests, E2E, duplication, import-linter, and generated artifacts. Security and zizmor stay daily. CodeQL, Scorecard, and branch hygiene stay Monday. Mutation stays Sunday |
 | `nightly-replay-parity.yml` | `nightly-replay-parity` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Replay/determinism parity validation |
 | `performance-nightly.yml` | `Performance Nightly` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Performance-regression gate |
 | `pr-hygiene.yml` | `PR Hygiene` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Stale report-noise draft PR cleanup under repository hygiene policy |

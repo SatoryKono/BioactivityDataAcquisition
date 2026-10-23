@@ -254,10 +254,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Deterministic nightly lanes (#12363):** `nightly.yml` still cron-runs daily
-  at 03:00 UTC. `tests`, `e2e`, `duplication`, `import-linter`, and
-  `generated-artifact-daily` run on Monday or `workflow_dispatch`. Security
-  and zizmor stay daily. CodeQL, Scorecard, and Sunday mutation are unchanged.
+- **Nightly shadow cadence (#12362, rollback of #12452):** PR #12452 moved
+  `tests`, `e2e`, `duplication`, `import-linter`, and
+  `generated-artifact-daily` from every 03:00 UTC schedule to Monday or
+  `workflow_dispatch`. Those five jobs run on every schedule again. Security,
+  zizmor, CodeQL, Scorecard, branch hygiene, mutation, and the quarterly
+  settings review are unchanged. Success evidence is kept 30 days. Failure
+  and cancellation diagnostics are kept 90 days, the Actions artifact limit.
+  Cancellation upload stays best-effort. The 14-day window has not started.
 
 - **VCR cassettes leave GitHub LFS:** `tests/fixtures/vcr/**/*.yaml` are stored
   as regular git blobs. Required CI lanes no longer call `git lfs pull`; they
