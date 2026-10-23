@@ -545,7 +545,7 @@ class TestCanonicalTestLanes:
             "tests/unit/memory/test_security.py",
             "tests/unit/memory/test_tooling.py",
             "tests/unit/memory/test_user_memory.py",
-            "tests/unit/memory/test_validate.py"
+            "tests/unit/memory/test_validate.py",
         ]
         assert lanes["performance"]["marker_expression"] == "benchmark and performance"
         assert "-p" in lanes["performance"]["pytest_args"]
