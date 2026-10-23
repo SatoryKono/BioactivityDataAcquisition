@@ -1,6 +1,8 @@
 pins:
   - path: "actions/checkout"
     sha: "3d3c42e5aac5ba805825da76410c181273ba90b1"
+  - path: "actions/cache/restore"
+    sha: "27d5ce7f107fe9357f9df03efb73ab90386fccae"
   - path: "actions/upload-artifact"
     sha: "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
   - path: "wagoid/commitlint-github-action"
