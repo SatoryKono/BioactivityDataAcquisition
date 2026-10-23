@@ -1,0 +1,186 @@
+{
+  "adoption": "proposed",
+  "baseline_sha": "7a16d8ca6d8977bd54ead3ff6392855197ed7912",
+  "dataset": "bioetl-synthetic-benchmarks-v1",
+  "environment": "github-actions",
+  "raw_sha256": "65b623110f869261e92fcbe53d3f083c83299f497b9c348664ec52252face213",
+  "run_attempt": "1",
+  "run_id": "39629885020",
+  "run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/39629885020",
+  "schema_version": 1,
+  "scopes": [
+    "tests/benchmarks/"
+  ],
+  "tests": [
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.0023213590108700196",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_bronze_write.py::test_bronze_write_small"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.010030175340000084",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_bronze_write.py::test_bronze_write_medium"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.052844365142856224",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_bronze_write.py::test_bronze_write_large"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.014372119999990218",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_delta_write.py::test_delta_write_append_small"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.013614794000005759",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_delta_write.py::test_delta_write_append_medium"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.048698322999996435",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_delta_write.py::test_delta_write_append_large"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.03725976299999445",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_delta_write.py::test_delta_write_merge_medium"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.0000196229098138762",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestContentHashPerformance::test_content_hash_small_record"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.00009033617278097804",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestContentHashPerformance::test_content_hash_medium_record"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.00032307072502830666",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestContentHashPerformance::test_content_hash_large_record"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.00018667444488943273",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestNormalizationPerformance::test_normalize_floats"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.0001329853236065723",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestNormalizationPerformance::test_normalize_strings"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.00013419853499213737",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestSerializationPerformance::test_canonical_json_dumps"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "2.2806430983016392E-7",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestEntityIdPerformance::test_entity_id_with_field"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.0000121035972856711",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestEntityIdPerformance::test_entity_id_hash_fallback"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.0010114665341878176",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestBatchProcessingPerformance::test_batch_hash_generation_small"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.01498206358208971",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestBatchProcessingPerformance::test_batch_hash_generation_medium"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.00001860288794769295",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestBatchProcessingPerformance::test_batch_transformation_filter"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.00017637913937191632",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestBatchProcessingPerformance::test_batch_transformation_map"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.0013124613118907912",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestPolarsPerformance::test_polars_from_dicts"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.00010732128109661992",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestPolarsPerformance::test_polars_filter_operation"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.0005016673782894884",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestPolarsPerformance::test_polars_group_aggregate"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.0001256640529969959",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestSchemaValidationPerformance::test_dict_field_validation"
+    },
+    {
+      "dataset": "bioetl-synthetic-benchmarks-v1",
+      "environment": "github-actions",
+      "mean": "0.00037442154402781666",
+      "scope": "tests/benchmarks/",
+      "test_id": "tests/benchmarks/test_performance.py::TestSchemaValidationPerformance::test_comprehensive_validation"
+    }
+  ],
+  "threshold": "0.1",
+  "validation_manifest_sha256": "a22bcdb3e36b917f8ba4be6e2d8e9b3ee291caca922101342452f10862b8afa5"
+}
