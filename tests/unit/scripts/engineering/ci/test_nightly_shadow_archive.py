@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import inspect
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -18,6 +19,7 @@ from scripts.engineering.ci.nightly_shadow_archive import (
     main,
     oracle_equivalent,
     oracle_pagination,
+    REPO_ROOT,
     oracle_sha256,
     partition_bucket,
     partition_producer,
@@ -108,6 +110,26 @@ def _store(root: Path, raw: dict[str, object], outcomes: dict[str, object]) -> P
         outcomes=outcomes,
         manifest=_manifest(raw, outcomes),
     )
+
+
+def _seal_index(root: Path) -> None:
+    rows = []
+    for manifest_path in sorted(root.glob("run-*/attempt-*/manifest.json")):
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        timestamps = manifest["timestamps"]
+        rows.append(
+            {
+                "conclusion": manifest["conclusion"],
+                "created_at": timestamps["created_at"],
+                "event": manifest["event"],
+                "head_sha": manifest["head_sha"],
+                "pagination_status": manifest["pagination_status"],
+                "raw_sha256": manifest["raw_sha256"],
+                "run_attempt": manifest["run_attempt"],
+                "run_id": manifest["run_id"],
+            }
+        )
+    (root / "index.json").write_bytes(canonical_bytes(rows))
 
 
 def test_oracle_does_not_use_the_schedule_classifier() -> None:
@@ -218,6 +240,7 @@ def test_snapshot_round_trip_and_identical_rewrite(tmp_path: Path) -> None:
     first = _store(tmp_path, raw, outcomes)
     second = _store(tmp_path, raw, outcomes)
     assert first == second
+    _seal_index(tmp_path)
     verified = verify_archive(tmp_path)
     assert verified["snapshot_count"] == 1
     assert verified["snapshots"][0]["raw_sha256"] == oracle_sha256(canonical_bytes(raw))
@@ -236,11 +259,12 @@ def test_verify_rejects_missing_archive_malformed_manifest_and_checksum(
 ) -> None:
     with pytest.raises(ArchiveError, match="archive unavailable"):
         verify_archive(tmp_path / "missing")
-    with pytest.raises(ArchiveError, match="archive unavailable"):
+    with pytest.raises(ArchiveError, match="archive index unavailable"):
         verify_archive(tmp_path)
     raw = _raw()
     outcomes = _outcomes()
     stored = _store(tmp_path, raw, outcomes)
+    _seal_index(tmp_path)
     manifest_path = stored / "manifest.json"
     manifest_path.write_text("{", encoding="utf-8")
     with pytest.raises(ArchiveError, match="malformed"):
@@ -261,6 +285,7 @@ def test_verify_rejects_sha_attempt_and_pagination_mismatch(tmp_path: Path) -> N
     raw = _raw()
     outcomes = _outcomes()
     stored = _store(tmp_path, raw, outcomes)
+    _seal_index(tmp_path)
     manifest_path = stored / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest["head_sha"] = "different"
@@ -341,6 +366,33 @@ def test_mixed_history_is_an_unacceptable_window_and_blocks_the_next_stage() -> 
     }
     with pytest.raises(ArchiveError, match="not accepted"):
         require_accepted(ledger)
+
+
+def test_verify_rejects_an_indexed_snapshot_that_is_missing(tmp_path: Path) -> None:
+    _store(tmp_path, _raw(run_id=11), _outcomes())
+    removed = _store(tmp_path, _raw(run_id=12, head="def456"), _outcomes())
+    _seal_index(tmp_path)
+    shutil.rmtree(removed)
+    with pytest.raises(ArchiveError, match="indexed snapshot missing"):
+        verify_archive(tmp_path)
+
+
+def test_committed_gap_ledger_is_not_the_shadow_window() -> None:
+    ledger_path = REPO_ROOT / "reports/governance/n1-shadow-window/ledger.json"
+    ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    historical = ledger["historical_window"]
+    assert historical["status"] == "unacceptable"
+    assert "mixed_tested_sha" in historical["reason_codes"]
+    assert "no_parallel_candidate_arm" in historical["reason_codes"]
+    assert ledger["window_start_sha"] is None
+    assert ledger["window_start_utc"] is None
+    assert ledger["independent_review_record"] is None
+    assert ledger["next_window"]["status"] == "not_started"
+    assert ledger["durable_archive"]["minimum_days"] == 90
+    assert ledger["durable_archive"]["elapsed_age_is_90_days"] is False
+    assert ledger["durable_archive"]["independent_restore"] is False
+    assert "14 full UTC days" in ledger["window_protocol"]["minimum_span"]
+    assert any("Do not delete" in item for item in ledger["window_protocol"]["gaps"])
     assert (
         main(["require-accepted", "--ledger", "reports/governance/missing-ledger.json"])
         == 1

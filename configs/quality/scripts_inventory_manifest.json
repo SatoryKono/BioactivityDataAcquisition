@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-23T15:50:05.119345+00:00",
+  "generated_at": "2026-10-23T16:02:06.924085+00:00",
   "summary": {
     "total_scripts": 668,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 16,
       "scripts": 556,
       "skills": 13,
-      "tests": 485
+      "tests": 486
     }
   },
   "scripts": [
@@ -9939,8 +9939,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "scripts/engineering/ci/nightly_shadow_archive.py",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.ci.actions_timing_common import ("
+        },
         {
           "path": "scripts/engineering/ci/report_docker_actions_timing.py",
           "line": 26,
@@ -10285,7 +10291,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/nightly.yml",
@@ -10310,6 +10316,12 @@
           "line": 152,
           "source_group": "scripts",
           "text": "\"nightly-shadow\": \"scripts/engineering/ci/nightly_shadow_archive.py\","
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.nightly_shadow_archive import ("
         }
       ],
       "owner": "@bioetl-platform",
@@ -11417,7 +11429,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 301,
+      "reference_count": 302,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -19573,7 +19585,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
@@ -19586,6 +19598,12 @@
           "line": 136,
           "source_group": "docs",
           "text": "- Review automation in `github_settings_review.py` MUST remain read-only."
+        },
+        {
+          "path": "scripts/engineering/ci/nightly_shadow_archive.py",
+          "line": 35,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo.github_settings_review import ("
         },
         {
           "path": "scripts/engineering/ci/report_docker_actions_timing.py",
@@ -19616,12 +19634,6 @@
           "line": 13,
           "source_group": "tests",
           "text": "TOOL_PATH = ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"github_settings_review.py\""
-        },
-        {
-          "path": "tests/architecture/test_github_governance_review.py",
-          "line": 340,
-          "source_group": "tests",
-          "text": "assert \"python -m scripts.engineering.repo.github_settings_review\" not in workflow"
         }
       ],
       "owner": "@bioetl-platform",
