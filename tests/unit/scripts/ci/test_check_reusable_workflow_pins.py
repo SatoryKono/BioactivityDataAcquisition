@@ -243,11 +243,28 @@ def test_local_action_yaml_suffix_passes_and_escape_fails(tmp_path: Path) -> Non
     assert not pins.check_pins(registry, [missing], repo_root=tmp_path)
 
 
-def test_current_coordinator_has_no_job_level_calls_and_matches_registry() -> None:
+DOCKER_LANE_PIN = (
+    "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml"
+    "@843eb3f1c9410df7eccfebf3c8a810cc897ed0e9"
+)
+
+
+def test_current_coordinator_job_level_calls_match_registry() -> None:
+    """The coordinator's only reusable call is the pinned docker-lane workflow."""
     document = yaml.safe_load(COORDINATOR.read_text(encoding="utf-8"))
     jobs = document["jobs"]
     assert isinstance(jobs, dict)
+    reusable = {
+        name: str(job["uses"])
+        for name, job in jobs.items()
+        if isinstance(job, dict) and "uses" in job
+    }
+    assert reusable == {"docker-lane": DOCKER_LANE_PIN}
     for name, job in jobs.items():
+        assert isinstance(job, dict)
+        if name in reusable:
+            assert "steps" not in job, name
+            continue
         assert "uses" not in job, name
         assert isinstance(job.get("steps"), list)
     assert pins.check_pins(

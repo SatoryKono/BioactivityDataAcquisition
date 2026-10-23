@@ -96,6 +96,10 @@ def test_selected_actions_patterns_cover_third_party_allowed_uses_only() -> None
     assert "google/osv-scanner-action@*" in patterns
     assert "google/osv-scanner-action/osv-scanner-action@*" in patterns
     assert "docker/build-push-action@*" in patterns
+    assert (
+        "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@*"
+        not in patterns
+    )
     owners_repos = {
         "/".join(action.split("/")[:2])
         for action in policy.ALLOWED_USES
@@ -243,12 +247,38 @@ def test_pr_gate_coordinator_materializes_on_every_pr_without_duplicate_owners()
     assert not {"paths", "paths-ignore"}.intersection(pull_request)
     assert "pr-gate-complete" in coordinator["jobs"]
     assert coordinator["permissions"] == {"contents": "read"}
-    assert "continue-on-error" not in coordinator_path.read_text(encoding="utf-8")
+    continue_on_error_steps = [
+        (job_name, step.get("id"))
+        for job_name, job in coordinator["jobs"].items()
+        for step in job.get("steps", [])
+        if "continue-on-error" in step
+    ]
+    assert continue_on_error_steps == [("class-lane", "osv-scan")]
+    class_lane_steps = coordinator["jobs"]["class-lane"]["steps"]
+    assert len(continue_on_error_steps) == 1
+    osv_step = next(step for step in class_lane_steps if step.get("id") == "osv-scan")
+    assert osv_step.get("continue-on-error") is True
+    osv_step_index = class_lane_steps.index(osv_step)
+    osv_gate = next(step for step in class_lane_steps if step.get("id") == "osv-gate")
+    assert class_lane_steps.index(osv_gate) > osv_step_index
+    assert "--osv-json osv-results.json" in str(osv_gate.get("run", ""))
     assert "secrets: inherit" not in coordinator_path.read_text(encoding="utf-8")
     catalog = _load_yaml(ROOT / "configs" / "quality" / "github_required_checks.yaml")
     gate_ids = {gate["id"] for gate in catalog["gates"]}
     aggregate_needs = set(coordinator["jobs"]["pr-gate-complete"]["needs"])
-    assert aggregate_needs == {"classify-changes", "fast-governance", "class-lane"}
+    assert aggregate_needs == {
+        "classify-changes",
+        "fast-governance",
+        "class-lane",
+        "docker-lane",
+    }
+    assert coordinator["jobs"]["docker-lane"]["permissions"] == {
+        "contents": "read",
+        "security-events": "write",
+        "packages": "write",
+        "id-token": "write",
+        "attestations": "write",
+    }
     assert gate_ids
     assert {"commit-governance", "docs-governance"} <= gate_ids
     assert "pr-gate-complete" in policy_doc
@@ -583,6 +613,23 @@ def test_security_workflow_runs_gitleaks_and_osv_scanner() -> None:
     assert "2026-11-30" in pip_audit_run
     assert "#9853" in pip_audit_run or "9853" in pip_audit_run
     assert not (ROOT / "osv-scanner.toml").exists()
+
+    coordinator = _load_yaml(ROOT / ".github/workflows/pr-required.yml")
+    class_lane = cast(dict[str, Any], coordinator["jobs"]["class-lane"])
+    lane_osv_step = next(
+        step
+        for step in class_lane["steps"]
+        if str(step.get("uses", "")).startswith(
+            "google/osv-scanner-action/osv-scanner-action@"
+        )
+    )
+    lane_recorder = next(
+        str(step.get("run", ""))
+        for step in class_lane["steps"]
+        if step.get("id") == "record"
+    )
+    assert lane_osv_step.get("continue-on-error") is True
+    assert '"conclusion" if key == "osv-scan" else "outcome"' in lane_recorder
 
 
 def test_codeql_workflow_covers_python_and_actions_and_is_sha_pinned() -> None:

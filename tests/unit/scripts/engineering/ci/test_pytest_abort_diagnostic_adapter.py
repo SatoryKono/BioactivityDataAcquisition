@@ -23,7 +23,10 @@ from scripts.engineering.ci.pytest_abort_diagnostic_adapter import (
     junit_file_is_complete,
     serial_coverage_pass_budget_seconds,
 )
-from scripts.engineering.ci.run_pytest_resilient import main as resilient_main
+from scripts.engineering.ci.run_pytest_resilient import (
+    _create_parser,
+    main as resilient_main,
+)
 
 pytestmark = [pytest.mark.unit, pytest.mark.subprocess_backed]
 
@@ -570,6 +573,20 @@ def _resilient_args(target: Path, reports: Path) -> list[str]:
     ]
 
 
+def test_target_accepts_every_affected_path() -> None:
+    """Affected pytest passes every selected path after one --target flag."""
+    args = _create_parser().parse_args(
+        [
+            "--target",
+            "tests/a.py",
+            "tests/b.py",
+            "--reports-dir",
+            "reports/quality",
+        ]
+    )
+    assert args.target == ["tests/a.py", "tests/b.py"]
+
+
 def test_resilient_runner_propagates_failure_and_success(tmp_path: Path) -> None:
     failing = tmp_path / "test_fail.py"
     failing.write_text("def test_fail():\n    assert False\n", encoding="utf-8")
@@ -849,3 +866,12 @@ def test_disappearing_leaves_really_fall_back_to_launcher(monkeypatch) -> None:
     result = owner._deliver_diagnostic_signal(SimpleNamespace(pid=101), {202, 203})
     assert result == ("process_group", signal.SIGABRT)
     assert delivered == [(101, signal.SIGABRT)]
+
+
+def test_runner_accepts_multiple_pytest_targets() -> None:
+    from scripts.engineering.ci.run_pytest_resilient import _create_parser
+
+    parsed = _create_parser().parse_args(
+        ["--target", "tests/a.py", "tests/b.py", "--no-fallback"]
+    )
+    assert parsed.target == ["tests/a.py", "tests/b.py"]

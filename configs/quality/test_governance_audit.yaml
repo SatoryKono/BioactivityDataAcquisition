@@ -1089,6 +1089,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py
       target_lane: repo-backed-unit
       protected_surface: scripts/engineering/ci/pr_gate.py + configs/quality/github_required_checks.yaml fail-closed PR classifier and aggregator contract
+    - path: tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py
+      target_lane: repo-backed-unit
+      protected_surface: scripts/engineering/ci/presubmit_gate.py local Ruff, strict mypy, affected-test, and fast architecture gate
     - path: tests/unit/repo_backed/application/services/test_config_dq_service.py
       target_lane: repo-backed-unit
       protected_surface: src/bioetl/application/services/config_dq_service.py
@@ -1190,6 +1193,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py
       target_lane: repo-backed-unit
       protected_surface: Root npm manifest/lock, MCP filesystem launchers, and Grafana npm/Playwright preflight contracts; synthetic browser/Docker inputs, no live provider data
+    - path: tests/unit/repo_backed/scripts/ci/test_sync_control.py
+      target_lane: repo-backed-unit
+      protected_surface: sync_control.py script execution validation
     - path: tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ai/mcp/{mcp_*_wrapper.sh,mcp_*_wrapper.ps1,support/**,check.sh}
@@ -1199,6 +1205,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ai/mcp/mcp_memory_wrapper.sh
+    - path: tests/unit/repo_backed/scripts/ci/test_sync_control.py
+      target_lane: repo-backed-unit
+      protected_surface: scripts/engineering/ci/sync_control.py exact argv and environment validation
     - path: tests/unit/repo_backed/scripts/test_zed_workspace_config.py
       target_lane: repo-backed-unit
       protected_surface: .zed/{settings.json,tasks.json,mcp.json,snippets/**}

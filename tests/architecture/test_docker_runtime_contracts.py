@@ -1025,9 +1025,9 @@ def test_retained_services_use_immutable_images_and_complete_envelopes() -> None
 
 
 def test_retired_ci_helper_cannot_replace_canonical_docker_workflow() -> None:
-    helper = (ROOT / "scripts/engineering/ci/apply_ci_fixes.py").read_text(
-        encoding="utf-8"
-    )
+    helper = (
+        ROOT / "scripts/migrations/archive/ci_optimizations/apply_ci_fixes.py"
+    ).read_text(encoding="utf-8")
 
     assert '"ci-03"' not in helper
     assert "DOCKER_YML_FIXED" not in helper
@@ -1708,9 +1708,10 @@ def test_docker_security_gate_covers_dependency_build_inputs() -> None:
     assert isinstance(trigger, dict)
     assert "workflow_call" in trigger
     assert "pull_request" not in trigger
+    assert "push" not in trigger
     # Dependency/build inputs trigger the docker gate through the shared
-    # required-checks catalog (CircleCI pr-gate, catalog version 3); main
-    # pushes additionally reach docker.yml via main-integrity.yml.
+    # required-checks catalog. main-integrity.yml is the only main caller,
+    # so a direct push cannot publish ahead of the integrity job.
     catalog = _load_yaml(ROOT / "configs/quality/github_required_checks.yaml")
     docker_gate = next(gate for gate in catalog["gates"] if gate.get("id") == "docker")
     paths = set(docker_gate["paths"]["include"])
