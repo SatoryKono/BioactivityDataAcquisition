@@ -276,7 +276,8 @@ def test_real_daily_caller_and_command_partition_are_complete() -> None:
             assert step["run"] == row["command"]
     pr = (ROOT / ".github/workflows/pr-required.yml").read_text()
     assert "BIOETL_ARTIFACT_TEST_SELECTION: ci" in pr
-    assert "generated_artifact_checks ci" in pr
+    # #12440 replaced the ci partition driver with the resilient runner.
+    assert "scripts.engineering.ci.run_pytest_resilient" in pr
     assert "exit 5" not in pr
 
 

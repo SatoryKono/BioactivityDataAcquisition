@@ -910,6 +910,7 @@ def test_assignment_redacts_only_the_secret_value() -> None:
     assert "token=" in redacted
     assert "super-secret-value" not in redacted
     assert redacted.endswith("]")
+    assert _redact_text(redacted, ()) == redacted
 
 
 def test_credential_prefixes_stay_out_of_the_journal(tmp_path: Path) -> None:
