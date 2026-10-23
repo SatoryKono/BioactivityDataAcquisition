@@ -15,7 +15,7 @@ import re
 import shlex
 import sys
 import uuid
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -283,11 +283,18 @@ def _remember_journal_invocation(
         expected_invocations[name] = invocation_id
 
 
+def _pytest_targets(target: str | Sequence[str]) -> list[str]:
+    """Normalize one path or several pytest targets into argv items."""
+    if isinstance(target, str):
+        return [target]
+    return [str(item) for item in target]
+
+
 def _run_pass(
     *,
     name: str,
     base_command: list[str],
-    target: str,
+    target: str | Sequence[str],
     marker_expr: str,
     addopts: list[str],
     reports_dir: Path,
@@ -309,7 +316,7 @@ def _run_pass(
 
     command = [
         *base_command,
-        target,
+        *_pytest_targets(target),
         "-m",
         marker_expr,
         "--junitxml",
@@ -563,7 +570,7 @@ def _run_named_pass(
     *,
     name: str,
     base_command: list[str],
-    target: str,
+    target: str | Sequence[str],
     marker_expr: str,
     addopts: str,
     reports_dir: Path,
@@ -647,8 +654,9 @@ def _create_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--target",
-        default="tests/",
-        help="Pytest target path or nodeid (default: tests/).",
+        nargs="+",
+        default=["tests/"],
+        help="Pytest target paths or nodeids (default: tests/).",
     )
     parser.add_argument(
         "--reports-dir",
