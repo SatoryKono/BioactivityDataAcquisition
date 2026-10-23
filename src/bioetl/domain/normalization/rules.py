@@ -187,7 +187,7 @@ def normalize_boolean(
     """Coerce common source-system boolean encodings to canonical bool."""
     vt = type(value)
     if vt is bool:
-        return value
+        return bool(value)
     if vt is str:
         return _mapped_binary_flag(value)
     if vt is int or vt is float:
