@@ -37,6 +37,9 @@ ALLOWED_USES: dict[str, set[str]] = {
         "d86bb7b8a4e8407c8bc35392cb52192137d649ca",  # main
         "4d46594b319b39d24f0bb239b699362d7f4288bb",  # PR #12425
     },
+    "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml": {
+        "843eb3f1c9410df7eccfebf3c8a810cc897ed0e9",
+    },
     "actions/attest-build-provenance": {
         "977bb373ede98d70efdf65b84cb5f73e068dcc2a",  # v3
     },
