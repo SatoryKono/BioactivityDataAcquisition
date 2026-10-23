@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-23T06:34:12.761835+00:00",
+  "generated_at": "2026-10-23T06:41:53.110010+00:00",
   "summary": {
     "total_scripts": 667,
     "status_counts": {
@@ -8339,7 +8339,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 237,
+          "line": 239,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json"
         },
@@ -9781,19 +9781,19 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 120,
+          "line": 122,
           "source_group": "ci",
           "text": "uv run --no-sync --frozen --no-build python -m scripts.engineering.ci pr-gate classify \"${classify_args[@]}\""
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 304,
+          "line": 306,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results assert-steps \\"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 388,
+          "line": 390,
           "source_group": "ci",
           "text": "uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results affected-tests \\"
         }
@@ -10124,7 +10124,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 607,
+          "line": 609,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10350,7 +10350,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 769,
+          "line": 780,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10834,13 +10834,13 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 377,
+          "line": 379,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-mar"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 398,
+          "line": 400,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target \"${targets[@]}\" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-marker "
         },
@@ -12950,7 +12950,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 191,
+          "line": 193,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.diagnostics audit-structure --path ."
         },
@@ -13886,7 +13886,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 364,
+          "line": 366,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -19059,13 +19059,13 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 166,
+          "line": 168,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/repo/check_github_actions_runtime_policy.py --pr-required-pins --check"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 602,
+          "line": 604,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
@@ -19564,7 +19564,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_github_actions_runtime_policy.py",
-          "line": 147,
+          "line": 150,
           "source_group": "scripts",
           "text": "vs this list is reviewed by `github_settings_review.py`, not here."
         },

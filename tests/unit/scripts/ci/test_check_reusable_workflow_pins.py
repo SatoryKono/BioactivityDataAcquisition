@@ -243,13 +243,15 @@ def test_local_action_yaml_suffix_passes_and_escape_fails(tmp_path: Path) -> Non
     assert not pins.check_pins(registry, [missing], repo_root=tmp_path)
 
 
-def test_current_coordinator_has_no_job_level_calls_and_matches_registry() -> None:
+def test_current_coordinator_job_calls_match_registry() -> None:
     document = yaml.safe_load(COORDINATOR.read_text(encoding="utf-8"))
     jobs = document["jobs"]
     assert isinstance(jobs, dict)
     for name, job in jobs.items():
-        assert "uses" not in job, name
-        assert isinstance(job.get("steps"), list)
+        if "uses" in job:
+            assert name == "docker-lane", name
+            continue
+        assert isinstance(job.get("steps"), list), name
     assert pins.check_pins(
         REGISTRY,
         [COORDINATOR],
