@@ -306,12 +306,6 @@ def _probe_env(tmp_path: Path) -> tuple[dict[str, str], Path, Path | None]:
             pythonpath.append(str(locked_src))
     env = os.environ.copy()
     env.pop("PYTEST_ADDOPTS", None)
-    for key in (
-        "PYTEST_XDIST_WORKER",
-        "PYTEST_XDIST_WORKER_COUNT",
-        "PYTEST_XDIST_TESTRUNUID",
-    ):
-        env.pop(key, None)
     env["PYTHONPATH"] = os.pathsep.join(pythonpath)
     env["BIOETL_VCS_PROBE_LOG"] = str(log_path)
     env["BIOETL_BENCHMARK_CALLER"] = "synthetic-proof"
@@ -378,12 +372,6 @@ def test_pytest_wrappers_load_guard_before_benchmark_plugin() -> None:
 def test_guard_import_does_not_sample_the_clock() -> None:
     """Importing the guard must not sample the measurement clock."""
     env = os.environ.copy()
-    for key in (
-        "PYTEST_XDIST_WORKER",
-        "PYTEST_XDIST_WORKER_COUNT",
-        "PYTEST_XDIST_TESTRUNUID",
-    ):
-        env.pop(key, None)
     pythonpath = [str(ROOT), str(ROOT / "src")]
     if env.get("PYTHONPATH"):
         pythonpath.append(env["PYTHONPATH"])

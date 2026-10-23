@@ -299,18 +299,6 @@ entries:
     vcr_related: false
     review_date: "2026-07-30"
     rationale: Control-plane replay linkage is skipped on WSL where asyncio teardown on cloud-mounted storage is not reliable.
-  - path: tests/integration/infrastructure/durability/test_crash_gold.py
-    suite: integration
-    category: conditional_environment_guard
-    owner: "@bioetl-storage"
-    linked_issue: "#7249"
-    lifecycle: permanent_policy
-    reviewed_skip_calls: 1
-    vcr_related: false
-    review_date: "2026-10-23"
-    rationale: >
-      Gold crash probes that send SIGKILL skip on platforms where that signal
-      does not exist. Linux CI remains the merge truth.
   - path: tests/integration/infrastructure/storage/test_atomic.py
     suite: integration
     category: conditional_environment_guard

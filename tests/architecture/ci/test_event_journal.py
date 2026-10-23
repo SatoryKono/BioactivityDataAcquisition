@@ -517,12 +517,6 @@ def _run_journal(
     test_file = tmp_path / "test_sample.py"
     test_file.write_text(body, encoding="utf-8")
     child_env = os.environ.copy()
-    for key in (
-        "PYTEST_XDIST_WORKER",
-        "PYTEST_XDIST_WORKER_COUNT",
-        "PYTEST_XDIST_TESTRUNUID",
-    ):
-        child_env.pop(key, None)
     child_env.pop("EXPECTED_CHECKOUT_SHA", None)
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = "inv-live"
     child_env["BIOETL_JOURNAL_PASS"] = "parallel"
@@ -710,12 +704,6 @@ def test_disk_error_does_not_replace_the_test_result(tmp_path: Path) -> None:
     test_file = tmp_path / "test_disk.py"
     test_file.write_text("def test_fail():\n    assert False\n", encoding="utf-8")
     child_env = os.environ.copy()
-    for key in (
-        "PYTEST_XDIST_WORKER",
-        "PYTEST_XDIST_WORKER_COUNT",
-        "PYTEST_XDIST_TESTRUNUID",
-    ):
-        child_env.pop(key, None)
     child_env["PYTHONPATH"] = str(_ROOT)
     child_env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = "inv-disk"
