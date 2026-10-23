@@ -116,7 +116,10 @@ passed.
 ## Secrets
 
 - The current coordinator grants `contents: read`. Fast governance also grants
-  `security-events: write`. Never commit tokens.
+  `security-events: write`. The `docker-lane` job additionally grants
+  `security-events: write`, `packages: write`, `id-token: write`, and
+  `attestations: write` so the nested Docker workflow passes startup
+  validation. Never commit tokens.
 - `.env` files are machine-local and require explicit approval to edit.
 
 ### Historical CircleCI contexts
