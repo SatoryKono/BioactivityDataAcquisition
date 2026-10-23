@@ -23,7 +23,10 @@ from scripts.engineering.ci.pytest_abort_diagnostic_adapter import (
     junit_file_is_complete,
     serial_coverage_pass_budget_seconds,
 )
-from scripts.engineering.ci.run_pytest_resilient import main as resilient_main
+from scripts.engineering.ci.run_pytest_resilient import (
+    _create_parser,
+    main as resilient_main,
+)
 
 pytestmark = [pytest.mark.unit, pytest.mark.subprocess_backed]
 
@@ -568,6 +571,20 @@ def _resilient_args(target: Path, reports: Path) -> list[str]:
         "--fallback-addopts",
         _LIGHT_ADDOPTS,
     ]
+
+
+def test_target_accepts_every_affected_path() -> None:
+    """Affected pytest passes every selected path after one --target flag."""
+    args = _create_parser().parse_args(
+        [
+            "--target",
+            "tests/a.py",
+            "tests/b.py",
+            "--reports-dir",
+            "reports/quality",
+        ]
+    )
+    assert args.target == ["tests/a.py", "tests/b.py"]
 
 
 def test_resilient_runner_propagates_failure_and_success(tmp_path: Path) -> None:

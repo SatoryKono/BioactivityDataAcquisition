@@ -21,6 +21,13 @@ pytestmark = pytest.mark.architecture
 _ROOT = Path(__file__).resolve().parents[3]
 
 
+def _drop_inherited_xdist(env: dict[str, str]) -> dict[str, str]:
+    """Remove the parent xdist identity so a child pytest owns its session."""
+    for key in [name for name in env if name.startswith("PYTEST_XDIST_")]:
+        del env[key]
+    return env
+
+
 def _identity(
     *,
     role: str,
@@ -516,7 +523,7 @@ def _run_journal(
     journal = tmp_path / "journal"
     test_file = tmp_path / "test_sample.py"
     test_file.write_text(body, encoding="utf-8")
-    child_env = os.environ.copy()
+    child_env = _drop_inherited_xdist(os.environ.copy())
     child_env.pop("EXPECTED_CHECKOUT_SHA", None)
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = "inv-live"
     child_env["BIOETL_JOURNAL_PASS"] = "parallel"
@@ -703,7 +710,7 @@ def test_disk_error_does_not_replace_the_test_result(tmp_path: Path) -> None:
     journal = blocked / "journal"
     test_file = tmp_path / "test_disk.py"
     test_file.write_text("def test_fail():\n    assert False\n", encoding="utf-8")
-    child_env = os.environ.copy()
+    child_env = _drop_inherited_xdist(os.environ.copy())
     child_env["PYTHONPATH"] = str(_ROOT)
     child_env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = "inv-disk"
@@ -816,11 +823,13 @@ def test_runner_keeps_test_failure_distinct_from_journal_status(tmp_path: Path) 
             "60",
         ],
         cwd=_ROOT,
-        env={
-            **os.environ,
-            "PYTHONPATH": str(_ROOT),
-            "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
-        },
+        env=_drop_inherited_xdist(
+            {
+                **os.environ,
+                "PYTHONPATH": str(_ROOT),
+                "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+            }
+        ),
         capture_output=True,
         text=True,
         check=False,

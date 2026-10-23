@@ -14,8 +14,57 @@ variables, see [README.md](../../README.md#installation) and `.env.example`.
 | `BIOETL_JSON_ENCODER` | JSON encoder implementation (orjson or stdlib) | `""` | No |
 | `BIOETL_SILVER_DEDUP_TIMEOUT_SECONDS` | Timeout budget in seconds for Silver deduplication executor work | `60.0` | No |
 | `BIOETL_STRICT_MEDALLION` | When True, schema drift in Silver layer raises SchemaEvolutionError | `False` | No |
+| `BIOETL_DEBUG` | Enable debug features | `False` | No |
+| `BIOETL_TEST_MODE` | Shortens HTTP retry delays, caps request timeout, ignores YAML input filters, and relaxes some local durability paths. It does not replace provider calls with fixtures and is not an offline mode | `False` | No |
+| `BIOETL_STRICT_ERROR_HANDLING` | When True, API client errors raise exceptions instead of being silently ignored | `False` | No |
+| `BIOETL_ARCHIVE_ROOT` | Optional separate local archive root | unset | No |
 
 The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-level`. Settings does not read a log-level environment variable.
+
+## Pipeline Configuration
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `BIOETL_PIPELINE__BATCH_SIZE` | Fills `Settings.pipeline.batch_size` and the settings info view. Batch execution reads `pipeline.config.batch_size` from the pipeline YAML, not this variable | `100` | No |
+| `BIOETL_PIPELINE__CHECKPOINT_INTERVAL` | Fills `Settings.pipeline.checkpoint_interval`. Checkpoint frequency during execution reads `pipeline.config.checkpoint_interval` from the pipeline YAML, not this variable | `1000` | No |
+| `BIOETL_PIPELINE__STRICT_PREFLIGHT` | Block startup on Medallion preflight violations | `True` | No |
+| `BIOETL_PIPELINE__RELAXED_DQ` | When True, DQ thresholds are relaxed for testing | `False` | No |
+| `BIOETL_PIPELINE__MAX_CONCURRENT_BATCHES` | Maximum concurrent batch writes | `4` | No |
+| `BIOETL_PIPELINE__HEARTBEAT_INTERVAL` | Lock heartbeat interval in seconds | `30` | No |
+| `BIOETL_PIPELINE__SILVER_RESILIENCE_ENABLED` | Feature flag for adaptive resilience in Silver merge | `True` | No |
+| `BIOETL_PIPELINE__HEALTH_CHECK_MODE` | Preflight health-check gate mode | `strict` | No |
+| `BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE` | Minimum persistence profile | `replay_ready` | No |
+| `BIOETL_PIPELINE__CONTROL_PLANE__RUN_MANIFEST_ENABLED` | Create immutable run manifests before execution | `True` | No |
+| `BIOETL_PIPELINE__CONTROL_PLANE__RUN_LEDGER_ENABLED` | Append run-ledger events for lifecycle and lineage | `True` | No |
+| `BIOETL_PIPELINE__CONTROL_PLANE__CHECKPOINT_COMPATIBILITY_POLICY` | Resume behavior when checkpoint validation fails | `hard_fail` | No |
+
+### Silver Resilience & Retry Policies
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `BIOETL_PIPELINE__SILVER_METADATA_ATOMIC_RETRY__ENABLED` | Atomic replace retry policy for Silver metadata sidecars | `True` | No |
+| `BIOETL_PIPELINE__SILVER_METADATA_ATOMIC_RETRY__MAX_RETRIES` | Max retries | `20` | No |
+| `BIOETL_PIPELINE__SILVER_METADATA_ATOMIC_RETRY__BASE_DELAY_SECONDS` | Base delay in seconds | `0.010` | No |
+| `BIOETL_PIPELINE__SILVER_METADATA_ATOMIC_RETRY__MAX_DELAY_SECONDS` | Max delay in seconds | `0.250` | No |
+| `BIOETL_PIPELINE__SILVER_METADATA_ATOMIC_RETRY__ADAPTIVE_BACKOFF` | Use adaptive backoff | `True` | No |
+| `BIOETL_PIPELINE__SILVER_METADATA_ATOMIC_RETRY__JITTER_SECONDS` | Jitter in seconds | `0.010` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_RETRY__ENABLED` | Commit conflict retry policy for Delta merge | `True` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_RETRY__MAX_RETRIES` | Max retries | `3` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_RETRY__BASE_DELAY_SECONDS` | Base delay in seconds | `0.250` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_RETRY__MAX_DELAY_SECONDS` | Max delay in seconds | `2.0` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_RETRY__ADAPTIVE_BACKOFF` | Use adaptive backoff | `True` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_RETRY__JITTER_SECONDS` | Jitter in seconds | `0.050` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__RETRY_ENABLED` | Dedicated retry controls for timeout | `True` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__MAX_RETRIES` | Max retries | `1` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__BASE_DELAY_SECONDS` | Base delay in seconds | `0.200` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__MAX_DELAY_SECONDS` | Max delay in seconds | `2.0` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__ADAPTIVE_BACKOFF` | Use adaptive backoff | `True` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__JITTER_SECONDS` | Jitter in seconds | `0.050` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__EXECUTION_TIMEOUT_SECONDS` | Default-profile execution timeout in seconds | `45.0` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__UNIT_EXECUTION_TIMEOUT_SECONDS` | Unit-profile execution timeout in seconds | `15.0` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__E2E_EXECUTION_TIMEOUT_SECONDS` | E2E-profile execution timeout in seconds | `600.0` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PROFILE` | Retry profile | `default` | No |
+| `BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PLAIN_WRITE_PROCESS_ISOLATION` | Process isolation | `False` | No |
 
 ## Provider API Keys
 
@@ -34,6 +83,7 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `BIOETL_PUBMED_API_KEY` | PubMed API key for higher rate limits | - | No |
+| `BIOETL_DEFAULT_EMAIL` | Technical email for NCBI API tool identification | `default@example.com` | No |
 
 ### Semantic Scholar
 | Variable | Description | Required |
@@ -45,8 +95,10 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `BIOETL_METRICS_PORT` | Prometheus metrics endpoint port | `8000` | No |
+| `BIOETL_METRICS_ENABLED` | Flat `Settings.metrics_enabled`. Used only when `observability` is absent, and shown in settings info. Standard runtime bootstrap does not let this override `Settings.observability.metrics_enabled` | `True` | No |
 | `BIOETL_METRICS_ADDR` | Prometheus metrics endpoint address | `0.0.0.0` | No |
 | `BIOETL_PROMETHEUS_URL` | Optional Prometheus base URL for local HTTP probes | unset (`http://localhost:9090` loopback default in health/processed-records) | No |
+| `BIOETL_OBSERVABILITY__METRICS_ENABLED` | Runtime metrics switch (`Settings.observability.metrics_enabled`). Metrics bootstrap and the observability builder read this field | `True` | No |
 | `BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED` | Enable Prometheus metrics HTTP server (requires `metrics_enabled` to be active) | `True` | No |
 | `BIOETL_OBSERVABILITY__METRICS_FAIL_FAST` | If True, exit with error when the metrics server fails to start. `resolve_metrics_fail_fast` (used by `maybe_start_metrics_server`) automatically enables fail-fast only when `env` is `prod`, `test_mode` is not `True`, and the field was not set explicitly; explicit `True` and `False` are preserved. `bioetl health server` passes the declared value and does not apply that override | `False` | No |
 | `BIOETL_OBSERVABILITY__METRICS_RETRY_COUNT` | Total number of attempts (not additional retries) for transient errors when starting the metrics server | `3` | No |

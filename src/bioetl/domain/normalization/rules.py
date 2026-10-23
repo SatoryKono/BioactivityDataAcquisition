@@ -165,6 +165,31 @@ def normalize_unit(
     return UNIT_MAPPING.get(stripped, stripped)
 
 
+def _mapped_binary_flag(value: str) -> bool | None:
+    if not value:
+        return None
+    return BINARY_FLAG_MAPPING.get(value.strip().lower())
+
+
+def _boolean_from_text(value: str) -> bool | None:
+    text = value.strip().lower()
+    if not text:
+        return None
+    return BINARY_FLAG_MAPPING.get(text)
+
+
+def _boolean_from_int(value: int) -> bool | None:
+    if value in (0, 1):
+        return bool(value)
+    return None
+
+
+def _boolean_from_float(value: float) -> bool | None:
+    if value in (0.0, 1.0):
+        return bool(int(value))
+    return None
+
+
 def normalize_boolean(
     value: Any,  # Any: Accepts various input types for boolean conversion
 ) -> bool | None:
@@ -173,14 +198,30 @@ def normalize_boolean(
     if vt is bool:
         return bool(value)
     if vt is str:
-        text = str(value).strip().lower()
-        if not text:
-            return None
-        return BINARY_FLAG_MAPPING.get(text)
+        return _boolean_from_text(value)
     if vt is int:
-        return bool(value) if value in (0, 1) else None
+        return _boolean_from_int(value)
     if vt is float:
-        return bool(int(value)) if value in (0.0, 1.0) else None
+        return _boolean_from_float(value)
+    return None
+
+
+def _flag_from_text(value: str) -> int | None:
+    mapped = _mapped_binary_flag(value)
+    if mapped is None:
+        return None
+    return int(mapped)
+
+
+def _flag_from_int(value: int) -> int | None:
+    if value in (0, 1):
+        return value
+    return None
+
+
+def _flag_from_float(value: float) -> int | None:
+    if value in (0.0, 1.0):
+        return int(value)
     return None
 
 
@@ -192,12 +233,11 @@ def normalize_binary_flag(
     if vt is bool:
         return int(value)
     if vt is int:
-        return value if value in (0, 1) else None
+        return _flag_from_int(value)
     if vt is str:
-        b = BINARY_FLAG_MAPPING.get(value.strip().lower()) if value else None
-        return int(b) if b is not None else None
+        return _flag_from_text(value)
     if vt is float:
-        return int(value) if value in (0.0, 1.0) else None
+        return _flag_from_float(value)
     return None
 
 
