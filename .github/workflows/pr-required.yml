@@ -343,17 +343,17 @@ jobs:
       - name: Ruff check
         id: ruff
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
-        run: uv run --frozen --no-build ruff check src tests --output-format=github
+        run: uv run --frozen --no-build ruff check src tests scripts --output-format=github
 
       - name: Ruff format
         id: ruff-format
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
-        run: uv run --frozen --no-build ruff format --check src tests
+        run: uv run --frozen --no-build ruff format --check src tests scripts
 
       - name: Ruff isort
         id: ruff-isort
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
-        run: uv run --frozen --no-build ruff check --select I src tests --output-format=github
+        run: uv run --frozen --no-build ruff check --select I src tests scripts --output-format=github
 
       - name: C901 governance
         id: c901

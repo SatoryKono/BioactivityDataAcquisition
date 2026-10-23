@@ -186,6 +186,7 @@ def test_only_osv_scanner_uses_continue_on_error_before_severity_gate() -> None:
     continuing_steps = [step for step in steps if step.get("continue-on-error")]
     assert len(continuing_steps) == 1
     assert continuing_steps[0]["name"] == "Run OSV-Scanner"
+    assert continuing_steps[0].get("continue-on-error") is True
     osv_gate = next(
         step
         for step in steps
@@ -205,10 +206,29 @@ def test_only_osv_scanner_uses_continue_on_error_before_severity_gate() -> None:
 
 
 def test_aggregator_does_not_use_continue_on_error() -> None:
-    coordinator = _load_yaml(COORDINATOR)
-    aggregator = coordinator["jobs"]["pr-gate-complete"]
-    assert "continue-on-error" not in aggregator
-    assert all("continue-on-error" not in step for step in aggregator.get("steps", []))
+    """The aggregator must not swallow a failed required check.
+
+    The class lane may continue past the OSV scanner only so the following
+    HIGH/CRITICAL gate can fail closed. A GitHub expression such as
+    ``${{ true }}`` is rejected: only a missing field or a literal false is
+    allowed, except the literal true on Run OSV-Scanner.
+    """
+    workflow = yaml.safe_load(COORDINATOR.read_text(encoding="utf-8"))
+    jobs = workflow["jobs"]
+    for job_name, job in jobs.items():
+        assert job.get("continue-on-error", False) is False, job_name
+    continuing: list[tuple[str, object, object]] = []
+    for job_name, job in jobs.items():
+        for step in job.get("steps", []):
+            if "continue-on-error" not in step:
+                continue
+            value = step["continue-on-error"]
+            assert value is True or value is False, (job_name, step.get("id"), value)
+            if value is True:
+                continuing.append((job_name, step.get("name"), step.get("id")))
+    assert continuing == [("class-lane", "Run OSV-Scanner", "osv-scan")]
+    aggregator_steps = jobs["pr-gate-complete"].get("steps", [])
+    assert all("continue-on-error" not in step for step in aggregator_steps)
 
 
 def test_called_owner_workflows_reject_duplicate_yaml_keys() -> None:

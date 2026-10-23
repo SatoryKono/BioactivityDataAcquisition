@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-23T00:07:39.524315+00:00",
+  "generated_at": "2026-10-23T00:14:41.065877+00:00",
   "summary": {
-    "total_scripts": 665,
+    "total_scripts": 666,
     "status_counts": {
       "active": 334,
-      "supporting": 331
+      "supporting": 332
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -13,9 +13,9 @@
       "ci": 73,
       "docs": 287,
       "other": 16,
-      "scripts": 555,
+      "scripts": 557,
       "skills": 13,
-      "tests": 483
+      "tests": 484
     }
   },
   "scripts": [
@@ -9747,7 +9747,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 27,
+      "reference_count": 28,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -10024,7 +10024,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 50,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"apply-ci-fixes\": \"apply_ci_fixes.py\","
         },
@@ -10081,7 +10081,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 43,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"e2e-skip-rate\": \"check_e2e_matrix_skip_rate.py\","
         },
@@ -10126,7 +10126,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 44,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"e2e-rerun\": \"check_e2e_rerun_stability.py\","
         },
@@ -10159,7 +10159,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 46,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"neo4j-memory-live\": \"check_neo4j_memory_live_audit.py\","
         }
@@ -10174,7 +10174,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 45,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"neo4j-memory\": \"check_neo4j_memory_ontology.py\","
         }
@@ -10362,7 +10362,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 11,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
@@ -10372,9 +10372,15 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 55,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"pr-gate\": module_command(\"scripts.engineering.ci.pr_gate\"),"
+        },
+        {
+          "path": "scripts/engineering/ci/presubmit_gate.py",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.ci.pr_gate import ("
         },
         {
           "path": "tests/architecture/test_circleci_migration_contract.py",
@@ -10405,12 +10411,6 @@
           "line": 678,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_gate import load_catalog"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py",
-          "line": 13,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci import pr_gate"
         }
       ],
       "owner": "@bioetl-platform",
@@ -10439,7 +10439,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 56,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"pr-lane-results\": module_command(\"scripts.engineering.ci.pr_lane_results\"),"
         },
@@ -10480,6 +10480,37 @@
       "next_step": "Keep as the internal result-mapping implementation behind the canonical scripts.engineering.ci pr-lane-results command; do not expose a second workflow CLI surface."
     },
     {
+      "path": "scripts/engineering/ci/presubmit_gate.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/engineering/ci/__main__.py",
+          "line": 42,
+          "source_group": "scripts",
+          "text": "\"presubmit\": \"presubmit_gate.py\","
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci import presubmit_gate as gate"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py",
+          "line": 95,
+          "source_group": "tests",
+          "text": "[\"scripts/engineering/ci/presubmit_gate.py\"],"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-01",
+      "next_step": "Retain as the local Ruff, mypy, and affected-test implementation behind the canonical `python -m scripts.engineering.ci presubmit` router command. Keep it supporting so active_script_count_max does not grow; promote only after an active slot is freed."
+    },
+    {
       "path": "scripts/engineering/ci/publish_docker_image.sh",
       "type": "sh",
       "status": "supporting",
@@ -10488,7 +10519,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 60,
+          "line": 62,
           "source_group": "scripts",
           "text": "\"publish-docker\": shell_command(\"publish_docker_image.sh\"),"
         },
@@ -10519,7 +10550,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 58,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"scripts.engineering.ci.publish_scorecard_sarif\""
         },
@@ -10697,13 +10728,13 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 41,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"quality-gate\": \"quality_integral_gate.py\","
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 42,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"architecture-junit-skips\": \"quality_integral_gate.py\","
         },
@@ -10779,7 +10810,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 47,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"docker-timing\": \"report_docker_actions_timing.py\","
         },
@@ -10822,7 +10853,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 48,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"pr-gate-timing\": \"report_pr_gate_timing.py\","
         },
@@ -10859,7 +10890,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 49,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"debt-report\": \"report_quality_debt_weekly.py\","
         },
@@ -10910,7 +10941,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"run-tests\": \"run_pytest_resilient.py\","
         },
@@ -11317,7 +11348,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 32,
+          "line": 33,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.cli_dispatch import ("
         },
@@ -11426,7 +11457,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 299,
+      "reference_count": 300,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -12099,7 +12130,7 @@
           "path": ".pre-commit-config.yaml",
           "line": 112,
           "source_group": "ci",
-          "text": "entry: python3 scripts/engineering/dev/run_project_python.py -m mypy --config-file pyproject.toml --strict --no-incremental src/bioetl"
+          "text": "entry: python3 scripts/engineering/dev/run_project_python.py -m mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory"
         },
         {
           "path": ".pre-commit-config.yaml",
@@ -19110,7 +19141,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 95,
+          "line": 91,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -19121,7 +19152,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -19152,6 +19183,12 @@
           "line": 154,
           "source_group": "agents",
           "text": "`python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`."
+        },
+        {
+          "path": "scripts/engineering/ci/presubmit_gate.py",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo.check_no_partial_tree import resolve_revision"
         },
         {
           "path": "tests/architecture/test_junie_runtime_ci_contract.py",
@@ -22051,7 +22088,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 108,
+          "line": 104,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
