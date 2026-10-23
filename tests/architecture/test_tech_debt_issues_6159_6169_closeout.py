@@ -363,9 +363,7 @@ def test_issue_6169_script_governance_ratchet_has_headroom() -> None:
         "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1": (
             "legacy_manual_utility"
         ),
-        "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1": (
-            "legacy_manual_utility"
-        ),
+        "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1": ("legacy_manual_utility"),
         "scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh": (
             "legacy_manual_utility"
         ),

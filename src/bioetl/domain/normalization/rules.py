@@ -165,44 +165,37 @@ def normalize_unit(
     return UNIT_MAPPING.get(stripped, stripped)
 
 
-def _bool_from_binary_text(value: str) -> bool | None:
-    if not value:
-        return None
-    return BINARY_FLAG_MAPPING.get(value.strip().lower())
-
-
-def _bool_from_binary_number(value: int | float) -> bool | None:
-    if value in (0, 1, 0.0, 1.0):
-        return bool(value)
-    return None
-
-
-def _coerce_binary_bool(value: Any) -> bool | None:  # Any: source-system flag
-    kind = type(value)
-    if kind is bool:
-        return bool(value)
-    if kind is str:
-        return _bool_from_binary_text(value)
-    if kind is int or kind is float:
-        return _bool_from_binary_number(value)
-    return None
-
-
 def normalize_boolean(
     value: Any,  # Any: Accepts various input types for boolean conversion
 ) -> bool | None:
     """Coerce common source-system boolean encodings to canonical bool."""
-    return _coerce_binary_bool(value)
+    vt = type(value)
+    if vt is bool:
+        return value
+    if vt is str:
+        return BINARY_FLAG_MAPPING.get(value.strip().lower()) if value else None
+    if vt is int:
+        return bool(value) if value in (0, 1) else None
+    if vt is float:
+        return bool(int(value)) if value in (0.0, 1.0) else None
+    return None
 
 
 def normalize_binary_flag(
     value: Any,  # Any: Handles various input representations for binary flags
 ) -> int | None:
     """Coerce common boolean-like values to the canonical 0/1 flag contract."""
-    flag = _coerce_binary_bool(value)
-    if flag is None:
-        return None
-    return int(flag)
+    vt = type(value)
+    if vt is bool:
+        return int(value)
+    if vt is int:
+        return value if value in (0, 1) else None
+    if vt is str:
+        b = BINARY_FLAG_MAPPING.get(value.strip().lower()) if value else None
+        return int(b) if b is not None else None
+    if vt is float:
+        return int(value) if value in (0.0, 1.0) else None
+    return None
 
 
 def normalize_operator(

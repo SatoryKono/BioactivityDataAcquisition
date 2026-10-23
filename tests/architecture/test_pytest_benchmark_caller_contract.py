@@ -306,9 +306,6 @@ def _probe_env(tmp_path: Path) -> tuple[dict[str, str], Path, Path | None]:
             pythonpath.append(str(locked_src))
     env = os.environ.copy()
     env.pop("PYTEST_ADDOPTS", None)
-    for key in list(env):
-        if key.startswith("PYTEST_XDIST_"):
-            env.pop(key)
     env["PYTHONPATH"] = os.pathsep.join(pythonpath)
     env["BIOETL_VCS_PROBE_LOG"] = str(log_path)
     env["BIOETL_BENCHMARK_CALLER"] = "synthetic-proof"
