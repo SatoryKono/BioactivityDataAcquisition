@@ -258,10 +258,15 @@ def test_archive_runs_appends_new_attempts_without_dropping_old_index_rows(
     second = _raw(run_id=12)
     second["created_at"] = "2026-10-10T03:00:00Z"
     selected: list[dict[str, object]] = [first]
+
+    def collect_selected(*args: object, **kwargs: object) -> list[dict[str, object]]:
+        assert kwargs["include_incomplete"] is False
+        return selected
+
     monkeypatch.setattr(
         archive_module,
         "collect_selected_runs",
-        lambda *args, **kwargs: selected,
+        collect_selected,
     )
 
     def build_attempt(client: object, repository: str, run: dict[str, object]):
