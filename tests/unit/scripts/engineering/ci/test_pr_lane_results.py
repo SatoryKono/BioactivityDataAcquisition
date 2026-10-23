@@ -222,6 +222,24 @@ def test_n1_evidence_paths_have_shadow_compare_routes() -> None:
     assert report["selected_count"] >= 1
 
 
+def test_shadow_compare_routes_billing_pr_non_code_changes() -> None:
+    """Billing documentation and its manifest have explicit test routes."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        [
+            "CHANGELOG.md",
+            "docs/02-architecture/finances-github-billing.md",
+            "reports/engineering/finances/billing_manifest.json",
+        ],
+        repo_root=repo_root,
+    )
+
+    assert "tests/architecture/test_docs_version_sync.py" in report["selected"]
+    assert "tests/architecture/test_documentation_sync.py" in report["selected"]
+    assert "tests/unit/scripts/test_github_billing.py" in report["selected"]
+
+
 def test_shadow_compare_rejects_mixed_diff_with_unmapped_path(
     tmp_path: Path,
 ) -> None:

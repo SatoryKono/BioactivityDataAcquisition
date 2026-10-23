@@ -1,20 +1,34 @@
 {
   "status": "AWAITING_DATA",
-  "blocker": "Отсутствует доступ к billing API/выгрузке у текущего агента. Ожидается выгрузка от участника с billing-доступом.",
+  "financial_effect": "не установлен",
+  "blocker": "Нет разрешённой исходной выгрузки за 2026-09-01..2026-09-30 и 2026-10-01..2026-10-19 и нет подтверждения владельца billing-доступа. Issue #12351 не разрешает доступ к платёжным аккаунтам.",
   "periods": [
     {
+      "role": "source",
       "start": "2026-09-01",
       "end": "2026-09-30",
       "status": "PENDING"
     },
     {
+      "role": "source",
       "start": "2026-10-01",
       "end": "2026-10-19",
       "status": "PENDING"
     }
   ],
-  "schema_version": "1.0",
-  "currency": "USD",
-  "filters_applied": "None",
-  "expected_checksum": "PENDING"
+  "comparable_after": {
+    "status": "NOT_AGREED",
+    "tracked_by": "#12366"
+  },
+  "schema_version": "1.1",
+  "currency": null,
+  "filters_applied": null,
+  "timezone": null,
+  "exported_at": null,
+  "normalization_version": null,
+  "source": null,
+  "calculation_command": null,
+  "expected_checksum": "PENDING",
+  "billing_access_owner": null,
+  "calculation_confirmed_by": null
 }

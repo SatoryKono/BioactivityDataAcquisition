@@ -70,6 +70,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **GitHub billing acceptance (#12351):** the October 1–19 window is a source
+  slice, not a comparable after period. While the export is absent, the
+  billing manifest no longer records unproven `currency: USD` or
+  `filters_applied: "None"` (`schema_version` 1.1, both null). Cache and
+  custom-image storage stay outside `shared_storage` even when the product
+  label says shared storage. Validator errors name the constraint and omit
+  cell values. Financial effect remains unestablished.
+
 - **Pytest nodeid inventory (#12436):** `--check` compares the committed
   manifest except `source_commit`, so a fresh clone can pass without the
   manifest containing its own commit SHA. Sharded lanes follow shard paths

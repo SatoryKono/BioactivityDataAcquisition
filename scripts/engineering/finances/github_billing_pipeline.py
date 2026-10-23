@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import date
 from decimal import Decimal
 
 from scripts.engineering.finances.github_billing_schema import GitHubBillingRecord
@@ -66,13 +67,14 @@ def _is_shared_storage(record: GitHubBillingRecord) -> bool:
     """Return whether the row belongs in the shared artifact/package pool.
 
     Actions artifact storage and Packages storage share that pool. Actions
-    cache storage and custom-image storage stay outside it.
+    cache storage and custom-image storage stay outside it even when the
+    product label itself says shared storage.
     """
-    if "shared storage" in record.product.casefold():
-        return True
     sku = _normalized_sku(record.sku)
     if sku in _SEPARATE_STORAGE_SKUS:
         return False
+    if "shared storage" in record.product.casefold():
+        return True
     return sku in _SHARED_STORAGE_SKUS
 
 
@@ -120,3 +122,27 @@ def extract_workflow_attribution(
         key = (record.repository, record.workflow_path or "unattributed")
         attribution[key] = attribution.get(key, Decimal("0")) + record.net_amount
     return attribution
+
+
+def split_inclusive_source_period(
+    records: list[GitHubBillingRecord],
+    *,
+    period_start: date,
+    period_end: date,
+) -> tuple[tuple[GitHubBillingRecord, ...], tuple[GitHubBillingRecord, ...]]:
+    """Split rows into an inclusive source window and the rows outside it.
+
+    The caller names the window. Neither side is labeled a comparable after
+    period. Rows are kept as-is: nothing is dropped, rewritten, or assigned
+    to a repository or workflow. An empty input is not a zero-spend report.
+    """
+    if period_end < period_start:
+        raise ValueError("period end is before period start")
+    inside: list[GitHubBillingRecord] = []
+    outside: list[GitHubBillingRecord] = []
+    for record in records:
+        if period_start <= record.date <= period_end:
+            inside.append(record)
+        else:
+            outside.append(record)
+    return tuple(inside), tuple(outside)

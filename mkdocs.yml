@@ -164,6 +164,7 @@ nav:
           - "File Policy": 00-project/governance/03-file-policy.md
           - "Extending BioETL": 00-project/governance/04-extending-bioetl.md
           - "GitHub Policy": 00-project/governance/05-github-policy.md
+          - "PR Required Check Crosswalk": 00-project/governance/pr-required-check-crosswalk.md
           - "GitHub Labels, Intake, and Wiki": 00-project/governance/github-label-taxonomy.md
           - "Docs Publication Policy": 00-project/governance/06-doc-publication-policy.md
           - "Docs Navigation Policy": 00-project/governance/07-doc-nav-policy.md
