@@ -19,6 +19,22 @@ from scripts.engineering.ci.pytest_event_journal import (
 pytestmark = pytest.mark.architecture
 
 _ROOT = Path(__file__).resolve().parents[3]
+_XDIST_ENV_PREFIX = "PYTEST_XDIST_"
+
+
+def _fresh_child_env() -> dict[str, str]:
+    """Copy the environment without the parent xdist worker identity.
+
+    Architecture CI runs these tests inside an xdist worker. A child pytest
+    that inherits ``PYTEST_XDIST_WORKER`` is recorded as a worker with no
+    controller collection.
+    """
+
+    child_env = os.environ.copy()
+    for key in list(child_env):
+        if key.startswith(_XDIST_ENV_PREFIX):
+            child_env.pop(key)
+    return child_env
 
 
 def _identity(
@@ -516,7 +532,7 @@ def _run_journal(
     journal = tmp_path / "journal"
     test_file = tmp_path / "test_sample.py"
     test_file.write_text(body, encoding="utf-8")
-    child_env = os.environ.copy()
+    child_env = _fresh_child_env()
     child_env.pop("EXPECTED_CHECKOUT_SHA", None)
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = "inv-live"
     child_env["BIOETL_JOURNAL_PASS"] = "parallel"
@@ -703,7 +719,7 @@ def test_disk_error_does_not_replace_the_test_result(tmp_path: Path) -> None:
     journal = blocked / "journal"
     test_file = tmp_path / "test_disk.py"
     test_file.write_text("def test_fail():\n    assert False\n", encoding="utf-8")
-    child_env = os.environ.copy()
+    child_env = _fresh_child_env()
     child_env["PYTHONPATH"] = str(_ROOT)
     child_env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = "inv-disk"

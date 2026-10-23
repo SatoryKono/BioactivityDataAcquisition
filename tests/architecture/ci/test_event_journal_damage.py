@@ -33,6 +33,7 @@ _load = _HELPERS._load
 _named_receipt = _HELPERS._named_receipt
 _outcome = _HELPERS._outcome
 _phases = _HELPERS._phases
+_fresh_child_env = _HELPERS._fresh_child_env
 _run_journal = _HELPERS._run_journal
 _start = _HELPERS._start
 _write_receipt = _HELPERS._write_receipt
@@ -260,7 +261,7 @@ def test_xdist_workers_share_the_controller_redaction_key(tmp_path: Path) -> Non
         "    assert password == 'swordfish'\n",
         encoding="utf-8",
     )
-    child_env = os.environ.copy()
+    child_env = _fresh_child_env()
     child_env.pop("EXPECTED_CHECKOUT_SHA", None)
     child_env.pop("BIOETL_JOURNAL_REDACTION_KEY", None)
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = "inv-xdist"
@@ -850,7 +851,7 @@ def test_runner_preserves_both_receipt_producers(tmp_path: Path, fails: bool) ->
     journal = tmp_path / "journal"
     receipts = tmp_path / "receipts"
     env = {
-        **os.environ,
+        **_fresh_child_env(),
         "BIOETL_MERGE_ENV": "kept",
         "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
     }

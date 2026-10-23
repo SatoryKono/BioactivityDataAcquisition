@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-23T07:06:24.154741+00:00",
+  "generated_at": "2026-10-23T07:24:44.905993+00:00",
   "summary": {
     "total_scripts": 667,
     "status_counts": {
@@ -10510,7 +10510,7 @@
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 1486,
+          "line": 1502,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pytest_abort_diagnostic_adapter as adapter"
         },
@@ -10577,19 +10577,19 @@
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 504,
+          "line": 520,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_event_journal import _group_receipts"
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 528,
+          "line": 544,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_event_journal import ("
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 896,
+          "line": 912,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_event_journal import _redact_text"
         }
@@ -15524,7 +15524,7 @@
         },
         {
           "path": "tests/architecture/test_pytest_benchmark_caller_contract.py",
-          "line": 937,
+          "line": 940,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_hotspot_degradation_report import ("
         }
