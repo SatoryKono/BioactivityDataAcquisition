@@ -587,9 +587,7 @@ def _atomic_create(path: Path, payload: bytes, *, root: Path) -> None:
     safe = rebuild_confined_path(path, root=root)
     if safe.exists():
         raise ArchiveError(f"refusing to overwrite {safe}")
-    temporary = rebuild_confined_path(
-        safe.with_suffix(safe.suffix + ".tmp"), root=root
-    )
+    temporary = rebuild_confined_path(safe.with_suffix(safe.suffix + ".tmp"), root=root)
     temporary.write_bytes(payload)
     try:
         os.replace(temporary, safe)
