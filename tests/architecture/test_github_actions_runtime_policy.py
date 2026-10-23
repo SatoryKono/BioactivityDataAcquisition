@@ -743,6 +743,42 @@ def test_scorecard_workflow_is_non_blocking_weekly_baseline() -> None:
     assert "!cancelled()" in str(upload.get("if", ""))
 
 
+_WEEKLY_DETERMINISTIC_JOBS = (
+    "tests",
+    "e2e",
+    "duplication",
+    "import-linter",
+    "generated-artifact-daily",
+)
+_WEEKLY_DETERMINISTIC_IF = (
+    "github.event_name == 'workflow_dispatch' || needs.clock.outputs.dow == 'Mon'"
+)
+
+
+def test_nightly_deterministic_lanes_are_monday_or_manual() -> None:
+    """Deterministic nightly lanes run Monday; dispatch forces them (#12363)."""
+    nightly = _load_yaml(ROOT / ".github/workflows/nightly.yml")
+    triggers = cast(dict[str, Any], nightly.get("on", nightly.get(True)))
+    jobs = cast(dict[str, dict[str, Any]], nightly["jobs"])
+
+    assert triggers["schedule"] == [{"cron": "0 3 * * *"}]
+    assert "workflow_dispatch" in triggers
+    for name in _WEEKLY_DETERMINISTIC_JOBS:
+        assert jobs[name]["needs"] == "clock"
+        assert jobs[name]["if"] == _WEEKLY_DETERMINISTIC_IF
+    for name in ("security", "zizmor"):
+        assert "if" not in jobs[name]
+        assert "needs" not in jobs[name]
+    assert jobs["codeql"]["if"] == "needs.clock.outputs.dow == 'Mon'"
+    assert jobs["scorecard"]["if"] == "needs.clock.outputs.dow == 'Mon'"
+    assert jobs["mutation"]["if"] == "needs.clock.outputs.dow == 'Sun'"
+    assert str(jobs["tests"]["uses"]).endswith("tests.yml")
+    assert jobs["tests"]["with"]["generated-artifacts"] is True
+    assert str(jobs["e2e"]["uses"]).endswith("e2e-matrix-health.yml")
+    assert str(jobs["duplication"]["uses"]).endswith("duplication-complexity.yml")
+    assert str(jobs["import-linter"]["uses"]).endswith("import-linter.yml")
+
+
 def test_syft_sbom_is_generated_on_release_and_ghcr_push() -> None:
     release = _load_yaml(RELEASE_WORKFLOW)
     docker = _load_yaml(ROOT / ".github/workflows/docker.yml")

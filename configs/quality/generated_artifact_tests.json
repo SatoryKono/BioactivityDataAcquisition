@@ -3313,51 +3313,51 @@
       "reason": "Source/workflow/registry contract or temporary fixture; generated path is not committed input."
     },
     {
-      "node": "tests/unit/infrastructure/quality/test_architecture_debt_task_generation.py::test_default_output_path_uses_quality_reports_directory",
+      "node": "tests/unit/scripts/engineering/quality/test_architecture_debt_task_generation.py::test_default_output_path_uses_quality_reports_directory",
       "reason": "Source/workflow/registry contract or temporary fixture; generated path is not committed input."
     },
     {
-      "node": "tests/unit/infrastructure/quality/test_architecture_debt_task_generation.py::test_generate_tasks_payload_adds_artifact_backlog_tasks",
+      "node": "tests/unit/scripts/engineering/quality/test_architecture_debt_task_generation.py::test_generate_tasks_payload_adds_artifact_backlog_tasks",
       "reason": "Source/workflow/registry contract or temporary fixture; generated path is not committed input."
     },
     {
-      "node": "tests/unit/infrastructure/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_invalid_program_done_deadline",
+      "node": "tests/unit/scripts/engineering/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_invalid_program_done_deadline",
       "reason": "Source/workflow/registry contract or temporary fixture; generated path is not committed input."
     },
     {
-      "node": "tests/unit/infrastructure/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_missing_baseline",
+      "node": "tests/unit/scripts/engineering/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_missing_baseline",
       "reason": "Source/workflow/registry contract or temporary fixture; generated path is not committed input."
     },
     {
-      "node": "tests/unit/infrastructure/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_missing_governance",
+      "node": "tests/unit/scripts/engineering/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_missing_governance",
       "reason": "Source/workflow/registry contract or temporary fixture; generated path is not committed input."
     },
     {
-      "node": "tests/unit/infrastructure/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_missing_quarterly_targets",
+      "node": "tests/unit/scripts/engineering/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_missing_quarterly_targets",
       "reason": "Source/workflow/registry contract or temporary fixture; generated path is not committed input."
     },
     {
-      "node": "tests/unit/infrastructure/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_missing_schema_version",
+      "node": "tests/unit/scripts/engineering/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_missing_schema_version",
       "reason": "Source/workflow/registry contract or temporary fixture; generated path is not committed input."
     },
     {
-      "node": "tests/unit/infrastructure/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_non_decreasing_max_exemptions",
+      "node": "tests/unit/scripts/engineering/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_non_decreasing_max_exemptions",
       "reason": "Source/workflow/registry contract or temporary fixture; generated path is not committed input."
     },
     {
-      "node": "tests/unit/infrastructure/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_non_increasing_min_score",
+      "node": "tests/unit/scripts/engineering/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_non_increasing_min_score",
       "reason": "Source/workflow/registry contract or temporary fixture; generated path is not committed input."
     },
     {
-      "node": "tests/unit/infrastructure/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_scorecard_structure__registry_groups__0b4ae76f",
+      "node": "tests/unit/scripts/engineering/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_scorecard_structure__registry_groups__0b4ae76f",
       "reason": "Source/workflow/registry contract or temporary fixture; generated path is not committed input."
     },
     {
-      "node": "tests/unit/infrastructure/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_scorecard_structure__scorecard_no_errors__0048c8a0",
+      "node": "tests/unit/scripts/engineering/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_scorecard_structure__scorecard_no_errors__0048c8a0",
       "reason": "Source/workflow/registry contract or temporary fixture; generated path is not committed input."
     },
     {
-      "node": "tests/unit/infrastructure/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_wrong_schema_version",
+      "node": "tests/unit/scripts/engineering/quality/test_debt_scorecard_validation.py::TestValidateDebtScorecardStructure::test_wrong_schema_version",
       "reason": "Source/workflow/registry contract or temporary fixture; generated path is not committed input."
     },
     {
