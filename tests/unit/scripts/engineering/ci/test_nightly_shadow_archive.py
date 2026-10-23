@@ -5,15 +5,18 @@ from __future__ import annotations
 import inspect
 import json
 import shutil
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
 
+import scripts.engineering.ci.nightly_shadow_archive as archive_module
 from scripts.engineering.ci.nightly_shadow_archive import (
     JOB_KINDS,
     ArchiveError,
     _atomic_create,
     aggregate_results,
+    archive_runs,
     assess_shadow_window,
     canonical_bytes,
     job_duty,
@@ -247,6 +250,48 @@ def test_snapshot_round_trip_and_identical_rewrite(tmp_path: Path) -> None:
     assert verified["snapshots"][0]["raw_sha256"] == oracle_sha256(canonical_bytes(raw))
 
 
+def test_archive_runs_appends_new_attempts_without_dropping_old_index_rows(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    first = _raw(run_id=11)
+    second = _raw(run_id=12)
+    second["created_at"] = "2026-10-10T03:00:00Z"
+    selected: list[dict[str, object]] = [first]
+    monkeypatch.setattr(
+        archive_module,
+        "collect_selected_runs",
+        lambda *args, **kwargs: selected,
+    )
+
+    def build_attempt(client: object, repository: str, run: dict[str, object]):
+        raw = dict(run)
+        outcomes = _outcomes()
+        return raw, outcomes, _manifest(raw, outcomes)
+
+    monkeypatch.setattr(archive_module, "build_attempt_archive", build_attempt)
+    arguments = {
+        "client": object(),
+        "repository": "owner/repository",
+        "workflow": "nightly.yml",
+        "branch": "main",
+        "event": "schedule",
+        "limit": 40,
+        "output": tmp_path,
+    }
+    archive_runs(**arguments)
+    selected[:] = [second, first]
+    report = archive_runs(**arguments)
+
+    assert report["snapshot_count"] == 2
+    verified = verify_archive(tmp_path)
+    assert verified["snapshot_count"] == 2
+    assert [(row["run_id"], row["run_attempt"]) for row in verified["snapshots"]] == [
+        (11, 1),
+        (12, 1),
+    ]
+
+
 def test_existing_snapshot_is_not_overwritten(tmp_path: Path) -> None:
     _store(tmp_path, _raw(), _outcomes())
     changed = _raw()
@@ -395,6 +440,95 @@ def test_verify_rejects_an_indexed_snapshot_with_a_missing_manifest(
     (stored / "manifest.json").unlink()
     with pytest.raises(ArchiveError, match="indexed snapshot missing"):
         verify_archive(tmp_path)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("head_sha", "f" * 40),
+        ("created_at", "2026-10-10T03:00:00Z"),
+        ("pagination_status", "incomplete"),
+        ("event", "workflow_dispatch"),
+        ("conclusion", "failure"),
+    ],
+)
+def test_verify_rejects_index_metadata_that_differs_from_snapshot(
+    tmp_path: Path,
+    field: str,
+    value: str,
+) -> None:
+    _store(tmp_path, _raw(), _outcomes())
+    _seal_index(tmp_path)
+    index_path = tmp_path / "index.json"
+    index = json.loads(index_path.read_text(encoding="utf-8"))
+    index[0][field] = value
+    index_path.write_bytes(canonical_bytes(index))
+    with pytest.raises(ArchiveError, match=rf"indexed metadata mismatch \({field}\)"):
+        verify_archive(tmp_path)
+
+
+def test_record_window_rejects_unverified_index_metadata(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(archive_module, "REPO_ROOT", tmp_path)
+    _store(tmp_path, _raw(), _outcomes())
+    _seal_index(tmp_path)
+    index_path = tmp_path / "index.json"
+    index = json.loads(index_path.read_text(encoding="utf-8"))
+    index[0]["head_sha"] = "f" * 40
+    index_path.write_bytes(canonical_bytes(index))
+    ledger_path = tmp_path / "ledger-output.json"
+
+    result = main(
+        [
+            "record-window",
+            "--index",
+            "index.json",
+            "--output",
+            ledger_path.name,
+            "--baseline-sha",
+            "a" * 40,
+            "--recorded-at",
+            "2026-10-23T03:00:00Z",
+            "--artifact-retention-days",
+            "30",
+            "--actions-retention-cap-days",
+            "90",
+            "--actions-permissions-http",
+            "not-observed",
+            "--actions-execution-observed",
+            "false",
+        ]
+    )
+
+    assert result == 1
+    assert not ledger_path.exists()
+
+
+def test_assess_shadow_window_rejects_missing_daily_attempts() -> None:
+    start = datetime(2026, 10, 1, 3, tzinfo=UTC)
+    runs = [
+        {
+            "created_at": (start + timedelta(days=day))
+            .isoformat()
+            .replace("+00:00", "Z"),
+            "head_sha": "a" * 40,
+            "pagination_status": "complete",
+        }
+        for day in range(15)
+        if day != 7
+    ]
+    result = assess_shadow_window(
+        runs,
+        candidate_pairs=1,
+        artifact_retention_days=30,
+        actions_retention_cap_days=90,
+        independent_review=True,
+        cadence_changed_before_acceptance=False,
+    )
+    assert result["status"] == "unacceptable"
+    assert "missing_daily_attempts" in result["reason_codes"]
 
 
 def test_committed_gap_ledger_is_not_the_shadow_window() -> None:
