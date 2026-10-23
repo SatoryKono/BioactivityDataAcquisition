@@ -1,11 +1,11 @@
 {
-  "source_branch": "fix/coverage-html-junit-shards-17089069319766676508",
-  "source_commit": "0d227a53a9cf0194e77cb514ede9ca217e40f465",
+  "source_branch": "main",
+  "source_commit": "9a3bda47c3736a2385a630c7594eda8aeb0f96e1",
   "source_run_id": "39846202084",
-  "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/39846202084",
-  "source_tree_sha256": "5cdc3ae5d0645dc2a31a6dcbffd40824eb72fbf9a62f603c597ad4ea4254b1f5",
-  "refreshed_at_utc": "2026-10-22T20:25:11.574757+00:00",
+  "source_event": "push",
+  "source_run_url": null,
+  "source_tree_sha256": "c5e038d3d86ab3301035c6fdd1003945e32f2fb5c3c092ebac405d2ae10ddbba",
+  "refreshed_at_utc": "2026-10-23T02:52:07.990656+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.81,
   "coverage": {
