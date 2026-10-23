@@ -171,6 +171,13 @@ def _mapped_binary_flag(value: str) -> bool | None:
     return BINARY_FLAG_MAPPING.get(value.strip().lower())
 
 
+def _boolean_from_text(value: str) -> bool | None:
+    text = value.strip().lower()
+    if not text:
+        return None
+    return BINARY_FLAG_MAPPING.get(text)
+
+
 def _boolean_from_int(value: int) -> bool | None:
     if value in (0, 1):
         return bool(value)
@@ -189,9 +196,9 @@ def normalize_boolean(
     """Coerce common source-system boolean encodings to canonical bool."""
     vt = type(value)
     if vt is bool:
-        return value
+        return bool(value)
     if vt is str:
-        return _mapped_binary_flag(value)
+        return _boolean_from_text(value)
     if vt is int:
         return _boolean_from_int(value)
     if vt is float:
