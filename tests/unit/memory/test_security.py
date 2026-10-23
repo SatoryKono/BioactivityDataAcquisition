@@ -12,7 +12,7 @@ from memory.security import (
     inspect_memory_content,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.memory
 
 
 @pytest.mark.parametrize(

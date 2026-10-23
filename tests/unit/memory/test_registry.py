@@ -8,7 +8,7 @@ import pytest
 
 from memory.registry import load_memory_registry, validate_memory_registry
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.memory
 
 
 def test_repository_memory_registry_is_valid_and_deterministic() -> None:

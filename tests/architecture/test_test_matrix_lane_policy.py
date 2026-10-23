@@ -527,7 +527,25 @@ class TestCanonicalTestLanes:
         assert "no:xdist" in lanes["prompt-tests-nightly"]["pytest_args"]
         assert lanes["memory"]["marker_expression"] == "memory and not benchmark"
         assert lanes["memory"]["paths"] == [
-            "tests/smoke/test_neo4j_memory_mcp_smoke.py"
+            "tests/smoke/test_neo4j_memory_mcp_smoke.py",
+            "tests/unit/memory/test_evidence_store.py",
+            "tests/unit/memory/test_freshness.py",
+            "tests/unit/memory/test_gate_evidence_ingestion.py",
+            "tests/unit/memory/test_graph_entrypoints.py",
+            "tests/unit/memory/test_handoff.py",
+            "tests/unit/memory/test_issue_10526_http_transport_slice.py",
+            "tests/unit/memory/test_issue_10526_live_queries_slice.py",
+            "tests/unit/memory/test_mcp_scope.py",
+            "tests/unit/memory/test_mutation_ledger.py",
+            "tests/unit/memory/test_notes_workflow.py",
+            "tests/unit/memory/test_proof_gate.py",
+            "tests/unit/memory/test_record_envelope.py",
+            "tests/unit/memory/test_registry.py",
+            "tests/unit/memory/test_review_curated.py",
+            "tests/unit/memory/test_security.py",
+            "tests/unit/memory/test_tooling.py",
+            "tests/unit/memory/test_user_memory.py",
+            "tests/unit/memory/test_validate.py",
         ]
         assert lanes["performance"]["marker_expression"] == "benchmark and performance"
         assert "-p" in lanes["performance"]["pytest_args"]
