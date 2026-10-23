@@ -89,7 +89,7 @@ def _record_from_row(row: dict[str, str | None]) -> GitHubBillingRecord:
 
 def _load_records(raw: str) -> list[GitHubBillingRecord]:
     """Parse a normalized CSV payload into billing records."""
-    reader = csv.DictReader(io.StringIO(raw))
+    reader = csv.DictReader(io.StringIO(raw, newline=""))
     header_error = _header_error(list(reader.fieldnames) if reader.fieldnames else None)
     if header_error is not None:
         raise header_error

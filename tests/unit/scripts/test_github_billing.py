@@ -281,6 +281,22 @@ def test_validate_billing_report_rejects_empty_and_header_only(tmp_path: Path) -
         validate_billing_report(str(extra_cell))
 
 
+def test_validate_billing_report_accepts_cr_only_line_endings(tmp_path: Path) -> None:
+    """CSV exports using CR as the record separator remain readable."""
+    cr_only = tmp_path / "cr-only.csv"
+    cr_only.write_text(
+        _HEADER + "\r" + "2026-09-15,Actions,Actions Linux,org/one,"
+        ".github/workflows/ci.yml,1,minutes,1,0,1,USD\r",
+        encoding="utf-8",
+        newline="",
+    )
+
+    records = validate_billing_report(str(cr_only))
+
+    assert len(records) == 1
+    assert records[0].net_amount == Decimal("1")
+
+
 def test_cache_sku_stays_outside_shared_pool_when_product_says_shared() -> None:
     """A shared-storage product label does not absorb cache or custom images."""
     records = [
