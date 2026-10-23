@@ -261,6 +261,12 @@ def test_xdist_workers_share_the_controller_redaction_key(tmp_path: Path) -> Non
         encoding="utf-8",
     )
     child_env = os.environ.copy()
+    for key in (
+        "PYTEST_XDIST_WORKER",
+        "PYTEST_XDIST_WORKER_COUNT",
+        "PYTEST_XDIST_TESTRUNUID",
+    ):
+        child_env.pop(key, None)
     child_env.pop("EXPECTED_CHECKOUT_SHA", None)
     child_env.pop("BIOETL_JOURNAL_REDACTION_KEY", None)
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = "inv-xdist"
