@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.memory
 
 ROOT = Path(__file__).resolve().parents[3]
 CORE = ROOT / "src" / "memory" / "graph" / "sync_pkg" / "_core.py"

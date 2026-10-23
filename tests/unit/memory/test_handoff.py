@@ -9,7 +9,7 @@ import pytest
 from memory.handoff import HandoffRecord
 from memory.records import ActorIdentity, RecordEnvelope, RecordScope, RecordType
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.memory
 
 
 def _envelope() -> RecordEnvelope:
