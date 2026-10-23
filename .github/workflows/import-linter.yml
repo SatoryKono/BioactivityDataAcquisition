@@ -38,13 +38,13 @@ jobs:
                 run: uv run --frozen --no-build ruff check src/bioetl/infrastructure --output-format=github
 
             -   name: Ruff format (strict full gate - src + tests)
-                run: uv run --frozen --no-build ruff format --check src tests
+                run: uv run --frozen --no-build ruff format --check src tests scripts
 
             -   name: Ruff isort (strict full gate - src + tests)
-                run: uv run --frozen --no-build ruff check --select I src tests --output-format=github
+                run: uv run --frozen --no-build ruff check --select I src tests scripts --output-format=github
 
             -   name: Ruff (strict full gate - src + tests)
-                run: uv run --frozen --no-build ruff check src tests --output-format=github
+                run: uv run --frozen --no-build ruff check src tests scripts --output-format=github
 
             -   name: Detect changed Python files
                 id: changed-python
@@ -113,7 +113,7 @@ jobs:
                     # Large restore merges / full-tree diffs: avoid per-path argv.
                     if [[ "$file_count" -gt 400 ]]; then
                       echo "Large change set (${file_count}); using directory-level ruff format --check."
-                      uv run --frozen --no-build ruff format --check src tests
+                      uv run --frozen --no-build ruff format --check src tests scripts
                       exit 0
                     fi
 
