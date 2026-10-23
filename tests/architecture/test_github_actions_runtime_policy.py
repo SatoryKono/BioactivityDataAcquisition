@@ -1331,3 +1331,21 @@ def test_diagram_nightly_phase2_has_timeout() -> None:
         "nightly-phase2"
     ]
     assert int(job.get("timeout-minutes", 0)) >= 15
+
+
+def test_pr_required_fetch_depth_keeps_class_lane_history() -> None:
+    """Class lane must see base...head. Shallow clones stay on history-free jobs."""
+    jobs = _load_yaml(ROOT / ".github/workflows/pr-required.yml")["jobs"]
+
+    def checkout_depth(job_name: str) -> int:
+        step = next(
+            step
+            for step in jobs[job_name]["steps"]
+            if str(step.get("uses", "")).startswith("actions/checkout@")
+        )
+        return int(step["with"]["fetch-depth"])
+
+    assert checkout_depth("classify-changes") == 0
+    assert checkout_depth("class-lane") == 0
+    assert checkout_depth("fast-governance") == 1
+    assert checkout_depth("pr-gate-complete") == 1

@@ -332,7 +332,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 1
+          # Affected pytest runs `git diff base...head`, and gitleaks scans
+          # commits. fetch-depth 1 makes that diff exit 128.
+          fetch-depth: 0
 
       - name: Set up Python + uv
         id: setup-python
