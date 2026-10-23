@@ -1,5 +1,5 @@
 {
-  "count": 41714,
+  "count": 41715,
   "duplicate_nodeids": [],
   "nodes": [
     {
@@ -1322981,6 +1322981,38 @@
         "project_root",
         "record_mode",
         "request",
+        "vcr",
+        "vcr_cassette_dir",
+        "vcr_config",
+        "vcr_markers"
+      ],
+      "nodeid": "tests/unit/scripts/engineering/ci/test_pytest_abort_diagnostic_adapter.py::test_runner_accepts_multiple_pytest_targets",
+      "overlap_rationale": null,
+      "semantic_production_criticality": "critical",
+      "type": "Function",
+      "workflow_job": "tests"
+    },
+    {
+      "canonical_owner": "Core",
+      "execution_policy": "unit-scripts-tooling",
+      "file": "tests/unit/scripts/engineering/ci/test_pytest_abort_diagnostic_adapter.py",
+      "fixtures": [
+        "_bioetl_test_silver_validator",
+        "_guard_global_pathlib_state",
+        "_init_publication_type_classification",
+        "_manual_vcr_marker_runtime",
+        "_pin_test_cwd_to_project_root",
+        "_restore_runtime_bootstrap_pipeline_after_repo_backed_tests",
+        "_sanitize_bioetl_env_vars",
+        "_syrupy_apply_ide_patches",
+        "_vcr_marker",
+        "block_network",
+        "default_vcr_record_mode",
+        "event_loop_policy",
+        "monkeypatch",
+        "project_root",
+        "record_mode",
+        "request",
         "tmp_path",
         "tmp_path_factory",
         "vcr",
@@ -1392920,7 +1392952,7 @@
     }
   ],
   "schema_version": 1,
-  "source_commit": "6446bcdb93fcdd1f13271168da2a65f6bbf472dd",
+  "source_commit": "60f69a15cc0555c5a94d568945293c8e56b886ba",
   "unowned_count": 0,
   "unowned_nodeids": []
 }
