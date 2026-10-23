@@ -205,6 +205,7 @@
 04-reference/templates/provider-spec-template.md
 04-reference/templates/runbook-template.md
 05-engineering/README.md
+05-engineering/ci-policy-matrix-crosswalk.md
 05-engineering/test-telemetry-baseline.md
 05-operations/deployment/NEO4J-COMPLETION-GUIDE.md
 05-operations/deployment/NEO4J-MCP-INDEX.md
