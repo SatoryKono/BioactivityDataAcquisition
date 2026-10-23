@@ -25,7 +25,7 @@ name: PR Gate Complete
 # policy-anchor:ruleset-enforcement-mode 13643213 and 15730586 enforcement: disabled
 # policy-anchor:stored-ruleset-contexts ci/circleci: pr-gate-complete is not active CircleCI protection
 # policy-anchor:target-gha-context pr-gate-complete is not the context stored on the rulesets
-# policy-anchor:enforcement-verified-date 2026-10-22 is not proof of active merge protection
+# policy-anchor:enforcement-verified-date 2026-10-09 is not proof of active merge protection
 # policy-anchor:merge-block a successful pr-gate-complete does not by itself block merge and does not confirm live server rulesets
 
 on:
@@ -343,17 +343,17 @@ jobs:
       - name: Ruff check
         id: ruff
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
-        run: uv run --frozen --no-build ruff check src tests --output-format=github
+        run: uv run --frozen --no-build ruff check src tests scripts --output-format=github
 
       - name: Ruff format
         id: ruff-format
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
-        run: uv run --frozen --no-build ruff format --check src tests
+        run: uv run --frozen --no-build ruff format --check src tests scripts
 
       - name: Ruff isort
         id: ruff-isort
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
-        run: uv run --frozen --no-build ruff check --select I src tests --output-format=github
+        run: uv run --frozen --no-build ruff check --select I src tests scripts --output-format=github
 
       - name: C901 governance
         id: c901
@@ -374,7 +374,7 @@ jobs:
       - name: Architecture pytest slice
         id: arch-pytest
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
-        run: uv run --frozen --no-build pytest tests/architecture -m "not slow and not benchmark and not memory" -q --tb=line
+        run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-marker "not slow and not benchmark and not memory and not serial_or_bounded" --parallel-addopts "-n auto --dist loadscope --max-worker-restart=0 -q --tb=line" --serial-marker "serial_or_bounded and not slow and not benchmark and not memory" --serial-addopts "-p no:xdist -q --tb=line"
 
       - name: Affected pytest
         id: affected-pytest
@@ -395,8 +395,16 @@ jobs:
             echo "::error::tests gate has no affected pytest target"
             exit 1
           fi
-          uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks ci \
-            --report reports/quality/affected-test-partition.json -- "${targets[@]}" -q --tb=line
+          uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target "${targets[@]}" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-marker "not serial_or_bounded" --parallel-addopts "-n auto --dist loadfile --max-worker-restart=0 -q --tb=line" --serial-marker "serial_or_bounded" --serial-addopts "-p no:xdist -q --tb=line" --no-fallback
+
+      - name: Restore mypy cache
+        if: needs['classify-changes'].outputs['type-checking'] == 'required'
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: .mypy_cache
+          key: ${{ runner.os }}-${{ runner.arch }}-python-${{ env.pythonLocation }}-mypy-${{ hashFiles('pyproject.toml', 'uv.lock') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-python-${{ env.pythonLocation }}-mypy-${{ hashFiles('pyproject.toml', 'uv.lock') }}-
 
       - name: Run mypy (strict mode, full gate)
         if: needs['classify-changes'].outputs['type-checking'] == 'required'
@@ -406,14 +414,13 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p reports
-          rm -rf .mypy_cache
 
           echo "Running full mypy strict gate on src/bioetl + src/memory..."
           echo "Event: $EVENT_NAME" | tee reports/mypy_strict.log
 
           set +e
           timeout --signal=TERM --kill-after=30s 30m \
-            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --no-incremental src/bioetl src/memory \
+            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory \
             2>&1 | tee -a reports/mypy_strict.log
           status=${PIPESTATUS[0]}
           set -e
