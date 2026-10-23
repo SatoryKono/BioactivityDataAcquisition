@@ -243,8 +243,8 @@ def decide_owner(lane_names: Sequence[str]) -> OwnerDecision:
 def fallback_owner(file_name: str, markers: set[str]) -> OwnerDecision | None:
     """Own tests that PR lanes exclude on purpose.
 
-    ``coverage-verify`` is an umbrella rerun, so a slow or benchmark node that
-    matches only that lane would otherwise stay unowned.
+    ``coverage-verify`` is an umbrella rerun. A node that matches only that
+    lane, or no lane, would otherwise stay unowned and fail ``--update``.
     """
 
     if file_name.startswith("tests/benchmarks/") or "benchmark" in markers:
@@ -255,6 +255,12 @@ def fallback_owner(file_name: str, markers: set[str]) -> OwnerDecision | None:
         return OwnerDecision("FullOnly", None, ("slow",))
     if "memory" in markers:
         return OwnerDecision("AgentMemory", None, ("memory",))
+    if file_name.startswith("tests/e2e/"):
+        return OwnerDecision("FullOnly", None, ("e2e",))
+    if "repo_backed" in markers:
+        return OwnerDecision("FullOnly", None, ("repo-backed-outside-lane",))
+    if "subprocess_backed" in markers:
+        return OwnerDecision("FullOnly", None, ("subprocess-backed",))
     return None
 
 
@@ -290,7 +296,7 @@ def build_record(
 
     markers = set(node.markers)
     decision = decide_owner(matching_lanes(rules, node.file, markers))
-    if decision.canonical_owner == "unowned":
+    if decision.canonical_owner == "unowned" and not decision.lanes:
         decision = fallback_owner(node.file, markers) or decision
     return {
         "canonical_owner": decision.canonical_owner,
