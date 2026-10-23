@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-23T14:17:08.749938+00:00",
+  "generated_at": "2026-10-23T16:08:35.422299+00:00",
   "summary": {
     "total_scripts": 667,
     "status_counts": {
@@ -2896,7 +2896,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 69,
+          "line": 87,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3678,7 +3678,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 68,
+          "line": 86,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3733,7 +3733,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 67,
+          "line": 85,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -8484,13 +8484,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 302,
+          "line": 307,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 711,
+          "line": 716,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
@@ -10124,7 +10124,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 627,
+          "line": 643,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10154,7 +10154,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 323,
+          "line": 328,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import generated_artifact_checks as checks"
         }
@@ -10350,7 +10350,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 798,
+          "line": 814,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10392,7 +10392,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 463,
+          "line": 481,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         }
@@ -10448,7 +10448,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 75,
+          "line": 93,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -12333,7 +12333,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 38,
+          "line": 43,
           "source_group": "scripts",
           "text": "from scripts.engineering.dev.run_tests import TESTS_ROOT as PYTEST_ALL_ROOT"
         },
@@ -13306,19 +13306,19 @@
         },
         {
           "path": "scripts/engineering/finances/github_billing_pipeline.py",
-          "line": 7,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.finances.github_billing_schema import GitHubBillingRecord"
-        },
-        {
-          "path": "scripts/engineering/finances/github_billing_validator.py",
           "line": 8,
           "source_group": "scripts",
           "text": "from scripts.engineering.finances.github_billing_schema import GitHubBillingRecord"
         },
         {
+          "path": "scripts/engineering/finances/github_billing_validator.py",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.finances.github_billing_schema import GitHubBillingRecord"
+        },
+        {
           "path": "tests/unit/scripts/test_github_billing.py",
-          "line": 16,
+          "line": 17,
           "source_group": "tests",
           "text": "from scripts.engineering.finances.github_billing_schema import GitHubBillingRecord"
         }
@@ -13343,7 +13343,7 @@
         },
         {
           "path": "tests/unit/scripts/test_github_billing.py",
-          "line": 17,
+          "line": 18,
           "source_group": "tests",
           "text": "from scripts.engineering.finances.github_billing_validator import ("
         }
@@ -14703,13 +14703,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 378,
+          "line": 383,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 399,
+          "line": 404,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_evaluators as evaluators"
         },
@@ -14746,7 +14746,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 398,
+          "line": 403,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_report as cli"
         },
@@ -19071,7 +19071,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 622,
+          "line": 638,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
@@ -19101,7 +19101,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 91,
+          "line": 121,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -22101,7 +22101,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 104,
+          "line": 135,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
