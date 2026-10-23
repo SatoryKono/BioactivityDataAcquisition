@@ -8,6 +8,7 @@ and follow the Ports & Adapters (Hexagonal) architecture pattern.
 from __future__ import annotations
 
 import ast
+import re
 import sys
 from pathlib import Path
 
@@ -163,8 +164,129 @@ def _collect_adapter_violations(base_path: Path) -> list[str]:
     return violations
 
 
-def main() -> int:
+_ANY_TOKEN = re.compile(r"\bAny\b")
+
+
+def _imports_typing_name(tree: ast.AST, name: str) -> bool:
+    """Return True when the tree imports ``name`` from ``typing``."""
+    return any(
+        isinstance(node, ast.ImportFrom)
+        and node.module == "typing"
+        and any(alias.name == name for alias in node.names)
+        for node in ast.walk(tree)
+    )
+
+
+def _domain_named_files(domain_path: Path, filename: str) -> list[Path]:
+    """Return matching domain files in stable path order."""
+    return sorted(path for path in domain_path.rglob(filename) if path.is_file())
+
+
+def collect_domain_type_errors(domain_path: Path) -> list[str]:
+    """Return blocking Protocol gaps for domain ``ports.py`` modules."""
+    errors: list[str] = []
+    for path in _domain_named_files(domain_path, "ports.py"):
+        tree = _parse_file_tree(path)
+        if tree is not None and not _imports_typing_name(tree, "Protocol"):
+            errors.append(f"{path}: ports.py should use typing.Protocol")
+    return errors
+
+
+def collect_domain_type_notices(domain_path: Path) -> list[str]:
+    """Return non-blocking NewType hints for domain ``types.py`` modules."""
+    notices: list[str] = []
+    for path in _domain_named_files(domain_path, "types.py"):
+        tree = _parse_file_tree(path)
+        if tree is not None and not _imports_typing_name(tree, "NewType"):
+            notices.append(
+                f"ℹ️  {path}: Consider using NewType for domain-specific types"
+            )
+    return notices
+
+
+def _line_mentions_any(line: str) -> bool:
+    """Return True for executable lines that mention ``Any``."""
+    if "TYPE_CHECKING" in line or line.strip().startswith("#"):
+        return False
+    return _ANY_TOKEN.search(line) is not None
+
+
+def _any_warnings_in_file(path: Path) -> list[str]:
+    """Return Any-usage warnings for one Python file."""
+    return [
+        f"{path}:{index}: {line.strip()}"
+        for index, line in enumerate(
+            path.read_text(encoding="utf-8").splitlines(),
+            1,
+        )
+        if _line_mentions_any(line)
+    ]
+
+
+def collect_any_usage_warnings(base_path: Path) -> list[str]:
+    """Return advisory Any-usage warnings under domain and application."""
+    warnings: list[str] = []
+    for layer in ("domain", "application"):
+        layer_path = base_path / "src" / "bioetl" / layer
+        if not layer_path.is_dir():
+            continue
+        for py_file in sorted(layer_path.rglob("*.py")):
+            warnings.extend(_any_warnings_in_file(py_file))
+    return warnings
+
+
+def _report_any_usage(base_path: Path) -> None:
+    """Print advisory Any-usage findings. They do not fail the gate."""
+    warnings = collect_any_usage_warnings(base_path)
+    if not warnings:
+        print("✅ No problematic Any type usage found")
+        return
+    print(f"⚠️  Found {len(warnings)} potential Any type usage(s):")
+    for line in warnings[:10]:
+        print(f"  {line}")
+    extra = len(warnings) - 10
+    if extra > 0:
+        print(f"  ... and {extra} more")
+    print("\nConsider using more specific types where possible.")
+
+
+def _report_domain_type_definitions(domain_path: Path) -> int:
+    """Print domain type-policy findings and return the exit code."""
+    if not domain_path.is_dir():
+        print("Domain layer not found")
+        return 1
+    for notice in collect_domain_type_notices(domain_path):
+        print(notice)
+    errors = collect_domain_type_errors(domain_path)
+    if not errors:
+        print("✅ Domain layer type definitions look good")
+        return 0
+    print("❌ Type definition issues found:")
+    for issue in errors:
+        print(f"  {issue}")
+    return 1
+
+
+def check_domain_type_policy(base_path: Path) -> int:
+    """Run the domain NewType, Protocol, and Any policy gate."""
+    exit_code = _report_domain_type_definitions(base_path / "src" / "bioetl" / "domain")
+    _report_any_usage(base_path)
+    return exit_code
+
+
+def main(argv: list[str] | None = None) -> int:
     """Run infrastructure architecture checks."""
+    args = list(sys.argv[1:] if argv is None else argv)
+    if args == ["domain-type-policy"]:
+        return check_domain_type_policy(Path())
+    if args:
+        print(
+            "usage: python -m scripts.engineering.qa.check_architecture "
+            "[domain-type-policy]",
+            file=sys.stderr,
+        )
+        return 2
+
     base_path = Path("")
     all_violations: list[str] = []
 
