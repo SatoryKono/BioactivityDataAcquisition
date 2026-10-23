@@ -1,8 +1,8 @@
 {
   "schema_version": "ci-baseline-v1",
-  "timestamp_utc": "2026-10-22T22:34:49.901924+00:00",
+  "timestamp_utc": "2026-10-22T23:32:09.074502+00:00",
   "git": {
-    "main_sha": "79952b76b83c86ed1181b4caf0628ce47a2ed3f9",
+    "main_sha": "d19819a37a44b2a5a8b5340614e4ca39d8c396a6",
     "develop_sha": null,
     "develop_branch_status": "absent"
   },
@@ -91,7 +91,7 @@
     },
     {
       "path": ".github/workflows/docker.yml",
-      "sha256": "77621c99d2ccddfd7f57da4838592a18b3ae14e81fb504b7819506a1cae8987c"
+      "sha256": "404ab6a73e750b7ff3a5375ab0b84af83e0b8519dc296c6728eac072adf8b8b7"
     },
     {
       "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -171,7 +171,7 @@
     },
     {
       "path": ".github/workflows/pr-required.yml",
-      "sha256": "3d7cf07d4a60c179227e9d528e1843e509109362f3c2c8ccb834ddb82e584896"
+      "sha256": "7eb92e91abf985aa18778496941f09fb6fe58c594bfa75f4e967a8b2941ddbf2"
     },
     {
       "path": ".github/workflows/provider-contract-drift.yml",
@@ -319,7 +319,7 @@
     },
     {
       "path": "scripts/engineering/ci/pr_lane_results.py",
-      "sha256": "8de4cd188edae7456a72a76f5b180a9a8ef3b808bb66ca42c259deff1e12b2ca"
+      "sha256": "9ec4ea826712344f1d4a62748531a8713684c5d5cf6bb25c5f848c332ca9ace3"
     },
     {
       "path": "scripts/engineering/ci/publish_docker_image.sh",
@@ -402,5 +402,5 @@
       "sha256": "2818398bb7be4fac9b0b7234654a3925f7efe98ad0a1ec389218e654703c35d7"
     }
   ],
-  "inventory_sha256": "3f5f1be8c3f468811fc53547ff861f4e27095dbe5d64b9dd8b5ddea710e6520c"
+  "inventory_sha256": "439e4b01453359d26e8785c6a99d9b68ff7d2dbcf82dda7538c8c10136990cb5"
 }
