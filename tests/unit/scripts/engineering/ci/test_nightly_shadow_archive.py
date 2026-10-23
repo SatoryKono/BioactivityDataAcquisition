@@ -12,6 +12,7 @@ import pytest
 from scripts.engineering.ci.nightly_shadow_archive import (
     JOB_KINDS,
     ArchiveError,
+    _atomic_create,
     aggregate_results,
     assess_shadow_window,
     canonical_bytes,
@@ -254,6 +255,15 @@ def test_existing_snapshot_is_not_overwritten(tmp_path: Path) -> None:
         _store(tmp_path, changed, _outcomes())
 
 
+def test_atomic_create_rejects_a_path_outside_the_archive_root(
+    tmp_path: Path,
+) -> None:
+    outside = tmp_path.parent / f"{tmp_path.name}-outside.json"
+    with pytest.raises(ValueError, match="refusing path outside"):
+        _atomic_create(outside, b"{}", root=tmp_path)
+    assert not outside.exists()
+
+
 def test_verify_rejects_missing_archive_malformed_manifest_and_checksum(
     tmp_path: Path,
 ) -> None:
@@ -373,6 +383,16 @@ def test_verify_rejects_an_indexed_snapshot_that_is_missing(tmp_path: Path) -> N
     removed = _store(tmp_path, _raw(run_id=12, head="def456"), _outcomes())
     _seal_index(tmp_path)
     shutil.rmtree(removed)
+    with pytest.raises(ArchiveError, match="indexed snapshot missing"):
+        verify_archive(tmp_path)
+
+
+def test_verify_rejects_an_indexed_snapshot_with_a_missing_manifest(
+    tmp_path: Path,
+) -> None:
+    stored = _store(tmp_path, _raw(run_id=11), _outcomes())
+    _seal_index(tmp_path)
+    (stored / "manifest.json").unlink()
     with pytest.raises(ArchiveError, match="indexed snapshot missing"):
         verify_archive(tmp_path)
 

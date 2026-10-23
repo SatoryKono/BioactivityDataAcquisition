@@ -30,6 +30,7 @@ from scripts.engineering.ci.actions_timing_common import (
 )
 from scripts.engineering.common.repo_paths import (
     ensure_path_within_root,
+    rebuild_confined_path,
     resolve_cli_path,
 )
 from scripts.engineering.repo.github_settings_review import (
@@ -583,10 +584,12 @@ def _same_snapshot(destination: Path, files: Mapping[str, bytes]) -> bool:
 
 
 def _atomic_create(path: Path, payload: bytes, *, root: Path) -> None:
-    safe = ensure_path_within_root(path, root)
+    safe = rebuild_confined_path(path, root=root)
     if safe.exists():
         raise ArchiveError(f"refusing to overwrite {safe}")
-    temporary = ensure_path_within_root(safe.with_suffix(safe.suffix + ".tmp"), root)
+    temporary = rebuild_confined_path(
+        safe.with_suffix(safe.suffix + ".tmp"), root=root
+    )
     temporary.write_bytes(payload)
     try:
         os.replace(temporary, safe)
