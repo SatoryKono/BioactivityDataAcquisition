@@ -1,0 +1,7 @@
+{
+  "measured_sha": "7a16d8ca6d8977bd54ead3ff6392855197ed7912",
+  "raw_sha256": "65b623110f869261e92fcbe53d3f083c83299f497b9c348664ec52252face213",
+  "reason": "insufficient_baseline",
+  "status": "failed",
+  "validation_manifest_sha256": "a22bcdb3e36b917f8ba4be6e2d8e9b3ee291caca922101342452f10862b8afa5"
+}

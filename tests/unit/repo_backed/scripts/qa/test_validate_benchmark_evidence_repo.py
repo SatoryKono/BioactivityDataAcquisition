@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import shutil
 import subprocess
@@ -225,3 +227,38 @@ def test_nightly_caller_declares_dataset_and_loads_guard_before_benchmark():
     assert command.index("-p tests.benchmarks.benchmark_vcs_guard") < command.index(
         "-p benchmark"
     )
+
+
+def test_reviewed_summary_adopts_candidate_without_changing_measurements():
+    """Flip only adoption; keep the failed gate and the measured bytes."""
+    root = Path(__file__).resolve().parents[5]
+    candidates = sorted(
+        (root / "reports/performance/evidence").rglob(
+            "benchmark-summary-candidate.json"
+        )
+    )
+    assert len(candidates) == 1
+    folder = candidates[0].parent
+    candidate = json.loads(candidates[0].read_text(encoding="utf-8"))
+    summary = json.loads(
+        (root / "reports/performance/benchmark-summary.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert candidate["adoption"] == "proposed"
+    adopted = dict(candidate)
+    adopted["adoption"] = "measured"
+    assert summary == adopted
+    raw = (folder / "benchmark-measurements.json").read_bytes()
+    receipt = (folder / "benchmark-validation-manifest.json").read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == summary["raw_sha256"]
+    assert hashlib.sha256(receipt).hexdigest() == summary["validation_manifest_sha256"]
+    gate = json.loads((folder / "benchmark-gate.json").read_text(encoding="utf-8"))
+    manifest = json.loads(
+        (folder / "benchmark-manifest.json").read_text(encoding="utf-8")
+    )
+    assert gate == manifest
+    assert gate["status"] == "failed"
+    assert gate["reason"] == "insufficient_baseline"
+    assert gate["measured_sha"] == summary["baseline_sha"]
+    assert gate["raw_sha256"] == summary["raw_sha256"]
