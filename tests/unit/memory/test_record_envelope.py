@@ -16,7 +16,7 @@ from memory.records import (
     TrustLevel,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.memory
 
 
 def _envelope() -> RecordEnvelope:

@@ -17,7 +17,7 @@ from tests.helpers.cli_process import run_main_in_process
 
 import pytest
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.memory
 
 
 def _ignore_memory_package_runtime_payloads(

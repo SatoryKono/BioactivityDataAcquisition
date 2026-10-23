@@ -319,7 +319,7 @@ acceptance gates; workflow deletion is no longer a completion criterion.
 | `import-linter.yml` | Lint and Architecture Gates | import-linter + layer architecture |
 | `main-integrity.yml` | Main Integrity | Post-merge smoke, root hygiene, and Docker image gate |
 | `mutation-testing.yml` | Mutation Testing | Sole Sunday mutation owner (#10263 exception); push and pull_request stay off |
-| `nightly.yml` | Nightly | Single schedule for full tests, E2E, weekly mutation, and Monday lanes |
+| `nightly.yml` | Nightly | Daily 03:00 UTC. Monday or `workflow_dispatch`: tests, E2E, duplication, import-linter, generated artifacts. Security and zizmor stay daily. CodeQL and Scorecard stay Monday. Mutation stays Sunday |
 | `no-partial-tree-commits.yml` | No partial-tree commits | Reject incomplete Git trees (#11709) |
 | `opencode-pr-review.yml` | opencode-pr-review | Dispatch-only stub (#11012); remote OpenCode installer removed |
 | `opencode-triage.yml` | opencode-triage | Dispatch-only stub (#11012); remote OpenCode installer removed |

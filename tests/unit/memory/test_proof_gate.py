@@ -19,7 +19,7 @@ from memory.proof import (
 from tests.helpers.clock import FIXED_TEST_TIME
 from tests.helpers.isolated_git import init_tracked_fixture_repo
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.memory
 
 
 def _init_repo(repo: Path) -> None:

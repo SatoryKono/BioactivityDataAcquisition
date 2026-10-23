@@ -70,6 +70,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Pytest nodeid inventory (#12436):** `--check` compares the committed
+  manifest except `source_commit`, so a fresh clone can pass without the
+  manifest containing its own commit SHA. Sharded lanes follow shard paths
+  and ignores. Tests outside configured lanes are `FullOnly`. Collection
+  passes `--artifact-selection=all`. `normalize_boolean` no longer returns
+  `Any` for string inputs.
+
 - **Lock release under repeated cancellation:** `release_lock` keeps the
   cleanup task shielded until barriers, heartbeat shutdown, and lock release
   finish, then re-raises the caller's cancellation. The eager/lazy measurement
@@ -246,6 +253,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   scanning owner; default setup stays off; weekly Monday triage.
 
 ### Changed
+
+- **Deterministic nightly lanes (#12363):** `nightly.yml` still cron-runs daily
+  at 03:00 UTC. `tests`, `e2e`, `duplication`, `import-linter`, and
+  `generated-artifact-daily` run on Monday or `workflow_dispatch`. Security
+  and zizmor stay daily. CodeQL, Scorecard, and Sunday mutation are unchanged.
 
 - **VCR cassettes leave GitHub LFS:** `tests/fixtures/vcr/**/*.yaml` are stored
   as regular git blobs. Required CI lanes no longer call `git lfs pull`; they

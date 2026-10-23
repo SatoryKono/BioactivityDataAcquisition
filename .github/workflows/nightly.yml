@@ -33,7 +33,7 @@ jobs:
 
   tests:
     needs: clock
-    if: needs.clock.outputs.dow == 'Mon'
+    if: "github.event_name == 'workflow_dispatch' || needs.clock.outputs.dow == 'Mon'"
     uses: ./.github/workflows/tests.yml
     with:
       generated-artifacts: true
@@ -42,7 +42,7 @@ jobs:
 
   e2e:
     needs: clock
-    if: needs.clock.outputs.dow == 'Mon'
+    if: "github.event_name == 'workflow_dispatch' || needs.clock.outputs.dow == 'Mon'"
     uses: ./.github/workflows/e2e-matrix-health.yml
     permissions:
       contents: read
@@ -54,14 +54,14 @@ jobs:
 
   duplication:
     needs: clock
-    if: needs.clock.outputs.dow == 'Mon'
+    if: "github.event_name == 'workflow_dispatch' || needs.clock.outputs.dow == 'Mon'"
     uses: ./.github/workflows/duplication-complexity.yml
     permissions:
       contents: read
 
   import-linter:
     needs: clock
-    if: needs.clock.outputs.dow == 'Mon'
+    if: "github.event_name == 'workflow_dispatch' || needs.clock.outputs.dow == 'Mon'"
     uses: ./.github/workflows/import-linter.yml
     permissions:
       contents: read
@@ -121,7 +121,7 @@ jobs:
 
   generated-artifact-daily:
     needs: clock
-    if: needs.clock.outputs.dow == 'Mon'
+    if: "github.event_name == 'workflow_dispatch' || needs.clock.outputs.dow == 'Mon'"
     name: Generated artifact assertions (daily)
     runs-on: ubuntu-latest
     timeout-minutes: 120

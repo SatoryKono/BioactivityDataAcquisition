@@ -97,6 +97,9 @@ _SECRET_PREFIX = re.compile(
     r"(?:ghp_[A-Za-z0-9]+|github_pat_[A-Za-z0-9_]+|sk-[A-Za-z0-9]+|"
     r"xox[baprs]-[A-Za-z0-9-]+|AKIA[A-Z0-9]{16})"
 )
+# Unquoted assignment values stop at "]". A second pass therefore sees
+# "[redacted:<12 hex>" without the closing bracket.
+_REDACTED_ASSIGNMENT_VALUE = re.compile(r"\[redacted:[0-9a-f]{12}\]?")
 _SAFE_ENV_KEYS = frozenset(
     {
         "GITHUB_RUN_ID",
@@ -192,6 +195,8 @@ def _assigned_secret(match: re.Match[str]) -> tuple[int, str]:
 
 def _replace_assignment(match: re.Match[str]) -> str:
     index, value = _assigned_secret(match)
+    if _REDACTED_ASSIGNMENT_VALUE.fullmatch(value) is not None:
+        return match.group(0)
     prefix = match.group(0)[: match.start(index) - match.start(0)]
     suffix = match.group(0)[match.end(index) - match.start(0) :]
     return prefix + _redaction_token(value) + suffix
@@ -408,11 +413,9 @@ class EventJournalPlugin:
             "event": event_type,
             "identity": _redact_structured(self.identity, self.secrets),
         }
-        for key, value in data.items():
-            if isinstance(value, str):
-                payload[key] = _redact_text(value, self.secrets)
-            else:
-                payload[key] = value
+        redacted_data = _redact_structured(data, self.secrets)
+        if isinstance(redacted_data, dict):
+            payload.update(redacted_data)
         line = json.dumps(payload, sort_keys=True, ensure_ascii=True) + "\n"
         try:
             self._file.write(line)
@@ -455,11 +458,11 @@ class EventJournalPlugin:
         return True
 
     def record_selected(self, items: list[Any]) -> None:
-        nodeids = sorted(_redact_text(str(item.nodeid), self.secrets) for item in items)
+        nodeids = sorted(str(item.nodeid) for item in items)
         self.record("collection_finished", {"nodeids": nodeids})
 
     def pytest_deselected(self, items: list[Any]) -> None:
-        nodeids = sorted(_redact_text(str(item.nodeid), self.secrets) for item in items)
+        nodeids = sorted(str(item.nodeid) for item in items)
         self.record("deselected", {"nodeids": nodeids})
 
     def pytest_collectreport(self, report: Any) -> None:

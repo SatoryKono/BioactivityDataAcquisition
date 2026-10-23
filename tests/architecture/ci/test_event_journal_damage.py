@@ -33,6 +33,7 @@ _load = _HELPERS._load
 _named_receipt = _HELPERS._named_receipt
 _outcome = _HELPERS._outcome
 _phases = _HELPERS._phases
+_drop_inherited_xdist = _HELPERS._drop_inherited_xdist
 _run_journal = _HELPERS._run_journal
 _start = _HELPERS._start
 _write_receipt = _HELPERS._write_receipt
@@ -260,7 +261,7 @@ def test_xdist_workers_share_the_controller_redaction_key(tmp_path: Path) -> Non
         "    assert password == 'swordfish'\n",
         encoding="utf-8",
     )
-    child_env = os.environ.copy()
+    child_env = _drop_inherited_xdist(os.environ.copy())
     child_env.pop("EXPECTED_CHECKOUT_SHA", None)
     child_env.pop("BIOETL_JOURNAL_REDACTION_KEY", None)
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = "inv-xdist"
@@ -849,11 +850,13 @@ def test_runner_preserves_both_receipt_producers(tmp_path: Path, fails: bool) ->
     )
     journal = tmp_path / "journal"
     receipts = tmp_path / "receipts"
-    env = {
-        **os.environ,
-        "BIOETL_MERGE_ENV": "kept",
-        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
-    }
+    env = _drop_inherited_xdist(
+        {
+            **os.environ,
+            "BIOETL_MERGE_ENV": "kept",
+            "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+        }
+    )
     env.pop("EXPECTED_CHECKOUT_SHA", None)
     result = subprocess.run(
         [
@@ -1203,3 +1206,68 @@ def test_followup_cmdline_result_mismatch_never_proves_completion(
     )
     assert result.returncode == forced
     assert _live_verdict(tmp_path / "run")["status"] != "complete"
+
+
+def test_record_redacts_nested_secrets_in_payload(tmp_path: Path) -> None:
+    from scripts.engineering.ci.pytest_event_journal import EventJournalPlugin
+
+    identity = _identity(role="worker", worker_id="gw0")
+    path = tmp_path / "journal.jsonl"
+    plugin = EventJournalPlugin(config=None, path=path, identity=identity)
+    plugin.secrets = ("supersecret", "swordfish")
+    plugin.record(
+        "custom_event",
+        {
+            "string": "this is a supersecret string",
+            "password": "hunter2",
+            "nested": {
+                "safe_key": "safe value",
+                "nested_password": "swordfish",
+                "list": [
+                    "supersecret",
+                    "safe",
+                ],
+            },
+        },
+    )
+    assert plugin._file is not None
+    plugin._file.close()
+    out = path.read_text(encoding="utf-8")
+
+    assert "supersecret" not in out
+    assert "swordfish" not in out
+    assert "hunter2" not in out
+    assert "[redacted:" in out
+
+    parsed = json.loads(out)
+    assert parsed["event"] == "custom_event"
+    assert "nested" in parsed
+    assert parsed["nested"]["safe_key"] == "safe value"
+    assert "[redacted:" in parsed["nested"]["nested_password"]
+    assert parsed["password"].startswith("[redacted:")
+
+
+def test_parametrized_assignment_nodeid_stays_reconciled(tmp_path: Path) -> None:
+    result = _run_journal(
+        tmp_path,
+        "import pytest\n\n"
+        "@pytest.mark.parametrize(\n"
+        "    'password',\n"
+        "    ['swordfish'],\n"
+        "    ids=['password=swordfish'],\n"
+        ")\n"
+        "def test_login(password):\n"
+        "    assert password == 'swordfish'\n",
+        [],
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    verdict = _live_verdict(tmp_path)
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert "unexplained_selected_tests" not in verdict["reasons"]
+    assert "unselected_outcome" not in verdict["reasons"]
+    blob = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in (tmp_path / "journal").glob("receipt_*.jsonl")
+    )
+    assert "swordfish" not in blob
+    assert "[redacted:" in blob

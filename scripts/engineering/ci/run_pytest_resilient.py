@@ -15,7 +15,7 @@ import re
 import shlex
 import sys
 import uuid
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -283,11 +283,22 @@ def _remember_journal_invocation(
         expected_invocations[name] = invocation_id
 
 
+def _pytest_targets(target: str | Sequence[str]) -> list[str]:
+    """Return every pytest path from one string or from repeated CLI values."""
+    if isinstance(target, str):
+        paths = [target]
+    else:
+        paths = [str(item) for item in target if item]
+    if not paths:
+        raise ValueError("pytest target must not be empty")
+    return paths
+
+
 def _run_pass(
     *,
     name: str,
     base_command: list[str],
-    target: str,
+    target: str | Sequence[str],
     marker_expr: str,
     addopts: list[str],
     reports_dir: Path,
@@ -309,7 +320,7 @@ def _run_pass(
 
     command = [
         *base_command,
-        target,
+        *_pytest_targets(target),
         "-m",
         marker_expr,
         "--junitxml",
@@ -563,7 +574,7 @@ def _run_named_pass(
     *,
     name: str,
     base_command: list[str],
-    target: str,
+    target: str | Sequence[str],
     marker_expr: str,
     addopts: str,
     reports_dir: Path,
@@ -593,6 +604,50 @@ def _run_named_pass(
     )
 
 
+def _collected_nothing(result: PassResult) -> bool:
+    """True when pytest collected no tests and the pass itself did not crash."""
+    return (
+        result.return_code == 5
+        and not result.timed_out
+        and not result.worker_crash_detected
+    )
+
+
+def _artifact_report_path(reports_dir: Path, pass_name: str) -> Path:
+    """Return the per-pass artifact-selection proof written by pytest."""
+    return reports_dir / f"artifact-selection-{pass_name}.json"
+
+
+def _deferral_pytest_args(report_path: Path | None) -> list[str]:
+    """Ask pytest to write a fresh selection report for this pass."""
+    if report_path is None:
+        return []
+    report_path.unlink(missing_ok=True)
+    return [f"--artifact-selection-report={report_path.as_posix()}"]
+
+
+def _pass_is_proven_deferral(result: PassResult, report_path: Path | None) -> bool:
+    """Accept exit 5 only when every collected node is owned by Nightly."""
+    if report_path is None or not _collected_nothing(result):
+        return False
+    if not report_path.is_file():
+        return False
+    try:
+        payload = json.loads(report_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    if not isinstance(payload, dict):
+        return False
+    exit_code = payload.get("pytest_exit_code")
+    if not isinstance(exit_code, int):
+        return False
+    from scripts.engineering.ci.generated_artifact_checks import proven_deferral
+    from scripts.engineering.dev.pytest_artifact_selection import load_manifest
+
+    selectors = {row["node"] for row in load_manifest()["tests"]}
+    return proven_deferral(payload, exit_code, selectors)
+
+
 def _run_serial_pass(
     *,
     base_command: list[str],
@@ -605,24 +660,35 @@ def _run_serial_pass(
     expected_invocations: dict[str, str] | None = None,
     receipt: ReceiptInvocation | None = None,
     child_env: dict[str, str] | None = None,
+    allow_no_tests: bool = True,
+    deferral_report: Path | None = None,
 ) -> int:
     """Run dedicated serial marker pass and record the summary."""
+    addopts = args.serial_addopts
+    report_args = _deferral_pytest_args(deferral_report)
+    if report_args:
+        addopts = f"{addopts} {' '.join(report_args)}".strip()
     serial_result = _run_named_pass(
         name="serial",
         base_command=base_command,
         target=args.target,
         marker_expr=args.serial_marker,
-        addopts=args.serial_addopts,
+        addopts=addopts,
         reports_dir=reports_dir,
         journal_dir=journal_dir,
         timeout_seconds=serial_timeout,
         executed_passes=executed_passes,
         expected_invocations=expected_invocations,
-        allow_no_tests=True,
+        allow_no_tests=allow_no_tests,
         receipt=receipt,
         child_env=child_env,
     )
-    serial_rc = _effective_exit_code(serial_result, allow_no_tests=True)
+    accept_empty = allow_no_tests or _pass_is_proven_deferral(
+        serial_result, deferral_report
+    )
+    if accept_empty and not allow_no_tests:
+        summary_lines.append("serial_proven_artifact_deferral=true")
+    serial_rc = _effective_exit_code(serial_result, allow_no_tests=accept_empty)
     _append_pass_summary(summary_lines, result=serial_result, effective_rc=serial_rc)
     return serial_rc
 
@@ -647,8 +713,12 @@ def _create_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--target",
-        default="tests/",
-        help="Pytest target path or nodeid (default: tests/).",
+        nargs="+",
+        default=["tests/"],
+        help=(
+            "Pytest target paths or nodeids (default: tests/). "
+            "Extra values are one pytest invocation."
+        ),
     )
     parser.add_argument(
         "--reports-dir",
@@ -710,6 +780,15 @@ def _create_parser() -> argparse.ArgumentParser:
         help=(
             "Do not start a second pytest pass after a worker crash or watchdog "
             "timeout. The parallel pass status is returned as-is."
+        ),
+    )
+    parser.add_argument(
+        "--prove-artifact-deferral",
+        action="store_true",
+        help=(
+            "When every affected node is deferred to Nightly, accept pytest "
+            "exit 5 only if the artifact-selection report proves that deferral. "
+            "An empty selection that is not fully deferred still fails."
         ),
     )
     parser.add_argument(
@@ -789,6 +868,186 @@ def _reject_sha_without_receipt_dir(args: argparse.Namespace) -> int | None:
     return None
 
 
+@dataclass
+class _RunContext:
+    """Shared inputs for the passes that follow the parallel attempt."""
+
+    args: argparse.Namespace
+    base_command: list[str]
+    reports_dir: Path
+    journal_dir: Path | None
+    summary_lines: list[str]
+    executed_passes: list[str]
+    expected_invocations: dict[str, str]
+    receipt: ReceiptInvocation | None
+    child_env: dict[str, str]
+    serial_timeout: float | None
+    fallback_timeout: float | None
+    prove_deferral: bool
+
+
+def _done(ctx: _RunContext, test_rc: int) -> int:
+    """Persist the summary and return the gate status."""
+    return _finish_run(
+        reports_dir=ctx.reports_dir,
+        summary_lines=ctx.summary_lines,
+        journal_dir=ctx.journal_dir,
+        executed_passes=ctx.executed_passes,
+        test_rc=test_rc,
+        expected_invocations=ctx.expected_invocations,
+    )
+
+
+def _finish_deferral_proof(ctx: _RunContext) -> int:
+    """Prove a mixed serial/non-serial selection was fully deferred."""
+    proof_report = _artifact_report_path(ctx.reports_dir, "deferral-proof")
+    proof_result = _run_pass(
+        name="deferral-proof",
+        base_command=ctx.base_command,
+        target=ctx.args.target,
+        marker_expr="serial or not serial",
+        addopts=[
+            *_deferral_pytest_args(proof_report),
+            "-q",
+            "--tb=line",
+            "-p",
+            "no:xdist",
+        ],
+        reports_dir=ctx.reports_dir,
+        journal_dir=ctx.journal_dir,
+        timeout_seconds=ctx.serial_timeout,
+        executed_passes=ctx.executed_passes,
+        expected_invocations=ctx.expected_invocations,
+        allow_no_tests=False,
+        receipt=ctx.receipt,
+        child_env=ctx.child_env,
+    )
+    proof_proven = _pass_is_proven_deferral(proof_result, proof_report)
+    if proof_proven:
+        ctx.summary_lines.append("deferral_proof_proven=true")
+    proof_rc = 0 if proof_proven else _effective_exit_code(proof_result)
+    _append_pass_summary(ctx.summary_lines, result=proof_result, effective_rc=proof_rc)
+    return _done(ctx, proof_rc)
+
+
+def _finish_unmatched_parallel(ctx: _RunContext) -> int:
+    """Run serial tests when the parallel marker matched nothing.
+
+    Exit 5 stays a failure unless the artifact report proves every collected
+    node was deferred to Nightly.
+    """
+    ctx.summary_lines.append("parallel_collected_no_tests=true")
+    serial_report = (
+        _artifact_report_path(ctx.reports_dir, "serial") if ctx.prove_deferral else None
+    )
+    serial_rc = _run_serial_pass(
+        base_command=ctx.base_command,
+        args=ctx.args,
+        reports_dir=ctx.reports_dir,
+        journal_dir=ctx.journal_dir,
+        serial_timeout=ctx.serial_timeout,
+        summary_lines=ctx.summary_lines,
+        executed_passes=ctx.executed_passes,
+        expected_invocations=ctx.expected_invocations,
+        receipt=ctx.receipt,
+        child_env=ctx.child_env,
+        allow_no_tests=False,
+        deferral_report=serial_report,
+    )
+    if serial_rc == 5 and ctx.prove_deferral:
+        return _finish_deferral_proof(ctx)
+    return _done(ctx, serial_rc)
+
+
+def _finish_green_parallel(ctx: _RunContext) -> int:
+    """Record a successful parallel pass, then the optional serial pass."""
+    if ctx.args.skip_serial_pass:
+        return _done(ctx, 0)
+    serial_rc = _run_serial_pass(
+        base_command=ctx.base_command,
+        args=ctx.args,
+        reports_dir=ctx.reports_dir,
+        journal_dir=ctx.journal_dir,
+        serial_timeout=ctx.serial_timeout,
+        summary_lines=ctx.summary_lines,
+        receipt=ctx.receipt,
+        child_env=ctx.child_env,
+        executed_passes=ctx.executed_passes,
+        expected_invocations=ctx.expected_invocations,
+    )
+    return _done(ctx, serial_rc)
+
+
+def _finish_without_fallback(
+    ctx: _RunContext, parallel_result: PassResult, parallel_rc: int
+) -> int:
+    """Return the parallel status when fallback must not start."""
+    if _parallel_failure_is_stable(parallel_result):
+        ctx.summary_lines.append("parallel_failed_without_worker_crash=true")
+    else:
+        _append_parallel_instability_markers(
+            ctx.summary_lines, parallel_result=parallel_result
+        )
+        ctx.summary_lines.append("fallback_skipped=true")
+    return _done(ctx, parallel_rc)
+
+
+def _run_fallback_pass(ctx: _RunContext, parallel_result: PassResult) -> int:
+    """Re-run the parallel marker serially after an unstable parallel pass."""
+    _append_parallel_instability_markers(
+        ctx.summary_lines, parallel_result=parallel_result
+    )
+    sys.stdout.write(
+        "\nparallel pass unstable (worker crash/timeout), running serial fallback pass.\n"
+    )
+    fallback_result = _run_named_pass(
+        name="fallback",
+        base_command=ctx.base_command,
+        target=ctx.args.target,
+        marker_expr=ctx.args.parallel_marker,
+        addopts=ctx.args.fallback_addopts,
+        reports_dir=ctx.reports_dir,
+        journal_dir=ctx.journal_dir,
+        timeout_seconds=ctx.fallback_timeout,
+        executed_passes=ctx.executed_passes,
+        expected_invocations=ctx.expected_invocations,
+        receipt=ctx.receipt,
+        child_env=ctx.child_env,
+    )
+    fallback_rc = _effective_exit_code(fallback_result)
+    _append_pass_summary(
+        ctx.summary_lines, result=fallback_result, effective_rc=fallback_rc
+    )
+    if fallback_rc != 0 or ctx.args.skip_serial_pass:
+        return _done(ctx, fallback_rc)
+    serial_rc = _run_serial_pass(
+        base_command=ctx.base_command,
+        args=ctx.args,
+        reports_dir=ctx.reports_dir,
+        journal_dir=ctx.journal_dir,
+        serial_timeout=ctx.serial_timeout,
+        summary_lines=ctx.summary_lines,
+        receipt=ctx.receipt,
+        child_env=ctx.child_env,
+        executed_passes=ctx.executed_passes,
+        expected_invocations=ctx.expected_invocations,
+    )
+    return _done(ctx, serial_rc)
+
+
+def _dispatch_after_parallel(
+    ctx: _RunContext, parallel_result: PassResult, parallel_rc: int
+) -> int:
+    """Choose serial, deferral proof, or fallback from the parallel status."""
+    if parallel_rc == 0:
+        return _finish_green_parallel(ctx)
+    if _collected_nothing(parallel_result) and not ctx.args.skip_serial_pass:
+        return _finish_unmatched_parallel(ctx)
+    if _parallel_failure_is_stable(parallel_result) or ctx.args.no_fallback:
+        return _finish_without_fallback(ctx, parallel_result, parallel_rc)
+    return _run_fallback_pass(ctx, parallel_result)
+
+
 def _execute_passes(args: argparse.Namespace) -> int:
     """Run the parallel, fallback, and serial passes."""
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
@@ -817,13 +1076,20 @@ def _execute_passes(args: argparse.Namespace) -> int:
     parallel_timeout = args.parallel_timeout_seconds or None
     fallback_timeout = args.fallback_timeout_seconds or None
     serial_timeout = args.serial_timeout_seconds or None
+    prove_deferral = bool(args.prove_artifact_deferral)
+    parallel_report = (
+        _artifact_report_path(reports_dir, "parallel") if prove_deferral else None
+    )
 
     parallel_result = _run_pass(
         name="parallel",
         base_command=base_command,
         target=args.target,
         marker_expr=args.parallel_marker,
-        addopts=_split_args(args.parallel_addopts),
+        addopts=[
+            *_deferral_pytest_args(parallel_report),
+            *_split_args(args.parallel_addopts),
+        ],
         reports_dir=reports_dir,
         journal_dir=journal_dir,
         timeout_seconds=parallel_timeout,
@@ -834,132 +1100,31 @@ def _execute_passes(args: argparse.Namespace) -> int:
     )
 
     parallel_rc = _effective_exit_code(parallel_result)
+    if _pass_is_proven_deferral(parallel_result, parallel_report):
+        summary_lines.append("parallel_proven_artifact_deferral=true")
+        parallel_rc = 0
     _append_pass_summary(
         summary_lines,
         result=parallel_result,
         effective_rc=parallel_rc,
     )
-
-    run_serial_pass = not args.skip_serial_pass
-
-    if parallel_rc == 0:
-        if not run_serial_pass:
-            return _finish_run(
-                reports_dir=reports_dir,
-                summary_lines=summary_lines,
-                journal_dir=journal_dir,
-                executed_passes=executed_passes,
-                test_rc=0,
-                expected_invocations=expected_invocations,
-            )
-
-        serial_rc = _run_serial_pass(
-            base_command=base_command,
+    return _dispatch_after_parallel(
+        _RunContext(
             args=args,
+            base_command=base_command,
             reports_dir=reports_dir,
             journal_dir=journal_dir,
-            serial_timeout=serial_timeout,
             summary_lines=summary_lines,
+            executed_passes=executed_passes,
+            expected_invocations=expected_invocations,
             receipt=receipt,
             child_env=child_env,
-            executed_passes=executed_passes,
-            expected_invocations=expected_invocations,
-        )
-        return _finish_run(
-            reports_dir=reports_dir,
-            summary_lines=summary_lines,
-            journal_dir=journal_dir,
-            executed_passes=executed_passes,
-            test_rc=serial_rc,
-            expected_invocations=expected_invocations,
-        )
-
-    if _parallel_failure_is_stable(parallel_result) or args.no_fallback:
-        if _parallel_failure_is_stable(parallel_result):
-            summary_lines.append("parallel_failed_without_worker_crash=true")
-        else:
-            _append_parallel_instability_markers(
-                summary_lines,
-                parallel_result=parallel_result,
-            )
-            summary_lines.append("fallback_skipped=true")
-        return _finish_run(
-            reports_dir=reports_dir,
-            summary_lines=summary_lines,
-            journal_dir=journal_dir,
-            executed_passes=executed_passes,
-            test_rc=parallel_rc,
-            expected_invocations=expected_invocations,
-        )
-
-    _append_parallel_instability_markers(
-        summary_lines,
-        parallel_result=parallel_result,
-    )
-    sys.stdout.write(
-        "\nparallel pass unstable (worker crash/timeout), running serial fallback pass.\n"
-    )
-
-    fallback_result = _run_named_pass(
-        name="fallback",
-        base_command=base_command,
-        target=args.target,
-        marker_expr=args.parallel_marker,
-        addopts=args.fallback_addopts,
-        reports_dir=reports_dir,
-        journal_dir=journal_dir,
-        timeout_seconds=fallback_timeout,
-        executed_passes=executed_passes,
-        expected_invocations=expected_invocations,
-        receipt=receipt,
-        child_env=child_env,
-    )
-    fallback_rc = _effective_exit_code(fallback_result)
-    _append_pass_summary(
-        summary_lines,
-        result=fallback_result,
-        effective_rc=fallback_rc,
-    )
-
-    if fallback_rc != 0:
-        return _finish_run(
-            reports_dir=reports_dir,
-            summary_lines=summary_lines,
-            journal_dir=journal_dir,
-            executed_passes=executed_passes,
-            test_rc=fallback_rc,
-            expected_invocations=expected_invocations,
-        )
-
-    if run_serial_pass:
-        serial_rc = _run_serial_pass(
-            base_command=base_command,
-            args=args,
-            reports_dir=reports_dir,
-            journal_dir=journal_dir,
             serial_timeout=serial_timeout,
-            summary_lines=summary_lines,
-            receipt=receipt,
-            child_env=child_env,
-            executed_passes=executed_passes,
-            expected_invocations=expected_invocations,
-        )
-        return _finish_run(
-            reports_dir=reports_dir,
-            summary_lines=summary_lines,
-            journal_dir=journal_dir,
-            executed_passes=executed_passes,
-            test_rc=serial_rc,
-            expected_invocations=expected_invocations,
-        )
-
-    return _finish_run(
-        reports_dir=reports_dir,
-        summary_lines=summary_lines,
-        journal_dir=journal_dir,
-        executed_passes=executed_passes,
-        test_rc=0,
-        expected_invocations=expected_invocations,
+            fallback_timeout=fallback_timeout,
+            prove_deferral=prove_deferral,
+        ),
+        parallel_result,
+        parallel_rc,
     )
 
 

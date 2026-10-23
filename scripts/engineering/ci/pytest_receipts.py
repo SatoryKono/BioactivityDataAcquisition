@@ -408,11 +408,14 @@ def _render_phases(phases: Mapping[str, str | None]) -> dict[str, Any]:
     }
 
 
+def _is_xdist_worker(config: Any) -> bool:
+    """True only for a real xdist worker, not an inherited worker env."""
+    return getattr(config, "workerinput", None) is not None
+
+
 def _is_xdist_controller(config: Any) -> bool:
     """True only when this process distributes work and does not execute it."""
-    if getattr(config, "workerinput", None) is not None:
-        return False
-    if os.environ.get("PYTEST_XDIST_WORKER"):
+    if _is_xdist_worker(config):
         return False
     if not config.pluginmanager.hasplugin("xdist"):
         return False
@@ -445,10 +448,7 @@ class ReceiptPlugin:
         self.pass_name = _safe_id(pass_name, "pass")
         self.expected_sha = expected_sha
         self.repo_root = Path(repo_root).resolve() if repo_root else Path.cwd()
-        self.worker_id = _safe_id(
-            os.environ.get("PYTEST_XDIST_WORKER", "master"),
-            "worker",
-        )
+        self.worker_id = _safe_id("master", "worker")
         self.write_receipt = True
         self.collection_observed = False
         self.selected_nodeids: list[str] = []
@@ -473,6 +473,11 @@ class ReceiptPlugin:
             raise RuntimeError(message)
 
     def pytest_configure(self, config: Any) -> None:
+        if _is_xdist_worker(config):
+            self.worker_id = _safe_id(
+                os.environ.get("PYTEST_XDIST_WORKER") or "master",
+                "worker",
+            )
         self.write_receipt = not _is_xdist_controller(config)
 
     def pytest_deselected(self, items: list[Any]) -> None:
@@ -532,9 +537,7 @@ class ReceiptPlugin:
     def _assigned_nodeids(self, session: Any) -> list[str] | None:
         """Shard assigned to this xdist worker, including tests still queued."""
         config = session.config
-        if getattr(config, "workerinput", None) is None and not os.environ.get(
-            "PYTEST_XDIST_WORKER"
-        ):
+        if not _is_xdist_worker(config):
             return None
         interactor = next(
             (

@@ -10112,13 +10112,13 @@
       "references": [
         {
           "path": ".github/workflows/nightly.yml",
-          "line": 132,
+          "line": 142,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks"
         },
         {
           "path": ".github/workflows/nightly.yml",
-          "line": 137,
+          "line": 147,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks"
         },
