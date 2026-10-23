@@ -331,6 +331,7 @@ acceptance gates; workflow deletion is no longer a completion criterion.
 | `security.yml` | Security Scans | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
 | `skills-consistency.yml` | Skills Consistency | Path-filtered local skill mirrors plus Codex–Junie runtime parity |
 | `tests.yml` | Tests | Primary unit/integration test matrix |
+| `type-checking-cold.yml` | Type Checking (Strict Cold Control) | Strict mypy cold control without cache |
 | `type-checking.yml` | Type Checking (Strict) | basedpyright / type gates |
 | `zizmor.yml` | zizmor | High-confidence GitHub Actions YAML audit |
 

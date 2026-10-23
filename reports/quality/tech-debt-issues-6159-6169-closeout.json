@@ -66,8 +66,8 @@
         "scripts/docs/matrix/export_structural_contract.py",
         "scripts/docs/matrix/filter_rows.py",
         "scripts/docs/matrix/generate_field_matrix.py",
-        "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1",
-        "scripts/engineering/ci/apply-ci-optimizations.ps1",
+        "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1",
+        "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1",
         "scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh"
       ],
       "untriaged_zero_reference_supporting_script_count": 0,
