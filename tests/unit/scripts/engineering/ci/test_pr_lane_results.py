@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -10,6 +11,7 @@ from scripts.engineering.ci.pr_lane_results import (
     affected_pytest_targets,
     assert_step_outcomes,
     build_results,
+    build_shadow_compare,
     main as lane_main,
 )
 
@@ -173,6 +175,106 @@ def test_empty_diff_cli_prints_full_suite(
         == 0
     )
     assert capsys.readouterr().out.splitlines() == ["tests"]
+
+
+def test_shadow_compare_records_selection_without_activation(tmp_path: Path) -> None:
+    """Shadow mode records a narrow selection and does not mark it activated."""
+    unit_domain = tmp_path / "tests" / "unit" / "domain"
+    unit_domain.mkdir(parents=True)
+    (unit_domain / "test_sample.py").write_text(
+        "def test_sample():\n    assert True\n",
+        encoding="utf-8",
+    )
+
+    report = build_shadow_compare(
+        ["tests/unit/domain/test_sample.py"],
+        repo_root=tmp_path,
+    )
+
+    assert report == {
+        "activation": "not_applied",
+        "covers_full_suite": False,
+        "full_suite_root": "tests",
+        "mode": "shadow",
+        "selected": ["tests/unit/domain/test_sample.py"],
+        "selected_count": 1,
+    }
+
+
+def test_shadow_compare_marks_full_suite_for_empty_diff(tmp_path: Path) -> None:
+    """An empty diff is recorded as the full suite and still stays observational."""
+    (tmp_path / "tests").mkdir()
+
+    report = build_shadow_compare([], repo_root=tmp_path)
+
+    assert report["activation"] == "not_applied"
+    assert report["covers_full_suite"] is True
+    assert report["selected"] == ["tests"]
+
+
+def test_shadow_compare_cli_fails_closed_on_unmapped_path(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """An unmapped path must not produce a successful shadow report."""
+    repo_root = Path(__file__).resolve().parents[5]
+    assert (
+        lane_main(
+            [
+                "shadow-compare",
+                "--repo-root",
+                str(repo_root),
+                "--changed-file",
+                "docs/readme.md",
+            ]
+        )
+        == 1
+    )
+    assert "shadow compare refused an empty selection" in capsys.readouterr().err
+
+
+def test_shadow_compare_cli_writes_canonical_json(tmp_path: Path) -> None:
+    """The report file is canonical JSON and replaces the path atomically."""
+    (tmp_path / "tests").mkdir()
+    output = tmp_path / "reports" / "impact-shadow-compare.json"
+
+    assert (
+        lane_main(
+            [
+                "shadow-compare",
+                "--repo-root",
+                str(tmp_path),
+                "--changed-file",
+                " ",
+                "--output",
+                str(output),
+            ]
+        )
+        == 0
+    )
+
+    payload = output.read_text(encoding="utf-8")
+    assert payload.endswith("\n")
+    assert json.loads(payload)["activation"] == "not_applied"
+    assert list(json.loads(payload)) == [
+        "activation",
+        "covers_full_suite",
+        "full_suite_root",
+        "mode",
+        "selected",
+        "selected_count",
+    ]
+    assert not output.with_suffix(".json.tmp").exists()
+
+
+def test_required_tests_gate_requires_shadow_step() -> None:
+    """A required tests gate fails closed when the shadow step did not succeed."""
+    failures = assert_step_outcomes(
+        {"tests": {"decision": "required", "reason": "path_match"}},
+        {"affected-pytest": "success", "impact-shadow-compare": "skipped"},
+        owner="class-lane",
+    )
+
+    assert failures == ["tests:impact-shadow-compare=skipped"]
 
 
 def test_unmapped_path_still_has_no_pytest_target(
