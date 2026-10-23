@@ -28,11 +28,11 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `perf/replace-any-with-logical-or-5102176891185862466`
-- Source commit: `0d227a53a9cf0194e77cb514ede9ca217e40f465`
-- Source run id: `39846202084`
+- Source commit: `8a4286d21becf1fe183acfaf3f051bc6f7916038`
+- Source run id: `local-pr12231-local-coverage-8a4286d`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `9e2a30a9d35076d3bb03511796393aa1274b5082bd77de5fb21dbae7fd9c67b0`
+- Source tree sha256: `80024e1ca68747b7797ca5a296d849a39f1c847e8bef3893942c1efcd73b24a1`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-15T18:50:07.879352+00:00`
 

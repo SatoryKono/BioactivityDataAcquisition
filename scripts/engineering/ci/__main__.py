@@ -7,6 +7,7 @@ Usage:
 
 Commands:
     run-tests       Run pytest with resilient retry logic
+    presubmit       Local Ruff, mypy, affected-test, and architecture gate
     quality-gate    Integral quality gate for CI
     architecture-junit-skips  Fail closed on empty/skipped architecture JUnit
     pr-gate         Classify and aggregate required PR checks
@@ -19,7 +20,6 @@ Commands:
     docker-timing   Report Docker workflow timing and capacity evidence
     pr-gate-timing  Report PR Gate Complete timing and capacity evidence
     debt-report     Generate weekly quality debt report
-    apply-ci-fixes  Apply one-off hosted GitHub workflow fixes
     publish-scorecard  Publish approved source-bound Scorecard SARIF
     publish-docker  Publish the approved same-workflow scanned image
 """
@@ -38,6 +38,7 @@ from scripts.engineering.common.cli_dispatch import (
 
 COMMANDS = {
     "run-tests": "run_pytest_resilient.py",
+    "presubmit": "presubmit_gate.py",
     "quality-gate": "quality_integral_gate.py",
     "architecture-junit-skips": "quality_integral_gate.py",
     "e2e-skip-rate": "check_e2e_matrix_skip_rate.py",
@@ -47,7 +48,6 @@ COMMANDS = {
     "docker-timing": "report_docker_actions_timing.py",
     "pr-gate-timing": "report_pr_gate_timing.py",
     "debt-report": "report_quality_debt_weekly.py",
-    "apply-ci-fixes": "apply_ci_fixes.py",
 }
 COMMAND_SPECS = {name: python_command(script) for name, script in COMMANDS.items()}
 COMMAND_SPECS.update(
