@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import os
+import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -112,6 +115,57 @@ def _ignore_pattern(root: Path, relative: str) -> str:
     return pattern.rsplit(":", 1)[-1]
 
 
+def _assert_receipt_parents_and_index(root: Path, evidence: str, receipt: str) -> None:
+    """Parents stay un-ignored and git add tracks the receipt without -f."""
+    path = root / receipt
+    index_dir = Path(tempfile.mkdtemp(prefix="benchmark-receipt-index-"))
+    env = os.environ.copy()
+    env["GIT_INDEX_FILE"] = str(index_dir / "index")
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}\n", encoding="utf-8")
+        parents = (
+            "reports/performance",
+            "reports/performance/evidence",
+            f"reports/performance/evidence/{_MEASURED_SHA}",
+            evidence,
+        )
+        for relative in parents:
+            assert _git_check_ignore(root, relative, verbose=False).returncode == 1, (
+                relative
+            )
+            assert _ignore_pattern(root, relative).startswith("!"), relative
+        added = subprocess.run(
+            ["git", "add", "--", receipt],
+            cwd=root,
+            check=False,
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        assert added.returncode == 0, added.stderr
+        listed = subprocess.run(
+            ["git", "ls-files", "--error-unmatch", "--", receipt],
+            cwd=root,
+            check=False,
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        assert listed.returncode == 0, listed.stderr
+        assert listed.stdout.strip() == receipt
+    finally:
+        path.unlink(missing_ok=True)
+        shutil.rmtree(index_dir, ignore_errors=True)
+        folder = path.parent
+        while folder != root / "reports" / "performance" / "evidence":
+            try:
+                folder.rmdir()
+            except OSError:
+                break
+            folder = folder.parent
+
+
 def test_root_benchmark_manifest_stays_ignored_while_evidence_copy_is_tracked():
     root = Path(__file__).resolve().parents[5]
     evidence = f"reports/performance/evidence/{_MEASURED_SHA}/{_RAW_SHA}"
@@ -128,6 +182,7 @@ def test_root_benchmark_manifest_stays_ignored_while_evidence_copy_is_tracked():
         f"{evidence}/benchmark-measurements.json",
         f"{evidence}/benchmark-gate.json",
         f"{evidence}/benchmark-summary-candidate.json",
+        f"{evidence}/benchmark-validation-manifest.json",
     )
     for relative in ignored:
         assert _git_check_ignore(root, relative, verbose=False).returncode == 0, (
@@ -143,6 +198,11 @@ def test_root_benchmark_manifest_stays_ignored_while_evidence_copy_is_tracked():
     assert _ignore_pattern(root, f"{evidence}/benchmark-manifest.json") == (
         "!/reports/performance/evidence/*/*/benchmark-manifest.json"
     )
+    receipt = f"{evidence}/benchmark-validation-manifest.json"
+    assert _ignore_pattern(root, receipt) == (
+        "!/reports/performance/evidence/*/*/benchmark-validation-manifest.json"
+    )
+    _assert_receipt_parents_and_index(root, evidence, receipt)
 
 
 def test_nightly_caller_declares_dataset_and_loads_guard_before_benchmark():
