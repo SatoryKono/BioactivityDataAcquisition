@@ -262,7 +262,7 @@ gates:
   - id: docker
     display_name: Docker Build and Compose
     owner_workflow: .github/workflows/docker.yml
-    owner_jobs: [docker-runtime-contracts, docker-lint, docker-compose-validate, docker-build, docker-complete]
+    owner_jobs: [docker-lane]
     legacy_context: docker-build
     decision: path_scoped
     paths:
