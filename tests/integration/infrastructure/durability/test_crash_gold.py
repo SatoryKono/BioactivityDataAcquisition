@@ -46,6 +46,10 @@ from tests.integration.infrastructure.durability.builders import (
 pytestmark = pytest.mark.integration
 
 _CHILD_TIMEOUT_S = 120.0
+_SIGKILL_ONLY = pytest.mark.skipif(
+    not hasattr(signal, "SIGKILL"),
+    reason="SIGKILL is unavailable on this platform",
+)
 
 
 def _schema_policy() -> GoldSchemaPolicyByVersion:
@@ -189,6 +193,7 @@ def _assert_no_python_phase_boundary(target: object) -> None:
     )
 
 
+@_SIGKILL_ONLY
 def test_row_10b_crash_during_postwrite_collaborator_gate(tmp_path: Path) -> None:
     """Row 10b: SIGKILL in the second postwrite leaves both Delta tables."""
     root = isolated_store_root(tmp_path, "g1_gold")
@@ -205,6 +210,7 @@ def test_row_10b_crash_during_postwrite_collaborator_gate(tmp_path: Path) -> Non
     assert v2_rows == [{"entity_id": "CHEMBL123", "value": 5.5}]
 
 
+@_SIGKILL_ONLY
 def test_row_11a_dual_write_crash_before_commit(tmp_path: Path) -> None:
     """Row 11a: a kill at dispatch entry publishes no Gold Delta table."""
     root = isolated_store_root(tmp_path, "g1_gold")

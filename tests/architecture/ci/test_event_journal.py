@@ -833,7 +833,7 @@ def test_runner_keeps_test_failure_distinct_from_journal_status(tmp_path: Path) 
         ],
         cwd=_ROOT,
         env={
-            **os.environ,
+            **_fresh_child_env(),
             "PYTHONPATH": str(_ROOT),
             "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
         },

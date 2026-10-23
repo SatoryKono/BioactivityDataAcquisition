@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-23T07:24:44.905993+00:00",
+  "generated_at": "2026-10-23T07:41:58.375705+00:00",
   "summary": {
     "total_scripts": 667,
     "status_counts": {
@@ -8339,7 +8339,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 239,
+          "line": 238,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json"
         },
@@ -9781,19 +9781,19 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 122,
+          "line": 121,
           "source_group": "ci",
           "text": "uv run --no-sync --frozen --no-build python -m scripts.engineering.ci pr-gate classify \"${classify_args[@]}\""
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 306,
+          "line": 305,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results assert-steps \\"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 390,
+          "line": 389,
           "source_group": "ci",
           "text": "uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results affected-tests \\"
         }
@@ -10124,7 +10124,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 609,
+          "line": 608,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10350,7 +10350,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 780,
+          "line": 779,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10834,13 +10834,13 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 379,
+          "line": 378,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-mar"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 400,
+          "line": 399,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target \"${targets[@]}\" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-marker "
         },
@@ -12950,7 +12950,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 193,
+          "line": 192,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.diagnostics audit-structure --path ."
         },
@@ -13886,7 +13886,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 366,
+          "line": 365,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -15085,13 +15085,13 @@
         },
         {
           "path": ".github/workflows/docker.yml",
-          "line": 331,
+          "line": 323,
           "source_group": "ci",
           "text": "python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \\"
         },
         {
           "path": ".github/workflows/docker.yml",
-          "line": 383,
+          "line": 375,
           "source_group": "ci",
           "text": "python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \\"
         },
@@ -19059,13 +19059,13 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 168,
+          "line": 167,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/repo/check_github_actions_runtime_policy.py --pr-required-pins --check"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 604,
+          "line": 603,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },

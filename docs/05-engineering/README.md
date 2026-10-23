@@ -31,6 +31,7 @@ SSOT.
 | Operator runbooks | `docs/05-operations/runbooks/` |
 | Active plans | `docs/plans/` (thin; one active backlog) |
 | Test telemetry baseline | [test-telemetry-baseline.md](test-telemetry-baseline.md) |
+| CI ruleset policy crosswalk | [ci-policy-matrix-crosswalk.md](ci-policy-matrix-crosswalk.md) |
 | Historical engineering closeouts | `docs/99-archive/engineering/` |
 | Normalization / control-plane history | archived engineering plans + ADRs 014/044 |
 
