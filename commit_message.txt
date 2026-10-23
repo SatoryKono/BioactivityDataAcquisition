@@ -1,0 +1,3 @@
+feat: split architecture tests into fast boundaries and slow governance
+
+This commit semantically classifies tests in `tests/architecture/**` into two groups: runtime boundaries and repository governance. It moves ~75 tests matching "doc, diagram, repo_, readme, audit, coverage, passport, agent, github, gitignore, metrics, catalog, manifest, registry, review, scorecard, baseline, telemetry" to the `S7-crosscutting-architecture-guardrails-b` shard for slow governance and explicit exclusion from fast boundary shards. The artifacts are subsequently updated and verified to pass using `make qa-arch-fast` without zeroing any test provenance.
