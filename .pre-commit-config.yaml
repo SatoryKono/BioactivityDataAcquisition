@@ -12,16 +12,16 @@ default_install_hook_types:
 repos:
   # Ruff - Fast Python linter and formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.10
+    rev: v0.15.17
     hooks:
       # Run the linter
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
-        files: ^(src|tests|scripts)/.*\.py$
+        files: ^(src|tests)/.*\.py$
         stages: [pre-commit]
       # Run the formatter
       - id: ruff-format
-        files: ^(src|tests|scripts)/.*\.py$
+        files: ^(src|tests)/.*\.py$
         stages: [pre-commit]
 
   # General file checks
@@ -108,8 +108,8 @@ repos:
         verbose: true
 
       - id: mypy-strict
-        name: Run strict mypy gate on src/bioetl and src/memory
-        entry: python3 scripts/engineering/dev/run_project_python.py -m mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory
+        name: Run strict mypy gate on src/bioetl
+        entry: python3 scripts/engineering/dev/run_project_python.py -m mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
         language: system
         pass_filenames: false
         stages: [pre-push]

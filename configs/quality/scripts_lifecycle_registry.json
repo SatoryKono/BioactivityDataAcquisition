@@ -769,13 +769,13 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-10-31"
     },
-    "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1": {
+    "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1": {
+    "scripts/engineering/ci/apply-ci-optimizations.ps1": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow.",
       "owner": "@bioetl-platform",
@@ -802,12 +802,6 @@
     "scripts/engineering/ci/pr_gate.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the fail-closed classifier and aggregator implementation behind the canonical `python -m scripts.engineering.ci pr-gate` router command; keep direct CI and contributor usage routed through that public command.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-12-01"
-    },
-    "scripts/engineering/ci/presubmit_gate.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the local Ruff, mypy, and affected-test implementation behind the canonical `python -m scripts.engineering.ci presubmit` router command. Keep it supporting so active_script_count_max does not grow; promote only after an active slot is freed.",
       "owner": "@bioetl-platform",
       "review_by": "2026-12-01"
     },
@@ -1398,12 +1392,6 @@
       "next_step": "Retain as the test-imported content-contract checker; promote to an active QA router command only after it is owned by scripts.engineering.qa __main__ and a matching active slot is freed.",
       "owner": "@bioetl-observability",
       "review_by": "2026-09-30"
-    },
-    "scripts/engineering/qa/verify_quality_move.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the QM-02 before/after verifier invoked by its unit tests. Keep it supporting so the active script budget does not grow; promote only after a router slot is freed.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
     },
     "scripts/engineering/repo/_branch_cleanup_policy.py": {
       "decision": "shared_helper_module",

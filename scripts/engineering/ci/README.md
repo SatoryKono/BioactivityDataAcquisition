@@ -29,6 +29,7 @@ python -m scripts.engineering.ci <command> [args...]
 | `docker-timing`  | `scripts/engineering/ci/report_docker_actions_timing.py` | Collect read-only Docker Actions timing and runner-capacity evidence      |
 | `pr-gate-timing` | `scripts/engineering/ci/report_pr_gate_timing.py`        | Collect read-only PR Gate Complete wall-clock, queue, and owner-path evidence |
 | `debt-report`    | `scripts/engineering/ci/report_quality_debt_weekly.py` | Generate weekly quality debt report                                         |
+| `apply-ci-fixes` | `scripts/engineering/ci/apply_ci_fixes.py`             | One-off GitHub-hosted workflow repair helper requiring explicit token input |
 
 ## When to Use
 
@@ -54,6 +55,8 @@ Canonical taxonomy:
 
 | File                                                      | Description                                                                   |
 | --------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `scripts/engineering/ci/apply-ci-optimizations.ps1`       | PowerShell CI optimization script                                             |
+| `scripts/engineering/ci/apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization                                              |
 | `scripts/engineering/ci/_compatibility_registry.py`       | Shared compatibility registry loader used by telemetry/reporting helpers      |
 | `scripts/engineering/ci/_compatibility_telemetry.py`      | Compatibility inventory telemetry helper used by architecture reporting flows |
 | `scripts/engineering/ci/pytest_abort_diagnostic_adapter.py` | Isolated abort supervisor used by `run_pytest_resilient.py`. Sidecar manifest only; it does not replace JUnit completeness. |

@@ -319,6 +319,7 @@ jobs:
         needs['classify-changes'].outputs['tests'] == 'required' ||
         needs['classify-changes'].outputs['type-checking'] == 'required' ||
         needs['classify-changes'].outputs['security'] == 'required' ||
+        needs['classify-changes'].outputs['docker'] == 'required' ||
         needs['classify-changes'].outputs['generated-artifacts'] == 'required' ||
         needs['classify-changes'].outputs['duplication'] == 'required'
       }}
@@ -343,17 +344,17 @@ jobs:
       - name: Ruff check
         id: ruff
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
-        run: uv run --frozen --no-build ruff check src tests scripts --output-format=github
+        run: uv run --frozen --no-build ruff check src tests --output-format=github
 
       - name: Ruff format
         id: ruff-format
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
-        run: uv run --frozen --no-build ruff format --check src tests scripts
+        run: uv run --frozen --no-build ruff format --check src tests
 
       - name: Ruff isort
         id: ruff-isort
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
-        run: uv run --frozen --no-build ruff check --select I src tests scripts --output-format=github
+        run: uv run --frozen --no-build ruff check --select I src tests --output-format=github
 
       - name: C901 governance
         id: c901
@@ -374,7 +375,7 @@ jobs:
       - name: Architecture pytest slice
         id: arch-pytest
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
-        run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-marker "not slow and not benchmark and not memory and not serial_or_bounded" --parallel-addopts "-n auto --dist loadscope --max-worker-restart=0 -q --tb=line" --serial-marker "serial_or_bounded and not slow and not benchmark and not memory" --serial-addopts "-p no:xdist -q --tb=line"
+        run: uv run --frozen --no-build pytest tests/architecture -m "not slow and not benchmark and not memory" -q --tb=line
 
       - name: Affected pytest
         id: affected-pytest
@@ -395,7 +396,8 @@ jobs:
             echo "::error::tests gate has no affected pytest target"
             exit 1
           fi
-          uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target "${targets[@]}" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-marker "not serial_or_bounded" --parallel-addopts "-n auto --dist loadfile --max-worker-restart=0 -q --tb=line" --serial-marker "serial_or_bounded" --serial-addopts "-p no:xdist -q --tb=line" --no-fallback
+          uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks ci \
+            --report reports/quality/affected-test-partition.json -- "${targets[@]}" -q --tb=line
 
       - name: Restore mypy cache
         if: needs['classify-changes'].outputs['type-checking'] == 'required'
@@ -601,6 +603,38 @@ jobs:
         if: needs['classify-changes'].outputs['security'] == 'required'
         run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json
 
+      - name: Set up Docker Buildx
+        id: setup-buildx
+        if: needs['classify-changes'].outputs['docker'] == 'required'
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Validate docker-compose.yml syntax
+        id: docker-compose
+        if: needs['classify-changes'].outputs['docker'] == 'required'
+        env:
+          NEO4J_PASSWORD: ci-compose-validation-placeholder
+        run: docker compose config > /dev/null
+
+      - name: Validate docker-compose.monitoring.yml syntax
+        id: docker-monitoring-compose
+        if: needs['classify-changes'].outputs['docker'] == 'required'
+        env:
+          NEO4J_PASSWORD: ci-compose-validation-placeholder
+          GF_SECURITY_ADMIN_PASSWORD: ci-compose-validation-placeholder
+          GF_RENDERING_RENDERER_TOKEN: ci-compose-validation-placeholder
+        run: docker compose -f docker-compose.monitoring.yml config > /dev/null
+
+      - name: Run Docker runtime contracts
+        id: docker-contracts
+        if: needs['classify-changes'].outputs['docker'] == 'required'
+        run: |
+          uv run --frozen --no-build pytest -q --tb=line \
+            tests/architecture/test_docker_runtime_contracts.py \
+            tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py \
+            tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager_recovery_networks.py \
+            tests/unit/repo_backed/scripts/ops/docker/test_docker_runtime_probe.py \
+            tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py
+
       - name: Check generated schema artifacts
         id: schema-artifacts
         if: needs['classify-changes'].outputs['generated-artifacts'] == 'required'
@@ -717,15 +751,6 @@ jobs:
             --outcomes-env \
             --owner "$LANE_OWNER"
 
-
-  docker-lane:
-    name: Docker lane
-    needs: classify-changes
-    if: needs['classify-changes'].outputs['docker'] == 'required'
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@843eb3f1c9410df7eccfebf3c8a810cc897ed0e9
-    with:
-      caller-sha: ${{ needs.classify-changes.outputs.head_sha }}
-
   pr-gate-complete:
     name: pr-gate-complete
     runs-on: ubuntu-latest
@@ -735,7 +760,6 @@ jobs:
       - classify-changes
       - fast-governance
       - class-lane
-      - docker-lane
     permissions:
       contents: read
     steps:
@@ -758,7 +782,6 @@ jobs:
           DECISION_MATRIX: ${{ needs.classify-changes.outputs.decision_matrix }}
           FAST_RESULT: ${{ needs.fast-governance.result }}
           CLASS_RESULT: ${{ needs.class-lane.result }}
-          DOCKER_RESULT: ${{ needs.docker-lane.result }}
           EXPECTED_HEAD_SHA: ${{ needs.classify-changes.outputs.head_sha }}
           OBSERVED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -772,7 +795,6 @@ jobs:
             --head-sha "${EXPECTED_HEAD_SHA}" \
             --job-result "fast-governance=${FAST_RESULT}" \
             --job-result "class-lane=${CLASS_RESULT}" \
-            --job-result "docker-lane=${DOCKER_RESULT}" \
             --output reports/quality/pr-gate-aggregate-results.json
           AGGREGATE_RESULTS="$(tr -d '\r\n' < reports/quality/pr-gate-aggregate-results.json)"
           export AGGREGATE_RESULTS

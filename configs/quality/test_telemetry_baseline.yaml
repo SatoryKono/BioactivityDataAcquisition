@@ -4,11 +4,11 @@ workflow_path: .github/workflows/tests.yml
 source_branch: perf/replace-any-with-logical-or-5102176891185862466
 refreshed_at_utc: '2026-10-15T18:50:07.879352+00:00'
 refresh_status: captured
-source_commit: 8a4286d21becf1fe183acfaf3f051bc6f7916038
-source_run_id: local-pr12231-local-coverage-8a4286d
+source_commit: 0d227a53a9cf0194e77cb514ede9ca217e40f465
+source_run_id: '39846202084'
 source_event: local_coverage_verify
 source_run_url: null
-source_tree_sha256: 12c96db2a94eabf0723640d0be57769d24a0dc07825d0a2702fdf278e20a0893
+source_tree_sha256: 9e2a30a9d35076d3bb03511796393aa1274b5082bd77de5fb21dbae7fd9c67b0
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
@@ -37,7 +37,7 @@ artifact_inputs:
   - reports/pr12231-local-coverage-8a4286d/junit/serial.xml
 coverage:
   threshold_percent: 85.0
-  actual_percent: 99.66
+  actual_percent: 99.81
   threshold_satisfied: true
 duration_telemetry:
   total_cases: 34037
