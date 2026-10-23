@@ -46,6 +46,9 @@ WORKFLOW_PATH = ".github/workflows/nightly.yml"
 ACTIONS_RETENTION_CAP_DAYS = 90
 SUCCESS_RETENTION_DAYS = 30
 DIAGNOSTIC_RETENTION_DAYS = 90
+RUN_ID_LABEL = "run id"
+RUN_ATTEMPT_LABEL = "run attempt"
+UTC_OFFSET_SUFFIX = "+00:00"
 WEEKDAYS = frozenset({"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"})
 QUARTER_MONTHS = frozenset({"01", "04", "07", "10"})
 JOB_KINDS: dict[str, str] = {
@@ -317,8 +320,8 @@ def write_snapshot(
 ) -> Path:
     """Write one attempt. An existing different snapshot is an error."""
 
-    run_id = _positive_int(raw.get("id"), "run id")
-    attempt = _positive_int(raw.get("run_attempt"), "run attempt")
+    run_id = _positive_int(raw.get("id"), RUN_ID_LABEL)
+    attempt = _positive_int(raw.get("run_attempt"), RUN_ATTEMPT_LABEL)
     destination = ensure_path_within_root(
         root / f"run-{run_id}" / f"attempt-{attempt}",
         root,
@@ -378,8 +381,8 @@ def build_attempt_archive(
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     """Collect one attempt through the shared timing collector."""
 
-    run_id = _positive_int(run.get("id"), "run id")
-    attempt = _positive_int(run.get("run_attempt"), "run attempt")
+    run_id = _positive_int(run.get("id"), RUN_ID_LABEL)
+    attempt = _positive_int(run.get("run_attempt"), RUN_ATTEMPT_LABEL)
     jobs, observation = collect_jobs_observation(
         client,
         repository,
@@ -528,8 +531,8 @@ def _persist_archive_snapshots(
     new_directories: list[Path] = []
     try:
         for raw, outcomes, manifest in snapshots:
-            run_id = _positive_int(raw.get("id"), "run id")
-            attempt = _positive_int(raw.get("run_attempt"), "run attempt")
+            run_id = _positive_int(raw.get("id"), RUN_ID_LABEL)
+            attempt = _positive_int(raw.get("run_attempt"), RUN_ATTEMPT_LABEL)
             destination = ensure_path_within_root(
                 output / f"run-{run_id}" / f"attempt-{attempt}", output
             )
@@ -628,8 +631,8 @@ def _span_covers_14_days(runs: Sequence[Mapping[str, object]]) -> bool:
     if start is None or end is None:
         return False
     try:
-        opened = datetime.fromisoformat(start.replace("Z", "+00:00"))
-        closed = datetime.fromisoformat(end.replace("Z", "+00:00"))
+        opened = datetime.fromisoformat(start.replace("Z", UTC_OFFSET_SUFFIX))
+        closed = datetime.fromisoformat(end.replace("Z", UTC_OFFSET_SUFFIX))
     except ValueError:
         return False
     return (closed - opened).total_seconds() >= 14 * 24 * 60 * 60
@@ -653,7 +656,7 @@ def _missing_utc_days(runs: Sequence[Mapping[str, object]]) -> list[str]:
         if not isinstance(created_at, str):
             return ["unknown"]
         try:
-            stamp = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+            stamp = datetime.fromisoformat(created_at.replace("Z", UTC_OFFSET_SUFFIX))
         except ValueError:
             return ["unknown"]
         if stamp.tzinfo is None:
