@@ -1012,7 +1012,6 @@
         "tests/unit/domain/chembl/test_target_protein_classification.py",
         "tests/unit/domain/test_protein_class_target_type.py",
         "tests/unit/infrastructure/config/test_protein_class_target_type_loader.py",
-        "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py",
         "tests/unit/infrastructure/storage/test_gold_target_receipt_contract.py",
         "tests/unit/infrastructure/validation/test_chembl_target_protein_classification_bool.py",
         "tests/unit/memory/test_issue_10526_add_claim_target_relation_slice.py",
@@ -1048,6 +1047,7 @@
         "tests/unit/memory/test_issue_10526_workflow_module_script_targets_slice.py",
         "tests/unit/repo_backed/application/pipelines/chembl/test_chembl_target_helpers.py",
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
+        "tests/unit/scripts/engineering/quality/test_quarterly_targets_validation.py",
         "tests/unit/scripts/ops/observability/test_action_target_routes.py"
       ],
       "contract_yaml_contract_ref": "chembl.target",
@@ -1771,7 +1771,6 @@
         "tests/unit/domain/chembl/test_target_protein_classification.py",
         "tests/unit/domain/test_protein_class_target_type.py",
         "tests/unit/infrastructure/config/test_protein_class_target_type_loader.py",
-        "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py",
         "tests/unit/infrastructure/storage/test_gold_target_receipt_contract.py",
         "tests/unit/infrastructure/validation/test_chembl_target_protein_classification_bool.py",
         "tests/unit/memory/test_issue_10526_add_claim_target_relation_slice.py",
@@ -1807,6 +1806,7 @@
         "tests/unit/memory/test_issue_10526_workflow_module_script_targets_slice.py",
         "tests/unit/repo_backed/application/pipelines/chembl/test_chembl_target_helpers.py",
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
+        "tests/unit/scripts/engineering/quality/test_quarterly_targets_validation.py",
         "tests/unit/scripts/ops/observability/test_action_target_routes.py"
       ],
       "contract_yaml_contract_ref": "composite.target",
@@ -2714,5 +2714,5 @@
     "gold_enabled": "Effective runtime state of pipeline.sink.gold.enabled after hierarchical config resolution; omitted enabled defaults to true. Never infer this from contract/Pandera availability or from unrelated flags such as filters.input_filter.enabled.",
     "missing_gold_enabled_count": "Runtime-enabled Gold rows whose contract parity_status is not covered."
   },
-  "snapshot_date": "2026-10-21"
+  "snapshot_date": "2026-10-23"
 }
