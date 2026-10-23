@@ -369,7 +369,6 @@ shards:
   wave: 2
   paths:
   - tests/architecture
-  - tests/architecture/test_debt_governance_telemetry_reporting.py
   - tests/architecture/test_domain_composite_config_importer_map.py
   workers_override: 0
   extra_pytest_args:
