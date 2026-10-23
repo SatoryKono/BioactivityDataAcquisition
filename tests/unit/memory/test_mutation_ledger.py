@@ -10,7 +10,7 @@ import pytest
 from memory.ledger import MutationEvent, MutationLedger
 from memory.records import ActorIdentity
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.memory
 
 
 def _event(event_id: str, operation: str = "create") -> MutationEvent:

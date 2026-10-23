@@ -27,7 +27,7 @@ from memory.validation import (
 )
 
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.memory
 
 
 def _copy_minimal_memory_scaffold(memory_root: Path) -> None:
