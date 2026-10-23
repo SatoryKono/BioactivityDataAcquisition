@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-23T06:31:19.249260+00:00",
+  "generated_at": "2026-10-23T06:34:12.761835+00:00",
   "summary": {
     "total_scripts": 667,
     "status_counts": {
@@ -10,7 +10,7 @@
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
-      "ci": 73,
+      "ci": 74,
       "docs": 287,
       "other": 16,
       "scripts": 555,
@@ -10124,7 +10124,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 599,
+          "line": 607,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10350,7 +10350,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 761,
+          "line": 769,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10708,7 +10708,7 @@
         },
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 397,
+          "line": 398,
           "source_group": "docs",
           "text": "[`replay_parity_inputs.py` pytest plugin](../../scripts/engineering/ci/replay_parity_inputs.py)"
         }
@@ -13212,7 +13212,7 @@
       "references": [
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 653,
+          "line": 654,
           "source_group": "docs",
           "text": "and [relevance report builder](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/build_relevance_report.py)."
         }
@@ -13231,7 +13231,7 @@
       "references": [
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 651,
+          "line": 652,
           "source_group": "docs",
           "text": "[findings normalizer](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/normalize_findings.py),"
         }
@@ -13250,7 +13250,7 @@
       "references": [
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 652,
+          "line": 653,
           "source_group": "docs",
           "text": "[triage classifier](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/triage_findings.py),"
         }
@@ -13609,7 +13609,7 @@
       "references": [
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 656,
+          "line": 657,
           "source_group": "docs",
           "text": "The [issue 5376 metric snapshot helper](../../scripts/engineering/qa/_refresh_issue5376_live_metrics.py)"
         }
@@ -13798,8 +13798,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
+        {
+          "path": ".github/workflows/type-checking-cold.yml",
+          "line": 59,
+          "source_group": "ci",
+          "text": "uv run --frozen --no-build python -m scripts.engineering.qa.check_architecture domain-type-policy"
+        },
+        {
+          "path": ".github/workflows/type-checking.yml",
+          "line": 83,
+          "source_group": "ci",
+          "text": "uv run --frozen --no-build python -m scripts.engineering.qa.check_architecture domain-type-policy"
+        },
         {
           "path": "docs/05-operations/troubleshooting/common-errors.md",
           "line": 47,
@@ -14854,7 +14866,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 11,
       "references": [
         {
           "path": "scripts/engineering/qa/docker_stability_campaign/__init__.py",
@@ -16628,7 +16640,7 @@
         },
         {
           "path": "scripts/engineering/qa/check_architecture.py",
-          "line": 115,
+          "line": 116,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_composition_protocol_inventory import ("
         },
@@ -19053,7 +19065,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 594,
+          "line": 602,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
