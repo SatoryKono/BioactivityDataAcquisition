@@ -303,7 +303,7 @@ entries:
     suite: integration
     category: conditional_environment_guard
     owner: "@bioetl-storage"
-    linked_issue: "#12370"
+    linked_issue: "#7249"
     lifecycle: permanent_policy
     reviewed_skip_calls: 1
     vcr_related: false
