@@ -148,7 +148,7 @@ jobs:
           --validators-outcome "${{ steps.validators.outcome }}"
           --output reports/quality/generated-artifact-daily-partition.json
       - name: Upload success evidence
-        if: steps.partition.outputs.bucket == 'success'
+        if: "always() && !cancelled() && steps.partition.outputs.bucket == 'success'"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: generated-artifact-daily-success
@@ -156,7 +156,7 @@ jobs:
           if-no-files-found: error
           retention-days: 30
       - name: Upload non-success diagnostics
-        if: steps.partition.outputs.bucket == 'diagnostics'
+        if: "always() && !cancelled() && steps.partition.outputs.bucket == 'diagnostics'"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: generated-artifact-daily-diagnostics

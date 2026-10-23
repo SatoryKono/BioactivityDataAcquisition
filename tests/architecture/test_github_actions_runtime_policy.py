@@ -779,7 +779,10 @@ def test_nightly_deterministic_lanes_stay_daily_until_shadow_acceptance() -> Non
     }
     assert uploads["Upload success evidence"]["with"]["retention-days"] == 30
     assert uploads["Upload success evidence"]["if"] == (
-        "steps.partition.outputs.bucket == 'success'"
+        "always() && !cancelled() && steps.partition.outputs.bucket == 'success'"
+    )
+    assert uploads["Upload non-success diagnostics"]["if"] == (
+        "always() && !cancelled() && steps.partition.outputs.bucket == 'diagnostics'"
     )
     assert uploads["Upload non-success diagnostics"]["with"]["retention-days"] == 90
     cancelled = uploads["Upload cancellation diagnostics best effort"]

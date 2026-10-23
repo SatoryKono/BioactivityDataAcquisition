@@ -338,14 +338,14 @@ def write_snapshot(
 
 
 def verify_archive(root: Path) -> dict[str, Any]:
-    """Recompute checksums and identities. Unavailable archives fail closed."""
+    """Recompute checksums and require every indexed snapshot to exist."""
 
     if not root.is_dir():
         raise ArchiveError(f"archive unavailable: {root}")
+    index = _load_index(root / "index.json")
     manifests = sorted(root.glob("run-*/attempt-*/manifest.json"))
-    if not manifests:
-        raise ArchiveError(f"archive unavailable: {root}")
     checked = [_verify_one(path) for path in manifests]
+    _require_index_coverage(index, checked)
     return {
         "schema_version": SCHEMA_VERSION,
         "status": "verified",
@@ -594,6 +594,58 @@ def _atomic_create(path: Path, payload: bytes) -> None:
         raise
 
 
+def _load_index(path: Path) -> list[dict[str, Any]]:
+    if not path.is_file():
+        raise ArchiveError(f"archive index unavailable: {path}")
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise ArchiveError(f"malformed archive index: {path}") from exc
+    if not isinstance(payload, list) or not payload:
+        raise ArchiveError(f"archive index unavailable: {path}")
+    rows: list[dict[str, Any]] = []
+    for row in payload:
+        if not isinstance(row, dict):
+            raise ArchiveError(f"malformed archive index: {path}")
+        rows.append(row)
+    return rows
+
+
+def _snapshot_key(row: Mapping[str, Any]) -> tuple[int, int]:
+    return (
+        _positive_int(row.get("run_id"), "indexed run id"),
+        _positive_int(row.get("run_attempt"), "indexed attempt"),
+    )
+
+
+def _require_index_coverage(
+    index: Sequence[Mapping[str, Any]],
+    checked: Sequence[Mapping[str, Any]],
+) -> None:
+    found: dict[tuple[int, int], Mapping[str, Any]] = {}
+    for row in checked:
+        key = _snapshot_key(row)
+        if key in found:
+            raise ArchiveError(f"duplicate snapshot: {key}")
+        found[key] = row
+    indexed: set[tuple[int, int]] = set()
+    for row in index:
+        key = _snapshot_key(row)
+        snapshot = found.get(key)
+        if snapshot is None:
+            raise ArchiveError(
+                f"indexed snapshot missing: run {key[0]} attempt {key[1]}"
+            )
+        if snapshot.get("raw_sha256") != row.get("raw_sha256"):
+            raise ArchiveError(
+                f"indexed checksum mismatch: run {key[0]} attempt {key[1]}"
+            )
+        indexed.add(key)
+    extras = set(found) - indexed
+    if extras:
+        raise ArchiveError(f"snapshot is not in the archive index: {sorted(extras)}")
+
+
 def _verify_one(manifest_path: Path) -> dict[str, Any]:
     destination = manifest_path.parent
     try:
@@ -789,6 +841,42 @@ def _command_archive(argv: Sequence[str]) -> int:
     return 0
 
 
+def _window_protocol() -> dict[str, Any]:
+    """Rules for a future window. They do not rewrite the historical gap ledger."""
+
+    return {
+        "minimum_span": "14 full UTC days after the start observation, not 14 runs",
+        "start_rule": (
+            "Set window_start_sha and window_start_utc only after this daily "
+            "configuration is merged and the first valid comparable "
+            "baseline/candidate observation exists. Record both SHAs, both "
+            "UTCs, and the configuration id. Do not backdate."
+        ),
+        "completeness": [
+            "Each UTC day in the half-open span has the schedule attempts for that fixed configuration.",
+            "Each attempt keeps raw.json, outcomes.json, and manifest.json.",
+            "verify-archive matches every index run/attempt pair and its raw SHA-256.",
+            "Pagination status is complete. Unknown and incomplete stay unknown, not success.",
+            "The oracle compares baseline and candidate outcomes on the same inputs and does not call the schedule classifier.",
+        ],
+        "gaps": [
+            "A missing day, artifact, or API page stays missing. It is not success and not zero.",
+            "Cancellation upload is best-effort. The existing read-only timing collector backfills from the Actions API when that upload is absent.",
+            "If the collector cannot read the attempt, record the gap. Do not rebuild it from another SHA or date.",
+            "Historical failures and gap reasons remain in the unacceptable ledger. Do not delete or rewrite those snapshots.",
+        ],
+        "invalid_when": [
+            "The span is shorter than 14 full UTC days.",
+            "Baseline and candidate configurations are mixed in one comparable group.",
+            "The candidate arm is absent.",
+            "Checksum, run id, attempt, or head SHA does not match the indexed raw JSON.",
+            "An indexed snapshot directory or manifest is missing.",
+            "Independent restore of every raw JSON is not recorded.",
+            "Cadence or retention of the fixed configuration changes during the window.",
+        ],
+    }
+
+
 def _command_record_window(argv: Sequence[str]) -> int:
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("--index", required=True)
@@ -839,6 +927,18 @@ def _command_record_window(argv: Sequence[str]) -> int:
         "actions_permissions_http": args.actions_permissions_http,
         "actions_execution_observed": args.actions_execution_observed == "true",
         "historical_window": historical,
+        "durable_archive": {
+            "actions_success_retention_days": SUCCESS_RETENTION_DAYS,
+            "actions_failure_retention_days": DIAGNOSTIC_RETENTION_DAYS,
+            "actions_cancellation_retention_days": DIAGNOSTIC_RETENTION_DAYS,
+            "actions_service_cap_days": ACTIONS_RETENTION_CAP_DAYS,
+            "git_path": "reports/governance/n1-shadow-window",
+            "policy": "append-only git snapshots; an existing run/attempt is not overwritten",
+            "minimum_days": 90,
+            "elapsed_age_is_90_days": False,
+            "independent_restore": False,
+        },
+        "window_protocol": _window_protocol(),
         "next_window": {
             "status": "not_started",
             "minimum_utc_days": 14,
