@@ -555,6 +555,37 @@ def test_router_executes_lane_results_as_importable_module(capsys):
     assert "affected-tests" in capsys.readouterr().out
 
 
+def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
+    """Durable evidence and coupled snapshots select their governing tests."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            ".gitignore",
+            "docs/reports/generated/documentation-cleanup-inventory.json",
+            "docs/reports/generated/documentation-cleanup-inventory.md",
+            "reports/performance/benchmark-summary.json",
+            (
+                "reports/performance/evidence/deadbeef/raw/"
+                "benchmark-validation-manifest.json"
+            ),
+            "reports/quality/flaky-test-burndown-review.json",
+            "reports/quality/test-governance-current.json",
+        ],
+        repo_root=repo_root,
+    )
+
+    assert report["activation"] == "not_applied"
+    assert report["covers_full_suite"] is False
+    selected = set(report["selected"])
+    assert selected == {
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+        "tests/architecture/test_gitignore_secret_and_agents_policy.py",
+        "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
+        "tests/architecture/test_test_governance_audit.py",
+        "tests/unit/repo_backed/scripts/qa/test_validate_benchmark_evidence_repo.py",
+    }
+
+
 def test_base_checkout_aggregation_uses_existing_module_entrypoint():
     """Verify base checkout aggregation uses existing module entrypoint."""
     import yaml
