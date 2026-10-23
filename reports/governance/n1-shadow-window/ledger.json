@@ -1,0 +1,50 @@
+{
+  "actions_execution_observed": true,
+  "actions_permissions_http": "403",
+  "baseline_sha": "ce050a180ffea36a2ff1400e3d66c4ebcc3bcaaf",
+  "decision_owner": "CI",
+  "frequency_change_pr": 12452,
+  "historical_window": {
+    "candidate_pairs": 0,
+    "independent_review": false,
+    "reason_codes": [
+      "actions_retention_cap_below_90",
+      "cadence_changed_before_shadow_acceptance",
+      "independent_review_absent",
+      "mixed_tested_sha",
+      "no_parallel_candidate_arm",
+      "shorter_than_14_utc_days",
+      "success_retention_below_30"
+    ],
+    "run_count": 14,
+    "schema_version": 1,
+    "status": "unacceptable",
+    "unique_head_sha_count": 13,
+    "utc_end": "2026-10-23T08:13:54Z",
+    "utc_start": "2026-10-10T03:15:28Z"
+  },
+  "independent_review_record": null,
+  "next_window": {
+    "configuration_id": "daily-deterministic-plus-existing-weekly-security",
+    "continuation": "Start the 14 UTC-day window only after this daily configuration is on main and the first valid comparable observation exists. Record that observation SHA and UTC then. Do not backdate it and do not mix it with the unacceptable history below. An independent reviewer must restore every raw JSON and reproduce the calculations before N1 can close. Do not continue N2 before that.",
+    "minimum_utc_days": 14,
+    "status": "not_started"
+  },
+  "personal_assignees": [],
+  "recorded_at": "2026-10-23T15:49:14Z",
+  "restored_daily_jobs": [
+    "tests",
+    "e2e",
+    "duplication",
+    "import-linter",
+    "generated-artifact-daily"
+  ],
+  "reviewer_roles": [
+    "security",
+    "test-subject-owner",
+    "evidence-keeper"
+  ],
+  "schema_version": 1,
+  "window_start_sha": null,
+  "window_start_utc": null
+}
