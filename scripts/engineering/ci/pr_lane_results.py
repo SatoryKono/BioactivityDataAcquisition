@@ -51,6 +51,19 @@ TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_telemetry_baseline.py",
     "tests/architecture/test_test_telemetry_governance.py",
 )
+BENCHMARK_EVIDENCE_TESTS: tuple[str, ...] = (
+    "tests/unit/repo_backed/scripts/qa/test_validate_benchmark_evidence_repo.py",
+)
+DOCUMENTATION_CLEANUP_INVENTORY_TESTS: tuple[str, ...] = (
+    "tests/architecture/test_documentation_cleanup_inventory.py",
+)
+FLAKY_BURNDOWN_REVIEW_TESTS: tuple[str, ...] = (
+    "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
+)
+TEST_GOVERNANCE_ARTIFACT_TESTS: tuple[str, ...] = (
+    "tests/architecture/test_test_governance_audit.py",
+    *FLAKY_BURNDOWN_REVIEW_TESTS,
+)
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".coderabbit.yaml": ("tests/architecture/test_coderabbit_config.py",),
@@ -91,6 +104,18 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_scripts_inventory_manifest.py",
     ),
     "docs/05-engineering/test-telemetry-baseline.md": TELEMETRY_BASELINE_TESTS,
+    ".gitignore": (
+        "tests/architecture/test_gitignore_secret_and_agents_policy.py",
+        *BENCHMARK_EVIDENCE_TESTS,
+    ),
+    "docs/reports/generated/documentation-cleanup-inventory.json": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    "docs/reports/generated/documentation-cleanup-inventory.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    "reports/quality/flaky-test-burndown-review.json": FLAKY_BURNDOWN_REVIEW_TESTS,
+    "reports/quality/test-governance-current.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
     ".github/workflows/pr-required.yml": (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
     "configs/quality/reusable_action_pins.yaml": (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
     "scripts/engineering/repo/check_github_actions_runtime_policy.py": (
@@ -115,12 +140,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/05-operations/runbooks/generated-artifact-drift-workflow.md": (
         "tests/architecture/test_generated_artifact_drift_workflow.py",
     ),
-    "reports/quality/flaky-test-burndown-review.json": (
-        "tests/unit/scripts/qa/test_report_flaky_test_burndown_review.py",
-    ),
-    "reports/quality/test-governance-current.json": (
-        "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
-    ),
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
@@ -131,6 +150,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "reports/governance/n1-shadow-window/": (
         "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
     ),
+    "reports/performance/": BENCHMARK_EVIDENCE_TESTS,
     "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.": (
         NPM_RUNTIME_TEST,
     ),
