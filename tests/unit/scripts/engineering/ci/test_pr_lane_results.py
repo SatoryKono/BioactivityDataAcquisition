@@ -201,6 +201,27 @@ def test_shadow_compare_records_selection_without_activation(tmp_path: Path) -> 
     }
 
 
+def test_n1_evidence_paths_have_shadow_compare_routes() -> None:
+    """Nightly, docs, and the gap archive must not fail closed as unmapped."""
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            ".github/workflows/nightly.yml",
+            "CHANGELOG.md",
+            "configs/quality/scripts_lifecycle_registry.json",
+            "docs/04-reference/github-actions-workflows.md",
+            "docs/05-operations/ci-workflow-map.md",
+            "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
+            "reports/governance/n1-shadow-window/ledger.json",
+            "reports/quality/flaky-test-burndown-review.json",
+            "reports/quality/test-governance-current.json",
+        ],
+        repo_root=root,
+    )
+    assert report["activation"] == "not_applied"
+    assert report["selected_count"] >= 1
+
+
 def test_shadow_compare_routes_billing_pr_non_code_changes() -> None:
     """Billing documentation and its manifest have explicit test routes."""
     repo_root = Path(__file__).resolve().parents[5]

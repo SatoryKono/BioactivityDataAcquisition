@@ -249,10 +249,8 @@ def test_real_daily_caller_and_command_partition_are_complete() -> None:
     assert "workflow_dispatch" in nightly[True]
     assert nightly["jobs"]["tests"]["with"]["generated-artifacts"] is True
     daily = nightly["jobs"]["generated-artifact-daily"]
-    assert daily["needs"] == "clock"
-    assert daily["if"] == (
-        "github.event_name == 'workflow_dispatch' || needs.clock.outputs.dow == 'Mon'"
-    )
+    assert "needs" not in daily
+    assert "if" not in daily
     assert "continue-on-error" not in daily
     commands = "\n".join(step.get("run", "") for step in daily["steps"])
     assert "daily --report" in commands and "validators --report" in commands

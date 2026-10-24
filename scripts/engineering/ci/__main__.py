@@ -22,6 +22,7 @@ Commands:
     debt-report     Generate weekly quality debt report
     publish-scorecard  Publish approved source-bound Scorecard SARIF
     publish-docker  Publish the approved same-workflow scanned image
+    nightly-shadow  Partition nightly evidence and guard mandatory skips
 """
 
 from __future__ import annotations
@@ -52,6 +53,9 @@ COMMANDS = {
 COMMAND_SPECS = {name: python_command(script) for name, script in COMMANDS.items()}
 COMMAND_SPECS.update(
     {
+        "nightly-shadow": module_command(
+            "scripts.engineering.ci.nightly_shadow_archive"
+        ),
         "pr-gate": module_command("scripts.engineering.ci.pr_gate"),
         "pr-lane-results": module_command("scripts.engineering.ci.pr_lane_results"),
         "publish-scorecard": module_command(

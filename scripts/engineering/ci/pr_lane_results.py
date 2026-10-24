@@ -66,7 +66,10 @@ TEST_GOVERNANCE_ARTIFACT_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
-    "CHANGELOG.md": ("tests/architecture/test_docs_version_sync.py",),
+    "CHANGELOG.md": (
+        "tests/architecture/test_docs_version_sync.py",
+        "tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py",
+    ),
     ".coderabbit.yaml": ("tests/architecture/test_coderabbit_config.py",),
     "Makefile": (
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
@@ -128,6 +131,24 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/engineering/repo/check_github_actions_runtime_policy.py": (
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
     ),
+    ".github/workflows/nightly.yml": (
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+        "tests/architecture/test_actions_artifact_storage_policy.py",
+        "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
+    ),
+    "configs/quality/scripts_lifecycle_registry.json": (
+        "tests/architecture/test_scripts_lifecycle_registry.py",
+    ),
+    "docs/04-reference/github-actions-workflows.md": (
+        "tests/architecture/test_gha_disabled_map_10263.py",
+        "tests/architecture/test_required_checks_prose_consistency.py",
+    ),
+    "docs/05-operations/ci-workflow-map.md": (
+        "tests/architecture/test_required_checks_prose_consistency.py",
+    ),
+    "docs/05-operations/runbooks/generated-artifact-drift-workflow.md": (
+        "tests/architecture/test_generated_artifact_drift_workflow.py",
+    ),
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
@@ -135,6 +156,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
+    "reports/governance/n1-shadow-window/": (
+        "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
+    ),
     "reports/performance/": BENCHMARK_EVIDENCE_TESTS,
     "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.": (
         NPM_RUNTIME_TEST,

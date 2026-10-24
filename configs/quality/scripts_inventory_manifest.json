@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-23T16:36:24.785654+00:00",
+  "generated_at": "2026-10-23T17:09:42.218398+00:00",
   "summary": {
-    "total_scripts": 667,
+    "total_scripts": 668,
     "status_counts": {
       "active": 334,
-      "supporting": 333
+      "supporting": 334
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
-      "ci": 74,
+      "ci": 75,
       "docs": 287,
       "other": 16,
-      "scripts": 555,
+      "scripts": 556,
       "skills": 13,
-      "tests": 485
+      "tests": 486
     }
   },
   "scripts": [
@@ -455,7 +455,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 204,
+          "line": 207,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.ps1\","
         },
@@ -486,7 +486,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 205,
+          "line": 208,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.sh\","
         },
@@ -815,7 +815,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 206,
+          "line": 209,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/setup-env.sh\","
         },
@@ -972,7 +972,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 203,
+          "line": 206,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/test-basic.sh\","
         }
@@ -1995,7 +1995,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 207,
+          "line": 210,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/check-env.ps1\","
         }
@@ -2180,7 +2180,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 208,
+          "line": 211,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/setup-env.sh\","
         },
@@ -2896,7 +2896,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 88,
+          "line": 91,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3678,7 +3678,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 87,
+          "line": 90,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3733,7 +3733,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 86,
+          "line": 89,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -5644,7 +5644,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 209,
+          "line": 212,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.ps1\","
         }
@@ -5665,7 +5665,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 210,
+          "line": 213,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.sh\","
         }
@@ -5686,7 +5686,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 211,
+          "line": 214,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.ps1\","
         }
@@ -5719,7 +5719,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 212,
+          "line": 215,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.sh\","
         },
@@ -5854,7 +5854,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 197,
+          "line": 200,
           "source_group": "scripts",
           "text": "\"scripts/ci_check_docs_parity.sh\","
         }
@@ -5942,7 +5942,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 199,
+          "line": 202,
           "source_group": "scripts",
           "text": "\"scripts/data_quality/check_dq_dsl_parity.py\","
         }
@@ -8484,13 +8484,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 307,
+          "line": 305,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 716,
+          "line": 714,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
@@ -9747,7 +9747,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 29,
+      "reference_count": 30,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -9780,6 +9780,12 @@
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci"
         },
         {
+          "path": ".github/workflows/nightly.yml",
+          "line": 145,
+          "source_group": "ci",
+          "text": "uv run --frozen --no-build python -m scripts.engineering.ci"
+        },
+        {
           "path": ".github/workflows/pr-required.yml",
           "line": 121,
           "source_group": "ci",
@@ -9790,12 +9796,6 @@
           "line": 305,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results assert-steps \\"
-        },
-        {
-          "path": ".github/workflows/pr-required.yml",
-          "line": 391,
-          "source_group": "ci",
-          "text": "uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results affected-tests \\"
         }
       ]
     },
@@ -9939,8 +9939,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "scripts/engineering/ci/nightly_shadow_archive.py",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.ci.actions_timing_common import ("
+        },
         {
           "path": "scripts/engineering/ci/report_docker_actions_timing.py",
           "line": 26,
@@ -9957,7 +9963,7 @@
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-10-31",
-      "next_step": "Retain as the shared GitHub Actions attempt collector imported by the Docker and PR-gate timing reports. It has no standalone command surface; keep it supporting so active_script_count_max does not grow."
+      "next_step": "Retain as the shared GitHub Actions attempt collector imported by the Docker and PR-gate timing reports and by nightly_shadow_archive. It has no standalone command surface; keep it supporting so active_script_count_max does not grow."
     },
     {
       "path": "scripts/engineering/ci/check_e2e_matrix_skip_rate.py",
@@ -10004,7 +10010,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"e2e-skip-rate\": \"check_e2e_matrix_skip_rate.py\","
         },
@@ -10049,7 +10055,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"e2e-rerun\": \"check_e2e_rerun_stability.py\","
         },
@@ -10082,7 +10088,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"neo4j-memory-live\": \"check_neo4j_memory_live_audit.py\","
         }
@@ -10097,7 +10103,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"neo4j-memory\": \"check_neo4j_memory_ontology.py\","
         }
@@ -10112,13 +10118,13 @@
       "references": [
         {
           "path": ".github/workflows/nightly.yml",
-          "line": 142,
+          "line": 133,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks"
         },
         {
           "path": ".github/workflows/nightly.yml",
-          "line": 147,
+          "line": 139,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks"
         },
@@ -10154,7 +10160,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 328,
+          "line": 326,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import generated_artifact_checks as checks"
         }
@@ -10281,6 +10287,49 @@
       "next_step": "Internal evidence-validation functions imported by the canonical telemetry updater and local coverage producer; no CLI, main, or direct invocation exists. Retain as supporting code and expose operations only through those existing entrypoints."
     },
     {
+      "path": "scripts/engineering/ci/nightly_shadow_archive.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": ".github/workflows/nightly.yml",
+          "line": 146,
+          "source_group": "ci",
+          "text": "nightly-shadow partition"
+        },
+        {
+          "path": "scripts/engineering/ci/__main__.py",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "nightly-shadow  Partition nightly evidence and guard mandatory skips"
+        },
+        {
+          "path": "scripts/engineering/ci/__main__.py",
+          "line": 57,
+          "source_group": "scripts",
+          "text": "\"scripts.engineering.ci.nightly_shadow_archive\""
+        },
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 152,
+          "source_group": "scripts",
+          "text": "\"nightly-shadow\": \"scripts/engineering/ci/nightly_shadow_archive.py\","
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.nightly_shadow_archive import ("
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the N1 shadow partition, mandatory-skip guard, and immutable archive behind python -m scripts.engineering.ci nightly-shadow. Keep it supporting so active_script_count_max does not grow."
+    },
+    {
       "path": "scripts/engineering/ci/pr_gate.py",
       "type": "py",
       "status": "supporting",
@@ -10295,7 +10344,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 55,
+          "line": 59,
           "source_group": "scripts",
           "text": "\"pr-gate\": module_command(\"scripts.engineering.ci.pr_gate\"),"
         },
@@ -10362,7 +10411,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 56,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"pr-lane-results\": module_command(\"scripts.engineering.ci.pr_lane_results\"),"
         },
@@ -10392,7 +10441,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 499,
+          "line": 520,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         }
@@ -10411,7 +10460,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"presubmit\": \"presubmit_gate.py\","
         },
@@ -10442,13 +10491,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 60,
+          "line": 64,
           "source_group": "scripts",
           "text": "\"publish-docker\": shell_command(\"publish_docker_image.sh\"),"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 94,
+          "line": 97,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -10473,7 +10522,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 58,
+          "line": 62,
           "source_group": "scripts",
           "text": "\"scripts.engineering.ci.publish_scorecard_sarif\""
         },
@@ -10651,13 +10700,13 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"quality-gate\": \"quality_integral_gate.py\","
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"architecture-junit-skips\": \"quality_integral_gate.py\","
         },
@@ -10733,7 +10782,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"docker-timing\": \"report_docker_actions_timing.py\","
         },
@@ -10776,7 +10825,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"pr-gate-timing\": \"report_pr_gate_timing.py\","
         },
@@ -10813,7 +10862,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"debt-report\": \"report_quality_debt_weekly.py\","
         },
@@ -10876,7 +10925,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"run-tests\": \"run_pytest_resilient.py\","
         }
@@ -11124,7 +11173,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 200,
+          "line": 203,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_control_plane_artifacts.py\","
         },
@@ -11271,7 +11320,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 32,
+          "line": 33,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.cli_dispatch import ("
         },
@@ -11380,7 +11429,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 301,
+      "reference_count": 302,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -14703,13 +14752,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 383,
+          "line": 381,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 404,
+          "line": 402,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_evaluators as evaluators"
         },
@@ -14746,7 +14795,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 403,
+          "line": 401,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_report as cli"
         },
@@ -19101,7 +19150,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 128,
+          "line": 131,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -19536,7 +19585,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
@@ -19549,6 +19598,12 @@
           "line": 136,
           "source_group": "docs",
           "text": "- Review automation in `github_settings_review.py` MUST remain read-only."
+        },
+        {
+          "path": "scripts/engineering/ci/nightly_shadow_archive.py",
+          "line": 38,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo.github_settings_review import ("
         },
         {
           "path": "scripts/engineering/ci/report_docker_actions_timing.py",
@@ -19579,12 +19634,6 @@
           "line": 13,
           "source_group": "tests",
           "text": "TOOL_PATH = ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"github_settings_review.py\""
-        },
-        {
-          "path": "tests/architecture/test_github_governance_review.py",
-          "line": 340,
-          "source_group": "tests",
-          "text": "assert \"python -m scripts.engineering.repo.github_settings_review\" not in workflow"
         }
       ],
       "owner": "@bioetl-platform",
@@ -22101,7 +22150,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 142,
+          "line": 166,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -24380,7 +24429,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 214,
+          "line": 217,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         },
@@ -24441,7 +24490,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 215,
+          "line": 218,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         },
@@ -24563,7 +24612,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 217,
+          "line": 220,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/start-neo4j-audit.sh\","
         }
@@ -24793,7 +24842,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 198,
+          "line": 201,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/repo/cleanup_repository.py\","
         }
