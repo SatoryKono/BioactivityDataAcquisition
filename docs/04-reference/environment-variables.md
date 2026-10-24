@@ -126,7 +126,7 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| `BIOETL_ENFORCE_REPORT_ROOT_MARKER` | Fail readiness closed when the run-report root marker is invalid | `False` | No |
+| `BIOETL_ENFORCE_REPORT_ROOT_MARKER` | Fail readiness closed when the run-report root marker is invalid | `False` (`1` (True) in docker-compose.yml) | No |
 | `BIOETL_REPORT_ROOT` | Run-report root override | unset | No |
 
 ## Windows + WSL Mixed Checkout
