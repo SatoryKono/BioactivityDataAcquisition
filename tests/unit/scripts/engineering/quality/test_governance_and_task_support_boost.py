@@ -36,8 +36,8 @@ from unittest.mock import patch
 
 import pytest
 
-import bioetl.infrastructure.quality.architecture_debt_task_support as support_module
-from bioetl.infrastructure.quality.budget_evaluator import (
+import scripts.engineering.quality.architecture_debt_task_support as support_module
+from scripts.engineering.quality.budget_evaluator import (
     _count_hotspot_registry_entries,
     _get_typed_budgets,
     _get_typed_prefixes,
@@ -45,20 +45,20 @@ from bioetl.infrastructure.quality.budget_evaluator import (
     current_quarter_target,
     evaluate_hotspot_budget_violations,
 )
-from bioetl.infrastructure.quality.debt_scorecard import (
+from scripts.engineering.quality.debt_scorecard import (
     _iter_registry_entries,
     _normalized_owner,
     _resolve_enforceable_baseline,
     _technical_debt_owner_counts,
     evaluate_debt_scorecard,
 )
-from bioetl.infrastructure.quality._governance_validation import (
+from scripts.engineering.quality._governance_validation import (
     _burn_down_priority_registries,
     _validate_baseline_policy,
     _validate_governance_section,
     _validate_hotspot_budgets_section,
 )
-from bioetl.infrastructure.quality.architecture_debt_reduction import (
+from scripts.engineering.quality.architecture_debt_reduction import (
     _default_limit,
     _default_plan_output_path,
     _layer_for_target,
@@ -66,7 +66,7 @@ from bioetl.infrastructure.quality.architecture_debt_reduction import (
     find_latest_architecture_debt_tasks_file,
     load_architecture_debt_tasks,
 )
-from bioetl.infrastructure.quality.architecture_debt_task_support import (
+from scripts.engineering.quality.architecture_debt_task_support import (
     SymbolMetricLocation,
     build_symbol_index,
     fallback_complexity,
@@ -80,7 +80,7 @@ from bioetl.infrastructure.quality.architecture_debt_task_support import (
     select_symbol_location,
     task_status,
 )
-from bioetl.infrastructure.quality.inventory import ExemptionInventorySummary
+from scripts.engineering.quality.inventory import ExemptionInventorySummary
 
 
 pytestmark = pytest.mark.unit
@@ -692,20 +692,20 @@ def test_evaluate_debt_scorecard_covers_missing_baseline_and_target_paths(
         expired_entries=0,
     )
     monkeypatch.setattr(
-        "bioetl.infrastructure.quality.debt_scorecard.load_exemptions_registry",
+        "scripts.engineering.quality.debt_scorecard.load_exemptions_registry",
         lambda _path=None: {"registries": {}},
     )
     monkeypatch.setattr(
-        "bioetl.infrastructure.quality.debt_scorecard.build_exemption_inventory",
+        "scripts.engineering.quality.debt_scorecard.build_exemption_inventory",
         lambda _path=None, today=None: inventory,
     )
     monkeypatch.setattr(
-        "bioetl.infrastructure.quality.debt_scorecard.validate_debt_scorecard",
+        "scripts.engineering.quality.debt_scorecard.validate_debt_scorecard",
         lambda _path=None: [],
     )
 
     monkeypatch.setattr(
-        "bioetl.infrastructure.quality.debt_scorecard.load_debt_scorecard",
+        "scripts.engineering.quality.debt_scorecard.load_debt_scorecard",
         lambda _path=None: {
             "baseline": {"total_exemptions": "bad"},
             "quarterly_targets": [{"quarter": "2026-Q2"}],
@@ -716,7 +716,7 @@ def test_evaluate_debt_scorecard_covers_missing_baseline_and_target_paths(
     assert violations == ["scorecard enforceable baseline missing int total_exemptions"]
 
     monkeypatch.setattr(
-        "bioetl.infrastructure.quality.debt_scorecard.load_debt_scorecard",
+        "scripts.engineering.quality.debt_scorecard.load_debt_scorecard",
         lambda _path=None: {
             "baseline": {"total_exemptions": 1},
             "quarterly_targets": [],
