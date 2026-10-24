@@ -247,3 +247,4 @@ filters/README.md
 filters/inventory-baseline.md
 security/export-policy.md
 security/rbac-matrix.md
+00-project/ai/agents/journals/bolt.md
