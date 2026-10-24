@@ -5,28 +5,28 @@ from __future__ import annotations
 from datetime import date
 from pathlib import Path
 
-from bioetl.infrastructure.quality.exemptions_registry_access import (
+from scripts.engineering.quality.exemptions_registry_access import (
     load_exemptions_registry,
 )
-from bioetl.infrastructure.quality.exemptions_registry_paths import (
+from scripts.engineering.quality.exemptions_registry_paths import (
     _SRC_ROOT_PREFIX,
 )
-from bioetl.infrastructure.quality.exemptions_registry_paths import (
+from scripts.engineering.quality.exemptions_registry_paths import (
     is_module_path_key as _is_module_path_key,
 )
-from bioetl.infrastructure.quality.exemptions_registry_paths import (
+from scripts.engineering.quality.exemptions_registry_paths import (
     normalize_path_text as _normalize_path_text,
 )
-from bioetl.infrastructure.quality.exemptions_registry_paths import (
+from scripts.engineering.quality.exemptions_registry_paths import (
     project_root as _project_root,
 )
-from bioetl.infrastructure.quality.exemptions_registry_targets import (
+from scripts.engineering.quality.exemptions_registry_targets import (
     validate_exemption_target_references,
 )
-from bioetl.infrastructure.quality.exemptions_registry_validation import (
+from scripts.engineering.quality.exemptions_registry_validation import (
     get_policy_required_fields as _get_policy_required_fields,
 )
-from bioetl.infrastructure.quality.exemptions_registry_validation import (
+from scripts.engineering.quality.exemptions_registry_validation import (
     validate_exemption_entry as _validate_exemption_entry,
 )
 

@@ -7,8 +7,8 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
-from bioetl.infrastructure.quality._primitives import _parse_iso_date, _quarter_label
-from bioetl.infrastructure.quality.exemptions_registry import load_exemptions_registry
+from scripts.engineering.quality._primitives import _parse_iso_date, _quarter_label
+from scripts.engineering.quality.exemptions_registry import load_exemptions_registry
 
 
 @dataclass(frozen=True)

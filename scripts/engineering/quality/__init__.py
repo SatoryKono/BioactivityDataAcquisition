@@ -2,19 +2,19 @@
 
 from __future__ import annotations
 
-from bioetl.infrastructure.quality.architecture_debt_reduction import (
+from scripts.engineering.quality.architecture_debt_reduction import (
     build_architecture_debt_execution_plan,
     find_latest_architecture_debt_tasks_file,
     load_architecture_debt_tasks,
 )
-from bioetl.infrastructure.quality.architecture_debt_task_generation import (
+from scripts.engineering.quality.architecture_debt_task_generation import (
     generate_architecture_debt_tasks_payload,
 )
-from bioetl.infrastructure.quality.architecture_quality_scorecard import (
+from scripts.engineering.quality.architecture_quality_scorecard import (
     build_architecture_quality_scorecard,
     write_architecture_quality_scorecard,
 )
-from bioetl.infrastructure.quality.debt_scorecard import (
+from scripts.engineering.quality.debt_scorecard import (
     build_exemption_inventory,
     compute_integral_debt_score,
     evaluate_debt_scorecard,
@@ -23,7 +23,7 @@ from bioetl.infrastructure.quality.debt_scorecard import (
     validate_debt_scorecard,
     validate_scorecard_registry_sync,
 )
-from bioetl.infrastructure.quality.exemptions_registry import (
+from scripts.engineering.quality.exemptions_registry import (
     EXEMPTION_REGISTRIES_ALLOW_EMPTY,
     REQUIRED_EXEMPTION_REGISTRIES,
     build_module_path_key,

@@ -8,10 +8,10 @@ from typing import Any
 import yaml
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.quality.exemptions_registry_paths import (
+from scripts.engineering.quality.exemptions_registry_paths import (
     build_module_path_key,
 )
-from bioetl.infrastructure.quality.exemptions_registry_paths import (
+from scripts.engineering.quality.exemptions_registry_paths import (
     resolve_registry_path as _resolve_registry_path,
 )
 

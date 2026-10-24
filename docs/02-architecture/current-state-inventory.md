@@ -43,7 +43,7 @@ nonregressing adoption retains prior accepted values where the fresh raw
 measurement is lower. Those 2566-module figures and the summary table below are
 historical measurement evidence for that commit, not the live source-module
 count. The current source inventory binding at the end of this document reports
-the live projection (`source_module_count=2571`). This is local measurement
+the live projection (`source_module_count=2566`). This is local measurement
 evidence, not CircleCI acceptance or lifecycle ADMIT for the final PR head.
 
 | Artifact | Historical measurement (`912f4839`) | Source |
@@ -52,7 +52,7 @@ evidence, not CircleCI acceptance or lifecycle ADMIT for the final PR head.
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
 | Source modules in module coverage inventory | `2566` | `reports/quality/module-coverage-inventory.json` (historical measurement) |
 | Unmatched live modules / uncovered measured modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, complete source-module snapshot |
-| Coverage inventory status counts | `2524` fully covered, `41` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `2513` fully covered, `52` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `0` | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Module-boundaries coupling | `10.0` (`control-plane` fan-in `1/2`, `runtime_builders` fan-in `2/3`) | `reports/quality/architecture-quality-scorecard.json`, `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py` |
