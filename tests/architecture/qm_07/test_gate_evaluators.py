@@ -7,6 +7,10 @@ from scripts.engineering.qa.debt_governance_gate_evaluators import (
 )
 
 
+import pytest
+
+
+@pytest.mark.unit
 def test_imports_not_none() -> None:
     assert callable(build_architecture_quality_scorecard)
     assert callable(evaluate_debt_scorecard)
