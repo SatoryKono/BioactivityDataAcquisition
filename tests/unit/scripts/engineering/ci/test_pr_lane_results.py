@@ -618,6 +618,7 @@ def test_base_checkout_aggregation_uses_existing_module_entrypoint():
     )
     assert "python -m scripts.engineering.ci.pr_lane_results build" in build
 
+
 def test_assert_steps_with_large_dependency_review_payload() -> None:
     """Simulate a large dependency-review step outcome mimicking the ARG_MAX failure case but strictly verifying step checks pass when data is provided."""
     # Create a very large payload for the dependency-review step (similar to the 500k issue payload)
@@ -641,6 +642,7 @@ def test_assert_steps_with_large_dependency_review_payload() -> None:
     )
 
     assert failures == []
+
 
 def test_assert_steps_malformed_outcomes() -> None:
     """Simulate a malformed outcome payload that includes strange formatting."""
