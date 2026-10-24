@@ -1,0 +1,9 @@
+include pyproject.toml
+include uv.lock
+include README.md
+include LICENSE
+include CHANGELOG.md
+
+recursive-include scripts/engineering/quality *.py
+recursive-include src/bioetl *.py
+recursive-include src/memory *.py

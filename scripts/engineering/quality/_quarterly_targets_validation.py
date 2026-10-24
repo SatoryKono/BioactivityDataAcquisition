@@ -7,7 +7,7 @@ from itertools import pairwise
 from typing import cast
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.quality._primitives import (
+from scripts.engineering.quality._primitives import (
     QuarterTarget,
     _parse_quarter_label,
     _validate_budget_mapping,

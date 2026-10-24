@@ -10,7 +10,7 @@ _SRC_ROOT_PREFIX = "src/bioetl/"
 
 def project_root() -> Path:
     """Return repository root path."""
-    return Path(__file__).resolve().parents[4]
+    return Path(__file__).resolve().parents[3]
 
 
 def resolve_registry_path(path: Path | str | None = None) -> Path:

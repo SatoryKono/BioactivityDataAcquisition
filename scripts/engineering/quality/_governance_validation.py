@@ -5,15 +5,15 @@ from __future__ import annotations
 from datetime import date
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.quality._baseline_validation import (
+from scripts.engineering.quality._baseline_validation import (
     _is_valid_rollout_section_key,
 )
-from bioetl.infrastructure.quality._primitives import (
+from scripts.engineering.quality._primitives import (
     _parse_iso_date,
     _validate_gate_mode,
     _validate_non_negative_int,
 )
-from bioetl.infrastructure.quality.report_formatter import (
+from scripts.engineering.quality.report_formatter import (
     _is_rollout_cutoff_stale,
 )
 

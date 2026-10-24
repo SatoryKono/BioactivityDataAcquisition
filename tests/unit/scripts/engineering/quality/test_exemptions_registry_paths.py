@@ -34,7 +34,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.infrastructure.quality.exemptions_registry_paths import (
+from scripts.engineering.quality.exemptions_registry_paths import (
     build_module_path_key,
     is_module_path_key,
     normalize_path_text,

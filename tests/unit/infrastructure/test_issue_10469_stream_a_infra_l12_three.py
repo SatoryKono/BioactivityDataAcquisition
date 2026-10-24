@@ -81,8 +81,8 @@ from bioetl.infrastructure.observability.observability_backend_probes import (
 from bioetl.infrastructure.observability.observability_backend_process import (
     _find_posix_listener_pids_by_port,
 )
-from bioetl.infrastructure.quality.architecture_quality_scoring import _interpretation
-from bioetl.infrastructure.quality.exemptions_registry_targets import (
+from scripts.engineering.quality.architecture_quality_scoring import _interpretation
+from scripts.engineering.quality.exemptions_registry_targets import (
     _validate_registry_entries,
 )
 from bioetl.infrastructure.quarantine.filtered_read_support import (

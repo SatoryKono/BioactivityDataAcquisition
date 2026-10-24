@@ -15,7 +15,7 @@ from scripts.engineering.qa.report_adr_enforcement_matrix import (
 )
 from scripts.engineering.qa.report_lazy_import_inventory import collect_lazy_imports
 
-from bioetl.infrastructure.quality.architecture_quality_scoring import (
+from scripts.engineering.quality.architecture_quality_scoring import (
     _build_categories,
     _build_diagnostic_payload,
     _count_hotspot_families_at_budget,
@@ -406,7 +406,7 @@ def build_architecture_quality_scorecard(
 
     return {
         "schema_version": 2,
-        "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
+        "generated_by": "scripts.engineering.quality.architecture_quality_scorecard",
         "source_artifacts": source_artifacts,
         "weights_sum": weights_sum,
         "integral_score": integral_score,
