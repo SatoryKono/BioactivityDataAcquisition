@@ -617,3 +617,42 @@ def test_base_checkout_aggregation_uses_existing_module_entrypoint():
         step["run"] for step in steps if "pr_lane_results build" in step.get("run", "")
     )
     assert "python -m scripts.engineering.ci.pr_lane_results build" in build
+
+def test_assert_steps_with_large_dependency_review_payload() -> None:
+    """Simulate a large dependency-review step outcome mimicking the ARG_MAX failure case but strictly verifying step checks pass when data is provided."""
+    # Create a very large payload for the dependency-review step (similar to the 500k issue payload)
+    large_payload = "x" * 200_000
+
+    outcomes = {
+        "dependency-review": "success",
+        "cleanliness": "success",
+        "cleanup-governance": "success",
+        "root-docs": "success",
+        "root-registry": "success",
+        "structure-audit": "success",
+        "hygiene-pytest": "success",
+        "dependency_payload": large_payload,
+    }
+
+    failures = assert_step_outcomes(
+        {"root-hygiene": {"decision": "required", "reason": "path_match"}},
+        outcomes,
+        owner="fast-governance",
+    )
+
+    assert failures == []
+
+def test_assert_steps_malformed_outcomes() -> None:
+    """Simulate a malformed outcome payload that includes strange formatting."""
+    failures = assert_step_outcomes(
+        {"type-checking": {"decision": "required", "reason": "path_match"}},
+        {
+            "mypy": "",  # Missing outcome
+            "newtype-protocol": "success",
+            "any-usage": "success",
+        },
+        owner="class-lane",
+    )
+
+    # Empty string outcome defaults to 'missing' string representation in assert_step_outcomes
+    assert failures == ["type-checking:mypy=missing"]
