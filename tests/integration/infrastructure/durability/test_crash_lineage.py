@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import os
 import signal
 from datetime import UTC, datetime
@@ -35,6 +34,7 @@ _SIGKILL_ONLY = pytest.mark.skipif(
     reason="SIGKILL is unavailable on this platform",
 )
 
+
 def _collaborators() -> DurabilityCollaborators:
     return DurabilityCollaborators(
         logger=NoOpLogger(),
@@ -43,9 +43,11 @@ def _collaborators() -> DurabilityCollaborators:
         silver_validator=ContractAwareSilverValidator(),
     )
 
+
 def _assembled_store(root: Path) -> FileLineageStore:
     assembly = assemble_store("g3_lineage", root, _collaborators())
     return cast(FileLineageStore, assembly.instance)
+
 
 def _dummy_fragment() -> LineageGraphFragment:
     return LineageGraphFragment(
@@ -55,6 +57,7 @@ def _dummy_fragment() -> LineageGraphFragment:
         created_at=datetime.now(UTC),
         stored_fragment_id=None,
     )
+
 
 def _child_kill_after_fragment_write(root_path: Path) -> None:
     store = _assembled_store(root_path)
@@ -71,6 +74,7 @@ def _child_kill_after_fragment_write(root_path: Path) -> None:
 
     with patch.object(FileLineageStore, "_fragment_indexes", new=mock_fragment_indexes):
         store.save(fragment)
+
 
 @pytest.mark.integration
 @_SIGKILL_ONLY
@@ -98,12 +102,14 @@ def test_row_15a_lineage_crash_after_fragment_write(tmp_path: Path) -> None:
     run_indexes = list((root / "indexes").glob("**/*.jsonl"))
     assert len(run_indexes) == 0
 
+
 def _child_kill_mid_index_append(root_path: Path) -> None:
     store = _assembled_store(root_path)
     fragment = _dummy_fragment()
 
     # Patch append_jsonl_payload
     original_append = append_jsonl_payload
+
     def mock_append(*args: object, **kwargs: object) -> int:
         index_path = kwargs.get("path") or args[0]
         if "run_id" in str(index_path):
@@ -111,8 +117,12 @@ def _child_kill_mid_index_append(root_path: Path) -> None:
             os.kill(os.getpid(), signal.SIGKILL)
         return original_append(*args, **kwargs)
 
-    with patch("bioetl.infrastructure.control_plane.file_lineage_store.append_jsonl_payload", new=mock_append):
+    with patch(
+        "bioetl.infrastructure.control_plane.file_lineage_store.append_jsonl_payload",
+        new=mock_append,
+    ):
         store.save(fragment)
+
 
 @pytest.mark.integration
 @_SIGKILL_ONLY
