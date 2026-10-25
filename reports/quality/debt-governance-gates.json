@@ -427,25 +427,26 @@
       "status": "pass"
     },
     {
-      "current": "747c097c779cd443a71177a5745ba0048b83bb1a2c631e0d5ec59abe919d4336",
+      "current": "db481facc9c4e5393c41a1d2cc0585f8c207fe7238e4aa6701ffbba07aebc2c0",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
       "remediation": "Fetch origin/main and regenerate the remote-main architecture debt baseline.",
       "source_artifact": "reports/quality/architecture-debt-remote-main-baseline.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": {
         "artifacts": [
-          "adr_enforcement_matrix"
+          "adr_enforcement_matrix",
+          "remote_main_baseline"
         ],
-        "count": 1
+        "count": 2
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: adr_enforcement_matrix",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: adr_enforcement_matrix, remote_main_baseline",
       "source_artifact": "reports/quality/*.json",
       "status": "fail"
     }
@@ -479,23 +480,24 @@
     "dq_contract_registry_diagnostics": false,
     "hotspot_family_baseline": false,
     "module_coverage_inventory": false,
-    "remote_main_baseline": false
+    "remote_main_baseline": true
   },
   "status_counts": {
-    "fail": 2,
-    "pass": 45,
+    "fail": 3,
+    "pass": 44,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 10.0,
     "architecture_quality_scorecard_interpretation": "excellent",
-    "fail_count": 2,
+    "fail_count": 3,
     "failing_gates": [
       "test_governance_budget_violations",
+      "remote_main_architecture_debt_baseline",
       "generated_artifact_drift"
     ],
     "gate_count": 47,
-    "pass_count": 45,
+    "pass_count": 44,
     "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
