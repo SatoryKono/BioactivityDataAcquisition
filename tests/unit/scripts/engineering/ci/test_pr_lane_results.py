@@ -279,6 +279,16 @@ def test_shadow_compare_routes_provider_parity_evidence(name: str) -> None:
     ]
 
 
+def test_shadow_compare_routes_sec003_audit_to_metadata_parser() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["reports/engineering/SEC-003_audit_report.md"], repo_root=root
+    )
+    assert report["selected"] == [
+        "tests/unit/domain/services/test_composite_metadata_helpers.py"
+    ]
+
+
 def test_shadow_compare_routes_quality_and_runtime_documentation() -> None:
     """Debt and runtime documentation changes retain governing tests."""
     repo_root = Path(__file__).resolve().parents[5]
