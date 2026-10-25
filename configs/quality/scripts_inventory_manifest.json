@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-25T10:14:43.492613+00:00",
+  "generated_at": "2026-10-25T10:24:22.512025+00:00",
   "summary": {
     "total_scripts": 696,
     "status_counts": {
@@ -15316,7 +15316,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 432,
+          "line": 426,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         },
@@ -16154,7 +16154,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 435,
+          "line": 429,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         },
@@ -19115,9 +19115,9 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 429,
+          "line": 423,
           "source_group": "tests",
-          "text": "/ \"architecture_debt_reduction.py\""
+          "text": "ROOT / \"scripts\" / \"engineering\" / \"quality\" / \"architecture_debt_reduction.py\""
         },
         {
           "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_nineteen.py",
@@ -19172,7 +19172,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 421,
+          "line": 420,
           "source_group": "tests",
           "text": "/ \"architecture_debt_task_generation.py\""
         },
@@ -19921,7 +19921,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 13,
       "references": [
         {
           "path": "scripts/engineering/quality/budget_evaluator.py",
@@ -19948,6 +19948,18 @@
           "text": "\"scripts/engineering/quality/scoring.py\","
         },
         {
+          "path": "tests/unit/scripts/engineering/quality/test_exemptions_registry.py",
+          "line": 482,
+          "source_group": "tests",
+          "text": "(scripts_dir / \"scoring.py\").write_text("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_exemptions_registry.py",
+          "line": 494,
+          "source_group": "tests",
+          "text": "\"scripts/engineering/quality/scoring.py::compute_integral_debt_score\": {}"
+        },
+        {
           "path": "tests/unit/scripts/engineering/quality/test_exemptions_registry_paths.py",
           "line": 133,
           "source_group": "tests",
@@ -19958,18 +19970,6 @@
           "line": 161,
           "source_group": "tests",
           "text": "canonical = \"scripts/engineering/quality/scoring.py\""
-        },
-        {
-          "path": "tests/unit/scripts/engineering/quality/test_exemptions_registry_paths.py",
-          "line": 175,
-          "source_group": "tests",
-          "text": "abs_path = root / \"scripts\" / \"engineering\" / \"quality\" / \"scoring.py\""
-        },
-        {
-          "path": "tests/unit/scripts/engineering/quality/test_exemptions_registry_paths.py",
-          "line": 177,
-          "source_group": "tests",
-          "text": "assert result == \"scripts/engineering/quality/scoring.py\""
         }
       ]
     },
