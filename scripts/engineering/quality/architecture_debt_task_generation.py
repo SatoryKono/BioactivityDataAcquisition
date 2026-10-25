@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from scripts.engineering.common.repo_paths import resolve_repo_root
 from typing import Final, cast
 
 from scripts.engineering.quality.architecture_debt_artifact_tasks import (
@@ -56,7 +55,7 @@ REGISTRY_NAMES: Final[tuple[str, ...]] = (
 
 
 def _project_root() -> Path:
-    return resolve_repo_root()
+    return Path(__file__).resolve().parents[3]
 
 
 def _default_output_path(
