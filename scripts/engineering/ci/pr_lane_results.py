@@ -51,6 +51,8 @@ GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
+TYPE_CHECKING_WORKFLOW = ".github/workflows/type-checking.yml"
+TYPE_CHECKING_COLD_WORKFLOW = ".github/workflows/type-checking-cold.yml"
 
 TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_telemetry_baseline.py",
@@ -119,16 +121,16 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             ".github/workflows/skills-consistency.yml",
             ".github/workflows/stale.yml",
             ".github/workflows/tests.yml",
-            ".github/workflows/type-checking-cold.yml",
-            ".github/workflows/type-checking.yml",
+            TYPE_CHECKING_COLD_WORKFLOW,
+            TYPE_CHECKING_WORKFLOW,
             ".github/workflows/zizmor.yml",
         ),
         (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
     ),
     **dict.fromkeys(
         (
-            ".github/workflows/type-checking.yml",
-            ".github/workflows/type-checking-cold.yml",
+            TYPE_CHECKING_WORKFLOW,
+            TYPE_CHECKING_COLD_WORKFLOW,
             "scripts/engineering/dev/run_mypy.sh",
             "scripts/engineering/dev/run_mypy.ps1",
             "scripts/engineering/dev/zed_mypy.py",
@@ -138,8 +140,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     **dict.fromkeys(
         (
-            ".github/workflows/type-checking.yml",
-            ".github/workflows/type-checking-cold.yml",
+            TYPE_CHECKING_WORKFLOW,
+            TYPE_CHECKING_COLD_WORKFLOW,
         ),
         (GITHUB_ACTIONS_RUNTIME_POLICY_TEST, MYPY_TARGET_CONTRACT_TEST),
     ),
