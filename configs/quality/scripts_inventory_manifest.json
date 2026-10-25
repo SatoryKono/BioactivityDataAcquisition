@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-25T09:57:13.990966+00:00",
+  "generated_at": "2026-10-25T10:19:52.912163+00:00",
   "summary": {
     "total_scripts": 668,
     "status_counts": {
@@ -9793,7 +9793,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 312,
+          "line": 314,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results assert-steps \\"
         }
@@ -10130,7 +10130,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 650,
+          "line": 652,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10399,7 +10399,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 822,
+          "line": 824,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10883,13 +10883,13 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 387,
+          "line": 389,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-mar"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 408,
+          "line": 410,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target \"${targets[@]}\" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-marker "
         },
@@ -13941,7 +13941,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 374,
+          "line": 376,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -14752,7 +14752,7 @@
         },
         {
           "path": "tests/architecture/qm_07/test_gate_evaluators.py",
-          "line": 3,
+          "line": 5,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
@@ -19126,7 +19126,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 645,
+          "line": 647,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
