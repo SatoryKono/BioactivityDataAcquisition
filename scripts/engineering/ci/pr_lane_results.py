@@ -75,6 +75,9 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "reports/quality/total-tech-debt-audit-main-current.md": (
+        "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
+    ),
     "CHANGELOG.md": ("tests/architecture/test_docs_version_sync.py",),
     ".coderabbit.yaml": ("tests/architecture/test_coderabbit_config.py",),
     ".github/workflows/duplication-complexity.yml": (
@@ -115,11 +118,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "Makefile": (
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
     ),
-<<<<<<< HEAD
     "Dockerfile.bioetl": (DOCKER_RUNTIME_CONTRACT_TEST,),
-=======
-    "Dockerfile.bioetl": ("tests/architecture/test_docker_runtime_contracts.py",),
->>>>>>> 1aa134d59 (fix(ci): eliminate shared PR gate failures)
+    ".github/workflows/docker.yml": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    "reports/quality/architecture-debt-remote-main-baseline.md": (
+        "tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py",
+    ),
     "configs/quality/generated_artifact_routing.yaml": (
         "tests/architecture/test_generated_artifact_routing.py",
     ),
@@ -184,22 +187,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/quality/flaky-test-burndown-review.json": FLAKY_BURNDOWN_REVIEW_TESTS,
     "reports/quality/test-governance-current.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
-<<<<<<< HEAD
-    "reports/quality/total-tech-debt-audit-main-current.md": (
-        "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
-    ),
     "reports/engineering/finances/billing_manifest.json": (
         "tests/unit/scripts/test_github_billing.py",
     ),
     "reports/security/blocker-CVE-out-of-scope.md": (DOCKER_RUNTIME_CONTRACT_TEST,),
-=======
-    "reports/engineering/finances/billing_manifest.json": (
-        "tests/unit/scripts/test_github_billing.py",
-    ),
-    "reports/security/blocker-CVE-out-of-scope.md": (
-        "tests/architecture/test_docker_runtime_contracts.py",
-    ),
->>>>>>> 1aa134d59 (fix(ci): eliminate shared PR gate failures)
     ".github/workflows/pr-required.yml": (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
     "configs/quality/reusable_action_pins.yaml": (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
     "scripts/engineering/repo/check_github_actions_runtime_policy.py": (
@@ -463,13 +454,8 @@ def _global_dependency_lane(root: Path, dependencies: set[str]) -> bool:
     )
 
 
-<<<<<<< HEAD
 def _generated_artifact_test_records(root: Path) -> list[object]:
     """Load and validate the generated-artifact test records."""
-=======
-def _generated_artifact_targets(path: str, root: Path) -> list[str]:
-    """Return tests declared for a generated artifact or one of its siblings."""
->>>>>>> 1aa134d59 (fix(ci): eliminate shared PR gate failures)
     registry_path = root / GENERATED_ARTIFACT_TESTS
     if not registry_path.is_file():
         return []
@@ -482,15 +468,11 @@ def _generated_artifact_targets(path: str, root: Path) -> list[str]:
         raise ValueError(
             "Invalid generated artifact test registry: tests must be a list"
         )
-<<<<<<< HEAD
     return records
 
 
 def _tests_by_generated_artifact(records: list[object]) -> dict[str, set[str]]:
     """Build the artifact-to-test index from validated registry records."""
-=======
-
->>>>>>> 1aa134d59 (fix(ci): eliminate shared PR gate failures)
     tests_by_artifact: dict[str, set[str]] = {}
     for record in records:
         if not isinstance(record, dict):
@@ -506,19 +488,11 @@ def _tests_by_generated_artifact(records: list[object]) -> dict[str, set[str]]:
                     "Invalid generated artifact test registry: artifact path"
                 )
             tests_by_artifact.setdefault(artifact, set()).add(test_path)
-<<<<<<< HEAD
     return tests_by_artifact
 
 
 def _generated_artifact_routes(root: Path) -> list[object]:
     """Load and validate generated-artifact sibling routes."""
-=======
-
-    direct = tests_by_artifact.get(path)
-    if direct:
-        return sorted(direct)
-
->>>>>>> 1aa134d59 (fix(ci): eliminate shared PR gate failures)
     routing_path = root / GENERATED_ARTIFACT_ROUTING
     if not routing_path.is_file():
         return []
@@ -531,7 +505,6 @@ def _generated_artifact_routes(root: Path) -> list[object]:
         raise ValueError(
             "Invalid generated artifact routing registry: routes must be a list"
         )
-<<<<<<< HEAD
     return routes
 
 
@@ -578,25 +551,6 @@ def _generated_artifact_targets(path: str, root: Path) -> list[str]:
             continue
         targets.update(_tests_for_route(outputs, tests_by_artifact))
     return sorted(targets)
-=======
-    for route in routes:
-        if not isinstance(route, dict):
-            raise ValueError("Invalid generated artifact routing registry: route entry")
-        outputs = route.get("outputs")
-        if not isinstance(outputs, list) or not all(
-            isinstance(output, str) for output in outputs
-        ):
-            raise ValueError("Invalid generated artifact routing registry: outputs")
-        if path not in outputs:
-            continue
-        sibling_tests = {
-            target
-            for output in outputs
-            for target in tests_by_artifact.get(output, set())
-        }
-        return sorted(sibling_tests)
-    return []
->>>>>>> 1aa134d59 (fix(ci): eliminate shared PR gate failures)
 
 
 def _mapped_targets(path: str, root: Path) -> list[str]:
@@ -605,12 +559,7 @@ def _mapped_targets(path: str, root: Path) -> list[str]:
     for prefix, values in AFFECTED_TESTS_BY_PREFIX.items():
         if path.startswith(prefix):
             targets.extend(values)
-<<<<<<< HEAD
     targets.extend(_generated_artifact_targets(path, root))
-=======
-    if not targets:
-        targets.extend(_generated_artifact_targets(path, root))
->>>>>>> 1aa134d59 (fix(ci): eliminate shared PR gate failures)
     return targets
 
 
