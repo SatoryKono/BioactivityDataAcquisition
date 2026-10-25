@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-25T16:05:26.899997+00:00",
+  "generated_at": "2026-10-25T17:18:05.591838+00:00",
   "summary": {
     "total_scripts": 696,
     "status_counts": {
@@ -10392,7 +10392,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 600,
+          "line": 616,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         }
@@ -12767,7 +12767,7 @@
       "references": [
         {
           "path": "pyproject.toml",
-          "line": 350,
+          "line": 351,
           "source_group": "build",
           "text": "# (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py); memory"
         },
@@ -15846,13 +15846,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/run_observability_closure_campaign.py",
-          "line": 1816,
+          "line": 1812,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import observability_closure_campaign_cli as _campaign_cli"
         },
         {
           "path": "scripts/engineering/qa/run_observability_closure_campaign.py",
-          "line": 1817,
+          "line": 1813,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_closure_campaign_cli import ("
         }
@@ -15871,7 +15871,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/run_observability_closure_campaign.py",
-          "line": 1660,
+          "line": 1656,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_closure_campaign_validation import ("
         }
@@ -20432,7 +20432,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 205,
+          "line": 206,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23432,7 +23432,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 237,
+          "line": 238,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },

@@ -197,6 +197,7 @@ constraint-dependencies = ["virtualenv>=21.14.7"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+exclude = ["scripts", "scripts.*", "bioetl.infrastructure.quality", "bioetl.infrastructure.quality.*"]
 
 # ============ PYTEST ============
 [tool.pytest.ini_options]
