@@ -70,9 +70,6 @@ TEST_GOVERNANCE_ARTIFACT_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
-    "configs/quality/scripts_lifecycle_registry.json": (
-        "tests/architecture/test_scripts_lifecycle_registry.py",
-    ),
     "configs/quality/technical_debt_audit_registry.yaml": (
         "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
     ),
