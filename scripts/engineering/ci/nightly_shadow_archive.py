@@ -509,6 +509,15 @@ def _collect_archive_snapshots(
         index_by_key[key] = row
     snapshots: list[tuple[Mapping[str, Any], Mapping[str, Any], dict[str, Any]]] = []
     for run in runs:
+        key = (
+            _positive_int(run.get("id"), RUN_ID_LABEL),
+            _positive_int(run.get("run_attempt"), RUN_ATTEMPT_LABEL),
+        )
+        # The existing archive was verified before collection. Keep its original
+        # immutable snapshot: nested API metadata (such as repository.description)
+        # can change even when this completed attempt has not changed.
+        if key in index_by_key:
+            continue
         raw, outcomes, manifest = build_attempt_archive(client, repository, run)
         _bind_hashes(raw, outcomes, manifest)
         row = _index_row(manifest)

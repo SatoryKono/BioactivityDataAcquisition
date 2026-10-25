@@ -258,6 +258,7 @@ def test_archive_runs_appends_new_attempts_without_dropping_old_index_rows(
     second = _raw(run_id=12)
     second["created_at"] = "2026-10-10T03:00:00Z"
     selected: list[dict[str, object]] = [first]
+    built_run_ids: list[object] = []
 
     def collect_selected(*args: object, **kwargs: object) -> list[dict[str, object]]:
         assert kwargs["include_incomplete"] is False
@@ -270,6 +271,7 @@ def test_archive_runs_appends_new_attempts_without_dropping_old_index_rows(
     )
 
     def build_attempt(client: object, repository: str, run: dict[str, object]):
+        built_run_ids.append(run["id"])
         raw = dict(run)
         outcomes = _outcomes()
         return raw, outcomes, _manifest(raw, outcomes)
@@ -285,10 +287,16 @@ def test_archive_runs_appends_new_attempts_without_dropping_old_index_rows(
         "output": tmp_path,
     }
     archive_runs(**arguments)
+    original_snapshot = (tmp_path / "run-11" / "attempt-1" / "raw.json").read_bytes()
+    first["repository"] = {"description": "Updated repository description"}
     selected[:] = [second, first]
     report = archive_runs(**arguments)
 
     assert report["snapshot_count"] == 2
+    assert built_run_ids == [11, 12]
+    assert (
+        tmp_path / "run-11" / "attempt-1" / "raw.json"
+    ).read_bytes() == original_snapshot
     verified = verify_archive(tmp_path)
     assert verified["snapshot_count"] == 2
     assert [(row["run_id"], row["run_attempt"]) for row in verified["snapshots"]] == [
