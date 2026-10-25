@@ -236,6 +236,22 @@ def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
     )
 
 
+@pytest.mark.parametrize("workflow", ["codeql.yml", "tests.yml", "release.yml"])
+def test_shadow_compare_routes_reviewed_workflow_contracts(workflow: str) -> None:
+    """Reviewed workflows select the validator that scans their action refs."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [f".github/workflows/{workflow}"], repo_root=repo_root
+    )
+    assert report["selected"] == [
+        "tests/architecture/test_github_actions_runtime_policy.py"
+    ]
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            [".github/workflows/unreviewed-new-workflow.yml"], repo_root=repo_root
+        )
+
+
 def test_shadow_compare_routes_grafana_npm_projects() -> None:
     """Grafana package updates select their project governance tests."""
     repo_root = Path(__file__).resolve().parents[5]
