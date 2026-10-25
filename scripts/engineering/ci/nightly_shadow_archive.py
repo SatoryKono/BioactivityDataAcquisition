@@ -41,6 +41,7 @@ from scripts.engineering.repo.github_settings_review import (
 )
 
 SCHEMA_VERSION = 1
+ARCHIVE_INDEX_NAME = "index.json"
 PARTITION_NAME = "generated-artifact-daily-partition.json"
 WORKFLOW_PATH = ".github/workflows/nightly.yml"
 ACTIONS_RETENTION_CAP_DAYS = 90
@@ -352,7 +353,7 @@ def verify_archive(root: Path) -> dict[str, Any]:
 
     if not root.is_dir():
         raise ArchiveError(f"archive unavailable: {root}")
-    index = _load_index(root / "index.json")
+    index = _load_index(root / ARCHIVE_INDEX_NAME)
     manifests = sorted(root.glob("run-*/attempt-*/manifest.json"))
     checked = [_verify_one(path) for path in manifests]
     _require_index_coverage(index, checked)
@@ -476,7 +477,7 @@ def archive_runs(
         include_incomplete=False,
         workflow_runs_endpoint=_workflow_endpoint,
     )
-    index_path = ensure_path_within_root(output / "index.json", output)
+    index_path = ensure_path_within_root(output / ARCHIVE_INDEX_NAME, output)
     index, previous_index_bytes = _existing_archive_index(output, index_path)
     index, snapshots = _collect_archive_snapshots(client, repository, runs, index)
     _persist_archive_snapshots(
@@ -1049,7 +1050,7 @@ def _command_record_window(argv: Sequence[str]) -> int:
     parser.add_argument("--cadence-changed-before-acceptance", action="store_true")
     args = parser.parse_args(argv)
     index_path = resolve_cli_path(args.index, root=REPO_ROOT)
-    if index_path.name != "index.json":
+    if index_path.name != ARCHIVE_INDEX_NAME:
         raise ArchiveError(f"archive index must be named index.json: {index_path}")
     runs = verify_archive(index_path.parent)["snapshots"]
     historical = assess_shadow_window(

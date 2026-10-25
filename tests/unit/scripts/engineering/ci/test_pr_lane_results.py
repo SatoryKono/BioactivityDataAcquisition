@@ -278,6 +278,20 @@ def test_n1_evidence_paths_have_shadow_compare_routes() -> None:
     assert report["selected_count"] >= 1
 
 
+def test_shadow_compare_routes_lineage_crash_evidence() -> None:
+    """Lineage crash reports select the test that produced the evidence."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        ["reports/audit-runs/12106-s6/evidence/evidence.md"],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/integration/infrastructure/durability/test_crash_lineage.py"
+    ]
+
+
 def test_shadow_compare_routes_quality_module_move() -> None:
     """Both sides of the quality-module move keep governing test coverage."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -689,6 +703,7 @@ def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
             ".gitignore",
             "configs/quality/generated_artifact_routing.yaml",
             "configs/quality/generated_artifact_tests.json",
+            "configs/quality/test_skip_inventory.yaml",
             "Dockerfile.bioetl",
             "docs/reports/generated/documentation-cleanup-inventory.json",
             "docs/reports/generated/documentation-cleanup-inventory.md",
@@ -712,6 +727,8 @@ def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
         "tests/architecture/test_docker_runtime_contracts.py",
         "tests/architecture/test_generated_artifact_routing.py",
         "tests/architecture/test_gitignore_secret_and_agents_policy.py",
+        "tests/architecture/test_tech_debt_issues_5559_5563_closeout.py",
+        "tests/architecture/test_test_skip_inventory.py",
         "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
         "tests/architecture/test_test_governance_audit.py",
         "tests/unit/repo_backed/scripts/qa/test_validate_benchmark_evidence_repo.py",

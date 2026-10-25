@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3970 |
-| Tracked doc-like files | 3970 |
+| Doc-like files | 3972 |
+| Tracked doc-like files | 3972 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3970 |
+| tracked | 3972 |
 
 ## Lifecycle Counts
 
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 213 |
+| working_report | 215 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -55,7 +55,7 @@
 | Archived | 1553 |
 | Canonical | 76 |
 | Generated | 1064 |
-| Working | 526 |
+| Working | 528 |
 
 ## Surface Families
 
@@ -65,13 +65,13 @@
 | archive | 1553 |
 | canonical | 76 |
 | generated | 1064 |
-| working | 526 |
+| working | 528 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 244 |
+| archive-after-migration | 246 |
 | generate-automatically | 1064 |
 | keep | 2662 |
 
@@ -126,6 +126,8 @@
 | `reports/audit-runs/12106-s4-crash-silver/evidence.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12106-s5/evidence/evidence.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12106-s5/matrix.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12106-s6/durability-crash-restart-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12106-s6/evidence/evidence.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/handoff.md` | Working | 0 | archive-after-migration |
@@ -157,8 +159,6 @@
 | `reports/audit-runs/12107-r07/tracking-responsibility-decision.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20261006-2f16e40/comprehensive/anti-remediation.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20261022-p03/audit-manifest.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20261022-p03/findings.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20261022-p03/handoff.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
