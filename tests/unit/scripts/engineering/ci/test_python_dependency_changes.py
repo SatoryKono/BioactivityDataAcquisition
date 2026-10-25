@@ -65,6 +65,9 @@ def test_pytest_config_change_retains_required_lane(
     dependency_changed: bool,
 ) -> None:
     (tmp_path / "tests").mkdir()
+    _consumer(
+        tmp_path, "tests/architecture/qm_07/test_distribution_isolation.py", "pytest"
+    )
 
     def revision(root: Path, sha: str, name: str) -> dict:
         if name == "uv.lock":
@@ -138,6 +141,9 @@ def test_uv_constraint_dependencies_select_the_pytest_family_lane(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     (tmp_path / "tests").mkdir()
+    _consumer(
+        tmp_path, "tests/architecture/qm_07/test_distribution_isolation.py", "pytest"
+    )
     (tmp_path / "uv.lock").write_text(
         "\n".join(
             (
@@ -338,12 +344,18 @@ def test_dependency_consumers_reuse_source_routes(
     _consumer(tmp_path, f"src/bioetl/{owner}/consumer.py", imported)
     (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
     (tmp_path / f"tests/unit/{owner}").mkdir(parents=True)
+    _consumer(
+        tmp_path, "tests/architecture/qm_07/test_distribution_isolation.py", "pytest"
+    )
     targets = lane.affected_pytest_targets(
         ["uv.lock", "pyproject.toml"],
         repo_root=tmp_path,
         changed_python_dependencies={package},
     )
-    assert targets == [f"tests/unit/{owner}"]
+    assert targets == [
+        f"tests/unit/{owner}",
+        "tests/architecture/qm_07/test_distribution_isolation.py",
+    ]
 
 
 def test_transitive_dependency_selects_direct_consumer(tmp_path: Path) -> None:
