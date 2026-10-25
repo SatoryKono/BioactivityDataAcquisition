@@ -16,7 +16,6 @@ __all__ = [
 ]
 
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
-_WHITESPACE_PATTERN = re.compile(r"\s+")
 _CONTROL_CHARS_PATTERN = re.compile(r"[\x00-\x08\x0e-\x1f\x7f-\x9f]")
 
 
@@ -81,23 +80,3 @@ def _normalize_text_field(text: str | None) -> str | None:
 
     text = " ".join(text.split())
     return text or None
-
-
-def _strip_html_and_decode_entities(text: str) -> str:
-    """Strip HTML tags and decode HTML entities."""
-    return unescape(_HTML_TAG_PATTERN.sub("", text))
-
-
-def _remove_control_characters(text: str) -> str:
-    """Remove non-whitespace control characters."""
-    return _CONTROL_CHARS_PATTERN.sub("", text)
-
-
-def _normalize_unicode_nfc(text: str) -> str:
-    """Normalize unicode using NFC canonical composition."""
-    return unicodedata.normalize("NFC", text)
-
-
-def _collapse_whitespace(text: str) -> str:
-    """Collapse any whitespace sequence into a single space."""
-    return _WHITESPACE_PATTERN.sub(" ", text)
