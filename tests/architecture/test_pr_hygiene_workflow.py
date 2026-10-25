@@ -45,7 +45,7 @@ def test_pr_hygiene_workflow_is_dispatch_only_and_keep_disabled() -> None:
 def test_pr_hygiene_workflow_closes_only_stale_report_noise_drafts() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
 
-    assert "actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b" in workflow
+    assert "actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd" in workflow
     assert "pull-requests: write" in workflow
     assert "issues: write" in workflow
     assert "pr.draft" in workflow

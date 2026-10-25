@@ -66,7 +66,7 @@ def test_chembl_baseline_smoke_workflow_uses_pinned_artifacts_and_summary() -> N
 
     assert "uses: ./.github/actions/setup-python-uv" in workflow
     assert (
-        "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in workflow
+        "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9" in workflow
     )
     assert "GITHUB_STEP_SUMMARY" in workflow
     assert "chembl-baseline-cli-runner-${{ matrix.python-version }}" in workflow
