@@ -80,7 +80,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/qa/test_topology_source_binding.py",
     ),
     "docs/04-reference/environment-variables.md": (
-        "tests/architecture/test_docker_runtime_contracts.py",
+        DOCKER_RUNTIME_CONTRACT_TEST,
         "tests/architecture/test_documentation_cleanup_inventory.py",
     ),
     "docs/reports/evidence/project-package-topology/SUMMARY.md": (
