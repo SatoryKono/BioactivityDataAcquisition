@@ -85,6 +85,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             ".github/workflows/type-checking-cold.yml",
             "scripts/engineering/dev/run_mypy.sh",
             "scripts/engineering/dev/run_mypy.ps1",
+            "scripts/engineering/dev/zed_mypy.py",
+            "configs/quality/github_required_checks.yaml",
         ),
         ("tests/architecture/test_mypy_target_contract.py",),
     ),
@@ -103,6 +105,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     ".pre-commit-config.yaml": (
         "tests/architecture/test_scripts_inventory_discovery.py",
+        "tests/architecture/test_mypy_target_contract.py",
+    ),
+    "scripts/engineering/ci/presubmit_gate.py": (
+        "tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py",
+        "tests/architecture/test_mypy_target_contract.py",
     ),
     "configs/quality/debt_scorecard.yaml": (
         "tests/architecture/test_quality_debt_scorecard.py",

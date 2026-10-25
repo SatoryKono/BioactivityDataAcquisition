@@ -1,5 +1,6 @@
 """Strict mypy scope remains aligned after moving engineering quality modules."""
 
+import ast
 from pathlib import Path
 
 import pytest
@@ -47,3 +48,55 @@ def test_mypy_wrappers_default_to_all_strict_targets(name: str) -> None:
     assert len(defaults) == 1
     assert "--strict" in defaults[0]
     assert all(target in defaults[0] for target in TARGETS)
+
+
+def test_pre_push_checks_all_strict_targets() -> None:
+    config = yaml.safe_load(
+        (ROOT / ".pre-commit-config.yaml").read_text(encoding="utf-8")
+    )
+    hook = next(
+        hook
+        for repo in config["repos"]
+        for hook in repo.get("hooks", [])
+        if hook["id"] == "mypy-strict"
+    )
+    assert "--strict" in hook["entry"].split()
+    assert all(target in hook["entry"].split() for target in TARGETS)
+
+
+@pytest.mark.parametrize(
+    ("path", "variable"),
+    [
+        ("scripts/engineering/ci/presubmit_gate.py", "_MYPY_TREES"),
+        ("scripts/engineering/dev/zed_mypy.py", "cmd"),
+    ],
+)
+def test_python_entrypoints_check_all_targets(path: str, variable: str) -> None:
+    tree = ast.parse((ROOT / path).read_text(encoding="utf-8"))
+    assignment = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == variable
+            for target in node.targets
+        )
+    )
+    values = [
+        node.value
+        for node in ast.walk(assignment.value)
+        if isinstance(node, ast.Constant)
+    ]
+    assert all(target in values for target in TARGETS)
+
+
+def test_quality_only_changes_require_type_checking() -> None:
+    from scripts.engineering.ci.pr_gate import REQUIRED, classify_changes, load_catalog
+
+    catalog = load_catalog(ROOT / "configs/quality/github_required_checks.yaml")
+    matrix = classify_changes(
+        catalog,
+        ["scripts/engineering/quality/debt_scorecard.py"],
+        head_sha="a" * 40,
+    )
+    assert matrix["decisions"]["type-checking"]["decision"] == REQUIRED
