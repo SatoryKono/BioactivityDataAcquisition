@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
+from bioetl.domain.normalization.text import normalize_string
 
 __all__ = [
     "UNHANDLED_FALLBACK_NORMALIZATION",
@@ -133,6 +134,4 @@ def canonicalize_json_like_string(value: str) -> str:
 
 def normalize_plain_text(value: str) -> str | None:
     """Normalize plain text outside named field buckets."""
-    from bioetl.domain.normalization.text import normalize_string
-
     return normalize_string(value)
