@@ -22,9 +22,12 @@ Found a `core->scripts` dependency in `src/bioetl/interfaces/cli/commands/domain
 This is an explicit **named blocker** for QM-07 installed-runtime isolation.
 
 ### Root/Path seams in 5 modules
-**Command:** `uv run python <seams_test.py>`
-**Exit Code:** 0
-**Output:**
+**Status:** NOT_VERIFIABLE.
+**Reported command:** `uv run python <seams_test.py>` (placeholder, not executable evidence).
+**Exit Code:** NOT_VERIFIABLE; the originally reported 0 cannot be tied to a retained script.
+The script and its exact invocation were not retained. The following historical
+output is preserved as an unverified claim, not proof that all five seams passed.
+**Reported output (unverified):**
 ```
 ADR root: /app
 ADR out: /app/reports/quality/architecture_debt_execution_plan_2026-10-25-18-39.json
@@ -87,5 +90,5 @@ ModuleNotFoundError: No module named 'scripts'
 ```
 
 ## Итоги
-- Количественные итоги: 30 cold imports проверено (MEASURED), 5 seams проверено (MEASURED).
+- Количественные итоги: 30 cold imports заявлены как проверенные (MEASURED); проверка 5 seams — NOT_VERIFIABLE, поскольку точная команда и скрипт отсутствуют.
 - Выявлен именованный блокер: core->scripts dependency (`src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py`).
