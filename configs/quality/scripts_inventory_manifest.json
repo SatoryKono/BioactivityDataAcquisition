@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-25T19:13:55.049509+00:00",
+  "generated_at": "2026-10-25T19:25:46.055669+00:00",
   "summary": {
     "total_scripts": 696,
     "status_counts": {
@@ -10392,7 +10392,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 660,
+          "line": 663,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         }
@@ -10506,7 +10506,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
@@ -12787,7 +12787,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "pyproject.toml",
@@ -12824,6 +12824,12 @@
           "line": 277,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+          "line": 285,
+          "source_group": "tests",
+          "text": "if path == \"scripts/engineering/dev/zed_mypy.py\":"
         }
       ]
     },
@@ -20091,13 +20097,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 324,
+          "line": 327,
           "source_group": "tests",
           "text": "\"src/bioetl/infrastructure/quality/scoring.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 325,
+          "line": 328,
           "source_group": "tests",
           "text": "\"scripts/engineering/quality/scoring.py\","
         },
