@@ -267,6 +267,23 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
     }
 
 
+def test_shadow_compare_routes_quality_and_runtime_documentation() -> None:
+    """Debt and runtime documentation changes retain governing tests."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        [
+            "configs/quality/debt_scorecard.yaml",
+            "docs/02-architecture/current-state-inventory.md",
+            "docs/04-reference/environment-variables.md",
+        ],
+        repo_root=repo_root,
+    )
+
+    assert "tests/architecture/test_quality_debt_scorecard.py" in report["selected"]
+    assert "tests/architecture/test_docker_runtime_contracts.py" in report["selected"]
+
+
 def test_shadow_compare_routes_lineage_crash_evidence() -> None:
     """Lineage crash reports select the test that produced the evidence."""
     repo_root = Path(__file__).resolve().parents[5]
