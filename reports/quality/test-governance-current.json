@@ -1001,14 +1001,7 @@
     }
   },
   "assertless_total_candidates": 85,
-  "budget_violations": [
-    {
-      "actual": 2,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1182,11 +1175,8 @@
     ]
   },
   "intentional_no_exception_contract": 85,
-  "markerless_examples": [
-    "tests/architecture/qm_07/test_gate_evaluators.py:10",
-    "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py:13"
-  ],
-  "markerless_test_functions": 2,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2035,11 +2025,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/architecture/qm_07/test_gate_evaluators.py:10",
-      "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py:13"
-    ],
-    "markerless_test_functions": 2,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2057,8 +2044,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3174,
-      "test_python_file_count": 3421,
+      "test_glob_file_count": 3176,
+      "test_python_file_count": 3424,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2099,13 +2086,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3174,
-    "total_test_functions": 31327,
+    "total_test_files": 3176,
+    "total_test_functions": 31344,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "b5c1862024aab335c793ca06a83ac35a906d84cb854d525f92c342395f142021",
+  "source_tree_sha256": "ef34b36c74e407c22835134b96c34b09ffba79256f53be57dabaceef27914887",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2114,11 +2101,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 85,
-    "markerless_examples": [
-      "tests/architecture/qm_07/test_gate_evaluators.py:10",
-      "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py:13"
-    ],
-    "markerless_test_functions": 2,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -2128,8 +2112,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3174,
-    "test_python_file_count": 3421,
+    "test_glob_file_count": 3176,
+    "test_python_file_count": 3424,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2170,8 +2154,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3174,
-  "total_test_functions": 31327,
+  "total_test_files": 3176,
+  "total_test_functions": 31344,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

@@ -279,7 +279,9 @@ class TestExemptionsDebtReductionAndFormatter:
             },
         )
         errors = validate_exemption_key_normalization()
-        assert any("inside src/ tree" in item for item in errors)
+        assert any(
+            "inside src/bioetl or scripts/engineering tree" in item for item in errors
+        )
 
         monkeypatch.setattr(
             policy, "REQUIRED_EXEMPTION_REGISTRIES", ("file_size_limits", "custom")

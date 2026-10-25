@@ -130,7 +130,7 @@ class TestIsModulePathKey:
 
     def test_canonical_key(self) -> None:
         """Canonical src/bioetl/.../module.py key should be valid."""
-        assert is_module_path_key("src/bioetl/infrastructure/quality/scoring.py")
+        assert is_module_path_key("scripts/engineering/quality/scoring.py")
 
     def test_non_bioetl_prefix(self) -> None:
         """Path not starting with src/bioetl/ should be invalid."""
@@ -158,16 +158,23 @@ class TestBuildModulePathKey:
 
     def test_already_canonical_key(self) -> None:
         """Canonical key should be returned as-is."""
-        canonical = "src/bioetl/infrastructure/quality/scoring.py"
+        canonical = "scripts/engineering/quality/scoring.py"
         result = build_module_path_key(canonical)
         assert result == canonical
 
     def test_absolute_path_under_src(self) -> None:
         """Absolute path under project's src/ should produce canonical key."""
         root = project_root()
-        abs_path = root / "src" / "bioetl" / "infrastructure" / "quality" / "scoring.py"
+        abs_path = root / "src" / "bioetl" / "domain" / "types.py"
         result = build_module_path_key(abs_path)
-        assert result == "src/bioetl/infrastructure/quality/scoring.py"
+        assert result == "src/bioetl/domain/types.py"
+
+    def test_absolute_path_under_engineering_scripts(self) -> None:
+        """Engineering script path should produce a repository-relative key."""
+        root = project_root()
+        abs_path = root / "scripts" / "engineering" / "quality" / "scoring.py"
+        result = build_module_path_key(abs_path)
+        assert result == "scripts/engineering/quality/scoring.py"
 
     def test_bioetl_prefix_path(self) -> None:
         """Path starting with 'bioetl/' should get 'src/' prefix."""

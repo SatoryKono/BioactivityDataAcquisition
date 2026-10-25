@@ -42,7 +42,6 @@ ______________________________________________________________________
 | `infrastructure.errors`        | Error mapping utilities                     | `DomainInfraExceptionMapper`                                  |
 | `infrastructure.schemas`       | Pydantic config schemas for YAML validation | `BaseDQConfig`, `BaseApiConfig`                               |
 | `infrastructure.system`        | System utilities                            | `MemoryMonitor`                                               |
-| `infrastructure.quality`       | Technical debt tracking                     | no active exported symbols        |
 | `infrastructure.time`          | Time utilities                              | `SystemClock`                                                 |
 
 ______________________________________________________________________

@@ -9,7 +9,7 @@ from scripts.engineering.quality.exemptions_registry_access import (
     load_exemptions_registry,
 )
 from scripts.engineering.quality.exemptions_registry_paths import (
-    _SRC_ROOT_PREFIX,
+    _CANONICAL_MODULE_PREFIXES,
 )
 from scripts.engineering.quality.exemptions_registry_paths import (
     is_module_path_key as _is_module_path_key,
@@ -66,7 +66,10 @@ def validate_exemption_key_normalization(
         return ["registries.file_size_limits: expected mapping"]
 
     errors: list[str] = []
-    src_root = _project_root() / "src"
+    allowed_roots = (
+        _project_root() / "src" / "bioetl",
+        _project_root() / "scripts" / "engineering",
+    )
 
     for key in sorted(file_size):
         if not isinstance(key, str) or not key.strip():
@@ -77,7 +80,7 @@ def validate_exemption_key_normalization(
         if not _is_module_path_key(normalized):
             errors.append(
                 f"file_size_limits.{key}: expected canonical path key "
-                f"'{_SRC_ROOT_PREFIX}.../*.py'"
+                f"under {_CANONICAL_MODULE_PREFIXES}"
             )
             continue
 
@@ -85,9 +88,10 @@ def validate_exemption_key_normalization(
         if not module_path.exists():
             errors.append(f"file_size_limits.{key}: target file does not exist")
             continue
-        if not module_path.is_relative_to(src_root):
+        if not any(module_path.is_relative_to(root) for root in allowed_roots):
             errors.append(
-                f"file_size_limits.{key}: target path must be inside src/ tree"
+                f"file_size_limits.{key}: target path must be inside "
+                "src/bioetl or scripts/engineering tree"
             )
 
     return errors
