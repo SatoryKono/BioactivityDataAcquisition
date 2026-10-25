@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-25T17:18:05.591838+00:00",
+  "generated_at": "2026-10-25T18:05:18.276805+00:00",
   "summary": {
     "total_scripts": 696,
     "status_counts": {
@@ -10124,7 +10124,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 652,
+          "line": 658,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10350,7 +10350,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 824,
+          "line": 830,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10840,9 +10840,9 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 410,
+          "line": 416,
           "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target \"${targets[@]}\" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-marker "
+          "text": "uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target \"${targets[@]}\" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-timeout"
         },
         {
           "path": ".github/workflows/tests.yml",
@@ -20402,7 +20402,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 647,
+          "line": 653,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
