@@ -505,6 +505,29 @@ def test_configuration_only_change_is_not_a_dependency_success(
         dependencies.changed_dependencies(tmp_path, "base", "head")
 
 
+def test_setuptools_package_exclusion_routes_to_full_suite(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Reviewed package-discovery changes keep the fail-closed full-suite route."""
+    before = {"tool": {"setuptools": {"packages": {"find": {"where": ["src"]}}}}}
+    after = {
+        "tool": {
+            "setuptools": {
+                "packages": {
+                    "find": {"where": ["src"], "exclude": ["scripts", "scripts.*"]}
+                }
+            }
+        }
+    }
+    monkeypatch.setattr(
+        dependencies,
+        "_read_revision",
+        lambda _root, revision, _name: before if revision == "base" else after,
+    )
+
+    assert dependencies.pytest_configuration_changed(tmp_path, "base", "head")
+
+
 def test_test_only_dependency_selects_its_consumers(tmp_path: Path) -> None:
     _consumer(tmp_path, "tests/unit/test_snapshot.py", "syrupy")
     (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
