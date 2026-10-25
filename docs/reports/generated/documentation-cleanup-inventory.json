@@ -97338,6 +97338,62 @@
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/audit-runs/12106-s6/durability-crash-restart-matrix.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/audit-runs/12106-s6/evidence/evidence.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
       "extension": ".json",
       "freshness": "review-required",
       "generated_route": null,
@@ -110769,10 +110825,10 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 26,
       "reports_workspace_entrypoint": 1,
-      "working_report": 213
+      "working_report": 215
     },
     "by_recommended_action": {
-      "archive-after-migration": 244,
+      "archive-after-migration": 246,
       "generate-automatically": 1064,
       "keep": 2618
     },
@@ -110798,7 +110854,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 517,
+      "reports": 519,
       "security": 2
     },
     "by_status": {
@@ -110806,17 +110862,17 @@
       "Archived": 1553,
       "Canonical": 76,
       "Generated": 1064,
-      "Working": 482
+      "Working": 484
     },
     "by_surface_family": {
       "active": 751,
       "archive": 1553,
       "canonical": 76,
       "generated": 1064,
-      "working": 482
+      "working": 484
     },
     "by_tracking_state": {
-      "tracked": 3926
+      "tracked": 3928
     },
     "docs_reports_local_count": 59,
     "duplicate_group_count": 80,
@@ -110829,8 +110885,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3926,
+    "total_doc_like": 3928,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3926
+    "total_doc_like_tracked": 3928
   }
 }
