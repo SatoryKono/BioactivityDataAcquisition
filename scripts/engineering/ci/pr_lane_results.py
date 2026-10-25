@@ -501,8 +501,7 @@ def _mapped_targets(path: str, root: Path) -> list[str]:
     for prefix, values in AFFECTED_TESTS_BY_PREFIX.items():
         if path.startswith(prefix):
             targets.extend(values)
-    if not targets:
-        targets.extend(_generated_artifact_targets(path, root))
+    targets.extend(_generated_artifact_targets(path, root))
     return targets
 
 
