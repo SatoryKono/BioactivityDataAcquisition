@@ -283,6 +283,18 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
     }
 
 
+@pytest.mark.parametrize(
+    "name", ["SUMMARY.md", "chembl_data.json", "uniprot_headers.txt"]
+)
+def test_shadow_compare_routes_provider_parity_evidence(name: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([f"reports/evidence/12461/{name}"], repo_root=root)
+    assert report["selected"] == [
+        "tests/architecture/test_provider_contract_interoperability_governance.py",
+        "tests/contract/test_provider_contract_snapshot_registry.py",
+    ]
+
+
 def test_shadow_compare_routes_sec003_audit_to_metadata_parser() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
