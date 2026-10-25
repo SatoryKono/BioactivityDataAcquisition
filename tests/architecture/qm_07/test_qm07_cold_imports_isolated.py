@@ -9,7 +9,11 @@ from pathlib import Path
 import subprocess
 import sys
 
+import pytest
 
+
+@pytest.mark.architecture
+@pytest.mark.unit
 def test_cold_imports(tmp_path: Path) -> None:
     modules = [
         "bioetl.infrastructure.quality",

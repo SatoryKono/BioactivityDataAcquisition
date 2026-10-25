@@ -70,6 +70,20 @@ TEST_GOVERNANCE_ARTIFACT_TESTS: tuple[str, ...] = (
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "CHANGELOG.md": ("tests/architecture/test_docs_version_sync.py",),
     ".coderabbit.yaml": ("tests/architecture/test_coderabbit_config.py",),
+    "configs/quality/debt_scorecard.yaml": (
+        "tests/architecture/test_quality_debt_scorecard.py",
+    ),
+    "docs/02-architecture/current-state-inventory.md": (
+        "tests/architecture/test_arch_s4_s9_gates.py",
+        "tests/unit/scripts/qa/test_topology_source_binding.py",
+    ),
+    "docs/04-reference/environment-variables.md": (
+        "tests/architecture/test_docker_runtime_contracts.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+    ),
+    "docs/reports/evidence/project-package-topology/SUMMARY.md": (
+        "tests/unit/scripts/qa/test_topology_source_binding.py",
+    ),
     "Makefile": (
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
     ),

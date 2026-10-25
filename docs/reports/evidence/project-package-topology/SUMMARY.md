@@ -438,7 +438,7 @@ it is not a new coverage measurement or a complete topology re-audit.
 
 ## Current source inventory binding
 
-- `source_tree_sha256=503cd8b42b33cf2398c1abc7354c2978d56bc0149781377febbc0fccfde67080`
+- `source_tree_sha256=cd79aef881191b7c37d6d4967ccb02bb98d1073ca04adacd8e4580ecdb6a34d8`
 - `source_module_count=2596`
 - Source modules: `2596`
 - `coverage_inventory_module_count=2596`
