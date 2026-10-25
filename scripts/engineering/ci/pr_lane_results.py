@@ -68,6 +68,10 @@ TEST_GOVERNANCE_ARTIFACT_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_governance_audit.py",
     *FLAKY_BURNDOWN_REVIEW_TESTS,
 )
+TEST_SKIP_INVENTORY_TESTS: tuple[str, ...] = (
+    "tests/architecture/test_test_skip_inventory.py",
+    "tests/architecture/test_tech_debt_issues_5559_5563_closeout.py",
+)
 QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_architecture_quality_scorecard.py",
     "tests/architecture/test_quality_debt_scorecard.py",
@@ -162,6 +166,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/integration_vcr_policy.yaml": (
         "tests/architecture/test_integration_vcr_policy.py",
     ),
+    "configs/quality/test_skip_inventory.yaml": TEST_SKIP_INVENTORY_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
     "configs/quality/scripts_inventory_manifest.json": (
         "tests/architecture/test_scripts_inventory_manifest.py",
@@ -220,6 +225,9 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "grafana/plugins/bioetl-selectorshell-panel/": (
         "tests/architecture/test_braces_backport.py",
         RESIDUAL_OSV_TEST,
+    ),
+    "reports/audit-runs/12106-s6/": (
+        "tests/integration/infrastructure/durability/test_crash_lineage.py",
     ),
     "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
     "reports/performance/": BENCHMARK_EVIDENCE_TESTS,
