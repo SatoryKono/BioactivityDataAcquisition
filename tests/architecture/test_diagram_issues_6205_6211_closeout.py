@@ -18,7 +18,7 @@ from typing import Any
 
 import pytest
 
-pytestmark = pytest.mark.architecture
+pytestmark = [pytest.mark.architecture, pytest.mark.slow]
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "diagram-issues-6205-6211-closeout.json"

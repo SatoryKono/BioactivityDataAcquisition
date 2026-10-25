@@ -18,7 +18,7 @@ import re
 from pathlib import Path
 
 
-pytestmark = pytest.mark.architecture
+pytestmark = [pytest.mark.architecture, pytest.mark.slow]
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CLASS_SUMMARY = (

@@ -20,7 +20,7 @@ from types import ModuleType
 import pytest
 
 
-pytestmark = pytest.mark.architecture
+pytestmark = [pytest.mark.architecture, pytest.mark.slow]
 
 
 def _load_module() -> ModuleType:

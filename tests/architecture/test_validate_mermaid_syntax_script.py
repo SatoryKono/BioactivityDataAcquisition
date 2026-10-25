@@ -17,7 +17,7 @@ import pytest
 from pathlib import Path
 
 
-pytestmark = pytest.mark.architecture
+pytestmark = [pytest.mark.architecture, pytest.mark.slow]
 
 
 def _script_text() -> str:

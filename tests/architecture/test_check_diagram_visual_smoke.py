@@ -20,7 +20,7 @@ from pathlib import Path
 from types import ModuleType
 
 
-pytestmark = pytest.mark.architecture
+pytestmark = [pytest.mark.architecture, pytest.mark.slow]
 
 
 def _load_module() -> ModuleType:
