@@ -163,6 +163,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/engineering/ci/pr_lane_results.py": (
         "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
     ),
+    PYPROJECT_TOML: ("tests/architecture/qm_07/test_distribution_isolation.py",),
     "configs/quality/integration_vcr_policy.yaml": (
         "tests/architecture/test_integration_vcr_policy.py",
     ),
@@ -211,6 +212,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "scripts/ai/gemini/npm-tooling/": (
+        "tests/architecture/test_gemini_cli_bootstrap.py",
+    ),
     "scripts/engineering/quality/": QUALITY_GOVERNANCE_TESTS,
     "src/bioetl/infrastructure/quality/": QUALITY_GOVERNANCE_TESTS,
     "grafana/tooling/router-v7-bridge/": (
@@ -881,7 +885,7 @@ def _dependency_selection(
         args.repo_root,
         args.base_sha,
         args.head_sha,
-        allow_configuration=all_tests,
+        allow_configuration=True,
     )
     all_tests = all_tests or removed_dependencies(
         args.repo_root, args.base_sha, args.head_sha

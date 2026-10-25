@@ -236,6 +236,16 @@ def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
     )
 
 
+@pytest.mark.parametrize("manifest", ["package.json", "package-lock.json"])
+def test_shadow_compare_routes_gemini_toolchain(manifest: str) -> None:
+    """Each toolchain manifest independently selects the integrity contract."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [f"scripts/ai/gemini/npm-tooling/{manifest}"], repo_root=repo_root
+    )
+    assert report["selected"] == ["tests/architecture/test_gemini_cli_bootstrap.py"]
+
+
 def test_shadow_compare_routes_grafana_npm_projects() -> None:
     """Grafana package updates select their project governance tests."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -287,6 +297,22 @@ def test_shadow_compare_routes_quality_module_move() -> None:
         "tests/architecture/test_architecture_quality_scorecard.py"
         in report["selected"]
     )
+
+
+def test_shadow_compare_keeps_package_discovery_contract_narrow() -> None:
+    """A package-discovery PR selects its changed contract without all tests."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        ["pyproject.toml"],
+        repo_root=repo_root,
+        changed_python_dependencies=set(),
+    )
+
+    assert report["covers_full_suite"] is False
+    assert report["selected"] == [
+        "tests/architecture/qm_07/test_distribution_isolation.py"
+    ]
 
 
 def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
