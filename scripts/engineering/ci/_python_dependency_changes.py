@@ -21,6 +21,10 @@ from packaging.requirements import Requirement
 
 PYTHON_MANIFEST = "pyproject.toml"
 PYTHON_LOCK = "uv.lock"
+FULL_SUITE_CONFIGURATION_PREFIXES = ("tool.pytest.ini_options",)
+NARROW_CONFIGURATION_PREFIXES = ("tool.setuptools.packages.find.exclude",)
+# Stub-only wheels have no runtime import owner. Keep reviewed ownership explicit.
+STUB_RUNTIME_DISTRIBUTIONS = {"types-openpyxl": "openpyxl"}
 
 
 def _name(value: str) -> str:
@@ -119,12 +123,16 @@ def pytest_configuration_changed(root: Path, base: str, head: str) -> bool:
     before = _configuration(_read_revision(root, base, PYTHON_MANIFEST))
     after = _configuration(_read_revision(root, head, PYTHON_MANIFEST))
     paths = _changed_paths(before, after)
-    unknown = [path for path in paths if not path.startswith("tool.pytest.ini_options")]
+    classified_prefixes = (
+        *FULL_SUITE_CONFIGURATION_PREFIXES,
+        *NARROW_CONFIGURATION_PREFIXES,
+    )
+    unknown = [path for path in paths if not path.startswith(classified_prefixes)]
     if unknown:
         raise ValueError(
             "Unconfirmed Python manifest configuration route: " + ", ".join(unknown)
         )
-    return bool(paths)
+    return any(path.startswith(FULL_SUITE_CONFIGURATION_PREFIXES) for path in paths)
 
 
 def _configuration(document: dict[str, Any]) -> dict[str, Any]:
@@ -283,6 +291,10 @@ def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
     module_owners = packages_distributions()
     for dependency in sorted(changed):
         family = _lock_family(packages, dependency)
+        runtime = STUB_RUNTIME_DISTRIBUTIONS.get(dependency)
+        locked = {_name(package["name"]) for package in packages}
+        if runtime and {dependency, runtime} <= declared & locked:
+            family.update(_lock_family(packages, runtime))
         selected = _import_consumers(imports, module_owners, family)
         selected |= _declared_reference_consumers(references, declared, family)
         if selected:
