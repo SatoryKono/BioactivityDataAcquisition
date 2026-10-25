@@ -236,6 +236,22 @@ def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
     )
 
 
+@pytest.mark.parametrize("workflow", ["codeql.yml", "tests.yml", "release.yml"])
+def test_shadow_compare_routes_reviewed_workflow_contracts(workflow: str) -> None:
+    """Reviewed workflows select the validator that scans their action refs."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [f".github/workflows/{workflow}"], repo_root=repo_root
+    )
+    assert report["selected"] == [
+        "tests/architecture/test_github_actions_runtime_policy.py"
+    ]
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            [".github/workflows/unreviewed-new-workflow.yml"], repo_root=repo_root
+        )
+
+
 @pytest.mark.parametrize("manifest", ["package.json", "package-lock.json"])
 def test_shadow_compare_routes_gemini_toolchain(manifest: str) -> None:
     """Each toolchain manifest independently selects the integrity contract."""
@@ -303,6 +319,11 @@ def test_shadow_compare_routes_strict_mypy_scope_contract(path: str) -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare([path], repo_root=root)
     expected = ["tests/architecture/test_mypy_target_contract.py"]
+    if path in {
+        ".github/workflows/type-checking.yml",
+        ".github/workflows/type-checking-cold.yml",
+    }:
+        expected.insert(0, "tests/architecture/test_github_actions_runtime_policy.py")
     if path == "scripts/engineering/dev/zed_mypy.py":
         expected.extend(["tests/unit/scripts", "tests/unit/repo_backed/scripts"])
     assert report["selected"] == expected
