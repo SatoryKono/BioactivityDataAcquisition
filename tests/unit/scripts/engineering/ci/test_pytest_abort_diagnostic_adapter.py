@@ -896,6 +896,30 @@ def test_posix_pid_liveness_distinguishes_exited_states(monkeypatch, state) -> N
     assert probes == ([] if exited else [(1234, 0)])
 
 
+def test_cleanup_tolerates_non_utf8_process_name(monkeypatch, tmp_path: Path) -> None:
+    from types import SimpleNamespace
+    from scripts.engineering.ci import pytest_abort_diagnostic_adapter as owner
+
+    stat = tmp_path / "1234" / "stat"
+    stat.parent.mkdir()
+    stat.write_bytes(b"1234 (worker\xff (parser)) Z 1 2 3")
+    delivered = []
+    monkeypatch.setattr(owner, "Path", lambda path: tmp_path)
+    monkeypatch.setattr(
+        owner,
+        "os",
+        SimpleNamespace(
+            name="posix",
+            getpid=lambda: 999,
+            kill=lambda *args: delivered.append(("kill", args)),
+            killpg=lambda *args: delivered.append(("killpg", args)),
+        ),
+    )
+    monkeypatch.setattr(owner, "signal", SimpleNamespace(SIGKILL=9))
+    assert owner._terminate_recorded(1234, set()) == ""
+    assert delivered == [("killpg", (1234, 9))]
+
+
 def test_posix_pid_liveness_falls_back_without_proc_metadata(monkeypatch) -> None:
     from types import SimpleNamespace
     from scripts.engineering.ci import pytest_abort_diagnostic_adapter as owner
