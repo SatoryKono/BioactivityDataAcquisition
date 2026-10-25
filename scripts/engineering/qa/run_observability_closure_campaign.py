@@ -768,14 +768,16 @@ def _run_phase_command(
     try:
         from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
-        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
-            ensure_safe_cli_argv([str(token) for token in command]),
-            cwd=phase_root if isolated_workdir else repo_root,
-            env=env,
-            capture_output=True,
-            text=True,
-            timeout=timeout_seconds,
-            check=False,
+        completed = (
+            subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
+                ensure_safe_cli_argv([str(token) for token in command]),
+                cwd=phase_root if isolated_workdir else repo_root,
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=timeout_seconds,
+                check=False,
+            )
         )
         exit_code = completed.returncode
         stdout = completed.stdout
@@ -1348,14 +1350,16 @@ def _execute_attempt_subprocess(
     try:
         from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
-        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
-            ensure_safe_cli_argv([str(token) for token in command]),
-            cwd=attempt_root,
-            env=env,
-            capture_output=True,
-            text=True,
-            timeout=timeout_seconds,
-            check=False,
+        completed = (
+            subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
+                ensure_safe_cli_argv([str(token) for token in command]),
+                cwd=attempt_root,
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=timeout_seconds,
+                check=False,
+            )
         )
         return completed.returncode, False, completed.stdout, completed.stderr
     except subprocess.TimeoutExpired as exc:

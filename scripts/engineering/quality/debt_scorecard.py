@@ -6,7 +6,6 @@ from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
-from scripts.engineering.common.repo_paths import resolve_repo_root
 
 import yaml
 
@@ -71,7 +70,7 @@ def _resolve_enforceable_baseline(scorecard: JsonDict) -> dict[str, object]:
 
 
 def _project_root() -> Path:
-    return resolve_repo_root()
+    return Path(__file__).resolve().parents[3]
 
 
 def _resolve_scorecard_path(path: Path | str | None = None) -> Path:

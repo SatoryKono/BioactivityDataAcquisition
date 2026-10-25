@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 from datetime import datetime
 from pathlib import Path
-from scripts.engineering.common.repo_paths import resolve_repo_root
 from typing import Final, cast
 
 PLAN_SCHEMA_VERSION: Final[str] = "1.0"
@@ -43,7 +42,7 @@ _TASK_FAMILY_CATEGORIES: Final[dict[str, str]] = {
 
 
 def _project_root() -> Path:
-    return resolve_repo_root()
+    return Path(__file__).resolve().parents[3]
 
 
 def _default_plan_output_path(
