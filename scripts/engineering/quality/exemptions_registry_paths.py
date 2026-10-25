@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from scripts.engineering.common.repo_paths import resolve_repo_root
 
 _DEFAULT_REGISTRY_PATH = Path("configs/quality/architecture_metric_exemptions.yaml")
 _SRC_ROOT_PREFIX = "src/bioetl/"
@@ -10,7 +11,7 @@ _SRC_ROOT_PREFIX = "src/bioetl/"
 
 def project_root() -> Path:
     """Return repository root path."""
-    return Path(__file__).resolve().parents[4]
+    return resolve_repo_root()
 
 
 def resolve_registry_path(path: Path | str | None = None) -> Path:

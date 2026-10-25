@@ -6,16 +6,16 @@ from collections import Counter
 from datetime import date
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.quality._primitives import (
+from scripts.engineering.quality._primitives import (
     _parse_quarter_label,
     _quarter_label,
 )
-from bioetl.infrastructure.quality.inventory import ExemptionInventorySummary
-from bioetl.infrastructure.quality.report_formatter import (
+from scripts.engineering.quality.inventory import ExemptionInventorySummary
+from scripts.engineering.quality.report_formatter import (
     _collect_allowances,
     _is_active_grace_window,
 )
-from bioetl.infrastructure.quality.scoring import (
+from scripts.engineering.quality.scoring import (
     _compute_group_counts,
     _evaluate_expiry_cap,
     _evaluate_group_budgets,

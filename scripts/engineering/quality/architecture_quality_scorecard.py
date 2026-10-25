@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from scripts.engineering.common.repo_paths import resolve_repo_root
 from typing import Any
 
 import yaml
@@ -15,7 +16,7 @@ from scripts.engineering.qa.report_adr_enforcement_matrix import (
 )
 from scripts.engineering.qa.report_lazy_import_inventory import collect_lazy_imports
 
-from bioetl.infrastructure.quality.architecture_quality_scoring import (
+from scripts.engineering.quality.architecture_quality_scoring import (
     _build_categories,
     _build_diagnostic_payload,
     _count_hotspot_families_at_budget,
@@ -23,7 +24,7 @@ from bioetl.infrastructure.quality.architecture_quality_scoring import (
     _score_category,
 )
 
-PROJECT_ROOT = Path(__file__).resolve().parents[4]
+PROJECT_ROOT = resolve_repo_root()
 DEFAULT_OUTPUT = (
     PROJECT_ROOT / "reports" / "quality" / "architecture-quality-scorecard.json"
 )
@@ -406,7 +407,7 @@ def build_architecture_quality_scorecard(
 
     return {
         "schema_version": 2,
-        "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
+        "generated_by": "scripts.engineering.quality.architecture_quality_scorecard",
         "source_artifacts": source_artifacts,
         "weights_sum": weights_sum,
         "integral_score": integral_score,

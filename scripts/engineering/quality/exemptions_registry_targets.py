@@ -6,16 +6,16 @@ import ast
 from collections import Counter
 from pathlib import Path
 
-from bioetl.infrastructure.quality.exemptions_registry_access import (
+from scripts.engineering.quality.exemptions_registry_access import (
     load_exemptions_registry,
 )
-from bioetl.infrastructure.quality.exemptions_registry_paths import (
+from scripts.engineering.quality.exemptions_registry_paths import (
     is_module_path_key as _is_module_path_key,
 )
-from bioetl.infrastructure.quality.exemptions_registry_paths import (
+from scripts.engineering.quality.exemptions_registry_paths import (
     normalize_path_text as _normalize_path_text,
 )
-from bioetl.infrastructure.quality.exemptions_registry_paths import (
+from scripts.engineering.quality.exemptions_registry_paths import (
     project_root as _project_root,
 )
 
