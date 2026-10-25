@@ -42,8 +42,7 @@ def test_mypy_wrappers_default_to_all_strict_targets(name: str) -> None:
         line
         for line in lines
         if line.startswith("DEFAULT_ARGS=(")
-        or "$ArgsList = @(" in line
-        and "--strict" in line
+        or ("$ArgsList = @(" in line and "--strict" in line)
     ]
     assert len(defaults) == 1
     assert "--strict" in defaults[0]
