@@ -10,28 +10,28 @@ existing call-sites continue to work without changes.
 from __future__ import annotations
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.quality._baseline_validation import (
+from scripts.engineering.quality._baseline_validation import (
     _validate_baseline_section,
     _validate_historical_baseline_section,
     _validate_registry_groups_section,
 )
-from bioetl.infrastructure.quality._decomposition_validation import (
+from scripts.engineering.quality._decomposition_validation import (
     _validate_expiry_decomposition_targets_section,
     _validate_owner_decomposition_targets_section,
     _validate_owner_diversification_policy,
     _validate_priority_registry_burndown,
     _validate_program_done_criteria_section,
 )
-from bioetl.infrastructure.quality._governance_validation import (
+from scripts.engineering.quality._governance_validation import (
     _validate_governance_section,
 )
-from bioetl.infrastructure.quality._grace_windows_validation import (
+from scripts.engineering.quality._grace_windows_validation import (
     _validate_grace_windows_section,
 )
-from bioetl.infrastructure.quality._primitives import (
+from scripts.engineering.quality._primitives import (
     _parse_iso_date,
 )
-from bioetl.infrastructure.quality._quarterly_targets_validation import (
+from scripts.engineering.quality._quarterly_targets_validation import (
     _validate_quarterly_targets_section,
 )
 

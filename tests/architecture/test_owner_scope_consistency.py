@@ -20,7 +20,7 @@ import pytest
 
 import re
 
-from bioetl.infrastructure.quality import load_debt_scorecard, load_exemptions_registry
+from scripts.engineering.quality import load_debt_scorecard, load_exemptions_registry
 
 
 pytestmark = pytest.mark.architecture
