@@ -109,43 +109,43 @@ from bioetl.infrastructure.observability.observability_backend_probes import (
     wait_for_observability_backend_ready,
     wait_for_observability_backend_required_paths_ready,
 )
-from bioetl.infrastructure.quality._baseline_validation import (
+from scripts.engineering.quality._baseline_validation import (
     _validate_baseline_mapping,
     _validate_grouped_registry_coverage,
     _validate_registry_counts_mapping,
     _validate_registry_group_entry,
 )
-from bioetl.infrastructure.quality.architecture_debt_artifact_tasks import (
+from scripts.engineering.quality.architecture_debt_artifact_tasks import (
     _append_reviewed_metric_task,
     _count_value,
     _metric_policy,
     artifact_defaults,
 )
-from bioetl.infrastructure.quality.architecture_debt_task_support import (
+from scripts.engineering.quality.architecture_debt_task_support import (
     fallback_complexity,
     function_complexities,
     iter_source_modules,
     parse_limit_value,
     safe_text,
 )
-from bioetl.infrastructure.quality.architecture_quality_scorecard import (
+from scripts.engineering.quality.architecture_quality_scorecard import (
     _as_float,
     _load_json,
     _load_yaml,
 )
-from bioetl.infrastructure.quality.budget_evaluator import (
+from scripts.engineering.quality.budget_evaluator import (
     current_quarter_target,
     resolve_grace_allowances,
 )
-from bioetl.infrastructure.quality.exemptions_registry_policy import (
+from scripts.engineering.quality.exemptions_registry_policy import (
     validate_exemption_key_normalization,
     validate_exemptions_registry,
 )
-from bioetl.infrastructure.quality.exemptions_registry_validation import (
+from scripts.engineering.quality.exemptions_registry_validation import (
     get_policy_required_fields,
     validate_exemption_entry,
 )
-from bioetl.infrastructure.quality.report_formatter import (
+from scripts.engineering.quality.report_formatter import (
     _extract_growth_violation_section,
     _is_active_grace_window,
     _is_rollout_cutoff_stale,
@@ -471,7 +471,7 @@ def test_manifest_protection_helpers() -> None:
 def test_exemptions_policy_and_validation(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from bioetl.infrastructure.quality import exemptions_registry_policy as policy
+    from scripts.engineering.quality import exemptions_registry_policy as policy
 
     monkeypatch.setattr(
         policy, "load_exemptions_registry", lambda _path=None: {"registries": []}

@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import cast
 
-from bioetl.infrastructure.quality.architecture_debt_task_policy import (
+from scripts.engineering.quality.architecture_debt_task_policy import (
     COMMON_ACCEPTANCE_CRITERIA,
     COMMON_ALLOWED_PATHS,
     COMMON_FORBIDDEN_PATHS,

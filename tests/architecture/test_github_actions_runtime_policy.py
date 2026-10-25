@@ -629,7 +629,9 @@ def test_security_workflow_runs_gitleaks_and_osv_scanner() -> None:
         if step.get("id") == "record"
     )
     assert lane_osv_step.get("continue-on-error") is True
-    assert '"conclusion" if key == "osv-scan" else "outcome"' in lane_recorder
+    assert '"osv-gate": "${{ steps.osv-gate.outcome }}"' in lane_recorder
+    assert '"osv-scan"' not in lane_recorder
+    assert "toJson(steps)" not in lane_recorder
 
 
 def test_codeql_workflow_covers_python_and_actions_and_is_sha_pinned() -> None:
