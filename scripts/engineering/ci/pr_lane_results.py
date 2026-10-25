@@ -88,6 +88,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/qm_07/test_distribution_isolation.py",
         "tests/architecture/qm_07/test_qm07_cold_imports.py",
     ),
+    "docs/05-operations/runbooks/incident-response.md": (
+        "tests/integration/test_prometheus_rules_config.py",
+    ),
     "reports/engineering/SCHEMA-001_execution_evidence.md": (
         "tests/unit/scripts/test_verify_schema_parity.py",
         "tests/unit/scripts/ops/data/test_check_delta_integrity.py",
