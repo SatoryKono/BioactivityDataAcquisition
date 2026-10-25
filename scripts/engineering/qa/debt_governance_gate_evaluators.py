@@ -32,13 +32,13 @@ from scripts.engineering.qa.report_module_coverage_inventory import (
 from scripts.engineering.repo.check_scripts_inventory import build_review_expiry_report
 
 try:
-    from bioetl.infrastructure.quality.architecture_quality_scorecard import (
+    from scripts.engineering.quality.architecture_quality_scorecard import (
         build_architecture_quality_scorecard,
     )
 except Exception:  # pragma: no cover
     build_architecture_quality_scorecard = None  # type: ignore[assignment]
 try:
-    from bioetl.infrastructure.quality.debt_scorecard import (
+    from scripts.engineering.quality.debt_scorecard import (
         evaluate_debt_scorecard,
         load_debt_scorecard,
     )

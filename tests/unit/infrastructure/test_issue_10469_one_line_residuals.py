@@ -71,7 +71,7 @@ from bioetl.infrastructure.storage.support.atomic_group import AtomicWriteGroup
 from bioetl.infrastructure.storage.workflow_row_reconciliation_support import (
     _validate_strict_key_types,
 )
-from bioetl.infrastructure.quality._decomposition_owner_policy import (
+from scripts.engineering.quality._decomposition_owner_policy import (
     _validate_owner_decomposition_targets_section,
 )
 

@@ -470,7 +470,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 207
-      total_loc: 25909
+      total_loc: 25908
       files_ge_250_loc: 0
       helper_function_ratio: 0.384
       max_internal_fan_in: 5
@@ -1110,7 +1110,7 @@ program_done_criteria:
   score_semantics:
     exemption_debt_integral:
       scale: 0_to_100
-      function: bioetl.infrastructure.quality.scoring.compute_integral_debt_score
+      function: scripts.engineering.quality.scoring.compute_integral_debt_score
       current_when_zero_exemptions: 100.0
     architecture_quality_integral:
       scale: 0_to_10
