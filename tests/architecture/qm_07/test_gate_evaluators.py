@@ -1,10 +1,14 @@
 """The source-checkout governance facade must expose working evaluators."""
 
+import pytest
+
 from scripts.engineering.qa.debt_governance_gate_evaluators import (
     build_architecture_quality_scorecard,
     evaluate_debt_scorecard,
     load_debt_scorecard,
 )
+
+pytestmark = pytest.mark.architecture
 
 
 def test_imports_not_none() -> None:

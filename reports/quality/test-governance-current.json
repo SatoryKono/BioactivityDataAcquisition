@@ -1001,14 +1001,7 @@
     }
   },
   "assertless_total_candidates": 85,
-  "budget_violations": [
-    {
-      "actual": 2,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1182,11 +1175,8 @@
     ]
   },
   "intentional_no_exception_contract": 85,
-  "markerless_examples": [
-    "tests/architecture/qm_07/test_gate_evaluators.py:10",
-    "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py:13"
-  ],
-  "markerless_test_functions": 2,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2035,11 +2025,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/architecture/qm_07/test_gate_evaluators.py:10",
-      "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py:13"
-    ],
-    "markerless_test_functions": 2,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2105,7 +2092,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "360b19d4fc457e365a3d41b1299521520204c4e1a309b2de266c348357d4f2b0",
+  "source_tree_sha256": "014778efb80395a1c7f5ed33e09a1b43e5675207d31a1c629e3bc0d197edab7d",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2114,11 +2101,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 85,
-    "markerless_examples": [
-      "tests/architecture/qm_07/test_gate_evaluators.py:10",
-      "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py:13"
-    ],
-    "markerless_test_functions": 2,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
