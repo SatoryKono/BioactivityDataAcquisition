@@ -284,6 +284,11 @@ def assess_shadow_window(
         reasons.append("empty_window")
     elif len(shas) != 1:
         reasons.append("mixed_tested_sha")
+    if any(
+        not isinstance(run.get("head_sha"), str) or not run["head_sha"].strip()
+        for run in runs
+    ):
+        reasons.append("missing_tested_sha")
     if candidate_pairs < 1:
         reasons.append("no_parallel_candidate_arm")
     reasons.extend(_window_observation_reason_codes(runs))
@@ -660,9 +665,10 @@ def _window_observation_reason_codes(
     runs: Sequence[Mapping[str, object]],
 ) -> list[str]:
     reasons: list[str] = []
-    if not _span_covers_14_days(runs):
+    scheduled = [run for run in runs if run.get("event") == "schedule"]
+    if not _span_covers_14_days(scheduled):
         reasons.append("shorter_than_14_utc_days")
-    if _missing_utc_days(runs):
+    if len(scheduled) != len(runs) or _missing_utc_days(scheduled):
         reasons.append("missing_daily_attempts")
     return reasons
 

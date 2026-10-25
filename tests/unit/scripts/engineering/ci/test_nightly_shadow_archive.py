@@ -593,6 +593,42 @@ def test_assess_shadow_window_rejects_missing_daily_attempts() -> None:
     assert "missing_daily_attempts" in result["reason_codes"]
 
 
+@pytest.mark.parametrize(
+    ("field", "value", "reason"),
+    [
+        ("head_sha", None, "missing_tested_sha"),
+        ("head_sha", "", "missing_tested_sha"),
+        ("event", "workflow_dispatch", "missing_daily_attempts"),
+        ("event", None, "missing_daily_attempts"),
+    ],
+)
+def test_shadow_window_rejects_unbound_or_manual_observation(
+    field, value, reason
+) -> None:
+    start = datetime(2026, 10, 1, 3, tzinfo=UTC)
+    runs = [
+        {
+            "created_at": (start + timedelta(days=day)).isoformat(),
+            "head_sha": "a" * 40,
+            "event": "schedule",
+            "pagination_status": "complete",
+        }
+        for day in range(15)
+    ]
+    options = {
+        "candidate_pairs": 1,
+        "artifact_retention_days": 30,
+        "actions_retention_cap_days": 90,
+        "independent_review": True,
+        "cadence_changed_before_acceptance": False,
+    }
+    assert assess_shadow_window(runs, **options)["status"] == "complete"
+    runs[7][field] = value
+    result = assess_shadow_window(runs, **options)
+    assert result["status"] == "unacceptable"
+    assert reason in result["reason_codes"]
+
+
 def test_committed_gap_ledger_is_not_the_shadow_window() -> None:
     ledger_path = REPO_ROOT / "reports/governance/n1-shadow-window/ledger.json"
     ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
