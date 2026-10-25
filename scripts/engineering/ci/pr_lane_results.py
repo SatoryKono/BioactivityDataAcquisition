@@ -79,6 +79,17 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "reports/app-001-audit.md": (
+        "tests/unit/application/core/test_batch_execution_lifecycle.py",
+        "tests/unit/application/core/test_derived_scan_budget.py",
+        "tests/unit/application/core/test_pipeline_services.py",
+        "tests/unit/application/core/test_health_aggregator.py",
+        "tests/unit/application/core/test_heartbeat.py",
+        "tests/unit/application/core/test_lock_release_callback_contract.py",
+        "tests/unit/application/core/test_runner.py",
+        "tests/unit/application/services/test_pipeline_runner_service.py",
+        "tests/unit/application/services/run_reports/test_composite_report.py",
+    ),
     "docs/04-reference/environment-variables.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         "tests/architecture/test_documentation_cleanup_inventory.py",

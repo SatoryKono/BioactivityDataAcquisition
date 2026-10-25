@@ -257,6 +257,21 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
     }
 
 
+def test_shadow_compare_routes_app001_audit_to_cancellation_contracts() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(["reports/app-001-audit.md"], repo_root=root)
+    assert report["covers_full_suite"] is False
+    assert len(report["selected"]) == 9
+    assert (
+        "tests/unit/application/core/test_batch_execution_lifecycle.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/unit/application/core/test_lock_release_callback_contract.py"
+        in report["selected"]
+    )
+
+
 def test_shadow_compare_routes_quality_and_runtime_documentation() -> None:
     """Debt and runtime documentation changes retain governing tests."""
     repo_root = Path(__file__).resolve().parents[5]
