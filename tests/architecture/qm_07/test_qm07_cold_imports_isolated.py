@@ -1,5 +1,3 @@
-import pytest
-
 """Cold imports from a source checkout and an unrelated working directory.
 
 Both src and the checkout root are explicit: QM-07 wheel isolation is BLOCKED
@@ -16,7 +14,6 @@ import pytest
 pytestmark = pytest.mark.architecture
 
 
-@pytest.mark.architecture
 def test_cold_imports(tmp_path: Path) -> None:
     modules = [
         "scripts.engineering.quality",
