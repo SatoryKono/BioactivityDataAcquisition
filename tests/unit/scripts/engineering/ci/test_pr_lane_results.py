@@ -267,7 +267,11 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
         [
             ".github/workflows/duplication-complexity.yml",
             "configs/quality/package_cohesion_budget.yaml",
+            "configs/quality/scripts_lifecycle_registry.json",
+            "configs/quality/technical_debt_audit_registry.yaml",
             "docs/02-architecture/current-state-inventory.md",
+            "docs/04-reference/api/infrastructure.md",
+            "reports/quality/total-tech-debt-audit-main-current.md",
         ],
         repo_root=repo_root,
     )
@@ -276,6 +280,14 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
         "tests/architecture/test_github_actions_runtime_policy.py" in report["selected"]
     )
     assert "tests/unit/scripts/qa/test_topology_source_binding.py" in report["selected"]
+    assert "tests/architecture/test_scripts_lifecycle_registry.py" in report["selected"]
+    assert "tests/architecture/test_api_reference_public_facades.py" in report[
+        "selected"
+    ]
+    assert (
+        "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py"
+        in report["selected"]
+    )
 
 
 def test_shadow_compare_rejects_mixed_diff_with_unmapped_path(

@@ -155,6 +155,15 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/scripts_inventory_manifest.json": (
         "tests/architecture/test_scripts_inventory_manifest.py",
     ),
+    "configs/quality/scripts_lifecycle_registry.json": (
+        "tests/architecture/test_scripts_lifecycle_registry.py",
+    ),
+    "configs/quality/technical_debt_audit_registry.yaml": (
+        "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
+    ),
+    "docs/04-reference/api/infrastructure.md": (
+        "tests/architecture/test_api_reference_public_facades.py",
+    ),
     "docs/02-architecture/finances-github-billing.md": (
         "tests/architecture/test_documentation_sync.py",
     ),
@@ -171,6 +180,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/quality/flaky-test-burndown-review.json": FLAKY_BURNDOWN_REVIEW_TESTS,
     "reports/quality/test-governance-current.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
+    "reports/quality/total-tech-debt-audit-main-current.md": (
+        "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
+    ),
     "reports/engineering/finances/billing_manifest.json": (
         "tests/unit/scripts/test_github_billing.py",
     ),
