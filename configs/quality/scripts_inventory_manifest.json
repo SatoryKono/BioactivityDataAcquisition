@@ -10130,7 +10130,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 652,
+          "line": 658,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10411,7 +10411,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 824,
+          "line": 830,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10901,9 +10901,9 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 410,
+          "line": 416,
           "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target \"${targets[@]}\" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-marker "
+          "text": "uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target \"${targets[@]}\" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-timeout"
         },
         {
           "path": ".github/workflows/tests.yml",
@@ -15907,13 +15907,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/run_observability_closure_campaign.py",
-          "line": 1816,
+          "line": 1812,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import observability_closure_campaign_cli as _campaign_cli"
         },
         {
           "path": "scripts/engineering/qa/run_observability_closure_campaign.py",
-          "line": 1817,
+          "line": 1813,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_closure_campaign_cli import ("
         }
@@ -15932,7 +15932,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/run_observability_closure_campaign.py",
-          "line": 1660,
+          "line": 1656,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_closure_campaign_validation import ("
         }
@@ -20463,7 +20463,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 647,
+          "line": 653,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
