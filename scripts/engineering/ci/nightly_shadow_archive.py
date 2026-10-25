@@ -125,7 +125,7 @@ def oracle_equivalent(
     for name in job_names:
         left_value = left.get(name, "missing")
         right_value = right.get(name, "missing")
-        if left_value != right_value:
+        if left_value != right_value or left_value in (None, "", "missing"):
             mismatches.append(
                 {
                     "job": name,

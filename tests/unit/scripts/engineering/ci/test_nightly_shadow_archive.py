@@ -152,6 +152,18 @@ def test_oracle_does_not_use_the_schedule_classifier() -> None:
     assert compared["mismatches"][0]["left"] == "skipped"
 
 
+@pytest.mark.parametrize("missing", [None, "", "missing"])
+def test_equivalence_rejects_missing_observations(missing: object) -> None:
+    for left, right in (
+        ({}, {}),
+        ({"tests": missing}, {"tests": missing}),
+        ({"tests": "success"}, {}),
+    ):
+        compared = oracle_equivalent(left, right, job_names=["tests"])
+        assert compared["equivalent"] is False
+        assert compared["mismatches"][0]["job"] == "tests"
+
+
 @pytest.mark.parametrize(
     ("daily", "validators", "expected"),
     [
