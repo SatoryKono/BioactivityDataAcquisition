@@ -33,7 +33,7 @@ from datetime import date
 
 import pytest
 
-from bioetl.infrastructure.quality._primitives import (
+from scripts.engineering.quality._primitives import (
     _parse_iso_date,
     _parse_quarter_label,
     _quarter_label,

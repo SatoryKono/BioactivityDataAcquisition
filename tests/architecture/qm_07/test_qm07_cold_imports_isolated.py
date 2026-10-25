@@ -9,42 +9,46 @@ from pathlib import Path
 import subprocess
 import sys
 
+import pytest
+
+pytestmark = pytest.mark.architecture
+
 
 def test_cold_imports(tmp_path: Path) -> None:
     modules = [
-        "bioetl.infrastructure.quality",
-        "bioetl.infrastructure.quality._baseline_validation",
-        "bioetl.infrastructure.quality._decomposition_burndown_policy",
-        "bioetl.infrastructure.quality._decomposition_owner_policy",
-        "bioetl.infrastructure.quality._decomposition_program_policy",
-        "bioetl.infrastructure.quality._decomposition_validation",
-        "bioetl.infrastructure.quality._governance_validation",
-        "bioetl.infrastructure.quality._grace_windows_validation",
-        "bioetl.infrastructure.quality._primitives",
-        "bioetl.infrastructure.quality._quarterly_targets_validation",
-        "bioetl.infrastructure.quality.architecture_debt_artifact_tasks",
-        "bioetl.infrastructure.quality.architecture_debt_reduction",
-        "bioetl.infrastructure.quality.architecture_debt_task_generation",
-        "bioetl.infrastructure.quality.architecture_debt_task_policy",
-        "bioetl.infrastructure.quality.architecture_debt_task_support",
-        "bioetl.infrastructure.quality.architecture_quality_scorecard",
-        "bioetl.infrastructure.quality.architecture_quality_scoring",
-        "bioetl.infrastructure.quality.budget_evaluator",
-        "bioetl.infrastructure.quality.debt_scorecard",
-        "bioetl.infrastructure.quality.debt_scorecard_validation",
-        "bioetl.infrastructure.quality.exemptions_registry",
-        "bioetl.infrastructure.quality.exemptions_registry_access",
-        "bioetl.infrastructure.quality.exemptions_registry_paths",
-        "bioetl.infrastructure.quality.exemptions_registry_policy",
-        "bioetl.infrastructure.quality.exemptions_registry_targets",
-        "bioetl.infrastructure.quality.exemptions_registry_validation",
-        "bioetl.infrastructure.quality.inventory",
-        "bioetl.infrastructure.quality.registry_sync_service",
-        "bioetl.infrastructure.quality.report_formatter",
-        "bioetl.infrastructure.quality.scoring",
+        "scripts.engineering.quality",
+        "scripts.engineering.quality._baseline_validation",
+        "scripts.engineering.quality._decomposition_burndown_policy",
+        "scripts.engineering.quality._decomposition_owner_policy",
+        "scripts.engineering.quality._decomposition_program_policy",
+        "scripts.engineering.quality._decomposition_validation",
+        "scripts.engineering.quality._governance_validation",
+        "scripts.engineering.quality._grace_windows_validation",
+        "scripts.engineering.quality._primitives",
+        "scripts.engineering.quality._quarterly_targets_validation",
+        "scripts.engineering.quality.architecture_debt_artifact_tasks",
+        "scripts.engineering.quality.architecture_debt_reduction",
+        "scripts.engineering.quality.architecture_debt_task_generation",
+        "scripts.engineering.quality.architecture_debt_task_policy",
+        "scripts.engineering.quality.architecture_debt_task_support",
+        "scripts.engineering.quality.architecture_quality_scorecard",
+        "scripts.engineering.quality.architecture_quality_scoring",
+        "scripts.engineering.quality.budget_evaluator",
+        "scripts.engineering.quality.debt_scorecard",
+        "scripts.engineering.quality.debt_scorecard_validation",
+        "scripts.engineering.quality.exemptions_registry",
+        "scripts.engineering.quality.exemptions_registry_access",
+        "scripts.engineering.quality.exemptions_registry_paths",
+        "scripts.engineering.quality.exemptions_registry_policy",
+        "scripts.engineering.quality.exemptions_registry_targets",
+        "scripts.engineering.quality.exemptions_registry_validation",
+        "scripts.engineering.quality.inventory",
+        "scripts.engineering.quality.registry_sync_service",
+        "scripts.engineering.quality.report_formatter",
+        "scripts.engineering.quality.scoring",
     ]
     repo_root = Path(__file__).resolve().parents[3]
-    quality_root = repo_root / "src/bioetl/infrastructure/quality"
+    quality_root = repo_root / "scripts/engineering/quality"
 
     for module in modules:
         # -I ignores inherited PYTHONPATH and cwd. Each module gets a fresh process.

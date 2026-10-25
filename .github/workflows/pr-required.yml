@@ -301,6 +301,8 @@ jobs:
               "docs-verify": "${{ steps.docs-verify.outcome }}",
               "mkdocs-nav": "${{ steps.mkdocs-nav.outcome }}",
               "prose-consistency": "${{ steps.prose-consistency.outcome }}",
+              "zizmor": "${{ steps.zizmor.outcome }}",
+              "dependency-review": "${{ steps.dependency-review.outcome }}",
           }
           Path("reports/quality/lane-step-outcomes.json").write_text(
               json.dumps(flat, separators=(",", ":")),
