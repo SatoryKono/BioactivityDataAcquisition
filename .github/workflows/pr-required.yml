@@ -407,7 +407,13 @@ jobs:
             echo "::error::tests gate has no affected pytest target"
             exit 1
           fi
-          uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target "${targets[@]}" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-marker "not serial" --parallel-addopts "-n auto --dist loadfile --max-worker-restart=0 -q --tb=line" --serial-marker "serial" --serial-addopts "-p no:xdist -q --tb=line" --no-fallback --prove-artifact-deferral
+          parallel_timeout=900
+          # Framework/toolchain updates select the entire suite, not a small
+          # affected slice. Keep a bounded pass within the existing 90m job.
+          if [[ ${#targets[@]} -eq 1 && "${targets[0]%/}" == "tests" ]]; then
+            parallel_timeout=2400
+          fi
+          uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target "${targets[@]}" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-timeout-seconds "$parallel_timeout" --parallel-marker "not serial" --parallel-addopts "-n auto --dist loadfile --max-worker-restart=0 -q --tb=line" --serial-marker "serial" --serial-addopts "-p no:xdist -q --tb=line" --no-fallback --prove-artifact-deferral
 
       - name: Shadow compare impact selection
         id: impact-shadow-compare

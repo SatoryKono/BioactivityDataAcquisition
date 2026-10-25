@@ -79,6 +79,13 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "reports/engineering/SCHEMA-001_execution_evidence.md": (
+        "tests/unit/scripts/test_verify_schema_parity.py",
+        "tests/unit/scripts/ops/data/test_check_delta_integrity.py",
+    ),
+    "reports/engineering/SEC-003_audit_report.md": (
+        "tests/unit/domain/services/test_composite_metadata_helpers.py",
+    ),
     "docs/04-reference/environment-variables.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         "tests/architecture/test_documentation_cleanup_inventory.py",
@@ -216,6 +223,13 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "reports/evidence/12461/": (
+        "tests/architecture/test_provider_contract_interoperability_governance.py",
+        "tests/contract/test_provider_contract_snapshot_registry.py",
+    ),
+    "scripts/ai/gemini/npm-tooling/": (
+        "tests/architecture/test_gemini_cli_bootstrap.py",
+    ),
     "scripts/engineering/quality/": QUALITY_GOVERNANCE_TESTS,
     "src/bioetl/infrastructure/quality/": QUALITY_GOVERNANCE_TESTS,
     "grafana/tooling/router-v7-bridge/": (
