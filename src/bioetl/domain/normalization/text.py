@@ -22,10 +22,10 @@ _CONTROL_CHARS_PATTERN = re.compile(r"[\x00-\x08\x0e-\x1f\x7f-\x9f]")
 
 def normalize_string(value: str | None) -> str | None:
     """Normalize string by stripping whitespace, return None for empty."""
-    if value is None:
+    if not value:
         return None
     stripped = value.strip()
-    return stripped if stripped else None
+    return stripped or None
 
 
 def normalize_to_string(value: object) -> str | None:
@@ -33,7 +33,7 @@ def normalize_to_string(value: object) -> str | None:
     if value is None:
         return None
     str_value = str(value).strip()
-    return str_value if str_value else None
+    return str_value or None
 
 
 def strip_html_tags(text: str | None) -> str | None:
@@ -41,13 +41,13 @@ def strip_html_tags(text: str | None) -> str | None:
     if not text:
         return None
 
-    clean = text
-    if "<" in clean:
-        clean = _HTML_TAG_PATTERN.sub("", clean)
-    if "&" in clean:
-        clean = unescape(clean)
-    clean = " ".join(clean.split())
-    return clean or None
+    if "<" in text:
+        text = _HTML_TAG_PATTERN.sub("", text)
+    if "&" in text:
+        text = unescape(text)
+
+    text = " ".join(text.split())
+    return text or None
 
 
 def normalize_oa_status(status: str | None) -> str | None:
@@ -71,17 +71,16 @@ def _normalize_text_field(text: str | None) -> str | None:
     if not text:
         return None
 
-    normalized = text
-    for step in (
-        _strip_html_and_decode_entities,
-        _remove_control_characters,
-        _normalize_unicode_nfc,
-        _collapse_whitespace,
-    ):
-        normalized = step(normalized)
+    if "<" in text:
+        text = _HTML_TAG_PATTERN.sub("", text)
+    if "&" in text:
+        text = unescape(text)
 
-    normalized = normalized.strip()
-    return normalized if normalized else None
+    text = _CONTROL_CHARS_PATTERN.sub("", text)
+    text = unicodedata.normalize("NFC", text)
+
+    text = " ".join(text.split())
+    return text or None
 
 
 def _strip_html_and_decode_entities(text: str) -> str:
