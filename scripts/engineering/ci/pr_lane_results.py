@@ -120,6 +120,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/quality/flaky-test-burndown-review.json": FLAKY_BURNDOWN_REVIEW_TESTS,
     "reports/quality/test-governance-current.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
+    "reports/quality/architecture-debt-remote-main-baseline.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
+    "reports/quality/config-surface-backlog.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
+    "reports/quality/debt-governance-gates.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
+    "reports/quality/debt-governance-gates.md": TEST_GOVERNANCE_ARTIFACT_TESTS,
+    "reports/quality/live-residual-snapshot.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
     "reports/engineering/finances/billing_manifest.json": (
         "tests/unit/scripts/test_github_billing.py",
     ),
