@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import Counter
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.quality._primitives import _parse_quarter_label
+from scripts.engineering.quality._primitives import _parse_quarter_label
 
 
 def compute_integral_debt_score(

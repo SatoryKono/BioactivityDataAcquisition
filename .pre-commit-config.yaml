@@ -58,7 +58,7 @@ repos:
         exclude: >
           (?x)(
             (^|.*/)(check_cfg|debug_chembl_pub2?|debug_.*)\.py|
-            .*/src/bioetl/infrastructure/quality/external_api\.py
+            .*/scripts/engineering/quality/external_api\.py
           )$
       - id: mixed-line-ending
         args: [--fix=lf]

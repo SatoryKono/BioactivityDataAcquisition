@@ -1110,7 +1110,7 @@ program_done_criteria:
   score_semantics:
     exemption_debt_integral:
       scale: 0_to_100
-      function: bioetl.infrastructure.quality.scoring.compute_integral_debt_score
+      function: scripts.engineering.quality.scoring.compute_integral_debt_score
       current_when_zero_exemptions: 100.0
     architecture_quality_integral:
       scale: 0_to_10
