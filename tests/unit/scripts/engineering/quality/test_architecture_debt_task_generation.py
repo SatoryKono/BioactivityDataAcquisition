@@ -38,9 +38,9 @@ from pathlib import Path
 
 import yaml
 
-from bioetl.infrastructure.quality import architecture_debt_task_generation as tasks
-from bioetl.infrastructure.quality import architecture_debt_artifact_tasks
-from bioetl.infrastructure.quality.architecture_debt_task_generation import (
+from scripts.engineering.quality import architecture_debt_task_generation as tasks
+from scripts.engineering.quality import architecture_debt_artifact_tasks
+from scripts.engineering.quality.architecture_debt_task_generation import (
     generate_architecture_debt_tasks_payload,
 )
 
