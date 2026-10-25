@@ -220,6 +220,22 @@ def test_shadow_compare_routes_billing_pr_non_code_changes() -> None:
     assert "tests/unit/scripts/test_github_billing.py" in report["selected"]
 
 
+def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            ".github/workflows/docker.yml",
+            "reports/quality/architecture-debt-remote-main-baseline.md",
+        ],
+        repo_root=repo_root,
+    )
+    assert "tests/architecture/test_docker_runtime_contracts.py" in report["selected"]
+    assert (
+        "tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py"
+        in report["selected"]
+    )
+
+
 def test_shadow_compare_routes_grafana_npm_projects() -> None:
     """Grafana package updates select their project governance tests."""
     repo_root = Path(__file__).resolve().parents[5]

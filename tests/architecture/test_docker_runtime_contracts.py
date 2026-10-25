@@ -1650,6 +1650,18 @@ def test_docker_security_baseline_is_uploaded_with_bounded_retention() -> None:
     assert "--format json" in base_run
     assert "--output reports/security/trivy-base-results.json" in base_run
     assert "chainguard/wolfi-base@sha256:" in base_run
+    runtime_image = next(
+        line.split()[1]
+        for line in (ROOT / "Dockerfile.bioetl").read_text().splitlines()
+        if line.startswith("FROM ") and line.endswith(" AS runtime-root")
+    )
+    assert f'"{runtime_image}"' in base_run
+    provenance = next(
+        step
+        for step in steps
+        if step.get("name") == "Capture image and runtime provenance"
+    )
+    assert f"wolfi_base_image={runtime_image}" in str(provenance["run"])
     assert step_names.index("Validate complete security baseline") < step_names.index(
         "Upload reproducible security baseline"
     )
