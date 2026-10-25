@@ -529,16 +529,19 @@ def test_verify_rejects_index_metadata_that_differs_from_snapshot(
         verify_archive(tmp_path)
 
 
+@pytest.mark.parametrize("index_name", ["index.json", "other-index.json"])
 def test_record_window_rejects_unverified_index_metadata(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    index_name: str,
 ) -> None:
     monkeypatch.setattr(archive_module, "REPO_ROOT", tmp_path)
     _store(tmp_path, _raw(), _outcomes())
     _seal_index(tmp_path)
     index_path = tmp_path / "index.json"
     index = json.loads(index_path.read_text(encoding="utf-8"))
-    index[0]["head_sha"] = "f" * 40
+    if index_name == "index.json":
+        index[0]["head_sha"] = "f" * 40
     index_path.write_bytes(canonical_bytes(index))
     ledger_path = tmp_path / "ledger-output.json"
 
@@ -546,7 +549,7 @@ def test_record_window_rejects_unverified_index_metadata(
         [
             "record-window",
             "--index",
-            "index.json",
+            index_name,
             "--output",
             ledger_path.name,
             "--baseline-sha",

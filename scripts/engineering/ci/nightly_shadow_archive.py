@@ -1049,6 +1049,8 @@ def _command_record_window(argv: Sequence[str]) -> int:
     parser.add_argument("--cadence-changed-before-acceptance", action="store_true")
     args = parser.parse_args(argv)
     index_path = resolve_cli_path(args.index, root=REPO_ROOT)
+    if index_path.name != "index.json":
+        raise ArchiveError(f"archive index must be named index.json: {index_path}")
     runs = verify_archive(index_path.parent)["snapshots"]
     historical = assess_shadow_window(
         runs,
