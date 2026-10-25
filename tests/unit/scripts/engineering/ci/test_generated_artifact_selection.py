@@ -277,7 +277,7 @@ def test_real_daily_caller_and_command_partition_are_complete() -> None:
             step = next(step for step in steps if step.get("name") == row["step"])
             assert step["if"] == "inputs.generated-artifacts"
             assert step["run"] == row["command"]
-    pr = (ROOT / ".github/workflows/pr-required.yml").read_text()
+    pr = (ROOT / ".github/workflows/pr-required.yml").read_text(encoding="utf-8")
     assert "BIOETL_ARTIFACT_TEST_SELECTION: ci" in pr
     # #12440 replaced the ci partition driver with the resilient runner.
     assert "scripts.engineering.ci.run_pytest_resilient" in pr
@@ -780,7 +780,9 @@ def test_source_checks_and_coverage_selection_survive_daily_partition():
         row for row in load_manifest()["validators"] if row["id"] == "scripts-inventory"
     )
     assert "--check" in daily["argv"]
-    pr = yaml.safe_load((ROOT / ".github/workflows/pr-required.yml").read_text())
+    pr = yaml.safe_load(
+        (ROOT / ".github/workflows/pr-required.yml").read_text(encoding="utf-8")
+    )
     commands = [
         step.get("run", "")
         for job in pr["jobs"].values()

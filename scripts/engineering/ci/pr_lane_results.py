@@ -145,7 +145,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_actions_artifact_storage_policy.py",
         "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
     ),
-    "CHANGELOG.md": ("tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py",),
     "configs/quality/scripts_lifecycle_registry.json": (
         "tests/architecture/test_scripts_lifecycle_registry.py",
     ),
@@ -158,12 +157,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/05-operations/runbooks/generated-artifact-drift-workflow.md": (
         "tests/architecture/test_generated_artifact_drift_workflow.py",
-    ),
-    "reports/quality/flaky-test-burndown-review.json": (
-        "tests/unit/scripts/qa/test_report_flaky_test_burndown_review.py",
-    ),
-    "reports/quality/test-governance-current.json": (
-        "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
     ),
 }
 
