@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-25T11:02:28.989356+00:00",
+  "generated_at": "2026-10-25T12:37:02.822700+00:00",
   "summary": {
     "total_scripts": 696,
     "status_counts": {
@@ -10392,7 +10392,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 558,
+          "line": 570,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         }
@@ -12767,7 +12767,7 @@
       "references": [
         {
           "path": "pyproject.toml",
-          "line": 348,
+          "line": 350,
           "source_group": "build",
           "text": "# (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py); memory"
         },
@@ -20432,7 +20432,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 180,
+          "line": 192,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23432,7 +23432,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 209,
+          "line": 221,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -26876,7 +26876,7 @@
         },
         {
           "path": "pyproject.toml",
-          "line": 161,
+          "line": 163,
           "source_group": "build",
           "text": "# JSON Schema validation (scripts/validate_pipeline_configs.py)"
         },
