@@ -279,16 +279,19 @@ jobs:
         if: always()
         env:
           DECISION_MATRIX: ${{ needs.classify-changes.outputs.decision_matrix }}
-          STEPS_JSON: ${{ toJson(steps) }}
           LANE_OWNER: fast-governance
         run: |
           set -euo pipefail
           mkdir -p reports/quality
+          cat << 'EOF_STEPS_JSON' > /tmp/steps-raw.json
+          ${{ toJson(steps) }}
+          EOF_STEPS_JSON
           uv run --frozen --no-build python -c '
           import json
           import os
           from pathlib import Path
-          raw = json.loads(os.environ["STEPS_JSON"])
+          with open("/tmp/steps-raw.json", encoding="utf-8") as f:
+              raw = json.load(f)
           flat = {}
           for key, value in raw.items():
               if isinstance(value, dict):
@@ -708,16 +711,19 @@ jobs:
         if: always()
         env:
           DECISION_MATRIX: ${{ needs.classify-changes.outputs.decision_matrix }}
-          STEPS_JSON: ${{ toJson(steps) }}
           LANE_OWNER: class-lane
         run: |
           set -euo pipefail
           mkdir -p reports/quality
+          cat << 'EOF_STEPS_JSON' > /tmp/steps-raw.json
+          ${{ toJson(steps) }}
+          EOF_STEPS_JSON
           uv run --frozen --no-build python -c '
           import json
           import os
           from pathlib import Path
-          raw = json.loads(os.environ["STEPS_JSON"])
+          with open("/tmp/steps-raw.json", encoding="utf-8") as f:
+              raw = json.load(f)
           osv_scan = raw.get("osv-scan")
           osv_gate = raw.get("osv-gate")
           if (
