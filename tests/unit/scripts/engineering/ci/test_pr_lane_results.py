@@ -268,6 +268,26 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
 
 
 @pytest.mark.parametrize(
+    "path",
+    [
+        ".github/workflows/type-checking.yml",
+        ".github/workflows/type-checking-cold.yml",
+        "scripts/engineering/dev/run_mypy.sh",
+        "scripts/engineering/dev/run_mypy.ps1",
+        "scripts/engineering/dev/zed_mypy.py",
+        "configs/quality/github_required_checks.yaml",
+    ],
+)
+def test_shadow_compare_routes_strict_mypy_scope_contract(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    expected = ["tests/architecture/test_mypy_target_contract.py"]
+    if path == "scripts/engineering/dev/zed_mypy.py":
+        expected.extend(["tests/unit/scripts", "tests/unit/repo_backed/scripts"])
+    assert report["selected"] == expected
+
+
+@pytest.mark.parametrize(
     "name", ["SUMMARY.md", "chembl_data.json", "uniprot_headers.txt"]
 )
 def test_shadow_compare_routes_provider_parity_evidence(name: str) -> None:
@@ -548,7 +568,7 @@ def test_affected_targets_map_telemetry_baseline(tmp_path: Path) -> None:
         repo_root=tmp_path,
     )
     untouched = affected_pytest_targets(
-        ["configs/quality/github_required_checks.yaml"],
+        ["configs/quality/unregistered-config.yaml"],
         repo_root=tmp_path,
     )
 
