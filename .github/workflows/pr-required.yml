@@ -460,12 +460,12 @@ jobs:
           set -o pipefail
           mkdir -p reports
 
-          echo "Running full mypy strict gate on src/bioetl + src/memory..."
+          echo "Running full mypy strict gate on src/bioetl + src/memory + scripts/engineering/quality..."
           echo "Event: $EVENT_NAME" | tee reports/mypy_strict.log
 
           set +e
           timeout --signal=TERM --kill-after=30s 30m \
-            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory \
+            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory scripts/engineering/quality \
             2>&1 | tee -a reports/mypy_strict.log
           status=${PIPESTATUS[0]}
           set -e
