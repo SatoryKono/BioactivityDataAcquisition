@@ -87,6 +87,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_diagram_nightly_workflow.py",
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
     ),
+    "reports/audit-runs/20261025-p17-002/P17-002-reusable-workflows-audit.md": (
+        "tests/unit/scripts/ci/test_check_reusable_workflow_pins.py",
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
     "docs/05-operations/runbooks/incident-response.md": (
         "tests/integration/test_prometheus_rules_config.py",
     ),
