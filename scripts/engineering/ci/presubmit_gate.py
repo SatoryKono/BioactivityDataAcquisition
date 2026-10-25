@@ -28,7 +28,7 @@ from scripts.engineering.repo.check_no_partial_tree import resolve_revision
 
 _SHA_RE = re.compile(r"^[0-9a-f]{40}(?:[0-9a-f]{24})?$")
 _RUFF_TREES = ("src", "tests", "scripts")
-_MYPY_TREES = ("src/bioetl", "src/memory")
+_MYPY_TREES = ("src/bioetl", "src/memory", "scripts/engineering/quality")
 _FAST_ARCHITECTURE_MARK = "not slow and not benchmark and not memory"
 _AFFECTED_REPORT = "reports/quality/affected-test-partition.json"
 _SELECT_TIMEOUT_SECONDS = 300
@@ -124,7 +124,7 @@ def run_ruff() -> bool:
 
 def run_mypy() -> bool:
     """Run strict incremental mypy on src/bioetl and src/memory."""
-    print("Running strict mypy gate on src/bioetl + src/memory...", flush=True)
+    print("Running strict mypy gate on " + " + ".join(_MYPY_TREES) + "...", flush=True)
     command = [
         "uv",
         "run",
