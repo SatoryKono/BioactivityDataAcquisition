@@ -5,12 +5,12 @@ from __future__ import annotations
 from pathlib import Path
 
 _DEFAULT_REGISTRY_PATH = Path("configs/quality/architecture_metric_exemptions.yaml")
-_SRC_ROOT_PREFIX = "src/bioetl/"
+_CANONICAL_MODULE_PREFIXES = ("src/bioetl/", "scripts/engineering/")
 
 
 def project_root() -> Path:
     """Return repository root path."""
-    return Path(__file__).resolve().parents[4]
+    return Path(__file__).resolve().parents[3]
 
 
 def resolve_registry_path(path: Path | str | None = None) -> Path:
@@ -29,7 +29,9 @@ def normalize_path_text(value: str) -> str:
 def is_module_path_key(value: str) -> bool:
     """Check whether value matches canonical registry key format."""
     normalized = normalize_path_text(value)
-    return normalized.startswith(_SRC_ROOT_PREFIX) and normalized.endswith(".py")
+    return normalized.endswith(".py") and normalized.startswith(
+        _CANONICAL_MODULE_PREFIXES
+    )
 
 
 def build_module_path_key(
@@ -39,11 +41,11 @@ def build_module_path_key(
 ) -> str:
     """Build canonical registry key for a module path.
 
-    Canonical format is repository-relative POSIX path:
-    ``src/bioetl/<layer>/.../<module>.py``.
+    Canonical format is a repository-relative POSIX path under either
+    ``src/bioetl`` or ``scripts/engineering``.
 
     Returns:
-        Canonical registry key string in format 'src/bioetl/.../module.py'.
+        Canonical repository-relative registry key.
     """
     text = normalize_path_text(str(module_path))
     if is_module_path_key(text):
@@ -56,6 +58,12 @@ def build_module_path_key(
     if not path_obj.is_absolute():
         path_obj = (Path.cwd() / path_obj).absolute()
 
+    repo_root = project_root()
+    if path_obj.is_relative_to(repo_root):
+        repo_relative = path_obj.relative_to(repo_root).as_posix()
+        if is_module_path_key(repo_relative):
+            return repo_relative
+
     if path_obj.is_relative_to(src_root_path):
         rel = path_obj.relative_to(src_root_path).as_posix()
         return f"src/{rel}"
@@ -64,5 +72,6 @@ def build_module_path_key(
         return f"src/{text}"
 
     raise ValueError(
-        f"module_path must resolve under src/ or already be canonical ({module_path!r})"
+        "module_path must resolve under src/bioetl or scripts/engineering, "
+        f"or already be canonical ({module_path!r})"
     )

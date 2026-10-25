@@ -23,17 +23,17 @@ from types import ModuleType
 
 import yaml
 
-from bioetl.infrastructure.quality._primitives import (
+from scripts.engineering.quality._primitives import (
     _parse_quarter_label,
     _quarter_label,
 )
-from bioetl.infrastructure.quality.exemptions_registry_validation import (
+from scripts.engineering.quality.exemptions_registry_validation import (
     _ALLOWED_CLASSIFICATIONS,
 )
-from bioetl.infrastructure.quality.report_formatter import (
+from scripts.engineering.quality.report_formatter import (
     _is_rollout_cutoff_stale,
 )
-from bioetl.infrastructure.quality import (
+from scripts.engineering.quality import (
     build_exemption_inventory,
     evaluate_debt_scorecard,
     load_debt_scorecard,
