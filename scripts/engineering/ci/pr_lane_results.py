@@ -483,26 +483,37 @@ def _route_outputs(route: object) -> list[str]:
     return outputs
 
 
+def _output_matches_path(output: str, path: str) -> bool:
+    """Return whether an output file or directory owns ``path``."""
+    return path == output or (output.endswith("/") and path.startswith(output))
+
+
+def _tests_for_route(
+    outputs: list[str], tests_by_artifact: dict[str, set[str]]
+) -> set[str]:
+    """Return tests registered for every file below the route outputs."""
+    return {
+        target
+        for output in outputs
+        for artifact, artifact_tests in tests_by_artifact.items()
+        if _output_matches_path(output, artifact)
+        for target in artifact_tests
+    }
+
+
 def _generated_artifact_targets(path: str, root: Path) -> list[str]:
     """Return tests declared for a generated artifact or one of its siblings."""
     records = _generated_artifact_test_records(root)
     tests_by_artifact = _tests_by_generated_artifact(records)
-    direct = tests_by_artifact.get(path)
-    if direct:
-        return sorted(direct)
+    targets = set(tests_by_artifact.get(path, set()))
 
     routes = _generated_artifact_routes(root)
     for route in routes:
         outputs = _route_outputs(route)
-        if path not in outputs:
+        if not any(_output_matches_path(output, path) for output in outputs):
             continue
-        sibling_tests = {
-            target
-            for output in outputs
-            for target in tests_by_artifact.get(output, set())
-        }
-        return sorted(sibling_tests)
-    return []
+        targets.update(_tests_for_route(outputs, tests_by_artifact))
+    return sorted(targets)
 
 
 def _mapped_targets(path: str, root: Path) -> list[str]:
