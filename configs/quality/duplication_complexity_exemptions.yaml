@@ -152,7 +152,7 @@ path_entries:
   progress_note: '2026-09-18 stagger review (#10527): dispatch paths still
     branch-heavy, no removal completed; retained until 2027-02-15.'
   rationale: Observability dispatch paths remain branch-heavy and cardinality-sensitive.
-- path: src/bioetl/infrastructure/quality/
+- path: scripts/engineering/quality/
   scopes:
   - xenon
   - critical_check
