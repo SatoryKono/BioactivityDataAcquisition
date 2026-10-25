@@ -20,8 +20,8 @@
 ## Результаты проверок
 
 ### 1. Парсинг XML PubMed внешнего ввода (defusedxml)
-- `src/bioetl/infrastructure/adapters/pubmed/xml_processor.py`: Парсинг `xml_text` использует `defused_ET.fromstring(xml_text)` (строка 33).
-- Исключение `defused_ET.EntitiesForbidden` корректно перехватывается и обрабатывается (строки 35-39).
+- `src/bioetl/infrastructure/adapters/pubmed/xml_processor.py`, метод `PubMedXmlProcessor.parse_response`: парсинг `xml_text` использует `defused_ET.fromstring(xml_text)`.
+- Тот же метод корректно перехватывает и обрабатывает исключение `defused_ET.EntitiesForbidden`.
 - Обычный `xml.etree.ElementTree` импортируется как `ET`, но используется только для аннотаций типов (`ET.Element`) и для `ET.tostring` (сериализация, не парсинг).
 - Ожидаемый результат: Внешний ввод парсится безопасным `defusedxml`. ПРОВЕРЕНО (PASS).
 
