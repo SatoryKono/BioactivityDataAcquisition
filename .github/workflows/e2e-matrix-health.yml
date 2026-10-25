@@ -110,7 +110,7 @@ jobs:
           fi
 
       - name: Upload E2E matrix health artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ always() && !cancelled() }}
         with:
           name: e2e-matrix-health-blocking
@@ -195,7 +195,7 @@ jobs:
             --markdown-out reports/e2e/matrix-smoke-live-summary.md
 
       - name: Upload E2E nightly artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ always() && !cancelled() }}
         with:
           name: e2e-matrix-health-nightly-live-${{ github.sha }}
@@ -245,7 +245,7 @@ jobs:
             --junitxml=reports/e2e/e2e-nightly-full.xml
 
       - name: Upload full E2E replay artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ always() && !cancelled() }}
         with:
           name: e2e-nightly-full-replay-${{ github.sha }}
@@ -280,7 +280,7 @@ jobs:
 
       - name: Upload prompt test artifacts
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: prompt-tests-nightly-${{ github.sha }}
           path: reports/e2e/prompt-tests-nightly.xml
