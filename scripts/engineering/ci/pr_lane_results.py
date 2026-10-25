@@ -50,6 +50,7 @@ GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
 )
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
+MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 
 TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_telemetry_baseline.py",
@@ -88,7 +89,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "scripts/engineering/dev/zed_mypy.py",
             "configs/quality/github_required_checks.yaml",
         ),
-        ("tests/architecture/test_mypy_target_contract.py",),
+        (MYPY_TARGET_CONTRACT_TEST,),
     ),
     "reports/engineering/SEC-003_audit_report.md": (
         "tests/unit/domain/services/test_composite_metadata_helpers.py",
@@ -108,11 +109,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     ".pre-commit-config.yaml": (
         "tests/architecture/test_scripts_inventory_discovery.py",
-        "tests/architecture/test_mypy_target_contract.py",
+        MYPY_TARGET_CONTRACT_TEST,
     ),
     "scripts/engineering/ci/presubmit_gate.py": (
         "tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py",
-        "tests/architecture/test_mypy_target_contract.py",
+        MYPY_TARGET_CONTRACT_TEST,
     ),
     "configs/quality/debt_scorecard.yaml": (
         "tests/architecture/test_quality_debt_scorecard.py",
