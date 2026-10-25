@@ -29,6 +29,7 @@ from tests.integration.infrastructure.durability.builders import (
 pytestmark = pytest.mark.integration
 
 _CHILD_TIMEOUT_S = 10.0
+_FRAGMENT_CREATED_AT = datetime(2026, 10, 25, tzinfo=UTC)
 _SIGKILL_ONLY = pytest.mark.skipif(
     not hasattr(signal, "SIGKILL"),
     reason="SIGKILL is unavailable on this platform",
@@ -54,7 +55,7 @@ def _dummy_fragment() -> LineageGraphFragment:
         fragment_id="frag_1",
         run_id="run_1",
         manifest_id="manifest_1",
-        created_at=datetime.now(UTC),
+        created_at=_FRAGMENT_CREATED_AT,
         stored_fragment_id=None,
     )
 
