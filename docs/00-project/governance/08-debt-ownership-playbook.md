@@ -35,7 +35,7 @@ Every new exemption is accepted only if metadata includes:
 Mandatory enforcement points:
 
 - Registry policy fields in `configs/quality/architecture_metric_exemptions.yaml`.
-- Validator check in `src/bioetl/infrastructure/quality/exemptions_registry.py`.
+- Validator check in `scripts/engineering/quality/exemptions_registry.py`.
 - Architecture tests in `tests/architecture/test_quality_exemptions_registry.py`.
 
 ## PR Checklist

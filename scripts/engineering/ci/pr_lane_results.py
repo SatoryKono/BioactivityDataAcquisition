@@ -66,10 +66,50 @@ TEST_GOVERNANCE_ARTIFACT_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_governance_audit.py",
     *FLAKY_BURNDOWN_REVIEW_TESTS,
 )
+QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
+    "tests/architecture/test_architecture_quality_scorecard.py",
+    "tests/architecture/test_quality_debt_scorecard.py",
+    "tests/architecture/test_quality_exemptions_registry.py",
+)
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "CHANGELOG.md": ("tests/architecture/test_docs_version_sync.py",),
     ".coderabbit.yaml": ("tests/architecture/test_coderabbit_config.py",),
+    ".github/workflows/duplication-complexity.yml": (
+        "tests/architecture/test_github_actions_runtime_policy.py",
+        "tests/architecture/test_tech_debt_issues_5811_5816_closeout.py",
+    ),
+    ".pre-commit-config.yaml": (
+        "tests/architecture/test_scripts_inventory_discovery.py",
+    ),
+    "configs/quality/debt_scorecard.yaml": (
+        "tests/architecture/test_quality_debt_scorecard.py",
+    ),
+    "configs/quality/duplication_complexity_exemptions.yaml": (
+        "tests/architecture/test_duplication_complexity_expiry_governance.py",
+    ),
+    "configs/quality/package_cohesion_budget.yaml": (
+        "tests/architecture/test_architecture_quality_scorecard.py",
+    ),
+    "configs/quality/time_seam_classification.yaml": (
+        "tests/architecture/test_time_seam_classification.py",
+    ),
+    "docs/00-project/architecture-index.md": (
+        "tests/architecture/test_documentation.py",
+    ),
+    "docs/00-project/governance/08-debt-ownership-playbook.md": (
+        "tests/architecture/test_tech_debt_roadmap_7461_7465.py",
+    ),
+    "docs/02-architecture/current-state-inventory.md": (
+        "tests/architecture/test_arch_s4_s9_gates.py",
+        "tests/unit/scripts/qa/test_topology_source_binding.py",
+    ),
+    "docs/03-guides/testing.md": (
+        "tests/architecture/test_test_telemetry_governance.py",
+    ),
+    "docs/reports/evidence/project-package-topology/SUMMARY.md": (
+        "tests/unit/scripts/qa/test_topology_source_binding.py",
+    ),
     "Makefile": (
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
     ),
@@ -146,6 +186,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "scripts/engineering/quality/": QUALITY_GOVERNANCE_TESTS,
+    "src/bioetl/infrastructure/quality/": QUALITY_GOVERNANCE_TESTS,
     "grafana/tooling/router-v7-bridge/": (
         "tests/architecture/test_circleci_migration_contract.py",
         "tests/architecture/test_residual_osv_9853.py",

@@ -33,7 +33,7 @@ from datetime import date
 
 import pytest
 
-from bioetl.infrastructure.quality.exemptions_registry_validation import (
+from scripts.engineering.quality.exemptions_registry_validation import (
     _normalize_required_fields,
     _resolve_due_field,
     _validate_due_date,

@@ -6,41 +6,41 @@ from datetime import datetime
 from pathlib import Path
 from typing import Final, cast
 
-from bioetl.infrastructure.quality.architecture_debt_artifact_tasks import (
+from scripts.engineering.quality.architecture_debt_artifact_tasks import (
     artifact_defaults as _artifact_defaults,
 )
-from bioetl.infrastructure.quality.architecture_debt_artifact_tasks import (
+from scripts.engineering.quality.architecture_debt_artifact_tasks import (
     build_compatibility_surface_tasks as _build_compatibility_surface_tasks,
 )
-from bioetl.infrastructure.quality.architecture_debt_artifact_tasks import (
+from scripts.engineering.quality.architecture_debt_artifact_tasks import (
     build_dead_code_review_tasks as _build_dead_code_review_tasks,
 )
-from bioetl.infrastructure.quality.architecture_debt_artifact_tasks import (
+from scripts.engineering.quality.architecture_debt_artifact_tasks import (
     build_duplication_tasks as _build_duplication_tasks,
 )
-from bioetl.infrastructure.quality.architecture_debt_artifact_tasks import (
+from scripts.engineering.quality.architecture_debt_artifact_tasks import (
     build_hotspot_family_tasks as _build_hotspot_family_tasks,
 )
-from bioetl.infrastructure.quality.architecture_debt_task_policy import (
+from scripts.engineering.quality.architecture_debt_task_policy import (
     COMMON_ACCEPTANCE_CRITERIA,
     COMMON_ALLOWED_PATHS,
     COMMON_CHECKS,
     COMMON_FORBIDDEN_PATHS,
 )
-from bioetl.infrastructure.quality.architecture_debt_task_policy import (
+from scripts.engineering.quality.architecture_debt_task_policy import (
     build_checks as _build_checks,
 )
-from bioetl.infrastructure.quality.architecture_debt_task_policy import (
+from scripts.engineering.quality.architecture_debt_task_policy import (
     build_goal as _build_goal,
 )
-from bioetl.infrastructure.quality.architecture_debt_task_support import (
+from scripts.engineering.quality.architecture_debt_task_support import (
     SymbolMetricLocation,
     build_symbol_index,
     measure_task,
     parse_limit_value,
     task_status,
 )
-from bioetl.infrastructure.quality.exemptions_registry import load_exemptions_registry
+from scripts.engineering.quality.exemptions_registry import load_exemptions_registry
 
 TASK_SCHEMA_VERSION: Final[str] = "1.0"
 REGISTRY_NAMES: Final[tuple[str, ...]] = (
@@ -55,7 +55,7 @@ REGISTRY_NAMES: Final[tuple[str, ...]] = (
 
 
 def _project_root() -> Path:
-    return Path(__file__).resolve().parents[4]
+    return Path(__file__).resolve().parents[3]
 
 
 def _default_output_path(

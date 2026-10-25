@@ -23,10 +23,10 @@ if str(PROJECT_ROOT) not in sys.path:
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from bioetl.infrastructure.quality.architecture_quality_scorecard import (
+from scripts.engineering.quality.architecture_quality_scorecard import (
     build_architecture_quality_scorecard,
 )
-from bioetl.infrastructure.quality.debt_scorecard import (
+from scripts.engineering.quality.debt_scorecard import (
     evaluate_debt_scorecard,
     load_debt_scorecard,
 )
