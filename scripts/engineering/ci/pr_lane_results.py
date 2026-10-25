@@ -79,6 +79,10 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "docs/04-reference/environment-variables.md": (
+        DOCKER_RUNTIME_CONTRACT_TEST,
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+    ),
     "reports/quality/total-tech-debt-audit-main-current.md": (
         "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
     ),
