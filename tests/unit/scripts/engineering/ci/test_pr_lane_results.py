@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 from scripts.engineering.ci.pr_lane_results import (
+    OWNER_STEPS,
     affected_pytest_targets,
     assert_step_outcomes,
     build_results,
@@ -209,6 +210,7 @@ def test_shadow_compare_routes_billing_pr_non_code_changes() -> None:
         [
             "CHANGELOG.md",
             "docs/02-architecture/finances-github-billing.md",
+            "reports/engineering/ci/acceptance_f1_report.md",
             "reports/engineering/finances/billing_manifest.json",
         ],
         repo_root=repo_root,
@@ -579,6 +581,7 @@ def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
     report = build_shadow_compare(
         [
             ".gitignore",
+            "Dockerfile.bioetl",
             "docs/reports/generated/documentation-cleanup-inventory.json",
             "docs/reports/generated/documentation-cleanup-inventory.md",
             "reports/performance/benchmark-summary.json",
@@ -597,6 +600,7 @@ def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
     selected = set(report["selected"])
     assert selected == {
         "tests/architecture/test_documentation_cleanup_inventory.py",
+        "tests/architecture/test_docker_runtime_contracts.py",
         "tests/architecture/test_gitignore_secret_and_agents_policy.py",
         "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
         "tests/architecture/test_test_governance_audit.py",
@@ -617,3 +621,87 @@ def test_base_checkout_aggregation_uses_existing_module_entrypoint():
         step["run"] for step in steps if "pr_lane_results build" in step.get("run", "")
     )
     assert "python -m scripts.engineering.ci.pr_lane_results build" in build
+
+
+def test_record_steps_uses_bounded_outcomes_instead_of_all_step_outputs() -> None:
+    """Keep large action outputs out of the recorder process environment."""
+    import re
+    import yaml
+
+    root = Path(__file__).resolve().parents[5]
+    workflow_text = (root / ".github/workflows/pr-required.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "toJson(steps)" not in workflow_text
+
+    workflow = yaml.safe_load(workflow_text)
+    for job_id, owner in (
+        ("fast-governance", "fast-governance"),
+        ("class-lane", "class-lane"),
+    ):
+        record = next(
+            step
+            for step in workflow["jobs"][job_id]["steps"]
+            if step.get("name") == "Record required step outcomes"
+        )
+        serialized = set(re.findall(r"steps\.([a-z0-9-]+)\.outcome", record["run"]))
+        required = {
+            step_id for step_ids in OWNER_STEPS[owner].values() for step_id in step_ids
+        }
+        assert serialized == required
+
+
+def test_assert_steps_malformed_outcomes() -> None:
+    """Simulate a malformed outcome payload that includes strange formatting."""
+    failures = assert_step_outcomes(
+        {"type-checking": {"decision": "required", "reason": "path_match"}},
+        {
+            "mypy": "",  # Missing outcome
+            "newtype-protocol": "success",
+            "any-usage": "success",
+        },
+        owner="class-lane",
+    )
+
+    # Empty string outcome defaults to 'missing' string representation in assert_step_outcomes
+    assert failures == ["type-checking:mypy=missing"]
+
+
+def test_generated_artifact_sibling_uses_canonical_test_registry(
+    tmp_path: Path,
+) -> None:
+    """Route a generated sibling through its registered artifact test."""
+    test_path = "tests/architecture/test_generated_report.py"
+    target = tmp_path / test_path
+    target.parent.mkdir(parents=True)
+    target.write_text("def test_report():\n    assert True\n", encoding="utf-8")
+    registry = tmp_path / "configs/quality/generated_artifact_tests.json"
+    registry.parent.mkdir(parents=True)
+    registry.write_text(
+        json.dumps(
+            {
+                "tests": [
+                    {
+                        "node": f"{test_path}::test_report",
+                        "artifacts": ["reports/quality/report.json"],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    (registry.parent / "generated_artifact_routing.yaml").write_text(
+        "routes:\n"
+        "  - id: report\n"
+        "    outputs:\n"
+        "      - reports/quality/report.json\n"
+        "      - reports/quality/report.md\n",
+        encoding="utf-8",
+    )
+
+    report = build_shadow_compare(
+        ["reports/quality/report.md"],
+        repo_root=tmp_path,
+    )
+
+    assert report["selected"] == [test_path]

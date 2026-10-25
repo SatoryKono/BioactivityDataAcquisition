@@ -39,6 +39,8 @@ PYPROJECT_TOML = "pyproject.toml"
 UV_LOCK = "uv.lock"
 PYTHON_DEPENDENCY_FILES = frozenset({PYPROJECT_TOML, UV_LOCK})
 TEST_FILE_GLOB = "test_*.py"
+GENERATED_ARTIFACT_TESTS = Path("configs/quality/generated_artifact_tests.json")
+GENERATED_ARTIFACT_ROUTING = Path("configs/quality/generated_artifact_routing.yaml")
 
 from scripts.engineering.dev.run_tests import TESTS_ROOT as PYTEST_ALL_ROOT
 
@@ -70,6 +72,13 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".coderabbit.yaml": ("tests/architecture/test_coderabbit_config.py",),
     "Makefile": (
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
+    ),
+    "Dockerfile.bioetl": ("tests/architecture/test_docker_runtime_contracts.py",),
+    "configs/quality/generated_artifact_routing.yaml": (
+        "tests/architecture/test_generated_artifact_routing.py",
+    ),
+    "configs/quality/generated_artifact_tests.json": (
+        "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
     ),
     "tests/fixtures/contracts/coderabbit-schema.v2.json": (
         "tests/architecture/test_coderabbit_config.py",
@@ -122,6 +131,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/quality/test-governance-current.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
     "reports/engineering/finances/billing_manifest.json": (
         "tests/unit/scripts/test_github_billing.py",
+    ),
+    "reports/engineering/ci/acceptance_f1_report.md": (
+        "tests/architecture/qm_07/test_acceptance_f1_report.py",
     ),
     ".github/workflows/pr-required.yml": (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
     "configs/quality/reusable_action_pins.yaml": (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
@@ -324,7 +336,7 @@ def affected_pytest_targets(
     paths = [path for raw in changed_files if (path := raw.strip().replace("\\", "/"))]
     if not paths:
         return [_python_suite_root(repo_root)]
-    mapped = {path: _mapped_targets(path) for path in paths}
+    mapped = {path: _mapped_targets(path, repo_root) for path in paths}
     _require_targets(
         [target for values in mapped.values() for target in values], repo_root
     )
@@ -371,12 +383,80 @@ def _global_dependency_lane(root: Path, dependencies: set[str]) -> bool:
     )
 
 
-def _mapped_targets(path: str) -> list[str]:
+def _generated_artifact_targets(path: str, root: Path) -> list[str]:
+    """Return tests declared for a generated artifact or one of its siblings."""
+    registry_path = root / GENERATED_ARTIFACT_TESTS
+    if not registry_path.is_file():
+        return []
+    try:
+        payload = json.loads(registry_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Invalid generated artifact test registry: {exc}") from exc
+    records = payload.get("tests") if isinstance(payload, dict) else None
+    if not isinstance(records, list):
+        raise ValueError(
+            "Invalid generated artifact test registry: tests must be a list"
+        )
+
+    tests_by_artifact: dict[str, set[str]] = {}
+    for record in records:
+        if not isinstance(record, dict):
+            raise ValueError("Invalid generated artifact test registry: test entry")
+        node = record.get("node")
+        artifacts = record.get("artifacts")
+        if not isinstance(node, str) or not isinstance(artifacts, list):
+            raise ValueError("Invalid generated artifact test registry: test fields")
+        test_path = node.partition("::")[0]
+        for artifact in artifacts:
+            if not isinstance(artifact, str):
+                raise ValueError(
+                    "Invalid generated artifact test registry: artifact path"
+                )
+            tests_by_artifact.setdefault(artifact, set()).add(test_path)
+
+    direct = tests_by_artifact.get(path)
+    if direct:
+        return sorted(direct)
+
+    routing_path = root / GENERATED_ARTIFACT_ROUTING
+    if not routing_path.is_file():
+        return []
+    try:
+        routing = yaml.safe_load(routing_path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError) as exc:
+        raise ValueError(f"Invalid generated artifact routing registry: {exc}") from exc
+    routes = routing.get("routes") if isinstance(routing, dict) else None
+    if not isinstance(routes, list):
+        raise ValueError(
+            "Invalid generated artifact routing registry: routes must be a list"
+        )
+    for route in routes:
+        if not isinstance(route, dict):
+            raise ValueError("Invalid generated artifact routing registry: route entry")
+        outputs = route.get("outputs")
+        if not isinstance(outputs, list) or not all(
+            isinstance(output, str) for output in outputs
+        ):
+            raise ValueError("Invalid generated artifact routing registry: outputs")
+        if path not in outputs:
+            continue
+        sibling_tests = {
+            target
+            for output in outputs
+            for target in tests_by_artifact.get(output, set())
+        }
+        return sorted(sibling_tests)
+    return []
+
+
+def _mapped_targets(path: str, root: Path) -> list[str]:
     """Return catalog-mapped tests for one changed path."""
     targets = list(AFFECTED_TESTS_BY_PATH.get(path, ()))
     for prefix, values in AFFECTED_TESTS_BY_PREFIX.items():
         if path.startswith(prefix):
             targets.extend(values)
+    if not targets:
+        targets.extend(_generated_artifact_targets(path, root))
     return targets
 
 
@@ -596,7 +676,7 @@ def _changed_paths(changed_files: list[str]) -> list[str]:
 
 def _has_selection_route(path: str, root: Path) -> bool:
     """Return whether one path has an explicit impact-selection route."""
-    if path in PYTHON_DEPENDENCY_FILES or _mapped_targets(path):
+    if path in PYTHON_DEPENDENCY_FILES or _mapped_targets(path, root):
         return True
     if path.startswith(TESTS_PREFIX) and path.endswith(".py"):
         return True
