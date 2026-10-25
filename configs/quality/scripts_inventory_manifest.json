@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-25T12:35:05.757844+00:00",
+  "generated_at": "2026-10-25T13:18:47.054453+00:00",
   "summary": {
-    "total_scripts": 667,
+    "total_scripts": 696,
     "status_counts": {
       "active": 334,
-      "supporting": 333
+      "supporting": 362
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
       "ci": 74,
-      "docs": 287,
+      "docs": 289,
       "other": 16,
-      "scripts": 555,
+      "scripts": 584,
       "skills": 13,
-      "tests": 485
+      "tests": 513
     }
   },
   "scripts": [
@@ -2896,7 +2896,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 111,
+          "line": 142,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3678,7 +3678,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 110,
+          "line": 141,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3733,7 +3733,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 109,
+          "line": 140,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -9747,7 +9747,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 29,
+      "reference_count": 30,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -10392,7 +10392,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 521,
+          "line": 570,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         }
@@ -10448,7 +10448,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 117,
+          "line": 148,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -11141,7 +11141,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 19,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -11174,22 +11174,22 @@
           "text": "source_artifact=\"scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload\","
         },
         {
+          "path": "scripts/engineering/quality/architecture_quality_scorecard.py",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.ci.validate_registry_dq_refs import ("
+        },
+        {
+          "path": "scripts/engineering/quality/architecture_quality_scorecard.py",
+          "line": 119,
+          "source_group": "scripts",
+          "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py\""
+        },
+        {
           "path": "tests/architecture/test_architecture_quality_scorecard.py",
           "line": 177,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload\""
-        },
-        {
-          "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 152,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py\","
-        },
-        {
-          "path": "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py",
-          "line": 26,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci.validate_registry_dq_refs import build_diagnostics_payload"
         }
       ]
     },
@@ -11380,7 +11380,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 301,
+      "reference_count": 303,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -13529,7 +13529,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 401,
+      "reference_count": 405,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -15316,7 +15316,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 432,
+          "line": 426,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         },
@@ -16154,7 +16154,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 435,
+          "line": 429,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         },
@@ -16283,7 +16283,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 11,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -16310,6 +16310,18 @@
           "text": "from scripts.engineering.qa import ("
         },
         {
+          "path": "scripts/engineering/quality/architecture_quality_scorecard.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa.report_adr_enforcement_matrix import ("
+        },
+        {
+          "path": "scripts/engineering/quality/architecture_quality_scorecard.py",
+          "line": 155,
+          "source_group": "scripts",
+          "text": "\"scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload\""
+        },
+        {
           "path": "tests/architecture/test_adr_enforcement_matrix.py",
           "line": 22,
           "source_group": "tests",
@@ -16320,18 +16332,6 @@
           "line": 23,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_adr_enforcement_matrix import build_payload"
-        },
-        {
-          "path": "tests/architecture/test_adr_enforcement_matrix.py",
-          "line": 129,
-          "source_group": "tests",
-          "text": "\"  python -m scripts.engineering.qa.report_adr_enforcement_matrix --update\","
-        },
-        {
-          "path": "tests/architecture/test_architecture_quality_scorecard.py",
-          "line": 168,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -17358,7 +17358,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -17371,6 +17371,12 @@
           "line": 185,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_lazy_import_inventory\""
+        },
+        {
+          "path": "scripts/engineering/quality/architecture_quality_scorecard.py",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa.report_lazy_import_inventory import collect_lazy_imports"
         },
         {
           "path": "tests/architecture/test_arch_s4_s9_gates.py",
@@ -18765,6 +18771,1325 @@
       "next_step": "Retain as the QM-02 before/after verifier invoked by its unit tests. Keep it supporting so the active script budget does not grow; promote only after a router slot is freed."
     },
     {
+      "path": "scripts/engineering/quality/_baseline_validation.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/_governance_validation.py",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._baseline_validation import ("
+        },
+        {
+          "path": "scripts/engineering/quality/debt_scorecard_validation.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._baseline_validation import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_four.py",
+          "line": 112,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality._baseline_validation import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_thirteen.py",
+          "line": 52,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality._baseline_validation import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_baseline_validation.py",
+          "line": 34,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality._baseline_validation import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/_decomposition_burndown_policy.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/_decomposition_validation.py",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._decomposition_burndown_policy import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py",
+          "line": 30,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality._decomposition_burndown_policy import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/_decomposition_owner_policy.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/_decomposition_burndown_policy.py",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._decomposition_owner_policy import ("
+        },
+        {
+          "path": "scripts/engineering/quality/_decomposition_validation.py",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._decomposition_owner_policy import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_one_line_residuals.py",
+          "line": 74,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality._decomposition_owner_policy import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/_decomposition_program_policy.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/_decomposition_validation.py",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._decomposition_program_policy import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/_decomposition_validation.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/debt_scorecard_validation.py",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._decomposition_validation import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_decomposition_validation.py",
+          "line": 34,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality._decomposition_validation import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/_governance_validation.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/debt_scorecard_validation.py",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._governance_validation import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12.py",
+          "line": 417,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality._governance_validation import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_thirteen.py",
+          "line": 57,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality._governance_validation import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_governance_and_task_support_boost.py",
+          "line": 55,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality._governance_validation import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_governance_validation.py",
+          "line": 36,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality._governance_validation import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/_grace_windows_validation.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/debt_scorecard_validation.py",
+          "line": 28,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._grace_windows_validation import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_grace_windows_validation.py",
+          "line": 36,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality._grace_windows_validation import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/_primitives.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 16,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/check_quality_exemptions.py",
+          "line": 21,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._primitives import _parse_quarter_label"
+        },
+        {
+          "path": "scripts/engineering/quality/_baseline_validation.py",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._primitives import ("
+        },
+        {
+          "path": "scripts/engineering/quality/_decomposition_burndown_policy.py",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._primitives import ("
+        },
+        {
+          "path": "scripts/engineering/quality/_decomposition_owner_policy.py",
+          "line": 6,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._primitives import ("
+        },
+        {
+          "path": "scripts/engineering/quality/_decomposition_program_policy.py",
+          "line": 6,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._primitives import ("
+        },
+        {
+          "path": "scripts/engineering/quality/_governance_validation.py",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._primitives import ("
+        },
+        {
+          "path": "scripts/engineering/quality/_grace_windows_validation.py",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._primitives import ("
+        },
+        {
+          "path": "scripts/engineering/quality/_quarterly_targets_validation.py",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._primitives import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/_quarterly_targets_validation.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/debt_scorecard_validation.py",
+          "line": 34,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality._quarterly_targets_validation import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py",
+          "line": 33,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality._quarterly_targets_validation import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_quarterly_targets_validation.py",
+          "line": 34,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality._quarterly_targets_validation import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/architecture_debt_artifact_tasks.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 9,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_debt_artifact_tasks import ("
+        },
+        {
+          "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_debt_artifact_tasks import ("
+        },
+        {
+          "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_debt_artifact_tasks import ("
+        },
+        {
+          "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_debt_artifact_tasks import ("
+        },
+        {
+          "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
+          "line": 21,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_debt_artifact_tasks import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_four.py",
+          "line": 118,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.architecture_debt_artifact_tasks import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_thirteen.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality import architecture_debt_artifact_tasks as debt_tasks"
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_thirteen.py",
+          "line": 20,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.architecture_debt_artifact_tasks import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/architecture_debt_reduction.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 11,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/reduce_architecture_debt.py",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_debt_reduction import ("
+        },
+        {
+          "path": "scripts/engineering/quality/__init__.py",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_debt_reduction import ("
+        },
+        {
+          "path": "tests/architecture/test_generated_artifact_routing.py",
+          "line": 423,
+          "source_group": "tests",
+          "text": "ROOT / \"scripts\" / \"engineering\" / \"quality\" / \"architecture_debt_reduction.py\""
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_nineteen.py",
+          "line": 20,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.architecture_debt_reduction import _layer_for_target"
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seventeen.py",
+          "line": 24,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.architecture_debt_reduction import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_thirteen.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality import architecture_debt_reduction as debt_reduction"
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_thirteen.py",
+          "line": 26,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.architecture_debt_reduction import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_three.py",
+          "line": 69,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality import architecture_debt_reduction as debt"
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/generate_architecture_debt_tasks.py",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_debt_task_generation import ("
+        },
+        {
+          "path": "scripts/engineering/quality/__init__.py",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_debt_task_generation import ("
+        },
+        {
+          "path": "tests/architecture/test_generated_artifact_routing.py",
+          "line": 420,
+          "source_group": "tests",
+          "text": "/ \"architecture_debt_task_generation.py\""
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_architecture_debt_task_generation.py",
+          "line": 41,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality import architecture_debt_task_generation as tasks"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_architecture_debt_task_generation.py",
+          "line": 43,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.architecture_debt_task_generation import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/architecture_debt_task_policy.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/architecture_debt_artifact_tasks.py",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_debt_task_policy import ("
+        },
+        {
+          "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
+          "line": 24,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_debt_task_policy import ("
+        },
+        {
+          "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_debt_task_policy import ("
+        },
+        {
+          "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
+          "line": 33,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_debt_task_policy import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py",
+          "line": 57,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.architecture_debt_task_policy import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/architecture_debt_task_support.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
+          "line": 36,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_debt_task_support import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_four.py",
+          "line": 124,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.architecture_debt_task_support import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_thirteen.py",
+          "line": 30,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.architecture_debt_task_support import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py",
+          "line": 31,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.architecture_debt_task_support import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_runtime_policy_guard_contracts.py",
+          "line": 15,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality import architecture_debt_task_support as debt"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_governance_and_task_support_boost.py",
+          "line": 69,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.architecture_debt_task_support import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/architecture_quality_scorecard.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 14,
+      "references": [
+        {
+          "path": "scripts/engineering/ci/quality_integral_gate.py",
+          "line": 44,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_quality_scorecard import ("
+        },
+        {
+          "path": "scripts/engineering/qa/debt_governance_gate_evaluators.py",
+          "line": 35,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_quality_scorecard import ("
+        },
+        {
+          "path": "scripts/engineering/qa/report_architecture_quality_scorecard.py",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_quality_scorecard import ("
+        },
+        {
+          "path": "scripts/engineering/qa/report_debt_governance_gates.py",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_quality_scorecard import ("
+        },
+        {
+          "path": "scripts/engineering/quality/__init__.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_quality_scorecard import ("
+        },
+        {
+          "path": "tests/architecture/qm_07/test_qm07_cold_imports.py",
+          "line": 17,
+          "source_group": "tests",
+          "text": "\"architecture_quality_scorecard.py\","
+        },
+        {
+          "path": "tests/architecture/qm_07/test_qm07_cold_imports.py",
+          "line": 21,
+          "source_group": "tests",
+          "text": "\"architecture_quality_scorecard.py\","
+        },
+        {
+          "path": "tests/architecture/qm_07/test_qm07_cold_imports.py",
+          "line": 25,
+          "source_group": "tests",
+          "text": "\"architecture_quality_scorecard.py\","
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/architecture_quality_scoring.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "docs/00-project/architecture-index.md",
+          "line": 92,
+          "source_group": "docs",
+          "text": "`scripts/engineering/quality/architecture_quality_scoring.py`) match"
+        },
+        {
+          "path": "scripts/engineering/quality/architecture_quality_scorecard.py",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.architecture_quality_scoring import ("
+        },
+        {
+          "path": "tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py",
+          "line": 22,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.architecture_quality_scoring import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py",
+          "line": 60,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.architecture_quality_scoring import _lazy_import_util"
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_three.py",
+          "line": 84,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.architecture_quality_scoring import _interpretation"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_architecture_quality_scorecard.py",
+          "line": 42,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/budget_evaluator.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/debt_scorecard.py",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.budget_evaluator import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_four.py",
+          "line": 136,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.budget_evaluator import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_thirteen.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality import budget_evaluator as budget_mod"
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_thirteen.py",
+          "line": 39,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.budget_evaluator import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_budget_evaluator.py",
+          "line": 36,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.budget_evaluator import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_governance_and_task_support_boost.py",
+          "line": 40,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.budget_evaluator import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/debt_scorecard.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 10,
+      "references": [
+        {
+          "path": "scripts/engineering/ci/quality_integral_gate.py",
+          "line": 47,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.debt_scorecard import ("
+        },
+        {
+          "path": "scripts/engineering/qa/check_quality_exemptions.py",
+          "line": 22,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.debt_scorecard import ("
+        },
+        {
+          "path": "scripts/engineering/qa/debt_governance_gate_evaluators.py",
+          "line": 41,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.debt_scorecard import ("
+        },
+        {
+          "path": "scripts/engineering/qa/report_debt_governance_gates.py",
+          "line": 29,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.debt_scorecard import ("
+        },
+        {
+          "path": "scripts/engineering/quality/__init__.py",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.debt_scorecard import ("
+        },
+        {
+          "path": "scripts/engineering/quality/debt_scorecard_validation.py",
+          "line": 125,
+          "source_group": "scripts",
+          "text": "# Re-export _parse_iso_date for backward compatibility (used by debt_scorecard.py)."
+        },
+        {
+          "path": "tests/architecture/qm_07/test_qm07_cold_imports.py",
+          "line": 28,
+          "source_group": "tests",
+          "text": "(\"debt_scorecard.py\", \"scripts.engineering.common.repo_paths\"),"
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_two_line_residuals_three.py",
+          "line": 21,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.debt_scorecard import _iter_registry_entries"
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/debt_scorecard_validation.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/debt_scorecard.py",
+          "line": 21,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.debt_scorecard_validation import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_debt_scorecard_validation.py",
+          "line": 34,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.debt_scorecard_validation import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/exemptions_registry.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 10,
+      "references": [
+        {
+          "path": "docs/00-project/governance/08-debt-ownership-playbook.md",
+          "line": 38,
+          "source_group": "docs",
+          "text": "- Validator check in `scripts/engineering/quality/exemptions_registry.py`."
+        },
+        {
+          "path": "scripts/engineering/ci/quality_integral_gate.py",
+          "line": 52,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry import load_exemptions_registry"
+        },
+        {
+          "path": "scripts/engineering/qa/check_quality_exemptions.py",
+          "line": 29,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry import ("
+        },
+        {
+          "path": "scripts/engineering/quality/__init__.py",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry import ("
+        },
+        {
+          "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
+          "line": 43,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry import load_exemptions_registry"
+        },
+        {
+          "path": "scripts/engineering/quality/debt_scorecard.py",
+          "line": 24,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry import load_exemptions_registry"
+        },
+        {
+          "path": "scripts/engineering/quality/inventory.py",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry import load_exemptions_registry"
+        },
+        {
+          "path": "scripts/ops/migrations/oneoff/migrate_exemption_keys_to_paths.py",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/exemptions_registry_access.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/exemptions_registry.py",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_access import ("
+        },
+        {
+          "path": "scripts/engineering/quality/exemptions_registry_policy.py",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_access import ("
+        },
+        {
+          "path": "scripts/engineering/quality/exemptions_registry_targets.py",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_access import ("
+        },
+        {
+          "path": "tests/architecture/qm_07/test_qm07_cold_imports.py",
+          "line": 29,
+          "source_group": "tests",
+          "text": "(\"exemptions_registry_access.py\", \"scripts.engineering.common.repo_paths\"),"
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/exemptions_registry_paths.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 13,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/exemptions_registry.py",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_paths import ("
+        },
+        {
+          "path": "scripts/engineering/quality/exemptions_registry.py",
+          "line": 19,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_paths import ("
+        },
+        {
+          "path": "scripts/engineering/quality/exemptions_registry_access.py",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_paths import ("
+        },
+        {
+          "path": "scripts/engineering/quality/exemptions_registry_access.py",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_paths import ("
+        },
+        {
+          "path": "scripts/engineering/quality/exemptions_registry_policy.py",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_paths import ("
+        },
+        {
+          "path": "scripts/engineering/quality/exemptions_registry_policy.py",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_paths import ("
+        },
+        {
+          "path": "scripts/engineering/quality/exemptions_registry_policy.py",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_paths import ("
+        },
+        {
+          "path": "scripts/engineering/quality/exemptions_registry_policy.py",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_paths import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/exemptions_registry_policy.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/exemptions_registry.py",
+          "line": 22,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_policy import ("
+        },
+        {
+          "path": "scripts/engineering/quality/exemptions_registry.py",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_policy import ("
+        },
+        {
+          "path": "scripts/engineering/quality/exemptions_registry.py",
+          "line": 29,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_policy import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_four.py",
+          "line": 140,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.exemptions_registry_policy import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_four.py",
+          "line": 474,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality import exemptions_registry_policy as policy"
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_thirteen.py",
+          "line": 17,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality import exemptions_registry_policy as policy"
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_thirteen.py",
+          "line": 42,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.exemptions_registry_policy import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/exemptions_registry_targets.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/exemptions_registry.py",
+          "line": 32,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_targets import ("
+        },
+        {
+          "path": "scripts/engineering/quality/exemptions_registry_policy.py",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_targets import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_three.py",
+          "line": 85,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.exemptions_registry_targets import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_thirteen.py",
+          "line": 18,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality import exemptions_registry_targets as targets"
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_three.py",
+          "line": 70,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality import exemptions_registry_targets as targets"
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/exemptions_registry_validation.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/exemptions_registry_policy.py",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_validation import ("
+        },
+        {
+          "path": "scripts/engineering/quality/exemptions_registry_policy.py",
+          "line": 29,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.exemptions_registry_validation import ("
+        },
+        {
+          "path": "tests/architecture/test_quality_debt_scorecard.py",
+          "line": 30,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.exemptions_registry_validation import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_four.py",
+          "line": 144,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.exemptions_registry_validation import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_thirteen.py",
+          "line": 19,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality import exemptions_registry_validation as validation"
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_thirteen.py",
+          "line": 46,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.exemptions_registry_validation import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_exemptions_registry_validation.py",
+          "line": 36,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.exemptions_registry_validation import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/inventory.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 9,
+      "references": [
+        {
+          "path": "scripts/engineering/ci/quality_integral_gate.py",
+          "line": 53,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.inventory import build_exemption_inventory"
+        },
+        {
+          "path": "scripts/engineering/quality/budget_evaluator.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.inventory import ExemptionInventorySummary"
+        },
+        {
+          "path": "scripts/engineering/quality/debt_scorecard.py",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.inventory import ("
+        },
+        {
+          "path": "scripts/engineering/quality/registry_sync_service.py",
+          "line": 6,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.inventory import ExemptionInventorySummary"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_budget_evaluator.py",
+          "line": 43,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.inventory import ExemptionInventorySummary"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_debt_scorecard.py",
+          "line": 48,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.inventory import ExemptionInventorySummary"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_governance_and_task_support_boost.py",
+          "line": 83,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.inventory import ExemptionInventorySummary"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_inventory.py",
+          "line": 38,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.inventory import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/registry_sync_service.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/debt_scorecard.py",
+          "line": 29,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.registry_sync_service import validate_registry_sync"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_registry_sync_service.py",
+          "line": 35,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.registry_sync_service import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/report_formatter.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/_governance_validation.py",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.report_formatter import ("
+        },
+        {
+          "path": "scripts/engineering/quality/budget_evaluator.py",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.report_formatter import ("
+        },
+        {
+          "path": "scripts/engineering/quality/debt_scorecard.py",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.report_formatter import ("
+        },
+        {
+          "path": "tests/architecture/test_quality_debt_scorecard.py",
+          "line": 33,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.report_formatter import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_four.py",
+          "line": 148,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.report_formatter import ("
+        },
+        {
+          "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_thirteen.py",
+          "line": 49,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.report_formatter import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_report_formatter.py",
+          "line": 37,
+          "source_group": "tests",
+          "text": "from scripts.engineering.quality.report_formatter import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
+      "path": "scripts/engineering/quality/scoring.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 13,
+      "references": [
+        {
+          "path": "scripts/engineering/quality/budget_evaluator.py",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.scoring import ("
+        },
+        {
+          "path": "scripts/engineering/quality/debt_scorecard.py",
+          "line": 33,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.quality.scoring import compute_integral_debt_score"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+          "line": 250,
+          "source_group": "tests",
+          "text": "\"src/bioetl/infrastructure/quality/scoring.py\","
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+          "line": 251,
+          "source_group": "tests",
+          "text": "\"scripts/engineering/quality/scoring.py\","
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_exemptions_registry.py",
+          "line": 482,
+          "source_group": "tests",
+          "text": "(scripts_dir / \"scoring.py\").write_text("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_exemptions_registry.py",
+          "line": 494,
+          "source_group": "tests",
+          "text": "\"scripts/engineering/quality/scoring.py::compute_integral_debt_score\": {}"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_exemptions_registry_paths.py",
+          "line": 133,
+          "source_group": "tests",
+          "text": "assert is_module_path_key(\"scripts/engineering/quality/scoring.py\")"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/quality/test_exemptions_registry_paths.py",
+          "line": 161,
+          "source_group": "tests",
+          "text": "canonical = \"scripts/engineering/quality/scoring.py\""
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-15",
+      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved."
+    },
+    {
       "path": "scripts/engineering/repo/__main__.py",
       "type": "py",
       "status": "active",
@@ -19107,7 +20432,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 152,
+          "line": 192,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -22107,7 +23432,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 179,
+          "line": 221,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },

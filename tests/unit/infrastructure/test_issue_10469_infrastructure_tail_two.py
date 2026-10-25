@@ -27,10 +27,10 @@ from bioetl.infrastructure.config.protein_class_target_type_loader import (
 from bioetl.infrastructure.control_plane import _durability
 from bioetl.infrastructure.control_plane import file_run_ledger_store
 from bioetl.infrastructure.observability import metrics_publisher_adapter
-from bioetl.infrastructure.quality._decomposition_burndown_policy import (
+from scripts.engineering.quality._decomposition_burndown_policy import (
     _validate_expiry_decomposition_targets_section,
 )
-from bioetl.infrastructure.quality._quarterly_targets_validation import (
+from scripts.engineering.quality._quarterly_targets_validation import (
     _validate_quarterly_targets_section,
 )
 from bioetl.infrastructure.schemas.base_schemas_pubchem import (
