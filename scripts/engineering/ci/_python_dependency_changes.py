@@ -24,7 +24,7 @@ PYTHON_LOCK = "uv.lock"
 FULL_SUITE_CONFIGURATION_PREFIXES = ("tool.pytest.ini_options",)
 NARROW_CONFIGURATION_PREFIXES = ("tool.setuptools.packages.find.exclude",)
 # Stub-only wheels have no runtime import owner. Keep reviewed ownership explicit.
-STUB_RUNTIME_DISTRIBUTIONS = {"types-openpyxl": "openpyxl"}
+STUB_RUNTIME_DISTRIBUTIONS = {"types-openpyxl": ("openpyxl", "openpyxl")}
 
 
 def _name(value: str) -> str:
@@ -291,11 +291,13 @@ def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
     module_owners = packages_distributions()
     for dependency in sorted(changed):
         family = _lock_family(packages, dependency)
-        runtime = STUB_RUNTIME_DISTRIBUTIONS.get(dependency)
+        stub_owner = STUB_RUNTIME_DISTRIBUTIONS.get(dependency)
         locked = {_name(package["name"]) for package in packages}
-        if runtime and {dependency, runtime} <= declared & locked:
-            family.update(_lock_family(packages, runtime))
         selected = _import_consumers(imports, module_owners, family)
+        if stub_owner and {dependency, stub_owner[0]} <= declared & locked:
+            selected.update(
+                path for path, modules in imports.items() if stub_owner[1] in modules
+            )
         selected |= _declared_reference_consumers(references, declared, family)
         if selected:
             consumers.update(selected)
