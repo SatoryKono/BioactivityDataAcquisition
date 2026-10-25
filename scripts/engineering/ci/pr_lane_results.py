@@ -123,6 +123,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
     ),
     "Dockerfile.bioetl": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    ".github/workflows/docker.yml": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    "reports/quality/architecture-debt-remote-main-baseline.md": (
+        "tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py",
+    ),
     "configs/quality/generated_artifact_routing.yaml": (
         "tests/architecture/test_generated_artifact_routing.py",
     ),
