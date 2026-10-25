@@ -530,6 +530,12 @@ def _persist_archive_snapshots(
     previous_index_bytes: bytes | None,
     snapshots: Sequence[tuple[Mapping[str, Any], Mapping[str, Any], dict[str, Any]]],
 ) -> None:
+    # An index is proof that at least one immutable attempt was archived.  Do
+    # not create an empty index on the initial poll: verify_archive() correctly
+    # rejects empty indexes, so materialising one here would make every later
+    # archive update fail before a completed run can arrive.
+    if previous_index_bytes is None and not index and not snapshots:
+        return
     payload = canonical_bytes(index)
     new_directories: list[Path] = []
     try:

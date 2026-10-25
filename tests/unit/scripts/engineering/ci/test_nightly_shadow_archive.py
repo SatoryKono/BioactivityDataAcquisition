@@ -297,6 +297,43 @@ def test_archive_runs_appends_new_attempts_without_dropping_old_index_rows(
     ]
 
 
+def test_archive_runs_waits_for_first_completed_run_before_creating_index(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    selected: list[dict[str, object]] = []
+
+    monkeypatch.setattr(
+        archive_module,
+        "collect_selected_runs",
+        lambda *args, **kwargs: selected,
+    )
+
+    def build_attempt(client: object, repository: str, run: dict[str, object]):
+        raw = dict(run)
+        outcomes = _outcomes()
+        return raw, outcomes, _manifest(raw, outcomes)
+
+    monkeypatch.setattr(archive_module, "build_attempt_archive", build_attempt)
+    arguments = {
+        "client": object(),
+        "repository": "owner/repository",
+        "workflow": "nightly.yml",
+        "branch": "main",
+        "event": "schedule",
+        "limit": 40,
+        "output": tmp_path,
+    }
+
+    assert archive_runs(**arguments)["snapshot_count"] == 0
+    assert archive_runs(**arguments)["snapshot_count"] == 0
+    assert not (tmp_path / "index.json").exists()
+
+    selected.append(_raw(run_id=11))
+    assert archive_runs(**arguments)["snapshot_count"] == 1
+    assert verify_archive(tmp_path)["snapshot_count"] == 1
+
+
 def test_existing_snapshot_is_not_overwritten(tmp_path: Path) -> None:
     _store(tmp_path, _raw(), _outcomes())
     changed = _raw()
