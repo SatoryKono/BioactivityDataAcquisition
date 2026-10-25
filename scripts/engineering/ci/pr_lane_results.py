@@ -74,6 +74,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
     ),
     "Dockerfile.bioetl": ("tests/architecture/test_docker_runtime_contracts.py",),
+    "configs/quality/generated_artifact_routing.yaml": (
+        "tests/architecture/test_generated_artifact_routing.py",
+    ),
+    "configs/quality/generated_artifact_tests.json": (
+        "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+    ),
     "tests/fixtures/contracts/coderabbit-schema.v2.json": (
         "tests/architecture/test_coderabbit_config.py",
     ),

@@ -580,6 +580,8 @@ def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
     report = build_shadow_compare(
         [
             ".gitignore",
+            "configs/quality/generated_artifact_routing.yaml",
+            "configs/quality/generated_artifact_tests.json",
             "Dockerfile.bioetl",
             "docs/reports/generated/documentation-cleanup-inventory.json",
             "docs/reports/generated/documentation-cleanup-inventory.md",
@@ -600,10 +602,12 @@ def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
     assert selected == {
         "tests/architecture/test_documentation_cleanup_inventory.py",
         "tests/architecture/test_docker_runtime_contracts.py",
+        "tests/architecture/test_generated_artifact_routing.py",
         "tests/architecture/test_gitignore_secret_and_agents_policy.py",
         "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
         "tests/architecture/test_test_governance_audit.py",
         "tests/unit/repo_backed/scripts/qa/test_validate_benchmark_evidence_repo.py",
+        "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
     }
 
 
