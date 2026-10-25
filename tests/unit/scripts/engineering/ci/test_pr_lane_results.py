@@ -281,9 +281,9 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
     )
     assert "tests/unit/scripts/qa/test_topology_source_binding.py" in report["selected"]
     assert "tests/architecture/test_scripts_lifecycle_registry.py" in report["selected"]
-    assert "tests/architecture/test_api_reference_public_facades.py" in report[
-        "selected"
-    ]
+    assert (
+        "tests/architecture/test_api_reference_public_facades.py" in report["selected"]
+    )
     assert (
         "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py"
         in report["selected"]
