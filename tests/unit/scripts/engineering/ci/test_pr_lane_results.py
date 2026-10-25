@@ -264,10 +264,7 @@ def test_shadow_compare_keeps_package_discovery_contract_narrow() -> None:
     repo_root = Path(__file__).resolve().parents[5]
 
     report = build_shadow_compare(
-        [
-            "pyproject.toml",
-            "tests/architecture/qm_07/test_distribution_isolation.py",
-        ],
+        ["pyproject.toml"],
         repo_root=repo_root,
         changed_python_dependencies=set(),
     )
