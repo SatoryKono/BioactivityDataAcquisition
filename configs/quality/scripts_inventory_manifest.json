@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-25T10:05:07.660285+00:00",
+  "generated_at": "2026-10-25T10:08:29.433544+00:00",
   "summary": {
     "total_scripts": 667,
     "status_counts": {
@@ -14703,7 +14703,7 @@
         },
         {
           "path": "tests/architecture/qm_07/test_gate_evaluators.py",
-          "line": 3,
+          "line": 5,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
