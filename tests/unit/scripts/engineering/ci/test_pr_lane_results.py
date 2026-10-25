@@ -272,12 +272,10 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
         repo_root=repo_root,
     )
 
-    assert "tests/architecture/test_github_actions_runtime_policy.py" in report[
-        "selected"
-    ]
-    assert "tests/unit/scripts/qa/test_topology_source_binding.py" in report[
-        "selected"
-    ]
+    assert (
+        "tests/architecture/test_github_actions_runtime_policy.py" in report["selected"]
+    )
+    assert "tests/unit/scripts/qa/test_topology_source_binding.py" in report["selected"]
 
 
 def test_shadow_compare_rejects_mixed_diff_with_unmapped_path(

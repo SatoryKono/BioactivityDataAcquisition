@@ -124,9 +124,7 @@ def pytest_configuration_changed(root: Path, base: str, head: str) -> bool:
     after = _configuration(_read_revision(root, head, PYTHON_MANIFEST))
     paths = _changed_paths(before, after)
     unknown = [
-        path
-        for path in paths
-        if not path.startswith(FULL_SUITE_CONFIGURATION_PREFIXES)
+        path for path in paths if not path.startswith(FULL_SUITE_CONFIGURATION_PREFIXES)
     ]
     if unknown:
         raise ValueError(

@@ -237,7 +237,6 @@ def test_s7_package_cohesion_budgets_are_not_exceeded() -> None:
         assert loc <= int(row["max_package_loc"]), row["path"]
 
 
-
 def _ast_parent_map(tree: ast.AST) -> dict[ast.AST, ast.AST]:
     parents: dict[ast.AST, ast.AST] = {}
     for node in ast.walk(tree):

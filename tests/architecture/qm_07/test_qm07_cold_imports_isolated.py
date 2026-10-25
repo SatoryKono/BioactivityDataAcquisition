@@ -1,4 +1,5 @@
 import pytest
+
 """Cold imports from a source checkout and an unrelated working directory.
 
 Both src and the checkout root are explicit: QM-07 wheel isolation is BLOCKED
