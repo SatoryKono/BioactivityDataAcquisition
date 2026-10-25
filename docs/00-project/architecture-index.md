@@ -89,7 +89,7 @@ by scorecard regeneration. Clean posture scores 10.0; live integral is sensitive
 to those diagnostics (`schema_version` 2).
 
 Interpretation bands (`_interpretation` in
-`src/bioetl/infrastructure/quality/architecture_quality_scoring.py`) match
+`scripts/engineering/quality/architecture_quality_scoring.py`) match
 `prompt.architecture.cycle`:
 
 | Band | integral | Machine token |
