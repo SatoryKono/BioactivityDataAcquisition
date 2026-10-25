@@ -12,7 +12,7 @@
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
-| Generated routes | 73 |
+| Generated routes | 74 |
 
 ## Tracking State
 
@@ -54,8 +54,8 @@
 | Active | 751 |
 | Archived | 1553 |
 | Canonical | 76 |
-| Generated | 1062 |
-| Working | 485 |
+| Generated | 1064 |
+| Working | 483 |
 
 ## Surface Families
 
@@ -64,15 +64,15 @@
 | active | 751 |
 | archive | 1553 |
 | canonical | 76 |
-| generated | 1062 |
-| working | 485 |
+| generated | 1064 |
+| working | 483 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 247 |
-| generate-automatically | 1062 |
+| archive-after-migration | 245 |
+| generate-automatically | 1064 |
 | keep | 2618 |
 
 ## Cleanup Candidates
@@ -305,6 +305,7 @@
 
 | Route | Generator | Commit Policy |
 | --- | --- | --- |
+| adr-enforcement-matrix | `scripts/engineering/qa/report_adr_enforcement_matrix.py` | tracked_quality_baseline |
 | adr-registry-generated-docs | `scripts/generate_adr_registry.py` | tracked_curated_generated_doc |
 | ai-local-generated-docs-helpers | `AI runtime memory, prompts, and local skill generators` | ignored_local_export |
 | ai-runtime-governance-mirrors | `scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py` | tracked_mirror_surface |
