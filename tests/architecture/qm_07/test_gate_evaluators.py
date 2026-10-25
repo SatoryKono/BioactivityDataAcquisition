@@ -8,6 +8,8 @@ from scripts.engineering.qa.debt_governance_gate_evaluators import (
     load_debt_scorecard,
 )
 
+pytestmark = pytest.mark.architecture
+
 
 @pytest.mark.architecture
 @pytest.mark.unit
