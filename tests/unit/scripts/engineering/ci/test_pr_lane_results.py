@@ -658,7 +658,7 @@ def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
     assert report["activation"] == "not_applied"
     assert report["covers_full_suite"] is False
     selected = set(report["selected"])
-    assert selected == {
+    baseline = {
         "tests/architecture/test_documentation_cleanup_inventory.py",
         "tests/architecture/test_docker_runtime_contracts.py",
         "tests/architecture/test_generated_artifact_routing.py",
@@ -668,6 +668,18 @@ def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
         "tests/unit/repo_backed/scripts/qa/test_validate_benchmark_evidence_repo.py",
         "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
     }
+    registry = json.loads(
+        (repo_root / "configs/quality/generated_artifact_tests.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    generated_owners = {
+        record["node"].partition("::")[0]
+        for record in registry["tests"]
+        if "reports/quality/test-governance-current.json" in record["artifacts"]
+    }
+    assert baseline <= selected
+    assert generated_owners <= selected
 
 
 def test_base_checkout_aggregation_uses_existing_module_entrypoint():
@@ -827,6 +839,42 @@ def test_generated_artifact_route_unions_direct_and_sibling_tests(
     )
 
     assert report["selected"] == [json_test, markdown_test]
+
+
+def test_static_mapping_unions_generated_registry_tests(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A static path mapping must not suppress generated-registry owners."""
+    from scripts.engineering.ci import pr_lane_results as lane
+
+    artifact = "reports/quality/report.json"
+    static_test = "tests/architecture/test_static_owner.py"
+    generated_test = "tests/architecture/test_generated_owner.py"
+    for test_path in (static_test, generated_test):
+        target = tmp_path / test_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("def test_report():\n    assert True\n", encoding="utf-8")
+    monkeypatch.setitem(lane.AFFECTED_TESTS_BY_PATH, artifact, (static_test,))
+    registry = tmp_path / "configs/quality/generated_artifact_tests.json"
+    registry.parent.mkdir(parents=True)
+    registry.write_text(
+        json.dumps(
+            {
+                "tests": [
+                    {
+                        "node": f"{generated_test}::test_report",
+                        "artifacts": [artifact],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_shadow_compare([artifact], repo_root=tmp_path)
+
+    assert report["selected"] == [static_test, generated_test]
 
 
 def test_generated_artifact_directory_output_routes_descendants(
