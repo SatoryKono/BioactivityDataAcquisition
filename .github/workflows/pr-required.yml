@@ -279,7 +279,6 @@ jobs:
         if: always()
         env:
           DECISION_MATRIX: ${{ needs.classify-changes.outputs.decision_matrix }}
-          STEPS_JSON: ${{ toJson(steps) }}
           LANE_OWNER: fast-governance
         run: |
           set -euo pipefail
@@ -288,13 +287,21 @@ jobs:
           import json
           import os
           from pathlib import Path
-          raw = json.loads(os.environ["STEPS_JSON"])
-          flat = {}
-          for key, value in raw.items():
-              if isinstance(value, dict):
-                  flat[key] = str(value.get("outcome") or value.get("conclusion") or "")
-              else:
-                  flat[key] = str(value)
+          flat = {
+              "cleanliness": "${{ steps.cleanliness.outcome }}",
+              "cleanup-governance": "${{ steps.cleanup-governance.outcome }}",
+              "root-docs": "${{ steps.root-docs.outcome }}",
+              "root-registry": "${{ steps.root-registry.outcome }}",
+              "structure-audit": "${{ steps.structure-audit.outcome }}",
+              "hygiene-pytest": "${{ steps.hygiene-pytest.outcome }}",
+              "compiled-artifacts": "${{ steps.compiled-artifacts.outcome }}",
+              "commitlint": "${{ steps.commitlint.outcome }}",
+              "docs-passports": "${{ steps.docs-passports.outcome }}",
+              "docs-links": "${{ steps.docs-links.outcome }}",
+              "docs-verify": "${{ steps.docs-verify.outcome }}",
+              "mkdocs-nav": "${{ steps.mkdocs-nav.outcome }}",
+              "prose-consistency": "${{ steps.prose-consistency.outcome }}",
+          }
           Path("reports/quality/lane-step-outcomes.json").write_text(
               json.dumps(flat, separators=(",", ":")),
               encoding="utf-8",
@@ -708,7 +715,6 @@ jobs:
         if: always()
         env:
           DECISION_MATRIX: ${{ needs.classify-changes.outputs.decision_matrix }}
-          STEPS_JSON: ${{ toJson(steps) }}
           LANE_OWNER: class-lane
         run: |
           set -euo pipefail
@@ -717,28 +723,30 @@ jobs:
           import json
           import os
           from pathlib import Path
-          raw = json.loads(os.environ["STEPS_JSON"])
-          osv_scan = raw.get("osv-scan")
-          osv_gate = raw.get("osv-gate")
-          if (
-              isinstance(osv_scan, dict)
-              and isinstance(osv_gate, dict)
-              and str(osv_scan.get("outcome", "")).lower() == "failure"
-              and str(osv_gate.get("outcome", "")).lower() == "success"
-          ):
-              normalized_osv_scan = dict(osv_scan)
-              normalized_osv_scan["outcome"] = "success"
-              raw["osv-scan"] = normalized_osv_scan
-          flat = {}
-          for key, value in raw.items():
-              if isinstance(value, dict):
-                  # OSV findings are allowed to make the scan step return 1;
-                  # the following osv-gate determines whether they are allowed.
-                  result_key = "conclusion" if key == "osv-scan" else "outcome"
-                  result = value.get(result_key) or value.get("outcome") or value.get("conclusion") or ""
-                  flat[key] = str(result)
-              else:
-                  flat[key] = str(value)
+          flat = {
+              "ruff": "${{ steps.ruff.outcome }}",
+              "ruff-format": "${{ steps.ruff-format.outcome }}",
+              "ruff-isort": "${{ steps.ruff-isort.outcome }}",
+              "c901": "${{ steps.c901.outcome }}",
+              "lint-imports": "${{ steps.lint-imports.outcome }}",
+              "arch-pytest": "${{ steps.arch-pytest.outcome }}",
+              "affected-pytest": "${{ steps.affected-pytest.outcome }}",
+              "impact-shadow-compare": "${{ steps.impact-shadow-compare.outcome }}",
+              "mypy": "${{ steps.mypy.outcome }}",
+              "newtype-protocol": "${{ steps.newtype-protocol.outcome }}",
+              "any-usage": "${{ steps.any-usage.outcome }}",
+              "detect-secrets": "${{ steps.detect-secrets.outcome }}",
+              "pip-audit": "${{ steps.pip-audit.outcome }}",
+              "bandit": "${{ steps.bandit.outcome }}",
+              "gitleaks": "${{ steps.gitleaks.outcome }}",
+              "osv-gate": "${{ steps.osv-gate.outcome }}",
+              "schema-artifacts": "${{ steps.schema-artifacts.outcome }}",
+              "schema-parity": "${{ steps.schema-parity.outcome }}",
+              "duplication-exemptions": "${{ steps.duplication-exemptions.outcome }}",
+              "constructor-args": "${{ steps.constructor-args.outcome }}",
+              "jscpd": "${{ steps.jscpd.outcome }}",
+              "duplication-hotspots": "${{ steps.duplication-hotspots.outcome }}",
+          }
           Path("reports/quality/lane-step-outcomes.json").write_text(
               json.dumps(flat, separators=(",", ":")),
               encoding="utf-8",
