@@ -1081,7 +1081,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert (
         dockerfile.count(
             "chainguard/wolfi-base@sha256:"
-            "19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
+            "360896efb0753a5701c48f860e17130c205eae5a264797aa3e7ea126ee2923a7"
         )
         == 2
     )

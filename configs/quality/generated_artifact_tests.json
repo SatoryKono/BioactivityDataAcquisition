@@ -5,6 +5,14 @@
   "scope": "Committed generated evidence and generator drift; fixture generation and independent source/governance/security contracts stay in CI.",
   "tests": [
     {
+      "node": "tests/architecture/test_adr_registry_governance_sync.py::test_adr_registry_mirrors_track_latest_decision_index",
+      "artifacts": [
+        "docs/02-architecture/adr-registry.md",
+        "docs/02-architecture/adr-registry/"
+      ],
+      "reason": "Checks the generated ADR registry mirrors and directory artifacts against the canonical decision index."
+    },
+    {
       "node": "tests/architecture/test_adr_enforcement_matrix.py::test_accepted_adr_enforcement_matrix_has_no_unreviewed_gaps",
       "artifacts": [
         "reports/quality/adr-enforcement-matrix.json"

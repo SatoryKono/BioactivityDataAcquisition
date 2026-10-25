@@ -234,9 +234,13 @@ def test_task_support_helpers_cover_path_and_symbol_resolution(tmp_path: Path) -
     syntax_error_path = source_root / "broken.py"
     syntax_error_path.write_text("def broken(:\n", encoding="utf-8")
     (source_root / "__init__.py").write_text("", encoding="utf-8")
+    script_path = tmp_path / "scripts" / "engineering" / "quality" / "score.py"
+    script_path.parent.mkdir(parents=True)
+    script_path.write_text("def score():\n    return 1\n", encoding="utf-8")
 
     modules = iter_source_modules(tmp_path)
     assert module_path in modules
+    assert script_path in modules
     assert all(path.name != "__init__.py" for path in modules)
 
     symbol_index = build_symbol_index(tmp_path)
