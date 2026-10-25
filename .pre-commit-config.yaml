@@ -108,8 +108,8 @@ repos:
         verbose: true
 
       - id: mypy-strict
-        name: Run strict mypy gate on src/bioetl and src/memory
-        entry: python3 scripts/engineering/dev/run_project_python.py -m mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory
+        name: Run strict mypy gate on product and engineering quality code
+        entry: python3 scripts/engineering/dev/run_project_python.py -m mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory scripts/engineering/quality
         language: system
         pass_filenames: false
         stages: [pre-push]

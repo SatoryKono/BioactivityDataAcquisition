@@ -50,6 +50,7 @@ GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
 )
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
+MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 
 TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_telemetry_baseline.py",
@@ -79,6 +80,25 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "reports/engineering/cache_preflight_experiment_report.md": (
+        "tests/architecture/test_setup_python_uv_cache_policy.py",
+        "tests/architecture/test_conftest_session_caches.py",
+        "tests/architecture/test_pr_gate_complete.py",
+    ),
+    **dict.fromkeys(
+        (
+            ".github/workflows/type-checking.yml",
+            ".github/workflows/type-checking-cold.yml",
+            "scripts/engineering/dev/run_mypy.sh",
+            "scripts/engineering/dev/run_mypy.ps1",
+            "scripts/engineering/dev/zed_mypy.py",
+            "configs/quality/github_required_checks.yaml",
+        ),
+        (MYPY_TARGET_CONTRACT_TEST,),
+    ),
+    "reports/engineering/SEC-003_audit_report.md": (
+        "tests/unit/domain/services/test_composite_metadata_helpers.py",
+    ),
     "docs/04-reference/environment-variables.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         "tests/architecture/test_documentation_cleanup_inventory.py",
@@ -94,6 +114,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     ".pre-commit-config.yaml": (
         "tests/architecture/test_scripts_inventory_discovery.py",
+        MYPY_TARGET_CONTRACT_TEST,
+    ),
+    "scripts/engineering/ci/presubmit_gate.py": (
+        "tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py",
+        MYPY_TARGET_CONTRACT_TEST,
     ),
     "configs/quality/debt_scorecard.yaml": (
         "tests/architecture/test_quality_debt_scorecard.py",
@@ -216,6 +241,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "reports/evidence/12461/": (
+        "tests/architecture/test_provider_contract_interoperability_governance.py",
+        "tests/contract/test_provider_contract_snapshot_registry.py",
+    ),
     "scripts/ai/gemini/npm-tooling/": (
         "tests/architecture/test_gemini_cli_bootstrap.py",
     ),
