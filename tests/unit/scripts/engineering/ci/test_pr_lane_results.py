@@ -241,6 +241,20 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
     }
 
 
+def test_shadow_compare_routes_lineage_crash_evidence() -> None:
+    """Lineage crash reports select the test that produced the evidence."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        ["reports/audit-runs/12106-s6/evidence/evidence.md"],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/integration/infrastructure/durability/test_crash_lineage.py"
+    ]
+
+
 def test_shadow_compare_rejects_mixed_diff_with_unmapped_path(
     tmp_path: Path,
 ) -> None:

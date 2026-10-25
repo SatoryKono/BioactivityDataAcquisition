@@ -159,6 +159,9 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_braces_backport.py",
         "tests/architecture/test_residual_osv_9853.py",
     ),
+    "reports/audit-runs/12106-s6/": (
+        "tests/integration/infrastructure/durability/test_crash_lineage.py",
+    ),
     "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
     "reports/performance/": BENCHMARK_EVIDENCE_TESTS,
     "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.": (
