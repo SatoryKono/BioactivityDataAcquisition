@@ -34,12 +34,12 @@ jobs:
           mkdir -p reports
           rm -rf .mypy_cache
 
-          echo "Running full mypy strict gate on src/bioetl + src/memory... (COLD CONTROL)"
+          echo "Running full mypy strict gate on src/bioetl + src/memory + scripts/engineering/quality... (COLD CONTROL)"
           echo "Event: $EVENT_NAME" | tee reports/mypy_strict.log
 
           set +e
           timeout --signal=TERM --kill-after=30s 30m \
-            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --no-incremental src/bioetl src/memory \
+            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --no-incremental src/bioetl src/memory scripts/engineering/quality \
             2>&1 | tee -a reports/mypy_strict.log
           status=${PIPESTATUS[0]}
           set -e

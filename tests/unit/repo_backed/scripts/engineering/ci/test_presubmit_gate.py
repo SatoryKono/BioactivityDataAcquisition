@@ -374,7 +374,11 @@ def test_ruff_and_mypy_commands_cover_required_trees(
     assert "--strict" in mypy_command
     assert "--incremental" in mypy_command
     assert "--no-incremental" not in mypy_command
-    assert mypy_command[-2:] == ["src/bioetl", "src/memory"]
+    assert mypy_command[-3:] == [
+        "src/bioetl",
+        "src/memory",
+        "scripts/engineering/quality",
+    ]
     assert gate.fast_architecture_command()[4:8] == [
         "pytest",
         "tests/architecture",
