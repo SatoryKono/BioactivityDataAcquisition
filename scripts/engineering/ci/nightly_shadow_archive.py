@@ -376,8 +376,20 @@ def require_accepted(ledger: Mapping[str, Any]) -> None:
     if historical.get("independent_review") is not True:
         raise ArchiveError("independent review is missing")
     reasons = historical.get("reason_codes")
-    if reasons:
+    if not isinstance(reasons, list) or reasons:
         raise ArchiveError("shadow window still has gap reasons")
+    archive = ledger.get("durable_archive")
+    if not isinstance(archive, Mapping):
+        raise ArchiveError("ledger is missing durable_archive")
+    if archive.get("acceptance") != "pass":
+        raise ArchiveError("durable archive is not accepted")
+    if archive.get("independent_restore") is not True:
+        raise ArchiveError("independent restore is missing")
+    if archive.get("elapsed_age_is_90_days") is not True:
+        raise ArchiveError("durable archive has not aged 90 days")
+    review = ledger.get("independent_review_record")
+    if not isinstance(review, Mapping) or not review:
+        raise ArchiveError("independent review record is missing")
 
 
 def build_attempt_archive(
@@ -855,6 +867,10 @@ def _verify_identity(
     pagination = outcomes.get("pagination") if isinstance(outcomes, dict) else None
     if not isinstance(pagination, dict):
         raise ArchiveError(f"pagination missing: {destination}")
+    jobs = outcomes.get("jobs")
+    fetched = pagination.get("jobs_fetched")
+    if not isinstance(jobs, list) or type(fetched) is not int or len(jobs) != fetched:
+        raise ArchiveError(f"pagination jobs mismatch: {destination}")
     status = oracle_pagination(
         pagination.get("jobs_fetched"),
         pagination.get("jobs_total_count"),

@@ -449,6 +449,89 @@ def test_pagination_oracle_keeps_unknown_distinct(
     assert oracle_pagination(fetched, total, hit_page_cap=hit_page_cap) == expected
 
 
+@pytest.mark.parametrize("jobs", [None, {}, [], [{}, {}]])
+def test_verify_rejects_missing_or_miscounted_jobs(
+    tmp_path: Path, jobs: object
+) -> None:
+    """Valid checksums cannot substitute for the saved job inventory."""
+    outcomes = _outcomes()
+    if jobs is None:
+        outcomes.pop("jobs")
+    else:
+        outcomes["jobs"] = jobs
+    _store(tmp_path, _raw(), outcomes)
+    _seal_index(tmp_path)
+    with pytest.raises(ArchiveError, match="pagination jobs mismatch"):
+        verify_archive(tmp_path)
+
+
+def _accepted_ledger() -> dict[str, object]:
+    """Build synthetic acceptance fields, not real restoration evidence."""
+    return {
+        "historical_window": {
+            "status": "complete",
+            "independent_review": True,
+            "reason_codes": [],
+        },
+        "durable_archive": {
+            "acceptance": "pass",
+            "independent_restore": True,
+            "elapsed_age_is_90_days": True,
+        },
+        "independent_review_record": {"reviewer": "independent-test-reviewer"},
+    }
+
+
+@pytest.mark.parametrize(
+    ("section", "field", "value"),
+    [
+        ("historical_window", "reason_codes", None),
+        ("historical_window", "reason_codes", ""),
+        ("historical_window", "reason_codes", {}),
+        ("historical_window", "reason_codes", ["gap"]),
+        ("durable_archive", "acceptance", "not_pass"),
+        ("durable_archive", "independent_restore", False),
+        ("durable_archive", "independent_restore", 1),
+        ("durable_archive", "elapsed_age_is_90_days", False),
+        ("durable_archive", "elapsed_age_is_90_days", 1),
+    ],
+)
+def test_acceptance_rejects_missing_or_invalid_evidence(
+    section: str, field: str, value: object
+) -> None:
+    """Completion flags alone cannot accept a deficient archive."""
+    ledger = _accepted_ledger()
+    nested = ledger[section]
+    assert isinstance(nested, dict)
+    nested[field] = value
+    with pytest.raises(ArchiveError):
+        require_accepted(ledger)
+    del nested[field]
+    with pytest.raises(ArchiveError):
+        require_accepted(ledger)
+
+
+@pytest.mark.parametrize("field", ["durable_archive", "independent_review_record"])
+@pytest.mark.parametrize("value", [None, {}, "asserted", True])
+def test_acceptance_requires_structured_evidence(field: str, value: object) -> None:
+    """Missing and scalar evidence records must fail closed."""
+    ledger = _accepted_ledger()
+    ledger[field] = value
+    with pytest.raises(ArchiveError):
+        require_accepted(ledger)
+    del ledger[field]
+    with pytest.raises(ArchiveError):
+        require_accepted(ledger)
+
+
+def test_acceptance_does_not_require_future_window_start() -> None:
+    """The acceptance barrier does not invent a future observation identity."""
+    ledger = _accepted_ledger()
+    assert require_accepted(ledger) is None
+    ledger.update(window_start_sha=None, window_start_utc=None)
+    assert require_accepted(ledger) is None
+
+
 def test_mixed_history_is_an_unacceptable_window_and_blocks_the_next_stage() -> None:
     historical = assess_shadow_window(
         [

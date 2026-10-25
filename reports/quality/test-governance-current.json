@@ -626,6 +626,13 @@
       "path": "tests/unit/scripts/ci/test_docker_publication_guards.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_matching_clean_producer_is_accepted"
+    },
+    {
+      "category": "weak_no_value",
+      "line": "527",
+      "path": "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
+      "rationale": "candidate tests that need later assertion strengthening or removal review",
+      "test_name": "test_acceptance_does_not_require_future_window_start"
     }
   ],
   "assertless_category_counts": {
@@ -633,7 +640,7 @@
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
     "intentional_no_exception_contract": 85,
-    "weak_no_value": 0
+    "weak_no_value": 1
   },
   "assertless_examples": [
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
@@ -998,10 +1005,23 @@
       "categories": {
         "intentional_no_exception_contract": 2
       }
+    },
+    "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "weak_no_value": 1
+      }
     }
   },
-  "assertless_total_candidates": 85,
-  "budget_violations": [],
+  "assertless_total_candidates": 86,
+  "budget_violations": [
+    {
+      "actual": 1,
+      "budget": "refined_assertless_max",
+      "expected_max": 0,
+      "metric": "refined_assertless_tests"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1178,7 +1198,7 @@
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
-  "refined_assertless_tests": 0,
+  "refined_assertless_tests": 1,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
@@ -1816,6 +1836,13 @@
         "path": "tests/unit/scripts/ci/test_docker_publication_guards.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_matching_clean_producer_is_accepted"
+      },
+      {
+        "category": "weak_no_value",
+        "line": "527",
+        "path": "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_acceptance_does_not_require_future_window_start"
       }
     ],
     "assertless_category_counts": {
@@ -1823,7 +1850,7 @@
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
       "intentional_no_exception_contract": 85,
-      "weak_no_value": 0
+      "weak_no_value": 1
     },
     "assertless_examples": [
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
@@ -1852,7 +1879,7 @@
       "tests/unit/composition/factories/storage/test_health_mixin.py:103",
       "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:623"
     ],
-    "assertless_total_candidates": 85,
+    "assertless_total_candidates": 86,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2028,7 +2055,7 @@
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "parse_errors": [],
-    "refined_assertless_tests": 0,
+    "refined_assertless_tests": 1,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
@@ -2087,15 +2114,15 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3178,
-    "total_test_functions": 31384,
+    "total_test_functions": 31388,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "39391ba305adba167749b38b686d3c0df3ac7837bced57116b6b818cddf852e4",
+  "source_tree_sha256": "c3ecf0b5d87b86653e34a89104168ac8fa85308bb1e1b1e395e2a0dc4a93ef98",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 85,
+    "assertless_total_candidates": 86,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
@@ -2103,7 +2130,7 @@
     "intentional_no_exception_contract": 85,
     "markerless_examples": [],
     "markerless_test_functions": 0,
-    "refined_assertless_tests": 0,
+    "refined_assertless_tests": 1,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
@@ -2155,7 +2182,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3178,
-  "total_test_functions": 31384,
+  "total_test_functions": 31388,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
