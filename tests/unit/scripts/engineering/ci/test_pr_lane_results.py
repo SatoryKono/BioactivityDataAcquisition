@@ -687,7 +687,10 @@ def test_record_steps_uses_bounded_outcomes_instead_of_all_step_outputs() -> Non
         required = {
             step_id for step_ids in OWNER_STEPS[owner].values() for step_id in step_ids
         }
-        assert serialized == required
+        audited = (
+            {"zizmor", "dependency-review"} if owner == "fast-governance" else set()
+        )
+        assert serialized == required | audited
 
 
 def test_assert_steps_malformed_outcomes() -> None:
@@ -704,6 +707,17 @@ def test_assert_steps_malformed_outcomes() -> None:
 
     # Empty string outcome defaults to 'missing' string representation in assert_step_outcomes
     assert failures == ["type-checking:mypy=missing"]
+
+
+def test_assert_steps_reports_audited_action_failure() -> None:
+    """A failing audited action remains visible outside gate-owned steps."""
+    failures = assert_step_outcomes(
+        {},
+        {"zizmor": "failure", "dependency-review": "skipped"},
+        owner="fast-governance",
+    )
+
+    assert failures == ["step:zizmor=failure"]
 
 
 def test_generated_artifact_sibling_uses_canonical_test_registry(
@@ -740,6 +754,88 @@ def test_generated_artifact_sibling_uses_canonical_test_registry(
 
     report = build_shadow_compare(
         ["reports/quality/report.md"],
+        repo_root=tmp_path,
+    )
+
+    assert report["selected"] == [test_path]
+
+
+def test_generated_artifact_route_unions_direct_and_sibling_tests(
+    tmp_path: Path,
+) -> None:
+    """A direct artifact match must not hide tests owned by its sibling."""
+    json_test = "tests/architecture/test_generated_json.py"
+    markdown_test = "tests/architecture/test_generated_markdown.py"
+    for test_path in (json_test, markdown_test):
+        target = tmp_path / test_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("def test_report():\n    assert True\n", encoding="utf-8")
+    registry = tmp_path / "configs/quality/generated_artifact_tests.json"
+    registry.parent.mkdir(parents=True)
+    registry.write_text(
+        json.dumps(
+            {
+                "tests": [
+                    {
+                        "node": f"{json_test}::test_report",
+                        "artifacts": ["reports/quality/report.json"],
+                    },
+                    {
+                        "node": f"{markdown_test}::test_report",
+                        "artifacts": ["reports/quality/report.md"],
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    (registry.parent / "generated_artifact_routing.yaml").write_text(
+        "routes:\n"
+        "  - id: report\n"
+        "    outputs:\n"
+        "      - reports/quality/report.json\n"
+        "      - reports/quality/report.md\n",
+        encoding="utf-8",
+    )
+
+    report = build_shadow_compare(
+        ["reports/quality/report.json"],
+        repo_root=tmp_path,
+    )
+
+    assert report["selected"] == [json_test, markdown_test]
+
+
+def test_generated_artifact_directory_output_routes_descendants(
+    tmp_path: Path,
+) -> None:
+    """A tracked output directory owns generated files below it."""
+    test_path = "tests/architecture/test_generated_directory.py"
+    target = tmp_path / test_path
+    target.parent.mkdir(parents=True)
+    target.write_text("def test_report():\n    assert True\n", encoding="utf-8")
+    registry = tmp_path / "configs/quality/generated_artifact_tests.json"
+    registry.parent.mkdir(parents=True)
+    registry.write_text(
+        json.dumps(
+            {
+                "tests": [
+                    {
+                        "node": f"{test_path}::test_report",
+                        "artifacts": ["docs/generated/"],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    (registry.parent / "generated_artifact_routing.yaml").write_text(
+        "routes:\n  - id: docs\n    outputs:\n      - docs/generated/\n",
+        encoding="utf-8",
+    )
+
+    report = build_shadow_compare(
+        ["docs/generated/nested/report.json"],
         repo_root=tmp_path,
     )
 
