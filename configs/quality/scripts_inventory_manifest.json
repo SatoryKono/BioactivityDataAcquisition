@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-25T10:53:19.825832+00:00",
+  "generated_at": "2026-10-25T11:31:06.626237+00:00",
   "summary": {
     "total_scripts": 667,
     "status_counts": {
@@ -12767,7 +12767,7 @@
       "references": [
         {
           "path": "pyproject.toml",
-          "line": 348,
+          "line": 349,
           "source_group": "build",
           "text": "# (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py); memory"
         },
@@ -25551,7 +25551,7 @@
         },
         {
           "path": "pyproject.toml",
-          "line": 161,
+          "line": 162,
           "source_group": "build",
           "text": "# JSON Schema validation (scripts/validate_pipeline_configs.py)"
         },
