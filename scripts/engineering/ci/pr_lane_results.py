@@ -48,6 +48,8 @@ NPM_RUNTIME_TEST = "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.
 GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
     "tests/architecture/test_github_actions_runtime_policy.py"
 )
+DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
+RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 
 TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_telemetry_baseline.py",
@@ -113,7 +115,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "Makefile": (
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
     ),
-    "Dockerfile.bioetl": ("tests/architecture/test_docker_runtime_contracts.py",),
+    "Dockerfile.bioetl": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "configs/quality/generated_artifact_routing.yaml": (
         "tests/architecture/test_generated_artifact_routing.py",
     ),
@@ -172,9 +174,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/engineering/finances/billing_manifest.json": (
         "tests/unit/scripts/test_github_billing.py",
     ),
-    "reports/security/blocker-CVE-out-of-scope.md": (
-        "tests/architecture/test_docker_runtime_contracts.py",
-    ),
+    "reports/security/blocker-CVE-out-of-scope.md": (DOCKER_RUNTIME_CONTRACT_TEST,),
     ".github/workflows/pr-required.yml": (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
     "configs/quality/reusable_action_pins.yaml": (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
     "scripts/engineering/repo/check_github_actions_runtime_policy.py": (
@@ -190,16 +190,16 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "src/bioetl/infrastructure/quality/": QUALITY_GOVERNANCE_TESTS,
     "grafana/tooling/router-v7-bridge/": (
         "tests/architecture/test_circleci_migration_contract.py",
-        "tests/architecture/test_residual_osv_9853.py",
+        RESIDUAL_OSV_TEST,
     ),
     "grafana/plugins/bioetl-scenes-app/": (
         "tests/architecture/test_braces_backport.py",
         "tests/architecture/test_dashboard_scenes_contract.py",
-        "tests/architecture/test_residual_osv_9853.py",
+        RESIDUAL_OSV_TEST,
     ),
     "grafana/plugins/bioetl-selectorshell-panel/": (
         "tests/architecture/test_braces_backport.py",
-        "tests/architecture/test_residual_osv_9853.py",
+        RESIDUAL_OSV_TEST,
     ),
     "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
     "reports/performance/": BENCHMARK_EVIDENCE_TESTS,
@@ -438,8 +438,8 @@ def _global_dependency_lane(root: Path, dependencies: set[str]) -> bool:
     )
 
 
-def _generated_artifact_targets(path: str, root: Path) -> list[str]:
-    """Return tests declared for a generated artifact or one of its siblings."""
+def _generated_artifact_test_records(root: Path) -> list[object]:
+    """Load and validate the generated-artifact test records."""
     registry_path = root / GENERATED_ARTIFACT_TESTS
     if not registry_path.is_file():
         return []
@@ -452,7 +452,11 @@ def _generated_artifact_targets(path: str, root: Path) -> list[str]:
         raise ValueError(
             "Invalid generated artifact test registry: tests must be a list"
         )
+    return records
 
+
+def _tests_by_generated_artifact(records: list[object]) -> dict[str, set[str]]:
+    """Build the artifact-to-test index from validated registry records."""
     tests_by_artifact: dict[str, set[str]] = {}
     for record in records:
         if not isinstance(record, dict):
@@ -468,11 +472,11 @@ def _generated_artifact_targets(path: str, root: Path) -> list[str]:
                     "Invalid generated artifact test registry: artifact path"
                 )
             tests_by_artifact.setdefault(artifact, set()).add(test_path)
+    return tests_by_artifact
 
-    direct = tests_by_artifact.get(path)
-    if direct:
-        return sorted(direct)
 
+def _generated_artifact_routes(root: Path) -> list[object]:
+    """Load and validate generated-artifact sibling routes."""
     routing_path = root / GENERATED_ARTIFACT_ROUTING
     if not routing_path.is_file():
         return []
@@ -485,14 +489,32 @@ def _generated_artifact_targets(path: str, root: Path) -> list[str]:
         raise ValueError(
             "Invalid generated artifact routing registry: routes must be a list"
         )
+    return routes
+
+
+def _route_outputs(route: object) -> list[str]:
+    """Return one validated generated-artifact route output list."""
+    if not isinstance(route, dict):
+        raise ValueError("Invalid generated artifact routing registry: route entry")
+    outputs = route.get("outputs")
+    if not isinstance(outputs, list) or not all(
+        isinstance(output, str) for output in outputs
+    ):
+        raise ValueError("Invalid generated artifact routing registry: outputs")
+    return outputs
+
+
+def _generated_artifact_targets(path: str, root: Path) -> list[str]:
+    """Return tests declared for a generated artifact or one of its siblings."""
+    records = _generated_artifact_test_records(root)
+    tests_by_artifact = _tests_by_generated_artifact(records)
+    direct = tests_by_artifact.get(path)
+    if direct:
+        return sorted(direct)
+
+    routes = _generated_artifact_routes(root)
     for route in routes:
-        if not isinstance(route, dict):
-            raise ValueError("Invalid generated artifact routing registry: route entry")
-        outputs = route.get("outputs")
-        if not isinstance(outputs, list) or not all(
-            isinstance(output, str) for output in outputs
-        ):
-            raise ValueError("Invalid generated artifact routing registry: outputs")
+        outputs = _route_outputs(route)
         if path not in outputs:
             continue
         sibling_tests = {
