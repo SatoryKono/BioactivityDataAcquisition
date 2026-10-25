@@ -239,7 +239,7 @@ gates:
     legacy_context: type-check
     decision: path_scoped
     paths:
-      include: [src/**, pyproject.toml, .github/workflows/type-checking.yml, .github/workflows/pr-required.yml]
+      include: [src/**, scripts/engineering/quality/**, pyproject.toml, .github/workflows/type-checking.yml, .github/workflows/pr-required.yml]
     allowed_results: [success, not_applicable]
     not_applicable_allowed: true
     not_applicable_reason_required: true
