@@ -18,7 +18,7 @@ from bioetl.infrastructure.adapters.input.idmapping_csv_reader_adapter import (
     IDMappingCsvReaderAdapter,
 )
 from bioetl.infrastructure.config.enum_loader_adapter import FileSystemEnumLoader
-from bioetl.infrastructure.quality.debt_scorecard import _iter_registry_entries
+from scripts.engineering.quality.debt_scorecard import _iter_registry_entries
 from bioetl.infrastructure.schemas.composite_validation import (
     CompositeDQSchema,
     DQOverrideSchema,

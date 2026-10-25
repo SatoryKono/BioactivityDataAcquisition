@@ -5,10 +5,10 @@ from __future__ import annotations
 from itertools import pairwise
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.quality._decomposition_owner_policy import (
+from scripts.engineering.quality._decomposition_owner_policy import (
     _collect_quarterly_registry_budgets,
 )
-from bioetl.infrastructure.quality._primitives import (
+from scripts.engineering.quality._primitives import (
     _parse_quarter_label,
     _validate_non_negative_int,
 )
