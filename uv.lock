@@ -414,6 +414,7 @@ dev = [
     { name = "beautifulsoup4" },
     { name = "build" },
     { name = "detect-secrets" },
+    { name = "filelock" },
     { name = "grimp" },
     { name = "hypothesis" },
     { name = "import-linter" },
@@ -468,6 +469,7 @@ proofagent = [
 tests = [
     { name = "beautifulsoup4" },
     { name = "detect-secrets" },
+    { name = "filelock" },
     { name = "hypothesis" },
     { name = "opentelemetry-api" },
     { name = "opentelemetry-exporter-otlp" },
@@ -522,6 +524,8 @@ requires-dist = [
     { name = "deltalake", specifier = ">=0.18,<1.0" },
     { name = "detect-secrets", marker = "extra == 'dev'", specifier = ">=1.4" },
     { name = "detect-secrets", marker = "extra == 'tests'", specifier = ">=1.4" },
+    { name = "filelock", marker = "extra == 'dev'", specifier = ">=4.2.1" },
+    { name = "filelock", marker = "extra == 'tests'", specifier = ">=4.2.1" },
     { name = "grimp", marker = "extra == 'dev'", specifier = ">=3.15" },
     { name = "grimp", marker = "extra == 'tests-full'", specifier = ">=3.15" },
     { name = "httpx", specifier = ">=0.27" },
@@ -1063,11 +1067,11 @@ wheels = [
 
 [[package]]
 name = "filelock"
-version = "3.31.1"
+version = "4.2.4"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/53/55/1e19b2b56a24a4b94624f7e819e1bb87fa6c5609dbaf621df3aa6568a761/filelock-3.31.1.tar.gz", hash = "sha256:9e0c4e88ebe90833c1beafd3a547ccbc0bf7f491cd3858c3ec7aed63efe02163", size = 196656, upload-time = "2026-07-20T03:14:32.414Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d8/28/3893324bcadf8f89b1616637468d766af3f625008c0735bf704fdfa86617/filelock-4.2.4.tar.gz", hash = "sha256:c6d8663535e1650ee430507b4ffbac7b464dd64b7647ea0112a9f406499d163d", size = 652444, upload-time = "2026-10-19T01:57:51.001Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/88/61/df1d9db18f188d0ae648956a1decadc0e3b77d0571474370fd01f28a82b1/filelock-3.31.1-py3-none-any.whl", hash = "sha256:9ea33146c780161bf67cb20c7cb26b651566820d65ad8dfdd79422602a2dcfc0", size = 97189, upload-time = "2026-07-20T03:14:31.307Z" },
+    { url = "https://files.pythonhosted.org/packages/e0/1b/5e74289a1878e666bb4b65fe5805a04cafcac2aa5f519ef1ead67ef91c56/filelock-4.2.4-py3-none-any.whl", hash = "sha256:301241438c57936ef93f4243a94f2559022268bfcf9b375a9a72eb0f8db8358e", size = 162475, upload-time = "2026-10-19T01:57:49.419Z" },
 ]
 
 [[package]]

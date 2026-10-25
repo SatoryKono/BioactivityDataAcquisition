@@ -10,27 +10,27 @@ from pathlib import Path
 import yaml
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.quality._primitives import _quarter_label
-from bioetl.infrastructure.quality.budget_evaluator import (
+from scripts.engineering.quality._primitives import _quarter_label
+from scripts.engineering.quality.budget_evaluator import (
     current_quarter_target,
     evaluate_budget_violations,
     evaluate_governance_violations,
     evaluate_hotspot_budget_violations,
     resolve_grace_allowances,
 )
-from bioetl.infrastructure.quality.debt_scorecard_validation import (
+from scripts.engineering.quality.debt_scorecard_validation import (
     validate_debt_scorecard_raw,
 )
-from bioetl.infrastructure.quality.exemptions_registry import load_exemptions_registry
-from bioetl.infrastructure.quality.inventory import (
+from scripts.engineering.quality.exemptions_registry import load_exemptions_registry
+from scripts.engineering.quality.inventory import (
     ExemptionInventorySummary,
     build_exemption_inventory,
 )
-from bioetl.infrastructure.quality.registry_sync_service import validate_registry_sync
-from bioetl.infrastructure.quality.report_formatter import (
+from scripts.engineering.quality.registry_sync_service import validate_registry_sync
+from scripts.engineering.quality.report_formatter import (
     split_growth_violations_by_severity,
 )
-from bioetl.infrastructure.quality.scoring import compute_integral_debt_score
+from scripts.engineering.quality.scoring import compute_integral_debt_score
 
 _DEFAULT_SCORECARD_PATH = Path("configs/quality/debt_scorecard.yaml")
 
@@ -70,7 +70,7 @@ def _resolve_enforceable_baseline(scorecard: JsonDict) -> dict[str, object]:
 
 
 def _project_root() -> Path:
-    return Path(__file__).resolve().parents[4]
+    return Path(__file__).resolve().parents[3]
 
 
 def _resolve_scorecard_path(path: Path | str | None = None) -> Path:

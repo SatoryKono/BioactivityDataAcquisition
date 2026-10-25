@@ -311,6 +311,18 @@ entries:
     rationale: >
       Gold SIGKILL crash probes skip only when the platform has no SIGKILL.
       The rest of the module still runs.
+  - path: tests/integration/infrastructure/durability/test_crash_lineage.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-storage"
+    linked_issue: "#12106"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-10-25"
+    rationale: >
+      Lineage SIGKILL crash probes skip only when the platform has no SIGKILL.
+      The remaining lineage durability assertions stay enabled.
   - path: tests/integration/infrastructure/storage/test_atomic.py
     suite: integration
     category: conditional_environment_guard
