@@ -22,7 +22,7 @@ import pytest
 
 from tests.architecture._platform_skip_support import mounted_worktree_skip_reason
 
-pytestmark = [pytest.mark.architecture, pytest.mark.slow]
+pytestmark = pytest.mark.architecture
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DOCS_ROOT = REPO_ROOT / "docs"

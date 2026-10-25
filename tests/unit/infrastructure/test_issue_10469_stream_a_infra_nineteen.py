@@ -17,7 +17,7 @@ from bioetl.infrastructure.control_plane.file_artifact_lifecycle_reasons import 
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_types import (
     _ProtectedRefs,
 )
-from bioetl.infrastructure.quality.architecture_debt_reduction import _layer_for_target
+from scripts.engineering.quality.architecture_debt_reduction import _layer_for_target
 from bioetl.infrastructure.schemas.composite_config_base import EnricherSchema
 from bioetl.infrastructure.schemas.pipeline_config_common_schemas import (
     AuthoritativeContentHashPolicyConfig,

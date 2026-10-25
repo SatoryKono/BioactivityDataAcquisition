@@ -20,7 +20,7 @@ import sys
 
 import pytest
 
-pytestmark = [pytest.mark.architecture, pytest.mark.slow]
+pytestmark = pytest.mark.architecture
 
 _STALE_WORKFLOW_NEEDLE = b"validate-mermaid.yml"
 _STALE_SCAN_SKIP_DIRS = frozenset(

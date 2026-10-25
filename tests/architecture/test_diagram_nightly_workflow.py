@@ -17,7 +17,7 @@ import pytest
 from pathlib import Path
 
 
-pytestmark = [pytest.mark.architecture, pytest.mark.slow]
+pytestmark = pytest.mark.architecture
 
 
 def test_nightly_workflow_exists_and_is_scheduled() -> None:

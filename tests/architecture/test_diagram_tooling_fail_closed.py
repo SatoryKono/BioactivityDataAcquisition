@@ -9,7 +9,7 @@ from types import ModuleType
 
 import pytest
 
-pytestmark = [pytest.mark.architecture, pytest.mark.slow]
+pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 

@@ -22,7 +22,7 @@ import pytest
 from scripts.diagrams.fix.prune_orphan_nodes import analyse_file, detect_diagram_type
 
 
-pytestmark = [pytest.mark.architecture, pytest.mark.slow]
+pytestmark = pytest.mark.architecture
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DIAGRAM_ROOT = REPO_ROOT / "docs" / "02-architecture" / "diagrams"
