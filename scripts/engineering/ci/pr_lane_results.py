@@ -51,6 +51,8 @@ GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
+TYPE_CHECKING_WORKFLOW = ".github/workflows/type-checking.yml"
+TYPE_CHECKING_COLD_WORKFLOW = ".github/workflows/type-checking-cold.yml"
 
 TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_telemetry_baseline.py",
@@ -89,14 +91,62 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     **dict.fromkeys(
         (
-            ".github/workflows/type-checking.yml",
-            ".github/workflows/type-checking-cold.yml",
+            ".github/workflows/architecture-docs-nightly.yml",
+            ".github/workflows/branch-hygiene.yml",
+            ".github/workflows/chembl-baseline-smoke.yml",
+            ".github/workflows/codeql.yml",
+            ".github/workflows/commit-lint.yml",
+            ".github/workflows/consolidation-gates.yml",
+            ".github/workflows/contract-governance-fast-check.yml",
+            ".github/workflows/contract-tests.yml",
+            ".github/workflows/dashboard-render-host.yml",
+            ".github/workflows/diagram-nightly.yml",
+            ".github/workflows/docs-kpi-weekly.yml",
+            ".github/workflows/docs.yml",
+            ".github/workflows/e2e-matrix-health.yml",
+            ".github/workflows/github-settings-quarterly-review.yml",
+            ".github/workflows/import-linter.yml",
+            ".github/workflows/mutation-testing.yml",
+            ".github/workflows/nightly-replay-parity.yml",
+            ".github/workflows/nightly.yml",
+            ".github/workflows/performance-nightly.yml",
+            ".github/workflows/port-contracts.yml",
+            ".github/workflows/pr-hygiene.yml",
+            ".github/workflows/provider-contract-drift.yml",
+            ".github/workflows/quality-debt-weekly.yml",
+            ".github/workflows/release.yml",
+            ".github/workflows/reusable-setup.yml",
+            ".github/workflows/root-hygiene.yml",
+            ".github/workflows/router-v7-bridge.yml",
+            ".github/workflows/schema-governance.yml",
+            ".github/workflows/scorecard.yml",
+            ".github/workflows/security.yml",
+            ".github/workflows/skills-consistency.yml",
+            ".github/workflows/stale.yml",
+            ".github/workflows/tests.yml",
+            TYPE_CHECKING_COLD_WORKFLOW,
+            TYPE_CHECKING_WORKFLOW,
+            ".github/workflows/zizmor.yml",
+        ),
+        (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
+    ),
+    **dict.fromkeys(
+        (
+            TYPE_CHECKING_WORKFLOW,
+            TYPE_CHECKING_COLD_WORKFLOW,
             "scripts/engineering/dev/run_mypy.sh",
             "scripts/engineering/dev/run_mypy.ps1",
             "scripts/engineering/dev/zed_mypy.py",
             "configs/quality/github_required_checks.yaml",
         ),
         (MYPY_TARGET_CONTRACT_TEST,),
+    ),
+    **dict.fromkeys(
+        (
+            TYPE_CHECKING_WORKFLOW,
+            TYPE_CHECKING_COLD_WORKFLOW,
+        ),
+        (GITHUB_ACTIONS_RUNTIME_POLICY_TEST, MYPY_TARGET_CONTRACT_TEST),
     ),
     "reports/engineering/SEC-003_audit_report.md": (
         "tests/unit/domain/services/test_composite_metadata_helpers.py",
