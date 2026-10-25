@@ -873,6 +873,50 @@ def test_disappearing_leaves_really_fall_back_to_launcher(monkeypatch) -> None:
     assert delivered == [(101, signal.SIGABRT)]
 
 
+@pytest.mark.parametrize("state", ["Z", "X", "R", "S"])
+def test_posix_pid_liveness_distinguishes_exited_states(monkeypatch, state) -> None:
+    from types import SimpleNamespace
+    from scripts.engineering.ci import pytest_abort_diagnostic_adapter as owner
+
+    probes = []
+    monkeypatch.setattr(
+        owner,
+        "os",
+        SimpleNamespace(
+            name="posix", getpid=lambda: 999, kill=lambda *args: probes.append(args)
+        ),
+    )
+    monkeypatch.setattr(
+        Path,
+        "read_text",
+        lambda *args, **kwargs: f"1234 (worker (parser)) {state} 1 2 3",
+    )
+    exited = state in {"Z", "X"}
+    assert owner._pid_alive(1234) is not exited
+    assert probes == ([] if exited else [(1234, 0)])
+
+
+def test_posix_pid_liveness_falls_back_without_proc_metadata(monkeypatch) -> None:
+    from types import SimpleNamespace
+    from scripts.engineering.ci import pytest_abort_diagnostic_adapter as owner
+
+    probes = []
+    monkeypatch.setattr(
+        owner,
+        "os",
+        SimpleNamespace(
+            name="posix", getpid=lambda: 999, kill=lambda *args: probes.append(args)
+        ),
+    )
+
+    def unavailable(*args, **kwargs):
+        raise FileNotFoundError
+
+    monkeypatch.setattr(Path, "read_text", unavailable)
+    assert owner._pid_alive(1234) is True
+    assert probes == [(1234, 0)]
+
+
 def test_runner_accepts_multiple_pytest_targets() -> None:
     from scripts.engineering.ci.run_pytest_resilient import _create_parser
 

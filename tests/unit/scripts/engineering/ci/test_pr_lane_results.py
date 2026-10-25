@@ -236,6 +236,16 @@ def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
     )
 
 
+@pytest.mark.parametrize("manifest", ["package.json", "package-lock.json"])
+def test_shadow_compare_routes_gemini_toolchain(manifest: str) -> None:
+    """Each toolchain manifest independently selects the integrity contract."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [f"scripts/ai/gemini/npm-tooling/{manifest}"], repo_root=repo_root
+    )
+    assert report["selected"] == ["tests/architecture/test_gemini_cli_bootstrap.py"]
+
+
 def test_shadow_compare_routes_grafana_npm_projects() -> None:
     """Grafana package updates select their project governance tests."""
     repo_root = Path(__file__).resolve().parents[5]
