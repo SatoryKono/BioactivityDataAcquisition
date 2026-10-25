@@ -571,7 +571,8 @@ def test_record_window_rejects_unverified_index_metadata(
     assert not ledger_path.exists()
 
 
-def test_assess_shadow_window_rejects_missing_daily_attempts() -> None:
+@pytest.mark.parametrize("missing_day", [None, 7])
+def test_assess_shadow_window_rejects_missing_daily_attempts(missing_day) -> None:
     start = datetime(2026, 10, 1, 3, tzinfo=UTC)
     runs = [
         {
@@ -580,9 +581,10 @@ def test_assess_shadow_window_rejects_missing_daily_attempts() -> None:
             .replace("+00:00", "Z"),
             "head_sha": "a" * 40,
             "pagination_status": "complete",
+            "event": "schedule",
         }
         for day in range(15)
-        if day != 7
+        if day != missing_day
     ]
     result = assess_shadow_window(
         runs,
@@ -592,8 +594,32 @@ def test_assess_shadow_window_rejects_missing_daily_attempts() -> None:
         independent_review=True,
         cadence_changed_before_acceptance=False,
     )
-    assert result["status"] == "unacceptable"
-    assert "missing_daily_attempts" in result["reason_codes"]
+    if missing_day is None:
+        assert result["status"] == "complete"
+        assert result["reason_codes"] == []
+    else:
+        assert result["status"] == "unacceptable"
+        assert result["reason_codes"] == ["missing_daily_attempts"]
+
+
+@pytest.mark.parametrize("last_day", [13, 14])
+def test_shadow_window_span_uses_utc_dates_despite_scheduler_jitter(last_day) -> None:
+    from scripts.engineering.ci.nightly_shadow_archive import _span_covers_14_days
+
+    runs = [
+        {"created_at": "2026-11-01T08:00:00Z"},
+        {"created_at": f"2026-11-{last_day + 1:02d}T03:20:00Z"},
+    ]
+    assert _span_covers_14_days(runs) is (last_day == 14)
+
+
+@pytest.mark.parametrize("end", ["2026-11-15T08:00:00", "2026-11-15T08:00:00Z"])
+def test_shadow_window_span_rejects_timezone_naive_observations(end) -> None:
+    from scripts.engineering.ci.nightly_shadow_archive import _span_covers_14_days
+
+    assert not _span_covers_14_days(
+        [{"created_at": "2026-11-01T08:00:00"}, {"created_at": end}]
+    )
 
 
 @pytest.mark.parametrize(

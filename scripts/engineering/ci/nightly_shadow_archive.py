@@ -659,7 +659,11 @@ def _span_covers_14_days(runs: Sequence[Mapping[str, object]]) -> bool:
         closed = datetime.fromisoformat(end.replace("Z", UTC_OFFSET_SUFFIX))
     except ValueError:
         return False
-    return (closed - opened).total_seconds() >= 14 * 24 * 60 * 60
+    if opened.tzinfo is None or closed.tzinfo is None:
+        return False
+    opened_day = opened.astimezone(UTC).date()
+    closed_day = closed.astimezone(UTC).date()
+    return (closed_day - opened_day).days >= 14
 
 
 def _window_observation_reason_codes(
