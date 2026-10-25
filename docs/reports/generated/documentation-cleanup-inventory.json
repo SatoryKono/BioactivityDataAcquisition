@@ -100356,17 +100356,17 @@
     {
       "canonical_successor": null,
       "catalog_lifecycle": null,
-      "commit_policy": "tracked_quality_baseline",
+      "commit_policy": null,
       "declared_class": null,
       "declared_status": null,
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,
       "extension": ".json",
-      "freshness": "regenerate",
-      "generated_route": "adr-enforcement-matrix",
+      "freshness": "review-required",
+      "generated_route": null,
       "generated_route_exception": null,
-      "generator": "scripts/engineering/qa/report_adr_enforcement_matrix.py",
+      "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
       "inbound_links": 0,
@@ -100374,27 +100374,27 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "reports/quality/adr-enforcement-matrix.json",
-      "recommended_action": "generate-automatically",
+      "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
       "section": "reports",
-      "status": "Generated",
-      "surface_family": "generated",
+      "status": "Working",
+      "surface_family": "working",
       "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
       "catalog_lifecycle": null,
-      "commit_policy": "tracked_quality_baseline",
+      "commit_policy": null,
       "declared_class": null,
       "declared_status": null,
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,
       "extension": ".md",
-      "freshness": "regenerate",
-      "generated_route": "adr-enforcement-matrix",
+      "freshness": "review-required",
+      "generated_route": null,
       "generated_route_exception": null,
-      "generator": "scripts/engineering/qa/report_adr_enforcement_matrix.py",
+      "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
       "inbound_links": 0,
@@ -100402,11 +100402,11 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "reports/quality/adr-enforcement-matrix.md",
-      "recommended_action": "generate-automatically",
+      "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
       "section": "reports",
-      "status": "Generated",
-      "surface_family": "generated",
+      "status": "Working",
+      "surface_family": "working",
       "tracking_state": "tracked"
     },
     {
@@ -109960,17 +109960,6 @@
   ],
   "generated_routes": [
     {
-      "commit_policy": "tracked_quality_baseline",
-      "generator": "scripts/engineering/qa/report_adr_enforcement_matrix.py",
-      "id": "adr-enforcement-matrix",
-      "notes": "ADR enforcement JSON and Markdown are one generated evidence pair.",
-      "output_kind": "working_report",
-      "outputs": [
-        "reports/quality/adr-enforcement-matrix.json",
-        "reports/quality/adr-enforcement-matrix.md"
-      ]
-    },
-    {
       "commit_policy": "tracked_curated_generated_doc",
       "generator": "scripts/generate_adr_registry.py",
       "id": "adr-registry-generated-docs",
@@ -110800,8 +110789,8 @@
       "working_report": 214
     },
     "by_recommended_action": {
-      "archive-after-migration": 245,
-      "generate-automatically": 1064,
+      "archive-after-migration": 247,
+      "generate-automatically": 1062,
       "keep": 2618
     },
     "by_section": {
@@ -110833,22 +110822,22 @@
       "Active": 751,
       "Archived": 1553,
       "Canonical": 76,
-      "Generated": 1064,
-      "Working": 483
+      "Generated": 1062,
+      "Working": 485
     },
     "by_surface_family": {
       "active": 751,
       "archive": 1553,
       "canonical": 76,
-      "generated": 1064,
-      "working": 483
+      "generated": 1062,
+      "working": 485
     },
     "by_tracking_state": {
       "tracked": 3927
     },
     "docs_reports_local_count": 59,
     "duplicate_group_count": 80,
-    "generated_route_count": 74,
+    "generated_route_count": 73,
     "generated_without_route_count": 214,
     "generated_without_route_or_exception_count": 0,
     "github_issue_lifecycle_counts": {

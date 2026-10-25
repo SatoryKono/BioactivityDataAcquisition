@@ -60,15 +60,12 @@ def safe_text(path: Path) -> str | None:
 
 def iter_source_modules(project_root: Path) -> list[Path]:
     """Return canonical project source modules eligible for symbol analysis."""
-    source_roots = (
-        project_root / "src" / "bioetl",
-        project_root / "scripts" / "engineering",
-    )
+    src_root = project_root / "src" / "bioetl"
+    if not src_root.exists():
+        return []
     return sorted(
         path
-        for source_root in source_roots
-        if source_root.exists()
-        for path in source_root.rglob("*.py")
+        for path in src_root.rglob("*.py")
         if path.is_file() and not path.name.startswith("__")
     )
 

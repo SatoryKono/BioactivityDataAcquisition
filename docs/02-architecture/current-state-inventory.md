@@ -156,7 +156,7 @@ Full pipeline catalog: [Pipeline Catalog](../04-reference/pipeline-catalog.md).
 | Storage | `src/bioetl/domain/ports/storage/*.py`, `storage_maintenance.py` | Narrow Bronze/Silver/Gold/Merged/lifecycle storage contracts. | `src/bioetl/infrastructure/storage/**` |
 | Runtime control | `src/bioetl/domain/ports/runtime/*.py` | Lock, checkpoint, clock, runner, registry, shutdown, debug, memory. | Application/composition/infrastructure runtime services. |
 | Observability | `src/bioetl/domain/ports/observability/*.py`; `logger_port.py` compatibility re-export | Logger, metrics, tracing, DQ monitor contracts. | `src/bioetl/infrastructure/observability/**` and NoOp ports. |
-| Quality | `src/bioetl/domain/ports/quality/*.py` | DQ config, analyzers, reports, quarantine, validation, fallback/error policy. | `src/bioetl/application/services/dq/**`, `src/bioetl/infrastructure/quality/**`. |
+| Quality | `src/bioetl/domain/ports/quality/*.py` | DQ config, analyzers, reports, quarantine, validation, fallback/error policy. | `src/bioetl/application/services/dq/**`, `scripts/engineering/quality/**`. |
 | Control plane | `src/bioetl/domain/ports/control_plane/*.py` | Run/workflow manifest, ledger, effective config, lineage, artifact comparison stores. | `src/bioetl/infrastructure/control_plane/**`. |
 | Config/metadata/export | `src/bioetl/domain/ports/config/*.py`, `metadata/*.py`, `export.py` | Config loading, metadata writing/coordinating, export catalog/writer. | Infrastructure config, metadata, and export adapters. |
 
@@ -198,7 +198,7 @@ Infrastructure.
 | Storage | `src/bioetl/infrastructure/storage/**` | Bronze/Silver/Gold/metadata/quarantine/checkpoint/local file and Delta-backed persistence. | Domain storage/runtime ports. | Infrastructure |
 | Control-plane stores | `src/bioetl/infrastructure/control_plane/**` | File-backed manifests, ledgers, effective config, lineage, workflow stores, replay artifacts. | Domain control-plane ports. | Infrastructure |
 | Observability | `src/bioetl/infrastructure/observability/**` | Prometheus metrics, metrics server, tracing/logging adapters, Pushgateway publication. | Domain observability ports. | Infrastructure |
-| Quality/export | `src/bioetl/infrastructure/quality/**`, `export/**` | DQ config/runtime support, debt scorecards, export adapters. | Domain quality/export ports. | Infrastructure |
+| Quality/export | `scripts/engineering/quality/**`, `export/**` | DQ config/runtime support, debt scorecards, export adapters. | Domain quality/export ports. | Infrastructure |
 
 ## DQ Validators
 

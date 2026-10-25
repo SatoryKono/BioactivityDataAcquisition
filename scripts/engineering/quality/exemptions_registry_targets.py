@@ -40,7 +40,7 @@ def _iter_source_modules(src_root: Path) -> list[Path]:
 
 
 def _build_symbol_index(
-    source_roots: tuple[Path, ...],
+    src_root: Path,
 ) -> tuple[dict[str, set[str]], dict[str, set[str]], Counter[str], Counter[str]]:
     """Build per-module and global class/function symbol indexes."""
     project_root = _project_root()
@@ -49,11 +49,7 @@ def _build_symbol_index(
     class_counts: Counter[str] = Counter()
     function_counts: Counter[str] = Counter()
 
-    for module_path in (
-        module
-        for source_root in source_roots
-        for module in _iter_source_modules(source_root)
-    ):
+    for module_path in _iter_source_modules(src_root):
         try:
             tree = ast.parse(module_path.read_text(encoding="utf-8"))
         except SyntaxError:
@@ -195,13 +191,12 @@ def validate_exemption_target_references(
     if not isinstance(registries, dict):
         return ["registries: expected mapping"]
 
-    project_root = _project_root()
-    src_root = project_root / "src" / "bioetl"
+    src_root = _project_root() / "src" / "bioetl"
     if not src_root.exists():
         return ["src/bioetl: source root not found"]
 
     classes_by_module, functions_by_module, class_counts, function_counts = (
-        _build_symbol_index((src_root, project_root / "scripts" / "engineering"))
+        _build_symbol_index(src_root)
     )
     errors: list[str] = []
 

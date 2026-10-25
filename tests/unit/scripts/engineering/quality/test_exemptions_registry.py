@@ -475,34 +475,6 @@ class TestValidateExemptionTargetReferences:
 
         assert errors == []
 
-    def test_valid_engineering_function_key(self, tmp_path: Path) -> None:
-        """Engineering-script symbols must participate in exemption lookups."""
-        scripts_dir = tmp_path / "scripts" / "engineering" / "quality"
-        scripts_dir.mkdir(parents=True)
-        (scripts_dir / "scoring.py").write_text(
-            "def compute_integral_debt_score():\n    return 1\n",
-            encoding="utf-8",
-        )
-        (tmp_path / "src" / "bioetl").mkdir(parents=True)
-        raw = {
-            "policy": {"required_fields": []},
-            "registries": {name: {} for name in REQUIRED_EXEMPTION_REGISTRIES},
-        }
-        registries = raw["registries"]
-        assert isinstance(registries, dict)
-        registries["function_complexity"] = {
-            "scripts/engineering/quality/scoring.py::compute_integral_debt_score": {}
-        }
-
-        path = _write_registry(tmp_path, raw)
-        with patch(
-            "scripts.engineering.quality.exemptions_registry._project_root",
-            return_value=tmp_path,
-        ):
-            errors = validate_exemption_target_references(path)
-
-        assert errors == []
-
     def test_missing_symbol_reports_error(self, tmp_path: Path) -> None:
         """Missing path-qualified symbols should raise target-reference errors."""
         src_dir = tmp_path / "src" / "bioetl" / "application"

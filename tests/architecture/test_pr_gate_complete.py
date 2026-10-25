@@ -198,9 +198,11 @@ def test_only_osv_scanner_uses_continue_on_error_before_severity_gate() -> None:
         step for step in steps if step.get("name") == "Record required step outcomes"
     )
     record_run = str(record_step["run"])
-    assert '"osv-gate": "${{ steps.osv-gate.outcome }}"' in record_run
-    assert '"osv-scan"' not in record_run
-    assert "toJson(steps)" not in record_run
+    assert 'result_key = "conclusion" if key == "osv-scan" else "outcome"' in record_run
+    assert 'raw.get("osv-scan")' in record_run
+    assert 'raw.get("osv-gate")' in record_run
+    assert 'osv_scan.get("outcome", "")).lower() == "failure"' in record_run
+    assert 'osv_gate.get("outcome", "")).lower() == "success"' in record_run
 
 
 def test_aggregator_does_not_use_continue_on_error() -> None:

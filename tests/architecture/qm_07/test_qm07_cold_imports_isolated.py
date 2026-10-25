@@ -9,10 +9,6 @@ from pathlib import Path
 import subprocess
 import sys
 
-import pytest
-
-pytestmark = pytest.mark.architecture
-
 
 def test_cold_imports(tmp_path: Path) -> None:
     modules = [

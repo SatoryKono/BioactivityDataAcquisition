@@ -1001,7 +1001,14 @@
     }
   },
   "assertless_total_candidates": 85,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 2,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1175,8 +1182,11 @@
     ]
   },
   "intentional_no_exception_contract": 85,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "markerless_examples": [
+    "tests/architecture/qm_07/test_gate_evaluators.py:10",
+    "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py:13"
+  ],
+  "markerless_test_functions": 2,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2025,8 +2035,11 @@
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/architecture/qm_07/test_gate_evaluators.py:10",
+      "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py:13"
+    ],
+    "markerless_test_functions": 2,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2087,12 +2100,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3174,
-    "total_test_functions": 31336,
+    "total_test_functions": 31327,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "3abb276295114a274ccf98eff7674d49e49fcf392462f06c2871ce1278adc5c7",
+  "source_tree_sha256": "b5c1862024aab335c793ca06a83ac35a906d84cb854d525f92c342395f142021",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2101,8 +2114,11 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 85,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/architecture/qm_07/test_gate_evaluators.py:10",
+      "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py:13"
+    ],
+    "markerless_test_functions": 2,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -2155,7 +2171,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3174,
-  "total_test_functions": 31336,
+  "total_test_functions": 31327,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
