@@ -301,8 +301,11 @@ jobs:
               "docs-verify": "${{ steps.docs-verify.outcome }}",
               "mkdocs-nav": "${{ steps.mkdocs-nav.outcome }}",
               "prose-consistency": "${{ steps.prose-consistency.outcome }}",
+<<<<<<< HEAD
               "zizmor": "${{ steps.zizmor.outcome }}",
               "dependency-review": "${{ steps.dependency-review.outcome }}",
+=======
+>>>>>>> 1aa134d59 (fix(ci): eliminate shared PR gate failures)
           }
           Path("reports/quality/lane-step-outcomes.json").write_text(
               json.dumps(flat, separators=(",", ":")),

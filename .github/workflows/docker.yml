@@ -212,7 +212,7 @@ jobs:
           set -euo pipefail
           {
             echo "source_sha=${TESTED_SHA}"
-            echo "wolfi_base_image=chainguard/wolfi-base@sha256:360896efb0753a5701c48f860e17130c205eae5a264797aa3e7ea126ee2923a7"
+            echo "wolfi_base_image=chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
             echo "runtime_python=python-3.13=3.13.16_git20261002-r2"
             echo "builder_uv=uv=0.11.26-r0"
             echo "setuptools_build_constraint=setuptools==83.0.0"
@@ -315,7 +315,7 @@ jobs:
             --output reports/security/trivy-base-results.json \
             --severity CRITICAL,HIGH,MEDIUM,UNKNOWN \
             --exit-code 0 \
-            "chainguard/wolfi-base@sha256:360896efb0753a5701c48f860e17130c205eae5a264797aa3e7ea126ee2923a7"
+            "chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
           test -s reports/security/trivy-base-results.json
 
       - name: Generate Trivy fixability audit

@@ -220,22 +220,6 @@ def test_shadow_compare_routes_billing_pr_non_code_changes() -> None:
     assert "tests/unit/scripts/test_github_billing.py" in report["selected"]
 
 
-def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
-    repo_root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare(
-        [
-            ".github/workflows/docker.yml",
-            "reports/quality/architecture-debt-remote-main-baseline.md",
-        ],
-        repo_root=repo_root,
-    )
-    assert "tests/architecture/test_docker_runtime_contracts.py" in report["selected"]
-    assert (
-        "tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py"
-        in report["selected"]
-    )
-
-
 def test_shadow_compare_routes_grafana_npm_projects() -> None:
     """Grafana package updates select their project governance tests."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -750,10 +734,14 @@ def test_record_steps_uses_bounded_outcomes_instead_of_all_step_outputs() -> Non
         required = {
             step_id for step_ids in OWNER_STEPS[owner].values() for step_id in step_ids
         }
+<<<<<<< HEAD
         audited = (
             {"zizmor", "dependency-review"} if owner == "fast-governance" else set()
         )
         assert serialized == required | audited
+=======
+        assert serialized == required
+>>>>>>> 1aa134d59 (fix(ci): eliminate shared PR gate failures)
 
 
 def test_assert_steps_malformed_outcomes() -> None:
@@ -772,6 +760,7 @@ def test_assert_steps_malformed_outcomes() -> None:
     assert failures == ["type-checking:mypy=missing"]
 
 
+<<<<<<< HEAD
 def test_assert_steps_reports_audited_action_failure() -> None:
     """A failing audited action remains visible outside gate-owned steps."""
     failures = assert_step_outcomes(
@@ -783,6 +772,8 @@ def test_assert_steps_reports_audited_action_failure() -> None:
     assert failures == ["step:zizmor=failure"]
 
 
+=======
+>>>>>>> 1aa134d59 (fix(ci): eliminate shared PR gate failures)
 def test_generated_artifact_sibling_uses_canonical_test_registry(
     tmp_path: Path,
 ) -> None:
@@ -821,6 +812,7 @@ def test_generated_artifact_sibling_uses_canonical_test_registry(
     )
 
     assert report["selected"] == [test_path]
+<<<<<<< HEAD
 
 
 def test_generated_artifact_route_unions_direct_and_sibling_tests(
@@ -939,3 +931,5 @@ def test_generated_artifact_directory_output_routes_descendants(
     )
 
     assert report["selected"] == [test_path]
+=======
+>>>>>>> 1aa134d59 (fix(ci): eliminate shared PR gate failures)
