@@ -21,10 +21,8 @@ from packaging.requirements import Requirement
 
 PYTHON_MANIFEST = "pyproject.toml"
 PYTHON_LOCK = "uv.lock"
-FULL_SUITE_CONFIGURATION_PREFIXES = (
-    "tool.pytest.ini_options",
-    "tool.setuptools.packages.find.exclude",
-)
+FULL_SUITE_CONFIGURATION_PREFIXES = ("tool.pytest.ini_options",)
+NARROW_CONFIGURATION_PREFIXES = ("tool.setuptools.packages.find.exclude",)
 
 
 def _name(value: str) -> str:
@@ -123,14 +121,16 @@ def pytest_configuration_changed(root: Path, base: str, head: str) -> bool:
     before = _configuration(_read_revision(root, base, PYTHON_MANIFEST))
     after = _configuration(_read_revision(root, head, PYTHON_MANIFEST))
     paths = _changed_paths(before, after)
-    unknown = [
-        path for path in paths if not path.startswith(FULL_SUITE_CONFIGURATION_PREFIXES)
-    ]
+    classified_prefixes = (
+        *FULL_SUITE_CONFIGURATION_PREFIXES,
+        *NARROW_CONFIGURATION_PREFIXES,
+    )
+    unknown = [path for path in paths if not path.startswith(classified_prefixes)]
     if unknown:
         raise ValueError(
             "Unconfirmed Python manifest configuration route: " + ", ".join(unknown)
         )
-    return bool(paths)
+    return any(path.startswith(FULL_SUITE_CONFIGURATION_PREFIXES) for path in paths)
 
 
 def _configuration(document: dict[str, Any]) -> dict[str, Any]:

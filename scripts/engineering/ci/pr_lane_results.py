@@ -865,7 +865,7 @@ def _dependency_selection(
         args.repo_root,
         args.base_sha,
         args.head_sha,
-        allow_configuration=all_tests,
+        allow_configuration=True,
     )
     all_tests = all_tests or removed_dependencies(
         args.repo_root, args.base_sha, args.head_sha

@@ -259,6 +259,25 @@ def test_shadow_compare_routes_quality_module_move() -> None:
     )
 
 
+def test_shadow_compare_keeps_package_discovery_contract_narrow() -> None:
+    """A package-discovery PR selects its changed contract without all tests."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        [
+            "pyproject.toml",
+            "tests/architecture/qm_07/test_distribution_isolation.py",
+        ],
+        repo_root=repo_root,
+        changed_python_dependencies=set(),
+    )
+
+    assert report["covers_full_suite"] is False
+    assert report["selected"] == [
+        "tests/architecture/qm_07/test_distribution_isolation.py"
+    ]
+
+
 def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
     """Quality-move configs and documentation retain explicit governing tests."""
     repo_root = Path(__file__).resolve().parents[5]

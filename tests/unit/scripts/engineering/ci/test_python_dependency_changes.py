@@ -505,10 +505,12 @@ def test_configuration_only_change_is_not_a_dependency_success(
         dependencies.changed_dependencies(tmp_path, "base", "head")
 
 
-def test_setuptools_package_exclusion_routes_to_full_suite(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+def test_setuptools_package_exclusion_uses_narrow_classified_route(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """Reviewed package-discovery changes keep the fail-closed full-suite route."""
+    """Package-discovery changes use their dedicated distribution contract."""
     before = {"tool": {"setuptools": {"packages": {"find": {"where": ["src"]}}}}}
     after = {
         "tool": {
@@ -525,7 +527,31 @@ def test_setuptools_package_exclusion_routes_to_full_suite(
         lambda _root, revision, _name: before if revision == "base" else after,
     )
 
-    assert dependencies.pytest_configuration_changed(tmp_path, "base", "head")
+    assert not dependencies.pytest_configuration_changed(tmp_path, "base", "head")
+    contract = "tests/architecture/qm_07/test_distribution_isolation.py"
+    contract_path = tmp_path / contract
+    contract_path.parent.mkdir(parents=True)
+    contract_path.write_text("def test_contract(): pass\n", encoding="utf-8")
+    (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
+    assert (
+        lane.main(
+            [
+                "affected-tests",
+                "--repo-root",
+                str(tmp_path),
+                "--changed-file",
+                "pyproject.toml",
+                "--changed-file",
+                contract,
+                "--base-sha",
+                "base",
+                "--head-sha",
+                "head",
+            ]
+        )
+        == 0
+    )
+    assert capsys.readouterr().out.splitlines() == [contract]
 
 
 def test_test_only_dependency_selects_its_consumers(tmp_path: Path) -> None:
