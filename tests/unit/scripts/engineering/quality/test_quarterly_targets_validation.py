@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.infrastructure.quality._quarterly_targets_validation import (
+from scripts.engineering.quality._quarterly_targets_validation import (
     _validate_quarter_target,
     _validate_quarterly_targets_section,
 )
