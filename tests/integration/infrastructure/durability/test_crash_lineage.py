@@ -79,7 +79,6 @@ def _child_kill_after_fragment_write(root_path: Path) -> None:
 
 @pytest.mark.integration
 @_SIGKILL_ONLY
-@pytest.mark.unit
 def test_row_15a_lineage_crash_after_fragment_write(tmp_path: Path) -> None:
     """Row 15a: Crash after fragment write leaves fragment but no indexes (NOT_VERIFIABLE for recovery, need index sync).
     We test if a kill between atomic_write_text and _fragment_indexes leaves orphaned fragment.
@@ -131,7 +130,6 @@ def _child_kill_mid_index_append(root_path: Path) -> None:
 
 @pytest.mark.integration
 @_SIGKILL_ONLY
-@pytest.mark.unit
 def test_row_15b_lineage_crash_mid_index_append(tmp_path: Path) -> None:
     """Row 15b: Crash in the middle of index appends leaves partial indexes (NOT_VERIFIABLE)."""
     root = isolated_store_root(tmp_path, "g3_lineage")
