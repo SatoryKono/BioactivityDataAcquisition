@@ -57,7 +57,7 @@
     {
       "current": {
         "source_module_count": 2566,
-        "source_tree_sha256": "57acfc3c3fc131fd37622f12c25380ac273cf9dbb03744c10a0ec57c9e1e4847",
+        "source_tree_sha256": "ea399d69ac471e6c9643ca7fe4b277d71e4ebed3f7defdaeb0d9e29de7fb759e",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -71,7 +71,7 @@
       "name": "module_coverage_scorecard_coherence",
       "remediation": "Refresh architecture-quality scorecard and module coverage inventory until counts and source-tree hash match.",
       "source_artifact": "reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -437,17 +437,15 @@
     },
     {
       "current": {
-        "artifacts": [
-          "architecture_quality_scorecard"
-        ],
-        "count": 1
+        "artifacts": [],
+        "count": 0
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: architecture_quality_scorecard",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: none",
       "source_artifact": "reports/quality/*.json",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -474,7 +472,7 @@
   "schema_version": 1,
   "stale_artifacts": {
     "adr_enforcement_matrix": false,
-    "architecture_quality_scorecard": true,
+    "architecture_quality_scorecard": false,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
     "hotspot_family_baseline": false,
@@ -482,21 +480,18 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 2,
-    "pass": 45,
+    "fail": 0,
+    "pass": 47,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 10.0,
     "architecture_quality_scorecard_interpretation": "excellent",
-    "fail_count": 2,
-    "failing_gates": [
-      "module_coverage_scorecard_coherence",
-      "generated_artifact_drift"
-    ],
+    "fail_count": 0,
+    "failing_gates": [],
     "gate_count": 47,
-    "pass_count": 45,
-    "release_gate_status": "failing",
+    "pass_count": 47,
+    "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []
   }
