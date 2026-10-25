@@ -41,16 +41,16 @@ else:
         render_debt_governance_section,
     )
 
-from bioetl.infrastructure.quality.architecture_quality_scorecard import (
+from scripts.engineering.quality.architecture_quality_scorecard import (
     build_architecture_quality_scorecard,
 )
-from bioetl.infrastructure.quality.debt_scorecard import (
+from scripts.engineering.quality.debt_scorecard import (
     DebtScorecardResult,
     evaluate_debt_scorecard,
     load_debt_scorecard,
 )
-from bioetl.infrastructure.quality.exemptions_registry import load_exemptions_registry
-from bioetl.infrastructure.quality.inventory import build_exemption_inventory
+from scripts.engineering.quality.exemptions_registry import load_exemptions_registry
+from scripts.engineering.quality.inventory import build_exemption_inventory
 from memory.proof import emit_receipt_from_environment
 
 

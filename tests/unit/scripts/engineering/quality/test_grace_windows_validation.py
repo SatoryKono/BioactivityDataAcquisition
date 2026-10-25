@@ -33,7 +33,7 @@ from datetime import date
 
 import pytest
 
-from bioetl.infrastructure.quality._grace_windows_validation import (
+from scripts.engineering.quality._grace_windows_validation import (
     _validate_allowances,
     _validate_grace_window_dates,
     _validate_grace_window_identity_fields,

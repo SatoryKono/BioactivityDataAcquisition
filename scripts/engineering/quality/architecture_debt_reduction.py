@@ -42,7 +42,7 @@ _TASK_FAMILY_CATEGORIES: Final[dict[str, str]] = {
 
 
 def _project_root() -> Path:
-    return Path(__file__).resolve().parents[4]
+    return Path(__file__).resolve().parents[3]
 
 
 def _default_plan_output_path(

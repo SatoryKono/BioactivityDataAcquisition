@@ -6,30 +6,30 @@ from datetime import date
 from pathlib import Path
 from typing import Any, cast
 
-import bioetl.infrastructure.quality.exemptions_registry_policy as _policy_module
-import bioetl.infrastructure.quality.exemptions_registry_targets as _targets_module
-from bioetl.infrastructure.quality.exemptions_registry_access import (
+import scripts.engineering.quality.exemptions_registry_policy as _policy_module
+import scripts.engineering.quality.exemptions_registry_targets as _targets_module
+from scripts.engineering.quality.exemptions_registry_access import (
     get_registry_values,
     load_exemptions_registry,
     resolve_registry_value,
 )
-from bioetl.infrastructure.quality.exemptions_registry_paths import (
+from scripts.engineering.quality.exemptions_registry_paths import (
     build_module_path_key,
 )
-from bioetl.infrastructure.quality.exemptions_registry_paths import (
+from scripts.engineering.quality.exemptions_registry_paths import (
     project_root as _project_root,
 )
-from bioetl.infrastructure.quality.exemptions_registry_policy import (
+from scripts.engineering.quality.exemptions_registry_policy import (
     EXEMPTION_REGISTRIES_ALLOW_EMPTY,
     REQUIRED_EXEMPTION_REGISTRIES,
 )
-from bioetl.infrastructure.quality.exemptions_registry_policy import (
+from scripts.engineering.quality.exemptions_registry_policy import (
     validate_exemption_key_normalization as _validate_exemption_key_normalization_impl,
 )
-from bioetl.infrastructure.quality.exemptions_registry_policy import (
+from scripts.engineering.quality.exemptions_registry_policy import (
     validate_exemptions_registry as _validate_exemptions_registry_impl,
 )
-from bioetl.infrastructure.quality.exemptions_registry_targets import (
+from scripts.engineering.quality.exemptions_registry_targets import (
     validate_exemption_target_references as _validate_exemption_target_references_impl,
 )
 

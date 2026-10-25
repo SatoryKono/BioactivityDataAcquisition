@@ -8,53 +8,53 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.infrastructure.quality import architecture_debt_artifact_tasks as debt_tasks
-from bioetl.infrastructure.quality import architecture_debt_reduction as debt_reduction
-from bioetl.infrastructure.quality import (
+from scripts.engineering.quality import architecture_debt_artifact_tasks as debt_tasks
+from scripts.engineering.quality import architecture_debt_reduction as debt_reduction
+from scripts.engineering.quality import (
     architecture_quality_scorecard as scorecard_mod,
 )
-from bioetl.infrastructure.quality import budget_evaluator as budget_mod
-from bioetl.infrastructure.quality import exemptions_registry_policy as policy
-from bioetl.infrastructure.quality import exemptions_registry_targets as targets
-from bioetl.infrastructure.quality import exemptions_registry_validation as validation
-from bioetl.infrastructure.quality.architecture_debt_artifact_tasks import (
+from scripts.engineering.quality import budget_evaluator as budget_mod
+from scripts.engineering.quality import exemptions_registry_policy as policy
+from scripts.engineering.quality import exemptions_registry_targets as targets
+from scripts.engineering.quality import exemptions_registry_validation as validation
+from scripts.engineering.quality.architecture_debt_artifact_tasks import (
     artifact_defaults,
     build_dead_code_review_tasks,
     build_duplication_tasks,
     build_hotspot_family_tasks,
 )
-from bioetl.infrastructure.quality.architecture_debt_reduction import (
+from scripts.engineering.quality.architecture_debt_reduction import (
     find_latest_architecture_debt_tasks_file,
     load_architecture_debt_tasks,
 )
-from bioetl.infrastructure.quality.architecture_debt_task_support import (
+from scripts.engineering.quality.architecture_debt_task_support import (
     SymbolMetricLocation,
     build_symbol_index,
     measure_task,
     safe_text,
 )
-from bioetl.infrastructure.quality.architecture_quality_scorecard import (
+from scripts.engineering.quality.architecture_quality_scorecard import (
     write_architecture_quality_scorecard,
 )
-from bioetl.infrastructure.quality.budget_evaluator import (
+from scripts.engineering.quality.budget_evaluator import (
     evaluate_hotspot_budget_violations,
 )
-from bioetl.infrastructure.quality.exemptions_registry_policy import (
+from scripts.engineering.quality.exemptions_registry_policy import (
     validate_exemption_key_normalization,
     validate_exemptions_registry,
 )
-from bioetl.infrastructure.quality.exemptions_registry_validation import (
+from scripts.engineering.quality.exemptions_registry_validation import (
     validate_exemption_entry,
 )
-from bioetl.infrastructure.quality.report_formatter import (
+from scripts.engineering.quality.report_formatter import (
     _resolve_rollout_mode_for_section,
 )
-from bioetl.infrastructure.quality._baseline_validation import (
+from scripts.engineering.quality._baseline_validation import (
     _normalize_registry_groups,
     _validate_historical_baseline_metadata,
     _validate_historical_baseline_section,
 )
-from bioetl.infrastructure.quality._governance_validation import (
+from scripts.engineering.quality._governance_validation import (
     _burn_down_priority_registries,
     _validate_owner_registry_subsystems,
     _validate_warn_until_by_section,
@@ -156,7 +156,7 @@ class TestBaselineGovernanceAndDebtTasks:
             is None
         )
         monkeypatch.setattr(
-            "bioetl.infrastructure.quality._baseline_validation._validate_baseline_mapping",
+            "scripts.engineering.quality._baseline_validation._validate_baseline_mapping",
             lambda **_kwargs: (1, {}),
         )
         assert (
@@ -279,7 +279,9 @@ class TestExemptionsDebtReductionAndFormatter:
             },
         )
         errors = validate_exemption_key_normalization()
-        assert any("inside src/ tree" in item for item in errors)
+        assert any(
+            "inside src/bioetl or scripts/engineering tree" in item for item in errors
+        )
 
         monkeypatch.setattr(
             policy, "REQUIRED_EXEMPTION_REGISTRIES", ("file_size_limits", "custom")
@@ -397,11 +399,11 @@ class TestExemptionsDebtReductionAndFormatter:
             == "SAFE_MARGIN"
         )
         monkeypatch.setattr(
-            "bioetl.infrastructure.quality.architecture_debt_task_support.iter_source_modules",
+            "scripts.engineering.quality.architecture_debt_task_support.iter_source_modules",
             lambda _root: [tmp_path / "broken.py"],
         )
         monkeypatch.setattr(
-            "bioetl.infrastructure.quality.architecture_debt_task_support.safe_text",
+            "scripts.engineering.quality.architecture_debt_task_support.safe_text",
             lambda _path: "def oops(:\n",
         )
         assert build_symbol_index(tmp_path) == {}
@@ -416,7 +418,7 @@ class TestExemptionsDebtReductionAndFormatter:
             complexity=4,
         )
         monkeypatch.setattr(
-            "bioetl.infrastructure.quality.architecture_debt_task_support.select_symbol_location",
+            "scripts.engineering.quality.architecture_debt_task_support.select_symbol_location",
             lambda **_kwargs: (location, "src/mod.py", "Cls", None),
         )
         _target, name, value, _note = measure_task(
