@@ -46,7 +46,6 @@ dependencies = [
     "structlog>=24.0",
     # High-performance JSON serialization (required by batch_writer, bronze_writer, delta_writer)
     "orjson>=3.11.0,<4.0",
-    "filelock>=4.2.1",
 ]
 
 [project.scripts]
@@ -79,6 +78,7 @@ export = [
     "openpyxl>=3.1",
 ]
 tests = [
+    "filelock>=4.2.1",
     # Testing frameworks
     "pytest>=9.0.3,<9.2",
     "pytest-cov>=4.0",
@@ -116,6 +116,7 @@ tests_full = [
     "vulture>=2.11",
 ]
 dev = [
+    "filelock>=4.2.1",
     "pytest>=9.0.3,<9.2",
     "pytest-cov>=4.0",
     "pytest-asyncio>=1.4",
