@@ -52,21 +52,21 @@ jobs:
           --report-reports-workspace-json reports/quality/reports-workspace-review.json
 
       - name: Upload cleanup classification evidence
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: root-hygiene-cleanup-classification
           path: reports/quality/root-hygiene-cleanup-classification.json
           retention-days: 3
 
       - name: Upload root review evidence
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: root-hygiene-review-evidence
           path: reports/quality/root-hygiene-review-evidence.json
           retention-days: 3
 
       - name: Upload reports workspace evidence
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: reports-workspace-review
           path: reports/quality/reports-workspace-review.json
