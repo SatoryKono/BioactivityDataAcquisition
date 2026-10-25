@@ -281,7 +281,10 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
 def test_shadow_compare_routes_strict_mypy_scope_contract(path: str) -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare([path], repo_root=root)
-    assert report["selected"] == ["tests/architecture/test_mypy_target_contract.py"]
+    expected = ["tests/architecture/test_mypy_target_contract.py"]
+    if path == "scripts/engineering/dev/zed_mypy.py":
+        expected.extend(["tests/unit/scripts", "tests/unit/repo_backed/scripts"])
+    assert report["selected"] == expected
 
 
 def test_shadow_compare_routes_quality_and_runtime_documentation() -> None:
