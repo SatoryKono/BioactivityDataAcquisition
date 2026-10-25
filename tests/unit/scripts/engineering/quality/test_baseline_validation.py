@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.infrastructure.quality._baseline_validation import (
+from scripts.engineering.quality._baseline_validation import (
     _is_valid_rollout_section_key,
     _validate_baseline_section,
     _validate_historical_baseline_section,

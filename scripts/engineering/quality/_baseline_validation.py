@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import Counter
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.quality._primitives import (
+from scripts.engineering.quality._primitives import (
     _parse_iso_date,
     _validate_non_negative_int,
 )

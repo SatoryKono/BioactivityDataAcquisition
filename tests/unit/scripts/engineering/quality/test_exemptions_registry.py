@@ -36,7 +36,7 @@ from unittest.mock import patch
 import pytest
 import yaml
 
-from bioetl.infrastructure.quality.exemptions_registry import (
+from scripts.engineering.quality.exemptions_registry import (
     EXEMPTION_REGISTRIES_ALLOW_EMPTY,
     REQUIRED_EXEMPTION_REGISTRIES,
     get_registry_values,
@@ -239,7 +239,7 @@ class TestValidateExemptionKeyNormalization:
 
         # Mock project_root to return our tmp_path
         with patch(
-            "bioetl.infrastructure.quality.exemptions_registry._project_root",
+            "scripts.engineering.quality.exemptions_registry._project_root",
             return_value=tmp_path,
         ):
             errors = validate_exemption_key_normalization(path)
@@ -260,7 +260,7 @@ class TestValidateExemptionKeyNormalization:
         }
         path = _write_registry(tmp_path, raw)
         with patch(
-            "bioetl.infrastructure.quality.exemptions_registry._project_root",
+            "scripts.engineering.quality.exemptions_registry._project_root",
             return_value=tmp_path,
         ):
             errors = validate_exemption_key_normalization(path)
@@ -280,7 +280,7 @@ class TestValidateExemptionKeyNormalization:
         }
         path = _write_registry(tmp_path, raw)
         with patch(
-            "bioetl.infrastructure.quality.exemptions_registry._project_root",
+            "scripts.engineering.quality.exemptions_registry._project_root",
             return_value=tmp_path,
         ):
             errors = validate_exemption_key_normalization(path)
@@ -314,11 +314,11 @@ class TestValidateExemptionsRegistry:
         path = _write_registry(tmp_path, self._valid_raw())
         with (
             patch(
-                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
+                "scripts.engineering.quality.exemptions_registry.validate_exemption_key_normalization",
                 return_value=[],
             ),
             patch(
-                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
+                "scripts.engineering.quality.exemptions_registry.validate_exemption_target_references",
                 return_value=[],
             ),
         ):
@@ -362,11 +362,11 @@ class TestValidateExemptionsRegistry:
         path = _write_registry(tmp_path, raw)
         with (
             patch(
-                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
+                "scripts.engineering.quality.exemptions_registry.validate_exemption_key_normalization",
                 return_value=[],
             ),
             patch(
-                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
+                "scripts.engineering.quality.exemptions_registry.validate_exemption_target_references",
                 return_value=[],
             ),
         ):
@@ -391,11 +391,11 @@ class TestValidateExemptionsRegistry:
         path = _write_registry(tmp_path, raw)
         with (
             patch(
-                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
+                "scripts.engineering.quality.exemptions_registry.validate_exemption_key_normalization",
                 return_value=[],
             ),
             patch(
-                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
+                "scripts.engineering.quality.exemptions_registry.validate_exemption_target_references",
                 return_value=[],
             ),
         ):
@@ -407,11 +407,11 @@ class TestValidateExemptionsRegistry:
         path = _write_registry(tmp_path, self._valid_raw())
         with (
             patch(
-                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
+                "scripts.engineering.quality.exemptions_registry.validate_exemption_key_normalization",
                 return_value=[],
             ),
             patch(
-                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
+                "scripts.engineering.quality.exemptions_registry.validate_exemption_target_references",
                 return_value=[],
             ),
         ):
@@ -468,7 +468,35 @@ class TestValidateExemptionTargetReferences:
 
         path = _write_registry(tmp_path, raw)
         with patch(
-            "bioetl.infrastructure.quality.exemptions_registry._project_root",
+            "scripts.engineering.quality.exemptions_registry._project_root",
+            return_value=tmp_path,
+        ):
+            errors = validate_exemption_target_references(path)
+
+        assert errors == []
+
+    def test_valid_engineering_function_key(self, tmp_path: Path) -> None:
+        """Engineering-script symbols must participate in exemption lookups."""
+        scripts_dir = tmp_path / "scripts" / "engineering" / "quality"
+        scripts_dir.mkdir(parents=True)
+        (scripts_dir / "scoring.py").write_text(
+            "def compute_integral_debt_score():\n    return 1\n",
+            encoding="utf-8",
+        )
+        (tmp_path / "src" / "bioetl").mkdir(parents=True)
+        raw = {
+            "policy": {"required_fields": []},
+            "registries": {name: {} for name in REQUIRED_EXEMPTION_REGISTRIES},
+        }
+        registries = raw["registries"]
+        assert isinstance(registries, dict)
+        registries["function_complexity"] = {
+            "scripts/engineering/quality/scoring.py::compute_integral_debt_score": {}
+        }
+
+        path = _write_registry(tmp_path, raw)
+        with patch(
+            "scripts.engineering.quality.exemptions_registry._project_root",
             return_value=tmp_path,
         ):
             errors = validate_exemption_target_references(path)
@@ -515,7 +543,7 @@ class TestValidateExemptionTargetReferences:
 
         path = _write_registry(tmp_path, raw)
         with patch(
-            "bioetl.infrastructure.quality.exemptions_registry._project_root",
+            "scripts.engineering.quality.exemptions_registry._project_root",
             return_value=tmp_path,
         ):
             errors = validate_exemption_target_references(path)
@@ -567,7 +595,7 @@ class TestValidateExemptionTargetReferences:
 
         path = _write_registry(tmp_path, raw)
         with patch(
-            "bioetl.infrastructure.quality.exemptions_registry._project_root",
+            "scripts.engineering.quality.exemptions_registry._project_root",
             return_value=tmp_path,
         ):
             errors = validate_exemption_target_references(path)
@@ -613,7 +641,7 @@ class TestValidateExemptionTargetReferences:
 
         path = _write_registry(tmp_path, raw)
         with patch(
-            "bioetl.infrastructure.quality.exemptions_registry._project_root",
+            "scripts.engineering.quality.exemptions_registry._project_root",
             return_value=tmp_path,
         ):
             errors = validate_exemption_target_references(path)
@@ -662,7 +690,7 @@ class TestValidateExemptionTargetReferences:
 
         path = _write_registry(tmp_path, raw)
         with patch(
-            "bioetl.infrastructure.quality.exemptions_registry._project_root",
+            "scripts.engineering.quality.exemptions_registry._project_root",
             return_value=tmp_path,
         ):
             errors = validate_exemption_target_references(path)

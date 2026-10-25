@@ -39,6 +39,8 @@ PYPROJECT_TOML = "pyproject.toml"
 UV_LOCK = "uv.lock"
 PYTHON_DEPENDENCY_FILES = frozenset({PYPROJECT_TOML, UV_LOCK})
 TEST_FILE_GLOB = "test_*.py"
+GENERATED_ARTIFACT_TESTS = Path("configs/quality/generated_artifact_tests.json")
+GENERATED_ARTIFACT_ROUTING = Path("configs/quality/generated_artifact_routing.yaml")
 
 from scripts.engineering.dev.run_tests import TESTS_ROOT as PYTEST_ALL_ROOT
 
@@ -46,6 +48,8 @@ NPM_RUNTIME_TEST = "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.
 GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
     "tests/architecture/test_github_actions_runtime_policy.py"
 )
+DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
+RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 
 TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_telemetry_baseline.py",
@@ -64,12 +68,70 @@ TEST_GOVERNANCE_ARTIFACT_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_governance_audit.py",
     *FLAKY_BURNDOWN_REVIEW_TESTS,
 )
+TEST_SKIP_INVENTORY_TESTS: tuple[str, ...] = (
+    "tests/architecture/test_test_skip_inventory.py",
+    "tests/architecture/test_tech_debt_issues_5559_5563_closeout.py",
+)
+QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
+    "tests/architecture/test_architecture_quality_scorecard.py",
+    "tests/architecture/test_quality_debt_scorecard.py",
+    "tests/architecture/test_quality_exemptions_registry.py",
+)
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "reports/quality/total-tech-debt-audit-main-current.md": (
+        "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
+    ),
     "CHANGELOG.md": ("tests/architecture/test_docs_version_sync.py",),
     ".coderabbit.yaml": ("tests/architecture/test_coderabbit_config.py",),
+    ".github/workflows/duplication-complexity.yml": (
+        "tests/architecture/test_github_actions_runtime_policy.py",
+        "tests/architecture/test_tech_debt_issues_5811_5816_closeout.py",
+    ),
+    ".pre-commit-config.yaml": (
+        "tests/architecture/test_scripts_inventory_discovery.py",
+    ),
+    "configs/quality/debt_scorecard.yaml": (
+        "tests/architecture/test_quality_debt_scorecard.py",
+    ),
+    "configs/quality/duplication_complexity_exemptions.yaml": (
+        "tests/architecture/test_duplication_complexity_expiry_governance.py",
+    ),
+    "configs/quality/package_cohesion_budget.yaml": (
+        "tests/architecture/test_architecture_quality_scorecard.py",
+    ),
+    "configs/quality/time_seam_classification.yaml": (
+        "tests/architecture/test_time_seam_classification.py",
+    ),
+    "docs/00-project/architecture-index.md": (
+        "tests/architecture/test_documentation.py",
+    ),
+    "docs/00-project/governance/08-debt-ownership-playbook.md": (
+        "tests/architecture/test_tech_debt_roadmap_7461_7465.py",
+    ),
+    "docs/02-architecture/current-state-inventory.md": (
+        "tests/architecture/test_arch_s4_s9_gates.py",
+        "tests/unit/scripts/qa/test_topology_source_binding.py",
+    ),
+    "docs/03-guides/testing.md": (
+        "tests/architecture/test_test_telemetry_governance.py",
+    ),
+    "docs/reports/evidence/project-package-topology/SUMMARY.md": (
+        "tests/unit/scripts/qa/test_topology_source_binding.py",
+    ),
     "Makefile": (
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
+    ),
+    "Dockerfile.bioetl": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    ".github/workflows/docker.yml": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    "reports/quality/architecture-debt-remote-main-baseline.md": (
+        "tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py",
+    ),
+    "configs/quality/generated_artifact_routing.yaml": (
+        "tests/architecture/test_generated_artifact_routing.py",
+    ),
+    "configs/quality/generated_artifact_tests.json": (
+        "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
     ),
     "tests/fixtures/contracts/coderabbit-schema.v2.json": (
         "tests/architecture/test_coderabbit_config.py",
@@ -100,9 +162,19 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/integration_vcr_policy.yaml": (
         "tests/architecture/test_integration_vcr_policy.py",
     ),
+    "configs/quality/test_skip_inventory.yaml": TEST_SKIP_INVENTORY_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
     "configs/quality/scripts_inventory_manifest.json": (
         "tests/architecture/test_scripts_inventory_manifest.py",
+    ),
+    "configs/quality/scripts_lifecycle_registry.json": (
+        "tests/architecture/test_scripts_lifecycle_registry.py",
+    ),
+    "configs/quality/technical_debt_audit_registry.yaml": (
+        "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
+    ),
+    "docs/04-reference/api/infrastructure.md": (
+        "tests/architecture/test_api_reference_public_facades.py",
     ),
     "docs/02-architecture/finances-github-billing.md": (
         "tests/architecture/test_documentation_sync.py",
@@ -120,14 +192,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/quality/flaky-test-burndown-review.json": FLAKY_BURNDOWN_REVIEW_TESTS,
     "reports/quality/test-governance-current.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
-    "reports/quality/architecture-debt-remote-main-baseline.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
-    "reports/quality/config-surface-backlog.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
-    "reports/quality/debt-governance-gates.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
-    "reports/quality/debt-governance-gates.md": TEST_GOVERNANCE_ARTIFACT_TESTS,
-    "reports/quality/live-residual-snapshot.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
     "reports/engineering/finances/billing_manifest.json": (
         "tests/unit/scripts/test_github_billing.py",
     ),
+    "reports/security/blocker-CVE-out-of-scope.md": (DOCKER_RUNTIME_CONTRACT_TEST,),
     ".github/workflows/pr-required.yml": (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
     "configs/quality/reusable_action_pins.yaml": (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
     "scripts/engineering/repo/check_github_actions_runtime_policy.py": (
@@ -139,6 +207,24 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "scripts/engineering/quality/": QUALITY_GOVERNANCE_TESTS,
+    "src/bioetl/infrastructure/quality/": QUALITY_GOVERNANCE_TESTS,
+    "grafana/tooling/router-v7-bridge/": (
+        "tests/architecture/test_circleci_migration_contract.py",
+        RESIDUAL_OSV_TEST,
+    ),
+    "grafana/plugins/bioetl-scenes-app/": (
+        "tests/architecture/test_braces_backport.py",
+        "tests/architecture/test_dashboard_scenes_contract.py",
+        RESIDUAL_OSV_TEST,
+    ),
+    "grafana/plugins/bioetl-selectorshell-panel/": (
+        "tests/architecture/test_braces_backport.py",
+        RESIDUAL_OSV_TEST,
+    ),
+    "reports/audit-runs/12106-s6/": (
+        "tests/integration/infrastructure/durability/test_crash_lineage.py",
+    ),
     "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
     "reports/performance/": BENCHMARK_EVIDENCE_TESTS,
     "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.": (
@@ -329,7 +415,7 @@ def affected_pytest_targets(
     paths = [path for raw in changed_files if (path := raw.strip().replace("\\", "/"))]
     if not paths:
         return [_python_suite_root(repo_root)]
-    mapped = {path: _mapped_targets(path) for path in paths}
+    mapped = {path: _mapped_targets(path, repo_root) for path in paths}
     _require_targets(
         [target for values in mapped.values() for target in values], repo_root
     )
@@ -376,12 +462,112 @@ def _global_dependency_lane(root: Path, dependencies: set[str]) -> bool:
     )
 
 
-def _mapped_targets(path: str) -> list[str]:
+def _generated_artifact_test_records(root: Path) -> list[object]:
+    """Load and validate the generated-artifact test records."""
+    registry_path = root / GENERATED_ARTIFACT_TESTS
+    if not registry_path.is_file():
+        return []
+    try:
+        payload = json.loads(registry_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Invalid generated artifact test registry: {exc}") from exc
+    records = payload.get("tests") if isinstance(payload, dict) else None
+    if not isinstance(records, list):
+        raise ValueError(
+            "Invalid generated artifact test registry: tests must be a list"
+        )
+    return records
+
+
+def _tests_by_generated_artifact(records: list[object]) -> dict[str, set[str]]:
+    """Build the artifact-to-test index from validated registry records."""
+    tests_by_artifact: dict[str, set[str]] = {}
+    for record in records:
+        if not isinstance(record, dict):
+            raise ValueError("Invalid generated artifact test registry: test entry")
+        node = record.get("node")
+        artifacts = record.get("artifacts")
+        if not isinstance(node, str) or not isinstance(artifacts, list):
+            raise ValueError("Invalid generated artifact test registry: test fields")
+        test_path = node.partition("::")[0]
+        for artifact in artifacts:
+            if not isinstance(artifact, str):
+                raise ValueError(
+                    "Invalid generated artifact test registry: artifact path"
+                )
+            tests_by_artifact.setdefault(artifact, set()).add(test_path)
+    return tests_by_artifact
+
+
+def _generated_artifact_routes(root: Path) -> list[object]:
+    """Load and validate generated-artifact sibling routes."""
+    routing_path = root / GENERATED_ARTIFACT_ROUTING
+    if not routing_path.is_file():
+        return []
+    try:
+        routing = yaml.safe_load(routing_path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError) as exc:
+        raise ValueError(f"Invalid generated artifact routing registry: {exc}") from exc
+    routes = routing.get("routes") if isinstance(routing, dict) else None
+    if not isinstance(routes, list):
+        raise ValueError(
+            "Invalid generated artifact routing registry: routes must be a list"
+        )
+    return routes
+
+
+def _route_outputs(route: object) -> list[str]:
+    """Return one validated generated-artifact route output list."""
+    if not isinstance(route, dict):
+        raise ValueError("Invalid generated artifact routing registry: route entry")
+    outputs = route.get("outputs")
+    if not isinstance(outputs, list) or not all(
+        isinstance(output, str) for output in outputs
+    ):
+        raise ValueError("Invalid generated artifact routing registry: outputs")
+    return outputs
+
+
+def _output_matches_path(output: str, path: str) -> bool:
+    """Return whether an output file or directory owns ``path``."""
+    return path == output or (output.endswith("/") and path.startswith(output))
+
+
+def _tests_for_route(
+    outputs: list[str], tests_by_artifact: dict[str, set[str]]
+) -> set[str]:
+    """Return tests registered for every file below the route outputs."""
+    return {
+        target
+        for output in outputs
+        for artifact, artifact_tests in tests_by_artifact.items()
+        if _output_matches_path(output, artifact)
+        for target in artifact_tests
+    }
+
+
+def _generated_artifact_targets(path: str, root: Path) -> list[str]:
+    """Return tests declared for a generated artifact or one of its siblings."""
+    records = _generated_artifact_test_records(root)
+    tests_by_artifact = _tests_by_generated_artifact(records)
+    targets = set(tests_by_artifact.get(path, set()))
+
+    routes = _generated_artifact_routes(root)
+    for route in routes:
+        outputs = _route_outputs(route)
+        if not any(_output_matches_path(output, path) for output in outputs):
+            continue
+        targets.update(_tests_for_route(outputs, tests_by_artifact))
+    return sorted(targets)
+
+
+def _mapped_targets(path: str, root: Path) -> list[str]:
     """Return catalog-mapped tests for one changed path."""
     targets = list(AFFECTED_TESTS_BY_PATH.get(path, ()))
     for prefix, values in AFFECTED_TESTS_BY_PREFIX.items():
         if path.startswith(prefix):
             targets.extend(values)
+    targets.extend(_generated_artifact_targets(path, root))
     return targets
 
 
@@ -601,7 +787,7 @@ def _changed_paths(changed_files: list[str]) -> list[str]:
 
 def _has_selection_route(path: str, root: Path) -> bool:
     """Return whether one path has an explicit impact-selection route."""
-    if path in PYTHON_DEPENDENCY_FILES or _mapped_targets(path):
+    if path in PYTHON_DEPENDENCY_FILES or _mapped_targets(path, root):
         return True
     if path.startswith(TESTS_PREFIX) and path.endswith(".py"):
         return True

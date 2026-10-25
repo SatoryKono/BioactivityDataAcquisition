@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.quality.inventory import ExemptionInventorySummary
+from scripts.engineering.quality.inventory import ExemptionInventorySummary
 
 __all__ = ["validate_registry_sync"]
 
