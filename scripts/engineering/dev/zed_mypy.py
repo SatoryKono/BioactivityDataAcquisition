@@ -3,7 +3,7 @@
 
 CI (``.github/workflows/type-checking.yml``) runs::
 
-    mypy --config-file pyproject.toml --strict --no-incremental src/bioetl src/memory
+    mypy --config-file pyproject.toml --strict --no-incremental src/bioetl src/memory scripts/engineering/quality
 
 ``src/memory/**`` is type-checked like product code (AUD-004).
 Prefer this wrapper from Zed Type check so results match the merge gate.
@@ -27,20 +27,22 @@ def main(argv: list[str] | None = None) -> int:
     del argv
     os.chdir(REPO_ROOT)
     ensure_ready(modules=("mypy",))
-    # Match CI type-checking.yml product gate (AUD-004: memory included).
+    # Match CI type-checking.yml product and engineering quality gate.
     cmd = [
         sys.executable,
         "-m",
         "mypy",
         "--config-file",
         "pyproject.toml",
+        "--strict",
         "--no-pretty",
         "src/bioetl",
         "src/memory",
+        "scripts/engineering/quality",
     ]
     print("[zed_mypy] CI-aligned type gate:", " ".join(cmd), flush=True)
     print(
-        "[zed_mypy] scope=src/bioetl + src/memory (AUD-004 strict)",
+        "[zed_mypy] scope=src/bioetl + src/memory + scripts/engineering/quality (strict)",
         flush=True,
     )
     completed = subprocess.run(cmd, cwd=REPO_ROOT, check=False)
