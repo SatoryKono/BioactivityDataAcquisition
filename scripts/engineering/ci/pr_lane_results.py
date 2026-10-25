@@ -75,6 +75,9 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "reports/quality/total-tech-debt-audit-main-current.md": (
+        "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
+    ),
     "CHANGELOG.md": ("tests/architecture/test_docs_version_sync.py",),
     ".coderabbit.yaml": ("tests/architecture/test_coderabbit_config.py",),
     ".github/workflows/duplication-complexity.yml": (
@@ -188,9 +191,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/quality/flaky-test-burndown-review.json": FLAKY_BURNDOWN_REVIEW_TESTS,
     "reports/quality/test-governance-current.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
-    "reports/quality/total-tech-debt-audit-main-current.md": (
-        "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
-    ),
     "reports/engineering/finances/billing_manifest.json": (
         "tests/unit/scripts/test_github_billing.py",
     ),
