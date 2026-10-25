@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-25T10:19:52.912163+00:00",
+  "generated_at": "2026-10-25T10:57:27.641081+00:00",
   "summary": {
     "total_scripts": 668,
     "status_counts": {
@@ -10395,7 +10395,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 14,
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
