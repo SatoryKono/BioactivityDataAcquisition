@@ -146,6 +146,19 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "grafana/tooling/router-v7-bridge/": (
+        "tests/architecture/test_circleci_migration_contract.py",
+        "tests/architecture/test_residual_osv_9853.py",
+    ),
+    "grafana/plugins/bioetl-scenes-app/": (
+        "tests/architecture/test_braces_backport.py",
+        "tests/architecture/test_dashboard_scenes_contract.py",
+        "tests/architecture/test_residual_osv_9853.py",
+    ),
+    "grafana/plugins/bioetl-selectorshell-panel/": (
+        "tests/architecture/test_braces_backport.py",
+        "tests/architecture/test_residual_osv_9853.py",
+    ),
     "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
     "reports/performance/": BENCHMARK_EVIDENCE_TESTS,
     "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.": (

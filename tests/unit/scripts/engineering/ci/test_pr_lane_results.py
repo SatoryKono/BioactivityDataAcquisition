@@ -220,6 +220,27 @@ def test_shadow_compare_routes_billing_pr_non_code_changes() -> None:
     assert "tests/unit/scripts/test_github_billing.py" in report["selected"]
 
 
+def test_shadow_compare_routes_grafana_npm_projects() -> None:
+    """Grafana package updates select their project governance tests."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        [
+            "grafana/tooling/router-v7-bridge/package-lock.json",
+            "grafana/plugins/bioetl-scenes-app/package.json",
+            "grafana/plugins/bioetl-selectorshell-panel/package-lock.json",
+        ],
+        repo_root=repo_root,
+    )
+
+    assert set(report["selected"]) == {
+        "tests/architecture/test_braces_backport.py",
+        "tests/architecture/test_circleci_migration_contract.py",
+        "tests/architecture/test_dashboard_scenes_contract.py",
+        "tests/architecture/test_residual_osv_9853.py",
+    }
+
+
 def test_shadow_compare_rejects_mixed_diff_with_unmapped_path(
     tmp_path: Path,
 ) -> None:
