@@ -101,6 +101,7 @@ def _observed_calls() -> list[WallClockCall]:
     calls: list[WallClockCall] = []
     source_paths = [
         *sorted((ROOT / "src" / "bioetl").rglob("*.py")),
+        *sorted((ROOT / "scripts" / "engineering" / "quality").rglob("*.py")),
         ROOT / "src" / "memory" / "tooling" / "prune.py",
         ROOT / "src" / "memory" / "tooling" / "review_curated.py",
     ]
