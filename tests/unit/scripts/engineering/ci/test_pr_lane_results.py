@@ -236,6 +236,16 @@ def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
     )
 
 
+@pytest.mark.parametrize("manifest", ["package.json", "package-lock.json"])
+def test_shadow_compare_routes_gemini_toolchain(manifest: str) -> None:
+    """Each toolchain manifest independently selects the integrity contract."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [f"scripts/ai/gemini/npm-tooling/{manifest}"], repo_root=repo_root
+    )
+    assert report["selected"] == ["tests/architecture/test_gemini_cli_bootstrap.py"]
+
+
 def test_shadow_compare_routes_grafana_npm_projects() -> None:
     """Grafana package updates select their project governance tests."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -255,6 +265,28 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
         "tests/architecture/test_dashboard_scenes_contract.py",
         "tests/architecture/test_residual_osv_9853.py",
     }
+
+
+@pytest.mark.parametrize(
+    "name", ["SUMMARY.md", "chembl_data.json", "uniprot_headers.txt"]
+)
+def test_shadow_compare_routes_provider_parity_evidence(name: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([f"reports/evidence/12461/{name}"], repo_root=root)
+    assert report["selected"] == [
+        "tests/architecture/test_provider_contract_interoperability_governance.py",
+        "tests/contract/test_provider_contract_snapshot_registry.py",
+    ]
+
+
+def test_shadow_compare_routes_sec003_audit_to_metadata_parser() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["reports/engineering/SEC-003_audit_report.md"], repo_root=root
+    )
+    assert report["selected"] == [
+        "tests/unit/domain/services/test_composite_metadata_helpers.py"
+    ]
 
 
 def test_shadow_compare_routes_quality_and_runtime_documentation() -> None:
