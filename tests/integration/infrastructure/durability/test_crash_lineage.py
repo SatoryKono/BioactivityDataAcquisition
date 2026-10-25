@@ -99,9 +99,8 @@ def test_row_15a_lineage_crash_after_fragment_write(tmp_path: Path) -> None:
     fragments = list(fragments_dir.glob("*.json"))
     assert len(fragments) == 1
 
-    # Run ID index doesn't have the entry
-    run_indexes = list((root / "indexes").glob("**/*.jsonl"))
-    assert len(run_indexes) == 0
+    # No lookup index was started before _fragment_indexes was entered.
+    assert list(root.glob("_by_*/*.jsonl")) == []
 
 
 def _child_kill_mid_index_append(root_path: Path) -> None:
@@ -112,9 +111,14 @@ def _child_kill_mid_index_append(root_path: Path) -> None:
     original_append = append_jsonl_payload
 
     def mock_append(*args: object, **kwargs: object) -> int:
-        index_path = kwargs.get("path") or args[0]
-        if "run_id" in str(index_path):
-            # Kill during the run_id index append
+        index_path = Path(kwargs.get("path") or args[0])
+        payload = bytes(kwargs.get("payload") or args[1])
+        if "_by_run_id" in index_path.parts:
+            # Persist an unterminated prefix before simulating the hard crash.
+            index_path.parent.mkdir(parents=True, exist_ok=True)
+            with index_path.open("ab", buffering=0) as handle:
+                handle.write(payload[: max(1, len(payload) // 2)])
+                os.fsync(handle.fileno())
             os.kill(os.getpid(), signal.SIGKILL)
         return original_append(*args, **kwargs)
 
@@ -141,3 +145,11 @@ def test_row_15b_lineage_crash_mid_index_append(tmp_path: Path) -> None:
     fragments_dir = root / "fragments"
     fragments = list(fragments_dir.glob("*.json"))
     assert len(fragments) == 1
+
+    semantic_indexes = list((root / "_by_fragment_id").glob("*.jsonl"))
+    assert len(semantic_indexes) == 1
+    assert semantic_indexes[0].read_bytes().endswith(b"\n")
+
+    run_indexes = list((root / "_by_run_id").glob("*.jsonl"))
+    assert len(run_indexes) == 1
+    assert not run_indexes[0].read_bytes().endswith(b"\n")
