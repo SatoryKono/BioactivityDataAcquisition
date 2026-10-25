@@ -90,6 +90,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         ("tests/architecture/test_mypy_target_contract.py",),
     ),
+    "reports/engineering/SEC-003_audit_report.md": (
+        "tests/unit/domain/services/test_composite_metadata_helpers.py",
+    ),
     "docs/04-reference/environment-variables.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         "tests/architecture/test_documentation_cleanup_inventory.py",
