@@ -153,13 +153,7 @@ bioetl workflow status <NAME> [OPTIONS]
   published family default or fail closed, so this flag cannot bypass
   exact-replay guardrails.
 - pipeline-level `--resume` is intentionally not exposed on `workflow run`;
-  workflow control-plane resume stays on `--resume-last`.
-- `--resume-last` использует semantic `execution_fingerprint`, а не только имя workflow.
-- `--resume-manifest-id` и `--resume-run-id` pin-ят resume на один конкретный
   persisted workflow occurrence, когда оператору недостаточно latest-match
-  поведения `--resume-last`.
-- `--incremental` разрешён только для обычного workflow launch path и не может
-  смешиваться с `--resume-last`, `--resume-manifest-id`, `--resume-run-id` или
   явным `--start-offset`.
 - destructive ambiguity recovery не делает silent replay: при `repair_required`
   оператор должен использовать `--repair-steps` или `--force-steps`.
@@ -179,16 +173,12 @@ bioetl workflow run chembl_activity --use-cached-bronze --exact-replay --replay-
 #   --required-persistence-profile replay_ready --no-health-server \
 #   --no-ensure-observability-backend
 bioetl workflow run chembl_baseline --log-level DEBUG --debug-export --debug-export-format csv --debug-export-format xlsx
-bioetl workflow run chembl_target --incremental --use-cached-bronze --cached-bronze-date 2026-06-29
 bioetl workflow status chembl_activity
 bioetl workflow run publication_provider_pack --dry-run
 bioetl workflow run chembl_baseline --dry-run
 bioetl workflow run chembl_core --dry-run
 bioetl workflow run chembl_core --only-steps summarize_core_extracts
-bioetl workflow run chembl_core --resume-last
-bioetl workflow run chembl_core --resume-manifest-id wf-manifest-2026-06-30-001
 bioetl workflow run chembl_core --resume-run-id 00000000-0000-0000-0000-000000000111
-bioetl workflow run chembl_core --resume-last --repair-steps reconcile_assay_target_orphans
 bioetl workflow run chembl_reference_pack --limit 100 --required-persistence-profile degraded_observable --no-ensure-observability-backend
 bioetl workflow run chembl_reference_pack --observability-backend-port 18081
 bioetl workflow status chembl_core
@@ -218,7 +208,7 @@ bioetl run --pipeline <NAME> [OPTIONS]
 
 | Параметр            | Описание                                                 |
 | ------------------- | -------------------------------------------------------- |
-| `--pipeline <NAME>` | Имя пайплайна (соответствует YAML в `configs/entities/`) |
+| `--pipeline` | Имя пайплайна (соответствует YAML в `configs/entities/`) |
 
 **Опции:**
 
@@ -318,9 +308,6 @@ bioetl run --pipeline chembl_activity \
 
 **Checkpoint resume policy (runtime setting):**
 
-Migration: CLI flag `--checkpoint-compatibility` was removed. Operators set
-`settings.pipeline.control_plane.checkpoint_compatibility_policy` in config
-(`observe`, `soft_fail`, `hard_fail`). Do not revive the retired flag.
 
 - `settings.pipeline.control_plane.checkpoint_compatibility_policy=observe`
   Degraded operator mode: продолжить можно только при несовместимостях вне
@@ -933,7 +920,7 @@ bioetl debug --pipeline <NAME> [OPTIONS]
 
 | Параметр            | Описание                                                 |
 | ------------------- | -------------------------------------------------------- |
-| `--pipeline <NAME>` | Имя пайплайна (соответствует YAML в `configs/entities/`) |
+| `--pipeline` | Имя пайплайна (соответствует YAML в `configs/entities/`) |
 
 **Опции:**
 
@@ -944,8 +931,6 @@ bioetl debug --pipeline <NAME> [OPTIONS]
 | `--mode`         | choice | `log`         | Поддерживается только `log`; значение `interactive` принимается парсером, но отклоняется при выполнении с кодом 80 (`CONFIG_ERROR`) |
 | `--run-type`     | choice | `incremental` | `incremental`, `backfill`, `rebuild` |
 
-Migration: `--breakpoint` (singular), `--step-into`, `--inspect-state`,
-`--debugger-port` и `--dry-run` **удалены**. Не восстанавливать remote
 debugger port как canonical debug surface.
 
 **Примеры:**
@@ -981,11 +966,6 @@ bioetl diagnostics [COMMAND] [OPTIONS]
 | Подкоманда | Назначение |
 | --- | --- |
 | `guide` | Canonical diagnostics discovery / routing guide |
-| `health` | Provider health diagnostics (`--provider`, `--json`) |
-| `metrics` | Metrics/admin observability workflow summary (`--json`) |
-| `run` | One-run forensic dossier by `--run-id` |
-| `dossier` | One-run dossier by `--run-id` **или** `--manifest-id` |
-| `contract-checks` | Public observability contract checks (`--json`) |
 | `checkpoint` | Checkpoint state + correlated audit/manifest context |
 | `manifest` | Inspect one run manifest / ledger |
 | `forensic-diff` | Compare two runs or manifests |
@@ -1093,7 +1073,6 @@ bioetl dq [COMMAND] [OPTIONS]
 | Команда | Назначение |
 | --- | --- |
 | `show <PIPELINE>` | Показать DQ configuration (`--format json\|yaml`) |
-| `show-effective <PIPELINE>` | Effective config artifact (`--format`, repeatable `--override key=value`) |
 | `validate <PIPELINE>` | Валидация DQ configuration (`--config-file PATH` optional) |
 | `check-compatibility <A> <B>` | Совместимость двух configuration artifacts |
 
@@ -1159,9 +1138,6 @@ Migration: `bioetl lineage show --entity --record-id` **удалён**
 
 | Подкоманда | Назначение |
 | --- | --- |
-| `explain` | Lineage graph одного run/manifest (`--run-id` **или** `--manifest-id`) |
-| `trace` | Immediate upstream/downstream для `--dataset-ref` |
-| `show-fragment` | Один fragment по `FRAGMENT_ID` (`--semantic` для semantic lookup) |
 
 `--format` для всех трёх: `text`, `json`, `yaml` (не `dot`).
 
