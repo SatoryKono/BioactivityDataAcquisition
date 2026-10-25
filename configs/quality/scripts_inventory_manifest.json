@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-25T16:38:33.221389+00:00",
+  "generated_at": "2026-10-25T17:25:18.951572+00:00",
   "summary": {
     "total_scripts": 696,
     "status_counts": {
@@ -11175,13 +11175,13 @@
         },
         {
           "path": "scripts/engineering/quality/architecture_quality_scorecard.py",
-          "line": 10,
+          "line": 11,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.validate_registry_dq_refs import ("
         },
         {
           "path": "scripts/engineering/quality/architecture_quality_scorecard.py",
-          "line": 119,
+          "line": 120,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py\""
         },
@@ -11380,7 +11380,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 303,
+      "reference_count": 308,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -16311,13 +16311,13 @@
         },
         {
           "path": "scripts/engineering/quality/architecture_quality_scorecard.py",
-          "line": 13,
+          "line": 14,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_adr_enforcement_matrix import ("
         },
         {
           "path": "scripts/engineering/quality/architecture_quality_scorecard.py",
-          "line": 155,
+          "line": 156,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload\""
         },
@@ -17374,7 +17374,7 @@
         },
         {
           "path": "scripts/engineering/quality/architecture_quality_scorecard.py",
-          "line": 16,
+          "line": 17,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_lazy_import_inventory import collect_lazy_imports"
         },
@@ -19082,31 +19082,31 @@
       "references": [
         {
           "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
-          "line": 9,
+          "line": 10,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.architecture_debt_artifact_tasks import ("
         },
         {
           "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
-          "line": 12,
+          "line": 13,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.architecture_debt_artifact_tasks import ("
         },
         {
           "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
-          "line": 15,
+          "line": 16,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.architecture_debt_artifact_tasks import ("
         },
         {
           "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
-          "line": 18,
+          "line": 19,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.architecture_debt_artifact_tasks import ("
         },
         {
           "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
-          "line": 21,
+          "line": 22,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.architecture_debt_artifact_tasks import ("
         },
@@ -19253,19 +19253,19 @@
         },
         {
           "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
-          "line": 24,
+          "line": 25,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.architecture_debt_task_policy import ("
         },
         {
           "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
-          "line": 30,
+          "line": 31,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.architecture_debt_task_policy import ("
         },
         {
           "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
-          "line": 33,
+          "line": 34,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.architecture_debt_task_policy import ("
         },
@@ -19290,7 +19290,7 @@
       "references": [
         {
           "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.architecture_debt_task_support import ("
         },
@@ -19406,7 +19406,7 @@
         },
         {
           "path": "scripts/engineering/quality/architecture_quality_scorecard.py",
-          "line": 18,
+          "line": 19,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.architecture_quality_scoring import ("
         },
@@ -19449,7 +19449,7 @@
       "references": [
         {
           "path": "scripts/engineering/quality/debt_scorecard.py",
-          "line": 14,
+          "line": 15,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.budget_evaluator import ("
         },
@@ -19559,7 +19559,7 @@
       "references": [
         {
           "path": "scripts/engineering/quality/debt_scorecard.py",
-          "line": 21,
+          "line": 22,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.debt_scorecard_validation import ("
         },
@@ -19608,13 +19608,13 @@
         },
         {
           "path": "scripts/engineering/quality/architecture_debt_task_generation.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.exemptions_registry import load_exemptions_registry"
         },
         {
           "path": "scripts/engineering/quality/debt_scorecard.py",
-          "line": 24,
+          "line": 25,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.exemptions_registry import load_exemptions_registry"
         },
@@ -19908,7 +19908,7 @@
         },
         {
           "path": "scripts/engineering/quality/debt_scorecard.py",
-          "line": 25,
+          "line": 26,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.inventory import ("
         },
@@ -19957,7 +19957,7 @@
       "references": [
         {
           "path": "scripts/engineering/quality/debt_scorecard.py",
-          "line": 29,
+          "line": 30,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.registry_sync_service import validate_registry_sync"
         },
@@ -19994,7 +19994,7 @@
         },
         {
           "path": "scripts/engineering/quality/debt_scorecard.py",
-          "line": 30,
+          "line": 31,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.report_formatter import ("
         },
@@ -20043,7 +20043,7 @@
         },
         {
           "path": "scripts/engineering/quality/debt_scorecard.py",
-          "line": 33,
+          "line": 34,
           "source_group": "scripts",
           "text": "from scripts.engineering.quality.scoring import compute_integral_debt_score"
         },
