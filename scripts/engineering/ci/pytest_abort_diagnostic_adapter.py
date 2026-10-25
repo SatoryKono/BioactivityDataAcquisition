@@ -719,7 +719,9 @@ def _terminate_pid(pid: int) -> str:
 def _posix_pid_exited(pid: int) -> bool:
     """Linux zombies retain a PID but cannot execute or survive cleanup."""
     try:
-        stat = (Path("/proc") / str(pid) / "stat").read_text(encoding="utf-8")
+        stat = (Path("/proc") / str(pid) / "stat").read_text(
+            encoding="utf-8", errors="replace"
+        )
     except OSError:
         return False
     marker = stat.rfind(")")

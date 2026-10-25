@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-25T19:06:08.605472+00:00",
+  "generated_at": "2026-10-25T19:25:55.092938+00:00",
   "summary": {
     "total_scripts": 696,
     "status_counts": {
@@ -10494,7 +10494,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
