@@ -485,8 +485,8 @@
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 9.32,
-    "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
+    "architecture_quality_scorecard_integral_score": 10.0,
+    "architecture_quality_scorecard_interpretation": "excellent",
     "fail_count": 0,
     "failing_gates": [],
     "gate_count": 47,

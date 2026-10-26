@@ -7,8 +7,8 @@
 - warn_count: 0
 - fail_count: 0
 - release_gate_status: `passing`
-- architecture_quality_scorecard_integral_score: `9.32`
-- architecture_quality_scorecard_interpretation: `good_targeted_improvements`
+- architecture_quality_scorecard_integral_score: `10.0`
+- architecture_quality_scorecard_interpretation: `excellent`
 
 | gate | status | metric | current | limit | source |
 | --- | --- | --- | ---: | ---: | --- |
