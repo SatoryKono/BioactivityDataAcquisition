@@ -444,9 +444,18 @@ def test_shadow_compare_routes_app002_port_map_to_port_contracts() -> None:
     ]
 
 
-def test_shadow_compare_routes_app001_audit_to_cancellation_contracts() -> None:
+@pytest.mark.parametrize(
+    "path",
+    (
+        "reports/app-001-audit.md",
+        "reports/audit/AUDIT-20261022-APP-001-Cancellation.md",
+    ),
+)
+def test_shadow_compare_routes_app001_audit_to_cancellation_contracts(
+    path: str,
+) -> None:
     root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare(["reports/app-001-audit.md"], repo_root=root)
+    report = build_shadow_compare([path], repo_root=root)
     assert report["covers_full_suite"] is False
     assert set(report["selected"]) == {
         "tests/unit/application/core/test_batch_execution_lifecycle.py",
