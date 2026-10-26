@@ -241,7 +241,10 @@ def test_describe_required_probe_failure_rejects_unsupported_schemes() -> None:
         urlopen_fn=fake_urlopen,
     )
 
-    assert detail == "Capability probe file:///etc/passwd/first failed: unsupported URL scheme."
+    assert (
+        detail
+        == "Capability probe file:///etc/passwd/first failed: unsupported URL scheme."
+    )
     assert calls == []
 
 
