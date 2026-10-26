@@ -1553,6 +1553,30 @@ def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_
     assert "--fail-on-blocking" in enforcement["run"]
 
 
+@pytest.mark.parametrize(
+    "scan_name",
+    [
+        "Run full Trivy JSON evidence scan",
+        "Run Trivy on pinned Wolfi runtime base image",
+    ],
+)
+def test_docker_trivy_db_prefers_primary_registry_without_skipping_updates(
+    scan_name: str,
+) -> None:
+    """A broken pull-through mirror must not be the first DB source."""
+    steps = _load_yaml(ROOT / ".github/workflows/docker.yml")["jobs"]["docker-build"][
+        "steps"
+    ]
+    scan = next(step for step in steps if step.get("name") == scan_name)
+    command = scan["run"]
+    primary = "--db-repository ghcr.io/aquasecurity/trivy-db:2"
+    mirror = "--db-repository mirror.gcr.io/aquasec/trivy-db:2"
+    assert primary in command and mirror in command
+    assert command.index(primary) < command.index(mirror)
+    assert "--skip-db-update" not in command
+    assert "--skip-java-db-update" not in command
+
+
 def test_docker_workflow_probes_shellless_runtime_and_default_health() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     assert workflow["permissions"] == {"contents": "read"}
