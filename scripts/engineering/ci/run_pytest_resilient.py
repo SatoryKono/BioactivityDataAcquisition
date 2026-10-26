@@ -36,6 +36,8 @@ _WORKER_CRASH_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^maximum crashed workers reached:", re.IGNORECASE),
     re.compile(r"^xdist\.[\w.]*(?:internal error|Interrupted)\b", re.IGNORECASE),
 )
+_INTERNAL_ERROR_PREFIX = "INTERNALERROR"
+_WORKER_CONTROLLER_MARKER = "<WorkerController gw"
 _MAXFAIL_INTERRUPT = re.compile(r"stopping after \d+ failures", re.IGNORECASE)
 SUMMARY_FILENAME = "summary.txt"
 
@@ -98,6 +100,23 @@ def _extract_failed_nodeids(output: str) -> list[str]:
     return sorted(set(nodeids))
 
 
+def _is_internal_error_worker_crash(line: str) -> bool:
+    """Return True for pytest's rewritten ``assert not crashitem`` line.
+
+    The marker is recognized only after an ``INTERNALERROR>`` prefix so a
+    normal assertion that mentions ``WorkerController`` is not a crash.
+    """
+    stripped = line.lstrip()
+    prefix, separator, rest = stripped.partition(">")
+    if separator != ">" or prefix.strip().upper() != _INTERNAL_ERROR_PREFIX:
+        return False
+    index = rest.find(_WORKER_CONTROLLER_MARKER)
+    if index < 0:
+        return False
+    cursor = index + len(_WORKER_CONTROLLER_MARKER)
+    return cursor < len(rest) and rest[cursor].isdigit()
+
+
 def _detect_worker_crash(output: str) -> bool:
     """Return True if output indicates an xdist worker or node crash.
 
@@ -107,6 +126,8 @@ def _detect_worker_crash(output: str) -> bool:
     for line in output.splitlines():
         if _MAXFAIL_INTERRUPT.search(line):
             continue
+        if _is_internal_error_worker_crash(line):
+            return True
         if any(pattern.search(line) for pattern in _WORKER_CRASH_PATTERNS):
             return True
     return False

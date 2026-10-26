@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from scripts.engineering.common.repo_paths import resolve_repo_root
 from typing import Any
 
 import yaml
@@ -23,7 +24,7 @@ from scripts.engineering.quality.architecture_quality_scoring import (
     _score_category,
 )
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
+PROJECT_ROOT = resolve_repo_root()
 DEFAULT_OUTPUT = (
     PROJECT_ROOT / "reports" / "quality" / "architecture-quality-scorecard.json"
 )

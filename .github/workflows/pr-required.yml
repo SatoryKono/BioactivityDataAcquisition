@@ -131,7 +131,7 @@ jobs:
 
       - name: Upload decision matrix
         if: ${{ failure() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pr-gate-decisions-${{ github.event.pull_request.head.sha || github.sha }}
           path: reports/quality/pr-gate-decisions.json
@@ -222,7 +222,7 @@ jobs:
       - name: Lint commit messages
         id: commitlint
         if: needs['classify-changes'].outputs['commit-governance'] == 'required'
-        uses: wagoid/commitlint-github-action@f133a0d95090ef2609192b4a21f54e20af819ea9 # v6
+        uses: wagoid/commitlint-github-action@b948419dd99f3fd78a6548d48f94e3df7f6bf3ed # v6
         with:
           configFile: commitlint.config.mjs
           helpURL: https://www.conventionalcommits.org/
@@ -256,7 +256,7 @@ jobs:
 
       - name: Run zizmor
         id: zizmor
-        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
         with:
           inputs: |
             .github/workflows
@@ -407,7 +407,13 @@ jobs:
             echo "::error::tests gate has no affected pytest target"
             exit 1
           fi
-          uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target "${targets[@]}" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-marker "not serial" --parallel-addopts "-n auto --dist loadfile --max-worker-restart=0 -q --tb=line" --serial-marker "serial" --serial-addopts "-p no:xdist -q --tb=line" --no-fallback --prove-artifact-deferral
+          parallel_timeout=900
+          # Framework/toolchain updates select the entire suite, not a small
+          # affected slice. Keep a bounded pass within the existing 90m job.
+          if [[ ${#targets[@]} -eq 1 && "${targets[0]%/}" == "tests" ]]; then
+            parallel_timeout=2400
+          fi
+          uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target "${targets[@]}" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-timeout-seconds "$parallel_timeout" --parallel-marker "not serial" --parallel-addopts "-n auto --dist loadfile --max-worker-restart=0 -q --tb=line" --serial-marker "serial" --serial-addopts "-p no:xdist -q --tb=line" --no-fallback --prove-artifact-deferral
 
       - name: Shadow compare impact selection
         id: impact-shadow-compare
@@ -435,7 +441,7 @@ jobs:
 
       - name: Upload impact shadow compare
         if: always() && !cancelled() && needs['classify-changes'].outputs['tests'] == 'required' && hashFiles('reports/quality/impact-shadow-compare.json') != ''
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: impact-shadow-compare-${{ github.sha }}
           path: reports/quality/impact-shadow-compare.json
@@ -444,7 +450,7 @@ jobs:
 
       - name: Restore mypy cache
         if: needs['classify-changes'].outputs['type-checking'] == 'required'
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .mypy_cache
           key: ${{ runner.os }}-${{ runner.arch }}-python-${{ env.pythonLocation }}-mypy-${{ hashFiles('pyproject.toml', 'uv.lock') }}-${{ github.sha }}
@@ -460,12 +466,12 @@ jobs:
           set -o pipefail
           mkdir -p reports
 
-          echo "Running full mypy strict gate on src/bioetl + src/memory..."
+          echo "Running full mypy strict gate on src/bioetl + src/memory + scripts/engineering/quality..."
           echo "Event: $EVENT_NAME" | tee reports/mypy_strict.log
 
           set +e
           timeout --signal=TERM --kill-after=30s 30m \
-            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory \
+            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory scripts/engineering/quality \
             2>&1 | tee -a reports/mypy_strict.log
           status=${PIPESTATUS[0]}
           set -e
@@ -627,7 +633,7 @@ jobs:
         # Keep the scan result file available so documented residuals do not
         # skip the gate and required-step assertion.
         continue-on-error: true
-        uses: google/osv-scanner-action/osv-scanner-action@a345acffa64b0eaede81a3d9aae6141214d9c8fc # v2.6.0
+        uses: google/osv-scanner-action/osv-scanner-action@b1d267aea5211fa648d9d442fa64b90dbdcbdd36 # v2.7.0
         with:
           scan-args: |-
             --lockfile=uv.lock
@@ -698,7 +704,7 @@ jobs:
 
       - name: Upload hotspot duplication report
         if: always() && !cancelled() && needs['classify-changes'].outputs['duplication'] == 'required' && hashFiles('reports/quality/hotspot-duplication-baseline.json') != ''
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: hotspot-duplication-${{ github.sha }}
           path: |

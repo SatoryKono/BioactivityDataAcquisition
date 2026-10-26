@@ -32,8 +32,6 @@ jobs:
           echo "month=$(LC_ALL=C date -u +%m)" >> "$GITHUB_OUTPUT"
 
   tests:
-    needs: clock
-    if: "github.event_name == 'workflow_dispatch' || needs.clock.outputs.dow == 'Mon'"
     uses: ./.github/workflows/tests.yml
     with:
       generated-artifacts: true
@@ -41,8 +39,6 @@ jobs:
       contents: read
 
   e2e:
-    needs: clock
-    if: "github.event_name == 'workflow_dispatch' || needs.clock.outputs.dow == 'Mon'"
     uses: ./.github/workflows/e2e-matrix-health.yml
     permissions:
       contents: read
@@ -53,15 +49,11 @@ jobs:
       contents: read
 
   duplication:
-    needs: clock
-    if: "github.event_name == 'workflow_dispatch' || needs.clock.outputs.dow == 'Mon'"
     uses: ./.github/workflows/duplication-complexity.yml
     permissions:
       contents: read
 
   import-linter:
-    needs: clock
-    if: "github.event_name == 'workflow_dispatch' || needs.clock.outputs.dow == 'Mon'"
     uses: ./.github/workflows/import-linter.yml
     permissions:
       contents: read
@@ -120,8 +112,6 @@ jobs:
       contents: read
 
   generated-artifact-daily:
-    needs: clock
-    if: "github.event_name == 'workflow_dispatch' || needs.clock.outputs.dow == 'Mon'"
     name: Generated artifact assertions (daily)
     runs-on: ubuntu-latest
     timeout-minutes: 120
@@ -138,19 +128,46 @@ jobs:
         with:
           python-version: "3.12"
       - name: Run every generated-artifact assertion including slow tests serially
+        id: daily
         run: >-
           uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks
           daily --report reports/quality/generated-artifact-daily-selection.json
       - name: Run standalone generated-artifact validators
+        id: validators
         if: ${{ !cancelled() }}
         run: >-
           uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks
           validators --report reports/quality/generated-artifact-daily-validators.json
-      - name: Upload actual partition and validator outcomes
-        if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - name: Partition producer outcome before upload
+        id: partition
+        if: always() && !cancelled()
+        run: >-
+          uv run --frozen --no-build python -m scripts.engineering.ci
+          nightly-shadow partition
+          --daily-outcome "${{ steps.daily.outcome }}"
+          --validators-outcome "${{ steps.validators.outcome }}"
+          --output reports/quality/generated-artifact-daily-partition.json
+      - name: Upload success evidence
+        if: "always() && !cancelled() && steps.partition.outputs.bucket == 'success'"
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: generated-artifact-daily-outcomes
+          name: generated-artifact-daily-success
           path: reports/quality/generated-artifact-daily-*.json
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
+      - name: Upload non-success diagnostics
+        if: "always() && !cancelled() && (steps.partition.outputs.bucket == 'diagnostics' || steps.partition.outcome != 'success')"
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: generated-artifact-daily-diagnostics
+          path: reports/quality/generated-artifact-daily-*.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Upload cancellation diagnostics best effort
+        if: cancelled()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: generated-artifact-daily-cancelled
+          path: reports/quality/generated-artifact-daily-*.json
+          if-no-files-found: warn
+          retention-days: 90
