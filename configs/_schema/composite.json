@@ -1,6 +1,7 @@
 {
   "$defs": {
     "AggregationFieldSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for aggregation field specification.",
       "properties": {
         "source": {
@@ -43,6 +44,7 @@
       "type": "object"
     },
     "AggregationSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for 1:M enricher aggregation config.",
       "properties": {
         "group_by": {
@@ -77,6 +79,7 @@
       "type": "object"
     },
     "ColumnGroupSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for column group configuration.",
       "properties": {
         "name": {
@@ -601,6 +604,7 @@
       "type": "object"
     },
     "EnricherSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for enricher pipeline configuration.",
       "properties": {
         "pipeline": {
@@ -971,6 +975,7 @@
       "type": "object"
     },
     "MergeOutputSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for merge output paths.",
       "properties": {
         "silver": {
@@ -1153,6 +1158,7 @@
       "type": "object"
     },
     "SeedSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for seed pipeline configuration.",
       "properties": {
         "pipeline": {
@@ -1200,6 +1206,7 @@
       "type": "object"
     },
     "TargetProteinClassificationProjectionSchema": {
+      "additionalProperties": false,
       "description": "Typed projection for deterministic target protein classification aliases.",
       "properties": {
         "source_prefix": {
