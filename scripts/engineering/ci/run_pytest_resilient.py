@@ -36,7 +36,10 @@ _WORKER_CRASH_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^maximum crashed workers reached:", re.IGNORECASE),
     re.compile(r"^xdist\.[\w.]*(?:internal error|Interrupted)\b", re.IGNORECASE),
     # pytest rewrites `assert not crashitem` and prefixes INTERNALERROR>.
-    re.compile(r"<WorkerController gw\d+>", re.IGNORECASE),
+    re.compile(
+        r"^\s*INTERNALERROR>\s+.*<WorkerController gw\d+>",
+        re.IGNORECASE,
+    ),
 )
 _MAXFAIL_INTERRUPT = re.compile(r"stopping after \d+ failures", re.IGNORECASE)
 SUMMARY_FILENAME = "summary.txt"

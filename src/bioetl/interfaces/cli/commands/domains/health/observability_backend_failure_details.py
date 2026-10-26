@@ -7,9 +7,11 @@ from pathlib import Path
 from types import TracebackType
 from typing import Protocol, Self
 from urllib.error import HTTPError, URLError
-from urllib.request import build_opener
 
 from bioetl.domain.exceptions import redact_string
+from bioetl.infrastructure.observability.observability_backend_probes import (
+    _open_observability_probe,
+)
 
 
 class _HttpProbeResponse(Protocol):
@@ -40,29 +42,9 @@ class _SupportsPoll(Protocol):
     def poll(self) -> int | None: ...
 
 
-class _ResponseOpener(Protocol):
-    """Standard-library opener surface with a typed probe response."""
-
-    def open(
-        self,
-        fullurl: str,
-        data: bytes | None = None,
-        timeout: float = ...,
-    ) -> _HttpProbeResponse: ...
-
-
-def _open_probe_response(
-    opener: _ResponseOpener,
-    url: str,
-    *,
-    timeout: float,
-) -> _HttpProbeResponse:
-    return opener.open(url, timeout=timeout)
-
-
 def _open_url(url: str, *, timeout: float) -> _HttpProbeResponse:
-    """Open one HTTP probe URL through a short-lived standard-library opener."""
-    return _open_probe_response(build_opener(), url, timeout=timeout)
+    """Open one HTTP probe URL without following a non-HTTP redirect."""
+    return _open_observability_probe(url, timeout=timeout)
 
 
 def _read_backend_startup_log_excerpt(

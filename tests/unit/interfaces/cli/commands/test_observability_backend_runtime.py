@@ -37,8 +37,11 @@ from io import BytesIO
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
+from email.message import Message
 from urllib.error import HTTPError
+from urllib.request import Request
 
+import bioetl.infrastructure.observability.observability_backend_probes as probe_subject
 import bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details as failure_details_subject
 import bioetl.infrastructure.observability.observability_backend_process as process_subject
 import bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime as runtime_subject
@@ -248,18 +251,30 @@ def test_describe_required_probe_failure_rejects_unsupported_schemes() -> None:
     assert calls == []
 
 
-def test_open_url_uses_standard_library_opener(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_open_url_uses_http_only_redirect_opener(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     opener = MagicMock()
     build_opener = MagicMock(return_value=opener)
-    monkeypatch.setattr(failure_details_subject, "build_opener", build_opener)
+    monkeypatch.setattr(probe_subject, "build_opener", build_opener)
 
     failure_details_subject._open_url("http://127.0.0.1:8081/health", timeout=1.5)
 
-    build_opener.assert_called_once_with()
+    build_opener.assert_called_once_with(probe_subject._HttpHttpsRedirectHandler)
     opener.open.assert_called_once_with(
         "http://127.0.0.1:8081/health",
         timeout=1.5,
     )
+
+
+def test_probe_redirect_handler_rejects_ftp_location() -> None:
+    handler = probe_subject._HttpHttpsRedirectHandler()
+    request = Request("http://127.0.0.1:8081/health")
+    headers = Message()
+    headers["Location"] = "ftp://127.0.0.1/payload"
+
+    with pytest.raises(HTTPError, match="not allowed"):
+        handler.http_error_302(request, BytesIO(b""), 302, "Found", headers)
 
 
 def test_ensure_backend_returns_disabled_when_flag_is_off() -> None:

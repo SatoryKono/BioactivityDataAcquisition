@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import time
+from http.client import HTTPMessage
 from types import TracebackType
-from typing import TYPE_CHECKING, Protocol, Self
+from typing import IO, TYPE_CHECKING, Protocol, Self, cast
 from urllib.error import HTTPError, URLError
-from urllib.request import urlopen
+from urllib.parse import urlsplit
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 _HEALTH_PATH_SUFFIX = "/health"
 
@@ -42,6 +44,37 @@ class _UrlOpenFn(Protocol):
     def __call__(self, url: str, *, timeout: float) -> _HttpProbeResponse: ...
 
 
+class _HttpHttpsRedirectHandler(HTTPRedirectHandler):
+    """Follow observability redirects only when the next URL stays on HTTP(S)."""
+
+    def redirect_request(
+        self,
+        req: Request,
+        fp: IO[bytes],
+        code: int,
+        msg: str,
+        headers: HTTPMessage,
+        newurl: str,
+    ) -> Request | None:
+        if urlsplit(newurl).scheme.lower() not in {"http", "https"}:
+            raise HTTPError(
+                req.full_url,
+                code,
+                f"Redirection to url {newurl!r} is not allowed",
+                headers,
+                fp,
+            )
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def _open_observability_probe(url: str, *, timeout: float) -> _HttpProbeResponse:
+    """Open one probe URL without following a non-HTTP redirect."""
+    return cast(
+        "_HttpProbeResponse",
+        build_opener(_HttpHttpsRedirectHandler).open(url, timeout=timeout),
+    )
+
+
 def _build_observability_backend_probe_urls(health_url: str) -> tuple[str, ...]:
     """Return canonical readiness probe URLs for one backend base health URL."""
     return (
@@ -55,7 +88,7 @@ def probe_observability_backend(
     health_url: str,
     *,
     timeout_seconds: float = 1.0,
-    urlopen_fn: _UrlOpenFn = urlopen,
+    urlopen_fn: _UrlOpenFn = _open_observability_probe,
 ) -> bool:
     """Return True when the observability backend responds successfully."""
     if not (health_url.startswith("http://") or health_url.startswith("https://")):
@@ -75,7 +108,7 @@ def probe_observability_backend_required_paths(
     *,
     required_probe_paths: tuple[str, ...],
     timeout_seconds: float = 1.0,
-    urlopen_fn: _UrlOpenFn = urlopen,
+    urlopen_fn: _UrlOpenFn = _open_observability_probe,
 ) -> bool:
     """Return True when the backend exposes all required HTTP capability paths."""
     if not (health_url.startswith("http://") or health_url.startswith("https://")):
