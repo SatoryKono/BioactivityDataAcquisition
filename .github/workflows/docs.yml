@@ -52,6 +52,17 @@ jobs:
             tests/architecture/test_required_checks_prose_consistency.py \
             tests/architecture/test_api_reference_public_facades.py \
             tests/architecture/test_docs_governance_workflow.py \
+            tests/architecture/test_check_diagram_visual_smoke.py \
+            tests/architecture/test_diagram_artifact_check.py \
+            tests/architecture/test_diagram_lint_policy_rules.py \
+            tests/architecture/test_diagram_nightly_suite.py \
+            tests/architecture/test_diagram_nightly_workflow.py \
+            tests/architecture/test_diagram_quality_budget_security.py \
+            tests/architecture/test_diagram_quality_gates.py \
+            tests/architecture/test_diagram_regression_workflow.py \
+            tests/architecture/test_diagram_tooling_fail_closed.py \
+            tests/architecture/test_run_diagram_checks_script.py \
+            tests/architecture/test_validate_mermaid_syntax_script.py \
             tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_rules_version_extractable \
             tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_claude_md_synced \
             tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_required_docs_synced \
