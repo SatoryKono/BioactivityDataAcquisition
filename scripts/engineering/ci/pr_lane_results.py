@@ -51,6 +51,7 @@ GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
+DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
 INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST = (
     "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
 )
@@ -243,6 +244,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/00-project/governance/08-debt-ownership-playbook.md": (
         "tests/architecture/test_tech_debt_roadmap_7461_7465.py",
     ),
+    "docs/02-architecture/01-domain-layer.md": (
+        DOCUMENTATION_SYNC_TEST,
+        "tests/architecture/test_domain_io_taint_inventory.py",
+    ),
     "docs/02-architecture/current-state-inventory.md": (
         "tests/architecture/test_arch_s4_s9_gates.py",
         "tests/unit/scripts/qa/test_topology_source_binding.py",
@@ -259,7 +264,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "Dockerfile.bioetl": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "docs/04-reference/cli.md": (
         "tests/architecture/test_cli_doc_parity.py",
-        "tests/architecture/test_documentation_sync.py",
+        DOCUMENTATION_SYNC_TEST,
     ),
     ".github/workflows/docker.yml": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "reports/quality/architecture-debt-remote-main-baseline.md": (
@@ -315,9 +320,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/04-reference/api/infrastructure.md": (
         "tests/architecture/test_api_reference_public_facades.py",
     ),
-    "docs/02-architecture/finances-github-billing.md": (
-        "tests/architecture/test_documentation_sync.py",
-    ),
+    "docs/02-architecture/finances-github-billing.md": (DOCUMENTATION_SYNC_TEST,),
     "docs/05-engineering/test-telemetry-baseline.md": TELEMETRY_BASELINE_TESTS,
     ".gitignore": (
         "tests/architecture/test_gitignore_secret_and_agents_policy.py",
