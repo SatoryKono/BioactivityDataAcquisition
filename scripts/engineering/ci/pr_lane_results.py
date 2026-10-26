@@ -82,6 +82,12 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".gitleaksignore": (
+        "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
+    ),
+    "reports/architecture/f-09-conformance-matrix-report.md": (
+        "tests/architecture/test_adapter_port_conformance.py",
+    ),
     "reports/engineering/SEC-002_audit_report.md": (
         "tests/security/test_pubmed_xxe_mitigation.py",
         "tests/unit/application/pipelines/pubmed/test_xml_parser.py",
