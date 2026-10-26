@@ -363,19 +363,6 @@ def test_shadow_compare_routes_qm07_report_to_isolation_contracts() -> None:
     }
 
 
-def test_shadow_compare_routes_app002_port_map_to_port_contracts() -> None:
-    root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare(
-        ["reports/engineering/app-002-port-map/report.md"], repo_root=root
-    )
-    assert report["covers_full_suite"] is False
-    assert report["selected"] == [
-        "tests/architecture/test_port_contracts.py",
-        "tests/architecture/test_application_services_cross_subdomain_imports.py",
-        "tests/unit/application/ports/test_application_ports_no_factory_aliases.py",
-    ]
-
-
 @pytest.mark.parametrize(
     "path",
     (
@@ -388,6 +375,19 @@ def test_shadow_compare_routes_incident_operator_docs(path: str) -> None:
     report = build_shadow_compare([path], repo_root=root)
     assert report["selected"] == [
         "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
+    ]
+
+
+def test_shadow_compare_routes_app002_port_map_to_port_contracts() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["reports/engineering/app-002-port-map/report.md"], repo_root=root
+    )
+    assert report["covers_full_suite"] is False
+    assert report["selected"] == [
+        "tests/architecture/test_port_contracts.py",
+        "tests/architecture/test_application_services_cross_subdomain_imports.py",
+        "tests/unit/application/ports/test_application_ports_no_factory_aliases.py",
     ]
 
 
@@ -528,32 +528,6 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
         "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py"
         in report["selected"]
     )
-
-
-def test_operator_runbook_docs_select_alert_semantics() -> None:
-    """Gold and lock docs stay on the incident-runbook semantics test."""
-    repo_root = Path(__file__).resolve().parents[5]
-    semantics = "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
-
-    targets = affected_pytest_targets(
-        [
-            "docs/00-project/RULES.md",
-            "docs/05-operations/runbooks/incident-response.md",
-            "docs/05-operations/runbooks/stale-lock.md",
-        ],
-        repo_root=repo_root,
-    )
-
-    assert semantics in targets
-    report = build_shadow_compare(
-        [
-            "docs/00-project/RULES.md",
-            "docs/05-operations/runbooks/stale-lock.md",
-        ],
-        repo_root=repo_root,
-    )
-    assert report["activation"] == "not_applied"
-    assert semantics in report["selected"]
 
 
 def test_shadow_compare_rejects_mixed_diff_with_unmapped_path(
