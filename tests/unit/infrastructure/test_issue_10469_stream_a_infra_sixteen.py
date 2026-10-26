@@ -37,13 +37,11 @@ def test_enricher_join_keys_and_aggregation_required() -> None:
         EnricherSchema(
             pipeline="p",
             join_keys=[" "],
-            output_fields=["f"],
         )
     with pytest.raises(ValueError, match="requires aggregation"):
         EnricherSchema(
             pipeline="p",
             join_keys=["id"],
-            output_fields=["f"],
             cardinality="many_to_one",
         )
 
