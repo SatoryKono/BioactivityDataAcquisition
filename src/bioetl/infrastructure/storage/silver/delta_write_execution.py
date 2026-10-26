@@ -9,6 +9,7 @@ import subprocess  # nosec B404 - see suppression registry
 import sys
 import tempfile
 import threading
+import time
 from collections.abc import Awaitable, Callable
 from contextlib import suppress
 from dataclasses import replace
@@ -225,33 +226,145 @@ def _write_arrow_payload_for_subprocess(*, table_path: str, table: pa.Table) -> 
     return payload_path
 
 
+_SUBPROCESS_OUTPUT_LIMIT_BYTES = 16384
+_SUBPROCESS_OUTPUT_CHAR_LIMIT = 4000
+_SUBPROCESS_READER_DRAIN_SECONDS = 0.5
+_SUBPROCESS_READER_JOIN_SECONDS = 2.0
+_SUBPROCESS_CANCEL_POLL_SECONDS = 0.2
+
+
 class _BoundedStreamReader(threading.Thread):
     """Drain a stream concurrently while retaining only a bounded tail."""
 
-    def __init__(self, stream: IO[bytes] | None, limit_bytes: int = 16384) -> None:
+    def __init__(
+        self,
+        stream: IO[bytes] | None,
+        limit_bytes: int = _SUBPROCESS_OUTPUT_LIMIT_BYTES,
+    ) -> None:
         super().__init__(daemon=True)
         self._stream = stream
         self._limit = limit_bytes
         self._chunks: list[bytes] = []
         self._length = 0
+        self._lock = threading.Lock()
 
     def run(self) -> None:
-        if self._stream is None:
+        stream = self._stream
+        if stream is None:
             return
         try:
-            for chunk in iter(lambda: self._stream.read(4096), b""):  # type: ignore[union-attr]
-                self._chunks.append(chunk)
-                self._length += len(chunk)
-                while self._chunks and self._length - len(self._chunks[0]) >= self._limit:
-                    removed = self._chunks.pop(0)
-                    self._length -= len(removed)
-        except OSError:
-            pass
+            while True:
+                chunk = stream.read(4096)
+                if not chunk:
+                    return
+                self._append_bounded(chunk)
+        except (OSError, ValueError):
+            return
 
-    def get_decoded(self, char_limit: int = 4000) -> str:
+    def _append_bounded(self, chunk: bytes) -> None:
+        with self._lock:
+            self._chunks.append(chunk)
+            self._length += len(chunk)
+            while self._chunks and self._length - len(self._chunks[0]) >= self._limit:
+                removed = self._chunks.pop(0)
+                self._length -= len(removed)
+
+    def get_decoded(self, char_limit: int = _SUBPROCESS_OUTPUT_CHAR_LIMIT) -> str:
         """Decode the retained tail and return up to `char_limit` characters."""
-        payload = b"".join(self._chunks)[-self._limit :]
+        with self._lock:
+            payload = b"".join(self._chunks)[-self._limit :]
         return payload.decode("utf-8", errors="replace").strip()[-char_limit:]
+
+
+def _wait_for_plain_delta_subprocess(
+    proc: subprocess.Popen[bytes],
+    *,
+    timeout_seconds: float,
+    cancel_event: threading.Event | None,
+) -> None:
+    """Wait until the child exits, the deadline passes, or cancellation is set."""
+    deadline = time.monotonic() + timeout_seconds
+    while True:
+        if cancel_event is not None and cancel_event.is_set():
+            raise subprocess.TimeoutExpired(cmd=proc.args, timeout=timeout_seconds)
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise subprocess.TimeoutExpired(cmd=proc.args, timeout=timeout_seconds)
+        slice_timeout = (
+            min(_SUBPROCESS_CANCEL_POLL_SECONDS, remaining)
+            if cancel_event is not None
+            else remaining
+        )
+        try:
+            proc.wait(timeout=slice_timeout)
+        except subprocess.TimeoutExpired:
+            timed_out_fully = cancel_event is None or slice_timeout >= remaining - 1e-9
+            if timed_out_fully:
+                raise
+            continue
+        else:
+            return
+
+
+def _reap_plain_delta_subprocess(proc: subprocess.Popen[bytes]) -> None:
+    """Kill a child that is still running after the wait returns."""
+    if proc.returncode is not None:
+        return
+    with suppress(OSError):
+        proc.kill()
+    with suppress(subprocess.TimeoutExpired, OSError):
+        proc.wait(timeout=_SUBPROCESS_READER_JOIN_SECONDS)
+
+
+def _close_subprocess_pipes(proc: subprocess.Popen[bytes]) -> None:
+    for stream in (proc.stdout, proc.stderr):
+        if stream is None:
+            continue
+        with suppress(OSError, ValueError):
+            stream.close()
+
+
+def _readers_still_running(readers: tuple[_BoundedStreamReader, ...]) -> bool:
+    return any(reader.is_alive() for reader in readers)
+
+
+def _join_bounded_readers(
+    readers: tuple[_BoundedStreamReader, ...],
+    *,
+    timeout_seconds: float,
+) -> None:
+    deadline = time.monotonic() + timeout_seconds
+    pending = list(readers)
+    while pending and time.monotonic() < deadline:
+        still_running: list[_BoundedStreamReader] = []
+        for reader in pending:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                still_running.extend(pending[pending.index(reader) :])
+                break
+            reader.join(timeout=min(0.01, remaining))
+            if reader.is_alive():
+                still_running.append(reader)
+        pending = still_running
+
+
+def _finish_subprocess_readers(
+    proc: subprocess.Popen[bytes],
+    *readers: _BoundedStreamReader,
+) -> None:
+    """Drain captured output, then close pipes that are still blocking."""
+    reader_tuple = tuple(readers)
+    _join_bounded_readers(
+        reader_tuple,
+        timeout_seconds=_SUBPROCESS_READER_DRAIN_SECONDS,
+    )
+    if _readers_still_running(reader_tuple):
+        _close_subprocess_pipes(proc)
+        _join_bounded_readers(
+            reader_tuple,
+            timeout_seconds=_SUBPROCESS_READER_JOIN_SECONDS,
+        )
+    _close_subprocess_pipes(proc)
 
 
 def _decode_subprocess_output(payload: bytes) -> str:
@@ -264,12 +377,20 @@ def _run_plain_delta_write_subprocess(
     kwargs: dict[str, Any],  # Any: Delta Lake write kwargs are heterogeneous
     arrow_data: pa.Table,
     timeout_seconds: float,
+    cancel_event: threading.Event | None = None,
 ) -> None:
     """Execute one plain Delta write in a child process.
 
     This path is used by Windows E2E runs where a hung delta-rs native call can
     outlive Python thread timeouts. The child process keeps the timeout
     enforceable without changing the default production write path.
+
+    Stdout and stderr are drained concurrently and only the last 16384 bytes
+    are retained. Pipes are closed before the readers are joined, and that
+    join is bounded, so a child that leaves a pipe open cannot extend the
+    timeout. ``cancel_event`` is polled while waiting. The plain-write caller
+    sets it when the awaiting task is cancelled, which reaps the child
+    without waiting out ``timeout_seconds``.
     """
     table_or_uri = str(kwargs["table_or_uri"])
     metadata = {key: value for key, value in kwargs.items() if key != "data"}
@@ -294,20 +415,20 @@ def _run_plain_delta_write_subprocess(
         err_reader = _BoundedStreamReader(proc.stderr)
         out_reader.start()
         err_reader.start()
-
+        timeout_exc: subprocess.TimeoutExpired | None = None
         try:
-            proc.wait(timeout=timeout_seconds)
+            _wait_for_plain_delta_subprocess(
+                proc,
+                timeout_seconds=timeout_seconds,
+                cancel_event=cancel_event,
+            )
         except subprocess.TimeoutExpired as exc:
-            proc.kill()
-            proc.wait()
-            raise TimeoutError from exc
+            timeout_exc = exc
         finally:
-            if proc.returncode is None:
-                proc.kill()
-                proc.wait()
-
-        out_reader.join()
-        err_reader.join()
+            _reap_plain_delta_subprocess(proc)
+            _finish_subprocess_readers(proc, out_reader, err_reader)
+        if timeout_exc is not None:
+            raise TimeoutError from timeout_exc
     finally:
         with suppress(OSError):
             payload_path.unlink(missing_ok=True)
@@ -390,15 +511,21 @@ async def _write_plain_delta_request(
     )
     try:
         if process_isolation:
-            await _await_blocking_deltalake_call(
-                operation_name="plain-write-subprocess",
-                call=lambda: _run_plain_delta_write_subprocess(
-                    kwargs=kwargs,
-                    arrow_data=request.arrow_data,
-                    timeout_seconds=timeout_seconds,
-                ),
-                timeout_seconds=timeout_seconds + 5.0,
-            )
+            cancel_event = threading.Event()
+            try:
+                await _await_blocking_deltalake_call(
+                    operation_name="plain-write-subprocess",
+                    call=lambda: _run_plain_delta_write_subprocess(
+                        kwargs=kwargs,
+                        arrow_data=request.arrow_data,
+                        timeout_seconds=timeout_seconds,
+                        cancel_event=cancel_event,
+                    ),
+                    timeout_seconds=timeout_seconds + 5.0,
+                )
+            except asyncio.CancelledError:
+                cancel_event.set()
+                raise
             return
         module = load_module()
         if _should_execute_plain_write_inline(table_path=canonical_path, module=module):

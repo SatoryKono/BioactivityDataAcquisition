@@ -138,10 +138,12 @@ def test_delta_write_execution_edges(
             self.stderr = None
             self.returncode = None
             self.waited_once = False
+
         def wait(self, timeout=None):
             if not self.waited_once and timeout is not None:
                 self.waited_once = True
                 raise subprocess.TimeoutExpired(cmd="x", timeout=timeout)
+
         def kill(self):
             pass
 
@@ -159,11 +161,14 @@ def test_delta_write_execution_edges(
     class _FakePopenFail:
         def __init__(self, *args, **kwargs):
             import io
+
             self.stdout = io.BytesIO(b"")
             self.stderr = io.BytesIO(b"fail")
             self.returncode = 2
+
         def wait(self, timeout=None):
             pass
+
         def kill(self):
             pass
 
