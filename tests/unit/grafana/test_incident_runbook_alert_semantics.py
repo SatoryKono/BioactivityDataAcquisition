@@ -96,6 +96,13 @@ def test_lock_instructions_do_not_name_a_fictional_alert() -> None:
     assert "LockLostError" in stale
 
 
+def test_stale_lock_docs_describe_retention_without_lease_renewal() -> None:
+    """The TTL sweep retains a held entry without extending its deadline."""
+    stale = OPERATOR_DOCS[1].read_text(encoding="utf-8")
+    assert "is renewed" not in stale
+    assert "does not extend `expires_at`" in stale
+
+
 def test_unknown_alert_name_is_rejected() -> None:
     """A fictional backtick alertname fails the name check."""
     known = load_alert_names(RULES_PATH.read_text(encoding="utf-8"))
