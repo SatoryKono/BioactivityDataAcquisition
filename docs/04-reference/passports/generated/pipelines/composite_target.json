@@ -41,7 +41,6 @@
         "timeout_seconds": 300
       },
       {
-        "filter_condition": "target_id IS NOT NULL",
         "join_keys": [
           "target_id"
         ],
@@ -384,7 +383,7 @@
         "source": "dependency"
       },
       {
-        "description": "target_id IS NOT NULL",
+        "description": "no condition",
         "name": "uniprot_idmapping",
         "required": false,
         "source": "dependency"
@@ -489,8 +488,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.1.0",
-    "semantic_content_hash": "sha256:04784f02e9df492008e995c00f0fd9b41c7e9fe7f8a9c6c59beb85d78eebddb1",
-    "source_revision": "sha256:9ea11140a1845de962e3598559682225afad5ed60fa6d0f30b951430eef0f05c"
+    "semantic_content_hash": "sha256:ee7c5001d7cc17ea2ad675643c6b8b98dacff3d701423aed4138a06fbf215138",
+    "source_revision": "sha256:0bb400480ab8b75ca17fa876f0a2c23044b26045f68b6468d08cbb7bd7741ce6"
   },
   "silver": {
     "dq_execution": {

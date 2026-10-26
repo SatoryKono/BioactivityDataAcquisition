@@ -245,6 +245,24 @@ def test_shadow_compare_routes_historical_secret_fingerprints() -> None:
     assert report["covers_full_suite"] is False
 
 
+@pytest.mark.parametrize(
+    "path",
+    (
+        "configs/composites/activity.yaml",
+        "configs/composites/target.yaml",
+        "configs/composites/field_groups/shared_policy.yaml",
+    ),
+)
+def test_shadow_compare_routes_composite_configs(path: str) -> None:
+    """Every composite YAML selects the schema test that loads the family."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=repo_root)
+    assert (
+        "tests/unit/infrastructure/schemas/test_composite_config_schema.py"
+        in report["selected"]
+    )
+
+
 def test_shadow_compare_routes_published_pipeline_schemas() -> None:
     """Published pipeline JSON schemas select the tests that read them."""
     repo_root = Path(__file__).resolve().parents[5]
