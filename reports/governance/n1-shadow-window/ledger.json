@@ -1,0 +1,89 @@
+{
+  "actions_execution_observed": true,
+  "actions_permissions_http": "403",
+  "baseline_sha": "ce050a180ffea36a2ff1400e3d66c4ebcc3bcaaf",
+  "decision_owner": "CI",
+  "durable_archive": {
+    "acceptance": "not_pass",
+    "actions_cancellation_retention_days": 90,
+    "actions_failure_retention_days": 90,
+    "actions_service_cap_days": 90,
+    "actions_success_retention_days": 30,
+    "elapsed_age_is_90_days": false,
+    "git_path": "reports/governance/n1-shadow-window",
+    "independent_restore": false,
+    "local_verify_archive_is_author_check_only": true,
+    "minimum_days": 90,
+    "policy": "Append-only git snapshots under reports/governance/n1-shadow-window. An existing run/attempt is not overwritten. Presence in git is the storage location, not proof that the bytes survive or were restored."
+  },
+  "frequency_change_pr": 12452,
+  "historical_window": {
+    "candidate_pairs": 0,
+    "independent_review": false,
+    "reason_codes": [
+      "actions_retention_cap_below_90",
+      "cadence_changed_before_shadow_acceptance",
+      "independent_review_absent",
+      "mixed_tested_sha",
+      "no_parallel_candidate_arm",
+      "shorter_than_14_utc_days",
+      "success_retention_below_30"
+    ],
+    "run_count": 14,
+    "schema_version": 1,
+    "status": "unacceptable",
+    "unique_head_sha_count": 13,
+    "utc_end": "2026-10-23T08:13:54Z",
+    "utc_start": "2026-10-10T03:15:28Z"
+  },
+  "independent_review_record": null,
+  "next_window": {
+    "configuration_id": "daily-deterministic-plus-existing-weekly-security",
+    "continuation": "Start the 14 UTC-day window only after this daily configuration is on main and the first valid comparable observation exists. Record that observation SHA and UTC then. Do not backdate it and do not mix it with the unacceptable history below. An independent reviewer must restore every raw JSON and reproduce the calculations before N1 can close. Do not continue N2 before that.",
+    "minimum_utc_days": 14,
+    "status": "not_started"
+  },
+  "personal_assignees": [],
+  "recorded_at": "2026-10-23T16:17:52Z",
+  "restored_daily_jobs": [
+    "tests",
+    "e2e",
+    "duplication",
+    "import-linter",
+    "generated-artifact-daily"
+  ],
+  "reviewer_roles": [
+    "security",
+    "test-subject-owner",
+    "evidence-keeper"
+  ],
+  "schema_version": 1,
+  "window_protocol": {
+    "completeness": [
+      "Each UTC day in the half-open span has the schedule attempts for that fixed configuration.",
+      "Each attempt keeps raw.json, outcomes.json, and manifest.json.",
+      "verify-archive matches every index run/attempt pair and its raw SHA-256.",
+      "Pagination status is complete. Unknown and incomplete stay unknown, not success.",
+      "The oracle compares baseline and candidate outcomes on the same inputs and does not call the schedule classifier."
+    ],
+    "gaps": [
+      "A missing day, artifact, or API page stays missing. It is not success and not zero.",
+      "Cancellation upload is best-effort. The existing read-only timing collector backfills from the Actions API when that upload is absent.",
+      "If the collector cannot read the attempt, record the gap. Do not rebuild it from another SHA or date.",
+      "Historical failures and gap reasons remain in the unacceptable ledger. Do not delete or rewrite those snapshots."
+    ],
+    "invalid_when": [
+      "The span is shorter than 14 full UTC days.",
+      "Baseline and candidate configurations are mixed in one comparable group.",
+      "The candidate arm is absent.",
+      "Checksum, run id, attempt, or head SHA does not match the indexed raw JSON.",
+      "An indexed snapshot directory or manifest is missing.",
+      "Independent restore of every raw JSON is not recorded.",
+      "Cadence or retention of the fixed configuration changes during the window."
+    ],
+    "minimum_span": "14 full UTC days after the start observation, not 14 runs",
+    "start_rule": "Set window_start_sha and window_start_utc only after this daily configuration is merged and the first valid comparable baseline/candidate observation exists. Record both SHAs, both UTCs, and the configuration id. Do not backdate."
+  },
+  "window_start_sha": null,
+  "window_start_utc": null
+}

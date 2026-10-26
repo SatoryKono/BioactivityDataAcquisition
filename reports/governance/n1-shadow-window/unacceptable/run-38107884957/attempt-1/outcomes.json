@@ -1,0 +1,596 @@
+{
+  "jobs": [
+    {
+      "completed_at": "2026-10-11T03:17:13Z",
+      "conclusion": "success",
+      "id": 114377152175,
+      "name": "clock",
+      "started_at": "2026-10-11T03:17:10Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:20:19Z",
+      "conclusion": "success",
+      "id": 114377152286,
+      "name": "import-linter / Architecture (S7-crosscutting-architecture-a)",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:18:12Z",
+      "conclusion": "failure",
+      "id": 114377152316,
+      "name": "duplication / duplication-complexity",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:21:32Z",
+      "conclusion": "success",
+      "id": 114377152320,
+      "name": "import-linter / Architecture (slow)",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:17:48Z",
+      "conclusion": "success",
+      "id": 114377152321,
+      "name": "import-linter / C901 Governance (blocking)",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:17:47Z",
+      "conclusion": "success",
+      "id": 114377152334,
+      "name": "duplication / Executor Complexity Check",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:17:47Z",
+      "conclusion": "success",
+      "id": 114377152340,
+      "name": "duplication / Constructor Arguments Check",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:21:48Z",
+      "conclusion": "success",
+      "id": 114377152342,
+      "name": "import-linter / Architecture (S7-crosscutting-architecture-c)",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:20:31Z",
+      "conclusion": "success",
+      "id": 114377152343,
+      "name": "import-linter / Architecture (S7-crosscutting-architecture-guardrails-b)",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:06Z",
+      "conclusion": "success",
+      "id": 114377152351,
+      "name": "import-linter / Architecture (S7-crosscutting-architecture-d)",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:17:48Z",
+      "conclusion": "success",
+      "id": 114377152355,
+      "name": "import-linter / Import contracts",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:18:13Z",
+      "conclusion": "failure",
+      "id": 114377152356,
+      "name": "tests / config-schema-preflight",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:18:50Z",
+      "conclusion": "success",
+      "id": 114377152363,
+      "name": "import-linter / Architecture (S7-crosscutting-architecture-b)",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:21:03Z",
+      "conclusion": "success",
+      "id": 114377152372,
+      "name": "import-linter / Architecture (S7-crosscutting-architecture-guardrails-a)",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:18:47Z",
+      "conclusion": "success",
+      "id": 114377152379,
+      "name": "import-linter / lint",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:17:15Z",
+      "conclusion": "cancelled",
+      "id": 114377152412,
+      "name": "zizmor / zizmor",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:17:53Z",
+      "conclusion": "success",
+      "id": 114377152444,
+      "name": "tests / dependency-preflight",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:21:44Z",
+      "conclusion": "failure",
+      "id": 114377152632,
+      "name": "security / gitleaks",
+      "started_at": "2026-10-11T03:18:49Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:20Z",
+      "conclusion": "failure",
+      "id": 114377152634,
+      "name": "security / detect-secrets",
+      "started_at": "2026-10-11T03:18:48Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:33Z",
+      "conclusion": "success",
+      "id": 114377152635,
+      "name": "security / pip-audit",
+      "started_at": "2026-10-11T03:18:33Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:18:52Z",
+      "conclusion": "success",
+      "id": 114377152653,
+      "name": "security / bandit",
+      "started_at": "2026-10-11T03:18:14Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:32Z",
+      "conclusion": "success",
+      "id": 114377152690,
+      "name": "security / osv-scanner",
+      "started_at": "2026-10-11T03:18:52Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:17:14Z",
+      "conclusion": "failure",
+      "id": 114377152712,
+      "name": "e2e / e2e-nightly-complete",
+      "started_at": "2026-10-11T03:17:11Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:17:09Z",
+      "conclusion": "skipped",
+      "id": 114377152959,
+      "name": "e2e / prompt-tests-nightly",
+      "started_at": "2026-10-11T03:17:09Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:17:09Z",
+      "conclusion": "skipped",
+      "id": 114377153009,
+      "name": "e2e / e2e-nightly-full-replay",
+      "started_at": "2026-10-11T03:17:09Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:17:09Z",
+      "conclusion": "skipped",
+      "id": 114377153109,
+      "name": "e2e / matrix-smoke-blocking",
+      "started_at": "2026-10-11T03:17:09Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:53Z",
+      "conclusion": "success",
+      "id": 114377153133,
+      "name": "import-linter / Architecture (S7-crosscutting-architecture-a3)",
+      "started_at": "2026-10-11T03:17:12Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:17:09Z",
+      "conclusion": "skipped",
+      "id": 114377153250,
+      "name": "e2e / matrix-smoke-nightly-live",
+      "started_at": "2026-10-11T03:17:09Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:18:42Z",
+      "conclusion": "success",
+      "id": 114377162837,
+      "name": "mutation / mutation-testing (application-export-manifests, src/bioetl/application/services/export_lineage/ex...",
+      "started_at": "2026-10-11T03:17:17Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:18:36Z",
+      "conclusion": "success",
+      "id": 114377162892,
+      "name": "mutation / mutation-testing (application-workflow-runner, src/bioetl/application/services/workflow/workflow_...",
+      "started_at": "2026-10-11T03:17:17Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:27:06Z",
+      "conclusion": "failure",
+      "id": 114377162908,
+      "name": "mutation / mutation-testing (application-control-plane, src/bioetl/application/services/control_plane/, test...",
+      "started_at": "2026-10-11T03:17:17Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T04:16:46Z",
+      "conclusion": "success",
+      "id": 114377162918,
+      "name": "mutation / mutation-testing (domain, src/bioetl/domain/, tests/unit/domain/, 70.0)",
+      "started_at": "2026-10-11T03:17:17Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:17:13Z",
+      "conclusion": "skipped",
+      "id": 114377162950,
+      "name": "branch-hygiene",
+      "started_at": "2026-10-11T03:17:13Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:17:13Z",
+      "conclusion": "skipped",
+      "id": 114377163022,
+      "name": "scorecard",
+      "started_at": "2026-10-11T03:17:13Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:17:13Z",
+      "conclusion": "skipped",
+      "id": 114377163073,
+      "name": "github-settings",
+      "started_at": "2026-10-11T03:17:13Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:17:13Z",
+      "conclusion": "skipped",
+      "id": 114377163152,
+      "name": "codeql",
+      "started_at": "2026-10-11T03:17:13Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:18:41Z",
+      "conclusion": "success",
+      "id": 114377266780,
+      "name": "tests / vcr-preflight",
+      "started_at": "2026-10-11T03:17:55Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:10Z",
+      "conclusion": "success",
+      "id": 114377266790,
+      "name": "tests / flaky-telemetry",
+      "started_at": "2026-10-11T03:17:55Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:56Z",
+      "conclusion": "success",
+      "id": 114377266797,
+      "name": "tests / contract-confidence",
+      "started_at": "2026-10-11T03:17:55Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:24:37Z",
+      "conclusion": "success",
+      "id": 114377266826,
+      "name": "tests / governance-preflight",
+      "started_at": "2026-10-11T03:17:55Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:18:54Z",
+      "conclusion": "success",
+      "id": 114377266839,
+      "name": "tests / smoke-check",
+      "started_at": "2026-10-11T03:17:56Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:32:04Z",
+      "conclusion": "success",
+      "id": 114377266868,
+      "name": "tests / neo4j-memory-live-audit",
+      "started_at": "2026-10-11T03:17:56Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:18:41Z",
+      "conclusion": "success",
+      "id": 114377266875,
+      "name": "tests / track-d-gates",
+      "started_at": "2026-10-11T03:17:56Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:51Z",
+      "conclusion": "success",
+      "id": 114377266876,
+      "name": "tests / unit-subprocess-backed",
+      "started_at": "2026-10-11T03:17:55Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:18:53Z",
+      "conclusion": "success",
+      "id": 114377266880,
+      "name": "tests / memory-tests",
+      "started_at": "2026-10-11T03:17:56Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:21:00Z",
+      "conclusion": "success",
+      "id": 114377266882,
+      "name": "tests / unit-filesystem-contracts",
+      "started_at": "2026-10-11T03:17:56Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:26Z",
+      "conclusion": "success",
+      "id": 114377266907,
+      "name": "tests / control-plane-e2e",
+      "started_at": "2026-10-11T03:18:44Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:00Z",
+      "conclusion": "success",
+      "id": 114377266917,
+      "name": "tests / Repo-backed unit (product)",
+      "started_at": "2026-10-11T03:17:56Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:21:29Z",
+      "conclusion": "success",
+      "id": 114377266948,
+      "name": "tests / serial-coverage",
+      "started_at": "2026-10-11T03:17:56Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:18:38Z",
+      "conclusion": "success",
+      "id": 114377266966,
+      "name": "tests / performance-budgets",
+      "started_at": "2026-10-11T03:17:56Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:18Z",
+      "conclusion": "success",
+      "id": 114377266971,
+      "name": "tests / Unit scripts tooling (debt-governance)",
+      "started_at": "2026-10-11T03:17:56Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:20:42Z",
+      "conclusion": "success",
+      "id": 114377266972,
+      "name": "tests / Repo-backed unit (tooling)",
+      "started_at": "2026-10-11T03:17:55Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:14Z",
+      "conclusion": "success",
+      "id": 114377266973,
+      "name": "tests / Repo-backed unit (ops)",
+      "started_at": "2026-10-11T03:17:55Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:20:17Z",
+      "conclusion": "success",
+      "id": 114377266978,
+      "name": "tests / Unit fast (unit-domain)",
+      "started_at": "2026-10-11T03:17:56Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:20:33Z",
+      "conclusion": "success",
+      "id": 114377267002,
+      "name": "tests / Unit scripts tooling (other)",
+      "started_at": "2026-10-11T03:17:56Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:33Z",
+      "conclusion": "success",
+      "id": 114377267007,
+      "name": "tests / test-matrix (3.13, unit-other, tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/applic...",
+      "started_at": "2026-10-11T03:17:55Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:18:47Z",
+      "conclusion": "success",
+      "id": 114377267011,
+      "name": "tests / Unit scripts tooling (passport)",
+      "started_at": "2026-10-11T03:17:55Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:20:37Z",
+      "conclusion": "success",
+      "id": 114377267017,
+      "name": "tests / test-matrix (3.13, unit-domain, tests/unit/domain/, tests/unit/domain/**/*.py, -n auto --dist loa...",
+      "started_at": "2026-10-11T03:17:56Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:18:31Z",
+      "conclusion": "success",
+      "id": 114377267020,
+      "name": "tests / quality-metrics-gate",
+      "started_at": "2026-10-11T03:17:55Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:37Z",
+      "conclusion": "success",
+      "id": 114377267025,
+      "name": "tests / Unit fast (unit-infrastructure)",
+      "started_at": "2026-10-11T03:17:55Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:20:03Z",
+      "conclusion": "success",
+      "id": 114377267052,
+      "name": "tests / test-matrix (3.13, unit-infrastructure, tests/unit/infrastructure/, tests/unit/infrastructure/**/...",
+      "started_at": "2026-10-11T03:18:13Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:20:42Z",
+      "conclusion": "success",
+      "id": 114377267054,
+      "name": "tests / Unit fast (unit-other)",
+      "started_at": "2026-10-11T03:18:42Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:28Z",
+      "conclusion": "success",
+      "id": 114377267083,
+      "name": "tests / test-matrix (3.13, unit-application, tests/unit/application/, tests/unit/application/**/*.py, -n ...",
+      "started_at": "2026-10-11T03:17:55Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:19:40Z",
+      "conclusion": "success",
+      "id": 114377267089,
+      "name": "tests / test-matrix (3.13, security, tests/security/, tests/security/**/*.py, -n auto --dist loadscope --...",
+      "started_at": "2026-10-11T03:18:40Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:23:57Z",
+      "conclusion": "success",
+      "id": 114377267096,
+      "name": "tests / test-matrix (3.13, integration, tests/integration/, tests/integration/**/*.py, -p no:xdist)",
+      "started_at": "2026-10-11T03:18:38Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:20:41Z",
+      "conclusion": "success",
+      "id": 114377267113,
+      "name": "tests / Unit fast (unit-application)",
+      "started_at": "2026-10-11T03:18:43Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:21:52Z",
+      "conclusion": "success",
+      "id": 114377886915,
+      "name": "import-linter / checks-complete",
+      "started_at": "2026-10-11T03:21:50Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:25:04Z",
+      "conclusion": "failure",
+      "id": 114378224445,
+      "name": "tests / coverage-verify",
+      "started_at": "2026-10-11T03:24:00Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:24:37Z",
+      "conclusion": "success",
+      "id": 114378224490,
+      "name": "tests / duration-telemetry",
+      "started_at": "2026-10-11T03:23:59Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:25:05Z",
+      "conclusion": "success",
+      "id": 114378325566,
+      "name": "tests / dq-consistency-gate",
+      "started_at": "2026-10-11T03:24:39Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:26:43Z",
+      "conclusion": "success",
+      "id": 114378398057,
+      "name": "tests / Proof-or-Stop advisory closeout",
+      "started_at": "2026-10-11T03:25:06Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:25:04Z",
+      "conclusion": "skipped",
+      "id": 114378399155,
+      "name": "tests / coverage-inventory-currentness",
+      "started_at": "2026-10-11T03:25:04Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-10-11T03:32:10Z",
+      "conclusion": "failure",
+      "id": 114379526873,
+      "name": "tests / tests-complete",
+      "started_at": "2026-10-11T03:32:06Z",
+      "status": "completed"
+    }
+  ],
+  "pagination": {
+    "hit_page_cap": false,
+    "jobs_fetched": 73,
+    "jobs_total_count": 73,
+    "pages_fetched": 1,
+    "status": "complete"
+  },
+  "schema_version": 1
+}

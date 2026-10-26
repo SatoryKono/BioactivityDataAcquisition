@@ -292,6 +292,27 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
     }
 
 
+def test_n1_evidence_paths_have_shadow_compare_routes() -> None:
+    """Nightly, docs, and the gap archive must not fail closed as unmapped."""
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            ".github/workflows/nightly.yml",
+            "CHANGELOG.md",
+            "configs/quality/scripts_lifecycle_registry.json",
+            "docs/04-reference/github-actions-workflows.md",
+            "docs/05-operations/ci-workflow-map.md",
+            "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
+            "reports/governance/n1-shadow-window/ledger.json",
+            "reports/quality/flaky-test-burndown-review.json",
+            "reports/quality/test-governance-current.json",
+        ],
+        repo_root=root,
+    )
+    assert report["activation"] == "not_applied"
+    assert report["selected_count"] >= 1
+
+
 @pytest.mark.parametrize(
     "path",
     [
@@ -357,6 +378,22 @@ def test_shadow_compare_routes_app001_audit_to_cancellation_contracts() -> None:
         "tests/unit/application/services/test_pipeline_runner_service.py",
         "tests/unit/application/services/run_reports/test_composite_report.py",
     }
+
+
+def test_shadow_compare_routes_silver_filter_inventory_baseline() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            "docs/filters/inventory-baseline.csv",
+            "docs/filters/inventory-baseline.json",
+            "docs/filters/inventory-baseline.md",
+        ],
+        repo_root=root,
+    )
+    assert report["covers_full_suite"] is False
+    assert report["selected"] == [
+        "tests/architecture/test_silver_filter_boundary_inventory.py"
+    ]
 
 
 def test_shadow_compare_routes_sec003_audit_to_metadata_parser() -> None:
@@ -1113,18 +1150,3 @@ def test_generated_artifact_directory_output_routes_descendants(
     )
 
     assert report["selected"] == [test_path]
-
-
-def test_shadow_compare_routes_silver_filter_inventory_baseline() -> None:
-    root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare(
-        [
-            "docs/filters/inventory-baseline.csv",
-            "docs/filters/inventory-baseline.json",
-            "docs/filters/inventory-baseline.md",
-        ],
-        repo_root=root,
-    )
-    assert report["selected"] == [
-        "tests/architecture/test_silver_filter_boundary_inventory.py"
-    ]
