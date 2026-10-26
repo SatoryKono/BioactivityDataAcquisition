@@ -59,4 +59,8 @@ curl -sS -D - -o /tmp/search-body.json \
 
 ## Вывод
 
-Статус BLOCKED. Нулевые ответы относятся только к коду, который видит этот installation token. `GET /user` не даёт организации, приватные репозитории вне установки не проверены, а `uses:`-запрос для `reusable-setup.yml` завершился HTTP 429. Issue #12482 остаётся открытым. `reusable-setup.yml` и `reusable-mermaid-setup.yml` не удаляются.
+Статус BLOCKED. Нулевые ответы относятся только к коду, который видит этот installation token. `GET /user` не даёт организации, приватные репозитории вне установки не проверены, а `uses:`-запрос для `reusable-setup.yml` завершился HTTP 429. `reusable-setup.yml` и `reusable-mermaid-setup.yml` не удаляются.
+
+**Исторический статус в этом снимке (26.10.2026):** на момент фиксации результатов Issue #12482 оставалась открытой. Это отражает состояние issue для данного снимка, а не её последующий статус.
+
+**Актуальное уточнение (26.10.2026, 18:26:03 UTC):** Issue #12482 закрыта со статусом `completed` по принятому retain-решению ([запись о приёмке](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12482#issuecomment-6424075387)). Оба reusable workflow — `reusable-setup.yml` и `reusable-mermaid-setup.yml` — сохранены. Наличие внешних callers остаётся неизвестным из-за ограничений доступа и неполного покрытия поиска, описанных выше. Закрытие issue не означает слияние PR #12548 и не доказывает отсутствие внешних callers.
