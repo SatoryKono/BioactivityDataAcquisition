@@ -37,7 +37,7 @@ _WORKER_CRASH_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^xdist\.[\w.]*(?:internal error|Interrupted)\b", re.IGNORECASE),
     # pytest rewrites `assert not crashitem` and prefixes INTERNALERROR>.
     re.compile(
-        r"^\s*INTERNALERROR>\s+.*<WorkerController gw\d+>",
+        r"^\s*INTERNALERROR>\s+[^<]*<WorkerController gw\d+>",
         re.IGNORECASE,
     ),
 )
