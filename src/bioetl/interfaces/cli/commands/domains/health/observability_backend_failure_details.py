@@ -3,13 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from http.client import HTTPMessage
 from pathlib import Path
 from types import TracebackType
-from typing import IO, Protocol, Self, cast
+from typing import Protocol, Self, cast
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlsplit
-from urllib.request import HTTPRedirectHandler, Request, build_opener
+from urllib.request import build_opener
 
 from bioetl.domain.exceptions import redact_string
 
@@ -42,35 +40,9 @@ class _SupportsPoll(Protocol):
     def poll(self) -> int | None: ...
 
 
-class _HttpHttpsRedirectHandler(HTTPRedirectHandler):
-    """Follow capability-probe redirects only when the next URL stays on HTTP(S)."""
-
-    def redirect_request(
-        self,
-        req: Request,
-        fp: IO[bytes],
-        code: int,
-        msg: str,
-        headers: HTTPMessage,
-        newurl: str,
-    ) -> Request | None:
-        if urlsplit(newurl).scheme.lower() not in {"http", "https"}:
-            raise HTTPError(
-                req.full_url,
-                code,
-                f"Redirection to url {newurl!r} is not allowed",
-                headers,
-                fp,
-            )
-        return super().redirect_request(req, fp, code, msg, headers, newurl)
-
-
 def _open_url(url: str, *, timeout: float) -> _HttpProbeResponse:
-    """Open one HTTP probe URL without following a non-HTTP redirect."""
-    return cast(
-        "_HttpProbeResponse",
-        build_opener(_HttpHttpsRedirectHandler).open(url, timeout=timeout),
-    )
+    """Open one HTTP probe URL through a short-lived standard-library opener."""
+    return cast("_HttpProbeResponse", build_opener().open(url, timeout=timeout))
 
 
 def _read_backend_startup_log_excerpt(

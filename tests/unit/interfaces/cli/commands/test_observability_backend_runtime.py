@@ -251,33 +251,22 @@ def test_describe_required_probe_failure_rejects_unsupported_schemes() -> None:
     assert calls == []
 
 
-def test_open_url_uses_http_only_redirect_opener(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_open_url_uses_standard_library_opener(monkeypatch: pytest.MonkeyPatch) -> None:
     opener = MagicMock()
     build_opener = MagicMock(return_value=opener)
     monkeypatch.setattr(failure_details_subject, "build_opener", build_opener)
 
     failure_details_subject._open_url("http://127.0.0.1:8081/health", timeout=1.5)
 
-    build_opener.assert_called_once_with(
-        failure_details_subject._HttpHttpsRedirectHandler
-    )
+    build_opener.assert_called_once_with()
     opener.open.assert_called_once_with(
         "http://127.0.0.1:8081/health",
         timeout=1.5,
     )
 
 
-@pytest.mark.parametrize(
-    "handler_cls",
-    (
-        probe_subject._HttpHttpsRedirectHandler,
-        failure_details_subject._HttpHttpsRedirectHandler,
-    ),
-)
-def test_probe_redirect_handler_rejects_ftp_location(handler_cls: type) -> None:
-    handler = handler_cls()
+def test_probe_redirect_handler_rejects_ftp_location() -> None:
+    handler = probe_subject._HttpHttpsRedirectHandler()
     request = Request("http://127.0.0.1:8081/health")
     headers = Message()
     headers["Location"] = "ftp://127.0.0.1/payload"
