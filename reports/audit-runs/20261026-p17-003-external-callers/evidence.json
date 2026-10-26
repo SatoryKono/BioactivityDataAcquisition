@@ -313,5 +313,30 @@
   "workflow_git_blobs": {
     ".github/workflows/reusable-mermaid-setup.yml": "d6f739ada337ca2e6127f4c3d6769ae72a61bd3b",
     ".github/workflows/reusable-setup.yml": "264fdaed915448e5ecd00c9a74fbe5fed7211984"
+  },
+  "command_provenance_note": {
+    "scope": "external code_search records and the user_endpoint probe",
+    "curl_fields": "requested_or_illustrative_only; not evidence that curl executed",
+    "actual_invocation": "unknown for every external request because executed argv was not captured",
+    "observed_gh_prefixed_stderr": {
+      "code_search_indexes_1_based": [
+        6,
+        7,
+        8
+      ],
+      "user_endpoint": true,
+      "interpretation": "stderr text is retained verbatim; the gh: prefix does not establish the exact command or argv"
+    },
+    "other_stderr": "original missing or empty stderr states remain unchanged; no text was inferred",
+    "raw_http_status_exit_code_and_query_fields": "preserved unchanged",
+    "no_new_network_calls": true,
+    "raw_source": {
+      "commit": "bf3a00a936ed052155454fef66e0bf5367ba0bba",
+      "git_blob": "5a0711a25dbac8e20e26bd8b56d4310ec0411631",
+      "path": "reports/audit-runs/20261026-p17-003-external-callers/evidence.json",
+      "byte_count": 14204,
+      "sha256": "e0ebc9b82f06c4c088199af8e0c22350d9135028fcb3a395fd8f2c3d483ddcf3",
+      "original_fields_preserved_verbatim": true
+    }
   }
 }

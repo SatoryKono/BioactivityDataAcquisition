@@ -4,24 +4,26 @@
 - **Срок:** 2026-10-26
 - **Точная ревизия (SHA):** `173b6ff3eab1b99c7a84583518fee21fff89cfcd` (содержимое workflow совпадает с `origin/main`; локальный HEAD измерения записан в evidence)
 - **Область:** внешние callers `.github/workflows/reusable-setup.yml` и `.github/workflows/reusable-mermaid-setup.yml`
-- **Версии инструментов и backend:** `rg`, GitHub CLI `gh`, GitHub REST API version `2022-11-28`
+- **Интерфейсы в evidence:** локальный `rg`, GitHub REST API version `2022-11-28`; в raw stderr встречается префикс `gh:`, но фактический executable/argv не записан
 - **Команды и exit codes:** см. evidence; краткая сводка ниже
 - **Ожидаемый результат:** найти внешних callers deprecated reusable workflow
 - **Допустимые пропуски:** N/A
 - **Ссылка на доказательства:** `reports/audit-runs/20261026-p17-003-external-callers/evidence.json`
 - **Независимый проверяющий:** N/A
 
-Канонического генератора этого отчёта в репозитории нет. Evidence собрано прямыми вызовами `rg` и `GET /search/code`. Секреты в артефакт не записываются: в curl стоит `$GH_TOKEN`.
+Канонического генератора этого отчёта в репозитории нет. Секреты в артефакт не записываются: в сохранённых строках curl указан плейсхолдер `$GH_TOKEN`.
+
+**Уточнение provenance команд:** поле `curl` в `evidence.json` — запрошенная/иллюстративная строка, а не подтверждённый argv запущенного процесса. Фактическая команда и её аргументы для внешних запросов не записаны, поэтому invocation остаётся `UNKNOWN`. Raw HTTP-статусы, exit codes и stderr сохранены. В нескольких записях stderr начинается с `gh:`; это наблюдаемый текст ошибки, но он не восстанавливает точную команду. Для записей без stderr поле также не выводит фактическую команду. Первоначальный JSON сохранён в истории Git: исходный blob `5a0711a25dbac8e20e26bd8b56d4310ec0411631`, SHA-256 `e0ebc9b82f06c4c088199af8e0c22350d9135028fcb3a395fd8f2c3d483ddcf3`.
 
 ## Учётные данные
 
 Измерение сделано токеном GitHub App installation. Активный аккаунт GitHub CLI: `cursor`. Заголовок `X-OAuth-Scopes` отсутствует.
 
-`GET https://api.github.com/user` (HTTP 403, process exit 1, 0.272s): `Resource not accessible by integration`.
+Endpoint `GET https://api.github.com/user` записан в evidence с HTTP 403, process exit 1 и длительностью 0.272s: `Resource not accessible by integration`. Точная фактически выполненная команда неизвестна; сохранённая строка curl является иллюстративной.
 
 Персональные токены из черновика (`GITHUB_TOKEN_02`, `SARIF_GITHUB_TOKEN`) в этом checkout отсутствуют. Их прежний результат не переизмерялся и не используется как evidence.
 
-## Команды
+## Локальные команды и иллюстративный HTTP-пример
 
 Локально, из корня репозитория:
 
@@ -33,7 +35,7 @@ rg -n 'uses:[[:space:]]*.*reusable-(setup|mermaid-setup)\.yml'
 
 Все три команды: process exit 1, 0 совпадений.
 
-Внешний поиск, без подстановки секрета:
+В evidence сохранены строки curl для внешних search-запросов. Это примеры запрошенных запросов, не подтверждённые команды исполнения:
 
 ```bash
 curl -sS -D - -o /tmp/search-body.json \
@@ -44,7 +46,14 @@ curl -sS -D - -o /tmp/search-body.json \
   --data-urlencode "q=SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-setup.yml -repo:SatoryKono/BioactivityDataAcquisition"
 ```
 
-Тот же endpoint для `reusable-mermaid-setup.yml`.
+Для `reusable-mermaid-setup.yml` в evidence записана аналогичная строка запроса. Точные фактически выполненные команды и argv для этих запросов неизвестны.
+
+## Происхождение результатов
+
+- Поля `curl` во всех девяти записях `code_search` и в записи `user_endpoint` классифицированы как запрошенные/иллюстративные; они не подтверждают запуск `curl`.
+- В трёх записях `code_search` с `process_exit_code: 1` raw stderr начинается с `gh:`; у `user_endpoint` сохранён такой же префикс. Эти строки сохранены без изменений. Ни stderr, ни HTTP-поля не раскрывают точный фактический argv; он остаётся `UNKNOWN`.
+- Если в исходной записи stderr отсутствовал или был пуст, это состояние сохранено; недостающий текст не восстановлен.
+- Новых сетевых запросов для этой корректировки не выполнялось.
 
 ## Результаты проверки
 
