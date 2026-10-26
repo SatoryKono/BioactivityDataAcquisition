@@ -2,6 +2,7 @@
 
 **Revision SHA:** f07ead17df6283b9a7d2d8bfc7e10e2358f97c8b
 **Method:** Static AST analysis for explicit `Port` interface declarations
+**Wiring correction:** checked against composition factories at `f5c3b438160ff79af9e16be7333c84f8e6a61805`. `CheckpointPort` resolves to `LocalCheckpointAdapter` via `create_checkpoint()`, `QuarantinePort` resolves to `UnifiedQuarantineAdapter` via `create_quarantine()`, and `BronzeStoragePort` / `MergedStoragePort` resolve to `StorageBundle` via `bootstrap_storage_adapter()`. Names with no class in the tree stay `NOT_VERIFIABLE`.
 
 ## 1. Use Cases and their Ports
 
@@ -31,7 +32,7 @@
 
 | Port | Implementation | Status |
 |---|---|---|
-| `BronzeStoragePort` | `DeltaBronzeStorage` | RESOLVED |
+| `BronzeStoragePort` | `StorageBundle` | RESOLVED |
 | `ClockPort` | `RuntimeClock` | RESOLVED |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
 
@@ -47,7 +48,7 @@
 
 | Port | Implementation | Status |
 |---|---|---|
-| `CheckpointPort` | `DeltaCheckpointStorage` | RESOLVED |
+| `CheckpointPort` | `LocalCheckpointAdapter` | RESOLVED |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
 
 ### `CheckpointService`
@@ -55,7 +56,7 @@
 
 | Port | Implementation | Status |
 |---|---|---|
-| `CheckpointPort` | `DeltaCheckpointStorage` | RESOLVED |
+| `CheckpointPort` | `LocalCheckpointAdapter` | RESOLVED |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
 
 ### `CheckpointValidationProtocol`
@@ -140,7 +141,7 @@
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
 | `PipelineConfigLoaderPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
 | `RegistryAccessorPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-| `SettingsLoaderPort` | `PydanticSettingsLoader` | RESOLVED |
+| `SettingsLoaderPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
 
 ### `ConflictResolverService`
 **Location:** `src/bioetl/application/composite/conflict_resolver.py`
@@ -341,7 +342,7 @@
 |---|---|---|
 | `DeltaReaderPort` | `CompositeReplayInputReader` | RESOLVED |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
-| `MergedStoragePort` | `DeltaMergedStorage` | RESOLVED |
+| `MergedStoragePort` | `StorageBundle` | RESOLVED |
 | `SilverStoragePort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
 
 ### `MetricsService`
@@ -407,21 +408,21 @@
 
 | Port | Implementation | Status |
 |---|---|---|
-| `CheckpointPort` | `DeltaCheckpointStorage` | RESOLVED |
+| `CheckpointPort` | `LocalCheckpointAdapter` | RESOLVED |
 | `LockPort` | `MemoryLock` | RESOLVED |
-| `QuarantinePort` | `DeltaQuarantineWriter` | RESOLVED |
+| `QuarantinePort` | `UnifiedQuarantineAdapter` | RESOLVED |
 
 ### `PipelineService`
 **Location:** `src/bioetl/application/core/pipeline_services.py`
 
 | Port | Implementation | Status |
 |---|---|---|
-| `CheckpointPort` | `DeltaCheckpointStorage` | RESOLVED |
+| `CheckpointPort` | `LocalCheckpointAdapter` | RESOLVED |
 | `DataSourcePort` | `BaseHttpAdapter` | RESOLVED |
 | `LockPort` | `MemoryLock` | RESOLVED |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
 | `MetricsPort` | `PrometheusMetrics` | RESOLVED |
-| `QuarantinePort` | `DeltaQuarantineWriter` | RESOLVED |
+| `QuarantinePort` | `UnifiedQuarantineAdapter` | RESOLVED |
 | `TracingPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
 
 ### `PostrunService`
@@ -460,7 +461,7 @@
 | Port | Implementation | Status |
 |---|---|---|
 | `MetricsPort` | `PrometheusMetrics` | RESOLVED |
-| `QuarantinePort` | `DeltaQuarantineWriter` | RESOLVED |
+| `QuarantinePort` | `UnifiedQuarantineAdapter` | RESOLVED |
 
 ### `QuarantineService`
 **Location:** `src/bioetl/application/services/quality/quarantine_service.py`
@@ -469,7 +470,7 @@
 |---|---|---|
 | `ClockPort` | `RuntimeClock` | RESOLVED |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
-| `QuarantinePort` | `DeltaQuarantineWriter` | RESOLVED |
+| `QuarantinePort` | `UnifiedQuarantineAdapter` | RESOLVED |
 
 ### `QuarantineServiceSyncMixin`
 **Location:** `src/bioetl/application/services/quality/_quarantine_service_sync_mixin.py`
@@ -638,7 +639,7 @@
 | Port | Implementation | Status |
 |---|---|---|
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
-| `MergedStoragePort` | `DeltaMergedStorage` | RESOLVED |
+| `MergedStoragePort` | `StorageBundle` | RESOLVED |
 
 ### `_PipelineRunnerCleanupHostProtocol`
 **Location:** `src/bioetl/application/core/_runner_support.py`
