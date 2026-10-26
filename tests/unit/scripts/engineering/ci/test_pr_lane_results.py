@@ -639,6 +639,18 @@ def test_affected_targets_fail_closed_without_memory_test(tmp_path: Path) -> Non
         affected_pytest_targets(["src/memory/rag/chunking.py"], repo_root=tmp_path)
 
 
+def test_affected_targets_preserve_docs_workflow_specialized_contracts() -> None:
+    """The general workflow map must not erase the docs-specific contracts."""
+    repo_root = Path(__file__).resolve().parents[5]
+    assert affected_pytest_targets(
+        [".github/workflows/docs.yml"], repo_root=repo_root
+    ) == [
+        "tests/architecture/test_docs_governance_workflow.py",
+        "tests/architecture/test_diagram_nightly_workflow.py",
+        "tests/architecture/test_github_actions_runtime_policy.py",
+    ]
+
+
 def test_affected_targets_map_makefile_benchmark_contract() -> None:
     """Makefile edits select the benchmark-target contract, not an empty lane."""
     repo_root = Path(__file__).resolve().parents[5]
