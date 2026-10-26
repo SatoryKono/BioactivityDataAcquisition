@@ -88,6 +88,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/architecture/f-09-conformance-matrix-report.md": (
         "tests/architecture/test_adapter_port_conformance.py",
     ),
+    "reports/engineering/qm_07_report.md": (
+        "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py",
+        "tests/architecture/qm_07/test_gate_evaluators.py",
+        "tests/architecture/qm_07/test_distribution_isolation.py",
+        "tests/architecture/qm_07/test_qm07_cold_imports.py",
+    ),
     "reports/engineering/SEC-002_audit_report.md": (
         "tests/security/test_pubmed_xxe_mitigation.py",
         "tests/unit/application/pipelines/pubmed/test_xml_parser.py",

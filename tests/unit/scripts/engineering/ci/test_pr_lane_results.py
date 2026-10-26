@@ -329,6 +329,19 @@ def test_shadow_compare_routes_provider_parity_evidence(name: str) -> None:
     ]
 
 
+def test_shadow_compare_routes_qm07_report_to_isolation_contracts() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["reports/engineering/qm_07_report.md"], repo_root=root
+    )
+    assert set(report["selected"]) == {
+        "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py",
+        "tests/architecture/qm_07/test_gate_evaluators.py",
+        "tests/architecture/qm_07/test_distribution_isolation.py",
+        "tests/architecture/qm_07/test_qm07_cold_imports.py",
+    }
+
+
 def test_shadow_compare_routes_app001_audit_to_cancellation_contracts() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(["reports/app-001-audit.md"], repo_root=root)
