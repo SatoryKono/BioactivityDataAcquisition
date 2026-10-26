@@ -245,6 +245,30 @@ def test_shadow_compare_routes_historical_secret_fingerprints() -> None:
     assert report["covers_full_suite"] is False
 
 
+def test_shadow_compare_routes_published_pipeline_schemas() -> None:
+    """Published pipeline JSON schemas select the tests that read them."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            "configs/_schema/composite.json",
+            "configs/_schema/pipeline.json",
+        ],
+        repo_root=repo_root,
+    )
+    assert (
+        "tests/architecture/test_config_schema_migration_status.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/integration/config/test_validate_pipeline_configs.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/unit/repo_backed/infrastructure/config/test_composite_sort_by_closure.py"
+        in report["selected"]
+    )
+
+
 def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
