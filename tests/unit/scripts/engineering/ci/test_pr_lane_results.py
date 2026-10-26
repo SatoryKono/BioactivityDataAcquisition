@@ -245,6 +245,19 @@ def test_shadow_compare_routes_historical_secret_fingerprints() -> None:
     assert report["covers_full_suite"] is False
 
 
+def test_shadow_compare_routes_target_composite_config() -> None:
+    """The target composite file selects the schema test that loads it."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["configs/composites/target.yaml"],
+        repo_root=repo_root,
+    )
+    assert (
+        "tests/unit/infrastructure/schemas/test_composite_config_schema.py"
+        in report["selected"]
+    )
+
+
 def test_shadow_compare_routes_published_pipeline_schemas() -> None:
     """Published pipeline JSON schemas select the tests that read them."""
     repo_root = Path(__file__).resolve().parents[5]

@@ -311,6 +311,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/integration/config/test_validate_pipeline_configs.py",
         "tests/unit/repo_backed/infrastructure/config/test_composite_sort_by_closure.py",
     ),
+    "configs/composites/target.yaml": (
+        "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
+    ),
     "configs/_schema/pipeline.json": (
         "tests/architecture/test_config_schema_migration_status.py",
         "tests/integration/config/test_validate_pipeline_configs.py",

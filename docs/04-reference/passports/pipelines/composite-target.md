@@ -24,7 +24,7 @@ Join keys, cardinality и source tables берутся из composite configurat
 | Source | `composite` · `chembl_target` |
 | Method / endpoint | — · — |
 | Resource / tables | `silver/chembl/target`, `silver/chembl/target_component`, `silver/chembl/protein_class`, `silver/chembl/target_protein_classification`, `silver/uniprot/idmapping`, `silver/uniprot/protein` |
-| Filters | `chembl_target_component`: no condition; `chembl_protein_class`: no condition; `chembl_target_protein_classification`: no condition; `uniprot_idmapping`: target_id IS NOT NULL; `uniprot_protein`: no condition |
+| Filters | `chembl_target_component`: no condition; `chembl_protein_class`: no condition; `chembl_target_protein_classification`: no condition; `uniprot_idmapping`: no condition; `uniprot_protein`: no condition |
 
 ## Silver и Data Quality
 

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import Self
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.types import JsonDict
@@ -22,6 +22,10 @@ from bioetl.infrastructure.schemas._composite_config_merge_schema import (
     MergeOutputSchema,
     MergeSchema,
     MergeSortBySchema,
+)
+from bioetl.infrastructure.schemas._composite_config_policy_schema import (
+    NormalizedAnchorPolicySchema,
+    NormalizedJoinKeyPolicySchema,
 )
 from bioetl.infrastructure.schemas.composite_config_base import (
     AggregationFieldSchema,
@@ -52,9 +56,25 @@ class CompositeConfigSchema(BaseModel):
     the domain layer and enforced via delegated validation.
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     name: str = Field(..., min_length=1, description="Composite pipeline name")
     version: str = Field(
         ..., min_length=1, description="Configuration version (semver)"
+    )
+    normalized_anchor_policy: NormalizedAnchorPolicySchema | None = Field(
+        default=None,
+        description=(
+            "Declared normalized-anchor policy. Omitted when the composite does "
+            "not declare one. Not copied into domain CompositeConfig."
+        ),
+    )
+    normalized_join_key_policy: NormalizedJoinKeyPolicySchema | None = Field(
+        default=None,
+        description=(
+            "Declared normalized join-key policy. Omitted when the composite does "
+            "not declare one. Not copied into domain CompositeConfig."
+        ),
     )
     seed: SeedSchema = Field(..., description="Seed pipeline configuration")
     dependencies: list[DependencySchema] = Field(
@@ -120,6 +140,8 @@ class CompositeConfigFileSchema(BaseModel):
     Validates the entire YAML file structure including schema_version
     and maintenance metadata.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     schema_version: str = Field(
         default="2.0.0", description="Schema version for file format"
@@ -197,6 +219,8 @@ __all__ = [
     "MergeOutputSchema",
     "MergeSchema",
     "MergeSortBySchema",
+    "NormalizedAnchorPolicySchema",
+    "NormalizedJoinKeyPolicySchema",
     "RetrySchema",
     "SeedSchema",
     "validate_composite_config_payload",

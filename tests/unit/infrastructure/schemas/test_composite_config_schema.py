@@ -30,28 +30,47 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from pathlib import Path
 
 import pytest
+import yaml
 from pydantic import ValidationError
 
+from bioetl.infrastructure.config.composite_config_api import load_composite_config
+
 from bioetl.infrastructure.schemas._composite_config_merge_schema import (
+    ColumnGroupSchema,
     MergeOutputSchema,
     TargetProteinClassificationProjectionSchema,
+)
+from bioetl.infrastructure.schemas._composite_config_policy_schema import (
+    NormalizedAnchorPolicySchema,
+    NormalizedJoinKeyPolicySchema,
+    PublicationIdentityJoinPolicySchema,
+    PubchemCompoundAnchorSchema,
+    PubchemCompoundJoinBoundarySchema,
+    UniprotIdMappingAnchorSchema,
+    UniprotIdMappingJoinBoundarySchema,
 )
 from bioetl.infrastructure.schemas.composite_config import (
     AggregationFieldSchema,
     AggregationSchema,
-    ColumnGroupSchema,
+    CompositeConfigFileSchema,
     CompositeConfigSchema,
     CompositeDQSchema,
     CrossValidationSchema,
     DependencySchema,
     DQOverrideSchema,
+    EnricherFieldPairingSchema,
     EnricherSchema,
     ExecutionSchema,
+    FieldComparisonSpecSchema,
+    LineageSchema,
     MergeSchema,
     MergeSortBySchema,
+    RetrySchema,
     SeedSchema,
+    validate_composite_config_payload,
 )
 
 
@@ -431,6 +450,103 @@ def _assert_extra_forbidden(exc_info: pytest.ExceptionInfo[ValidationError]) -> 
             {"name": "system", "fields": ["entity_id"], "unknown_key": 1},
         ),
         (TargetProteinClassificationProjectionSchema, {"unknown_key": 1}),
+        (
+            DependencySchema,
+            {
+                "pipeline": "uniprot_idmapping",
+                "join_keys": ["target_id"],
+                "filter_condition": "target_id IS NOT NULL",
+            },
+        ),
+        (RetrySchema, {"max_attempts": 2, "unknown_key": 1}),
+        (ExecutionSchema, {"max_concurrency": 2, "unknown_key": 1}),
+        (LineageSchema, {"track_status": False, "unknown_key": 1}),
+        (
+            FieldComparisonSpecSchema,
+            {"field": "doi", "method": "exact", "unknown_key": 1},
+        ),
+        (
+            EnricherFieldPairingSchema,
+            {
+                "enricher_pipeline": "crossref_publication",
+                "fields": [{"field": "doi"}],
+                "unknown_key": 1,
+            },
+        ),
+        (CrossValidationSchema, {"enabled": True, "unknown_key": 1}),
+        (CompositeConfigSchema, {"name": "composite_publication", "unknown_key": 1}),
+        (CompositeConfigFileSchema, {"schema_version": "2.0.0", "unknown_key": 1}),
+        (
+            PublicationIdentityJoinPolicySchema,
+            {"rationale": "identifiers first", "unknown_key": 1},
+        ),
+        (
+            NormalizedJoinKeyPolicySchema,
+            {
+                "publication_identity": {"rationale": "identifiers first"},
+                "unknown_key": 1,
+            },
+        ),
+        (
+            PubchemCompoundJoinBoundarySchema,
+            {
+                "active_join_keys": ["inchi_key"],
+                "retained_validation_anchors": ["standardized_inchi_key"],
+                "activation_condition": "seed emits anchors",
+                "rationale": "retained for validation",
+                "unknown_key": 1,
+            },
+        ),
+        (
+            PubchemCompoundAnchorSchema,
+            {
+                "join_boundary": {
+                    "active_join_keys": ["inchi_key"],
+                    "retained_validation_anchors": ["standardized_inchi_key"],
+                    "activation_condition": "seed emits anchors",
+                    "rationale": "retained for validation",
+                },
+                "unknown_key": 1,
+            },
+        ),
+        (
+            UniprotIdMappingJoinBoundarySchema,
+            {
+                "source_anchor": "target_id",
+                "normalized_output_anchor": "uniprot_accession",
+                "required_status": "found",
+                "downstream_pipeline": "uniprot_protein",
+                "rationale": "chain through idmapping",
+                "unknown_key": 1,
+            },
+        ),
+        (
+            UniprotIdMappingAnchorSchema,
+            {
+                "join_boundary": {
+                    "source_anchor": "target_id",
+                    "normalized_output_anchor": "uniprot_accession",
+                    "required_status": "found",
+                    "downstream_pipeline": "uniprot_protein",
+                    "rationale": "chain through idmapping",
+                },
+                "unknown_key": 1,
+            },
+        ),
+        (
+            NormalizedAnchorPolicySchema,
+            {
+                "pubchem_compound": {
+                    "join_boundary": {
+                        "active_join_keys": ["inchi_key"],
+                        "retained_validation_anchors": ["standardized_inchi_key"],
+                        "activation_condition": "seed emits anchors",
+                        "rationale": "retained for validation",
+                    }
+                },
+                "unknown_key": 1,
+            },
+        ),
     ],
 )
 def test_composite_schema_classes_reject_unknown_keys(
@@ -510,6 +626,82 @@ def test_nested_composite_config_rejects_unknown_keys() -> None:
         _assert_extra_forbidden(exc_info)
 
 
+def test_nested_dependency_execution_and_policy_reject_unknown_keys() -> None:
+    """Unknown keys fail inside dependency, execution, and declared policy blocks."""
+    dependency_payload = _base_payload()
+    dependency_payload["dependencies"] = [
+        {
+            "pipeline": "uniprot_idmapping",
+            "join_keys": ["target_id"],
+            "filter_condition": "target_id IS NOT NULL",
+        }
+    ]
+    execution_payload = _base_payload()
+    execution_payload["execution"] = {"retry": {"max_attempts": 2, "unknown_key": 1}}
+    policy_payload = _base_payload()
+    policy_payload["normalized_join_key_policy"] = {
+        "publication_identity": {
+            "primary_join_keys": ["doi"],
+            "fallback_join_keys": [],
+            "rationale": "identifiers first",
+            "unknown_key": 1,
+        }
+    }
+    file_payload = {
+        "schema_version": "2.0.0",
+        "composite": _base_payload(),
+        "unknown_key": 1,
+    }
+
+    for payload in (dependency_payload, execution_payload, policy_payload):
+        with pytest.raises(ValidationError) as exc_info:
+            CompositeConfigSchema.model_validate(payload)
+        _assert_extra_forbidden(exc_info)
+
+    with pytest.raises(ValidationError) as exc_info:
+        CompositeConfigFileSchema.model_validate(file_payload)
+    _assert_extra_forbidden(exc_info)
+
+
+def test_real_composite_configs_keep_domain_and_declared_policies() -> None:
+    """Tracked composite YAML stays loadable, and the removed dependency key stays absent."""
+    config_dir = Path("configs/composites")
+    for config_path in sorted(config_dir.glob("*.yaml")):
+        raw = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        assert isinstance(raw, dict)
+        schema = validate_composite_config_payload(raw)
+        domain = load_composite_config(config_path.stem)
+        assert schema.to_domain().name == domain.name
+        assert schema.composite.normalized_anchor_policy is not None
+        assert schema.composite.normalized_join_key_policy is not None
+
+    target_raw = yaml.safe_load(
+        (config_dir / "target.yaml").read_text(encoding="utf-8")
+    )
+    assert isinstance(target_raw, dict)
+    dependencies = target_raw["composite"]["dependencies"]
+    assert isinstance(dependencies, list)
+    assert all("filter_condition" not in item for item in dependencies)
+
+    target = load_composite_config("target")
+    dependency = next(
+        item for item in target.dependencies if item.pipeline == "uniprot_idmapping"
+    )
+    assert dependency.join_keys == ("target_id",)
+    assert dependency.key_filter is None
+    assert not hasattr(dependency, "filter_condition")
+
+    target_schema = validate_composite_config_payload(
+        yaml.safe_load((config_dir / "target.yaml").read_text(encoding="utf-8"))
+    )
+    anchor = target_schema.composite.normalized_anchor_policy
+    assert anchor is not None
+    assert anchor.uniprot_idmapping.join_boundary.source_anchor == "target_id"
+    join_policy = target_schema.composite.normalized_join_key_policy
+    assert join_policy is not None
+    assert join_policy.publication_identity.primary_join_keys == []
+
+
 def test_forbid_schemas_keep_valid_defaults_and_to_domain() -> None:
     """Declared defaults and domain conversion stay intact."""
     field = AggregationFieldSchema(source="term", agg="first")
@@ -561,9 +753,24 @@ def test_forbid_schemas_keep_valid_defaults_and_to_domain() -> None:
     }
     loaded = CompositeConfigSchema.model_validate(payload)
     domain = loaded.to_domain()
+    assert loaded.normalized_anchor_policy is None
+    assert loaded.normalized_join_key_policy is None
     assert domain.seed.pipeline == "chembl_publication"
     assert domain.merge.column_groups[0].name == "system"
     assert domain.enrichers[0].join_keys == ("doi",)
+
+    dependency = DependencySchema(pipeline="uniprot_idmapping", join_keys=["target_id"])
+    assert dependency.required is False
+    assert dependency.timeout_seconds == 600
+    assert dependency.key_filter is None
+    assert dependency.to_domain().key_filter is None
+
+    execution = ExecutionSchema()
+    assert execution.max_concurrency == 4
+    assert execution.retry.max_attempts == 3
+    assert execution.to_domain().retry_max_attempts == 3
+    assert LineageSchema().track_field_sources is True
+    assert CrossValidationSchema().enabled is True
 
 
 @pytest.mark.parametrize(
@@ -576,6 +783,17 @@ def test_forbid_schemas_keep_valid_defaults_and_to_domain() -> None:
         MergeOutputSchema,
         ColumnGroupSchema,
         TargetProteinClassificationProjectionSchema,
+        DependencySchema,
+        RetrySchema,
+        ExecutionSchema,
+        LineageSchema,
+        FieldComparisonSpecSchema,
+        EnricherFieldPairingSchema,
+        CrossValidationSchema,
+        CompositeConfigSchema,
+        CompositeConfigFileSchema,
+        NormalizedAnchorPolicySchema,
+        NormalizedJoinKeyPolicySchema,
     ],
 )
 def test_composite_schema_json_forbids_additional_properties(schema_cls: type) -> None:
