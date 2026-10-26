@@ -502,6 +502,35 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
     )
 
 
+def test_operator_runbook_docs_select_alert_semantics() -> None:
+    """Gold and lock docs stay on the incident-runbook semantics test."""
+    repo_root = Path(__file__).resolve().parents[5]
+    semantics = (
+        "tests/unit/infrastructure/observability/"
+        "test_incident_runbook_alert_semantics.py"
+    )
+
+    targets = affected_pytest_targets(
+        [
+            "docs/00-project/RULES.md",
+            "docs/05-operations/runbooks/incident-response.md",
+            "docs/05-operations/runbooks/stale-lock.md",
+        ],
+        repo_root=repo_root,
+    )
+
+    assert semantics in targets
+    report = build_shadow_compare(
+        [
+            "docs/00-project/RULES.md",
+            "docs/05-operations/runbooks/stale-lock.md",
+        ],
+        repo_root=repo_root,
+    )
+    assert report["activation"] == "not_applied"
+    assert semantics in report["selected"]
+
+
 def test_shadow_compare_rejects_mixed_diff_with_unmapped_path(
     tmp_path: Path,
 ) -> None:

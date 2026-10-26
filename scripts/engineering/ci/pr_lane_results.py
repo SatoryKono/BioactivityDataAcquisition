@@ -114,7 +114,13 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/05-operations/runbooks/incident-response.md": (
         "tests/integration/test_prometheus_rules_config.py",
-        "tests/unit/test_incident_runbook_alert_semantics.py",
+        "tests/unit/infrastructure/observability/test_incident_runbook_alert_semantics.py",
+    ),
+    "docs/05-operations/runbooks/stale-lock.md": (
+        "tests/unit/infrastructure/observability/test_incident_runbook_alert_semantics.py",
+    ),
+    "docs/00-project/RULES.md": (
+        "tests/unit/infrastructure/observability/test_incident_runbook_alert_semantics.py",
     ),
     "reports/engineering/SCHEMA-001_execution_evidence.md": (
         "tests/unit/scripts/test_verify_schema_parity.py",
