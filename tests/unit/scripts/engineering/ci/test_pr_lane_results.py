@@ -236,6 +236,22 @@ def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
     )
 
 
+@pytest.mark.parametrize("workflow", ["codeql.yml", "tests.yml", "release.yml"])
+def test_shadow_compare_routes_reviewed_workflow_contracts(workflow: str) -> None:
+    """Reviewed workflows select the validator that scans their action refs."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [f".github/workflows/{workflow}"], repo_root=repo_root
+    )
+    assert report["selected"] == [
+        "tests/architecture/test_github_actions_runtime_policy.py"
+    ]
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            [".github/workflows/unreviewed-new-workflow.yml"], repo_root=repo_root
+        )
+
+
 @pytest.mark.parametrize("manifest", ["package.json", "package-lock.json"])
 def test_shadow_compare_routes_gemini_toolchain(manifest: str) -> None:
     """Each toolchain manifest independently selects the integrity contract."""
@@ -264,6 +280,60 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
         "tests/architecture/test_circleci_migration_contract.py",
         "tests/architecture/test_dashboard_scenes_contract.py",
         "tests/architecture/test_residual_osv_9853.py",
+    }
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        ".github/workflows/type-checking.yml",
+        ".github/workflows/type-checking-cold.yml",
+        "scripts/engineering/dev/run_mypy.sh",
+        "scripts/engineering/dev/run_mypy.ps1",
+        "scripts/engineering/dev/zed_mypy.py",
+        "configs/quality/github_required_checks.yaml",
+    ],
+)
+def test_shadow_compare_routes_strict_mypy_scope_contract(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    expected = ["tests/architecture/test_mypy_target_contract.py"]
+    if path in {
+        ".github/workflows/type-checking.yml",
+        ".github/workflows/type-checking-cold.yml",
+    }:
+        expected.insert(0, "tests/architecture/test_github_actions_runtime_policy.py")
+    if path == "scripts/engineering/dev/zed_mypy.py":
+        expected.extend(["tests/unit/scripts", "tests/unit/repo_backed/scripts"])
+    assert report["selected"] == expected
+
+
+@pytest.mark.parametrize(
+    "name", ["SUMMARY.md", "chembl_data.json", "uniprot_headers.txt"]
+)
+def test_shadow_compare_routes_provider_parity_evidence(name: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([f"reports/evidence/12461/{name}"], repo_root=root)
+    assert report["selected"] == [
+        "tests/architecture/test_provider_contract_interoperability_governance.py",
+        "tests/contract/test_provider_contract_snapshot_registry.py",
+    ]
+
+
+def test_shadow_compare_routes_app001_audit_to_cancellation_contracts() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(["reports/app-001-audit.md"], repo_root=root)
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/unit/application/core/test_batch_execution_lifecycle.py",
+        "tests/unit/application/core/test_derived_scan_budget.py",
+        "tests/unit/application/core/test_pipeline_services.py",
+        "tests/unit/application/core/test_health_aggregator.py",
+        "tests/unit/application/core/test_heartbeat.py",
+        "tests/unit/application/core/test_lock_release_callback_contract.py",
+        "tests/unit/application/core/test_runner.py",
+        "tests/unit/application/services/test_pipeline_runner_service.py",
+        "tests/unit/application/services/run_reports/test_composite_report.py",
     }
 
 
@@ -536,7 +606,7 @@ def test_affected_targets_map_telemetry_baseline(tmp_path: Path) -> None:
         repo_root=tmp_path,
     )
     untouched = affected_pytest_targets(
-        ["configs/quality/github_required_checks.yaml"],
+        ["configs/quality/unregistered-config.yaml"],
         repo_root=tmp_path,
     )
 
@@ -563,6 +633,18 @@ def test_affected_targets_fail_closed_without_memory_test(tmp_path: Path) -> Non
     """A mapping never turns an absent test into a passing target."""
     with pytest.raises(ValueError, match="Missing mandatory mapped test targets"):
         affected_pytest_targets(["src/memory/rag/chunking.py"], repo_root=tmp_path)
+
+
+def test_affected_targets_preserve_docs_workflow_specialized_contracts() -> None:
+    """The general workflow map must not erase the docs-specific contracts."""
+    repo_root = Path(__file__).resolve().parents[5]
+    assert affected_pytest_targets(
+        [".github/workflows/docs.yml"], repo_root=repo_root
+    ) == [
+        "tests/architecture/test_docs_governance_workflow.py",
+        "tests/architecture/test_diagram_nightly_workflow.py",
+        "tests/architecture/test_github_actions_runtime_policy.py",
+    ]
 
 
 def test_affected_targets_map_makefile_benchmark_contract() -> None:

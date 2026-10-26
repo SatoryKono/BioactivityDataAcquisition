@@ -50,6 +50,9 @@ GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
 )
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
+MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
+TYPE_CHECKING_WORKFLOW = ".github/workflows/type-checking.yml"
+TYPE_CHECKING_COLD_WORKFLOW = ".github/workflows/type-checking-cold.yml"
 
 TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_telemetry_baseline.py",
@@ -79,6 +82,91 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".github/workflows/docs.yml": (
+        "tests/architecture/test_docs_governance_workflow.py",
+        "tests/architecture/test_diagram_nightly_workflow.py",
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
+    "reports/audit-runs/20261025-p17-002/P17-002-reusable-workflows-audit.md": (
+        "tests/unit/scripts/ci/test_check_reusable_workflow_pins.py",
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
+    "docs/05-operations/runbooks/incident-response.md": (
+        "tests/integration/test_prometheus_rules_config.py",
+    ),
+    "reports/engineering/SCHEMA-001_execution_evidence.md": (
+        "tests/unit/scripts/test_verify_schema_parity.py",
+        "tests/unit/scripts/ops/data/test_check_delta_integrity.py",
+    ),
+    **dict.fromkeys(
+        (
+            ".github/workflows/architecture-docs-nightly.yml",
+            ".github/workflows/branch-hygiene.yml",
+            ".github/workflows/chembl-baseline-smoke.yml",
+            ".github/workflows/codeql.yml",
+            ".github/workflows/commit-lint.yml",
+            ".github/workflows/consolidation-gates.yml",
+            ".github/workflows/contract-governance-fast-check.yml",
+            ".github/workflows/contract-tests.yml",
+            ".github/workflows/dashboard-render-host.yml",
+            ".github/workflows/diagram-nightly.yml",
+            ".github/workflows/docs-kpi-weekly.yml",
+            ".github/workflows/e2e-matrix-health.yml",
+            ".github/workflows/github-settings-quarterly-review.yml",
+            ".github/workflows/import-linter.yml",
+            ".github/workflows/mutation-testing.yml",
+            ".github/workflows/nightly-replay-parity.yml",
+            ".github/workflows/nightly.yml",
+            ".github/workflows/performance-nightly.yml",
+            ".github/workflows/port-contracts.yml",
+            ".github/workflows/pr-hygiene.yml",
+            ".github/workflows/provider-contract-drift.yml",
+            ".github/workflows/quality-debt-weekly.yml",
+            ".github/workflows/release.yml",
+            ".github/workflows/reusable-setup.yml",
+            ".github/workflows/root-hygiene.yml",
+            ".github/workflows/router-v7-bridge.yml",
+            ".github/workflows/schema-governance.yml",
+            ".github/workflows/scorecard.yml",
+            ".github/workflows/security.yml",
+            ".github/workflows/skills-consistency.yml",
+            ".github/workflows/stale.yml",
+            ".github/workflows/tests.yml",
+            TYPE_CHECKING_COLD_WORKFLOW,
+            TYPE_CHECKING_WORKFLOW,
+            ".github/workflows/zizmor.yml",
+        ),
+        (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
+    ),
+    **dict.fromkeys(
+        (
+            TYPE_CHECKING_WORKFLOW,
+            TYPE_CHECKING_COLD_WORKFLOW,
+            "scripts/engineering/dev/run_mypy.sh",
+            "scripts/engineering/dev/run_mypy.ps1",
+            "scripts/engineering/dev/zed_mypy.py",
+            "configs/quality/github_required_checks.yaml",
+        ),
+        (MYPY_TARGET_CONTRACT_TEST,),
+    ),
+    **dict.fromkeys(
+        (
+            TYPE_CHECKING_WORKFLOW,
+            TYPE_CHECKING_COLD_WORKFLOW,
+        ),
+        (GITHUB_ACTIONS_RUNTIME_POLICY_TEST, MYPY_TARGET_CONTRACT_TEST),
+    ),
+    "reports/app-001-audit.md": (
+        "tests/unit/application/core/test_batch_execution_lifecycle.py",
+        "tests/unit/application/core/test_derived_scan_budget.py",
+        "tests/unit/application/core/test_pipeline_services.py",
+        "tests/unit/application/core/test_health_aggregator.py",
+        "tests/unit/application/core/test_heartbeat.py",
+        "tests/unit/application/core/test_lock_release_callback_contract.py",
+        "tests/unit/application/core/test_runner.py",
+        "tests/unit/application/services/test_pipeline_runner_service.py",
+        "tests/unit/application/services/run_reports/test_composite_report.py",
+    ),
     "reports/engineering/SEC-003_audit_report.md": (
         "tests/unit/domain/services/test_composite_metadata_helpers.py",
     ),
@@ -97,6 +185,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     ".pre-commit-config.yaml": (
         "tests/architecture/test_scripts_inventory_discovery.py",
+        MYPY_TARGET_CONTRACT_TEST,
+    ),
+    "scripts/engineering/ci/presubmit_gate.py": (
+        "tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py",
+        MYPY_TARGET_CONTRACT_TEST,
     ),
     "configs/quality/debt_scorecard.yaml": (
         "tests/architecture/test_quality_debt_scorecard.py",
@@ -219,6 +312,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "reports/evidence/12461/": (
+        "tests/architecture/test_provider_contract_interoperability_governance.py",
+        "tests/contract/test_provider_contract_snapshot_registry.py",
+    ),
     "scripts/ai/gemini/npm-tooling/": (
         "tests/architecture/test_gemini_cli_bootstrap.py",
     ),

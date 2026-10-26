@@ -42,6 +42,7 @@ ALLOWED_USES: dict[str, set[str]] = {
     },
     "actions/attest-build-provenance": {
         "977bb373ede98d70efdf65b84cb5f73e068dcc2a",  # v3
+        "4d101475d8b20a2381f78447822ac1eab6504dd8",  # v4.2.2
     },
     "actions/checkout": {
         "de0fac2e4500dabe0009e67214ff5f5447ce83dd",  # v6.0.2
@@ -50,22 +51,44 @@ ALLOWED_USES: dict[str, set[str]] = {
     "actions/setup-python": {
         "a309ff8b426b58ec0e2a45f0f869d46889d02405",  # v6.2.0
         "5fda3b95a4ea91299a34e894583c3862153e4b97",  # v7.0.0
+        "6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",  # v7.1.0
     },
-    "actions/cache": {"27d5ce7f107fe9357f9df03efb73ab90386fccae"},  # v5.0.5
-    "actions/cache/restore": {"27d5ce7f107fe9357f9df03efb73ab90386fccae"},  # v5.0.5
-    "actions/cache/save": {"27d5ce7f107fe9357f9df03efb73ab90386fccae"},  # v5.0.5
-    "actions/upload-artifact": {"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"},  # v7.0.1
+    "actions/cache": {
+        "27d5ce7f107fe9357f9df03efb73ab90386fccae",  # v5.0.5
+        "55cc8345863c7cc4c66a329aec7e433d2d1c52a9",  # v6.1.0
+    },
+    "actions/cache/restore": {
+        "27d5ce7f107fe9357f9df03efb73ab90386fccae",  # v5.0.5
+        "55cc8345863c7cc4c66a329aec7e433d2d1c52a9",  # v6.1.0
+    },
+    "actions/cache/save": {
+        "27d5ce7f107fe9357f9df03efb73ab90386fccae",  # v5.0.5
+        "55cc8345863c7cc4c66a329aec7e433d2d1c52a9",  # v6.1.0
+    },
+    "actions/upload-artifact": {
+        "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",  # v7.0.1
+        "cf430e030ddbb5b0abf93d22962f4752f3646cd9",  # v7.0.2
+    },
     "actions/setup-node": {
         "48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e",  # v6.4.0
         "249970729cb0ef3589644e2896645e5dc5ba9c38",  # v6.5.0
     },
-    "actions/download-artifact": {"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"},  # v8.0.1
-    "actions/github-script": {"f28e40c7f34bde8b3046d885e986cb6290c5673b"},  # v7
+    "actions/download-artifact": {
+        "3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c",  # v8.0.1
+        "9000827ccba6bdab643e8b6fd33ac0654aef8333",  # v8.0.2
+    },
+    "actions/github-script": {
+        "f28e40c7f34bde8b3046d885e986cb6290c5673b",  # v7
+        "ed597411d8f924073f98dfc5c65a23a2325f34cd",  # v8.0.0
+    },
     "actions/labeler": {
         "8558fd74291d67161a8a78ce36a881fa63b766a9",  # v5
         "bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13",  # v7.0.0
     },
-    "actions/stale": {"5bef64f19d7facfb25b37b414482c7164d639639"},  # v9
+    "actions/stale": {
+        "5bef64f19d7facfb25b37b414482c7164d639639",  # v9
+        "1e223db275d687790206a7acac4d1a11bd6fe629",  # v10.4.0
+    },
     "actions/dependency-review-action": {
         "a1d282b36b6f3519aa1f3fc636f609c47dddb294",  # v5.0.0
     },
@@ -73,18 +96,23 @@ ALLOWED_USES: dict[str, set[str]] = {
         "37802adc94f370d6bfd71619e3f0bf239e1f3b78",  # v7 (canonical; composite setup-python-uv)
         "20cfd1bf945f4377ade1205e4dbc17946fc9a30d",  # v10.0.1
         "bec219d24cd3e171d82865faccec33120bb574f4",  # v10.1.0
+        "18d369b23da25a81e9458561248e1aafff6a70fa",  # v10.3.1
     },
     "SonarSource/sonarqube-scan-action": {
         "fd88b7d7ccbaefd23d8f36f73b59db7a3d246602",
     },
     "anchore/sbom-action": {
         "e22c389904149dbc22b58101806040fa8d37a610",  # v0.24.0
+        "66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c",  # v0.24.3
     },
     "aquasecurity/trivy-action": {
         "57a97c7e7821a5776cebc9bb87c984fa69cba8f1",  # v0.35.0
         "ed142fd0673e97e23eac54620cfb913e5ce36c25",  # v0.36.0
     },
-    "docker/build-push-action": {"ca052bb54ab0790a636c9b5f226502c73d547a25"},  # v5.4.0
+    "docker/build-push-action": {
+        "ca052bb54ab0790a636c9b5f226502c73d547a25",  # v5.4.0
+        "c3c9e263c25d99ce0380d002d59b67737d91b0dc",  # v7.4.0
+    },
     "docker/login-action": {"dbcb813823bdd20940b903addbd779551569679f"},  # v4.6.0
     "docker/setup-buildx-action": {
         "bb05f3f5519dd87d3ba754cc423b652a5edd6d2c",  # v4.2.0
@@ -97,39 +125,47 @@ ALLOWED_USES: dict[str, set[str]] = {
         "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28",  # v4.37.8
         "cdf488f595d80d6e07e03d4674febd5ab45fa938",  # v4.37.9
         "b96794f015dfd88f77b49b1c93e0fa7110f94c63",  # v4.38.0
+        "9b3254085494b55a0f7c4c2b3d2d52cc712ce370",  # v4.39.1
     },
     "github/codeql-action/analyze": {
         "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28",  # v4.37.8
         "cdf488f595d80d6e07e03d4674febd5ab45fa938",  # v4.37.9
         "b96794f015dfd88f77b49b1c93e0fa7110f94c63",  # v4.38.0
+        "9b3254085494b55a0f7c4c2b3d2d52cc712ce370",  # v4.39.1
     },
     "github/codeql-action/upload-sarif": {
         "8dca8a82e2fa1a2c8908956f711300f9c4a4f4f6",  # v2 (docker.yml Trivy)
         "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28",  # v4.37.8
         "cdf488f595d80d6e07e03d4674febd5ab45fa938",  # v4.37.9
         "b96794f015dfd88f77b49b1c93e0fa7110f94c63",  # v4.38.0
+        "9b3254085494b55a0f7c4c2b3d2d52cc712ce370",  # v4.39.1
     },
     "google/osv-scanner-action/osv-scanner-action": {
         "6e4298ebc4db23e847df9b2e2de2939d6f066c67",  # v2.5.1
         "a345acffa64b0eaede81a3d9aae6141214d9c8fc",  # v2.6.0
+        "b1d267aea5211fa648d9d442fa64b90dbdcbdd36",  # v2.7.0
     },
     "hadolint/hadolint-action": {
         "06be81baf89a55ffd0e24b8f04a4185738dd3387",  # v3.5.0
     },
     "ossf/scorecard-action": {
         "2d1146689b8cda280b9bc96326124645441f03bc",  # v2.4.4
+        "fa7117db83c52d787ae5a89f350999701505d78e",  # v2.5.0
     },
     "pypa/gh-action-pypi-publish": {
         "dc37677b2e1c63e2034f94d8a5b11f265b73ba33",  # v1.14.2
+        "7245906fb61fa33a13554f9d5fb856fe61758086",  # v1.14.3
     },
     "softprops/action-gh-release": {
         "efb35369e0ad2afab669f228072c1b0d510eae64",  # v3.0.3
     },
     "wagoid/commitlint-github-action": {
         "f133a0d95090ef2609192b4a21f54e20af819ea9",  # v6
+        "b948419dd99f3fd78a6548d48f94e3df7f6bf3ed",  # v6
     },
     "zizmorcore/zizmor-action": {
         "cc914d7f3750a2d13d75c7f184a1060aa0e9d482",  # v0.6.4
+        "85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e",  # v0.7.1
     },
 }
 
