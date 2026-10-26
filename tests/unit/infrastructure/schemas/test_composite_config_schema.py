@@ -34,6 +34,10 @@ from copy import deepcopy
 import pytest
 from pydantic import ValidationError
 
+from bioetl.infrastructure.schemas._composite_config_merge_schema import (
+    MergeOutputSchema,
+    TargetProteinClassificationProjectionSchema,
+)
 from bioetl.infrastructure.schemas.composite_config import (
     AggregationFieldSchema,
     AggregationSchema,
@@ -382,4 +386,198 @@ def test_merge_sort_by_schema_forbids_extra() -> None:
 def test_merge_sort_by_json_schema_forbids_additional_properties() -> None:
     """Published MergeSortBySchema must reject keys outside silver/gold."""
     schema = MergeSortBySchema.model_json_schema()
+    assert schema["additionalProperties"] is False
+
+
+def _assert_extra_forbidden(exc_info: pytest.ExceptionInfo[ValidationError]) -> None:
+    assert any(err["type"] == "extra_forbidden" for err in exc_info.value.errors())
+
+
+@pytest.mark.parametrize(
+    ("schema_cls", "payload"),
+    [
+        (
+            AggregationFieldSchema,
+            {"source": "term", "agg": "collect_list", "unknown_key": 1},
+        ),
+        (
+            AggregationSchema,
+            {
+                "group_by": "publication_id",
+                "fields": {"terms": {"source": "term", "agg": "first"}},
+                "unknown_key": 1,
+            },
+        ),
+        (
+            SeedSchema,
+            {
+                "pipeline": "chembl_publication",
+                "output_keys": ["doi"],
+                "silver_table": "silver/chembl/publication",
+                "unknown_key": 1,
+            },
+        ),
+        (
+            EnricherSchema,
+            {
+                "pipeline": "crossref_publication",
+                "join_keys": ["doi"],
+                "unknown_key": 1,
+            },
+        ),
+        (MergeOutputSchema, {"silver": "s", "gold": "g", "unknown_key": 1}),
+        (
+            ColumnGroupSchema,
+            {"name": "system", "fields": ["entity_id"], "unknown_key": 1},
+        ),
+        (TargetProteinClassificationProjectionSchema, {"unknown_key": 1}),
+    ],
+)
+def test_composite_schema_classes_reject_unknown_keys(
+    schema_cls: type,
+    payload: dict[str, object],
+) -> None:
+    """Unknown keys fail as extra_forbidden, not as an import or runtime error."""
+    with pytest.raises(ValidationError) as exc_info:
+        schema_cls.model_validate(payload)
+    _assert_extra_forbidden(exc_info)
+
+
+def test_nested_composite_config_rejects_unknown_keys() -> None:
+    """Unknown keys inside the real composite payload use extra_forbidden."""
+    nested_payloads: list[dict[str, object]] = []
+
+    seed_payload = _base_payload()
+    seed = seed_payload["seed"]
+    assert isinstance(seed, dict)
+    seed["unknown_key"] = 1
+    nested_payloads.append(seed_payload)
+
+    enricher_payload = _base_payload()
+    enrichers = enricher_payload["enrichers"]
+    assert isinstance(enrichers, list)
+    enrichers[0]["unknown_key"] = 1
+    nested_payloads.append(enricher_payload)
+
+    aggregation_payload = _base_payload()
+    aggregation_enrichers = aggregation_payload["enrichers"]
+    assert isinstance(aggregation_enrichers, list)
+    aggregation_enrichers[0]["cardinality"] = "many_to_one"
+    aggregation_enrichers[0]["aggregation"] = {
+        "group_by": "doi",
+        "unknown_key": 1,
+        "fields": {"terms": {"source": "term", "agg": "collect_list"}},
+    }
+    nested_payloads.append(aggregation_payload)
+
+    field_payload = _base_payload()
+    field_enrichers = field_payload["enrichers"]
+    assert isinstance(field_enrichers, list)
+    field_enrichers[0]["cardinality"] = "many_to_one"
+    field_enrichers[0]["aggregation"] = {
+        "group_by": "doi",
+        "fields": {
+            "terms": {"source": "term", "agg": "collect_list", "unknown_key": 1}
+        },
+    }
+    nested_payloads.append(field_payload)
+
+    output_payload = _base_payload()
+    merge = output_payload["merge"]
+    assert isinstance(merge, dict)
+    output = merge["output"]
+    assert isinstance(output, dict)
+    output["unknown_key"] = 1
+    nested_payloads.append(output_payload)
+
+    group_payload = _base_payload()
+    group_merge = group_payload["merge"]
+    assert isinstance(group_merge, dict)
+    group_merge["column_groups"] = [
+        {"name": "system", "fields": ["entity_id"], "unknown_key": 1}
+    ]
+    nested_payloads.append(group_payload)
+
+    projection_payload = _base_payload()
+    projection_merge = projection_payload["merge"]
+    assert isinstance(projection_merge, dict)
+    projection_merge["target_protein_classification_projection"] = {"unknown_key": 1}
+    nested_payloads.append(projection_payload)
+
+    for payload in nested_payloads:
+        with pytest.raises(ValidationError) as exc_info:
+            CompositeConfigSchema.model_validate(payload)
+        _assert_extra_forbidden(exc_info)
+
+
+def test_forbid_schemas_keep_valid_defaults_and_to_domain() -> None:
+    """Declared defaults and domain conversion stay intact."""
+    field = AggregationFieldSchema(source="term", agg="first")
+    assert field.filter is None
+    assert field.to_domain("terms").output_field == "terms"
+
+    aggregation = AggregationSchema(group_by="publication_id", fields={"terms": field})
+    assert aggregation.order_by == []
+    domain_aggregation = aggregation.to_domain()
+    assert domain_aggregation.group_by == "publication_id"
+    assert domain_aggregation.order_by == ()
+
+    seed = SeedSchema(
+        pipeline="chembl_publication",
+        output_keys=["doi"],
+        silver_table="silver/chembl/publication",
+    )
+    assert seed.limit is None
+    assert seed.to_domain().limit is None
+
+    enricher = EnricherSchema(pipeline="crossref_publication", join_keys=["doi"])
+    assert enricher.required is False
+    assert enricher.fallback_strategy == "skip"
+    assert enricher.cardinality == "one_to_one"
+    assert enricher.to_domain().filter_condition is None
+
+    output = MergeOutputSchema(silver="silver/path", gold="gold/path")
+    assert output.silver == "silver/path"
+    group = ColumnGroupSchema(name="system", fields=["entity_id"])
+    assert group.pattern is None
+    assert group.provider_order[0] == "chembl"
+    projection = TargetProteinClassificationProjectionSchema()
+    assert projection.include_protein_classifications is True
+    assert projection.levels == [1, 2, 3, 4, 5]
+    assert (
+        projection.expand_field_mappings()[
+            "chembl.target_protein_classification.protein_classifications"
+        ]
+        == "protein_classifications"
+    )
+
+    payload = _base_payload()
+    merge = payload["merge"]
+    assert isinstance(merge, dict)
+    merge["column_groups"] = [{"name": "system", "fields": ["entity_id"]}]
+    merge["target_protein_classification_projection"] = {
+        "levels": [1],
+        "include_protein_classifications": False,
+    }
+    loaded = CompositeConfigSchema.model_validate(payload)
+    domain = loaded.to_domain()
+    assert domain.seed.pipeline == "chembl_publication"
+    assert domain.merge.column_groups[0].name == "system"
+    assert domain.enrichers[0].join_keys == ("doi",)
+
+
+@pytest.mark.parametrize(
+    "schema_cls",
+    [
+        AggregationFieldSchema,
+        AggregationSchema,
+        SeedSchema,
+        EnricherSchema,
+        MergeOutputSchema,
+        ColumnGroupSchema,
+        TargetProteinClassificationProjectionSchema,
+    ],
+)
+def test_composite_schema_json_forbids_additional_properties(schema_cls: type) -> None:
+    schema = schema_cls.model_json_schema()
     assert schema["additionalProperties"] is False

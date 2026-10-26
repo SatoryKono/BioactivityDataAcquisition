@@ -4,6 +4,7 @@
 * **Task ID**: 12479
 * **Target SHA**: f5c3b438160ff79af9e16be7333c84f8e6a61805
 * **Date**: 2026-10-26 09:37:07 UTC
+* **Source identity**: the nine audited files are unchanged from the target SHA through `173b6ff3eab1b99c7a84583518fee21fff89cfcd` (`git diff` of those paths is empty).
 
 ## Nine Files Matrix
 
@@ -17,7 +18,7 @@
 | `src/bioetl/application/core/preflight/health_aggregator.py` | `if isinstance(result, asyncio.CancelledError): raise result` | `tests/unit/application/core/test_preflight_health_aggregator.py::TestHealthAggregator::test_check_all_reraises_cancelled_error` | PASS (Rethrows inner `CancelledError` from `gather(return_exceptions=True)`) | None | NOT_APPLICABLE (No swallowing) |
 | `src/bioetl/application/core/runner.py` | `except (PipelineShutdownError, CancelledError) as exc: ... if isinstance(exc, CancelledError): raise` | `tests/unit/application/core/test_runner.py::test_cancelled_run_records_terminal_ledger_before_reraising` | PASS (Records shutdown ledger and re-raises `CancelledError`) | None | NOT_APPLICABLE (No swallowing) |
 | `src/bioetl/application/services/execution/pipeline_runner_service.py` | `except asyncio.CancelledError: ... raise` | `tests/unit/application/services/test_pipeline_runner_service.py::test_cancelled_execution_persists_snapshot_and_releases_observations` | PASS (Extracts metrics, finalizes reports, re-raises `CancelledError`) | None | NOT_APPLICABLE (No swallowing) |
-| `src/bioetl/application/services/run_reports/composite.py` | `if isinstance(error, (asyncio.CancelledError, PipelineShutdownError)): status = "shutdown"` | `tests/unit/application/services/run_reports/test_terminal_observations.py` (assumed coverage via run_service reports logic) | PASS (Only maps the error to a status string; does not actually catch/swallow it in this method) | None | NOT_APPLICABLE (Status mapping only) |
+| `src/bioetl/application/services/run_reports/composite.py` | `if isinstance(error, (asyncio.CancelledError, PipelineShutdownError)): status = "shutdown"` | `tests/unit/application/services/run_reports/test_composite_report.py::test_parent_records_terminal_evidence` | PASS (Maps `CancelledError` to status `shutdown`, records `error_type`, and the test expects the exception to propagate) | None | NOT_APPLICABLE (Status mapping only) |
 
 ## Conclusion
 All 9 files correctly handle `asyncio.CancelledError`. They either:

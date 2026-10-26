@@ -1,5 +1,5 @@
 {
-  "allowed_exception_count": 119,
+  "allowed_exception_count": 116,
   "allowed_exceptions": [
     {
       "kind": "import:pandera",
@@ -231,27 +231,6 @@
       "path": "src/bioetl/domain/contracts/gold/uniprot.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
-    },
-    {
-      "kind": "attribute_call:resolve",
-      "line": 191,
-      "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
-      "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
-      "symbol": "StageAccountingSnapshotsMixin._removals_for_bucket"
-    },
-    {
-      "kind": "attribute_call:resolve",
-      "line": 238,
-      "path": "src/bioetl/domain/run_reports/reason_catalog_data.py",
-      "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
-      "symbol": "ReasonCatalog.family_for"
-    },
-    {
-      "kind": "attribute_call:resolve",
-      "line": 241,
-      "path": "src/bioetl/domain/run_reports/reason_catalog_data.py",
-      "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
-      "symbol": "ReasonCatalog.default_outcome_for"
     },
     {
       "kind": "import:pandera",
