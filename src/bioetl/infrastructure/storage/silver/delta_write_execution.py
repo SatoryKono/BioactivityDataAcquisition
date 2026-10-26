@@ -242,7 +242,9 @@ class _BoundedStreamReader(threading.Thread):
             for chunk in iter(lambda: self._stream.read(4096), b""):  # type: ignore[union-attr]
                 self._chunks.append(chunk)
                 self._length += len(chunk)
-                while self._chunks and self._length - len(self._chunks[0]) >= self._limit:
+                while (
+                    self._chunks and self._length - len(self._chunks[0]) >= self._limit
+                ):
                     removed = self._chunks.pop(0)
                     self._length -= len(removed)
         except OSError:

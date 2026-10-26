@@ -369,11 +369,14 @@ def test_run_plain_delta_write_subprocess_uses_arrow_file_not_stdin(
             assert arrow_path.exists()
             assert arrow_path.stat().st_size > 0
             import io
+
             self.stdout = io.BytesIO(b"")
             self.stderr = io.BytesIO(b"")
             self.returncode = 0
+
         def wait(self, timeout=None):
             pass
+
         def kill(self):
             pass
 
