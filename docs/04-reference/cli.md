@@ -209,7 +209,7 @@ ______________________________________________________________________
 #### `run` — Run a configured pipeline
 
 ```bash
-bioetl run [OPTIONS] PIPELINE
+bioetl run [OPTIONS]
 ```
 
 Выполняет ETL-пайплайн для указанной сущности.
@@ -442,7 +442,7 @@ ______________________________________________________________________
 #### `run-composite` — Run a composite pipeline
 
 ```bash
-bioetl run-composite [OPTIONS] PIPELINE
+bioetl run-composite [OPTIONS]
 ```
 
 Выполняет композитный пайплайн (seed + enrichers) согласно ADR-026.
@@ -883,7 +883,7 @@ ______________________________________________________________________
 #### `export` — Экспорт артефактов пайплайна
 
 ```bash
-bioetl export [OPTIONS] PIPELINE
+bioetl export [OPTIONS] [TABLE]
 ```
 
 Экспортирует Delta-таблицы Silver/Gold в CSV, XLSX или TSV.
@@ -957,10 +957,10 @@ ______________________________________________________________________
 
 ### `debug` — Отладка пайплайнов
 
-#### `debug` — Отладка пайплайна с breakpoints
+#### `debug` — Отладка пайплайна с диагностическим логированием
 
 ```bash
-bioetl debug [OPTIONS] PIPELINE
+bioetl debug [OPTIONS]
 ```
 
 Запускает пайплайн с DEBUG-логированием и ограничением количества записей.
