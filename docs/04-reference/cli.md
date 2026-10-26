@@ -206,6 +206,12 @@ ______________________________________________________________________
 
 ### `run` — Запуск одного пайплайна
 
+#### `run` — Run a configured pipeline
+
+```bash
+bioetl run [OPTIONS]
+```
+
 Выполняет ETL-пайплайн для указанной сущности.
 
 **Синтаксис:**
@@ -383,6 +389,12 @@ ______________________________________________________________________
 
 ### `run-all` — Запуск всех пайплайнов провайдера
 
+#### `run-all` — Run all configured pipelines
+
+```bash
+bioetl run-all [OPTIONS]
+```
+
 Последовательно выполняет все пайплайны для указанного провайдера.
 
 **Синтаксис:**
@@ -426,6 +438,12 @@ bioetl run-all --source chembl --run-type rebuild --yes
 ______________________________________________________________________
 
 ### `run-composite` — Запуск композитных пайплайнов
+
+#### `run-composite` — Run a composite pipeline
+
+```bash
+bioetl run-composite [OPTIONS]
+```
 
 Выполняет композитный пайплайн (seed + enrichers) согласно ADR-026.
 
@@ -490,7 +508,14 @@ Composite resume semantics:
 
 ______________________________________________________________________
 
-### `replay-composite`
+### `replay-composite` — Replay saved composite inputs offline and verify Silver/Gold
+
+#### `replay-composite`
+
+```bash
+bioetl replay-composite [OPTIONS]
+```
+
 
 Offline replay of a digest-bound composite parent envelope (ADR-062). Reproduces
 Silver/Gold in a new isolated directory without invoking provider APIs.
@@ -503,7 +528,14 @@ All three options are required. The envelope must be named `parent.json`; use th
 SHA-256 recorded by the parent run report. Missing or inconsistent evidence stops
 the command instead of claiming replay equivalence.
 
-### `replay-assay`
+### `replay-assay` — Replay saved assay inputs offline and verify Silver/Gold
+
+#### `replay-assay`
+
+```bash
+bioetl replay-assay [OPTIONS]
+```
+
 
 Compatibility command for the same offline replay callback and required options:
 
@@ -848,6 +880,12 @@ ______________________________________________________________________
 
 ### `export` — Экспорт данных
 
+#### `export` — Экспорт артефактов пайплайна
+
+```bash
+bioetl export [OPTIONS] [TABLE]
+```
+
 Экспортирует Delta-таблицы Silver/Gold в CSV, XLSX или TSV.
 
 **Синтаксис:**
@@ -918,6 +956,12 @@ bioetl export chembl.activity -o ./my-exports
 ______________________________________________________________________
 
 ### `debug` — Отладка пайплайнов
+
+#### `debug` — Отладка пайплайна с диагностическим логированием
+
+```bash
+bioetl debug [OPTIONS]
+```
 
 Запускает пайплайн с DEBUG-логированием и ограничением количества записей.
 Поддерживается только режим `log` без точек останова. Интерактивное пошаговое
