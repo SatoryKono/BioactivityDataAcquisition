@@ -714,11 +714,16 @@ def _create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--target",
         nargs="+",
-        default=["tests/"],
+        default=[],
         help=(
-            "Pytest target paths or nodeids (default: tests/). "
-            "Extra values are one pytest invocation."
+            "Pytest target paths or nodeids. Extra values are one pytest invocation."
         ),
+    )
+    parser.add_argument(
+        "--target-file",
+        type=Path,
+        default=None,
+        help="Path to a file containing targets, one per line.",
     )
     parser.add_argument(
         "--reports-dir",
@@ -1132,6 +1137,15 @@ def main(argv: list[str] | None = None) -> int:
     """CLI entrypoint."""
     parser = _create_parser()
     args = parser.parse_args(argv)
+
+    if args.target_file:
+        with open(args.target_file, "r") as f:
+            file_targets = [line.strip() for line in f if line.strip()]
+        args.target.extend(file_targets)
+
+    if not args.target:
+        args.target = ["tests/"]
+
     rejected = _reject_invalid_invocation(args)
     if rejected is not None:
         return rejected

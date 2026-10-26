@@ -50,6 +50,9 @@ GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
 )
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
+MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
+TYPE_CHECKING_WORKFLOW = ".github/workflows/type-checking.yml"
+TYPE_CHECKING_COLD_WORKFLOW = ".github/workflows/type-checking-cold.yml"
 
 TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_telemetry_baseline.py",
@@ -79,6 +82,83 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".github/workflows/docs.yml": (
+        "tests/architecture/test_docs_governance_workflow.py",
+        "tests/architecture/test_diagram_nightly_workflow.py",
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
+    "reports/audit-runs/20261025-p17-002/P17-002-reusable-workflows-audit.md": (
+        "tests/unit/scripts/ci/test_check_reusable_workflow_pins.py",
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
+    "docs/05-operations/runbooks/incident-response.md": (
+        "tests/integration/test_prometheus_rules_config.py",
+    ),
+    "reports/engineering/SCHEMA-001_execution_evidence.md": (
+        "tests/unit/scripts/test_verify_schema_parity.py",
+        "tests/unit/scripts/ops/data/test_check_delta_integrity.py",
+    ),
+    **dict.fromkeys(
+        (
+            ".github/workflows/architecture-docs-nightly.yml",
+            ".github/workflows/branch-hygiene.yml",
+            ".github/workflows/chembl-baseline-smoke.yml",
+            ".github/workflows/codeql.yml",
+            ".github/workflows/commit-lint.yml",
+            ".github/workflows/consolidation-gates.yml",
+            ".github/workflows/contract-governance-fast-check.yml",
+            ".github/workflows/contract-tests.yml",
+            ".github/workflows/dashboard-render-host.yml",
+            ".github/workflows/diagram-nightly.yml",
+            ".github/workflows/docs-kpi-weekly.yml",
+            ".github/workflows/e2e-matrix-health.yml",
+            ".github/workflows/github-settings-quarterly-review.yml",
+            ".github/workflows/import-linter.yml",
+            ".github/workflows/mutation-testing.yml",
+            ".github/workflows/nightly-replay-parity.yml",
+            ".github/workflows/nightly.yml",
+            ".github/workflows/performance-nightly.yml",
+            ".github/workflows/port-contracts.yml",
+            ".github/workflows/pr-hygiene.yml",
+            ".github/workflows/provider-contract-drift.yml",
+            ".github/workflows/quality-debt-weekly.yml",
+            ".github/workflows/release.yml",
+            ".github/workflows/reusable-setup.yml",
+            ".github/workflows/root-hygiene.yml",
+            ".github/workflows/router-v7-bridge.yml",
+            ".github/workflows/schema-governance.yml",
+            ".github/workflows/scorecard.yml",
+            ".github/workflows/security.yml",
+            ".github/workflows/skills-consistency.yml",
+            ".github/workflows/stale.yml",
+            ".github/workflows/tests.yml",
+            TYPE_CHECKING_COLD_WORKFLOW,
+            TYPE_CHECKING_WORKFLOW,
+            ".github/workflows/zizmor.yml",
+        ),
+        (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
+    ),
+    **dict.fromkeys(
+        (
+            TYPE_CHECKING_WORKFLOW,
+            TYPE_CHECKING_COLD_WORKFLOW,
+            "scripts/engineering/dev/run_mypy.sh",
+            "scripts/engineering/dev/run_mypy.ps1",
+            "scripts/engineering/dev/zed_mypy.py",
+            "configs/quality/github_required_checks.yaml",
+        ),
+        (MYPY_TARGET_CONTRACT_TEST,),
+    ),
+    **dict.fromkeys(
+        (
+            TYPE_CHECKING_WORKFLOW,
+            TYPE_CHECKING_COLD_WORKFLOW,
+        ),
+        (GITHUB_ACTIONS_RUNTIME_POLICY_TEST, MYPY_TARGET_CONTRACT_TEST),
+    ),
+    "reports/engineering/SEC-003_audit_report.md": (
+        "tests/unit/domain/services/test_composite_metadata_helpers.py",
+    ),
     "docs/04-reference/environment-variables.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         "tests/architecture/test_documentation_cleanup_inventory.py",
@@ -94,6 +174,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     ".pre-commit-config.yaml": (
         "tests/architecture/test_scripts_inventory_discovery.py",
+        MYPY_TARGET_CONTRACT_TEST,
+    ),
+    "scripts/engineering/ci/presubmit_gate.py": (
+        "tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py",
+        MYPY_TARGET_CONTRACT_TEST,
     ),
     "configs/quality/debt_scorecard.yaml": (
         "tests/architecture/test_quality_debt_scorecard.py",
@@ -216,6 +301,13 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "reports/evidence/12461/": (
+        "tests/architecture/test_provider_contract_interoperability_governance.py",
+        "tests/contract/test_provider_contract_snapshot_registry.py",
+    ),
+    "scripts/ai/gemini/npm-tooling/": (
+        "tests/architecture/test_gemini_cli_bootstrap.py",
+    ),
     "scripts/engineering/quality/": QUALITY_GOVERNANCE_TESTS,
     "src/bioetl/infrastructure/quality/": QUALITY_GOVERNANCE_TESTS,
     "grafana/tooling/router-v7-bridge/": (
@@ -937,6 +1029,91 @@ def _shadow_command(args: argparse.Namespace) -> int:
     return 0
 
 
+def _subtract_affected_command(args: argparse.Namespace) -> int:
+    """Subtract fixed targets from affected targets and output remainder."""
+    with open(args.affected_file, "r") as f:
+        affected_targets = [line.strip() for line in f if line.strip()]
+
+    if not affected_targets:
+        print("::error::tests gate has no affected pytest target", file=sys.stderr)
+        return 1
+
+    def get_nodes(targets: list[str], label: str) -> set[str]:
+        if not targets:
+            return set()
+        print(f"Collecting nodeids for {label}...", file=sys.stderr)
+        # We can run pytest inline in a subprocess by passing a small inline script
+        # that invokes pytest.main() with a custom plugin, and dumps JSON to stdout
+        script = """
+import pytest
+import sys
+import json
+class NodeCollector:
+    def __init__(self):
+        self.nodes = []
+    def pytest_collection_modifyitems(self, items):
+        for item in items:
+            self.nodes.append(item.nodeid)
+if __name__ == '__main__':
+    targets = sys.argv[1:]
+    collector = NodeCollector()
+    ret = pytest.main(['-q', '--collect-only'] + targets, plugins=[collector])
+    if ret not in (0, 5):
+        sys.exit(ret)
+    print(json.dumps(collector.nodes))
+"""
+        completed = subprocess.run(
+            [sys.executable, "-c", script] + targets,
+            capture_output=True,
+            text=True,
+            cwd=args.repo_root,
+        )
+        if completed.returncode not in (0, 5):
+            print(
+                f"::error::pytest collection failed for {label} targets:\n{completed.stderr}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        try:
+            nodes = json.loads(completed.stdout.strip().splitlines()[-1])
+            return set(nodes)
+        except (ValueError, IndexError):
+            print(
+                f"::error::Failed to parse JSON from pytest collection for {label}:\n{completed.stdout}\n{completed.stderr}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+    arch_nodes = get_nodes(args.fixed_targets, "architecture")
+    affected_nodes = get_nodes(affected_targets, "affected")
+
+    intersection = affected_nodes.intersection(arch_nodes)
+    print("## Duplicate nodeids in affected and architecture", file=sys.stderr)
+    if intersection:
+        for node in sorted(intersection):
+            print(node, file=sys.stderr)
+    else:
+        print("None", file=sys.stderr)
+
+    remainder = affected_nodes - arch_nodes
+    if not remainder:
+        print(
+            "::error::tests gate has no affected pytest target after subtracting fixed tests",
+            file=sys.stderr,
+        )
+        return 1
+
+    payload = "\n".join(sorted(remainder)) + "\n"
+    if args.output is None:
+        sys.stdout.write(payload)
+    else:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(payload, encoding="utf-8")
+
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the lane-results command parser."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -977,6 +1154,14 @@ def build_parser() -> argparse.ArgumentParser:
     shadow.add_argument("--changed-file", action="append", default=[])
     shadow.add_argument("--output", type=Path)
     shadow.set_defaults(handler=_shadow_command)
+
+    subtract = subparsers.add_parser("subtract-affected")
+    subtract.add_argument("--repo-root", type=Path, default=Path("."))
+    subtract.add_argument("--fixed-targets", nargs="+", required=True)
+    subtract.add_argument("--affected-file", type=Path, required=True)
+    subtract.add_argument("--output", type=Path)
+    subtract.set_defaults(handler=_subtract_affected_command)
+
     return parser
 
 
