@@ -320,9 +320,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/04-reference/api/infrastructure.md": (
         "tests/architecture/test_api_reference_public_facades.py",
     ),
-    "docs/02-architecture/finances-github-billing.md": (
-        DOCUMENTATION_SYNC_TEST,
-    ),
+    "docs/02-architecture/finances-github-billing.md": (DOCUMENTATION_SYNC_TEST,),
     "docs/05-engineering/test-telemetry-baseline.md": TELEMETRY_BASELINE_TESTS,
     ".gitignore": (
         "tests/architecture/test_gitignore_secret_and_agents_policy.py",
