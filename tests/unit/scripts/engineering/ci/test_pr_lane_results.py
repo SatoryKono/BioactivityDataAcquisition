@@ -378,6 +378,19 @@ def test_shadow_compare_routes_incident_operator_docs(path: str) -> None:
     ]
 
 
+def test_shadow_compare_routes_app002_port_map_to_port_contracts() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["reports/engineering/app-002-port-map/report.md"], repo_root=root
+    )
+    assert report["covers_full_suite"] is False
+    assert report["selected"] == [
+        "tests/architecture/test_port_contracts.py",
+        "tests/architecture/test_application_services_cross_subdomain_imports.py",
+        "tests/unit/application/ports/test_application_ports_no_factory_aliases.py",
+    ]
+
+
 def test_shadow_compare_routes_app001_audit_to_cancellation_contracts() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(["reports/app-001-audit.md"], repo_root=root)

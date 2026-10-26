@@ -94,6 +94,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/qm_07/test_distribution_isolation.py",
         "tests/architecture/qm_07/test_qm07_cold_imports.py",
     ),
+    "reports/engineering/app-002-port-map/report.md": (
+        "tests/architecture/test_port_contracts.py",
+        "tests/architecture/test_application_services_cross_subdomain_imports.py",
+        "tests/unit/application/ports/test_application_ports_no_factory_aliases.py",
+    ),
     "reports/engineering/SEC-002_audit_report.md": (
         "tests/security/test_pubmed_xxe_mitigation.py",
         "tests/unit/application/pipelines/pubmed/test_xml_parser.py",
