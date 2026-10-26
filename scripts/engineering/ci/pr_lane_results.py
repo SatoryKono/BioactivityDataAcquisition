@@ -317,9 +317,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/integration/config/test_validate_pipeline_configs.py",
         "tests/unit/repo_backed/infrastructure/config/test_composite_sort_by_closure.py",
     ),
-    "configs/composites/target.yaml": (
-        "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
-    ),
     "configs/_schema/pipeline.json": (
         "tests/architecture/test_config_schema_migration_status.py",
         "tests/integration/config/test_validate_pipeline_configs.py",
@@ -390,6 +387,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "configs/composites/": (
+        "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
+    ),
     "reports/evidence/12461/": (
         "tests/architecture/test_provider_contract_interoperability_governance.py",
         "tests/contract/test_provider_contract_snapshot_registry.py",
