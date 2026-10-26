@@ -320,6 +320,23 @@ def test_shadow_compare_routes_provider_parity_evidence(name: str) -> None:
     ]
 
 
+def test_shadow_compare_routes_app001_audit_to_cancellation_contracts() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(["reports/app-001-audit.md"], repo_root=root)
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/unit/application/core/test_batch_execution_lifecycle.py",
+        "tests/unit/application/core/test_derived_scan_budget.py",
+        "tests/unit/application/core/test_pipeline_services.py",
+        "tests/unit/application/core/test_health_aggregator.py",
+        "tests/unit/application/core/test_heartbeat.py",
+        "tests/unit/application/core/test_lock_release_callback_contract.py",
+        "tests/unit/application/core/test_runner.py",
+        "tests/unit/application/services/test_pipeline_runner_service.py",
+        "tests/unit/application/services/run_reports/test_composite_report.py",
+    }
+
+
 def test_shadow_compare_routes_sec003_audit_to_metadata_parser() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
