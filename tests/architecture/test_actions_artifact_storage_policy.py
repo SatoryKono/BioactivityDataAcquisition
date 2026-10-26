@@ -11,7 +11,9 @@ import pytest
 pytestmark = pytest.mark.architecture
 
 _UPLOAD_ARTIFACT_PREFIX = "actions/upload-artifact@"
-_MAX_RETENTION_DAYS = 30
+# upload-artifact accepts 1..90 days. 90 is the service maximum used for
+# failure and cancellation diagnostics (#12362).
+_MAX_RETENTION_DAYS = 90
 
 
 def _iter_upload_steps(node: object) -> Iterator[dict[str, Any]]:

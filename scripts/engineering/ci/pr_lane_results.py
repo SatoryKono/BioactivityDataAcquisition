@@ -94,6 +94,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/qm_07/test_distribution_isolation.py",
         "tests/architecture/qm_07/test_qm07_cold_imports.py",
     ),
+    "reports/engineering/SEC-002_audit_report.md": (
+        "tests/security/test_pubmed_xxe_mitigation.py",
+        "tests/unit/application/pipelines/pubmed/test_xml_parser.py",
+    ),
     "reports/engineering/cache_preflight_experiment_report.md": (
         "tests/architecture/test_setup_python_uv_cache_policy.py",
         "tests/architecture/test_conftest_session_caches.py",
@@ -324,6 +328,29 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/engineering/repo/check_github_actions_runtime_policy.py": (
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
     ),
+    ".github/workflows/nightly.yml": (
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+        "tests/architecture/test_actions_artifact_storage_policy.py",
+        "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
+    ),
+    "docs/04-reference/github-actions-workflows.md": (
+        "tests/architecture/test_gha_disabled_map_10263.py",
+        "tests/architecture/test_required_checks_prose_consistency.py",
+    ),
+    "docs/05-operations/ci-workflow-map.md": (
+        "tests/architecture/test_required_checks_prose_consistency.py",
+    ),
+    "docs/05-operations/runbooks/generated-artifact-drift-workflow.md": (
+        "tests/architecture/test_generated_artifact_drift_workflow.py",
+    ),
+    **dict.fromkeys(
+        (
+            "docs/filters/inventory-baseline.csv",
+            "docs/filters/inventory-baseline.json",
+            "docs/filters/inventory-baseline.md",
+        ),
+        ("tests/architecture/test_silver_filter_boundary_inventory.py",),
+    ),
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
@@ -357,6 +384,9 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ),
     "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
     "reports/performance/": BENCHMARK_EVIDENCE_TESTS,
+    "reports/governance/n1-shadow-window/": (
+        "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
+    ),
     "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.": (
         NPM_RUNTIME_TEST,
     ),
