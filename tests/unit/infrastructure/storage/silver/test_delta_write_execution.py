@@ -282,6 +282,76 @@ async def test_write_plain_delta_request_can_use_process_isolation(
     assert timeout_seconds == pytest.approx(3.0)
 
 
+def test_run_plain_delta_write_subprocess_bounded_diagnostics(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """Oversized continuous output to both streams must be bounded without hanging."""
+    table_path = tmp_path / "silver" / "entity" / "table"
+    request = _make_request(str(table_path))
+
+    script = """
+import sys
+for _ in range(1000):
+    sys.stdout.write("x" * 100 + "\\n")
+    sys.stderr.write("y" * 100 + "\\n")
+sys.stdout.flush()
+sys.stderr.flush()
+sys.stdout.write("stdout_tail")
+sys.stderr.write("stderr_tail")
+sys.exit(1)
+"""
+    # Replace the execution code with our spam script
+    monkeypatch.setattr(subject, "_PLAIN_DELTA_WRITE_SUBPROCESS_CODE", script)
+
+    with pytest.raises(RuntimeError) as exc_info:
+        _run_plain_delta_write_subprocess(
+            kwargs={
+                "table_or_uri": normalize_delta_filesystem_path(request.table_path),
+                "mode": "append",
+            },
+            arrow_data=request.arrow_data,
+            timeout_seconds=5.0,
+        )
+
+    msg = str(exc_info.value)
+    assert "exit_code=1" in msg
+    assert "stdout_tail" in msg
+    assert "stderr_tail" in msg
+    assert len(msg) < 10000  # Ensure we didn't accumulate unbounded output
+
+
+def test_run_plain_delta_write_subprocess_timeout_reaps_child(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """Timeout must clean up the child process and pipes without leaking."""
+    table_path = tmp_path / "silver" / "entity" / "table"
+    request = _make_request(str(table_path))
+
+    script = """
+import sys
+import time
+sys.stdout.write("started\\n")
+sys.stdout.flush()
+time.sleep(10)
+"""
+    monkeypatch.setattr(subject, "_PLAIN_DELTA_WRITE_SUBPROCESS_CODE", script)
+
+    start_time = time.monotonic()
+    with pytest.raises(TimeoutError):
+        _run_plain_delta_write_subprocess(
+            kwargs={
+                "table_or_uri": normalize_delta_filesystem_path(request.table_path),
+                "mode": "append",
+            },
+            arrow_data=request.arrow_data,
+            timeout_seconds=0.1,
+        )
+    elapsed = time.monotonic() - start_time
+    assert elapsed < 1.0
+
+
 def test_run_plain_delta_write_subprocess_uses_arrow_file_not_stdin(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -291,15 +361,23 @@ def test_run_plain_delta_write_subprocess_uses_arrow_file_not_stdin(
     request = _make_request(str(table_path))
     captured: dict[str, object] = {}
 
-    def _fake_run(cmd: list[str], **kwargs: object) -> SimpleNamespace:
-        captured["kwargs"] = kwargs
-        metadata = json.loads(cmd[3])
-        arrow_path = Path(str(metadata["arrow_path"]))
-        assert arrow_path.exists()
-        assert arrow_path.stat().st_size > 0
-        return SimpleNamespace(returncode=0, stdout=b"", stderr=b"")
+    class _FakePopen:
+        def __init__(self, cmd: list[str], **kwargs: object) -> None:
+            captured["kwargs"] = kwargs
+            metadata = json.loads(cmd[3])
+            arrow_path = Path(str(metadata["arrow_path"]))
+            assert arrow_path.exists()
+            assert arrow_path.stat().st_size > 0
+            import io
+            self.stdout = io.BytesIO(b"")
+            self.stderr = io.BytesIO(b"")
+            self.returncode = 0
+        def wait(self, timeout=None):
+            pass
+        def kill(self):
+            pass
 
-    monkeypatch.setattr(subprocess, "run", _fake_run)
+    monkeypatch.setattr(subprocess, "Popen", _FakePopen)
 
     _run_plain_delta_write_subprocess(
         kwargs={

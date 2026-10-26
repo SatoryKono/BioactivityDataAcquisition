@@ -13,7 +13,7 @@ from collections.abc import Awaitable, Callable
 from contextlib import suppress
 from dataclasses import replace
 from pathlib import Path
-from typing import Any, Protocol, cast
+from typing import IO, Any, Protocol, cast
 
 import pyarrow as pa
 from deltalake import DeltaTable as DeltaTableType
@@ -225,6 +225,35 @@ def _write_arrow_payload_for_subprocess(*, table_path: str, table: pa.Table) -> 
     return payload_path
 
 
+class _BoundedStreamReader(threading.Thread):
+    """Drain a stream concurrently while retaining only a bounded tail."""
+
+    def __init__(self, stream: IO[bytes] | None, limit_bytes: int = 16384) -> None:
+        super().__init__(daemon=True)
+        self._stream = stream
+        self._limit = limit_bytes
+        self._chunks: list[bytes] = []
+        self._length = 0
+
+    def run(self) -> None:
+        if self._stream is None:
+            return
+        try:
+            for chunk in iter(lambda: self._stream.read(4096), b""):  # type: ignore[union-attr]
+                self._chunks.append(chunk)
+                self._length += len(chunk)
+                while self._chunks and self._length - len(self._chunks[0]) >= self._limit:
+                    removed = self._chunks.pop(0)
+                    self._length -= len(removed)
+        except OSError:
+            pass
+
+    def get_decoded(self, char_limit: int = 4000) -> str:
+        """Decode the retained tail and return up to `char_limit` characters."""
+        payload = b"".join(self._chunks)[-self._limit :]
+        return payload.decode("utf-8", errors="replace").strip()[-char_limit:]
+
+
 def _decode_subprocess_output(payload: bytes) -> str:
     """Decode bounded subprocess output for deterministic error messages."""
     return payload.decode("utf-8", errors="replace").strip()[-4000:]
@@ -250,31 +279,45 @@ def _run_plain_delta_write_subprocess(
     )
     metadata["arrow_path"] = payload_path.as_posix()
     try:
+        # No shell or user-controlled command is involved.
+        proc = subprocess.Popen(  # nosec B603 - see suppression registry
+            [
+                sys.executable,
+                "-c",
+                _PLAIN_DELTA_WRITE_SUBPROCESS_CODE,
+                json.dumps(metadata),
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        out_reader = _BoundedStreamReader(proc.stdout)
+        err_reader = _BoundedStreamReader(proc.stderr)
+        out_reader.start()
+        err_reader.start()
+
         try:
-            # No shell or user-controlled command is involved.
-            completed = subprocess.run(  # nosec B603 - see suppression registry
-                [
-                    sys.executable,
-                    "-c",
-                    _PLAIN_DELTA_WRITE_SUBPROCESS_CODE,
-                    json.dumps(metadata),
-                ],
-                capture_output=True,
-                check=False,
-                timeout=timeout_seconds,
-            )
+            proc.wait(timeout=timeout_seconds)
         except subprocess.TimeoutExpired as exc:
+            proc.kill()
+            proc.wait()
             raise TimeoutError from exc
+        finally:
+            if proc.returncode is None:
+                proc.kill()
+                proc.wait()
+
+        out_reader.join()
+        err_reader.join()
     finally:
         with suppress(OSError):
             payload_path.unlink(missing_ok=True)
 
-    if completed.returncode != 0:
-        stderr = _decode_subprocess_output(completed.stderr)
-        stdout = _decode_subprocess_output(completed.stdout)
+    if proc.returncode != 0:
+        stderr = err_reader.get_decoded()
+        stdout = out_reader.get_decoded()
         raise RuntimeError(
             "Delta write subprocess failed "
-            f"(exit_code={completed.returncode}, stderr={stderr!r}, stdout={stdout!r})"
+            f"(exit_code={proc.returncode}, stderr={stderr!r}, stdout={stdout!r})"
         )
 
 
