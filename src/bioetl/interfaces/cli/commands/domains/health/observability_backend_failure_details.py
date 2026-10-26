@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from pathlib import Path
 from types import TracebackType
-from typing import Protocol, Self
+from typing import Protocol, Self, cast
 from urllib.error import HTTPError, URLError
 from urllib.request import build_opener
 
@@ -40,29 +40,9 @@ class _SupportsPoll(Protocol):
     def poll(self) -> int | None: ...
 
 
-class _ResponseOpener(Protocol):
-    """Standard-library opener surface with a typed probe response."""
-
-    def open(
-        self,
-        fullurl: str,
-        data: bytes | None = None,
-        timeout: float = ...,
-    ) -> _HttpProbeResponse: ...
-
-
-def _open_probe_response(
-    opener: _ResponseOpener,
-    url: str,
-    *,
-    timeout: float,
-) -> _HttpProbeResponse:
-    return opener.open(url, timeout=timeout)
-
-
 def _open_url(url: str, *, timeout: float) -> _HttpProbeResponse:
     """Open one HTTP probe URL through a short-lived standard-library opener."""
-    return _open_probe_response(build_opener(), url, timeout=timeout)
+    return cast("_HttpProbeResponse", build_opener().open(url, timeout=timeout))
 
 
 def _read_backend_startup_log_excerpt(
@@ -166,6 +146,8 @@ def _probe_required_path(
     urlopen_fn: _UrlOpenFn,
 ) -> str | None:
     """Return one capability-probe failure, or None for a healthy path."""
+    if not (probe_url.startswith("http://") or probe_url.startswith("https://")):
+        return f"Capability probe {probe_url} failed: unsupported URL scheme."
     try:
         with urlopen_fn(probe_url, timeout=timeout_seconds) as response:
             status = response.status
