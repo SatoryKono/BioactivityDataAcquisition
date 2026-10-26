@@ -1169,7 +1169,7 @@
     },
     "NormalizedAnchorPolicySchema": {
       "additionalProperties": false,
-      "description": "Declared normalized-anchor policy for one composite file.",
+      "description": "Declared normalized-anchor policy. Not copied into domain CompositeConfig.",
       "properties": {
         "pubchem_compound": {
           "$ref": "#/$defs/PubchemCompoundAnchorSchema"
@@ -1187,7 +1187,7 @@
     },
     "NormalizedJoinKeyPolicySchema": {
       "additionalProperties": false,
-      "description": "Declared normalized join-key policy for one composite file.",
+      "description": "Declared normalized join-key policy. Not copied into domain CompositeConfig.",
       "properties": {
         "publication_identity": {
           "$ref": "#/$defs/PublicationIdentityJoinPolicySchema"
