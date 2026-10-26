@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-26T09:42:21.777550+00:00",
+  "generated_at": "2026-10-26T09:46:31.928538+00:00",
   "summary": {
     "total_scripts": 697,
     "status_counts": {
@@ -10453,7 +10453,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 836,
+          "line": 848,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         }
@@ -20158,13 +20158,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 459,
+          "line": 474,
           "source_group": "tests",
           "text": "\"src/bioetl/infrastructure/quality/scoring.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 460,
+          "line": 475,
           "source_group": "tests",
           "text": "\"scripts/engineering/quality/scoring.py\","
         },

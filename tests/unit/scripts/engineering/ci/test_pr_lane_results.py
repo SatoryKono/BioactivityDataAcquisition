@@ -376,6 +376,21 @@ def test_shadow_compare_routes_app002_port_map_to_port_contracts() -> None:
     ]
 
 
+@pytest.mark.parametrize(
+    "path",
+    (
+        "docs/00-project/RULES.md",
+        "docs/05-operations/runbooks/stale-lock.md",
+    ),
+)
+def test_shadow_compare_routes_incident_operator_docs(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert report["selected"] == [
+        "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
+    ]
+
+
 def test_shadow_compare_routes_app001_audit_to_cancellation_contracts() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(["reports/app-001-audit.md"], repo_root=root)
@@ -518,10 +533,7 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
 def test_operator_runbook_docs_select_alert_semantics() -> None:
     """Gold and lock docs stay on the incident-runbook semantics test."""
     repo_root = Path(__file__).resolve().parents[5]
-    semantics = (
-        "tests/unit/infrastructure/observability/"
-        "test_incident_runbook_alert_semantics.py"
-    )
+    semantics = "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
 
     targets = affected_pytest_targets(
         [
