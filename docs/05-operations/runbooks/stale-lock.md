@@ -34,14 +34,18 @@ ______________________________________________________________________
 
 ### Symptoms
 
-- Alert "Lock expired" fires.
-- Pipeline refuses to start with `LockAcquisitionError`.
-- Logs show "Lock held by owner ... (expired)".
+- No Prometheus alertname exists for lock expiry.
+- Pipeline refuses to start with `LockAcquisitionError`
+  (`Failed to acquire lock: {key}`, optional `(owned by {owner})`).
+- A run that loses ownership raises `LockLostError`
+  (`Lock lost: {key}`, optional `(run_id=...)`).
+- Soft TTL lease expiry removes an unlocked `MemoryLock` entry. A held lock
+  is renewed. Lease expiry is not an alert.
 
 ### Causes
 
 1. **Worker Crash**: Worker process was killed (OOM, SIGKILL) without releasing the lock.
-1. **Long Running Job**: Job exceeded the 4-hour hard limit.
+1. **Soft TTL**: An unlocked `MemoryLock` entry passes its lease and is dropped. A lock that is still held is renewed instead.
 1. **Forced Termination**: Process was interrupted before graceful shutdown (`aclose()`), leaving stale in-process lock state.
 
 ### Diagnosis Steps
