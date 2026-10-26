@@ -25,7 +25,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2566,
+        "source_module_count": 2596,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -182,7 +182,7 @@
       "module_boundaries_coupling": "hotspot budget warnings and duplicate clusters proxy; at-budget families and cap saturation penalize the diagnostic grade and remain shrink-only for program gates"
     }
   },
-  "generated_by": "scripts.engineering.quality.architecture_quality_scorecard",
+  "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
   "integral_score": 10.0,
   "interpretation": "excellent",
   "metrics": {
@@ -214,7 +214,7 @@
     "retained_public_export_facade_count": 3,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2566,
+    "source_module_count": 2596,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
@@ -250,7 +250,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "0a4d53f89004fa14c882044694cedbd675c8e2fdd3fe539a7fd552c32b1d9aae"
+      "source_fingerprint": "455d3497b4ffad641d5f9cd1c4d8eda2e75d5bda200ea2aa46eec32342d62b7b"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -269,7 +269,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "e004119066477ae9ee490d667644da12496fde6d6b4e5b2ba73c424efb99f7b9",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "ea399d69ac471e6c9643ca7fe4b277d71e4ebed3f7defdaeb0d9e29de7fb759e"
+      "source_tree_sha256": "503cd8b42b33cf2398c1abc7354c2978d56bc0149781377febbc0fccfde67080"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

@@ -11,7 +11,7 @@ from bioetl.infrastructure.config.dq_contract_config_loader import (
     DQContractConfigLoader,
 )
 from bioetl.infrastructure.config.pipeline_config_api import _load_base_config
-from scripts.engineering.quality.architecture_debt_reduction import _project_root
+from bioetl.infrastructure.quality.architecture_debt_reduction import _project_root
 from bioetl.infrastructure.schemas.pipeline_config_common_schemas import (
     AuthoritativeContentHashPolicyConfig,
 )

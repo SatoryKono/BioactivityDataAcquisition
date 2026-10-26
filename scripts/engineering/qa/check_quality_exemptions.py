@@ -18,15 +18,15 @@ import os
 from datetime import date
 from pathlib import Path
 
-from scripts.engineering.quality._primitives import _parse_quarter_label
-from scripts.engineering.quality.debt_scorecard import (
+from bioetl.infrastructure.quality._primitives import _parse_quarter_label
+from bioetl.infrastructure.quality.debt_scorecard import (
     evaluate_debt_scorecard,
     load_debt_scorecard,
     split_growth_violations_by_severity,
     validate_debt_scorecard,
     validate_scorecard_registry_sync,
 )
-from scripts.engineering.quality.exemptions_registry import (
+from bioetl.infrastructure.quality.exemptions_registry import (
     load_exemptions_registry,
     validate_exemptions_registry,
 )

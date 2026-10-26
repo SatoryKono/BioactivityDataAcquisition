@@ -36,7 +36,7 @@ from unittest.mock import patch
 
 import pytest
 
-from scripts.engineering.quality.debt_scorecard import (
+from bioetl.infrastructure.quality.debt_scorecard import (
     DebtScorecardResult,
     _project_root,
     _resolve_scorecard_path,
@@ -45,7 +45,7 @@ from scripts.engineering.quality.debt_scorecard import (
     validate_debt_scorecard,
     validate_scorecard_registry_sync,
 )
-from scripts.engineering.quality.inventory import ExemptionInventorySummary
+from bioetl.infrastructure.quality.inventory import ExemptionInventorySummary
 
 
 pytestmark = pytest.mark.unit
@@ -298,7 +298,7 @@ class TestValidateScorecardRegistrySync:
             by_registry={"reg_a": 0, "reg_b": 0},
         )
         with patch(
-            "scripts.engineering.quality.debt_scorecard.build_exemption_inventory",
+            "bioetl.infrastructure.quality.debt_scorecard.build_exemption_inventory",
             return_value=inventory,
         ):
             errors = validate_scorecard_registry_sync(
@@ -323,7 +323,7 @@ class TestEvaluateDebtScorecard:
 
         inventory = _make_inventory(total=0)
         with patch(
-            "scripts.engineering.quality.debt_scorecard.build_exemption_inventory",
+            "bioetl.infrastructure.quality.debt_scorecard.build_exemption_inventory",
             return_value=inventory,
         ):
             errors, summary = evaluate_debt_scorecard(
@@ -374,7 +374,7 @@ class TestEvaluateDebtScorecard:
 
         inventory = _make_inventory(total=0, by_registry={"reg_a": 0, "reg_b": 0})
         with patch(
-            "scripts.engineering.quality.debt_scorecard.build_exemption_inventory",
+            "bioetl.infrastructure.quality.debt_scorecard.build_exemption_inventory",
             return_value=inventory,
         ):
             errors, summary = evaluate_debt_scorecard(
@@ -406,7 +406,7 @@ class TestEvaluateDebtScorecard:
             expired=0,
         )
         with patch(
-            "scripts.engineering.quality.debt_scorecard.build_exemption_inventory",
+            "bioetl.infrastructure.quality.debt_scorecard.build_exemption_inventory",
             return_value=inventory,
         ):
             errors, summary = evaluate_debt_scorecard(

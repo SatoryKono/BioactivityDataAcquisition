@@ -31,8 +31,8 @@ from __future__ import annotations
 
 import pytest
 
-from scripts.engineering.quality.inventory import ExemptionInventorySummary
-from scripts.engineering.quality.registry_sync_service import (
+from bioetl.infrastructure.quality.inventory import ExemptionInventorySummary
+from bioetl.infrastructure.quality.registry_sync_service import (
     _validate_registry_baselines,
     _validate_registry_membership,
     _validate_total_exemptions,

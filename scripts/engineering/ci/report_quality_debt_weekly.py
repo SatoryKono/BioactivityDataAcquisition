@@ -29,7 +29,7 @@ else:
         render_debt_governance_section,
     )
 
-from scripts.engineering.quality import (
+from bioetl.infrastructure.quality import (
     build_exemption_inventory,
     evaluate_debt_scorecard,
     load_debt_scorecard,

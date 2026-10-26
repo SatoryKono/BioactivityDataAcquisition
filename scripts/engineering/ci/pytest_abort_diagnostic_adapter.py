@@ -716,26 +716,11 @@ def _terminate_pid(pid: int) -> str:
     return ""
 
 
-def _posix_pid_exited(pid: int) -> bool:
-    """Linux zombies retain a PID but cannot execute or survive cleanup."""
-    try:
-        stat = (Path("/proc") / str(pid) / "stat").read_text(
-            encoding="utf-8", errors="replace"
-        )
-    except OSError:
-        return False
-    marker = stat.rfind(")")
-    fields = stat[marker + 2 :].split() if marker >= 0 else []
-    return bool(fields and fields[0] in {"Z", "X"})
-
-
 def _pid_alive(pid: int) -> bool:
     if pid <= 0 or pid == os.getpid():
         return False
     if os.name == "nt":
         return _windows_pid_alive(pid)
-    if _posix_pid_exited(pid):
-        return False
     try:
         os.kill(pid, 0)
     except OSError:

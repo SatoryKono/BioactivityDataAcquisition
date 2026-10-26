@@ -1495,7 +1495,6 @@
         "docs/00-project/ai/prompts/fragments/project-requirements-audit.md",
         "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
         "docs/00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md",
-        "docs/00-project/governance/pr-required-check-crosswalk.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/03-guides/index.md",
         "docs/05-operations/ci-workflow-map.md",
@@ -1560,7 +1559,6 @@
         "docs/00-project/RULES.md",
         "docs/00-project/ai/agents/guides/TEST_LANE_MENTAL_MODEL.md",
         "docs/00-project/ai/memory/gh-issues-documentation-update.md",
-        "docs/00-project/governance/pr-required-check-crosswalk.md",
         "docs/01-requirements/REQUIREMENTS.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/03-guides/testing.md",
@@ -1587,7 +1585,6 @@
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/00-project/governance/01-documentation-governance-style-guide.md",
-        "docs/00-project/governance/pr-required-check-crosswalk.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "tests/architecture/test_doc_crossref_integrity.py",
         "tests/unit/memory/test_rag_indexing.py"

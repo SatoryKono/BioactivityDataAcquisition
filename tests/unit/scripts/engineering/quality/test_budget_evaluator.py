@@ -33,14 +33,14 @@ import pytest
 
 from datetime import date
 
-from scripts.engineering.quality.budget_evaluator import (
+from bioetl.infrastructure.quality.budget_evaluator import (
     _is_owner_decomposition_active,
     current_quarter_target,
     evaluate_budget_violations,
     evaluate_governance_violations,
     resolve_grace_allowances,
 )
-from scripts.engineering.quality.inventory import ExemptionInventorySummary
+from bioetl.infrastructure.quality.inventory import ExemptionInventorySummary
 
 
 pytestmark = pytest.mark.unit

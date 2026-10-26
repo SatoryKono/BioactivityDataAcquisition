@@ -33,7 +33,7 @@ from collections import Counter
 
 import pytest
 
-from scripts.engineering.quality.scoring import (
+from bioetl.infrastructure.quality.scoring import (
     _compute_group_counts,
     _evaluate_expiry_cap,
     _evaluate_group_budgets,

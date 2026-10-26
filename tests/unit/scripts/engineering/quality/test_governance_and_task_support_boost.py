@@ -36,8 +36,8 @@ from unittest.mock import patch
 
 import pytest
 
-import scripts.engineering.quality.architecture_debt_task_support as support_module
-from scripts.engineering.quality.budget_evaluator import (
+import bioetl.infrastructure.quality.architecture_debt_task_support as support_module
+from bioetl.infrastructure.quality.budget_evaluator import (
     _count_hotspot_registry_entries,
     _get_typed_budgets,
     _get_typed_prefixes,
@@ -45,20 +45,20 @@ from scripts.engineering.quality.budget_evaluator import (
     current_quarter_target,
     evaluate_hotspot_budget_violations,
 )
-from scripts.engineering.quality.debt_scorecard import (
+from bioetl.infrastructure.quality.debt_scorecard import (
     _iter_registry_entries,
     _normalized_owner,
     _resolve_enforceable_baseline,
     _technical_debt_owner_counts,
     evaluate_debt_scorecard,
 )
-from scripts.engineering.quality._governance_validation import (
+from bioetl.infrastructure.quality._governance_validation import (
     _burn_down_priority_registries,
     _validate_baseline_policy,
     _validate_governance_section,
     _validate_hotspot_budgets_section,
 )
-from scripts.engineering.quality.architecture_debt_reduction import (
+from bioetl.infrastructure.quality.architecture_debt_reduction import (
     _default_limit,
     _default_plan_output_path,
     _layer_for_target,
@@ -66,7 +66,7 @@ from scripts.engineering.quality.architecture_debt_reduction import (
     find_latest_architecture_debt_tasks_file,
     load_architecture_debt_tasks,
 )
-from scripts.engineering.quality.architecture_debt_task_support import (
+from bioetl.infrastructure.quality.architecture_debt_task_support import (
     SymbolMetricLocation,
     build_symbol_index,
     fallback_complexity,
@@ -80,7 +80,7 @@ from scripts.engineering.quality.architecture_debt_task_support import (
     select_symbol_location,
     task_status,
 )
-from scripts.engineering.quality.inventory import ExemptionInventorySummary
+from bioetl.infrastructure.quality.inventory import ExemptionInventorySummary
 
 
 pytestmark = pytest.mark.unit
@@ -234,13 +234,9 @@ def test_task_support_helpers_cover_path_and_symbol_resolution(tmp_path: Path) -
     syntax_error_path = source_root / "broken.py"
     syntax_error_path.write_text("def broken(:\n", encoding="utf-8")
     (source_root / "__init__.py").write_text("", encoding="utf-8")
-    script_path = tmp_path / "scripts" / "engineering" / "quality" / "score.py"
-    script_path.parent.mkdir(parents=True)
-    script_path.write_text("def score():\n    return 1\n", encoding="utf-8")
 
     modules = iter_source_modules(tmp_path)
     assert module_path in modules
-    assert script_path in modules
     assert all(path.name != "__init__.py" for path in modules)
 
     symbol_index = build_symbol_index(tmp_path)
@@ -696,20 +692,20 @@ def test_evaluate_debt_scorecard_covers_missing_baseline_and_target_paths(
         expired_entries=0,
     )
     monkeypatch.setattr(
-        "scripts.engineering.quality.debt_scorecard.load_exemptions_registry",
+        "bioetl.infrastructure.quality.debt_scorecard.load_exemptions_registry",
         lambda _path=None: {"registries": {}},
     )
     monkeypatch.setattr(
-        "scripts.engineering.quality.debt_scorecard.build_exemption_inventory",
+        "bioetl.infrastructure.quality.debt_scorecard.build_exemption_inventory",
         lambda _path=None, today=None: inventory,
     )
     monkeypatch.setattr(
-        "scripts.engineering.quality.debt_scorecard.validate_debt_scorecard",
+        "bioetl.infrastructure.quality.debt_scorecard.validate_debt_scorecard",
         lambda _path=None: [],
     )
 
     monkeypatch.setattr(
-        "scripts.engineering.quality.debt_scorecard.load_debt_scorecard",
+        "bioetl.infrastructure.quality.debt_scorecard.load_debt_scorecard",
         lambda _path=None: {
             "baseline": {"total_exemptions": "bad"},
             "quarterly_targets": [{"quarter": "2026-Q2"}],
@@ -720,7 +716,7 @@ def test_evaluate_debt_scorecard_covers_missing_baseline_and_target_paths(
     assert violations == ["scorecard enforceable baseline missing int total_exemptions"]
 
     monkeypatch.setattr(
-        "scripts.engineering.quality.debt_scorecard.load_debt_scorecard",
+        "bioetl.infrastructure.quality.debt_scorecard.load_debt_scorecard",
         lambda _path=None: {
             "baseline": {"total_exemptions": 1},
             "quarterly_targets": [],

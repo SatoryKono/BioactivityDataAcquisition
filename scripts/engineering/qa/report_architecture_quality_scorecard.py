@@ -14,7 +14,7 @@ if str(PROJECT_ROOT) not in __import__("sys").path:
 if str(SRC_ROOT) not in __import__("sys").path:
     __import__("sys").path.insert(0, str(SRC_ROOT))
 
-from scripts.engineering.quality.architecture_quality_scorecard import (
+from bioetl.infrastructure.quality.architecture_quality_scorecard import (
     build_architecture_quality_scorecard,
 )
 

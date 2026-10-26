@@ -82,7 +82,7 @@ def test_architecture_quality_scorecard_artifact_matches_live_collector() -> Non
     assert ARTIFACT.exists()
 
     committed = json.loads(ARTIFACT.read_text(encoding="utf-8"))
-    from scripts.engineering.quality.architecture_quality_scorecard import (
+    from bioetl.infrastructure.quality.architecture_quality_scorecard import (
         build_architecture_quality_scorecard,
     )
 

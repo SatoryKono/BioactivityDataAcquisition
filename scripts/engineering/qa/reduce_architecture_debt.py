@@ -11,7 +11,7 @@ from typing import cast
 
 from scripts.engineering.common.repo_paths import REPO_ROOT
 
-from scripts.engineering.quality.architecture_debt_reduction import (
+from bioetl.infrastructure.quality.architecture_debt_reduction import (
     _default_plan_output_path,
     build_architecture_debt_execution_plan,
     find_latest_architecture_debt_tasks_file,

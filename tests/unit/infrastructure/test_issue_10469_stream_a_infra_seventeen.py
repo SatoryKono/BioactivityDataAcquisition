@@ -21,7 +21,7 @@ from bioetl.infrastructure.control_plane.file_artifact_lifecycle_types import (
 from bioetl.infrastructure.observability._metrics_gateway_publication import (
     _normalize_grouping_label_value,
 )
-from scripts.engineering.quality.architecture_debt_reduction import (
+from bioetl.infrastructure.quality.architecture_debt_reduction import (
     _within_limit_category,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig

@@ -31,7 +31,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.engineering.quality import (
+from bioetl.infrastructure.quality import (
     build_module_path_key,
     get_registry_values,
     resolve_registry_value,

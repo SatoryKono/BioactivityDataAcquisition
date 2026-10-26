@@ -34,7 +34,7 @@ from datetime import date
 
 import pytest
 
-from scripts.engineering.quality.report_formatter import (
+from bioetl.infrastructure.quality.report_formatter import (
     _collect_allowances,
     _extract_growth_violation_section,
     _is_active_grace_window,

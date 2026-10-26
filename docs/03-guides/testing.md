@@ -415,7 +415,7 @@ Supported policy slice for issue `#2598`:
   поэтому substantial duplication/hotspot/test-governance reductions должны
   менять integral score после регенерации committed artifact.
   Artifact строится через
-  `scripts.engineering.quality.architecture_quality_scorecard` и проверяется
+  `bioetl.infrastructure.quality.architecture_quality_scorecard` и проверяется
   `tests/architecture/test_architecture_quality_scorecard.py`; `quality_integral_gate`
   включает этот payload в CI JSON output для trend visibility.
 - canonical VCR placement уже enforced в CI: кассеты вне `tests/fixtures/vcr/{provider}/` блокируются

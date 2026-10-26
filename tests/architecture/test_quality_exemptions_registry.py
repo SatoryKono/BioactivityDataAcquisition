@@ -18,7 +18,7 @@ from pathlib import Path
 
 import yaml
 
-from scripts.engineering.quality import (
+from bioetl.infrastructure.quality import (
     EXEMPTION_REGISTRIES_ALLOW_EMPTY,
     REQUIRED_EXEMPTION_REGISTRIES,
     get_registry_values,

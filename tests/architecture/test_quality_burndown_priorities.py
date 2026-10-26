@@ -23,7 +23,7 @@ import pytest
 import ast
 from pathlib import Path
 
-from scripts.engineering.quality.exemptions_registry import load_exemptions_registry
+from bioetl.infrastructure.quality.exemptions_registry import load_exemptions_registry
 
 pytestmark = pytest.mark.architecture
 
