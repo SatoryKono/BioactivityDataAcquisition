@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-26T05:09:23.070707+00:00",
+  "generated_at": "2026-10-26T05:21:29.805549+00:00",
   "summary": {
     "total_scripts": 696,
     "status_counts": {
@@ -15145,13 +15145,13 @@
         },
         {
           "path": ".github/workflows/docker.yml",
-          "line": 323,
+          "line": 327,
           "source_group": "ci",
           "text": "python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \\"
         },
         {
           "path": ".github/workflows/docker.yml",
-          "line": 375,
+          "line": 379,
           "source_group": "ci",
           "text": "python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \\"
         },
