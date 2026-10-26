@@ -126,6 +126,23 @@ def test_probe_observability_backend_uses_liveness_then_fallback() -> None:
     ]
 
 
+def test_probe_observability_backend_rejects_unsupported_schemes() -> None:
+    calls: list[str] = []
+
+    def fake_urlopen(url: str, timeout: float) -> object:
+        calls.append(url)
+        return object()
+
+    assert (
+        probe_observability_backend(
+            "file:///etc/passwd",
+            urlopen_fn=fake_urlopen,
+        )
+        is False
+    )
+    assert calls == []
+
+
 def test_probe_observability_backend_required_paths_uses_backend_base_url() -> None:
     calls: list[str] = []
 
@@ -209,6 +226,23 @@ def test_describe_required_probe_failure_checks_every_required_path() -> None:
         "http://127.0.0.1:8081/first",
         "http://127.0.0.1:8081/second",
     ]
+
+
+def test_describe_required_probe_failure_rejects_unsupported_schemes() -> None:
+    calls: list[str] = []
+
+    def fake_urlopen(url: str, timeout: float) -> object:
+        calls.append(url)
+        return object()
+
+    detail = runtime_subject._describe_required_probe_failure(
+        "file:///etc/passwd",
+        required_probe_paths=("/first",),
+        urlopen_fn=fake_urlopen,
+    )
+
+    assert detail == "Capability probe file:///etc/passwd/first failed: unsupported URL scheme."
+    assert calls == []
 
 
 def test_open_url_uses_standard_library_opener(monkeypatch: pytest.MonkeyPatch) -> None:

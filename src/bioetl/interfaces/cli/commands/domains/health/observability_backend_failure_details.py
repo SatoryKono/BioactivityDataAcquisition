@@ -166,6 +166,8 @@ def _probe_required_path(
     urlopen_fn: _UrlOpenFn,
 ) -> str | None:
     """Return one capability-probe failure, or None for a healthy path."""
+    if not (probe_url.startswith("http://") or probe_url.startswith("https://")):
+        return f"Capability probe {probe_url} failed: unsupported URL scheme."
     try:
         with urlopen_fn(probe_url, timeout=timeout_seconds) as response:
             status = response.status

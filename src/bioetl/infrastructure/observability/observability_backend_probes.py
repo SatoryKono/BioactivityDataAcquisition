@@ -58,6 +58,8 @@ def probe_observability_backend(
     urlopen_fn: _UrlOpenFn = urlopen,
 ) -> bool:
     """Return True when the observability backend responds successfully."""
+    if not (health_url.startswith("http://") or health_url.startswith("https://")):
+        return False
     for probe_url in _build_observability_backend_probe_urls(health_url):
         try:
             with urlopen_fn(probe_url, timeout=timeout_seconds) as response:
@@ -76,6 +78,8 @@ def probe_observability_backend_required_paths(
     urlopen_fn: _UrlOpenFn = urlopen,
 ) -> bool:
     """Return True when the backend exposes all required HTTP capability paths."""
+    if not (health_url.startswith("http://") or health_url.startswith("https://")):
+        return False
     if not required_probe_paths:
         return True
     base_url = (
