@@ -327,6 +327,21 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/engineering/repo/check_github_actions_runtime_policy.py": (
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
     ),
+    ".github/workflows/nightly.yml": (
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+        "tests/architecture/test_actions_artifact_storage_policy.py",
+        "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
+    ),
+    "docs/04-reference/github-actions-workflows.md": (
+        "tests/architecture/test_gha_disabled_map_10263.py",
+        "tests/architecture/test_required_checks_prose_consistency.py",
+    ),
+    "docs/05-operations/ci-workflow-map.md": (
+        "tests/architecture/test_required_checks_prose_consistency.py",
+    ),
+    "docs/05-operations/runbooks/generated-artifact-drift-workflow.md": (
+        "tests/architecture/test_generated_artifact_drift_workflow.py",
+    ),
     **dict.fromkeys(
         (
             "docs/filters/inventory-baseline.csv",
@@ -368,6 +383,9 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ),
     "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
     "reports/performance/": BENCHMARK_EVIDENCE_TESTS,
+    "reports/governance/n1-shadow-window/": (
+        "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
+    ),
     "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.": (
         NPM_RUNTIME_TEST,
     ),

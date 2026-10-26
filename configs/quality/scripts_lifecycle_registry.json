@@ -765,7 +765,7 @@
     },
     "scripts/engineering/ci/actions_timing_common.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the shared GitHub Actions attempt collector imported by the Docker and PR-gate timing reports. It has no standalone command surface; keep it supporting so active_script_count_max does not grow.",
+      "next_step": "Retain as the shared GitHub Actions attempt collector imported by the Docker and PR-gate timing reports and by nightly_shadow_archive. It has no standalone command surface; keep it supporting so active_script_count_max does not grow.",
       "owner": "@bioetl-platform",
       "review_by": "2026-10-31"
     },
@@ -792,6 +792,12 @@
       "next_step": "Retain as the shared JUnit record-accounting backend imported by update_test_telemetry_baseline and invoked internally by the tests workflow. Its CLI has no operator inputs and only adapts CI environment/artifact paths; the owning tests workflow remains the public execution surface.",
       "owner": "@bioetl-platform",
       "review_by": "2026-10-31"
+    },
+    "scripts/engineering/ci/nightly_shadow_archive.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the N1 shadow partition, mandatory-skip guard, and immutable archive behind python -m scripts.engineering.ci nightly-shadow. Keep it supporting so active_script_count_max does not grow.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
     },
     "scripts/engineering/ci/local_test_telemetry.py": {
       "decision": "shared_helper_module",
