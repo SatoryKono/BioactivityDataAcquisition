@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-25T22:54:53.015142+00:00",
+  "generated_at": "2026-10-26T05:09:23.076334+00:00",
   "summary": {
     "total_scripts": 696,
     "status_counts": {
@@ -2896,7 +2896,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 239,
+          "line": 247,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3678,7 +3678,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 238,
+          "line": 246,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3733,7 +3733,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 237,
+          "line": 245,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -5869,7 +5869,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 129,
+          "line": 140,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.data_quality"
         },
@@ -6247,13 +6247,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 248,
+          "line": 259,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 368,
+          "line": 379,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
@@ -6298,7 +6298,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 390,
+          "line": 401,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
@@ -6375,7 +6375,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 379,
+          "line": 390,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
@@ -6459,13 +6459,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 251,
+          "line": 262,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 373,
+          "line": 384,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
@@ -6917,7 +6917,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 385,
+          "line": 396,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/fix/harmonize_link_styles.py --dry-run --fail-on-errors"
         },
@@ -7180,7 +7180,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 323,
+          "line": 334,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py \"${lint_targets[@]}\" --json > /tmp/diagram-lint.json"
         },
@@ -7225,7 +7225,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 326,
+          "line": 337,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -7393,7 +7393,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 135,
+          "line": 146,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_all_bundles.py --check"
         },
@@ -7462,7 +7462,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 134,
+          "line": 145,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check"
         },
@@ -7991,7 +7991,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 282,
+          "line": 293,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -8333,7 +8333,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 118,
+          "line": 129,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json"
         },
@@ -10392,7 +10392,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 706,
+          "line": 718,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         }
@@ -10417,7 +10417,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 175,
+          "line": 183,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10460,7 +10460,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 245,
+          "line": 253,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -12797,7 +12797,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 143,
+          "line": 151,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -15397,13 +15397,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 142,
+          "line": 153,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 146,
+          "line": 157,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         },
@@ -20480,7 +20480,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 291,
+          "line": 299,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23480,7 +23480,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 330,
+          "line": 338,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },

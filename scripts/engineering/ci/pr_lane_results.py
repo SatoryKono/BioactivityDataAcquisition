@@ -86,6 +86,15 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/security/test_pubmed_xxe_mitigation.py",
         "tests/unit/application/pipelines/pubmed/test_xml_parser.py",
     ),
+    ".github/workflows/docs.yml": (
+        "tests/architecture/test_docs_governance_workflow.py",
+        "tests/architecture/test_diagram_nightly_workflow.py",
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
+    "reports/audit-runs/20261025-p17-002/P17-002-reusable-workflows-audit.md": (
+        "tests/unit/scripts/ci/test_check_reusable_workflow_pins.py",
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
     "docs/05-operations/runbooks/incident-response.md": (
         "tests/integration/test_prometheus_rules_config.py",
     ),
@@ -106,7 +115,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             ".github/workflows/dashboard-render-host.yml",
             ".github/workflows/diagram-nightly.yml",
             ".github/workflows/docs-kpi-weekly.yml",
-            ".github/workflows/docs.yml",
             ".github/workflows/e2e-matrix-health.yml",
             ".github/workflows/github-settings-quarterly-review.yml",
             ".github/workflows/import-linter.yml",
