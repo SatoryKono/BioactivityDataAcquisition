@@ -82,6 +82,32 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".gitleaksignore": (
+        "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
+    ),
+    "reports/architecture/f-09-conformance-matrix-report.md": (
+        "tests/architecture/test_adapter_port_conformance.py",
+    ),
+    "reports/engineering/qm_07_report.md": (
+        "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py",
+        "tests/architecture/qm_07/test_gate_evaluators.py",
+        "tests/architecture/qm_07/test_distribution_isolation.py",
+        "tests/architecture/qm_07/test_qm07_cold_imports.py",
+    ),
+    "reports/engineering/cache_preflight_experiment_report.md": (
+        "tests/architecture/test_setup_python_uv_cache_policy.py",
+        "tests/architecture/test_conftest_session_caches.py",
+        "tests/architecture/test_pr_gate_complete.py",
+    ),
+    ".github/workflows/docs.yml": (
+        "tests/architecture/test_docs_governance_workflow.py",
+        "tests/architecture/test_diagram_nightly_workflow.py",
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
+    "reports/audit-runs/20261025-p17-002/P17-002-reusable-workflows-audit.md": (
+        "tests/unit/scripts/ci/test_check_reusable_workflow_pins.py",
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
     "docs/05-operations/runbooks/incident-response.md": (
         "tests/integration/test_prometheus_rules_config.py",
     ),
@@ -102,7 +128,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             ".github/workflows/dashboard-render-host.yml",
             ".github/workflows/diagram-nightly.yml",
             ".github/workflows/docs-kpi-weekly.yml",
-            ".github/workflows/docs.yml",
             ".github/workflows/e2e-matrix-health.yml",
             ".github/workflows/github-settings-quarterly-review.yml",
             ".github/workflows/import-linter.yml",
@@ -147,6 +172,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             TYPE_CHECKING_COLD_WORKFLOW,
         ),
         (GITHUB_ACTIONS_RUNTIME_POLICY_TEST, MYPY_TARGET_CONTRACT_TEST),
+    ),
+    "reports/app-001-audit.md": (
+        "tests/unit/application/core/test_batch_execution_lifecycle.py",
+        "tests/unit/application/core/test_derived_scan_budget.py",
+        "tests/unit/application/core/test_pipeline_services.py",
+        "tests/unit/application/core/test_health_aggregator.py",
+        "tests/unit/application/core/test_heartbeat.py",
+        "tests/unit/application/core/test_lock_release_callback_contract.py",
+        "tests/unit/application/core/test_runner.py",
+        "tests/unit/application/services/test_pipeline_runner_service.py",
+        "tests/unit/application/services/run_reports/test_composite_report.py",
     ),
     "reports/engineering/SEC-003_audit_report.md": (
         "tests/unit/domain/services/test_composite_metadata_helpers.py",

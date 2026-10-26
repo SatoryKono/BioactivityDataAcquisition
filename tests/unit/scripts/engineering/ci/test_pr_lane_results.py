@@ -220,6 +220,15 @@ def test_shadow_compare_routes_billing_pr_non_code_changes() -> None:
     assert "tests/unit/scripts/test_github_billing.py" in report["selected"]
 
 
+def test_shadow_compare_routes_historical_secret_fingerprints() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([".gitleaksignore"], repo_root=repo_root)
+    assert report["selected"] == [
+        "tests/architecture/test_secret_shape_and_operator_guide_contracts.py"
+    ]
+    assert report["covers_full_suite"] is False
+
+
 def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
@@ -318,6 +327,36 @@ def test_shadow_compare_routes_provider_parity_evidence(name: str) -> None:
         "tests/architecture/test_provider_contract_interoperability_governance.py",
         "tests/contract/test_provider_contract_snapshot_registry.py",
     ]
+
+
+def test_shadow_compare_routes_qm07_report_to_isolation_contracts() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["reports/engineering/qm_07_report.md"], repo_root=root
+    )
+    assert set(report["selected"]) == {
+        "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py",
+        "tests/architecture/qm_07/test_gate_evaluators.py",
+        "tests/architecture/qm_07/test_distribution_isolation.py",
+        "tests/architecture/qm_07/test_qm07_cold_imports.py",
+    }
+
+
+def test_shadow_compare_routes_app001_audit_to_cancellation_contracts() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(["reports/app-001-audit.md"], repo_root=root)
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/unit/application/core/test_batch_execution_lifecycle.py",
+        "tests/unit/application/core/test_derived_scan_budget.py",
+        "tests/unit/application/core/test_pipeline_services.py",
+        "tests/unit/application/core/test_health_aggregator.py",
+        "tests/unit/application/core/test_heartbeat.py",
+        "tests/unit/application/core/test_lock_release_callback_contract.py",
+        "tests/unit/application/core/test_runner.py",
+        "tests/unit/application/services/test_pipeline_runner_service.py",
+        "tests/unit/application/services/run_reports/test_composite_report.py",
+    }
 
 
 def test_shadow_compare_routes_sec003_audit_to_metadata_parser() -> None:
@@ -616,6 +655,18 @@ def test_affected_targets_fail_closed_without_memory_test(tmp_path: Path) -> Non
     """A mapping never turns an absent test into a passing target."""
     with pytest.raises(ValueError, match="Missing mandatory mapped test targets"):
         affected_pytest_targets(["src/memory/rag/chunking.py"], repo_root=tmp_path)
+
+
+def test_affected_targets_preserve_docs_workflow_specialized_contracts() -> None:
+    """The general workflow map must not erase the docs-specific contracts."""
+    repo_root = Path(__file__).resolve().parents[5]
+    assert affected_pytest_targets(
+        [".github/workflows/docs.yml"], repo_root=repo_root
+    ) == [
+        "tests/architecture/test_docs_governance_workflow.py",
+        "tests/architecture/test_diagram_nightly_workflow.py",
+        "tests/architecture/test_github_actions_runtime_policy.py",
+    ]
 
 
 def test_affected_targets_map_makefile_benchmark_contract() -> None:
