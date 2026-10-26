@@ -31,7 +31,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import os
 import subprocess
 import tempfile
 import threading
@@ -39,6 +38,7 @@ import time
 from pathlib import Path
 from types import SimpleNamespace
 
+import psutil
 import pyarrow as pa
 import pytest
 
@@ -442,8 +442,7 @@ time.sleep(30)
         )
     assert time.monotonic() - start_time < 2.0
     pid = int(pid_path.read_text(encoding="utf-8"))
-    with pytest.raises(OSError):
-        os.kill(pid, 0)
+    assert not psutil.pid_exists(pid)
 
 
 def test_run_plain_delta_write_subprocess_closes_pipes_before_join(

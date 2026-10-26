@@ -148,7 +148,7 @@ def test_delta_write_execution_edges(
             pass
 
     monkeypatch.setattr(
-        "bioetl.infrastructure.storage.silver.delta_write_execution.subprocess.Popen",
+        "bioetl.infrastructure.storage.silver.support.subprocess.Popen",
         _FakePopenTimeout,
     )
     with pytest.raises(TimeoutError):
@@ -173,7 +173,7 @@ def test_delta_write_execution_edges(
             pass
 
     monkeypatch.setattr(
-        "bioetl.infrastructure.storage.silver.delta_write_execution.subprocess.Popen",
+        "bioetl.infrastructure.storage.silver.support.subprocess.Popen",
         _FakePopenFail,
     )
     with pytest.raises(RuntimeError, match="exit_code=2"):
