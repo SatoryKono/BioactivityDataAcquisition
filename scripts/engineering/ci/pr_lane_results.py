@@ -338,6 +338,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/05-operations/runbooks/generated-artifact-drift-workflow.md": (
         "tests/architecture/test_generated_artifact_drift_workflow.py",
     ),
+    **dict.fromkeys(
+        (
+            "docs/filters/inventory-baseline.csv",
+            "docs/filters/inventory-baseline.json",
+            "docs/filters/inventory-baseline.md",
+        ),
+        ("tests/architecture/test_silver_filter_boundary_inventory.py",),
+    ),
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
