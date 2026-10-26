@@ -58,7 +58,7 @@
 | `ADR-047` | `enforced` | 76 | 2 | - |
 | `ADR-048` | `enforced` | 18 | 3 | - |
 | `ADR-049` | `enforced` | 5 | 1 | - |
-| `ADR-050` | `enforced` | 23 | 8 | - |
+| `ADR-050` | `enforced` | 24 | 9 | - |
 | `ADR-051` | `enforced` | 11 | 5 | - |
 | `ADR-052` | `enforced` | 9 | 4 | - |
 | `ADR-053` | `enforced` | 32 | 10 | - |

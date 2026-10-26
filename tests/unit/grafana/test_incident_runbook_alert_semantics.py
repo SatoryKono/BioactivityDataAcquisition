@@ -10,7 +10,7 @@ import yaml
 
 pytestmark = pytest.mark.unit
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 RULES_PATH = ROOT / "grafana/prometheus-rules/bioetl_observability.yml"
 OPERATOR_DOCS = (
     ROOT / "docs/05-operations/runbooks/incident-response.md",
