@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-26T10:35:59.488245+00:00",
+  "generated_at": "2026-10-26T13:31:20.553551+00:00",
   "summary": {
     "total_scripts": 697,
     "status_counts": {
@@ -11,7 +11,7 @@
       "agents": 11,
       "build": 18,
       "ci": 75,
-      "docs": 289,
+      "docs": 290,
       "other": 16,
       "scripts": 585,
       "skills": 13,
@@ -17178,8 +17178,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
+        {
+          "path": "docs/02-architecture/01-domain-layer.md",
+          "line": 644,
+          "source_group": "docs",
+          "text": "проверка — `scripts/engineering/qa/report_domain_io_taint_inventory.py`:"
+        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 42,
@@ -17196,7 +17202,7 @@
           "path": "tests/architecture/test_domain_io_taint_inventory.py",
           "line": 20,
           "source_group": "tests",
-          "text": "from scripts.engineering.qa.report_domain_io_taint_inventory import build_payload"
+          "text": "from scripts.engineering.qa.report_domain_io_taint_inventory import ("
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
