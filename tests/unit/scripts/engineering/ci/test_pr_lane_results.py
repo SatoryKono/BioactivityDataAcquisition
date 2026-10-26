@@ -363,6 +363,21 @@ def test_shadow_compare_routes_qm07_report_to_isolation_contracts() -> None:
     }
 
 
+@pytest.mark.parametrize(
+    "path",
+    (
+        "docs/00-project/RULES.md",
+        "docs/05-operations/runbooks/stale-lock.md",
+    ),
+)
+def test_shadow_compare_routes_incident_operator_docs(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert report["selected"] == [
+        "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
+    ]
+
+
 def test_shadow_compare_routes_app002_port_map_to_port_contracts() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(

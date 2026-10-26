@@ -51,6 +51,9 @@ GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
+INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST = (
+    "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
+)
 TYPE_CHECKING_WORKFLOW = ".github/workflows/type-checking.yml"
 TYPE_CHECKING_COLD_WORKFLOW = ".github/workflows/type-checking-cold.yml"
 
@@ -119,7 +122,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/05-operations/runbooks/incident-response.md": (
         "tests/integration/test_prometheus_rules_config.py",
+        INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
     ),
+    "docs/05-operations/runbooks/stale-lock.md": (
+        INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
+    ),
+    "docs/00-project/RULES.md": (INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,),
     "reports/engineering/SCHEMA-001_execution_evidence.md": (
         "tests/unit/scripts/test_verify_schema_parity.py",
         "tests/unit/scripts/ops/data/test_check_delta_integrity.py",
