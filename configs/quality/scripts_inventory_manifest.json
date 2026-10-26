@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-26T08:00:30.011147+00:00",
+  "generated_at": "2026-10-26T08:09:59.438835+00:00",
   "summary": {
     "total_scripts": 696,
     "status_counts": {
@@ -10136,7 +10136,7 @@
         },
         {
           "path": "scripts/engineering/ci/run_pytest_resilient.py",
-          "line": 644,
+          "line": 646,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.generated_artifact_checks import proven_deferral"
         },
@@ -10516,7 +10516,7 @@
         },
         {
           "path": "scripts/engineering/ci/run_pytest_resilient.py",
-          "line": 351,
+          "line": 353,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.pytest_abort_diagnostic_adapter import ("
         },
@@ -10577,19 +10577,19 @@
         },
         {
           "path": "scripts/engineering/ci/run_pytest_resilient.py",
-          "line": 158,
+          "line": 160,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.pytest_event_journal import ensure_redaction_key"
         },
         {
           "path": "scripts/engineering/ci/run_pytest_resilient.py",
-          "line": 461,
+          "line": 463,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.pytest_event_journal import atomic_write_json"
         },
         {
           "path": "scripts/engineering/ci/run_pytest_resilient.py",
-          "line": 502,
+          "line": 504,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.pytest_event_journal import ("
         },
@@ -11812,7 +11812,7 @@
         },
         {
           "path": "scripts/engineering/ci/run_pytest_resilient.py",
-          "line": 645,
+          "line": 647,
           "source_group": "scripts",
           "text": "from scripts.engineering.dev.pytest_artifact_selection import load_manifest"
         },

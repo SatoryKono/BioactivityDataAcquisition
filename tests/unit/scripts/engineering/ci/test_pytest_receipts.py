@@ -1087,3 +1087,12 @@ def test_maxfail_interrupt_is_not_a_worker_crash() -> None:
         "xdist.dsession.Interrupted: stopping after 1 failures\n"
         "[gw0] node down: not properly terminated\n"
     )
+    assert _detect_worker_crash(
+        "INTERNALERROR> AssertionError: "
+        "('tests/architecture/test_workflow_yaml_syntax.py"
+        "::test_workflow_is_valid_yaml[architecture-docs-nightly.yml]', "
+        "<WorkerController gw0>)\n"
+        "INTERNALERROR> assert not "
+        "'tests/architecture/test_workflow_yaml_syntax.py"
+        "::test_workflow_is_valid_yaml[architecture-docs-nightly.yml]'\n"
+    )
