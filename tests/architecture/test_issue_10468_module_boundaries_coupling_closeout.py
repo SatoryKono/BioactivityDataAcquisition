@@ -19,7 +19,7 @@ from typing import Any
 import pytest
 import yaml
 
-from bioetl.infrastructure.quality.architecture_quality_scoring import (
+from scripts.engineering.quality.architecture_quality_scoring import (
     _score_module_boundaries_coupling,
 )
 from scripts.engineering.qa.hotspot_family_metrics import collect_hotspot_family_metrics

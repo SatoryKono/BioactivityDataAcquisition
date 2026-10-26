@@ -30,8 +30,8 @@ jobs:
 
       - name: Generate Radon complexity reports
         run: |
-          uv run --frozen --no-build radon cc src tests -a -s > reports/radon_cc.txt
-          uv run --frozen --no-build radon cc src tests -a -s -j > reports/radon_cc.json
+          uv run --frozen --no-build radon cc src tests scripts/engineering/quality -a -s > reports/radon_cc.txt
+          uv run --frozen --no-build radon cc src tests scripts/engineering/quality -a -s -j > reports/radon_cc.json
 
       - name: Enforce cyclomatic complexity threshold (CC ≤ 10)
         run: |
@@ -42,7 +42,7 @@ jobs:
           # silver storage, control-plane artifacts, quarantine, observability,
           # quality governance, input adapters, extractor modules, memory.
           uv run --frozen --no-build xenon --max-absolute B --max-modules B --max-average A \
-            --exclude "tests/*,src/memory/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*,src/bioetl/composition/runtime_builders/*,src/bioetl/composition/factories/services/*,src/bioetl/infrastructure/storage/silver/*,src/bioetl/infrastructure/control_plane/*,src/bioetl/infrastructure/quarantine/*,src/bioetl/infrastructure/observability/*,src/bioetl/infrastructure/quality/*" src
+            --exclude "tests/*,src/memory/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*,src/bioetl/composition/runtime_builders/*,src/bioetl/composition/factories/services/*,src/bioetl/infrastructure/storage/silver/*,src/bioetl/infrastructure/control_plane/*,src/bioetl/infrastructure/quarantine/*,src/bioetl/infrastructure/observability/*,scripts/engineering/quality/*" src scripts/engineering/quality
 
       - name: Strict complexity check for domain layer (CC ≤ 5)
         run: |
@@ -94,7 +94,7 @@ jobs:
               "src/bioetl/infrastructure/control_plane/",
               "src/bioetl/infrastructure/quarantine/",
               "src/bioetl/infrastructure/observability/",
-              "src/bioetl/infrastructure/quality/",
+              "scripts/engineering/quality/",
           }
 
           # Exempted functions (with documented reasons; registry function_entries)
@@ -161,7 +161,7 @@ jobs:
 
       - name: Upload reports
         if: ${{ failure() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: duplication-complexity-reports
           path: |

@@ -7,25 +7,25 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3927 |
-| Tracked doc-like files | 3927 |
+| Doc-like files | 3943 |
+| Tracked doc-like files | 3943 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
-| Generated routes | 73 |
+| Generated routes | 74 |
 
 ## Tracking State
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3927 |
+| tracked | 3943 |
 
 ## Lifecycle Counts
 
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
-| active_quality_baseline | 73 |
+| active_quality_baseline | 72 |
 | closeout_evidence | 166 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 28 |
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 213 |
+| working_report | 230 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -54,8 +54,8 @@
 | Active | 751 |
 | Archived | 1553 |
 | Canonical | 76 |
-| Generated | 1062 |
-| Working | 485 |
+| Generated | 1064 |
+| Working | 499 |
 
 ## Surface Families
 
@@ -64,16 +64,16 @@
 | active | 751 |
 | archive | 1553 |
 | canonical | 76 |
-| generated | 1062 |
-| working | 485 |
+| generated | 1064 |
+| working | 499 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 246 |
-| generate-automatically | 1062 |
-| keep | 2619 |
+| archive-after-migration | 261 |
+| generate-automatically | 1064 |
+| keep | 2618 |
 
 ## Cleanup Candidates
 
@@ -126,6 +126,8 @@
 | `reports/audit-runs/12106-s4-crash-silver/evidence.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12106-s5/evidence/evidence.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12106-s5/matrix.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12106-s6/durability-crash-restart-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12106-s6/evidence/evidence.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/handoff.md` | Working | 0 | archive-after-migration |
@@ -157,8 +159,6 @@
 | `reports/audit-runs/12107-r07/tracking-responsibility-decision.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20261006-2f16e40/comprehensive/anti-remediation.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20261022-p03/audit-manifest.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20261022-p03/findings.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20261022-p03/handoff.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -305,6 +305,7 @@
 
 | Route | Generator | Commit Policy |
 | --- | --- | --- |
+| adr-enforcement-matrix | `scripts/engineering/qa/report_adr_enforcement_matrix.py` | tracked_quality_baseline |
 | adr-registry-generated-docs | `scripts/generate_adr_registry.py` | tracked_curated_generated_doc |
 | ai-local-generated-docs-helpers | `AI runtime memory, prompts, and local skill generators` | ignored_local_export |
 | ai-runtime-governance-mirrors | `scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py` | tracked_mirror_surface |

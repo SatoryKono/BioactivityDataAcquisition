@@ -53,42 +53,52 @@ ______________________________________________________________________
 
 ### Common Alerts & Actions
 
-
 ### Alert Mapping Table
 
-| Alert Name | Defining Rule File | Procedure / Anchor |
+Exact identifiers come from [the Prometheus rules](../../../grafana/prometheus-rules/bioetl_observability.yml).
+All nine alerts whose `runbook` annotation points here have a procedure below.
+The Gold row links to its canonical DQ runbook; it does not change that annotation.
+Symptoms and log messages are not alert identifiers.
+
+| Exact alertname | Signal | Procedure |
 | --- | --- | --- |
-| `BioETLProviderHttpErrorRateHigh` | `bioetl_observability.yml` | [1. Provider HTTP Error Rate High](#1-provider-http-error-rate-high) |
-| `BioETLProviderRateLimiterTokensDepleted` | `bioetl_observability.yml` | [2. Provider Rate Limiter Exhausted](#2-provider-rate-limiter-exhausted) |
-| `BioETLProviderRateLimiterWaitHigh` | `bioetl_observability.yml` | [2. Provider Rate Limiter Exhausted](#2-provider-rate-limiter-exhausted) |
-| `BioETLGoldValidationFailuresCritical` | `bioetl_observability.yml` | [3. Schema Mismatch (Gold Layer)](#3-schema-mismatch-gold-layer) |
-| `BioETLProviderHealthCheckFailuresDetected` | `bioetl_observability.yml` | [6. Provider Failures / Health Checks](#6-provider-failures--health-checks) |
-| `BioETLProviderFailureRateHigh` | `bioetl_observability.yml` | [6. Provider Failures / Health Checks](#6-provider-failures--health-checks) |
-| `BioETLProviderRetriesExhausted` | `bioetl_observability.yml` | [7. Provider Retries / Circuit Breaker](#7-provider-retries--circuit-breaker) |
-| `BioETLProviderRetriesExhaustedPersistent` | `bioetl_observability.yml` | [7. Provider Retries / Circuit Breaker](#7-provider-retries--circuit-breaker) |
-| `BioETLCircuitBreakerStuckOpen` | `bioetl_observability.yml` | [7. Provider Retries / Circuit Breaker](#7-provider-retries--circuit-breaker) |
-| `BioETLProviderAdapterLatencyHigh` | `bioetl_observability.yml` | [8. Provider Latency](#8-provider-latency) |
+| `BioETLProviderFailureRateHigh` | Health-check failure ratio | [Provider health](#6-provider-health-and-latency) |
+| `BioETLProviderHealthCheckFailuresDetected` | Failed health checks | [Provider health](#6-provider-health-and-latency) |
+| `BioETLProviderAdapterLatencyHigh` | Adapter latency | [Provider latency](#6-provider-health-and-latency) |
+| `BioETLProviderHttpErrorRateHigh` | HTTP error ratio | [HTTP errors](#1-provider-http-errors) |
+| `BioETLProviderRateLimiterWaitHigh` | Internal limiter wait | [Rate limiter](#2-internal-rate-limiter-pressure) |
+| `BioETLProviderRateLimiterTokensDepleted` | Internal token availability | [Rate limiter](#2-internal-rate-limiter-pressure) |
+| `BioETLProviderRetriesExhausted` | One or two exhaustion events in one hour | [Retry exhaustion](#7-retry-exhaustion) |
+| `BioETLProviderRetriesExhaustedPersistent` | At least three exhaustion events in one hour | [Retry exhaustion](#7-retry-exhaustion) |
+| `BioETLCircuitBreakerStuckOpen` | Circuit-breaker state | [Circuit breaker](#8-circuit-breaker-stuck-open) |
+| `BioETLGoldValidationFailuresCritical` | Gold hard-fail validation | [DQ runbook](pipeline-failure-dq.md) and [local triage](#3-schema-mismatch-gold-layer) |
 
-### 1. Provider HTTP Error Rate High
+### 1. Provider HTTP Errors
 
-- **Alert**: `BioETLProviderHttpErrorRateHigh`
-- **Symptom**: Logs show repeated `401 Unauthorized` errors or other HTTP errors from a provider API.
+- **Alert**: `BioETLProviderHttpErrorRateHigh`.
+- **Symptom**: Elevated HTTP errors. Inspect actual status codes: `401 Unauthorized`
+  is one possible symptom, not what this aggregate alert proves.
 - **Severity**: P1 (if blocking) or P2.
-- **Diagnosis**: Determine specific HTTP status from logs (e.g. 401 for auth failure, 5xx for provider outage, 429 for provider quota exhaustion) before attempting mitigation.
+- **Diagnosis**: For confirmed 401/403 responses, inspect credentials and permissions.
+  For 429 or 5xx responses, inspect provider limits, availability, and retry logs
+  before changing credentials. Never include secret values in incident evidence.
 - **Action**:
-  1. Check logs to establish the exact error type and status code.
-  1. If 401: Verify and rotate the key in secrets manager/`BIOETL_{PROVIDER}_{KEY}`, then restart pipeline.
-  1. For 5xx: Check provider status page and await resolution.
+  1. Verify the key in the secrets manager (or `.env` for local).
+  1. Rotate the key only if invalid or expired credentials are confirmed.
+  1. Update the environment variable `BIOETL_{PROVIDER}_{KEY}` (for example: `BIOETL_UNIPROT_API_KEY`).
+  1. Restart the pipeline.
 
-### 2. Provider Rate Limiter Exhausted
+### 2. Internal Rate-Limiter Pressure
 
-- **Alert**: `BioETLProviderRateLimiterTokensDepleted` / `BioETLProviderRateLimiterWaitHigh`
-- **Symptom**: Internal rate limiter is throttling requests to provider, causing high wait times or token depletion.
+- **Alerts**: `BioETLProviderRateLimiterWaitHigh` and `BioETLProviderRateLimiterTokensDepleted`.
+- **Symptom**: Elevated internal limiter wait or depleted tokens; neither alone
+  proves a provider returned HTTP 429. Check response logs separately.
 - **Severity**: P2.
-- **Diagnosis**: The pipeline's internal rate limiting configuration is restricting throughput, preventing a real 429 from the provider but slowing down ingestion.
+- **Diagnosis**: Compare local concurrency, configured rate, and the provider's
+  documented allowance. A local limiter signal is not evidence of an HTTP status.
 - **Action**:
   1. Check the provider's status page for global issues.
-  1. Review provider documentation for allowed quotas. Do not blindly reduce rate limits unless a real 429 is observed or quotas changed.
+  1. Reduce the rate limit in the **provider** config
      (`configs/providers/{provider}.yaml`), not entity YAML:
      ```yaml
      source:
@@ -99,17 +109,25 @@ ______________________________________________________________________
 
 ### 3. Schema Mismatch (Gold Layer)
 
-- **Alert**: `BioETLGoldValidationFailuresCritical`
+- **Alert**: `BioETLGoldValidationFailuresCritical`; follow the canonical
+  [Pipeline Failure — Data Quality](pipeline-failure-dq.md) procedure.
 - **Symptom**: Pipeline fails with `schema-violations > 0` and `SchemaValidationError`.
 - **Severity**: P1.
-- **Diagnosis**: Gold validation failed. This may indicate Schema Drift, upstream bugs, or data anomalies. It does not strictly guarantee schema drift.
+- **Diagnosis**: A Gold hard-fail does not prove upstream schema drift. Inspect the
+  exact rule, field/type, transformation, and raw record to distinguish malformed
+  data, contract violations, and actual schema changes.
 - **Action**:
-  1. See [pipeline-failure-dq.md](pipeline-failure-dq.md) for the correct resolution procedure.
+  1. Inspect the raw data in Bronze to identify the new field or type change.
+  1. Preserve the failed run and follow the DQ runbook; do not weaken nullability,
+     schema checks, or quarantine rules merely to make the run pass.
+  1. Change a contract only after evidence and review establish the intended
+     schema (requires a PR and release).
 
 ### 4. Lock Timeout
 
-- **Alert**: None (Manual observation / Pipeline refuses to start)
-- **Symptom**: Logs show "Lock expired", or pipeline refuses to start.
+- **Symptom**: Logs report "Lock expired", or a pipeline refuses to start.
+  This is a log symptom, not an alertname. Checkpoint alerts describe checkpoint
+  operations and are not lock-expiry detectors.
 - **Severity**: P2.
 - **Diagnosis**: A previous local process crashed without releasing `MemoryLock`, or a job ran longer than the 4-hour hard limit.
 - **Action**:
@@ -137,30 +155,35 @@ ______________________________________________________________________
   3. Re-run affected workflow(s) and verify no Node-runtime policy annotations remain.
   4. If policy or SHAs must rotate, update checker allowlist and triage notes in `docs/05-operations/verification/ci-failure-triage-2026-05-05.md`.
 
+### 6. Provider Health and Latency
 
-### 6. Provider Failures / Health Checks
+- **Alerts**: `BioETLProviderFailureRateHigh`,
+  `BioETLProviderHealthCheckFailuresDetected`, and `BioETLProviderAdapterLatencyHigh`.
+- **Diagnosis**: Identify the provider and window; inspect probe failures or
+  request latency respectively. Neither signal alone identifies an auth fault.
+- **Action**: Check provider status, network reachability, request logs, and local
+  load. Compare failed and successful requests. Preserve evidence and escalate
+  before changing credentials or request limits.
 
-- **Alert**: `BioETLProviderHealthCheckFailuresDetected` / `BioETLProviderFailureRateHigh`
-- **Symptom**: Provider health checks are failing or failure rate exceeds threshold.
-- **Severity**: P1 (if blocking) or P2.
-- **Diagnosis**: The provider endpoint is unresponsive or returning excessive failures.
-- **Action**: Check provider status page. Review adapter logs.
+### 7. Retry Exhaustion
 
-### 7. Provider Retries / Circuit Breaker
+- **Alerts**: `BioETLProviderRetriesExhausted` and `BioETLProviderRetriesExhaustedPersistent`.
+- **Diagnosis**: Inspect events by provider and operation. The rules distinguish
+  one or two exhaustion events from at least three in one hour; this is not the
+  same signal as circuit-breaker state.
+- **Action**: Preserve the final error and retry history, distinguish transient
+  from permanent failures, and check provider availability. Do not add unbounded
+  retries. Escalate persistent failures with the affected operation.
 
-- **Alert**: `BioETLProviderRetriesExhausted` / `BioETLProviderRetriesExhaustedPersistent` / `BioETLCircuitBreakerStuckOpen`
-- **Symptom**: Retries for a provider have been exhausted, or circuit breaker is stuck open.
-- **Severity**: P2.
-- **Diagnosis**: `RetriesExhausted` indicates a failure to process a payload after all attempts. `CircuitBreakerStuckOpen` indicates a protective state where requests are being rejected fast to protect the upstream.
-- **Action**: Verify if the provider is down. Temporarily disable the pipeline if there is an extended outage.
+### 8. Circuit Breaker Stuck Open
 
-### 8. Provider Latency
-
-- **Alert**: `BioETLProviderAdapterLatencyHigh`
-- **Symptom**: High latency observed in adapter requests to the provider.
-- **Severity**: P3.
-- **Diagnosis**: The provider API is responding slower than usual. This may or may not correlate with active pipeline backlogs.
-- **Action**: Check network health and provider status. Consider reducing concurrency if the provider is struggling.
+- **Alert**: `BioETLCircuitBreakerStuckOpen`.
+- **Diagnosis**: Inspect adapter state and transition logs. The rule uses a
+  rolling maximum; firing does not prove every instant in the window was open
+  or that retry exhaustion caused the state.
+- **Action**: Diagnose the provider/network fault and verify recovery before
+  resuming traffic. Do not disable the breaker or force repeated requests against
+  a failing provider merely to clear the alert.
 
 ### Escalation Policy
 
