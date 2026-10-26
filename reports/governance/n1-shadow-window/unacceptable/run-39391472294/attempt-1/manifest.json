@@ -1,0 +1,23 @@
+{
+  "action_sha": null,
+  "action_sha_status": "missing",
+  "base_sha": null,
+  "conclusion": "failure",
+  "event": "schedule",
+  "head_sha": "342ff6dee3c0c2f11ad46a6bbc4ac49bcaba3c3c",
+  "outcomes_sha256": "5cee7e0adc1607f0108300f91d1a2bcefdcdde66bf9f6991385441b8fcfd577c",
+  "pagination_status": "complete",
+  "raw_sha256": "bf65af1baf77db1fd516141707658b9f10efef3887cf4af3d351eff311d7d95e",
+  "run_attempt": 1,
+  "run_id": 39391472294,
+  "schema_version": 1,
+  "tested_sha": "342ff6dee3c0c2f11ad46a6bbc4ac49bcaba3c3c",
+  "timestamps": {
+    "created_at": "2026-10-20T08:10:16Z",
+    "run_started_at": "2026-10-20T08:10:16Z",
+    "updated_at": "2026-10-20T08:24:03Z"
+  },
+  "workflow_code_sha": "342ff6dee3c0c2f11ad46a6bbc4ac49bcaba3c3c",
+  "workflow_code_sha_source": "head_sha",
+  "workflow_path": ".github/workflows/nightly.yml"
+}

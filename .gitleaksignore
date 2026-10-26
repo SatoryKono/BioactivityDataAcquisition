@@ -16,3 +16,7 @@ f14da1bc80eb3861df0019b8ec7eea60c2d409a1:.env.local:generic-api-key:19
 5c5367b40888f265d0c838c137bf7cf0030bbc13:BACKEND_RECOVERY_COMPLETE.md:curl-auth-user:68
 35553c42a818fa7c91073368c242dd3303ba0c58:.oai_key_tmp:openai-api-key:1
 be9ee1d1a9d9a0a9e483c051c5864fa15d5d435e:.ai/mcp/mcp.json:github-pat:85
+# Public response metadata, not credentials: API Gateway request ID and deployment date.
+# Scope to these two historical findings; new commits and other headers remain scanned.
+356b9750421edc0676e06830d2ffbb32bf942a53:reports/evidence/12461/semanticscholar_headers.txt:generic-api-key:5
+356b9750421edc0676e06830d2ffbb32bf942a53:reports/evidence/12461/uniprot_headers.txt:generic-api-key:8
