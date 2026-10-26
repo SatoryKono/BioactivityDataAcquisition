@@ -202,6 +202,22 @@ def test_shadow_compare_records_selection_without_activation(tmp_path: Path) -> 
     }
 
 
+def test_shadow_compare_routes_domain_layer_doc() -> None:
+    """Domain layer doc edits keep a fail-closed impact route."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        ["docs/02-architecture/01-domain-layer.md"],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/architecture/test_documentation_sync.py",
+        "tests/architecture/test_domain_io_taint_inventory.py",
+    ]
+    assert report["covers_full_suite"] is False
+
+
 def test_shadow_compare_routes_billing_pr_non_code_changes() -> None:
     """Billing documentation and its manifest have explicit test routes."""
     repo_root = Path(__file__).resolve().parents[5]

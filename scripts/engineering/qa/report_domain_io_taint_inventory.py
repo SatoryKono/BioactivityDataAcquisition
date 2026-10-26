@@ -45,6 +45,12 @@ PANDERA_IMPORT_PREFIXES = ("pandera", "pandas")
 _REASON_NETWORK_CLIENT = "network client"
 _REASON_NETWORK_READ = "network read"
 _REASON_FILESYSTEM_DISCOVERY = "filesystem discovery"
+_REASON_FILESYSTEM_READ_WRITE = "filesystem read/write"
+_REASON_FILESYSTEM_MUTATION = "filesystem mutation"
+_REASON_FILESYSTEM_READ = "filesystem read"
+_REASON_FILESYSTEM_WRITE = "filesystem write"
+_REASON_PROCESS_EXECUTION = "process execution"
+_REASON_RANDOM_IDENTITY = "random occurrence identity"
 _REASON_WALL_CLOCK = "wall-clock timestamp"
 _MODULE_SCOPE = "<module>"
 _REASON_FILESYSTEM_MODULE = "filesystem module load bypassing the import graph"
@@ -60,11 +66,11 @@ FORBIDDEN_IMPORT_PREFIXES = {
     "socket": "network socket",
     "sqlalchemy": "database client",
     "sqlite3": "database client",
-    "subprocess": "process execution",
+    "subprocess": _REASON_PROCESS_EXECUTION,
 }
 FORBIDDEN_CALL_NAMES = {
     "input": "interactive input",
-    "open": "filesystem read/write",
+    "open": _REASON_FILESYSTEM_READ_WRITE,
 }
 # Path methods already enforced by name. Applied only when the receiver
 # resolves to pathlib.Path / PosixPath / WindowsPath, not to PurePath.
@@ -74,18 +80,18 @@ FORBIDDEN_ATTRIBUTE_CALLS = {
     "exists": "filesystem existence probe",
     "glob": _REASON_FILESYSTEM_DISCOVERY,
     "iterdir": _REASON_FILESYSTEM_DISCOVERY,
-    "mkdir": "filesystem mutation",
+    "mkdir": _REASON_FILESYSTEM_MUTATION,
     "module_from_spec": _REASON_FILESYSTEM_MODULE,
-    "open": "filesystem read/write",
-    "read_bytes": "filesystem read",
-    "read_text": "filesystem read",
+    "open": _REASON_FILESYSTEM_READ_WRITE,
+    "read_bytes": _REASON_FILESYSTEM_READ,
+    "read_text": _REASON_FILESYSTEM_READ,
     "resolve": "filesystem resolution",
     "rglob": _REASON_FILESYSTEM_DISCOVERY,
     "spec_from_file_location": _REASON_FILESYSTEM_MODULE,
     "stat": "filesystem metadata read",
-    "unlink": "filesystem mutation",
-    "write_bytes": "filesystem write",
-    "write_text": "filesystem write",
+    "unlink": _REASON_FILESYSTEM_MUTATION,
+    "write_bytes": _REASON_FILESYSTEM_WRITE,
+    "write_text": _REASON_FILESYSTEM_WRITE,
 }
 # Source-text keys kept for calls the binding resolver does not rename,
 # including the bare ``uuid4()`` alias and ``datetime.now()``.
@@ -96,10 +102,10 @@ FORBIDDEN_QUALIFIED_CALLS = {
     "importlib.util.spec_from_file_location": _REASON_FILESYSTEM_MODULE,
     "os.getenv": "process environment read",
     "random.random": "randomness",
-    "subprocess.run": "process execution",
+    "subprocess.run": _REASON_PROCESS_EXECUTION,
     "time.time": _REASON_WALL_CLOCK,
-    "uuid.uuid4": "random occurrence identity",
-    "uuid4": "random occurrence identity",
+    "uuid.uuid4": _REASON_RANDOM_IDENTITY,
+    "uuid4": _REASON_RANDOM_IDENTITY,
 }
 # Canonical symbols after import resolution. ``os.*`` entries are the
 # side-effect operations already named by the domain purity check and this
@@ -111,21 +117,21 @@ _FORBIDDEN_RESOLVED_CALLS = {
     "importlib.util.module_from_spec": _REASON_FILESYSTEM_MODULE,
     "importlib.util.spec_from_file_location": _REASON_FILESYSTEM_MODULE,
     "os.getenv": "process environment read",
-    "os.mkdir": "filesystem mutation",
-    "os.open": "filesystem read/write",
+    "os.mkdir": _REASON_FILESYSTEM_MUTATION,
+    "os.open": _REASON_FILESYSTEM_READ_WRITE,
     "os.path.exists": "filesystem existence probe",
-    "os.read": "filesystem read",
-    "os.remove": "filesystem mutation",
-    "os.rename": "filesystem mutation",
+    "os.read": _REASON_FILESYSTEM_READ,
+    "os.remove": _REASON_FILESYSTEM_MUTATION,
+    "os.rename": _REASON_FILESYSTEM_MUTATION,
     "os.stat": "filesystem metadata read",
-    "os.unlink": "filesystem mutation",
-    "os.write": "filesystem write",
+    "os.unlink": _REASON_FILESYSTEM_MUTATION,
+    "os.write": _REASON_FILESYSTEM_WRITE,
     "random.random": "randomness",
     "sqlite3.connect": "database/network connection",
-    "subprocess.run": "process execution",
+    "subprocess.run": _REASON_PROCESS_EXECUTION,
     "time.time": _REASON_WALL_CLOCK,
     "urllib.request.urlopen": _REASON_NETWORK_READ,
-    "uuid.uuid4": "random occurrence identity",
+    "uuid.uuid4": _REASON_RANDOM_IDENTITY,
 }
 _PATH_IO_TYPES = frozenset(
     {
@@ -398,9 +404,9 @@ def _path_io_finding(symbol: str) -> tuple[str, str] | None:
             return None
         reason = FORBIDDEN_ATTRIBUTE_CALLS.get(method)
         if reason is None and method.startswith("read_"):
-            reason = "filesystem read"
+            reason = _REASON_FILESYSTEM_READ
         elif reason is None and method.startswith("write_"):
-            reason = "filesystem write"
+            reason = _REASON_FILESYSTEM_WRITE
         if reason is None:
             return None
         return f"attribute_call:{method}", reason

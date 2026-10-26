@@ -243,6 +243,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/00-project/governance/08-debt-ownership-playbook.md": (
         "tests/architecture/test_tech_debt_roadmap_7461_7465.py",
     ),
+    "docs/02-architecture/01-domain-layer.md": (
+        "tests/architecture/test_documentation_sync.py",
+        "tests/architecture/test_domain_io_taint_inventory.py",
+    ),
     "docs/02-architecture/current-state-inventory.md": (
         "tests/architecture/test_arch_s4_s9_gates.py",
         "tests/unit/scripts/qa/test_topology_source_binding.py",
