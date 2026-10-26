@@ -34,7 +34,7 @@ def test_installed_runtime_blocker_is_source_bound(
     dependency: str,
 ) -> None:
     repo_root = Path(__file__).resolve().parents[3]
-    source = repo_root / "scripts/engineering/quality" / filename
+    source = repo_root / "src/bioetl/infrastructure/quality" / filename
     tree = ast.parse(source.read_text(encoding="utf-8"))
     imports = {
         node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)

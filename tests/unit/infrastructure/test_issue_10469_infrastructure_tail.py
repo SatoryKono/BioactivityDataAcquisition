@@ -54,11 +54,11 @@ from bioetl.infrastructure.control_plane.file_historical_replay_universe_store i
 from bioetl.infrastructure.observability.required_publication_series import (
     _child_exists,
 )
-from scripts.engineering.quality.architecture_debt_task_policy import (
+from bioetl.infrastructure.quality.architecture_debt_task_policy import (
     load_yaml_if_present,
 )
-from scripts.engineering.quality.architecture_quality_scoring import _lazy_import_util
-from scripts.engineering.quality.exemptions_registry_paths import (
+from bioetl.infrastructure.quality.architecture_quality_scoring import _lazy_import_util
+from bioetl.infrastructure.quality.exemptions_registry_paths import (
     build_module_path_key,
 )
 from bioetl.infrastructure.storage.audit_normalization import require_audit_timestamp

@@ -414,13 +414,19 @@ def test_architecture_debt_task_outputs_route_under_reports_quality() -> None:
     """Architecture debt task generators must avoid repository root outputs."""
     task_generation = (
         ROOT
-        / "scripts"
-        / "engineering"
+        / "src"
+        / "bioetl"
+        / "infrastructure"
         / "quality"
         / "architecture_debt_task_generation.py"
     ).read_text(encoding="utf-8")
     debt_reduction = (
-        ROOT / "scripts" / "engineering" / "quality" / "architecture_debt_reduction.py"
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "quality"
+        / "architecture_debt_reduction.py"
     ).read_text(encoding="utf-8")
     generator_script = (
         ROOT / "scripts" / "engineering" / "qa" / "generate_architecture_debt_tasks.py"

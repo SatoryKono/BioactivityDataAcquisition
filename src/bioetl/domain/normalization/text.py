@@ -16,6 +16,7 @@ __all__ = [
 ]
 
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
+_WHITESPACE_PATTERN = re.compile(r"\s+")
 _CONTROL_CHARS_PATTERN = re.compile(r"[\x00-\x08\x0e-\x1f\x7f-\x9f]")
 
 
@@ -100,12 +101,4 @@ def _normalize_unicode_nfc(text: str) -> str:
 
 def _collapse_whitespace(text: str) -> str:
     """Collapse any whitespace sequence into a single space."""
-    # str.split() plus join avoids regex overhead. Preserve one boundary space
-    # when the original starts or ends with whitespace to match re.sub semantics.
-    if not text:
-        return text
-    if not text.strip():
-        return " "
-    leading = " " if text[0].isspace() else ""
-    trailing = " " if text[-1].isspace() else ""
-    return leading + " ".join(text.split()) + trailing
+    return _WHITESPACE_PATTERN.sub(" ", text)

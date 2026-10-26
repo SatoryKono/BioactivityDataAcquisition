@@ -35,11 +35,11 @@ import pytest
 import yaml
 from scripts.engineering.qa.report_lazy_import_inventory import collect_lazy_imports
 
-from scripts.engineering.quality.architecture_quality_scorecard import (
+from bioetl.infrastructure.quality.architecture_quality_scorecard import (
     _build_categories,
     build_architecture_quality_scorecard,
 )
-from scripts.engineering.quality import (
+from bioetl.infrastructure.quality import (
     architecture_quality_scorecard as scorecard_module,
     architecture_quality_scoring as scoring_module,
 )

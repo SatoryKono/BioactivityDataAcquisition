@@ -249,8 +249,10 @@ def test_real_daily_caller_and_command_partition_are_complete() -> None:
     assert "workflow_dispatch" in nightly[True]
     assert nightly["jobs"]["tests"]["with"]["generated-artifacts"] is True
     daily = nightly["jobs"]["generated-artifact-daily"]
-    assert "needs" not in daily
-    assert "if" not in daily
+    assert daily["needs"] == "clock"
+    assert daily["if"] == (
+        "github.event_name == 'workflow_dispatch' || needs.clock.outputs.dow == 'Mon'"
+    )
     assert "continue-on-error" not in daily
     commands = "\n".join(step.get("run", "") for step in daily["steps"])
     assert "daily --report" in commands and "validators --report" in commands
@@ -277,7 +279,7 @@ def test_real_daily_caller_and_command_partition_are_complete() -> None:
             step = next(step for step in steps if step.get("name") == row["step"])
             assert step["if"] == "inputs.generated-artifacts"
             assert step["run"] == row["command"]
-    pr = (ROOT / ".github/workflows/pr-required.yml").read_text(encoding="utf-8")
+    pr = (ROOT / ".github/workflows/pr-required.yml").read_text()
     assert "BIOETL_ARTIFACT_TEST_SELECTION: ci" in pr
     # #12440 replaced the ci partition driver with the resilient runner.
     assert "scripts.engineering.ci.run_pytest_resilient" in pr
@@ -780,9 +782,7 @@ def test_source_checks_and_coverage_selection_survive_daily_partition():
         row for row in load_manifest()["validators"] if row["id"] == "scripts-inventory"
     )
     assert "--check" in daily["argv"]
-    pr = yaml.safe_load(
-        (ROOT / ".github/workflows/pr-required.yml").read_text(encoding="utf-8")
-    )
+    pr = yaml.safe_load((ROOT / ".github/workflows/pr-required.yml").read_text())
     commands = [
         step.get("run", "")
         for job in pr["jobs"].values()

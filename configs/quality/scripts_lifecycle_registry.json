@@ -765,7 +765,7 @@
     },
     "scripts/engineering/ci/actions_timing_common.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the shared GitHub Actions attempt collector imported by the Docker and PR-gate timing reports and by nightly_shadow_archive. It has no standalone command surface; keep it supporting so active_script_count_max does not grow.",
+      "next_step": "Retain as the shared GitHub Actions attempt collector imported by the Docker and PR-gate timing reports. It has no standalone command surface; keep it supporting so active_script_count_max does not grow.",
       "owner": "@bioetl-platform",
       "review_by": "2026-10-31"
     },
@@ -792,12 +792,6 @@
       "next_step": "Retain as the shared JUnit record-accounting backend imported by update_test_telemetry_baseline and invoked internally by the tests workflow. Its CLI has no operator inputs and only adapts CI environment/artifact paths; the owning tests workflow remains the public execution surface.",
       "owner": "@bioetl-platform",
       "review_by": "2026-10-31"
-    },
-    "scripts/engineering/ci/nightly_shadow_archive.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the N1 shadow partition, mandatory-skip guard, and immutable archive behind python -m scripts.engineering.ci nightly-shadow. Keep it supporting so active_script_count_max does not grow.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-12-31"
     },
     "scripts/engineering/ci/local_test_telemetry.py": {
       "decision": "shared_helper_module",
@@ -1416,180 +1410,6 @@
       "next_step": "Retain as the QM-02 before/after verifier invoked by its unit tests. Keep it supporting so the active script budget does not grow; promote only after a router slot is freed.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
-    },
-    "scripts/engineering/quality/_baseline_validation.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/_decomposition_burndown_policy.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/_decomposition_owner_policy.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/_decomposition_program_policy.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/_decomposition_validation.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/_governance_validation.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/_grace_windows_validation.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/_primitives.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/_quarterly_targets_validation.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/architecture_debt_artifact_tasks.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/architecture_debt_reduction.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/architecture_debt_task_generation.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/architecture_debt_task_policy.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/architecture_debt_task_support.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/architecture_quality_scorecard.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/architecture_quality_scoring.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/budget_evaluator.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/debt_scorecard.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/debt_scorecard_validation.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/exemptions_registry.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/exemptions_registry_access.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/exemptions_registry_paths.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/exemptions_registry_policy.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/exemptions_registry_targets.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/exemptions_registry_validation.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/inventory.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/registry_sync_service.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/report_formatter.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
-    },
-    "scripts/engineering/quality/scoring.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as an import-only quality-governance module behind scripts.engineering.qa command surfaces; keep it supporting unless a separately budgeted public entrypoint is approved.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-15"
     },
     "scripts/engineering/repo/_branch_cleanup_policy.py": {
       "decision": "shared_helper_module",

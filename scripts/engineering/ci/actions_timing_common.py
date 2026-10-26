@@ -163,47 +163,18 @@ def collect_jobs(
 ) -> list[dict[str, Any]]:
     """Read one attempt's jobs, following ``per_page=100`` pagination."""
 
-    jobs, _observation = collect_jobs_observation(client, repository, run_id, attempt)
-    return jobs
-
-
-def collect_jobs_observation(
-    client: JsonGitHubClient,
-    repository: str,
-    run_id: int,
-    attempt: int,
-) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Same job pages as ``collect_jobs``, plus raw pagination counts.
-
-    ``jobs_total_count`` stays ``None`` when the API omits it. This function
-    does not classify those counts as success.
-    """
-
     jobs: list[dict[str, Any]] = []
-    total_count: int | None = None
-    pages = 0
-    hit_page_cap = False
     for page in range(1, 101):
         payload = client.json(
             ["api", _jobs_endpoint(repository, run_id, attempt, page)]
         )
-        pages += 1
-        if page == 1:
-            total_count = _total_count(payload)
         page_jobs = _page_jobs(payload)
         if not page_jobs:
             break
         jobs.extend(page_jobs)
         if len(page_jobs) < 100:
             break
-        if page == 100:
-            hit_page_cap = True
-    return jobs, {
-        "jobs_fetched": len(jobs),
-        "jobs_total_count": total_count,
-        "pages_fetched": pages,
-        "hit_page_cap": hit_page_cap,
-    }
+    return jobs
 
 
 def _collect_runs_by_id(
@@ -367,15 +338,6 @@ def _workflow_runs(payload: object) -> list[object]:
     if not isinstance(runs, list):
         return []
     return runs
-
-
-def _total_count(payload: object) -> int | None:
-    if not isinstance(payload, dict):
-        return None
-    value = payload.get("total_count")
-    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
-        return None
-    return value
 
 
 def _page_jobs(payload: object) -> list[dict[str, Any]]:

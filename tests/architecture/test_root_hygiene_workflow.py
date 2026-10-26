@@ -79,7 +79,7 @@ def test_root_hygiene_workflow_uploads_cleanup_classification_artifact() -> None
         in workflow
     )
     assert (
-        "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9" in workflow
+        "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in workflow
     )
     assert "root-hygiene-cleanup-classification" in workflow
     assert "root-hygiene-review-evidence" in workflow

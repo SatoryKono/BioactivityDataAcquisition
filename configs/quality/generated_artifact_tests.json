@@ -19,14 +19,6 @@
       "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
     },
     {
-      "node": "tests/architecture/test_adr_registry_governance_sync.py::test_adr_registry_mirrors_track_latest_decision_index",
-      "artifacts": [
-        "docs/02-architecture/adr-registry.md",
-        "docs/02-architecture/adr-registry/"
-      ],
-      "reason": "Checks the generated ADR registry mirrors and directory artifacts against the canonical decision index."
-    },
-    {
       "node": "tests/architecture/test_arch_s4_s9_gates.py::test_s6_source_tree_manifest_is_the_pinned_sha",
       "artifacts": [
         "reports/quality/source-tree-manifest.json"

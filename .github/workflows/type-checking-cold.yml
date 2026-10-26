@@ -34,12 +34,12 @@ jobs:
           mkdir -p reports
           rm -rf .mypy_cache
 
-          echo "Running full mypy strict gate on src/bioetl + src/memory + scripts/engineering/quality... (COLD CONTROL)"
+          echo "Running full mypy strict gate on src/bioetl + src/memory... (COLD CONTROL)"
           echo "Event: $EVENT_NAME" | tee reports/mypy_strict.log
 
           set +e
           timeout --signal=TERM --kill-after=30s 30m \
-            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --no-incremental src/bioetl src/memory scripts/engineering/quality \
+            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --no-incremental src/bioetl src/memory \
             2>&1 | tee -a reports/mypy_strict.log
           status=${PIPESTATUS[0]}
           set -e
@@ -59,7 +59,7 @@ jobs:
           uv run --frozen --no-build python -m scripts.engineering.qa.check_architecture domain-type-policy
 
       - name: Upload type checking reports
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ failure() && !cancelled() }}
         with:
           name: type-checking-reports

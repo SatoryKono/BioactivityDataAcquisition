@@ -33,7 +33,7 @@ import pytest
 
 from datetime import date
 
-from scripts.engineering.quality._governance_validation import (
+from bioetl.infrastructure.quality._governance_validation import (
     _validate_governance_section,
     _validate_growth_rollout,
     _validate_owner_registry_subsystems,

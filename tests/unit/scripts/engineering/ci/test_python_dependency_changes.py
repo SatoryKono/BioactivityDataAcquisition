@@ -31,34 +31,6 @@ def _distribution_owners(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
 
-@pytest.mark.parametrize("declare_runtime", [True, False])
-def test_stub_route_requires_declared_locked_runtime(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, declare_runtime: bool
-) -> None:
-    """Reviewed stub ownership selects real imports, never guesses package names."""
-    _consumer(tmp_path, "tests/test_export.py", "openpyxl")
-    requirements = (
-        '["types-openpyxl", "openpyxl"]' if declare_runtime else '["types-openpyxl"]'
-    )
-    (tmp_path / "pyproject.toml").write_text(
-        f"[project]\ndependencies = {requirements}\n", encoding="utf-8"
-    )
-    (tmp_path / "uv.lock").write_text(
-        '[[package]]\nname = "types-openpyxl"\n[[package]]\nname = "openpyxl"\n',
-        encoding="utf-8",
-    )
-    monkeypatch.setattr(
-        dependencies, "packages_distributions", lambda: {"openpyxl": ["openpyxl"]}
-    )
-    if declare_runtime:
-        assert dependencies.dependency_consumers(tmp_path, {"types-openpyxl"}) == [
-            "tests/test_export.py"
-        ]
-    else:
-        with pytest.raises(ValueError, match="Unconfirmed Python dependency"):
-            dependencies.dependency_consumers(tmp_path, {"types-openpyxl"})
-
-
 def test_pytest_helper_uses_canonical_all_tests_lane(tmp_path: Path) -> None:
     _consumer(tmp_path, "tests/helpers/publication_fixtures.py", "pytest")
     (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
@@ -93,9 +65,6 @@ def test_pytest_config_change_retains_required_lane(
     dependency_changed: bool,
 ) -> None:
     (tmp_path / "tests").mkdir()
-    _consumer(
-        tmp_path, "tests/architecture/qm_07/test_distribution_isolation.py", "pytest"
-    )
 
     def revision(root: Path, sha: str, name: str) -> dict:
         if name == "uv.lock":
@@ -169,9 +138,6 @@ def test_uv_constraint_dependencies_select_the_pytest_family_lane(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     (tmp_path / "tests").mkdir()
-    _consumer(
-        tmp_path, "tests/architecture/qm_07/test_distribution_isolation.py", "pytest"
-    )
     (tmp_path / "uv.lock").write_text(
         "\n".join(
             (
@@ -372,18 +338,12 @@ def test_dependency_consumers_reuse_source_routes(
     _consumer(tmp_path, f"src/bioetl/{owner}/consumer.py", imported)
     (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
     (tmp_path / f"tests/unit/{owner}").mkdir(parents=True)
-    _consumer(
-        tmp_path, "tests/architecture/qm_07/test_distribution_isolation.py", "pytest"
-    )
     targets = lane.affected_pytest_targets(
         ["uv.lock", "pyproject.toml"],
         repo_root=tmp_path,
         changed_python_dependencies={package},
     )
-    assert targets == [
-        f"tests/unit/{owner}",
-        "tests/architecture/qm_07/test_distribution_isolation.py",
-    ]
+    assert targets == [f"tests/unit/{owner}"]
 
 
 def test_transitive_dependency_selects_direct_consumer(tmp_path: Path) -> None:
@@ -543,55 +503,6 @@ def test_configuration_only_change_is_not_a_dependency_success(
     monkeypatch.setattr(dependencies, "_read_revision", lambda *args: {})
     with pytest.raises(ValueError, match="own classified route"):
         dependencies.changed_dependencies(tmp_path, "base", "head")
-
-
-def test_setuptools_package_exclusion_uses_narrow_classified_route(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
-) -> None:
-    """Package-discovery changes use their dedicated distribution contract."""
-    before = {"tool": {"setuptools": {"packages": {"find": {"where": ["src"]}}}}}
-    after = {
-        "tool": {
-            "setuptools": {
-                "packages": {
-                    "find": {"where": ["src"], "exclude": ["scripts", "scripts.*"]}
-                }
-            }
-        }
-    }
-    monkeypatch.setattr(
-        dependencies,
-        "_read_revision",
-        lambda _root, revision, _name: before if revision == "base" else after,
-    )
-
-    assert not dependencies.pytest_configuration_changed(tmp_path, "base", "head")
-    contract = "tests/architecture/qm_07/test_distribution_isolation.py"
-    contract_path = tmp_path / contract
-    contract_path.parent.mkdir(parents=True)
-    contract_path.write_text("def test_contract(): pass\n", encoding="utf-8")
-    (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
-    assert (
-        lane.main(
-            [
-                "affected-tests",
-                "--repo-root",
-                str(tmp_path),
-                "--changed-file",
-                "pyproject.toml",
-                "--changed-file",
-                contract,
-                "--base-sha",
-                "base",
-                "--head-sha",
-                "head",
-            ]
-        )
-        == 0
-    )
-    assert capsys.readouterr().out.splitlines() == [contract]
 
 
 def test_test_only_dependency_selects_its_consumers(tmp_path: Path) -> None:

@@ -222,8 +222,8 @@ architecture test before closing the task.
 
 PR/push pytest collection uses `generated_artifact` markers and the individual
 node inventory in `configs/quality/generated_artifact_tests.json`. Tests of
-current committed generated outputs run on every 03:00 UTC
-`nightly.yml` schedule and on `workflow_dispatch`. Source contracts and tests generating temporary fixtures remain
+current committed generated outputs run on the Monday 03:00 UTC
+`nightly.yml` step and on `workflow_dispatch`. Source contracts and tests generating temporary fixtures remain
 in ordinary CI; mixed modules use function markers, never directory exclusions.
 
 The daily owner runs all manifest tests serially, including `slow` tests, and

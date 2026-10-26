@@ -156,7 +156,7 @@ Full pipeline catalog: [Pipeline Catalog](../04-reference/pipeline-catalog.md).
 | Storage | `src/bioetl/domain/ports/storage/*.py`, `storage_maintenance.py` | Narrow Bronze/Silver/Gold/Merged/lifecycle storage contracts. | `src/bioetl/infrastructure/storage/**` |
 | Runtime control | `src/bioetl/domain/ports/runtime/*.py` | Lock, checkpoint, clock, runner, registry, shutdown, debug, memory. | Application/composition/infrastructure runtime services. |
 | Observability | `src/bioetl/domain/ports/observability/*.py`; `logger_port.py` compatibility re-export | Logger, metrics, tracing, DQ monitor contracts. | `src/bioetl/infrastructure/observability/**` and NoOp ports. |
-| Quality | `src/bioetl/domain/ports/quality/*.py` | DQ config, analyzers, reports, quarantine, validation, fallback/error policy. | `src/bioetl/application/services/dq/**`, `scripts/engineering/quality/**`. |
+| Quality | `src/bioetl/domain/ports/quality/*.py` | DQ config, analyzers, reports, quarantine, validation, fallback/error policy. | `src/bioetl/application/services/dq/**`, `src/bioetl/infrastructure/quality/**`. |
 | Control plane | `src/bioetl/domain/ports/control_plane/*.py` | Run/workflow manifest, ledger, effective config, lineage, artifact comparison stores. | `src/bioetl/infrastructure/control_plane/**`. |
 | Config/metadata/export | `src/bioetl/domain/ports/config/*.py`, `metadata/*.py`, `export.py` | Config loading, metadata writing/coordinating, export catalog/writer. | Infrastructure config, metadata, and export adapters. |
 
@@ -198,7 +198,7 @@ Infrastructure.
 | Storage | `src/bioetl/infrastructure/storage/**` | Bronze/Silver/Gold/metadata/quarantine/checkpoint/local file and Delta-backed persistence. | Domain storage/runtime ports. | Infrastructure |
 | Control-plane stores | `src/bioetl/infrastructure/control_plane/**` | File-backed manifests, ledgers, effective config, lineage, workflow stores, replay artifacts. | Domain control-plane ports. | Infrastructure |
 | Observability | `src/bioetl/infrastructure/observability/**` | Prometheus metrics, metrics server, tracing/logging adapters, Pushgateway publication. | Domain observability ports. | Infrastructure |
-| Quality/export | `scripts/engineering/quality/**`, `export/**` | DQ config/runtime support, debt scorecards, export adapters. | Domain quality/export ports. | Infrastructure |
+| Quality/export | `src/bioetl/infrastructure/quality/**`, `export/**` | DQ config/runtime support, debt scorecards, export adapters. | Domain quality/export ports. | Infrastructure |
 
 ## DQ Validators
 
@@ -335,12 +335,12 @@ by storage technology. Current owner boundaries:
 
 ## Current source inventory binding
 
-- `source_tree_sha256=90b471a35481ac3b5cd86c890104729159b7f9aa68ff30363840a423b6f5b40c`
-- `source_module_count=2566`
-- Source modules: `2566`
-- `coverage_inventory_module_count=2566`
-- Accepted coverage inventory: `2566` modules
-- Accepted inventory: `2513` fully covered
+- `source_tree_sha256=503cd8b42b33cf2398c1abc7354c2978d56bc0149781377febbc0fccfde67080`
+- `source_module_count=2596`
+- Source modules: `2596`
+- `coverage_inventory_module_count=2596`
+- Accepted coverage inventory: `2596` modules
+- Accepted inventory: `2543` fully covered
 - Accepted inventory: `52` partially covered
 - Test inventory: `assertless_total_candidates=85`
 

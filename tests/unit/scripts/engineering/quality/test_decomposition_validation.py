@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import pytest
 
-from scripts.engineering.quality._decomposition_validation import (
+from bioetl.infrastructure.quality._decomposition_validation import (
     _collect_quarterly_registry_budgets,
     _parse_owner_allocations,
     _validate_burndown_registries,

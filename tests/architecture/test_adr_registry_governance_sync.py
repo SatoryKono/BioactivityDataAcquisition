@@ -31,7 +31,6 @@ RULES_PATH = ROOT / "docs/00-project/RULES.md"
 FILTERS_README = ROOT / "docs/filters/README.md"
 
 
-@pytest.mark.generated_artifact
 def test_adr_registry_mirrors_track_latest_decision_index() -> None:
     generator = ADRRegistryGenerator()
     expected_total = len(generator.adr_index_metadata)

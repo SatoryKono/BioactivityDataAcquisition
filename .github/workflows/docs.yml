@@ -52,17 +52,6 @@ jobs:
             tests/architecture/test_required_checks_prose_consistency.py \
             tests/architecture/test_api_reference_public_facades.py \
             tests/architecture/test_docs_governance_workflow.py \
-            tests/architecture/test_check_diagram_visual_smoke.py \
-            tests/architecture/test_diagram_artifact_check.py \
-            tests/architecture/test_diagram_lint_policy_rules.py \
-            tests/architecture/test_diagram_nightly_suite.py \
-            tests/architecture/test_diagram_nightly_workflow.py \
-            tests/architecture/test_diagram_quality_budget_security.py \
-            tests/architecture/test_diagram_quality_gates.py \
-            tests/architecture/test_diagram_regression_workflow.py \
-            tests/architecture/test_diagram_tooling_fail_closed.py \
-            tests/architecture/test_run_diagram_checks_script.py \
-            tests/architecture/test_validate_mermaid_syntax_script.py \
             tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_rules_version_extractable \
             tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_claude_md_synced \
             tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_required_docs_synced \
@@ -129,7 +118,7 @@ jobs:
         run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json
 
       - name: Upload docs link-check report artifact
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: docs-link-check-report
           path: reports/docs-link-check-report.json
@@ -263,7 +252,7 @@ jobs:
             --manifest docs/02-architecture/diagrams/manifests/chembl-pipeline-activity-dataflow.txt
 
       - name: Upload generated ChEMBL activity renders
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: chembl-pipeline-activity-dataflow-renders
           path: |
@@ -342,7 +331,7 @@ jobs:
 
       - name: Upload diagram lint report
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: diagram-lint-report
           path: /tmp/diagram-lint.json
@@ -404,7 +393,7 @@ jobs:
             --markdown-out reports/diagrams/diagram-quality-report.md
 
       - name: Upload SVG artifacts
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: diagrams-svg
           path: |
@@ -412,7 +401,7 @@ jobs:
           retention-days: 7
 
       - name: Upload PNG artifacts
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: diagrams-png
           path: |
@@ -420,7 +409,7 @@ jobs:
           retention-days: 7
 
       - name: Upload diagram quality report
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: diagrams-quality-report
           path: |

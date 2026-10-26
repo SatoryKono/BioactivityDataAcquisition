@@ -22,6 +22,6 @@ packages:
     max_modules: 295
     max_package_loc: 40000
     linked_issue: "10595"
-  - path: scripts/engineering/quality
+  - path: src/bioetl/infrastructure/quality
     max_modules: 40
     max_package_loc: 8000

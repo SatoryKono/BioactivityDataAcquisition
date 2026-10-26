@@ -43,37 +43,37 @@ seams:
     category: operator_time_allowed
     replay_critical: false
     rationale: Curated memory review uses injectable current time and defaults only for operator maintenance.
-  - path: scripts/engineering/quality/debt_scorecard.py
+  - path: src/bioetl/infrastructure/quality/debt_scorecard.py
     scope: validate_scorecard_registry_sync
     call: date.today
     category: operator_time_allowed
     replay_critical: false
     rationale: Quality-governance CLI default date; callers can inject today for tests.
-  - path: scripts/engineering/quality/debt_scorecard.py
+  - path: src/bioetl/infrastructure/quality/debt_scorecard.py
     scope: evaluate_debt_scorecard
     call: date.today
     category: operator_time_allowed
     replay_critical: false
     rationale: Quality-governance CLI default date; callers can inject today for tests.
-  - path: scripts/engineering/quality/exemptions_registry_policy.py
+  - path: src/bioetl/infrastructure/quality/exemptions_registry_policy.py
     scope: validate_exemptions_registry
     call: date.today
     category: operator_time_allowed
     replay_critical: false
     rationale: Quality-governance CLI default date; callers can inject today for tests.
-  - path: scripts/engineering/quality/_governance_validation.py
+  - path: src/bioetl/infrastructure/quality/_governance_validation.py
     scope: _validate_warn_until_by_section
     call: date.today
     category: operator_time_allowed
     replay_critical: false
     rationale: Quality-governance rollout validation date; callers can inject today.
-  - path: scripts/engineering/quality/inventory.py
+  - path: src/bioetl/infrastructure/quality/inventory.py
     scope: build_exemption_inventory
     call: date.today
     category: operator_time_allowed
     replay_critical: false
     rationale: Quality-governance inventory date; callers can inject today.
-  - path: scripts/engineering/quality/report_formatter.py
+  - path: src/bioetl/infrastructure/quality/report_formatter.py
     scope: split_growth_violations_by_severity
     call: date.today
     category: operator_time_allowed

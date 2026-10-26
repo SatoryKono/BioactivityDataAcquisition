@@ -414,7 +414,7 @@ def test_api_request_sanitize_redacts_and_parses_headers() -> None:
 def test_governance_validation_reports_structural_errors() -> None:
     from datetime import date
 
-    from scripts.engineering.quality._governance_validation import (
+    from bioetl.infrastructure.quality._governance_validation import (
         _burn_down_priority_registries,
         _validate_governance_section,
     )

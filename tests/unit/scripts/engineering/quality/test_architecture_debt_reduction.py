@@ -34,7 +34,7 @@ import pytest
 from datetime import UTC
 from datetime import datetime
 
-from scripts.engineering.quality.architecture_debt_reduction import (
+from bioetl.infrastructure.quality.architecture_debt_reduction import (
     build_architecture_debt_execution_plan,
 )
 

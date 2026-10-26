@@ -1081,7 +1081,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert (
         dockerfile.count(
             "chainguard/wolfi-base@sha256:"
-            "360896efb0753a5701c48f860e17130c205eae5a264797aa3e7ea126ee2923a7"
+            "19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
         )
         == 2
     )
@@ -1553,30 +1553,6 @@ def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_
     assert "--fail-on-blocking" in enforcement["run"]
 
 
-@pytest.mark.parametrize(
-    "scan_name",
-    [
-        "Run full Trivy JSON evidence scan",
-        "Run Trivy on pinned Wolfi runtime base image",
-    ],
-)
-def test_docker_trivy_db_prefers_primary_registry_without_skipping_updates(
-    scan_name: str,
-) -> None:
-    """A broken pull-through mirror must not be the first DB source."""
-    steps = _load_yaml(ROOT / ".github/workflows/docker.yml")["jobs"]["docker-build"][
-        "steps"
-    ]
-    scan = next(step for step in steps if step.get("name") == scan_name)
-    command = scan["run"]
-    primary = "--db-repository ghcr.io/aquasecurity/trivy-db:2"
-    mirror = "--db-repository mirror.gcr.io/aquasec/trivy-db:2"
-    assert primary in command and mirror in command
-    assert command.index(primary) < command.index(mirror)
-    assert "--skip-db-update" not in command
-    assert "--skip-java-db-update" not in command
-
-
 def test_docker_workflow_probes_shellless_runtime_and_default_health() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     assert workflow["permissions"] == {"contents": "read"}
@@ -1674,18 +1650,6 @@ def test_docker_security_baseline_is_uploaded_with_bounded_retention() -> None:
     assert "--format json" in base_run
     assert "--output reports/security/trivy-base-results.json" in base_run
     assert "chainguard/wolfi-base@sha256:" in base_run
-    runtime_image = next(
-        line.split()[1]
-        for line in (ROOT / "Dockerfile.bioetl").read_text().splitlines()
-        if line.startswith("FROM ") and line.endswith(" AS runtime-root")
-    )
-    assert f'"{runtime_image}"' in base_run
-    provenance = next(
-        step
-        for step in steps
-        if step.get("name") == "Capture image and runtime provenance"
-    )
-    assert f"wolfi_base_image={runtime_image}" in str(provenance["run"])
     assert step_names.index("Validate complete security baseline") < step_names.index(
         "Upload reproducible security baseline"
     )

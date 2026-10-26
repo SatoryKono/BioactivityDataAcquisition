@@ -24,7 +24,7 @@ from typing import Any
 
 import yaml
 
-from scripts.engineering.quality.exemptions_registry import (
+from bioetl.infrastructure.quality.exemptions_registry import (
     build_module_path_key,
     load_exemptions_registry,
 )

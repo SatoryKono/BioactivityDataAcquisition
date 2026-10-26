@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import pytest
 
-from scripts.engineering.quality.debt_scorecard_validation import (
+from bioetl.infrastructure.quality.debt_scorecard_validation import (
     validate_debt_scorecard_structure,
 )
 

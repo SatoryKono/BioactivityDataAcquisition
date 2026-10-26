@@ -35,7 +35,7 @@ from unittest.mock import patch
 
 import pytest
 
-from scripts.engineering.quality.inventory import (
+from bioetl.infrastructure.quality.inventory import (
     ExemptionInventorySummary,
     _resolve_owner,
     _tally_expiry,
@@ -179,7 +179,7 @@ class TestBuildExemptionInventory:
     def test_builds_correct_totals(self) -> None:
         """Should count all entries across registries."""
         with patch(
-            "scripts.engineering.quality.inventory.load_exemptions_registry",
+            "bioetl.infrastructure.quality.inventory.load_exemptions_registry",
             return_value=self._mock_registry(),
         ):
             summary = build_exemption_inventory(today=date(2025, 6, 15))
@@ -190,7 +190,7 @@ class TestBuildExemptionInventory:
     def test_counts_by_owner(self) -> None:
         """Should count exemptions by owner."""
         with patch(
-            "scripts.engineering.quality.inventory.load_exemptions_registry",
+            "bioetl.infrastructure.quality.inventory.load_exemptions_registry",
             return_value=self._mock_registry(),
         ):
             summary = build_exemption_inventory(today=date(2025, 6, 15))
@@ -202,7 +202,7 @@ class TestBuildExemptionInventory:
     def test_counts_expired_entries(self) -> None:
         """Should count entries with past expiry dates."""
         with patch(
-            "scripts.engineering.quality.inventory.load_exemptions_registry",
+            "bioetl.infrastructure.quality.inventory.load_exemptions_registry",
             return_value=self._mock_registry(),
         ):
             summary = build_exemption_inventory(today=date(2025, 6, 15))
@@ -212,7 +212,7 @@ class TestBuildExemptionInventory:
     def test_by_expiry_quarter_populated(self) -> None:
         """Should count entries by expiry quarter."""
         with patch(
-            "scripts.engineering.quality.inventory.load_exemptions_registry",
+            "bioetl.infrastructure.quality.inventory.load_exemptions_registry",
             return_value=self._mock_registry(),
         ):
             summary = build_exemption_inventory(today=date(2025, 6, 15))
@@ -234,7 +234,7 @@ class TestBuildExemptionInventory:
             }
         }
         with patch(
-            "scripts.engineering.quality.inventory.load_exemptions_registry",
+            "bioetl.infrastructure.quality.inventory.load_exemptions_registry",
             return_value=raw,
         ):
             summary = build_exemption_inventory(today=date(2025, 6, 15))
@@ -253,7 +253,7 @@ class TestBuildExemptionInventory:
             }
         }
         with patch(
-            "scripts.engineering.quality.inventory.load_exemptions_registry",
+            "bioetl.infrastructure.quality.inventory.load_exemptions_registry",
             return_value=raw,
         ):
             summary = build_exemption_inventory(today=date(2025, 6, 15))
@@ -264,7 +264,7 @@ class TestBuildExemptionInventory:
         """Non-dict 'registries' should raise ValueError."""
         raw = {"registries": "not_a_dict"}
         with patch(
-            "scripts.engineering.quality.inventory.load_exemptions_registry",
+            "bioetl.infrastructure.quality.inventory.load_exemptions_registry",
             return_value=raw,
         ):
             with pytest.raises(ValueError, match="must be a mapping"):
@@ -274,7 +274,7 @@ class TestBuildExemptionInventory:
         """today=None should use date.today() without error."""
         raw: dict[str, object] = {"registries": {}}
         with patch(
-            "scripts.engineering.quality.inventory.load_exemptions_registry",
+            "bioetl.infrastructure.quality.inventory.load_exemptions_registry",
             return_value=raw,
         ):
             summary = build_exemption_inventory()

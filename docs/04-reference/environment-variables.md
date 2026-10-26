@@ -120,13 +120,13 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `BIOETL_RUNTIME_SOURCE_ID` | Opaque digest computed from the runtime root and mount roots and injected by `runtime_manager.py` | No |
+| `BIOETL_RUNTIME_SOURCE_ID` | Opaque runtime source digest (BIOETL_RUNTIME_SOURCE_ID) | No |
 
 ## Report Enforcement
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| `BIOETL_ENFORCE_REPORT_ROOT_MARKER` | Fail readiness closed when the run-report root marker is invalid | `False` (application); `1` (`True`) in `docker-compose.yml` | No |
+| `BIOETL_ENFORCE_REPORT_ROOT_MARKER` | Fail readiness closed when the run-report root marker is invalid | `False` | No |
 | `BIOETL_REPORT_ROOT` | Run-report root override | unset | No |
 
 ## Windows + WSL Mixed Checkout

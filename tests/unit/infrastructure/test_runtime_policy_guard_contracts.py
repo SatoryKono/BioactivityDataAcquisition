@@ -12,7 +12,7 @@ from bioetl.infrastructure.adapters.decorators.circuit_breaker import (
     CircuitBreakerDataSourceDecorator,
 )
 from bioetl.infrastructure.adapters.uniprot import _idmapping_transport as mapping
-from scripts.engineering.quality import architecture_debt_task_support as debt
+from bioetl.infrastructure.quality import architecture_debt_task_support as debt
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 pytestmark = pytest.mark.unit

@@ -1497,7 +1497,7 @@
       "symbol": "--silver-filter-only",
       "path": "docs/04-reference/cli.md",
       "occurrence_count": 3,
-      "first_line": 1289,
+      "first_line": 1245,
       "role": "Retired CLI shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Removed after sunset 2026-09-30; only retirement notes and negative tests should retain this spelling.",
       "notes": ""
@@ -1552,7 +1552,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/04-reference/cli.md",
       "occurrence_count": 4,
-      "first_line": 1290,
+      "first_line": 1246,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""

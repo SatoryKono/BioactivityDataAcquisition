@@ -85,15 +85,6 @@ forbidden_output_roots:
   - silver/
 
 routes:
-  - id: adr-enforcement-matrix
-    generator: scripts/engineering/qa/report_adr_enforcement_matrix.py
-    output_kind: working_report
-    commit_policy: tracked_quality_baseline
-    outputs:
-      - reports/quality/adr-enforcement-matrix.json
-      - reports/quality/adr-enforcement-matrix.md
-    notes: ADR enforcement JSON and Markdown are one generated evidence pair.
-
   - id: file-merger-working-reports
     generator: scripts/engineering/common/file_merger.py
     output_kind: working_report

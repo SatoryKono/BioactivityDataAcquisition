@@ -148,9 +148,6 @@ MODULE_COMMAND_SCRIPT_ALIASES: Final[dict[str, dict[str, str]]] = {
         "check-naming": "scripts/engineering/qa/vcr/check_vcr_filename_policy.py",
         "check-metadata-age": "scripts/engineering/qa/vcr/check_vcr_metadata_age.py",
     },
-    "scripts.engineering.ci": {
-        "nightly-shadow": "scripts/engineering/ci/nightly_shadow_archive.py",
-    },
     "scripts.engineering.repo": {
         "check-inventory": "scripts/engineering/repo/check_scripts_inventory.py",
         "check-catalog": "scripts/engineering/repo/check_scripts_catalog.py",

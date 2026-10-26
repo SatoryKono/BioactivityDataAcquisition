@@ -55,7 +55,7 @@ MAIN_REQUIRED_PUSH_CONCURRENCY_WORKFLOWS = (
     ROOT / ".github" / "workflows" / "codeql.yml",
 )
 UPLOAD_ARTIFACT_PREFIX = "actions/upload-artifact@"
-MAX_ARTIFACT_RETENTION_DAYS = 90
+MAX_ARTIFACT_RETENTION_DAYS = 30
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -629,9 +629,7 @@ def test_security_workflow_runs_gitleaks_and_osv_scanner() -> None:
         if step.get("id") == "record"
     )
     assert lane_osv_step.get("continue-on-error") is True
-    assert '"osv-gate": "${{ steps.osv-gate.outcome }}"' in lane_recorder
-    assert '"osv-scan"' not in lane_recorder
-    assert "toJson(steps)" not in lane_recorder
+    assert '"conclusion" if key == "osv-scan" else "outcome"' in lane_recorder
 
 
 def test_codeql_workflow_covers_python_and_actions_and_is_sha_pinned() -> None:
@@ -725,8 +723,7 @@ def test_workflows_do_not_use_unhashed_pip_or_npm_install() -> None:
 def test_scorecard_workflow_is_non_blocking_weekly_baseline() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/scorecard.yml")
     triggers = cast(dict[str, Any], workflow.get("on", workflow.get(True)))
-    scorecard_sha = "fa7117db83c52d787ae5a89f350999701505d78e"
-    assert scorecard_sha in policy.ALLOWED_USES["ossf/scorecard-action"]
+    scorecard_sha = next(iter(policy.ALLOWED_USES["ossf/scorecard-action"]))
     jobs = cast(dict[str, dict[str, Any]], workflow["jobs"])
 
     nightly = _load_yaml(ROOT / ".github/workflows/nightly.yml")
@@ -746,51 +743,35 @@ def test_scorecard_workflow_is_non_blocking_weekly_baseline() -> None:
     assert "!cancelled()" in str(upload.get("if", ""))
 
 
-_DAILY_DETERMINISTIC_JOBS = (
+_WEEKLY_DETERMINISTIC_JOBS = (
     "tests",
     "e2e",
     "duplication",
     "import-linter",
     "generated-artifact-daily",
 )
+_WEEKLY_DETERMINISTIC_IF = (
+    "github.event_name == 'workflow_dispatch' || needs.clock.outputs.dow == 'Mon'"
+)
 
 
-def test_nightly_deterministic_lanes_stay_daily_until_shadow_acceptance() -> None:
-    """#12452 weekly gate is rolled back for five jobs only (#12362)."""
+def test_nightly_deterministic_lanes_are_monday_or_manual() -> None:
+    """Deterministic nightly lanes run Monday; dispatch forces them (#12363)."""
     nightly = _load_yaml(ROOT / ".github/workflows/nightly.yml")
     triggers = cast(dict[str, Any], nightly.get("on", nightly.get(True)))
     jobs = cast(dict[str, dict[str, Any]], nightly["jobs"])
 
     assert triggers["schedule"] == [{"cron": "0 3 * * *"}]
-    assert triggers["workflow_dispatch"] is None
-    for name in _DAILY_DETERMINISTIC_JOBS:
-        assert "if" not in jobs[name]
-        assert "needs" not in jobs[name]
+    assert "workflow_dispatch" in triggers
+    for name in _WEEKLY_DETERMINISTIC_JOBS:
+        assert jobs[name]["needs"] == "clock"
+        assert jobs[name]["if"] == _WEEKLY_DETERMINISTIC_IF
     for name in ("security", "zizmor"):
         assert "if" not in jobs[name]
         assert "needs" not in jobs[name]
-    for name in ("codeql", "scorecard", "branch-hygiene"):
-        assert jobs[name]["if"] == "needs.clock.outputs.dow == 'Mon'"
+    assert jobs["codeql"]["if"] == "needs.clock.outputs.dow == 'Mon'"
+    assert jobs["scorecard"]["if"] == "needs.clock.outputs.dow == 'Mon'"
     assert jobs["mutation"]["if"] == "needs.clock.outputs.dow == 'Sun'"
-    daily = jobs["generated-artifact-daily"]
-    uploads = {
-        step["name"]: step
-        for step in daily["steps"]
-        if str(step.get("uses", "")).startswith("actions/upload-artifact@")
-    }
-    assert uploads["Upload success evidence"]["with"]["retention-days"] == 30
-    assert uploads["Upload success evidence"]["if"] == (
-        "always() && !cancelled() && steps.partition.outputs.bucket == 'success'"
-    )
-    assert uploads["Upload non-success diagnostics"]["if"] == (
-        "always() && !cancelled() && (steps.partition.outputs.bucket == 'diagnostics' || steps.partition.outcome != 'success')"
-    )
-    assert uploads["Upload non-success diagnostics"]["with"]["retention-days"] == 90
-    cancelled = uploads["Upload cancellation diagnostics best effort"]
-    assert cancelled["if"] == "cancelled()"
-    assert cancelled["with"]["retention-days"] == 90
-    assert cancelled["with"]["if-no-files-found"] == "warn"
-    assert "shadow-guard" not in jobs
     assert str(jobs["tests"]["uses"]).endswith("tests.yml")
     assert jobs["tests"]["with"]["generated-artifacts"] is True
     assert str(jobs["e2e"]["uses"]).endswith("e2e-matrix-health.yml")
@@ -801,8 +782,7 @@ def test_nightly_deterministic_lanes_stay_daily_until_shadow_acceptance() -> Non
 def test_syft_sbom_is_generated_on_release_and_ghcr_push() -> None:
     release = _load_yaml(RELEASE_WORKFLOW)
     docker = _load_yaml(ROOT / ".github/workflows/docker.yml")
-    sbom_sha = "66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c"
-    assert sbom_sha in policy.ALLOWED_USES["anchore/sbom-action"]
+    sbom_sha = next(iter(policy.ALLOWED_USES["anchore/sbom-action"]))
     release_uses = _step_uses(release, "build")
     docker_uses = _step_uses(docker, "docker-push")
     release_assets = release["jobs"]["create-github-release-assets"]
@@ -987,8 +967,7 @@ def test_canonical_uv_action_pair_is_setup_python_uv() -> None:
 def test_zizmor_workflow_is_path_filtered_and_sha_pinned() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/zizmor.yml")
     triggers = cast(dict[str, Any], workflow.get("on", workflow.get(True)))
-    zizmor_sha = "85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e"
-    assert zizmor_sha in policy.ALLOWED_USES["zizmorcore/zizmor-action"]
+    zizmor_sha = next(iter(policy.ALLOWED_USES["zizmorcore/zizmor-action"]))
     zizmor_step = next(
         step
         for step in workflow["jobs"]["zizmor"]["steps"]
@@ -1318,7 +1297,7 @@ def test_build_provenance_binds_release_files_and_published_ghcr_digest() -> Non
     """Provenance covers built files and the exact promoted manifest, with scoped OIDC."""
     release = _load_yaml(RELEASE_WORKFLOW)
     docker = _load_yaml(ROOT / ".github/workflows/docker.yml")
-    action = "actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8"
+    action = "actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a"
     build = release["jobs"]["build"]
     publish = docker["jobs"]["docker-push"]
     for job in (build, publish):

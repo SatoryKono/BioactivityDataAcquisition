@@ -66,8 +66,8 @@ from bioetl.infrastructure.control_plane.file_workflow_transform_artifact_store 
     _required_attr,
 )
 from bioetl.infrastructure.observability import observability_backend_process as backend
-from scripts.engineering.quality import architecture_debt_reduction as debt
-from scripts.engineering.quality import exemptions_registry_targets as targets
+from bioetl.infrastructure.quality import architecture_debt_reduction as debt
+from bioetl.infrastructure.quality import exemptions_registry_targets as targets
 from bioetl.infrastructure.schemas.pipeline_config_common_schemas import (
     AuthoritativeContentHashPolicyConfig,
     AuthoritativeContentHashPolicyContractConfig,

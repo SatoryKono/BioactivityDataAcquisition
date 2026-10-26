@@ -28,7 +28,7 @@ from bioetl.infrastructure.control_plane.file_contract_registry_store import (
 )
 from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from scripts.engineering.quality.architecture_debt_task_support import (
+from bioetl.infrastructure.quality.architecture_debt_task_support import (
     SymbolMetricLocation,
     build_symbol_index,
     measure_task,
@@ -273,11 +273,11 @@ def test_debt_safe_text_none_and_complexity(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(
-        "scripts.engineering.quality.architecture_debt_task_support.iter_source_modules",
+        "bioetl.infrastructure.quality.architecture_debt_task_support.iter_source_modules",
         lambda _root: [tmp_path / "gone.py"],
     )
     monkeypatch.setattr(
-        "scripts.engineering.quality.architecture_debt_task_support.safe_text",
+        "bioetl.infrastructure.quality.architecture_debt_task_support.safe_text",
         lambda _path: None,
     )
     assert build_symbol_index(tmp_path) == {}
@@ -291,7 +291,7 @@ def test_debt_safe_text_none_and_complexity(
         complexity=6,
     )
     monkeypatch.setattr(
-        "scripts.engineering.quality.architecture_debt_task_support.select_symbol_location",
+        "bioetl.infrastructure.quality.architecture_debt_task_support.select_symbol_location",
         lambda **_kwargs: (location, "src/mod.py", "fn", None),
     )
     _target, name, value, _note = measure_task(

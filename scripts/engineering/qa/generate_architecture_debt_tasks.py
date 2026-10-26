@@ -9,7 +9,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import cast
 
-from scripts.engineering.quality.architecture_debt_task_generation import (
+from bioetl.infrastructure.quality.architecture_debt_task_generation import (
     _default_output_path,
     generate_architecture_debt_tasks_payload,
 )
