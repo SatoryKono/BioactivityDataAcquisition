@@ -2,26 +2,26 @@
   "categories": [
     {
       "evidence_metrics": {
-        "layer_violations": 0
+        "layer_violations": 1
       },
       "id": "layer_compliance",
       "name": "Layer compliance",
-      "score": 10.0,
+      "score": 7.5,
       "weight": 0.13,
-      "weighted_score": 1.3
+      "weighted_score": 0.975
     },
     {
       "evidence_metrics": {
         "expired_compat_count": 0,
-        "layer_violations": 0,
+        "layer_violations": 1,
         "sunset_compat_count": 0,
         "transition_compat_count": 0
       },
       "id": "hexagonal_ports_adapters",
       "name": "Hexagonal / Ports & Adapters",
-      "score": 10.0,
+      "score": 8.5,
       "weight": 0.11,
-      "weighted_score": 1.1
+      "weighted_score": 0.935
     },
     {
       "evidence_metrics": {
@@ -37,7 +37,7 @@
     {
       "evidence_metrics": {
         "composition_util": 0.9458,
-        "layer_violations": 0,
+        "layer_violations": 1,
         "lazy_util": 0.0,
         "public_entrypoint_growth_count": 0,
         "public_export_facade_conflict_count": 0,
@@ -45,9 +45,9 @@
       },
       "id": "composition_di",
       "name": "Composition root / DI",
-      "score": 10.0,
+      "score": 8.5,
       "weight": 0.1,
-      "weighted_score": 1.0
+      "weighted_score": 0.85
     },
     {
       "evidence_metrics": {
@@ -103,15 +103,15 @@
         "contract_blocking_issue_count": 0,
         "dashboarded_without_declaration_count": 0,
         "dashboarded_without_emission_count": 0,
-        "layer_violations": 0,
+        "layer_violations": 1,
         "runtime_cardinality_review_required_count": 0,
         "runtime_cardinality_threshold_violation_count": 0
       },
       "id": "determinism_replay_observability",
       "name": "Determinism / replay / observability",
-      "score": 10.0,
+      "score": 9.5,
       "weight": 0.08,
-      "weighted_score": 0.8
+      "weighted_score": 0.76
     },
     {
       "evidence_metrics": {
@@ -183,8 +183,8 @@
     }
   },
   "generated_by": "scripts.engineering.quality.architecture_quality_scorecard",
-  "integral_score": 10.0,
-  "interpretation": "excellent",
+  "integral_score": 9.32,
+  "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 60,
     "adr_enforcement_blocking_gap_count": 0,
@@ -202,7 +202,7 @@
     "families_at_budget_count": 0,
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
-    "layer_violations": 0,
+    "layer_violations": 1,
     "lazy_import_cap": 0,
     "lazy_import_observed_count": 0,
     "lazy_util": 0.0,
@@ -250,7 +250,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "b23de06774a623bb324f5675db8a8a2cb90b07cf0e6bbf5f96e36c15612d5143"
+      "source_fingerprint": "ea4bf48c7c73d5496e05d124d97772429740b91101aec04f04128fc0af408c67"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
