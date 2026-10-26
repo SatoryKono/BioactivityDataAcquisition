@@ -248,14 +248,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_cli_doc_parity.py",
         "tests/architecture/test_documentation_sync.py",
     ),
-    **dict.fromkeys(
-        (
-            "docs/filters/inventory-baseline.csv",
-            "docs/filters/inventory-baseline.json",
-            "docs/filters/inventory-baseline.md",
-        ),
-        ("tests/architecture/test_silver_filter_boundary_inventory.py",),
-    ),
     ".github/workflows/docker.yml": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "reports/quality/architecture-debt-remote-main-baseline.md": (
         "tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py",
@@ -334,6 +326,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/reusable_action_pins.yaml": (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
     "scripts/engineering/repo/check_github_actions_runtime_policy.py": (
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
+    **dict.fromkeys(
+        (
+            "docs/filters/inventory-baseline.csv",
+            "docs/filters/inventory-baseline.json",
+            "docs/filters/inventory-baseline.md",
+        ),
+        ("tests/architecture/test_silver_filter_boundary_inventory.py",),
     ),
 }
 

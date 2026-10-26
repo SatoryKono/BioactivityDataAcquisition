@@ -359,6 +359,22 @@ def test_shadow_compare_routes_app001_audit_to_cancellation_contracts() -> None:
     }
 
 
+def test_shadow_compare_routes_silver_filter_inventory_baseline() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            "docs/filters/inventory-baseline.csv",
+            "docs/filters/inventory-baseline.json",
+            "docs/filters/inventory-baseline.md",
+        ],
+        repo_root=root,
+    )
+    assert report["covers_full_suite"] is False
+    assert report["selected"] == [
+        "tests/architecture/test_silver_filter_boundary_inventory.py"
+    ]
+
+
 def test_shadow_compare_routes_sec003_audit_to_metadata_parser() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
@@ -841,9 +857,6 @@ def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
             "configs/quality/generated_artifact_tests.json",
             "configs/quality/test_skip_inventory.yaml",
             "Dockerfile.bioetl",
-            "docs/filters/inventory-baseline.csv",
-            "docs/filters/inventory-baseline.json",
-            "docs/filters/inventory-baseline.md",
             "docs/reports/generated/documentation-cleanup-inventory.json",
             "docs/reports/generated/documentation-cleanup-inventory.md",
             "reports/performance/benchmark-summary.json",
@@ -866,7 +879,6 @@ def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
         "tests/architecture/test_docker_runtime_contracts.py",
         "tests/architecture/test_generated_artifact_routing.py",
         "tests/architecture/test_gitignore_secret_and_agents_policy.py",
-        "tests/architecture/test_silver_filter_boundary_inventory.py",
         "tests/architecture/test_tech_debt_issues_5559_5563_closeout.py",
         "tests/architecture/test_test_skip_inventory.py",
         "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
