@@ -14,7 +14,7 @@ __all__ = [
 
 from typing import Literal, Self
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from bioetl.domain.composite import (
     DependencyConfig,
@@ -32,6 +32,8 @@ from bioetl.domain.composite.strategy import FallbackStrategy
 
 class AggregationFieldSchema(BaseModel):
     """Pydantic schema for aggregation field specification."""
+
+    model_config = ConfigDict(extra="forbid")
 
     source: str = Field(
         ..., min_length=1, description="Source column name to aggregate"
@@ -60,6 +62,8 @@ class AggregationFieldSchema(BaseModel):
 
 class AggregationSchema(BaseModel):
     """Pydantic schema for 1:M enricher aggregation config."""
+
+    model_config = ConfigDict(extra="forbid")
 
     group_by: str = Field(..., min_length=1, description="Join key to group by")
     order_by: list[str] = Field(
@@ -98,6 +102,8 @@ class AggregationSchema(BaseModel):
 
 class SeedSchema(BaseModel):
     """Pydantic schema for seed pipeline configuration."""
+
+    model_config = ConfigDict(extra="forbid")
 
     pipeline: str = Field(..., min_length=1, description="Name of the seed pipeline")
     output_keys: list[str] = Field(
@@ -230,6 +236,8 @@ class DependencySchema(BaseModel):
 
 class EnricherSchema(BaseModel):
     """Pydantic schema for enricher pipeline configuration."""
+
+    model_config = ConfigDict(extra="forbid")
 
     pipeline: str = Field(
         ..., min_length=1, description="Name of the enricher pipeline"
