@@ -100,16 +100,12 @@ def _normalize_unicode_nfc(text: str) -> str:
 
 def _collapse_whitespace(text: str) -> str:
     """Collapse any whitespace sequence into a single space."""
-    # Optimization: str.split() + " ".join() is ~3-4x faster than re.sub(r"\s+", " ", text)
-    # By manually preserving leading/trailing spaces, we bypass regex engine overhead
-    # while maintaining exact functional parity for downstream data transformations.
-    try:
-        if not text.strip():
-            return " "
-        return (
-            (" " * text[0].isspace())
-            + " ".join(text.split())
-            + (" " * text[-1].isspace())
-        )
-    except IndexError:
+    # str.split() plus join avoids regex overhead. Preserve one boundary space
+    # when the original starts or ends with whitespace to match re.sub semantics.
+    if not text:
         return text
+    if not text.strip():
+        return " "
+    leading = " " if text[0].isspace() else ""
+    trailing = " " if text[-1].isspace() else ""
+    return leading + " ".join(text.split()) + trailing
