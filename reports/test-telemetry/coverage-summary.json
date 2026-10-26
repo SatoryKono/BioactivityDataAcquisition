@@ -4,7 +4,7 @@
   "source_run_id": "local-pr12231-local-coverage-8a4286d",
   "source_event": "local_coverage_verify",
   "source_run_url": null,
-  "source_tree_sha256": "467155f646ac8bc9d77c00e7582911c5e70ae55279bb041a3365226f19ed3ed5",
+  "source_tree_sha256": "97701960ca2b3cb9bf056406345def976bdc9d7a4a20b6756cb8d7e5a8f5b7e7",
   "refreshed_at_utc": "2026-10-15T18:50:07.879352+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.66,

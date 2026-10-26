@@ -144,6 +144,8 @@ class SeedSchema(BaseModel):
 class DependencySchema(BaseModel):
     """Pydantic schema for dependency pipeline configuration."""
 
+    model_config = ConfigDict(extra="forbid")
+
     pipeline: str = Field(
         ..., min_length=1, description="Name of the dependency pipeline"
     )

@@ -152,7 +152,6 @@ composite:
     join_keys:
     - target_id      # Direct join key from seed
     required: false         # Optional - many targets lack UniProt accessions
-    filter_condition: "target_id IS NOT NULL"
     timeout_seconds: 600
     silver_table: silver/uniprot/idmapping
 
