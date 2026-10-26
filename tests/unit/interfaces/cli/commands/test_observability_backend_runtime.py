@@ -37,8 +37,11 @@ from io import BytesIO
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
+from email.message import Message
 from urllib.error import HTTPError
+from urllib.request import Request
 
+import bioetl.infrastructure.observability.observability_backend_probes as probe_subject
 import bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details as failure_details_subject
 import bioetl.infrastructure.observability.observability_backend_process as process_subject
 import bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime as runtime_subject
@@ -126,6 +129,23 @@ def test_probe_observability_backend_uses_liveness_then_fallback() -> None:
     ]
 
 
+def test_probe_observability_backend_rejects_unsupported_schemes() -> None:
+    calls: list[str] = []
+
+    def fake_urlopen(url: str, timeout: float) -> object:
+        calls.append(url)
+        return object()
+
+    assert (
+        probe_observability_backend(
+            "file:///etc/passwd",
+            urlopen_fn=fake_urlopen,
+        )
+        is False
+    )
+    assert calls == []
+
+
 def test_probe_observability_backend_required_paths_uses_backend_base_url() -> None:
     calls: list[str] = []
 
@@ -211,6 +231,26 @@ def test_describe_required_probe_failure_checks_every_required_path() -> None:
     ]
 
 
+def test_describe_required_probe_failure_rejects_unsupported_schemes() -> None:
+    calls: list[str] = []
+
+    def fake_urlopen(url: str, timeout: float) -> object:
+        calls.append(url)
+        return object()
+
+    detail = runtime_subject._describe_required_probe_failure(
+        "file:///etc/passwd",
+        required_probe_paths=("/first",),
+        urlopen_fn=fake_urlopen,
+    )
+
+    assert (
+        detail
+        == "Capability probe file:///etc/passwd/first failed: unsupported URL scheme."
+    )
+    assert calls == []
+
+
 def test_open_url_uses_standard_library_opener(monkeypatch: pytest.MonkeyPatch) -> None:
     opener = MagicMock()
     build_opener = MagicMock(return_value=opener)
@@ -223,6 +263,16 @@ def test_open_url_uses_standard_library_opener(monkeypatch: pytest.MonkeyPatch) 
         "http://127.0.0.1:8081/health",
         timeout=1.5,
     )
+
+
+def test_probe_redirect_handler_rejects_ftp_location() -> None:
+    handler = probe_subject._HttpHttpsRedirectHandler()
+    request = Request("http://127.0.0.1:8081/health")
+    headers = Message()
+    headers["Location"] = "ftp://127.0.0.1/payload"
+
+    with pytest.raises(HTTPError, match="not allowed"):
+        handler.http_error_302(request, BytesIO(b""), 302, "Found", headers)
 
 
 def test_ensure_backend_returns_disabled_when_flag_is_off() -> None:
