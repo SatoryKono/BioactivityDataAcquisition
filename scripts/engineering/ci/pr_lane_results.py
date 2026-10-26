@@ -86,6 +86,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/security/test_pubmed_xxe_mitigation.py",
         "tests/unit/application/pipelines/pubmed/test_xml_parser.py",
     ),
+    "reports/engineering/cache_preflight_experiment_report.md": (
+        "tests/architecture/test_setup_python_uv_cache_policy.py",
+        "tests/architecture/test_conftest_session_caches.py",
+        "tests/architecture/test_pr_gate_complete.py",
+    ),
     ".github/workflows/docs.yml": (
         "tests/architecture/test_docs_governance_workflow.py",
         "tests/architecture/test_diagram_nightly_workflow.py",
