@@ -264,6 +264,8 @@ jobs:
         run: |
           set -euo pipefail
           trivy image \
+            --db-repository ghcr.io/aquasecurity/trivy-db:2 \
+            --db-repository mirror.gcr.io/aquasec/trivy-db:2 \
             --format json \
             --output reports/security/trivy-results.json \
             --severity CRITICAL,HIGH,MEDIUM,UNKNOWN \
@@ -311,6 +313,8 @@ jobs:
         run: |
           set -euo pipefail
           trivy image \
+            --db-repository ghcr.io/aquasecurity/trivy-db:2 \
+            --db-repository mirror.gcr.io/aquasec/trivy-db:2 \
             --format json \
             --output reports/security/trivy-base-results.json \
             --severity CRITICAL,HIGH,MEDIUM,UNKNOWN \
