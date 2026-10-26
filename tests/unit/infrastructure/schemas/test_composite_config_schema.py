@@ -43,15 +43,6 @@ from bioetl.infrastructure.schemas._composite_config_merge_schema import (
     MergeOutputSchema,
     TargetProteinClassificationProjectionSchema,
 )
-from bioetl.infrastructure.schemas._composite_config_policy_schema import (
-    NormalizedAnchorPolicySchema,
-    NormalizedJoinKeyPolicySchema,
-    PublicationIdentityJoinPolicySchema,
-    PubchemCompoundAnchorSchema,
-    PubchemCompoundJoinBoundarySchema,
-    UniprotIdMappingAnchorSchema,
-    UniprotIdMappingJoinBoundarySchema,
-)
 from bioetl.infrastructure.schemas.composite_config import (
     AggregationFieldSchema,
     AggregationSchema,
@@ -68,8 +59,15 @@ from bioetl.infrastructure.schemas.composite_config import (
     LineageSchema,
     MergeSchema,
     MergeSortBySchema,
+    NormalizedAnchorPolicySchema,
+    NormalizedJoinKeyPolicySchema,
+    PublicationIdentityJoinPolicySchema,
+    PubchemCompoundAnchorSchema,
+    PubchemCompoundJoinBoundarySchema,
     RetrySchema,
     SeedSchema,
+    UniprotIdMappingAnchorSchema,
+    UniprotIdMappingJoinBoundarySchema,
     validate_composite_config_payload,
 )
 
