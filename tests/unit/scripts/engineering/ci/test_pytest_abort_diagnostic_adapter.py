@@ -284,6 +284,8 @@ def test_launcher_descendant_is_gone_after_cleanup(
         assert not _pid_alive(child)
         assert "cleanup_incomplete" not in (manifest.cleanup_error or "")
         if os.name == "posix":
+            # Loaded runners may not reap both waiting parents within half
+            # the dump margin; the documented group fallback is valid too.
             assert manifest.diagnostic_signal_delivery in {
                 "leaf_descendants",
                 "leaf_descendants_then_process_group",
