@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-26T08:09:59.438835+00:00",
+  "generated_at": "2026-10-26T08:18:58.092425+00:00",
   "summary": {
     "total_scripts": 696,
     "status_counts": {
@@ -6057,7 +6057,7 @@
         },
         {
           "path": "tests/architecture/test_silver_filter_boundary_inventory.py",
-          "line": 427,
+          "line": 428,
           "source_group": "tests",
           "text": "\"Run: python scripts/data_quality/inventory_silver_filters_migration.py\\n\""
         }
