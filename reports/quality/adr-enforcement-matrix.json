@@ -1875,7 +1875,6 @@
       "decision_date": "2026-06-15",
       "decision_path": "docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md",
       "enforcement_owner_paths": [
-        "configs/quality/generated_artifact_tests.json",
         "configs/quality/scripts_inventory_manifest.json",
         "scripts/data_quality/inventory_silver_filters_migration.py",
         "scripts/data_quality/run_silver_gold_filter_parity.py",
@@ -1892,7 +1891,6 @@
         "configs/entities/chembl/molecule.yaml",
         "configs/entities/chembl/publication_term.yaml",
         "configs/entities/chembl/target.yaml",
-        "configs/quality/generated_artifact_tests.json",
         "configs/quality/scripts_inventory_manifest.json",
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",

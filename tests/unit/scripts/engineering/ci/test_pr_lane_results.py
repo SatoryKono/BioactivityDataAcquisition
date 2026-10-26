@@ -359,6 +359,22 @@ def test_shadow_compare_routes_app001_audit_to_cancellation_contracts() -> None:
     }
 
 
+def test_shadow_compare_routes_silver_filter_inventory_baseline() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            "docs/filters/inventory-baseline.csv",
+            "docs/filters/inventory-baseline.json",
+            "docs/filters/inventory-baseline.md",
+        ],
+        repo_root=root,
+    )
+    assert report["covers_full_suite"] is False
+    assert report["selected"] == [
+        "tests/architecture/test_silver_filter_boundary_inventory.py"
+    ]
+
+
 def test_shadow_compare_routes_sec003_audit_to_metadata_parser() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
@@ -1113,18 +1129,3 @@ def test_generated_artifact_directory_output_routes_descendants(
     )
 
     assert report["selected"] == [test_path]
-
-
-def test_shadow_compare_routes_silver_filter_inventory_baseline() -> None:
-    root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare(
-        [
-            "docs/filters/inventory-baseline.csv",
-            "docs/filters/inventory-baseline.json",
-            "docs/filters/inventory-baseline.md",
-        ],
-        repo_root=root,
-    )
-    assert report["selected"] == [
-        "tests/architecture/test_silver_filter_boundary_inventory.py"
-    ]
