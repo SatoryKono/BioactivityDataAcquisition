@@ -134,6 +134,7 @@ def test_delta_write_execution_edges(
 
     class _FakePopenTimeout:
         def __init__(self, *args, **kwargs):
+            self.args = args[0] if args else kwargs.get("args", [])
             self.stdout = None
             self.stderr = None
             self.returncode = None

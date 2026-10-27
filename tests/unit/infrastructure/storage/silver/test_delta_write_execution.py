@@ -379,10 +379,14 @@ def test_run_plain_delta_write_subprocess_timeout_reaps_child(
     """Timeout must clean up the child process and pipes without leaking."""
     table_path = tmp_path / "silver" / "entity" / "table"
     request = _make_request(str(table_path))
+    pid_path = tmp_path / "child.pid"
 
-    script = """
+    script = f"""
+import os
 import sys
 import time
+from pathlib import Path
+Path({str(pid_path)!r}).write_text(str(os.getpid()), encoding="utf-8")
 sys.stdout.write("started\\n")
 sys.stdout.flush()
 time.sleep(10)
@@ -401,6 +405,8 @@ time.sleep(10)
         )
     elapsed = time.monotonic() - start_time
     assert elapsed < 1.0
+    pid = int(pid_path.read_text(encoding="utf-8"))
+    assert not psutil.pid_exists(pid)
 
 
 def test_run_plain_delta_write_subprocess_cancel_reaps_child(
