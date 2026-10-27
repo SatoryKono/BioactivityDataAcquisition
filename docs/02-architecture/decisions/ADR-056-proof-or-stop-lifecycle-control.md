@@ -1,3 +1,16 @@
+______________________________________________________________________
+
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL maintainers
+Reviewers:
+
+- BioETL maintainers
+  Last verified: '2026-09-25'
+
+______________________________________________________________________
+
 # ADR-056: Proof-or-Stop lifecycle control
 
 **Status:** Accepted

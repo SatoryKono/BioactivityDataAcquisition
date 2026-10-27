@@ -108,6 +108,8 @@
       "decision_path": "docs/02-architecture/decisions/ADR-005-composition-layer-separation.md",
       "enforcement_owner_paths": [
         "configs/quality/scripts_inventory_manifest.json",
+        "tests/architecture/_cli_architecture_policy.py",
+        "tests/architecture/test_cli_architecture_policy.py",
         "tests/architecture/test_interfaces_no_infrastructure.py",
         "tests/unit/domain/ports/test_port_dtos.py",
         "tests/unit/interfaces/cli/commands/test_adr_commands.py"
@@ -131,6 +133,8 @@
         "src/bioetl/application/core/base.py",
         "src/bioetl/application/core/quarantine_manager.py",
         "src/bioetl/composition/__init__.py",
+        "tests/architecture/_cli_architecture_policy.py",
+        "tests/architecture/test_cli_architecture_policy.py",
         "tests/architecture/test_interfaces_no_infrastructure.py",
         "tests/unit/domain/ports/test_port_dtos.py",
         "tests/unit/interfaces/cli/commands/test_adr_commands.py"
@@ -2109,7 +2113,7 @@
         "tests/architecture/test_proof_or_stop_contract.py"
       ],
       "manual_exception": null,
-      "owner": "BioETL Team",
+      "owner": "BioETL maintainers",
       "status": "enforced",
       "title": "Proof-or-Stop Lifecycle Control"
     },
