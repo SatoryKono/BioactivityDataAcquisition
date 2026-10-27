@@ -436,6 +436,23 @@ def test_shadow_compare_routes_incident_operator_docs(path: str) -> None:
     ]
 
 
+@pytest.mark.parametrize(
+    "path",
+    (
+        "reports/audit-runs/20261026-p17-003-external-callers.md",
+        "reports/audit-runs/20261026-p17-003-external-callers/evidence.json",
+    ),
+)
+def test_shadow_compare_routes_p17_003_external_caller_report(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert report["covers_full_suite"] is False
+    assert report["selected"] == [
+        "tests/unit/scripts/ci/test_check_reusable_workflow_pins.py",
+        "tests/architecture/test_github_actions_runtime_policy.py",
+    ]
+
+
 def test_shadow_compare_routes_app002_port_map_to_port_contracts() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
