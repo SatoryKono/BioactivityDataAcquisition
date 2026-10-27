@@ -464,6 +464,7 @@ def test_shadow_compare_routes_security_suppression_registry() -> None:
         "tests/architecture/test_security_suppression_registry.py",
     ]
 
+
 def test_shadow_compare_routes_app002_port_map_to_port_contracts() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
