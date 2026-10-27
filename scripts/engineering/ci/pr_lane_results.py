@@ -312,7 +312,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
     "src/memory/rag/chunking.py": ("tests/unit/memory/test_rag_indexing.py",),
-    "scripts/engineering/ci/check_mypy_diagnostic_ratchet.py": (
+    "configs/quality/mypy_diagnostic_baseline.json": (
+        "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
+    ),
+    "scripts/engineering/ci/__init__.py": (
         "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
     ),
     "scripts/engineering/ci/publish_docker_image.sh": (

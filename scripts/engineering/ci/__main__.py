@@ -23,6 +23,7 @@ Commands:
     publish-scorecard  Publish approved source-bound Scorecard SARIF
     publish-docker  Publish the approved same-workflow scanned image
     nightly-shadow  Partition nightly evidence and guard mandatory skips
+    mypy-diagnostic-ratchet  Block growth of mypy error identities
 """
 
 from __future__ import annotations
@@ -384,10 +385,20 @@ def _gitleaks_boundaries(argv: list[str]) -> int:
     return int(not all(r["passed"] for r in results))
 
 
+def _mypy_diagnostic_ratchet(argv: list[str]) -> int:
+    """Run the diagnostic ratchet from the package helper."""
+    del argv
+    from scripts.engineering.ci import run_mypy_diagnostic_ratchet
+
+    return run_mypy_diagnostic_ratchet()
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     if argv and argv[0] == "gitleaks-boundaries":
         return _gitleaks_boundaries(argv[1:])
+    if argv and argv[0] == "mypy-diagnostic-ratchet":
+        return _mypy_diagnostic_ratchet(argv[1:])
     return dispatch_cli(
         argv,
         help_text=__doc__ or "",

@@ -4,10 +4,7 @@ from unittest import mock
 
 import pytest
 
-from scripts.engineering.ci.check_mypy_diagnostic_ratchet import (
-    _parse_mypy_output,
-    main,
-)
+from scripts.engineering.ci import _parse_mypy_output, run_mypy_diagnostic_ratchet
 
 pytestmark = pytest.mark.unit
 
@@ -43,15 +40,11 @@ def _repo_root(tmp_path: Path) -> Path:
 
 def _patch_repo(mock_resolve: mock.Mock, repo_root: Path) -> None:
     mock_resolve.return_value = (
-        repo_root
-        / "scripts"
-        / "engineering"
-        / "ci"
-        / "check_mypy_diagnostic_ratchet.py"
+        repo_root / "scripts" / "engineering" / "ci" / "__init__.py"
     )
 
 
-@mock.patch("scripts.engineering.ci.check_mypy_diagnostic_ratchet.Path.resolve")
+@mock.patch("scripts.engineering.ci.Path.resolve")
 def test_ratchet_pass(
     mock_resolve: mock.Mock, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -67,11 +60,11 @@ def test_ratchet_pass(
         encoding="utf-8",
     )
 
-    assert main() == 0
+    assert run_mypy_diagnostic_ratchet() == 0
     assert "Mypy diagnostic ratchet passed" in capsys.readouterr().out
 
 
-@mock.patch("scripts.engineering.ci.check_mypy_diagnostic_ratchet.Path.resolve")
+@mock.patch("scripts.engineering.ci.Path.resolve")
 def test_ratchet_fail_new_error(
     mock_resolve: mock.Mock, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -88,11 +81,11 @@ def test_ratchet_fail_new_error(
         encoding="utf-8",
     )
 
-    assert main() == 1
+    assert run_mypy_diagnostic_ratchet() == 1
     assert "Mypy diagnostic ratchet failed" in capsys.readouterr().out
 
 
-@mock.patch("scripts.engineering.ci.check_mypy_diagnostic_ratchet.Path.resolve")
+@mock.patch("scripts.engineering.ci.Path.resolve")
 def test_ratchet_missing_log_fails_closed(
     mock_resolve: mock.Mock, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -102,11 +95,11 @@ def test_ratchet_missing_log_fails_closed(
         "{}", encoding="utf-8"
     )
 
-    assert main() == 1
+    assert run_mypy_diagnostic_ratchet() == 1
     assert "mypy log file not found" in capsys.readouterr().out
 
 
-@mock.patch("scripts.engineering.ci.check_mypy_diagnostic_ratchet.Path.resolve")
+@mock.patch("scripts.engineering.ci.Path.resolve")
 def test_ratchet_invalid_baseline_json(
     mock_resolve: mock.Mock, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -117,5 +110,5 @@ def test_ratchet_invalid_baseline_json(
     )
     (repo_root / "reports" / "mypy_strict.log").write_text("", encoding="utf-8")
 
-    assert main() == 1
+    assert run_mypy_diagnostic_ratchet() == 1
     assert "Invalid JSON" in capsys.readouterr().out
