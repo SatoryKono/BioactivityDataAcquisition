@@ -691,9 +691,7 @@ def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
         )
 
     try:
-        parse_cli_architecture_contract(
-            importlinter_config.read_text(encoding="utf-8")
-        )
+        parse_cli_architecture_contract(importlinter_config.read_text(encoding="utf-8"))
     except CliArchitecturePolicyError as exc:
         pytest.fail(f"CLI architecture contract rejected: {exc}")
 
