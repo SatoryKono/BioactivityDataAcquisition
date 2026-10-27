@@ -25,6 +25,7 @@ FULL_SUITE_CONFIGURATION_PREFIXES = ("tool.pytest.ini_options",)
 NARROW_CONFIGURATION_PREFIXES = ("tool.setuptools.packages.find.exclude",)
 # Stub-only wheels have no runtime import owner. Keep reviewed ownership explicit.
 STUB_RUNTIME_DISTRIBUTIONS = {"types-openpyxl": ("openpyxl", "openpyxl")}
+# pip-audit / msgpack ownership: scripts/engineering/ci/pip_audit_owner.py
 
 
 def _name(value: str) -> str:
@@ -310,7 +311,24 @@ def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
     return sorted(consumers)
 
 
+def _package_dependency_edges(package: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return required and optional lock edges owned by one package entry."""
+    edges = [edge for edge in package.get("dependencies", []) if isinstance(edge, dict)]
+    optional = package.get("optional-dependencies")
+    if isinstance(optional, dict):
+        for group in optional.values():
+            if isinstance(group, list):
+                edges.extend(edge for edge in group if isinstance(edge, dict))
+    return edges
+
+
 def _lock_family(packages: list[dict[str, Any]], dependency: str) -> set[str]:
+    """Return the reverse dependency family, including optional extra edges.
+
+    Extra packages such as ``h2`` (via ``httpx[http2]``) appear under
+    ``optional-dependencies`` rather than required ``dependencies``. Walking
+    only the required list leaves those packages unconfirmed.
+    """
     family = {_name(dependency)}
     while True:
         parents = {
@@ -319,7 +337,7 @@ def _lock_family(packages: list[dict[str, Any]], dependency: str) -> set[str]:
             if package.get("source", {}).get("editable") != "."
             and any(
                 _name(edge["name"]) in family
-                for edge in package.get("dependencies", [])
+                for edge in _package_dependency_edges(package)
             )
         }
         expanded = family | parents

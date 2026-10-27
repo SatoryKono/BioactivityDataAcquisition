@@ -196,10 +196,13 @@ docs = [
 # msgpack / litellm floors: CVE-2026-114613 / CVE-2026-114612 (CI-MAP-7 / #12582).
 # Prefer litellm 1.102.2 (listed pip-audit fix). Avoid 1.103.0 (still vulnerable) and
 # 1.103.1+ (httpx[http2] → orphaned h2/hpack/hyperframe on the consumer-route gate).
+# Pin new AWS transitive entries to 7+ day aged releases (boto3/botocore 1.43.116).
 constraint-dependencies = [
     "virtualenv>=21.14.7",
     "msgpack>=1.2.3",
     "litellm>=1.102.2,<1.103.0",
+    "boto3>=1.43.1,<=1.43.116",
+    "botocore>=1.43.1,<=1.43.116",
 ]
 
 [tool.setuptools.packages.find]
