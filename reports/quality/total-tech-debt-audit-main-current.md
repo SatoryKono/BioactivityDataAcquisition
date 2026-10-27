@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `c4145e7d56f2582bf7517a7ab6034b04bed457ff2610c1f0545c3d56f9de779c`
+Evidence surface SHA-256: `86ee31f47f9c9e7ba242c8d26a68390929c14a7270b04236cd4b99c5c4f60acb`
 
 ## Current evidence summary
 
@@ -69,7 +69,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "c4145e7d56f2582bf7517a7ab6034b04bed457ff2610c1f0545c3d56f9de779c",
+  "evidence_surface_sha256": "86ee31f47f9c9e7ba242c8d26a68390929c14a7270b04236cd4b99c5c4f60acb",
   "metrics": {
     "architecture_integral_score": 10.0,
     "architecture_interpretation": "excellent",
