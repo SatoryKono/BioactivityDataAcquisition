@@ -31,6 +31,7 @@ from bioetl.domain.filtering import (
 )
 from bioetl.domain.filtering import InputFilterConfig as DomainInputFilterConfig
 from bioetl.domain.models.filter import ExtractionParams
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseGoldFiltersConfig,
     BaseInputFilterConfig,
@@ -145,6 +146,7 @@ class FilterConfigFile(BaseModel):
         input_filter: Input filtering configuration.
         silver_filters: Silver layer domain-level filter configuration.
         gold_filters: Gold layer filter configuration.
+        metadata: Non-executable filter metadata (registry + local YAML).
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -182,6 +184,16 @@ class FilterConfigFile(BaseModel):
         description=(
             "Versioned source-profile metadata for extraction_params. "
             "This is provider request policy, not a Silver filter."
+        ),
+    )
+    metadata: JsonDict = Field(
+        default_factory=dict,
+        description=(
+            "Non-executable ``filters.metadata`` section: policy notes and "
+            "registry-injected annotations (e.g. publication_filter_policy). "
+            "Documented open nested structure (JsonDict); not part of "
+            "to_domain() filter execution. Parent ``extra=forbid`` still "
+            "rejects unknown sibling keys."
         ),
     )
 
