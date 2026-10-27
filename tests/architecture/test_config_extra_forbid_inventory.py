@@ -85,9 +85,7 @@ def test_migration_debt_is_exact_identity_set_of_effective_ignore() -> None:
     assert debt == sorted(debt)
     assert len(debt) == payload["counts"]["effective_ignore"]
     live_ignore = sorted(
-        row["identity"]
-        for row in live["models"]
-        if row["effective_extra"] == "ignore"
+        row["identity"] for row in live["models"] if row["effective_extra"] == "ignore"
     )
     assert debt == live_ignore
 
@@ -128,9 +126,7 @@ def test_forbid_new_permissive_identities_after_baseline() -> None:
 
     live = build_payload()
     live_ignore = {
-        row["identity"]
-        for row in live["models"]
-        if row["effective_extra"] == "ignore"
+        row["identity"] for row in live["models"] if row["effective_extra"] == "ignore"
     }
     new_permissive = sorted(live_ignore - frozen)
     assert new_permissive == [], (
@@ -201,9 +197,7 @@ def test_dq_ingress_vs_projection_classification() -> None:
         row = models[identity]
         assert row["role"] == "dq-layer-projection"
         assert identity in payload["migration_debt_identities"]
-        assert "checks" in str(row.get("notes", "")) or identity.endswith(
-            "SinkConfig"
-        )
+        assert "checks" in str(row.get("notes", "")) or identity.endswith("SinkConfig")
 
     # SinkDQReportConfig must NOT credit a checks field (PSC-5).
     from bioetl.infrastructure.schemas.pipeline_config_common_schemas import (
@@ -296,6 +290,6 @@ def test_manifest_includes_workflow_and_contract_policy_roots() -> None:
             if row["identity"].endswith(f".{identity_suffix}")
         ]
         assert matches, identity_suffix
-        assert all(
-            row["reachable_from_runtime_roots"] is True for row in matches
-        ), matches
+        assert all(row["reachable_from_runtime_roots"] is True for row in matches), (
+            matches
+        )
