@@ -112886,7 +112886,7 @@
   "generator": "python -m scripts.docs generate-cleanup-inventory --update",
   "schema_version": 1,
   "source_inputs": [
-    "git ls-files",
+    "git -c core.quotepath=false ls-files -z",
     "bounded docs/reports local ignored docs scan",
     "configs/quality/repo_structure_catalog.yaml",
     "configs/quality/generated_artifact_routing.yaml",

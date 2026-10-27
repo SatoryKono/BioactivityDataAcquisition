@@ -186,14 +186,22 @@ def _repo_relative(path: Path) -> str:
 
 
 def _run_git_ls_files() -> list[str]:
+    """List tracked paths in UTF-8, independent of locale / core.quotepath.
+
+    Plain ``git ls-files`` under ``LANG=C`` (GitHub Actions default) quotes
+    non-ASCII paths with C-style octal escapes, which drops Cyrillic docs from
+    the inventory and fails ``--check`` against UTF-8 committed artifacts.
+    NUL-terminated listing with quotepath disabled matches CI and local checkouts.
+    """
     result = subprocess.run(
-        ["git", "ls-files"],
+        ["git", "-c", "core.quotepath=false", "ls-files", "-z"],
         cwd=PROJECT_ROOT,
         check=True,
-        text=True,
         stdout=subprocess.PIPE,
     )
-    return result.stdout.splitlines()
+    if not result.stdout:
+        return []
+    return [path.decode("utf-8") for path in result.stdout.split(b"\0") if path]
 
 
 def _is_quarantined_path(path: str) -> bool:
@@ -1069,7 +1077,7 @@ def _build_inventory() -> dict[str, Any]:
         "generator": "python -m scripts.docs generate-cleanup-inventory --update",
         "check_command": "python -m scripts.docs generate-cleanup-inventory --check",
         "source_inputs": [
-            "git ls-files",
+            "git -c core.quotepath=false ls-files -z",
             "bounded docs/reports local ignored docs scan",
             "configs/quality/repo_structure_catalog.yaml",
             "configs/quality/generated_artifact_routing.yaml",
