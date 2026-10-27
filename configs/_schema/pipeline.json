@@ -441,6 +441,7 @@
       "type": "object"
     },
     "ConditionalValidationConfig": {
+      "additionalProperties": false,
       "description": "Configuration for conditional validation rule.",
       "properties": {
         "name": {
@@ -521,6 +522,7 @@
       "type": "object"
     },
     "CrossFieldValidationConfig": {
+      "additionalProperties": false,
       "description": "Configuration for cross-field validation rule.",
       "properties": {
         "name": {
@@ -676,6 +678,7 @@
       ]
     },
     "DQReportYamlConfig": {
+      "additionalProperties": false,
       "description": "Configuration for DQ report generation.",
       "properties": {
         "enabled": {
@@ -727,6 +730,7 @@
       "type": "object"
     },
     "DQYamlConfig": {
+      "additionalProperties": false,
       "description": "Data Quality configuration.",
       "properties": {
         "soft_fail_threshold": {
@@ -894,6 +898,7 @@
       "type": "object"
     },
     "FieldValidationConfig": {
+      "additionalProperties": false,
       "description": "Configuration for a single field validation rule.",
       "properties": {
         "field": {

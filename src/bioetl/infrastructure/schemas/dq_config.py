@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from bioetl.domain.config import ConditionalValidation as DomainConditionalValidation
 from bioetl.domain.config import CrossFieldValidation as DomainCrossFieldValidation
@@ -56,6 +56,8 @@ class ThresholdsConfig(BaseModel):
         0.15
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     soft_fail: float = Field(
         default=0.05,
         ge=0.0,
@@ -88,6 +90,8 @@ class ThresholdsConfig(BaseModel):
 
 class KeyNullabilityRuleConfig(BaseModel):
     """Nullability policy for Silver merge/partition keys."""
+
+    model_config = ConfigDict(extra="forbid")
 
     field: str = Field(description="Field name")
     key_type: Literal["merge", "partition"] = Field(
@@ -144,6 +148,8 @@ class DQConfigFile(BaseModel):
         ... )
         >>> domain = config.to_domain()
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     # Metadata
     version: str = Field(
