@@ -1,0 +1,342 @@
+{
+  "code_search": [
+    {
+      "attempt": "initial",
+      "curl": "curl -sS -D - -o /tmp/search-body.json -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GH_TOKEN\" -H \"X-GitHub-Api-Version: 2022-11-28\" -G \"https://api.github.com/search/code\" --data-urlencode \"q=uses:SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-setup.yml\"",
+      "documentation_url": "https://docs.github.com/rest/search/search#search-code",
+      "elapsed_seconds": 0.208,
+      "endpoint": "GET https://api.github.com/search/code",
+      "http_status": 429,
+      "incomplete_results": null,
+      "items": [],
+      "message": "try again in 736.014796977s",
+      "process_exit_code": 1,
+      "query": "uses:SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-setup.yml",
+      "response_headers": {
+        "x-accepted-github-permissions": null,
+        "x-accepted-oauth-scopes": null,
+        "x-github-media-type": null,
+        "x-oauth-scopes": null,
+        "x-ratelimit-limit": "10",
+        "x-ratelimit-remaining": "10",
+        "x-ratelimit-resource": "code_search"
+      },
+      "status_field": "429",
+      "total_count": null
+    },
+    {
+      "attempt": "initial",
+      "curl": "curl -sS -D - -o /tmp/search-body.json -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GH_TOKEN\" -H \"X-GitHub-Api-Version: 2022-11-28\" -G \"https://api.github.com/search/code\" --data-urlencode \"q=uses:SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-mermaid-setup.yml\"",
+      "documentation_url": "https://docs.github.com/rest/search/search#search-code",
+      "elapsed_seconds": 0.229,
+      "endpoint": "GET https://api.github.com/search/code",
+      "http_status": 429,
+      "incomplete_results": null,
+      "items": [],
+      "message": "try again in 735.782770877s",
+      "process_exit_code": 1,
+      "query": "uses:SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-mermaid-setup.yml",
+      "response_headers": {
+        "x-accepted-github-permissions": null,
+        "x-accepted-oauth-scopes": null,
+        "x-github-media-type": null,
+        "x-oauth-scopes": null,
+        "x-ratelimit-limit": "10",
+        "x-ratelimit-remaining": "10",
+        "x-ratelimit-resource": "code_search"
+      },
+      "status_field": "429",
+      "total_count": null
+    },
+    {
+      "attempt": "initial",
+      "curl": "curl -sS -D - -o /tmp/search-body.json -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GH_TOKEN\" -H \"X-GitHub-Api-Version: 2022-11-28\" -G \"https://api.github.com/search/code\" --data-urlencode \"q=SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-setup.yml -repo:SatoryKono/BioactivityDataAcquisition\"",
+      "documentation_url": null,
+      "elapsed_seconds": 0.473,
+      "endpoint": "GET https://api.github.com/search/code",
+      "http_status": 200,
+      "incomplete_results": false,
+      "items": [],
+      "message": null,
+      "process_exit_code": 0,
+      "query": "SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-setup.yml -repo:SatoryKono/BioactivityDataAcquisition",
+      "response_headers": {
+        "x-accepted-github-permissions": null,
+        "x-accepted-oauth-scopes": null,
+        "x-github-media-type": null,
+        "x-oauth-scopes": null,
+        "x-ratelimit-limit": "10",
+        "x-ratelimit-remaining": "9",
+        "x-ratelimit-resource": "code_search"
+      },
+      "status_field": null,
+      "total_count": 0
+    },
+    {
+      "attempt": "initial",
+      "curl": "curl -sS -D - -o /tmp/search-body.json -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GH_TOKEN\" -H \"X-GitHub-Api-Version: 2022-11-28\" -G \"https://api.github.com/search/code\" --data-urlencode \"q=SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-mermaid-setup.yml -repo:SatoryKono/BioactivityDataAcquisition\"",
+      "documentation_url": "https://docs.github.com/rest/search/search#search-code",
+      "elapsed_seconds": 0.237,
+      "endpoint": "GET https://api.github.com/search/code",
+      "http_status": 429,
+      "incomplete_results": null,
+      "items": [],
+      "message": "try again in 735.975261441s",
+      "process_exit_code": 1,
+      "query": "SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-mermaid-setup.yml -repo:SatoryKono/BioactivityDataAcquisition",
+      "response_headers": {
+        "x-accepted-github-permissions": null,
+        "x-accepted-oauth-scopes": null,
+        "x-github-media-type": null,
+        "x-oauth-scopes": null,
+        "x-ratelimit-limit": "10",
+        "x-ratelimit-remaining": "9",
+        "x-ratelimit-resource": "code_search"
+      },
+      "status_field": "429",
+      "total_count": null
+    },
+    {
+      "attempt": "retry",
+      "curl": "curl -sS -D - -o /tmp/search-body.json -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GH_TOKEN\" -H \"X-GitHub-Api-Version: 2022-11-28\" -G \"https://api.github.com/search/code\" --data-urlencode \"q=SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-mermaid-setup.yml -repo:SatoryKono/BioactivityDataAcquisition\"",
+      "documentation_url": null,
+      "elapsed_seconds": 0.503,
+      "endpoint": "GET https://api.github.com/search/code",
+      "http_status": 200,
+      "incomplete_results": false,
+      "items": [],
+      "message": null,
+      "process_exit_code": 0,
+      "query": "SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-mermaid-setup.yml -repo:SatoryKono/BioactivityDataAcquisition",
+      "response_headers": {
+        "date": "Mon, 26 Oct 2026 18:05:41 GMT",
+        "x-accepted-github-permissions": null,
+        "x-accepted-oauth-scopes": null,
+        "x-github-media-type": null,
+        "x-github-request-id": "3276:AA940:5C97A58:12F6FE3A:6ADF9674",
+        "x-oauth-scopes": null,
+        "x-ratelimit-limit": "10",
+        "x-ratelimit-remaining": "9",
+        "x-ratelimit-resource": "code_search"
+      },
+      "stderr": "",
+      "total_count": 0
+    },
+    {
+      "attempt": "uses_qualifier_external",
+      "curl": "curl -sS -D - -o /tmp/search-body.json -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GH_TOKEN\" -H \"X-GitHub-Api-Version: 2022-11-28\" -G \"https://api.github.com/search/code\" --data-urlencode \"q=uses:SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-setup.yml -repo:SatoryKono/BioactivityDataAcquisition\"",
+      "documentation_url": "https://docs.github.com/rest/search/search#search-code",
+      "elapsed_seconds": 0.232,
+      "endpoint": "GET https://api.github.com/search/code",
+      "http_status": 429,
+      "incomplete_results": null,
+      "items": [],
+      "message": "try again in 226.150772ms",
+      "process_exit_code": 1,
+      "query": "uses:SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-setup.yml -repo:SatoryKono/BioactivityDataAcquisition",
+      "response_headers": {
+        "x-accepted-github-permissions": null,
+        "x-accepted-oauth-scopes": null,
+        "x-github-media-type": null,
+        "x-oauth-scopes": null,
+        "x-ratelimit-limit": "10",
+        "x-ratelimit-remaining": "8",
+        "x-ratelimit-resource": "code_search"
+      },
+      "status_field": "429",
+      "stderr": "gh: try again in 226.150772ms (HTTP 429)\n",
+      "total_count": null
+    },
+    {
+      "attempt": "uses_qualifier_external",
+      "curl": "curl -sS -D - -o /tmp/search-body.json -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GH_TOKEN\" -H \"X-GitHub-Api-Version: 2022-11-28\" -G \"https://api.github.com/search/code\" --data-urlencode \"q=uses:SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-mermaid-setup.yml -repo:SatoryKono/BioactivityDataAcquisition\"",
+      "documentation_url": "https://docs.github.com/rest/search/search#search-code",
+      "elapsed_seconds": 0.225,
+      "endpoint": "GET https://api.github.com/search/code",
+      "http_status": 429,
+      "incomplete_results": null,
+      "items": [],
+      "message": "try again in 5.767843ms",
+      "process_exit_code": 1,
+      "query": "uses:SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-mermaid-setup.yml -repo:SatoryKono/BioactivityDataAcquisition",
+      "response_headers": {
+        "x-accepted-github-permissions": null,
+        "x-accepted-oauth-scopes": null,
+        "x-github-media-type": null,
+        "x-oauth-scopes": null,
+        "x-ratelimit-limit": "10",
+        "x-ratelimit-remaining": "8",
+        "x-ratelimit-resource": "code_search"
+      },
+      "status_field": "429",
+      "stderr": "gh: try again in 5.767843ms (HTTP 429)\n",
+      "total_count": null
+    },
+    {
+      "attempt": "uses_qualifier_external_retry",
+      "curl": "curl -sS -D - -o /tmp/search-body.json -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GH_TOKEN\" -H \"X-GitHub-Api-Version: 2022-11-28\" -G \"https://api.github.com/search/code\" --data-urlencode \"q=uses:SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-setup.yml -repo:SatoryKono/BioactivityDataAcquisition\"",
+      "documentation_url": "https://docs.github.com/rest/search/search#search-code",
+      "elapsed_seconds": 0.257,
+      "endpoint": "GET https://api.github.com/search/code",
+      "http_status": 429,
+      "incomplete_results": null,
+      "items": [],
+      "message": "try again in 3.195041ms",
+      "process_exit_code": 1,
+      "query": "uses:SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-setup.yml -repo:SatoryKono/BioactivityDataAcquisition",
+      "response_headers": {
+        "x-accepted-github-permissions": null,
+        "x-accepted-oauth-scopes": null,
+        "x-github-media-type": null,
+        "x-oauth-scopes": null,
+        "x-ratelimit-limit": "10",
+        "x-ratelimit-remaining": "8",
+        "x-ratelimit-resource": "code_search"
+      },
+      "status_field": "429",
+      "stderr": "gh: try again in 3.195041ms (HTTP 429)\n",
+      "total_count": null
+    },
+    {
+      "attempt": "uses_qualifier_external_retry",
+      "curl": "curl -sS -D - -o /tmp/search-body.json -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GH_TOKEN\" -H \"X-GitHub-Api-Version: 2022-11-28\" -G \"https://api.github.com/search/code\" --data-urlencode \"q=uses:SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-mermaid-setup.yml -repo:SatoryKono/BioactivityDataAcquisition\"",
+      "documentation_url": null,
+      "elapsed_seconds": 0.512,
+      "endpoint": "GET https://api.github.com/search/code",
+      "http_status": 200,
+      "incomplete_results": false,
+      "items": [],
+      "message": null,
+      "process_exit_code": 0,
+      "query": "uses:SatoryKono/BioactivityDataAcquisition/.github/workflows/reusable-mermaid-setup.yml -repo:SatoryKono/BioactivityDataAcquisition",
+      "response_headers": {
+        "x-accepted-github-permissions": null,
+        "x-accepted-oauth-scopes": null,
+        "x-github-media-type": null,
+        "x-oauth-scopes": null,
+        "x-ratelimit-limit": "10",
+        "x-ratelimit-remaining": "7",
+        "x-ratelimit-resource": "code_search"
+      },
+      "status_field": null,
+      "stderr": "",
+      "total_count": 0
+    }
+  ],
+  "credential": {
+    "authorization_scheme": "Bearer",
+    "github_cli_account": "cursor",
+    "oauth_scopes_header": null,
+    "personal_tokens_from_prior_draft_available": false,
+    "prior_draft_token_names_not_remeasured": [
+      "GITHUB_TOKEN_02",
+      "SARIF_GITHUB_TOKEN"
+    ],
+    "token_class": "github_app_installation"
+  },
+  "local_commands": [
+    {
+      "command": [
+        "rg",
+        "-n",
+        "--glob",
+        "!reusable-setup.yml",
+        "reusable-setup\\.yml",
+        ".github/workflows"
+      ],
+      "cwd": "/workspace",
+      "elapsed_seconds": 0.011,
+      "match_count": 0,
+      "process_exit_code": 1,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "rg",
+        "-n",
+        "--glob",
+        "!reusable-mermaid-setup.yml",
+        "reusable-mermaid-setup\\.yml",
+        ".github/workflows"
+      ],
+      "cwd": "/workspace",
+      "elapsed_seconds": 0.01,
+      "match_count": 0,
+      "process_exit_code": 1,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "rg",
+        "-n",
+        "uses:[[:space:]]*.*reusable-(setup|mermaid-setup)\\.yml"
+      ],
+      "cwd": "/workspace",
+      "elapsed_seconds": 0.002,
+      "match_count": 0,
+      "process_exit_code": 1,
+      "stderr": "",
+      "stdout": ""
+    }
+  ],
+  "local_head_at_measurement": "6d1107096a7004b0cc1ed545fc60980f6571a904",
+  "measured_at_utc": "2026-10-26T18:03:42Z",
+  "schema_version": 1,
+  "user_endpoint": {
+    "curl": "curl -sS -D - -o /tmp/user-body.json -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GH_TOKEN\" -H \"X-GitHub-Api-Version: 2022-11-28\" \"https://api.github.com/user\"",
+    "documentation_url": "https://docs.github.com/rest/users/users#get-the-authenticated-user",
+    "elapsed_seconds": 0.272,
+    "http_status": 403,
+    "incomplete_results": null,
+    "items": [],
+    "message": "Resource not accessible by integration",
+    "method": "GET",
+    "process_exit_code": 1,
+    "response_headers": {
+      "date": "Mon, 26 Oct 2026 18:05:40 GMT",
+      "x-accepted-github-permissions": "allows_permissionless_access=true",
+      "x-accepted-oauth-scopes": null,
+      "x-github-media-type": "github.v3; format=json",
+      "x-github-request-id": "3266:2361F6:57CC9DE:11FEF4D8:6ADF9674",
+      "x-oauth-scopes": null,
+      "x-ratelimit-limit": "5000",
+      "x-ratelimit-remaining": "4944",
+      "x-ratelimit-resource": "core"
+    },
+    "stderr": "gh: Resource not accessible by integration (HTTP 403)\n",
+    "total_count": null,
+    "url": "https://api.github.com/user"
+  },
+  "workflow_content_revision": "173b6ff3eab1b99c7a84583518fee21fff89cfcd",
+  "workflow_git_blobs": {
+    ".github/workflows/reusable-mermaid-setup.yml": "d6f739ada337ca2e6127f4c3d6769ae72a61bd3b",
+    ".github/workflows/reusable-setup.yml": "264fdaed915448e5ecd00c9a74fbe5fed7211984"
+  },
+  "command_provenance_note": {
+    "scope": "external code_search records and the user_endpoint probe",
+    "curl_fields": "requested_or_illustrative_only; not evidence that curl executed",
+    "actual_invocation": "unknown for every external request because executed argv was not captured",
+    "observed_gh_prefixed_stderr": {
+      "code_search_indexes_1_based": [
+        6,
+        7,
+        8
+      ],
+      "user_endpoint": true,
+      "interpretation": "stderr text is retained verbatim; the gh: prefix does not establish the exact command or argv"
+    },
+    "other_stderr": "original missing or empty stderr states remain unchanged; no text was inferred",
+    "raw_http_status_exit_code_and_query_fields": "preserved unchanged",
+    "no_new_network_calls": true,
+    "raw_source": {
+      "commit": "bf3a00a936ed052155454fef66e0bf5367ba0bba",
+      "git_blob": "5a0711a25dbac8e20e26bd8b56d4310ec0411631",
+      "path": "reports/audit-runs/20261026-p17-003-external-callers/evidence.json",
+      "byte_count": 14204,
+      "sha256": "e0ebc9b82f06c4c088199af8e0c22350d9135028fcb3a395fd8f2c3d483ddcf3",
+      "original_fields_preserved_verbatim": true
+    }
+  }
+}
