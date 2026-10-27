@@ -11,11 +11,14 @@
 """Architecture test: pipeline configs must not contain unknown keys.
 
 PipelineYamlConfig uses ``extra="forbid"`` to reject unrecognised YAML
-fields at parse time.  This test loads every pipeline YAML through the
-standard loading pipeline and asserts that Pydantic validation succeeds.
+fields at parse time.  This test loads every expected entity pipeline YAML
+through the standard loading pipeline and asserts that Pydantic validation
+succeeds.
 
-If a new key is added to a YAML file without a corresponding model field,
-this test will fail with a ``ValidationError`` listing the unknown key.
+RF-001 (#12566): discovery is **fail-closed**. Unexpected load/resolve
+failures on the pinned expected list fail the suite; they must not be
+silently skipped via ``ValueError → continue``. An invalid unknown-key
+payload must fail (not be skipped).
 """
 
 from __future__ import annotations
@@ -27,9 +30,45 @@ import yaml
 from pydantic import ValidationError
 
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-# Discover all unified entity configs (provider/entity.yaml → provider_entity)
+pytestmark = pytest.mark.architecture
+
 _ENTITIES_DIR = Path("configs/entities")
+
+# Pinned expected provider_entity pipeline names (runtime entity catalog).
+# Disk discovery must match this set exactly; drift = fail.
+EXPECTED_ENTITY_PIPELINE_NAMES: frozenset[str] = frozenset(
+    {
+        "chembl_activity",
+        "chembl_assay",
+        "chembl_assay_parameters",
+        "chembl_cell_line",
+        "chembl_compound_record",
+        "chembl_molecule",
+        "chembl_protein_class",
+        "chembl_publication",
+        "chembl_publication_similarity",
+        "chembl_publication_term",
+        "chembl_subcellular_fraction",
+        "chembl_target",
+        "chembl_target_component",
+        "chembl_target_protein_classification",
+        "chembl_tissue",
+        "composite_activity",
+        "composite_assay",
+        "composite_molecule",
+        "composite_publication",
+        "composite_target",
+        "crossref_publication",
+        "openalex_publication",
+        "pubchem_compound",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "uniprot_idmapping",
+        "uniprot_protein",
+    }
+)
 
 
 def _has_pipeline_section(config_path: Path) -> bool:
@@ -45,26 +84,53 @@ def _has_pipeline_section(config_path: Path) -> bool:
     return isinstance(pipeline_section, dict)
 
 
-_PIPELINE_NAMES: list[str] = []
-for provider_dir in sorted(_ENTITIES_DIR.iterdir()):
-    if not provider_dir.is_dir() or provider_dir.name.startswith(("_", ".")):
-        continue
-    for yaml_file in sorted(provider_dir.glob("*.yaml")):
-        if yaml_file.name.startswith("_"):
+def discover_entity_pipeline_names(entities_dir: Path = _ENTITIES_DIR) -> list[str]:
+    """Discover provider_entity names that declare a pipeline section.
+
+    Fail-closed: does **not** call ``load_pipeline_config`` during discovery.
+    Load failures are asserted separately so broken configs cannot vanish
+    from parametrization via silent skip.
+    """
+    names: list[str] = []
+    for provider_dir in sorted(entities_dir.iterdir()):
+        if not provider_dir.is_dir() or provider_dir.name.startswith(("_", ".")):
             continue
-        if not _has_pipeline_section(yaml_file):
-            continue
-        pipeline_name = f"{provider_dir.name}_{yaml_file.stem}"
+        for yaml_file in sorted(provider_dir.glob("*.yaml")):
+            if yaml_file.name.startswith("_"):
+                continue
+            if not _has_pipeline_section(yaml_file):
+                continue
+            names.append(f"{provider_dir.name}_{yaml_file.stem}")
+    return names
+
+
+def test_entity_pipeline_discovery_matches_expected_list() -> None:
+    """Pinned expected list must match disk candidates (no silent drift)."""
+    discovered = frozenset(discover_entity_pipeline_names())
+    assert discovered == EXPECTED_ENTITY_PIPELINE_NAMES, (
+        "Entity pipeline discovery drifted from the pinned expected list.\n"
+        f"only_on_disk={sorted(discovered - EXPECTED_ENTITY_PIPELINE_NAMES)}\n"
+        f"only_expected={sorted(EXPECTED_ENTITY_PIPELINE_NAMES - discovered)}"
+    )
+
+
+def test_entity_pipeline_configs_load_fail_closed() -> None:
+    """Every expected entity pipeline config must load; failures are not skipped."""
+    failures: list[str] = []
+    for pipeline_name in sorted(EXPECTED_ENTITY_PIPELINE_NAMES):
         try:
-            # Keep strict-key coverage scoped to configs the runtime loader
-            # can resolve as entity pipelines.
             load_pipeline_config(pipeline_name)
-        except ValueError:
-            continue
-        _PIPELINE_NAMES.append(pipeline_name)
+        except Exception as exc:  # noqa: BLE001 — surface any resolve/load failure
+            failures.append(f"{pipeline_name}: {type(exc).__name__}: {exc}")
+    assert failures == [], (
+        "Fail-closed discovery: expected pipeline configs failed to load:\n"
+        + "\n".join(failures)
+    )
 
 
-@pytest.mark.parametrize("pipeline_name", _PIPELINE_NAMES)
+@pytest.mark.parametrize(
+    "pipeline_name", sorted(EXPECTED_ENTITY_PIPELINE_NAMES)
+)
 def test_pipeline_config_no_unknown_keys(pipeline_name: str) -> None:
     """Loading a pipeline config must not raise ValidationError for extra keys.
 
@@ -85,13 +151,22 @@ def test_pipeline_config_no_unknown_keys(pipeline_name: str) -> None:
                 + "from the YAML config."
             )
             pytest.fail(message)
-        raise  # Re-raise non-extra validation errors
-    except ValueError as exc:
-        # Defensive guard for mixed/stale test discovery environments where a
-        # non-pipeline stub (for example composite/* status files) may leak
-        # into parametrization.
-        if "missing 'pipeline' section" in str(exc):
-            pytest.skip(
-                f"Pipeline config '{pipeline_name}' is a non-pipeline stub and is skipped"
-            )
         raise
+
+
+def test_invalid_pipeline_config_unknown_key_fails() -> None:
+    """Negative: unknown keys on PipelineYamlConfig must fail, not be skipped."""
+    payload = {
+        "pipeline_name": "chembl_activity",
+        "provider": "chembl",
+        "entity_type": "activity",
+        "rf001_unknown_key_must_fail": True,
+    }
+    with pytest.raises(ValidationError) as exc_info:
+        PipelineYamlConfig.model_validate(payload)
+    extra_fields = [
+        error["loc"]
+        for error in exc_info.value.errors()
+        if error["type"] == "extra_forbidden"
+    ]
+    assert ("rf001_unknown_key_must_fail",) in extra_fields
