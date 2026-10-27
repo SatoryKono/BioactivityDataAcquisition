@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-26'
+  Last verified: '2026-10-27'
 
 ______________________________________________________________________
 
@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `perf/replace-any-with-logical-or-5102176891185862466`
-- Source commit: `8a4286d21becf1fe183acfaf3f051bc6f7916038`
-- Source run id: `local-pr12231-local-coverage-8a4286d`
-- Source event: `local_coverage_verify`
+- Source branch: `main`
+- Source commit: `ac6be17fc86eaf48b214deacb952f186a0b0114f`
+- Source run id: `0`
+- Source event: `push`
 - Source run URL: `pending`
-- Source tree sha256: `11a2a630932ab20518421d38484da760643938b24f2bfa959b686ff01877109a`
+- Source tree sha256: `1a21863aebfc15b2e445be175cf5f107681487411abc02d2469b43d754f5f461`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-15T18:50:07.879352+00:00`
+- Refreshed at (UTC): `2026-10-27T00:48:33.260808+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -102,7 +102,7 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `99.66%`
+- Actual coverage: `85.00%`
 - Threshold satisfied: `True`
 
 ## Duration Telemetry

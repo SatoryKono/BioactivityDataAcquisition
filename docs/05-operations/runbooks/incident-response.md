@@ -71,7 +71,7 @@ Symptoms and log messages are not alert identifiers.
 | `BioETLProviderRetriesExhausted` | One or two exhaustion events in one hour | [Retry exhaustion](#7-retry-exhaustion) |
 | `BioETLProviderRetriesExhaustedPersistent` | At least three exhaustion events in one hour | [Retry exhaustion](#7-retry-exhaustion) |
 | `BioETLCircuitBreakerStuckOpen` | Circuit-breaker state | [Circuit breaker](#8-circuit-breaker-stuck-open) |
-| `BioETLGoldValidationFailuresCritical` | `stage="gold"` hard-fail counter | [DQ runbook](pipeline-failure-dq.md) and [local triage](#3-schema-mismatch-gold-layer) |
+| `BioETLGoldValidationFailuresCritical` | Gold hard-fail validation | [DQ runbook](pipeline-failure-dq.md) and [local triage](#3-schema-mismatch-gold-layer) |
 
 ### 1. Provider HTTP Errors
 
@@ -109,50 +109,27 @@ Symptoms and log messages are not alert identifiers.
 
 ### 3. Schema Mismatch (Gold Layer)
 
-- **Alert**: `BioETLGoldValidationFailuresCritical`. The rule annotation still
-  points at the canonical
+- **Alert**: `BioETLGoldValidationFailuresCritical`; follow the canonical
   [Pipeline Failure — Data Quality](pipeline-failure-dq.md) procedure.
-- **Signal**: the expression counts
-  `increase(bioetl_dq_validation_failures_total{stage="gold", severity="hard_fail"}[15m])`.
-  Production emitters of that counter pass `stage="threshold"`, not
-  `stage="gold"`. A threshold hard-fail is a different signal.
-- **Thrown exception**: Gold write preparation raises `GoldContractValidationError`.
-  `reject_reason` carries `reason_code`, `rule_id`, `contract_version`, `field`,
-  and `message`. A record mismatch keeps `pandera.errors.SchemaError` or
-  `SchemaErrors` on `original`, and the message starts with
-  `Schema validation failed:`. A schema that is not strict fails first with
-  `rule_id` `gold.contract.strict_schema`.
-- **Validation result**: `ValidationResult` (`valid`, `errors`) is the value
-  returned by the Pandera validator. It is not the exception. ADR-018 records
-  that proposed name `SchemaValidationError` was not adopted and is not a
-  runtime type. The composite `ValidationResult` of `ValidationIssue` items is
-  a second return value, not this exception either.
-- **Severity**: P1 when the Gold write fails closed.
-- **Diagnosis**: A Gold hard-fail does not prove a new field or type. Read
-  `reject_reason` before deciding whether the record is malformed, a required
-  field is missing, or the contract itself changed.
+- **Symptom**: Pipeline fails with `schema-violations > 0` and `SchemaValidationError`.
+- **Severity**: P1.
+- **Diagnosis**: A Gold hard-fail does not prove upstream schema drift. Inspect the
+  exact rule, field/type, transformation, and raw record to distinguish malformed
+  data, contract violations, and actual schema changes.
 - **Action**:
-  1. Preserve the failed run. Read the exception class, `rule_id`,
-     `reason_code`, `field`, and the `original` type.
-  1. If the log says `DQ hard threshold exceeded` and the exception is
-     `DataQualityThresholdError`, follow the DQ runbook. That path records
-     `stage="threshold"`.
-  1. Compare the rejected record with the Gold contract only after
-     `reason_code` is a contract failure. Change the contract only when review
-     shows that the schema, not the record, is wrong. Do not weaken
-     nullability, schema checks, or quarantine rules to make the run pass.
+  1. Inspect the raw data in Bronze to identify the new field or type change.
+  1. Preserve the failed run and follow the DQ runbook; do not weaken nullability,
+     schema checks, or quarantine rules merely to make the run pass.
+  1. Change a contract only after evidence and review establish the intended
+     schema (requires a PR and release).
 
 ### 4. Lock Timeout
 
-- **Symptom**: No lock alertname exists. `LockAcquisitionError` reports
-  `Failed to acquire lock: {key}` and may append `(owned by {owner})`.
-  `LockLostError` reports `Lock lost: {key}` and may append `(run_id=...)`.
-  Soft TTL expiry on `MemoryLock` drops an entry only when that lock is not
-  held. Lease expiry is not published as an alert. Checkpoint alerts describe
-  checkpoint operations and are not lock detectors.
+- **Symptom**: Logs report "Lock expired", or a pipeline refuses to start.
+  This is a log symptom, not an alertname. Checkpoint alerts describe checkpoint
+  operations and are not lock-expiry detectors.
 - **Severity**: P2.
-- **Diagnosis**: A live local process still holds the in-process `MemoryLock`,
-  or the holder has already exited. Exit leaves no cross-process lock to steal.
+- **Diagnosis**: A previous local process crashed without releasing `MemoryLock`, or a job ran longer than the 4-hour hard limit.
 - **Action**:
   1. Check for stuck local Python processes running this pipeline.
   1. Identify the lock owner `run-id` from logs (or from the failed run context).

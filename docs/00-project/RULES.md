@@ -1926,10 +1926,10 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 | ---------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Auth failure           | `401 Unauthorized` в логах                     | Проверить/обновить `BIOETL-{PROVIDER}-API-KEY`                                                                                                         |
 | Rate limit exhausted   | `429` + пик `errors-total{type="recoverable"}` | Уменьшить `requests-per-second` в конфиге                                                                                                              |
-| Schema mismatch (Gold) | Выбрасывается `GoldContractValidationError` с `reject_reason`. `ValidationResult` (`valid`, `errors`) — возврат валидатора, не исключение. `SchemaValidationError` не является runtime-типом. Алерт `BioETLGoldValidationFailuresCritical` считает `stage="gold"`; действующий emitter пишет `stage="threshold"`. | Читать `reason_code`, `rule_id`, `field` и тип `original`. Контракт менять только после review. Порог DQ — `DataQualityThresholdError` и лог `DQ hard threshold exceeded`. |
+| Schema mismatch (Gold) | Pipeline fail + `schema-violations` > 0        | Проверить изменения API; обновить Gold-схему через ADR                                                                                                 |
 | Stale checkpoint       | Warning при старте                             | `--resume` для продолжения или удалить файл `data/output/checkpoints/{pipeline-name}.json` для рестарта                                                |
 | DQ errors exceed active `hard_fail` | Batch rejected or quarantined according to the active disposition policy | Проверить источник и действующий DQ surface: `configs/base/quality.yaml`, `configs/contracts/**`, inline `pipeline.dq_overrides`, или Silver DQ request |
-| Lock timeout           | Alertname нет. `LockAcquisitionError`: `Failed to acquire lock`. `LockLostError`: `Lock lost`. Истечение soft TTL `MemoryLock` не публикуется как alert. | Проверить живой процесс и owner `run-id`. `bioetl lock check/release` действует только в текущем процессе. |
+| Lock timeout           | Alert "Lock expired"                           | Проверить зомби-процессы; определить owner `run-id`; для same-process диагностики использовать `bioetl lock check/release --pipeline ... --run-id ...` |
 
 ## Приложение D: Схема Конфигурации Пайплайна
 

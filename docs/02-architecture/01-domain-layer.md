@@ -40,7 +40,7 @@ ______________________________________________________________________
 
 Ключевые характеристики:
 
-- Чистота: без реального filesystem/network I/O (норма в §3) и без инфраструктурных зависимостей. Исключение для
+- Чистота: без I/O и без инфраструктурных зависимостей. Исключение для
   schema-contract representation в `domain/schemas/` и `domain/contracts/`
   зафиксировано в [ADR-048](decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md).
 - Консистентность: инварианты удерживаются внутри aggregate boundaries.
@@ -635,15 +635,7 @@ strategy и не является решением для этого слоя.
 
 ## 3. Глобальные Инварианты Слоя
 
-- Domain не выполняет реальный filesystem/network I/O и не импортирует
-  infrastructure/application/interfaces. Чистые `urllib.parse` и
-  `PurePath`/path-value операции (тип, конструктор, арифметика пути)
-  разрешены. Запрещены сами I/O-вызовы: `Path.open`, `read_*`/`write_*`,
-  `urlopen` и side-effect `os.*`, включая обычные import-алиасы. Факт
-  импорта `pathlib` или `urllib.parse` I/O не является. Operation-based
-  проверка — `scripts/engineering/qa/report_domain_io_taint_inventory.py`:
-  имена разрешаются по импортам и прямым присваиваниям внутри модуля, без
-  межпроцедурного taint и без запрета одноимённого вызова только из-за имени.
+- Domain не выполняет I/O и не импортирует infrastructure/application/interfaces.
 - Между агрегатами взаимодействие строится через идентификаторы и доменные события, а не через инфраструктурные зависимости.
 - Value objects валидируют и нормализуют данные при создании.
 - Состояние агрегатов изменяется только через явные transition-методы.

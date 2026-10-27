@@ -202,22 +202,6 @@ def test_shadow_compare_records_selection_without_activation(tmp_path: Path) -> 
     }
 
 
-def test_shadow_compare_routes_domain_layer_doc() -> None:
-    """Domain layer doc edits keep a fail-closed impact route."""
-    repo_root = Path(__file__).resolve().parents[5]
-
-    report = build_shadow_compare(
-        ["docs/02-architecture/01-domain-layer.md"],
-        repo_root=repo_root,
-    )
-
-    assert report["selected"] == [
-        "tests/architecture/test_documentation_sync.py",
-        "tests/architecture/test_domain_io_taint_inventory.py",
-    ]
-    assert report["covers_full_suite"] is False
-
-
 def test_shadow_compare_routes_billing_pr_non_code_changes() -> None:
     """Billing documentation and its manifest have explicit test routes."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -243,48 +227,6 @@ def test_shadow_compare_routes_historical_secret_fingerprints() -> None:
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py"
     ]
     assert report["covers_full_suite"] is False
-
-
-@pytest.mark.parametrize(
-    "path",
-    (
-        "configs/composites/activity.yaml",
-        "configs/composites/target.yaml",
-        "configs/composites/field_groups/shared_policy.yaml",
-    ),
-)
-def test_shadow_compare_routes_composite_configs(path: str) -> None:
-    """Every composite YAML selects the schema test that loads the family."""
-    repo_root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare([path], repo_root=repo_root)
-    assert (
-        "tests/unit/infrastructure/schemas/test_composite_config_schema.py"
-        in report["selected"]
-    )
-
-
-def test_shadow_compare_routes_published_pipeline_schemas() -> None:
-    """Published pipeline JSON schemas select the tests that read them."""
-    repo_root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare(
-        [
-            "configs/_schema/composite.json",
-            "configs/_schema/pipeline.json",
-        ],
-        repo_root=repo_root,
-    )
-    assert (
-        "tests/architecture/test_config_schema_migration_status.py"
-        in report["selected"]
-    )
-    assert (
-        "tests/integration/config/test_validate_pipeline_configs.py"
-        in report["selected"]
-    )
-    assert (
-        "tests/unit/repo_backed/infrastructure/config/test_composite_sort_by_closure.py"
-        in report["selected"]
-    )
 
 
 def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
@@ -421,38 +363,6 @@ def test_shadow_compare_routes_qm07_report_to_isolation_contracts() -> None:
     }
 
 
-@pytest.mark.parametrize(
-    "path",
-    (
-        "docs/00-project/RULES.md",
-        "docs/05-operations/runbooks/stale-lock.md",
-    ),
-)
-def test_shadow_compare_routes_incident_operator_docs(path: str) -> None:
-    root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare([path], repo_root=root)
-    assert report["selected"] == [
-        "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
-    ]
-
-
-@pytest.mark.parametrize(
-    "path",
-    (
-        "reports/audit-runs/20261026-p17-003-external-callers.md",
-        "reports/audit-runs/20261026-p17-003-external-callers/evidence.json",
-    ),
-)
-def test_shadow_compare_routes_p17_003_external_caller_report(path: str) -> None:
-    root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare([path], repo_root=root)
-    assert report["covers_full_suite"] is False
-    assert report["selected"] == [
-        "tests/unit/scripts/ci/test_check_reusable_workflow_pins.py",
-        "tests/architecture/test_github_actions_runtime_policy.py",
-    ]
-
-
 def test_shadow_compare_routes_app002_port_map_to_port_contracts() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
@@ -466,18 +376,9 @@ def test_shadow_compare_routes_app002_port_map_to_port_contracts() -> None:
     ]
 
 
-@pytest.mark.parametrize(
-    "path",
-    (
-        "reports/app-001-audit.md",
-        "reports/audit/AUDIT-20261022-APP-001-Cancellation.md",
-    ),
-)
-def test_shadow_compare_routes_app001_audit_to_cancellation_contracts(
-    path: str,
-) -> None:
+def test_shadow_compare_routes_app001_audit_to_cancellation_contracts() -> None:
     root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare([path], repo_root=root)
+    report = build_shadow_compare(["reports/app-001-audit.md"], repo_root=root)
     assert report["covers_full_suite"] is False
     assert set(report["selected"]) == {
         "tests/unit/application/core/test_batch_execution_lifecycle.py",

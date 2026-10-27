@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4000 |
-| Tracked doc-like files | 4000 |
+| Doc-like files | 3995 |
+| Tracked doc-like files | 3995 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4000 |
+| tracked | 3995 |
 
 ## Lifecycle Counts
 
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 243 |
+| working_report | 238 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -55,7 +55,7 @@
 | Archived | 1553 |
 | Canonical | 76 |
 | Generated | 1064 |
-| Working | 556 |
+| Working | 551 |
 
 ## Surface Families
 
@@ -65,13 +65,13 @@
 | archive | 1553 |
 | canonical | 76 |
 | generated | 1064 |
-| working | 556 |
+| working | 551 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 274 |
+| archive-after-migration | 269 |
 | generate-automatically | 1064 |
 | keep | 2662 |
 
@@ -120,8 +120,6 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/runtime-receipt.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | Working | 0 | archive-after-migration |
-| `reports/12361_named_blocker.md` | Working | 0 | archive-after-migration |
-| `reports/NAMED_BLOCKER_12464.md` | Working | 0 | archive-after-migration |
 | `reports/acceptance/P04-REM-R10-acceptance-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/acceptance/P04-REM-R10-acceptance-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/acceptance/receipt-12069.md` | Working | 0 | archive-after-migration |
@@ -159,6 +157,8 @@
 | `reports/audit-runs/12107-r07/telemetry-applicability.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/telemetry-historical/coverage-summary.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/telemetry-historical/slowest-tests.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/telemetry-historical/squash-provenance.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07/tracking-responsibility-decision.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

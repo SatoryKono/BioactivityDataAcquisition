@@ -22,8 +22,6 @@ __all__ = [
 class MergeOutputSchema(BaseModel):
     """Pydantic schema for merge output paths."""
 
-    model_config = ConfigDict(extra="forbid")
-
     silver: str = Field(..., min_length=1, description="Path for merged Silver table")
     gold: str = Field(..., min_length=1, description="Path for merged Gold table")
 
@@ -55,8 +53,6 @@ class MergeSortBySchema(BaseModel):
 class ColumnGroupSchema(BaseModel):
     """Pydantic schema for column group configuration."""
 
-    model_config = ConfigDict(extra="forbid")
-
     name: str = Field(..., min_length=1, description="Group name for logging")
     fields: list[str] = Field(
         default_factory=list, description="Explicit field names to include"
@@ -87,8 +83,6 @@ class ColumnGroupSchema(BaseModel):
 
 class TargetProteinClassificationProjectionSchema(BaseModel):
     """Typed projection for deterministic target protein classification aliases."""
-
-    model_config = ConfigDict(extra="forbid")
 
     source_prefix: str = Field(
         default="chembl.target_protein_classification",

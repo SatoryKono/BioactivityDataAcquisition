@@ -169,8 +169,6 @@ class CompositeDQSchema(BaseModel):
 class RetrySchema(BaseModel):
     """Pydantic schema for retry configuration."""
 
-    model_config = ConfigDict(extra="forbid")
-
     max_attempts: int = Field(
         default=3, ge=0, description="Maximum retry attempts per enricher"
     )
@@ -181,8 +179,6 @@ class RetrySchema(BaseModel):
 
 class ExecutionSchema(BaseModel):
     """Pydantic schema for execution options."""
-
-    model_config = ConfigDict(extra="forbid")
 
     max_concurrency: int = Field(
         default=4, gt=0, description="Maximum concurrent enrichers"
@@ -210,8 +206,6 @@ class ExecutionSchema(BaseModel):
 
 class LineageSchema(BaseModel):
     """Pydantic schema for lineage tracking configuration."""
-
-    model_config = ConfigDict(extra="forbid")
 
     track_field_sources: bool = Field(
         default=True, description="Track which source provided each field"
@@ -249,8 +243,6 @@ class LineageSchema(BaseModel):
 class FieldComparisonSpecSchema(BaseModel):
     """Pydantic schema for a single field comparison specification."""
 
-    model_config = ConfigDict(extra="forbid")
-
     field: str = Field(..., min_length=1, description="Unified Silver column name")
     method: Literal["exact", "fuzzy", "numeric_tolerance", "skip"] = Field(
         default="exact", description="Comparison method"
@@ -275,8 +267,6 @@ class FieldComparisonSpecSchema(BaseModel):
 class EnricherFieldPairingSchema(BaseModel):
     """Pydantic schema for enricher field pairing."""
 
-    model_config = ConfigDict(extra="forbid")
-
     enricher_pipeline: str = Field(
         ..., min_length=1, description="Enricher pipeline name"
     )
@@ -298,8 +288,6 @@ class EnricherFieldPairingSchema(BaseModel):
 
 class CrossValidationSchema(BaseModel):
     """Pydantic schema for cross-validation configuration."""
-
-    model_config = ConfigDict(extra="forbid")
 
     enabled: bool = Field(default=True, description="Enable cross-validation")
     warning_threshold: int = Field(

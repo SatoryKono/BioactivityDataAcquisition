@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-26T19:23:12.751106+00:00",
+  "generated_at": "2026-10-26T09:24:10.400764+00:00",
   "summary": {
     "total_scripts": 697,
     "status_counts": {
@@ -11,7 +11,7 @@
       "agents": 11,
       "build": 18,
       "ci": 75,
-      "docs": 290,
+      "docs": 289,
       "other": 16,
       "scripts": 585,
       "skills": 13,
@@ -2896,7 +2896,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 309,
+          "line": 280,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3678,7 +3678,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 308,
+          "line": 279,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3733,7 +3733,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 307,
+          "line": 278,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -10453,7 +10453,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 888,
+          "line": 807,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         }
@@ -10478,7 +10478,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 241,
+          "line": 216,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10521,7 +10521,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 315,
+          "line": 286,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -12858,7 +12858,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 192,
+          "line": 173,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -12882,13 +12882,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 363,
+          "line": 323,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 376,
+          "line": 336,
           "source_group": "tests",
           "text": "if path == \"scripts/engineering/dev/zed_mypy.py\":"
         }
@@ -17178,14 +17178,8 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
-        {
-          "path": "docs/02-architecture/01-domain-layer.md",
-          "line": 644,
-          "source_group": "docs",
-          "text": "проверка — `scripts/engineering/qa/report_domain_io_taint_inventory.py`:"
-        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 42,
@@ -17202,7 +17196,7 @@
           "path": "tests/architecture/test_domain_io_taint_inventory.py",
           "line": 20,
           "source_group": "tests",
-          "text": "from scripts.engineering.qa.report_domain_io_taint_inventory import ("
+          "text": "from scripts.engineering.qa.report_domain_io_taint_inventory import build_payload"
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
@@ -20164,13 +20158,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 540,
+          "line": 459,
           "source_group": "tests",
           "text": "\"src/bioetl/infrastructure/quality/scoring.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 541,
+          "line": 460,
           "source_group": "tests",
           "text": "\"scripts/engineering/quality/scoring.py\","
         },
@@ -20541,13 +20535,13 @@
         },
         {
           "path": "docs/05-operations/runbooks/incident-response.md",
-          "line": 177,
+          "line": 154,
           "source_group": "docs",
           "text": "2. Replace failing references with vetted pinned SHAs from CI runtime policy (see `scripts/engineering/repo/check_github_actions_runtime_policy.py`)."
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 368,
+          "line": 332,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23547,7 +23541,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 433,
+          "line": 397,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },

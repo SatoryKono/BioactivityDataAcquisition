@@ -346,7 +346,6 @@
       "type": "object"
     },
     "ColumnGroupConfig": {
-      "additionalProperties": false,
       "description": "Configuration for a column group in output ordering.\n\nDefines how columns are grouped and ordered in the merged output.\nColumns can be matched by explicit field names or regex patterns.\n\nAttributes:\n    name: Group name for logging/debugging.\n    fields: Explicit list of field names to include in this group.\n        Matches both exact field names and prefixed versions\n        (e.g., \"title\" matches \"title\" and \"crossref.title\").\n    pattern: Regex pattern to match field names.\n        Applied after explicit field matching.\n    provider_order: Order of providers within this group.\n        Seed columns (no prefix) always come first.\n\nExample:\n    >>> group = ColumnGroupConfig(\n    ...     name=\"title\",\n    ...     fields=(\"title\", \"vernacular_title\"),\n    ...     provider_order=(\"chembl\", \"crossref\", \"openalex\"),\n    ... )",
       "properties": {
         "name": {
@@ -395,7 +394,6 @@
       "type": "object"
     },
     "ColumnGroupSchema": {
-      "additionalProperties": false,
       "description": "Pydantic schema for column group configuration.",
       "properties": {
         "name": {
@@ -789,7 +787,6 @@
       "type": "object"
     },
     "DataSchemaConfig": {
-      "additionalProperties": false,
       "description": "Top-level schema configuration for composite pipeline column management.\n\nDefines shared column groups and per-layer (Silver/Gold) column selection\nrules used during the merge phase of composite pipelines.",
       "properties": {
         "column_groups": {
@@ -1229,7 +1226,6 @@
       "type": "object"
     },
     "LayerColumnConfig": {
-      "additionalProperties": false,
       "description": "Column selection configuration for a single Medallion layer.\n\nSupports three mutually exclusive selection modes: explicit column list,\ngroup inclusion, or full column group definitions. Exactly one mode\nmay be active; specifying more than one raises ``ValueError``.",
       "properties": {
         "columns": {

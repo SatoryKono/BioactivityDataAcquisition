@@ -2,7 +2,7 @@
 
 **Revision SHA:** f07ead17df6283b9a7d2d8bfc7e10e2358f97c8b
 **Method:** Static AST analysis for explicit `Port` interface declarations
-**Wiring correction:** checked against composition factories at `f07ead17df6283b9a7d2d8bfc7e10e2358f97c8b`. `CheckpointPort` resolves to `LocalCheckpointAdapter` via `create_checkpoint()`, `QuarantinePort` resolves to `UnifiedQuarantineAdapter` via `create_quarantine()`, and `BronzeStoragePort` / `MergedStoragePort` resolve to `StorageBundle` via `bootstrap_storage_adapter()`. Names with no class in the tree stay `NOT_VERIFIABLE`.
+**Wiring correction:** checked against composition factories at `f5c3b438160ff79af9e16be7333c84f8e6a61805`. `CheckpointPort` resolves to `LocalCheckpointAdapter` via `create_checkpoint()`, `QuarantinePort` resolves to `UnifiedQuarantineAdapter` via `create_quarantine()`, and `BronzeStoragePort` / `MergedStoragePort` resolve to `StorageBundle` via `bootstrap_storage_adapter()`. Names with no class in the tree stay `NOT_VERIFIABLE`.
 
 ## 1. Use Cases and their Ports
 
