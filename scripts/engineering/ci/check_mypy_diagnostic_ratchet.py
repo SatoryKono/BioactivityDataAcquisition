@@ -1,15 +1,21 @@
 """Diagnostic ratchet to prevent regression in type debt."""
+
 import json
 import sys
 from pathlib import Path
 from collections import defaultdict
 from typing import Any
 
+
 def _parse_mypy_output(log_path: Path) -> dict[str, dict[str, dict[str, int]]]:
     """Parse mypy log output into a dict of module -> message -> code -> count."""
-    diagnostics: dict[str, dict[str, dict[str, int]]] = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+    diagnostics: dict[str, dict[str, dict[str, int]]] = defaultdict(
+        lambda: defaultdict(lambda: defaultdict(int))
+    )
     if not log_path.exists():
-        raise FileNotFoundError(f"mypy log file not found at {log_path}. Ensure mypy runs before this script.")
+        raise FileNotFoundError(
+            f"mypy log file not found at {log_path}. Ensure mypy runs before this script."
+        )
 
     with open(log_path, "r", encoding="utf-8") as f:
         for line in f:
@@ -23,7 +29,7 @@ def _parse_mypy_output(log_path: Path) -> dict[str, dict[str, dict[str, int]]]:
             code_start = msg_and_code.rfind("[")
             code_end = msg_and_code.rfind("]")
             if code_start != -1 and code_end != -1 and code_end > code_start:
-                code = msg_and_code[code_start + 1:code_end]
+                code = msg_and_code[code_start + 1 : code_end]
                 msg = msg_and_code[:code_start].strip()
             else:
                 code = "unknown"
@@ -32,6 +38,7 @@ def _parse_mypy_output(log_path: Path) -> dict[str, dict[str, dict[str, int]]]:
             diagnostics[file_path][msg][code] += 1
 
     return diagnostics
+
 
 def main() -> int:
     repo_root = Path(__file__).resolve().parents[3]
@@ -57,7 +64,9 @@ def main() -> int:
             for code, count in codes.items():
                 baseline_count = baseline.get(file_path, {}).get(msg, {}).get(code, 0)
                 if count > baseline_count:
-                    errors.append(f"{file_path}: count for '{msg}' [{code}] increased from {baseline_count} to {count}")
+                    errors.append(
+                        f"{file_path}: count for '{msg}' [{code}] increased from {baseline_count} to {count}"
+                    )
 
     if errors:
         print("::error::Mypy diagnostic ratchet failed. New type errors introduced:")
@@ -67,6 +76,7 @@ def main() -> int:
 
     print("::notice::Mypy diagnostic ratchet passed.")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
