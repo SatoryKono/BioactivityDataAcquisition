@@ -12,7 +12,7 @@ __all__ = ["PUBMED_FETCH_ERRORS", "PubMedFetchMixin"]
 import asyncio
 import contextlib
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import httpx
 
@@ -88,6 +88,7 @@ class PubMedFetchMixin(PubMedAdapterStateMixin):
 
             with contextlib.suppress(Exception):
                 # Pseudo-response keeps request-collector metrics after streaming.
+                # ``content`` is required: APIRequestCollector reads response.content.
                 class PseudoResponse:
                     def __init__(
                         self, original: httpx.Response, text_content: str
@@ -97,10 +98,15 @@ class PubMedFetchMixin(PubMedAdapterStateMixin):
                         self.url = original.url
                         self.text = text_content
                         self.request = original.request
+                        self._content = text_content.encode("utf-8")
+
+                    @property
+                    def content(self) -> bytes:
+                        return self._content
 
                 self._request_collector.record_from_response(
-                    PseudoResponse(response, xml_text),
-                    duration_ms,  # type: ignore[arg-type]
+                    cast(httpx.Response, PseudoResponse(response, xml_text)),
+                    duration_ms,
                 )
 
             root = PubMedXmlProcessor.parse_response(xml_text)

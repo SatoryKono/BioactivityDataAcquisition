@@ -31,12 +31,25 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
 
+import httpx
 import pytest
 
 from bioetl.infrastructure.adapters.pubmed import ENTREZ_API_BASE, PubMedAdapter
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 pytestmark = pytest.mark.unit
+
+_STREAM_XML = """<?xml version="1.0"?>
+<PubmedArticleSet>
+  <PubmedArticle>
+    <MedlineCitation>
+      <PMID>12345678</PMID>
+      <Article>
+        <ArticleTitle>Stream Metadata Title</ArticleTitle>
+      </Article>
+    </MedlineCitation>
+  </PubmedArticle>
+</PubmedArticleSet>"""
 
 
 @pytest.fixture
@@ -115,3 +128,40 @@ def test_request_metadata__resets_request_count__e1eb5603(
     adapter.clear_request_collector()
 
     assert adapter.request_count == 0
+
+
+@pytest.mark.asyncio
+async def test_fetch_batch_records_streamed_response_size(
+    adapter: PubMedAdapter,
+    mock_http_client: AsyncMock,
+) -> None:
+    """``_fetch_batch`` must record PseudoResponse.content size after streaming.
+
+    Existing metadata tests only call ``record_request`` directly; this path
+    exercises ``record_from_response`` via the streamed efetch body so a
+    missing ``content`` attribute cannot regress silently.
+    """
+    xml_bytes = _STREAM_XML.encode("utf-8")
+    efetch_response = MagicMock()
+    efetch_response.status_code = 200
+    efetch_response.headers = httpx.Headers({})
+    efetch_response.url = httpx.URL(f"{ENTREZ_API_BASE}efetch.fcgi")
+    efetch_response.request = MagicMock(method="GET")
+    efetch_response.aclose = AsyncMock()
+
+    async def mock_aiter():
+        yield xml_bytes
+
+    efetch_response.aiter_bytes.return_value = mock_aiter()
+    mock_http_client.stream = AsyncMock(return_value=efetch_response)
+    mock_http_client.timeout = 10.0
+    mock_http_client.read_timeout_multiplier = 2.0
+
+    records = await adapter._fetch_batch(["12345678"])
+
+    assert len(records) == 1
+    assert adapter.request_count == 1
+    metadata = adapter.get_source_metadata()
+    assert metadata.total_requests == 1
+    assert metadata.api_requests[0].response_size_bytes == len(xml_bytes)
+    assert metadata.api_requests[0].status_code == 200
