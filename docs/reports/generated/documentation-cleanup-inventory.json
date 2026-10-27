@@ -104472,6 +104472,34 @@
     {
       "canonical_successor": null,
       "catalog_lifecycle": null,
+      "commit_policy": "tracked_quality_baseline",
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "current",
+      "generated_route": "config-extra-forbid-inventory-quality-baseline",
+      "generated_route_exception": null,
+      "generator": "tests/architecture/_config_extra_forbid_inventory.py",
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "active_quality_baseline",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/quality/config-extra-forbid-inventory.json",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
       "commit_policy": null,
       "declared_class": null,
       "declared_status": null,
@@ -112294,6 +112322,16 @@
     },
     {
       "commit_policy": "tracked_quality_baseline",
+      "generator": "tests/architecture/_config_extra_forbid_inventory.py",
+      "id": "config-extra-forbid-inventory-quality-baseline",
+      "notes": "PSC RF-001 (#12566) effective-extra inventory, dual debt registries, and full runtime-root nested-path manifest. Does not migrate forbid (RF-002).\n",
+      "output_kind": "working_report",
+      "outputs": [
+        "reports/quality/config-extra-forbid-inventory.json"
+      ]
+    },
+    {
+      "commit_policy": "tracked_quality_baseline",
       "generator": "scripts/engineering/qa/report_contract_coverage_matrix.py",
       "id": "contract-coverage-matrix-quality-baseline",
       "notes": "Contract coverage matrix JSON/MD pair is a generated tracked baseline for entity config contract coverage; regenerate both together.",
@@ -112895,7 +112933,7 @@
   "summary": {
     "by_lifecycle": {
       "active_backlog": 1,
-      "active_quality_baseline": 116,
+      "active_quality_baseline": 117,
       "closeout_evidence": 166,
       "docs_reports_curated_entrypoint": 2,
       "docs_reports_curated_or_historical_report": 28,
@@ -112913,7 +112951,7 @@
     "by_recommended_action": {
       "archive-after-migration": 273,
       "generate-automatically": 1066,
-      "keep": 2663
+      "keep": 2664
     },
     "by_section": {
       ".github": 6,
@@ -112937,7 +112975,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 592,
+      "reports": 593,
       "security": 2
     },
     "by_status": {
@@ -112945,21 +112983,21 @@
       "Archived": 1554,
       "Canonical": 76,
       "Generated": 1066,
-      "Working": 555
+      "Working": 556
     },
     "by_surface_family": {
       "active": 751,
       "archive": 1554,
       "canonical": 76,
       "generated": 1066,
-      "working": 555
+      "working": 556
     },
     "by_tracking_state": {
-      "tracked": 4002
+      "tracked": 4003
     },
     "docs_reports_local_count": 59,
     "duplicate_group_count": 80,
-    "generated_route_count": 75,
+    "generated_route_count": 76,
     "generated_without_route_count": 214,
     "generated_without_route_or_exception_count": 0,
     "github_issue_lifecycle_counts": {
@@ -112968,8 +113006,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4002,
+    "total_doc_like": 4003,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4002
+    "total_doc_like_tracked": 4003
   }
 }
