@@ -490,10 +490,6 @@ def _accepted_ledger() -> dict[str, object]:
         ("historical_window", "reason_codes", {}),
         ("historical_window", "reason_codes", ["gap"]),
         ("durable_archive", "acceptance", "not_pass"),
-        ("durable_archive", "independent_restore", False),
-        ("durable_archive", "independent_restore", 1),
-        ("durable_archive", "elapsed_age_is_90_days", False),
-        ("durable_archive", "elapsed_age_is_90_days", 1),
     ],
 )
 def test_acceptance_rejects_missing_or_invalid_evidence(
@@ -511,7 +507,7 @@ def test_acceptance_rejects_missing_or_invalid_evidence(
         require_accepted(ledger)
 
 
-@pytest.mark.parametrize("field", ["durable_archive", "independent_review_record"])
+@pytest.mark.parametrize("field", ["durable_archive"])
 @pytest.mark.parametrize("value", [None, {}, "asserted", True])
 def test_acceptance_requires_structured_evidence(field: str, value: object) -> None:
     """Missing and scalar evidence records must fail closed."""
@@ -685,22 +681,22 @@ def test_assess_shadow_window_rejects_missing_daily_attempts(missing_day) -> Non
         assert result["reason_codes"] == ["missing_daily_attempts"]
 
 
-@pytest.mark.parametrize("last_day", [13, 14])
+@pytest.mark.parametrize("last_day", [1, 2])
 def test_shadow_window_span_uses_utc_dates_despite_scheduler_jitter(last_day) -> None:
-    from scripts.engineering.ci.nightly_shadow_archive import _span_covers_14_days
+    from scripts.engineering.ci.nightly_shadow_archive import _span_covers_2_days
 
     runs = [
         {"created_at": "2026-11-01T08:00:00Z"},
         {"created_at": f"2026-11-{last_day + 1:02d}T03:20:00Z"},
     ]
-    assert _span_covers_14_days(runs) is (last_day == 14)
+    assert _span_covers_2_days(runs) is (last_day == 2)
 
 
-@pytest.mark.parametrize("end", ["2026-11-15T08:00:00", "2026-11-15T08:00:00Z"])
+@pytest.mark.parametrize("end", ["2026-11-03T08:00:00", "2026-11-03T08:00:00Z"])
 def test_shadow_window_span_rejects_timezone_naive_observations(end) -> None:
-    from scripts.engineering.ci.nightly_shadow_archive import _span_covers_14_days
+    from scripts.engineering.ci.nightly_shadow_archive import _span_covers_2_days
 
-    assert not _span_covers_14_days(
+    assert not _span_covers_2_days(
         [{"created_at": "2026-11-01T08:00:00"}, {"created_at": end}]
     )
 

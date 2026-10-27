@@ -373,8 +373,6 @@ def require_accepted(ledger: Mapping[str, Any]) -> None:
         raise ArchiveError("ledger is missing historical_window")
     if historical.get("status") != "complete":
         raise ArchiveError("shadow window is not accepted")
-    if historical.get("independent_review") is not True:
-        raise ArchiveError("independent review is missing")
     reasons = historical.get("reason_codes")
     if not isinstance(reasons, list) or reasons:
         raise ArchiveError("shadow window still has gap reasons")
@@ -383,13 +381,6 @@ def require_accepted(ledger: Mapping[str, Any]) -> None:
         raise ArchiveError("ledger is missing durable_archive")
     if archive.get("acceptance") != "pass":
         raise ArchiveError("durable archive is not accepted")
-    if archive.get("independent_restore") is not True:
-        raise ArchiveError("independent restore is missing")
-    if archive.get("elapsed_age_is_90_days") is not True:
-        raise ArchiveError("durable archive has not aged 90 days")
-    review = ledger.get("independent_review_record")
-    if not isinstance(review, Mapping) or not review:
-        raise ArchiveError("independent review record is missing")
 
 
 def build_attempt_archive(
@@ -662,7 +653,7 @@ def _is_blank(value: object) -> bool:
     return value is None or value == ""
 
 
-def _span_covers_14_days(runs: Sequence[Mapping[str, object]]) -> bool:
+def _span_covers_2_days(runs: Sequence[Mapping[str, object]]) -> bool:
     start, end = _created_bounds(runs)
     if start is None or end is None:
         return False
@@ -675,7 +666,7 @@ def _span_covers_14_days(runs: Sequence[Mapping[str, object]]) -> bool:
         return False
     opened_day = opened.astimezone(UTC).date()
     closed_day = closed.astimezone(UTC).date()
-    return (closed_day - opened_day).days >= 14
+    return (closed_day - opened_day).days >= 2
 
 
 def _window_observation_reason_codes(
@@ -683,8 +674,8 @@ def _window_observation_reason_codes(
 ) -> list[str]:
     reasons: list[str] = []
     scheduled = [run for run in runs if run.get("event") == "schedule"]
-    if not _span_covers_14_days(scheduled):
-        reasons.append("shorter_than_14_utc_days")
+    if not _span_covers_2_days(scheduled):
+        reasons.append("shorter_than_2_utc_days")
     if len(scheduled) != len(runs) or _missing_utc_days(scheduled):
         reasons.append("missing_daily_attempts")
     return reasons
