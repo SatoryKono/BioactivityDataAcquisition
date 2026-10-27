@@ -12,7 +12,7 @@ from __future__ import annotations
 import contextlib
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from bioetl.domain.value_objects.dq_report import (
     BronzeDQCheckType,
@@ -35,12 +35,17 @@ class BronzeDQReportConfig(BaseModel):
     Bronze DQ reports focus on minimal validation: record counts,
     file integrity, and schema snapshots for lineage tracking.
 
+    Layer-specific projection DTO (includes ``checks``). Not the YAML
+    ingress ``SinkDQReportConfig``.
+
     Attributes:
         enabled: Whether to generate DQ report (default: False).
         output_path: Path for report output. None = alongside data.
         format: Output format (json, yaml, html).
         checks: List of checks to perform.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     enabled: bool = Field(
         default=False,
@@ -90,12 +95,17 @@ class SilverDQReportConfig(BaseModel):
     Silver DQ reports focus on data quality monitoring: null rates,
     uniqueness, type conformance, schema drift, and deduplication stats.
 
+    Layer-specific projection DTO (includes ``checks``). Not the YAML
+    ingress ``SinkDQReportConfig``.
+
     Attributes:
         enabled: Whether to generate DQ report (default: False).
         output_path: Path for report output. None = alongside data.
         format: Output format (json, yaml, html).
         checks: List of checks to perform.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     enabled: bool = Field(
         default=False,
@@ -150,12 +160,17 @@ class GoldDQReportConfig(BaseModel):
     Gold DQ reports focus on strict validation: completeness,
     business rules, referential integrity, and anomaly detection.
 
+    Layer-specific projection DTO (includes ``checks``). Not the YAML
+    ingress ``SinkDQReportConfig``.
+
     Attributes:
         enabled: Whether to generate DQ report (default: False).
         output_path: Path for report output. None = alongside data.
         format: Output format (json, yaml, html).
         checks: List of checks to perform.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     enabled: bool = Field(
         default=False,
@@ -206,7 +221,11 @@ class BronzeSinkConfig(BaseModel):
     """Bronze sink configuration with optional DQ report.
 
     Extends base bronze sink config with DQ report generation.
+    Projection extract DTO — consumers must map from ``SinkLayerConfig``
+    rather than dumping the full ingress payload.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     path: str = Field(description="Base path for Bronze data")
     format: Literal["jsonl"] = Field(default="jsonl")
@@ -219,7 +238,11 @@ class SilverSinkConfig(BaseModel):
 
     Unified schema for Silver layer sink configuration.
     Includes both metadata and DQ report settings.
+    Projection extract DTO — consumers must map from ``SinkLayerConfig``
+    rather than dumping the full ingress payload.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     path: str = Field(description="Base path for Silver data")
     format: Literal["delta"] = Field(default="delta")
@@ -244,7 +267,11 @@ class GoldSinkConfig(BaseModel):
     """Gold sink configuration with optional DQ report.
 
     Extends base gold sink config with DQ report generation.
+    Projection extract DTO — consumers must map from ``SinkLayerConfig``
+    rather than dumping the full ingress payload.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     path: str = Field(description="Base path for Gold data")
     format: Literal["delta"] = Field(default="delta")

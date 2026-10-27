@@ -117,7 +117,6 @@ filters:
     column_name: publication_id
     filter_field: publication_id
     batch_size: 20
-    checkpoint_interval: 1000
     fallback_column: title
   extraction_params:
     doc_type: PUBLICATION

@@ -275,8 +275,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.1.0",
-    "semantic_content_hash": "sha256:bde3824be62346cf1bc2db68df042ef867298dd2cc9a485cb455e126f21f49aa",
-    "source_revision": "sha256:896fde192dea1457da71b719766b1bef68c35d08be4d1f96bb5441bdc521c985"
+    "semantic_content_hash": "sha256:31eafcbaa6e7fce52baadcae4734c00fbcf516bb2d1878dd110594359e01e64c",
+    "source_revision": "sha256:d4f805a8eb7fd82a334646f71e2e106747d2cfafe8635cf83e1566b0e758e626"
   },
   "silver": {
     "column_projection": {

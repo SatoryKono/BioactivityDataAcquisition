@@ -1,15 +1,15 @@
 {
   "baseline_sha": "100854af874059f7a873a501518e2955f6eb5916",
   "counts": {
-    "among_none_default_ignore": 13,
-    "among_none_inherited_forbid": 2,
-    "among_none_inherited_ignore": 12,
+    "among_none_default_ignore": 0,
+    "among_none_inherited_forbid": 14,
+    "among_none_inherited_ignore": 0,
     "basemodel_total": 105,
-    "effective_forbid": 69,
-    "effective_ignore": 36,
-    "local_forbid": 67,
-    "local_ignore": 11,
-    "local_none": 27
+    "effective_forbid": 105,
+    "effective_ignore": 0,
+    "local_forbid": 91,
+    "local_ignore": 0,
+    "local_none": 14
   },
   "forbid_new_baseline_identities": [
     "bioetl.infrastructure.schemas.base_schemas_chembl.BaseApiConfig",
@@ -71,44 +71,7 @@
       "rationale": "Upstream API response / adapter wire DTOs may tolerate extra keys; out of PSC forbid-track (PSC G8). Do not confuse with BaseApiConfig."
     }
   ],
-  "migration_debt_identities": [
-    "bioetl.infrastructure.schemas.base_schemas_chembl.BaseApiConfig",
-    "bioetl.infrastructure.schemas.base_schemas_chembl.BaseCsvExportConfig",
-    "bioetl.infrastructure.schemas.base_schemas_chembl.BaseDQConfig",
-    "bioetl.infrastructure.schemas.base_schemas_chembl.BaseDQThresholds",
-    "bioetl.infrastructure.schemas.base_schemas_chembl.BaseMaintenanceConfig",
-    "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseFilterColumnSchema",
-    "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldColumnFilterConfig",
-    "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldFiltersConfig",
-    "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListContainsFilterConfig",
-    "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListLengthFilterConfig",
-    "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldRangeFilterConfig",
-    "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseInputFilterConfig",
-    "bioetl.infrastructure.schemas.dq_report_config.BronzeDQReportConfig",
-    "bioetl.infrastructure.schemas.dq_report_config.BronzeSinkConfig",
-    "bioetl.infrastructure.schemas.dq_report_config.GoldDQReportConfig",
-    "bioetl.infrastructure.schemas.dq_report_config.GoldSinkConfig",
-    "bioetl.infrastructure.schemas.dq_report_config.SilverDQReportConfig",
-    "bioetl.infrastructure.schemas.dq_report_config.SilverSinkConfig",
-    "bioetl.infrastructure.schemas.filter_config.FilterConfigFile",
-    "bioetl.infrastructure.schemas.filter_config.GoldFiltersFileConfig",
-    "bioetl.infrastructure.schemas.filter_config.InputFilterFileConfig",
-    "bioetl.infrastructure.schemas.filter_config.SilverFiltersFileConfig",
-    "bioetl.infrastructure.schemas.pipeline_config_common.CircuitBreakerYamlConfig",
-    "bioetl.infrastructure.schemas.pipeline_config_common.CsvExportConfig",
-    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.ContentHashConfig",
-    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.FilterColumnSchema",
-    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldColumnFilterConfig",
-    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldFiltersConfig",
-    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldListContainsFilterConfig",
-    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldListLengthFilterConfig",
-    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldRangeFilterConfig",
-    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.InputFilterYamlConfig",
-    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.MaintenanceConfig",
-    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.SilverFiltersConfig",
-    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.SinkDQReportConfig",
-    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.TransformConfig"
-  ],
+  "migration_debt_identities": [],
   "models": [
     {
       "declaration_source": "local",
@@ -162,9 +125,9 @@
     },
     {
       "declaration_source": "local",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_chembl.BaseApiConfig",
-      "local_extra": "ignore",
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.base_schemas_chembl",
       "name": "BaseApiConfig",
       "not_wire_dto": true,
@@ -184,17 +147,17 @@
     },
     {
       "declaration_source": "local",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_chembl.BaseCsvExportConfig",
-      "local_extra": "ignore",
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.base_schemas_chembl",
       "name": "BaseCsvExportConfig",
       "reachable_from_runtime_roots": false,
       "role": "config-boundary"
     },
     {
-      "declaration_source": "inherited-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "inherited-forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_chembl.BaseDQConfig",
       "local_extra": null,
       "module": "bioetl.infrastructure.schemas.base_schemas_chembl",
@@ -204,9 +167,9 @@
     },
     {
       "declaration_source": "local",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_chembl.BaseDQThresholds",
-      "local_extra": "ignore",
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.base_schemas_chembl",
       "name": "BaseDQThresholds",
       "reachable_from_runtime_roots": false,
@@ -214,9 +177,9 @@
     },
     {
       "declaration_source": "local",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_chembl.BaseMaintenanceConfig",
-      "local_extra": "ignore",
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.base_schemas_chembl",
       "name": "BaseMaintenanceConfig",
       "reachable_from_runtime_roots": false,
@@ -254,9 +217,9 @@
     },
     {
       "declaration_source": "local",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseFilterColumnSchema",
-      "local_extra": "ignore",
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.base_schemas_pubchem",
       "name": "BaseFilterColumnSchema",
       "reachable_from_runtime_roots": true,
@@ -264,9 +227,9 @@
     },
     {
       "declaration_source": "local",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldColumnFilterConfig",
-      "local_extra": "ignore",
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.base_schemas_pubchem",
       "name": "BaseGoldColumnFilterConfig",
       "reachable_from_runtime_roots": true,
@@ -274,9 +237,9 @@
     },
     {
       "declaration_source": "local",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldFiltersConfig",
-      "local_extra": "ignore",
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.base_schemas_pubchem",
       "name": "BaseGoldFiltersConfig",
       "reachable_from_runtime_roots": false,
@@ -284,9 +247,9 @@
     },
     {
       "declaration_source": "local",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListContainsFilterConfig",
-      "local_extra": "ignore",
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.base_schemas_pubchem",
       "name": "BaseGoldListContainsFilterConfig",
       "reachable_from_runtime_roots": true,
@@ -294,9 +257,9 @@
     },
     {
       "declaration_source": "local",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListLengthFilterConfig",
-      "local_extra": "ignore",
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.base_schemas_pubchem",
       "name": "BaseGoldListLengthFilterConfig",
       "reachable_from_runtime_roots": true,
@@ -304,9 +267,9 @@
     },
     {
       "declaration_source": "local",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldRangeFilterConfig",
-      "local_extra": "ignore",
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.base_schemas_pubchem",
       "name": "BaseGoldRangeFilterConfig",
       "reachable_from_runtime_roots": true,
@@ -314,9 +277,9 @@
     },
     {
       "declaration_source": "local",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseInputFilterConfig",
-      "local_extra": "ignore",
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.base_schemas_pubchem",
       "name": "BaseInputFilterConfig",
       "reachable_from_runtime_roots": false,
@@ -573,10 +536,10 @@
       "role": "config-boundary"
     },
     {
-      "declaration_source": "default-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "local",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.BronzeDQReportConfig",
-      "local_extra": null,
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.dq_report_config",
       "name": "BronzeDQReportConfig",
       "notes": "Layer-specific DQ projection DTO (may include checks); not the SinkLayerConfig.dq_report YAML ingress. Composition risk: sink_config.model_dump() → projection.model_validate.",
@@ -584,10 +547,10 @@
       "role": "dq-layer-projection"
     },
     {
-      "declaration_source": "default-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "local",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.BronzeSinkConfig",
-      "local_extra": null,
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.dq_report_config",
       "name": "BronzeSinkConfig",
       "notes": "Layer-specific DQ projection DTO (may include checks); not the SinkLayerConfig.dq_report YAML ingress. Composition risk: sink_config.model_dump() → projection.model_validate.",
@@ -595,10 +558,10 @@
       "role": "dq-layer-projection"
     },
     {
-      "declaration_source": "default-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "local",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.GoldDQReportConfig",
-      "local_extra": null,
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.dq_report_config",
       "name": "GoldDQReportConfig",
       "notes": "Layer-specific DQ projection DTO (may include checks); not the SinkLayerConfig.dq_report YAML ingress. Composition risk: sink_config.model_dump() → projection.model_validate.",
@@ -606,10 +569,10 @@
       "role": "dq-layer-projection"
     },
     {
-      "declaration_source": "default-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "local",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.GoldSinkConfig",
-      "local_extra": null,
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.dq_report_config",
       "name": "GoldSinkConfig",
       "notes": "Layer-specific DQ projection DTO (may include checks); not the SinkLayerConfig.dq_report YAML ingress. Composition risk: sink_config.model_dump() → projection.model_validate.",
@@ -617,10 +580,10 @@
       "role": "dq-layer-projection"
     },
     {
-      "declaration_source": "default-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "local",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.SilverDQReportConfig",
-      "local_extra": null,
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.dq_report_config",
       "name": "SilverDQReportConfig",
       "notes": "Layer-specific DQ projection DTO (may include checks); not the SinkLayerConfig.dq_report YAML ingress. Composition risk: sink_config.model_dump() → projection.model_validate.",
@@ -628,10 +591,10 @@
       "role": "dq-layer-projection"
     },
     {
-      "declaration_source": "default-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "local",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.SilverSinkConfig",
-      "local_extra": null,
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.dq_report_config",
       "name": "SilverSinkConfig",
       "notes": "Layer-specific DQ projection DTO (may include checks); not the SinkLayerConfig.dq_report YAML ingress. Composition risk: sink_config.model_dump() → projection.model_validate.",
@@ -639,18 +602,18 @@
       "role": "dq-layer-projection"
     },
     {
-      "declaration_source": "default-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "local",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile",
-      "local_extra": null,
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.filter_config",
       "name": "FilterConfigFile",
       "reachable_from_runtime_roots": true,
       "role": "runtime-only-root"
     },
     {
-      "declaration_source": "inherited-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "inherited-forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.filter_config.GoldFiltersFileConfig",
       "local_extra": null,
       "module": "bioetl.infrastructure.schemas.filter_config",
@@ -659,8 +622,8 @@
       "role": "config-boundary"
     },
     {
-      "declaration_source": "inherited-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "inherited-forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.filter_config.InputFilterFileConfig",
       "local_extra": null,
       "module": "bioetl.infrastructure.schemas.filter_config",
@@ -669,8 +632,8 @@
       "role": "config-boundary"
     },
     {
-      "declaration_source": "inherited-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "inherited-forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.filter_config.SilverFiltersFileConfig",
       "local_extra": null,
       "module": "bioetl.infrastructure.schemas.filter_config",
@@ -699,10 +662,10 @@
       "role": "generator-root"
     },
     {
-      "declaration_source": "default-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "local",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common.CircuitBreakerYamlConfig",
-      "local_extra": null,
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.pipeline_config_common",
       "name": "CircuitBreakerYamlConfig",
       "reachable_from_runtime_roots": true,
@@ -729,10 +692,10 @@
       "role": "config-boundary"
     },
     {
-      "declaration_source": "default-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "local",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common.CsvExportConfig",
-      "local_extra": null,
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.pipeline_config_common",
       "name": "CsvExportConfig",
       "reachable_from_runtime_roots": true,
@@ -799,18 +762,18 @@
       "role": "config-boundary"
     },
     {
-      "declaration_source": "default-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "local",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.ContentHashConfig",
-      "local_extra": null,
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.pipeline_config_common_schemas",
       "name": "ContentHashConfig",
       "reachable_from_runtime_roots": true,
       "role": "config-boundary"
     },
     {
-      "declaration_source": "inherited-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "inherited-forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.FilterColumnSchema",
       "local_extra": null,
       "module": "bioetl.infrastructure.schemas.pipeline_config_common_schemas",
@@ -819,8 +782,8 @@
       "role": "config-boundary"
     },
     {
-      "declaration_source": "inherited-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "inherited-forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldColumnFilterConfig",
       "local_extra": null,
       "module": "bioetl.infrastructure.schemas.pipeline_config_common_schemas",
@@ -829,8 +792,8 @@
       "role": "config-boundary"
     },
     {
-      "declaration_source": "inherited-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "inherited-forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldFiltersConfig",
       "local_extra": null,
       "module": "bioetl.infrastructure.schemas.pipeline_config_common_schemas",
@@ -839,8 +802,8 @@
       "role": "config-boundary"
     },
     {
-      "declaration_source": "inherited-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "inherited-forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldListContainsFilterConfig",
       "local_extra": null,
       "module": "bioetl.infrastructure.schemas.pipeline_config_common_schemas",
@@ -849,8 +812,8 @@
       "role": "config-boundary"
     },
     {
-      "declaration_source": "inherited-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "inherited-forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldListLengthFilterConfig",
       "local_extra": null,
       "module": "bioetl.infrastructure.schemas.pipeline_config_common_schemas",
@@ -859,8 +822,8 @@
       "role": "config-boundary"
     },
     {
-      "declaration_source": "inherited-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "inherited-forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldRangeFilterConfig",
       "local_extra": null,
       "module": "bioetl.infrastructure.schemas.pipeline_config_common_schemas",
@@ -869,8 +832,8 @@
       "role": "config-boundary"
     },
     {
-      "declaration_source": "inherited-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "inherited-forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.InputFilterYamlConfig",
       "local_extra": null,
       "module": "bioetl.infrastructure.schemas.pipeline_config_common_schemas",
@@ -879,10 +842,10 @@
       "role": "config-boundary"
     },
     {
-      "declaration_source": "default-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "local",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.MaintenanceConfig",
-      "local_extra": null,
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.pipeline_config_common_schemas",
       "name": "MaintenanceConfig",
       "reachable_from_runtime_roots": true,
@@ -899,8 +862,8 @@
       "role": "config-boundary"
     },
     {
-      "declaration_source": "inherited-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "inherited-forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.SilverFiltersConfig",
       "local_extra": null,
       "module": "bioetl.infrastructure.schemas.pipeline_config_common_schemas",
@@ -909,10 +872,10 @@
       "role": "config-boundary"
     },
     {
-      "declaration_source": "default-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "local",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.SinkDQReportConfig",
-      "local_extra": null,
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.pipeline_config_common_schemas",
       "name": "SinkDQReportConfig",
       "notes": "YAML/pipeline sink ingress: enabled/output_path/format only; no checks field (PSC §3.9).",
@@ -930,10 +893,10 @@
       "role": "config-boundary"
     },
     {
-      "declaration_source": "default-ignore",
-      "effective_extra": "ignore",
+      "declaration_source": "local",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.TransformConfig",
-      "local_extra": null,
+      "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.pipeline_config_common_schemas",
       "name": "TransformConfig",
       "reachable_from_runtime_roots": true,
@@ -1492,176 +1455,176 @@
       "root": "bioetl.infrastructure.schemas.dq_config.DQConfigFile"
     },
     {
-      "classification": "runtime-only",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.BronzeDQReportConfig",
       "path": "$",
       "role": "dq-layer-projection",
       "root": "bioetl.infrastructure.schemas.dq_report_config.BronzeDQReportConfig"
     },
     {
-      "classification": "runtime-only",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.BronzeSinkConfig",
       "path": "$",
       "role": "dq-layer-projection",
       "root": "bioetl.infrastructure.schemas.dq_report_config.BronzeSinkConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.BronzeDQReportConfig",
       "path": "dq_report",
       "role": "dq-layer-projection",
       "root": "bioetl.infrastructure.schemas.dq_report_config.BronzeSinkConfig"
     },
     {
-      "classification": "runtime-only",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.GoldDQReportConfig",
       "path": "$",
       "role": "dq-layer-projection",
       "root": "bioetl.infrastructure.schemas.dq_report_config.GoldDQReportConfig"
     },
     {
-      "classification": "runtime-only",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.GoldSinkConfig",
       "path": "$",
       "role": "dq-layer-projection",
       "root": "bioetl.infrastructure.schemas.dq_report_config.GoldSinkConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.GoldDQReportConfig",
       "path": "dq_report",
       "role": "dq-layer-projection",
       "root": "bioetl.infrastructure.schemas.dq_report_config.GoldSinkConfig"
     },
     {
-      "classification": "runtime-only",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.SilverDQReportConfig",
       "path": "$",
       "role": "dq-layer-projection",
       "root": "bioetl.infrastructure.schemas.dq_report_config.SilverDQReportConfig"
     },
     {
-      "classification": "runtime-only",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.SilverSinkConfig",
       "path": "$",
       "role": "dq-layer-projection",
       "root": "bioetl.infrastructure.schemas.dq_report_config.SilverSinkConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.SilverDQReportConfig",
       "path": "dq_report",
       "role": "dq-layer-projection",
       "root": "bioetl.infrastructure.schemas.dq_report_config.SilverSinkConfig"
     },
     {
-      "classification": "runtime-only",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile",
       "path": "$",
       "role": "runtime-only-root",
       "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.filter_config.GoldFiltersFileConfig",
       "path": "gold_filters",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldColumnFilterConfig",
       "path": "gold_filters.columns",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListContainsFilterConfig",
       "path": "gold_filters.list_contains",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListLengthFilterConfig",
       "path": "gold_filters.list_lengths",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldRangeFilterConfig",
       "path": "gold_filters.ranges",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.filter_config.InputFilterFileConfig",
       "path": "input_filter",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseFilterColumnSchema",
       "path": "input_filter.columns",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.filter_config.SilverFiltersFileConfig",
       "path": "silver_filters",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldColumnFilterConfig",
       "path": "silver_filters.columns",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListContainsFilterConfig",
       "path": "silver_filters.list_contains",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListLengthFilterConfig",
       "path": "silver_filters.list_lengths",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldRangeFilterConfig",
       "path": "silver_filters.ranges",
       "role": "config-boundary",
@@ -1684,8 +1647,8 @@
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common.CircuitBreakerYamlConfig",
       "path": "circuit_breaker",
       "role": "config-boundary",
@@ -1700,8 +1663,8 @@
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.ContentHashConfig",
       "path": "content_hash",
       "role": "config-boundary",
@@ -1812,104 +1775,104 @@
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldFiltersConfig",
       "path": "gold_filters",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldColumnFilterConfig",
       "path": "gold_filters.columns",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListContainsFilterConfig",
       "path": "gold_filters.list_contains",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListLengthFilterConfig",
       "path": "gold_filters.list_lengths",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldRangeFilterConfig",
       "path": "gold_filters.ranges",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.InputFilterYamlConfig",
       "path": "input_filter",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseFilterColumnSchema",
       "path": "input_filter.columns",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.MaintenanceConfig",
       "path": "maintenance",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.SilverFiltersConfig",
       "path": "silver_filters",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldColumnFilterConfig",
       "path": "silver_filters.columns",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListContainsFilterConfig",
       "path": "silver_filters.list_contains",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListLengthFilterConfig",
       "path": "silver_filters.list_lengths",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldRangeFilterConfig",
       "path": "silver_filters.ranges",
       "role": "config-boundary",
@@ -1924,16 +1887,16 @@
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common.CsvExportConfig",
       "path": "sink.csv_export",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.SinkDQReportConfig",
       "path": "sink.dq_report",
       "role": "dq-yaml-ingress",
@@ -1972,8 +1935,8 @@
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
-      "classification": "migration-debt",
-      "effective_extra": "ignore",
+      "classification": "forbid",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config_common_schemas.TransformConfig",
       "path": "transform",
       "role": "config-boundary",
@@ -2151,11 +2114,12 @@
     }
   ],
   "notes": {
-    "base_api_config": "BaseApiConfig is connection config in migration debt; not wire.",
+    "base_api_config": "BaseApiConfig is connection config (not wire); RF-002 migrated to extra=forbid — not a justified wire exclusion.",
     "dq_yaml_ingress": "SinkLayerConfig.dq_report → SinkDQReportConfig (enabled/output_path/format; no checks).",
     "dual_registries": "migration_debt_identities=(a) current exact identity set; justified_exclusions=(b) seed. Transfer (a)→(b) ≠ clearing debt.",
     "forbid_new_permissive": "Forbid-new ceiling is RF001_FORBID_NEW_BASELINE_IDENTITIES in tests/architecture/_config_extra_forbid_inventory.py. Any new effective-ignore under schemas/** outside that frozenset fails. Regenerating the JSON report must not refresh/widen it; migration_debt_identities may shrink below the ceiling after real RF-002 forbid migration.",
-    "generator_scope": "generate-pipeline emits only pipeline/composite/source/dq JSON; FilterConfigFile, dq_report_config, WorkflowConfigFileSchema, and PipelineContractPolicy roots are runtime-only."
+    "generator_scope": "generate-pipeline emits only pipeline/composite/source/dq JSON; FilterConfigFile, dq_report_config, WorkflowConfigFileSchema, and PipelineContractPolicy roots are runtime-only.",
+    "rf002_debt_clear": "RF-002 (#12567) clears migration_debt_identities via real forbid migration + DQ ingress→projection field mapping; create≠clear. RF001_FORBID_NEW_BASELINE_IDENTITIES ceiling stays frozen at 36."
   },
   "rf": "RF-001",
   "runtime_roots": [
@@ -2176,57 +2140,57 @@
       "schema_artifact": "configs/_schema/dq.json"
     },
     {
-      "classification": "runtime-only",
+      "classification": "forbid",
       "coverage": "runtime-only",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.BronzeDQReportConfig",
       "role": "dq-layer-projection",
       "schema_artifact": null
     },
     {
-      "classification": "runtime-only",
+      "classification": "forbid",
       "coverage": "runtime-only",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.BronzeSinkConfig",
       "role": "dq-layer-projection",
       "schema_artifact": null
     },
     {
-      "classification": "runtime-only",
+      "classification": "forbid",
       "coverage": "runtime-only",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.GoldDQReportConfig",
       "role": "dq-layer-projection",
       "schema_artifact": null
     },
     {
-      "classification": "runtime-only",
+      "classification": "forbid",
       "coverage": "runtime-only",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.GoldSinkConfig",
       "role": "dq-layer-projection",
       "schema_artifact": null
     },
     {
-      "classification": "runtime-only",
+      "classification": "forbid",
       "coverage": "runtime-only",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.SilverDQReportConfig",
       "role": "dq-layer-projection",
       "schema_artifact": null
     },
     {
-      "classification": "runtime-only",
+      "classification": "forbid",
       "coverage": "runtime-only",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.dq_report_config.SilverSinkConfig",
       "role": "dq-layer-projection",
       "schema_artifact": null
     },
     {
-      "classification": "runtime-only",
+      "classification": "forbid",
       "coverage": "runtime-only",
-      "effective_extra": "ignore",
+      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile",
       "role": "runtime-only-root",
       "schema_artifact": null

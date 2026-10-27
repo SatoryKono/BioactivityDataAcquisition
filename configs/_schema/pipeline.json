@@ -163,6 +163,7 @@
       "type": "object"
     },
     "BaseFilterColumnSchema": {
+      "additionalProperties": false,
       "description": "Base class for filter column configuration.",
       "properties": {
         "column_name": {
@@ -184,6 +185,7 @@
       "type": "object"
     },
     "BaseGoldColumnFilterConfig": {
+      "additionalProperties": false,
       "description": "Base class for Gold column filter configuration.",
       "properties": {
         "operator": {
@@ -221,6 +223,7 @@
       "type": "object"
     },
     "BaseGoldListContainsFilterConfig": {
+      "additionalProperties": false,
       "description": "Base class for Gold list contains filter configuration.",
       "properties": {
         "values": {
@@ -249,6 +252,7 @@
       "type": "object"
     },
     "BaseGoldListLengthFilterConfig": {
+      "additionalProperties": false,
       "description": "Base class for Gold list length filter configuration.",
       "properties": {
         "min": {
@@ -282,6 +286,7 @@
       "type": "object"
     },
     "BaseGoldRangeFilterConfig": {
+      "additionalProperties": false,
       "description": "Base class for Gold range filter configuration.",
       "properties": {
         "min": {
@@ -327,6 +332,7 @@
       "type": "object"
     },
     "CircuitBreakerYamlConfig": {
+      "additionalProperties": false,
       "description": "Circuit Breaker configuration.",
       "properties": {
         "failure_threshold": {
@@ -499,6 +505,7 @@
       "type": "object"
     },
     "ContentHashConfig": {
+      "additionalProperties": false,
       "description": "Configures include/exclude field policy for content hash generation.",
       "properties": {
         "include": {
@@ -623,6 +630,7 @@
       "type": "object"
     },
     "CsvExportConfig": {
+      "additionalProperties": false,
       "description": "Configuration for CSV export.",
       "properties": {
         "enabled": {
@@ -1062,6 +1070,7 @@
       ]
     },
     "GoldFiltersConfig": {
+      "additionalProperties": false,
       "description": "Schema for gold_filters in YAML.",
       "properties": {
         "columns": {
@@ -1141,6 +1150,7 @@
       "type": "string"
     },
     "InputFilterYamlConfig": {
+      "additionalProperties": false,
       "description": "Configuration for input ID filtering from CSV.",
       "properties": {
         "enabled": {
@@ -1309,6 +1319,7 @@
       "type": "object"
     },
     "MaintenanceConfig": {
+      "additionalProperties": false,
       "description": "Configuration for automated maintenance operations.",
       "properties": {
         "auto_vacuum": {
@@ -1387,6 +1398,7 @@
       "type": "object"
     },
     "SilverFiltersConfig": {
+      "additionalProperties": false,
       "description": "Schema for structural Silver filters in YAML.\n\nCanonical Silver accepts ``required_fields`` and ``exclude_if_present``.\nSemantic Gold-style keys are rejected at the schema boundary.",
       "properties": {
         "columns": {
@@ -1452,7 +1464,8 @@
       "type": "object"
     },
     "SinkDQReportConfig": {
-      "description": "DQ report configuration for sink layers.",
+      "additionalProperties": false,
+      "description": "DQ report configuration for sink layers (YAML ingress).\n\nFields: ``enabled`` / ``output_path`` / ``format`` only. Layer-specific\n``checks`` belong on Bronze/Silver/GoldDQReportConfig projections, not here.",
       "properties": {
         "enabled": {
           "default": false,
@@ -1707,6 +1720,7 @@
       "type": "object"
     },
     "TransformConfig": {
+      "additionalProperties": false,
       "description": "Configuration for transform versioning and steps.",
       "properties": {
         "version": {

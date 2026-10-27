@@ -20,7 +20,7 @@ type FilterScalar = str | int | bool
 class BaseFilterColumnSchema(BaseModel):
     """Base class for filter column configuration."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     column_name: str = Field(description="Column name in CSV containing filter IDs")
     filter_field: str = Field(description="API field name to filter by")
@@ -29,7 +29,7 @@ class BaseFilterColumnSchema(BaseModel):
 class BaseInputFilterConfig(BaseModel):
     """Base class for input filter configuration."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     enabled: bool = Field(
         default=False, description="Whether input filtering is enabled"
@@ -110,7 +110,7 @@ class BaseInputFilterConfig(BaseModel):
 class BaseGoldRangeFilterConfig(BaseModel):
     """Base class for Gold range filter configuration."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     min: float | None = Field(default=None, description="Minimum value")
     max: float | None = Field(default=None, description="Maximum value")
@@ -121,7 +121,7 @@ class BaseGoldRangeFilterConfig(BaseModel):
 class BaseGoldListLengthFilterConfig(BaseModel):
     """Base class for Gold list length filter configuration."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     min: int | None = Field(default=None, description="Minimum list length")
     max: int | None = Field(default=None, description="Maximum list length")
@@ -130,7 +130,7 @@ class BaseGoldListLengthFilterConfig(BaseModel):
 class BaseGoldListContainsFilterConfig(BaseModel):
     """Base class for Gold list contains filter configuration."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     values: list[str] = Field(description="Values that must be present in the list")
     mode: Literal["all", "any"] = Field(
@@ -142,7 +142,7 @@ class BaseGoldListContainsFilterConfig(BaseModel):
 class BaseGoldColumnFilterConfig(BaseModel):
     """Base class for Gold column filter configuration."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     operator: Literal[
         "in", "not_in", "is_null", "is_not_null", "is_empty", "is_not_empty"
@@ -168,7 +168,7 @@ class BaseGoldColumnFilterConfig(BaseModel):
 class BaseGoldFiltersConfig(BaseModel):
     """Base class for Gold filters configuration."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     columns: dict[str, list[FilterScalar] | BaseGoldColumnFilterConfig] = Field(
         default_factory=dict,

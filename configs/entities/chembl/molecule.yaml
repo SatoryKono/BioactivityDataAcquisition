@@ -301,7 +301,6 @@ filters:
     column_name: molecule_chembl_id
     filter_field: molecule_id
     batch_size: 20
-    checkpoint_interval: 1000
     fallback_column: title
   extraction_params:
     molecule_type: Small molecule

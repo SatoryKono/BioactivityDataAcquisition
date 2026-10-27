@@ -66,6 +66,8 @@ class InputFilterYamlConfig(BaseInputFilterConfig):
 class MaintenanceConfig(BaseModel):
     """Configuration for automated maintenance operations."""
 
+    model_config = ConfigDict(extra="forbid")
+
     auto_vacuum: bool = Field(
         default=False,
         description="Enable automatic VACUUM after successful pipeline run",
@@ -126,7 +128,13 @@ class ScdConfigYamlConfig(BaseModel):
 
 
 class SinkDQReportConfig(BaseModel):
-    """DQ report configuration for sink layers."""
+    """DQ report configuration for sink layers (YAML ingress).
+
+    Fields: ``enabled`` / ``output_path`` / ``format`` only. Layer-specific
+    ``checks`` belong on Bronze/Silver/GoldDQReportConfig projections, not here.
+    """
+
+    model_config = ConfigDict(extra="forbid")
 
     enabled: bool = Field(
         default=False,
@@ -262,6 +270,8 @@ SEMVER_PATTERN = re.compile(
 class TransformConfig(BaseModel):
     """Configuration for transform versioning and steps."""
 
+    model_config = ConfigDict(extra="forbid")
+
     version: str | None = Field(
         default=None,
         description="Transform version in semver format (e.g., '1.0.0')",
@@ -287,6 +297,8 @@ class TransformConfig(BaseModel):
 
 class ContentHashConfig(BaseModel):
     """Configures include/exclude field policy for content hash generation."""
+
+    model_config = ConfigDict(extra="forbid")
 
     include: list[str] = Field(
         default_factory=list,

@@ -432,7 +432,6 @@ filters:
     column_name: activity_id
     filter_field: activity_id
     batch_size: 1000
-    checkpoint_interval: 1000
     fallback_column: title
   extraction_params:
     standard_type__in: IC50,Ki

@@ -679,12 +679,18 @@ def build_payload() -> dict[str, object]:
                 "(enabled/output_path/format; no checks)."
             ),
             "base_api_config": (
-                "BaseApiConfig is connection config in migration debt; not wire."
+                "BaseApiConfig is connection config (not wire); RF-002 migrated "
+                "to extra=forbid — not a justified wire exclusion."
             ),
             "generator_scope": (
                 "generate-pipeline emits only pipeline/composite/source/dq JSON; "
                 "FilterConfigFile, dq_report_config, WorkflowConfigFileSchema, and "
                 "PipelineContractPolicy roots are runtime-only."
+            ),
+            "rf002_debt_clear": (
+                "RF-002 (#12567) clears migration_debt_identities via real forbid "
+                "migration + DQ ingress→projection field mapping; create≠clear. "
+                "RF001_FORBID_NEW_BASELINE_IDENTITIES ceiling stays frozen at 36."
             ),
         },
     }

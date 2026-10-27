@@ -336,7 +336,6 @@ filters:
     column_name: uniprot_id
     filter_field: accession
     batch_size: 100
-    checkpoint_interval: 1000
     fallback_column: title
   extraction_params: {}
   silver_filters:

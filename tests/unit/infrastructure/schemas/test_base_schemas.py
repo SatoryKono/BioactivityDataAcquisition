@@ -603,14 +603,14 @@ class TestInheritanceChain:
 class TestConfigDictSettings:
     """Test that ConfigDict settings are properly applied."""
 
-    def test_extra_ignore_dq_thresholds(self) -> None:
-        """Test that extra fields are ignored in BaseDQThresholds."""
-        config = BaseDQThresholds(
-            soft_fail_threshold=0.05,
-            hard_fail_threshold=0.20,
-            unknown_field="ignored",  # type: ignore[call-arg]
-        )
-        assert not hasattr(config, "unknown_field")
+    def test_extra_forbid_dq_thresholds(self) -> None:
+        """RF-002: BaseDQThresholds rejects unknown fields (extra=forbid)."""
+        with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
+            BaseDQThresholds(
+                soft_fail_threshold=0.05,
+                hard_fail_threshold=0.20,
+                unknown_field="rejected",  # type: ignore[call-arg]
+            )
 
     def test_extra_forbid_circuit_breaker(self) -> None:
         """Canonical transport boundaries reject unknown fields."""

@@ -16,7 +16,7 @@ from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreake
 class BaseDQThresholds(BaseModel):
     """DQ threshold configuration with soft_fail < hard_fail validation."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     soft_fail_threshold: float = Field(
         default=0.05,
@@ -130,9 +130,13 @@ class HttpClientConfig(BaseModel):
 
 
 class BaseApiConfig(BaseModel):
-    """Base class for API connection configuration."""
+    """Base class for API connection configuration.
 
-    model_config = ConfigDict(extra="ignore")
+    Connection/client config (base_url/rate_limit/timeout), not an adapter
+    wire/response DTO. PSC RF-002 migrates this leaf to ``extra="forbid"``.
+    """
+
+    model_config = ConfigDict(extra="forbid")
 
     base_url: str | None = Field(default=None, description="Base URL for the API")
     rate_limit: float | None = Field(
@@ -155,7 +159,7 @@ class BaseApiConfig(BaseModel):
 class BaseCsvExportConfig(BaseModel):
     """Base class for CSV export configuration."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     enabled: bool = Field(default=False, description="Whether CSV export is enabled")
     path: str | None = Field(default=None, description="Output path for CSV file")
@@ -167,7 +171,7 @@ class BaseCsvExportConfig(BaseModel):
 class BaseMaintenanceConfig(BaseModel):
     """Base class for maintenance configuration."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     auto_vacuum: bool = Field(
         default=False,

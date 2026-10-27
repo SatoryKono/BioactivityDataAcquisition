@@ -263,7 +263,6 @@ filters:
     filter_field: doi
     batch_size: 50
     fallback_column: title
-    checkpoint_interval: 1000
   extraction_params: {}
   silver_filters:
     exclude_if_present: []

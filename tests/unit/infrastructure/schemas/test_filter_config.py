@@ -35,13 +35,21 @@ Requirements:
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
+import yaml
+from pydantic import ValidationError
 
 from bioetl.domain.filtering import SilverFilterConfig
 from bioetl.domain.models.filter import (
     ExtractionParams,
     compute_extraction_params_sha256,
 )
+from bioetl.infrastructure.config.entity_filter_metadata_registry import (
+    apply_shared_filter_metadata,
+)
+from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
 
 
@@ -250,3 +258,130 @@ class TestSilverFilterMigration:
                     },
                 }
             )
+
+
+class TestFilterConfigFileMetadataBoundary:
+    """RF-002 follow-up: ``filters.metadata`` is modeled; other unknowns stay forbid."""
+
+    def test_local_filters_metadata_accepted_and_unknown_sibling_rejected(
+        self,
+    ) -> None:
+        """Local non-executable metadata loads; typo siblings still extra_forbidden."""
+        payload = {
+            "version": "1.0.0",
+            "provider": "chembl",
+            "entity": "target",
+            "input_filter": {"enabled": False},
+            "metadata": {
+                "target_filter_policy": {
+                    "scope": "source_specific",
+                }
+            },
+        }
+        config = FilterConfigFile.model_validate(payload)
+        assert config.metadata["target_filter_policy"]["scope"] == "source_specific"
+        # metadata is not part of executable domain conversion.
+        _input, _silver, _gold, extraction = config.to_domain()
+        assert extraction.params == {}
+
+        with pytest.raises(ValidationError) as exc_info:
+            FilterConfigFile.model_validate(
+                {**payload, "rf002_unknown_filter_key": True}
+            )
+        assert any(err["type"] == "extra_forbidden" for err in exc_info.value.errors())
+
+    def test_registry_metadata_plus_local_metadata_loads_via_filter_loader(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        """Registry-injected metadata merged with local filters.metadata validates."""
+        configs_root = tmp_path / "configs"
+        entity_rel = "entities/chembl/assay_parameters.yaml"
+        entity_path = configs_root / entity_rel
+        entity_path.parent.mkdir(parents=True)
+        registry_path = (
+            configs_root / "quality" / "entity_filter_metadata_registry.yaml"
+        )
+        registry_path.parent.mkdir(parents=True)
+        # applies_to must match path relative to configs_root (entities/...).
+        registry_path.write_text(
+            f"""
+profiles:
+  shared_publication_filter_metadata:
+    applies_to:
+      - {entity_rel}
+    filter_metadata:
+      publication_filter_policy:
+        scope: source_specific
+        source: registry
+""",
+            encoding="utf-8",
+        )
+        entity_path.write_text(
+            """
+version: 1.0.0
+provider: chembl
+entity: assay_parameters
+pipeline:
+  pipeline_name: chembl_assay_parameters
+  provider: chembl
+  entity_type: assay_parameters
+filters:
+  version: 1.0.0
+  provider: chembl
+  entity: assay_parameters
+  input_filter:
+    enabled: false
+  metadata:
+    publication_filter_policy:
+      owner: entity
+    local_note:
+      enabled: true
+""",
+            encoding="utf-8",
+        )
+        # Defaults layer required by FilterConfigLoader.load.
+        base_path = configs_root / "base" / "pipeline.yaml"
+        base_path.parent.mkdir(parents=True)
+        base_path.write_text(
+            """
+filter_defaults:
+  version: 1.0.0
+  input_filter:
+    enabled: false
+""",
+            encoding="utf-8",
+        )
+
+        raw = yaml.safe_load(entity_path.read_text(encoding="utf-8"))
+        merged_entity = apply_shared_filter_metadata(
+            configs_root=configs_root,
+            config_path=entity_path,
+            payload=raw,
+        )
+        filters_section = merged_entity["filters"]
+        assert filters_section["metadata"]["publication_filter_policy"]["source"] == (
+            "registry"
+        )
+        assert filters_section["metadata"]["publication_filter_policy"]["owner"] == (
+            "entity"
+        )
+        assert filters_section["metadata"]["local_note"]["enabled"] is True
+
+        validated = FilterConfigFile.model_validate(filters_section)
+        assert validated.metadata["publication_filter_policy"]["source"] == "registry"
+
+        loaded = FilterConfigLoader(configs_root).load("chembl", "assay_parameters")
+        assert len(loaded) == 4
+
+        # Unknown sibling on filters section still forbidden.
+        with pytest.raises(ValidationError) as exc_info:
+            FilterConfigFile.model_validate(
+                {**filters_section, "not_a_real_filter_section": 1}
+            )
+        assert any(err["type"] == "extra_forbidden" for err in exc_info.value.errors())
+
+    def test_live_chembl_target_filter_loader_accepts_local_metadata(self) -> None:
+        """Live entity with local filters.metadata must load after RF-002 forbid."""
+        result = FilterConfigLoader(Path("configs")).load("chembl", "target")
+        assert len(result) == 4
