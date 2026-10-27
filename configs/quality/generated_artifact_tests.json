@@ -167,6 +167,69 @@
       "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
     },
     {
+      "node": "tests/architecture/test_config_extra_forbid_inventory.py::test_base_api_config_not_classified_as_wire_dto",
+      "artifacts": [
+        "reports/quality/config-extra-forbid-inventory.json"
+      ],
+      "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
+    },
+    {
+      "node": "tests/architecture/test_config_extra_forbid_inventory.py::test_config_extra_forbid_inventory_artifact_matches_generator",
+      "artifacts": [
+        "reports/quality/config-extra-forbid-inventory.json"
+      ],
+      "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
+    },
+    {
+      "node": "tests/architecture/test_config_extra_forbid_inventory.py::test_config_extra_forbid_inventory_counts_match_effective_policy",
+      "artifacts": [
+        "reports/quality/config-extra-forbid-inventory.json"
+      ],
+      "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
+    },
+    {
+      "node": "tests/architecture/test_config_extra_forbid_inventory.py::test_dq_ingress_vs_projection_classification",
+      "artifacts": [
+        "reports/quality/config-extra-forbid-inventory.json"
+      ],
+      "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
+    },
+    {
+      "node": "tests/architecture/test_config_extra_forbid_inventory.py::test_forbid_new_permissive_identities_after_baseline",
+      "artifacts": [
+        "reports/quality/config-extra-forbid-inventory.json"
+      ],
+      "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
+    },
+    {
+      "node": "tests/architecture/test_config_extra_forbid_inventory.py::test_full_manifest_covers_runtime_roots_and_nested_paths",
+      "artifacts": [
+        "reports/quality/config-extra-forbid-inventory.json"
+      ],
+      "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
+    },
+    {
+      "node": "tests/architecture/test_config_extra_forbid_inventory.py::test_justified_exclusions_registry_is_separate_from_migration_debt",
+      "artifacts": [
+        "reports/quality/config-extra-forbid-inventory.json"
+      ],
+      "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
+    },
+    {
+      "node": "tests/architecture/test_config_extra_forbid_inventory.py::test_manifest_includes_workflow_and_contract_policy_roots",
+      "artifacts": [
+        "reports/quality/config-extra-forbid-inventory.json"
+      ],
+      "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
+    },
+    {
+      "node": "tests/architecture/test_config_extra_forbid_inventory.py::test_migration_debt_is_exact_identity_set_of_effective_ignore",
+      "artifacts": [
+        "reports/quality/config-extra-forbid-inventory.json"
+      ],
+      "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
+    },
+    {
       "node": "tests/architecture/test_config_surface_entity_residual_plateau.py::test_config_surface_duplication_audit_matches_live_backlog",
       "artifacts": [
         "configs/quality/test_telemetry_baseline.yaml"

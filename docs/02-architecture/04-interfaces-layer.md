@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-02'
+  Last verified: '2026-10-27'
 
 ______________________________________________________________________
 
@@ -132,8 +132,32 @@ ______________________________________________________________________
 
 - **Максимальная простота:** Этот слой должен быть как можно более "глупым". Его задача — делегировать работу другим слоям, а не выполнять её самому.
 - **Единственная ответственность:** Единственная ответственность этого слоя — запуск приложения и управление его жизненным циклом на самом верхнем уровне.
-- **Без прямого Infrastructure coupling:** `interfaces` может импортировать `domain`, `application` и `composition`, но не должен напрямую импортировать `infrastructure`; конкретные adapters и storage implementations подключаются только через Composition layer.
+- **Без прямого Infrastructure coupling:** `interfaces` может импортировать `domain`, `application` и `composition`, но не должен напрямую импортировать `infrastructure`; конкретные adapters и storage implementations подключаются только через Composition layer. Machine-readable SSOT этой границы — см. §3.1.
 - **CLI-local process lifecycle:** CLI façades must not own subprocess/HTTP I/O. Current case: `src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py` remains the CLI entry; `src/bioetl/composition/observability_backend.py` wires the infrastructure adapters `observability_backend_process.py` and `observability_backend_probes.py`; application `observability_backend_startup.py` orchestrates injected start/probe/wait seams.
+
+### 3.1. CLI architecture policy SSOT (`interfaces → infrastructure`)
+
+Нормативная матрица импортов: [ADR-005](decisions/ADR-005-composition-layer-separation.md)
+и [RULES.md §1.1.1](../00-project/RULES.md). Для contributors и architecture
+gates действует один machine-readable источник:
+
+| Роль | Путь | Назначение |
+| --- | --- | --- |
+| **SSOT (contract)** | [`.importlinter`](../../.importlinter) contract `interfaces-no-direct-infrastructure` | Запрет прямых `bioetl.interfaces → bioetl.infrastructure`; косвенные импорты через composition разрешены |
+| **Loader / schema** | [`tests/architecture/_cli_architecture_policy.py`](../../tests/architecture/_cli_architecture_policy.py) | Единственный loader контракта; consumers: `test_cli_architecture_policy.py`, `test_interfaces_no_infrastructure.py`, `test_layer_dependencies.py` |
+
+**Не путать с политикой:**
+[`configs/quality/architecture/composition_ownership_map.yaml`](../../configs/quality/architecture/composition_ownership_map.yaml)
+— M5 composition ownership map; это **не** CLI architecture policy и loader
+её не читает.
+
+**Запрещено:** второй файл политики
+`configs/quality/architecture/cli_architecture_policy.yaml` (отсутствие
+проверяет `test_loader_does_not_use_a_second_cli_policy_file`). Не добавлять
+параллельный YAML/JSON как «второй SSOT».
+
+Операторский CLI reference (`docs/04-reference/cli.md`, команды/флаги) —
+отдельная поверхность; этот указатель закрывает только architecture boundary.
 
 ______________________________________________________________________
 
@@ -157,6 +181,7 @@ ______________________________________________________________________
 
 | ADR                                                               | Тема                                |
 | ----------------------------------------------------------------- | ----------------------------------- |
+| [ADR-005](decisions/ADR-005-composition-layer-separation.md)      | Import matrix; CLI architecture SSOT |
 | [ADR-015](decisions/ADR-015-pipeline-services-lifecycle.md)       | Pipeline Services Lifecycle         |
 | [ADR-026](decisions/ADR-026-composite-pipeline-pattern.md)        | Composite Pipeline — расширения CLI |
 | [ADR-044](decisions/ADR-044-run-manifest-ledger-control-plane.md) | Control-plane inspection CLI        |
@@ -164,6 +189,7 @@ ______________________________________________________________________
 ### Смежные Разделы Документации
 
 - [Composition Layer](05-composition-layer.md) — runtime bootstrap (`bootstrap_pipeline_runner`, `bootstrap_composite_runner`), фабрики
-- [CLI Reference](../04-reference/cli.md) — полная документация CLI команд
+- [CLI Reference](../04-reference/cli.md) — полная документация CLI команд (не architecture SSOT)
 - [ADR-005](decisions/ADR-005-composition-layer-separation.md) — активная матрица импортов; `interfaces` использует `composition` и не импортирует `infrastructure` напрямую
 - [RULES.md §1 "Архитектура и Слои"](../00-project/RULES.md) — high-level layering rules и ссылки на активные ADR
+- §3.1 выше — contributor pointer: `.importlinter` + `_cli_architecture_policy.py`
