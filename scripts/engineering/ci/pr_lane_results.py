@@ -121,6 +121,16 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/ci/test_check_reusable_workflow_pins.py",
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
     ),
+    **dict.fromkeys(
+        (
+            "reports/audit-runs/20261026-p17-003-external-callers.md",
+            "reports/audit-runs/20261026-p17-003-external-callers/evidence.json",
+        ),
+        (
+            "tests/unit/scripts/ci/test_check_reusable_workflow_pins.py",
+            GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+        ),
+    ),
     "docs/05-operations/runbooks/incident-response.md": (
         "tests/integration/test_prometheus_rules_config.py",
         INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
