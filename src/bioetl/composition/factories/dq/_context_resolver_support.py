@@ -90,9 +90,7 @@ def project_sink_layer_to_extract_payload(
         nested_model = _nested_basemodel_type(field_info.annotation)
         if nested_model is not None and isinstance(value, Mapping):
             value = {
-                key: value[key]
-                for key in nested_model.model_fields
-                if key in value
+                key: value[key] for key in nested_model.model_fields if key in value
             }
         payload[field_name] = value
     return payload

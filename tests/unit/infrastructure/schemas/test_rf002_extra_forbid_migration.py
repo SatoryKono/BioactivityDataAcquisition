@@ -246,9 +246,7 @@ def test_rf002_root_model_consumer_artifact_matrix() -> None:
     assert generator_names == {"pipeline", "composite", "source", "dq"}
     for row in RF002_ROOT_MATRIX:
         if row["artifact"] is None:
-            assert row["root"] not in {
-                cls.__name__ for cls in SCHEMAS.values()
-            }, row
+            assert row["root"] not in {cls.__name__ for cls in SCHEMAS.values()}, row
         else:
             artifact = ROOT / str(row["artifact"])
             assert artifact.is_file(), row

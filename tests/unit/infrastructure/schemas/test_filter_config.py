@@ -288,9 +288,7 @@ class TestFilterConfigFileMetadataBoundary:
             FilterConfigFile.model_validate(
                 {**payload, "rf002_unknown_filter_key": True}
             )
-        assert any(
-            err["type"] == "extra_forbidden" for err in exc_info.value.errors()
-        )
+        assert any(err["type"] == "extra_forbidden" for err in exc_info.value.errors())
 
     def test_registry_metadata_plus_local_metadata_loads_via_filter_loader(
         self,
@@ -381,9 +379,7 @@ filter_defaults:
             FilterConfigFile.model_validate(
                 {**filters_section, "not_a_real_filter_section": 1}
             )
-        assert any(
-            err["type"] == "extra_forbidden" for err in exc_info.value.errors()
-        )
+        assert any(err["type"] == "extra_forbidden" for err in exc_info.value.errors())
 
     def test_live_chembl_target_filter_loader_accepts_local_metadata(self) -> None:
         """Live entity with local filters.metadata must load after RF-002 forbid."""
