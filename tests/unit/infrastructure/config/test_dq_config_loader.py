@@ -253,8 +253,8 @@ thresholds:
   hard_fail: 0.20
 strict_validation: false
 invalid_record_policy: quarantine
-field_validations: []
-cross_field_validations: []
+common_field_validations: []
+common_cross_field_validations: []
 """
         )
 

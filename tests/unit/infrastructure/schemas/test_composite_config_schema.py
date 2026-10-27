@@ -668,9 +668,7 @@ def test_composite_dq_rejects_nullablee_typo_and_keeps_default() -> None:
     """
     typo_payload = _base_payload()
     typo_payload["dq_overrides"] = {
-        "field_validations": [
-            {"field": "doi", "type": "required", "nullablee": False}
-        ],
+        "field_validations": [{"field": "doi", "type": "required", "nullablee": False}],
         "cross_field_validations": [
             {
                 "name": "doi_present",

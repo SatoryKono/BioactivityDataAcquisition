@@ -331,6 +331,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_config_schema_migration_status.py",
         "tests/integration/config/test_validate_pipeline_configs.py",
     ),
+    "configs/_schema/dq.json": (
+        "tests/architecture/test_config_schema_migration_status.py",
+        "tests/unit/infrastructure/schemas/test_dq_config.py",
+    ),
     "configs/quality/test_skip_inventory.yaml": TEST_SKIP_INVENTORY_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
     "configs/quality/scripts_inventory_manifest.json": (
