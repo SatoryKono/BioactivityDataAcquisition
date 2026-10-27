@@ -6,8 +6,11 @@ from collections.abc import Callable
 from pathlib import Path
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.schemas.dq_config import DQConfigFile
 
 LoadYamlFn = Callable[[Path], JsonDict]
+_FLAT_THRESHOLD_ALIASES = frozenset({"soft_fail_threshold", "hard_fail_threshold"})
+_FLAT_DQ_KEYS = frozenset(DQConfigFile.model_fields) | _FLAT_THRESHOLD_ALIASES
 
 _PROVIDER_FALLBACK_KEYS = (
     "thresholds",
@@ -111,5 +114,5 @@ def _load_unified_quality_layer(
         return quality_section
 
     if any(key in raw for key in fallback_keys):
-        return raw
+        return {key: value for key, value in raw.items() if key in _FLAT_DQ_KEYS}
     return {}
