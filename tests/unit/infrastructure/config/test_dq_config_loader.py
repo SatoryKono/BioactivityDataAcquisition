@@ -241,6 +241,44 @@ quality:
         assert config.hard_fail_threshold == pytest.approx(0.12)
         assert "provider_field" in [fv.field for fv in config.field_validations]
 
+    def test_flat_provider_layer_ignores_non_dq_sections(self, tmp_path: Path) -> None:
+        """A provider file without ``quality`` keeps DQ keys and drops siblings."""
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "quality.yaml").write_text(
+            """
+version: "1.0.0"
+thresholds:
+  soft_fail: 0.05
+  hard_fail: 0.20
+strict_validation: false
+invalid_record_policy: quarantine
+common_field_validations: []
+common_cross_field_validations: []
+"""
+        )
+
+        providers_root = tmp_path / "providers"
+        providers_root.mkdir(parents=True)
+        (providers_root / "test_provider.yaml").write_text(
+            """
+version: "1.0.0"
+provider: test_provider
+source:
+  url: https://example.test/provider
+provider_field_validations:
+  - field: provider_field
+    type: required
+    nullable: true
+soft_fail_threshold: 0.03
+"""
+        )
+
+        loader = DQConfigLoader(tmp_path)
+        config = loader.load("test_provider", "missing_entity")
+        assert config.soft_fail_threshold == pytest.approx(0.03)
+        assert "provider_field" in [fv.field for fv in config.field_validations]
+
     def test_load_entity_layer_from_unified_entity_file(self, tmp_path: Path) -> None:
         """Entity-level DQ rules should load from configs/entities/{p}/{e}.yaml."""
         base_root = tmp_path / "base"
@@ -253,8 +291,8 @@ thresholds:
   hard_fail: 0.20
 strict_validation: false
 invalid_record_policy: quarantine
-field_validations: []
-cross_field_validations: []
+common_field_validations: []
+common_cross_field_validations: []
 """
         )
 
