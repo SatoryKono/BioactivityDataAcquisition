@@ -134,3 +134,28 @@ class HTTPClientRequestMethodsMixin:
         # circuit_breaker.call is typed to return httpx.Response for this path.
         response.raise_for_status()
         return response
+
+    async def stream(
+        self,
+        method: str,
+        url: str,
+        params: JsonDict | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> httpx.Response:
+        """Send HTTP request with streamed response body (retry-aware).
+
+        Args:
+            method: HTTP method name.
+            url: Target URL.
+            params: Optional query parameters.
+            headers: Optional additional HTTP headers.
+
+        Returns:
+            Open streamed ``httpx.Response``; caller must ``aclose()`` it.
+        """
+        request_kwargs: dict[str, object] = {
+            "params": params,
+            "headers": headers,
+            "_stream": True,
+        }
+        return await self._request_with_retry(method, url, **request_kwargs)

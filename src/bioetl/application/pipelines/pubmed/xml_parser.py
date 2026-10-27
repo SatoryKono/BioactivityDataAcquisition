@@ -8,7 +8,7 @@ from __future__ import annotations
 __all__ = ["get_int", "get_text"]
 
 
-import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry
+import xml.etree.ElementTree as ET  # nosec B405  # type annotations only
 
 
 def get_text(node: ET.Element | None) -> str | None:
@@ -25,16 +25,13 @@ def get_text(node: ET.Element | None) -> str | None:
         None otherwise.
 
     Example:
-        >>> import defusedxml.ElementTree as ET
-        >>> elem = ET.fromstring("<title>  PubMed Article  </title>")
+        >>> import defusedxml.ElementTree as defused_ET
+        >>> elem = defused_ET.fromstring("<title>  PubMed Article  </title>")
         >>> get_text(elem)
         'PubMed Article'
         >>> get_text(None)
-        None
-        >>> empty = ET.fromstring("<title></title>")
+        >>> empty = defused_ET.fromstring("<title></title>")
         >>> get_text(empty)
-        None
-
     """
     if node is not None and node.text:
         return node.text.strip()
@@ -55,19 +52,15 @@ def get_int(node: ET.Element | None) -> int | None:
         None otherwise (including for non-numeric text).
 
     Example:
-        >>> import defusedxml.ElementTree as ET
-        >>> year = ET.fromstring("<Year>2024</Year>")
+        >>> import defusedxml.ElementTree as defused_ET
+        >>> year = defused_ET.fromstring("<Year>2024</Year>")
         >>> get_int(year)
         2024
         >>> get_int(None)
-        None
-        >>> invalid = ET.fromstring("<Year>invalid</Year>")
+        >>> invalid = defused_ET.fromstring("<Year>invalid</Year>")
         >>> get_int(invalid)
-        None
-        >>> empty = ET.fromstring("<Year>  </Year>")
+        >>> empty = defused_ET.fromstring("<Year>  </Year>")
         >>> get_int(empty)
-        None
-
     """
     if node is not None and node.text:
         text = node.text.strip()
