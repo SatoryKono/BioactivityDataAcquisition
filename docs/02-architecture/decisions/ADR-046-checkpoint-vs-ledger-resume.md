@@ -235,9 +235,12 @@ The follow-up implementation ADR MUST include, at minimum:
 
 ### A. Promote RunLedger into the universal resume state immediately
 
-Rejected for now because current ledger replay is intentionally too coarse and
-does not reconstruct rich checkpoint payloads or runner-specific execution
-state.
+Rejected for now as a universal replacement: the composite projection can
+reconstruct the rich checkpoint payloads listed in section 2 from bounded
+suffix events, but it still requires a trusted checkpoint baseline and does
+not provide a general baseline for every runner family or arbitrary missing
+checkpoint state. This constraint does not deny the payload reconstruction
+already performed by `RunLedgerReplayProjection`.
 
 ### B. Freeze checkpoint-only resume forever
 
