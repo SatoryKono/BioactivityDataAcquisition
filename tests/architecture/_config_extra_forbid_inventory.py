@@ -8,19 +8,19 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Effective ``extra`` inventory + nested-path manifest for PSC RF-001 (#12566).
+"""Effective ``extra`` inventory + nested-path manifest for PSC RF-001…RF-003.
 
 Scans ``src/bioetl/infrastructure/schemas/**`` BaseModel subclasses, computes
 effective ``model_config['extra']`` (local / inherited / default-ignore), and
 builds:
 
-* registry (a) migration-debt identity set (exact, sorted)
-* registry (b) justified exclusions (seed; anchors finalized in RF-003)
+* registry (a) migration-debt identity set (exact, sorted; empty after RF-002)
+* registry (b) justified exclusions (finalized with owning anchors in RF-003)
 * full runtime-root + reachable nested-path manifest with classification
 
 This module is the generator for
-``reports/quality/config-extra-forbid-inventory.json``. It does **not** migrate
-``extra=forbid`` (RF-002).
+``reports/quality/config-extra-forbid-inventory.json``. Forbid migration was
+RF-002; RF-003 only ratchets identity sets + negatives + registry (b) anchors.
 """
 
 from __future__ import annotations
@@ -51,8 +51,12 @@ SCHEMA_VERSION = 1
 
 # Fresh-main tip when RF-001 inventory baseline was first computed.
 BASELINE_SHA = "100854af874059f7a873a501518e2955f6eb5916"
+# Fresh-main tip when RF-002 cleared migration debt (a) to exact empty set.
+RF002_DEBT_CLEARED_SHA = "5416aa7a1c0fac5d8d0cbb6119b271e5ca226a73"
 ISSUE_ID = "12566"
 RF_ID = "RF-001"
+RF003_ISSUE_ID = "12568"
+RF003_ID = "RF-003"
 
 # Forbidden-new ceiling: exact permissive identity set at RF-001 land.
 # Source of truth is this frozenset in code — NOT the regenerable JSON report.
@@ -145,9 +149,17 @@ WORKFLOW_RECONCILE_FOREIGN_KEYS_IDENTITY = (
 # transform_name. Inventory-only explicit edges (do not change runtime schemas).
 WORKFLOW_TRANSFORM_CONFIG_PATH = "workflow.steps.config"
 
-# Seed justified exclusions (registry b). These are NOT migration debt and MUST
-# stay out of registry (a). Transfer from (a)→(b) is reclassification, not debt clear.
-JUSTIFIED_EXCLUSIONS_SEED: tuple[dict[str, str], ...] = (
+FILTER_CONFIG_ROOT = "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
+# Annotation walk skips JsonDict fields; inventory-only explicit open-dict edge.
+FILTER_CONFIG_METADATA_PATH = "metadata"
+FILTER_CONFIG_METADATA_IDENTITY = (
+    "bioetl.infrastructure.schemas.filter_config.FilterConfigFile.metadata"
+)
+
+# Finalized justified exclusions (registry b). These are NOT migration debt and
+# MUST stay out of registry (a). Transfer from (a)→(b) is reclassification, not
+# debt clear (PSC §3.7). RF-003 owns rationale + owning anchor tests.
+JUSTIFIED_EXCLUSIONS: tuple[dict[str, str], ...] = (
     {
         "identity": "bioetl.infrastructure.config._base.Settings",
         "kind": "env-settings",
@@ -156,6 +168,10 @@ JUSTIFIED_EXCLUSIONS_SEED: tuple[dict[str, str], ...] = (
             "not a YAML pipeline config boundary (PSC G7)."
         ),
         "anchor": "src/bioetl/infrastructure/config/_base.py",
+        "anchor_test": (
+            "tests/architecture/test_rf003_config_extra_forbid_ratchet.py::"
+            "test_registry_b_settings_anchor_ignores_unknown_keys"
+        ),
     },
     {
         "identity": "bioetl.domain.types.identifiers.JsonDict",
@@ -166,6 +182,10 @@ JUSTIFIED_EXCLUSIONS_SEED: tuple[dict[str, str], ...] = (
             "(PSC G6 / §3.8)."
         ),
         "anchor": "src/bioetl/domain/types/identifiers.py",
+        "anchor_test": (
+            "tests/architecture/test_rf003_config_extra_forbid_ratchet.py::"
+            "test_registry_b_jsondict_open_semantics_and_parent_strictness"
+        ),
     },
     {
         "identity": "src/bioetl/infrastructure/adapters/**",
@@ -175,7 +195,38 @@ JUSTIFIED_EXCLUSIONS_SEED: tuple[dict[str, str], ...] = (
             "out of PSC forbid-track (PSC G8). Do not confuse with BaseApiConfig."
         ),
         "anchor": "src/bioetl/infrastructure/adapters/",
+        "anchor_test": (
+            "tests/architecture/test_rf003_config_extra_forbid_ratchet.py::"
+            "test_registry_b_adapter_wire_ignores_extras_not_base_api"
+        ),
     },
+    {
+        "identity": (
+            "bioetl.infrastructure.schemas.filter_config.FilterConfigFile.metadata"
+        ),
+        "kind": "open-dict-field",
+        "rationale": (
+            "Documented open nested JsonDict on FilterConfigFile: non-executable "
+            "filters.metadata (registry + local YAML). Unknown-key rejection is "
+            "not required inside metadata; parent FilterConfigFile extra=forbid "
+            "still rejects unknown sibling keys (PSC §3.8 / RF-002 follow-up)."
+        ),
+        "anchor": "src/bioetl/infrastructure/schemas/filter_config.py",
+        "anchor_test": (
+            "tests/architecture/test_rf003_config_extra_forbid_ratchet.py::"
+            "test_registry_b_filter_config_metadata_open_dict"
+        ),
+    },
+)
+# Back-compat alias for RF-001 tests / imports; prefer JUSTIFIED_EXCLUSIONS.
+JUSTIFIED_EXCLUSIONS_SEED = JUSTIFIED_EXCLUSIONS
+RF003_REQUIRED_EXCLUSION_KINDS: frozenset[str] = frozenset(
+    {
+        "env-settings",
+        "open-dict-typealias",
+        "adapter-wire-models",
+        "open-dict-field",
+    }
 )
 
 DQ_YAML_INGRESS_IDENTITY = (
@@ -376,6 +427,8 @@ def _role_for_identity(identity: str) -> str:
         WORKFLOW_RECONCILE_FOREIGN_KEYS_IDENTITY,
     }:
         return "workflow-transform-config"
+    if identity == FILTER_CONFIG_METADATA_IDENTITY:
+        return "open-dict-field"
     if identity in GENERATOR_COVERED_ROOTS:
         return "generator-root"
     if identity in RUNTIME_ONLY_ROOTS:
@@ -390,7 +443,7 @@ def _classify_path(
     migration_debt: set[str],
     root_identity: str,
 ) -> str:
-    if identity in {exclusion["identity"] for exclusion in JUSTIFIED_EXCLUSIONS_SEED}:
+    if identity in {exclusion["identity"] for exclusion in JUSTIFIED_EXCLUSIONS}:
         return "justified-exclusion"
     if effective == "forbid":
         if root_identity in GENERATOR_COVERED_ROOTS and identity == root_identity:
@@ -543,11 +596,55 @@ def build_manifest(
                     model_effective=model_effective,
                 )
             )
+        if root_identity == FILTER_CONFIG_ROOT:
+            path_rows.extend(
+                _explicit_filter_config_metadata_edges(
+                    root_identity=root_identity,
+                    migration_debt=migration_debt,
+                )
+            )
     root_rows.sort(key=lambda row: str(row["identity"]))
     path_rows.sort(
         key=lambda row: (str(row["root"]), str(row["path"]), str(row["identity"]))
     )
     return root_rows, path_rows
+
+
+def _explicit_filter_config_metadata_edges(
+    *,
+    root_identity: str,
+    migration_debt: set[str],
+) -> list[dict[str, object]]:
+    """Attach FilterConfigFile.metadata JsonDict as justified open-dict edge.
+
+    ``_walk_nested_paths`` only yields BaseModel nested types, so the documented
+    open ``metadata: JsonDict`` field is invisible unless we add this inventory
+    edge. Classification must resolve to justified-exclusion via
+    ``JUSTIFIED_EXCLUSIONS``.
+    """
+    exclusion_ids = {item["identity"] for item in JUSTIFIED_EXCLUSIONS}
+    assert FILTER_CONFIG_METADATA_IDENTITY in exclusion_ids, (
+        "FilterConfigFile.metadata must remain in JUSTIFIED_EXCLUSIONS "
+        "when emitting its nested_paths edge"
+    )
+    classification = _classify_path(
+        identity=FILTER_CONFIG_METADATA_IDENTITY,
+        effective="open",
+        migration_debt=migration_debt,
+        root_identity=root_identity,
+    )
+    assert classification == "justified-exclusion", classification
+    return [
+        {
+            "root": root_identity,
+            "path": FILTER_CONFIG_METADATA_PATH,
+            "identity": FILTER_CONFIG_METADATA_IDENTITY,
+            "effective_extra": "open",
+            "classification": classification,
+            "role": _role_for_identity(FILTER_CONFIG_METADATA_IDENTITY),
+            "edge_kind": "explicit-open-dict-field",
+        }
+    ]
 
 
 def _explicit_workflow_transform_config_edges(
@@ -630,7 +727,7 @@ def build_payload() -> dict[str, object]:
                 "risk: sink_config.model_dump() → projection.model_validate."
             )
 
-    justified = [dict(item) for item in JUSTIFIED_EXCLUSIONS_SEED]
+    justified = [dict(item) for item in JUSTIFIED_EXCLUSIONS]
     justified.sort(key=lambda item: item["identity"])
 
     forbid_new_baseline = sorted(RF001_FORBID_NEW_BASELINE_IDENTITIES)
@@ -642,17 +739,25 @@ def build_payload() -> dict[str, object]:
             "Live effective-ignore identities outside frozen RF-001 forbid-new "
             f"baseline: {unknown_vs_baseline}"
         )
+    if migration_debt:
+        raise RuntimeError(
+            "RF-003 invariant: migration debt (a) must remain exact empty set "
+            f"after RF-002 ({RF002_DEBT_CLEARED_SHA}); found: {migration_debt}"
+        )
 
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_by": GENERATED_BY,
         "rf": RF_ID,
         "issue": ISSUE_ID,
+        "rf003": RF003_ID,
+        "rf003_issue": RF003_ISSUE_ID,
         "baseline_sha": BASELINE_SHA,
+        "rf002_debt_cleared_sha": RF002_DEBT_CLEARED_SHA,
         "schemas_root": "src/bioetl/infrastructure/schemas",
         "counts": _counts(rows),
         "models": rows,
-        # (a) regenerable current debt — may shrink after RF-002 migration.
+        # (a) regenerable current debt — MUST stay [] after RF-002 (RF-003 ratchet).
         "migration_debt_identities": migration_debt,
         # Frozen forbid-new ceiling (copy of RF001_FORBID_NEW_BASELINE_IDENTITIES).
         # Regenerating this JSON does not redefine the ceiling; the Python
@@ -663,16 +768,16 @@ def build_payload() -> dict[str, object]:
         "nested_paths": path_rows,
         "notes": {
             "dual_registries": (
-                "migration_debt_identities=(a) current exact identity set; "
-                "justified_exclusions=(b) seed. Transfer (a)→(b) ≠ clearing debt."
+                "migration_debt_identities=(a) exact identity set (must stay []); "
+                "justified_exclusions=(b) finalized RF-003 with anchor tests. "
+                "Transfer (a)→(b) ≠ clearing debt."
             ),
             "forbid_new_permissive": (
                 "Forbid-new ceiling is RF001_FORBID_NEW_BASELINE_IDENTITIES in "
                 "tests/architecture/_config_extra_forbid_inventory.py. "
                 "Any new effective-ignore under schemas/** outside that frozenset "
                 "fails. Regenerating the JSON report must not refresh/widen it; "
-                "migration_debt_identities may shrink below the ceiling after "
-                "real RF-002 forbid migration."
+                "migration_debt_identities must remain [] after RF-002."
             ),
             "dq_yaml_ingress": (
                 "SinkLayerConfig.dq_report → SinkDQReportConfig "
@@ -691,6 +796,11 @@ def build_payload() -> dict[str, object]:
                 "RF-002 (#12567) clears migration_debt_identities via real forbid "
                 "migration + DQ ingress→projection field mapping; create≠clear. "
                 "RF001_FORBID_NEW_BASELINE_IDENTITIES ceiling stays frozen at 36."
+            ),
+            "rf003_ratchet": (
+                "RF-003 (#12568) owns identity-set ratchet + negatives + registry "
+                "(b) anchors only; does not own remaining code migration "
+                f"(debt cleared at {RF002_DEBT_CLEARED_SHA})."
             ),
         },
     }

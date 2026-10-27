@@ -54,18 +54,28 @@
   "justified_exclusions": [
     {
       "anchor": "src/bioetl/domain/types/identifiers.py",
+      "anchor_test": "tests/architecture/test_rf003_config_extra_forbid_ratchet.py::test_registry_b_jsondict_open_semantics_and_parent_strictness",
       "identity": "bioetl.domain.types.identifiers.JsonDict",
       "kind": "open-dict-typealias",
       "rationale": "Documented open dict alias (dict[str, Any]); unknown-key rejection is not required on the open dict itself; parent forbid-paths stay strict (PSC G6 / §3.8)."
     },
     {
       "anchor": "src/bioetl/infrastructure/config/_base.py",
+      "anchor_test": "tests/architecture/test_rf003_config_extra_forbid_ratchet.py::test_registry_b_settings_anchor_ignores_unknown_keys",
       "identity": "bioetl.infrastructure.config._base.Settings",
       "kind": "env-settings",
       "rationale": "ENV/settings surface (BaseSettings) intentionally uses extra='ignore'; not a YAML pipeline config boundary (PSC G7)."
     },
     {
+      "anchor": "src/bioetl/infrastructure/schemas/filter_config.py",
+      "anchor_test": "tests/architecture/test_rf003_config_extra_forbid_ratchet.py::test_registry_b_filter_config_metadata_open_dict",
+      "identity": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile.metadata",
+      "kind": "open-dict-field",
+      "rationale": "Documented open nested JsonDict on FilterConfigFile: non-executable filters.metadata (registry + local YAML). Unknown-key rejection is not required inside metadata; parent FilterConfigFile extra=forbid still rejects unknown sibling keys (PSC §3.8 / RF-002 follow-up)."
+    },
+    {
       "anchor": "src/bioetl/infrastructure/adapters/",
+      "anchor_test": "tests/architecture/test_rf003_config_extra_forbid_ratchet.py::test_registry_b_adapter_wire_ignores_extras_not_base_api",
       "identity": "src/bioetl/infrastructure/adapters/**",
       "kind": "adapter-wire-models",
       "rationale": "Upstream API response / adapter wire DTOs may tolerate extra keys; out of PSC forbid-track (PSC G8). Do not confuse with BaseApiConfig."
@@ -1591,6 +1601,15 @@
       "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
     },
     {
+      "classification": "justified-exclusion",
+      "edge_kind": "explicit-open-dict-field",
+      "effective_extra": "open",
+      "identity": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile.metadata",
+      "path": "metadata",
+      "role": "open-dict-field",
+      "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
+    },
+    {
       "classification": "forbid",
       "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.filter_config.SilverFiltersFileConfig",
@@ -2116,12 +2135,16 @@
   "notes": {
     "base_api_config": "BaseApiConfig is connection config (not wire); RF-002 migrated to extra=forbid — not a justified wire exclusion.",
     "dq_yaml_ingress": "SinkLayerConfig.dq_report → SinkDQReportConfig (enabled/output_path/format; no checks).",
-    "dual_registries": "migration_debt_identities=(a) current exact identity set; justified_exclusions=(b) seed. Transfer (a)→(b) ≠ clearing debt.",
-    "forbid_new_permissive": "Forbid-new ceiling is RF001_FORBID_NEW_BASELINE_IDENTITIES in tests/architecture/_config_extra_forbid_inventory.py. Any new effective-ignore under schemas/** outside that frozenset fails. Regenerating the JSON report must not refresh/widen it; migration_debt_identities may shrink below the ceiling after real RF-002 forbid migration.",
+    "dual_registries": "migration_debt_identities=(a) exact identity set (must stay []); justified_exclusions=(b) finalized RF-003 with anchor tests. Transfer (a)→(b) ≠ clearing debt.",
+    "forbid_new_permissive": "Forbid-new ceiling is RF001_FORBID_NEW_BASELINE_IDENTITIES in tests/architecture/_config_extra_forbid_inventory.py. Any new effective-ignore under schemas/** outside that frozenset fails. Regenerating the JSON report must not refresh/widen it; migration_debt_identities must remain [] after RF-002.",
     "generator_scope": "generate-pipeline emits only pipeline/composite/source/dq JSON; FilterConfigFile, dq_report_config, WorkflowConfigFileSchema, and PipelineContractPolicy roots are runtime-only.",
-    "rf002_debt_clear": "RF-002 (#12567) clears migration_debt_identities via real forbid migration + DQ ingress→projection field mapping; create≠clear. RF001_FORBID_NEW_BASELINE_IDENTITIES ceiling stays frozen at 36."
+    "rf002_debt_clear": "RF-002 (#12567) clears migration_debt_identities via real forbid migration + DQ ingress→projection field mapping; create≠clear. RF001_FORBID_NEW_BASELINE_IDENTITIES ceiling stays frozen at 36.",
+    "rf003_ratchet": "RF-003 (#12568) owns identity-set ratchet + negatives + registry (b) anchors only; does not own remaining code migration (debt cleared at 5416aa7a1c0fac5d8d0cbb6119b271e5ca226a73)."
   },
   "rf": "RF-001",
+  "rf002_debt_cleared_sha": "5416aa7a1c0fac5d8d0cbb6119b271e5ca226a73",
+  "rf003": "RF-003",
+  "rf003_issue": "12568",
   "runtime_roots": [
     {
       "classification": "generator-covered",

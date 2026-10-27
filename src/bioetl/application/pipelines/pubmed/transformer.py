@@ -7,10 +7,10 @@ from __future__ import annotations
 __all__ = ["PubMedPublicationTransformer"]
 
 import re
-import xml.etree.ElementTree as ET  # nosec B405
+import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry
+from typing import TYPE_CHECKING, Any, ClassVar, cast, override
 
 import defusedxml.ElementTree as defused_ET
-from typing import TYPE_CHECKING, Any, ClassVar, cast, override
 
 from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.pipelines.common import BasePublicationTransformer
