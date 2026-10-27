@@ -68,6 +68,57 @@ async def _dispatch_http_request(
         return await client.request(method, url, **typed_kwargs)
 
 
+def _apply_provider_cooldown(host: RequestTimingHost, response: httpx.Response) -> None:
+    """Extend local cooldown when the provider signals Retry-After."""
+    if response.status_code not in (429, 503):
+        return
+    retry_after = parse_retry_after(response.headers.get("Retry-After", ""))
+    if retry_after is None:
+        return
+    host._request_not_before = max(
+        host._request_not_before, time.monotonic() + retry_after
+    )
+
+
+def _log_http_attempt(
+    host: RequestTimingHost,
+    *,
+    method: str,
+    attempt_number: int,
+    phase: str,
+    started: float,
+    admitted: float | None,
+    completed: float,
+    response: httpx.Response | None,
+    error_type: str | None,
+) -> None:
+    """Emit one attempt-complete log without request secrets."""
+    if host.logger is None:
+        return
+    run_fields: dict[str, str] = {}
+    if host.run_id is not None:
+        run_fields["run_id"] = str(host.run_id)
+    admission_end = admitted if admitted is not None else completed
+    transport_seconds = 0.0 if admitted is None else completed - admitted
+    status_code = None if response is None else response.status_code
+    host.logger.info(
+        "http_attempt_completed",
+        provider=host.provider,
+        **run_fields,
+        method=method,
+        attempt=attempt_number,
+        phase=phase,
+        admission_seconds=round(admission_end - started, 6),
+        transport_seconds=round(transport_seconds, 6),
+        status_code=status_code,
+        error_type=error_type,
+        circuit_state=host.circuit_breaker.get_state().value,
+        cooldown_remaining_seconds=round(
+            max(0.0, host._request_not_before - completed), 6
+        ),
+    )
+
+
 async def execute_timed_request(
     host: RequestTimingHost,
     client: httpx.AsyncClient,
@@ -104,39 +155,23 @@ async def execute_timed_request(
 
         response = await host.circuit_breaker.call(send)
         response.extensions["bioetl_transport_seconds"] = time.monotonic() - admitted
-        if response.status_code in (429, 503):
-            retry_after = parse_retry_after(response.headers.get("Retry-After", ""))
-            if retry_after is not None:
-                host._request_not_before = max(
-                    host._request_not_before, time.monotonic() + retry_after
-                )
+        _apply_provider_cooldown(host, response)
         return response
     except BaseException as error:
         error_type = type(error).__name__
         raise
     finally:
-        completed = time.monotonic()
-        if host.logger is not None:
-            host.logger.info(
-                "http_attempt_completed",
-                provider=host.provider,
-                **({"run_id": str(host.run_id)} if host.run_id is not None else {}),
-                method=method,
-                attempt=attempt_number,
-                phase=phase,
-                admission_seconds=round(
-                    (admitted if admitted is not None else completed) - started, 6
-                ),
-                transport_seconds=round(completed - admitted, 6)
-                if admitted is not None
-                else 0.0,
-                status_code=response.status_code if response is not None else None,
-                error_type=error_type,
-                circuit_state=host.circuit_breaker.get_state().value,
-                cooldown_remaining_seconds=round(
-                    max(0.0, host._request_not_before - completed), 6
-                ),
-            )
+        _log_http_attempt(
+            host,
+            method=method,
+            attempt_number=attempt_number,
+            phase=phase,
+            started=started,
+            admitted=admitted,
+            completed=time.monotonic(),
+            response=response,
+            error_type=error_type,
+        )
 
 
 async def _await_admission(host: RequestTimingHost) -> None:
