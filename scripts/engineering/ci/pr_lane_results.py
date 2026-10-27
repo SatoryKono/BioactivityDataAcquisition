@@ -317,6 +317,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
     "src/memory/rag/chunking.py": ("tests/unit/memory/test_rag_indexing.py",),
+    "configs/quality/mypy_diagnostic_baseline.json": (
+        "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
+    ),
+    "scripts/engineering/ci/__init__.py": (
+        "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
+    ),
     "scripts/engineering/ci/publish_docker_image.sh": (
         "tests/unit/scripts/ci/test_docker_publication_guards.py",
     ),
@@ -409,6 +415,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "docs/02-architecture/decisions/": (
+        "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+    ),
     "configs/composites/": (
         "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
     ),

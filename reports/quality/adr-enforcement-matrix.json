@@ -2113,7 +2113,7 @@
         "tests/architecture/test_proof_or_stop_contract.py"
       ],
       "manual_exception": null,
-      "owner": "BioETL Team",
+      "owner": "BioETL maintainers",
       "status": "enforced",
       "title": "Proof-or-Stop Lifecycle Control"
     },

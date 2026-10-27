@@ -1,3 +1,16 @@
+______________________________________________________________________
+
+Version: 1.0.0
+Status: Accepted
+Class: published
+Owner: BioETL Team
+Reviewers:
+
+- BioETL Team
+  Last verified: '2026-09-25'
+
+______________________________________________________________________
+
 # ADR-055: Retain foreign-key reconciliation as a governed workflow data step
 
 **Status:** Accepted  
