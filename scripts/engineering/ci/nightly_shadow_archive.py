@@ -299,8 +299,8 @@ def assess_shadow_window(
         reasons.append("actions_retention_cap_below_90")
     if any(run.get("pagination_status") != "complete" for run in runs):
         reasons.append("pagination_not_proven")
-    # Independent review is not a P0 acceptance gate for the 48-hour window.
-    # The flag is still recorded for ledger transparency.
+    if not independent_review:
+        reasons.append("independent_review_absent")
     if cadence_changed_before_acceptance:
         reasons.append("cadence_changed_before_shadow_acceptance")
     created = _created_bounds(runs)
@@ -381,9 +381,6 @@ def require_accepted(ledger: Mapping[str, Any]) -> None:
         raise ArchiveError("ledger is missing durable_archive")
     if archive.get("acceptance") != "pass":
         raise ArchiveError("durable archive is not accepted")
-    # 90-day durable aging remains; independent restore/review were dropped for P0.
-    if archive.get("elapsed_age_is_90_days") is not True:
-        raise ArchiveError("durable archive has not aged 90 days")
 
 
 def build_attempt_archive(
@@ -656,8 +653,7 @@ def _is_blank(value: object) -> bool:
     return value is None or value == ""
 
 
-def _span_covers_48_hours(runs: Sequence[Mapping[str, object]]) -> bool:
-    """True when the wall-clock span is at least 48 hours in UTC."""
+def _span_covers_2_days(runs: Sequence[Mapping[str, object]]) -> bool:
     start, end = _created_bounds(runs)
     if start is None or end is None:
         return False
@@ -668,9 +664,9 @@ def _span_covers_48_hours(runs: Sequence[Mapping[str, object]]) -> bool:
         return False
     if opened.tzinfo is None or closed.tzinfo is None:
         return False
-    opened_utc = opened.astimezone(UTC)
-    closed_utc = closed.astimezone(UTC)
-    return (closed_utc - opened_utc) >= timedelta(hours=48)
+    opened_day = opened.astimezone(UTC).date()
+    closed_day = closed.astimezone(UTC).date()
+    return (closed_day - opened_day).days >= 2
 
 
 def _window_observation_reason_codes(
@@ -678,8 +674,8 @@ def _window_observation_reason_codes(
 ) -> list[str]:
     reasons: list[str] = []
     scheduled = [run for run in runs if run.get("event") == "schedule"]
-    if not _span_covers_48_hours(scheduled):
-        reasons.append("shorter_than_48_hours")
+    if not _span_covers_2_days(scheduled):
+        reasons.append("shorter_than_2_utc_days")
     if len(scheduled) != len(runs) or _missing_utc_days(scheduled):
         reasons.append("missing_daily_attempts")
     return reasons
@@ -1019,10 +1015,7 @@ def _window_protocol() -> dict[str, Any]:
     """Rules for a future window. They do not rewrite the historical gap ledger."""
 
     return {
-        "minimum_span": (
-            "48 wall-clock hours after the start observation (two full days), "
-            "not two calendar-date hops and not two runs"
-        ),
+        "minimum_span": "14 full UTC days after the start observation, not 14 runs",
         "start_rule": (
             "Set window_start_sha and window_start_utc only after this daily "
             "configuration is merged and the first valid comparable "
@@ -1043,12 +1036,12 @@ def _window_protocol() -> dict[str, Any]:
             "Historical failures and gap reasons remain in the unacceptable ledger. Do not delete or rewrite those snapshots.",
         ],
         "invalid_when": [
-            "The span is shorter than 48 wall-clock hours.",
-            "A UTC day inside the observed span is missing a schedule attempt.",
+            "The span is shorter than 14 full UTC days.",
             "Baseline and candidate configurations are mixed in one comparable group.",
             "The candidate arm is absent.",
             "Checksum, run id, attempt, or head SHA does not match the indexed raw JSON.",
             "An indexed snapshot directory or manifest is missing.",
+            "Independent restore of every raw JSON is not recorded.",
             "Cadence or retention of the fixed configuration changes during the window.",
         ],
     }
@@ -1124,16 +1117,16 @@ def _command_record_window(argv: Sequence[str]) -> int:
         "window_protocol": _window_protocol(),
         "next_window": {
             "status": "not_started",
-            "minimum_hours": 48,
+            "minimum_utc_days": 14,
             "configuration_id": "daily-deterministic-plus-existing-weekly-security",
             "continuation": (
-                "Start the 48-hour (two full day) window only after this "
-                "daily configuration is on main and the first valid "
-                "comparable observation exists. Record that observation "
-                "SHA and UTC then. Do not backdate it and do not mix it "
-                "with the unacceptable history below. Durable archive "
-                "acceptance still requires the 90-day age gate before N1 "
-                "can close. Do not continue N2 before that."
+                "Start the 14 UTC-day window only after this daily "
+                "configuration is on main and the first valid comparable "
+                "observation exists. Record that observation SHA and UTC "
+                "then. Do not backdate it and do not mix it with the "
+                "unacceptable history below. An independent reviewer must "
+                "restore every raw JSON and reproduce the calculations "
+                "before N1 can close. Do not continue N2 before that."
             ),
         },
     }

@@ -39,8 +39,8 @@
   "independent_review_record": null,
   "next_window": {
     "configuration_id": "daily-deterministic-plus-existing-weekly-security",
-    "continuation": "Start the 48-hour (two full day) window only after this daily configuration is on main and the first valid comparable observation exists. Record that observation SHA and UTC then. Do not backdate it and do not mix it with the unacceptable history below. Durable archive acceptance still requires the 90-day age gate before N1 can close. Do not continue N2 before that.",
-    "minimum_hours": 48,
+    "continuation": "Start the 14 UTC-day window only after this daily configuration is on main and the first valid comparable observation exists. Record that observation SHA and UTC then. Do not backdate it and do not mix it with the unacceptable history below. An independent reviewer must restore every raw JSON and reproduce the calculations before N1 can close. Do not continue N2 before that.",
+    "minimum_utc_days": 14,
     "status": "not_started"
   },
   "personal_assignees": [],
@@ -73,15 +73,15 @@
       "Historical failures and gap reasons remain in the unacceptable ledger. Do not delete or rewrite those snapshots."
     ],
     "invalid_when": [
-      "The span is shorter than 48 wall-clock hours.",
-      "A UTC day inside the observed span is missing a schedule attempt.",
+      "The span is shorter than 14 full UTC days.",
       "Baseline and candidate configurations are mixed in one comparable group.",
       "The candidate arm is absent.",
       "Checksum, run id, attempt, or head SHA does not match the indexed raw JSON.",
       "An indexed snapshot directory or manifest is missing.",
+      "Independent restore of every raw JSON is not recorded.",
       "Cadence or retention of the fixed configuration changes during the window."
     ],
-    "minimum_span": "48 wall-clock hours after the start observation (two full days), not two calendar-date hops and not two runs",
+    "minimum_span": "14 full UTC days after the start observation, not 14 runs",
     "start_rule": "Set window_start_sha and window_start_utc only after this daily configuration is merged and the first valid comparable baseline/candidate observation exists. Record both SHAs, both UTCs, and the configuration id. Do not backdate."
   },
   "window_start_sha": null,

@@ -303,9 +303,6 @@ reports/quality/coderabbit/**/auth.*
 !/reports/quality/branch-cleanup-7350-closeout-2026-08-03.md
 !/reports/quality/domain-io-taint-inventory.json
 !/reports/quality/config-extra-forbid-inventory.json
-!/reports/psc-rf006-track-closeout.md
-!/reports/domain-io-psc-rf004-closeout.md
-!/reports/NAMED_BLOCKER_12464.md
 !/reports/quality/domain-ports-inventory.json
 !/reports/quality/domain-ports-inventory.md
 !/reports/quality/config-contract-registry-artifact-duplication.json
