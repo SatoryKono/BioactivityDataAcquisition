@@ -1,0 +1,13 @@
+{
+  "commit": "928168ac9daca24f2c8a39eb4116c58ff98bb9a7",
+  "tree": "9ece3c762b14b8b4c2b13c123e00cb476c2ebc8a",
+  "timestamp": "2026-10-26T14:31:33Z",
+  "command": "uv run --frozen --no-build mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory scripts/engineering/quality",
+  "cache_mode": "incremental",
+  "stdout": "pyproject.toml: note: unused section(s): module = ['boto3.*', 'botocore', 'botocore.*', 'orjson.*', 'psutil.*', 's3transfer', 's3transfer.*', 'vcr.*', 'zstandard.*']\nSuccess: no issues found in 2947 source files\n",
+  "stderr": "",
+  "exit_code": 0,
+  "python_version": "3.13.14",
+  "mypy_version": "2.4.0",
+  "target_manifest": ["src/bioetl", "src/memory", "scripts/engineering/quality"]
+}

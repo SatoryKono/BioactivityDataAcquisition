@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-26T10:35:59.488245+00:00",
+  "generated_at": "2026-10-26T23:16:52.690164+00:00",
   "summary": {
-    "total_scripts": 697,
+    "total_scripts": 698,
     "status_counts": {
-      "active": 334,
+      "active": 335,
       "supporting": 363
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
-      "ci": 75,
+      "ci": 76,
       "docs": 289,
       "other": 16,
-      "scripts": 585,
+      "scripts": 586,
       "skills": 13,
-      "tests": 514
+      "tests": 515
     }
   },
   "scripts": [
@@ -10080,6 +10080,45 @@
       ]
     },
     {
+      "path": "scripts/engineering/ci/check_mypy_diagnostic_ratchet.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": ".github/workflows/type-checking.yml",
+          "line": 74,
+          "source_group": "ci",
+          "text": "uv run --frozen python -m scripts.engineering.ci.check_mypy_diagnostic_ratchet"
+        },
+        {
+          "path": "scripts/engineering/ci/pr_lane_results.py",
+          "line": 294,
+          "source_group": "scripts",
+          "text": "\"scripts/engineering/ci/check_mypy_diagnostic_ratchet.py\": ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
+          "line": 7,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.check_mypy_diagnostic_ratchet import main, _parse_mypy_output"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
+          "line": 30,
+          "source_group": "tests",
+          "text": "mock_resolve.return_value = repo_root / \"scripts\" / \"engineering\" / \"ci\" / \"check_mypy_diagnostic_ratchet.py\""
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
+          "line": 58,
+          "source_group": "tests",
+          "text": "mock_resolve.return_value = repo_root / \"scripts\" / \"engineering\" / \"ci\" / \"check_mypy_diagnostic_ratchet.py\""
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/ci/check_neo4j_memory_live_audit.py",
       "type": "py",
       "status": "active",
@@ -10521,7 +10560,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 294,
+          "line": 297,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -13923,7 +13962,7 @@
         },
         {
           "path": ".github/workflows/type-checking.yml",
-          "line": 83,
+          "line": 87,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa.check_architecture domain-type-policy"
         },
@@ -20541,7 +20580,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 340,
+          "line": 343,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23541,7 +23580,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 405,
+          "line": 408,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
