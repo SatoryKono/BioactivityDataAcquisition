@@ -73,8 +73,8 @@ def project_sink_layer_to_extract_payload(
 
     Ingress sink layers carry fields absent from Bronze/Silver/GoldSinkConfig
     (``enabled``, ``csv_export``, ``scd_config``, …). Blind ``model_dump()`` +
-    ``model_validate`` under ``extra="forbid"`` rejects valid ingress configs.
-    Only fields declared on the projection model are forwarded. Nested
+    ``model_validate`` under Pydantic forbid-extra mode rejects valid ingress
+    configs. Only fields declared on the projection model are forwarded. Nested
     ``dq_report`` is mapped field-wise so ingress (no ``checks``) never invents
     projection-only keys, while an already-projection dump keeps ``checks``.
     """
