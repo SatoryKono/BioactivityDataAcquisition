@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from pathlib import Path
 from unittest import mock
@@ -31,6 +33,16 @@ def test_parse_mypy_output_valid(tmp_path: Path) -> None:
     assert "src/bioetl/c.py" not in diagnostics
 
 
+def test_parse_mypy_output_without_line_number(tmp_path: Path) -> None:
+    log = tmp_path / "mypy.log"
+    log.write_text(
+        'dir/a.py: error: Duplicate module named "a" [no-redef]\n',
+        encoding="utf-8",
+    )
+    diagnostics = _parse_mypy_output(log)
+    assert diagnostics["dir/a.py"]['Duplicate module named "a"']["no-redef"] == 1
+
+
 def _repo_root(tmp_path: Path) -> Path:
     repo_root = tmp_path / "repo"
     (repo_root / "reports").mkdir(parents=True)
@@ -41,6 +53,12 @@ def _repo_root(tmp_path: Path) -> Path:
 def _patch_repo(mock_resolve: mock.Mock, repo_root: Path) -> None:
     mock_resolve.return_value = (
         repo_root / "scripts" / "engineering" / "ci" / "__init__.py"
+    )
+
+
+def _write_exit_code(repo_root: Path, code: int) -> None:
+    (repo_root / "reports" / "mypy_strict.exit_code").write_text(
+        f"{code}\n", encoding="utf-8"
     )
 
 
@@ -59,6 +77,7 @@ def test_ratchet_pass(
         "src/bioetl/a.py:10: error: Incompatible return type [return-value]\n",
         encoding="utf-8",
     )
+    _write_exit_code(repo_root, 1)
 
     assert run_mypy_diagnostic_ratchet() == 0
     assert "Mypy diagnostic ratchet passed" in capsys.readouterr().out
@@ -80,6 +99,7 @@ def test_ratchet_fail_new_error(
         "src/bioetl/a.py:15: error: Incompatible return type [return-value]\n",
         encoding="utf-8",
     )
+    _write_exit_code(repo_root, 1)
 
     assert run_mypy_diagnostic_ratchet() == 1
     assert "Mypy diagnostic ratchet failed" in capsys.readouterr().out
@@ -109,6 +129,37 @@ def test_ratchet_invalid_baseline_json(
         "{", encoding="utf-8"
     )
     (repo_root / "reports" / "mypy_strict.log").write_text("", encoding="utf-8")
+    _write_exit_code(repo_root, 0)
 
     assert run_mypy_diagnostic_ratchet() == 1
     assert "Invalid JSON" in capsys.readouterr().out
+
+
+@mock.patch("scripts.engineering.ci.Path.resolve")
+def test_ratchet_event_only_log_with_failing_exit_code(
+    mock_resolve: mock.Mock, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = _repo_root(tmp_path)
+    _patch_repo(mock_resolve, repo_root)
+    (repo_root / "configs" / "quality" / "mypy_diagnostic_baseline.json").write_text(
+        "{}", encoding="utf-8"
+    )
+    (repo_root / "reports" / "mypy_strict.log").write_text(
+        "Event: pull_request\n", encoding="utf-8"
+    )
+    _write_exit_code(repo_root, 1)
+
+    assert run_mypy_diagnostic_ratchet() == 1
+    assert "without recognized diagnostics" in capsys.readouterr().out
+
+
+@mock.patch("scripts.engineering.ci.Path.resolve")
+def test_ratchet_missing_exit_code_fails_closed(
+    mock_resolve: mock.Mock, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = _repo_root(tmp_path)
+    _patch_repo(mock_resolve, repo_root)
+    (repo_root / "reports" / "mypy_strict.log").write_text("", encoding="utf-8")
+
+    assert run_mypy_diagnostic_ratchet() == 1
+    assert "exit code file not found" in capsys.readouterr().out

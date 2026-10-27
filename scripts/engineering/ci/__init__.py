@@ -12,17 +12,22 @@ DiagnosticCounts = dict[str, dict[str, dict[str, int]]]
 
 
 def _location_path(prefix: str) -> str | None:
-    parts = prefix.rsplit(":", 2)
+    text = prefix.strip()
+    if not text:
+        return None
+    parts = text.rsplit(":", 2)
     if len(parts) == 2 and parts[1].isdigit():
         path = parts[0].strip()
         return path or None
-    if len(parts) != 3 or not parts[2].isdigit():
-        return None
-    if parts[1].isdigit():
-        path = parts[0].strip()
+    if len(parts) == 3 and parts[2].isdigit():
+        if parts[1].isdigit():
+            path = parts[0].strip()
+            return path or None
+        path = f"{parts[0]}:{parts[1]}".strip()
         return path or None
-    path = f"{parts[0]}:{parts[1]}".strip()
-    return path or None
+    # mypy also emits `path: error: ...` with no line number, for example
+    # `dir/a.py: error: Duplicate module named "a"`.
+    return text
 
 
 def _split_code(message_and_code: str) -> tuple[str, str]:
@@ -100,16 +105,46 @@ def _compare_diagnostics(
     return errors
 
 
+def _read_mypy_exit_code(path: Path) -> int:
+    if not path.exists():
+        raise FileNotFoundError(
+            f"mypy exit code file not found at {path}. Ensure mypy runs before this script."
+        )
+    raw = path.read_text(encoding="utf-8").strip()
+    if not raw.lstrip("-").isdigit():
+        raise ValueError(f"mypy exit code file {path} does not contain an integer")
+    return int(raw)
+
+
 def run_mypy_diagnostic_ratchet() -> int:
     """Fail when mypy log identities exceed the committed baseline."""
     repo_root = Path(__file__).resolve().parents[3]
     log_path = repo_root / "reports" / "mypy_strict.log"
+    exit_code_path = repo_root / "reports" / "mypy_strict.exit_code"
     baseline_path = repo_root / "configs" / "quality" / "mypy_diagnostic_baseline.json"
 
     try:
         current_diagnostics = _parse_mypy_output(log_path)
     except FileNotFoundError as exc:
         print(f"::error::{exc}")
+        return 1
+
+    try:
+        exit_code = _read_mypy_exit_code(exit_code_path)
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"::error::{exc}")
+        return 1
+    if exit_code not in (0, 1):
+        print(
+            f"::error::mypy exit code {exit_code} is not a completed run "
+            "(expected 0 or 1)"
+        )
+        return 1
+    if exit_code == 1 and not current_diagnostics:
+        print(
+            "::error::mypy exited 1 without recognized diagnostics; "
+            "the log is not a completed diagnostic run"
+        )
         return 1
 
     if baseline_path.exists():
