@@ -344,6 +344,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/technical_debt_audit_registry.yaml": (
         "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
     ),
+    "configs/quality/security_suppression_registry.yaml": (
+        "tests/architecture/test_security_suppression_registry.py",
+    ),
     "docs/04-reference/api/infrastructure.md": (
         "tests/architecture/test_api_reference_public_facades.py",
     ),

@@ -182,8 +182,8 @@ entries:
       Supports local listener probes and taskkill via resolved system
       executables with fixed argv, no shell, and a timeout.
   - id: SUP-SP-003
-    path: src/bioetl/infrastructure/storage/silver/delta_write_execution.py
-    line: 8
+    path: src/bioetl/infrastructure/storage/silver/support.py
+    line: 6
     rule: B404
     symbol: subprocess
     owner: stream-a
@@ -234,10 +234,10 @@ entries:
       git rev-parse --short HEAD via which()-resolved executable with fixed
       argv; no shell, timeout=5, returns None on failure.
   - id: SUP-SR-006
-    path: src/bioetl/infrastructure/storage/silver/delta_write_execution.py
-    line: 209
+    path: src/bioetl/infrastructure/storage/silver/support.py
+    line: 271
     rule: B603
-    symbol: subprocess.run
+    symbol: subprocess.Popen
     owner: stream-a
     review_date: "2027-03-18"
     rationale: >-
