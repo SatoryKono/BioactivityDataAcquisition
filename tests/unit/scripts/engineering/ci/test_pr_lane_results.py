@@ -485,6 +485,42 @@ def test_shadow_compare_routes_p17_003_external_caller_report(path: str) -> None
     ]
 
 
+def test_shadow_compare_routes_issue_12485_evidence_paths() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            "reports/evidence/12485/criterion_to_evidence.md",
+            "reports/ledger12457_handoff.json",
+        ],
+        repo_root=root,
+    )
+    assert report["covers_full_suite"] is False
+    assert report["selected"] == [
+        "tests/architecture/test_config_topology_docs_drift.py",
+        "tests/unit/application/composite/checkpoint/test_checkpoint_runtime.py",
+        "tests/unit/domain/control_plane/test_run_ledger_replay.py",
+    ]
+    with pytest.raises(
+        ValueError,
+        match=r"unmapped paths: reports/evidence/12485/unmapped-evidence.md",
+    ):
+        build_shadow_compare(
+            ["reports/evidence/12485/unmapped-evidence.md"], repo_root=root
+        )
+
+
+def test_shadow_compare_routes_low_coverage_revalidation_junit() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["reports/quality/low-coverage-6045-revalidation.xml"],
+        repo_root=root,
+    )
+    assert report["covers_full_suite"] is False
+    assert report["selected"] == [
+        "tests/unit/scripts/qa/test_refresh_governance_artifacts.py"
+    ]
+
+
 def test_shadow_compare_routes_security_suppression_registry() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
