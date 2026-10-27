@@ -640,10 +640,24 @@ strategy и не является решением для этого слоя.
   `PurePath`/path-value операции (тип, конструктор, арифметика пути)
   разрешены. Запрещены сами I/O-вызовы: `Path.open`, `read_*`/`write_*`,
   `urlopen` и side-effect `os.*`, включая обычные import-алиасы. Факт
-  импорта `pathlib` или `urllib.parse` I/O не является. Operation-based
-  проверка — `scripts/engineering/qa/report_domain_io_taint_inventory.py`:
-  имена разрешаются по импортам и прямым присваиваниям внутри модуля, без
+  импорта `pathlib` или `urllib.parse` I/O не является. **Variant A
+  (operation-based)** — принятая норма PSC / RF-004: код на `main` через
+  `#12544` (`#12463`); выбор A vs B из старого PR text не reopen.
+  Machine-checkable SSOT проверки —
+  `scripts/engineering/qa/report_domain_io_taint_inventory.py` (+ артефакт
+  `reports/quality/domain-io-taint-inventory.json`, owning tests
+  `tests/architecture/test_domain_io_taint_inventory.py`): имена
+  разрешаются по импортам и прямым присваиваниям внутри модуля, без
   межпроцедурного taint и без запрета одноимённого вызова только из-за имени.
+  Зелёный Domain I/O inventory **не** равен PASS полного
+  `tests/architecture` (`#12477`: residue **10 failed / 5592 passed /
+  19 skipped** — narrative `#12564` @ Run Base SHA `1528cb5a…`, tip
+  `100854af87…` наследует evidence, не fresh re-run; waiver ≠ PASS).
+  Closeout / owner path:
+  [`reports/domain-io-psc-rf004-closeout.md`](../../reports/domain-io-psc-rf004-closeout.md);
+  named blocker `#12464` ← `#12477`:
+  [`reports/NAMED_BLOCKER_12464.md`](../../reports/NAMED_BLOCKER_12464.md)
+  (KEEP).
 - Между агрегатами взаимодействие строится через идентификаторы и доменные события, а не через инфраструктурные зависимости.
 - Value objects валидируют и нормализуют данные при создании.
 - Состояние агрегатов изменяется только через явные transition-методы.
