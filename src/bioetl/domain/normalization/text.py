@@ -71,31 +71,22 @@ def _normalize_text_field(text: str | None) -> str | None:
         return None
 
     normalized = text
-    for step in (
-        _strip_html_and_decode_entities,
-        _remove_control_characters,
-        _normalize_unicode_nfc,
-        _collapse_whitespace,
-    ):
-        normalized = step(normalized)
 
-    normalized = normalized.strip()
+    # BOLT OPTIMIZATION:
+    # 1. Conditionally run expensive regex and entity decoding only if characters exist.
+    # 2. Avoid function call overhead in hot ETL loop by inlining steps here.
+    if "<" in normalized or "&" in normalized:
+        normalized = unescape(_HTML_TAG_PATTERN.sub("", normalized))
+
+    normalized = _CONTROL_CHARS_PATTERN.sub("", normalized)
+    normalized = unicodedata.normalize("NFC", normalized)
+
+    # BOLT OPTIMIZATION:
+    # " ".join(str.split()) efficiently collapses multiple internal spaces
+    # and inherently strips leading/trailing space without regex overhead.
+    normalized = " ".join(normalized.split())
+
     return normalized if normalized else None
-
-
-def _strip_html_and_decode_entities(text: str) -> str:
-    """Strip HTML tags and decode HTML entities."""
-    return unescape(_HTML_TAG_PATTERN.sub("", text))
-
-
-def _remove_control_characters(text: str) -> str:
-    """Remove non-whitespace control characters."""
-    return _CONTROL_CHARS_PATTERN.sub("", text)
-
-
-def _normalize_unicode_nfc(text: str) -> str:
-    """Normalize unicode using NFC canonical composition."""
-    return unicodedata.normalize("NFC", text)
 
 
 def _collapse_whitespace(text: str) -> str:
