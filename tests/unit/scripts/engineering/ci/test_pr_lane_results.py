@@ -453,6 +453,17 @@ def test_shadow_compare_routes_p17_003_external_caller_report(path: str) -> None
     ]
 
 
+def test_shadow_compare_routes_security_suppression_registry() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["configs/quality/security_suppression_registry.yaml"],
+        repo_root=root,
+    )
+    assert report["covers_full_suite"] is False
+    assert report["selected"] == [
+        "tests/architecture/test_security_suppression_registry.py",
+    ]
+
 def test_shadow_compare_routes_app002_port_map_to_port_contracts() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
