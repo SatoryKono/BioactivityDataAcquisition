@@ -11,6 +11,44 @@
     "local_ignore": 11,
     "local_none": 27
   },
+  "forbid_new_baseline_identities": [
+    "bioetl.infrastructure.schemas.base_schemas_chembl.BaseApiConfig",
+    "bioetl.infrastructure.schemas.base_schemas_chembl.BaseCsvExportConfig",
+    "bioetl.infrastructure.schemas.base_schemas_chembl.BaseDQConfig",
+    "bioetl.infrastructure.schemas.base_schemas_chembl.BaseDQThresholds",
+    "bioetl.infrastructure.schemas.base_schemas_chembl.BaseMaintenanceConfig",
+    "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseFilterColumnSchema",
+    "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldColumnFilterConfig",
+    "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldFiltersConfig",
+    "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListContainsFilterConfig",
+    "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListLengthFilterConfig",
+    "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldRangeFilterConfig",
+    "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseInputFilterConfig",
+    "bioetl.infrastructure.schemas.dq_report_config.BronzeDQReportConfig",
+    "bioetl.infrastructure.schemas.dq_report_config.BronzeSinkConfig",
+    "bioetl.infrastructure.schemas.dq_report_config.GoldDQReportConfig",
+    "bioetl.infrastructure.schemas.dq_report_config.GoldSinkConfig",
+    "bioetl.infrastructure.schemas.dq_report_config.SilverDQReportConfig",
+    "bioetl.infrastructure.schemas.dq_report_config.SilverSinkConfig",
+    "bioetl.infrastructure.schemas.filter_config.FilterConfigFile",
+    "bioetl.infrastructure.schemas.filter_config.GoldFiltersFileConfig",
+    "bioetl.infrastructure.schemas.filter_config.InputFilterFileConfig",
+    "bioetl.infrastructure.schemas.filter_config.SilverFiltersFileConfig",
+    "bioetl.infrastructure.schemas.pipeline_config_common.CircuitBreakerYamlConfig",
+    "bioetl.infrastructure.schemas.pipeline_config_common.CsvExportConfig",
+    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.ContentHashConfig",
+    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.FilterColumnSchema",
+    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldColumnFilterConfig",
+    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldFiltersConfig",
+    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldListContainsFilterConfig",
+    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldListLengthFilterConfig",
+    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldRangeFilterConfig",
+    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.InputFilterYamlConfig",
+    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.MaintenanceConfig",
+    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.SilverFiltersConfig",
+    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.SinkDQReportConfig",
+    "bioetl.infrastructure.schemas.pipeline_config_common_schemas.TransformConfig"
+  ],
   "generated_by": "tests.architecture._config_extra_forbid_inventory",
   "issue": "12566",
   "justified_exclusions": [
@@ -958,8 +996,8 @@
       "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.pipeline_contract_policy",
       "name": "PipelineContractPolicy",
-      "reachable_from_runtime_roots": false,
-      "role": "config-boundary"
+      "reachable_from_runtime_roots": true,
+      "role": "pipeline-contract-policy-root"
     },
     {
       "declaration_source": "local",
@@ -968,7 +1006,7 @@
       "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.pipeline_contract_policy",
       "name": "PipelineContractRollout",
-      "reachable_from_runtime_roots": false,
+      "reachable_from_runtime_roots": true,
       "role": "config-boundary"
     },
     {
@@ -1048,8 +1086,8 @@
       "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.workflow_config",
       "name": "WorkflowConfigFileSchema",
-      "reachable_from_runtime_roots": false,
-      "role": "config-boundary"
+      "reachable_from_runtime_roots": true,
+      "role": "workflow-config-root"
     },
     {
       "declaration_source": "local",
@@ -1058,7 +1096,7 @@
       "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.workflow_config",
       "name": "WorkflowConfigSchema",
-      "reachable_from_runtime_roots": false,
+      "reachable_from_runtime_roots": true,
       "role": "config-boundary"
     },
     {
@@ -1068,7 +1106,7 @@
       "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.workflow_config",
       "name": "WorkflowDefaultsSchema",
-      "reachable_from_runtime_roots": false,
+      "reachable_from_runtime_roots": true,
       "role": "config-boundary"
     },
     {
@@ -1078,7 +1116,7 @@
       "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.workflow_config",
       "name": "WorkflowPipelineStepSchema",
-      "reachable_from_runtime_roots": false,
+      "reachable_from_runtime_roots": true,
       "role": "config-boundary"
     },
     {
@@ -1108,7 +1146,7 @@
       "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.workflow_config",
       "name": "WorkflowRunOptionsSchema",
-      "reachable_from_runtime_roots": false,
+      "reachable_from_runtime_roots": true,
       "role": "config-boundary"
     },
     {
@@ -1118,7 +1156,7 @@
       "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.workflow_config",
       "name": "WorkflowTransformStepSchema",
-      "reachable_from_runtime_roots": false,
+      "reachable_from_runtime_roots": true,
       "role": "config-boundary"
     },
     {
@@ -1128,7 +1166,7 @@
       "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.workflow_config_fk",
       "name": "WorkflowReferenceCohortSchema",
-      "reachable_from_runtime_roots": false,
+      "reachable_from_runtime_roots": true,
       "role": "config-boundary"
     }
   ],
@@ -1942,6 +1980,22 @@
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },
     {
+      "classification": "forbid",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.pipeline_contract_policy.PipelineContractPolicy",
+      "path": "$",
+      "role": "pipeline-contract-policy-root",
+      "root": "bioetl.infrastructure.schemas.pipeline_contract_policy.PipelineContractPolicy"
+    },
+    {
+      "classification": "forbid",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.pipeline_contract_policy.PipelineContractRollout",
+      "path": "rollout",
+      "role": "config-boundary",
+      "root": "bioetl.infrastructure.schemas.pipeline_contract_policy.PipelineContractPolicy"
+    },
+    {
       "classification": "generator-covered",
       "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.source_config.SourceYamlConfig",
@@ -2012,14 +2066,78 @@
       "path": "source.rate_limit.with_api_key",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.source_config.SourceYamlConfig"
+    },
+    {
+      "classification": "forbid",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigFileSchema",
+      "path": "$",
+      "role": "workflow-config-root",
+      "root": "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigFileSchema"
+    },
+    {
+      "classification": "forbid",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigSchema",
+      "path": "workflow",
+      "role": "config-boundary",
+      "root": "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigFileSchema"
+    },
+    {
+      "classification": "forbid",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.workflow_config.WorkflowDefaultsSchema",
+      "path": "workflow.defaults",
+      "role": "config-boundary",
+      "root": "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigFileSchema"
+    },
+    {
+      "classification": "forbid",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.workflow_config.WorkflowRunOptionsSchema",
+      "path": "workflow.defaults.run_options",
+      "role": "config-boundary",
+      "root": "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigFileSchema"
+    },
+    {
+      "classification": "forbid",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.workflow_config.WorkflowPipelineStepSchema",
+      "path": "workflow.steps",
+      "role": "config-boundary",
+      "root": "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigFileSchema"
+    },
+    {
+      "classification": "forbid",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.workflow_config.WorkflowTransformStepSchema",
+      "path": "workflow.steps",
+      "role": "config-boundary",
+      "root": "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigFileSchema"
+    },
+    {
+      "classification": "forbid",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.workflow_config_fk.WorkflowReferenceCohortSchema",
+      "path": "workflow.steps.reference_cohort",
+      "role": "config-boundary",
+      "root": "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigFileSchema"
+    },
+    {
+      "classification": "forbid",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.workflow_config.WorkflowRunOptionsSchema",
+      "path": "workflow.steps.run_options",
+      "role": "config-boundary",
+      "root": "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigFileSchema"
     }
   ],
   "notes": {
     "base_api_config": "BaseApiConfig is connection config in migration debt; not wire.",
     "dq_yaml_ingress": "SinkLayerConfig.dq_report → SinkDQReportConfig (enabled/output_path/format; no checks).",
-    "dual_registries": "migration_debt_identities=(a) exact identity set; justified_exclusions=(b) seed. Transfer (a)→(b) ≠ clearing debt.",
-    "forbid_new_permissive": "After RF-001 lands, any new effective-ignore identity under schemas/** not in (a)∪schemas-overlap-of-(b) fails the ratchet.",
-    "generator_scope": "generate-pipeline emits only pipeline/composite/source/dq JSON; FilterConfigFile and dq_report_config models are runtime-only."
+    "dual_registries": "migration_debt_identities=(a) current exact identity set; justified_exclusions=(b) seed. Transfer (a)→(b) ≠ clearing debt.",
+    "forbid_new_permissive": "Forbid-new ceiling is RF001_FORBID_NEW_BASELINE_IDENTITIES in tests/architecture/_config_extra_forbid_inventory.py. Any new effective-ignore under schemas/** outside that frozenset fails. Regenerating the JSON report must not refresh/widen it; migration_debt_identities may shrink below the ceiling after real RF-002 forbid migration.",
+    "generator_scope": "generate-pipeline emits only pipeline/composite/source/dq JSON; FilterConfigFile, dq_report_config, WorkflowConfigFileSchema, and PipelineContractPolicy roots are runtime-only."
   },
   "rf": "RF-001",
   "runtime_roots": [
@@ -2104,12 +2222,28 @@
       "schema_artifact": "configs/_schema/pipeline.json"
     },
     {
+      "classification": "forbid",
+      "coverage": "runtime-only",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.pipeline_contract_policy.PipelineContractPolicy",
+      "role": "pipeline-contract-policy-root",
+      "schema_artifact": null
+    },
+    {
       "classification": "generator-covered",
       "coverage": "generator-covered",
       "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.source_config.SourceYamlConfig",
       "role": "generator-root",
       "schema_artifact": "configs/_schema/source.json"
+    },
+    {
+      "classification": "forbid",
+      "coverage": "runtime-only",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigFileSchema",
+      "role": "workflow-config-root",
+      "schema_artifact": null
     }
   ],
   "schema_version": 1,

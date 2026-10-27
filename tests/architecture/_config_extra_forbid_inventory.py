@@ -54,6 +54,52 @@ BASELINE_SHA = "100854af874059f7a873a501518e2955f6eb5916"
 ISSUE_ID = "12566"
 RF_ID = "RF-001"
 
+# Forbidden-new ceiling: exact permissive identity set at RF-001 land.
+# Source of truth is this frozenset in code — NOT the regenerable JSON report.
+# Regenerating ``config-extra-forbid-inventory.json`` must not refresh/widen it.
+# RF-002 may shrink live migration debt below this ceiling after real forbid
+# migration; it must not introduce identities outside this set.
+RF001_FORBID_NEW_BASELINE_IDENTITIES: frozenset[str] = frozenset(
+    {
+        "bioetl.infrastructure.schemas.base_schemas_chembl.BaseApiConfig",
+        "bioetl.infrastructure.schemas.base_schemas_chembl.BaseCsvExportConfig",
+        "bioetl.infrastructure.schemas.base_schemas_chembl.BaseDQConfig",
+        "bioetl.infrastructure.schemas.base_schemas_chembl.BaseDQThresholds",
+        "bioetl.infrastructure.schemas.base_schemas_chembl.BaseMaintenanceConfig",
+        "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseFilterColumnSchema",
+        "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldColumnFilterConfig",
+        "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldFiltersConfig",
+        "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListContainsFilterConfig",
+        "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldListLengthFilterConfig",
+        "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseGoldRangeFilterConfig",
+        "bioetl.infrastructure.schemas.base_schemas_pubchem.BaseInputFilterConfig",
+        "bioetl.infrastructure.schemas.dq_report_config.BronzeDQReportConfig",
+        "bioetl.infrastructure.schemas.dq_report_config.BronzeSinkConfig",
+        "bioetl.infrastructure.schemas.dq_report_config.GoldDQReportConfig",
+        "bioetl.infrastructure.schemas.dq_report_config.GoldSinkConfig",
+        "bioetl.infrastructure.schemas.dq_report_config.SilverDQReportConfig",
+        "bioetl.infrastructure.schemas.dq_report_config.SilverSinkConfig",
+        "bioetl.infrastructure.schemas.filter_config.FilterConfigFile",
+        "bioetl.infrastructure.schemas.filter_config.GoldFiltersFileConfig",
+        "bioetl.infrastructure.schemas.filter_config.InputFilterFileConfig",
+        "bioetl.infrastructure.schemas.filter_config.SilverFiltersFileConfig",
+        "bioetl.infrastructure.schemas.pipeline_config_common.CircuitBreakerYamlConfig",
+        "bioetl.infrastructure.schemas.pipeline_config_common.CsvExportConfig",
+        "bioetl.infrastructure.schemas.pipeline_config_common_schemas.ContentHashConfig",
+        "bioetl.infrastructure.schemas.pipeline_config_common_schemas.FilterColumnSchema",
+        "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldColumnFilterConfig",
+        "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldFiltersConfig",
+        "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldListContainsFilterConfig",
+        "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldListLengthFilterConfig",
+        "bioetl.infrastructure.schemas.pipeline_config_common_schemas.GoldRangeFilterConfig",
+        "bioetl.infrastructure.schemas.pipeline_config_common_schemas.InputFilterYamlConfig",
+        "bioetl.infrastructure.schemas.pipeline_config_common_schemas.MaintenanceConfig",
+        "bioetl.infrastructure.schemas.pipeline_config_common_schemas.SilverFiltersConfig",
+        "bioetl.infrastructure.schemas.pipeline_config_common_schemas.SinkDQReportConfig",
+        "bioetl.infrastructure.schemas.pipeline_config_common_schemas.TransformConfig",
+    }
+)
+
 GENERATOR_COVERED_ROOTS: dict[str, str] = {
     "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig": (
         "configs/_schema/pipeline.json"
@@ -75,6 +121,17 @@ RUNTIME_ONLY_ROOTS: tuple[str, ...] = (
     "bioetl.infrastructure.schemas.dq_report_config.BronzeSinkConfig",
     "bioetl.infrastructure.schemas.dq_report_config.SilverSinkConfig",
     "bioetl.infrastructure.schemas.dq_report_config.GoldSinkConfig",
+    # load_workflow_config → WorkflowConfigFileSchema (not in generate-pipeline SCHEMAS)
+    "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigFileSchema",
+    # load_pipeline_contract_policy → PipelineContractPolicy (entity contracts section)
+    "bioetl.infrastructure.schemas.pipeline_contract_policy.PipelineContractPolicy",
+)
+
+WORKFLOW_CONFIG_ROOT = (
+    "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigFileSchema"
+)
+PIPELINE_CONTRACT_POLICY_ROOT = (
+    "bioetl.infrastructure.schemas.pipeline_contract_policy.PipelineContractPolicy"
 )
 
 # Seed justified exclusions (registry b). These are NOT migration debt and MUST
@@ -298,6 +355,10 @@ def _role_for_identity(identity: str) -> str:
         return "dq-layer-projection"
     if identity == BASE_API_CONFIG_IDENTITY:
         return "api-connection-config"
+    if identity == WORKFLOW_CONFIG_ROOT:
+        return "workflow-config-root"
+    if identity == PIPELINE_CONTRACT_POLICY_ROOT:
+        return "pipeline-contract-policy-root"
     if identity in GENERATOR_COVERED_ROOTS:
         return "generator-root"
     if identity in RUNTIME_ONLY_ROOTS:
@@ -392,7 +453,11 @@ def _runtime_root_classes() -> dict[str, type[BaseModel]]:
     )
     from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+    from bioetl.infrastructure.schemas.pipeline_contract_policy import (
+        PipelineContractPolicy,
+    )
     from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
+    from bioetl.infrastructure.schemas.workflow_config import WorkflowConfigFileSchema
 
     roots: dict[str, type[BaseModel]] = {
         _qualname(PipelineYamlConfig): PipelineYamlConfig,
@@ -406,6 +471,8 @@ def _runtime_root_classes() -> dict[str, type[BaseModel]]:
         _qualname(BronzeSinkConfig): BronzeSinkConfig,
         _qualname(SilverSinkConfig): SilverSinkConfig,
         _qualname(GoldSinkConfig): GoldSinkConfig,
+        _qualname(WorkflowConfigFileSchema): WorkflowConfigFileSchema,
+        _qualname(PipelineContractPolicy): PipelineContractPolicy,
     }
     return roots
 
@@ -503,6 +570,14 @@ def build_payload() -> dict[str, object]:
     justified = [dict(item) for item in JUSTIFIED_EXCLUSIONS_SEED]
     justified.sort(key=lambda item: item["identity"])
 
+    forbid_new_baseline = sorted(RF001_FORBID_NEW_BASELINE_IDENTITIES)
+    unknown_vs_baseline = sorted(set(migration_debt) - RF001_FORBID_NEW_BASELINE_IDENTITIES)
+    if unknown_vs_baseline:
+        raise RuntimeError(
+            "Live effective-ignore identities outside frozen RF-001 forbid-new "
+            f"baseline: {unknown_vs_baseline}"
+        )
+
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_by": GENERATED_BY,
@@ -512,18 +587,27 @@ def build_payload() -> dict[str, object]:
         "schemas_root": "src/bioetl/infrastructure/schemas",
         "counts": _counts(rows),
         "models": rows,
+        # (a) regenerable current debt — may shrink after RF-002 migration.
         "migration_debt_identities": migration_debt,
+        # Frozen forbid-new ceiling (copy of RF001_FORBID_NEW_BASELINE_IDENTITIES).
+        # Regenerating this JSON does not redefine the ceiling; the Python
+        # frozenset is the authority. Owning tests assert against the constant.
+        "forbid_new_baseline_identities": forbid_new_baseline,
         "justified_exclusions": justified,
         "runtime_roots": root_rows,
         "nested_paths": path_rows,
         "notes": {
             "dual_registries": (
-                "migration_debt_identities=(a) exact identity set; "
+                "migration_debt_identities=(a) current exact identity set; "
                 "justified_exclusions=(b) seed. Transfer (a)→(b) ≠ clearing debt."
             ),
             "forbid_new_permissive": (
-                "After RF-001 lands, any new effective-ignore identity under "
-                "schemas/** not in (a)∪schemas-overlap-of-(b) fails the ratchet."
+                "Forbid-new ceiling is RF001_FORBID_NEW_BASELINE_IDENTITIES in "
+                "tests/architecture/_config_extra_forbid_inventory.py. "
+                "Any new effective-ignore under schemas/** outside that frozenset "
+                "fails. Regenerating the JSON report must not refresh/widen it; "
+                "migration_debt_identities may shrink below the ceiling after "
+                "real RF-002 forbid migration."
             ),
             "dq_yaml_ingress": (
                 "SinkLayerConfig.dq_report → SinkDQReportConfig "
@@ -534,7 +618,8 @@ def build_payload() -> dict[str, object]:
             ),
             "generator_scope": (
                 "generate-pipeline emits only pipeline/composite/source/dq JSON; "
-                "FilterConfigFile and dq_report_config models are runtime-only."
+                "FilterConfigFile, dq_report_config, WorkflowConfigFileSchema, and "
+                "PipelineContractPolicy roots are runtime-only."
             ),
         },
     }

@@ -36,7 +36,10 @@ from tests.architecture._config_extra_forbid_inventory import (
     DQ_YAML_INGRESS_IDENTITY,
     GENERATOR_COVERED_ROOTS,
     JUSTIFIED_EXCLUSIONS_SEED,
+    PIPELINE_CONTRACT_POLICY_ROOT,
+    RF001_FORBID_NEW_BASELINE_IDENTITIES,
     RUNTIME_ONLY_ROOTS,
+    WORKFLOW_CONFIG_ROOT,
     build_payload,
     render_payload,
 )
@@ -110,24 +113,36 @@ def test_justified_exclusions_registry_is_separate_from_migration_debt() -> None
 
 @pytest.mark.generated_artifact
 def test_forbid_new_permissive_identities_after_baseline() -> None:
-    """Any new effective-ignore under schemas/** outside registry (a) fails."""
+    """Forbid-new uses a frozen identity ceiling, not the regenerable debt list.
+
+    Codex P2: comparing live_ignore to regenerable ``migration_debt_identities``
+    is tautological after inventory refresh and allows ignore↔forbid swaps.
+    Authority is ``RF001_FORBID_NEW_BASELINE_IDENTITIES`` in the helper module.
+    """
     payload = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
-    baseline_debt = set(payload["migration_debt_identities"])
+    frozen = RF001_FORBID_NEW_BASELINE_IDENTITIES
+    # Artifact may document the ceiling, but regeneration must echo the constant
+    # — it must not become an independent mutable baseline.
+    assert payload["forbid_new_baseline_identities"] == sorted(frozen)
+    assert set(payload["forbid_new_baseline_identities"]) == frozen
+
     live = build_payload()
     live_ignore = {
         row["identity"]
         for row in live["models"]
         if row["effective_extra"] == "ignore"
     }
-    new_permissive = sorted(live_ignore - baseline_debt)
+    new_permissive = sorted(live_ignore - frozen)
     assert new_permissive == [], (
         "Forbid-new permissive identities after RF-001 baseline; "
         f"unexpected effective-ignore models: {new_permissive}"
     )
-    # Shrinking debt is allowed only via real migration (RF-002); RF-001 pins
-    # exact set equality so accidental removals from the artifact without
-    # code migration also fail the artifact-matches-generator gate.
-    assert live_ignore == baseline_debt
+    # Current regenerable debt may shrink under the ceiling (RF-002), but must
+    # never exceed it and must match the live scan.
+    debt = set(payload["migration_debt_identities"])
+    assert debt == live_ignore
+    assert debt <= frozen
+    assert len(frozen) == 36
 
 
 @pytest.mark.generated_artifact
@@ -220,3 +235,67 @@ def test_base_api_config_not_classified_as_wire_dto() -> None:
         if item["kind"] == "adapter-wire-models"
     )
     assert "BaseApiConfig" in wire["rationale"] or "Do not confuse" in wire["rationale"]
+
+
+@pytest.mark.generated_artifact
+def test_manifest_includes_workflow_and_contract_policy_roots() -> None:
+    """load_workflow_config / load_pipeline_contract_policy roots must be reachable."""
+    payload = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
+    roots = {row["identity"]: row for row in payload["runtime_roots"]}
+    models = {row["identity"]: row for row in payload["models"]}
+
+    assert WORKFLOW_CONFIG_ROOT in roots
+    assert PIPELINE_CONTRACT_POLICY_ROOT in roots
+    assert WORKFLOW_CONFIG_ROOT in RUNTIME_ONLY_ROOTS
+    assert PIPELINE_CONTRACT_POLICY_ROOT in RUNTIME_ONLY_ROOTS
+
+    workflow_root = roots[WORKFLOW_CONFIG_ROOT]
+    assert workflow_root["coverage"] == "runtime-only"
+    assert workflow_root["schema_artifact"] is None
+    assert workflow_root["role"] == "workflow-config-root"
+    # Already local forbid — classification is forbid; coverage remains runtime-only
+    # (absent from generate-pipeline SCHEMAS).
+    assert workflow_root["effective_extra"] == "forbid"
+    assert workflow_root["classification"] == "forbid"
+
+    contract_root = roots[PIPELINE_CONTRACT_POLICY_ROOT]
+    assert contract_root["coverage"] == "runtime-only"
+    assert contract_root["schema_artifact"] is None
+    assert contract_root["role"] == "pipeline-contract-policy-root"
+    assert contract_root["effective_extra"] == "forbid"
+    assert contract_root["classification"] == "forbid"
+
+    assert models[WORKFLOW_CONFIG_ROOT]["reachable_from_runtime_roots"] is True
+    assert models[PIPELINE_CONTRACT_POLICY_ROOT]["reachable_from_runtime_roots"] is True
+
+    workflow_paths = {
+        row["path"]
+        for row in payload["nested_paths"]
+        if row["root"] == WORKFLOW_CONFIG_ROOT
+    }
+    assert "workflow.defaults" in workflow_paths
+    assert "workflow.steps" in workflow_paths
+
+    contract_paths = {
+        row["path"]
+        for row in payload["nested_paths"]
+        if row["root"] == PIPELINE_CONTRACT_POLICY_ROOT
+    }
+    assert "$" in contract_paths
+    assert "rollout" in contract_paths
+
+    # Nested workflow / contract models used by those loaders must be reachable.
+    for identity_suffix in (
+        "WorkflowConfigSchema",
+        "WorkflowDefaultsSchema",
+        "PipelineContractRollout",
+    ):
+        matches = [
+            row
+            for row in payload["models"]
+            if row["identity"].endswith(f".{identity_suffix}")
+        ]
+        assert matches, identity_suffix
+        assert all(
+            row["reachable_from_runtime_roots"] is True for row in matches
+        ), matches
