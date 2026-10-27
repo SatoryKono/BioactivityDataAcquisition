@@ -22,8 +22,9 @@ accepted Domain I/O surface norm**. SSOT политики:
 - артефакт: `reports/quality/domain-io-taint-inventory.json`
 - owning tests: `tests/architecture/test_domain_io_taint_inventory.py`
 
-На baseline tip: `violation_count=0`; inventory `--check` зелёный. Это **не**
-эквивалентно PASS полного `tests/architecture` (`#12477`).
+На baseline tip: `python -m scripts.engineering.qa report-domain-io-taint-inventory --check`
+→ exit 0, `violation_count=0`. Это **не** эквивалентно PASS полного
+`tests/architecture` (`#12477`).
 
 ## 2. Residue `#12477` — не PASS (provenance счётчиков)
 
