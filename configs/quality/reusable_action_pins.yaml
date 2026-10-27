@@ -24,4 +24,4 @@ pins:
   - path: "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml"
     sha: "843eb3f1c9410df7eccfebf3c8a810cc897ed0e9"
   - path: "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml"
-    sha: "3117d0a38aa5c7795e25377ca3efe948f3e68214"
+    sha: "f377cff40abf52d63220346b9ab64814f3081ca6"

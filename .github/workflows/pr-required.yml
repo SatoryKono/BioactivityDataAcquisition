@@ -768,7 +768,7 @@ jobs:
       contents: read
     # Pin must stay on trusted main (#11232). docs.yml owns diagram/docs
     # governance so arch-pytest can ignore the expensive Mermaid modules (#12374).
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@3117d0a38aa5c7795e25377ca3efe948f3e68214
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@f377cff40abf52d63220346b9ab64814f3081ca6
 
   docker-lane:
     name: Docker lane

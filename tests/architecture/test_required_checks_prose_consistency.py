@@ -514,8 +514,9 @@ def test_prose_only_change_runs_pytest_without_lint_arch() -> None:
     )
     docs_workflow = (ROOT / ".github/workflows/docs.yml").read_text(encoding="utf-8")
     assert "docs-governance'] == 'required'" in coordinator
-    assert "uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@" in (
-        coordinator
+    assert (
+        "uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@"
+        in (coordinator)
     )
     assert "tests/architecture/test_required_checks_prose_consistency.py" in (
         docs_workflow

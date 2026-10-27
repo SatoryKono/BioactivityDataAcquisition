@@ -41,7 +41,7 @@ ALLOWED_USES: dict[str, set[str]] = {
         "843eb3f1c9410df7eccfebf3c8a810cc897ed0e9",  # #12417
     },
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml": {
-        "3117d0a38aa5c7795e25377ca3efe948f3e68214",  # #12374 docs-lane
+        "f377cff40abf52d63220346b9ab64814f3081ca6",  # #12374 docs concurrency
     },
     "actions/attest-build-provenance": {
         "977bb373ede98d70efdf65b84cb5f73e068dcc2a",  # v3

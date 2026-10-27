@@ -120,6 +120,7 @@ def test_coordinator_materializes_on_supported_pr_bases_after_owner_cutover() ->
 
 
 def test_coordinator_has_classify_and_aggregate_jobs() -> None:
+    """Aggregator needs every lane owner, including the reusable docs-lane."""
     data = _load_yaml(COORDINATOR)
     jobs = data.get("jobs", {})
     assert "classify-changes" in jobs
