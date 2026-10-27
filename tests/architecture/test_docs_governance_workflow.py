@@ -98,6 +98,11 @@ def test_docs_workflow_path_filters_include_github_workflows_glob() -> None:
     assert "workflow_call:" in trigger_block
     assert "pull_request:" not in trigger_block
     assert "push:" not in trigger_block
+    # Caller inherits github.workflow; docs- prefix avoids coordinator cancel.
+    assert (
+        "group: docs-${{ github.event.pull_request.number || github.sha }}"
+        in trigger_block
+    )
 
     catalog = Path("configs/quality/github_required_checks.yaml").read_text(
         encoding="utf-8"

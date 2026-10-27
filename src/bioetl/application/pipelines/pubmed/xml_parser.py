@@ -8,37 +8,30 @@ from __future__ import annotations
 __all__ = ["get_int", "get_text"]
 
 
-import xml.etree.ElementTree as ET  # nosec B405
-
-import defusedxml.ElementTree as defused_ET
+import xml.etree.ElementTree as ET  # nosec B405  # type annotations only
 
 
 def get_text(node: ET.Element | None) -> str | None:
     """Extract text content from an XML element.
 
-        Safely extracts and strips whitespace from XML element text content.
-        Handles None elements and empty text gracefully.
+    Safely extracts and strips whitespace from XML element text content.
+    Handles None elements and empty text gracefully.
 
-        Args:
-            node: XML element to extract text from, or None.
+    Args:
+        node: XML element to extract text from, or None.
 
-        Returns:
-            Stripped text content if element exists and has non-empty text,
-            None otherwise.
+    Returns:
+        Stripped text content if element exists and has non-empty text,
+        None otherwise.
 
-        Example:
-            >>> import xml.etree.ElementTree as ET  # nosec B405
-
-    import defusedxml.ElementTree as defused_ET
-            >>> elem = defused_ET.fromstring("<title>  PubMed Article  </title>")
-            >>> get_text(elem)
-            'PubMed Article'
-            >>> get_text(None)
-            None
-            >>> empty = defused_ET.fromstring("<title></title>")
-            >>> get_text(empty)
-            None
-
+    Example:
+        >>> import defusedxml.ElementTree as defused_ET
+        >>> elem = defused_ET.fromstring("<title>  PubMed Article  </title>")
+        >>> get_text(elem)
+        'PubMed Article'
+        >>> get_text(None)
+        >>> empty = defused_ET.fromstring("<title></title>")
+        >>> get_text(empty)
     """
     if node is not None and node.text:
         return node.text.strip()
@@ -48,32 +41,26 @@ def get_text(node: ET.Element | None) -> str | None:
 def get_int(node: ET.Element | None) -> int | None:
     """Extract integer value from an XML element.
 
-        Safely parses integer from XML element text content.
-        Returns None for missing elements, empty text, or non-integer values.
+    Safely parses integer from XML element text content.
+    Returns None for missing elements, empty text, or non-integer values.
 
-        Args:
-            node: XML element containing integer text, or None.
+    Args:
+        node: XML element containing integer text, or None.
 
-        Returns:
-            Parsed integer if element exists and contains valid integer text,
-            None otherwise (including for non-numeric text).
+    Returns:
+        Parsed integer if element exists and contains valid integer text,
+        None otherwise (including for non-numeric text).
 
-        Example:
-            >>> import xml.etree.ElementTree as ET  # nosec B405
-
-    import defusedxml.ElementTree as defused_ET
-            >>> year = defused_ET.fromstring("<Year>2024</Year>")
-            >>> get_int(year)
-            2024
-            >>> get_int(None)
-            None
-            >>> invalid = defused_ET.fromstring("<Year>invalid</Year>")
-            >>> get_int(invalid)
-            None
-            >>> empty = defused_ET.fromstring("<Year>  </Year>")
-            >>> get_int(empty)
-            None
-
+    Example:
+        >>> import defusedxml.ElementTree as defused_ET
+        >>> year = defused_ET.fromstring("<Year>2024</Year>")
+        >>> get_int(year)
+        2024
+        >>> get_int(None)
+        >>> invalid = defused_ET.fromstring("<Year>invalid</Year>")
+        >>> get_int(invalid)
+        >>> empty = defused_ET.fromstring("<Year>  </Year>")
+        >>> get_int(empty)
     """
     if node is not None and node.text:
         text = node.text.strip()

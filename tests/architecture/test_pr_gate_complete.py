@@ -120,6 +120,7 @@ def test_coordinator_materializes_on_supported_pr_bases_after_owner_cutover() ->
 
 
 def test_coordinator_has_classify_and_aggregate_jobs() -> None:
+    """Aggregator needs every lane owner, including the reusable docs-lane."""
     data = _load_yaml(COORDINATOR)
     jobs = data.get("jobs", {})
     assert "classify-changes" in jobs
@@ -127,7 +128,13 @@ def test_coordinator_has_classify_and_aggregate_jobs() -> None:
     agg = jobs["pr-gate-complete"]
     assert str(agg.get("if", "")).strip() == "${{ always() }}"
     needs = set(agg.get("needs", []))
-    assert needs == {"classify-changes", "fast-governance", "class-lane", "docker-lane"}
+    assert needs == {
+        "classify-changes",
+        "fast-governance",
+        "class-lane",
+        "docs-lane",
+        "docker-lane",
+    }
     classify = jobs["classify-changes"]
     assert "head_sha" in str(classify.get("outputs", {}))
     assert int(classify.get("timeout-minutes", 0)) >= 15

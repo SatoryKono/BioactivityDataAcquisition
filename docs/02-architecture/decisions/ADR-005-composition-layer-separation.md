@@ -74,11 +74,19 @@ composition            ✅        ✅             ✅             ✅           
 interfaces             ✅        ✅             ❌             ✅           ✅
 ```
 
-> **Note (2026-05-13):** Direct `interfaces → infrastructure` imports are no longer
-> part of the active import matrix. The `interfaces` layer (CLI, API handlers) must
-> obtain concrete runtime wiring through `composition` entrypoints or call
-> application services behind ports. `tests/architecture/test_interfaces_no_infrastructure.py`
-> and `.importlinter` enforce this policy with no active legacy allowlist.
+> **Note (2026-05-13; updated 2026-10-27 / #12570):** Direct
+> `interfaces → infrastructure` imports are no longer part of the active import
+> matrix. The `interfaces` layer (CLI, API handlers) must obtain concrete runtime
+> wiring through `composition` entrypoints or call application services behind
+> ports. **Machine-readable SSOT** for this boundary is the `.importlinter`
+> contract `interfaces-no-direct-infrastructure`, loaded only by
+> `tests/architecture/_cli_architecture_policy.py` (consumers:
+> `test_cli_architecture_policy.py`, `test_interfaces_no_infrastructure.py`,
+> `test_layer_dependencies.py`). There is no active legacy allowlist.
+> `configs/quality/architecture/composition_ownership_map.yaml` is the M5
+> ownership map — **not** this policy. A second YAML
+> (`configs/quality/architecture/cli_architecture_policy.yaml`) is **forbidden**.
+> Contributor pointer: `docs/02-architecture/04-interfaces-layer.md` §3.1.
 >
 > **Note (2026-05-24):** `.importlinter` also enforces `composition-no-interfaces`.
 > Composition-owned bootstrap/runtime helpers must remain import-clean from
@@ -201,6 +209,12 @@ src/bioetl/
 
 - No performance impact
 - No additional dependencies
+- CLI architecture boundary SSOT stays in `.importlinter` contract
+  `interfaces-no-direct-infrastructure` with a single loader
+  (`tests/architecture/_cli_architecture_policy.py`); ownership map ≠ policy;
+  a parallel `cli_architecture_policy.yaml` is forbidden (see
+  `docs/02-architecture/04-interfaces-layer.md` §3.1 / #12570). Code acceptance
+  for the loader landed via `#12480` / `#12559` and is not reopened here.
 
 ## References
 

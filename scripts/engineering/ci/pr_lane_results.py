@@ -317,6 +317,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
     "src/memory/rag/chunking.py": ("tests/unit/memory/test_rag_indexing.py",),
+    "configs/quality/mypy_diagnostic_baseline.json": (
+        "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
+    ),
+    "scripts/engineering/ci/__init__.py": (
+        "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
+    ),
     "scripts/engineering/ci/publish_docker_image.sh": (
         "tests/unit/scripts/ci/test_docker_publication_guards.py",
     ),
@@ -409,6 +415,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "docs/02-architecture/decisions/": (
+        "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+    ),
     "configs/composites/": (
         "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
     ),
@@ -461,13 +471,14 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
 
 FAST_GOVERNANCE = "fast-governance"
 CLASS_LANE = "class-lane"
+DOCS_LANE = "docs-lane"
 DOCKER_LANE = "docker-lane"
 
 GATE_OWNERS: dict[str, str] = {
     "root-hygiene": FAST_GOVERNANCE,
     "compiled-artifacts": FAST_GOVERNANCE,
     "commit-governance": FAST_GOVERNANCE,
-    "docs-governance": FAST_GOVERNANCE,
+    "docs-governance": DOCS_LANE,
     "lint-arch": CLASS_LANE,
     "tests": CLASS_LANE,
     "type-checking": CLASS_LANE,
@@ -489,12 +500,12 @@ OWNER_STEPS: dict[str, dict[str, tuple[str, ...]]] = {
         ),
         "compiled-artifacts": ("compiled-artifacts", "cleanliness"),
         "commit-governance": ("commitlint",),
+    },
+    DOCS_LANE: {
         "docs-governance": (
-            "docs-passports",
-            "docs-links",
-            "docs-verify",
-            "mkdocs-nav",
-            "prose-consistency",
+            "docs-governance",
+            "validate-mkdocs",
+            "check-diagram-drift",
         ),
     },
     DOCKER_LANE: {

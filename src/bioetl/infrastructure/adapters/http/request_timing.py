@@ -50,6 +50,24 @@ class RequestTimingHost(Protocol):
     _request_not_before: float
 
 
+async def _dispatch_http_request(
+    client: httpx.AsyncClient,
+    method: str,
+    url: str,
+    httpx_kwargs: dict[str, Any],
+    *,
+    is_stream: bool,
+    request_timeout: float | None,
+) -> httpx.Response:
+    """Send one HTTPX request, optionally as a streamed response."""
+    async with asyncio.timeout(request_timeout):
+        typed_kwargs = cast(_RequestKwargs, httpx_kwargs)
+        if is_stream:
+            request = client.build_request(method, url, **typed_kwargs)  # type: ignore[misc]
+            return await client.send(request, stream=True)
+        return await client.request(method, url, **typed_kwargs)
+
+
 async def execute_timed_request(
     host: RequestTimingHost,
     client: httpx.AsyncClient,
@@ -71,21 +89,18 @@ async def execute_timed_request(
         admitted = time.monotonic()
         phase = "transport"
 
-        is_stream = request_kwargs.get("_stream", False)
-        # Create a copy of kwargs without _stream for httpx
+        is_stream = bool(request_kwargs.get("_stream", False))
         httpx_kwargs = {k: v for k, v in request_kwargs.items() if k != "_stream"}
 
         async def send() -> httpx.Response:
-            async with asyncio.timeout(request_timeout):
-                if is_stream:
-                    request = client.build_request(
-                        method, url, **cast(_RequestKwargs, httpx_kwargs)
-                    )  # type: ignore[misc]
-                    return await client.send(request, stream=True)
-                else:
-                    return await client.request(
-                        method, url, **cast(_RequestKwargs, httpx_kwargs)
-                    )
+            return await _dispatch_http_request(
+                client,
+                method,
+                url,
+                httpx_kwargs,
+                is_stream=is_stream,
+                request_timeout=request_timeout,
+            )
 
         response = await host.circuit_breaker.call(send)
         response.extensions["bioetl_transport_seconds"] = time.monotonic() - admitted

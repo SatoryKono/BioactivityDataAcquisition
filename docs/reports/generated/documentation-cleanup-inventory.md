@@ -7,26 +7,26 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4002 |
-| Tracked doc-like files | 4002 |
+| Doc-like files | 4006 |
+| Tracked doc-like files | 4006 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
-| Generated routes | 74 |
+| Generated routes | 76 |
 
 ## Tracking State
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4002 |
+| tracked | 4006 |
 
 ## Lifecycle Counts
 
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
-| active_quality_baseline | 116 |
-| closeout_evidence | 166 |
+| active_quality_baseline | 117 |
+| closeout_evidence | 167 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 28 |
 | docs_reports_generated_or_route_owned | 7 |
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 244 |
+| working_report | 246 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -54,8 +54,8 @@
 | Active | 751 |
 | Archived | 1554 |
 | Canonical | 76 |
-| Generated | 1064 |
-| Working | 557 |
+| Generated | 1066 |
+| Working | 559 |
 
 ## Surface Families
 
@@ -64,16 +64,16 @@
 | active | 751 |
 | archive | 1554 |
 | canonical | 76 |
-| generated | 1064 |
-| working | 557 |
+| generated | 1066 |
+| working | 559 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-migration | 275 |
-| generate-automatically | 1064 |
-| keep | 2663 |
+| generate-automatically | 1066 |
+| keep | 2665 |
 
 ## Cleanup Candidates
 
@@ -121,7 +121,7 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | Working | 0 | archive-after-migration |
 | `reports/12361_named_blocker.md` | Working | 0 | archive-after-migration |
-| `reports/NAMED_BLOCKER_12464.md` | Working | 0 | archive-after-migration |
+| `reports/NAMED_BLOCKER_12464.md` | Working | 1 | archive-after-migration |
 | `reports/acceptance/P04-REM-R10-acceptance-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/acceptance/P04-REM-R10-acceptance-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/acceptance/receipt-12069.md` | Working | 0 | archive-after-migration |
@@ -326,6 +326,8 @@
 | compatibility-facade-snapshot-generated-doc | `scripts/engineering/qa/generate_compatibility_facade_snapshot.py` | tracked_curated_generated_doc |
 | config-comparison-matrix-generated-doc | `scripts/schema/analysis/generate_config_matrix.py` | tracked_curated_generated_doc |
 | config-contract-registry-artifact-duplication-quality-report | `scripts/engineering/qa/report_artifact_duplication_audit.py` | tracked_quality_baseline |
+| config-extra-forbid-inventory-quality-baseline | `tests/architecture/_config_extra_forbid_inventory.py` | tracked_quality_baseline |
+| contract-coverage-matrix-quality-baseline | `scripts/engineering/qa/report_contract_coverage_matrix.py` | tracked_quality_baseline |
 | contract-identity-diagnostics-quality-report | `scripts/engineering/ci/validate_contract_identity.py` | working_output |
 | contract-registry-diagnostics-quality-report | `scripts/engineering/ci/validate_contract_registry.py` | working_output |
 | contract-registry-dq-diagnostics-quality-report | `scripts/engineering/ci/validate_registry_dq_refs.py` | working_output |

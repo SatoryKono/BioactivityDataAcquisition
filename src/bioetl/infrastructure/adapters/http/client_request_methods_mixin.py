@@ -142,6 +142,17 @@ class HTTPClientRequestMethodsMixin:
         params: JsonDict | None = None,
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
+        """Send HTTP request with streamed response body (retry-aware).
+
+        Args:
+            method: HTTP method name.
+            url: Target URL.
+            params: Optional query parameters.
+            headers: Optional additional HTTP headers.
+
+        Returns:
+            Open streamed ``httpx.Response``; caller must ``aclose()`` it.
+        """
         request_kwargs: dict[str, object] = {
             "params": params,
             "headers": headers,

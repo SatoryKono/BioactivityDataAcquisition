@@ -18,6 +18,7 @@ from scripts.engineering.ci.pytest_abort_diagnostic_adapter import (
     SERIAL_COVERAGE_SETUP_RESERVE_SECONDS,
     SERIAL_COVERAGE_UPLOAD_RESERVE_SECONDS,
     PytestAbortDiagnosticAdapter,
+    _classify,
     _pid_alive,
     _terminate_pid,
     junit_file_is_complete,
@@ -62,7 +63,7 @@ def _junit_writer(base: Path, evidence: Path, payload: str = JUNIT) -> list[str]
 
 
 def _adapter(
-    base: Path, *, timeout: float = 5, margin: float = 0.4
+    base: Path, *, timeout: float | None = 5, margin: float = 0.4
 ) -> PytestAbortDiagnosticAdapter:
     return PytestAbortDiagnosticAdapter(timeout=timeout, dump_margin=margin, base=base)
 
@@ -72,7 +73,7 @@ def _run(
     command: list[str],
     evidence: Path | None,
     *,
-    timeout: float = 5,
+    timeout: float | None = 5,
     margin: float = 0.4,
 ) -> tuple[PytestAbortDiagnosticAdapter, object]:
     adapter = _adapter(base, timeout=timeout, margin=margin)
@@ -160,6 +161,8 @@ def test_positive_nonzero_exit_is_preserved(tmp_path: Path) -> None:
     os.name == "nt", reason="POSIX signal abort is verified only on POSIX"
 )
 def test_posix_signal_abort_wrapper_is_nonzero(tmp_path: Path) -> None:
+    # No watchdog: under xdist/CPU contention a short timeout races the child
+    # SIGABRT and mis-classifies as WATCHDOG_TIMEOUT (diagnostic SIGABRT).
     _, manifest = _run(
         tmp_path,
         _python_script(
@@ -168,6 +171,7 @@ def test_posix_signal_abort_wrapper_is_nonzero(tmp_path: Path) -> None:
             "import os, signal\nos.kill(os.getpid(), signal.SIGABRT)\n",
         ),
         tmp_path / "missing.xml",
+        timeout=None,
     )
     assert manifest.status == "SIGNAL_ABORT"
     assert manifest.exit_code is not None and manifest.exit_code < 0
@@ -175,6 +179,19 @@ def test_posix_signal_abort_wrapper_is_nonzero(tmp_path: Path) -> None:
     assert manifest.wrapper_exit_code == 128 + manifest.signal
     assert manifest.wrapper_exit_code != 0
     assert manifest.oom_inferred is False
+
+
+def test_classify_already_exited_signal_is_not_watchdog() -> None:
+    status, signal_number = _classify(
+        -6, timed_out=True, diagnostic_delivery="already_exited"
+    )
+    assert status == "SIGNAL_ABORT"
+    assert signal_number == 6
+    status, signal_number = _classify(
+        -6, timed_out=True, diagnostic_delivery="process_group"
+    )
+    assert status == "WATCHDOG_TIMEOUT"
+    assert signal_number == 6
 
 
 def test_timeout_is_nonzero_and_does_not_invent_junit(tmp_path: Path) -> None:

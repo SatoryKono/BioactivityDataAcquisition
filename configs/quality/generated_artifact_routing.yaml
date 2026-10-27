@@ -444,6 +444,16 @@ routes:
     notes: Semantic Domain I/O taint evidence is tracked and checked against the
       current source tree.
 
+  - id: config-extra-forbid-inventory-quality-baseline
+    generator: tests/architecture/_config_extra_forbid_inventory.py
+    output_kind: working_report
+    commit_policy: tracked_quality_baseline
+    outputs:
+      - reports/quality/config-extra-forbid-inventory.json
+    notes: >
+      PSC RF-001 (#12566) effective-extra inventory, dual debt registries, and
+      full runtime-root nested-path manifest. Does not migrate forbid (RF-002).
+
   - id: config-contract-registry-artifact-duplication-quality-report
     generator: scripts/engineering/qa/report_artifact_duplication_audit.py
     output_kind: working_report
@@ -710,6 +720,16 @@ routes:
       - docs/00-project/governance/root-local-clutter-cleanup.md
     notes: Root hygiene cleanup plan is a governed curated docs surface for
       root-allowlist and local clutter triage.
+
+  - id: contract-coverage-matrix-quality-baseline
+    generator: scripts/engineering/qa/report_contract_coverage_matrix.py
+    output_kind: working_report
+    commit_policy: tracked_quality_baseline
+    outputs:
+      - reports/quality/contract-coverage-matrix.json
+      - reports/quality/contract-coverage-matrix.md
+    notes: Contract coverage matrix JSON/MD pair is a generated tracked baseline
+      for entity config contract coverage; regenerate both together.
 
   - id: debt-governance-gates-quality-baseline
     generator: scripts/engineering/qa/report_debt_governance_gates.py
