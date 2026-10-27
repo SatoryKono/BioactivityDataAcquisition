@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-27T08:44:29.104260+00:00",
+  "generated_at": "2026-10-27T07:37:43.861306+00:00",
   "summary": {
     "total_scripts": 697,
     "status_counts": {
@@ -9747,7 +9747,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 32,
+      "reference_count": 33,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -10010,7 +10010,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"e2e-skip-rate\": \"check_e2e_matrix_skip_rate.py\","
         },
@@ -10055,7 +10055,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"e2e-rerun\": \"check_e2e_rerun_stability.py\","
         },
@@ -10088,7 +10088,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"neo4j-memory-live\": \"check_neo4j_memory_live_audit.py\","
         }
@@ -10103,7 +10103,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"neo4j-memory\": \"check_neo4j_memory_ontology.py\","
         }
@@ -10307,7 +10307,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 57,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"scripts.engineering.ci.nightly_shadow_archive\""
         },
@@ -10356,7 +10356,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 59,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"pr-gate\": module_command(\"scripts.engineering.ci.pr_gate\"),"
         },
@@ -10423,7 +10423,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 60,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"pr-lane-results\": module_command(\"scripts.engineering.ci.pr_lane_results\"),"
         },
@@ -10472,7 +10472,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"presubmit\": \"presubmit_gate.py\","
         },
@@ -10515,13 +10515,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 64,
+          "line": 65,
           "source_group": "scripts",
           "text": "\"publish-docker\": shell_command(\"publish_docker_image.sh\"),"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 320,
+          "line": 326,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -10546,7 +10546,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 62,
+          "line": 63,
           "source_group": "scripts",
           "text": "\"scripts.engineering.ci.publish_scorecard_sarif\""
         },
@@ -10736,13 +10736,13 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"quality-gate\": \"quality_integral_gate.py\","
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"architecture-junit-skips\": \"quality_integral_gate.py\","
         },
@@ -10818,7 +10818,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"docker-timing\": \"report_docker_actions_timing.py\","
         },
@@ -10861,7 +10861,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"pr-gate-timing\": \"report_pr_gate_timing.py\","
         },
@@ -10898,7 +10898,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 51,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"debt-report\": \"report_quality_debt_weekly.py\","
         },
@@ -10961,7 +10961,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"run-tests\": \"run_pytest_resilient.py\","
         }
@@ -11356,7 +11356,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 33,
+          "line": 34,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.cli_dispatch import ("
         },
@@ -13923,7 +13923,7 @@
         },
         {
           "path": ".github/workflows/type-checking.yml",
-          "line": 83,
+          "line": 87,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa.check_architecture domain-type-policy"
         },
@@ -20547,7 +20547,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 380,
+          "line": 386,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23547,7 +23547,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 452,
+          "line": 454,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
