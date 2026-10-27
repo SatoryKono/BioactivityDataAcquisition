@@ -133,6 +133,17 @@ WORKFLOW_CONFIG_ROOT = (
 PIPELINE_CONTRACT_POLICY_ROOT = (
     "bioetl.infrastructure.schemas.pipeline_contract_policy.PipelineContractPolicy"
 )
+WORKFLOW_RECONCILE_ROWS_IDENTITY = (
+    "bioetl.infrastructure.schemas.workflow_config.WorkflowReconcileRowsConfigSchema"
+)
+WORKFLOW_RECONCILE_FOREIGN_KEYS_IDENTITY = (
+    "bioetl.infrastructure.schemas.workflow_config."
+    "WorkflowReconcileForeignKeysConfigSchema"
+)
+# Annotation walk cannot see these: WorkflowTransformStepSchema.config is
+# JsonDict | None, but validators model_validate the reconcile schemas by
+# transform_name. Inventory-only explicit edges (do not change runtime schemas).
+WORKFLOW_TRANSFORM_CONFIG_PATH = "workflow.steps.config"
 
 # Seed justified exclusions (registry b). These are NOT migration debt and MUST
 # stay out of registry (a). Transfer from (a)→(b) is reclassification, not debt clear.
@@ -360,6 +371,11 @@ def _role_for_identity(identity: str) -> str:
         return "workflow-config-root"
     if identity == PIPELINE_CONTRACT_POLICY_ROOT:
         return "pipeline-contract-policy-root"
+    if identity in {
+        WORKFLOW_RECONCILE_ROWS_IDENTITY,
+        WORKFLOW_RECONCILE_FOREIGN_KEYS_IDENTITY,
+    }:
+        return "workflow-transform-config"
     if identity in GENERATOR_COVERED_ROOTS:
         return "generator-root"
     if identity in RUNTIME_ONLY_ROOTS:
@@ -519,11 +535,61 @@ def build_manifest(
                     "role": _role_for_identity(identity),
                 }
             )
+        if root_identity == WORKFLOW_CONFIG_ROOT:
+            path_rows.extend(
+                _explicit_workflow_transform_config_edges(
+                    root_identity=root_identity,
+                    migration_debt=migration_debt,
+                    model_effective=model_effective,
+                )
+            )
     root_rows.sort(key=lambda row: str(row["identity"]))
     path_rows.sort(
         key=lambda row: (str(row["root"]), str(row["path"]), str(row["identity"]))
     )
     return root_rows, path_rows
+
+
+def _explicit_workflow_transform_config_edges(
+    *,
+    root_identity: str,
+    migration_debt: set[str],
+    model_effective: Mapping[str, str],
+) -> list[dict[str, object]]:
+    """Attach reconcile config schemas hidden behind JsonDict config field."""
+    from bioetl.infrastructure.schemas.workflow_config import (
+        WorkflowReconcileForeignKeysConfigSchema,
+        WorkflowReconcileRowsConfigSchema,
+    )
+
+    edges: list[dict[str, object]] = []
+    for model in (
+        WorkflowReconcileRowsConfigSchema,
+        WorkflowReconcileForeignKeysConfigSchema,
+    ):
+        # Walk the explicit edge and any nested BaseModel leaves under it.
+        for path, nested in _walk_nested_paths(
+            model, prefix=WORKFLOW_TRANSFORM_CONFIG_PATH
+        ):
+            identity = _qualname(nested)
+            effective = model_effective.get(identity, _effective_extra(nested))
+            edges.append(
+                {
+                    "root": root_identity,
+                    "path": path,
+                    "identity": identity,
+                    "effective_extra": effective,
+                    "classification": _classify_path(
+                        identity=identity,
+                        effective=effective,
+                        migration_debt=migration_debt,
+                        root_identity=root_identity,
+                    ),
+                    "role": _role_for_identity(identity),
+                    "edge_kind": "explicit-json-dict-config",
+                }
+            )
+    return edges
 
 
 def build_payload() -> dict[str, object]:

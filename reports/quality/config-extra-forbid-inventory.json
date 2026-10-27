@@ -1126,8 +1126,8 @@
       "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.workflow_config",
       "name": "WorkflowReconcileForeignKeysConfigSchema",
-      "reachable_from_runtime_roots": false,
-      "role": "config-boundary"
+      "reachable_from_runtime_roots": true,
+      "role": "workflow-transform-config"
     },
     {
       "declaration_source": "local",
@@ -1136,8 +1136,8 @@
       "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.workflow_config",
       "name": "WorkflowReconcileRowsConfigSchema",
-      "reachable_from_runtime_roots": false,
-      "role": "config-boundary"
+      "reachable_from_runtime_roots": true,
+      "role": "workflow-transform-config"
     },
     {
       "declaration_source": "local",
@@ -2113,6 +2113,24 @@
       "identity": "bioetl.infrastructure.schemas.workflow_config.WorkflowTransformStepSchema",
       "path": "workflow.steps",
       "role": "config-boundary",
+      "root": "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigFileSchema"
+    },
+    {
+      "classification": "forbid",
+      "edge_kind": "explicit-json-dict-config",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.workflow_config.WorkflowReconcileForeignKeysConfigSchema",
+      "path": "workflow.steps.config",
+      "role": "workflow-transform-config",
+      "root": "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigFileSchema"
+    },
+    {
+      "classification": "forbid",
+      "edge_kind": "explicit-json-dict-config",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.workflow_config.WorkflowReconcileRowsConfigSchema",
+      "path": "workflow.steps.config",
+      "role": "workflow-transform-config",
       "root": "bioetl.infrastructure.schemas.workflow_config.WorkflowConfigFileSchema"
     },
     {

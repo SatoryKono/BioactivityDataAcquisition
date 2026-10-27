@@ -40,6 +40,9 @@ from tests.architecture._config_extra_forbid_inventory import (
     RF001_FORBID_NEW_BASELINE_IDENTITIES,
     RUNTIME_ONLY_ROOTS,
     WORKFLOW_CONFIG_ROOT,
+    WORKFLOW_RECONCILE_FOREIGN_KEYS_IDENTITY,
+    WORKFLOW_RECONCILE_ROWS_IDENTITY,
+    WORKFLOW_TRANSFORM_CONFIG_PATH,
     build_payload,
     render_payload,
 )
@@ -293,3 +296,23 @@ def test_manifest_includes_workflow_and_contract_policy_roots() -> None:
         assert all(row["reachable_from_runtime_roots"] is True for row in matches), (
             matches
         )
+
+    # JsonDict-backed transform configs validated dynamically by transform_name.
+    for identity in (
+        WORKFLOW_RECONCILE_ROWS_IDENTITY,
+        WORKFLOW_RECONCILE_FOREIGN_KEYS_IDENTITY,
+    ):
+        assert models[identity]["reachable_from_runtime_roots"] is True, identity
+        assert models[identity]["role"] == "workflow-transform-config"
+        edge_rows = [
+            row
+            for row in payload["nested_paths"]
+            if row["identity"] == identity and row["root"] == WORKFLOW_CONFIG_ROOT
+        ]
+        assert edge_rows, identity
+        assert any(
+            row["path"] == WORKFLOW_TRANSFORM_CONFIG_PATH for row in edge_rows
+        ), edge_rows
+        assert all(
+            row.get("edge_kind") == "explicit-json-dict-config" for row in edge_rows
+        ), edge_rows
