@@ -149,9 +149,7 @@ WORKFLOW_RECONCILE_FOREIGN_KEYS_IDENTITY = (
 # transform_name. Inventory-only explicit edges (do not change runtime schemas).
 WORKFLOW_TRANSFORM_CONFIG_PATH = "workflow.steps.config"
 
-FILTER_CONFIG_ROOT = (
-    "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
-)
+FILTER_CONFIG_ROOT = "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
 # Annotation walk skips JsonDict fields; inventory-only explicit open-dict edge.
 FILTER_CONFIG_METADATA_PATH = "metadata"
 FILTER_CONFIG_METADATA_IDENTITY = (

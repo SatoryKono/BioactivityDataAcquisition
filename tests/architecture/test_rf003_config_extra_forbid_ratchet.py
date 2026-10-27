@@ -156,7 +156,11 @@ def test_rf003_justified_exclusions_finalized_with_anchors() -> None:
     # schemas/** effective-ignore rows (they live outside migration debt scan).
     schemas_identities = {row["identity"] for row in payload["models"]}
     for item in exclusions:
-        if item["kind"] in {"env-settings", "open-dict-typealias", "adapter-wire-models"}:
+        if item["kind"] in {
+            "env-settings",
+            "open-dict-typealias",
+            "adapter-wire-models",
+        }:
             assert item["identity"] not in schemas_identities
         if item["kind"] == "open-dict-field":
             # Field path is not a BaseModel identity in the schemas scan.
@@ -263,9 +267,7 @@ def test_rf003_filter_config_metadata_nested_path_is_justified_exclusion() -> No
         if row["root"] == FILTER_CONFIG_ROOT
         and row["path"] == FILTER_CONFIG_METADATA_PATH
     ]
-    assert edge_rows, (
-        "nested_paths missing FilterConfigFile.metadata open-dict edge"
-    )
+    assert edge_rows, "nested_paths missing FilterConfigFile.metadata open-dict edge"
     assert len(edge_rows) == 1
     edge = edge_rows[0]
     assert edge["identity"] == FILTER_CONFIG_METADATA_IDENTITY
