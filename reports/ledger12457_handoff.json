@@ -1,0 +1,27 @@
+{
+  "issue_id": 12485,
+  "ledger_id": "ledger12457",
+  "owner": "Фёдор (архитектура)",
+  "date": "2026-10-22",
+  "verification_date": "2026-10-27T14:04Z",
+  "action": "Risk Accepted",
+  "risk_id": "P11-001",
+  "description": "Принятый риск гибридной модели resume (ADR-046) - санкционированная сложность, не дефект.",
+  "conditions": [
+    "Документация разграничения checkpoint/ledger соответствует коду (файл документации по ADR-046/control plane, аппрув архитектора)",
+    "Проверяемые сценарии: источник истины, рассогласование checkpoint/ledger, restart и replay - со ссылками на тесты/ADR."
+  ],
+  "provenance": {
+    "source": "сессия P11 (Jules 12246571058940301623, ревизия 626e2661761a713039d42dfd00b6893814b4fd20), finding P11-001; решение владельца от 22.10.2026.",
+    "exact_files": [
+      "docs/02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md"
+    ],
+    "exact_tests": [
+      "tests/architecture/test_config_topology_docs_drift.py",
+      "tests/unit/domain/control_plane/test_run_ledger_replay.py",
+      "tests/unit/application/composite/checkpoint/test_checkpoint_runtime.py"
+    ],
+    "current_sha": "3b8466d140b28e703442e28334c45e2872172fc1"
+  },
+  "review_conditions": "При изменении модели checkpoint/ledger или инциденте resume."
+}
