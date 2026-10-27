@@ -71,7 +71,7 @@
         "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
         "tests/unit/scripts/qa/test_refresh_governance_artifacts.py"
       ],
-      "note": "Owning test command returned exit 0 on the exact tree. No new review, passport, or re-approval was added."
+      "note": "Owning test command returned exit 0 on the exact tree for the referenced tests only; it does not exercise checkpoint/ledger mismatch reconciliation. No new review, passport, or re-approval was added."
     }
   ],
   "provenance": {
