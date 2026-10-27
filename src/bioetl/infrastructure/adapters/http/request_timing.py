@@ -54,7 +54,9 @@ async def _dispatch_http_request(
     client: httpx.AsyncClient,
     method: str,
     url: str,
-    httpx_kwargs: dict[str, Any],
+    httpx_kwargs: dict[
+        str, Any
+    ],  # Any: httpx request kwargs before cast to _RequestKwargs
     *,
     is_stream: bool,
     request_timeout: float | None,

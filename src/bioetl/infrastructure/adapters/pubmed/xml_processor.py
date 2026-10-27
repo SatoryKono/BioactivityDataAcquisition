@@ -13,7 +13,7 @@ from typing import cast
 __all__ = ["PubMedXmlProcessor"]
 
 
-import xml.etree.ElementTree as ET  # nosec B405
+import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry
 
 import defusedxml.ElementTree as defused_ET
 
