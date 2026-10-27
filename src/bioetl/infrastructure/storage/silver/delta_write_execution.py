@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import subprocess  # nosec B404 - see suppression registry
 import sys
 import tempfile
 import threading
@@ -25,7 +26,6 @@ from bioetl.infrastructure.storage.delta.table_ops import (
 from bioetl.infrastructure.storage.silver.delta_request_models import (
     _DeltaWriteRequest,
 )
-from bioetl.infrastructure.storage.silver.support import _execute_bounded_subprocess
 from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_bytes
 
 __all__ = [
@@ -235,16 +235,12 @@ def _run_plain_delta_write_subprocess(
     kwargs: dict[str, Any],  # Any: Delta Lake write kwargs are heterogeneous
     arrow_data: pa.Table,
     timeout_seconds: float,
-    cancel_event: threading.Event | None = None,
 ) -> None:
     """Execute one plain Delta write in a child process.
 
     This path is used by Windows E2E runs where a hung delta-rs native call can
     outlive Python thread timeouts. The child process keeps the timeout
     enforceable without changing the default production write path.
-
-    Stdout and stderr keep only the last 16384 bytes. ``cancel_event`` reaps
-    the child without waiting out ``timeout_seconds``.
     """
     table_or_uri = str(kwargs["table_or_uri"])
     metadata = {key: value for key, value in kwargs.items() if key != "data"}
@@ -254,19 +250,32 @@ def _run_plain_delta_write_subprocess(
     )
     metadata["arrow_path"] = payload_path.as_posix()
     try:
-        _execute_bounded_subprocess(
-            [
-                sys.executable,
-                "-c",
-                _PLAIN_DELTA_WRITE_SUBPROCESS_CODE,
-                json.dumps(metadata),
-            ],
-            timeout_seconds=timeout_seconds,
-            cancel_event=cancel_event,
-        )
+        try:
+            # No shell or user-controlled command is involved.
+            completed = subprocess.run(  # nosec B603 - see suppression registry
+                [
+                    sys.executable,
+                    "-c",
+                    _PLAIN_DELTA_WRITE_SUBPROCESS_CODE,
+                    json.dumps(metadata),
+                ],
+                capture_output=True,
+                check=False,
+                timeout=timeout_seconds,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise TimeoutError from exc
     finally:
         with suppress(OSError):
             payload_path.unlink(missing_ok=True)
+
+    if completed.returncode != 0:
+        stderr = _decode_subprocess_output(completed.stderr)
+        stdout = _decode_subprocess_output(completed.stdout)
+        raise RuntimeError(
+            "Delta write subprocess failed "
+            f"(exit_code={completed.returncode}, stderr={stderr!r}, stdout={stdout!r})"
+        )
 
 
 def _should_execute_plain_write_inline(
@@ -338,21 +347,15 @@ async def _write_plain_delta_request(
     )
     try:
         if process_isolation:
-            cancel_event = threading.Event()
-            try:
-                await _await_blocking_deltalake_call(
-                    operation_name="plain-write-subprocess",
-                    call=lambda: _run_plain_delta_write_subprocess(
-                        kwargs=kwargs,
-                        arrow_data=request.arrow_data,
-                        timeout_seconds=timeout_seconds,
-                        cancel_event=cancel_event,
-                    ),
-                    timeout_seconds=timeout_seconds + 5.0,
-                )
-            except asyncio.CancelledError:
-                cancel_event.set()
-                raise
+            await _await_blocking_deltalake_call(
+                operation_name="plain-write-subprocess",
+                call=lambda: _run_plain_delta_write_subprocess(
+                    kwargs=kwargs,
+                    arrow_data=request.arrow_data,
+                    timeout_seconds=timeout_seconds,
+                ),
+                timeout_seconds=timeout_seconds + 5.0,
+            )
             return
         module = load_module()
         if _should_execute_plain_write_inline(table_path=canonical_path, module=module):

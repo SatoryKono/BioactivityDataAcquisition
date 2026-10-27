@@ -38,7 +38,6 @@ import time
 from pathlib import Path
 from types import SimpleNamespace
 
-import psutil
 import pyarrow as pa
 import pytest
 
@@ -245,16 +244,15 @@ async def test_write_plain_delta_request_can_use_process_isolation(
 ) -> None:
     """Process isolation should bypass in-process delta-rs calls when enabled."""
     request = _make_request()
-    calls: list[tuple[dict[str, object], pa.Table, float, threading.Event]] = []
+    calls: list[tuple[dict[str, object], pa.Table, float]] = []
 
     def _fake_subprocess_write(
         *,
         kwargs: dict[str, object],
         arrow_data: pa.Table,
         timeout_seconds: float,
-        cancel_event: threading.Event,
     ) -> None:
-        calls.append((kwargs, arrow_data, timeout_seconds, cancel_event))
+        calls.append((kwargs, arrow_data, timeout_seconds))
 
     module = SimpleNamespace(
         write_deltalake=lambda **_kwargs: (_ for _ in ()).throw(
@@ -276,228 +274,12 @@ async def test_write_plain_delta_request_can_use_process_isolation(
     )
 
     assert len(calls) == 1
-    kwargs, arrow_data, timeout_seconds, cancel_event = calls[0]
+    kwargs, arrow_data, timeout_seconds = calls[0]
     assert kwargs["table_or_uri"] == normalize_delta_filesystem_path(request.table_path)
     assert kwargs["mode"] == "append"
     assert "partition_by" not in kwargs
     assert arrow_data is request.arrow_data
     assert timeout_seconds == pytest.approx(3.0)
-    assert isinstance(cancel_event, threading.Event)
-    assert not cancel_event.is_set()
-
-
-@pytest.mark.asyncio
-async def test_process_isolation_cancellation_signals_subprocess(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Cancelling the await must set the event the child wait loop polls."""
-    request = _make_request()
-    started = threading.Event()
-    observed: dict[str, threading.Event] = {}
-
-    def _fake_subprocess_write(
-        *,
-        kwargs: dict[str, object],
-        arrow_data: pa.Table,
-        timeout_seconds: float,
-        cancel_event: threading.Event,
-    ) -> None:
-        del kwargs, arrow_data, timeout_seconds
-        observed["cancel_event"] = cancel_event
-        started.set()
-        deadline = time.monotonic() + 2
-        while time.monotonic() < deadline:
-            if cancel_event.is_set():
-                return
-            time.sleep(0.01)
-        raise AssertionError("cancel event was not set")
-
-    monkeypatch.setattr(
-        subject,
-        "_run_plain_delta_write_subprocess",
-        _fake_subprocess_write,
-    )
-    task = asyncio.create_task(
-        _write_plain_delta_request(
-            load_module=lambda: SimpleNamespace(),
-            request=request,
-            mode="append",
-            timeout_seconds=3.0,
-            process_isolation=True,
-        )
-    )
-    assert await asyncio.to_thread(started.wait, 2)
-    task.cancel()
-    with pytest.raises(asyncio.CancelledError):
-        await task
-    assert observed["cancel_event"].is_set()
-
-
-def test_run_plain_delta_write_subprocess_bounded_diagnostics(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    """Oversized continuous output to both streams must be bounded without hanging."""
-    table_path = tmp_path / "silver" / "entity" / "table"
-    request = _make_request(str(table_path))
-
-    script = """
-import sys
-for _ in range(1000):
-    sys.stdout.write("x" * 100 + "\\n")
-    sys.stderr.write("y" * 100 + "\\n")
-sys.stdout.flush()
-sys.stderr.flush()
-sys.stdout.write("stdout_tail")
-sys.stderr.write("stderr_tail")
-sys.exit(1)
-"""
-    # Replace the execution code with our spam script
-    monkeypatch.setattr(subject, "_PLAIN_DELTA_WRITE_SUBPROCESS_CODE", script)
-
-    with pytest.raises(RuntimeError) as exc_info:
-        _run_plain_delta_write_subprocess(
-            kwargs={
-                "table_or_uri": normalize_delta_filesystem_path(request.table_path),
-                "mode": "append",
-            },
-            arrow_data=request.arrow_data,
-            timeout_seconds=5.0,
-        )
-
-    msg = str(exc_info.value)
-    assert "exit_code=1" in msg
-    assert "stdout_tail" in msg
-    assert "stderr_tail" in msg
-    assert len(msg) < 10000  # Ensure we didn't accumulate unbounded output
-
-
-def test_run_plain_delta_write_subprocess_timeout_reaps_child(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    """Timeout must clean up the child process and pipes without leaking."""
-    table_path = tmp_path / "silver" / "entity" / "table"
-    request = _make_request(str(table_path))
-    pid_path = tmp_path / "child.pid"
-
-    script = f"""
-import os
-import sys
-import time
-from pathlib import Path
-Path({str(pid_path)!r}).write_text(str(os.getpid()), encoding="utf-8")
-sys.stdout.write("started\\n")
-sys.stdout.flush()
-time.sleep(10)
-"""
-    monkeypatch.setattr(subject, "_PLAIN_DELTA_WRITE_SUBPROCESS_CODE", script)
-
-    start_time = time.monotonic()
-    with pytest.raises(TimeoutError):
-        _run_plain_delta_write_subprocess(
-            kwargs={
-                "table_or_uri": normalize_delta_filesystem_path(request.table_path),
-                "mode": "append",
-            },
-            arrow_data=request.arrow_data,
-            timeout_seconds=0.1,
-        )
-    elapsed = time.monotonic() - start_time
-    assert elapsed < 1.0
-    pid = int(pid_path.read_text(encoding="utf-8"))
-    assert not psutil.pid_exists(pid)
-
-
-def test_run_plain_delta_write_subprocess_cancel_reaps_child(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    """Cancellation must kill the child without waiting out the full timeout."""
-    table_path = tmp_path / "silver" / "entity" / "table"
-    request = _make_request(str(table_path))
-    pid_path = tmp_path / "child.pid"
-    script = f"""
-import os
-import sys
-import time
-from pathlib import Path
-Path({str(pid_path)!r}).write_text(str(os.getpid()), encoding="utf-8")
-time.sleep(30)
-"""
-    monkeypatch.setattr(subject, "_PLAIN_DELTA_WRITE_SUBPROCESS_CODE", script)
-    cancel_event = threading.Event()
-
-    def _cancel_when_started() -> None:
-        deadline = time.monotonic() + 5
-        while time.monotonic() < deadline and not pid_path.exists():
-            time.sleep(0.01)
-        cancel_event.set()
-
-    threading.Thread(target=_cancel_when_started, daemon=True).start()
-    start_time = time.monotonic()
-    with pytest.raises(TimeoutError):
-        _run_plain_delta_write_subprocess(
-            kwargs={
-                "table_or_uri": normalize_delta_filesystem_path(request.table_path),
-                "mode": "append",
-            },
-            arrow_data=request.arrow_data,
-            timeout_seconds=30.0,
-            cancel_event=cancel_event,
-        )
-    assert time.monotonic() - start_time < 2.0
-    pid = int(pid_path.read_text(encoding="utf-8"))
-    assert not psutil.pid_exists(pid)
-
-
-def test_run_plain_delta_write_subprocess_closes_pipes_before_join(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    """Open pipes must not keep the parent waiting after the child exits."""
-    table_path = tmp_path / "silver" / "entity" / "table"
-    request = _make_request(str(table_path))
-
-    class _BlockingStream:
-        def __init__(self) -> None:
-            self._closed = threading.Event()
-
-        def read(self, _size: int) -> bytes:
-            if not self._closed.wait(timeout=30):
-                raise AssertionError("stream was not closed")
-            return b""
-
-        def close(self) -> None:
-            self._closed.set()
-
-    class _FakePopen:
-        def __init__(self, cmd: list[str], **kwargs: object) -> None:
-            metadata = json.loads(cmd[3])
-            assert Path(str(metadata["arrow_path"])).exists()
-            self.stdout = _BlockingStream()
-            self.stderr = _BlockingStream()
-            self.returncode = 0
-            self.args: list[str] = cmd
-
-        def wait(self, timeout: float | None = None) -> int:
-            del timeout
-            return 0
-
-        def kill(self) -> None:
-            self.returncode = -9
-
-    monkeypatch.setattr(subprocess, "Popen", _FakePopen)
-    start_time = time.monotonic()
-    _run_plain_delta_write_subprocess(
-        kwargs={
-            "table_or_uri": normalize_delta_filesystem_path(request.table_path),
-            "mode": "append",
-        },
-        arrow_data=request.arrow_data,
-        timeout_seconds=5.0,
-    )
-    assert time.monotonic() - start_time < 1.5
 
 
 def test_run_plain_delta_write_subprocess_uses_arrow_file_not_stdin(
@@ -509,26 +291,15 @@ def test_run_plain_delta_write_subprocess_uses_arrow_file_not_stdin(
     request = _make_request(str(table_path))
     captured: dict[str, object] = {}
 
-    class _FakePopen:
-        def __init__(self, cmd: list[str], **kwargs: object) -> None:
-            captured["kwargs"] = kwargs
-            metadata = json.loads(cmd[3])
-            arrow_path = Path(str(metadata["arrow_path"]))
-            assert arrow_path.exists()
-            assert arrow_path.stat().st_size > 0
-            import io
+    def _fake_run(cmd: list[str], **kwargs: object) -> SimpleNamespace:
+        captured["kwargs"] = kwargs
+        metadata = json.loads(cmd[3])
+        arrow_path = Path(str(metadata["arrow_path"]))
+        assert arrow_path.exists()
+        assert arrow_path.stat().st_size > 0
+        return SimpleNamespace(returncode=0, stdout=b"", stderr=b"")
 
-            self.stdout = io.BytesIO(b"")
-            self.stderr = io.BytesIO(b"")
-            self.returncode = 0
-
-        def wait(self, timeout=None):
-            pass
-
-        def kill(self):
-            pass
-
-    monkeypatch.setattr(subprocess, "Popen", _FakePopen)
+    monkeypatch.setattr(subprocess, "run", _fake_run)
 
     _run_plain_delta_write_subprocess(
         kwargs={

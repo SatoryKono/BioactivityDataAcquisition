@@ -132,25 +132,12 @@ def test_delta_write_execution_edges(
 
     assert _decode_subprocess_output(b"ok") == "ok"
 
-    class _FakePopenTimeout:
-        def __init__(self, *args, **kwargs):
-            self.args = args[0] if args else kwargs.get("args", [])
-            self.stdout = None
-            self.stderr = None
-            self.returncode = None
-            self.waited_once = False
-
-        def wait(self, timeout=None):
-            if not self.waited_once and timeout is not None:
-                self.waited_once = True
-                raise subprocess.TimeoutExpired(cmd="x", timeout=timeout)
-
-        def kill(self):
-            pass
+    def _timeout(*_args: object, **_kwargs: object) -> None:
+        raise subprocess.TimeoutExpired(cmd="x", timeout=1)
 
     monkeypatch.setattr(
-        "bioetl.infrastructure.storage.silver.support.subprocess.Popen",
-        _FakePopenTimeout,
+        "bioetl.infrastructure.storage.silver.delta_write_execution.subprocess.run",
+        _timeout,
     )
     with pytest.raises(TimeoutError):
         _run_plain_delta_write_subprocess(
@@ -159,23 +146,12 @@ def test_delta_write_execution_edges(
             timeout_seconds=0.01,
         )
 
-    class _FakePopenFail:
-        def __init__(self, *args, **kwargs):
-            import io
-
-            self.stdout = io.BytesIO(b"")
-            self.stderr = io.BytesIO(b"fail")
-            self.returncode = 2
-
-        def wait(self, timeout=None):
-            pass
-
-        def kill(self):
-            pass
+    def _fail(*_args: object, **_kwargs: object) -> SimpleNamespace:
+        return SimpleNamespace(returncode=2, stderr=b"fail", stdout=b"")
 
     monkeypatch.setattr(
-        "bioetl.infrastructure.storage.silver.support.subprocess.Popen",
-        _FakePopenFail,
+        "bioetl.infrastructure.storage.silver.delta_write_execution.subprocess.run",
+        _fail,
     )
     with pytest.raises(RuntimeError, match="exit_code=2"):
         _run_plain_delta_write_subprocess(
