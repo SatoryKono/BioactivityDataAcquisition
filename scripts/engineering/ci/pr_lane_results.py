@@ -51,6 +51,9 @@ GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
     "tests/architecture/test_github_actions_runtime_policy.py"
 )
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
+CONFIG_SCHEMA_MIGRATION_STATUS_TEST = (
+    "tests/architecture/test_config_schema_migration_status.py"
+)
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
@@ -266,6 +269,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         DOCUMENTATION_SYNC_TEST,
         "tests/architecture/test_domain_io_taint_inventory.py",
     ),
+    "docs/02-architecture/decisions/ADR-054-passport-documentation-projections.md": (
+        "tests/architecture/test_adr_registry_governance_sync.py",
+    ),
+    "docs/02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md": (
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_passport_documentation_projections.py",
+    ),
+    "docs/02-architecture/decisions/ADR-056-proof-or-stop-lifecycle-control.md": (
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_proof_or_stop_contract.py",
+    ),
     "docs/02-architecture/current-state-inventory.md": (
         "tests/architecture/test_arch_s4_s9_gates.py",
         "tests/unit/scripts/qa/test_topology_source_binding.py",
@@ -325,13 +339,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_integration_vcr_policy.py",
     ),
     "configs/_schema/composite.json": (
-        "tests/architecture/test_config_schema_migration_status.py",
+        CONFIG_SCHEMA_MIGRATION_STATUS_TEST,
         "tests/integration/config/test_validate_pipeline_configs.py",
         "tests/unit/repo_backed/infrastructure/config/test_composite_sort_by_closure.py",
     ),
     "configs/_schema/pipeline.json": (
-        "tests/architecture/test_config_schema_migration_status.py",
+        CONFIG_SCHEMA_MIGRATION_STATUS_TEST,
         "tests/integration/config/test_validate_pipeline_configs.py",
+    ),
+    "configs/_schema/dq.json": (
+        CONFIG_SCHEMA_MIGRATION_STATUS_TEST,
+        "tests/unit/infrastructure/schemas/test_dq_config.py",
     ),
     "configs/quality/test_skip_inventory.yaml": TEST_SKIP_INVENTORY_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,

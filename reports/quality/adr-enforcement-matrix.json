@@ -2046,6 +2046,7 @@
       "enforcement_owner_paths": [
         "configs/quality/generated_artifact_routing.yaml",
         "scripts/docs/passports/projector.py",
+        "scripts/engineering/ci/pr_lane_results.py",
         "tests/architecture/test_adr_registry_governance_sync.py"
       ],
       "gap_reasons": [],
@@ -2057,6 +2058,7 @@
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/04-reference/passports/index.md",
         "scripts/docs/passports/projector.py",
+        "scripts/engineering/ci/pr_lane_results.py",
         "tests/architecture/test_adr_registry_governance_sync.py"
       ],
       "manual_exception": null,
@@ -2071,6 +2073,7 @@
       "decision_path": "docs/02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md",
       "enforcement_owner_paths": [
         "scripts/docs/passports/projector.py",
+        "scripts/engineering/ci/pr_lane_results.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_passport_documentation_projections.py"
       ],
@@ -2085,6 +2088,7 @@
         "docs/04-reference/passports/workflows/chembl-baseline.md",
         "docs/04-reference/passports/workflows/chembl-core.md",
         "scripts/docs/passports/projector.py",
+        "scripts/engineering/ci/pr_lane_results.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_passport_documentation_projections.py"
       ],
@@ -2099,6 +2103,7 @@
       "decision_date": "2026-08-09",
       "decision_path": "docs/02-architecture/decisions/ADR-056-proof-or-stop-lifecycle-control.md",
       "enforcement_owner_paths": [
+        "scripts/engineering/ci/pr_lane_results.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_proof_or_stop_contract.py"
       ],
@@ -2109,6 +2114,7 @@
         "docs/01-requirements/REQUIREMENTS.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/04-reference/contracts/README.md",
+        "scripts/engineering/ci/pr_lane_results.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_proof_or_stop_contract.py"
       ],

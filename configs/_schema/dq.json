@@ -1,6 +1,7 @@
 {
   "$defs": {
     "ConditionalValidationConfig": {
+      "additionalProperties": false,
       "description": "Configuration for conditional validation rule.",
       "properties": {
         "name": {
@@ -58,6 +59,7 @@
       "type": "object"
     },
     "CrossFieldValidationConfig": {
+      "additionalProperties": false,
       "description": "Configuration for cross-field validation rule.",
       "properties": {
         "name": {
@@ -174,6 +176,7 @@
       ]
     },
     "DQReportYamlConfig": {
+      "additionalProperties": false,
       "description": "Configuration for DQ report generation.",
       "properties": {
         "enabled": {
@@ -225,6 +228,7 @@
       "type": "object"
     },
     "FieldValidationConfig": {
+      "additionalProperties": false,
       "description": "Configuration for a single field validation rule.",
       "properties": {
         "field": {
@@ -375,6 +379,7 @@
       "type": "object"
     },
     "KeyNullabilityRuleConfig": {
+      "additionalProperties": false,
       "description": "Nullability policy for Silver merge/partition keys.",
       "properties": {
         "field": {
@@ -406,6 +411,7 @@
       "type": "object"
     },
     "ThresholdsConfig": {
+      "additionalProperties": false,
       "description": "Threshold configuration section.\n\nValidates DQ error thresholds for warning and failure modes.\nEnforces the invariant that soft_fail must be less than hard_fail.\n\nAttributes:\n    soft_fail: Warning threshold (0.0-1.0). Default: 0.05 (5%).\n        When error rate exceeds this threshold, a warning is emitted.\n    hard_fail: Failure threshold (0.0-1.0). Default: 0.50 (50%).\n        When error rate exceeds this threshold, the batch fails.\n\nExample:\n    >>> thresholds = ThresholdsConfig(soft_fail=0.05, hard_fail=0.15)\n    >>> thresholds.soft_fail\n    0.05\n    >>> thresholds.hard_fail\n    0.15",
       "properties": {
         "soft_fail": {
@@ -429,6 +435,7 @@
       "type": "object"
     }
   },
+  "additionalProperties": false,
   "description": "Complete DQ configuration file schema.\n\nRepresents structure of configs/quality/*.yaml files.\nContract YAML under configs/contracts/* uses ``strict_dq_validation`` as\nthe canonical file key, while this quality-config schema exposes the\nnormalized domain property name ``strict_validation``.\nSupports three levels of field validations for hierarchical merge:\n- common_*: from _defaults.yaml\n- provider_*: from providers/{provider}.yaml\n- entity_*: from entities/{provider}/{entity}.yaml\n\nThe merge order is: common → provider → entity (entity takes precedence).\n\nAttributes:\n    version: Schema version for compatibility checking.\n    provider: Provider name (optional, for provider/entity configs).\n    entity: Entity name (optional, for entity configs).\n    thresholds: DQ threshold configuration (soft/hard fail).\n    strict_validation: Normalized domain property corresponding to the\n        canonical contract-YAML key ``strict_dq_validation``.\n    invalid_record_policy: How to handle invalid records.\n    report: DQ report generation settings.\n    common_field_validations: Field validations from defaults.\n    provider_field_validations: Field validations from provider config.\n    entity_field_validations: Field validations from entity config.\n    common_cross_field_validations: Cross-field validations from defaults.\n    entity_cross_field_validations: Cross-field validations from entity.\n    entity_conditional_validations: Conditional validations from entity.\n\nExample:\n    >>> config = DQConfigFile(\n    ...     provider='chembl',\n    ...     entity='activity',\n    ...     thresholds=ThresholdsConfig(soft_fail=0.05, hard_fail=0.15),\n    ...     entity_field_validations=[\n    ...         FieldValidationConfig(\n    ...             field='activity_id',\n    ...             type='range',\n    ...             nullable=False\n    ...         )\n    ...     ]\n    ... )\n    >>> domain = config.to_domain()",
   "properties": {
     "version": {
