@@ -123,15 +123,17 @@ def test_adr_filename_parser_rejects_noncanonical_name() -> None:
 def test_unified_quality_layer_returns_flat_legacy_payload(tmp_path: Path) -> None:
     path = tmp_path / "provider.yaml"
     path.write_text("placeholder", encoding="utf-8")
-    payload = {"thresholds": {"soft_fail": 0.1}}
-    assert (
-        _load_unified_quality_layer(
-            layer_path=path,
-            fallback_keys=("thresholds",),
-            load_yaml=lambda _: payload,
-        )
-        is payload
+    payload = {
+        "thresholds": {"soft_fail": 0.1},
+        "source": {"url": "https://example.test"},
+    }
+    loaded = _load_unified_quality_layer(
+        layer_path=path,
+        fallback_keys=("thresholds",),
+        load_yaml=lambda _: payload,
     )
+    assert loaded == {"thresholds": {"soft_fail": 0.1}}
+    assert loaded is not payload
 
 
 def test_dq_threshold_normalization_replaces_non_mapping_container() -> None:

@@ -42,12 +42,14 @@ from pydantic import ValidationError
 
 from bioetl.infrastructure.schemas.dq_config import (
     DQConfigFile,
+    KeyNullabilityRuleConfig,
     ThresholdsConfig,
 )
 from bioetl.infrastructure.schemas.pipeline_config import (
     ConditionalValidationConfig,
     CrossFieldValidationConfig,
     DQReportYamlConfig,
+    DQYamlConfig,
     FieldValidationConfig,
 )
 
@@ -586,3 +588,75 @@ class TestCrossFieldValidationConfig:
                 condition="all_present",
                 severity="critical",  # type: ignore[arg-type]
             )
+
+
+def _assert_extra_forbidden(exc_info: pytest.ExceptionInfo[ValidationError]) -> None:
+    assert any(err["type"] == "extra_forbidden" for err in exc_info.value.errors())
+
+
+class TestDqSchemaExtraForbid:
+    """Unknown DQ config keys fail closed and do not keep silent defaults."""
+
+    @pytest.mark.parametrize(
+        ("schema_cls", "payload"),
+        [
+            (
+                FieldValidationConfig,
+                {"field": "doi", "type": "required", "nullablee": False},
+            ),
+            (
+                CrossFieldValidationConfig,
+                {
+                    "name": "doi_present",
+                    "fields": ["doi"],
+                    "condition": "all_present",
+                    "unknown_key": 1,
+                },
+            ),
+            (
+                ConditionalValidationConfig,
+                {
+                    "name": "when_doi",
+                    "condition_field": "doi",
+                    "condition_value": "10.1/abc",
+                    "unknown_key": 1,
+                },
+            ),
+            (DQReportYamlConfig, {"enabled": True, "unknown_key": 1}),
+            (DQYamlConfig, {"unknown_key": 1}),
+            (ThresholdsConfig, {"soft_fail": 0.05, "hard_fail": 0.2, "unknown_key": 1}),
+            (
+                KeyNullabilityRuleConfig,
+                {"field": "doi", "key_type": "merge", "unknown_key": 1},
+            ),
+            (DQConfigFile, {"version": "1.0.0", "unknown_key": 1}),
+        ],
+    )
+    def test_unknown_key_is_extra_forbidden(
+        self,
+        schema_cls: type,
+        payload: dict[str, object],
+    ) -> None:
+        with pytest.raises(ValidationError) as exc_info:
+            schema_cls.model_validate(payload)
+        _assert_extra_forbidden(exc_info)
+
+    def test_nullablee_inside_dq_file_does_not_keep_default(self) -> None:
+        with pytest.raises(ValidationError) as exc_info:
+            DQConfigFile.model_validate(
+                {
+                    "entity_field_validations": [
+                        {"field": "doi", "type": "required", "nullablee": False}
+                    ]
+                }
+            )
+        _assert_extra_forbidden(exc_info)
+
+        config = DQConfigFile.model_validate(
+            {"entity_field_validations": [{"field": "doi", "type": "required"}]}
+        )
+        rule = config.entity_field_validations[0]
+        assert rule.nullable is True
+        domain_rule = config.to_domain().field_validations[0]
+        assert domain_rule.nullable is True
+        assert domain_rule.field == "doi"

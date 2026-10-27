@@ -51,6 +51,9 @@ GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
     "tests/architecture/test_github_actions_runtime_policy.py"
 )
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
+CONFIG_SCHEMA_MIGRATION_STATUS_TEST = (
+    "tests/architecture/test_config_schema_migration_status.py"
+)
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
@@ -331,13 +334,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_integration_vcr_policy.py",
     ),
     "configs/_schema/composite.json": (
-        "tests/architecture/test_config_schema_migration_status.py",
+        CONFIG_SCHEMA_MIGRATION_STATUS_TEST,
         "tests/integration/config/test_validate_pipeline_configs.py",
         "tests/unit/repo_backed/infrastructure/config/test_composite_sort_by_closure.py",
     ),
     "configs/_schema/pipeline.json": (
-        "tests/architecture/test_config_schema_migration_status.py",
+        CONFIG_SCHEMA_MIGRATION_STATUS_TEST,
         "tests/integration/config/test_validate_pipeline_configs.py",
+    ),
+    "configs/_schema/dq.json": (
+        CONFIG_SCHEMA_MIGRATION_STATUS_TEST,
+        "tests/unit/infrastructure/schemas/test_dq_config.py",
     ),
     "configs/quality/test_skip_inventory.yaml": TEST_SKIP_INVENTORY_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,

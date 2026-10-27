@@ -661,6 +661,47 @@ def test_nested_dependency_execution_and_policy_reject_unknown_keys() -> None:
     _assert_extra_forbidden(exc_info)
 
 
+def test_composite_dq_rejects_nullablee_typo_and_keeps_default() -> None:
+    """A typo inside dq_overrides.field_validations is extra_forbidden.
+
+    The declared nullable default stays True only when the key is absent.
+    """
+    typo_payload = _base_payload()
+    typo_payload["dq_overrides"] = {
+        "field_validations": [{"field": "doi", "type": "required", "nullablee": False}],
+        "cross_field_validations": [
+            {
+                "name": "doi_present",
+                "fields": ["doi"],
+                "condition": "all_present",
+                "unknown_key": 1,
+            }
+        ],
+    }
+    with pytest.raises(ValidationError) as exc_info:
+        CompositeConfigSchema.model_validate(typo_payload)
+    _assert_extra_forbidden(exc_info)
+
+    valid_payload = _base_payload()
+    valid_payload["dq_overrides"] = {
+        "field_validations": [{"field": "doi", "type": "required"}],
+        "cross_field_validations": [
+            {
+                "name": "doi_present",
+                "fields": ["doi"],
+                "condition": "all_present",
+            }
+        ],
+    }
+    schema = CompositeConfigSchema.model_validate(valid_payload)
+    rule = schema.dq_overrides.field_validations[0]
+    assert rule.nullable is True
+    domain_rule = schema.dq_overrides.to_domain().field_validations[0]
+    assert domain_rule.nullable is True
+    assert domain_rule.field == "doi"
+    assert domain_rule.validation_type == "required"
+
+
 def test_real_composite_configs_keep_domain_and_declared_policies() -> None:
     """Tracked composite YAML stays loadable, and the removed dependency key stays absent."""
     config_dir = Path("configs/composites")
