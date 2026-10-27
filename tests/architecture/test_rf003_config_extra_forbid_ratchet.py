@@ -23,6 +23,7 @@ Moving a model into registry (b) is reclassification, not debt clear.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -62,9 +63,23 @@ ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_PATH = ROOT / "reports" / "quality" / "config-extra-forbid-inventory.json"
 PIPELINE_SCHEMA = ROOT / "configs" / "_schema" / "pipeline.json"
 
+# Approved composition digest of RF001_FORBID_NEW_BASELINE_IDENTITIES:
+# sha256(sorted(identity) + "\n" for each, UTF-8). Independent of regenerable
+# inventory JSON — blocks identity-swap that keeps count=36 (CodeRabbit
+# #discussion_r4390867605).
+RF001_FORBID_NEW_BASELINE_SHA256 = (
+    "6245c23df92b86124d4a18c7247067133728f24adf3708ca44ec033d8706c32c"
+)
+
 
 def _assert_extra_forbidden(exc_info: pytest.ExceptionInfo[ValidationError]) -> None:
     assert any(err["type"] == "extra_forbidden" for err in exc_info.value.errors())
+
+
+def _rf001_forbid_new_baseline_digest(identities: frozenset[str]) -> str:
+    """sha256 of sorted identities with trailing LF per line (deterministic)."""
+    payload = "".join(f"{identity}\n" for identity in sorted(identities))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 @pytest.mark.generated_artifact
@@ -87,10 +102,18 @@ def test_rf003_migration_debt_remains_exact_empty_set() -> None:
 @pytest.mark.generated_artifact
 def test_rf003_forbid_new_permissive_identities_exact_ceiling() -> None:
     """Cannot add a new schemas/** effective-ignore identity under the RF-001 ceiling."""
-    payload = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
     frozen = RF001_FORBID_NEW_BASELINE_IDENTITIES
-    assert set(payload["forbid_new_baseline_identities"]) == frozen
+    # Pin composition BEFORE comparing to regenerable inventory (prevents swap).
     assert len(frozen) == 36
+    assert (
+        _rf001_forbid_new_baseline_digest(frozen) == RF001_FORBID_NEW_BASELINE_SHA256
+    ), (
+        "RF001_FORBID_NEW_BASELINE_IDENTITIES composition drift; "
+        "approved digest must match sorted identities + trailing LF"
+    )
+
+    payload = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
+    assert set(payload["forbid_new_baseline_identities"]) == frozen
     live = build_payload()
     live_ignore = {
         row["identity"] for row in live["models"] if row["effective_extra"] == "ignore"
@@ -153,6 +176,7 @@ def test_registry_b_settings_anchor_ignores_unknown_keys() -> None:
     assert not hasattr(settings, "rf003_unknown_settings_key")
 
 
+@pytest.mark.generated_artifact
 def test_registry_b_jsondict_open_semantics_and_parent_strictness() -> None:
     """JsonDict stays open; parent forbid paths still reject unknown siblings."""
     # Type alias remains an open dict (not a BaseModel forbid boundary).
@@ -176,6 +200,7 @@ def test_registry_b_jsondict_open_semantics_and_parent_strictness() -> None:
     _assert_extra_forbidden(exc_info)
 
 
+@pytest.mark.generated_artifact
 def test_registry_b_adapter_wire_ignores_extras_not_base_api() -> None:
     """Adapter wire keeps extra=ignore; BaseApiConfig stays forbid (not wire)."""
     assert PubchemMoleculeApiRecord.model_config.get("extra") == "ignore"
