@@ -1001,6 +1001,13 @@
       "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
     },
     {
+      "node": "tests/architecture/test_rf003_config_extra_forbid_ratchet.py::test_rf003_filter_config_metadata_nested_path_is_justified_exclusion",
+      "artifacts": [
+        "reports/quality/config-extra-forbid-inventory.json"
+      ],
+      "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
+    },
+    {
       "node": "tests/architecture/test_rf003_config_extra_forbid_ratchet.py::test_rf003_forbid_new_permissive_identities_exact_ceiling",
       "artifacts": [
         "reports/quality/config-extra-forbid-inventory.json"

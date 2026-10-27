@@ -45,6 +45,9 @@ from tests.architecture._config_extra_forbid_inventory import (
     BASE_API_CONFIG_IDENTITY,
     BASELINE_SHA,
     DEFAULT_JSON_OUTPUT,
+    FILTER_CONFIG_METADATA_IDENTITY,
+    FILTER_CONFIG_METADATA_PATH,
+    FILTER_CONFIG_ROOT,
     JUSTIFIED_EXCLUSIONS,
     RF001_FORBID_NEW_BASELINE_IDENTITIES,
     RF002_DEBT_CLEARED_SHA,
@@ -215,6 +218,47 @@ def test_registry_b_filter_config_metadata_open_dict() -> None:
     with pytest.raises(ValidationError) as exc_info:
         FilterConfigFile.model_validate({**payload, "rf003_unknown_sibling": True})
     _assert_extra_forbidden(exc_info)
+
+
+@pytest.mark.generated_artifact
+def test_rf003_filter_config_metadata_nested_path_is_justified_exclusion() -> None:
+    """JsonDict metadata must appear in nested_paths as justified-exclusion edge.
+
+    ``_walk_nested_paths`` only yields BaseModel children; the open field needs an
+    explicit inventory edge linked to JUSTIFIED_EXCLUSIONS (Devin #discussion_r4390779006).
+    """
+    payload = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
+    live = build_payload()
+    exclusion_ids = {item["identity"] for item in JUSTIFIED_EXCLUSIONS}
+    assert FILTER_CONFIG_METADATA_IDENTITY in exclusion_ids
+
+    edge_rows = [
+        row
+        for row in payload["nested_paths"]
+        if row["root"] == FILTER_CONFIG_ROOT
+        and row["path"] == FILTER_CONFIG_METADATA_PATH
+    ]
+    assert edge_rows, (
+        "nested_paths missing FilterConfigFile.metadata open-dict edge"
+    )
+    assert len(edge_rows) == 1
+    edge = edge_rows[0]
+    assert edge["identity"] == FILTER_CONFIG_METADATA_IDENTITY
+    assert edge["classification"] == "justified-exclusion"
+    assert edge["effective_extra"] == "open"
+    assert edge["role"] == "open-dict-field"
+    assert edge.get("edge_kind") == "explicit-open-dict-field"
+    assert edge["identity"] in {
+        item["identity"] for item in payload["justified_exclusions"]
+    }
+
+    live_edges = [
+        row
+        for row in live["nested_paths"]
+        if row["root"] == FILTER_CONFIG_ROOT
+        and row["path"] == FILTER_CONFIG_METADATA_PATH
+    ]
+    assert live_edges == edge_rows
 
 
 @pytest.mark.parametrize(

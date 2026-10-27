@@ -149,6 +149,15 @@ WORKFLOW_RECONCILE_FOREIGN_KEYS_IDENTITY = (
 # transform_name. Inventory-only explicit edges (do not change runtime schemas).
 WORKFLOW_TRANSFORM_CONFIG_PATH = "workflow.steps.config"
 
+FILTER_CONFIG_ROOT = (
+    "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
+)
+# Annotation walk skips JsonDict fields; inventory-only explicit open-dict edge.
+FILTER_CONFIG_METADATA_PATH = "metadata"
+FILTER_CONFIG_METADATA_IDENTITY = (
+    "bioetl.infrastructure.schemas.filter_config.FilterConfigFile.metadata"
+)
+
 # Finalized justified exclusions (registry b). These are NOT migration debt and
 # MUST stay out of registry (a). Transfer from (a)→(b) is reclassification, not
 # debt clear (PSC §3.7). RF-003 owns rationale + owning anchor tests.
@@ -420,6 +429,8 @@ def _role_for_identity(identity: str) -> str:
         WORKFLOW_RECONCILE_FOREIGN_KEYS_IDENTITY,
     }:
         return "workflow-transform-config"
+    if identity == FILTER_CONFIG_METADATA_IDENTITY:
+        return "open-dict-field"
     if identity in GENERATOR_COVERED_ROOTS:
         return "generator-root"
     if identity in RUNTIME_ONLY_ROOTS:
@@ -587,11 +598,55 @@ def build_manifest(
                     model_effective=model_effective,
                 )
             )
+        if root_identity == FILTER_CONFIG_ROOT:
+            path_rows.extend(
+                _explicit_filter_config_metadata_edges(
+                    root_identity=root_identity,
+                    migration_debt=migration_debt,
+                )
+            )
     root_rows.sort(key=lambda row: str(row["identity"]))
     path_rows.sort(
         key=lambda row: (str(row["root"]), str(row["path"]), str(row["identity"]))
     )
     return root_rows, path_rows
+
+
+def _explicit_filter_config_metadata_edges(
+    *,
+    root_identity: str,
+    migration_debt: set[str],
+) -> list[dict[str, object]]:
+    """Attach FilterConfigFile.metadata JsonDict as justified open-dict edge.
+
+    ``_walk_nested_paths`` only yields BaseModel nested types, so the documented
+    open ``metadata: JsonDict`` field is invisible unless we add this inventory
+    edge. Classification must resolve to justified-exclusion via
+    ``JUSTIFIED_EXCLUSIONS``.
+    """
+    exclusion_ids = {item["identity"] for item in JUSTIFIED_EXCLUSIONS}
+    assert FILTER_CONFIG_METADATA_IDENTITY in exclusion_ids, (
+        "FilterConfigFile.metadata must remain in JUSTIFIED_EXCLUSIONS "
+        "when emitting its nested_paths edge"
+    )
+    classification = _classify_path(
+        identity=FILTER_CONFIG_METADATA_IDENTITY,
+        effective="open",
+        migration_debt=migration_debt,
+        root_identity=root_identity,
+    )
+    assert classification == "justified-exclusion", classification
+    return [
+        {
+            "root": root_identity,
+            "path": FILTER_CONFIG_METADATA_PATH,
+            "identity": FILTER_CONFIG_METADATA_IDENTITY,
+            "effective_extra": "open",
+            "classification": classification,
+            "role": _role_for_identity(FILTER_CONFIG_METADATA_IDENTITY),
+            "edge_kind": "explicit-open-dict-field",
+        }
+    ]
 
 
 def _explicit_workflow_transform_config_edges(

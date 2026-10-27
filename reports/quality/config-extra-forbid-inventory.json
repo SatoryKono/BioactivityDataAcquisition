@@ -1601,6 +1601,15 @@
       "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
     },
     {
+      "classification": "justified-exclusion",
+      "edge_kind": "explicit-open-dict-field",
+      "effective_extra": "open",
+      "identity": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile.metadata",
+      "path": "metadata",
+      "role": "open-dict-field",
+      "root": "bioetl.infrastructure.schemas.filter_config.FilterConfigFile"
+    },
+    {
       "classification": "forbid",
       "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.filter_config.SilverFiltersFileConfig",
