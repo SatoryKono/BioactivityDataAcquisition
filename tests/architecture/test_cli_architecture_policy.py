@@ -103,7 +103,7 @@ def test_valid_cli_contract_fixture_is_accepted() -> None:
 
 
 def test_direct_infrastructure_allowance_is_rejected() -> None:
-    with pytest.raises(CliArchitecturePolicyError, match="bioetl.infrastructure"):
+    with pytest.raises(CliArchitecturePolicyError, match=r"bioetl\.infrastructure"):
         parse_cli_architecture_contract(_DIRECT_INFRASTRUCTURE_ALLOWED)
 
 
