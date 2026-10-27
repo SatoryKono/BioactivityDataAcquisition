@@ -65105,6 +65105,34 @@
       "canonical_successor": null,
       "catalog_lifecycle": null,
       "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "historical",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/99-archive/plans/наблюдаемость.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "99-archive",
+      "status": "Archived",
+      "surface_family": "archive",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
       "declared_class": "internal-published",
       "declared_status": "active",
       "diagram_kind": null,
@@ -112874,7 +112902,7 @@
     "by_recommended_action": {
       "archive-after-migration": 275,
       "generate-automatically": 1064,
-      "keep": 2662
+      "keep": 2663
     },
     "by_section": {
       ".github": 6,
@@ -112886,7 +112914,7 @@
       "04-reference": 334,
       "05-engineering": 3,
       "05-operations": 92,
-      "99-archive": 1553,
+      "99-archive": 1554,
       "AGENTS.md": 1,
       "CHANGELOG.md": 1,
       "CONTRIBUTING.md": 1,
@@ -112903,20 +112931,20 @@
     },
     "by_status": {
       "Active": 751,
-      "Archived": 1553,
+      "Archived": 1554,
       "Canonical": 76,
       "Generated": 1064,
       "Working": 557
     },
     "by_surface_family": {
       "active": 751,
-      "archive": 1553,
+      "archive": 1554,
       "canonical": 76,
       "generated": 1064,
       "working": 557
     },
     "by_tracking_state": {
-      "tracked": 4001
+      "tracked": 4002
     },
     "docs_reports_local_count": 59,
     "duplicate_group_count": 80,
@@ -112929,8 +112957,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4001,
+    "total_doc_like": 4002,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4001
+    "total_doc_like_tracked": 4002
   }
 }
