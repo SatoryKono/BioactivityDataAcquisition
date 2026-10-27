@@ -361,7 +361,9 @@ async def test_pubmed_fetch_parse_error_limit_and_filter_mixin(
             stream_response = SimpleNamespace(
                 status_code=200,
                 headers=httpx.Headers({}),
-                url=httpx.URL("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"),
+                url=httpx.URL(
+                    "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+                ),
                 request=MagicMock(method="GET"),
                 aiter_bytes=lambda: _aiter_bytes(),
                 aclose=AsyncMock(),
