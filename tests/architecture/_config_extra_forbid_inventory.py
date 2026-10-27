@@ -274,7 +274,6 @@ def _effective_extra(cls: type[BaseModel]) -> str:
 
 
 def _declaration_source(
-    identity: str,
     local_extra: str | None,
     *,
     local_map: Mapping[str, str | None],
@@ -297,8 +296,10 @@ def _unwrap_annotation(annotation: object) -> list[object]:
     args = get_args(annotation)
     union_type = getattr(typing, "Union", None)
     types_union = getattr(__import__("types"), "UnionType", None)
-    if origin is typing.Union or origin is union_type or (
-        types_union is not None and isinstance(annotation, types_union)
+    if (
+        origin is typing.Union
+        or origin is union_type
+        or (types_union is not None and isinstance(annotation, types_union))
     ):
         out: list[object] = []
         for arg in args:
@@ -373,9 +374,7 @@ def _classify_path(
     migration_debt: set[str],
     root_identity: str,
 ) -> str:
-    if identity in {
-        exclusion["identity"] for exclusion in JUSTIFIED_EXCLUSIONS_SEED
-    }:
+    if identity in {exclusion["identity"] for exclusion in JUSTIFIED_EXCLUSIONS_SEED}:
         return "justified-exclusion"
     if effective == "forbid":
         if root_identity in GENERATOR_COVERED_ROOTS and identity == root_identity:
@@ -395,9 +394,7 @@ def build_model_rows() -> list[dict[str, object]]:
     for identity, cls in models.items():
         local_extra = local_map.get(identity)
         effective = _effective_extra(cls)
-        source = _declaration_source(
-            identity, local_extra, local_map=local_map, cls=cls
-        )
+        source = _declaration_source(local_extra, local_map=local_map, cls=cls)
         rows.append(
             {
                 "identity": identity,
@@ -523,7 +520,9 @@ def build_manifest(
                 }
             )
     root_rows.sort(key=lambda row: str(row["identity"]))
-    path_rows.sort(key=lambda row: (str(row["root"]), str(row["path"]), str(row["identity"])))
+    path_rows.sort(
+        key=lambda row: (str(row["root"]), str(row["path"]), str(row["identity"]))
+    )
     return root_rows, path_rows
 
 
@@ -533,9 +532,7 @@ def build_payload() -> dict[str, object]:
         str(row["identity"]): str(row["effective_extra"]) for row in rows
     }
     migration_debt = sorted(
-        str(row["identity"])
-        for row in rows
-        if row["effective_extra"] == "ignore"
+        str(row["identity"]) for row in rows if row["effective_extra"] == "ignore"
     )
     migration_debt_set = set(migration_debt)
     reachable: set[str] = set()
@@ -571,7 +568,9 @@ def build_payload() -> dict[str, object]:
     justified.sort(key=lambda item: item["identity"])
 
     forbid_new_baseline = sorted(RF001_FORBID_NEW_BASELINE_IDENTITIES)
-    unknown_vs_baseline = sorted(set(migration_debt) - RF001_FORBID_NEW_BASELINE_IDENTITIES)
+    unknown_vs_baseline = sorted(
+        set(migration_debt) - RF001_FORBID_NEW_BASELINE_IDENTITIES
+    )
     if unknown_vs_baseline:
         raise RuntimeError(
             "Live effective-ignore identities outside frozen RF-001 forbid-new "
@@ -663,7 +662,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.check:
         if not output_path.exists():
-            print(f"Missing config-extra-forbid inventory: {output_path}", file=sys.stderr)
+            print(
+                f"Missing config-extra-forbid inventory: {output_path}", file=sys.stderr
+            )
             return 1
         actual = output_path.read_text(encoding="utf-8")
         if actual != expected:

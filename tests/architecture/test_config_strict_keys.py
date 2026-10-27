@@ -120,7 +120,9 @@ def test_entity_pipeline_configs_load_fail_closed() -> None:
     for pipeline_name in sorted(EXPECTED_ENTITY_PIPELINE_NAMES):
         try:
             load_pipeline_config(pipeline_name)
-        except Exception as exc:  # noqa: BLE001 — surface any resolve/load failure
+        except Exception as exc:
+            # Broad catch is intentional: fail-closed discovery must surface any
+            # resolve/load failure, not only ValidationError.
             failures.append(f"{pipeline_name}: {type(exc).__name__}: {exc}")
     assert failures == [], (
         "Fail-closed discovery: expected pipeline configs failed to load:\n"
@@ -128,9 +130,7 @@ def test_entity_pipeline_configs_load_fail_closed() -> None:
     )
 
 
-@pytest.mark.parametrize(
-    "pipeline_name", sorted(EXPECTED_ENTITY_PIPELINE_NAMES)
-)
+@pytest.mark.parametrize("pipeline_name", sorted(EXPECTED_ENTITY_PIPELINE_NAMES))
 def test_pipeline_config_no_unknown_keys(pipeline_name: str) -> None:
     """Loading a pipeline config must not raise ValidationError for extra keys.
 
