@@ -316,7 +316,7 @@
       "reports/ledger12457_handoff.json",
       "reports/quality/low-coverage-6045-revalidation.xml"
     ],
-    "claim_boundary": "Run 40527527105 is not a PASS. Its architecture and affected-pytest steps succeeded; shadow compare failed on the three unmapped paths. The selector fix is on the existing pushed branch at 4026a87 but is not in a PR or merged."
+    "claim_boundary": "Run 40527527105 is not a PASS. Its architecture and affected-pytest steps succeeded; shadow compare failed on the three unmapped paths. That run is historical and did not test the current head. The selector fix is included in this PR at reviewed head e6d5d05a8ba4343ae713cb466969602a48a39c6a but is not merged."
   },
   "current_main_integration": {
     "main_sha": "9a1d2738053cc0bcaf08e1aba414aa13ca6e32a1",
