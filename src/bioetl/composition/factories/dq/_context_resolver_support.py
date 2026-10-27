@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast, get_args, get_origin
+from typing import TYPE_CHECKING, cast, get_args, get_origin
 
 from pydantic import BaseModel
 
@@ -68,7 +68,7 @@ def _nested_basemodel_type(annotation: object) -> type[BaseModel] | None:
 def project_sink_layer_to_extract_payload(
     sink_config: object,
     config_class: type[BaseModel],
-) -> dict[str, Any]:
+) -> dict[str, object]:
     """Map YAML ``SinkLayerConfig`` dump → layer extract/projection DTO payload.
 
     Ingress sink layers carry fields absent from Bronze/Silver/GoldSinkConfig
@@ -82,11 +82,11 @@ def project_sink_layer_to_extract_payload(
     if not isinstance(raw, Mapping):
         msg = "sink layer model_dump() must return a mapping"
         raise TypeError(msg)
-    payload: dict[str, Any] = {}
+    payload: dict[str, object] = {}
     for field_name, field_info in config_class.model_fields.items():
         if field_name not in raw:
             continue
-        value: Any = raw[field_name]
+        value: object = raw[field_name]
         nested_model = _nested_basemodel_type(field_info.annotation)
         if nested_model is not None and isinstance(value, Mapping):
             value = {
@@ -111,8 +111,8 @@ def extract_single_dq_config_impl(
     except TypeError:
         is_basemodel = False
     if is_basemodel:
-        payload: Mapping[str, object] | dict[str, Any] = (
-            project_sink_layer_to_extract_payload(sink_config, config_class)
+        payload: Mapping[str, object] = project_sink_layer_to_extract_payload(
+            sink_config, config_class
         )
     else:
         # Test doubles / structural mocks without model_fields.

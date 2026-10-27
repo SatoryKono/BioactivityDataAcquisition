@@ -263,6 +263,24 @@ def test_shadow_compare_routes_composite_configs(path: str) -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "path",
+    (
+        "configs/entities/chembl/activity.yaml",
+        "configs/entities/chembl/target.yaml",
+        "configs/entities/pubchem/compound.yaml",
+    ),
+)
+def test_shadow_compare_routes_entity_configs(path: str) -> None:
+    """Every entity YAML selects fail-closed pipeline load + filter schema tests."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=repo_root)
+    assert "tests/architecture/test_config_strict_keys.py" in report["selected"]
+    assert (
+        "tests/unit/infrastructure/schemas/test_filter_config.py" in report["selected"]
+    )
+
+
 def test_shadow_compare_routes_published_pipeline_schemas() -> None:
     """Published pipeline JSON schemas select the tests that read them."""
     repo_root = Path(__file__).resolve().parents[5]
