@@ -240,6 +240,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/engineering/SEC-003_audit_report.md": (
         "tests/unit/domain/services/test_composite_metadata_helpers.py",
     ),
+    # N1 coordinator status note (sibling of reports/governance/n1-shadow-window/).
+    "reports/governance/n1-shadow-window-status.md": (
+        "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
+    ),
     "docs/04-reference/environment-variables.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         "tests/architecture/test_documentation_cleanup_inventory.py",

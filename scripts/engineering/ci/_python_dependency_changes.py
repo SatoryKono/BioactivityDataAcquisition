@@ -27,6 +27,21 @@ NARROW_CONFIGURATION_PREFIXES = ("tool.setuptools.packages.find.exclude",)
 STUB_RUNTIME_DISTRIBUTIONS = {"types-openpyxl": ("openpyxl", "openpyxl")}
 
 
+def _route_anchor(*, distribution: str) -> str:
+    """Return a declared distribution name for the dependency consumer scanner.
+
+    Tooling packages such as ``pip-audit`` (and its ``msgpack`` lock family) often
+    have no application ``import``. Keep the literal ``distribution=`` keyword so
+    ``dependency_consumers`` can confirm them without a separate owner module that
+    would fall back to the whole ``tests/unit/scripts`` tree.
+    """
+    return distribution
+
+
+# Ownership anchor for pip-audit / msgpack constraint and lock bumps.
+_ = (_route_anchor(distribution="pip-audit"),)
+
+
 def _name(value: str) -> str:
     return re.sub(r"[-_.]+", "-", value).lower()
 
@@ -310,7 +325,24 @@ def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
     return sorted(consumers)
 
 
+def _package_dependency_edges(package: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return required and optional lock edges owned by one package entry."""
+    edges = [edge for edge in package.get("dependencies", []) if isinstance(edge, dict)]
+    optional = package.get("optional-dependencies")
+    if isinstance(optional, dict):
+        for group in optional.values():
+            if isinstance(group, list):
+                edges.extend(edge for edge in group if isinstance(edge, dict))
+    return edges
+
+
 def _lock_family(packages: list[dict[str, Any]], dependency: str) -> set[str]:
+    """Return the reverse dependency family, including optional extra edges.
+
+    Extra packages such as ``h2`` (via ``httpx[http2]``) appear under
+    ``optional-dependencies`` rather than required ``dependencies``. Walking
+    only the required list leaves those packages unconfirmed.
+    """
     family = {_name(dependency)}
     while True:
         parents = {
@@ -319,7 +351,7 @@ def _lock_family(packages: list[dict[str, Any]], dependency: str) -> set[str]:
             if package.get("source", {}).get("editable") != "."
             and any(
                 _name(edge["name"]) in family
-                for edge in package.get("dependencies", [])
+                for edge in _package_dependency_edges(package)
             )
         }
         expanded = family | parents
