@@ -82,5 +82,17 @@ def test_parse_composite_status_actual_dict():
     assert parse_composite_status({"a": "success"}) == {"a": "success"}
 
 
+def test_parse_literal_recursion_error_json():
+    # Simulate deep nesting to trigger RecursionError in json.loads
+    deep_json = "[" * 10000 + "]" * 10000
+    assert _parse_literal(deep_json) is None
+
+
+def test_parse_literal_length_limit():
+    # Exceed 250_000 chars length limit
+    long_string = '["' + "a" * 250_000 + '"]'
+    assert _parse_literal(long_string) is None
+
+
 if __name__ == "__main__":
     pytest.main([__file__])
