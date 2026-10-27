@@ -5,14 +5,14 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast, get_args, get_origin
+
+from pydantic import BaseModel
 
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
 from bioetl.domain.value_objects.dq_report import SilverDQCheckType
 
 if TYPE_CHECKING:
-    from pydantic import BaseModel
-
     from bioetl.domain.ports import (
         BronzeDQConfigPort,
         GoldDQConfigPort,
@@ -49,6 +49,55 @@ class DQServiceBundle:
         return self.report_service is not None
 
 
+def _nested_basemodel_type(annotation: object) -> type[BaseModel] | None:
+    """Return the BaseModel type from a field annotation (unwrap Optional/Union)."""
+    if isinstance(annotation, type) and issubclass(annotation, BaseModel):
+        return annotation
+    origin = get_origin(annotation)
+    if origin is None:
+        return None
+    for arg in get_args(annotation):
+        if arg is type(None):
+            continue
+        nested = _nested_basemodel_type(arg)
+        if nested is not None:
+            return nested
+    return None
+
+
+def project_sink_layer_to_extract_payload(
+    sink_config: object,
+    config_class: type[BaseModel],
+) -> dict[str, Any]:
+    """Map YAML ``SinkLayerConfig`` dump → layer extract/projection DTO payload.
+
+    Ingress sink layers carry fields absent from Bronze/Silver/GoldSinkConfig
+    (``enabled``, ``csv_export``, ``scd_config``, …). Blind ``model_dump()`` +
+    ``model_validate`` under ``extra="forbid"`` rejects valid ingress configs.
+    Only fields declared on the projection model are forwarded. Nested
+    ``dq_report`` is mapped field-wise so ingress (no ``checks``) never invents
+    projection-only keys, while an already-projection dump keeps ``checks``.
+    """
+    raw = cast(ModelDumpable, sink_config).model_dump()
+    if not isinstance(raw, Mapping):
+        msg = "sink layer model_dump() must return a mapping"
+        raise TypeError(msg)
+    payload: dict[str, Any] = {}
+    for field_name, field_info in config_class.model_fields.items():
+        if field_name not in raw:
+            continue
+        value: Any = raw[field_name]
+        nested_model = _nested_basemodel_type(field_info.annotation)
+        if nested_model is not None and isinstance(value, Mapping):
+            value = {
+                key: value[key]
+                for key in nested_model.model_fields
+                if key in value
+            }
+        payload[field_name] = value
+    return payload
+
+
 def extract_single_dq_config_impl(
     sink: Mapping[str, object],
     layer_name: str,
@@ -57,9 +106,20 @@ def extract_single_dq_config_impl(
     sink_config = sink.get(layer_name)
     if not sink_config or not hasattr(sink_config, "model_dump"):
         return None
-    validated = config_class.model_validate(
-        cast(ModelDumpable, sink_config).model_dump()
-    )
+    try:
+        is_basemodel = isinstance(config_class, type) and issubclass(
+            config_class, BaseModel
+        )
+    except TypeError:
+        is_basemodel = False
+    if is_basemodel:
+        payload: Mapping[str, object] | dict[str, Any] = (
+            project_sink_layer_to_extract_payload(sink_config, config_class)
+        )
+    else:
+        # Test doubles / structural mocks without model_fields.
+        payload = cast(ModelDumpable, sink_config).model_dump()
+    validated = config_class.model_validate(payload)
     dq_report = getattr(validated, "dq_report", None)
     if dq_report is not None and getattr(dq_report, "enabled", False):
         return cast(

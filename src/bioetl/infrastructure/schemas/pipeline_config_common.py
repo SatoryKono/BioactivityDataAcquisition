@@ -275,6 +275,8 @@ class DQYamlConfig(BaseModel):
 class CircuitBreakerYamlConfig(BaseModel):
     """Circuit Breaker configuration."""
 
+    model_config = ConfigDict(extra="forbid")
+
     failure_threshold: int = Field(default=5, ge=1)
     recovery_timeout: int = Field(default=300, ge=60)
 
@@ -292,6 +294,8 @@ class CircuitBreakerYamlConfig(BaseModel):
 
 class CsvExportConfig(BaseModel):
     """Configuration for CSV export."""
+
+    model_config = ConfigDict(extra="forbid")
 
     enabled: bool = False
     path: str | None = None

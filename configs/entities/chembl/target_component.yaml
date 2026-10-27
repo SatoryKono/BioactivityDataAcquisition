@@ -126,7 +126,6 @@ filters:
     column_name: component_id
     filter_field: component_id
     batch_size: 100
-    checkpoint_interval: 1000
     fallback_column: title
   extraction_params: {}
   silver_filters:

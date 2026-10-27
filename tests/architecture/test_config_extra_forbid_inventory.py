@@ -64,23 +64,36 @@ def test_config_extra_forbid_inventory_artifact_matches_generator() -> None:
 
 @pytest.mark.generated_artifact
 def test_config_extra_forbid_inventory_counts_match_effective_policy() -> None:
+    """Counts track live effective policy; RF-001 baseline preserved via SHA + ceiling.
+
+    RF-001 land counts (67/11/27 local; effective 69/36) are historical provenance
+    in the plan / RF-001 notes — not a forever soft-assert. After RF-002 forbid
+    migration, live inventory must report debt-cleared effective policy.
+    """
     payload = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
+    live = build_payload()
     counts = payload["counts"]
+    assert counts == live["counts"]
     assert counts["basemodel_total"] == 105
-    assert counts["local_forbid"] == 67
-    assert counts["local_ignore"] == 11
-    assert counts["local_none"] == 27
-    assert counts["among_none_inherited_forbid"] == 2
-    assert counts["among_none_inherited_ignore"] == 12
-    assert counts["among_none_default_ignore"] == 13
-    assert counts["effective_forbid"] == 69
-    assert counts["effective_ignore"] == 36
+    # RF-002: all previous effective-ignore identities migrated to forbid.
+    assert counts["local_ignore"] == 0
+    assert counts["among_none_inherited_ignore"] == 0
+    assert counts["among_none_default_ignore"] == 0
+    assert counts["effective_ignore"] == 0
+    assert counts["effective_forbid"] == 105
+    assert counts["local_forbid"] + counts["local_none"] == 105
+    assert counts["among_none_inherited_forbid"] == counts["local_none"]
+    # Provenance: RF-001 baseline SHA + forbid-new ceiling remain pinned.
     assert payload["baseline_sha"] == BASELINE_SHA
+    assert len(RF001_FORBID_NEW_BASELINE_IDENTITIES) == 36
 
 
 @pytest.mark.generated_artifact
 def test_migration_debt_is_exact_identity_set_of_effective_ignore() -> None:
-    """Registry (a): exact sorted identity set — no countdown-only soft ratchet."""
+    """Registry (a): exact sorted identity set — no countdown-only soft ratchet.
+
+    RF-002 completion criterion: debt (a) == [] after real forbid migration.
+    """
     payload = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
     live = build_payload()
     debt = payload["migration_debt_identities"]
@@ -91,6 +104,8 @@ def test_migration_debt_is_exact_identity_set_of_effective_ignore() -> None:
         row["identity"] for row in live["models"] if row["effective_extra"] == "ignore"
     )
     assert debt == live_ignore
+    assert debt == []
+    assert payload["counts"]["effective_ignore"] == 0
 
 
 @pytest.mark.generated_artifact
@@ -182,8 +197,9 @@ def test_dq_ingress_vs_projection_classification() -> None:
     models = {row["identity"]: row for row in payload["models"]}
     ingress = models[DQ_YAML_INGRESS_IDENTITY]
     assert ingress["role"] == "dq-yaml-ingress"
-    assert ingress["effective_extra"] == "ignore"
-    assert DQ_YAML_INGRESS_IDENTITY in payload["migration_debt_identities"]
+    # RF-002: ingress migrated to forbid; still no checks field (PSC-5).
+    assert ingress["effective_extra"] == "forbid"
+    assert DQ_YAML_INGRESS_IDENTITY not in payload["migration_debt_identities"]
 
     # Ingress must appear under PipelineYamlConfig.sink.dq_report path.
     ingress_paths = [
@@ -199,7 +215,8 @@ def test_dq_ingress_vs_projection_classification() -> None:
     for identity in sorted(DQ_PROJECTION_IDENTITIES):
         row = models[identity]
         assert row["role"] == "dq-layer-projection"
-        assert identity in payload["migration_debt_identities"]
+        assert row["effective_extra"] == "forbid"
+        assert identity not in payload["migration_debt_identities"]
         assert "checks" in str(row.get("notes", "")) or identity.endswith("SinkConfig")
 
     # SinkDQReportConfig must NOT credit a checks field (PSC-5).
@@ -222,7 +239,9 @@ def test_base_api_config_not_classified_as_wire_dto() -> None:
     api = models[BASE_API_CONFIG_IDENTITY]
     assert api["role"] == "api-connection-config"
     assert api.get("not_wire_dto") is True
-    assert BASE_API_CONFIG_IDENTITY in payload["migration_debt_identities"]
+    # RF-002: migrated to forbid (connection config), not moved to wire exclusions.
+    assert api["effective_extra"] == "forbid"
+    assert BASE_API_CONFIG_IDENTITY not in payload["migration_debt_identities"]
     # Must not appear in justified adapter-wire exclusion as a class identity.
     exclusion_ids = {item["identity"] for item in payload["justified_exclusions"]}
     assert BASE_API_CONFIG_IDENTITY not in exclusion_ids

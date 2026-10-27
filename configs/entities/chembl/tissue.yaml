@@ -213,7 +213,6 @@ filters:
     column_name: tissue_chembl_id
     filter_field: tissue_id
     batch_size: 1000
-    checkpoint_interval: 1000
     fallback_column: title
   extraction_params: {}
   silver_filters:

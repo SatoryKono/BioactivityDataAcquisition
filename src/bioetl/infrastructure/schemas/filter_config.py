@@ -23,7 +23,7 @@ Usage:
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from bioetl.domain.filtering import (
     GoldFilterConfig,
@@ -146,6 +146,8 @@ class FilterConfigFile(BaseModel):
         silver_filters: Silver layer domain-level filter configuration.
         gold_filters: Gold layer filter configuration.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     version: str = Field(
         default="1.0.0",

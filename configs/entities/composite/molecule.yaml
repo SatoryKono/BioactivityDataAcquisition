@@ -174,7 +174,6 @@ filters:
     column_name: entity_id
     filter_field: entity_id
     batch_size: 1000
-    checkpoint_interval: 1000
   silver_filters:
     required_fields:
     - entity_id

@@ -219,7 +219,6 @@ filters:
     column_name: target_chembl_id
     filter_field: target_id
     batch_size: 20
-    checkpoint_interval: 1000
     fallback_column: title
   extraction_params:
     target_type: SINGLE PROTEIN

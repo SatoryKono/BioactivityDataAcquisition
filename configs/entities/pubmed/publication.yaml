@@ -293,7 +293,6 @@ filters:
     filter_field: pmid
     batch_size: 100
     fallback_column: title
-    checkpoint_interval: 1000
   extraction_params: {}
   silver_filters:
     exclude_if_present: []

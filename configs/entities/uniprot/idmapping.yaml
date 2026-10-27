@@ -136,7 +136,6 @@ filters:
     column_name: target_chembl_id
     filter_field: target_id
     batch_size: 100
-    checkpoint_interval: 1000
     fallback_column: title
   extraction_params: {}
   silver_filters:
