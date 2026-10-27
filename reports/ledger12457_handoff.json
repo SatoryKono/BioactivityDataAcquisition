@@ -3,7 +3,7 @@
   "ledger_id": "ledger12457",
   "owner": "Фёдор (архитектура)",
   "date": "2026-10-22",
-  "verification_date": "2026-10-27T14:04Z",
+  "verification_date": "2026-10-27T14:55Z",
   "action": "Risk Accepted",
   "risk_id": "P11-001",
   "description": "Принятый риск гибридной модели resume (ADR-046) - санкционированная сложность, не дефект.",
@@ -13,15 +13,49 @@
   ],
   "provenance": {
     "source": "сессия P11 (Jules 12246571058940301623, ревизия 626e2661761a713039d42dfd00b6893814b4fd20), finding P11-001; решение владельца от 22.10.2026.",
+    "owner_decision": {
+      "owner": "Фёдор (архитектура)",
+      "decided_on": "2026-10-22",
+      "decision": "Risk Accepted — гибридная модель resume (checkpoint + ledger, ADR-046) является санкционированной сложностью, не дефектом.",
+      "audit_id": "AUDIT-20261022",
+      "finding_id": "P11-001",
+      "session": {
+        "agent": "Jules",
+        "session_id": "12246571058940301623",
+        "revision": "626e2661761a713039d42dfd00b6893814b4fd20"
+      },
+      "verifiable_records": [
+        {
+          "type": "github_issue",
+          "id": 12485,
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12485",
+          "role": "risk_registration_with_owner_decision_text",
+          "quote_anchor": "Запись принятия. Владелец принятия риска: Фёдор (архитектура), решение от 22.10.2026 в рамках аудита AUDIT-20261022"
+        },
+        {
+          "type": "github_issue",
+          "id": 12457,
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12457",
+          "role": "reconciliation_ledger_0_1_required_by_issue_12485"
+        },
+        {
+          "type": "adr",
+          "id": "ADR-046",
+          "path": "docs/02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md",
+          "role": "governing_architecture_decision"
+        }
+      ]
+    },
     "exact_files": [
-      "docs/02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md"
+      "docs/02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md",
+      "reports/evidence/12485/criterion_to_evidence.md"
     ],
     "exact_tests": [
       "tests/architecture/test_config_topology_docs_drift.py",
       "tests/unit/domain/control_plane/test_run_ledger_replay.py",
       "tests/unit/application/composite/checkpoint/test_checkpoint_runtime.py"
     ],
-    "current_sha": "3b8466d140b28e703442e28334c45e2872172fc1"
+    "current_sha": "ee4a8cbe9dfbf850a919e40b6d04591a3f9126ec"
   },
   "review_conditions": "При изменении модели checkpoint/ledger или инциденте resume."
 }

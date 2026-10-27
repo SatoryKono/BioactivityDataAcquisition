@@ -4,7 +4,7 @@
    **Evidence:** No code changes were made to the `bioetl` logic (`src/bioetl/application/composite/checkpoint/load_service.py`, `_checkpoint_replay_projection.py`). The existing logic was preserved.
 
 2. **Criterion:** Подлинная provenance уже принятого риска (сообщение пользователя от 2026-10-22).
-   **Evidence:** `reports/ledger12457_handoff.json` was created accurately matching the provided excerpt (owner "Фёдор (архитектура)", audit-20261022, Jules session details, finding P11-001).
+   **Evidence:** `reports/ledger12457_handoff.json` records `provenance.owner_decision` with verifiable GitHub anchors: issue [#12485](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12485) (risk registration + owner-decision text for Фёдор / 22.10.2026 / AUDIT-20261022 / P11-001) and ledger issue [#12457](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12457), plus ADR-046 as the governing decision.
 
 3. **Criterion:** Условия соответствия документации фактической реализации.
    **Evidence:** Updated `docs/02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md` to clarify that `RunLedgerReplayProjection` actually projects rich checkpoint payloads (dependency result maps, enrichment result maps, merge details) into the suffix delta. This directly matches the code in `src/bioetl/application/composite/checkpoint/_checkpoint_replay_projection.py` without promising universal ledger replay.
