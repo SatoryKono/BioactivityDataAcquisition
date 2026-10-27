@@ -234,6 +234,7 @@ def test_github_policy_python_version_claims_match_workflows() -> None:
 def test_pr_gate_coordinator_materializes_on_every_pr_without_duplicate_owners() -> (
     None
 ):
+    """Coordinator owns every PR and aggregates docs-lane with peer lanes."""
     policy_doc = GITHUB_POLICY.read_text(encoding="utf-8")
     coordinator_path = ROOT / ".github" / "workflows" / "pr-required.yml"
     coordinator = _load_yaml(coordinator_path)
@@ -270,6 +271,7 @@ def test_pr_gate_coordinator_materializes_on_every_pr_without_duplicate_owners()
         "classify-changes",
         "fast-governance",
         "class-lane",
+        "docs-lane",
         "docker-lane",
     }
     assert coordinator["jobs"]["docker-lane"]["permissions"] == {

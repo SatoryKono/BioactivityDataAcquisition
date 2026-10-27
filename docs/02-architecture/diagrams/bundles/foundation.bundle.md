@@ -1,6 +1,6 @@
 # BioETL Foundation Diagrams Bundle
 
-- Generated: 2026-09-26T15:13:19+00:00
+- Generated: 2026-10-16T02:51:43+00:00
 - Diagram count: 55
 
 ## Table of Contents
@@ -34,7 +34,7 @@
 - [21-activity-entity-data-flow — Activity Entity Data Flow (Extract → Transform → Load)](#21-activity-entity-data-flow)
 - [22-client-api-request-sequence — HTTP Client API Request Sequence](#22-client-api-request-sequence)
 - [23-silver-writer-class — SilverWriter Class Diagram](#23-silver-writer-class)
-- [24-hash-service-class — ContentHashService Class Diagram](#24-hash-service-class)
+- [24-hash-service-class — ContentHashPolicyGroup Class Diagram](#24-hash-service-class)
 - [25-circuit-breaker-observer-class — Circuit Breaker and Observer Classes](#25-circuit-breaker-observer-class)
 - [26-hexagonal-ports-adapters — Hexagonal Architecture — Ports and Adapters Overview](#26-hexagonal-ports-adapters)
 - [27-import-matrix-enforcement — Five-Layer Import Matrix Enforcement (ARCH-001)](#27-import-matrix-enforcement)
@@ -619,12 +619,12 @@
 
 ## 24-hash-service-class
 
-**ContentHashService Class Diagram**
+**ContentHashPolicyGroup Class Diagram**
 
 ![24-hash-service-class](../foundation/svg/24-hash-service-class.svg)
 
 ### Описание
-Диаграмма «ContentHashService Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.4 (Deduplication via content_hash). Схема имеет плотность порядка 5 узлов и 4 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: ContentHashService, NormalizationRules, ContentHash, BaseTransformer, HashFlow.
+Диаграмма «ContentHashPolicyGroup Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.4 (Deduplication via content_hash). Схема имеет плотность порядка 5 узлов и 4 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: ContentHashPolicyGroup, NormalizationRules, ContentHash, BaseTransformer, HashFlow.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -833,7 +833,7 @@
 ![35-bootstrap-sequence](../foundation/svg/35-bootstrap-sequence.svg)
 
 ### Описание
-Диаграмма «Composition Layer Bootstrap Sequence» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Root), composition/bootstrap/runtime/. Схема имеет плотность порядка 28 узлов и 27 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Step 1: Logger, Step 2: Configuration, Step 3: Observability Bundle, Step 4: Storage, Step 5: HTTP Client, Step 6: Data Source. Показательные узлы для быстрого чтения: BootstrapLogger.configure(), StructlogLogger (JSON, ISO timestamps, run_id binding), ConfigLoader.load(pipeline_name), PipelineYamlConfig (base defaults merged with entity.yaml), DQ + Filter config loaders, ObservabilityBundle.
+Диаграмма «Composition Layer Bootstrap Sequence» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Root), composition/bootstrap/runtime/. Схема имеет плотность порядка 28 узлов и 27 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Step 1: Logger, Step 2: Configuration, Step 3: Observability Bundle, Step 4: Storage, Step 5: HTTP Client, Step 6: Data Source. Показательные узлы для быстрого чтения: BootstrapLogger.configure(), StructlogLogger (JSON, ISO timestamps, run_id binding), BaseConfigLoader.load(pipeline_name), PipelineYamlConfig (base defaults merged with entity.yaml), DQ + Filter config loaders, ObservabilityBundle.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -909,7 +909,7 @@
 ![39-medallion-invariants](../foundation/svg/39-medallion-invariants.svg)
 
 ### Описание
-Диаграмма «Medallion Architecture Invariants (ARCH-007)» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.1 (Medallion), ARCH-007 clear policy. Схема имеет плотность порядка 23 узлов и 18 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: RunType Enum (domain/types.py), MedallionLifecycleService\n(application/services/medallion_lifecycle.py), INCREMENTAL Path, BACKFILL Path, REBUILD Path, Enforcement. Показательные узлы для быстрого чтения: RunType.INCREMENTAL 'Fetch new data since last run', RunType.BACKFILL 'Re-fetch a date range', RunType.REBUILD 'Full clean rebuild', ❌ DO NOT clear Silver, ❌ DO NOT clear Gold, Silver: merge/upsert (content_hash dedup).
+Диаграмма «Medallion Architecture Invariants (ARCH-007)» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.1 (Medallion), ARCH-007 clear policy. Схема имеет плотность порядка 23 узлов и 18 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: RunType Enum (domain/medallion.py), MedallionLifecycleService\n(application/services/medallion/medallion_lifecycle.py), INCREMENTAL Path, BACKFILL Path, REBUILD Path, Enforcement. Показательные узлы для быстрого чтения: RunType.INCREMENTAL 'Fetch new data since last run', RunType.BACKFILL 'Re-fetch a date range', RunType.REBUILD 'Full clean rebuild', ❌ DO NOT clear Silver, ❌ DO NOT clear Gold, Silver: merge/upsert (content_hash dedup).
 
 ### Метаданные
 - Тип: `flowchart`
