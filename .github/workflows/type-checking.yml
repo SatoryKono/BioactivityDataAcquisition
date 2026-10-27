@@ -71,7 +71,7 @@ jobs:
       - name: Mypy diagnostic ratchet
         if: always()
         run: |
-          uv run --frozen python -m scripts.engineering.ci.check_mypy_diagnostic_ratchet
+          uv run --frozen --no-build python -m scripts.engineering.ci.check_mypy_diagnostic_ratchet
 
 
       - name: Save mypy cache

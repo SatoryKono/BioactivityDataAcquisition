@@ -7,6 +7,25 @@ from collections import defaultdict
 from typing import Any
 
 
+def _parse_line(line: str) -> tuple[str, str, str] | None:
+    if ": error:" not in line:
+        return None
+    parts = line.split(":", 3)
+    if len(parts) < 4:
+        return None
+    file_path = parts[0].strip()
+    msg_and_code = parts[3].strip()
+    code_start = msg_and_code.rfind("[")
+    code_end = msg_and_code.rfind("]")
+    if code_start != -1 and code_end != -1 and code_end > code_start:
+        code = msg_and_code[code_start + 1 : code_end]
+        msg = msg_and_code[:code_start].strip()
+    else:
+        code = "unknown"
+        msg = msg_and_code
+    return file_path, msg, code
+
+
 def _parse_mypy_output(log_path: Path) -> dict[str, dict[str, dict[str, int]]]:
     """Parse mypy log output into a dict of module -> message -> code -> count."""
     diagnostics: dict[str, dict[str, dict[str, int]]] = defaultdict(
@@ -19,23 +38,10 @@ def _parse_mypy_output(log_path: Path) -> dict[str, dict[str, dict[str, int]]]:
 
     with open(log_path, "r", encoding="utf-8") as f:
         for line in f:
-            if ": error:" not in line:
-                continue
-            parts = line.split(":", 3)
-            if len(parts) < 4:
-                continue
-            file_path = parts[0].strip()
-            msg_and_code = parts[3].strip()
-            code_start = msg_and_code.rfind("[")
-            code_end = msg_and_code.rfind("]")
-            if code_start != -1 and code_end != -1 and code_end > code_start:
-                code = msg_and_code[code_start + 1 : code_end]
-                msg = msg_and_code[:code_start].strip()
-            else:
-                code = "unknown"
-                msg = msg_and_code
-
-            diagnostics[file_path][msg][code] += 1
+            parsed = _parse_line(line)
+            if parsed:
+                file_path, msg, code = parsed
+                diagnostics[file_path][msg][code] += 1
 
     return diagnostics
 

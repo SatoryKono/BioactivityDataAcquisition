@@ -34,7 +34,7 @@ trend evidence only.
 - Source run URL: `pending`
 - Source tree sha256: `8cd9c8a872cb00dcfe7dc7bfee7266b48fa9e3247d6cfa7c8f156894aa032bea`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-27T00:28:33.883436+00:00`
+- Refreshed at (UTC): `2026-10-27T01:06:39.500877+00:00`
 
 ## Branch-accurate provenance (#5729)
 
