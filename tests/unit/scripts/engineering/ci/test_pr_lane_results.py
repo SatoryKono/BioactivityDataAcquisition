@@ -761,6 +761,15 @@ def test_affected_targets_map_integration_vcr_policy() -> None:
     ) == ["tests/architecture/test_integration_vcr_policy.py"]
 
 
+def test_affected_targets_map_security_suppression_registry() -> None:
+    """Security suppression edits select the registry architecture test."""
+    repo_root = Path(__file__).resolve().parents[5]
+    assert affected_pytest_targets(
+        ["configs/quality/security_suppression_registry.yaml"],
+        repo_root=repo_root,
+    ) == ["tests/architecture/test_security_suppression_registry.py"]
+
+
 def test_affected_targets_map_telemetry_baseline(tmp_path: Path) -> None:
     """Telemetry edits select both baseline guards and leave other configs unmapped."""
     governance = tmp_path / "tests/architecture/test_test_telemetry_governance.py"
