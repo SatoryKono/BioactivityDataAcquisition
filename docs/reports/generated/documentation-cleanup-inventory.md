@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4003 |
-| Tracked doc-like files | 4003 |
+| Doc-like files | 4004 |
+| Tracked doc-like files | 4004 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4003 |
+| tracked | 4004 |
 
 ## Lifecycle Counts
 
@@ -26,7 +26,7 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_quality_baseline | 117 |
-| closeout_evidence | 166 |
+| closeout_evidence | 167 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 28 |
 | docs_reports_generated_or_route_owned | 7 |
@@ -55,7 +55,7 @@
 | Archived | 1554 |
 | Canonical | 76 |
 | Generated | 1066 |
-| Working | 556 |
+| Working | 557 |
 
 ## Surface Families
 
@@ -65,7 +65,7 @@
 | archive | 1554 |
 | canonical | 76 |
 | generated | 1066 |
-| working | 556 |
+| working | 557 |
 
 ## Recommended Actions
 
@@ -73,7 +73,7 @@
 | --- | --- |
 | archive-after-migration | 273 |
 | generate-automatically | 1066 |
-| keep | 2664 |
+| keep | 2665 |
 
 ## Cleanup Candidates
 
@@ -121,7 +121,7 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | Working | 0 | archive-after-migration |
 | `reports/12361_named_blocker.md` | Working | 0 | archive-after-migration |
-| `reports/NAMED_BLOCKER_12464.md` | Working | 0 | archive-after-migration |
+| `reports/NAMED_BLOCKER_12464.md` | Working | 1 | archive-after-migration |
 | `reports/acceptance/P04-REM-R10-acceptance-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/acceptance/P04-REM-R10-acceptance-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/acceptance/receipt-12069.md` | Working | 0 | archive-after-migration |
