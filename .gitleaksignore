@@ -20,3 +20,5 @@ be9ee1d1a9d9a0a9e483c051c5864fa15d5d435e:.ai/mcp/mcp.json:github-pat:85
 # Scope to these two historical findings; new commits and other headers remain scanned.
 356b9750421edc0676e06830d2ffbb32bf942a53:reports/evidence/12461/semanticscholar_headers.txt:generic-api-key:5
 356b9750421edc0676e06830d2ffbb32bf942a53:reports/evidence/12461/uniprot_headers.txt:generic-api-key:8
+ea8e7cddd44bf0dee7fd1f1d5c9d03cf01ab0c5f:reports/evidence/12461/semanticscholar_headers.txt:generic-api-key:5
+ea8e7cddd44bf0dee7fd1f1d5c9d03cf01ab0c5f:reports/evidence/12461/uniprot_headers.txt:generic-api-key:8
