@@ -1,6 +1,6 @@
 # BioETL Views Diagrams Bundle
 
-- Generated: 2026-09-30T10:14:15+00:00
+- Generated: 2026-10-16T02:51:43+00:00
 - Diagram count: 165
 
 ## Table of Contents
@@ -200,7 +200,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-07-31`
+- Дата: `2026-10-13`
 - Представление: `Full`
 - Узлы (metadata): `20`
 
@@ -685,7 +685,7 @@
 ![06-application-layer-class-diagram-infra](../views/svg/06-application-layer-class-diagram-infra.svg)
 
 ### Описание
-Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 12 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Runner Orchestration, Lifecycle / Support Services, Execution Support. Показательные узлы для быстрого чтения: PipelineRunner, RunnerDependencies, PipelineService, LockRuntimeService, CheckpointRuntimeService, PreflightService.
+Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 12 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Runner Orchestration, Lifecycle / Support Services, Execution Support. Показательные узлы для быстрого чтения: PipelineRunner, PipelineRunnerDependencies, PipelineService, LockRuntimeService, CheckpointRuntimeService, PreflightService.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -702,7 +702,7 @@
 ![06-application-layer-class-diagram-overview](../views/svg/06-application-layer-class-diagram-overview.svg)
 
 ### Описание
-Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 14 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Core, Processing Flow, Lifecycle Services. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, RunnerDependencies, BatchExecutor, PipelineService, BatchProcessingService.
+Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 14 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Core, Processing Flow, Lifecycle Services. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, PipelineRunnerDependencies, BatchExecutor, PipelineService, BatchProcessingService.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -932,7 +932,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-07-31`
+- Дата: `2026-10-13`
 - Представление: `Full`
 - Узлы (metadata): `24`
 
@@ -998,7 +998,7 @@
 ![10-infrastructure-layer-class-diagram-domain](../views/svg/10-infrastructure-layer-class-diagram-domain.svg)
 
 ### Описание
-Диаграмма «10 Infrastructure Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `10-infrastructure-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 20 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: DataSourcePort, Bronze/Silver/GoldStoragePorts, CsvExporter, MetricsPort, RetryPolicy, FilterableDataSourcePort.
+Диаграмма «10 Infrastructure Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `10-infrastructure-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 20 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: DataSourcePort, Bronze/Silver/GoldStoragePorts, CsvExporter, MetricsPort, RetryConfig, FilterableDataSourcePort.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1052,7 +1052,7 @@
 ![10-infrastructure-layer-class-diagram-overview](../views/svg/10-infrastructure-layer-class-diagram-overview.svg)
 
 ### Описание
-Диаграмма «10 Infrastructure Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `10-infrastructure-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 15 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: RetryPolicy, DataSourcePort, Bronze/Silver/GoldStoragePorts, FilterableDataSourcePort, CsvExporter, ChemblAdapter.
+Диаграмма «10 Infrastructure Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `10-infrastructure-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 15 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: RetryConfig, DataSourcePort, Bronze/Silver/GoldStoragePorts, FilterableDataSourcePort, CsvExporter, ChemblAdapter.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1230,7 +1230,7 @@
 ### Метаданные
 - Тип: `stateDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-07-31`
+- Дата: `2026-10-13`
 - Представление: `Full`
 - Узлы (metadata): `4`
 
@@ -1318,7 +1318,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-07-31`
+- Дата: `2026-10-13`
 - Представление: `Full`
 - Узлы (metadata): `26`
 
@@ -1440,7 +1440,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-07-31`
+- Дата: `2026-10-13`
 - Представление: `Full`
 - Узлы (metadata): `31`
 
@@ -1540,7 +1540,7 @@
 ![26-hexagonal-ports-adapters-dataflow](../views/svg/26-hexagonal-ports-adapters-dataflow.svg)
 
 ### Описание
-Диаграмма «26 Hexagonal Ports Adapters» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `26-hexagonal-ports-adapters-full.mermaid`. Схема имеет плотность порядка 12 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DataSourcePort, Bronze/Silver/GoldStoragePorts, ChemblAdapter, PubchemAdapter, UniprotAdapter, PubmedAdapter.
+Диаграмма «26 Hexagonal Ports Adapters» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `26-hexagonal-ports-adapters-full.mermaid`. Схема имеет плотность порядка 12 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DataSourcePort, Bronze/Silver/GoldStoragePorts, ChemblAdapter, PubChemAdapter, UniprotAdapter, PubmedAdapter.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1579,7 +1579,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-07-31`
+- Дата: `2026-10-13`
 - Представление: `Full`
 - Узлы (metadata): `35`
 
@@ -1611,7 +1611,7 @@
 ![26-hexagonal-ports-adapters-overview](../views/svg/26-hexagonal-ports-adapters-overview.svg)
 
 ### Описание
-Диаграмма «26 Hexagonal Ports Adapters» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `26-hexagonal-ports-adapters-full.mermaid`. Схема имеет плотность порядка 15 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DataSourcePort, Bronze/Silver/GoldStoragePorts, DeltaReaderPort, LockPort, ChemblAdapter, PubchemAdapter.
+Диаграмма «26 Hexagonal Ports Adapters» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `26-hexagonal-ports-adapters-full.mermaid`. Схема имеет плотность порядка 15 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DataSourcePort, Bronze/Silver/GoldStoragePorts, DeltaReaderPort, LockPort, ChemblAdapter, PubChemAdapter.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1843,7 +1843,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-07-31`
+- Дата: `2026-10-13`
 - Представление: `Full`
 - Узлы (metadata): `35`
 
@@ -2276,7 +2276,7 @@
 ![35-bootstrap-sequence-full](../views/svg/35-bootstrap-sequence-full.svg)
 
 ### Описание
-Диаграмма «Composition Layer Bootstrap Sequence» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Root), composition/bootstrap/runtime/. Схема имеет плотность порядка 28 узлов и 27 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Step 1: Logger, Step 2: Configuration, Step 3: Observability Bundle, Step 4: Storage, Step 5: HTTP Client, Step 6: Data Source. Показательные узлы для быстрого чтения: BootstrapLogger.configure(), StructlogLogger (JSON, ISO timestamps, run_id binding), ConfigLoader.load(pipeline_name), PipelineYamlConfig (base defaults merged with entity.yaml), DQ + Filter config loaders, ObservabilityBundle.
+Диаграмма «Composition Layer Bootstrap Sequence» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Root), composition/bootstrap/runtime/. Схема имеет плотность порядка 28 узлов и 27 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Step 1: Logger, Step 2: Configuration, Step 3: Observability Bundle, Step 4: Storage, Step 5: HTTP Client, Step 6: Data Source. Показательные узлы для быстрого чтения: BootstrapLogger.configure(), StructlogLogger (JSON, ISO timestamps, run_id binding), BaseConfigLoader.load(pipeline_name), PipelineYamlConfig (base defaults merged with entity.yaml), DQ + Filter config loaders, ObservabilityBundle.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -2313,7 +2313,7 @@
 ![35-bootstrap-sequence-overview](../views/svg/35-bootstrap-sequence-overview.svg)
 
 ### Описание
-Диаграмма «35 Bootstrap Sequence» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `35-bootstrap-sequence-full.mermaid`. Схема имеет плотность порядка 11 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: ConfigLoader, StorageFactory, HttpClientFactory, DataSourceFactory, ProviderRegistry, Coordination ports.
+Диаграмма «35 Bootstrap Sequence» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `35-bootstrap-sequence-full.mermaid`. Схема имеет плотность порядка 11 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: BaseConfigLoader, StorageFactory, HttpClientFactory, DataSourceFactory, ProviderRegistry, Coordination ports.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -2451,12 +2451,12 @@
 ![39-medallion-invariants-full](../views/svg/39-medallion-invariants-full.svg)
 
 ### Описание
-Диаграмма «Medallion Architecture Invariants (ARCH-007)» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.1 (Medallion), ARCH-007 clear policy. Схема имеет плотность порядка 23 узлов и 18 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: RunType Enum (domain/types.py), MedallionLifecycleService\n(application/services/medallion_lifecycle.py), INCREMENTAL Path, BACKFILL Path, REBUILD Path, Enforcement. Показательные узлы для быстрого чтения: RunType.INCREMENTAL 'Fetch new data since last run', RunType.BACKFILL 'Re-fetch a date range', RunType.REBUILD 'Full clean rebuild', ❌ DO NOT clear Silver, ❌ DO NOT clear Gold, Silver: merge/upsert (content_hash dedup).
+Диаграмма «Medallion Architecture Invariants (ARCH-007)» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.1 (Medallion), ARCH-007 clear policy. Схема имеет плотность порядка 23 узлов и 18 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: RunType Enum (domain/medallion.py), MedallionLifecycleService\n(application/services/medallion/medallion_lifecycle.py), INCREMENTAL Path, BACKFILL Path, REBUILD Path, Enforcement. Показательные узлы для быстрого чтения: RunType.INCREMENTAL 'Fetch new data since last run', RunType.BACKFILL 'Re-fetch a date range', RunType.REBUILD 'Full clean rebuild', ❌ DO NOT clear Silver, ❌ DO NOT clear Gold, Silver: merge/upsert (content_hash dedup).
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-07-31`
+- Дата: `2026-10-13`
 - Представление: `Full`
 - Узлы (metadata): `23`
 
@@ -2544,7 +2544,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-07-31`
+- Дата: `2026-10-13`
 - Представление: `Full`
 - Узлы (metadata): `22`
 
@@ -2632,7 +2632,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-07-31`
+- Дата: `2026-10-13`
 - Представление: `Full`
 - Узлы (metadata): `19`
 
@@ -2823,7 +2823,7 @@
 ![48-composite-phase-lifecycle-infra](../views/svg/48-composite-phase-lifecycle-infra.svg)
 
 ### Описание
-Диаграмма «48 Composite Phase Lifecycle» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `48-composite-phase-lifecycle-full.mermaid`. Схема имеет плотность порядка 9 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: CompositePipelineState, CompositePipelineRunner, PhaseDispatcher, PipelineRunner (seed), DependencyCoordinator, EnrichmentCoordinator.
+Диаграмма «48 Composite Phase Lifecycle» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `48-composite-phase-lifecycle-full.mermaid`. Схема имеет плотность порядка 9 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: CompositePipelineState, CompositePipelineRunner, CompositeRunnerStageDispatchMixin, PipelineRunner (seed), DependencyCoordinator, EnrichmentCoordinator.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -2896,7 +2896,7 @@
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-07-31`
+- Дата: `2026-10-13`
 - Представление: `Full`
 - Узлы (metadata): `35`
 
