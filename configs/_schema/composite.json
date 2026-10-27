@@ -1,6 +1,7 @@
 {
   "$defs": {
     "AggregationFieldSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for aggregation field specification.",
       "properties": {
         "source": {
@@ -43,6 +44,7 @@
       "type": "object"
     },
     "AggregationSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for 1:M enricher aggregation config.",
       "properties": {
         "group_by": {
@@ -77,6 +79,7 @@
       "type": "object"
     },
     "ColumnGroupSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for column group configuration.",
       "properties": {
         "name": {
@@ -122,6 +125,7 @@
       "type": "object"
     },
     "CompositeConfigSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for complete composite pipeline configuration.\n\nValidates structural/types contract for the 'composite' YAML section and\nconverts to domain CompositeConfig.\n\nBusiness invariants (join-key compatibility, uniqueness, etc.) are owned by\nthe domain layer and enforced via delegated validation.",
       "properties": {
         "name": {
@@ -135,6 +139,30 @@
           "minLength": 1,
           "title": "Version",
           "type": "string"
+        },
+        "normalized_anchor_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NormalizedAnchorPolicySchema"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Declared normalized-anchor policy. Omitted when the composite does not declare one. Not copied into domain CompositeConfig."
+        },
+        "normalized_join_key_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NormalizedJoinKeyPolicySchema"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Declared normalized join-key policy. Omitted when the composite does not declare one. Not copied into domain CompositeConfig."
         },
         "seed": {
           "$ref": "#/$defs/SeedSchema",
@@ -356,6 +384,7 @@
       "type": "object"
     },
     "CrossValidationSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for cross-validation configuration.",
       "properties": {
         "enabled": {
@@ -468,6 +497,7 @@
       "type": "object"
     },
     "DependencySchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for dependency pipeline configuration.",
       "properties": {
         "pipeline": {
@@ -575,6 +605,7 @@
       "type": "object"
     },
     "EnricherFieldPairingSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for enricher field pairing.",
       "properties": {
         "enricher_pipeline": {
@@ -601,6 +632,7 @@
       "type": "object"
     },
     "EnricherSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for enricher pipeline configuration.",
       "properties": {
         "pipeline": {
@@ -713,6 +745,7 @@
       "type": "object"
     },
     "ExecutionSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for execution options.",
       "properties": {
         "max_concurrency": {
@@ -737,6 +770,7 @@
       "type": "object"
     },
     "FieldComparisonSpecSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for a single field comparison specification.",
       "properties": {
         "field": {
@@ -927,6 +961,7 @@
       "type": "object"
     },
     "LineageSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for lineage tracking configuration.",
       "properties": {
         "track_field_sources": {
@@ -971,6 +1006,7 @@
       "type": "object"
     },
     "MergeOutputSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for merge output paths.",
       "properties": {
         "silver": {
@@ -1131,7 +1167,131 @@
       "title": "MergeSortBySchema",
       "type": "object"
     },
+    "NormalizedAnchorPolicySchema": {
+      "additionalProperties": false,
+      "description": "Declared normalized-anchor policy. Not copied into domain CompositeConfig.",
+      "properties": {
+        "pubchem_compound": {
+          "$ref": "#/$defs/PubchemCompoundAnchorSchema"
+        },
+        "uniprot_idmapping": {
+          "$ref": "#/$defs/UniprotIdMappingAnchorSchema"
+        }
+      },
+      "required": [
+        "pubchem_compound",
+        "uniprot_idmapping"
+      ],
+      "title": "NormalizedAnchorPolicySchema",
+      "type": "object"
+    },
+    "NormalizedJoinKeyPolicySchema": {
+      "additionalProperties": false,
+      "description": "Declared normalized join-key policy. Not copied into domain CompositeConfig.",
+      "properties": {
+        "publication_identity": {
+          "$ref": "#/$defs/PublicationIdentityJoinPolicySchema"
+        }
+      },
+      "required": [
+        "publication_identity"
+      ],
+      "title": "NormalizedJoinKeyPolicySchema",
+      "type": "object"
+    },
+    "PubchemCompoundAnchorSchema": {
+      "additionalProperties": false,
+      "description": "PubChem compound entry inside normalized_anchor_policy.",
+      "properties": {
+        "join_boundary": {
+          "$ref": "#/$defs/PubchemCompoundJoinBoundarySchema"
+        }
+      },
+      "required": [
+        "join_boundary"
+      ],
+      "title": "PubchemCompoundAnchorSchema",
+      "type": "object"
+    },
+    "PubchemCompoundJoinBoundarySchema": {
+      "additionalProperties": false,
+      "description": "PubChem anchors retained for validation but not used as join keys.",
+      "properties": {
+        "active_join_keys": {
+          "description": "Anchors that may participate in joins",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Active Join Keys",
+          "type": "array"
+        },
+        "retained_validation_anchors": {
+          "description": "Anchors kept for validation without becoming join keys",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Retained Validation Anchors",
+          "type": "array"
+        },
+        "activation_condition": {
+          "description": "When the PubChem join boundary becomes active",
+          "minLength": 1,
+          "title": "Activation Condition",
+          "type": "string"
+        },
+        "rationale": {
+          "description": "Why this boundary exists",
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "active_join_keys",
+        "retained_validation_anchors",
+        "activation_condition",
+        "rationale"
+      ],
+      "title": "PubchemCompoundJoinBoundarySchema",
+      "type": "object"
+    },
+    "PublicationIdentityJoinPolicySchema": {
+      "additionalProperties": false,
+      "description": "Publication identifier join order. Empty lists mean the policy does not apply.",
+      "properties": {
+        "primary_join_keys": {
+          "description": "Canonical identifier join keys",
+          "items": {
+            "type": "string"
+          },
+          "title": "Primary Join Keys",
+          "type": "array"
+        },
+        "fallback_join_keys": {
+          "description": "Fallback join keys used only after identifiers",
+          "items": {
+            "type": "string"
+          },
+          "title": "Fallback Join Keys",
+          "type": "array"
+        },
+        "rationale": {
+          "description": "Why this join order exists",
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rationale"
+      ],
+      "title": "PublicationIdentityJoinPolicySchema",
+      "type": "object"
+    },
     "RetrySchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for retry configuration.",
       "properties": {
         "max_attempts": {
@@ -1153,6 +1313,7 @@
       "type": "object"
     },
     "SeedSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for seed pipeline configuration.",
       "properties": {
         "pipeline": {
@@ -1200,6 +1361,7 @@
       "type": "object"
     },
     "TargetProteinClassificationProjectionSchema": {
+      "additionalProperties": false,
       "description": "Typed projection for deterministic target protein classification aliases.",
       "properties": {
         "source_prefix": {
@@ -1225,8 +1387,68 @@
       },
       "title": "TargetProteinClassificationProjectionSchema",
       "type": "object"
+    },
+    "UniprotIdMappingAnchorSchema": {
+      "additionalProperties": false,
+      "description": "UniProt idmapping entry inside normalized_anchor_policy.",
+      "properties": {
+        "join_boundary": {
+          "$ref": "#/$defs/UniprotIdMappingJoinBoundarySchema"
+        }
+      },
+      "required": [
+        "join_boundary"
+      ],
+      "title": "UniprotIdMappingAnchorSchema",
+      "type": "object"
+    },
+    "UniprotIdMappingJoinBoundarySchema": {
+      "additionalProperties": false,
+      "description": "UniProt idmapping chain from a source anchor to a downstream pipeline.",
+      "properties": {
+        "source_anchor": {
+          "description": "Upstream join anchor",
+          "minLength": 1,
+          "title": "Source Anchor",
+          "type": "string"
+        },
+        "normalized_output_anchor": {
+          "description": "Normalized anchor emitted for the next stage",
+          "minLength": 1,
+          "title": "Normalized Output Anchor",
+          "type": "string"
+        },
+        "required_status": {
+          "description": "Mapping status required before the chain continues",
+          "minLength": 1,
+          "title": "Required Status",
+          "type": "string"
+        },
+        "downstream_pipeline": {
+          "description": "Pipeline that consumes the normalized anchor",
+          "minLength": 1,
+          "title": "Downstream Pipeline",
+          "type": "string"
+        },
+        "rationale": {
+          "description": "Why this boundary exists",
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_anchor",
+        "normalized_output_anchor",
+        "required_status",
+        "downstream_pipeline",
+        "rationale"
+      ],
+      "title": "UniprotIdMappingJoinBoundarySchema",
+      "type": "object"
     }
   },
+  "additionalProperties": false,
   "description": "Pydantic schema for complete composite configuration file.\n\nValidates the entire YAML file structure including schema_version\nand maintenance metadata.",
   "properties": {
     "schema_version": {

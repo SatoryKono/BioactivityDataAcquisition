@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-27T01:51:47.976341+00:00",
+  "generated_at": "2026-10-27T05:30:12.538610+00:00",
   "summary": {
     "total_scripts": 698,
     "status_counts": {
@@ -11,7 +11,7 @@
       "agents": 11,
       "build": 18,
       "ci": 76,
-      "docs": 289,
+      "docs": 290,
       "other": 16,
       "scripts": 586,
       "skills": 13,
@@ -2896,7 +2896,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 288,
+          "line": 309,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3678,7 +3678,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 287,
+          "line": 308,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3733,7 +3733,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 286,
+          "line": 307,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -10084,7 +10084,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/type-checking.yml",
@@ -10094,7 +10094,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 294,
+          "line": 315,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/check_mypy_diagnostic_ratchet.py\": ("
         },
@@ -10106,13 +10106,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
-          "line": 52,
-          "source_group": "tests",
-          "text": "/ \"check_mypy_diagnostic_ratchet.py\""
-        },
-        {
-          "path": "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
-          "line": 83,
+          "line": 50,
           "source_group": "tests",
           "text": "/ \"check_mypy_diagnostic_ratchet.py\""
         }
@@ -10492,7 +10486,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 822,
+          "line": 906,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         }
@@ -10517,7 +10511,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 224,
+          "line": 241,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10560,7 +10554,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 297,
+          "line": 318,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -12897,7 +12891,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 181,
+          "line": 192,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -12921,13 +12915,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 323,
+          "line": 381,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 336,
+          "line": 394,
           "source_group": "tests",
           "text": "if path == \"scripts/engineering/dev/zed_mypy.py\":"
         }
@@ -17217,8 +17211,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
+        {
+          "path": "docs/02-architecture/01-domain-layer.md",
+          "line": 644,
+          "source_group": "docs",
+          "text": "проверка — `scripts/engineering/qa/report_domain_io_taint_inventory.py`:"
+        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 42,
@@ -17235,7 +17235,7 @@
           "path": "tests/architecture/test_domain_io_taint_inventory.py",
           "line": 20,
           "source_group": "tests",
-          "text": "from scripts.engineering.qa.report_domain_io_taint_inventory import build_payload"
+          "text": "from scripts.engineering.qa.report_domain_io_taint_inventory import ("
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
@@ -20197,13 +20197,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 474,
+          "line": 558,
           "source_group": "tests",
           "text": "\"src/bioetl/infrastructure/quality/scoring.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 475,
+          "line": 559,
           "source_group": "tests",
           "text": "\"scripts/engineering/quality/scoring.py\","
         },
@@ -20580,7 +20580,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 343,
+          "line": 371,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23580,7 +23580,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 408,
+          "line": 439,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },

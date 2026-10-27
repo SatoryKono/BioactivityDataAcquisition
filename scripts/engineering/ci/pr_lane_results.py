@@ -51,6 +51,7 @@ GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
+DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
 INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST = (
     "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
 )
@@ -119,6 +120,16 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/audit-runs/20261025-p17-002/P17-002-reusable-workflows-audit.md": (
         "tests/unit/scripts/ci/test_check_reusable_workflow_pins.py",
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
+    **dict.fromkeys(
+        (
+            "reports/audit-runs/20261026-p17-003-external-callers.md",
+            "reports/audit-runs/20261026-p17-003-external-callers/evidence.json",
+        ),
+        (
+            "tests/unit/scripts/ci/test_check_reusable_workflow_pins.py",
+            GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+        ),
     ),
     "docs/05-operations/runbooks/incident-response.md": (
         "tests/integration/test_prometheus_rules_config.py",
@@ -190,16 +201,22 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (GITHUB_ACTIONS_RUNTIME_POLICY_TEST, MYPY_TARGET_CONTRACT_TEST),
     ),
-    "reports/app-001-audit.md": (
-        "tests/unit/application/core/test_batch_execution_lifecycle.py",
-        "tests/unit/application/core/test_derived_scan_budget.py",
-        "tests/unit/application/core/test_pipeline_services.py",
-        "tests/unit/application/core/test_health_aggregator.py",
-        "tests/unit/application/core/test_heartbeat.py",
-        "tests/unit/application/core/test_lock_release_callback_contract.py",
-        "tests/unit/application/core/test_runner.py",
-        "tests/unit/application/services/test_pipeline_runner_service.py",
-        "tests/unit/application/services/run_reports/test_composite_report.py",
+    **dict.fromkeys(
+        (
+            "reports/app-001-audit.md",
+            "reports/audit/AUDIT-20261022-APP-001-Cancellation.md",
+        ),
+        (
+            "tests/unit/application/core/test_batch_execution_lifecycle.py",
+            "tests/unit/application/core/test_derived_scan_budget.py",
+            "tests/unit/application/core/test_pipeline_services.py",
+            "tests/unit/application/core/test_health_aggregator.py",
+            "tests/unit/application/core/test_heartbeat.py",
+            "tests/unit/application/core/test_lock_release_callback_contract.py",
+            "tests/unit/application/core/test_runner.py",
+            "tests/unit/application/services/test_pipeline_runner_service.py",
+            "tests/unit/application/services/run_reports/test_composite_report.py",
+        ),
     ),
     "reports/engineering/SEC-003_audit_report.md": (
         "tests/unit/domain/services/test_composite_metadata_helpers.py",
@@ -243,6 +260,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/00-project/governance/08-debt-ownership-playbook.md": (
         "tests/architecture/test_tech_debt_roadmap_7461_7465.py",
     ),
+    "docs/02-architecture/01-domain-layer.md": (
+        DOCUMENTATION_SYNC_TEST,
+        "tests/architecture/test_domain_io_taint_inventory.py",
+    ),
     "docs/02-architecture/current-state-inventory.md": (
         "tests/architecture/test_arch_s4_s9_gates.py",
         "tests/unit/scripts/qa/test_topology_source_binding.py",
@@ -259,7 +280,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "Dockerfile.bioetl": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "docs/04-reference/cli.md": (
         "tests/architecture/test_cli_doc_parity.py",
-        "tests/architecture/test_documentation_sync.py",
+        DOCUMENTATION_SYNC_TEST,
     ),
     ".github/workflows/docker.yml": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "reports/quality/architecture-debt-remote-main-baseline.md": (
@@ -304,6 +325,15 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/integration_vcr_policy.yaml": (
         "tests/architecture/test_integration_vcr_policy.py",
     ),
+    "configs/_schema/composite.json": (
+        "tests/architecture/test_config_schema_migration_status.py",
+        "tests/integration/config/test_validate_pipeline_configs.py",
+        "tests/unit/repo_backed/infrastructure/config/test_composite_sort_by_closure.py",
+    ),
+    "configs/_schema/pipeline.json": (
+        "tests/architecture/test_config_schema_migration_status.py",
+        "tests/integration/config/test_validate_pipeline_configs.py",
+    ),
     "configs/quality/test_skip_inventory.yaml": TEST_SKIP_INVENTORY_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
     "configs/quality/scripts_inventory_manifest.json": (
@@ -318,9 +348,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/04-reference/api/infrastructure.md": (
         "tests/architecture/test_api_reference_public_facades.py",
     ),
-    "docs/02-architecture/finances-github-billing.md": (
-        "tests/architecture/test_documentation_sync.py",
-    ),
+    "docs/02-architecture/finances-github-billing.md": (DOCUMENTATION_SYNC_TEST,),
     "docs/05-engineering/test-telemetry-baseline.md": TELEMETRY_BASELINE_TESTS,
     ".gitignore": (
         "tests/architecture/test_gitignore_secret_and_agents_policy.py",
@@ -372,6 +400,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "configs/composites/": (
+        "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
+    ),
     "reports/evidence/12461/": (
         "tests/architecture/test_provider_contract_interoperability_governance.py",
         "tests/contract/test_provider_contract_snapshot_registry.py",

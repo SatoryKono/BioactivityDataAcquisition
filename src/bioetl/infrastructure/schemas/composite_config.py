@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import Self
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.types import JsonDict
@@ -42,6 +42,93 @@ from bioetl.infrastructure.schemas.composite_validation import (
 )
 
 
+class PubchemCompoundJoinBoundarySchema(BaseModel):
+    """PubChem anchors retained for validation but not used as join keys."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    active_join_keys: list[str] = Field(
+        ..., min_length=1, description="Anchors that may participate in joins"
+    )
+    retained_validation_anchors: list[str] = Field(
+        ...,
+        min_length=1,
+        description="Anchors kept for validation without becoming join keys",
+    )
+    activation_condition: str = Field(
+        ..., min_length=1, description="When the PubChem join boundary becomes active"
+    )
+    rationale: str = Field(..., min_length=1, description="Why this boundary exists")
+
+
+class PubchemCompoundAnchorSchema(BaseModel):
+    """PubChem compound entry inside normalized_anchor_policy."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    join_boundary: PubchemCompoundJoinBoundarySchema
+
+
+class UniprotIdMappingJoinBoundarySchema(BaseModel):
+    """UniProt idmapping chain from a source anchor to a downstream pipeline."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    source_anchor: str = Field(..., min_length=1, description="Upstream join anchor")
+    normalized_output_anchor: str = Field(
+        ..., min_length=1, description="Normalized anchor emitted for the next stage"
+    )
+    required_status: str = Field(
+        ...,
+        min_length=1,
+        description="Mapping status required before the chain continues",
+    )
+    downstream_pipeline: str = Field(
+        ..., min_length=1, description="Pipeline that consumes the normalized anchor"
+    )
+    rationale: str = Field(..., min_length=1, description="Why this boundary exists")
+
+
+class UniprotIdMappingAnchorSchema(BaseModel):
+    """UniProt idmapping entry inside normalized_anchor_policy."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    join_boundary: UniprotIdMappingJoinBoundarySchema
+
+
+class NormalizedAnchorPolicySchema(BaseModel):
+    """Declared normalized-anchor policy. Not copied into domain CompositeConfig."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    pubchem_compound: PubchemCompoundAnchorSchema
+    uniprot_idmapping: UniprotIdMappingAnchorSchema
+
+
+class PublicationIdentityJoinPolicySchema(BaseModel):
+    """Publication identifier join order. Empty lists mean the policy does not apply."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    primary_join_keys: list[str] = Field(
+        default_factory=list, description="Canonical identifier join keys"
+    )
+    fallback_join_keys: list[str] = Field(
+        default_factory=list,
+        description="Fallback join keys used only after identifiers",
+    )
+    rationale: str = Field(..., min_length=1, description="Why this join order exists")
+
+
+class NormalizedJoinKeyPolicySchema(BaseModel):
+    """Declared normalized join-key policy. Not copied into domain CompositeConfig."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    publication_identity: PublicationIdentityJoinPolicySchema
+
+
 class CompositeConfigSchema(BaseModel):
     """Pydantic schema for complete composite pipeline configuration.
 
@@ -52,9 +139,25 @@ class CompositeConfigSchema(BaseModel):
     the domain layer and enforced via delegated validation.
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     name: str = Field(..., min_length=1, description="Composite pipeline name")
     version: str = Field(
         ..., min_length=1, description="Configuration version (semver)"
+    )
+    normalized_anchor_policy: NormalizedAnchorPolicySchema | None = Field(
+        default=None,
+        description=(
+            "Declared normalized-anchor policy. Omitted when the composite does "
+            "not declare one. Not copied into domain CompositeConfig."
+        ),
+    )
+    normalized_join_key_policy: NormalizedJoinKeyPolicySchema | None = Field(
+        default=None,
+        description=(
+            "Declared normalized join-key policy. Omitted when the composite does "
+            "not declare one. Not copied into domain CompositeConfig."
+        ),
     )
     seed: SeedSchema = Field(..., description="Seed pipeline configuration")
     dependencies: list[DependencySchema] = Field(
@@ -120,6 +223,8 @@ class CompositeConfigFileSchema(BaseModel):
     Validates the entire YAML file structure including schema_version
     and maintenance metadata.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     schema_version: str = Field(
         default="2.0.0", description="Schema version for file format"
@@ -197,7 +302,14 @@ __all__ = [
     "MergeOutputSchema",
     "MergeSchema",
     "MergeSortBySchema",
+    "NormalizedAnchorPolicySchema",
+    "NormalizedJoinKeyPolicySchema",
+    "PubchemCompoundAnchorSchema",
+    "PubchemCompoundJoinBoundarySchema",
+    "PublicationIdentityJoinPolicySchema",
     "RetrySchema",
     "SeedSchema",
+    "UniprotIdMappingAnchorSchema",
+    "UniprotIdMappingJoinBoundarySchema",
     "validate_composite_config_payload",
 ]
