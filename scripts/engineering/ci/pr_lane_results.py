@@ -13,6 +13,8 @@ import json
 import os
 import subprocess
 import sys
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
@@ -1140,6 +1142,218 @@ def _shadow_command(args: argparse.Namespace) -> int:
     return 0
 
 
+# The fixed architecture lane skips these markers. See pr-required.yml.
+_FIXED_LANE_MARKER = "not slow and not benchmark and not memory"
+
+
+def _selector_path(target: str) -> str:
+    """Return the filesystem path of a pytest path or nodeid."""
+    normalized = target.strip().replace("\\", "/").split("::", 1)[0]
+    return normalized.rstrip("/")
+
+
+def _is_parent_of(path: str, root: str) -> bool:
+    """Return whether ``path`` is a directory that contains ``root``."""
+    return bool(path) and root.startswith(f"{path}/")
+
+
+def _is_under(path: str, root: str) -> bool:
+    """Return whether ``path`` is ``root`` or a path inside it."""
+    return path == root or path.startswith(f"{root}/")
+
+
+@dataclass(frozen=True)
+class AffectedSubtraction:
+    """Targets to run after the fixed lane has covered its nodeids."""
+
+    execution_targets: tuple[str, ...]
+    ignore_paths: tuple[str, ...]
+    intersection: tuple[str, ...]
+
+
+def _is_pytest_nodeid(line: str) -> bool:
+    """Return True for one quiet-collection nodeid without regex backtracking."""
+    if not line or any(character.isspace() for character in line):
+        return False
+    head, separator, tail = line.partition("::")
+    return bool(head and separator and tail)
+
+
+def _collect_nodeids(
+    repo_root: Path,
+    targets: Sequence[str],
+    *,
+    marker: str | None = None,
+) -> set[str]:
+    """Collect pytest nodeids. A broken selector fails closed.
+
+    ``marker`` matches the fixed lane so tests it skips stay in the remainder.
+    """
+    if not targets:
+        return set()
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "--collect-only",
+        "-q",
+        "-p",
+        "no:benchmark",
+        "-p",
+        "no:xdist",
+        "-p",
+        "no:cov",
+        "--override-ini",
+        "addopts=",
+        "--import-mode=importlib",
+        "--disable-warnings",
+    ]
+    if marker:
+        command.extend(["-m", marker])
+    command.extend(targets)
+    completed = subprocess.run(
+        command,
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if completed.returncode not in (0, 5):
+        detail = completed.stderr.strip() or completed.stdout.strip()
+        message = (
+            "pytest collection failed for "
+            f"{', '.join(targets)} ({completed.returncode}): {detail}"
+        )
+        raise ValueError(message)
+    return {
+        line.strip()
+        for line in completed.stdout.splitlines()
+        if _is_pytest_nodeid(line.strip())
+    }
+
+
+def _partition_affected(
+    affected_targets: Sequence[str],
+    fixed_roots: Sequence[str],
+) -> tuple[list[str], list[str], list[str]]:
+    """Split affected selectors into kept paths, overlaps, and ignore roots."""
+    kept: list[str] = []
+    overlapping: list[str] = []
+    for target in affected_targets:
+        path = _selector_path(target)
+        if any(_is_parent_of(path, root) for root in fixed_roots):
+            kept.append(target)
+            continue
+        if any(_is_under(path, root) for root in fixed_roots):
+            overlapping.append(target)
+            continue
+        kept.append(target)
+    ignore = [
+        root
+        for root in fixed_roots
+        if any(
+            _is_parent_of(_selector_path(target), root) for target in affected_targets
+        )
+    ]
+    return kept, overlapping, ignore
+
+
+def plan_affected_subtraction(
+    affected_targets: Sequence[str],
+    fixed_targets: Sequence[str],
+    *,
+    collect_nodeids: Callable[..., set[str]],
+) -> AffectedSubtraction:
+    """Remove fixed-lane coverage without expanding disjoint targets.
+
+    A selector outside the fixed roots stays a path. A selector inside a fixed
+    root contributes only the nodeids that lane does not run (``slow``,
+    ``benchmark``, and ``memory``). A parent such as ``tests`` stays one path,
+    ignores the fixed root, and adds those same skipped nodeids explicitly.
+    Collection failure is fail-closed and must not fall back to the broad path.
+    """
+    if not affected_targets:
+        raise ValueError("tests gate has no affected pytest target")
+    fixed_roots = [path for target in fixed_targets if (path := _selector_path(target))]
+    if not fixed_roots:
+        raise ValueError("fixed lane has no selector")
+    kept, overlapping, ignore = _partition_affected(affected_targets, fixed_roots)
+    covered: set[str] = set()
+    remainder: list[str] = []
+
+    def _split(targets: Sequence[str]) -> None:
+        executed = set(collect_nodeids(targets, marker=_FIXED_LANE_MARKER))
+        present = set(collect_nodeids(targets))
+        covered.update(executed)
+        remainder.extend(sorted(present - executed))
+
+    if ignore:
+        _split(ignore)
+    if overlapping:
+        _split(overlapping)
+    execution = list(kept)
+    execution.extend(nodeid for nodeid in remainder if nodeid not in execution)
+    return AffectedSubtraction(
+        execution_targets=tuple(execution),
+        ignore_paths=tuple(dict.fromkeys(ignore)),
+        intersection=tuple(sorted(covered)),
+    )
+
+
+def _read_target_lines(path: Path) -> list[str]:
+    """Return non-empty selectors from one target file."""
+    return [
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+
+def _write_lines(path: Path, lines: Sequence[str]) -> None:
+    """Atomically replace one selector file."""
+    payload = ("\n".join(lines) + "\n") if lines else ""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(f"{path.suffix}.tmp")
+    temporary.write_text(payload, encoding="utf-8")
+    os.replace(temporary, path)
+
+
+def _report_intersection(
+    intersection: Sequence[str], ignore_paths: Sequence[str]
+) -> None:
+    """Print covered nodeids. An empty intersection is explicit."""
+    print("## Affected nodeids already covered by the fixed lane", file=sys.stderr)
+    if intersection:
+        for nodeid in intersection:
+            print(nodeid, file=sys.stderr)
+    else:
+        print("None", file=sys.stderr)
+    if ignore_paths:
+        print("fixed-lane ignores: " + ", ".join(ignore_paths), file=sys.stderr)
+
+
+def _subtract_affected_command(args: argparse.Namespace) -> int:
+    """Write the affected targets that the fixed lane does not already run."""
+    try:
+        affected = _read_target_lines(args.affected_file)
+
+        def collect(targets: Sequence[str], *, marker: str | None = None) -> set[str]:
+            return _collect_nodeids(args.repo_root, targets, marker=marker)
+
+        plan = plan_affected_subtraction(
+            affected,
+            list(args.fixed_targets),
+            collect_nodeids=collect,
+        )
+    except (OSError, ValueError) as error:
+        print(f"tests gate selection failed: {error}", file=sys.stderr)
+        return 1
+    _report_intersection(plan.intersection, plan.ignore_paths)
+    _write_lines(args.output, plan.execution_targets)
+    _write_lines(args.ignore_file, plan.ignore_paths)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the lane-results command parser."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -1180,6 +1394,14 @@ def build_parser() -> argparse.ArgumentParser:
     shadow.add_argument("--changed-file", action="append", default=[])
     shadow.add_argument("--output", type=Path)
     shadow.set_defaults(handler=_shadow_command)
+
+    subtract = subparsers.add_parser("subtract-affected")
+    subtract.add_argument("--repo-root", type=Path, default=Path("."))
+    subtract.add_argument("--fixed-targets", nargs="+", required=True)
+    subtract.add_argument("--affected-file", type=Path, required=True)
+    subtract.add_argument("--output", type=Path, required=True)
+    subtract.add_argument("--ignore-file", type=Path, required=True)
+    subtract.set_defaults(handler=_subtract_affected_command)
     return parser
 
 
