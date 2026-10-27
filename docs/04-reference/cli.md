@@ -526,7 +526,7 @@ bioetl replay-composite --envelope <path/to/parent.json> --sha256 <parent-envelo
 
 | Опция | Описание |
 | --- | --- |
-| `--envelope` | Путь к сохраненному composite input (required) |
+| `--envelope` | Путь к файлу `parent.json` (required) |
 | `--sha256` | Дайджест из parent run report для верификации (required) |
 | `--output` | Новая изолированная директория для вывода (required) |
 
@@ -552,10 +552,12 @@ bioetl replay-assay --envelope <path/to/parent.json> --sha256 <parent-envelope-d
 
 | Опция | Описание |
 | --- | --- |
-| `--envelope` | Путь к сохраненному assay input (required) |
+| `--envelope` | Путь к файлу `parent.json` (required) |
 | `--sha256` | Дайджест из parent run report для верификации (required) |
 | `--output` | Новая изолированная директория для вывода (required) |
 
+Все три опции обязательны. Envelope должен называться `parent.json`; используйте
+SHA-256 из отчёта родительского прогона.
 
 ### `run-manifest` — Inspect control-plane manifests and ledgers
 
