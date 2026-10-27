@@ -375,35 +375,3 @@ def test_historical_docs_report_is_retained_without_repeated_migration() -> None
         route=None,
         lifecycle="docs_reports_curated_or_historical_report",
     ) == ("Archived", "historical", "keep")
-
-
-def test_run_git_ls_files_keeps_non_ascii_paths_under_c_locale(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """CI LANG=C + default quotepath must not drop Cyrillic tracked docs."""
-    captured: dict[str, object] = {}
-
-    def fake_run(cmd: list[str], **kwargs: object) -> object:
-        captured["cmd"] = list(cmd)
-        captured["kwargs"] = kwargs
-        cyrillic = "docs/99-archive/plans/наблюдаемость.md".encode()
-        return type(
-            "Completed",
-            (),
-            {"stdout": cyrillic + b"\0docs/00-project/RULES.md\0"},
-        )()
-
-    monkeypatch.setattr(inventory.subprocess, "run", fake_run)
-
-    paths = inventory._run_git_ls_files()
-
-    assert captured["cmd"] == [
-        "git",
-        "-c",
-        "core.quotepath=false",
-        "ls-files",
-        "-z",
-    ]
-    assert captured["kwargs"].get("text") is not True
-    assert "docs/99-archive/plans/наблюдаемость.md" in paths
-    assert "docs/00-project/RULES.md" in paths

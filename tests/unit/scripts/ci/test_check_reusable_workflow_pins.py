@@ -247,14 +247,10 @@ DOCKER_LANE_PIN = (
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml"
     "@843eb3f1c9410df7eccfebf3c8a810cc897ed0e9"
 )
-DOCS_LANE_PIN = (
-    "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml"
-    "@f377cff40abf52d63220346b9ab64814f3081ca6"
-)
 
 
 def test_current_coordinator_job_level_calls_match_registry() -> None:
-    """Coordinator reusable calls stay pinned to registry SHAs (docker + docs)."""
+    """The coordinator's only reusable call is the pinned docker-lane workflow."""
     document = yaml.safe_load(COORDINATOR.read_text(encoding="utf-8"))
     jobs = document["jobs"]
     assert isinstance(jobs, dict)
@@ -263,10 +259,7 @@ def test_current_coordinator_job_level_calls_match_registry() -> None:
         for name, job in jobs.items()
         if isinstance(job, dict) and "uses" in job
     }
-    assert reusable == {
-        "docs-lane": DOCS_LANE_PIN,
-        "docker-lane": DOCKER_LANE_PIN,
-    }
+    assert reusable == {"docker-lane": DOCKER_LANE_PIN}
     for name, job in jobs.items():
         assert isinstance(job, dict)
         if name in reusable:

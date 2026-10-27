@@ -350,13 +350,11 @@ class PytestAbortDiagnosticAdapter:
             except subprocess.TimeoutExpired:
                 manifest.cleanup_error = "launcher_reap_timeout"
         manifest.exit_code = proc.returncode
+        manifest.status, manifest.signal = _classify(
+            proc.returncode, timed_out=timed_out
+        )
         manifest.diagnostic_signal_delivery = delivery
         manifest.diagnostic_signal_sent = sent
-        manifest.status, manifest.signal = _classify(
-            proc.returncode,
-            timed_out=timed_out,
-            diagnostic_delivery=delivery,
-        )
         _assess_into(manifest, evidence, before)
         _finalize(manifest, root)
         return manifest
@@ -441,21 +439,8 @@ def _relative(path: Path, root: Path) -> str:
     return resolved.relative_to(root.resolve(strict=False)).as_posix()
 
 
-def _classify(
-    exit_code: int | None,
-    *,
-    timed_out: bool,
-    diagnostic_delivery: str | None = None,
-) -> tuple[str, int | None]:
+def _classify(exit_code: int | None, *, timed_out: bool) -> tuple[str, int | None]:
     if timed_out:
-        # Child already reaped with a signal before our diagnostic killpg —
-        # keep SIGNAL_ABORT so a late self-abort is not mislabeled watchdog.
-        if (
-            diagnostic_delivery == "already_exited"
-            and exit_code is not None
-            and exit_code < 0
-        ):
-            return "SIGNAL_ABORT", -exit_code
         signal_number = -exit_code if exit_code is not None and exit_code < 0 else None
         return "WATCHDOG_TIMEOUT", signal_number
     if exit_code is None:

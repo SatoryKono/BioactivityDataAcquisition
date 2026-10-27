@@ -12,7 +12,7 @@
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
-| Generated routes | 75 |
+| Generated routes | 74 |
 
 ## Tracking State
 
@@ -54,8 +54,8 @@
 | Active | 751 |
 | Archived | 1554 |
 | Canonical | 76 |
-| Generated | 1066 |
-| Working | 555 |
+| Generated | 1064 |
+| Working | 557 |
 
 ## Surface Families
 
@@ -64,15 +64,15 @@
 | active | 751 |
 | archive | 1554 |
 | canonical | 76 |
-| generated | 1066 |
-| working | 555 |
+| generated | 1064 |
+| working | 557 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 273 |
-| generate-automatically | 1066 |
+| archive-after-migration | 275 |
+| generate-automatically | 1064 |
 | keep | 2663 |
 
 ## Cleanup Candidates
@@ -326,7 +326,6 @@
 | compatibility-facade-snapshot-generated-doc | `scripts/engineering/qa/generate_compatibility_facade_snapshot.py` | tracked_curated_generated_doc |
 | config-comparison-matrix-generated-doc | `scripts/schema/analysis/generate_config_matrix.py` | tracked_curated_generated_doc |
 | config-contract-registry-artifact-duplication-quality-report | `scripts/engineering/qa/report_artifact_duplication_audit.py` | tracked_quality_baseline |
-| contract-coverage-matrix-quality-baseline | `scripts/engineering/qa/report_contract_coverage_matrix.py` | tracked_quality_baseline |
 | contract-identity-diagnostics-quality-report | `scripts/engineering/ci/validate_contract_identity.py` | working_output |
 | contract-registry-diagnostics-quality-report | `scripts/engineering/ci/validate_contract_registry.py` | working_output |
 | contract-registry-dq-diagnostics-quality-report | `scripts/engineering/ci/validate_registry_dq_refs.py` | working_output |

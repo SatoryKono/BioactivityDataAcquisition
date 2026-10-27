@@ -997,7 +997,6 @@
       "contract_ref": "chembl.target",
       "contract_test_paths": [
         "tests/architecture/test_low_coverage_targeted_tests_6045.py",
-        "tests/architecture/test_mypy_target_contract.py",
         "tests/architecture/test_protein_class_target_type_codegen_contract.py",
         "tests/contract/test_gold_entity_coverage_complete.py",
         "tests/contract/test_gold_pk_consistency.py",
@@ -1757,7 +1756,6 @@
       "contract_ref": "composite.target",
       "contract_test_paths": [
         "tests/architecture/test_low_coverage_targeted_tests_6045.py",
-        "tests/architecture/test_mypy_target_contract.py",
         "tests/architecture/test_protein_class_target_type_codegen_contract.py",
         "tests/contract/test_gold_entity_coverage_complete.py",
         "tests/contract/test_gold_pk_consistency.py",
@@ -2716,5 +2714,5 @@
     "gold_enabled": "Effective runtime state of pipeline.sink.gold.enabled after hierarchical config resolution; omitted enabled defaults to true. Never infer this from contract/Pandera availability or from unrelated flags such as filters.input_filter.enabled.",
     "missing_gold_enabled_count": "Runtime-enabled Gold rows whose contract parity_status is not covered."
   },
-  "snapshot_date": "2026-10-27"
+  "snapshot_date": "2026-10-23"
 }

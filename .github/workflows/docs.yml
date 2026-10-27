@@ -5,9 +5,7 @@ permissions:
   contents: read
 
 concurrency:
-  # Prefix keeps this leaf distinct from the caller coordinator group.
-  # workflow_call inherits github.workflow from the caller (#12374 / #12565).
-  group: docs-${{ github.event.pull_request.number || github.sha }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 on:

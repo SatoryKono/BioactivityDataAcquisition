@@ -104500,17 +104500,17 @@
     {
       "canonical_successor": null,
       "catalog_lifecycle": null,
-      "commit_policy": "tracked_quality_baseline",
+      "commit_policy": null,
       "declared_class": null,
       "declared_status": null,
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,
       "extension": ".json",
-      "freshness": "regenerate",
-      "generated_route": "contract-coverage-matrix-quality-baseline",
+      "freshness": "review-required",
+      "generated_route": null,
       "generated_route_exception": null,
-      "generator": "scripts/engineering/qa/report_contract_coverage_matrix.py",
+      "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
       "inbound_links": 0,
@@ -104518,27 +104518,27 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "reports/quality/contract-coverage-matrix.json",
-      "recommended_action": "generate-automatically",
+      "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
       "section": "reports",
-      "status": "Generated",
-      "surface_family": "generated",
+      "status": "Working",
+      "surface_family": "working",
       "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
       "catalog_lifecycle": null,
-      "commit_policy": "tracked_quality_baseline",
+      "commit_policy": null,
       "declared_class": null,
       "declared_status": null,
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,
       "extension": ".md",
-      "freshness": "regenerate",
-      "generated_route": "contract-coverage-matrix-quality-baseline",
+      "freshness": "review-required",
+      "generated_route": null,
       "generated_route_exception": null,
-      "generator": "scripts/engineering/qa/report_contract_coverage_matrix.py",
+      "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
       "inbound_links": 0,
@@ -104546,11 +104546,11 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "reports/quality/contract-coverage-matrix.md",
-      "recommended_action": "generate-automatically",
+      "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
       "section": "reports",
-      "status": "Generated",
-      "surface_family": "generated",
+      "status": "Working",
+      "surface_family": "working",
       "tracking_state": "tracked"
     },
     {
@@ -112293,17 +112293,6 @@
       ]
     },
     {
-      "commit_policy": "tracked_quality_baseline",
-      "generator": "scripts/engineering/qa/report_contract_coverage_matrix.py",
-      "id": "contract-coverage-matrix-quality-baseline",
-      "notes": "Contract coverage matrix JSON/MD pair is a generated tracked baseline for entity config contract coverage; regenerate both together.",
-      "output_kind": "working_report",
-      "outputs": [
-        "reports/quality/contract-coverage-matrix.json",
-        "reports/quality/contract-coverage-matrix.md"
-      ]
-    },
-    {
       "commit_policy": "working_output",
       "generator": "scripts/engineering/ci/validate_contract_identity.py",
       "id": "contract-identity-diagnostics-quality-report",
@@ -112886,7 +112875,7 @@
   "generator": "python -m scripts.docs generate-cleanup-inventory --update",
   "schema_version": 1,
   "source_inputs": [
-    "git -c core.quotepath=false ls-files -z",
+    "git ls-files",
     "bounded docs/reports local ignored docs scan",
     "configs/quality/repo_structure_catalog.yaml",
     "configs/quality/generated_artifact_routing.yaml",
@@ -112911,8 +112900,8 @@
       "working_report": 244
     },
     "by_recommended_action": {
-      "archive-after-migration": 273,
-      "generate-automatically": 1066,
+      "archive-after-migration": 275,
+      "generate-automatically": 1064,
       "keep": 2663
     },
     "by_section": {
@@ -112944,22 +112933,22 @@
       "Active": 751,
       "Archived": 1554,
       "Canonical": 76,
-      "Generated": 1066,
-      "Working": 555
+      "Generated": 1064,
+      "Working": 557
     },
     "by_surface_family": {
       "active": 751,
       "archive": 1554,
       "canonical": 76,
-      "generated": 1066,
-      "working": 555
+      "generated": 1064,
+      "working": 557
     },
     "by_tracking_state": {
       "tracked": 4002
     },
     "docs_reports_local_count": 59,
     "duplicate_group_count": 80,
-    "generated_route_count": 75,
+    "generated_route_count": 74,
     "generated_without_route_count": 214,
     "generated_without_route_or_exception_count": 0,
     "github_issue_lifecycle_counts": {
