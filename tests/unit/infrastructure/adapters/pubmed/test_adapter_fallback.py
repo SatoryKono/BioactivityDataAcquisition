@@ -185,7 +185,16 @@ class TestSearchByTitle:
         </PubmedArticleSet>"""
 
         # Return different responses for esearch and efetch
-        mock_http_client.get.side_effect = [esearch_response, efetch_response]
+        mock_http_client.get.return_value = esearch_response
+        mock_http_client.stream.return_value = efetch_response
+        mock_http_client.timeout = 10.0
+        mock_http_client.read_timeout_multiplier = 2.0
+
+        async def mock_aiter():
+            yield efetch_response.text.encode("utf-8")
+
+        efetch_response.aiter_bytes.return_value = mock_aiter()
+        efetch_response.aclose = AsyncMock()
 
         results = await adapter._search_by_title("Test Publication Title")
 

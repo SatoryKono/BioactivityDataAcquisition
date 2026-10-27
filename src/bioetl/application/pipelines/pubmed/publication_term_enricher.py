@@ -6,7 +6,7 @@ from collections.abc import Iterable, Sequence
 from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING, Protocol, TypeVar, overload
 
-import defusedxml.ElementTree as defused_ET
+import defusedxml.ElementTree as ET
 from defusedxml.common import DefusedXmlException
 
 from bioetl.application.core.publication_term_runtime import (
@@ -50,9 +50,9 @@ def parse_pubmed_mesh_xml(
 ) -> tuple[list[dict[str, object]], list[str]]:
     """Parse MeshHeadingList and KeywordList from a PubMed efetch XML payload."""
     try:
-        root = defused_ET.fromstring(xml_text)
+        root = ET.fromstring(xml_text)
     except (
-        defused_ET.ParseError,
+        ET.ParseError,
         DefusedXmlException,
     ):
         return [], []

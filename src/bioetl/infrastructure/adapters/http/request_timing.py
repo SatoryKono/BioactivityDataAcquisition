@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import Protocol, TypedDict, cast
+from typing import Any, Protocol, TypedDict, cast
 
 import httpx
 from httpx._client import UseClientDefault
@@ -71,11 +71,21 @@ async def execute_timed_request(
         admitted = time.monotonic()
         phase = "transport"
 
+        is_stream = request_kwargs.get("_stream", False)
+        # Create a copy of kwargs without _stream for httpx
+        httpx_kwargs = {k: v for k, v in request_kwargs.items() if k != "_stream"}
+
         async def send() -> httpx.Response:
             async with asyncio.timeout(request_timeout):
-                return await client.request(
-                    method, url, **cast(_RequestKwargs, request_kwargs)
-                )
+                if is_stream:
+                    request = client.build_request(
+                        method, url, **cast(_RequestKwargs, httpx_kwargs)
+                    )  # type: ignore[misc]
+                    return await client.send(request, stream=True)
+                else:
+                    return await client.request(
+                        method, url, **cast(_RequestKwargs, httpx_kwargs)
+                    )
 
         response = await host.circuit_breaker.call(send)
         response.extensions["bioetl_transport_seconds"] = time.monotonic() - admitted

@@ -11,7 +11,8 @@ __all__ = ["PUBMED_FETCH_ERRORS", "PubMedFetchMixin"]
 
 import contextlib
 import time
-from typing import TYPE_CHECKING
+import httpx
+from typing import TYPE_CHECKING, cast, Any, cast, cast
 
 from bioetl.infrastructure.adapters.pubmed._errors import (
     PUBMED_RECORD_ERRORS as PUBMED_FETCH_ERRORS,
@@ -60,15 +61,49 @@ class PubMedFetchMixin(PubMedAdapterStateMixin):
         try:
             start_time = time.perf_counter()
             with self._adapter_metrics.measure_request("/efetch"):
-                response = await self.http_client.get(
-                    f"{ENTREZ_API_BASE}efetch.fcgi", params=params
+                response = await self.http_client.stream(
+                    "GET", f"{ENTREZ_API_BASE}efetch.fcgi", params=params
                 )
+
+                MAX_BYTES = 31457280  # 30 MiB limit
+            try:
+                import asyncio
+
+                # Use client timeout as boundary for the full payload stream
+                async with asyncio.timeout(
+                    self.http_client.timeout * self.http_client.read_timeout_multiplier
+                ):
+                    body = bytearray()
+                    async for chunk in response.aiter_bytes():
+                        body.extend(chunk)
+                        if len(body) > MAX_BYTES:
+                            raise ValueError(
+                                f"PubMed XML response exceeds limit of {MAX_BYTES} bytes"
+                            )
+                    xml_text = body.decode("utf-8")
+            finally:
+                await response.aclose()
+
             duration_ms = (time.perf_counter() - start_time) * 1000
 
             with contextlib.suppress(Exception):
-                self._request_collector.record_from_response(response, duration_ms)
+                # We need to construct a pseudo-response for the metric collector
+                class PseudoResponse:
+                    def __init__(
+                        self, original: httpx.Response, text_content: str
+                    ) -> None:
+                        self.status_code = original.status_code
+                        self.headers = original.headers
+                        self.url = original.url
+                        self.text = text_content
+                        self.request = original.request
 
-            root = PubMedXmlProcessor.parse_response(response.text)
+                self._request_collector.record_from_response(
+                    PseudoResponse(response, xml_text),
+                    duration_ms,  # type: ignore[arg-type]
+                )
+
+            root = PubMedXmlProcessor.parse_response(xml_text)
             if root is None:
                 self._logger.error(
                     "external_api_error",
