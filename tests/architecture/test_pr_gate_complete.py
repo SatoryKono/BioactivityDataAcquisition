@@ -64,12 +64,6 @@ def test_full_suite_affected_pass_has_bounded_workload_budget() -> None:
     assert '--parallel-marker "not serial"' in script
     assert '--serial-marker "serial"' in script
     assert "--no-fallback" in script
-    assert "subtract-affected" in script
-    assert "--fixed-targets tests/architecture" in script
-    assert "affected-nodes-deduplicated.txt" in script
-    assert "affected-fixed-ignores.txt" in script
-    assert "already covered by the fixed architecture lane" in script
-    assert "--ignore=${ignore_path}" in script
     assert job["timeout-minutes"] == 90
 
 

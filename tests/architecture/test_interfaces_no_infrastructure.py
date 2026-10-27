@@ -11,9 +11,8 @@
 """Architecture tests for interfaces layer dependencies.
 
 Ensures that CLI and other interfaces do not directly import infrastructure.
-Forbidden modules come from ``.importlinter`` contract
-``interfaces-no-direct-infrastructure`` (ADR-005). Interfaces route through
-application services or composition entrypoints.
+In project policy, interfaces should route through application services or
+composition entrypoints rather than bind themselves to infrastructure modules.
 """
 
 from __future__ import annotations
@@ -23,11 +22,6 @@ from datetime import date
 from pathlib import Path
 
 import pytest
-
-from tests.architecture._cli_architecture_policy import (
-    is_forbidden_infrastructure_import,
-    load_repo_cli_architecture_contract,
-)
 
 # Base path for source files
 SRC_PATH = Path(__file__).parent.parent.parent / "src" / "bioetl"
@@ -51,9 +45,12 @@ def _relative_source_path(path: Path) -> str:
 
 def _direct_infrastructure_imports(path: Path) -> list[str]:
     return sorted(
-        imported
-        for imported in get_imports_from_file(path)
-        if is_forbidden_infrastructure_import(imported)
+        {
+            imported
+            for imported in get_imports_from_file(path)
+            if imported == "bioetl.infrastructure"
+            or imported.startswith("bioetl.infrastructure.")
+        }
     )
 
 
@@ -219,7 +216,7 @@ class TestInterfacesNoDIrectInfrastructure:
         imports = get_imports_from_file(cli_path)
 
         infrastructure_imports = [
-            imp for imp in imports if is_forbidden_infrastructure_import(imp)
+            imp for imp in imports if "bioetl.infrastructure" in imp
         ]
 
         assert infrastructure_imports == [], (
@@ -265,7 +262,7 @@ class TestInterfacesNoDIrectInfrastructure:
 
             imports = get_imports_from_file(py_file)
             infrastructure_imports = [
-                imp for imp in imports if is_forbidden_infrastructure_import(imp)
+                imp for imp in imports if "bioetl.infrastructure" in imp
             ]
 
             if infrastructure_imports:
@@ -278,20 +275,21 @@ class TestInterfacesNoDIrectInfrastructure:
         )
 
     def test_legacy_cli_infrastructure_imports_documented(self):
-        """CLI commands have no legacy infrastructure-import allowlist.
+        """Document and track legacy infrastructure imports in CLI commands.
 
-        ADR-005 and ``.importlinter`` contract
-        ``interfaces-no-direct-infrastructure`` keep ``ignore_imports`` empty.
-        A new direct infrastructure import fails this test.
+        This test tracks known violations that are allowed temporarily.
+        As violations are fixed, remove them from the allowlist.
+        If all are fixed, this test can be removed.
         """
         commands_dir = SRC_PATH / "interfaces" / "cli" / "commands"
         assert commands_dir.exists(), "CLI commands directory not found"
 
-        # ADR-005 and the import-linter contract keep this allowlist empty.
-        contract = load_repo_cli_architecture_contract()
-        expected_violations: dict[str, list[str]] = {}
-        assert contract["ignore_imports"] == []
-        assert expected_violations == {}
+        # Expected legacy violations - keep in sync with test above
+        # Note: quarantine.py was fixed in IF-002 refactoring to use QuarantineService
+        # Note: health.py was fixed to use composition entrypoints for DI
+        expected_violations: dict[str, list[str]] = {
+            # All CLI commands now properly use composition entrypoints
+        }
 
         actual_violations = {}
 
@@ -301,7 +299,7 @@ class TestInterfacesNoDIrectInfrastructure:
 
             imports = get_imports_from_file(py_file)
             infrastructure_imports = sorted(
-                imp for imp in imports if is_forbidden_infrastructure_import(imp)
+                {imp for imp in imports if "bioetl.infrastructure" in imp}
             )
 
             if infrastructure_imports:
@@ -332,7 +330,7 @@ class TestInterfacesNoDIrectInfrastructure:
         imports = get_imports_from_file(init_path)
 
         infrastructure_imports = [
-            imp for imp in imports if is_forbidden_infrastructure_import(imp)
+            imp for imp in imports if "bioetl.infrastructure" in imp
         ]
 
         assert infrastructure_imports == [], (
@@ -497,7 +495,7 @@ def get_runtime_imports_from_file(file_path: Path) -> list[str]:
 
 def _runtime_infrastructure_imports(py_file: Path) -> list[str]:
     imports = get_runtime_imports_from_file(py_file)
-    return [imp for imp in imports if is_forbidden_infrastructure_import(imp)]
+    return [imp for imp in imports if "bioetl.infrastructure" in imp]
 
 
 def _http_runtime_infrastructure_violations(http_dir: Path) -> list[str]:
@@ -523,7 +521,7 @@ class TestHttpInterfaceNoInfrastructure:
         imports = get_runtime_imports_from_file(init_path)
 
         infrastructure_imports = [
-            imp for imp in imports if is_forbidden_infrastructure_import(imp)
+            imp for imp in imports if "bioetl.infrastructure" in imp
         ]
 
         assert infrastructure_imports == [], (
@@ -540,7 +538,7 @@ class TestHttpInterfaceNoInfrastructure:
         imports = get_runtime_imports_from_file(types_path)
 
         infrastructure_imports = [
-            imp for imp in imports if is_forbidden_infrastructure_import(imp)
+            imp for imp in imports if "bioetl.infrastructure" in imp
         ]
 
         assert infrastructure_imports == [], (
@@ -561,7 +559,7 @@ class TestHttpInterfaceNoInfrastructure:
         imports = get_runtime_imports_from_file(server_path)
 
         infrastructure_imports = [
-            imp for imp in imports if is_forbidden_infrastructure_import(imp)
+            imp for imp in imports if "bioetl.infrastructure" in imp
         ]
 
         assert infrastructure_imports == [], (
