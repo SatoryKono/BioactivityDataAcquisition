@@ -20,14 +20,17 @@ fullsuite.
 
 | Field | Value |
 | --- | --- |
-| Evidence tip SHA | `100854af874059f7a873a501518e2955f6eb5916` |
-| Evidence PR / commit | `#12564` |
-| Command (canonical) | `pytest tests/architecture` (см. body `#12564`) |
-| Result | **10 failed / 5592 passed / 19 skipped** |
+| Evidence PR / land commit | `#12564` → tip `100854af874059f7a873a501518e2955f6eb5916` |
+| **Run Base SHA** (заявлен в `#12564`) | `1528cb5ac3d1adef0239df693b2a9a4573765bf2` |
+| Command (canonical, per `#12564` text) | `uv run pytest tests/architecture/` |
+| Result (narrative `#12564`) | **10 failed / 5592 passed / 19 skipped** |
+| Tip attribution | **inheritance** of `#12564` narrative onto `100854af87…` — **не** fresh re-run journal @ tip |
+| In-tree run journal | **отсутствует** (`reports/issue-12477/20261027-alt1/` заявлен в тексте `#12564`, не tracked) |
 | Verdict | **residue — не full PASS** |
 
 `10 failed / 5592 passed / 19 skipped` **≠** PASS. Письменный owner
 acceptance или waiver **не** переводит этот результат в test PASS.
+Подробная provenance-таблица: `reports/domain-io-psc-rf004-closeout.md` §2.
 
 ## Action Required (owner path)
 

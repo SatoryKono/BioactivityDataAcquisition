@@ -4,8 +4,8 @@
 **Issues:** [#12569](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12569) (RF-004),
 [#12477](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12477) (residue OPEN),
 [#12463](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/12463) / [#12544](https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12544) (Variant A code on `main`)  
-**Baseline tip (fresh `origin/main`):** `100854af874059f7a873a501518e2955f6eb5916`  
-**Evidence commit (fullsuite rerun):** `#12564` @ same tip SHA  
+**RF-004 baseline tip (fresh `origin/main`):** `100854af874059f7a873a501518e2955f6eb5916`  
+**Evidence land commit on `main`:** `#12564` → `100854af874059f7a873a501518e2955f6eb5916`  
 
 ## 1. Variant A (Domain I/O) — зафиксированная норма PSC
 
@@ -25,10 +25,7 @@ accepted Domain I/O surface norm**. SSOT политики:
 На baseline tip: `violation_count=0`; inventory `--check` зелёный. Это **не**
 эквивалентно PASS полного `tests/architecture` (`#12477`).
 
-## 2. Residue `#12477` — не PASS
-
-По `#12564` / tip `100854af874059f7a873a501518e2955f6eb5916` полный прогон
-`tests/architecture`:
+## 2. Residue `#12477` — не PASS (provenance счётчиков)
 
 | Metric | Value |
 | --- | --- |
@@ -36,12 +33,37 @@ accepted Domain I/O surface norm**. SSOT политики:
 | passed | **5592** |
 | skipped | **19** |
 
+### 2.1. Какой SHA произвёл счётчики
+
+Источник narrative: commit/PR **`#12564`** (Jules/Cursor body + squash
+message на `main`).
+
+| Role | Full SHA | Meaning |
+| --- | --- | --- |
+| **Run Base SHA** (заявлен в `#12564` как база прогона) | `1528cb5ac3d1adef0239df693b2a9a4573765bf2` | SHA, к которому текст `#12564` привязывает команду `uv run pytest tests/architecture/` и результат **10 / 5592 / 19** |
+| **Land tip on `main`** (`#12564` merge) | `100854af874059f7a873a501518e2955f6eb5916` | Коммит, через который narrative evidence попал на `main`; `1528cb5a…` — ancestor этого tip |
+
+**Атрибуция к tip `100854af87…`:** это **наследование / rebase land
+evidence** через merge `#12564`, **не** утверждение, что RF-004 или PSC
+выполнили fresh fullsuite re-run именно на tip `100854af87…` и получили те
+же счётчики заново.
+
+### 2.2. Журнал прогона
+
+Путь `reports/issue-12477/20261027-alt1/` (логи / junit) **заявлен** в тексте
+`#12564`, но **отсутствует** в tracked tree на tip `100854af87…` и на
+исходных commits PR. In-tree run journal для сверки SHA **нет** — только
+commit/PR narrative. Это усиливает статус **residue**, не PASS.
+
+### 2.3. Verdict
+
 **Итог:** evidence residue / **не** full PASS.  
 **Owner waiver ≠ test PASS** — письменный acceptance или waiver **не**
 превращает 10 failed в PASS. Issue `#12477` остаётся **OPEN** до фактического
-зелёного fullsuite (exit 0 без неоговорённых skip/xfail) **или** явного
-owner out-of-scope с пометкой `partially complete` на зависимых приёмках —
-без переписывания счётчиков в PASS.
+зелёного fullsuite (exit 0 без неоговорённых skip/xfail) **на явно
+зафиксированном full SHA с журналом** **или** явного owner out-of-scope с
+пометкой `partially complete` на зависимых приёмках — без переписывания
+счётчиков в PASS и без выдачи tip-inheritance за fresh green.
 
 ## 3. Named blocker `#12464` ← `#12477`
 
