@@ -3,7 +3,7 @@
   "ledger_id": "ledger12457",
   "owner": "Фёдор (архитектура)",
   "date": "2026-10-22",
-  "verification_date": "2026-10-27T16:41:11Z",
+  "verification_date": "2026-10-27T16:46:22Z",
   "action": "Risk Accepted",
   "risk_id": "P11-001",
   "description": "Принятый риск гибридной модели resume (ADR-046) - санкционированная сложность, не дефект.",
@@ -12,7 +12,7 @@
       "condition_id": "documentation_matches_runtime_and_existing_owner_acceptance",
       "requirement": "Документация разграничения checkpoint/ledger соответствует коду (файл документации по ADR-046/control plane, аппрув архитектора)",
       "status": "verified",
-      "verified_on_revision": "ac9db16f8dfde87ddd3e8eef2fedb3191abafb16",
+      "verified_on_revision": "6500af7e38c569f8f73d358da9ec7045b832a062",
       "evidence": [
         {
           "type": "owner_source_message",
@@ -53,23 +53,25 @@
           "command_exit_code": 0
         }
       ],
-      "approval_note": "The existing owner decision is traced to its original messages. This is not a request for or claim of a new approval."
+      "approval_note": "The existing owner decision is traced to its original messages. This is not a request for or claim of a new approval.",
+      "tree_sha": "0b65e1c0822f83e91a9cb2d918a09c62c566d103"
     },
     {
       "condition_id": "source_of_truth_mismatch_restart_and_replay_scenarios_have_test_references",
       "requirement": "Проверяемые сценарии: источник истины, рассогласование checkpoint/ledger, restart и replay - со ссылками на тесты/ADR.",
       "status": "verified",
-      "verified_on_revision": "ac9db16f8dfde87ddd3e8eef2fedb3191abafb16",
-      "tree_sha": "04f1d2f9b0433e8714a7b12534883264da3adaaf",
-      "test_command": "BIOETL_PYTEST_NARROW=1 BIOETL_PYTEST_NO_COV=1 bash scripts/engineering/dev/run_pytest.sh tests/architecture/test_config_topology_docs_drift.py tests/unit/domain/control_plane/test_run_ledger_replay.py tests/unit/application/composite/checkpoint/test_checkpoint_runtime.py",
+      "verified_on_revision": "6500af7e38c569f8f73d358da9ec7045b832a062",
+      "tree_sha": "0b65e1c0822f83e91a9cb2d918a09c62c566d103",
+      "test_command": "BIOETL_PYTEST_NARROW=1 BIOETL_PYTEST_NO_COV=1 bash scripts/engineering/dev/run_pytest.sh tests/architecture/test_config_topology_docs_drift.py tests/unit/domain/control_plane/test_run_ledger_replay.py tests/unit/application/composite/checkpoint/test_checkpoint_runtime.py tests/unit/scripts/engineering/ci/test_pr_lane_results.py tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
       "exit_code": 0,
-      "reported_passed": 67,
       "test_paths": [
         "tests/architecture/test_config_topology_docs_drift.py",
         "tests/unit/domain/control_plane/test_run_ledger_replay.py",
-        "tests/unit/application/composite/checkpoint/test_checkpoint_runtime.py"
+        "tests/unit/application/composite/checkpoint/test_checkpoint_runtime.py",
+        "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+        "tests/unit/scripts/qa/test_refresh_governance_artifacts.py"
       ],
-      "note": "The tests were run against the exact tree later committed as verified_on_revision. No new review, passport, or re-approval was added."
+      "note": "Owning test command returned exit 0 on the exact tree. No new review, passport, or re-approval was added."
     }
   ],
   "provenance": {
@@ -132,7 +134,7 @@
       "tests/unit/domain/control_plane/test_run_ledger_replay.py",
       "tests/unit/application/composite/checkpoint/test_checkpoint_runtime.py"
     ],
-    "current_sha": "ac9db16f8dfde87ddd3e8eef2fedb3191abafb16"
+    "current_sha": "6500af7e38c569f8f73d358da9ec7045b832a062"
   },
   "review_conditions": "При изменении модели checkpoint/ledger или инциденте resume.",
   "revision_history": [
@@ -202,6 +204,94 @@
         },
         "review_conditions": "При изменении модели checkpoint/ledger или инциденте resume."
       }
+    },
+    {
+      "record_type": "preserved_prior_verification_status",
+      "target_revision": "ac9db16f8dfde87ddd3e8eef2fedb3191abafb16",
+      "verification_date": "2026-10-27T16:41:11Z",
+      "conditions": [
+        {
+          "condition_id": "documentation_matches_runtime_and_existing_owner_acceptance",
+          "requirement": "Документация разграничения checkpoint/ledger соответствует коду (файл документации по ADR-046/control plane, аппрув архитектора)",
+          "status": "verified",
+          "verified_on_revision": "ac9db16f8dfde87ddd3e8eef2fedb3191abafb16",
+          "evidence": [
+            {
+              "type": "owner_source_message",
+              "message_id": "Sentinel_fda89a6cbfc48191b7b40052d5cb09f8",
+              "occurred_at_utc": "2026-10-22T10:21:21.955023Z"
+            },
+            {
+              "type": "owner_source_message",
+              "message_id": "Sentinel_1f79397dd26c8191b2136a4b90d7cd32",
+              "occurred_at_utc": "2026-10-22T13:58:06.101058Z"
+            },
+            {
+              "type": "merged_documentation_pr",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12576",
+              "head_sha": "df749aad15d7b4481c68b9cb90bf6c0a9b67f6f7",
+              "merge_sha": "733eab56824d07158d518235b0ebbcf14d50a2ab"
+            },
+            {
+              "type": "adr_section",
+              "path": "docs/02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md",
+              "sections": [
+                "2. Ledger is append-only provenance and replay delta, not full state",
+                "Alternatives Considered / A"
+              ]
+            },
+            {
+              "type": "runtime_source",
+              "path": "src/bioetl/application/composite/checkpoint/_checkpoint_replay_projection.py",
+              "symbols": [
+                "dependency_results",
+                "enrichment_results",
+                "projection_contract"
+              ]
+            },
+            {
+              "type": "owning_test",
+              "path": "tests/architecture/test_config_topology_docs_drift.py",
+              "command_exit_code": 0
+            }
+          ],
+          "approval_note": "The existing owner decision is traced to its original messages. This is not a request for or claim of a new approval."
+        },
+        {
+          "condition_id": "source_of_truth_mismatch_restart_and_replay_scenarios_have_test_references",
+          "requirement": "Проверяемые сценарии: источник истины, рассогласование checkpoint/ledger, restart и replay - со ссылками на тесты/ADR.",
+          "status": "verified",
+          "verified_on_revision": "ac9db16f8dfde87ddd3e8eef2fedb3191abafb16",
+          "tree_sha": "04f1d2f9b0433e8714a7b12534883264da3adaaf",
+          "test_command": "BIOETL_PYTEST_NARROW=1 BIOETL_PYTEST_NO_COV=1 bash scripts/engineering/dev/run_pytest.sh tests/architecture/test_config_topology_docs_drift.py tests/unit/domain/control_plane/test_run_ledger_replay.py tests/unit/application/composite/checkpoint/test_checkpoint_runtime.py",
+          "exit_code": 0,
+          "reported_passed": 67,
+          "test_paths": [
+            "tests/architecture/test_config_topology_docs_drift.py",
+            "tests/unit/domain/control_plane/test_run_ledger_replay.py",
+            "tests/unit/application/composite/checkpoint/test_checkpoint_runtime.py"
+          ],
+          "note": "The tests were run against the exact tree later committed as verified_on_revision. No new review, passport, or re-approval was added."
+        }
+      ],
+      "ci_context": {
+        "run_id": 40527527105,
+        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/40527527105",
+        "tested_head_sha": "df749aad15d7b4481c68b9cb90bf6c0a9b67f6f7",
+        "merge_sha": "733eab56824d07158d518235b0ebbcf14d50a2ab",
+        "overall_conclusion": "failure",
+        "relevant_steps": {
+          "Architecture pytest slice": "success",
+          "Affected pytest": "success",
+          "Shadow compare impact selection": "failure"
+        },
+        "shadow_compare_unmapped_paths": [
+          "reports/evidence/12485/criterion_to_evidence.md",
+          "reports/ledger12457_handoff.json",
+          "reports/quality/low-coverage-6045-revalidation.xml"
+        ],
+        "claim_boundary": "This run is not a PASS. The separate selector change is pushed to a branch only; it is not in a PR and has not been merged."
+      }
     }
   ],
   "scope_constraints": [
@@ -226,6 +316,14 @@
       "reports/ledger12457_handoff.json",
       "reports/quality/low-coverage-6045-revalidation.xml"
     ],
-    "claim_boundary": "This run is not a PASS. The separate selector change is pushed to a branch only; it is not in a PR and has not been merged."
+    "claim_boundary": "Run 40527527105 is not a PASS. Its architecture and affected-pytest steps succeeded; shadow compare failed on the three unmapped paths. The selector fix is on the existing pushed branch at 4026a87 but is not in a PR or merged."
+  },
+  "current_main_integration": {
+    "main_sha": "9a1d2738053cc0bcaf08e1aba414aa13ca6e32a1",
+    "local_merge_commit": "d72a004ee0f5cc8ec044334f988d97aba01cc0cc",
+    "comparison_base_sha": "5416aa7a1c0fac5d8d0cbb6119b271e5ca226a73",
+    "changed_issue_scope_paths": [],
+    "remote_branch_head": "4026a87a94dc32f8e5e6ad937fb615e7d0fbd90e",
+    "publication_status": "no PR created; latest follow-up and current main integration remain local"
   }
 }
