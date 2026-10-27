@@ -711,6 +711,16 @@ routes:
     notes: Root hygiene cleanup plan is a governed curated docs surface for
       root-allowlist and local clutter triage.
 
+  - id: contract-coverage-matrix-quality-baseline
+    generator: scripts/engineering/qa/report_contract_coverage_matrix.py
+    output_kind: working_report
+    commit_policy: tracked_quality_baseline
+    outputs:
+      - reports/quality/contract-coverage-matrix.json
+      - reports/quality/contract-coverage-matrix.md
+    notes: Contract coverage matrix JSON/MD pair is a generated tracked baseline
+      for entity config contract coverage; regenerate both together.
+
   - id: debt-governance-gates-quality-baseline
     generator: scripts/engineering/qa/report_debt_governance_gates.py
     output_kind: working_report
