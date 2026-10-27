@@ -16,10 +16,8 @@
    **Evidence:** `reports/ledger12457_handoff.json` was generated and forced-staged with all necessary tracking fields, including `current_sha` evaluated after merging `main`.
 
 6. **Criterion:** Выполнить штатный ARTIFACT_REFRESH check/update/check, docs drift.
-   **Evidence:** Executed:
-   - `python -m scripts.docs check-drift --runtime-mirrors --freshness`
-   - `python -m scripts.docs check-links --links`
-   - `python -m scripts.engineering.ci.update_test_telemetry_baseline`
-   - `python -m scripts.engineering.qa refresh-ci-drift-families --update --test-gov --flaky-fingerprint`
-   - `python -m scripts.engineering.qa.refresh_governance_artifacts`
-   All checks pass cleanly.
+   **Evidence:** Verified on tip `d5b6ce5d3d` (Asia/Baghdad wall-clock 2026-10-27 ~18:04 UTC+3):
+   - `python -m scripts.docs check-drift --runtime-mirrors --freshness` → OK (0 errors, 0 warnings)
+   - `python -m scripts.docs check-links` (full suite; not `--links` alone) → OK — Links/Nav/Specs/Configs/Gold contracts/Workflow inventory/ChEMBL overview/Provider/Runbook/Control-plane/Not-in-nav/Doc drift all passed (`All checks passed.`)
+   - `python -m scripts.engineering.ci.update_test_telemetry_baseline --rebind-current-tree` → idempotent; preserves `local_coverage_verify` capture (`source_commit=8a4286d21b…`, coverage 99.66%, `measurement_provenance` present; `source_tree_sha256=394069633f…`)
+   - `python -m scripts.engineering.qa refresh-ci-drift-families --check --test-gov --flaky-fingerprint --telemetry --remote-main` → OK (`CI drift families complete (no budget ratchet)`). Per AGENTS.md this is the allowed CI-family path; `refresh_governance_artifacts` was **not** used for this rebind and is not claimed.
