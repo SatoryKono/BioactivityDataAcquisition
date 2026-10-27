@@ -46,9 +46,11 @@ def _parse_literal(value: object) -> object | None:
     """Parse a JSON literal from string payload with ast.literal_eval fallback."""
     if not isinstance(value, str):
         return None
+    if len(value) > 250_000:
+        return None
     try:
         return cast("object", json.loads(value))
-    except ValueError:
+    except (ValueError, RecursionError, MemoryError):
         # Fallback for legacy metadata using Python literals (single quotes)
         try:
             return cast("object", ast.literal_eval(value))
