@@ -129,7 +129,7 @@ Normative boundary:
 | Option | Summary | Strengths | Risks / Gaps | Recommendation |
 | ------ | ------- | --------- | ------------ | -------------- |
 | Checkpoint as operational state, ledger as provenance | Keep current split | Smallest change, matches current code, preserves deterministic stage/batch reconstruction, keeps operator inspection separate from execution state | Two concepts remain, requires continued docs discipline | Recommended now |
-| Universal ledger-based resume | Rebuild runner state from ledger events | One conceptual replay story, stronger narrative symmetry with manifest/ledger control plane | Current ledger projection is too coarse; would require new event taxonomy, richer persisted payloads, destructive replay rules, stage/batch reconstruction proofs, migration of compatibility policy | Not now |
+| Universal ledger-based resume | Rebuild runner state from ledger events | One conceptual replay story, stronger narrative symmetry with manifest/ledger control plane | Composite can reconstruct rich checkpoint payloads from a bounded suffix only with a trusted checkpoint baseline; a universal ledger-only projection without that baseline remains too coarse and would still need new event taxonomy, richer persisted payloads, destructive replay rules, stage/batch reconstruction proofs, and migration of compatibility policy | Not now |
 | Hybrid everywhere | Every runner uses checkpoint baseline + ledger suffix replay | Reuses current composite pattern | Forces runners to adopt ledger watermarks even where not needed; increases coupling between operational state and provenance timeline | Not now |
 | Never use ledger for resume | Checkpoint-only forever | Simplest mental model | Gives up useful bounded suffix replay for composite lifecycle recovery and watermark restoration | Not recommended |
 
@@ -235,9 +235,12 @@ The follow-up implementation ADR MUST include, at minimum:
 
 ### A. Promote RunLedger into the universal resume state immediately
 
-Rejected for now because current ledger replay is intentionally too coarse and
-does not reconstruct rich checkpoint payloads or runner-specific execution
-state.
+Rejected for now as a universal replacement: the composite projection can
+reconstruct the rich checkpoint payloads listed in section 2 from bounded
+suffix events, but it still requires a trusted checkpoint baseline and does
+not provide a general baseline for every runner family or arbitrary missing
+checkpoint state. This constraint does not deny the payload reconstruction
+already performed by `RunLedgerReplayProjection`.
 
 ### B. Freeze checkpoint-only resume forever
 

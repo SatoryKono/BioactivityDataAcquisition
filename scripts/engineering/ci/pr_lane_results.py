@@ -136,6 +136,20 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
         ),
     ),
+    **dict.fromkeys(
+        (
+            "reports/evidence/12485/criterion_to_evidence.md",
+            "reports/ledger12457_handoff.json",
+        ),
+        (
+            "tests/architecture/test_config_topology_docs_drift.py",
+            "tests/unit/application/composite/checkpoint/test_checkpoint_runtime.py",
+            "tests/unit/domain/control_plane/test_run_ledger_replay.py",
+        ),
+    ),
+    "reports/quality/low-coverage-6045-revalidation.xml": (
+        "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
+    ),
     "docs/05-operations/runbooks/incident-response.md": (
         "tests/integration/test_prometheus_rules_config.py",
         INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
