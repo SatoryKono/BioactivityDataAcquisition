@@ -11,8 +11,11 @@ import argparse
 import ast
 import json
 import os
+import re
 import subprocess
 import sys
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
@@ -51,6 +54,10 @@ GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
+DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
+INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST = (
+    "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
+)
 TYPE_CHECKING_WORKFLOW = ".github/workflows/type-checking.yml"
 TYPE_CHECKING_COLD_WORKFLOW = ".github/workflows/type-checking-cold.yml"
 
@@ -82,6 +89,32 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".gitleaksignore": (
+        "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
+    ),
+    "reports/architecture/f-09-conformance-matrix-report.md": (
+        "tests/architecture/test_adapter_port_conformance.py",
+    ),
+    "reports/engineering/qm_07_report.md": (
+        "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py",
+        "tests/architecture/qm_07/test_gate_evaluators.py",
+        "tests/architecture/qm_07/test_distribution_isolation.py",
+        "tests/architecture/qm_07/test_qm07_cold_imports.py",
+    ),
+    "reports/engineering/app-002-port-map/report.md": (
+        "tests/architecture/test_port_contracts.py",
+        "tests/architecture/test_application_services_cross_subdomain_imports.py",
+        "tests/unit/application/ports/test_application_ports_no_factory_aliases.py",
+    ),
+    "reports/engineering/SEC-002_audit_report.md": (
+        "tests/security/test_pubmed_xxe_mitigation.py",
+        "tests/unit/application/pipelines/pubmed/test_xml_parser.py",
+    ),
+    "reports/engineering/cache_preflight_experiment_report.md": (
+        "tests/architecture/test_setup_python_uv_cache_policy.py",
+        "tests/architecture/test_conftest_session_caches.py",
+        "tests/architecture/test_pr_gate_complete.py",
+    ),
     ".github/workflows/docs.yml": (
         "tests/architecture/test_docs_governance_workflow.py",
         "tests/architecture/test_diagram_nightly_workflow.py",
@@ -91,9 +124,24 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/ci/test_check_reusable_workflow_pins.py",
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
     ),
+    **dict.fromkeys(
+        (
+            "reports/audit-runs/20261026-p17-003-external-callers.md",
+            "reports/audit-runs/20261026-p17-003-external-callers/evidence.json",
+        ),
+        (
+            "tests/unit/scripts/ci/test_check_reusable_workflow_pins.py",
+            GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+        ),
+    ),
     "docs/05-operations/runbooks/incident-response.md": (
         "tests/integration/test_prometheus_rules_config.py",
+        INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
     ),
+    "docs/05-operations/runbooks/stale-lock.md": (
+        INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
+    ),
+    "docs/00-project/RULES.md": (INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,),
     "reports/engineering/SCHEMA-001_execution_evidence.md": (
         "tests/unit/scripts/test_verify_schema_parity.py",
         "tests/unit/scripts/ops/data/test_check_delta_integrity.py",
@@ -156,6 +204,23 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (GITHUB_ACTIONS_RUNTIME_POLICY_TEST, MYPY_TARGET_CONTRACT_TEST),
     ),
+    **dict.fromkeys(
+        (
+            "reports/app-001-audit.md",
+            "reports/audit/AUDIT-20261022-APP-001-Cancellation.md",
+        ),
+        (
+            "tests/unit/application/core/test_batch_execution_lifecycle.py",
+            "tests/unit/application/core/test_derived_scan_budget.py",
+            "tests/unit/application/core/test_pipeline_services.py",
+            "tests/unit/application/core/test_health_aggregator.py",
+            "tests/unit/application/core/test_heartbeat.py",
+            "tests/unit/application/core/test_lock_release_callback_contract.py",
+            "tests/unit/application/core/test_runner.py",
+            "tests/unit/application/services/test_pipeline_runner_service.py",
+            "tests/unit/application/services/run_reports/test_composite_report.py",
+        ),
+    ),
     "reports/engineering/SEC-003_audit_report.md": (
         "tests/unit/domain/services/test_composite_metadata_helpers.py",
     ),
@@ -198,6 +263,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/00-project/governance/08-debt-ownership-playbook.md": (
         "tests/architecture/test_tech_debt_roadmap_7461_7465.py",
     ),
+    "docs/02-architecture/01-domain-layer.md": (
+        DOCUMENTATION_SYNC_TEST,
+        "tests/architecture/test_domain_io_taint_inventory.py",
+    ),
     "docs/02-architecture/current-state-inventory.md": (
         "tests/architecture/test_arch_s4_s9_gates.py",
         "tests/unit/scripts/qa/test_topology_source_binding.py",
@@ -214,7 +283,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "Dockerfile.bioetl": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "docs/04-reference/cli.md": (
         "tests/architecture/test_cli_doc_parity.py",
-        "tests/architecture/test_documentation_sync.py",
+        DOCUMENTATION_SYNC_TEST,
     ),
     ".github/workflows/docker.yml": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "reports/quality/architecture-debt-remote-main-baseline.md": (
@@ -256,6 +325,15 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/integration_vcr_policy.yaml": (
         "tests/architecture/test_integration_vcr_policy.py",
     ),
+    "configs/_schema/composite.json": (
+        "tests/architecture/test_config_schema_migration_status.py",
+        "tests/integration/config/test_validate_pipeline_configs.py",
+        "tests/unit/repo_backed/infrastructure/config/test_composite_sort_by_closure.py",
+    ),
+    "configs/_schema/pipeline.json": (
+        "tests/architecture/test_config_schema_migration_status.py",
+        "tests/integration/config/test_validate_pipeline_configs.py",
+    ),
     "configs/quality/test_skip_inventory.yaml": TEST_SKIP_INVENTORY_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
     "configs/quality/scripts_inventory_manifest.json": (
@@ -270,9 +348,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/04-reference/api/infrastructure.md": (
         "tests/architecture/test_api_reference_public_facades.py",
     ),
-    "docs/02-architecture/finances-github-billing.md": (
-        "tests/architecture/test_documentation_sync.py",
-    ),
+    "docs/02-architecture/finances-github-billing.md": (DOCUMENTATION_SYNC_TEST,),
     "docs/05-engineering/test-telemetry-baseline.md": TELEMETRY_BASELINE_TESTS,
     ".gitignore": (
         "tests/architecture/test_gitignore_secret_and_agents_policy.py",
@@ -295,12 +371,38 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/engineering/repo/check_github_actions_runtime_policy.py": (
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
     ),
+    ".github/workflows/nightly.yml": (
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+        "tests/architecture/test_actions_artifact_storage_policy.py",
+        "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
+    ),
+    "docs/04-reference/github-actions-workflows.md": (
+        "tests/architecture/test_gha_disabled_map_10263.py",
+        "tests/architecture/test_required_checks_prose_consistency.py",
+    ),
+    "docs/05-operations/ci-workflow-map.md": (
+        "tests/architecture/test_required_checks_prose_consistency.py",
+    ),
+    "docs/05-operations/runbooks/generated-artifact-drift-workflow.md": (
+        "tests/architecture/test_generated_artifact_drift_workflow.py",
+    ),
+    **dict.fromkeys(
+        (
+            "docs/filters/inventory-baseline.csv",
+            "docs/filters/inventory-baseline.json",
+            "docs/filters/inventory-baseline.md",
+        ),
+        ("tests/architecture/test_silver_filter_boundary_inventory.py",),
+    ),
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "configs/composites/": (
+        "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
+    ),
     "reports/evidence/12461/": (
         "tests/architecture/test_provider_contract_interoperability_governance.py",
         "tests/contract/test_provider_contract_snapshot_registry.py",
@@ -328,6 +430,9 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ),
     "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
     "reports/performance/": BENCHMARK_EVIDENCE_TESTS,
+    "reports/governance/n1-shadow-window/": (
+        "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
+    ),
     "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.": (
         NPM_RUNTIME_TEST,
     ),
@@ -1029,88 +1134,184 @@ def _shadow_command(args: argparse.Namespace) -> int:
     return 0
 
 
-def _subtract_affected_command(args: argparse.Namespace) -> int:
-    """Subtract fixed targets from affected targets and output remainder."""
-    with open(args.affected_file, "r") as f:
-        affected_targets = [line.strip() for line in f if line.strip()]
+_NODE_ID_LINE = re.compile(r"^\S+::\S+$")
 
-    if not affected_targets:
-        print("::error::tests gate has no affected pytest target", file=sys.stderr)
-        return 1
 
-    def get_nodes(targets: list[str], label: str) -> set[str]:
-        if not targets:
-            return set()
-        print(f"Collecting nodeids for {label}...", file=sys.stderr)
-        # We can run pytest inline in a subprocess by passing a small inline script
-        # that invokes pytest.main() with a custom plugin, and dumps JSON to stdout
-        script = """
-import pytest
-import sys
-import json
-class NodeCollector:
-    def __init__(self):
-        self.nodes = []
-    def pytest_collection_modifyitems(self, items):
-        for item in items:
-            self.nodes.append(item.nodeid)
-if __name__ == '__main__':
-    targets = sys.argv[1:]
-    collector = NodeCollector()
-    ret = pytest.main(['-q', '--collect-only'] + targets, plugins=[collector])
-    if ret not in (0, 5):
-        sys.exit(ret)
-    print(json.dumps(collector.nodes))
-"""
-        completed = subprocess.run(
-            [sys.executable, "-c", script] + targets,
-            capture_output=True,
-            text=True,
-            cwd=args.repo_root,
+def _selector_path(target: str) -> str:
+    """Return the filesystem path of a pytest path or nodeid."""
+    normalized = target.strip().replace("\\", "/").split("::", 1)[0]
+    return normalized.rstrip("/")
+
+
+def _is_parent_of(path: str, root: str) -> bool:
+    """Return whether ``path`` is a directory that contains ``root``."""
+    return bool(path) and root.startswith(f"{path}/")
+
+
+def _is_under(path: str, root: str) -> bool:
+    """Return whether ``path`` is ``root`` or a path inside it."""
+    return path == root or path.startswith(f"{root}/")
+
+
+@dataclass(frozen=True)
+class AffectedSubtraction:
+    """Targets to run after the fixed lane has covered its nodeids."""
+
+    execution_targets: tuple[str, ...]
+    ignore_paths: tuple[str, ...]
+    intersection: tuple[str, ...]
+
+
+def _collect_nodeids(repo_root: Path, targets: Sequence[str]) -> set[str]:
+    """Collect pytest nodeids. A broken selector fails closed."""
+    if not targets:
+        return set()
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "--collect-only",
+            "-q",
+            "-p",
+            "no:benchmark",
+            "-p",
+            "no:xdist",
+            "-p",
+            "no:cov",
+            "--override-ini",
+            "addopts=",
+            "--import-mode=importlib",
+            "--disable-warnings",
+            *targets,
+        ],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if completed.returncode not in (0, 5):
+        detail = completed.stderr.strip() or completed.stdout.strip()
+        message = (
+            "pytest collection failed for "
+            f"{', '.join(targets)} ({completed.returncode}): {detail}"
         )
-        if completed.returncode not in (0, 5):
-            print(
-                f"::error::pytest collection failed for {label} targets:\n{completed.stderr}",
-                file=sys.stderr,
-            )
-            sys.exit(1)
+        raise ValueError(message)
+    return {
+        line.strip()
+        for line in completed.stdout.splitlines()
+        if _NODE_ID_LINE.match(line.strip())
+    }
 
-        try:
-            nodes = json.loads(completed.stdout.strip().splitlines()[-1])
-            return set(nodes)
-        except (ValueError, IndexError):
-            print(
-                f"::error::Failed to parse JSON from pytest collection for {label}:\n{completed.stdout}\n{completed.stderr}",
-                file=sys.stderr,
-            )
-            sys.exit(1)
 
-    arch_nodes = get_nodes(args.fixed_targets, "architecture")
-    affected_nodes = get_nodes(affected_targets, "affected")
+def _partition_affected(
+    affected_targets: Sequence[str],
+    fixed_roots: Sequence[str],
+) -> tuple[list[str], list[str], list[str]]:
+    """Split affected selectors into kept paths, overlaps, and ignore roots."""
+    kept: list[str] = []
+    overlapping: list[str] = []
+    for target in affected_targets:
+        path = _selector_path(target)
+        if any(_is_parent_of(path, root) for root in fixed_roots):
+            kept.append(target)
+            continue
+        if any(_is_under(path, root) for root in fixed_roots):
+            overlapping.append(target)
+            continue
+        kept.append(target)
+    ignore = [
+        root
+        for root in fixed_roots
+        if any(
+            _is_parent_of(_selector_path(target), root) for target in affected_targets
+        )
+    ]
+    return kept, overlapping, ignore
 
-    intersection = affected_nodes.intersection(arch_nodes)
-    print("## Duplicate nodeids in affected and architecture", file=sys.stderr)
+
+def plan_affected_subtraction(
+    affected_targets: Sequence[str],
+    fixed_targets: Sequence[str],
+    *,
+    collect_nodeids: Callable[[Sequence[str]], set[str]],
+) -> AffectedSubtraction:
+    """Remove fixed-lane coverage without expanding disjoint targets.
+
+    A selector outside the fixed roots stays a path. A selector inside a fixed
+    root is collected and omitted, because that lane already runs it. A parent
+    such as ``tests`` stays in place and the fixed root is ignored at runtime.
+    Collection failure is fail-closed and must not fall back to the broad path.
+    """
+    if not affected_targets:
+        raise ValueError("tests gate has no affected pytest target")
+    fixed_roots = [path for target in fixed_targets if (path := _selector_path(target))]
+    if not fixed_roots:
+        raise ValueError("fixed lane has no selector")
+    kept, overlapping, ignore = _partition_affected(affected_targets, fixed_roots)
+    intersection: set[str] = set()
+    if ignore:
+        intersection.update(collect_nodeids(ignore))
+    if overlapping:
+        intersection.update(collect_nodeids(overlapping))
+    return AffectedSubtraction(
+        execution_targets=tuple(kept),
+        ignore_paths=tuple(dict.fromkeys(ignore)),
+        intersection=tuple(sorted(intersection)),
+    )
+
+
+def _read_target_lines(path: Path) -> list[str]:
+    """Return non-empty selectors from one target file."""
+    return [
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+
+def _write_lines(path: Path, lines: Sequence[str]) -> None:
+    """Atomically replace one selector file."""
+    payload = ("\n".join(lines) + "\n") if lines else ""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(f"{path.suffix}.tmp")
+    temporary.write_text(payload, encoding="utf-8")
+    os.replace(temporary, path)
+
+
+def _report_intersection(
+    intersection: Sequence[str], ignore_paths: Sequence[str]
+) -> None:
+    """Print covered nodeids. An empty intersection is explicit."""
+    print("## Affected nodeids already covered by the fixed lane", file=sys.stderr)
     if intersection:
-        for node in sorted(intersection):
-            print(node, file=sys.stderr)
+        for nodeid in intersection:
+            print(nodeid, file=sys.stderr)
     else:
         print("None", file=sys.stderr)
+    if ignore_paths:
+        print("fixed-lane ignores: " + ", ".join(ignore_paths), file=sys.stderr)
 
-    remainder = affected_nodes - arch_nodes
-    if not remainder:
-        print(
-            "::error::tests gate has no affected pytest target after subtracting fixed tests",
-            file=sys.stderr,
+
+def _subtract_affected_command(args: argparse.Namespace) -> int:
+    """Write the affected targets that the fixed lane does not already run."""
+    try:
+        affected = _read_target_lines(args.affected_file)
+
+        def collect(targets: Sequence[str]) -> set[str]:
+            return _collect_nodeids(args.repo_root, targets)
+
+        plan = plan_affected_subtraction(
+            affected,
+            list(args.fixed_targets),
+            collect_nodeids=collect,
         )
+    except (OSError, ValueError) as error:
+        print(f"tests gate selection failed: {error}", file=sys.stderr)
         return 1
-
-    payload = "\n".join(sorted(remainder)) + "\n"
-    if args.output is None:
-        sys.stdout.write(payload)
-    else:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(payload, encoding="utf-8")
-
+    _report_intersection(plan.intersection, plan.ignore_paths)
+    _write_lines(args.output, plan.execution_targets)
+    _write_lines(args.ignore_file, plan.ignore_paths)
     return 0
 
 
@@ -1159,9 +1360,9 @@ def build_parser() -> argparse.ArgumentParser:
     subtract.add_argument("--repo-root", type=Path, default=Path("."))
     subtract.add_argument("--fixed-targets", nargs="+", required=True)
     subtract.add_argument("--affected-file", type=Path, required=True)
-    subtract.add_argument("--output", type=Path)
+    subtract.add_argument("--output", type=Path, required=True)
+    subtract.add_argument("--ignore-file", type=Path, required=True)
     subtract.set_defaults(handler=_subtract_affected_command)
-
     return parser
 
 

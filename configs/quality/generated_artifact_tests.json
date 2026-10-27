@@ -987,6 +987,22 @@
       "reason": "Reads committed generated inventory or capture via the explicitly referenced report path."
     },
     {
+      "node": "tests/architecture/test_silver_filter_boundary_inventory.py::test_inventory_baseline_outputs_match_generator",
+      "artifacts": [
+        "docs/filters/inventory-baseline.csv",
+        "docs/filters/inventory-baseline.json",
+        "docs/filters/inventory-baseline.md"
+      ],
+      "reason": "Checks committed ADR-050 inventory baseline bytes against the silver-filter scanner."
+    },
+    {
+      "node": "tests/architecture/test_silver_filter_boundary_inventory.py::test_inventory_baseline_reports_runtime_ops_and_source_profile_surfaces",
+      "artifacts": [
+        "docs/filters/inventory-baseline.json"
+      ],
+      "reason": "Reads the committed ADR-050 inventory baseline for surface categories and totals."
+    },
+    {
       "node": "tests/architecture/test_tech_debt_issue_6060_closeout.py::test_issue_6060_composition_runtime_builder_fan_in_has_headroom",
       "artifacts": [
         "reports/quality/hotspot-family-baseline.json"

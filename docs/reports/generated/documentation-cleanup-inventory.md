@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3943 |
-| Tracked doc-like files | 3943 |
+| Doc-like files | 4000 |
+| Tracked doc-like files | 4000 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,14 +18,14 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3943 |
+| tracked | 4000 |
 
 ## Lifecycle Counts
 
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
-| active_quality_baseline | 72 |
+| active_quality_baseline | 116 |
 | closeout_evidence | 166 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 28 |
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 230 |
+| working_report | 243 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -55,7 +55,7 @@
 | Archived | 1553 |
 | Canonical | 76 |
 | Generated | 1064 |
-| Working | 499 |
+| Working | 556 |
 
 ## Surface Families
 
@@ -65,15 +65,15 @@
 | archive | 1553 |
 | canonical | 76 |
 | generated | 1064 |
-| working | 499 |
+| working | 556 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 261 |
+| archive-after-migration | 274 |
 | generate-automatically | 1064 |
-| keep | 2618 |
+| keep | 2662 |
 
 ## Cleanup Candidates
 
@@ -120,9 +120,13 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/runtime-receipt.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | Working | 0 | archive-after-migration |
+| `reports/12361_named_blocker.md` | Working | 0 | archive-after-migration |
+| `reports/NAMED_BLOCKER_12464.md` | Working | 0 | archive-after-migration |
 | `reports/acceptance/P04-REM-R10-acceptance-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/acceptance/P04-REM-R10-acceptance-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/acceptance/receipt-12069.md` | Working | 0 | archive-after-migration |
+| `reports/app-001-audit.md` | Working | 0 | archive-after-migration |
+| `reports/architecture/f-09-conformance-matrix-report.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12106-s4-crash-silver/evidence.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12106-s5/evidence/evidence.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12106-s5/matrix.md` | Working | 0 | archive-after-migration |
@@ -155,10 +159,6 @@
 | `reports/audit-runs/12107-r07/telemetry-applicability.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/telemetry-historical/coverage-summary.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/telemetry-historical/slowest-tests.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/12107-r07/telemetry-historical/squash-provenance.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/12107-r07/tracking-responsibility-decision.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20261006-2f16e40/comprehensive/anti-remediation.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20261022-p03/audit-manifest.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

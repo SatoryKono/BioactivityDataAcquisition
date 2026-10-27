@@ -396,6 +396,7 @@ def test_shadow_candidate_rules_match_business_only_inventory() -> None:
     assert not violations, "\n".join(violations)
 
 
+@pytest.mark.generated_artifact
 def test_inventory_baseline_outputs_match_generator(tmp_path: Path) -> None:
     """Keep committed ADR-050 inventory artifacts tied to the scanner output."""
     plans = [
@@ -429,6 +430,7 @@ def test_inventory_baseline_outputs_match_generator(tmp_path: Path) -> None:
     )
 
 
+@pytest.mark.generated_artifact
 def test_inventory_baseline_reports_runtime_ops_and_source_profile_surfaces() -> None:
     payload = yaml.safe_load(JSON_OUT.read_text(encoding="utf-8")) or {}
     assert payload.get("schema_version") == "2.0.0"

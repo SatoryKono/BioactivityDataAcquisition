@@ -402,11 +402,21 @@ jobs:
             --base-sha "$BASE_SHA" \
             --head-sha "$HEAD_SHA" \
             > reports/quality/affected-tests.txt
-<<<<<<< HEAD
           mapfile -t targets < reports/quality/affected-tests.txt
           if [[ ${#targets[@]} -eq 0 ]]; then
             echo "::error::tests gate has no affected pytest target"
             exit 1
+          fi
+          uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results subtract-affected \
+            --repo-root . \
+            --fixed-targets tests/architecture \
+            --affected-file reports/quality/affected-tests.txt \
+            --output reports/quality/affected-nodes-deduplicated.txt \
+            --ignore-file reports/quality/affected-fixed-ignores.txt
+          mapfile -t targets < reports/quality/affected-nodes-deduplicated.txt
+          if [[ ${#targets[@]} -eq 0 ]]; then
+            echo "affected pytest targets are already covered by the fixed architecture lane"
+            exit 0
           fi
           parallel_timeout=900
           # Framework/toolchain updates select the entire suite, not a small
@@ -414,15 +424,18 @@ jobs:
           if [[ ${#targets[@]} -eq 1 && "${targets[0]%/}" == "tests" ]]; then
             parallel_timeout=2400
           fi
-          uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target "${targets[@]}" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-timeout-seconds "$parallel_timeout" --parallel-marker "not serial" --parallel-addopts "-n auto --dist loadfile --max-worker-restart=0 -q --tb=line" --serial-marker "serial" --serial-addopts "-p no:xdist -q --tb=line" --no-fallback --prove-artifact-deferral
-=======
-          uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results subtract-affected \
-            --repo-root . \
-            --fixed-targets tests/architecture \
-            --affected-file reports/quality/affected-tests.txt \
-            --output reports/quality/affected-nodes-deduplicated.txt
-          uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target-file reports/quality/affected-nodes-deduplicated.txt --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-marker "not serial" --parallel-addopts "-n auto --dist loadfile --max-worker-restart=0 -q --tb=line" --serial-marker "serial" --serial-addopts "-p no:xdist -q --tb=line" --no-fallback --prove-artifact-deferral
->>>>>>> 22ba4f12f (chore: preserve generated artifacts before merge)
+          parallel_addopts="-n auto --dist loadfile --max-worker-restart=0 -q --tb=line"
+          serial_addopts="-p no:xdist -q --tb=line"
+          if [[ -s reports/quality/affected-fixed-ignores.txt ]]; then
+            while IFS= read -r ignore_path; do
+              if [[ -z "$ignore_path" ]]; then
+                continue
+              fi
+              parallel_addopts+=" --ignore=${ignore_path}"
+              serial_addopts+=" --ignore=${ignore_path}"
+            done < reports/quality/affected-fixed-ignores.txt
+          fi
+          uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target "${targets[@]}" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-timeout-seconds "$parallel_timeout" --parallel-marker "not serial" --parallel-addopts "$parallel_addopts" --serial-marker "serial" --serial-addopts "$serial_addopts" --no-fallback --prove-artifact-deferral
 
       - name: Shadow compare impact selection
         id: impact-shadow-compare

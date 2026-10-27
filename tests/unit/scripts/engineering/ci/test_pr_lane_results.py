@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+from collections.abc import Sequence
 from pathlib import Path
 
 import pytest
@@ -14,6 +15,7 @@ from scripts.engineering.ci.pr_lane_results import (
     build_results,
     build_shadow_compare,
     main as lane_main,
+    plan_affected_subtraction,
 )
 
 pytestmark = pytest.mark.unit
@@ -202,6 +204,22 @@ def test_shadow_compare_records_selection_without_activation(tmp_path: Path) -> 
     }
 
 
+def test_shadow_compare_routes_domain_layer_doc() -> None:
+    """Domain layer doc edits keep a fail-closed impact route."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        ["docs/02-architecture/01-domain-layer.md"],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/architecture/test_documentation_sync.py",
+        "tests/architecture/test_domain_io_taint_inventory.py",
+    ]
+    assert report["covers_full_suite"] is False
+
+
 def test_shadow_compare_routes_billing_pr_non_code_changes() -> None:
     """Billing documentation and its manifest have explicit test routes."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -218,6 +236,57 @@ def test_shadow_compare_routes_billing_pr_non_code_changes() -> None:
     assert "tests/architecture/test_docs_version_sync.py" in report["selected"]
     assert "tests/architecture/test_documentation_sync.py" in report["selected"]
     assert "tests/unit/scripts/test_github_billing.py" in report["selected"]
+
+
+def test_shadow_compare_routes_historical_secret_fingerprints() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([".gitleaksignore"], repo_root=repo_root)
+    assert report["selected"] == [
+        "tests/architecture/test_secret_shape_and_operator_guide_contracts.py"
+    ]
+    assert report["covers_full_suite"] is False
+
+
+@pytest.mark.parametrize(
+    "path",
+    (
+        "configs/composites/activity.yaml",
+        "configs/composites/target.yaml",
+        "configs/composites/field_groups/shared_policy.yaml",
+    ),
+)
+def test_shadow_compare_routes_composite_configs(path: str) -> None:
+    """Every composite YAML selects the schema test that loads the family."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=repo_root)
+    assert (
+        "tests/unit/infrastructure/schemas/test_composite_config_schema.py"
+        in report["selected"]
+    )
+
+
+def test_shadow_compare_routes_published_pipeline_schemas() -> None:
+    """Published pipeline JSON schemas select the tests that read them."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            "configs/_schema/composite.json",
+            "configs/_schema/pipeline.json",
+        ],
+        repo_root=repo_root,
+    )
+    assert (
+        "tests/architecture/test_config_schema_migration_status.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/integration/config/test_validate_pipeline_configs.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/unit/repo_backed/infrastructure/config/test_composite_sort_by_closure.py"
+        in report["selected"]
+    )
 
 
 def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
@@ -283,6 +352,27 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
     }
 
 
+def test_n1_evidence_paths_have_shadow_compare_routes() -> None:
+    """Nightly, docs, and the gap archive must not fail closed as unmapped."""
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            ".github/workflows/nightly.yml",
+            "CHANGELOG.md",
+            "configs/quality/scripts_lifecycle_registry.json",
+            "docs/04-reference/github-actions-workflows.md",
+            "docs/05-operations/ci-workflow-map.md",
+            "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
+            "reports/governance/n1-shadow-window/ledger.json",
+            "reports/quality/flaky-test-burndown-review.json",
+            "reports/quality/test-governance-current.json",
+        ],
+        repo_root=root,
+    )
+    assert report["activation"] == "not_applied"
+    assert report["selected_count"] >= 1
+
+
 @pytest.mark.parametrize(
     "path",
     [
@@ -317,6 +407,106 @@ def test_shadow_compare_routes_provider_parity_evidence(name: str) -> None:
     assert report["selected"] == [
         "tests/architecture/test_provider_contract_interoperability_governance.py",
         "tests/contract/test_provider_contract_snapshot_registry.py",
+    ]
+
+
+def test_shadow_compare_routes_qm07_report_to_isolation_contracts() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["reports/engineering/qm_07_report.md"], repo_root=root
+    )
+    assert set(report["selected"]) == {
+        "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py",
+        "tests/architecture/qm_07/test_gate_evaluators.py",
+        "tests/architecture/qm_07/test_distribution_isolation.py",
+        "tests/architecture/qm_07/test_qm07_cold_imports.py",
+    }
+
+
+@pytest.mark.parametrize(
+    "path",
+    (
+        "docs/00-project/RULES.md",
+        "docs/05-operations/runbooks/stale-lock.md",
+    ),
+)
+def test_shadow_compare_routes_incident_operator_docs(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert report["selected"] == [
+        "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
+    ]
+
+
+@pytest.mark.parametrize(
+    "path",
+    (
+        "reports/audit-runs/20261026-p17-003-external-callers.md",
+        "reports/audit-runs/20261026-p17-003-external-callers/evidence.json",
+    ),
+)
+def test_shadow_compare_routes_p17_003_external_caller_report(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert report["covers_full_suite"] is False
+    assert report["selected"] == [
+        "tests/unit/scripts/ci/test_check_reusable_workflow_pins.py",
+        "tests/architecture/test_github_actions_runtime_policy.py",
+    ]
+
+
+def test_shadow_compare_routes_app002_port_map_to_port_contracts() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["reports/engineering/app-002-port-map/report.md"], repo_root=root
+    )
+    assert report["covers_full_suite"] is False
+    assert report["selected"] == [
+        "tests/architecture/test_port_contracts.py",
+        "tests/architecture/test_application_services_cross_subdomain_imports.py",
+        "tests/unit/application/ports/test_application_ports_no_factory_aliases.py",
+    ]
+
+
+@pytest.mark.parametrize(
+    "path",
+    (
+        "reports/app-001-audit.md",
+        "reports/audit/AUDIT-20261022-APP-001-Cancellation.md",
+    ),
+)
+def test_shadow_compare_routes_app001_audit_to_cancellation_contracts(
+    path: str,
+) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/unit/application/core/test_batch_execution_lifecycle.py",
+        "tests/unit/application/core/test_derived_scan_budget.py",
+        "tests/unit/application/core/test_pipeline_services.py",
+        "tests/unit/application/core/test_health_aggregator.py",
+        "tests/unit/application/core/test_heartbeat.py",
+        "tests/unit/application/core/test_lock_release_callback_contract.py",
+        "tests/unit/application/core/test_runner.py",
+        "tests/unit/application/services/test_pipeline_runner_service.py",
+        "tests/unit/application/services/run_reports/test_composite_report.py",
+    }
+
+
+def test_shadow_compare_routes_silver_filter_inventory_baseline() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            "docs/filters/inventory-baseline.csv",
+            "docs/filters/inventory-baseline.json",
+            "docs/filters/inventory-baseline.md",
+        ],
+        repo_root=root,
+    )
+    assert report["covers_full_suite"] is False
+    assert report["selected"] == [
+        "tests/architecture/test_silver_filter_boundary_inventory.py"
     ]
 
 
@@ -1074,3 +1264,202 @@ def test_generated_artifact_directory_output_routes_descendants(
     )
 
     assert report["selected"] == [test_path]
+
+
+def _reject_collection(targets: Sequence[str]) -> set[str]:
+    raise AssertionError(targets)
+
+
+def test_subtraction_keeps_disjoint_targets_without_collection() -> None:
+    """A target outside the fixed lane is not collected or rewritten."""
+    plan = plan_affected_subtraction(
+        ["tests/unit/test_sample.py"],
+        ["tests/architecture"],
+        collect_nodeids=_reject_collection,
+    )
+    assert plan.execution_targets == ("tests/unit/test_sample.py",)
+    assert plan.ignore_paths == ()
+    assert plan.intersection == ()
+
+
+def test_subtraction_drops_fixed_lane_files_and_reports_nodeids() -> None:
+    """Selectors already owned by the fixed lane are omitted, not re-run."""
+    seen: list[tuple[str, ...]] = []
+
+    def collect(targets: Sequence[str]) -> set[str]:
+        seen.append(tuple(targets))
+        return {f"{targets[0]}::test_covered"}
+
+    plan = plan_affected_subtraction(
+        ["tests/unit/test_sample.py", "tests/architecture/test_ci.py"],
+        ["tests/architecture"],
+        collect_nodeids=collect,
+    )
+    assert plan.execution_targets == ("tests/unit/test_sample.py",)
+    assert plan.ignore_paths == ()
+    assert plan.intersection == ("tests/architecture/test_ci.py::test_covered",)
+    assert seen == [("tests/architecture/test_ci.py",)]
+
+
+def test_subtraction_ignores_fixed_root_when_parent_is_selected() -> None:
+    """The full suite stays one target and ignores the fixed lane."""
+
+    def collect(targets: Sequence[str]) -> set[str]:
+        assert tuple(targets) == ("tests/architecture",)
+        return {
+            "tests/architecture/test_ci.py::test_one",
+            "tests/architecture/test_ci.py::test_two",
+        }
+
+    plan = plan_affected_subtraction(
+        ["tests"],
+        ["tests/architecture"],
+        collect_nodeids=collect,
+    )
+    assert plan.execution_targets == ("tests",)
+    assert plan.ignore_paths == ("tests/architecture",)
+    assert plan.intersection == (
+        "tests/architecture/test_ci.py::test_one",
+        "tests/architecture/test_ci.py::test_two",
+    )
+
+
+def test_subtraction_fails_closed_on_empty_selection() -> None:
+    """An empty affected file is a broken selector, not an empty success."""
+    with pytest.raises(ValueError, match="no affected pytest target"):
+        plan_affected_subtraction(
+            [],
+            ["tests/architecture"],
+            collect_nodeids=_reject_collection,
+        )
+
+
+def test_subtract_command_writes_plan_and_intersection(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """The CLI records covered nodeids and the ignore used at execution time."""
+    from scripts.engineering.ci import pr_lane_results as lane
+
+    affected = tmp_path / "affected.txt"
+    affected.write_text("tests\n", encoding="utf-8")
+    output = tmp_path / "deduped.txt"
+    ignore = tmp_path / "ignores.txt"
+
+    def collect(root: Path, targets: Sequence[str]) -> set[str]:
+        assert root == tmp_path
+        assert tuple(targets) == ("tests/architecture",)
+        return {"tests/architecture/test_ci.py::test_one"}
+
+    monkeypatch.setattr(lane, "_collect_nodeids", collect)
+    assert (
+        lane_main(
+            [
+                "subtract-affected",
+                "--repo-root",
+                str(tmp_path),
+                "--fixed-targets",
+                "tests/architecture",
+                "--affected-file",
+                str(affected),
+                "--output",
+                str(output),
+                "--ignore-file",
+                str(ignore),
+            ]
+        )
+        == 0
+    )
+    assert output.read_text(encoding="utf-8") == "tests\n"
+    assert ignore.read_text(encoding="utf-8") == "tests/architecture\n"
+    captured = capsys.readouterr()
+    assert "tests/architecture/test_ci.py::test_one" in captured.err
+    assert "fixed-lane ignores: tests/architecture" in captured.err
+
+
+def test_subtract_command_fail_closed_does_not_write_targets(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A broken selector must not leave a runnable target file behind."""
+    from scripts.engineering.ci import pr_lane_results as lane
+
+    affected = tmp_path / "affected.txt"
+    affected.write_text("tests/architecture/test_missing.py\n", encoding="utf-8")
+    output = tmp_path / "deduped.txt"
+
+    def collect(_root: Path, _targets: Sequence[str]) -> set[str]:
+        raise ValueError("pytest collection failed (4)")
+
+    monkeypatch.setattr(lane, "_collect_nodeids", collect)
+    assert (
+        lane_main(
+            [
+                "subtract-affected",
+                "--repo-root",
+                str(tmp_path),
+                "--fixed-targets",
+                "tests/architecture",
+                "--affected-file",
+                str(affected),
+                "--output",
+                str(output),
+                "--ignore-file",
+                str(tmp_path / "ignores.txt"),
+            ]
+        )
+        == 1
+    )
+    assert not output.exists()
+    assert not (tmp_path / "ignores.txt").exists()
+
+
+def test_subtract_command_writes_empty_plan_when_lane_covers_all(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Full overlap is a successful skip, not a failed tests gate."""
+    from scripts.engineering.ci import pr_lane_results as lane
+
+    affected = tmp_path / "affected.txt"
+    affected.write_text("tests/architecture/test_ci.py\n", encoding="utf-8")
+    output = tmp_path / "deduped.txt"
+    ignore = tmp_path / "ignores.txt"
+
+    def collect(_root: Path, targets: Sequence[str]) -> set[str]:
+        return {f"{targets[0]}::test_covered"}
+
+    monkeypatch.setattr(lane, "_collect_nodeids", collect)
+    assert (
+        lane_main(
+            [
+                "subtract-affected",
+                "--repo-root",
+                str(tmp_path),
+                "--fixed-targets",
+                "tests/architecture",
+                "--affected-file",
+                str(affected),
+                "--output",
+                str(output),
+                "--ignore-file",
+                str(ignore),
+            ]
+        )
+        == 0
+    )
+    assert output.read_text(encoding="utf-8") == ""
+    assert ignore.read_text(encoding="utf-8") == ""
+
+
+def test_collect_nodeids_parses_pytest_collection(tmp_path: Path) -> None:
+    """Collection keeps real nodeids and rejects a missing selector."""
+    from scripts.engineering.ci.pr_lane_results import _collect_nodeids
+
+    test_file = tmp_path / "tests" / "test_sample.py"
+    test_file.parent.mkdir()
+    test_file.write_text("def test_one():\n    assert True\n", encoding="utf-8")
+    assert _collect_nodeids(tmp_path, ["tests/test_sample.py"]) == {
+        "tests/test_sample.py::test_one"
+    }
+    with pytest.raises(ValueError, match="pytest collection failed"):
+        _collect_nodeids(tmp_path, ["tests/missing.py"])
