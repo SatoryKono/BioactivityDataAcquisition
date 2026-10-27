@@ -490,6 +490,8 @@ def _accepted_ledger() -> dict[str, object]:
         ("historical_window", "reason_codes", {}),
         ("historical_window", "reason_codes", ["gap"]),
         ("durable_archive", "acceptance", "not_pass"),
+        ("durable_archive", "elapsed_age_is_90_days", False),
+        ("durable_archive", "elapsed_age_is_90_days", 1),
     ],
 )
 def test_acceptance_rejects_missing_or_invalid_evidence(
@@ -551,7 +553,7 @@ def test_mixed_history_is_an_unacceptable_window_and_blocks_the_next_stage() -> 
     assert historical["status"] == "unacceptable"
     assert "mixed_tested_sha" in historical["reason_codes"]
     assert "no_parallel_candidate_arm" in historical["reason_codes"]
-    assert "independent_review_absent" in historical["reason_codes"]
+    assert "independent_review_absent" not in historical["reason_codes"]
     assert "pagination_not_proven" in historical["reason_codes"]
     assert "success_retention_below_30" in historical["reason_codes"]
     assert "actions_retention_cap_below_90" in historical["reason_codes"]
@@ -670,33 +672,55 @@ def test_assess_shadow_window_rejects_missing_daily_attempts(missing_day) -> Non
         candidate_pairs=1,
         artifact_retention_days=30,
         actions_retention_cap_days=90,
-        independent_review=True,
+        # P0 policy dropped independent review as an acceptance gate.
+        independent_review=False,
         cadence_changed_before_acceptance=False,
     )
     if missing_day is None:
         assert result["status"] == "complete"
         assert result["reason_codes"] == []
+        assert result["independent_review"] is False
     else:
         assert result["status"] == "unacceptable"
         assert result["reason_codes"] == ["missing_daily_attempts"]
 
 
-@pytest.mark.parametrize("last_day", [1, 2])
-def test_shadow_window_span_uses_utc_dates_despite_scheduler_jitter(last_day) -> None:
-    from scripts.engineering.ci.nightly_shadow_archive import _span_covers_2_days
+@pytest.mark.parametrize(
+    ("end", "ok"),
+    [
+        ("2026-11-03T07:59:59Z", False),
+        ("2026-11-03T08:00:00Z", True),
+        ("2026-11-03T03:20:00Z", False),
+        ("2026-11-03T00:01:00Z", False),
+    ],
+)
+def test_shadow_window_span_requires_full_48_wall_clock_hours(end, ok) -> None:
+    from scripts.engineering.ci.nightly_shadow_archive import _span_covers_48_hours
 
     runs = [
         {"created_at": "2026-11-01T08:00:00Z"},
-        {"created_at": f"2026-11-{last_day + 1:02d}T03:20:00Z"},
+        {"created_at": end},
     ]
-    assert _span_covers_2_days(runs) is (last_day == 2)
+    assert _span_covers_48_hours(runs) is ok
+
+
+def test_shadow_window_span_rejects_calendar_date_only_two_day_hop() -> None:
+    from scripts.engineering.ci.nightly_shadow_archive import _span_covers_48_hours
+
+    # UTC date delta is 2, wall-clock span is ~24h — must fail closed.
+    assert not _span_covers_48_hours(
+        [
+            {"created_at": "2026-11-01T23:59:00Z"},
+            {"created_at": "2026-11-03T00:01:00Z"},
+        ]
+    )
 
 
 @pytest.mark.parametrize("end", ["2026-11-03T08:00:00", "2026-11-03T08:00:00Z"])
 def test_shadow_window_span_rejects_timezone_naive_observations(end) -> None:
-    from scripts.engineering.ci.nightly_shadow_archive import _span_covers_2_days
+    from scripts.engineering.ci.nightly_shadow_archive import _span_covers_48_hours
 
-    assert not _span_covers_2_days(
+    assert not _span_covers_48_hours(
         [{"created_at": "2026-11-01T08:00:00"}, {"created_at": end}]
     )
 
@@ -755,7 +779,8 @@ def test_committed_gap_ledger_is_not_the_shadow_window() -> None:
     assert (
         ledger["durable_archive"]["local_verify_archive_is_author_check_only"] is True
     )
-    assert "14 full UTC days" in ledger["window_protocol"]["minimum_span"]
+    assert "48 wall-clock hours" in ledger["window_protocol"]["minimum_span"]
+    assert ledger["next_window"]["minimum_hours"] == 48
     assert any("Do not delete" in item for item in ledger["window_protocol"]["gaps"])
     assert (
         main(["require-accepted", "--ledger", "reports/governance/missing-ledger.json"])
