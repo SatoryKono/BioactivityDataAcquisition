@@ -284,6 +284,7 @@
       "type": "object"
     },
     "CrossFieldValidationConfig": {
+      "additionalProperties": false,
       "description": "Configuration for cross-field validation rule.",
       "properties": {
         "name": {
@@ -807,6 +808,7 @@
       "type": "object"
     },
     "FieldValidationConfig": {
+      "additionalProperties": false,
       "description": "Configuration for a single field validation rule.",
       "properties": {
         "field": {
