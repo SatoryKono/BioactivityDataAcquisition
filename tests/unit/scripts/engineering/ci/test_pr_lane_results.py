@@ -1266,8 +1266,10 @@ def test_generated_artifact_directory_output_routes_descendants(
     assert report["selected"] == [test_path]
 
 
-def _reject_collection(targets: Sequence[str]) -> set[str]:
-    raise AssertionError(targets)
+def _reject_collection(
+    targets: Sequence[str], *, marker: str | None = None
+) -> set[str]:
+    raise AssertionError((targets, marker))
 
 
 def test_subtraction_keeps_disjoint_targets_without_collection() -> None:
@@ -1284,10 +1286,10 @@ def test_subtraction_keeps_disjoint_targets_without_collection() -> None:
 
 def test_subtraction_drops_fixed_lane_files_and_reports_nodeids() -> None:
     """Selectors already owned by the fixed lane are omitted, not re-run."""
-    seen: list[tuple[str, ...]] = []
+    seen: list[tuple[tuple[str, ...], str | None]] = []
 
-    def collect(targets: Sequence[str]) -> set[str]:
-        seen.append(tuple(targets))
+    def collect(targets: Sequence[str], *, marker: str | None = None) -> set[str]:
+        seen.append((tuple(targets), marker))
         return {f"{targets[0]}::test_covered"}
 
     plan = plan_affected_subtraction(
@@ -1298,14 +1300,21 @@ def test_subtraction_drops_fixed_lane_files_and_reports_nodeids() -> None:
     assert plan.execution_targets == ("tests/unit/test_sample.py",)
     assert plan.ignore_paths == ()
     assert plan.intersection == ("tests/architecture/test_ci.py::test_covered",)
-    assert seen == [("tests/architecture/test_ci.py",)]
+    assert seen == [
+        (
+            ("tests/architecture/test_ci.py",),
+            "not slow and not benchmark and not memory",
+        ),
+        (("tests/architecture/test_ci.py",), None),
+    ]
 
 
 def test_subtraction_ignores_fixed_root_when_parent_is_selected() -> None:
     """The full suite stays one target and ignores the fixed lane."""
 
-    def collect(targets: Sequence[str]) -> set[str]:
+    def collect(targets: Sequence[str], *, marker: str | None = None) -> set[str]:
         assert tuple(targets) == ("tests/architecture",)
+        assert marker in (None, "not slow and not benchmark and not memory")
         return {
             "tests/architecture/test_ci.py::test_one",
             "tests/architecture/test_ci.py::test_two",
@@ -1322,6 +1331,28 @@ def test_subtraction_ignores_fixed_root_when_parent_is_selected() -> None:
         "tests/architecture/test_ci.py::test_one",
         "tests/architecture/test_ci.py::test_two",
     )
+
+
+def test_subtraction_keeps_tests_the_fixed_lane_skips() -> None:
+    """Slow architecture tests stay in the affected run."""
+
+    def collect(targets: Sequence[str], *, marker: str | None = None) -> set[str]:
+        assert tuple(targets) == ("tests/architecture/test_ci.py",)
+        if marker:
+            return {"tests/architecture/test_ci.py::test_fast"}
+        return {
+            "tests/architecture/test_ci.py::test_fast",
+            "tests/architecture/test_ci.py::test_slow",
+        }
+
+    plan = plan_affected_subtraction(
+        ["tests/architecture/test_ci.py"],
+        ["tests/architecture"],
+        collect_nodeids=collect,
+    )
+    assert plan.execution_targets == ("tests/architecture/test_ci.py::test_slow",)
+    assert plan.ignore_paths == ()
+    assert plan.intersection == ("tests/architecture/test_ci.py::test_fast",)
 
 
 def test_subtraction_fails_closed_on_empty_selection() -> None:
@@ -1347,9 +1378,12 @@ def test_subtract_command_writes_plan_and_intersection(
     output = tmp_path / "deduped.txt"
     ignore = tmp_path / "ignores.txt"
 
-    def collect(root: Path, targets: Sequence[str]) -> set[str]:
+    def collect(
+        root: Path, targets: Sequence[str], *, marker: str | None = None
+    ) -> set[str]:
         assert root == tmp_path
         assert tuple(targets) == ("tests/architecture",)
+        assert marker in (None, "not slow and not benchmark and not memory")
         return {"tests/architecture/test_ci.py::test_one"}
 
     monkeypatch.setattr(lane, "_collect_nodeids", collect)
@@ -1388,8 +1422,10 @@ def test_subtract_command_fail_closed_does_not_write_targets(
     affected.write_text("tests/architecture/test_missing.py\n", encoding="utf-8")
     output = tmp_path / "deduped.txt"
 
-    def collect(_root: Path, _targets: Sequence[str]) -> set[str]:
-        raise ValueError("pytest collection failed (4)")
+    def collect(
+        _root: Path, _targets: Sequence[str], *, marker: str | None = None
+    ) -> set[str]:
+        raise ValueError(f"pytest collection failed (4) {marker}")
 
     monkeypatch.setattr(lane, "_collect_nodeids", collect)
     assert (
@@ -1425,7 +1461,10 @@ def test_subtract_command_writes_empty_plan_when_lane_covers_all(
     output = tmp_path / "deduped.txt"
     ignore = tmp_path / "ignores.txt"
 
-    def collect(_root: Path, targets: Sequence[str]) -> set[str]:
+    def collect(
+        _root: Path, targets: Sequence[str], *, marker: str | None = None
+    ) -> set[str]:
+        assert marker in (None, "not slow and not benchmark and not memory")
         return {f"{targets[0]}::test_covered"}
 
     monkeypatch.setattr(lane, "_collect_nodeids", collect)

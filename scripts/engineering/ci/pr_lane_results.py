@@ -11,7 +11,6 @@ import argparse
 import ast
 import json
 import os
-import re
 import subprocess
 import sys
 from collections.abc import Callable, Sequence
@@ -1134,7 +1133,8 @@ def _shadow_command(args: argparse.Namespace) -> int:
     return 0
 
 
-_NODE_ID_LINE = re.compile(r"^\S+::\S+$")
+# The fixed architecture lane skips these markers. See pr-required.yml.
+_FIXED_LANE_MARKER = "not slow and not benchmark and not memory"
 
 
 def _selector_path(target: str) -> str:
@@ -1162,29 +1162,48 @@ class AffectedSubtraction:
     intersection: tuple[str, ...]
 
 
-def _collect_nodeids(repo_root: Path, targets: Sequence[str]) -> set[str]:
-    """Collect pytest nodeids. A broken selector fails closed."""
+def _is_pytest_nodeid(line: str) -> bool:
+    """Return True for one quiet-collection nodeid without regex backtracking."""
+    if not line or any(character.isspace() for character in line):
+        return False
+    head, separator, tail = line.partition("::")
+    return bool(head and separator and tail)
+
+
+def _collect_nodeids(
+    repo_root: Path,
+    targets: Sequence[str],
+    *,
+    marker: str | None = None,
+) -> set[str]:
+    """Collect pytest nodeids. A broken selector fails closed.
+
+    ``marker`` matches the fixed lane so tests it skips stay in the remainder.
+    """
     if not targets:
         return set()
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "--collect-only",
+        "-q",
+        "-p",
+        "no:benchmark",
+        "-p",
+        "no:xdist",
+        "-p",
+        "no:cov",
+        "--override-ini",
+        "addopts=",
+        "--import-mode=importlib",
+        "--disable-warnings",
+    ]
+    if marker:
+        command.extend(["-m", marker])
+    command.extend(targets)
     completed = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "pytest",
-            "--collect-only",
-            "-q",
-            "-p",
-            "no:benchmark",
-            "-p",
-            "no:xdist",
-            "-p",
-            "no:cov",
-            "--override-ini",
-            "addopts=",
-            "--import-mode=importlib",
-            "--disable-warnings",
-            *targets,
-        ],
+        command,
         cwd=repo_root,
         capture_output=True,
         text=True,
@@ -1200,7 +1219,7 @@ def _collect_nodeids(repo_root: Path, targets: Sequence[str]) -> set[str]:
     return {
         line.strip()
         for line in completed.stdout.splitlines()
-        if _NODE_ID_LINE.match(line.strip())
+        if _is_pytest_nodeid(line.strip())
     }
 
 
@@ -1234,13 +1253,14 @@ def plan_affected_subtraction(
     affected_targets: Sequence[str],
     fixed_targets: Sequence[str],
     *,
-    collect_nodeids: Callable[[Sequence[str]], set[str]],
+    collect_nodeids: Callable[..., set[str]],
 ) -> AffectedSubtraction:
     """Remove fixed-lane coverage without expanding disjoint targets.
 
     A selector outside the fixed roots stays a path. A selector inside a fixed
-    root is collected and omitted, because that lane already runs it. A parent
-    such as ``tests`` stays in place and the fixed root is ignored at runtime.
+    root contributes only the nodeids that lane does not run (``slow``,
+    ``benchmark``, and ``memory``). A parent such as ``tests`` stays one path,
+    ignores the fixed root, and adds those same skipped nodeids explicitly.
     Collection failure is fail-closed and must not fall back to the broad path.
     """
     if not affected_targets:
@@ -1249,15 +1269,25 @@ def plan_affected_subtraction(
     if not fixed_roots:
         raise ValueError("fixed lane has no selector")
     kept, overlapping, ignore = _partition_affected(affected_targets, fixed_roots)
-    intersection: set[str] = set()
+    covered: set[str] = set()
+    remainder: list[str] = []
+
+    def _split(targets: Sequence[str]) -> None:
+        executed = set(collect_nodeids(targets, marker=_FIXED_LANE_MARKER))
+        present = set(collect_nodeids(targets))
+        covered.update(executed)
+        remainder.extend(sorted(present - executed))
+
     if ignore:
-        intersection.update(collect_nodeids(ignore))
+        _split(ignore)
     if overlapping:
-        intersection.update(collect_nodeids(overlapping))
+        _split(overlapping)
+    execution = list(kept)
+    execution.extend(nodeid for nodeid in remainder if nodeid not in execution)
     return AffectedSubtraction(
-        execution_targets=tuple(kept),
+        execution_targets=tuple(execution),
         ignore_paths=tuple(dict.fromkeys(ignore)),
-        intersection=tuple(sorted(intersection)),
+        intersection=tuple(sorted(covered)),
     )
 
 
@@ -1298,8 +1328,8 @@ def _subtract_affected_command(args: argparse.Namespace) -> int:
     try:
         affected = _read_target_lines(args.affected_file)
 
-        def collect(targets: Sequence[str]) -> set[str]:
-            return _collect_nodeids(args.repo_root, targets)
+        def collect(targets: Sequence[str], *, marker: str | None = None) -> set[str]:
+            return _collect_nodeids(args.repo_root, targets, marker=marker)
 
         plan = plan_affected_subtraction(
             affected,
