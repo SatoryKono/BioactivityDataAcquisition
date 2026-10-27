@@ -1001,6 +1001,27 @@
       "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
     },
     {
+      "node": "tests/architecture/test_rf003_config_extra_forbid_ratchet.py::test_rf003_forbid_new_permissive_identities_exact_ceiling",
+      "artifacts": [
+        "reports/quality/config-extra-forbid-inventory.json"
+      ],
+      "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
+    },
+    {
+      "node": "tests/architecture/test_rf003_config_extra_forbid_ratchet.py::test_rf003_justified_exclusions_finalized_with_anchors",
+      "artifacts": [
+        "reports/quality/config-extra-forbid-inventory.json"
+      ],
+      "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
+    },
+    {
+      "node": "tests/architecture/test_rf003_config_extra_forbid_ratchet.py::test_rf003_migration_debt_remains_exact_empty_set",
+      "artifacts": [
+        "reports/quality/config-extra-forbid-inventory.json"
+      ],
+      "reason": "Reads committed generated evidence directly or through a helper/fixture, or checks generator output against committed bytes."
+    },
+    {
       "node": "tests/architecture/test_rf_001_architecture_evidence_baseline.py::test_current_state_inventory_matches_full_app_duplication_baseline",
       "artifacts": [
         "reports/quality/full-app-duplication-baseline.json"

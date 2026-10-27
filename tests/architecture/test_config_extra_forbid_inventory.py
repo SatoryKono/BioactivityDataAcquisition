@@ -35,9 +35,11 @@ from tests.architecture._config_extra_forbid_inventory import (
     DQ_PROJECTION_IDENTITIES,
     DQ_YAML_INGRESS_IDENTITY,
     GENERATOR_COVERED_ROOTS,
+    JUSTIFIED_EXCLUSIONS,
     JUSTIFIED_EXCLUSIONS_SEED,
     PIPELINE_CONTRACT_POLICY_ROOT,
     RF001_FORBID_NEW_BASELINE_IDENTITIES,
+    RF003_REQUIRED_EXCLUSION_KINDS,
     RUNTIME_ONLY_ROOTS,
     WORKFLOW_CONFIG_ROOT,
     WORKFLOW_RECONCILE_FOREIGN_KEYS_IDENTITY,
@@ -110,20 +112,24 @@ def test_migration_debt_is_exact_identity_set_of_effective_ignore() -> None:
 
 @pytest.mark.generated_artifact
 def test_justified_exclusions_registry_is_separate_from_migration_debt() -> None:
-    """Registry (b) seed must not overlap migration debt identities."""
+    """Registry (b) finalized set must not overlap migration debt identities."""
     payload = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
     debt = set(payload["migration_debt_identities"])
     exclusions = payload["justified_exclusions"]
     exclusion_ids = [item["identity"] for item in exclusions]
     assert exclusion_ids == sorted(exclusion_ids)
     assert set(exclusion_ids).isdisjoint(debt)
-    seed_ids = {item["identity"] for item in JUSTIFIED_EXCLUSIONS_SEED}
-    assert set(exclusion_ids) == seed_ids
+    # JUSTIFIED_EXCLUSIONS_SEED is a back-compat alias of JUSTIFIED_EXCLUSIONS.
+    assert JUSTIFIED_EXCLUSIONS_SEED is JUSTIFIED_EXCLUSIONS
+    finalized_ids = {item["identity"] for item in JUSTIFIED_EXCLUSIONS}
+    assert set(exclusion_ids) == finalized_ids
     kinds = {item["kind"] for item in exclusions}
+    assert RF003_REQUIRED_EXCLUSION_KINDS <= kinds
     assert {
         "env-settings",
         "open-dict-typealias",
         "adapter-wire-models",
+        "open-dict-field",
     } <= kinds
 
 
