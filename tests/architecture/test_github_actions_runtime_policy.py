@@ -270,6 +270,7 @@ def test_pr_gate_coordinator_materializes_on_every_pr_without_duplicate_owners()
         "classify-changes",
         "fast-governance",
         "class-lane",
+        "docs-lane",
         "docker-lane",
     }
     assert coordinator["jobs"]["docker-lane"]["permissions"] == {

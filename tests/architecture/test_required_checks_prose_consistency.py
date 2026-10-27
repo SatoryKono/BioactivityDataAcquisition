@@ -500,22 +500,28 @@ def test_every_prose_doc_selects_docs_governance() -> None:
 
 
 def test_prose_only_change_runs_pytest_without_lint_arch() -> None:
-    """Prose-only paths skip lint-arch and still execute the coordinator pytest."""
+    """Prose-only paths skip lint-arch and still execute docs-lane prose pytest."""
     from scripts.engineering.ci.pr_gate import (
         NOT_APPLICABLE,
         classify_changes,
         load_catalog,
     )
-    from scripts.engineering.ci.pr_lane_results import FAST_GOVERNANCE, OWNER_STEPS
+    from scripts.engineering.ci.pr_lane_results import DOCS_LANE, OWNER_STEPS
 
     catalog = load_catalog(CATALOG)
-    workflow = (ROOT / ".github/workflows/pr-required.yml").read_text(encoding="utf-8")
-    step = _coordinator_step(workflow, "prose-consistency")
-    assert "docs-governance'] == 'required'" in step
-    assert "lint-arch" not in step
-    assert "pytest tests/architecture/test_required_checks_prose_consistency.py" in step
-    assert "--junitxml=reports/quality/prose-consistency-junit.xml" in step
-    assert "prose-consistency" in OWNER_STEPS[FAST_GOVERNANCE]["docs-governance"]
+    coordinator = (ROOT / ".github/workflows/pr-required.yml").read_text(
+        encoding="utf-8"
+    )
+    docs_workflow = (ROOT / ".github/workflows/docs.yml").read_text(encoding="utf-8")
+    assert "docs-governance'] == 'required'" in coordinator
+    assert "uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@" in (
+        coordinator
+    )
+    assert "tests/architecture/test_required_checks_prose_consistency.py" in (
+        docs_workflow
+    )
+    assert "lint-arch" not in docs_workflow.split("jobs:", maxsplit=1)[0]
+    assert "docs-governance" in OWNER_STEPS[DOCS_LANE]
 
     prose_only: list[str] = []
     for doc_path in catalog["policy"]["prose_claim_doc_paths"]:

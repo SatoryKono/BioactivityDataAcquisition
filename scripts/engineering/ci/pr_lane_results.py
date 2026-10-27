@@ -471,13 +471,14 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
 
 FAST_GOVERNANCE = "fast-governance"
 CLASS_LANE = "class-lane"
+DOCS_LANE = "docs-lane"
 DOCKER_LANE = "docker-lane"
 
 GATE_OWNERS: dict[str, str] = {
     "root-hygiene": FAST_GOVERNANCE,
     "compiled-artifacts": FAST_GOVERNANCE,
     "commit-governance": FAST_GOVERNANCE,
-    "docs-governance": FAST_GOVERNANCE,
+    "docs-governance": DOCS_LANE,
     "lint-arch": CLASS_LANE,
     "tests": CLASS_LANE,
     "type-checking": CLASS_LANE,
@@ -499,12 +500,12 @@ OWNER_STEPS: dict[str, dict[str, tuple[str, ...]]] = {
         ),
         "compiled-artifacts": ("compiled-artifacts", "cleanliness"),
         "commit-governance": ("commitlint",),
+    },
+    DOCS_LANE: {
         "docs-governance": (
-            "docs-passports",
-            "docs-links",
-            "docs-verify",
-            "mkdocs-nav",
-            "prose-consistency",
+            "docs-governance",
+            "validate-mkdocs",
+            "check-diagram-drift",
         ),
     },
     DOCKER_LANE: {
