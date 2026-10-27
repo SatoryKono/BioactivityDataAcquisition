@@ -269,17 +269,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         DOCUMENTATION_SYNC_TEST,
         "tests/architecture/test_domain_io_taint_inventory.py",
     ),
-    "docs/02-architecture/decisions/ADR-054-passport-documentation-projections.md": (
-        "tests/architecture/test_adr_registry_governance_sync.py",
-    ),
-    "docs/02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md": (
-        "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_passport_documentation_projections.py",
-    ),
-    "docs/02-architecture/decisions/ADR-056-proof-or-stop-lifecycle-control.md": (
-        "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_proof_or_stop_contract.py",
-    ),
     "docs/02-architecture/current-state-inventory.md": (
         "tests/architecture/test_arch_s4_s9_gates.py",
         "tests/unit/scripts/qa/test_topology_source_binding.py",
@@ -420,6 +409,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "docs/02-architecture/decisions/": (
+        "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+    ),
     "configs/composites/": (
         "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
     ),
