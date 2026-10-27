@@ -33,6 +33,11 @@ from pathlib import Path
 
 import pytest
 
+from tests.architecture._cli_architecture_policy import (
+    CliArchitecturePolicyError,
+    parse_cli_architecture_contract,
+)
+
 pytestmark = pytest.mark.architecture
 
 # Infrastructure/I/O libraries that should NOT be in the domain layer
@@ -679,8 +684,16 @@ def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
     """
     importlinter_config = project_root / ".importlinter"
     if not importlinter_config.exists():
-        _handle_import_linter_capability_gap(".importlinter config not found")
-        return
+        pytest.fail(
+            "missing required CLI/layer policy source: .importlinter "
+            "(contract interfaces-no-direct-infrastructure). "
+            "Absent policy input must not pass."
+        )
+
+    try:
+        parse_cli_architecture_contract(importlinter_config.read_text(encoding="utf-8"))
+    except CliArchitecturePolicyError as exc:
+        pytest.fail(f"CLI architecture contract rejected: {exc}")
 
     lint_imports_cmd = _find_lint_imports_cmd(project_root)
     if lint_imports_cmd is None:

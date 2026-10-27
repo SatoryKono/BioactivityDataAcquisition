@@ -289,6 +289,20 @@ def test_shadow_compare_routes_published_pipeline_schemas() -> None:
     )
 
 
+def test_shadow_compare_routes_published_dq_schema() -> None:
+    """The published DQ JSON schema selects the tests that read it."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["configs/_schema/dq.json"],
+        repo_root=repo_root,
+    )
+    assert report["covers_full_suite"] is False
+    assert report["selected"] == [
+        "tests/architecture/test_config_schema_migration_status.py",
+        "tests/unit/infrastructure/schemas/test_dq_config.py",
+    ]
+
+
 def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(

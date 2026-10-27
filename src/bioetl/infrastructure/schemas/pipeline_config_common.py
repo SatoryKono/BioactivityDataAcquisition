@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from bioetl.domain.config import (
     ConditionalValidation as DomainConditionalValidation,
@@ -40,6 +40,8 @@ type DQAllowedScalar = str | int | float | bool
 class FieldValidationConfig(BaseModel):
     """Configuration for a single field validation rule."""
 
+    model_config = ConfigDict(extra="forbid")
+
     field: str = Field(description="Field name to validate")
     type: Literal[
         "required",
@@ -73,6 +75,8 @@ class FieldValidationConfig(BaseModel):
 class CrossFieldValidationConfig(BaseModel):
     """Configuration for cross-field validation rule."""
 
+    model_config = ConfigDict(extra="forbid")
+
     name: str = Field(description="Unique validation rule name")
     fields: list[str] = Field(description="Fields involved in validation")
     condition: Literal[
@@ -99,6 +103,8 @@ class CrossFieldValidationConfig(BaseModel):
 class ConditionalValidationConfig(BaseModel):
     """Configuration for conditional validation rule."""
 
+    model_config = ConfigDict(extra="forbid")
+
     name: str = Field(description="Unique validation rule name")
     condition_field: str = Field(description="Field to check for condition")
     condition_value: str | list[str] = Field(description="Value(s) that trigger")
@@ -112,6 +118,8 @@ class ConditionalValidationConfig(BaseModel):
 
 class DQReportYamlConfig(BaseModel):
     """Configuration for DQ report generation."""
+
+    model_config = ConfigDict(extra="forbid")
 
     enabled: bool = Field(default=True, description="Generate DQ reports")
     format: Literal["json", "yaml", "csv"] = Field(
@@ -128,6 +136,8 @@ class DQReportYamlConfig(BaseModel):
 
 class DQYamlConfig(BaseModel):
     """Data Quality configuration."""
+
+    model_config = ConfigDict(extra="forbid")
 
     soft_fail_threshold: float = Field(default=0.05)
     hard_fail_threshold: float = Field(default=0.20)
