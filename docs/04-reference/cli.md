@@ -524,6 +524,13 @@ Silver/Gold in a new isolated directory without invoking provider APIs.
 bioetl replay-composite --envelope <path/to/parent.json> --sha256 <parent-envelope-digest> --output <new-directory>
 ```
 
+| Опция | Описание |
+| --- | --- |
+| `--envelope` | Путь к сохраненному composite input (required) |
+| `--sha256` | Дайджест из parent run report для верификации (required) |
+| `--output` | Новая изолированная директория для вывода (required) |
+
+
 All three options are required. The envelope must be named `parent.json`; use the
 SHA-256 recorded by the parent run report. Missing or inconsistent evidence stops
 the command instead of claiming replay equivalence.
@@ -542,6 +549,13 @@ Compatibility command for the same offline replay callback and required options:
 ```bash
 bioetl replay-assay --envelope <path/to/parent.json> --sha256 <parent-envelope-digest> --output <new-directory>
 ```
+
+| Опция | Описание |
+| --- | --- |
+| `--envelope` | Путь к сохраненному assay input (required) |
+| `--sha256` | Дайджест из parent run report для верификации (required) |
+| `--output` | Новая изолированная директория для вывода (required) |
+
 
 ### `run-manifest` — Inspect control-plane manifests and ledgers
 
