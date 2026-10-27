@@ -46,6 +46,21 @@ def _parse_mypy_output(log_path: Path) -> dict[str, dict[str, dict[str, int]]]:
     return diagnostics
 
 
+def _compare_diagnostics(
+    current_diagnostics: dict[str, dict[str, dict[str, int]]], baseline: dict[str, Any]
+) -> list[str]:
+    errors = []
+    for file_path, messages in current_diagnostics.items():
+        for msg, codes in messages.items():
+            for code, count in codes.items():
+                baseline_count = baseline.get(file_path, {}).get(msg, {}).get(code, 0)
+                if count > baseline_count:
+                    errors.append(
+                        f"{file_path}: count for '{msg}' [{code}] increased from {baseline_count} to {count}"
+                    )
+    return errors
+
+
 def main() -> int:
     repo_root = Path(__file__).resolve().parents[3]
     log_path = repo_root / "reports" / "mypy_strict.log"
@@ -63,16 +78,7 @@ def main() -> int:
     else:
         baseline = {}
 
-    errors = []
-
-    for file_path, messages in current_diagnostics.items():
-        for msg, codes in messages.items():
-            for code, count in codes.items():
-                baseline_count = baseline.get(file_path, {}).get(msg, {}).get(code, 0)
-                if count > baseline_count:
-                    errors.append(
-                        f"{file_path}: count for '{msg}' [{code}] increased from {baseline_count} to {count}"
-                    )
+    errors = _compare_diagnostics(current_diagnostics, baseline)
 
     if errors:
         print("::error::Mypy diagnostic ratchet failed. New type errors introduced:")

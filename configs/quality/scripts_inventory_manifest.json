@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-26T23:16:52.690164+00:00",
+  "generated_at": "2026-10-27T01:51:47.976341+00:00",
   "summary": {
     "total_scripts": 698,
     "status_counts": {
@@ -10090,7 +10090,7 @@
           "path": ".github/workflows/type-checking.yml",
           "line": 74,
           "source_group": "ci",
-          "text": "uv run --frozen python -m scripts.engineering.ci.check_mypy_diagnostic_ratchet"
+          "text": "uv run --frozen --no-build python -m scripts.engineering.ci.check_mypy_diagnostic_ratchet"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
@@ -10102,19 +10102,19 @@
           "path": "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
           "line": 7,
           "source_group": "tests",
-          "text": "from scripts.engineering.ci.check_mypy_diagnostic_ratchet import main, _parse_mypy_output"
+          "text": "from scripts.engineering.ci.check_mypy_diagnostic_ratchet import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
-          "line": 30,
+          "line": 52,
           "source_group": "tests",
-          "text": "mock_resolve.return_value = repo_root / \"scripts\" / \"engineering\" / \"ci\" / \"check_mypy_diagnostic_ratchet.py\""
+          "text": "/ \"check_mypy_diagnostic_ratchet.py\""
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
-          "line": 58,
+          "line": 83,
           "source_group": "tests",
-          "text": "mock_resolve.return_value = repo_root / \"scripts\" / \"engineering\" / \"ci\" / \"check_mypy_diagnostic_ratchet.py\""
+          "text": "/ \"check_mypy_diagnostic_ratchet.py\""
         }
       ]
     },
