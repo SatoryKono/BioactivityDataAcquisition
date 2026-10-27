@@ -85,11 +85,10 @@ delta:
 - lifecycle state transitions;
 - `seed_completed`;
 - `merge_completed`;
-- last replayed event watermark.
+- last replayed event watermark;
+- rich checkpoint payloads such as dependency result maps, enrichment result maps, and merge payload details.
 
-It does **not** rebuild rich checkpoint payloads such as dependency result
-maps, enrichment result maps, or merge payload details. That is a deliberate
-constraint in the current implementation.
+Although the composite projection reconstructs these rich checkpoint payloads from suffix events, the ledger still does **not** serve as a universal baseline replacement. The bounded suffix replay is a deliberate constraint in the current implementation.
 
 ### 3. Composite resume is already hybrid, but narrowly so
 
