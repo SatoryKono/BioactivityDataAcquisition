@@ -25,7 +25,21 @@ FULL_SUITE_CONFIGURATION_PREFIXES = ("tool.pytest.ini_options",)
 NARROW_CONFIGURATION_PREFIXES = ("tool.setuptools.packages.find.exclude",)
 # Stub-only wheels have no runtime import owner. Keep reviewed ownership explicit.
 STUB_RUNTIME_DISTRIBUTIONS = {"types-openpyxl": ("openpyxl", "openpyxl")}
-# pip-audit / msgpack ownership: scripts/engineering/ci/pip_audit_owner.py
+
+
+def _route_anchor(*, distribution: str) -> str:
+    """Return a declared distribution name for the dependency consumer scanner.
+
+    Tooling packages such as ``pip-audit`` (and its ``msgpack`` lock family) often
+    have no application ``import``. Keep the literal ``distribution=`` keyword so
+    ``dependency_consumers`` can confirm them without a separate owner module that
+    would fall back to the whole ``tests/unit/scripts`` tree.
+    """
+    return distribution
+
+
+# Ownership anchor for pip-audit / msgpack constraint and lock bumps.
+_ = (_route_anchor(distribution="pip-audit"),)
 
 
 def _name(value: str) -> str:
