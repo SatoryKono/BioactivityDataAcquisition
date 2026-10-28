@@ -88,15 +88,44 @@ def _remote_main_sha(repo_root: Path, *, remote: str, branch: str) -> str:
 
 
 def _git_blob(repo_root: Path, revision: str, path: str) -> bytes | None:
-    result = subprocess.run(
-        ["git", "show", f"{revision}:{path}"],
-        cwd=repo_root,
-        check=False,
-        capture_output=True,
+    def run_git(
+        args: list[str], *, operation: str
+    ) -> subprocess.CompletedProcess[bytes]:
+        try:
+            result = subprocess.run(
+                ["git", *args],
+                cwd=repo_root,
+                check=False,
+                capture_output=True,
+            )
+        except OSError as exc:
+            raise RuntimeError(f"Git {operation} failed: {exc}") from exc
+        if result.returncode != 0:
+            detail = result.stderr.decode("utf-8", errors="replace").strip()
+            raise RuntimeError(
+                f"Git {operation} failed for {revision!r}: {detail or result.returncode}"
+            )
+        return result
+
+    resolved = (
+        run_git(
+            ["rev-parse", "--verify", f"{revision}^{{commit}}"],
+            operation="commit resolution",
+        )
+        .stdout.strip()
+        .decode("ascii")
     )
-    if result.returncode != 0:
+    tree_entries = run_git(
+        ["ls-tree", "-r", "--full-tree", "--name-only", "-z", resolved, "--", path],
+        operation="tree lookup",
+    ).stdout.split(b"\0")
+    if path.encode("utf-8") not in tree_entries:
         return None
-    return result.stdout
+
+    return run_git(
+        ["show", f"{resolved}:{path}"],
+        operation=f"blob read for {path}",
+    ).stdout
 
 
 _CONFLICT_MARKER_PREFIXES = ("<<<<<<<", "|||||||", "=======", ">>>>>>>")
