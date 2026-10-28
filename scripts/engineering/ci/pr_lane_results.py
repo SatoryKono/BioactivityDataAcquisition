@@ -252,6 +252,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
     ),
     "reports/epoch2208/b/benchmark.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/12375_b_repeat_blocker.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "CHANGELOG.md": ("tests/architecture/test_docs_version_sync.py",),
     ".coderabbit.yaml": ("tests/architecture/test_coderabbit_config.py",),
     ".github/workflows/duplication-complexity.yml": (
