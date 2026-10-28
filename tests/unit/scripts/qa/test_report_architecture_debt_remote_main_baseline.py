@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -22,6 +23,76 @@ from scripts.engineering.qa import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+def _committed_git_repo(tmp_path: Path) -> tuple[Path, str]:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    subprocess.run(["git", "-C", str(repo), "config", "user.name", "Test"], check=True)
+    subprocess.run(
+        ["git", "-C", str(repo), "config", "user.email", "test@example.com"],
+        check=True,
+    )
+    tracked = repo / "tracked.txt"
+    tracked.write_bytes(b"blob contents\n")
+    subprocess.run(["git", "-C", str(repo), "add", "tracked.txt"], check=True)
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-q", "-m", "test commit"],
+        check=True,
+    )
+    revision = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    ).stdout.strip()
+    return repo, revision
+
+
+def test_git_blob_returns_existing_blob(tmp_path: Path) -> None:
+    repo, revision = _committed_git_repo(tmp_path)
+
+    assert baseline._git_blob(repo, revision, "tracked.txt") == b"blob contents\n"
+
+
+def test_git_blob_returns_none_for_missing_path_in_valid_commit(tmp_path: Path) -> None:
+    repo, revision = _committed_git_repo(tmp_path)
+
+    assert baseline._git_blob(repo, revision, "missing.txt") is None
+
+
+def test_git_blob_raises_for_unresolvable_commit(tmp_path: Path) -> None:
+    repo, _ = _committed_git_repo(tmp_path)
+
+    with pytest.raises(RuntimeError, match="commit resolution"):
+        baseline._git_blob(repo, "missing-revision", "tracked.txt")
+
+
+def test_git_blob_raises_when_existing_blob_cannot_be_read(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo, revision = _committed_git_repo(tmp_path)
+    original_run = subprocess.run
+
+    def fail_blob_read(
+        args: list[str], **kwargs: object
+    ) -> subprocess.CompletedProcess[bytes]:
+        if args[:2] == ["git", "show"]:
+            return subprocess.CompletedProcess(
+                args,
+                128,
+                stdout=b"",
+                stderr=b"fatal: unable to read object",
+            )
+        return original_run(args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(baseline.subprocess, "run", fail_blob_read)
+
+    with pytest.raises(RuntimeError, match="blob read.*unable to read object"):
+        baseline._git_blob(repo, revision, "tracked.txt")
 
 
 def test_json_blob_summary_returns_unavailable_for_none_blob() -> None:
