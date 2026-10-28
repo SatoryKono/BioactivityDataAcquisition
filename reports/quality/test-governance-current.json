@@ -566,7 +566,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1648",
+      "line": "1651",
       "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_merged_empty_records_returns"
@@ -2007,7 +2007,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1648",
+        "line": "1651",
         "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_merged_empty_records_returns"
@@ -2497,7 +2497,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "17bb95c989f0119cba225ff35efd124b93c161d9fe48d3fd9110778f7e75c4b0",
+  "source_tree_sha256": "f480c380d045b6afa3bc974a9a1aeabed2a727512cf918931fca1cda4c68805e",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 107,
