@@ -70,5 +70,5 @@ Latest hash-only module-coverage, architecture dependency-map, governance-artifa
 ## Closeout still pending
 
 - Independent reviewer is not assigned; the author does not self-approve the Gold nullability finding.
-- Draft PR publication, remote SHA, PR CI, review/merge, and issue acceptance remain pending; none is implied by this report.
+- Draft PR [#12606](https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12606) was published from `codex/issue-12475-parity` at `23fcc8a0223b40481b88289a66d71eba091e0618`, based on `main` `cb17e466e267adaba386c522373f7460fa3bf4f8`. GitHub reported `Classify changes (decision matrix)` in progress at publication verification. Review, merge, and issue acceptance remain pending; none is implied by the Draft PR.
 - #12474 has not been started and remains gated on confirmed full #12475 acceptance.
