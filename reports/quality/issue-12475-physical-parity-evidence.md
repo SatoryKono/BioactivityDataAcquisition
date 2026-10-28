@@ -5,10 +5,9 @@ Status: local real-backend checks verified, with one confirmed Gold nullability 
 ## Provenance
 
 - Repository: `SatoryKono/BioactivityDataAcquisition`.
-- Base `main` at latest refresh: `cb17e466e267adaba386c522373f7460fa3bf4f8`; tree `5a46ccde440b84f8725a826658dbd391d9175b04`.
-- Tested storage implementation revision: `70c26231d90e0a4c81f1fa6785525169317e5b3f`; tree `4c7588fe1061f9a54ad3dc2d771d7fa37c106e18`.
-- Tested full-matrix revision: `49f4d00e7f6b86f2575ca28ab0aa9017010388bc`; tree `6268fbbaa3030c1a2eca79fb0be66248a5658211`.
-- Branch: `codex/issue-12475-parity`.
+- Base `main` at refresh: `71d01d3271874be76a2ab94744b55df1ba2cf6c4`; tree `4e1eccb8c0c23885d82375b5f9dde8b873e34489`.
+- Tested implementation and full-matrix revision: `5d144a4458b73444979be8730be9fee09f7edd47`; tree `0850fdd992983dfe97754b139d81698d5516224b`.
+- Branch: `codex/issue-12475-closeout`.
 - Environment: Windows x64, CPython 3.13.7, `deltalake` 0.25.5, PyArrow 25.0.1, Polars 2.0.0, Pandera 0.34.1, zstandard 0.25.0. `.venv-win` was prepared with `powershell -ExecutionPolicy Bypass -File scripts/engineering/dev/setup_env_windows.ps1` from checked-in `uv.lock` (SHA-256 `76596AAE5B29276D6287A91FAEAF984638E653C659E6AF20E39949075485F3C2`).
 - Write/read tests use deterministic inputs and real temporary local files/Delta tables; no mocks or repository data fixtures.
 
@@ -40,11 +39,13 @@ Gold uses the actual `ChEMBLPublicationGoldSchema` with `entity_id=CHEMBL123`, t
 
 ## Commands and outcomes
 
-Owning test command, run on full-matrix revision `49f4d00e7f6b86f2575ca28ab0aa9017010388bc`:
+Owning test command, rerun on exact implementation revision `5d144a4458b73444979be8730be9fee09f7edd47`:
 
 ```text
-.venv-win\Scripts\python.exe -m pytest -q tests/unit/domain/exceptions/test_storage.py tests/unit/infrastructure/storage/test_silver_writer_validation.py tests/unit/infrastructure/storage/test_gold_writer_integration.py::test_write_scd2_existing_table tests/integration/infrastructure/storage/test_issue_12475_physical_parity.py tests/integration/infrastructure/storage/test_gold_writer_versioning.py::test_issue_12475_gold_scd2_repeat_write_keeps_history_and_current_row tests/integration/infrastructure/storage/test_gold_writer_versioning.py::test_gold_writer_overwrite_is_idempotent_for_identical_records tests/e2e/test_pipeline_with_schema_drift_e2e.py::TestSchemaEvolutionErrorMode::test_schema_drift_error_mode_raises_on_new_field tests/e2e/test_pipeline_with_schema_drift_e2e.py::TestSchemaEvolutionEvolveMode::test_schema_evolve_mode_allows_new_fields -s
-exit code: 0; 85 passed; stdout: 85 passing-test dots; stderr: empty
+.venv-win\Scripts\python.exe -m pytest -q tests/unit/domain/exceptions/test_storage.py tests/unit/infrastructure/storage/test_silver_writer_validation.py tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py tests/unit/infrastructure/storage/test_gold_writer_integration.py::test_write_scd2_existing_table tests/integration/infrastructure/storage/test_issue_12475_physical_parity.py tests/integration/infrastructure/storage/test_gold_writer_versioning.py::test_issue_12475_gold_scd2_repeat_write_keeps_history_and_current_row tests/integration/infrastructure/storage/test_gold_writer_versioning.py::test_gold_writer_overwrite_is_idempotent_for_identical_records tests/e2e/test_pipeline_with_schema_drift_e2e.py::TestSchemaEvolutionErrorMode::test_schema_drift_error_mode_raises_on_new_field tests/e2e/test_pipeline_with_schema_drift_e2e.py::TestSchemaEvolutionEvolveMode::test_schema_evolve_mode_allows_new_fields -s
+exit code: 0; all selected tests passed; stdout: passing-test dots; stderr: empty
+
+The command includes a regression for input fields excluded by the prepared Arrow schema. `test_schema_drift_detects_record_fields_outside_prepared_schema` verifies that `on_schema_mismatch="error"` still reports the added field after the configured schema filters it from the Arrow payload. Two existing unit assertions were updated to include the `incoming_schema` keyword argument; the tested behavior and strict error contract were not weakened.
 ```
 
 | Check | Exit | Outcome |
@@ -70,6 +71,8 @@ Latest hash-only module-coverage, architecture dependency-map, governance-artifa
 
 ## Closeout still pending
 
-- Independent reviewer is not assigned; the author does not self-approve the Gold nullability finding.
-- Draft PR [#12606](https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12606) was published from `codex/issue-12475-parity` at `23fcc8a0223b40481b88289a66d71eba091e0618`, based on `main` `cb17e466e267adaba386c522373f7460fa3bf4f8`. GitHub reported `Classify changes (decision matrix)` in progress at publication verification. Review, merge, and issue acceptance remain pending; none is implied by the Draft PR.
+- PR [#12606](https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12606) was merged at `f8bbed37354c740165e41dd1acf70c5ba2d7ed49` from head `094a0e3031c9c98dd486a4af32475449fbb16c9c`, based on `cb17e466e267adaba386c522373f7460fa3bf4f8`. Its PR Gate Class lane and SonarCloud Code Analysis failed. The current `main` base `71d01d3271874be76a2ab94744b55df1ba2cf6c4` includes the later SCD2 complexity and VCR inventory corrections; those exact architecture and inventory tests pass on this follow-up branch.
+- Follow-up branch `codex/issue-12475-closeout` contains the issue-specific Silver schema-drift fix and regression. The owning command above and selected architecture/route tests pass at implementation commit `5d144a4458b73444979be8730be9fee09f7edd47`; clean-state full governance-artifact check and the coupled CI drift check excluding telemetry also pass. The branch is not yet published as a PR.
+- Committed telemetry remains stale for this branch's test-source tree. Per `docs/05-engineering/test-telemetry-baseline.md`, a manually dispatched Nightly run on this branch and its exact coverage and duration artifacts are required before refreshing the telemetry baseline. This run and the resulting clean telemetry check are pending.
+- Independent reviewer is not assigned; the author does not self-approve the confirmed Gold nullability finding. The issue remains OPEN. Its seven review concerns and measured real-backend results are documented above; final acceptance and closeout passport still require a qualifying published revision, CI/review evidence, and independent review.
 - #12474 has not been started and remains gated on confirmed full #12475 acceptance.
