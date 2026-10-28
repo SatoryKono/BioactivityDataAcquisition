@@ -873,6 +873,18 @@ def test_affected_targets_map_telemetry_baseline(tmp_path: Path) -> None:
     assert untouched == []
 
 
+def test_affected_targets_map_test_governance_audit_config() -> None:
+    """Test-governance config changes select their owning report checks."""
+    repo_root = Path(__file__).resolve().parents[5]
+    assert affected_pytest_targets(
+        ["configs/quality/test_governance_audit.yaml"],
+        repo_root=repo_root,
+    ) == [
+        "tests/architecture/test_test_governance_audit.py",
+        "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
+    ]
+
+
 def test_affected_targets_map_memory_source_without_test_diff() -> None:
     """A chunking-only PR must select its real RAG regression suite."""
     repo_root = Path(__file__).resolve().parents[5]
