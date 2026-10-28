@@ -7,7 +7,7 @@ Status: local real-backend checks verified, with one confirmed Gold nullability 
 - Repository: `SatoryKono/BioactivityDataAcquisition`.
 - Base `main` at latest refresh: `cb17e466e267adaba386c522373f7460fa3bf4f8`; tree `5a46ccde440b84f8725a826658dbd391d9175b04`.
 - Tested storage implementation revision: `70c26231d90e0a4c81f1fa6785525169317e5b3f`; tree `4c7588fe1061f9a54ad3dc2d771d7fa37c106e18`.
-- Tested full-matrix revision: `2fa9896bed6eb697395ba3833691e9ec3939e982`; tree `95672c964cc52120c5422c33df6aad8d885a442c`.
+- Tested full-matrix revision: `49f4d00e7f6b86f2575ca28ab0aa9017010388bc`; tree `6268fbbaa3030c1a2eca79fb0be66248a5658211`.
 - Branch: `codex/issue-12475-parity`.
 - Environment: Windows x64, CPython 3.13.7, `deltalake` 0.25.5, PyArrow 25.0.1, Polars 2.0.0, Pandera 0.34.1, zstandard 0.25.0. `.venv-win` was prepared with `powershell -ExecutionPolicy Bypass -File scripts/engineering/dev/setup_env_windows.ps1` from checked-in `uv.lock` (SHA-256 `76596AAE5B29276D6287A91FAEAF984638E653C659E6AF20E39949075485F3C2`).
 - Write/read tests use deterministic inputs and real temporary local files/Delta tables; no mocks or repository data fixtures.
@@ -40,7 +40,7 @@ Gold uses the actual `ChEMBLPublicationGoldSchema` with `entity_id=CHEMBL123`, t
 
 ## Commands and outcomes
 
-Owning test command, run on full-matrix revision `2fa9896bed6eb697395ba3833691e9ec3939e982`:
+Owning test command, run on full-matrix revision `49f4d00e7f6b86f2575ca28ab0aa9017010388bc`:
 
 ```text
 .venv-win\Scripts\python.exe -m pytest -q tests/unit/domain/exceptions/test_storage.py tests/unit/infrastructure/storage/test_silver_writer_validation.py tests/unit/infrastructure/storage/test_gold_writer_integration.py::test_write_scd2_existing_table tests/integration/infrastructure/storage/test_issue_12475_physical_parity.py tests/integration/infrastructure/storage/test_gold_writer_versioning.py::test_issue_12475_gold_scd2_repeat_write_keeps_history_and_current_row tests/integration/infrastructure/storage/test_gold_writer_versioning.py::test_gold_writer_overwrite_is_idempotent_for_identical_records tests/e2e/test_pipeline_with_schema_drift_e2e.py::TestSchemaEvolutionErrorMode::test_schema_drift_error_mode_raises_on_new_field tests/e2e/test_pipeline_with_schema_drift_e2e.py::TestSchemaEvolutionEvolveMode::test_schema_evolve_mode_allows_new_fields -s
@@ -59,7 +59,7 @@ exit code: 0; 85 passed; stdout: 85 passing-test dots; stderr: empty
 
 Full local coverage verification was attempted with `.venv-win\Scripts\python.exe -m scripts.engineering.qa.run_local_coverage_verify --max-workers 1` at revision `46df68864ecef46dcd9ea1cef4b0aff98b282f28`. The preserved manifest is `C:\Users\Fedor\.codex\preserved\issue-12475-initial-20261028\local-coverage-run-f1949-20261028`; its SHA-256 is `53D04BBE68FFB3A2E6852D3D8275A4FA8C29060229865878A1D9939989DF34B3`. It contains 14 successful and 3 unsuccessful shards, so `complete=false` and cannot refresh telemetry. The infrastructure shard's SCD2 no-op regression was corrected in `70c2623`; two remaining failures are unrelated to this issue: `test_real_daily_caller_and_command_partition_are_complete` (expected workflow fallback option absent from `pr-required.yml`) and `test_private_host_delivery_binds_source_and_survives_data_volume` (optional Grafana provisioning artifact hash mismatch). The preserved manifest predates the latest main and is not treated as qualifying coverage.
 
-Latest hash-only module-coverage, architecture dependency-map, governance-artifact and selected CI-family checks pass after their documented refreshes. `.venv-win\Scripts\python.exe -m scripts.engineering.qa refresh-ci-drift-families --check --telemetry` exits 1: the two telemetry governance tests detect live test-source hash `33bd4b5a6736f541011c2765b00c1febab853f0d9bf967f43e5b5d40c7a8c73c` differing from committed baseline `fd232459ae26a6b0fd0373eac78702a3d0d12ed773d12a8b3dff492df1ab4c07`. No partial coverage or manually constructed identity was used to rebind it; a qualifying source-bound CI run is still required.
+Latest hash-only module-coverage, architecture dependency-map, governance-artifact and selected CI-family checks pass after their documented refreshes. `.venv-win\Scripts\python.exe -m scripts.engineering.qa refresh-ci-drift-families --check --telemetry` exits 1: the two telemetry governance tests detect live test-source hash `d65f6b20251c80ffbcc5b09ea96c66e5ee6603111f791054849d5fa7827e68bb` differing from committed baseline `fd232459ae26a6b0fd0373eac78702a3d0d12ed773d12a8b3dff492df1ab4c07`. No partial coverage or manually constructed identity was used to rebind it; a qualifying source-bound CI run is still required.
 
 ## Prior results and seven substantive PR #12597 review concerns
 
