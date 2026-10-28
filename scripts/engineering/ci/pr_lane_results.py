@@ -60,6 +60,11 @@ DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
 INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST = (
     "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
 )
+ISSUE_12475_PHYSICAL_PARITY_TESTS = (
+    "tests/integration/infrastructure/storage/test_issue_12475_physical_parity.py",
+    "tests/integration/infrastructure/storage/test_gold_writer_versioning.py",
+    "tests/architecture/test_documentation_cleanup_inventory.py",
+)
 TYPE_CHECKING_WORKFLOW = ".github/workflows/type-checking.yml"
 TYPE_CHECKING_COLD_WORKFLOW = ".github/workflows/type-checking-cold.yml"
 
@@ -149,6 +154,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/quality/low-coverage-6045-revalidation.xml": (
         "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
+    ),
+    "reports/quality/issue-12475-physical-parity-evidence.md": (
+        *ISSUE_12475_PHYSICAL_PARITY_TESTS,
     ),
     "docs/05-operations/runbooks/incident-response.md": (
         "tests/integration/test_prometheus_rules_config.py",
@@ -250,6 +258,36 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/quality/total-tech-debt-audit-main-current.md": (
         "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
+    ),
+    **dict.fromkeys(
+        (
+            "reports/epoch2208/b/12371_b_handoff.md",
+            "reports/epoch2208/b/architecture_collection.txt",
+            "reports/epoch2208/b/benchmark.md",
+        ),
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "reports/test_failure_analysis.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/12375_b_repeat_blocker.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/12375_restart_c_no_change_report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/engineering/blocker-12364.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/12371-restart-c/handoff_report.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    "reports/12371-restart-c/separated_diffs.diff": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    "reports/engineering/benchmarks/jules/restart-2208-12377-a/BLOCKER.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    "reports/quality/12475_a_debt_gate_blocker_raw.txt": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    "reports/quality/AUDIT-20261022-3.1-epoch2208-A-report.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    "reports/quality/AUDIT-20261022-3.1-epoch2208-A.json": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
     "CHANGELOG.md": ("tests/architecture/test_docs_version_sync.py",),
     ".coderabbit.yaml": ("tests/architecture/test_coderabbit_config.py",),
@@ -365,6 +403,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/infrastructure/schemas/test_dq_config.py",
     ),
     "configs/quality/test_skip_inventory.yaml": TEST_SKIP_INVENTORY_TESTS,
+    "configs/quality/test_governance_audit.yaml": TEST_GOVERNANCE_ARTIFACT_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
     "configs/quality/scripts_inventory_manifest.json": (
         "tests/architecture/test_scripts_inventory_manifest.py",

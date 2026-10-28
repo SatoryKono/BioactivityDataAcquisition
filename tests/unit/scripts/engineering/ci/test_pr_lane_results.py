@@ -236,6 +236,24 @@ def test_shadow_compare_routes_billing_pr_non_code_changes() -> None:
     assert "tests/unit/scripts/test_github_billing.py" in report["selected"]
 
 
+def test_shadow_compare_routes_epoch2208_variant_b_evidence() -> None:
+    """Variant B evidence selects the cleanup-inventory contract."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        [
+            "reports/epoch2208/b/12371_b_handoff.md",
+            "reports/epoch2208/b/architecture_collection.txt",
+        ],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/architecture/test_documentation_cleanup_inventory.py"
+    ]
+    assert report["covers_full_suite"] is False
+
+
 def test_shadow_compare_routes_historical_secret_fingerprints() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare([".gitleaksignore"], repo_root=repo_root)
@@ -699,6 +717,25 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
     )
 
 
+def test_shadow_compare_routes_issue_12475_physical_parity_evidence() -> None:
+    """Physical parity evidence selects its storage and docs regressions."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        ["reports/quality/issue-12475-physical-parity-evidence.md"],
+        repo_root=repo_root,
+    )
+
+    assert (
+        "tests/integration/infrastructure/storage/test_issue_12475_physical_parity.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/architecture/test_documentation_cleanup_inventory.py"
+        in report["selected"]
+    )
+
+
 def test_shadow_compare_rejects_mixed_diff_with_unmapped_path(
     tmp_path: Path,
 ) -> None:
@@ -871,6 +908,18 @@ def test_affected_targets_map_telemetry_baseline(tmp_path: Path) -> None:
         "tests/architecture/test_test_telemetry_governance.py",
     ]
     assert untouched == []
+
+
+def test_affected_targets_map_test_governance_audit_config() -> None:
+    """Test-governance config changes select their owning report checks."""
+    repo_root = Path(__file__).resolve().parents[5]
+    assert affected_pytest_targets(
+        ["configs/quality/test_governance_audit.yaml"],
+        repo_root=repo_root,
+    ) == [
+        "tests/architecture/test_test_governance_audit.py",
+        "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
+    ]
 
 
 def test_affected_targets_map_memory_source_without_test_diff() -> None:

@@ -1,0 +1,1129 @@
+diff --git a/.github/workflows/pr-required.yml b/.github/workflows/pr-required.yml
+index d8b1c8db7..998503852 100644
+--- a/.github/workflows/pr-required.yml
++++ b/.github/workflows/pr-required.yml
+@@ -354,7 +354,7 @@ jobs:
+       - name: Architecture pytest slice
+         id: arch-pytest
+         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
+-        run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-marker "not slow and not benchmark and not memory and not serial" --parallel-addopts "-n auto --dist loadscope --max-worker-restart=0 -q --tb=line --ignore-glob=tests/architecture/test_diagram*.py --ignore=tests/architecture/test_check_diagram_visual_smoke.py --ignore=tests/architecture/test_run_diagram_checks_script.py --ignore=tests/architecture/test_validate_mermaid_syntax_script.py" --serial-marker "serial and not slow and not benchmark and not memory" --serial-addopts "-p no:xdist -q --tb=line --ignore-glob=tests/architecture/test_diagram*.py --ignore=tests/architecture/test_check_diagram_visual_smoke.py --ignore=tests/architecture/test_run_diagram_checks_script.py --ignore=tests/architecture/test_validate_mermaid_syntax_script.py" --fallback-addopts "-p no:xdist -q --tb=line --ignore-glob=tests/architecture/test_diagram*.py --ignore=tests/architecture/test_check_diagram_visual_smoke.py --ignore=tests/architecture/test_run_diagram_checks_script.py --ignore=tests/architecture/test_validate_mermaid_syntax_script.py"
++        run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-marker "not slow and not benchmark and not memory and not serial and not docs_governance" --parallel-addopts "-n auto --dist loadscope --max-worker-restart=0 -q --tb=line" --serial-marker "serial and not slow and not benchmark and not memory and not docs_governance" --serial-addopts "-p no:xdist -q --tb=line" --fallback-addopts "-p no:xdist -q --tb=line"
+
+       - name: Affected pytest
+         id: affected-pytest
+diff --git a/configs/quality/pytest_shards.yaml b/configs/quality/pytest_shards.yaml
+index 2d0bfb041..261bf7871 100644
+--- a/configs/quality/pytest_shards.yaml
++++ b/configs/quality/pytest_shards.yaml
+@@ -83,140 +83,6 @@ shards:
+   workers_override: 0
+   extra_pytest_args:
+   - --timeout=300
+-  - --ignore-glob=tests/architecture/**/*closeout*.py
+-  - --ignore-glob=tests/architecture/*closeout*.py
+-  - --ignore-glob=tests/architecture/test_tech_debt*.py
+-  - --ignore-glob=tests/architecture/test_issue_*.py
+-  - --ignore-glob=tests/architecture/test_[d-z]*.py
+-  - --ignore=tests/architecture/test_antipatterns.py
+-  - --ignore=tests/architecture/test_any_budget.py
+-  - --ignore=tests/architecture/test_scripts_catalog_governance.py
+-  - --ignore=tests/architecture/test_architecture_dependency_docs_drift.py
+-  - --ignore=tests/architecture/test_check_doc_links_guardrails.py
+-  - --ignore=tests/architecture/test_public_facade_inventory.py
+-  - --ignore=tests/architecture/test_public_surface_importer_census_governance.py
+-  - --ignore=tests/architecture/test_docs_version_sync.py
+-  - --ignore=tests/architecture/test_documentation_sync.py
+-  - --ignore=tests/architecture/test_code_metrics.py
+-  - --ignore=tests/architecture/test_diagram_regression_workflow.py
+-  - --ignore=tests/architecture/test_docs_governance_workflow.py
+-  - --ignore=tests/architecture/test_quality_debt_scorecard.py
+-  - --ignore=tests/architecture/test_quality_burndown_priorities.py
+-  - --ignore=tests/architecture/test_adr_enforcement_matrix.py
+-  - --ignore=tests/architecture/test_add_svg_text_fallback.py
+-  - --ignore=tests/architecture/test_adapter_contracts.py
+-  - --ignore=tests/architecture/test_contract_registry_loader_boundary.py
+-  - --ignore=tests/architecture/test_config_ci_invariants.py
+-  - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+-  - --ignore=tests/architecture/test_checkpoint_runtime_facade_usage.py
+-  - --ignore=tests/architecture/test_cli_command_import_guards.py
+-  - --ignore=tests/architecture/test_removed_surface_freeze_guards.py
+-  - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
+-  - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
+-  - --ignore=tests/architecture/test_config_root_governance.py
+-  - --ignore=tests/architecture/test_config_surface_entity_residual_plateau.py
+-  - --ignore=tests/architecture/test_contract_coverage_matrix_drift.py
+-  - --ignore=tests/architecture/test_adr_registry_governance_sync.py
+-  - --ignore=tests/architecture/test_architecture_acceptance_baseline.py
+-  - --ignore=tests/architecture/test_architecture_audit_rebaseline.py
+-  - --ignore=tests/architecture/test_architecture_debt_agent_surface.py
+-  - --ignore=tests/architecture/test_architecture_quality_scorecard.py
+-  - --ignore=tests/architecture/test_artifact_duplication_audit.py
+-  - --ignore=tests/architecture/test_branch_coverage_policy_sot.py
+-  - --ignore=tests/architecture/test_bronze_fixture_replay_baseline.py
+-  - --ignore=tests/architecture/test_check_diagram_visual_smoke.py
+-  - --ignore=tests/architecture/test_chembl_baseline_smoke_workflow.py
+-  - --ignore=tests/architecture/test_ci_coverage_surface_matrix.py
+-  - --ignore=tests/architecture/test_cli_doc_parity.py
+-  - --ignore=tests/architecture/test_cli_registry_explicit_path.py
+-  - --ignore=tests/architecture/test_codex_agent_catalog_inventory.py
+-  - --ignore=tests/architecture/test_codex_skill_agent_links.py
+-  - --ignore=tests/architecture/test_composite_schema_contract_coverage.py
+-  - --ignore=tests/architecture/test_config_taxonomy_review.py
+-  - --ignore=tests/architecture/test_config_topology_docs_drift.py
+-  - --ignore=tests/architecture/test_config_transition_registry.py
+-  - --ignore=tests/architecture/test_contract_coverage_matrix_integrity.py
+-  - --ignore=tests/architecture/test_control_plane_runtime_docs_alignment.py
+-  - --ignore=tests/architecture/test_coverage_exclusion_annotations.py
+-  - --ignore=tests/architecture/test_coverage_exclusion_governance.py
+-  - --ignore=tests/architecture/test_coverage_verify_lane_contract.py
+-  - --ignore=tests/architecture/test_curated_surface_telemetry_reporting.py
+-  - --ignore=tests/architecture/test_debt_governance_telemetry_reporting.py
+-  - --ignore=tests/architecture/test_deterministic_identity_documentation_governance.py
+-  - --ignore=tests/architecture/test_deterministic_sort_policy_coverage.py
+-  - --ignore=tests/architecture/test_diagram_13g_adapters_labeled.py
+-  - --ignore=tests/architecture/test_diagram_artifact_check.py
+-  - --ignore=tests/architecture/test_diagram_bundle_generator_contracts.py
+-  - --ignore=tests/architecture/test_diagram_corpus_regression_guards.py
+-  - --ignore=tests/architecture/test_diagram_description_index_contracts.py
+-  - --ignore=tests/architecture/test_diagram_drift_and_embed_guards.py
+-  - --ignore=tests/architecture/test_diagram_full_map_metrics_binding.py
+-  - --ignore=tests/architecture/test_diagram_lint_policy_rules.py
+-  - --ignore=tests/architecture/test_diagram_narrative_docs_sync.py
+-  - --ignore=tests/architecture/test_diagram_nightly_suite.py
+-  - --ignore=tests/architecture/test_diagram_nightly_workflow.py
+-  - --ignore=tests/architecture/test_diagram_quality_budget_security.py
+-  - --ignore=tests/architecture/test_diagram_quality_gates.py
+-  - --ignore=tests/architecture/test_diagram_tooling_fail_closed.py
+-  - --ignore=tests/architecture/test_doc_crossref_integrity.py
+-  - --ignore=tests/architecture/test_docker_runtime_contracts.py
+-  - --ignore=tests/architecture/test_docs_build_site_router.py
+-  - --ignore=tests/architecture/test_docs_internal_bootstrap_governance.py
+-  - --ignore=tests/architecture/test_docs_kpi_workflow.py
+-  - --ignore=tests/architecture/test_docs_root_surface_governance_alignment.py
+-  - --ignore=tests/architecture/test_docs_runtime_wrapper_governance.py
+-  - --ignore=tests/architecture/test_documentation.py
+-  - --ignore=tests/architecture/test_documentation_audit_remediation.py
+-  - --ignore=tests/architecture/test_documentation_cleanup_inventory.py
+-  - --ignore=tests/architecture/test_documentation_residual_keyword_guards.py
+-  - --ignore=tests/architecture/test_domain_aggregate_invariant_registry.py
+-  - --ignore=tests/architecture/test_github_actions_runtime_policy.py
+-  - --ignore=tests/architecture/test_github_governance_review.py
+-  - --ignore=tests/architecture/test_gitignore_secret_and_agents_policy.py
+-  - --ignore=tests/architecture/test_gold_snapshot_registry.py
+-  - --ignore=tests/architecture/test_grok_subagent_least_privilege.py
+-  - --ignore=tests/architecture/test_historical_prompt_docs_stack.py
+-  - --ignore=tests/architecture/test_internal_orchestration_docs.py
+-  - --ignore=tests/architecture/test_layer_contract_coverage_matrix.py
+-  - --ignore=tests/architecture/test_low_coverage_targeted_tests_6045.py
+-  - --ignore=tests/architecture/test_memory_rag_manifest_governance.py
+-  - --ignore=tests/architecture/test_metrics_server_wiring.py
+-  - --ignore=tests/architecture/test_mixin_collaborator_metrics.py
+-  - --ignore=tests/architecture/test_module_coverage_inventory.py
+-  - --ignore=tests/architecture/test_naming_audit_enforcement.py
+-  - --ignore=tests/architecture/test_naming_exception_registry_sync.py
+-  - --ignore=tests/architecture/test_nine_domain_audit_rhai_registry.py
+-  - --ignore=tests/architecture/test_no_print_in_docstrings.py
+-  - --ignore=tests/architecture/test_normalization_surface_coverage_ratchet.py
+-  - --ignore=tests/architecture/test_observability_docs_drift.py
+-  - --ignore=tests/architecture/test_observability_docs_sync.py
+-  - --ignore=tests/architecture/test_passport_documentation_projections.py
+-  - --ignore=tests/architecture/test_performance_budget_registry.py
+-  - --ignore=tests/architecture/test_port_adapter_factory_coverage_matrix.py
+-  - --ignore=tests/architecture/test_provider_registry_decomposition.py
+-  - --ignore=tests/architecture/test_quality_exemptions_registry.py
+-  - --ignore=tests/architecture/test_reference_docs_contract_residuals.py
+-  - --ignore=tests/architecture/test_reference_identifier_families_doc.py
+-  - --ignore=tests/architecture/test_registry_contracts.py
+-  - --ignore=tests/architecture/test_registry_threading.py
+-  - --ignore=tests/architecture/test_replay_sensitive_coverage_floor_ratchet.py
+-  - --ignore=tests/architecture/test_repo_backed_marker_hygiene.py
+-  - --ignore=tests/architecture/test_repo_cleanup_branch_router.py
+-  - --ignore=tests/architecture/test_reproducibility_docs_contract_drift.py
+-  - --ignore=tests/architecture/test_requirements_traceability_catalog.py
+-  - --ignore=tests/architecture/test_rf_001_architecture_evidence_baseline.py
+-  - --ignore=tests/architecture/test_root_hygiene_review_registry.py
+-  - --ignore=tests/architecture/test_run_diagram_checks_script.py
+-  - --ignore=tests/architecture/test_runtime_agent_docs_drift.py
+-  - --ignore=tests/architecture/test_runtime_registry_explicit_seams.py
+-  - --ignore=tests/architecture/test_security_suite_coverage.py
+-  - --ignore=tests/architecture/test_security_suppression_registry.py
+-  - --ignore=tests/architecture/test_test_governance_audit.py
+-  - --ignore=tests/architecture/test_test_telemetry_baseline.py
+-  - --ignore=tests/architecture/test_test_telemetry_governance.py
+-  - --ignore=tests/architecture/test_uniform_diagram_group_width.py
+-  - --ignore=tests/architecture/test_value_object_run_manifest_deprecation.py
+-  - --ignore=tests/architecture/test_vcr_metadata_catalog_drift.py
+ - name: S7-crosscutting-architecture-a3
+   wave: 2
+   paths:
+@@ -225,132 +91,6 @@ shards:
+   workers_override: 0
+   extra_pytest_args:
+   - --timeout=300
+-  - --ignore-glob=tests/architecture/**/*closeout*.py
+-  - --ignore-glob=tests/architecture/*closeout*.py
+-  - --ignore-glob=tests/architecture/test_tech_debt*.py
+-  - --ignore-glob=tests/architecture/test_issue_*.py
+-  - --ignore-glob=tests/architecture/*/test_*.py
+-  - --ignore-glob=tests/architecture/test_[a-c]*.py
+-  - --ignore-glob=tests/architecture/test_[g-z]*.py
+-  - --ignore=tests/architecture/test_diagram_regression_workflow.py
+-  - --ignore=tests/architecture/test_docs_governance_workflow.py
+-  - --ignore=tests/architecture/test_docs_version_sync.py
+-  - --ignore=tests/architecture/test_documentation_sync.py
+-  - --ignore=tests/architecture/test_adr_enforcement_matrix.py
+-  - --ignore=tests/architecture/test_add_svg_text_fallback.py
+-  - --ignore=tests/architecture/test_adapter_contracts.py
+-  - --ignore=tests/architecture/test_contract_registry_loader_boundary.py
+-  - --ignore=tests/architecture/test_config_ci_invariants.py
+-  - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+-  - --ignore=tests/architecture/test_checkpoint_runtime_facade_usage.py
+-  - --ignore=tests/architecture/test_cli_command_import_guards.py
+-  - --ignore=tests/architecture/test_removed_surface_freeze_guards.py
+-  - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
+-  - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
+-  - --ignore=tests/architecture/test_config_root_governance.py
+-  - --ignore=tests/architecture/test_config_surface_entity_residual_plateau.py
+-  - --ignore=tests/architecture/test_debt_governance_telemetry_reporting.py
+-  - --ignore=tests/architecture/test_domain_composite_config_importer_map.py
+-  - --ignore=tests/architecture/test_adr_registry_governance_sync.py
+-  - --ignore=tests/architecture/test_architecture_acceptance_baseline.py
+-  - --ignore=tests/architecture/test_architecture_audit_rebaseline.py
+-  - --ignore=tests/architecture/test_architecture_debt_agent_surface.py
+-  - --ignore=tests/architecture/test_architecture_quality_scorecard.py
+-  - --ignore=tests/architecture/test_artifact_duplication_audit.py
+-  - --ignore=tests/architecture/test_branch_coverage_policy_sot.py
+-  - --ignore=tests/architecture/test_bronze_fixture_replay_baseline.py
+-  - --ignore=tests/architecture/test_check_diagram_visual_smoke.py
+-  - --ignore=tests/architecture/test_chembl_baseline_smoke_workflow.py
+-  - --ignore=tests/architecture/test_ci_coverage_surface_matrix.py
+-  - --ignore=tests/architecture/test_cli_doc_parity.py
+-  - --ignore=tests/architecture/test_cli_registry_explicit_path.py
+-  - --ignore=tests/architecture/test_codex_agent_catalog_inventory.py
+-  - --ignore=tests/architecture/test_codex_skill_agent_links.py
+-  - --ignore=tests/architecture/test_composite_schema_contract_coverage.py
+-  - --ignore=tests/architecture/test_config_taxonomy_review.py
+-  - --ignore=tests/architecture/test_config_topology_docs_drift.py
+-  - --ignore=tests/architecture/test_config_transition_registry.py
+-  - --ignore=tests/architecture/test_contract_coverage_matrix_integrity.py
+-  - --ignore=tests/architecture/test_control_plane_runtime_docs_alignment.py
+-  - --ignore=tests/architecture/test_coverage_exclusion_annotations.py
+-  - --ignore=tests/architecture/test_coverage_exclusion_governance.py
+-  - --ignore=tests/architecture/test_coverage_verify_lane_contract.py
+-  - --ignore=tests/architecture/test_curated_surface_telemetry_reporting.py
+-  - --ignore=tests/architecture/test_deterministic_identity_documentation_governance.py
+-  - --ignore=tests/architecture/test_deterministic_sort_policy_coverage.py
+-  - --ignore=tests/architecture/test_diagram_13g_adapters_labeled.py
+-  - --ignore=tests/architecture/test_diagram_artifact_check.py
+-  - --ignore=tests/architecture/test_diagram_bundle_generator_contracts.py
+-  - --ignore=tests/architecture/test_diagram_corpus_regression_guards.py
+-  - --ignore=tests/architecture/test_diagram_description_index_contracts.py
+-  - --ignore=tests/architecture/test_diagram_drift_and_embed_guards.py
+-  - --ignore=tests/architecture/test_diagram_full_map_metrics_binding.py
+-  - --ignore=tests/architecture/test_diagram_lint_policy_rules.py
+-  - --ignore=tests/architecture/test_diagram_narrative_docs_sync.py
+-  - --ignore=tests/architecture/test_diagram_nightly_suite.py
+-  - --ignore=tests/architecture/test_diagram_nightly_workflow.py
+-  - --ignore=tests/architecture/test_diagram_quality_budget_security.py
+-  - --ignore=tests/architecture/test_diagram_quality_gates.py
+-  - --ignore=tests/architecture/test_diagram_tooling_fail_closed.py
+-  - --ignore=tests/architecture/test_doc_crossref_integrity.py
+-  - --ignore=tests/architecture/test_docker_runtime_contracts.py
+-  - --ignore=tests/architecture/test_docs_build_site_router.py
+-  - --ignore=tests/architecture/test_docs_internal_bootstrap_governance.py
+-  - --ignore=tests/architecture/test_docs_kpi_workflow.py
+-  - --ignore=tests/architecture/test_docs_root_surface_governance_alignment.py
+-  - --ignore=tests/architecture/test_docs_runtime_wrapper_governance.py
+-  - --ignore=tests/architecture/test_documentation.py
+-  - --ignore=tests/architecture/test_documentation_audit_remediation.py
+-  - --ignore=tests/architecture/test_documentation_cleanup_inventory.py
+-  - --ignore=tests/architecture/test_documentation_residual_keyword_guards.py
+-  - --ignore=tests/architecture/test_domain_aggregate_invariant_registry.py
+-  - --ignore=tests/architecture/test_github_actions_runtime_policy.py
+-  - --ignore=tests/architecture/test_github_governance_review.py
+-  - --ignore=tests/architecture/test_gitignore_secret_and_agents_policy.py
+-  - --ignore=tests/architecture/test_gold_snapshot_registry.py
+-  - --ignore=tests/architecture/test_grok_subagent_least_privilege.py
+-  - --ignore=tests/architecture/test_historical_prompt_docs_stack.py
+-  - --ignore=tests/architecture/test_internal_orchestration_docs.py
+-  - --ignore=tests/architecture/test_layer_contract_coverage_matrix.py
+-  - --ignore=tests/architecture/test_low_coverage_targeted_tests_6045.py
+-  - --ignore=tests/architecture/test_memory_rag_manifest_governance.py
+-  - --ignore=tests/architecture/test_metrics_server_wiring.py
+-  - --ignore=tests/architecture/test_mixin_collaborator_metrics.py
+-  - --ignore=tests/architecture/test_module_coverage_inventory.py
+-  - --ignore=tests/architecture/test_naming_audit_enforcement.py
+-  - --ignore=tests/architecture/test_naming_exception_registry_sync.py
+-  - --ignore=tests/architecture/test_nine_domain_audit_rhai_registry.py
+-  - --ignore=tests/architecture/test_no_print_in_docstrings.py
+-  - --ignore=tests/architecture/test_normalization_surface_coverage_ratchet.py
+-  - --ignore=tests/architecture/test_observability_docs_drift.py
+-  - --ignore=tests/architecture/test_observability_docs_sync.py
+-  - --ignore=tests/architecture/test_passport_documentation_projections.py
+-  - --ignore=tests/architecture/test_performance_budget_registry.py
+-  - --ignore=tests/architecture/test_port_adapter_factory_coverage_matrix.py
+-  - --ignore=tests/architecture/test_provider_registry_decomposition.py
+-  - --ignore=tests/architecture/test_quality_exemptions_registry.py
+-  - --ignore=tests/architecture/test_reference_docs_contract_residuals.py
+-  - --ignore=tests/architecture/test_reference_identifier_families_doc.py
+-  - --ignore=tests/architecture/test_registry_contracts.py
+-  - --ignore=tests/architecture/test_registry_threading.py
+-  - --ignore=tests/architecture/test_replay_sensitive_coverage_floor_ratchet.py
+-  - --ignore=tests/architecture/test_repo_backed_marker_hygiene.py
+-  - --ignore=tests/architecture/test_repo_cleanup_branch_router.py
+-  - --ignore=tests/architecture/test_reproducibility_docs_contract_drift.py
+-  - --ignore=tests/architecture/test_requirements_traceability_catalog.py
+-  - --ignore=tests/architecture/test_rf_001_architecture_evidence_baseline.py
+-  - --ignore=tests/architecture/test_root_hygiene_review_registry.py
+-  - --ignore=tests/architecture/test_run_diagram_checks_script.py
+-  - --ignore=tests/architecture/test_runtime_agent_docs_drift.py
+-  - --ignore=tests/architecture/test_runtime_registry_explicit_seams.py
+-  - --ignore=tests/architecture/test_security_suite_coverage.py
+-  - --ignore=tests/architecture/test_security_suppression_registry.py
+-  - --ignore=tests/architecture/test_test_governance_audit.py
+-  - --ignore=tests/architecture/test_test_telemetry_baseline.py
+-  - --ignore=tests/architecture/test_test_telemetry_governance.py
+-  - --ignore=tests/architecture/test_uniform_diagram_group_width.py
+-  - --ignore=tests/architecture/test_value_object_run_manifest_deprecation.py
+-  - --ignore=tests/architecture/test_vcr_metadata_catalog_drift.py
+ - name: S3-app-foundation
+   wave: 2
+   paths:
+@@ -373,142 +113,6 @@ shards:
+   workers_override: 0
+   extra_pytest_args:
+   - --timeout=300
+-  - --ignore-glob=tests/architecture/**/*closeout*.py
+-  - --ignore-glob=tests/architecture/*closeout*.py
+-  - --ignore-glob=tests/architecture/test_tech_debt*.py
+-  - --ignore-glob=tests/architecture/test_issue_*.py
+-  - --ignore-glob=tests/architecture/*/test_*.py
+-  - --ignore-glob=tests/architecture/test_[a-f]*.py
+-  - --ignore-glob=tests/architecture/test_[m-z]*.py
+-  - --ignore=tests/architecture/test_any_budget.py
+-  - --ignore=tests/architecture/test_scripts_catalog_governance.py
+-  - --ignore=tests/architecture/test_architecture_dependency_docs_drift.py
+-  - --ignore=tests/architecture/test_check_doc_links_guardrails.py
+-  - --ignore=tests/architecture/test_public_facade_inventory.py
+-  - --ignore=tests/architecture/test_public_surface_importer_census_governance.py
+-  - --ignore=tests/architecture/test_docs_version_sync.py
+-  - --ignore=tests/architecture/test_documentation_sync.py
+-  - --ignore=tests/architecture/test_code_metrics.py
+-  - --ignore=tests/architecture/test_layer_dependencies.py
+-  - --ignore=tests/architecture/test_diagram_regression_workflow.py
+-  - --ignore=tests/architecture/test_docs_governance_workflow.py
+-  - --ignore=tests/architecture/test_lint_terminology_script.py
+-  - --ignore=tests/architecture/test_quality_debt_scorecard.py
+-  - --ignore=tests/architecture/test_quality_burndown_priorities.py
+-  - --ignore=tests/architecture/test_adr_enforcement_matrix.py
+-  - --ignore=tests/architecture/test_add_svg_text_fallback.py
+-  - --ignore=tests/architecture/test_adapter_contracts.py
+-  - --ignore=tests/architecture/test_contract_registry_loader_boundary.py
+-  - --ignore=tests/architecture/test_config_ci_invariants.py
+-  - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+-  - --ignore=tests/architecture/test_checkpoint_runtime_facade_usage.py
+-  - --ignore=tests/architecture/test_cli_command_import_guards.py
+-  - --ignore=tests/architecture/test_removed_surface_freeze_guards.py
+-  - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
+-  - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
+-  - --ignore=tests/architecture/test_config_root_governance.py
+-  - --ignore=tests/architecture/test_config_surface_entity_residual_plateau.py
+-  - --ignore=tests/architecture/test_adr_registry_governance_sync.py
+-  - --ignore=tests/architecture/test_architecture_acceptance_baseline.py
+-  - --ignore=tests/architecture/test_architecture_audit_rebaseline.py
+-  - --ignore=tests/architecture/test_architecture_debt_agent_surface.py
+-  - --ignore=tests/architecture/test_architecture_quality_scorecard.py
+-  - --ignore=tests/architecture/test_artifact_duplication_audit.py
+-  - --ignore=tests/architecture/test_branch_coverage_policy_sot.py
+-  - --ignore=tests/architecture/test_bronze_fixture_replay_baseline.py
+-  - --ignore=tests/architecture/test_check_diagram_visual_smoke.py
+-  - --ignore=tests/architecture/test_chembl_baseline_smoke_workflow.py
+-  - --ignore=tests/architecture/test_ci_coverage_surface_matrix.py
+-  - --ignore=tests/architecture/test_cli_doc_parity.py
+-  - --ignore=tests/architecture/test_cli_registry_explicit_path.py
+-  - --ignore=tests/architecture/test_codex_agent_catalog_inventory.py
+-  - --ignore=tests/architecture/test_codex_skill_agent_links.py
+-  - --ignore=tests/architecture/test_composite_schema_contract_coverage.py
+-  - --ignore=tests/architecture/test_config_taxonomy_review.py
+-  - --ignore=tests/architecture/test_config_topology_docs_drift.py
+-  - --ignore=tests/architecture/test_config_transition_registry.py
+-  - --ignore=tests/architecture/test_contract_coverage_matrix_integrity.py
+-  - --ignore=tests/architecture/test_control_plane_runtime_docs_alignment.py
+-  - --ignore=tests/architecture/test_coverage_exclusion_annotations.py
+-  - --ignore=tests/architecture/test_coverage_exclusion_governance.py
+-  - --ignore=tests/architecture/test_coverage_verify_lane_contract.py
+-  - --ignore=tests/architecture/test_curated_surface_telemetry_reporting.py
+-  - --ignore=tests/architecture/test_debt_governance_telemetry_reporting.py
+-  - --ignore=tests/architecture/test_deterministic_identity_documentation_governance.py
+-  - --ignore=tests/architecture/test_deterministic_sort_policy_coverage.py
+-  - --ignore=tests/architecture/test_diagram_13g_adapters_labeled.py
+-  - --ignore=tests/architecture/test_diagram_artifact_check.py
+-  - --ignore=tests/architecture/test_diagram_bundle_generator_contracts.py
+-  - --ignore=tests/architecture/test_diagram_corpus_regression_guards.py
+-  - --ignore=tests/architecture/test_diagram_description_index_contracts.py
+-  - --ignore=tests/architecture/test_diagram_drift_and_embed_guards.py
+-  - --ignore=tests/architecture/test_diagram_full_map_metrics_binding.py
+-  - --ignore=tests/architecture/test_diagram_lint_policy_rules.py
+-  - --ignore=tests/architecture/test_diagram_narrative_docs_sync.py
+-  - --ignore=tests/architecture/test_diagram_nightly_suite.py
+-  - --ignore=tests/architecture/test_diagram_nightly_workflow.py
+-  - --ignore=tests/architecture/test_diagram_quality_budget_security.py
+-  - --ignore=tests/architecture/test_diagram_quality_gates.py
+-  - --ignore=tests/architecture/test_diagram_tooling_fail_closed.py
+-  - --ignore=tests/architecture/test_doc_crossref_integrity.py
+-  - --ignore=tests/architecture/test_docker_runtime_contracts.py
+-  - --ignore=tests/architecture/test_docs_build_site_router.py
+-  - --ignore=tests/architecture/test_docs_internal_bootstrap_governance.py
+-  - --ignore=tests/architecture/test_docs_kpi_workflow.py
+-  - --ignore=tests/architecture/test_docs_root_surface_governance_alignment.py
+-  - --ignore=tests/architecture/test_docs_runtime_wrapper_governance.py
+-  - --ignore=tests/architecture/test_documentation.py
+-  - --ignore=tests/architecture/test_documentation_audit_remediation.py
+-  - --ignore=tests/architecture/test_documentation_cleanup_inventory.py
+-  - --ignore=tests/architecture/test_documentation_residual_keyword_guards.py
+-  - --ignore=tests/architecture/test_domain_aggregate_invariant_registry.py
+-  - --ignore=tests/architecture/test_github_actions_runtime_policy.py
+-  - --ignore=tests/architecture/test_github_governance_review.py
+-  - --ignore=tests/architecture/test_gitignore_secret_and_agents_policy.py
+-  - --ignore=tests/architecture/test_gold_snapshot_registry.py
+-  - --ignore=tests/architecture/test_grok_subagent_least_privilege.py
+-  - --ignore=tests/architecture/test_historical_prompt_docs_stack.py
+-  - --ignore=tests/architecture/test_internal_orchestration_docs.py
+-  - --ignore=tests/architecture/test_layer_contract_coverage_matrix.py
+-  - --ignore=tests/architecture/test_low_coverage_targeted_tests_6045.py
+-  - --ignore=tests/architecture/test_memory_rag_manifest_governance.py
+-  - --ignore=tests/architecture/test_metrics_server_wiring.py
+-  - --ignore=tests/architecture/test_mixin_collaborator_metrics.py
+-  - --ignore=tests/architecture/test_module_coverage_inventory.py
+-  - --ignore=tests/architecture/test_naming_audit_enforcement.py
+-  - --ignore=tests/architecture/test_naming_exception_registry_sync.py
+-  - --ignore=tests/architecture/test_nine_domain_audit_rhai_registry.py
+-  - --ignore=tests/architecture/test_no_print_in_docstrings.py
+-  - --ignore=tests/architecture/test_normalization_surface_coverage_ratchet.py
+-  - --ignore=tests/architecture/test_observability_docs_drift.py
+-  - --ignore=tests/architecture/test_observability_docs_sync.py
+-  - --ignore=tests/architecture/test_passport_documentation_projections.py
+-  - --ignore=tests/architecture/test_performance_budget_registry.py
+-  - --ignore=tests/architecture/test_port_adapter_factory_coverage_matrix.py
+-  - --ignore=tests/architecture/test_provider_registry_decomposition.py
+-  - --ignore=tests/architecture/test_quality_exemptions_registry.py
+-  - --ignore=tests/architecture/test_reference_docs_contract_residuals.py
+-  - --ignore=tests/architecture/test_reference_identifier_families_doc.py
+-  - --ignore=tests/architecture/test_registry_contracts.py
+-  - --ignore=tests/architecture/test_registry_threading.py
+-  - --ignore=tests/architecture/test_replay_sensitive_coverage_floor_ratchet.py
+-  - --ignore=tests/architecture/test_repo_backed_marker_hygiene.py
+-  - --ignore=tests/architecture/test_repo_cleanup_branch_router.py
+-  - --ignore=tests/architecture/test_reproducibility_docs_contract_drift.py
+-  - --ignore=tests/architecture/test_requirements_traceability_catalog.py
+-  - --ignore=tests/architecture/test_rf_001_architecture_evidence_baseline.py
+-  - --ignore=tests/architecture/test_root_hygiene_review_registry.py
+-  - --ignore=tests/architecture/test_run_diagram_checks_script.py
+-  - --ignore=tests/architecture/test_runtime_agent_docs_drift.py
+-  - --ignore=tests/architecture/test_runtime_registry_explicit_seams.py
+-  - --ignore=tests/architecture/test_security_suite_coverage.py
+-  - --ignore=tests/architecture/test_security_suppression_registry.py
+-  - --ignore=tests/architecture/test_test_governance_audit.py
+-  - --ignore=tests/architecture/test_test_telemetry_baseline.py
+-  - --ignore=tests/architecture/test_test_telemetry_governance.py
+-  - --ignore=tests/architecture/test_uniform_diagram_group_width.py
+-  - --ignore=tests/architecture/test_value_object_run_manifest_deprecation.py
+-  - --ignore=tests/architecture/test_vcr_metadata_catalog_drift.py
+ - name: S5-infra-adapters
+   wave: 3
+   paths:
+@@ -545,144 +149,6 @@ shards:
+   workers_override: 0
+   extra_pytest_args:
+   - --timeout=300
+-  - --ignore-glob=tests/architecture/**/*closeout*.py
+-  - --ignore-glob=tests/architecture/*closeout*.py
+-  - --ignore-glob=tests/architecture/test_tech_debt*.py
+-  - --ignore-glob=tests/architecture/test_issue_*.py
+-  - --ignore-glob=tests/architecture/*/test_*.py
+-  - --ignore-glob=tests/architecture/test_[a-l]*.py
+-  - --ignore-glob=tests/architecture/test_[s-z]*.py
+-  - --ignore=tests/architecture/test_any_budget.py
+-  - --ignore=tests/architecture/test_scripts_catalog_governance.py
+-  - --ignore=tests/architecture/test_architecture_dependency_docs_drift.py
+-  - --ignore=tests/architecture/test_check_doc_links_guardrails.py
+-  - --ignore=tests/architecture/test_public_facade_inventory.py
+-  - --ignore=tests/architecture/test_public_surface_importer_census_governance.py
+-  - --ignore=tests/architecture/test_docs_version_sync.py
+-  - --ignore=tests/architecture/test_documentation_sync.py
+-  - --ignore=tests/architecture/test_code_metrics.py
+-  - --ignore=tests/architecture/test_diagram_regression_workflow.py
+-  - --ignore=tests/architecture/test_docs_governance_workflow.py
+-  - --ignore=tests/architecture/test_quality_debt_scorecard.py
+-  - --ignore=tests/architecture/test_quality_burndown_priorities.py
+-  - --ignore=tests/architecture/test_module_coverage_inventory_freshness.py
+-  - --ignore=tests/architecture/test_regression_metrics.py
+-  - --ignore=tests/architecture/test_adr_enforcement_matrix.py
+-  - --ignore=tests/architecture/test_add_svg_text_fallback.py
+-  - --ignore=tests/architecture/test_adapter_contracts.py
+-  - --ignore=tests/architecture/test_contract_registry_loader_boundary.py
+-  - --ignore=tests/architecture/test_config_ci_invariants.py
+-  - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+-  - --ignore=tests/architecture/test_checkpoint_runtime_facade_usage.py
+-  - --ignore=tests/architecture/test_cli_command_import_guards.py
+-  - --ignore=tests/architecture/test_removed_surface_freeze_guards.py
+-  - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
+-  - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
+-  - --ignore=tests/architecture/test_config_root_governance.py
+-  - --ignore=tests/architecture/test_config_surface_entity_residual_plateau.py
+-  - --ignore=tests/architecture/test_metadata_service_boundary_usage.py
+-  - --ignore=tests/architecture/test_retirement_candidate_triage.py
+-  - --ignore=tests/architecture/test_adr_registry_governance_sync.py
+-  - --ignore=tests/architecture/test_architecture_acceptance_baseline.py
+-  - --ignore=tests/architecture/test_architecture_audit_rebaseline.py
+-  - --ignore=tests/architecture/test_architecture_debt_agent_surface.py
+-  - --ignore=tests/architecture/test_architecture_quality_scorecard.py
+-  - --ignore=tests/architecture/test_artifact_duplication_audit.py
+-  - --ignore=tests/architecture/test_branch_coverage_policy_sot.py
+-  - --ignore=tests/architecture/test_bronze_fixture_replay_baseline.py
+-  - --ignore=tests/architecture/test_check_diagram_visual_smoke.py
+-  - --ignore=tests/architecture/test_chembl_baseline_smoke_workflow.py
+-  - --ignore=tests/architecture/test_ci_coverage_surface_matrix.py
+-  - --ignore=tests/architecture/test_cli_doc_parity.py
+-  - --ignore=tests/architecture/test_cli_registry_explicit_path.py
+-  - --ignore=tests/architecture/test_codex_agent_catalog_inventory.py
+-  - --ignore=tests/architecture/test_codex_skill_agent_links.py
+-  - --ignore=tests/architecture/test_composite_schema_contract_coverage.py
+-  - --ignore=tests/architecture/test_config_taxonomy_review.py
+-  - --ignore=tests/architecture/test_config_topology_docs_drift.py
+-  - --ignore=tests/architecture/test_config_transition_registry.py
+-  - --ignore=tests/architecture/test_contract_coverage_matrix_integrity.py
+-  - --ignore=tests/architecture/test_control_plane_runtime_docs_alignment.py
+-  - --ignore=tests/architecture/test_coverage_exclusion_annotations.py
+-  - --ignore=tests/architecture/test_coverage_exclusion_governance.py
+-  - --ignore=tests/architecture/test_coverage_verify_lane_contract.py
+-  - --ignore=tests/architecture/test_curated_surface_telemetry_reporting.py
+-  - --ignore=tests/architecture/test_debt_governance_telemetry_reporting.py
+-  - --ignore=tests/architecture/test_deterministic_identity_documentation_governance.py
+-  - --ignore=tests/architecture/test_deterministic_sort_policy_coverage.py
+-  - --ignore=tests/architecture/test_diagram_13g_adapters_labeled.py
+-  - --ignore=tests/architecture/test_diagram_artifact_check.py
+-  - --ignore=tests/architecture/test_diagram_bundle_generator_contracts.py
+-  - --ignore=tests/architecture/test_diagram_corpus_regression_guards.py
+-  - --ignore=tests/architecture/test_diagram_description_index_contracts.py
+-  - --ignore=tests/architecture/test_diagram_drift_and_embed_guards.py
+-  - --ignore=tests/architecture/test_diagram_full_map_metrics_binding.py
+-  - --ignore=tests/architecture/test_diagram_lint_policy_rules.py
+-  - --ignore=tests/architecture/test_diagram_narrative_docs_sync.py
+-  - --ignore=tests/architecture/test_diagram_nightly_suite.py
+-  - --ignore=tests/architecture/test_diagram_nightly_workflow.py
+-  - --ignore=tests/architecture/test_diagram_quality_budget_security.py
+-  - --ignore=tests/architecture/test_diagram_quality_gates.py
+-  - --ignore=tests/architecture/test_diagram_tooling_fail_closed.py
+-  - --ignore=tests/architecture/test_doc_crossref_integrity.py
+-  - --ignore=tests/architecture/test_docker_runtime_contracts.py
+-  - --ignore=tests/architecture/test_docs_build_site_router.py
+-  - --ignore=tests/architecture/test_docs_internal_bootstrap_governance.py
+-  - --ignore=tests/architecture/test_docs_kpi_workflow.py
+-  - --ignore=tests/architecture/test_docs_root_surface_governance_alignment.py
+-  - --ignore=tests/architecture/test_docs_runtime_wrapper_governance.py
+-  - --ignore=tests/architecture/test_documentation.py
+-  - --ignore=tests/architecture/test_documentation_audit_remediation.py
+-  - --ignore=tests/architecture/test_documentation_cleanup_inventory.py
+-  - --ignore=tests/architecture/test_documentation_residual_keyword_guards.py
+-  - --ignore=tests/architecture/test_domain_aggregate_invariant_registry.py
+-  - --ignore=tests/architecture/test_github_actions_runtime_policy.py
+-  - --ignore=tests/architecture/test_github_governance_review.py
+-  - --ignore=tests/architecture/test_gitignore_secret_and_agents_policy.py
+-  - --ignore=tests/architecture/test_gold_snapshot_registry.py
+-  - --ignore=tests/architecture/test_grok_subagent_least_privilege.py
+-  - --ignore=tests/architecture/test_historical_prompt_docs_stack.py
+-  - --ignore=tests/architecture/test_internal_orchestration_docs.py
+-  - --ignore=tests/architecture/test_layer_contract_coverage_matrix.py
+-  - --ignore=tests/architecture/test_low_coverage_targeted_tests_6045.py
+-  - --ignore=tests/architecture/test_memory_rag_manifest_governance.py
+-  - --ignore=tests/architecture/test_metrics_server_wiring.py
+-  - --ignore=tests/architecture/test_mixin_collaborator_metrics.py
+-  - --ignore=tests/architecture/test_module_coverage_inventory.py
+-  - --ignore=tests/architecture/test_naming_audit_enforcement.py
+-  - --ignore=tests/architecture/test_naming_exception_registry_sync.py
+-  - --ignore=tests/architecture/test_nine_domain_audit_rhai_registry.py
+-  - --ignore=tests/architecture/test_no_print_in_docstrings.py
+-  - --ignore=tests/architecture/test_normalization_surface_coverage_ratchet.py
+-  - --ignore=tests/architecture/test_observability_docs_drift.py
+-  - --ignore=tests/architecture/test_observability_docs_sync.py
+-  - --ignore=tests/architecture/test_passport_documentation_projections.py
+-  - --ignore=tests/architecture/test_performance_budget_registry.py
+-  - --ignore=tests/architecture/test_port_adapter_factory_coverage_matrix.py
+-  - --ignore=tests/architecture/test_provider_registry_decomposition.py
+-  - --ignore=tests/architecture/test_quality_exemptions_registry.py
+-  - --ignore=tests/architecture/test_reference_docs_contract_residuals.py
+-  - --ignore=tests/architecture/test_reference_identifier_families_doc.py
+-  - --ignore=tests/architecture/test_registry_contracts.py
+-  - --ignore=tests/architecture/test_registry_threading.py
+-  - --ignore=tests/architecture/test_replay_sensitive_coverage_floor_ratchet.py
+-  - --ignore=tests/architecture/test_repo_backed_marker_hygiene.py
+-  - --ignore=tests/architecture/test_repo_cleanup_branch_router.py
+-  - --ignore=tests/architecture/test_reproducibility_docs_contract_drift.py
+-  - --ignore=tests/architecture/test_requirements_traceability_catalog.py
+-  - --ignore=tests/architecture/test_rf_001_architecture_evidence_baseline.py
+-  - --ignore=tests/architecture/test_root_hygiene_review_registry.py
+-  - --ignore=tests/architecture/test_run_diagram_checks_script.py
+-  - --ignore=tests/architecture/test_runtime_agent_docs_drift.py
+-  - --ignore=tests/architecture/test_runtime_registry_explicit_seams.py
+-  - --ignore=tests/architecture/test_security_suite_coverage.py
+-  - --ignore=tests/architecture/test_security_suppression_registry.py
+-  - --ignore=tests/architecture/test_test_governance_audit.py
+-  - --ignore=tests/architecture/test_test_telemetry_baseline.py
+-  - --ignore=tests/architecture/test_test_telemetry_governance.py
+-  - --ignore=tests/architecture/test_uniform_diagram_group_width.py
+-  - --ignore=tests/architecture/test_value_object_run_manifest_deprecation.py
+-  - --ignore=tests/architecture/test_vcr_metadata_catalog_drift.py
+ - name: S7-crosscutting-architecture-guardrails-a
+   wave: 2
+   paths:
+@@ -943,139 +409,3 @@ shards:
+   workers_override: 0
+   extra_pytest_args:
+   - --timeout=300
+-  - --ignore-glob=tests/architecture/**/*closeout*.py
+-  - --ignore-glob=tests/architecture/*closeout*.py
+-  - --ignore-glob=tests/architecture/test_tech_debt*.py
+-  - --ignore-glob=tests/architecture/test_issue_*.py
+-  - --ignore-glob=tests/architecture/*/test_*.py
+-  - --ignore-glob=tests/architecture/test_[a-r]*.py
+-  - --ignore=tests/architecture/test_any_budget.py
+-  - --ignore=tests/architecture/test_scripts_catalog_governance.py
+-  - --ignore=tests/architecture/test_architecture_dependency_docs_drift.py
+-  - --ignore=tests/architecture/test_check_doc_links_guardrails.py
+-  - --ignore=tests/architecture/test_public_facade_inventory.py
+-  - --ignore=tests/architecture/test_docs_version_sync.py
+-  - --ignore=tests/architecture/test_documentation_sync.py
+-  - --ignore=tests/architecture/test_code_metrics.py
+-  - --ignore=tests/architecture/test_diagram_regression_workflow.py
+-  - --ignore=tests/architecture/test_docs_governance_workflow.py
+-  - --ignore=tests/architecture/test_quality_debt_scorecard.py
+-  - --ignore=tests/architecture/test_quality_burndown_priorities.py
+-  - --ignore=tests/architecture/test_scripts_deprecation_backlog.py
+-  - --ignore=tests/architecture/test_scripts_inventory_manifest.py
+-  - --ignore=tests/architecture/test_scripts_lifecycle_registry.py
+-  - --ignore=tests/architecture/test_test_structural_debt.py
+-  - --ignore=tests/architecture/test_adr_enforcement_matrix.py
+-  - --ignore=tests/architecture/test_add_svg_text_fallback.py
+-  - --ignore=tests/architecture/test_adapter_contracts.py
+-  - --ignore=tests/architecture/test_contract_registry_loader_boundary.py
+-  - --ignore=tests/architecture/test_config_ci_invariants.py
+-  - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+-  - --ignore=tests/architecture/test_checkpoint_runtime_facade_usage.py
+-  - --ignore=tests/architecture/test_cli_command_import_guards.py
+-  - --ignore=tests/architecture/test_removed_surface_freeze_guards.py
+-  - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
+-  - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
+-  - --ignore=tests/architecture/test_config_root_governance.py
+-  - --ignore=tests/architecture/test_config_surface_entity_residual_plateau.py
+-  - --ignore=tests/architecture/test_adr_registry_governance_sync.py
+-  - --ignore=tests/architecture/test_architecture_acceptance_baseline.py
+-  - --ignore=tests/architecture/test_architecture_audit_rebaseline.py
+-  - --ignore=tests/architecture/test_architecture_debt_agent_surface.py
+-  - --ignore=tests/architecture/test_architecture_quality_scorecard.py
+-  - --ignore=tests/architecture/test_artifact_duplication_audit.py
+-  - --ignore=tests/architecture/test_branch_coverage_policy_sot.py
+-  - --ignore=tests/architecture/test_bronze_fixture_replay_baseline.py
+-  - --ignore=tests/architecture/test_check_diagram_visual_smoke.py
+-  - --ignore=tests/architecture/test_chembl_baseline_smoke_workflow.py
+-  - --ignore=tests/architecture/test_ci_coverage_surface_matrix.py
+-  - --ignore=tests/architecture/test_cli_doc_parity.py
+-  - --ignore=tests/architecture/test_cli_registry_explicit_path.py
+-  - --ignore=tests/architecture/test_codex_agent_catalog_inventory.py
+-  - --ignore=tests/architecture/test_codex_skill_agent_links.py
+-  - --ignore=tests/architecture/test_composite_schema_contract_coverage.py
+-  - --ignore=tests/architecture/test_config_taxonomy_review.py
+-  - --ignore=tests/architecture/test_config_topology_docs_drift.py
+-  - --ignore=tests/architecture/test_config_transition_registry.py
+-  - --ignore=tests/architecture/test_contract_coverage_matrix_integrity.py
+-  - --ignore=tests/architecture/test_control_plane_runtime_docs_alignment.py
+-  - --ignore=tests/architecture/test_coverage_exclusion_annotations.py
+-  - --ignore=tests/architecture/test_coverage_exclusion_governance.py
+-  - --ignore=tests/architecture/test_coverage_verify_lane_contract.py
+-  - --ignore=tests/architecture/test_curated_surface_telemetry_reporting.py
+-  - --ignore=tests/architecture/test_debt_governance_telemetry_reporting.py
+-  - --ignore=tests/architecture/test_deterministic_identity_documentation_governance.py
+-  - --ignore=tests/architecture/test_deterministic_sort_policy_coverage.py
+-  - --ignore=tests/architecture/test_diagram_13g_adapters_labeled.py
+-  - --ignore=tests/architecture/test_diagram_artifact_check.py
+-  - --ignore=tests/architecture/test_diagram_bundle_generator_contracts.py
+-  - --ignore=tests/architecture/test_diagram_corpus_regression_guards.py
+-  - --ignore=tests/architecture/test_diagram_description_index_contracts.py
+-  - --ignore=tests/architecture/test_diagram_drift_and_embed_guards.py
+-  - --ignore=tests/architecture/test_diagram_full_map_metrics_binding.py
+-  - --ignore=tests/architecture/test_diagram_lint_policy_rules.py
+-  - --ignore=tests/architecture/test_diagram_narrative_docs_sync.py
+-  - --ignore=tests/architecture/test_diagram_nightly_suite.py
+-  - --ignore=tests/architecture/test_diagram_nightly_workflow.py
+-  - --ignore=tests/architecture/test_diagram_quality_budget_security.py
+-  - --ignore=tests/architecture/test_diagram_quality_gates.py
+-  - --ignore=tests/architecture/test_diagram_tooling_fail_closed.py
+-  - --ignore=tests/architecture/test_doc_crossref_integrity.py
+-  - --ignore=tests/architecture/test_docker_runtime_contracts.py
+-  - --ignore=tests/architecture/test_docs_build_site_router.py
+-  - --ignore=tests/architecture/test_docs_internal_bootstrap_governance.py
+-  - --ignore=tests/architecture/test_docs_kpi_workflow.py
+-  - --ignore=tests/architecture/test_docs_root_surface_governance_alignment.py
+-  - --ignore=tests/architecture/test_docs_runtime_wrapper_governance.py
+-  - --ignore=tests/architecture/test_documentation.py
+-  - --ignore=tests/architecture/test_documentation_audit_remediation.py
+-  - --ignore=tests/architecture/test_documentation_cleanup_inventory.py
+-  - --ignore=tests/architecture/test_documentation_residual_keyword_guards.py
+-  - --ignore=tests/architecture/test_domain_aggregate_invariant_registry.py
+-  - --ignore=tests/architecture/test_github_actions_runtime_policy.py
+-  - --ignore=tests/architecture/test_github_governance_review.py
+-  - --ignore=tests/architecture/test_gitignore_secret_and_agents_policy.py
+-  - --ignore=tests/architecture/test_gold_snapshot_registry.py
+-  - --ignore=tests/architecture/test_grok_subagent_least_privilege.py
+-  - --ignore=tests/architecture/test_historical_prompt_docs_stack.py
+-  - --ignore=tests/architecture/test_internal_orchestration_docs.py
+-  - --ignore=tests/architecture/test_layer_contract_coverage_matrix.py
+-  - --ignore=tests/architecture/test_low_coverage_targeted_tests_6045.py
+-  - --ignore=tests/architecture/test_memory_rag_manifest_governance.py
+-  - --ignore=tests/architecture/test_metrics_server_wiring.py
+-  - --ignore=tests/architecture/test_mixin_collaborator_metrics.py
+-  - --ignore=tests/architecture/test_module_coverage_inventory.py
+-  - --ignore=tests/architecture/test_naming_audit_enforcement.py
+-  - --ignore=tests/architecture/test_naming_exception_registry_sync.py
+-  - --ignore=tests/architecture/test_nine_domain_audit_rhai_registry.py
+-  - --ignore=tests/architecture/test_no_print_in_docstrings.py
+-  - --ignore=tests/architecture/test_normalization_surface_coverage_ratchet.py
+-  - --ignore=tests/architecture/test_observability_docs_drift.py
+-  - --ignore=tests/architecture/test_observability_docs_sync.py
+-  - --ignore=tests/architecture/test_passport_documentation_projections.py
+-  - --ignore=tests/architecture/test_performance_budget_registry.py
+-  - --ignore=tests/architecture/test_port_adapter_factory_coverage_matrix.py
+-  - --ignore=tests/architecture/test_provider_registry_decomposition.py
+-  - --ignore=tests/architecture/test_quality_exemptions_registry.py
+-  - --ignore=tests/architecture/test_reference_docs_contract_residuals.py
+-  - --ignore=tests/architecture/test_reference_identifier_families_doc.py
+-  - --ignore=tests/architecture/test_registry_contracts.py
+-  - --ignore=tests/architecture/test_registry_threading.py
+-  - --ignore=tests/architecture/test_replay_sensitive_coverage_floor_ratchet.py
+-  - --ignore=tests/architecture/test_repo_backed_marker_hygiene.py
+-  - --ignore=tests/architecture/test_repo_cleanup_branch_router.py
+-  - --ignore=tests/architecture/test_reproducibility_docs_contract_drift.py
+-  - --ignore=tests/architecture/test_requirements_traceability_catalog.py
+-  - --ignore=tests/architecture/test_rf_001_architecture_evidence_baseline.py
+-  - --ignore=tests/architecture/test_root_hygiene_review_registry.py
+-  - --ignore=tests/architecture/test_run_diagram_checks_script.py
+-  - --ignore=tests/architecture/test_runtime_agent_docs_drift.py
+-  - --ignore=tests/architecture/test_runtime_registry_explicit_seams.py
+-  - --ignore=tests/architecture/test_security_suite_coverage.py
+-  - --ignore=tests/architecture/test_security_suppression_registry.py
+-  - --ignore=tests/architecture/test_test_governance_audit.py
+-  - --ignore=tests/architecture/test_test_telemetry_baseline.py
+-  - --ignore=tests/architecture/test_test_telemetry_governance.py
+-  - --ignore=tests/architecture/test_uniform_diagram_group_width.py
+-  - --ignore=tests/architecture/test_value_object_run_manifest_deprecation.py
+-  - --ignore=tests/architecture/test_vcr_metadata_catalog_drift.py
+diff --git a/generate_baseline_diff.sh b/generate_baseline_diff.sh
+new file mode 100644
+index 000000000..cf4b9dd26
+--- /dev/null
++++ b/generate_baseline_diff.sh
+@@ -0,0 +1 @@
++uv run pytest tests/architecture --ignore-glob='tests/architecture/**/*closeout*.py' --ignore-glob='tests/architecture/*closeout*.py' --ignore-glob='tests/architecture/test_tech_debt*.py' --ignore-glob='tests/architecture/test_issue_*.py' --ignore-glob='tests/architecture/*/test_*.py' --ignore-glob='tests/architecture/test_[a-r]*.py' --ignore='tests/architecture/test_any_budget.py' --ignore='tests/architecture/test_scripts_catalog_governance.py' --ignore='tests/architecture/test_architecture_dependency_docs_drift.py' --ignore='tests/architecture/test_check_doc_links_guardrails.py' --ignore='tests/architecture/test_public_facade_inventory.py' --ignore='tests/architecture/test_docs_version_sync.py' --ignore='tests/architecture/test_documentation_sync.py' --ignore='tests/architecture/test_code_metrics.py' --ignore='tests/architecture/test_diagram_regression_workflow.py' --ignore='tests/architecture/test_docs_governance_workflow.py' --ignore='tests/architecture/test_quality_debt_scorecard.py' --ignore='tests/architecture/test_quality_burndown_priorities.py' --ignore='tests/architecture/test_scripts_deprecation_backlog.py' --ignore='tests/architecture/test_scripts_inventory_manifest.py' --ignore='tests/architecture/test_scripts_lifecycle_registry.py' --ignore='tests/architecture/test_test_structural_debt.py' --ignore='tests/architecture/test_adr_enforcement_matrix.py' --ignore='tests/architecture/test_add_svg_text_fallback.py' --ignore='tests/architecture/test_adapter_contracts.py' --ignore='tests/architecture/test_contract_registry_loader_boundary.py' --ignore='tests/architecture/test_config_ci_invariants.py' --ignore='tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py' --ignore='tests/architecture/test_checkpoint_runtime_facade_usage.py' --ignore='tests/architecture/test_cli_command_import_guards.py' --ignore='tests/architecture/test_removed_surface_freeze_guards.py' --ignore='tests/architecture/test_config_discrepancy_metrics_ratchets.py' --ignore='tests/architecture/test_config_discrepancy_report_drift.py' --ignore='tests/architecture/test_config_root_governance.py' --ignore='tests/architecture/test_config_surface_entity_residual_plateau.py' --ignore='tests/architecture/test_adr_registry_governance_sync.py' --ignore='tests/architecture/test_architecture_acceptance_baseline.py' --ignore='tests/architecture/test_architecture_audit_rebaseline.py' --ignore='tests/architecture/test_architecture_debt_agent_surface.py' --ignore='tests/architecture/test_architecture_quality_scorecard.py' --ignore='tests/architecture/test_artifact_duplication_audit.py' --ignore='tests/architecture/test_branch_coverage_policy_sot.py' --ignore='tests/architecture/test_bronze_fixture_replay_baseline.py' --ignore='tests/architecture/test_check_diagram_visual_smoke.py' --ignore='tests/architecture/test_chembl_baseline_smoke_workflow.py' --ignore='tests/architecture/test_ci_coverage_surface_matrix.py' --ignore='tests/architecture/test_cli_doc_parity.py' --ignore='tests/architecture/test_cli_registry_explicit_path.py' --ignore='tests/architecture/test_codex_agent_catalog_inventory.py' --ignore='tests/architecture/test_codex_skill_agent_links.py' --ignore='tests/architecture/test_composite_schema_contract_coverage.py' --ignore='tests/architecture/test_config_taxonomy_review.py' --ignore='tests/architecture/test_config_topology_docs_drift.py' --ignore='tests/architecture/test_config_transition_registry.py' --ignore='tests/architecture/test_contract_coverage_matrix_integrity.py' --ignore='tests/architecture/test_control_plane_runtime_docs_alignment.py' --ignore='tests/architecture/test_coverage_exclusion_annotations.py' --ignore='tests/architecture/test_coverage_exclusion_governance.py' --ignore='tests/architecture/test_coverage_verify_lane_contract.py' --ignore='tests/architecture/test_curated_surface_telemetry_reporting.py' --ignore='tests/architecture/test_debt_governance_telemetry_reporting.py' --ignore='tests/architecture/test_deterministic_identity_documentation_governance.py' --ignore='tests/architecture/test_deterministic_sort_policy_coverage.py' --ignore='tests/architecture/test_diagram_13g_adapters_labeled.py' --ignore='tests/architecture/test_diagram_artifact_check.py' --ignore='tests/architecture/test_diagram_bundle_generator_contracts.py' --ignore='tests/architecture/test_diagram_corpus_regression_guards.py' --ignore='tests/architecture/test_diagram_description_index_contracts.py' --ignore='tests/architecture/test_diagram_drift_and_embed_guards.py' --ignore='tests/architecture/test_diagram_full_map_metrics_binding.py' --ignore='tests/architecture/test_diagram_lint_policy_rules.py' --ignore='tests/architecture/test_diagram_narrative_docs_sync.py' --ignore='tests/architecture/test_diagram_nightly_suite.py' --ignore='tests/architecture/test_diagram_nightly_workflow.py' --ignore='tests/architecture/test_diagram_quality_budget_security.py' --ignore='tests/architecture/test_diagram_quality_gates.py' --ignore='tests/architecture/test_diagram_tooling_fail_closed.py' --ignore='tests/architecture/test_doc_crossref_integrity.py' --ignore='tests/architecture/test_docker_runtime_contracts.py' --ignore='tests/architecture/test_docs_build_site_router.py' --ignore='tests/architecture/test_docs_internal_bootstrap_governance.py' --ignore='tests/architecture/test_docs_kpi_workflow.py' --ignore='tests/architecture/test_docs_root_surface_governance_alignment.py' --ignore='tests/architecture/test_docs_runtime_wrapper_governance.py' --ignore='tests/architecture/test_documentation.py' --ignore='tests/architecture/test_documentation_audit_remediation.py' --ignore='tests/architecture/test_documentation_cleanup_inventory.py' --ignore='tests/architecture/test_documentation_residual_keyword_guards.py' --ignore='tests/architecture/test_domain_aggregate_invariant_registry.py' --ignore='tests/architecture/test_github_actions_runtime_policy.py' --ignore='tests/architecture/test_github_governance_review.py' --ignore='tests/architecture/test_gitignore_secret_and_agents_policy.py' --ignore='tests/architecture/test_gold_snapshot_registry.py' --ignore='tests/architecture/test_grok_subagent_least_privilege.py' --ignore='tests/architecture/test_historical_prompt_docs_stack.py' --ignore='tests/architecture/test_internal_orchestration_docs.py' --ignore='tests/architecture/test_layer_contract_coverage_matrix.py' --ignore='tests/architecture/test_low_coverage_targeted_tests_6045.py' --ignore='tests/architecture/test_memory_rag_manifest_governance.py' --ignore='tests/architecture/test_metrics_server_wiring.py' --ignore='tests/architecture/test_mixin_collaborator_metrics.py' --ignore='tests/architecture/test_module_coverage_inventory.py' --ignore='tests/architecture/test_naming_audit_enforcement.py' --ignore='tests/architecture/test_naming_exception_registry_sync.py' --ignore='tests/architecture/test_nine_domain_audit_rhai_registry.py' --ignore='tests/architecture/test_no_print_in_docstrings.py' --ignore='tests/architecture/test_normalization_surface_coverage_ratchet.py' --ignore='tests/architecture/test_observability_docs_drift.py' --ignore='tests/architecture/test_observability_docs_sync.py' --ignore='tests/architecture/test_passport_documentation_projections.py' --ignore='tests/architecture/test_performance_budget_registry.py' --ignore='tests/architecture/test_port_adapter_factory_coverage_matrix.py' --ignore='tests/architecture/test_provider_registry_decomposition.py' --ignore='tests/architecture/test_quality_exemptions_registry.py' --ignore='tests/architecture/test_reference_docs_contract_residuals.py' --ignore='tests/architecture/test_reference_identifier_families_doc.py' --ignore='tests/architecture/test_registry_contracts.py' --ignore='tests/architecture/test_registry_threading.py' --ignore='tests/architecture/test_replay_sensitive_coverage_floor_ratchet.py' --ignore='tests/architecture/test_repo_backed_marker_hygiene.py' --ignore='tests/architecture/test_repo_cleanup_branch_router.py' --ignore='tests/architecture/test_reproducibility_docs_contract_drift.py' --ignore='tests/architecture/test_requirements_traceability_catalog.py' --ignore='tests/architecture/test_rf_001_architecture_evidence_baseline.py' --ignore='tests/architecture/test_root_hygiene_review_registry.py' --ignore='tests/architecture/test_run_diagram_checks_script.py' --ignore='tests/architecture/test_runtime_agent_docs_drift.py' --ignore='tests/architecture/test_runtime_registry_explicit_seams.py' --ignore='tests/architecture/test_security_suite_coverage.py' --ignore='tests/architecture/test_security_suppression_registry.py' --ignore='tests/architecture/test_test_governance_audit.py' --ignore='tests/architecture/test_test_telemetry_baseline.py' --ignore='tests/architecture/test_test_telemetry_governance.py' --ignore='tests/architecture/test_uniform_diagram_group_width.py' --ignore='tests/architecture/test_value_object_run_manifest_deprecation.py' --ignore='tests/architecture/test_vcr_metadata_catalog_drift.py' --collect-only > reports/12371-restart-c/architecture_inventory_fast_baseline.txt
+diff --git a/mark_all_ignored.py b/mark_all_ignored.py
+new file mode 100644
+index 000000000..61c0f4fa7
+--- /dev/null
++++ b/mark_all_ignored.py
+@@ -0,0 +1,25 @@
++import subprocess
++import os
++
++with open("reports/12371-restart-c/architecture_inventory_full.txt") as f:
++    full = {line.strip() for line in f if '::' in line and not line.startswith('collected')}
++
++with open("reports/12371-restart-c/pr_required_baseline.txt") as f:
++    pr_req = {line.strip() for line in f if '::' in line and not line.startswith('collected')}
++
++diff = full - pr_req
++files = set(line.split("::")[0] for line in diff)
++
++for file in files:
++    try:
++        with open(file, "r") as f:
++            content = f.read()
++        if "pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]" not in content:
++            if "pytestmark = pytest.mark.architecture" in content:
++                content = content.replace("pytestmark = pytest.mark.architecture", "pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]")
++            else:
++                content += "\npytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]\n"
++        with open(file, "w") as f:
++            f.write(content)
++    except FileNotFoundError:
++        pass
+diff --git a/mark_files.py b/mark_files.py
+new file mode 100644
+index 000000000..e35358141
+--- /dev/null
++++ b/mark_files.py
+@@ -0,0 +1,27 @@
++import subprocess
++import os
++
++with open("reports/12371-restart-c/architecture_inventory_full.txt") as f:
++    full = {line.strip() for line in f if '::' in line and not line.startswith('collected')}
++
++with open("reports/12371-restart-c/pr_required_baseline.txt") as f:
++    pr_req = {line.strip() for line in f if '::' in line and not line.startswith('collected')}
++
++diff = full - pr_req
++files = set(line.split("::")[0] for line in diff)
++
++for file in files:
++    try:
++        with open(file, "r") as f:
++            content = f.read()
++        if "pytestmark = pytest.mark.architecture" in content:
++            content = content.replace("pytestmark = pytest.mark.architecture", "pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]")
++        else:
++            if "pytestmark = [" in content:
++                content = content.replace("pytestmark = [", "pytestmark = [pytest.mark.docs_governance, ")
++            else:
++                content += "\npytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]\n"
++        with open(file, "w") as f:
++            f.write(content)
++    except FileNotFoundError:
++        pass
+diff --git a/pyproject.toml b/pyproject.toml
+index 61975526f..d69e3f7e1 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -261,6 +261,7 @@ markers = [
+     "vcr: VCR.py recorded HTTP interactions",
+     "performance: Performance regression tests (optional CI stage)",
+     "architecture: Architecture tests (layer boundaries, contracts)",
++    "docs_governance: Documentation governance tests",
+     "contract: Contract tests (compatibility alias for singular marker usage)",
+     "contracts: Contract tests (API contracts, schema stability)",
+     "benchmark: Benchmark tests (excluded from standard runs, run with -m benchmark)",
+diff --git a/split_plan.py b/split_plan.py
+new file mode 100644
+index 000000000..f64deb98a
+--- /dev/null
++++ b/split_plan.py
+@@ -0,0 +1,15 @@
++import re
++
++with open("pyproject.toml") as f:
++    pyproject = f.read()
++
++pyproject = pyproject.replace(
++    '"architecture: Architecture tests (layer boundaries, contracts)",',
++    '"architecture: Architecture tests (layer boundaries, contracts)",\n    "docs_governance: Documentation governance tests",'
++)
++
++with open("pyproject.toml", "w") as f:
++    f.write(pyproject)
++
++with open("reports/12371-restart-c/run_split_audit.py") as f:
++    script = f.read()
+diff --git a/split_pr_required.py b/split_pr_required.py
+new file mode 100644
+index 000000000..6e0dc8d2d
+--- /dev/null
++++ b/split_pr_required.py
+@@ -0,0 +1,22 @@
++import re
++
++with open(".github/workflows/pr-required.yml") as f:
++    text = f.read()
++
++# Replace the ignore arguments with a simpler marker expression
++text = text.replace(
++    '--parallel-marker "not slow and not benchmark and not memory and not serial"',
++    '--parallel-marker "not slow and not benchmark and not memory and not serial and not docs_governance"'
++)
++
++text = text.replace(
++    '--serial-marker "serial and not slow and not benchmark and not memory"',
++    '--serial-marker "serial and not slow and not benchmark and not memory and not docs_governance"'
++)
++
++text = re.sub(r' --ignore-glob=tests/architecture/[a-zA-Z0-9_.*\[\]-]+\.py', '', text)
++text = re.sub(r' --ignore=tests/architecture/[a-zA-Z0-9_.*\[\]-]+\.py', '', text)
++
++with open(".github/workflows/pr-required.yml", "w") as f:
++    f.write(text)
++
+diff --git a/split_shards.py b/split_shards.py
+new file mode 100644
+index 000000000..3082947f9
+--- /dev/null
++++ b/split_shards.py
+@@ -0,0 +1,25 @@
++import re
++
++with open("configs/quality/pytest_shards.yaml") as f:
++    shards = f.read()
++
++# For S7-crosscutting-architecture-d and other shards, replace ignores with our marker.
++# We will just remove all the --ignore and --ignore-glob lines for tests/architecture
++lines = shards.split("\n")
++new_lines = []
++for line in lines:
++    if "--ignore-glob=tests/architecture" in line or "--ignore=tests/architecture" in line:
++        continue
++    new_lines.append(line)
++
++shards = "\n".join(new_lines)
++
++# But we need to make sure the ones running tests/architecture run it with -m "architecture and not docs_governance"
++shards = shards.replace(
++    'tests/architecture/ -m "architecture and not slow and not benchmark and not memory"',
++    'tests/architecture/ -m "architecture and not slow and not benchmark and not memory and not docs_governance"'
++)
++
++with open("configs/quality/pytest_shards.yaml", "w") as f:
++    f.write(shards)
++
+diff --git a/tests/architecture/test_check_diagram_visual_smoke.py b/tests/architecture/test_check_diagram_visual_smoke.py
+index 2220d7797..50cfd7379 100644
+--- a/tests/architecture/test_check_diagram_visual_smoke.py
++++ b/tests/architecture/test_check_diagram_visual_smoke.py
+@@ -20,7 +20,7 @@ from pathlib import Path
+ from types import ModuleType
+
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+
+ def _load_module() -> ModuleType:
+diff --git a/tests/architecture/test_diagram_13g_adapters_labeled.py b/tests/architecture/test_diagram_13g_adapters_labeled.py
+index bf798ef3a..5d8f48821 100644
+--- a/tests/architecture/test_diagram_13g_adapters_labeled.py
++++ b/tests/architecture/test_diagram_13g_adapters_labeled.py
+@@ -23,7 +23,7 @@ DIAGRAM_13G = (
+ )
+ ADAPTER_IDS = ("CA", "PA", "UA", "CRA", "OAA", "SSA", "PCA")
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+
+ def test_13g_provider_adapters_are_labeled() -> None:
+diff --git a/tests/architecture/test_diagram_artifact_check.py b/tests/architecture/test_diagram_artifact_check.py
+index 225ad8539..d4a4bb7a8 100644
+--- a/tests/architecture/test_diagram_artifact_check.py
++++ b/tests/architecture/test_diagram_artifact_check.py
+@@ -21,7 +21,7 @@ from pathlib import Path
+ from types import ModuleType
+
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+
+ def _load_module() -> ModuleType:
+diff --git a/tests/architecture/test_diagram_bundle_generator_contracts.py b/tests/architecture/test_diagram_bundle_generator_contracts.py
+index 434978cde..a915c0ce9 100644
+--- a/tests/architecture/test_diagram_bundle_generator_contracts.py
++++ b/tests/architecture/test_diagram_bundle_generator_contracts.py
+@@ -21,7 +21,7 @@ from pathlib import Path
+ from types import ModuleType
+
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+
+ def _load_generate_all_bundles() -> ModuleType:
+diff --git a/tests/architecture/test_diagram_corpus_regression_guards.py b/tests/architecture/test_diagram_corpus_regression_guards.py
+index 78212379c..d4cf3ae71 100644
+--- a/tests/architecture/test_diagram_corpus_regression_guards.py
++++ b/tests/architecture/test_diagram_corpus_regression_guards.py
+@@ -22,7 +22,7 @@ import pytest
+ from scripts.diagrams.fix.prune_orphan_nodes import analyse_file, detect_diagram_type
+
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+ REPO_ROOT = Path(__file__).resolve().parents[2]
+ DIAGRAM_ROOT = REPO_ROOT / "docs" / "02-architecture" / "diagrams"
+diff --git a/tests/architecture/test_diagram_description_index_contracts.py b/tests/architecture/test_diagram_description_index_contracts.py
+index 06561f94e..00b0083f0 100644
+--- a/tests/architecture/test_diagram_description_index_contracts.py
++++ b/tests/architecture/test_diagram_description_index_contracts.py
+@@ -20,7 +20,7 @@ from pathlib import Path
+ from types import ModuleType
+
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+
+ def _load_module() -> ModuleType:
+diff --git a/tests/architecture/test_diagram_drift_and_embed_guards.py b/tests/architecture/test_diagram_drift_and_embed_guards.py
+index 00f99d20b..393884589 100644
+--- a/tests/architecture/test_diagram_drift_and_embed_guards.py
++++ b/tests/architecture/test_diagram_drift_and_embed_guards.py
+@@ -22,7 +22,7 @@ import pytest
+
+ from tests.architecture._platform_skip_support import mounted_worktree_skip_reason
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+ REPO_ROOT = Path(__file__).resolve().parents[2]
+ DOCS_ROOT = REPO_ROOT / "docs"
+diff --git a/tests/architecture/test_diagram_full_map_metrics_binding.py b/tests/architecture/test_diagram_full_map_metrics_binding.py
+index 433092121..a24fb7f14 100644
+--- a/tests/architecture/test_diagram_full_map_metrics_binding.py
++++ b/tests/architecture/test_diagram_full_map_metrics_binding.py
+@@ -31,7 +31,7 @@ FULL_VIEW = (
+ MAPS = {"parent": PARENT_MAP, "full_view": FULL_VIEW}
+ ORPHAN_IDS = ("FDSP", "HCP", "MCP", "DNP", "DQMP", "SHP")
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+
+ @pytest.mark.parametrize("diagram", MAPS.values(), ids=MAPS.keys())
+diff --git a/tests/architecture/test_diagram_issues_6205_6211_closeout.py b/tests/architecture/test_diagram_issues_6205_6211_closeout.py
+index 65e391228..00f531b75 100644
+--- a/tests/architecture/test_diagram_issues_6205_6211_closeout.py
++++ b/tests/architecture/test_diagram_issues_6205_6211_closeout.py
+@@ -18,7 +18,7 @@ from typing import Any
+
+ import pytest
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+ ROOT = Path(__file__).resolve().parents[2]
+ CLOSEOUT = ROOT / "reports" / "quality" / "diagram-issues-6205-6211-closeout.json"
+diff --git a/tests/architecture/test_diagram_lint_policy_rules.py b/tests/architecture/test_diagram_lint_policy_rules.py
+index 82a79a70f..f5cdd3cec 100644
+--- a/tests/architecture/test_diagram_lint_policy_rules.py
++++ b/tests/architecture/test_diagram_lint_policy_rules.py
+@@ -21,7 +21,7 @@ from pathlib import Path
+ from types import ModuleType
+
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+
+ def _load_lint_module() -> ModuleType:
+diff --git a/tests/architecture/test_diagram_narrative_docs_sync.py b/tests/architecture/test_diagram_narrative_docs_sync.py
+index f86b6d8ec..c21fcc74e 100644
+--- a/tests/architecture/test_diagram_narrative_docs_sync.py
++++ b/tests/architecture/test_diagram_narrative_docs_sync.py
+@@ -18,7 +18,7 @@ import re
+ from pathlib import Path
+
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+ REPO_ROOT = Path(__file__).resolve().parents[2]
+ CLASS_SUMMARY = (
+diff --git a/tests/architecture/test_diagram_nightly_suite.py b/tests/architecture/test_diagram_nightly_suite.py
+index e2034198a..907510a33 100644
+--- a/tests/architecture/test_diagram_nightly_suite.py
++++ b/tests/architecture/test_diagram_nightly_suite.py
+@@ -21,7 +21,7 @@ from types import ModuleType
+ import pytest
+
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+
+ def _load_module() -> ModuleType:
+diff --git a/tests/architecture/test_diagram_nightly_workflow.py b/tests/architecture/test_diagram_nightly_workflow.py
+index 128a0a3dc..d0d26c036 100644
+--- a/tests/architecture/test_diagram_nightly_workflow.py
++++ b/tests/architecture/test_diagram_nightly_workflow.py
+@@ -17,7 +17,7 @@ import pytest
+ from pathlib import Path
+
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+
+ def test_nightly_workflow_exists_and_is_scheduled() -> None:
+diff --git a/tests/architecture/test_diagram_quality_budget_security.py b/tests/architecture/test_diagram_quality_budget_security.py
+index a31cd6af8..b0b416fa0 100644
+--- a/tests/architecture/test_diagram_quality_budget_security.py
++++ b/tests/architecture/test_diagram_quality_budget_security.py
+@@ -20,7 +20,7 @@ from types import ModuleType
+ import pytest
+
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+
+ def _load_module() -> ModuleType:
+diff --git a/tests/architecture/test_diagram_quality_gates.py b/tests/architecture/test_diagram_quality_gates.py
+index 5971c01c5..b7da3d820 100644
+--- a/tests/architecture/test_diagram_quality_gates.py
++++ b/tests/architecture/test_diagram_quality_gates.py
+@@ -20,7 +20,7 @@ from types import ModuleType
+ import pytest
+
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+
+ def _load_module() -> ModuleType:
+diff --git a/tests/architecture/test_diagram_regression_workflow.py b/tests/architecture/test_diagram_regression_workflow.py
+index 601e83771..7019fd82c 100644
+--- a/tests/architecture/test_diagram_regression_workflow.py
++++ b/tests/architecture/test_diagram_regression_workflow.py
+@@ -20,7 +20,7 @@ import sys
+
+ import pytest
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+ _STALE_WORKFLOW_NEEDLE = b"validate-mermaid.yml"
+ _STALE_SCAN_SKIP_DIRS = frozenset(
+diff --git a/tests/architecture/test_diagram_tooling_fail_closed.py b/tests/architecture/test_diagram_tooling_fail_closed.py
+index 72c8ea1ac..856eb5b4f 100644
+--- a/tests/architecture/test_diagram_tooling_fail_closed.py
++++ b/tests/architecture/test_diagram_tooling_fail_closed.py
+@@ -9,7 +9,7 @@ from types import ModuleType
+
+ import pytest
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+ ROOT = Path(__file__).resolve().parents[2]
+
+diff --git a/tests/architecture/test_run_diagram_checks_script.py b/tests/architecture/test_run_diagram_checks_script.py
+index cc2514575..9c0bed592 100644
+--- a/tests/architecture/test_run_diagram_checks_script.py
++++ b/tests/architecture/test_run_diagram_checks_script.py
+@@ -17,7 +17,7 @@ import pytest
+ from pathlib import Path
+
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+
+ def _script_text() -> str:
+diff --git a/tests/architecture/test_validate_mermaid_syntax_script.py b/tests/architecture/test_validate_mermaid_syntax_script.py
+index 8e606c359..b9ea7803a 100644
+--- a/tests/architecture/test_validate_mermaid_syntax_script.py
++++ b/tests/architecture/test_validate_mermaid_syntax_script.py
+@@ -17,7 +17,7 @@ import pytest
+ from pathlib import Path
+
+
+-pytestmark = pytest.mark.architecture
++pytestmark = [pytest.mark.architecture, pytest.mark.docs_governance]
+
+
+ def _script_text() -> str:
