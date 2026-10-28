@@ -32,9 +32,18 @@ The following commands were executed from the full-tree checkout at
   exit `0`; governance artifacts current.
 - `python -m scripts.engineering.ci pr-lane-results shadow-compare --base-sha
   origin/main --head-sha HEAD` — exit `0`; 16 tests selected and no unmapped
-  paths.
-- GitHub Actions run `40676125298` for the same exact head — conclusion
-  `success`, including `pr-gate-complete`.
+  paths. For this invocation, `origin/main` resolved to
+  `5ea476e6b61bcc4937a82af14c59e6772ddd4a50` and `HEAD` resolved to
+  `18a9b778cd22fae48a92ab83679e1f93e728f267`.
+- GitHub Actions run `40676125298` for commit
+  `18a9b778cd22fae48a92ab83679e1f93e728f267`, against base
+  `5ea476e6b61bcc4937a82af14c59e6772ddd4a50` — conclusion `success`,
+  including `pr-gate-complete`.
+- Skipped local verification checks: none. Conditional CI jobs skipped by that
+  run: generated pipeline-dataflow rendering, diagram rendering, and Docker
+  image publishing; their prerequisite/detection gates completed successfully.
+- Runtime/skills mirror sync: not applicable because no AI runtime or mirrored
+  skill sources were changed.
 
 No command in this verification implements or proves the requested semantic
 architecture/runtime-vs-governance split. That implementation remains blocked;
