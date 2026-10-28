@@ -24,6 +24,9 @@ from pathlib import Path
 import pytest
 import yaml
 
+from bioetl.domain.behavior.dq_rule_evaluator import evaluate_dq_rules_for_record
+from bioetl.domain.config.dq import DQConfig
+from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.infrastructure.config.domain_config_resolver import (
     resolve_domain_pipeline_config,
 )
@@ -729,17 +732,17 @@ class TestChemblPublicationCrossFieldRules:
 
 
 @pytest.mark.integration
-class TestPublicationYearWarnRule:
-    """Verify publication_year < 1950 warn rule is loaded from DQ configs."""
+class TestPublicationYearThresholdRules:
+    """Verify blocking publication-year thresholds load from DQ configs."""
 
     @pytest.mark.parametrize(
         "provider",
         ["chembl", "crossref", "openalex", "pubmed", "semanticscholar"],
     )
-    def test_publication_year_warn_rule_present(
+    def test_publication_year_1950_error_rule_present(
         self, dq_loader: DQConfigLoader, provider: str
     ) -> None:
-        """Each provider's publication DQ config has a year < 1950 warn rule."""
+        """Each provider blocks publication years below 1950."""
         config = dq_loader.load(provider, "publication")
 
         year_rules = [
@@ -748,23 +751,26 @@ class TestPublicationYearWarnRule:
             if fv.field == "publication_year" and fv.validation_type == "range"
         ]
 
-        # Should have at least 2 range rules: error (1500-2100) and warn (min 1950)
+        # Both the broad 1500-2100 guard and the stricter 1950 floor are blocking.
         assert len(year_rules) >= 2, (
             f"{provider}: expected ≥2 publication_year range rules, got {len(year_rules)}"
         )
 
-        # Find the warn rule
-        warn_rules = [r for r in year_rules if r.severity == "error" and r.min_value == 1950]
-        assert len(warn_rules) == 1, (
-            f"{provider}: expected 1 warn rule for publication_year, got {len(warn_rules)}"
+        early_year_rules = [
+            r for r in year_rules if r.severity == "error" and r.min_value == 1950
+        ]
+        assert len(early_year_rules) == 1, (
+            f"{provider}: expected 1 blocking 1950 rule, got {len(early_year_rules)}"
         )
 
-        warn_rule = warn_rules[0]
-        assert warn_rule.min_value == 1950, (
-            f"{provider}: warn rule min should be 1950, got {warn_rule.min_value}"
+        early_year_rule = early_year_rules[0]
+        assert early_year_rule.min_value == 1950, (
+            f"{provider}: early-year rule min should be 1950, "
+            f"got {early_year_rule.min_value}"
         )
-        assert warn_rule.max_value is None, (
-            f"{provider}: warn rule should have no max, got {warn_rule.max_value}"
+        assert early_year_rule.max_value is None, (
+            f"{provider}: early-year rule should have no max, "
+            f"got {early_year_rule.max_value}"
         )
 
     @pytest.mark.parametrize(
@@ -774,7 +780,7 @@ class TestPublicationYearWarnRule:
     def test_publication_year_error_rule_unchanged(
         self, dq_loader: DQConfigLoader, provider: str
     ) -> None:
-        """Existing error rule (1500-2100) remains intact alongside new warn rule."""
+        """Existing 1500-2100 error rule remains intact alongside the 1950 floor."""
         config = dq_loader.load(provider, "publication")
 
         year_rules = [
@@ -783,7 +789,9 @@ class TestPublicationYearWarnRule:
             if fv.field == "publication_year" and fv.validation_type == "range"
         ]
 
-        error_rules = [r for r in year_rules if r.severity == "error" and r.min_value == 1500]
+        error_rules = [
+            r for r in year_rules if r.severity == "error" and r.min_value == 1500
+        ]
         assert len(error_rules) == 1, (
             f"{provider}: expected 1 error rule for publication_year"
         )
@@ -791,6 +799,80 @@ class TestPublicationYearWarnRule:
         error_rule = error_rules[0]
         assert error_rule.min_value == 1500
         assert error_rule.max_value == 2100
+
+
+@pytest.mark.integration
+class TestBlockingPublicationCollectionRules:
+    """Blocking collection rules accept canonical runtime representations."""
+
+    @staticmethod
+    def _single_pattern_rule_config(
+        dq_loader: DQConfigLoader,
+        provider: str,
+        field: str,
+    ) -> DQConfig:
+        loaded = dq_loader.load(provider, "publication")
+        rules = tuple(
+            rule
+            for rule in loaded.field_validations
+            if rule.field == field and rule.validation_type == "pattern"
+        )
+        assert len(rules) == 1
+        assert rules[0].severity == "error"
+        return DQConfig(
+            field_validations=rules,
+            invalid_record_policy=loaded.invalid_record_policy,
+            contract_ref=loaded.contract_ref,
+        )
+
+    @pytest.mark.parametrize(
+        ("provider", "field", "value"),
+        [
+            ("semanticscholar", "author_s2_ids", '["2363804544"]'),
+            (
+                "semanticscholar",
+                "author_orcids",
+                '["0000-0002-1825-0097",null]',
+            ),
+            (
+                "semanticscholar",
+                "publication_type",
+                "Journal Article|Research Support",
+            ),
+            ("openalex", "author_openalex_ids", '["A123",null]'),
+            ("openalex", "author_orcids", '["0000-0002-1825-0097",null]'),
+            ("crossref", "author_orcids", '["0000-0002-1825-0097"]'),
+            ("pubmed", "author_orcids", '["0000-0002-1825-0097"]'),
+        ],
+    )
+    def test_runtime_collection_value_is_not_quarantined(
+        self,
+        dq_loader: DQConfigLoader,
+        provider: str,
+        field: str,
+        value: str,
+    ) -> None:
+        config = self._single_pattern_rule_config(dq_loader, provider, field)
+
+        assert evaluate_dq_rules_for_record({field: value}, dq_config=config) == []
+
+    def test_invalid_semantic_scholar_author_id_remains_blocking(
+        self,
+        dq_loader: DQConfigLoader,
+    ) -> None:
+        config = self._single_pattern_rule_config(
+            dq_loader,
+            "semanticscholar",
+            "author_s2_ids",
+        )
+
+        outcomes = evaluate_dq_rules_for_record(
+            {"author_s2_ids": '["not-an-id"]'},
+            dq_config=config,
+        )
+
+        assert len(outcomes) == 1
+        assert outcomes[0].disposition == DQDisposition.QUARANTINE
 
 
 @pytest.mark.integration
