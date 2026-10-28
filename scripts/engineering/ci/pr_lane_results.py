@@ -255,6 +255,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/test_failure_analysis.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12375_b_repeat_blocker.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12375_restart_c_no_change_report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/12371-restart-c/handoff_report.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    "reports/12371-restart-c/separated_diffs.diff": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
     "reports/engineering/benchmarks/jules/restart-2208-12377-a/BLOCKER.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
