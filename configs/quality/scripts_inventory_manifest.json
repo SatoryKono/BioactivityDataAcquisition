@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-28T12:18:52.553785+00:00",
+  "generated_at": "2026-10-28T15:31:15.227349+00:00",
   "summary": {
     "total_scripts": 697,
     "status_counts": {
@@ -2896,7 +2896,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 354,
+          "line": 355,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3678,7 +3678,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 353,
+          "line": 354,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3733,7 +3733,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 352,
+          "line": 353,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -10484,7 +10484,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 286,
+          "line": 287,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10527,7 +10527,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 366,
+          "line": 367,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -16493,7 +16493,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py",
-          "line": 20,
+          "line": 21,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import ("
         }
@@ -20553,7 +20553,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 426,
+          "line": 427,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23553,7 +23553,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 503,
+          "line": 504,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
