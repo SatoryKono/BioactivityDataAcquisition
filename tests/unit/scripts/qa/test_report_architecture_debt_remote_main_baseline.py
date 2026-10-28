@@ -36,9 +36,25 @@ def _committed_git_repo(tmp_path: Path) -> tuple[Path, str]:
     )
     tracked = repo / "tracked.txt"
     tracked.write_bytes(b"blob contents\n")
+    directory_entry = repo / "directory-as-blob.json"
+    directory_entry.mkdir()
+    (directory_entry / "nested.txt").write_bytes(b"nested contents\n")
     subprocess.run(["git", "-C", str(repo), "add", "tracked.txt"], check=True)
     subprocess.run(
-        ["git", "-C", str(repo), "commit", "-q", "-m", "test commit"],
+        ["git", "-C", str(repo), "add", "directory-as-blob.json"], check=True
+    )
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "commit.gpgsign=false",
+            "-C",
+            str(repo),
+            "commit",
+            "-q",
+            "-m",
+            "test commit",
+        ],
         check=True,
     )
     revision = subprocess.run(
@@ -61,6 +77,13 @@ def test_git_blob_returns_none_for_missing_path_in_valid_commit(tmp_path: Path) 
     repo, revision = _committed_git_repo(tmp_path)
 
     assert baseline._git_blob(repo, revision, "missing.txt") is None
+
+
+def test_git_blob_raises_for_directory_at_expected_path(tmp_path: Path) -> None:
+    repo, revision = _committed_git_repo(tmp_path)
+
+    with pytest.raises(RuntimeError, match="directory-as-blob.json.*tree, not a blob"):
+        baseline._git_blob(repo, revision, "directory-as-blob.json")
 
 
 def test_git_blob_raises_for_unresolvable_commit(tmp_path: Path) -> None:
