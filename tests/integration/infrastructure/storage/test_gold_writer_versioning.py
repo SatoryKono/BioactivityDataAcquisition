@@ -463,8 +463,7 @@ async def test_issue_12475_gold_scd2_repeat_write_keeps_history_and_current_row(
         "float64": pa.float64(),
     }
     expected_types = {
-        name: arrow_types[str(column.dtype)]
-        for name, column in schema.columns.items()
+        name: arrow_types[str(column.dtype)] for name, column in schema.columns.items()
     }
     expected_types.update(
         {
@@ -474,13 +473,9 @@ async def test_issue_12475_gold_scd2_repeat_write_keeps_history_and_current_row(
             "_version": pa.int64(),
         }
     )
-    actual_types = {
-        field.name: field.type for field in physical_schema
-    }
+    actual_types = {field.name: field.type for field in physical_schema}
     assert actual_types == expected_types
-    actual_nullability = {
-        field.name: field.nullable for field in physical_schema
-    }
+    actual_nullability = {field.name: field.nullable for field in physical_schema}
     assert all(actual_nullability.values())
     logically_nonnullable = {
         name for name, column in schema.columns.items() if not column.nullable

@@ -129,7 +129,9 @@ async def test_every_resolved_pipeline_config_writes_and_reads_all_layers(
             mode=config.sink["silver"].mode,
             on_schema_mismatch=config.sink["silver"].on_schema_mismatch,
         )
-        silver_table_path = tmp_path / "silver" / "issue12475_matrix" / f"pipeline_{observed:02d}"
+        silver_table_path = (
+            tmp_path / "silver" / "issue12475_matrix" / f"pipeline_{observed:02d}"
+        )
         silver_rows = DeltaTable(str(silver_table_path)).to_pyarrow_table().to_pylist()
         assert len(silver_rows) == 1
         assert silver_rows[0]["entity_id"] == record_id
@@ -158,7 +160,9 @@ async def test_every_resolved_pipeline_config_writes_and_reads_all_layers(
             ),
             **gold_write_options,
         )
-        gold_table_path = tmp_path / "gold" / "issue12475_matrix" / f"pipeline_{observed:02d}"
+        gold_table_path = (
+            tmp_path / "gold" / "issue12475_matrix" / f"pipeline_{observed:02d}"
+        )
         gold_rows = DeltaTable(str(gold_table_path)).to_pyarrow_table().to_pylist()
         assert len(gold_rows) == 1
         assert gold_rows[0]["entity_id"] == record_id

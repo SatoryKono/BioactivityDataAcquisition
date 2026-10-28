@@ -186,8 +186,16 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
         projected_columns = list(
             dict.fromkeys(
                 [*business_keys, current_flag_col]
-                + (["content_hash"] if any("content_hash" in record for record in records) else [])
-                + ([version_col] if any(version_col in record for record in records) else [])
+                + (
+                    ["content_hash"]
+                    if any("content_hash" in record for record in records)
+                    else []
+                )
+                + (
+                    [version_col]
+                    if any(version_col in record for record in records)
+                    else []
+                )
             )
         )
         current_snapshot = await self._run_in_executor(
@@ -213,9 +221,8 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
             if current is None:
                 insert_records.append(record)
                 continue
-            changed = (
-                not has_content_hash
-                or current.get("content_hash") != record.get("content_hash")
+            changed = not has_content_hash or current.get("content_hash") != record.get(
+                "content_hash"
             )
             if not changed:
                 unchanged_records.append({**record, marker_column: "noop"})
@@ -232,9 +239,7 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
         )
         valid_to_col = scd_config.valid_to_col
         merge_conditions = [f"source.{marker_column} = 'expire'"]
-        merge_conditions.extend(
-            f"target.{key} = source.{key}" for key in business_keys
-        )
+        merge_conditions.extend(f"target.{key} = source.{key}" for key in business_keys)
         merge_conditions.append(f"target.{current_flag_col} = true")
         merge_condition = " AND ".join(merge_conditions)
         ts_iso = ingestion_ts.isoformat()
