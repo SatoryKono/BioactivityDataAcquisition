@@ -48,6 +48,16 @@ def test_xml_processor_xxe_mitigation():
     assert result is None
 
 
+def test_xml_processor_rejects_quadratic_entity_expansion():
+    """Repeated references to one entity are denied before expansion."""
+    payload = (
+        '<!DOCTYPE root [<!ENTITY repeated "0123456789">]>'
+        "<root>" + "&repeated;" * 10_000 + "</root>"
+    )
+
+    assert PubMedXmlProcessor.parse_response(payload) is None
+
+
 def test_transformer_billion_laughs_mitigation():
     """Verify that PubMedPublicationTransformer blocks Entity Expansion (Billion Laughs)."""
     transformer = instantiate_test_transformer(

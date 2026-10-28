@@ -34,6 +34,7 @@ from unittest.mock import AsyncMock, MagicMock
 import httpx
 import pytest
 
+from bioetl.domain.exceptions.network.service import ExternalServiceError
 from bioetl.infrastructure.adapters.pubmed import ENTREZ_API_BASE, PubMedAdapter
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
@@ -165,3 +166,30 @@ async def test_fetch_batch_records_streamed_response_size(
     assert metadata.total_requests == 1
     assert metadata.api_requests[0].response_size_bytes == len(xml_bytes)
     assert metadata.api_requests[0].status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_fetch_batch_rejects_oversized_xml_before_parsing(
+    adapter: PubMedAdapter,
+    mock_http_client: AsyncMock,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An oversized response is rejected while streaming, before XML parsing."""
+    import bioetl.infrastructure.adapters.pubmed._fetch as fetch_module
+
+    monkeypatch.setattr(fetch_module, "_MAX_XML_BYTES", 8)
+    efetch_response = MagicMock()
+    efetch_response.aclose = AsyncMock()
+
+    async def mock_aiter():
+        yield b"<PubmedArticleSet>oversized</PubmedArticleSet>"
+
+    efetch_response.aiter_bytes.return_value = mock_aiter()
+    mock_http_client.stream = AsyncMock(return_value=efetch_response)
+    mock_http_client.timeout = 10.0
+    mock_http_client.read_timeout_multiplier = 2.0
+
+    with pytest.raises(ExternalServiceError, match="PubMed XML response exceeds limit"):
+        await adapter._fetch_batch(["12345678"])
+
+    efetch_response.aclose.assert_awaited_once()
