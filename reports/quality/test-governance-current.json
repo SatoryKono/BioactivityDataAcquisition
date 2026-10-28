@@ -397,6 +397,13 @@
       "test_name": "test_aclose_does_nothing"
     },
     {
+      "category": "weak_no_value",
+      "line": "162",
+      "path": "tests/unit/infrastructure/schemas/test_rf002_extra_forbid_migration.py",
+      "rationale": "candidate tests that need later assertion strengthening or removal review",
+      "test_name": "test_rf002_strict_leaves_reject_unknown_keys"
+    },
+    {
       "category": "intentional_no_exception_contract",
       "line": "72",
       "path": "tests/unit/infrastructure/storage/test_bronze_writer_validation_mixin.py",
@@ -633,7 +640,7 @@
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
     "intentional_no_exception_contract": 85,
-    "weak_no_value": 0
+    "weak_no_value": 1
   },
   "assertless_examples": [
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
@@ -873,6 +880,12 @@
         "intentional_no_exception_contract": 1
       }
     },
+    "tests/unit/infrastructure/schemas/test_rf002_extra_forbid_migration.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "weak_no_value": 1
+      }
+    },
     "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_dq.py": {
       "assertless_tests": 1,
       "categories": {
@@ -1000,8 +1013,15 @@
       }
     }
   },
-  "assertless_total_candidates": 85,
-  "budget_violations": [],
+  "assertless_total_candidates": 86,
+  "budget_violations": [
+    {
+      "actual": 1,
+      "budget": "refined_assertless_max",
+      "expected_max": 0,
+      "metric": "refined_assertless_tests"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1178,7 +1198,7 @@
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
-  "refined_assertless_tests": 0,
+  "refined_assertless_tests": 1,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
@@ -1587,6 +1607,13 @@
         "test_name": "test_aclose_does_nothing"
       },
       {
+        "category": "weak_no_value",
+        "line": "162",
+        "path": "tests/unit/infrastructure/schemas/test_rf002_extra_forbid_migration.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_rf002_strict_leaves_reject_unknown_keys"
+      },
+      {
         "category": "intentional_no_exception_contract",
         "line": "72",
         "path": "tests/unit/infrastructure/storage/test_bronze_writer_validation_mixin.py",
@@ -1823,7 +1850,7 @@
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
       "intentional_no_exception_contract": 85,
-      "weak_no_value": 0
+      "weak_no_value": 1
     },
     "assertless_examples": [
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
@@ -1852,7 +1879,7 @@
       "tests/unit/composition/factories/storage/test_health_mixin.py:103",
       "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:623"
     ],
-    "assertless_total_candidates": 85,
+    "assertless_total_candidates": 86,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2028,7 +2055,7 @@
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "parse_errors": [],
-    "refined_assertless_tests": 0,
+    "refined_assertless_tests": 1,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
@@ -2044,8 +2071,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3183,
-      "test_python_file_count": 3433,
+      "test_glob_file_count": 3187,
+      "test_python_file_count": 3437,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2086,16 +2113,16 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3183,
-    "total_test_functions": 31476,
+    "total_test_files": 3187,
+    "total_test_functions": 31510,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "505e9529563df1379cc1ffcf30c39e2ce22e91941d652c7f18a7f040bfe4df75",
+  "source_tree_sha256": "94a7ab96814db97b70b6a553fa0c8ce23b5091cb076800663dca82134a2be657",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 85,
+    "assertless_total_candidates": 86,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
@@ -2103,7 +2130,7 @@
     "intentional_no_exception_contract": 85,
     "markerless_examples": [],
     "markerless_test_functions": 0,
-    "refined_assertless_tests": 0,
+    "refined_assertless_tests": 1,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
@@ -2112,8 +2139,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3183,
-    "test_python_file_count": 3433,
+    "test_glob_file_count": 3187,
+    "test_python_file_count": 3437,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2154,8 +2181,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3183,
-  "total_test_functions": 31476,
+  "total_test_files": 3187,
+  "total_test_functions": 31510,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
