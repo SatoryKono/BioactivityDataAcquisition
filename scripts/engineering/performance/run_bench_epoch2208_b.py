@@ -80,4 +80,3 @@ for lane_name, base_cmd in lanes.items():
                 f.write(
                     f"{lane_name} | {conf_name} | Run {run_idx + 1} | {wall_clock:.2f}s | Exit: {proc.returncode}\n"
                 )
-
