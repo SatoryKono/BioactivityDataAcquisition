@@ -400,16 +400,21 @@ async def test_issue_12475_gold_scd2_repeat_write_keeps_history_and_current_row(
     """Repeated SCD2 writes close old rows and insert only changed versions."""
     schema = ChEMBLPublicationGoldSchema.to_schema()
 
-    def publication_record(*, title: str, content_hash: str) -> dict[str, object]:
+    def publication_record(
+        *,
+        title: str,
+        content_hash: str,
+        entity_id: str = "CHEMBL123",
+    ) -> dict[str, object]:
         record = dict.fromkeys(schema.columns)
         record.update(
             {
                 "_dq_warn": False,
                 "_dq_error": False,
                 "_index": 0,
-                "entity_id": "CHEMBL123",
+                "entity_id": entity_id,
                 "content_hash": content_hash * 64,
-                "publication_id": "CHEMBL123",
+                "publication_id": entity_id,
                 "title": title,
                 "publication_year": 2025.0,
                 "citations_received": 4.0,
@@ -506,3 +511,47 @@ async def test_issue_12475_gold_scd2_repeat_write_keeps_history_and_current_row(
         ingestion_ts=datetime(2026, 10, 28, 14, 0, tzinfo=UTC),
     )
     assert _load_gold_rows(tmp_path / "gold", "chembl.publication") == rows
+
+    await writer.write_gold(
+        table_name="chembl.publication",
+        records=[
+            publication_record(
+                entity_id="CHEMBL456",
+                title="New key",
+                content_hash="c",
+            )
+        ],
+        schema=schema,
+        primary_keys=["entity_id"],
+        mode="scd2",
+        scd_config=scd_config,
+        ingestion_ts=datetime(2026, 10, 28, 15, 0, tzinfo=UTC),
+    )
+    rows_after_new_key = _load_gold_rows(tmp_path / "gold", "chembl.publication")
+    new_key = next(row for row in rows_after_new_key if row["entity_id"] == "CHEMBL456")
+    assert new_key["_is_current"] is True
+    assert new_key["_version"] == 1
+
+    await writer.write_gold(
+        table_name="chembl.publication",
+        records=[
+            publication_record(title="Title v3", content_hash="d"),
+            publication_record(
+                entity_id="CHEMBL789",
+                title="Mixed batch new key",
+                content_hash="e",
+            ),
+        ],
+        schema=schema,
+        primary_keys=["entity_id"],
+        mode="scd2",
+        scd_config=scd_config,
+        ingestion_ts=datetime(2026, 10, 28, 16, 0, tzinfo=UTC),
+    )
+    final_rows = _load_gold_rows(tmp_path / "gold", "chembl.publication")
+    assert len(final_rows) == 5
+    current_by_key = {row["entity_id"]: row for row in final_rows if row["_is_current"]}
+    assert current_by_key["CHEMBL123"]["_version"] == 3
+    assert current_by_key["CHEMBL123"]["title"] == "Title v3"
+    assert current_by_key["CHEMBL456"]["_version"] == 1
+    assert current_by_key["CHEMBL789"]["_version"] == 1

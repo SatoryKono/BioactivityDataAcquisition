@@ -37,6 +37,7 @@ from unittest.mock import MagicMock, patch
 
 import pandera.pandas as pa
 import pyarrow as pa_arrow
+import pyarrow.dataset as pa_dataset
 import pytest
 from deltalake.exceptions import TableNotFoundError
 from pandera.pandas import DataFrameSchema
@@ -223,6 +224,25 @@ async def test_write_scd2_existing_table(gold_writer, valid_records, strict_sche
 
         # Verify execution
         mock_merge_builder.execute.assert_called_once()
+
+
+def test_scd2_current_snapshot_filter_limits_rows_to_incoming_keys(gold_writer):
+    """The SCD2 lookup reads only current rows for keys in the active batch."""
+    table = pa_arrow.table(
+        {
+            "id": [1, 2, 2, 3],
+            "is_current": [True, True, False, True],
+        }
+    )
+    expression = gold_writer._build_current_snapshot_filter(
+        business_keys=["id"],
+        current_flag_col="is_current",
+        records=[{"id": 2}],
+    )
+
+    rows = pa_dataset.dataset(table).to_table(filter=expression).to_pylist()
+
+    assert rows == [{"id": 2, "is_current": True}]
 
 
 async def test_read_gold(gold_writer):

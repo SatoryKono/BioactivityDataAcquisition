@@ -137,6 +137,45 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
             f"OR ({source_alias}.content_hash IS NOT NULL AND {target_alias}.content_hash IS NULL)"
         )
 
+    @staticmethod
+    def _build_current_snapshot_filter(
+        *,
+        business_keys: list[str],
+        current_flag_col: str,
+        records: list[GoldRecord],
+    ) -> Any:
+        """Filter the current SCD2 snapshot to keys present in this batch."""
+        import pyarrow.dataset as ds
+
+        current_filter = ds.field(current_flag_col).isin([True])
+        if len(business_keys) == 1:
+            key = business_keys[0]
+            incoming_values = list(dict.fromkeys(record.get(key) for record in records))
+            return current_filter & ds.field(key).isin(incoming_values)
+
+        incoming_filter = None
+        for record in records:
+            record_filter = None
+            for key in business_keys:
+                value = record.get(key)
+                field_filter = (
+                    ds.field(key).is_null() if value is None else ds.field(key) == value
+                )
+                record_filter = (
+                    field_filter
+                    if record_filter is None
+                    else record_filter & field_filter
+                )
+            incoming_filter = (
+                record_filter
+                if incoming_filter is None
+                else incoming_filter | record_filter
+            )
+
+        if incoming_filter is None:
+            raise ValueError("SCD2 snapshot filter requires at least one business key")
+        return current_filter & incoming_filter
+
     async def _write_scd2(
         self,
         table_path: str,
@@ -169,7 +208,6 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
     ) -> None:
         """Merge records using SCD Type 2 logic."""
         import pyarrow as pa
-        import pyarrow.dataset as ds
 
         if not records:
             return
@@ -201,7 +239,11 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
         current_snapshot = await self._run_in_executor(
             lambda: dt.to_pyarrow_dataset().to_table(
                 columns=projected_columns,
-                filter=ds.field(current_flag_col).isin([True]),
+                filter=self._build_current_snapshot_filter(
+                    business_keys=business_keys,
+                    current_flag_col=current_flag_col,
+                    records=records,
+                ),
                 use_threads=False,
             )
         )
@@ -219,7 +261,7 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
             key = tuple(record.get(name) for name in business_keys)
             current = current_by_key.get(key)
             if current is None:
-                insert_records.append(record)
+                insert_records.append({**record, marker_column: "insert"})
                 continue
             changed = not has_content_hash or current.get("content_hash") != record.get(
                 "content_hash"

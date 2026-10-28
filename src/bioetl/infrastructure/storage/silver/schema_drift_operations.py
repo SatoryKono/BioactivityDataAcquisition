@@ -58,14 +58,19 @@ class _SchemaDriftHostProtocol(Protocol):
 def _diff_schema_fields(
     existing_schema: pa.Schema | None,
     records: list[BronzeRecord],
+    *,
+    incoming_schema: pa.Schema | None = None,
 ) -> tuple[set[str], set[str]] | None:
     """Return incoming-only and existing-only fields for one Silver batch."""
     if existing_schema is None or not records:
         return None
 
+    incoming_field_names = (
+        incoming_schema.names if incoming_schema is not None else records[0].keys()
+    )
     incoming_fields = {
         field_name
-        for field_name in records[0]
+        for field_name in incoming_field_names
         if field_name not in NONDETERMINISTIC_PERSISTED_FIELDS
     }
     existing_fields = {
@@ -79,14 +84,16 @@ def _diff_schema_fields(
 def _diff_schema_types(
     existing_schema: pa.Schema | None,
     records: list[BronzeRecord],
+    *,
+    incoming_schema: pa.Schema | None = None,
 ) -> tuple[tuple[str, str, str], ...]:
-    """Return incompatible types inferred from persisted incoming values."""
+    """Return incompatible types from the prepared or inferred incoming schema."""
     if existing_schema is None or not records:
         return ()
-    incoming_schema = pa.Table.from_pylist(records).schema
+    resolved_incoming_schema = incoming_schema or pa.Table.from_pylist(records).schema
     incoming_fields = {
         field.name: field
-        for field in incoming_schema
+        for field in resolved_incoming_schema
         if field.name not in NONDETERMINISTIC_PERSISTED_FIELDS
     }
     changes = []
@@ -108,14 +115,24 @@ def _diff_schema_types(
 def _build_silver_schema_drift_diff(
     existing_schema: pa.Schema | None,
     records: list[BronzeRecord],
+    *,
+    incoming_schema: pa.Schema | None = None,
 ) -> _SilverSchemaDriftDiff | None:
     """Build a normalized Silver schema drift diff from existing and incoming data."""
-    diff = _diff_schema_fields(existing_schema, records)
+    diff = _diff_schema_fields(
+        existing_schema,
+        records,
+        incoming_schema=incoming_schema,
+    )
     if diff is None:
         return None
 
     new_fields, missing_fields = diff
-    changed_fields = _diff_schema_types(existing_schema, records)
+    changed_fields = _diff_schema_types(
+        existing_schema,
+        records,
+        incoming_schema=incoming_schema,
+    )
     if not new_fields and not missing_fields and not changed_fields:
         return None
 
@@ -136,7 +153,7 @@ def _build_schema_drift_info(
         field for field in diff.missing_fields if not field.startswith("_")
     ]
     status: Literal["info", "warn", "critical"]
-    if critical_missing:
+    if critical_missing or diff.changed_fields:
         status = "critical"
     elif len(diff.new_fields) > 3:
         status = "warn"
@@ -147,6 +164,7 @@ def _build_schema_drift_info(
         status=status,
         new_fields=diff.new_fields,
         missing_fields=diff.missing_fields,
+        changed_fields=diff.changed_fields,
     )
 
 
@@ -160,10 +178,16 @@ async def _check_schema_drift(
     table_name: str,
     records: list[BronzeRecord],
     on_schema_mismatch: Literal["error", "evolve", "ignore"],
+    *,
+    incoming_schema: pa.Schema | None = None,
 ) -> None:
     """Check schema drift and handle according to configured policy."""
     existing_schema = await host._get_table_schema(table_name)
-    diff = _build_silver_schema_drift_diff(existing_schema, records)
+    diff = _build_silver_schema_drift_diff(
+        existing_schema,
+        records,
+        incoming_schema=incoming_schema,
+    )
     if diff is None:
         return
 
@@ -179,6 +203,8 @@ async def _check_schema_drift(
     if diff.changed_fields:
         raise SchemaEvolutionError(
             table=table_name,
+            new_fields=set(diff.new_fields),
+            removed_fields=set(diff.missing_fields),
             changed_fields={
                 name: (existing, incoming)
                 for name, existing, incoming in diff.changed_fields
@@ -197,10 +223,16 @@ async def _detect_schema_drift(
     host: _SchemaDriftHostProtocol,
     table_name: str,
     records: list[BronzeRecord],
+    *,
+    incoming_schema: pa.Schema | None = None,
 ) -> SchemaDriftInfo | None:
     """Detect schema drift between existing table and incoming records."""
     existing_schema = await host._get_table_schema(table_name)
-    diff = _build_silver_schema_drift_diff(existing_schema, records)
+    diff = _build_silver_schema_drift_diff(
+        existing_schema,
+        records,
+        incoming_schema=incoming_schema,
+    )
     if diff is None:
         return None
     return _build_schema_drift_info(diff)

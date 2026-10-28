@@ -153,6 +153,8 @@ class _SilverWriterValidationHostProtocol(Protocol):
         table_name: str,
         records: list[dict[str, Any]],  # Any: BronzeRecord is JsonDict (heterogeneous)
         on_schema_mismatch: Literal["error", "evolve", "ignore"],
+        *,
+        incoming_schema: pa.Schema | None = None,
     ) -> None: ...
 
 
@@ -270,6 +272,7 @@ async def _finalize_silver_write_payload(
         schema_request.table_name,
         schema_request.records,
         schema_request.on_schema_mismatch,
+        incoming_schema=schema_request.arrow_data.schema,
     )
     return _build_prepared_silver_write_payload(
         table_path=host._resolve_table_path(schema_request.table_name),

@@ -226,7 +226,7 @@ def _silver_schema(*, added_field: bool = False, value_type: pa.DataType) -> pa.
 
 def _silver_record(
     entity_id: str,
-    value: str | int,
+    value: str | int | float,
     *,
     new_field: str | None = None,
 ) -> dict[str, Any]:
@@ -298,10 +298,44 @@ async def test_silver_delta_evolve_readback_matches_types_and_nullability(
 
 @pytest.mark.integration
 @pytest.mark.asyncio
+async def test_silver_existing_float_schema_accepts_int_after_arrow_coercion(
+    tmp_path: Path,
+) -> None:
+    """Prepared Arrow types prevent a false drift alarm for int-to-float coercion."""
+    writer = _silver_writer(tmp_path / "silver")
+    table_path = tmp_path / "silver" / "issue12475_float_coercion"
+    float_schema = _silver_schema(value_type=pa.float64())
+    await writer.write_silver(
+        table_name="issue12475_float_coercion",
+        records=[_silver_record("e1", 1.5)],
+        primary_keys=["entity_id"],
+        schema=float_schema,
+        mode="merge",
+        on_schema_mismatch="evolve",
+    )
+
+    await writer.write_silver(
+        table_name="issue12475_float_coercion",
+        records=[_silver_record("e2", 2)],
+        primary_keys=["entity_id"],
+        schema=float_schema,
+        mode="merge",
+        on_schema_mismatch="evolve",
+    )
+
+    rows = DeltaTable(str(table_path)).to_pyarrow_table().to_pylist()
+    assert {row["entity_id"]: row["value"] for row in rows} == {
+        "e1": 1.5,
+        "e2": 2.0,
+    }
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
 async def test_silver_delta_type_change_negative_control_is_schema_mismatch(
     tmp_path: Path,
 ) -> None:
-    """An incompatible field type is rejected by Delta schema validation itself."""
+    """Silver drift validation rejects an incompatible prepared Arrow type."""
     writer = _silver_writer(tmp_path / "silver")
     table_path = tmp_path / "silver" / "issue12475_type_change"
     await writer.write_silver(
