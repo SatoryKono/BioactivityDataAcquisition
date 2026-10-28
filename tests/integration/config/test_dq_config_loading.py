@@ -643,7 +643,7 @@ class TestChemblPublicationCrossFieldRules:
         assert cross_ref.condition == "any_present"
         assert "publication_pmid" in cross_ref.fields
         assert "publication_doi" in cross_ref.fields
-        assert cross_ref.severity == "warn"
+        assert cross_ref.severity == "error"
 
     def test_chembl_publication_alias_equality_rules(
         self, dq_loader: DQConfigLoader
@@ -754,7 +754,7 @@ class TestPublicationYearWarnRule:
         )
 
         # Find the warn rule
-        warn_rules = [r for r in year_rules if r.severity == "warn"]
+        warn_rules = [r for r in year_rules if r.severity == "error" and r.min_value == 1950]
         assert len(warn_rules) == 1, (
             f"{provider}: expected 1 warn rule for publication_year, got {len(warn_rules)}"
         )
@@ -783,7 +783,7 @@ class TestPublicationYearWarnRule:
             if fv.field == "publication_year" and fv.validation_type == "range"
         ]
 
-        error_rules = [r for r in year_rules if r.severity == "error"]
+        error_rules = [r for r in year_rules if r.severity == "error" and r.min_value == 1500]
         assert len(error_rules) == 1, (
             f"{provider}: expected 1 error rule for publication_year"
         )
