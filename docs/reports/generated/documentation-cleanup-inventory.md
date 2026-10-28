@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4016 |
-| Tracked doc-like files | 4016 |
+| Doc-like files | 4019 |
+| Tracked doc-like files | 4019 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4016 |
+| tracked | 4019 |
 
 ## Lifecycle Counts
 
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 254 |
+| working_report | 257 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -55,7 +55,7 @@
 | Archived | 1554 |
 | Canonical | 76 |
 | Generated | 1066 |
-| Working | 569 |
+| Working | 572 |
 
 ## Surface Families
 
@@ -65,13 +65,13 @@
 | archive | 1554 |
 | canonical | 76 |
 | generated | 1066 |
-| working | 569 |
+| working | 572 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 283 |
+| archive-after-migration | 286 |
 | generate-automatically | 1066 |
 | keep | 2667 |
 
@@ -121,6 +121,7 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | Working | 0 | archive-after-migration |
 | `reports/12361_named_blocker.md` | Working | 0 | archive-after-migration |
+| `reports/12371-restart-c/handoff_report.md` | Working | 0 | archive-after-migration |
 | `reports/12375_b_repeat_blocker.md` | Working | 0 | archive-after-migration |
 | `reports/12375_restart_c_no_change_report.md` | Working | 0 | archive-after-migration |
 | `reports/NAMED_BLOCKER_12464.md` | Working | 1 | archive-after-migration |
@@ -158,7 +159,6 @@
 | `reports/audit-runs/12107-r07/owner-decision-package.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/port-relationship-index.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/scan-manifest.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/12107-r07/telemetry-applicability.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

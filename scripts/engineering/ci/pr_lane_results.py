@@ -91,7 +91,6 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
-    "reports/engineering/blocker-12364.md": TEST_GOVERNANCE_ARTIFACT_TESTS,
     ".gitleaksignore": (
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
     ),
@@ -252,9 +251,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/quality/total-tech-debt-audit-main-current.md": (
         "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
     ),
+    "reports/epoch2208/b/benchmark.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/test_failure_analysis.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12375_b_repeat_blocker.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12375_restart_c_no_change_report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/engineering/blocker-12364.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/12371-restart-c/handoff_report.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    "reports/12371-restart-c/separated_diffs.diff": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
     "reports/engineering/benchmarks/jules/restart-2208-12377-a/BLOCKER.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
