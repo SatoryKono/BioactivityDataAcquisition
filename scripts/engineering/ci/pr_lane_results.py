@@ -60,6 +60,11 @@ DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
 INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST = (
     "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
 )
+ISSUE_12475_PHYSICAL_PARITY_TESTS = (
+    "tests/integration/infrastructure/storage/test_issue_12475_physical_parity.py",
+    "tests/integration/infrastructure/storage/test_gold_writer_versioning.py",
+    "tests/architecture/test_documentation_cleanup_inventory.py",
+)
 TYPE_CHECKING_WORKFLOW = ".github/workflows/type-checking.yml"
 TYPE_CHECKING_COLD_WORKFLOW = ".github/workflows/type-checking-cold.yml"
 
@@ -149,6 +154,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/quality/low-coverage-6045-revalidation.xml": (
         "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
+    ),
+    "reports/quality/issue-12475-physical-parity-evidence.md": (
+        *ISSUE_12475_PHYSICAL_PARITY_TESTS,
     ),
     "docs/05-operations/runbooks/incident-response.md": (
         "tests/integration/test_prometheus_rules_config.py",
