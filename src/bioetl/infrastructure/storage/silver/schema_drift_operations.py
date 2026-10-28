@@ -39,6 +39,7 @@ class _SilverSchemaDriftDiff:
 
     new_fields: tuple[str, ...]
     missing_fields: tuple[str, ...]
+    changed_fields: tuple[tuple[str, str, str], ...]
 
 
 class _SchemaDriftHostProtocol(Protocol):
@@ -75,6 +76,35 @@ def _diff_schema_fields(
     return incoming_fields - existing_fields, existing_fields - incoming_fields
 
 
+def _diff_schema_types(
+    existing_schema: pa.Schema | None,
+    records: list[BronzeRecord],
+) -> tuple[tuple[str, str, str], ...]:
+    """Return incompatible types inferred from persisted incoming values."""
+    if existing_schema is None or not records:
+        return ()
+    incoming_schema = pa.Table.from_pylist(records).schema
+    incoming_fields = {
+        field.name: field
+        for field in incoming_schema
+        if field.name not in NONDETERMINISTIC_PERSISTED_FIELDS
+    }
+    changes = []
+    for existing_field in existing_schema:
+        incoming_field = incoming_fields.get(existing_field.name)
+        if incoming_field is None or pa.types.is_null(incoming_field.type):
+            continue
+        if not existing_field.type.equals(incoming_field.type):
+            changes.append(
+                (
+                    existing_field.name,
+                    str(existing_field.type),
+                    str(incoming_field.type),
+                )
+            )
+    return tuple(sorted(changes))
+
+
 def _build_silver_schema_drift_diff(
     existing_schema: pa.Schema | None,
     records: list[BronzeRecord],
@@ -85,12 +115,14 @@ def _build_silver_schema_drift_diff(
         return None
 
     new_fields, missing_fields = diff
-    if not new_fields and not missing_fields:
+    changed_fields = _diff_schema_types(existing_schema, records)
+    if not new_fields and not missing_fields and not changed_fields:
         return None
 
     return _SilverSchemaDriftDiff(
         new_fields=tuple(sorted(new_fields)),
         missing_fields=tuple(sorted(missing_fields)),
+        changed_fields=changed_fields,
     )
 
 
@@ -140,8 +172,18 @@ async def _check_schema_drift(
         table=table_name,
         new_fields=list(diff.new_fields) if diff.new_fields else None,
         removed_fields=list(diff.missing_fields) if diff.missing_fields else None,
+        changed_fields=list(diff.changed_fields) if diff.changed_fields else None,
         action=on_schema_mismatch,
     )
+
+    if diff.changed_fields:
+        raise SchemaEvolutionError(
+            table=table_name,
+            changed_fields={
+                name: (existing, incoming)
+                for name, existing, incoming in diff.changed_fields
+            },
+        )
 
     if on_schema_mismatch == "error":
         raise SchemaEvolutionError(
