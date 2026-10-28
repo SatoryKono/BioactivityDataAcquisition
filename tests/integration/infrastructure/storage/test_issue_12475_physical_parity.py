@@ -21,12 +21,19 @@ from bioetl.infrastructure.config.pipeline_config_api import (
 )
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServicesRequest,
 )
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.helpers.clock import fixed_test_clock
-from tests.helpers.deterministic_ids import deterministic_batch_id, deterministic_run_id
+from bioetl.domain.types import ScdConfig
+from pandera.pandas import Column, DataFrameSchema
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_id,
+    deterministic_run_id,
+    deterministic_run_uuid_from_callsite,
+)
 
 
 @pytest.mark.integration
@@ -62,6 +69,97 @@ def test_resolved_production_sink_matrix_for_issue_12475() -> None:
             ("jsonl", "delta", "merge", "evolve", "delta", "overwrite"): 2,
         }
     )
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_every_resolved_pipeline_config_writes_and_reads_all_layers(
+    tmp_path: Path,
+) -> None:
+    """Exercise Bronze, Silver and configured Gold mode for all 27 pipelines."""
+    configs_root = Path("configs")
+    bronze_writer = BronzeWriter(
+        base_path=tmp_path / "bronze",
+        logger=NoOpLogger(),
+        metrics=NoOpMetrics(warn_on_use=False),
+    )
+    silver_writer = _silver_writer(tmp_path / "silver")
+    gold_writer = GoldWriter(base_path=tmp_path / "gold", logger=NoOpLogger())
+    gold_schema = DataFrameSchema(
+        {
+            "entity_id": Column(str, nullable=False),
+            "value": Column(float, nullable=False),
+        },
+        strict=True,
+    )
+    observed = 0
+
+    for entity_path in sorted((configs_root / "entities").rglob("*.yaml")):
+        payload = yaml.safe_load(entity_path.read_text(encoding="utf-8")) or {}
+        pipeline_name = (payload.get("pipeline") or {}).get("pipeline_name")
+        if not pipeline_name:
+            continue
+
+        config = load_pipeline_config_from_root(
+            pipeline_name,
+            configs_root=configs_root,
+        )
+        table_name = f"issue12475_matrix.pipeline_{observed:02d}"
+        record_id = f"matrix-{observed:02d}"
+        bronze_payload = {"entity_id": record_id, "value": 1.5, "optional": None}
+        bronze_result = await bronze_writer.write_bronze(
+            records=[json.dumps(bronze_payload).encode("utf-8")],
+            provider="issue12475_matrix",
+            entity=f"pipeline_{observed:02d}",
+            date=datetime(2026, 10, 28, tzinfo=UTC),
+            batch_id=deterministic_batch_id(f"issue12475.matrix.{observed}.batch"),
+            run_id=deterministic_run_id(f"issue12475.matrix.{observed}.run"),
+            run_type=RunType.INCREMENTAL,
+            ingestion_ts=datetime(2026, 10, 28, 12, 0, tzinfo=UTC),
+        )
+        assert [
+            row async for row in bronze_writer.read_bronze(bronze_result.relative_path)
+        ] == [bronze_payload]
+
+        await silver_writer.write_silver(
+            table_name=table_name,
+            records=[_silver_record(record_id, 1)],
+            primary_keys=["entity_id"],
+            schema=_silver_schema(value_type=pa.int64()),
+            mode=config.sink["silver"].mode,
+            on_schema_mismatch=config.sink["silver"].on_schema_mismatch,
+        )
+        silver_table_path = tmp_path / "silver" / "issue12475_matrix" / f"pipeline_{observed:02d}"
+        assert DeltaTable(str(silver_table_path)).to_pyarrow_table().num_rows == 1
+
+        configured_gold_mode = config.sink["gold"].mode
+        gold_mode = getattr(configured_gold_mode, "value", configured_gold_mode)
+        gold_write_options: dict[str, Any] = {}
+        if gold_mode == "scd2":
+            gold_write_options["scd_config"] = ScdConfig(
+                business_key="entity_id",
+                valid_from_col="_valid_from",
+                valid_to_col="_valid_to",
+                current_flag_col="_is_current",
+                version_col="_version",
+            )
+        await gold_writer.write_gold(
+            table_name=table_name,
+            records=[{"entity_id": record_id, "value": 1.5}],
+            schema=gold_schema,
+            primary_keys=["entity_id"],
+            mode=gold_mode,
+            ingestion_ts=datetime(2026, 10, 28, 12, 0, tzinfo=UTC),
+            run_id=deterministic_run_uuid_from_callsite(
+                f"issue12475_matrix_{observed}"
+            ),
+            **gold_write_options,
+        )
+        gold_table_path = tmp_path / "gold" / "issue12475_matrix" / f"pipeline_{observed:02d}"
+        assert DeltaTable(str(gold_table_path)).to_pyarrow_table().num_rows == 1
+        observed += 1
+
+    assert observed == 27
 
 
 @pytest.mark.integration
