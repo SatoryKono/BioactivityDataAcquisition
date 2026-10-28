@@ -236,6 +236,24 @@ def test_shadow_compare_routes_billing_pr_non_code_changes() -> None:
     assert "tests/unit/scripts/test_github_billing.py" in report["selected"]
 
 
+def test_shadow_compare_routes_epoch2208_variant_b_evidence() -> None:
+    """Variant B evidence selects the cleanup-inventory contract."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        [
+            "reports/epoch2208/b/12371_b_handoff.md",
+            "reports/epoch2208/b/architecture_collection.txt",
+        ],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/architecture/test_documentation_cleanup_inventory.py"
+    ]
+    assert report["covers_full_suite"] is False
+
+
 def test_shadow_compare_routes_historical_secret_fingerprints() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare([".gitleaksignore"], repo_root=repo_root)
