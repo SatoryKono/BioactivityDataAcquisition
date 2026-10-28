@@ -251,6 +251,15 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/quality/total-tech-debt-audit-main-current.md": (
         "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
     ),
+    "reports/quality/12475_a_debt_gate_blocker_raw.txt": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    "reports/quality/AUDIT-20261022-3.1-epoch2208-A-report.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    "reports/quality/AUDIT-20261022-3.1-epoch2208-A.json": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
     "CHANGELOG.md": ("tests/architecture/test_docs_version_sync.py",),
     ".coderabbit.yaml": ("tests/architecture/test_coderabbit_config.py",),
     ".github/workflows/duplication-complexity.yml": (
