@@ -253,6 +253,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/epoch2208/b/benchmark.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12375_b_repeat_blocker.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/engineering/benchmarks/jules/restart-2208-12377-a/BLOCKER.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
     "reports/quality/12475_a_debt_gate_blocker_raw.txt": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
