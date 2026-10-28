@@ -60,10 +60,13 @@ DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
 INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST = (
     "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
 )
+DOCUMENTATION_CLEANUP_INVENTORY_TEST = (
+    "tests/architecture/test_documentation_cleanup_inventory.py"
+)
 ISSUE_12475_PHYSICAL_PARITY_TESTS = (
     "tests/integration/infrastructure/storage/test_issue_12475_physical_parity.py",
     "tests/integration/infrastructure/storage/test_gold_writer_versioning.py",
-    "tests/architecture/test_documentation_cleanup_inventory.py",
+    DOCUMENTATION_CLEANUP_INVENTORY_TEST,
 )
 TYPE_CHECKING_WORKFLOW = ".github/workflows/type-checking.yml"
 TYPE_CHECKING_COLD_WORKFLOW = ".github/workflows/type-checking-cold.yml"
@@ -76,7 +79,7 @@ BENCHMARK_EVIDENCE_TESTS: tuple[str, ...] = (
     "tests/unit/repo_backed/scripts/qa/test_validate_benchmark_evidence_repo.py",
 )
 DOCUMENTATION_CLEANUP_INVENTORY_TESTS: tuple[str, ...] = (
-    "tests/architecture/test_documentation_cleanup_inventory.py",
+    DOCUMENTATION_CLEANUP_INVENTORY_TEST,
 )
 FLAKY_BURNDOWN_REVIEW_TESTS: tuple[str, ...] = (
     "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
@@ -254,7 +257,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/04-reference/environment-variables.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,
-        "tests/architecture/test_documentation_cleanup_inventory.py",
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
     ),
     "reports/quality/total-tech-debt-audit-main-current.md": (
         "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
