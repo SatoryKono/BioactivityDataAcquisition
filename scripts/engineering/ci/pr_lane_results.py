@@ -251,6 +251,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/quality/total-tech-debt-audit-main-current.md": (
         "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
     ),
+    "reports/test_failure_analysis.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12375_b_repeat_blocker.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12375_restart_c_no_change_report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12371-restart-c/handoff_report.md": (
