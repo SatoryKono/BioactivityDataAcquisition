@@ -352,8 +352,26 @@ async def test_pubmed_fetch_parse_error_limit_and_filter_mixin(
                 measure_request=lambda *_a, **_k: nullcontext()
             )
             self._request_collector = SimpleNamespace(record_from_response=MagicMock())
+            # SEC-002 `_fetch_batch` streams via http_client.stream + aiter_bytes.
+            bad_xml = b"<<<"
+
+            async def _aiter_bytes():
+                yield bad_xml
+
+            stream_response = SimpleNamespace(
+                status_code=200,
+                headers=httpx.Headers({}),
+                url=httpx.URL(
+                    "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+                ),
+                request=MagicMock(method="GET"),
+                aiter_bytes=lambda: _aiter_bytes(),
+                aclose=AsyncMock(),
+            )
             self.http_client = SimpleNamespace(
-                get=AsyncMock(return_value=SimpleNamespace(text="<<<"))
+                stream=AsyncMock(return_value=stream_response),
+                timeout=10.0,
+                read_timeout_multiplier=2.0,
             )
             self._error_handler = SimpleNamespace(
                 handle_error=lambda **_k: RuntimeError("x")
