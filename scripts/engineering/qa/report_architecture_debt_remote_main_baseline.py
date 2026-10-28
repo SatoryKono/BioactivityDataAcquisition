@@ -116,11 +116,26 @@ def _git_blob(repo_root: Path, revision: str, path: str) -> bytes | None:
         .decode("ascii")
     )
     tree_entries = run_git(
-        ["ls-tree", "-r", "--full-tree", "--name-only", "-z", resolved, "--", path],
+        ["ls-tree", "-r", "-t", "--full-tree", "-z", resolved, "--", path],
         operation="tree lookup",
     ).stdout.split(b"\0")
-    if path.encode("utf-8") not in tree_entries:
+    expected_path = path.encode("utf-8")
+    object_type: bytes | None = None
+    for entry in tree_entries:
+        if not entry:
+            continue
+        header, separator, entry_path = entry.partition(b"\t")
+        metadata = header.split()
+        if not separator or len(metadata) != 3:
+            raise RuntimeError(f"Git tree lookup returned a malformed entry: {entry!r}")
+        if entry_path == expected_path:
+            object_type = metadata[1]
+            break
+    if object_type is None:
         return None
+    if object_type != b"blob":
+        decoded_type = object_type.decode("ascii", errors="replace")
+        raise RuntimeError(f"Git tree entry for {path!r} is {decoded_type}, not a blob")
 
     return run_git(
         ["show", f"{resolved}:{path}"],
