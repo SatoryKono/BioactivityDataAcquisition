@@ -18,4 +18,7 @@ Thus, the condition "До полной доказанной приёмки #1236
 The mandate requires us to STOP and report this as a documented blocker without making partial changes to the retention parameters in any YAML files.
 
 ### Action Taken
-No code logic or `.github/workflows` changes have been made. This report documents the external/internal blocker as required by the environment constraint to ensure a non-empty `unidiffPatch` before concluding with the submit tool.
+No application runtime logic or `.github/workflows` retention settings have
+been changed for blocker #12364. The PR adds only this report, its generated
+governance artifacts, and an `AFFECTED_TESTS_BY_PATH` route that sends the
+report through the documentation inventory checks.
