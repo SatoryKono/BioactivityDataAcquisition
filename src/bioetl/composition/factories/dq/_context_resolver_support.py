@@ -78,10 +78,13 @@ def project_sink_layer_to_extract_payload(
     ``dq_report`` is mapped field-wise so ingress (no ``checks``) never invents
     projection-only keys, while an already-projection dump keeps ``checks``.
     """
-    raw = cast(ModelDumpable, sink_config).model_dump()
-    if not isinstance(raw, Mapping):
+    # Widen to object so the runtime Mapping guard is reachable under strict mypy
+    # (ModelDumpable.model_dump is typed as dict[str, object]).
+    raw_obj: object = cast(ModelDumpable, sink_config).model_dump()
+    if not isinstance(raw_obj, Mapping):
         msg = "sink layer model_dump() must return a mapping"
         raise TypeError(msg)
+    raw = cast(Mapping[str, object], raw_obj)
     payload: dict[str, object] = {}
     for field_name, field_info in config_class.model_fields.items():
         if field_name not in raw:

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-28T08:33:57.974161+00:00",
+  "generated_at": "2026-10-28T08:48:19.917881+00:00",
   "summary": {
     "total_scripts": 697,
     "status_counts": {
@@ -83,7 +83,7 @@
       "agent_usage": [
         "agent-debugging"
       ],
-      "reference_count": 15,
+      "reference_count": 16,
       "references": [
         {
           "path": ".codex/skills/agent-debugging/SKILL.md",
@@ -12858,7 +12858,7 @@
       "references": [
         {
           "path": "pyproject.toml",
-          "line": 351,
+          "line": 361,
           "source_group": "build",
           "text": "# (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py); memory"
         },
