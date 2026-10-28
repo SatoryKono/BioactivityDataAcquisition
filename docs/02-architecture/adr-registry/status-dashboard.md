@@ -2,7 +2,7 @@
 
 Quick overview of ADR status and distribution.
 
-**Last Updated**: 2026-10-04 10:33:34
+**Last Updated**: 2026-10-27 17:59:10
 
 ## 📈 Status Distribution
 
@@ -40,11 +40,11 @@ Quick overview of ADR status and distribution.
 
 Last 5 updated ADRs:
 
-- **ADR-062**: Immutable Composite Parent Merge Replay (2026-10-03)
-- **ADR-001**: Delta Lake vs Parquet (2026-09-25)
-- **ADR-002**: Medallion Architecture (2026-09-25)
-- **ADR-003**: In-Memory Locking (MemoryLock) (2026-09-25)
-- **ADR-005**: Composition Layer Separation (2026-09-25)
+- **ADR-054**: Evidence-Backed Passport Documentation Projections (2026-10-28)
+- **ADR-055**: Workflow Reconciliation Data-Step Ownership (2026-10-28)
+- **ADR-056**: Proof-or-Stop Lifecycle Control (2026-10-28)
+- **ADR-045**: Data Quality Contract System (2026-10-21)
+- **ADR-004**: Pydantic vs Dataclasses (2026-10-15)
 
 ## 🎯 Health Metrics
 

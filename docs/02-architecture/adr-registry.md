@@ -8,7 +8,7 @@ This page is a generated governance mirror and MUST be regenerated via
 `python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
 
 **Total ADRs**: 62
-**Last Updated**: 2026-10-04
+**Last Updated**: 2026-10-27
 
 ## 📊 Status Summary
 
@@ -656,7 +656,7 @@ Gold datasets. The operation is data-plane transformation, DQ validation,...
 
 ### ADR-056: Proof-or-Stop Lifecycle Control
 
-**Status**: `accepted` | **Category**: `Governance` | **Owner**: `BioETL Team`
+**Status**: `accepted` | **Category**: `Governance` | **Owner**: `BioETL maintainers`
 
 **Context**: BioETL already has comprehensive pre-commit, pre-push, CI, documentation,
 architecture, and debt gates. It also has an immutable EvidenceStore. The
