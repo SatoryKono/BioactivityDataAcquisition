@@ -171,6 +171,9 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
         import pyarrow as pa
         import pyarrow.dataset as ds
 
+        if not records:
+            return
+
         business_keys = (
             [business_key] if isinstance(business_key, str) else business_key
         )
@@ -202,6 +205,7 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
         has_content_hash = any("content_hash" in record for record in records)
         insert_records: list[GoldRecord] = []
         expire_records: list[GoldRecord] = []
+        unchanged_records: list[GoldRecord] = []
         for input_record in records:
             record = dict(input_record)
             key = tuple(record.get(name) for name in business_keys)
@@ -214,22 +218,20 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
                 or current.get("content_hash") != record.get("content_hash")
             )
             if not changed:
+                unchanged_records.append({**record, marker_column: "noop"})
                 continue
             if version_col in record:
                 record[version_col] = int(current.get(version_col, 0)) + 1
-            expire_records.append({**record, marker_column: True})
-            insert_records.append({**record, marker_column: False})
+            expire_records.append({**record, marker_column: "expire"})
+            insert_records.append({**record, marker_column: "insert"})
 
-        if not insert_records:
-            return
-
-        source_records = [*expire_records, *insert_records]
+        source_records = [*expire_records, *insert_records, *unchanged_records]
         source_data = self._to_arrow_table(
             source_records,
             column_order=column_order,
         )
         valid_to_col = scd_config.valid_to_col
-        merge_conditions = [f"source.{marker_column} = true"]
+        merge_conditions = [f"source.{marker_column} = 'expire'"]
         merge_conditions.extend(
             f"target.{key} = source.{key}" for key in business_keys
         )
@@ -263,7 +265,7 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
                             for field in source_data.schema
                             if field.name != marker_column
                         },
-                        predicate=f"source.{marker_column} = false",
+                        predicate=f"source.{marker_column} = 'insert'",
                     )
                     .execute()
                 )

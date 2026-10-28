@@ -201,7 +201,7 @@ async def test_write_scd2_existing_table(gold_writer, valid_records, strict_sche
     mock_merge_builder = MagicMock()
     mock_dt_instance.merge.return_value = mock_merge_builder
     mock_merge_builder.when_matched_update.return_value = mock_merge_builder
-    mock_merge_builder.when_not_matched_insert_all.return_value = mock_merge_builder
+    mock_merge_builder.when_not_matched_insert.return_value = mock_merge_builder
 
     with patch(
         "bioetl.infrastructure.storage.gold_writer.DeltaTable",
