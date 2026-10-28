@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-28T15:13:22.615330+00:00",
+  "generated_at": "2026-10-28T15:57:31.906395+00:00",
   "summary": {
     "total_scripts": 697,
     "status_counts": {
@@ -16493,7 +16493,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py",
-          "line": 20,
+          "line": 21,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import ("
         }
