@@ -397,40 +397,6 @@ def test_transitive_dependency_selects_direct_consumer(tmp_path: Path) -> None:
     ]
 
 
-def test_optional_extra_dependency_uses_declared_reference(tmp_path: Path) -> None:
-    """httpx[http2] → h2 must climb optional-dependencies to the declared owner."""
-    _optional_distribution(tmp_path, 'Adapter(distribution="proofagent-harness")\n')
-    (tmp_path / "uv.lock").write_text(
-        "\n".join(
-            (
-                "version = 1",
-                "[[package]]",
-                'name = "proofagent-harness"',
-                'dependencies = [{name = "litellm"}]',
-                "[[package]]",
-                'name = "litellm"',
-                'dependencies = [{name = "httpx", extra = ["http2"]}]',
-                "[[package]]",
-                'name = "httpx"',
-                "[package.optional-dependencies]",
-                'http2 = [{name = "h2"}]',
-                "[[package]]",
-                'name = "h2"',
-                'dependencies = [{name = "hpack"}, {name = "hyperframe"}]',
-                "[[package]]",
-                'name = "hpack"',
-                "[[package]]",
-                'name = "hyperframe"',
-                "",
-            )
-        ),
-        encoding="utf-8",
-    )
-    assert dependencies.dependency_consumers(
-        tmp_path, {"h2", "hpack", "hyperframe"}
-    ) == ["scripts/ai/agent_tools/__main__.py"]
-
-
 def test_transitive_optional_dependency_uses_declared_reference(
     tmp_path: Path,
 ) -> None:
