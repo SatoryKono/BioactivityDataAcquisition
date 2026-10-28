@@ -130,7 +130,10 @@ async def test_every_resolved_pipeline_config_writes_and_reads_all_layers(
             on_schema_mismatch=config.sink["silver"].on_schema_mismatch,
         )
         silver_table_path = tmp_path / "silver" / "issue12475_matrix" / f"pipeline_{observed:02d}"
-        assert DeltaTable(str(silver_table_path)).to_pyarrow_table().num_rows == 1
+        silver_rows = DeltaTable(str(silver_table_path)).to_pyarrow_table().to_pylist()
+        assert len(silver_rows) == 1
+        assert silver_rows[0]["entity_id"] == record_id
+        assert silver_rows[0]["value"] == 1
 
         configured_gold_mode = config.sink["gold"].mode
         gold_mode = getattr(configured_gold_mode, "value", configured_gold_mode)
@@ -156,7 +159,10 @@ async def test_every_resolved_pipeline_config_writes_and_reads_all_layers(
             **gold_write_options,
         )
         gold_table_path = tmp_path / "gold" / "issue12475_matrix" / f"pipeline_{observed:02d}"
-        assert DeltaTable(str(gold_table_path)).to_pyarrow_table().num_rows == 1
+        gold_rows = DeltaTable(str(gold_table_path)).to_pyarrow_table().to_pylist()
+        assert len(gold_rows) == 1
+        assert gold_rows[0]["entity_id"] == record_id
+        assert gold_rows[0]["value"] == 1.5
         observed += 1
 
     assert observed == 27
