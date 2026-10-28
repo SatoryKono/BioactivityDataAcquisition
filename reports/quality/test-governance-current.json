@@ -2492,12 +2492,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3188,
-    "total_test_functions": 31531,
+    "total_test_functions": 31532,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "f480c380d045b6afa3bc974a9a1aeabed2a727512cf918931fca1cda4c68805e",
+  "source_tree_sha256": "5265e319e1f875458902dae9ebc661a0f88fb14d3022165f0d42370a714948ae",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 107,
@@ -2560,7 +2560,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3188,
-  "total_test_functions": 31531,
+  "total_test_functions": 31532,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

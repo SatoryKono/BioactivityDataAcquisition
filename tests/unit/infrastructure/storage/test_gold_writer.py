@@ -806,7 +806,7 @@ class TestGoldWriterSCD2:
         mock_merge = MagicMock()
         mock_table_instance.merge.return_value = mock_merge
         mock_merge.when_matched_update.return_value = mock_merge
-        mock_merge.when_not_matched_insert_all.return_value = mock_merge
+        mock_merge.when_not_matched_insert.return_value = mock_merge
 
         scd_config = {
             "business_key": ["provider", "entity_id"],
@@ -850,7 +850,7 @@ class TestGoldWriterSCD2:
         mock_merge = MagicMock()
         mock_table_instance.merge.return_value = mock_merge
         mock_merge.when_matched_update.return_value = mock_merge
-        mock_merge.when_not_matched_insert_all.return_value = mock_merge
+        mock_merge.when_not_matched_insert.return_value = mock_merge
 
         schema = DataFrameSchema(
             {
