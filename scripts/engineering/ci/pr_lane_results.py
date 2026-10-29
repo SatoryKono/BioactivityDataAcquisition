@@ -91,6 +91,9 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "reports/engineering/12375-a/consumers.md": ("tests/architecture/test_documentation_cleanup_inventory.py",),
+    "reports/engineering/12375-a/handoff.md": ("tests/architecture/test_documentation_cleanup_inventory.py",),
+    "reports/engineering/12375-a/profile_summary.md": ("tests/architecture/test_documentation_cleanup_inventory.py",),
     ".gitleaksignore": (
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
     ),
@@ -433,9 +436,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
-    "reports/engineering/": (
-        "tests/architecture/test_documentation_cleanup_inventory.py",
-    ),
     "docs/02-architecture/decisions/": (
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
