@@ -65,9 +65,19 @@ def _diff_schema_fields(
     if existing_schema is None or not records:
         return None
 
-    incoming_field_names = (
-        incoming_schema.names if incoming_schema is not None else records[0].keys()
-    )
+    if incoming_schema is None:
+        incoming_field_names = {
+            field_name for record in records for field_name in record
+        }
+    else:
+        incoming_schema_names = set(incoming_schema.names)
+        incoming_field_names = set(incoming_schema_names)
+        incoming_field_names.update(
+            field_name
+            for record in records
+            for field_name in record
+            if field_name not in incoming_schema_names
+        )
     incoming_fields = {
         field_name
         for field_name in incoming_field_names
