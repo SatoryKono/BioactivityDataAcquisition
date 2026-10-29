@@ -20,6 +20,9 @@ from types import SimpleNamespace
 import pytest
 
 from scripts.engineering.qa import observability_metric_inventory_scan as inventory_scan
+from scripts.engineering.qa import (
+    observability_metric_inventory_scan as inventory_candidates,
+)
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
 
 # Repo-backed lane: two entrypoint tests spawn the module via subprocess with
@@ -1429,7 +1432,7 @@ def test_iter_candidate_paths_with_git_grep_includes_no_color_flag(
         fake_run_text_discovery_command,
     )
 
-    paths = inventory_scan._iter_candidate_paths_with_git_grep(
+    paths = inventory_candidates._iter_candidate_paths_with_git_grep(
         scan_root,
         markers=("increment_counter",),
         excluded_parts=(),

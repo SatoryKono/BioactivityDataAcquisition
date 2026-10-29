@@ -105,7 +105,7 @@ def render_contract_check_report(report: ObservabilityContractCheckReport) -> st
 
 
 def _check_metric_inventory(repo_root: Path) -> ContractCheck:
-    from scripts.engineering.qa import report_observability_metric_inventory
+    import bioetl.composition.observability_runtime as report_observability_metric_inventory
 
     report = report_observability_metric_inventory.collect_metric_inventory(repo_root)
     allowlist_path = repo_root / _METRIC_ALLOWLIST
