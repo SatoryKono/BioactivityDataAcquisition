@@ -12,8 +12,19 @@ pytestmark = pytest.mark.unit
 def test_nonbinary_values_are_not_silently_coerced(value):
     assert normalize_boolean(value) is None
     assert normalize_binary_flag(value) is None
+    for binary, expected in (
+        (0, False),
+        (1, True),
+        (0.0, False),
+        (1.0, True),
+        (False, False),
+        (True, True),
+    ):
+        assert normalize_boolean(binary) is expected
+        assert normalize_binary_flag(binary) == int(expected)
 
 
 @pytest.mark.parametrize("value", ["CALOHA:TS-0001", "CALOHA_TS-0001", "TS-TS-0001"])
 def test_caloha_aliases_do_not_duplicate_the_canonical_prefix(value):
     assert normalize_ontology_id(value) == "TS-0001"
+    assert normalize_ontology_id("UNREGISTERED_0001") == "UNREGISTERED_0001"

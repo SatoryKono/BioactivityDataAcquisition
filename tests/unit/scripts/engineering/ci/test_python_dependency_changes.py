@@ -626,6 +626,36 @@ def test_setuptools_package_exclusion_uses_narrow_classified_route(
         == 0
     )
     assert capsys.readouterr().out.splitlines() == [contract]
+    # Install hooks can affect every test; only these exact fields get the full lane.
+    before = {}
+    for key, value in (
+        ("build-backend", "scripts.engineering.common.build_backend"),
+        ("backend-path", ["."]),
+    ):
+        after = {"build-system": {key: value}}
+        assert dependencies.pytest_configuration_changed(tmp_path, "base", "head")
+        assert (
+            lane.main(
+                [
+                    "affected-tests",
+                    "--repo-root",
+                    str(tmp_path),
+                    "--changed-file",
+                    "pyproject.toml",
+                    "--base-sha",
+                    "base",
+                    "--head-sha",
+                    "head",
+                ]
+            )
+            == 0
+        )
+        assert capsys.readouterr().out.splitlines() == ["tests"]
+    after = {"build-system": {"build-backend-unreviewed": "unowned"}}
+    with pytest.raises(
+        ValueError, match="Unconfirmed Python manifest configuration route"
+    ):
+        dependencies.pytest_configuration_changed(tmp_path, "base", "head")
 
 
 def test_test_only_dependency_selects_its_consumers(tmp_path: Path) -> None:

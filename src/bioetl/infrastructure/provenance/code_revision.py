@@ -39,6 +39,7 @@ __all__ = [
     "get_dependency_lock_hash",
     "get_git_commit",
     "get_pipeline_version",
+    "list_git_worktree_files",
 ]
 
 
@@ -84,6 +85,7 @@ def _should_try_windows_git_fallback(
 def _run_git_command(
     *arguments: str,
     accepted_returncodes: tuple[int, ...] = (0,),
+    environment: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str] | None:
     """Run one git command, retrying explicit Windows executables when needed."""
     from shutil import which
@@ -97,8 +99,10 @@ def _run_git_command(
                 cwd=_REPO_ROOT,
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
                 timeout=5,
                 check=False,
+                env=environment,
             )
         except (subprocess.SubprocessError, FileNotFoundError, OSError):
             last_result = None
@@ -114,8 +118,10 @@ def _run_git_command(
                 cwd=_REPO_ROOT,
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
                 timeout=5,
                 check=False,
+                env=environment,
             )
         except (subprocess.SubprocessError, FileNotFoundError, OSError):
             continue
@@ -123,6 +129,25 @@ def _run_git_command(
             return candidate_result
         last_result = candidate_result
     return last_result
+
+
+def list_git_worktree_files(checkout: Path, pathspec: str) -> tuple[str, ...] | None:
+    """Read optional checkout metadata without inheriting Git redirects or secrets."""
+    result = _run_git_command(
+        "-C",
+        str(checkout.resolve()),
+        "ls-files",
+        "-z",
+        "--cached",
+        "--others",
+        "--exclude-standard",
+        "--",
+        pathspec,
+        environment={},
+    )
+    if result is None or result.returncode != 0:
+        return None
+    return tuple(name for name in result.stdout.split("\0") if name)
 
 
 @lru_cache(maxsize=1)

@@ -2802,7 +2802,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/provenance/code_revision.py",
-      "line": 270,
+      "line": 295,
       "layer": "infrastructure",
       "category": "unjustified",
       "justified": false,
@@ -2812,7 +2812,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/provenance/code_revision.py",
-      "line": 313,
+      "line": 338,
       "layer": "infrastructure",
       "category": "unjustified",
       "justified": false,

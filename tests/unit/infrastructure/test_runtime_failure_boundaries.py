@@ -106,6 +106,11 @@ def test_empty_batch_or_missing_schema_has_no_type_drift():
 
 
 def test_observability_redirects_cannot_escape_http():
+    opener = MagicMock(side_effect=AssertionError("Non-HTTP probes must never open IO"))
+    assert not probes.probe_observability_backend_required_paths(
+        "file:///private", required_probe_paths=("/ready",), urlopen_fn=opener
+    )
+    opener.assert_not_called()
     handler = probes._HttpHttpsRedirectHandler()
     request = Request("https://example.test/start")
     with pytest.raises(HTTPError, match="not allowed"):

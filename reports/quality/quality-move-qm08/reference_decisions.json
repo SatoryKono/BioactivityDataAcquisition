@@ -3156,7 +3156,7 @@
       "context": "exclude = [\"scripts\", \"scripts.*\", \"bioetl.infrastructure.quality\", \"bioetl.infrastructure.quality.*\"]",
       "purpose": "Retained exclusion/its generated evidence string for old namespace; it is neither an executable import nor active product owner.",
       "owner": "QM-08 / @bioetl-platform",
-      "reviewed_content_sha256": "9c6569e4546899367c8da09be025da1fe87b46bf47cc18d828a3a01e28ae56e9",
+      "reviewed_content_sha256": "775cc106b715c64d499668da39b5db24fbe46d90dfb82cd4af50fe338789d164",
       "review_by": "2026-11-30",
       "decision": "RETAIN_EXACT_REFERENCE",
       "exception_allowed": true,

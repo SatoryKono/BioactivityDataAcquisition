@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 import shutil
-import subprocess
 from collections import defaultdict
 from pathlib import Path
 
@@ -15,6 +14,7 @@ from bioetl.infrastructure.observability.metric_inventory_shared import (
 from bioetl.infrastructure.observability.metric_inventory_text import (
     _normalize_mapping_lists,
 )
+from bioetl.infrastructure.provenance.code_revision import list_git_worktree_files
 
 
 def _optional_git_files(root: Path) -> list[Path] | None:
@@ -24,31 +24,11 @@ def _optional_git_files(root: Path) -> list[Path] | None:
         executable = shutil.which("git")
         if executable is None:
             return None
-        try:
-            result = subprocess.run(
-                [
-                    executable,
-                    "-C",
-                    str(checkout),
-                    "ls-files",
-                    "-z",
-                    "--cached",
-                    "--others",
-                    "--exclude-standard",
-                    "--",
-                    root.relative_to(checkout).as_posix(),
-                ],
-                capture_output=True,
-                check=True,
-                timeout=10,
-                env={},  # Metadata-only child: no inherited Git redirects or secrets.
-            )
-        except (OSError, subprocess.SubprocessError):
-            pass  # No mandatory Git dependency: enumerate the explicit filesystem root.
-        else:
+        names = list_git_worktree_files(checkout, root.relative_to(checkout).as_posix())
+        if names is not None:
             return sorted(
                 checkout / name
-                for name in result.stdout.decode("utf-8").split("\0")
+                for name in names
                 if name
                 and Path(name).suffix in _TEXT_SUFFIXES
                 and (checkout / name).is_file()

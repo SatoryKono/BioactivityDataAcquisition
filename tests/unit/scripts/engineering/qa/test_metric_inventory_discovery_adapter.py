@@ -19,9 +19,18 @@ def test_collection_excludes_gitignored_docs_and_restores_runtime_callbacks(tmp_
     docs.mkdir(parents=True)
     (tmp_path / ".gitignore").write_text("docs/03-guides/local-draft.md\n")
     (docs / "tracked.md").write_text("bioetl_errors_total\n")
+    (docs / "tracked_я.md").write_text("# UTF-8 filename boundary\n", encoding="utf-8")
     (docs / "local-draft.md").write_text("bioetl_review_ignored_total\n")
     subprocess.run(
-        ["git", "-C", str(tmp_path), "add", ".gitignore", "docs/03-guides/tracked.md"],
+        [
+            "git",
+            "-C",
+            str(tmp_path),
+            "add",
+            ".gitignore",
+            "docs/03-guides/tracked.md",
+            "docs/03-guides/tracked_я.md",
+        ],
         check=True,
     )
     before = (
@@ -39,7 +48,14 @@ def test_collection_excludes_gitignored_docs_and_restores_runtime_callbacks(tmp_
         metric_inventory_discovery as discovery,
     )
 
-    assert discovery._iter_text_files(docs) == [docs / "tracked.md"]
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setenv("GIT_DIR", str(tmp_path / "foreign-git-dir"))
+        patch.setenv("GIT_WORK_TREE", str(tmp_path / "foreign-worktree"))
+        patch.setenv("GIT_INDEX_FILE", str(tmp_path / "foreign-index"))
+        assert discovery._iter_text_files(docs) == [
+            docs / "tracked.md",
+            docs / "tracked_я.md",
+        ]
     assert (
         assembly._iter_text_files,
         assembly._scan_canonical_metric_mentions,
@@ -70,7 +86,9 @@ def test_plain_installed_root_does_not_execute_git(tmp_path, monkeypatch):
     def forbidden(*args, **kwargs):
         pytest.fail("Installed roots must not require a Git executable")
 
-    monkeypatch.setattr(discovery.subprocess, "run", forbidden)
+    from bioetl.infrastructure.provenance import code_revision
+
+    monkeypatch.setattr(code_revision.subprocess, "run", forbidden)
     assert discovery._iter_text_files(tmp_path) == [tmp_path / "input.md"]
 
 
@@ -87,5 +105,7 @@ def test_checkout_without_git_executable_still_scans_explicit_root(
     def unavailable(*args, **kwargs):
         raise FileNotFoundError("git unavailable")
 
-    monkeypatch.setattr(discovery.subprocess, "run", unavailable)
+    from bioetl.infrastructure.provenance import code_revision
+
+    monkeypatch.setattr(code_revision.subprocess, "run", unavailable)
     assert discovery._iter_text_files(tmp_path) == [tmp_path / "input.md"]
