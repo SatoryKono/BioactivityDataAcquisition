@@ -117,6 +117,7 @@ class SchemaDrift(BaseModel):
         status: Drift severity (info, warn, critical).
         new_fields: List of new fields detected.
         missing_fields: List of missing fields detected.
+        changed_fields: Field names mapped to existing and incoming Arrow types.
     """
 
     status: Literal["info", "warn", "critical"] = Field(
@@ -125,6 +126,10 @@ class SchemaDrift(BaseModel):
     new_fields: list[str] = Field(default_factory=list, description="New fields")
     missing_fields: list[str] = Field(
         default_factory=list, description="Missing fields"
+    )
+    changed_fields: dict[str, tuple[str, str]] = Field(
+        default_factory=dict,
+        description="Changed field types as existing/incoming pairs",
     )
 
 
