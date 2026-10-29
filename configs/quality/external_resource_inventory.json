@@ -499,6 +499,18 @@
       "expression": "composite_dir.glob('*.yaml')",
       "context_manager": false,
       "reason": "Uninvoked helper; no shipped production call on target."
+    },
+    {
+      "file": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "line": 162,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "5da38ba6e84d6d0e292623b1c2ed1401d89cf95f",
+      "content_sha256": "010e88dfb189ab84e4048ea192da80b6d2579f78f66efad55400e394ebe6f7d5",
+      "source_segment": "workbook = Workbook()",
+      "call": "Workbook",
+      "scope": "write_debug_xlsx",
+      "reason": "Default Workbook() creates an in-memory object; external ZIP/output/XML resources are created by save176 and inventoried under infrastructure.export.debug_export_ops.xlsx-save",
+      "expression": "Workbook()"
     }
   ],
   "dynamic_wiring": [
@@ -4448,9 +4460,11 @@
       "object": "DebugExportAdapter",
       "file": "src/bioetl/infrastructure/export/debug_export_adapter.py",
       "resource_definitions": [
-        "export.debug_export_adapter.file"
+        "export.debug_export_adapter.file",
+        "export.debug_export_ops.file",
+        "infrastructure.export.debug_export_ops.xlsx-save"
       ],
-      "disposition": "source owner/helper alias; concrete allocation definitions are linked, not counted again",
+      "disposition": "source-qualified debug-export owner/service facade links CSV/schema/manifest handles and separate optional XLSX archive/temp save; class construction is not counted again; runtime not verified",
       "runtime_verified": false
     },
     {
@@ -6592,8 +6606,12 @@
       "candidate_id": "COMP004-legacy-307",
       "object": "DebugExportService",
       "file": "src/bioetl/application/services/export_lineage/debug_export_service.py",
-      "resource_definitions": [],
-      "disposition": "class defines no direct external acquisition on target; inspect its injected ports and delegated owner definitions rather than counting a class as an allocation",
+      "resource_definitions": [
+        "export.debug_export_adapter.file",
+        "export.debug_export_ops.file",
+        "infrastructure.export.debug_export_ops.xlsx-save"
+      ],
+      "disposition": "source-qualified debug-export owner/service facade links CSV/schema/manifest handles and separate optional XLSX archive/temp save; class construction is not counted again; runtime not verified",
       "runtime_verified": false
     },
     {
@@ -7168,7 +7186,7 @@
     "source_revision": "not recorded in recovered heuristic rows; never substituted with target SHA"
   },
   "scope_statement": "Owned production definitions in tracked src/bioetl, reached through shipped bioetl CLI, public composition/runtime factories, configured provider/storage/control-plane and optional health/telemetry paths. Includes OS files/temp descriptors, locks and compressed streams, native Delta reads/writes, HTTP clients/responses, processes/pipes, executors/threads/tasks and servers/exporters. In-memory DTOs, Arrow buffers and semaphores are not distinct external resources; injected resources retain caller ownership. Tests, scripts, IDE/MCP/Jules infrastructure, product data and user memory are outside the runtime resource denominator.",
-  "completeness_method": "Review every tracked production Python file and supported CLI lazy-command/provider/factory/config wiring; enumerate direct acquisition primitives, delegated I/O and dynamic wiring; reconcile the 377 preserved heuristic candidates separately. Group repeated call sites by concrete ownership definition, retaining every file/line/expression and Git blob. The whole-source census invalidates this inventory when any production file changes; static inventory is input to #12553, never evidence that unexecuted paths are leak-free. Platform/file-lock correction: independent source census includes every flock/locking primitive (7 additional calls; total 541). Windows callbacks at lineage63 and quarantine104 are LK_LOCK acquisitions with source-bound msvcrt delegates92/72 and LK_UNLCK cleanup106/82; POSIX release-only calls108/84 remain addressed exclusions. Bronze capability fallbacks and descriptor-based release are explicit. No platform runtime scenario was executed.",
+  "completeness_method": "Review every tracked production Python file and supported CLI lazy-command/provider/factory/config wiring; enumerate direct acquisition primitives, delegated I/O and dynamic wiring; reconcile the 377 preserved heuristic candidates separately. Group repeated call sites by concrete ownership definition, retaining every file/line/expression and Git blob. The whole-source census invalidates this inventory when any production file changes; static inventory is input to #12553, never evidence that unexecuted paths are leak-free. Platform/file-lock correction: independent source census includes every flock/locking primitive (7 additional calls; total 541). Windows callbacks at lineage63 and quarantine104 are LK_LOCK acquisitions with source-bound msvcrt delegates92/72 and LK_UNLCK cleanup106/82; POSIX release-only calls108/84 remain addressed exclusions. Bronze capability fallbacks and descriptor-based release are explicit. No platform runtime scenario was executed. XLSX save correction: Workbook/save source calls add18 independently classified calls (total559): Workbook162 is in-memory supporting construction, debug workbook.save176 is a distinct external save boundary, and16 other save facades link to existing resource identities. openpyxl3.1.5 ZIP/output handle and worksheet XML temp/stream components have separate ownership/normal/error/atexit observations; no runtime save was executed.",
   "history_statement": "Reuses merged PR #12615 as the initial three-row report, without inheriting its acceptance claims. Recovered the actual 377 heuristic rows and original patch from PAUSED session 413567682956614 activity aeb434fecfd8475e8c48ded8a0cc29e2. Originals and histories are preserved outside Git with recorded hashes; no session resumed, deleted or newly dispatched. Attempt/budget provenance remains rooted at #12478.",
   "reuse_statement": "#12106 crash/restart store matrix and #12479 cancellation propagation review remain independent evidence; this inventory supplies resource owners and observation points, without replaying their scenarios. #12469 remains open for subprocess hardening; subprocess owners/closers here do not assert its security properties. No lifecycle/shutdown runtime PASS is inherited from closed issues.",
   "accepted_site_keys": [
@@ -8231,6 +8249,11 @@
       "src/bioetl/infrastructure/export/debug_export_ops.py",
       95,
       "atomic_write_text(output_path, json.dumps({'columns': [{'name': h, 'types': types[h]} for h in headers]}, indent=2, sort_keys=True) + '\\n')"
+    ],
+    [
+      "src/bioetl/infrastructure/export/debug_export_ops.py",
+      176,
+      "workbook.save(output_path)"
     ],
     [
       "src/bioetl/infrastructure/export/debug_export_ops.py",
@@ -9928,6 +9951,198 @@
       "resource_identity": "export.csv.file",
       "reason": "shutil.move rename path or cross-filesystem copy-and-unlink fallback; library owns fallback source/target streams",
       "observation": "#12553: observe normal/error/cancellation/timeout/retry at this concrete operation; library transient handles are owned by the linked definition, not counted as a second persistent resource."
+    },
+    {
+      "file": "src/bioetl/composition/runtime_builders/effective_config_artifact_builder.py",
+      "line": 91,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "a2e402343fdb72d3469b89b7331d7c692130b54a",
+      "content_sha256": "1952e8ecd5a198e623e8f0e7cbf80bede51630a0dedffb60b16ea0af96e7864f",
+      "source_segment": "artifact_store.save(",
+      "resource_identity": "control.file_effective_config_artifact_store.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "artifact_store.save(artifact_id=artifact.artifact_id, run_id=run_id, payload=artifact_payload)"
+    },
+    {
+      "file": "src/bioetl/composition/bootstrap/cli/run_manifest.py",
+      "line": 193,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "53ed7fcc4160a3e1cafdde28bf3d628cb744b266",
+      "content_sha256": "5d3d0a463908a80ecfe907415aad1f02fae83103ab9fbe16fbcf0b56bc6a749c",
+      "source_segment": "return store.save(report)",
+      "resource_identity": "control.file_historical_replay_closure_store.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "store.save(report)"
+    },
+    {
+      "file": "src/bioetl/composition/bootstrap/cli/run_manifest.py",
+      "line": 202,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "53ed7fcc4160a3e1cafdde28bf3d628cb744b266",
+      "content_sha256": "5d3d0a463908a80ecfe907415aad1f02fae83103ab9fbe16fbcf0b56bc6a749c",
+      "source_segment": "return store.save(report)",
+      "resource_identity": "control.file_historical_replay_universe_store.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "store.save(report)"
+    },
+    {
+      "file": "src/bioetl/application/services/workflow/control_plane/execution_preparation.py",
+      "line": 107,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "56924b84e7d7e3003e26be96876b77a7fcf42424",
+      "content_sha256": "ebcaa5c3910989893d721f5a15f07b52535efb01f9726c6bf61a99449332cf09",
+      "source_segment": "workflow_state_port.save(state)",
+      "resource_identity": "control.file_workflow_execution_state_store.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "workflow_state_port.save(state)"
+    },
+    {
+      "file": "src/bioetl/application/services/workflow/control_plane/execution_recording.py",
+      "line": 82,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "f3cb8db00217ca89a8e299c68ae47489d4859660",
+      "content_sha256": "0a2d894ff2d917fd72d6de0f62702f4f7c7d3b91a2b49b10a3a97c83f3923e65",
+      "source_segment": "context.state_port.save(context.state)",
+      "resource_identity": "control.file_workflow_execution_state_store.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "context.state_port.save(context.state)"
+    },
+    {
+      "file": "src/bioetl/application/services/workflow/control_plane/execution_recording.py",
+      "line": 110,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "f3cb8db00217ca89a8e299c68ae47489d4859660",
+      "content_sha256": "0a2d894ff2d917fd72d6de0f62702f4f7c7d3b91a2b49b10a3a97c83f3923e65",
+      "source_segment": "context.state_port.save(context.state)",
+      "resource_identity": "control.file_workflow_execution_state_store.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "context.state_port.save(context.state)"
+    },
+    {
+      "file": "src/bioetl/application/services/workflow/control_plane/execution_recording.py",
+      "line": 141,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "f3cb8db00217ca89a8e299c68ae47489d4859660",
+      "content_sha256": "0a2d894ff2d917fd72d6de0f62702f4f7c7d3b91a2b49b10a3a97c83f3923e65",
+      "source_segment": "context.state_port.save(context.state)",
+      "resource_identity": "control.file_workflow_execution_state_store.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "context.state_port.save(context.state)"
+    },
+    {
+      "file": "src/bioetl/application/services/workflow/control_plane/execution_recording.py",
+      "line": 181,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "f3cb8db00217ca89a8e299c68ae47489d4859660",
+      "content_sha256": "0a2d894ff2d917fd72d6de0f62702f4f7c7d3b91a2b49b10a3a97c83f3923e65",
+      "source_segment": "context.state_port.save(context.state)",
+      "resource_identity": "control.file_workflow_execution_state_store.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "context.state_port.save(context.state)"
+    },
+    {
+      "file": "src/bioetl/application/services/workflow/control_plane/_execution_recording_finish.py",
+      "line": 78,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "6184f7f3f931a422650e7dcae958cdc5193bf8a3",
+      "content_sha256": "73fdfae8a56684799fe0b4be31076517ebea0219d80ae6f8d67b742b769a25d6",
+      "source_segment": "context.state_port.save(context.state)",
+      "resource_identity": "control.file_workflow_execution_state_store.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "context.state_port.save(context.state)"
+    },
+    {
+      "file": "src/bioetl/application/services/workflow/control_plane/_execution_recording_finish.py",
+      "line": 103,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "6184f7f3f931a422650e7dcae958cdc5193bf8a3",
+      "content_sha256": "73fdfae8a56684799fe0b4be31076517ebea0219d80ae6f8d67b742b769a25d6",
+      "source_segment": "context.state_port.save(context.state)",
+      "resource_identity": "control.file_workflow_execution_state_store.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "context.state_port.save(context.state)"
+    },
+    {
+      "file": "src/bioetl/application/services/workflow/control_plane/_execution_resume_support.py",
+      "line": 213,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "834571d300111b5c4a62507aeb145ee33766cb40",
+      "content_sha256": "ef06fa77db9db108f7c7f90726fab4009548dc9db89d227aedac4c25661fa28d",
+      "source_segment": "workflow_state_port.save(normalized_state)",
+      "resource_identity": "control.file_workflow_execution_state_store.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "workflow_state_port.save(normalized_state)"
+    },
+    {
+      "file": "src/bioetl/application/services/control_plane/manifest/service.py",
+      "line": 120,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "24da53942a3a5b44b1b7375868ac0d239287d1d0",
+      "content_sha256": "5332bff54df7386c2bb05f45dd322749b8095e4a9eef43e607b4aea01e06ba99",
+      "source_segment": "self.manifest_port.save(manifest)",
+      "resource_identity": "control._file_run_manifest_persistence.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "self.manifest_port.save(manifest)"
+    },
+    {
+      "file": "src/bioetl/application/services/control_plane/workflow/manifest_service.py",
+      "line": 82,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "15c4474011fc226730fe3377b3f67487dd42cfb4",
+      "content_sha256": "e5625d2542eb2dcc667b714735488f9c873060c7bb237d298f2a4da884f51050",
+      "source_segment": "self.manifest_port.save(manifest)",
+      "resource_identity": "control.file_workflow_manifest_store.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "self.manifest_port.save(manifest)"
+    },
+    {
+      "file": "src/bioetl/application/core/lifecycle/checkpoint_manager.py",
+      "line": 207,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "95488c02708268a130cea89473a2c43cc1110125",
+      "content_sha256": "9a3aafd022375a7ca92c8cd90da58529b8bc1babae74fa22cb2b2a9ee0671c67",
+      "source_segment": "await self._checkpoint.save(",
+      "resource_identity": "storage.checkpoint.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "self._checkpoint.save(pipeline=self._pipeline_name, run_id=self._run_id, metadata=metadata_payload)"
+    },
+    {
+      "file": "src/bioetl/application/composite/checkpoint/service.py",
+      "line": 182,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "8ce72dc95103e422b1f1e207d27983ff15fc5a9a",
+      "content_sha256": "aaf1d7f741cfc95c9db3cbb12c2dcdcf9d642e21c84cf34f9d8fae4538a9b4b9",
+      "source_segment": "self._persistence_service.save(self._load_service.synchronize_manifest(state))",
+      "resource_identity": "storage.atomic-publication.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "self._persistence_service.save(self._load_service.synchronize_manifest(state))"
+    },
+    {
+      "file": "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py",
+      "line": 49,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "1c0bfc98405b787c93717753b81e6388d25cb268",
+      "content_sha256": "c8eb019ae8fa99c6dc90304111462db45b72a68ebf091227fe960bbfad61ea7e",
+      "source_segment": "await host._checkpoint_manager.save(state)",
+      "resource_identity": "storage.atomic-publication.file",
+      "reason": "save facade delegates to already inventoried concrete file/atomic publication ownership; not another independent native resource",
+      "observation": "#12553: observe this public save boundary and linked writer/temp close/error contracts; do not double-count facade call and native handle",
+      "expression": "host._checkpoint_manager.save(state)"
     }
   ],
   "resource_parts": [
@@ -9943,8 +10158,8 @@
     },
     {
       "file": "configs/quality/external_resource_inventory/part-03.json",
-      "sha256": "c79adc49926ac223010b6f54edfb7eecf8d2d721940d754d2b5f38dcdb7a7cb9",
-      "resource_count": 29
+      "sha256": "1b6cb71b916550907b9f99765670f5eaa67db00d69ce8bc16374e8e94c3a3b30",
+      "resource_count": 30
     },
     {
       "file": "configs/quality/external_resource_inventory/part-04.json",
