@@ -210,7 +210,7 @@
         ".yml",
         ".json"
       ],
-      "files_scanned": 249,
+      "files_scanned": 255,
       "ignored_by_jscpd_patterns": [
         "**/configs/**",
         "**/*.yaml",
