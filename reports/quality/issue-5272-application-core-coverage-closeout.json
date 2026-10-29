@@ -2362,7 +2362,7 @@
     }
   ],
   "current_binding_refresh": {
-    "source_tree_sha256": "2ef9068ebde1be3ee09565727af21cd4b108aac53c9d4b255fc4ac844c687de3",
+    "source_tree_sha256": "afb23f5fb6ab02ab40590efdf4f356e485ffc83a4b609216413805b386f86e2c",
     "evidence": "reports/quality/module-coverage-inventory.json",
     "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
   },

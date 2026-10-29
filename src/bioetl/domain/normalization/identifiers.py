@@ -104,49 +104,59 @@ _CANONICAL_PREFIXES = tuple(ONTOLOGY_PREFIXES.values())
 
 
 def _fast_path_canonical(normalized: str, upper_val: str) -> str | None:
-    if upper_val.startswith(_CANONICAL_PREFIXES):
-        for canonical in _CANONICAL_PREFIXES:
-            if upper_val.startswith(canonical):
-                suffix = normalized[len(canonical) :]
-                if canonical == ONTOLOGY_PREFIXES[
-                    "CALOHA"
-                ] and suffix.upper().startswith("TS-"):
-                    return suffix.upper()
-                return canonical + suffix
+    if not upper_val.startswith(_CANONICAL_PREFIXES):
+        return None
+    for canonical in _CANONICAL_PREFIXES:
+        if upper_val.startswith(canonical):
+            return _fast_path_canonical_matched(normalized, canonical)
     return None
+
+
+def _fast_path_canonical_matched(normalized: str, canonical: str) -> str:
+    suffix = normalized[len(canonical) :]
+    if canonical == ONTOLOGY_PREFIXES["CALOHA"] and suffix.upper().startswith("TS-"):
+        return suffix.upper()
+    return canonical + suffix
 
 
 def _fast_path_colon(normalized: str) -> str | None:
-    if ":" in normalized:
-        prefix, id_part = normalized.split(":", 1)
-        prefix_upper = prefix.upper()
-        canonical_prefix = _PREFIX_TO_CANONICAL.get(prefix_upper)
+    prefix, id_part = normalized.split(":", 1)
+    prefix_upper = prefix.upper()
+    canonical_prefix = _PREFIX_TO_CANONICAL.get(prefix_upper)
+    if not canonical_prefix:
+        return None
+    if prefix_upper == "CALOHA":
+        id_part_upper = id_part.upper()
+        if id_part_upper.startswith("TS-"):
+            return id_part_upper
+    return f"{canonical_prefix}{id_part}"
+
+
+def _fast_path_underscore(normalized: str) -> str | None:
+    prefix, suffix = normalized.split("_", 1)
+    prefix_upper = prefix.upper()
+    canonical_prefix = _PREFIX_TO_CANONICAL.get(prefix_upper)
+    if not canonical_prefix:
+        return None
+    if prefix_upper == "CALOHA" and suffix.upper().startswith("TS-"):
+        return suffix.upper()
+    return f"{canonical_prefix}{suffix}"
+
+
+def _fast_path_space(normalized: str) -> str | None:
+    parts = normalized.split()
+    if len(parts) == 2:
+        canonical_prefix = _PREFIX_TO_CANONICAL.get(parts[0].upper())
         if canonical_prefix:
-            if prefix_upper == "CALOHA":
-                id_part_upper = id_part.upper()
-                if id_part_upper.startswith("TS-"):
-                    return id_part_upper
-            return f"{canonical_prefix}{id_part}"
+            return f"{canonical_prefix}{parts[1].zfill(7)}"
     return None
 
 
-def _fast_path_underscore_and_space(normalized: str) -> str | None:
-    if "_" in normalized:
-        prefix, suffix = normalized.split("_", 1)
-        prefix_upper = prefix.upper()
-        canonical_prefix = _PREFIX_TO_CANONICAL.get(prefix_upper)
-        if canonical_prefix:
-            if prefix_upper == "CALOHA" and suffix.upper().startswith("TS-"):
-                return suffix.upper()
-            return f"{canonical_prefix}{suffix}"
-
-    if " " in normalized:
-        parts = normalized.split()
-        if len(parts) == 2:
-            canonical_prefix = _PREFIX_TO_CANONICAL.get(parts[0].upper())
-            if canonical_prefix:
-                return f"{canonical_prefix}{parts[1].zfill(7)}"
-
+def _check_obo_iri(normalized: str) -> str | None:
+    lowered = normalized.lower()
+    for prefix in _OBO_IRI_PREFIXES:
+        if lowered.startswith(prefix):
+            return normalize_ontology_id(normalized[len(prefix) :])
     return None
 
 
@@ -165,25 +175,42 @@ def normalize_ontology_id(value: str) -> str | None:
     if canonical_match is not None:
         return canonical_match
 
+    return _fallback_normalize_ontology_id(normalized)
+
+
+def _fallback_normalize_ontology_id(normalized: str) -> str | None:
     # Quick exclusion
     if not (
         ":" in normalized or " " in normalized or "_" in normalized or "/" in normalized
     ):
         return normalized
 
-    # OBO IRI format
-    lowered = normalized.lower()
-    for prefix in _OBO_IRI_PREFIXES:
-        if lowered.startswith(prefix):
-            return normalize_ontology_id(normalized[len(prefix) :])
+    return _process_slow_paths(normalized)
 
-    colon_match = _fast_path_colon(normalized)
-    if colon_match is not None:
-        return colon_match
 
-    underscore_match = _fast_path_underscore_and_space(normalized)
-    if underscore_match is not None:
-        return underscore_match
+def _process_slow_paths(normalized: str) -> str | None:
+    obo_match = _check_obo_iri(normalized)
+    if obo_match is not None:
+        return obo_match
+
+    if ":" in normalized:
+        colon_match = _fast_path_colon(normalized)
+        if colon_match is not None:
+            return colon_match
+
+    return _process_slow_paths_fallback(normalized)
+
+
+def _process_slow_paths_fallback(normalized: str) -> str | None:
+    if "_" in normalized:
+        underscore_match = _fast_path_underscore(normalized)
+        if underscore_match is not None:
+            return underscore_match
+
+    if " " in normalized:
+        space_match = _fast_path_space(normalized)
+        if space_match is not None:
+            return space_match
 
     return normalized
 
