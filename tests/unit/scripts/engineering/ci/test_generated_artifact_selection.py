@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import errno
 import json
+import shlex
 from pathlib import Path
 import subprocess
 import sys
@@ -285,7 +286,19 @@ def test_real_daily_caller_and_command_partition_are_complete() -> None:
     assert '--parallel-marker "not serial"' in pr
     assert '--serial-marker "serial"' in pr
     assert "--prove-artifact-deferral" in pr
-    assert '--fallback-addopts "-p no:xdist -q --tb=line"' in pr
+    pr_workflow = yaml.safe_load(pr)
+    architecture = next(
+        step["run"]
+        for step in pr_workflow["jobs"]["class-lane"]["steps"]
+        if "--target tests/architecture " in step.get("run", "")
+    )
+    tokens = shlex.split(architecture)
+    fallback = shlex.split(tokens[tokens.index("--fallback-addopts") + 1])
+    assert fallback[:4] == ["-p", "no:xdist", "-q", "--tb=line"]
+    parallel = shlex.split(tokens[tokens.index("--parallel-addopts") + 1])
+    assert {arg for arg in fallback if arg.startswith("--ignore")} == {
+        arg for arg in parallel if arg.startswith("--ignore")
+    }
     assert "cov-fail-under" not in pr
     assert "exit 5" not in pr
 
@@ -783,14 +796,22 @@ def test_source_checks_and_coverage_selection_survive_daily_partition():
     pr = yaml.safe_load(
         (ROOT / ".github/workflows/pr-required.yml").read_text(encoding="utf-8")
     )
+    docs_lane = pr["jobs"]["docs-lane"]
+    assert docs_lane["uses"].startswith(
+        "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@"
+    )
+    assert (
+        docs_lane["if"]
+        == "needs['classify-changes'].outputs['docs-governance'] == 'required'"
+    )
+    docs = yaml.safe_load((ROOT / ".github/workflows/docs.yml").read_text())
     commands = [
         step.get("run", "")
-        for job in pr["jobs"].values()
+        for job in docs["jobs"].values()
         for step in job.get("steps", [])
     ]
     assert any(
-        "python -m scripts.docs passports check-source" in command
-        for command in commands
+        "python -m scripts.docs passports check" in command for command in commands
     )
 
 

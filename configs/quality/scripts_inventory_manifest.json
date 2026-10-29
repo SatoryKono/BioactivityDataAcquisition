@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-29T14:44:00.524130+00:00",
+  "generated_at": "2026-10-29T17:48:15.666380+00:00",
   "summary": {
     "total_scripts": 699,
     "status_counts": {
@@ -455,7 +455,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 208,
+          "line": 209,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.ps1\","
         },
@@ -486,7 +486,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 209,
+          "line": 210,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.sh\","
         },
@@ -815,7 +815,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 210,
+          "line": 211,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/setup-env.sh\","
         },
@@ -972,7 +972,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 207,
+          "line": 208,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/test-basic.sh\","
         }
@@ -1995,7 +1995,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 211,
+          "line": 212,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/check-env.ps1\","
         }
@@ -2180,7 +2180,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 212,
+          "line": 213,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/setup-env.sh\","
         },
@@ -5644,7 +5644,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 213,
+          "line": 214,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.ps1\","
         }
@@ -5665,7 +5665,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 214,
+          "line": 215,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.sh\","
         }
@@ -5686,7 +5686,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 215,
+          "line": 216,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.ps1\","
         }
@@ -5719,7 +5719,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 216,
+          "line": 217,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.sh\","
         },
@@ -5854,7 +5854,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 201,
+          "line": 202,
           "source_group": "scripts",
           "text": "\"scripts/ci_check_docs_parity.sh\","
         }
@@ -5942,7 +5942,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 203,
+          "line": 204,
           "source_group": "scripts",
           "text": "\"scripts/data_quality/check_dq_dsl_parity.py\","
         }
@@ -7916,7 +7916,7 @@
       "type": "mjs",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
@@ -7953,6 +7953,12 @@
           "line": 76,
           "source_group": "tests",
           "text": "svg2png_path = \"/\".join([\"scripts\", \"diagrams\", \"svg2png.mjs\"])"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/common/test_build_backend.py",
+          "line": 76,
+          "source_group": "tests",
+          "text": "\"scripts/diagrams/svg2png.mjs\","
         }
       ]
     },
@@ -8484,13 +8490,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 305,
+          "line": 318,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 714,
+          "line": 727,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
@@ -10148,19 +10154,19 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 15,
+          "line": 16,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.generated_artifact_checks import proven_deferral"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 227,
+          "line": 228,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import generated_artifact_checks as checks"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 326,
+          "line": 339,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import generated_artifact_checks as checks"
         }
@@ -10313,7 +10319,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 153,
+          "line": 154,
           "source_group": "scripts",
           "text": "\"nightly-shadow\": \"scripts/engineering/ci/nightly_shadow_archive.py\","
         },
@@ -11215,7 +11221,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 204,
+          "line": 205,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_control_plane_artifacts.py\","
         },
@@ -11328,7 +11334,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
         {
           "path": "pyproject.toml",
@@ -11341,6 +11347,18 @@
           "line": 38,
           "source_group": "tests",
           "text": "target = \"scripts/engineering/common/build_backend.py\""
+        },
+        {
+          "path": "tests/unit/scripts/engineering/common/test_build_backend.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "from scripts.engineering.common import build_backend as backend"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/common/test_build_backend.py",
+          "line": 20,
+          "source_group": "tests",
+          "text": "target = root / \"scripts/engineering/common/build_backend.py\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -11910,7 +11928,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 17,
+          "line": 18,
           "source_group": "tests",
           "text": "from scripts.engineering.dev.pytest_artifact_selection import ("
         }
@@ -12883,7 +12901,7 @@
       "references": [
         {
           "path": "pyproject.toml",
-          "line": 364,
+          "line": 366,
           "source_group": "build",
           "text": "# (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py); memory"
         },
@@ -13669,7 +13687,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 415,
+      "reference_count": 416,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -13887,7 +13905,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md",
-          "line": 53,
+          "line": 67,
           "source_group": "docs",
           "text": "| 2 | `python -m scripts.engineering.qa.build_pytest_nodeid_inventory --check` / `--update` | Actual pytest collection, test matrix and shard rules | `reports/quality/pytest-nodeid-inventory.json` |"
         },
@@ -14074,7 +14092,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 142,
+          "line": 143,
           "source_group": "scripts",
           "text": "\"check-c901\": \"scripts/engineering/qa/check_c901_baseline.py\","
         }
@@ -14360,13 +14378,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 143,
+          "line": 144,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": ("
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 144,
+          "line": 145,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/check_naming_package_consistency.py\""
         },
@@ -14861,13 +14879,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 381,
+          "line": 394,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 402,
+          "line": 415,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_evaluators as evaluators"
         },
@@ -14904,7 +14922,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 401,
+          "line": 414,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_report as cli"
         },
@@ -16042,13 +16060,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 565,
+          "line": 586,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import observability_metric_inventory_cli as _metric_cli"
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 566,
+          "line": 587,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_cli import ("
         },
@@ -16097,7 +16115,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 393,
+          "line": 414,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_report import ("
         },
@@ -16134,19 +16152,19 @@
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 436,
+          "line": 457,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import ("
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 439,
+          "line": 460,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_runtime import ("
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 442,
+          "line": 463,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_runtime import ("
         }
@@ -16171,7 +16189,7 @@
         },
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_runtime.py",
-          "line": 47,
+          "line": 46,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_scan import ("
         },
@@ -16238,7 +16256,7 @@
         },
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_runtime.py",
-          "line": 55,
+          "line": 54,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_shared import ("
         },
@@ -17731,7 +17749,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -17759,7 +17777,7 @@
         },
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_runtime.py",
-          "line": 352,
+          "line": 363,
           "source_group": "scripts",
           "text": "\"python -m scripts.engineering.qa.report_observability_metric_inventory \""
         },
@@ -18517,13 +18535,13 @@
         },
         {
           "path": "scripts/engineering/qa/refresh_governance_artifacts.py",
-          "line": 669,
+          "line": 729,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.technical_debt_audit_registry import ("
         },
         {
           "path": "scripts/engineering/qa/refresh_governance_artifacts.py",
-          "line": 721,
+          "line": 781,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.technical_debt_audit_registry import ("
         },
@@ -18811,7 +18829,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 148,
+          "line": 149,
           "source_group": "scripts",
           "text": "\"check-placement\": \"scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\","
         }
@@ -18868,7 +18886,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 143,
+          "line": 144,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": ("
         }
@@ -18913,7 +18931,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 150,
+          "line": 151,
           "source_group": "scripts",
           "text": "\"check-metadata-age\": \"scripts/engineering/qa/vcr/check_vcr_metadata_age.py\","
         },
@@ -20897,7 +20915,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md",
-          "line": 56,
+          "line": 70,
           "source_group": "docs",
           "text": "| 5 | `python -m scripts.engineering.repo check-inventory --check` / `--update` | Indexed scripts, callers, docs, catalog and lifecycle decisions | `configs/quality/scripts_inventory_manifest.json` |"
         }
@@ -22244,13 +22262,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 130,
+          "line": 131,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/codex-exec.bat\": (\"scripts/codex-exec.bat\",),"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 133,
+          "line": 134,
           "source_group": "scripts",
           "text": "\"scripts/codex-exec.bat\": (\"scripts/ops/launchers/codex/codex-exec.bat\",),"
         },
@@ -22387,7 +22405,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -22415,13 +22433,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 131,
+          "line": 132,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/codex.bat\": (\"scripts/codex.bat\",),"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 134,
+          "line": 135,
           "source_group": "scripts",
           "text": "\"scripts/codex.bat\": (\"scripts/ops/launchers/codex/codex.bat\",),"
         },
@@ -25924,7 +25942,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 218,
+          "line": 219,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         },
@@ -25985,7 +26003,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 219,
+          "line": 220,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         },
@@ -26107,7 +26125,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 221,
+          "line": 222,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/start-neo4j-audit.sh\","
         }
@@ -26337,7 +26355,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 202,
+          "line": 203,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/repo/cleanup_repository.py\","
         }
@@ -26458,7 +26476,7 @@
         "new-pipeline",
         "py-config-bot"
       ],
-      "reference_count": 81,
+      "reference_count": 82,
       "references": [
         {
           "path": ".circleci/config.yml",

@@ -88,8 +88,15 @@ def test_check_routes_every_governed_artifact_through_fail_closed_runner(
         return 0
 
     monkeypatch.setattr(refresh, "_run", fake_run)
+    sync_modes = []
+    monkeypatch.setattr(
+        refresh,
+        "_sync_scorecard_hotspot_metrics_from_baseline",
+        lambda **kwargs: sync_modes.append(kwargs),
+    )
 
     refresh._run_check_only()
+    assert sync_modes == [{"check_only": True}]
 
     assert calls == [
         [
@@ -242,8 +249,43 @@ def test_scorecard_sync_fails_when_required_input_is_missing(
     with pytest.raises(FileNotFoundError, match="hotspot-family-baseline.json"):
         refresh._sync_scorecard_hotspot_metrics_from_baseline()
 
+    import json
+    import yaml
+
+    quality = tmp_path / "reports/quality"
+    quality.mkdir(parents=True)
+    config = tmp_path / "configs/quality/debt_scorecard.yaml"
+    config.parent.mkdir(parents=True)
+    config.write_text(
+        yaml.safe_dump(
+            {
+                "config_surface_ratchet": {
+                    "metrics": {"config_count": {"current_count": 1, "max_count": 1}},
+                    "families": {},
+                }
+            }
+        )
+    )
+    (quality / "hotspot-family-baseline.json").write_text('{"families": []}')
+    (quality / "config-discrepancy-baseline.json").write_text(
+        json.dumps({"metrics": {"config_count": 0}, "families": {}})
+    )
+    before = config.read_bytes()
+    with pytest.raises(SystemExit, match="metric bindings are stale"):
+        refresh._sync_scorecard_hotspot_metrics_from_baseline(check_only=True)
+    assert config.read_bytes() == before
+    refresh._sync_scorecard_hotspot_metrics_from_baseline()
+    updated = config.read_bytes()
+    assert yaml.safe_load(updated)["config_surface_ratchet"]["metrics"][
+        "config_count"
+    ] == {"current_count": 0, "max_count": 0}
+    refresh._sync_scorecard_hotspot_metrics_from_baseline(check_only=True)
+    assert config.read_bytes() == updated
+
 
 def test_scorecard_budget_sync_is_shrink_only() -> None:
+    import copy
+
     family: dict[str, object] = {
         "bounded_growth_budgets": {
             "files_ge_250_loc": 4,
@@ -264,6 +306,54 @@ def test_scorecard_budget_sync_is_shrink_only() -> None:
         "files_ge_250_loc": 3,
         "max_internal_fan_in": 2,
     }
+    config = {
+        "config_surface_ratchet": {
+            "metrics": {
+                "unique_parameter_count": {"current_count": 353, "max_count": 353}
+            },
+            "families": {
+                "entity_effective": {
+                    "metrics": {
+                        "unique_parameter_count": {
+                            "current_count": 261,
+                            "max_count": 261,
+                        }
+                    }
+                }
+            },
+        }
+    }
+    baseline = {
+        "metrics": {"unique_parameter_count": 352},
+        "families": {"entity_effective": {"unique_parameter_count": 260}},
+    }
+    assert refresh._sync_config_surface_metrics(config, baseline) == 4
+    assert config["config_surface_ratchet"]["metrics"]["unique_parameter_count"] == {
+        "current_count": 352,
+        "max_count": 352,
+    }
+    assert config["config_surface_ratchet"]["families"]["entity_effective"]["metrics"][
+        "unique_parameter_count"
+    ] == {"current_count": 260, "max_count": 260}
+    stable = copy.deepcopy(config)
+    assert refresh._sync_config_surface_metrics(config, baseline) == 0
+    for rejected in (353, -1, True, "352"):
+        with pytest.raises(ValueError):
+            refresh._sync_config_surface_metrics(
+                config, {**baseline, "metrics": {"unique_parameter_count": rejected}}
+            )
+        assert config == stable
+    with pytest.raises(ValueError, match="budget growth"):
+        refresh._sync_config_surface_metrics(
+            config,
+            {
+                "metrics": {"unique_parameter_count": 351},
+                "families": {"entity_effective": {"unique_parameter_count": 261}},
+            },
+        )
+    assert (
+        config == stable
+    )  # A later family failure must not partly update aggregate counts.
 
 
 def test_atomic_writer_uses_utf8_lf_and_replaces_target(tmp_path: Path) -> None:

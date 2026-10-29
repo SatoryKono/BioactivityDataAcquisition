@@ -36,6 +36,7 @@ SCRIPT_EXTENSIONS: Final[tuple[str, ...]] = (
     ".sql",
 )
 SCRIPT_ROOTS: Final[tuple[str, ...]] = ("scripts",)
+_PYPROJECT: Final = "pyproject.toml"
 SEARCH_ROOTS: Final[tuple[str, ...]] = (
     "AGENTS.md",
     ".github/ISSUES",
@@ -46,7 +47,7 @@ SEARCH_ROOTS: Final[tuple[str, ...]] = (
     ".codex/skills",
     ".pre-commit-config.yaml",
     "grafana",
-    "pyproject.toml",
+    _PYPROJECT,
     "Makefile",
     "makefile",
     "docs",
@@ -379,7 +380,7 @@ def _source_group(rel_path: str) -> str:
         return "skills"
     if rel_path.startswith(".codex/agents/"):
         return "agents"
-    if rel_path in {"Makefile", "makefile", "pyproject.toml"}:
+    if rel_path in {"Makefile", "makefile", _PYPROJECT}:
         return "build"
     if rel_path.startswith("tests/"):
         return "tests"
@@ -692,7 +693,7 @@ def _discover_refs_in_file(
         and ABSOLUTE_SCRIPT_IMPORT_CANDIDATE_PATTERN.search(text) is not None
     )
     has_dispatcher_module_refs = _has_dispatcher_module_refs(rel, normalized_text)
-    has_build_backend_refs = rel == "pyproject.toml" and "build-backend" in text
+    has_build_backend_refs = rel == _PYPROJECT and "build-backend" in text
     has_basename_refs = _line_has_basename_script_candidate(
         normalized_text, basename_map
     )
@@ -757,6 +758,17 @@ def _discover_refs_in_file(
     return discovered
 
 
+def _local_backend_directories(directories: list[object]) -> list[Path]:
+    """Select relative backend roots without accepting parent traversal."""
+    return [
+        Path(directory)
+        for directory in directories
+        if isinstance(directory, str)
+        and not Path(directory).is_absolute()
+        and ".." not in Path(directory).parts
+    ]
+
+
 def _discover_build_backend_refs(
     text: str,
     source_group: str,
@@ -778,18 +790,13 @@ def _discover_build_backend_refs(
         return []
     line_no, raw_line = _get_first_module_string_line(text=text, module_name=module)
     evidence = _make_ref_evidence(
-        rel="pyproject.toml",
+        rel=_PYPROJECT,
         line_no=line_no,
         raw_line=raw_line,
         source_group=source_group,
     )
     discovered: list[tuple[str, RefEvidence]] = []
-    for directory in directories:
-        if not isinstance(directory, str):
-            continue
-        base = Path(directory)
-        if base.is_absolute() or ".." in base.parts:
-            continue
+    for base in _local_backend_directories(directories):
         for candidate in _module_file_candidates(base / Path(*module.split("."))):
             if candidate in script_set:
                 discovered.append((candidate, evidence))

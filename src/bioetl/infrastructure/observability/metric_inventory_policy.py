@@ -12,6 +12,7 @@ from bioetl.infrastructure.observability.metric_inventory_shared import (
     _ALLOWLIST_METADATA_REQUIRED_KEYS,
     _CHECK_DRIFT_KEYS,
 )
+from bioetl.infrastructure.time.system_clock import current_utc_time
 
 
 def _parse_allowlist_metric_name(
@@ -50,6 +51,7 @@ def _validate_allowlist_review_date(
     key: str,
     metric_name: str,
     raw_review_date: str,
+    today: date | None = None,
 ) -> None:
     try:
         review_date = date.fromisoformat(raw_review_date)
@@ -58,7 +60,9 @@ def _validate_allowlist_review_date(
             f"{key} metric {metric_name!r} has invalid review_date "
             f"{raw_review_date!r}; expected ISO YYYY-MM-DD"
         ) from exc
-    if review_date < date.today():
+    if review_date < (
+        today if today is not None else current_utc_time().astimezone().date()
+    ):
         raise ValueError(
             f"{key} metric {metric_name!r} has expired review_date "
             f"{raw_review_date}; refresh or remove this lifecycle exception"

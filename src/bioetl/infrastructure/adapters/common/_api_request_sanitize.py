@@ -61,7 +61,11 @@ def sanitize_base_url(parsed: SplitResult) -> str:
 def sanitize_params(
     params: JsonDict,  # Any: untyped API JSON record
 ) -> dict[str, str | int | float | bool | None]:
-    """Sanitize query parameters to exclude sensitive data."""
+    """Anonymize sensitive query values by irreversible constant redaction.
+
+    PII such as email is replaced, never retained in request metadata. Other
+    secrets receive the same treatment rather than a linkable value digest.
+    """
     result: dict[str, str | int | float | bool | None] = {}
     for key, value in params.items():
         normalized_key = key.lower().replace("-", "_")

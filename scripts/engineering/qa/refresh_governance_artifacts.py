@@ -155,8 +155,56 @@ def _sync_one_scorecard_family(
     return _sync_family_metrics(metrics, base) + _ratchet_family_budgets(family, base)
 
 
-def _sync_scorecard_hotspot_metrics_from_baseline() -> None:
-    """Copy measured hotspot metrics from baseline into scorecard (no budget growth)."""
+def _bind_config_metric_counts(metric: dict[str, object], value: int) -> int:
+    """Return the number of changed count fields while preserving policy metadata."""
+    changed = sum(
+        metric.get(field) != value for field in ("current_count", "max_count")
+    )
+    metric.update(current_count=value, max_count=value)
+    return changed
+
+
+def _plan_config_metric_counts(
+    policy: object, measured: object
+) -> list[tuple[dict[str, object], int]]:
+    """Validate every binding before changing any scorecard count."""
+    if not isinstance(policy, dict):
+        raise ValueError("Invalid config-surface metric policy")
+    if not isinstance(measured, dict):
+        raise ValueError("Missing config-surface baseline metrics")
+    planned = []
+    for name, value in measured.items():
+        metric = policy.get(name)
+        if type(value) is not int or value < 0 or not isinstance(metric, dict):
+            raise ValueError(f"Invalid config-surface metric: {name}")
+        maximum = metric.get("max_count")
+        if type(maximum) is not int or value > maximum:
+            raise ValueError(f"Config-surface budget growth is forbidden: {name}")
+        planned.append((metric, value))
+    return planned
+
+
+def _sync_config_surface_metrics(
+    scorecard: dict[str, object], baseline: dict[str, object]
+) -> int:
+    """Bind aggregate and family counts without raising any existing maximum."""
+    policy = scorecard["config_surface_ratchet"]
+    if not isinstance(policy, dict):
+        raise ValueError("Invalid config-surface policy")
+    planned = _plan_config_metric_counts(policy["metrics"], baseline["metrics"])
+    families = baseline["families"]
+    family_policies = policy["families"]
+    if not isinstance(families, dict) or not isinstance(family_policies, dict):
+        raise ValueError("Invalid config-surface families")
+    for name, metrics in families.items():
+        planned.extend(
+            _plan_config_metric_counts(family_policies[name]["metrics"], metrics)
+        )
+    return sum(_bind_config_metric_counts(metric, value) for metric, value in planned)
+
+
+def _sync_scorecard_hotspot_metrics_from_baseline(*, check_only: bool = False) -> None:
+    """Align hotspot/config metrics with generated inputs without budget growth."""
     import yaml
 
     baseline_path = ROOT / "reports/quality/hotspot-family-baseline.json"
@@ -183,7 +231,18 @@ def _sync_scorecard_hotspot_metrics_from_baseline() -> None:
     for family in families:
         if isinstance(family, dict):
             changed += _sync_one_scorecard_family(family, by_name)
+    if isinstance(scorecard, dict) and "config_surface_ratchet" in scorecard:
+        config_baseline = json.loads(
+            (ROOT / "reports/quality/config-discrepancy-baseline.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        changed += _sync_config_surface_metrics(scorecard, config_baseline)
 
+    if changed and check_only:
+        raise SystemExit(
+            "Scorecard metric bindings are stale; run the governance refresh"
+        )
     if changed:
         _write_text_atomically(
             scorecard_path,
@@ -194,12 +253,13 @@ def _sync_scorecard_hotspot_metrics_from_baseline() -> None:
                 width=100,
             ),
         )
-        print(f"SYNC scorecard hotspot metrics ({changed} field updates)")
+        print(f"SYNC scorecard baseline metrics ({changed} field updates)")
     else:
         print("SYNC scorecard hotspot metrics: already aligned")
 
 
 def _run_check_only() -> None:
+    _sync_scorecard_hotspot_metrics_from_baseline(check_only=True)
     _run(
         [
             sys.executable,

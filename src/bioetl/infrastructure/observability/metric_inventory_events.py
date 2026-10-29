@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import ast
-import os
 from collections import defaultdict
 from pathlib import Path
 from urllib.request import urlopen as urlopen
 
 from prometheus_client.registry import Collector
 
-from bioetl.domain.events import (
+from bioetl.domain.observability_contract import (
     ORDINARY_PIPELINE_STAGE_NAMES,
     PipelineEvent,
 )
@@ -27,7 +26,6 @@ from bioetl.infrastructure.observability.metric_inventory_discovery import (
 from bioetl.infrastructure.observability.metric_inventory_shared import (
     _DEFAULT_DRIFT_ALLOWLIST,
     _DEFAULT_OBSERVABILITY_GOVERNANCE,
-    _PROMETHEUS_BASE_URL_ENV_VAR,
 )
 from bioetl.infrastructure.observability.metric_inventory_text import (
     _normalize_mapping_lists,
@@ -291,14 +289,3 @@ def _runtime_cardinality_threshold_violations(
                 f"{metric_name} observed_series_count={observed} approved_max_series={approved_max}"
             )
     return violations
-
-
-def _resolve_prometheus_base_url(
-    explicit_base_url: str | None,
-) -> tuple[str | None, str]:
-    if explicit_base_url and explicit_base_url.strip():
-        return explicit_base_url.strip().rstrip("/"), "cli"
-    env_base_url = os.getenv(_PROMETHEUS_BASE_URL_ENV_VAR, "").strip()
-    if env_base_url:
-        return env_base_url.rstrip("/"), "env"
-    return None, "unconfigured"

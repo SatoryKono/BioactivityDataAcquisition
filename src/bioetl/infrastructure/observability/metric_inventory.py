@@ -7,7 +7,7 @@ from pathlib import Path
 from threading import RLock
 from typing import Any
 
-from bioetl.domain.runtime_observability_publication_contract import (
+from bioetl.domain.observability_contract import (
     get_runtime_observability_publication_contract,
 )
 from bioetl.infrastructure.observability.metric_inventory_assembly import (

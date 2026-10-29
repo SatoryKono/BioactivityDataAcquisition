@@ -10,10 +10,11 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import os
 import subprocess
 import tarfile
 import tempfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 from setuptools import build_meta as _backend
@@ -27,19 +28,44 @@ prepare_metadata_for_build_wheel = _backend.prepare_metadata_for_build_wheel
 prepare_metadata_for_build_editable = _backend.prepare_metadata_for_build_editable
 
 _RECEIPT = "quality-tooling-support.json"
-_TEXT_SUFFIXES = {
-    ".py",
-    ".json",
-    ".yaml",
-    ".yml",
-    ".md",
-    ".csv",
-    ".toml",
-    ".sh",
-    ".ps1",
-    ".txt",
+_BINARY_SUFFIXES = {
+    ".7z",
+    ".avi",
+    ".bmp",
+    ".doc",
+    ".docx",
+    ".gif",
+    ".gz",
+    ".ico",
+    ".jpeg",
+    ".jpg",
+    ".mp3",
+    ".mp4",
+    ".parquet",
+    ".pdf",
+    ".png",
+    ".tar",
+    ".tgz",
+    ".wav",
+    ".webm",
+    ".webp",
+    ".whl",
+    ".xz",
+    ".zip",
 }
-_SUPPORT_ROOTS = {"src", "scripts", "configs", "docs", "tests", "grafana", ".github"}
+_SUPPORT_ROOTS = {
+    "src",
+    "scripts",
+    "configs",
+    "docs",
+    "tests",
+    "grafana",
+    ".github",
+    ".circleci",
+    ".zed",
+    ".codex",
+    ".junie",
+}
 
 
 def _supported_path(path: str) -> bool:
@@ -50,6 +76,8 @@ def _supported_path(path: str) -> bool:
         or any(p.startswith(".env") for p in candidate.parts)
     ):
         return False
+    if candidate.parts[:2] == ("docs", "99-archive"):
+        return False  # Historical evidence is not an active tooling input.
     if path in {
         "uv.lock",
         ".importlinter",
@@ -58,9 +86,12 @@ def _supported_path(path: str) -> bool:
         "pyproject.toml",
         "README.md",
         "LICENSE",
+        "Makefile",
+        "makefile",
+        ".pre-commit-config.yaml",
     }:
         return True
-    if candidate.suffix not in _TEXT_SUFFIXES:
+    if candidate.suffix.lower() in _BINARY_SUFFIXES:
         return False
     if candidate.parts[0] in _SUPPORT_ROOTS:
         return True
@@ -81,6 +112,11 @@ def _support_paths(root: Path) -> list[str]:
         cwd=root,
         check=True,
         capture_output=True,
+        env={
+            key: value
+            for key, value in os.environ.items()
+            if not key.startswith("GIT_")
+        },
     )
     return sorted(
         name
@@ -95,6 +131,30 @@ def _add_bytes(archive: tarfile.TarFile, name: str, data: bytes) -> None:
     member.mode = 0o644
     member.mtime = 0
     archive.addfile(member, io.BytesIO(data))
+
+
+def _validated_members(archive: tarfile.TarFile) -> tuple[str, list[tarfile.TarInfo]]:
+    """Reject escaping paths and links before copying any upstream tar entry."""
+    members = archive.getmembers()
+    if not members:
+        raise ValueError("Empty setuptools sdist")
+    first_parts = PurePosixPath(members[0].name).parts
+    if not first_parts:
+        raise ValueError("Empty sdist member name")
+    prefix = first_parts[0]
+    for member in members:
+        path = PurePosixPath(member.name)
+        if (
+            path.is_absolute()
+            or ".." in path.parts
+            or "\\" in member.name
+            or ":" in member.name
+            or not path.parts
+            or path.parts[0] != prefix
+            or not (member.isfile() or member.isdir())
+        ):
+            raise ValueError(f"Unsafe sdist member: {member.name}")
+    return prefix, members
 
 
 def build_sdist(
@@ -127,18 +187,24 @@ def build_sdist(
     with tempfile.TemporaryDirectory(prefix="bioetl-sdist-") as temporary:
         filename = _backend.build_sdist(temporary, config_settings)
         with tarfile.open(Path(temporary) / filename, "r:gz") as original:
-            members = original.getmembers()
-            prefix = members[0].name.split("/")[0]
+            prefix, members = _validated_members(original)
             target = Path(sdist_directory).resolve() / filename
             target.parent.mkdir(parents=True, exist_ok=True)
             replaced = {f"{prefix}/{name}" for name in files} | {f"{prefix}/{_RECEIPT}"}
             with tarfile.open(target, "w:gz", format=tarfile.PAX_FORMAT) as output:
                 for member in members:
-                    if member.name not in replaced:
-                        output.addfile(
-                            member,
-                            original.extractfile(member) if member.isfile() else None,
-                        )
+                    if member.isfile() and member.name not in replaced:
+                        stream = original.extractfile(member.name)
+                        if stream is None:
+                            raise ValueError(
+                                f"Missing sdist member payload: {member.name}"
+                            )
+                        with stream:
+                            _add_bytes(
+                                output,
+                                PurePosixPath(member.name).as_posix(),
+                                stream.read(),
+                            )
                 for name, data in sorted(files.items()):
                     _add_bytes(output, f"{prefix}/{name}", data)
                 _add_bytes(

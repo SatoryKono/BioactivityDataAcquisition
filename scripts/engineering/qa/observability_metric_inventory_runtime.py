@@ -16,7 +16,6 @@ from bioetl.infrastructure.observability.metric_inventory_events import (
     _observed_runtime_series_counts as _observed_runtime_series_counts,
     _runtime_cardinality_evidence_rows as _runtime_cardinality_evidence_rows,
     _runtime_cardinality_threshold_violations as _runtime_cardinality_threshold_violations,
-    _resolve_prometheus_base_url as _resolve_prometheus_base_url,
 )
 
 
@@ -64,6 +63,18 @@ from scripts.engineering.qa.observability_metric_inventory_shared import (
 
 
 REGISTERED_PROMETHEUS_METRIC_LABELS: dict[str, frozenset[str]] = {}
+
+
+def _resolve_prometheus_base_url(
+    explicit_base_url: str | None,
+) -> tuple[str | None, str]:
+    """Resolve CLI/environment settings at the engineering boundary only."""
+    if explicit_base_url and explicit_base_url.strip():
+        return explicit_base_url.strip().rstrip("/"), "cli"
+    env_base_url = os.getenv(_PROMETHEUS_BASE_URL_ENV_VAR, "").strip()
+    if env_base_url:
+        return env_base_url.rstrip("/"), "env"
+    return None, "unconfigured"
 
 
 def _prometheus_metric_family_matcher(metric_name: str) -> str:

@@ -44,8 +44,22 @@ input identity. An issue's closed state or a local commit alone is not evidence.
 This workflow neither accepts QM-07 nor requires its lifecycle ADMIT to refresh
 an otherwise qualified input. Do not overwrite QM-07's checkout or receipts.
 
-Run each independent peripheral owner as check → update → check before the
-coupled rollup. Exact module entrypoints and output families are:
+Run each affected peripheral owner as check → update → check before the
+coupled rollup. For test/docs-only changes use the selected
+`refresh-ci-drift-families` families; do not run the full coupled writer merely
+to rebind fingerprints. Its `_ratchet_family_budgets` step may shrink
+`configs/quality/debt_scorecard.yaml`. Use the full coupled writer only when
+coverage, the dependency map or hotspot inputs changed, and review any shrink.
+Budgets must never increase. Exact entrypoints and output families are:
+
+If the config-discrepancy baseline is stale, run
+`python -m scripts.schema generate-config-matrix --check` → `--update` →
+`--check` **before** the full coupled owner. This produces
+`reports/quality/config-discrepancy-baseline.json`,
+`docs/04-reference/config_comparison_matrix.csv` and
+`docs/reports/generated/config-discrepancies-report.md`. The coupled scorecard
+sync takes its config counts from this baseline, tightens matching maxima and
+rejects any increase above an existing maximum.
 
 | Order | Owner and argv | Inputs | Outputs |
 | --- | --- | --- | --- |
@@ -55,9 +69,10 @@ coupled rollup. Exact module entrypoints and output families are:
 | 4 | `python -m scripts.engineering.qa report-compatibility-importer-census --check` / without `--check` | Python imports and existing facade/twin registries | `reports/quality/compatibility-importer-census.{json,md}` |
 | 5 | `python -m scripts.engineering.repo check-inventory --check` / `--update` | Indexed scripts, callers, docs, catalog and lifecycle decisions | `configs/quality/scripts_inventory_manifest.json` |
 | 6 | `python -m scripts.engineering.qa.refresh_governance_artifacts --check` / without `--check` | The coupled sources below | The coupled output set below |
-| 7 | `python -m scripts.engineering.qa refresh-ci-drift-families --check --test-gov --flaky-fingerprint --evidence --remote-main --dataflow` / replace `--check` with `--update` | Updated test/config/source fingerprints and fetched main | Test-governance, flaky, evidence-registry, remote-main and dataflow families |
+| 7 | `python -m scripts.engineering.qa refresh-ci-drift-families --check --test-gov --flaky-fingerprint --remote-main --dataflow` / replace `--check` with `--update` | Updated test/config/source fingerprints and fetched main | Test-governance, flaky, remote-main and dataflow families |
 | 8 | `python -m scripts.docs generate-cleanup-inventory --check` / `--update` | Final documentation links, headers and references | `docs/reports/generated/documentation-cleanup-inventory.{json,md}` |
 | 9 | `python -m scripts.engineering.qa report-debt-governance-gates --check` / `--update` | Final active scorecards and inventories | `reports/quality/debt-governance-gates.{json,md}` |
+| 10 | `python -m scripts.engineering.qa refresh-ci-drift-families --check --evidence` / replace `--check` with `--update` | Final audit evidence paths, including `debt-governance-gates.json` | Current audit registry/report `evidence_surface_sha256` |
 
 The full coupled owner runs, in source order:
 
@@ -124,6 +139,8 @@ applicable check modes plus owning tests. Compare before/after hashes: the check
 pass must create no tracked diff. Capture actual argv/cwd, interpreter and tool
 versions, source/input fingerprints, raw logs and exit codes. Keep failed and
 skipped checks as such. Commit the complete coherent tree in the owned branch.
+Check the evidence family again after the final debt rollup; a successful earlier
+rebind does not prove the final audit-registry hash is current.
 
 Fetch main again before finalization and integrate only into the owned branch;
 recheck changed inputs if integration moved the candidate. Transfer exact

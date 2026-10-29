@@ -353,20 +353,41 @@ def _sync_metric_scan_compatibility_seams() -> None:
 
 
 @contextmanager
-def _inventory_compatibility_seams() -> Iterator[None]:
+def _inventory_compatibility_seams(repo_root: Path | None = None) -> Iterator[None]:
     from bioetl.infrastructure.observability import metric_inventory_events as events
+    from bioetl.infrastructure.observability import (
+        metric_inventory_assembly as assembly,
+    )
+    from bioetl.infrastructure.observability import (
+        metric_inventory_candidates as candidates,
+    )
+    from bioetl.infrastructure.observability import metric_inventory_report as report
 
     targets = (
+        (_metric_discovery, "_REPO_ROOT"),
         (_metric_discovery, "_iter_text_files_with_git_ls_files"),
         (_metric_discovery, "_run_text_discovery_command"),
         (_metric_bindings, "_module_string_bindings"),
         (_metric_ast, "REGISTERED_PROMETHEUS_METRIC_LABELS"),
         (_metric_scan, "_DEFAULT_DECLARED_METRIC_DEFINITIONS"),
         (events, "REGISTERED_PROMETHEUS_METRIC_LABELS"),
+        (assembly, "_iter_text_files"),
+        (candidates, "_iter_text_files"),
+        (report, "_iter_text_files"),
+        (assembly, "_scan_canonical_metric_mentions"),
+        (report, "_scan_canonical_metric_mentions"),
     )
     previous = [(module, name, getattr(module, name)) for module, name in targets]
     try:
         _sync_metric_scan_compatibility_seams()
+        if repo_root is not None:
+            _metric_discovery._REPO_ROOT = repo_root.resolve()
+        for module in (assembly, candidates, report):
+            module._iter_text_files = _iter_text_files_impl
+        for module in (assembly, report):
+            module._scan_canonical_metric_mentions = (
+                _metric_discovery._scan_canonical_metric_mentions
+            )
         events.REGISTERED_PROMETHEUS_METRIC_LABELS = REGISTERED_PROMETHEUS_METRIC_LABELS
         yield
     finally:
@@ -544,7 +565,7 @@ def collect_metric_inventory(repo_root: Path) -> MetricInventoryReport:
         _reset_inventory_caches,
     )
 
-    with _COLLECTION_LOCK, _inventory_compatibility_seams():
+    with _COLLECTION_LOCK, _inventory_compatibility_seams(repo_root):
         _reset_inventory_caches()
         return _collect_metric_inventory_impl(
             repo_root,

@@ -43,6 +43,7 @@ RUN printf '# BioETL\n' > README.md \
 # Source-only changes therefore invalidate the small project-wheel layer, not
 # the complete third-party environment.
 COPY src/ ./src/
+COPY scripts/engineering/common/build_backend.py ./scripts/engineering/common/build_backend.py
 
 # Build the local wheel in an isolated environment whose backend is constrained
 # Docker-locally, then install only that wheel into the locked environment.

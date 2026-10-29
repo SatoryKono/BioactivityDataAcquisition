@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import os
+import shutil
+import subprocess
 from collections import defaultdict
 from pathlib import Path
 
@@ -15,8 +17,50 @@ from bioetl.infrastructure.observability.metric_inventory_text import (
 )
 
 
+def _optional_git_files(root: Path) -> list[Path] | None:
+    """Use bounded Git discovery only when the caller supplied a checkout root."""
+    checkout = next((p for p in (root, *root.parents) if (p / ".git").exists()), None)
+    if checkout is not None:
+        executable = shutil.which("git")
+        if executable is None:
+            return None
+        try:
+            result = subprocess.run(
+                [
+                    executable,
+                    "-C",
+                    str(checkout),
+                    "ls-files",
+                    "-z",
+                    "--cached",
+                    "--others",
+                    "--exclude-standard",
+                    "--",
+                    root.relative_to(checkout).as_posix(),
+                ],
+                capture_output=True,
+                check=True,
+                timeout=10,
+                env={},  # Metadata-only child: no inherited Git redirects or secrets.
+            )
+        except (OSError, subprocess.SubprocessError):
+            pass  # No mandatory Git dependency: enumerate the explicit filesystem root.
+        else:
+            return sorted(
+                checkout / name
+                for name in result.stdout.decode("utf-8").split("\0")
+                if name
+                and Path(name).suffix in _TEXT_SUFFIXES
+                and (checkout / name).is_file()
+            )
+    return None
+
+
 def _iter_text_files(root: Path) -> list[Path]:
-    """Enumerate the explicit input root without Git, rg, or a source checkout."""
+    """Respect optional checkout metadata; plain installed roots need no Git."""
+    discovered = _optional_git_files(root)
+    if discovered is not None:
+        return discovered
     if root.is_file():
         return [root] if root.suffix in _TEXT_SUFFIXES else []
     paths: list[Path] = []

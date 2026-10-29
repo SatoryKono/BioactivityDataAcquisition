@@ -8,12 +8,12 @@
       "path": "configs/quality/scripts_inventory_manifest.json",
       "literal": "src/bioetl/infrastructure/quality",
       "lines": [
-        20267
+        20285
       ],
       "context": "          \"text\": \"\\\"src/bioetl/infrastructure/quality/scoring.py\\\",\"",
       "purpose": "Retained exclusion/its generated evidence string for old namespace; it is neither an executable import nor active product owner.",
       "owner": "QM-08 / @bioetl-platform",
-      "reviewed_content_sha256": "390fa1ac723cf100b160e52c99e9d5fec3beaaed530e458645068c1a1719fe46",
+      "reviewed_content_sha256": "3733382034080279bda59e05672362ffd43ea62399e88bf4e4bdc7b91acf2d9b",
       "review_by": "2026-11-30",
       "decision": "RETAIN_EXACT_REFERENCE",
       "exception_allowed": true,
@@ -23,12 +23,12 @@
       "path": "configs/quality/scripts_inventory_manifest.json",
       "literal": "bioetl/infrastructure/quality",
       "lines": [
-        20267
+        20285
       ],
       "context": "          \"text\": \"\\\"src/bioetl/infrastructure/quality/scoring.py\\\",\"",
       "purpose": "Retained exclusion/its generated evidence string for old namespace; it is neither an executable import nor active product owner.",
       "owner": "QM-08 / @bioetl-platform",
-      "reviewed_content_sha256": "390fa1ac723cf100b160e52c99e9d5fec3beaaed530e458645068c1a1719fe46",
+      "reviewed_content_sha256": "3733382034080279bda59e05672362ffd43ea62399e88bf4e4bdc7b91acf2d9b",
       "review_by": "2026-11-30",
       "decision": "RETAIN_EXACT_REFERENCE",
       "exception_allowed": true,
@@ -3151,12 +3151,12 @@
       "path": "pyproject.toml",
       "literal": "bioetl.infrastructure.quality",
       "lines": [
-        213
+        215
       ],
       "context": "exclude = [\"scripts\", \"scripts.*\", \"bioetl.infrastructure.quality\", \"bioetl.infrastructure.quality.*\"]",
       "purpose": "Retained exclusion/its generated evidence string for old namespace; it is neither an executable import nor active product owner.",
       "owner": "QM-08 / @bioetl-platform",
-      "reviewed_content_sha256": "f638a2103f1ca7d4562a3505052f4c9ae72e14c7103d62f499801c11ea59fa0b",
+      "reviewed_content_sha256": "9c6569e4546899367c8da09be025da1fe87b46bf47cc18d828a3a01e28ae56e9",
       "review_by": "2026-11-30",
       "decision": "RETAIN_EXACT_REFERENCE",
       "exception_allowed": true,
