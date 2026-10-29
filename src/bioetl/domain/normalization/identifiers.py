@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.normalization.text import normalize_string
-
 __all__ = [
     "ONTOLOGY_PREFIXES",
     "PMID_MAX_EXCLUSIVE",
@@ -105,27 +103,67 @@ for p, c in list(_PREFIX_TO_CANONICAL.items()):
 _CANONICAL_PREFIXES = tuple(ONTOLOGY_PREFIXES.values())
 
 
-def normalize_ontology_id(value: str) -> str | None:
-    """Canonicalize ontology IDs with consistent prefix format."""
-    if type(value) is not str:
-        return None
-    normalized = normalize_string(value)
-    if normalized is None:
-        return "" if value == "" else None
-
-    upper_val = normalized.upper()
-
-    # 1. Very fast path: already canonical or correct prefix format
+def _fast_path_canonical(normalized: str, upper_val: str) -> str | None:
     if upper_val.startswith(_CANONICAL_PREFIXES):
         for canonical in _CANONICAL_PREFIXES:
             if upper_val.startswith(canonical):
                 suffix = normalized[len(canonical) :]
-                # Special case for CALOHA already starting with TS-
                 if canonical == ONTOLOGY_PREFIXES[
                     "CALOHA"
                 ] and suffix.upper().startswith("TS-"):
                     return suffix.upper()
                 return canonical + suffix
+    return None
+
+
+def _fast_path_colon(normalized: str) -> str | None:
+    if ":" in normalized:
+        prefix, id_part = normalized.split(":", 1)
+        prefix_upper = prefix.upper()
+        canonical_prefix = _PREFIX_TO_CANONICAL.get(prefix_upper)
+        if canonical_prefix:
+            if prefix_upper == "CALOHA":
+                id_part_upper = id_part.upper()
+                if id_part_upper.startswith("TS-"):
+                    return id_part_upper
+            return f"{canonical_prefix}{id_part}"
+    return None
+
+
+def _fast_path_underscore_and_space(normalized: str) -> str | None:
+    if "_" in normalized:
+        prefix, suffix = normalized.split("_", 1)
+        prefix_upper = prefix.upper()
+        canonical_prefix = _PREFIX_TO_CANONICAL.get(prefix_upper)
+        if canonical_prefix:
+            if prefix_upper == "CALOHA" and suffix.upper().startswith("TS-"):
+                return suffix.upper()
+            return f"{canonical_prefix}{suffix}"
+
+    if " " in normalized:
+        parts = normalized.split()
+        if len(parts) == 2:
+            canonical_prefix = _PREFIX_TO_CANONICAL.get(parts[0].upper())
+            if canonical_prefix:
+                return f"{canonical_prefix}{parts[1].zfill(7)}"
+
+    return None
+
+
+def normalize_ontology_id(value: str) -> str | None:
+    """Canonicalize ontology IDs with consistent prefix format."""
+    if type(value) is not str:
+        return None
+    from bioetl.domain.normalization.text import normalize_string
+
+    normalized = normalize_string(value)
+    if normalized is None:
+        return "" if value == "" else None
+
+    # 1. Very fast path: already canonical or correct prefix format
+    canonical_match = _fast_path_canonical(normalized, normalized.upper())
+    if canonical_match is not None:
+        return canonical_match
 
     # Quick exclusion
     if not (
@@ -139,35 +177,13 @@ def normalize_ontology_id(value: str) -> str | None:
         if lowered.startswith(prefix):
             return normalize_ontology_id(normalized[len(prefix) :])
 
-    # Colon format (GO:000001)
-    if ":" in normalized:
-        prefix, id_part = normalized.split(":", 1)
-        prefix_upper = prefix.upper()
-        canonical_prefix = _PREFIX_TO_CANONICAL.get(prefix_upper)
-        if canonical_prefix:
-            if prefix_upper == "CALOHA":
-                id_part_upper = id_part.upper()
-                if id_part_upper.startswith("TS-"):
-                    return id_part_upper
-            return f"{canonical_prefix}{id_part}"
+    colon_match = _fast_path_colon(normalized)
+    if colon_match is not None:
+        return colon_match
 
-    # Alternate underscore format (e.g. go_000001)
-    if "_" in normalized:
-        prefix, suffix = normalized.split("_", 1)
-        prefix_upper = prefix.upper()
-        canonical_prefix = _PREFIX_TO_CANONICAL.get(prefix_upper)
-        if canonical_prefix:
-            if prefix_upper == "CALOHA" and suffix.upper().startswith("TS-"):
-                return suffix.upper()
-            return f"{canonical_prefix}{suffix}"
-
-    # Space format (GO 000001)
-    if " " in normalized:
-        parts = normalized.split()
-        if len(parts) == 2:
-            canonical_prefix = _PREFIX_TO_CANONICAL.get(parts[0].upper())
-            if canonical_prefix:
-                return f"{canonical_prefix}{parts[1].zfill(7)}"
+    underscore_match = _fast_path_underscore_and_space(normalized)
+    if underscore_match is not None:
+        return underscore_match
 
     return normalized
 
