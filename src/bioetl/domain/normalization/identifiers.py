@@ -164,7 +164,7 @@ def _check_obo_iri(normalized: str) -> str | None:
     return None
 
 
-def normalize_ontology_id(value: str) -> str | None:
+def normalize_ontology_id(value: object) -> str | None:
     """Canonicalize ontology IDs with consistent prefix format."""
     if not isinstance(value, str):
         return None
