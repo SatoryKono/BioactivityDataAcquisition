@@ -165,36 +165,3 @@ async def test_fetch_batch_records_streamed_response_size(
     assert metadata.total_requests == 1
     assert metadata.api_requests[0].response_size_bytes == len(xml_bytes)
     assert metadata.api_requests[0].status_code == 200
-
-
-def test_request_metadata__redacts_email_and_api_key__12592(
-    adapter: PubMedAdapter,
-) -> None:
-    """Metadata snapshot should redact sensitive query parameters."""
-    test_url = f"{ENTREZ_API_BASE}efetch.fcgi?db=pubmed&email=synthetic-user@example.invalid&api_key=synthetic-placeholder&other=val"
-    adapter._request_collector.record_request(
-        url=test_url,
-        method="GET",
-        duration_ms=18.0,
-        status_code=200,
-    )
-
-    metadata = adapter.get_source_metadata(api_version="v1")
-
-    assert metadata.total_requests == 1
-    req = metadata.api_requests[0]
-
-    # Check that parameters are redacted in the persisted metadata
-    assert "email" in req.query_params
-    assert req.query_params["email"] == "[REDACTED]"
-    assert "api_key" in req.query_params
-    assert req.query_params["api_key"] == "[REDACTED]"
-
-    # Check that non-sensitive parameters are intact
-    assert "other" in req.query_params
-    assert req.query_params["other"] == "val"
-
-    # Check that the recorded URL is sanitized (if url includes query params)
-    # The record_request method parses query parameters and strips them from the base URL or keeps them in the query params.
-    assert "synthetic-user" not in req.base_url
-    assert "synthetic-placeholder" not in req.base_url

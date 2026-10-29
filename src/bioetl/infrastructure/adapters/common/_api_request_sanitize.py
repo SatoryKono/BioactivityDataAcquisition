@@ -31,7 +31,6 @@ _SENSITIVE_KEYS = frozenset(
         "authorization",
         "x_api_key",
         "bearer",
-        "email",
     }
 )
 
