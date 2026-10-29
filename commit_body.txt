@@ -1,8 +1,0 @@
-Refs #12552 (COMP-004)
-Creates external resources inventory at `reports/quality/external-resource-inventory.md`
-
-- Base SHA: ed67cdbc34f23adef555be936885dec8e870bf54
-- Head SHA: 071ca33d3c11f71fa4418457305288400a07f9b6
-- Diff scope: Included inventory creation and auto-generated artifact updates (e.g., `documentation-cleanup-inventory.json`, `architecture-debt-remote-main-baseline.json`).
-- Pre-commit: Ran `uv run pytest`, `uv run ruff`, and `uv run mypy` cleanly without errors.
-- Governance: Synced with `uv run python -m scripts.engineering.qa.refresh_governance_artifacts --check` and `sync-inventory`.
