@@ -105622,6 +105622,34 @@
       "catalog_lifecycle": null,
       "commit_policy": null,
       "declared_class": null,
+      "declared_status": "active",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "active_quality_baseline",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/quality/external-resource-inventory.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
       "declared_status": null,
       "diagram_kind": null,
       "duplicate_group": null,
@@ -113549,7 +113577,7 @@
   "summary": {
     "by_lifecycle": {
       "active_backlog": 1,
-      "active_quality_baseline": 118,
+      "active_quality_baseline": 119,
       "closeout_evidence": 168,
       "docs_reports_curated_entrypoint": 2,
       "docs_reports_curated_or_historical_report": 28,
@@ -113567,7 +113595,7 @@
     "by_recommended_action": {
       "archive-after-migration": 292,
       "generate-automatically": 1066,
-      "keep": 2667
+      "keep": 2668
     },
     "by_section": {
       ".github": 6,
@@ -113591,7 +113619,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 615,
+      "reports": 616,
       "security": 2
     },
     "by_status": {
@@ -113599,17 +113627,17 @@
       "Archived": 1554,
       "Canonical": 76,
       "Generated": 1066,
-      "Working": 578
+      "Working": 579
     },
     "by_surface_family": {
       "active": 751,
       "archive": 1554,
       "canonical": 76,
       "generated": 1066,
-      "working": 578
+      "working": 579
     },
     "by_tracking_state": {
-      "tracked": 4025
+      "tracked": 4026
     },
     "docs_reports_local_count": 59,
     "duplicate_group_count": 80,
@@ -113622,8 +113650,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4025,
+    "total_doc_like": 4026,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4025
+    "total_doc_like_tracked": 4026
   }
 }
