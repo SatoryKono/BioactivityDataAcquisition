@@ -6,7 +6,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal, override
 
-import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 
 from bioetl.domain.medallion import SilverWriteMode
@@ -138,15 +137,8 @@ class SilverWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         table_name: str,
         records: list[BronzeRecord],
         on_schema_mismatch: Literal["error", "evolve", "ignore"],
-        *,
-        incoming_schema: pa.Schema | None = None,
     ) -> None:
-        await super()._check_schema_drift(
-            table_name,
-            records,
-            on_schema_mismatch,
-            incoming_schema=incoming_schema,
-        )
+        await super()._check_schema_drift(table_name, records, on_schema_mismatch)
 
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """Implement ``SilverStoragePort`` clear for rebuild/backfill paths."""

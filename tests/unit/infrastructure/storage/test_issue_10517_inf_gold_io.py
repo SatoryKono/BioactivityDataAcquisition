@@ -281,14 +281,8 @@ async def test_scd2_write_and_merge_use_mocked_delta(
     host._run_in_executor = _run  # type: ignore[method-assign]
     merge = MagicMock()
     merge.when_matched_update.return_value = merge
-    merge.when_not_matched_insert.return_value = merge
-    dataset = MagicMock()
-    dataset.to_table.return_value = pa.table({})
-    dt = SimpleNamespace(
-        table_uri="synthetic",
-        merge=MagicMock(return_value=merge),
-        to_pyarrow_dataset=MagicMock(return_value=dataset),
-    )
+    merge.when_not_matched_insert_all.return_value = merge
+    dt = SimpleNamespace(table_uri="synthetic", merge=MagicMock(return_value=merge))
     await host._merge_scd2(
         dt,
         [{"id": 1}],

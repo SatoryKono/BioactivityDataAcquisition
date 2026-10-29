@@ -232,13 +232,13 @@ quality:
     error_message: oa_status must match the shared publication open-access registry
   - field: author_openalex_ids
     type: pattern
-    pattern: '^\[(("A\d+"|null)(,("A\d+"|null))*)?\]$'
+    pattern: '^\[("A\d+"(,"A\d+")*)?\]$'
     nullable: true
     severity: error
     error_message: author_openalex_ids must be a canonical JSON string array of OpenAlex author IDs
   - field: author_orcids
     type: pattern
-    pattern: '^\[(("\d{4}-\d{4}-\d{4}-\d{3}[0-9X]"|null)(,("\d{4}-\d{4}-\d{4}-\d{3}[0-9X]"|null))*)?\]$'
+    pattern: '^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
     nullable: true
     severity: error
     error_message: author_orcids must be a canonical JSON string array of ORCID identifiers

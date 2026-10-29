@@ -699,25 +699,6 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
     )
 
 
-def test_shadow_compare_routes_issue_12475_physical_parity_evidence() -> None:
-    """Physical parity evidence selects its storage and docs regressions."""
-    repo_root = Path(__file__).resolve().parents[5]
-
-    report = build_shadow_compare(
-        ["reports/quality/issue-12475-physical-parity-evidence.md"],
-        repo_root=repo_root,
-    )
-
-    assert (
-        "tests/integration/infrastructure/storage/test_issue_12475_physical_parity.py"
-        in report["selected"]
-    )
-    assert (
-        "tests/architecture/test_documentation_cleanup_inventory.py"
-        in report["selected"]
-    )
-
-
 def test_shadow_compare_rejects_mixed_diff_with_unmapped_path(
     tmp_path: Path,
 ) -> None:

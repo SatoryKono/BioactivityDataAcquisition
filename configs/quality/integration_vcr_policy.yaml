@@ -352,7 +352,6 @@ tracked_suite_inventory:
     - tests/integration/infrastructure/storage/test_export_reader_version_fallback.py
     - tests/integration/infrastructure/storage/test_gold_writer_read_cleanup.py
     - tests/integration/infrastructure/storage/test_gold_writer_versioning.py
-    - tests/integration/infrastructure/storage/test_issue_12475_physical_parity.py
     - tests/integration/infrastructure/storage/test_metadata_integration.py
     - tests/integration/infrastructure/storage/test_metadata_writer_filesystem.py
     - tests/integration/infrastructure/storage/test_retention_dedup.py

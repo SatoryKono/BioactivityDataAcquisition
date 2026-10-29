@@ -105,15 +105,10 @@ class _SilverWriterRuntimeValidationFacade:
         table_name: str,
         records: list[BronzeRecord],
         on_schema_mismatch: Literal["error", "evolve", "ignore"],
-        *,
-        incoming_schema: pa.Schema | None = None,
     ) -> None:
         """Check schema drift through the validation service."""
         if self._validation is None:
             raise RuntimeError(_SILVER_VALIDATION_OPERATIONS_REQUIRED)
         await self._validation._check_schema_drift(
-            table_name,
-            records,
-            on_schema_mismatch,
-            incoming_schema=incoming_schema,
+            table_name, records, on_schema_mismatch
         )
