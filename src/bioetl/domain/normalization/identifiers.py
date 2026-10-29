@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from bioetl.domain.normalization.text import normalize_string
+
 __all__ = [
     "ONTOLOGY_PREFIXES",
     "PMID_MAX_EXCLUSIVE",
@@ -94,108 +96,80 @@ ONTOLOGY_PREFIXES = {
     "UO": "UO_",
 }
 
+_PREFIX_TO_CANONICAL = dict(ONTOLOGY_PREFIXES)
+for p, c in list(_PREFIX_TO_CANONICAL.items()):
+    canonical_prefix = c.rstrip("_")
+    if canonical_prefix != p:
+        _PREFIX_TO_CANONICAL[canonical_prefix] = c
 
-def _normalize_colon_format(value: str) -> str | None:
-    """Handle colon format ontology IDs (CLO:1234 -> CLO_1234)."""
-    if ":" in value:
-        prefix, id_part = value.split(":", 1)
-        prefix = prefix.upper()
-        if prefix in ONTOLOGY_PREFIXES:
-            if prefix == "CALOHA":
-                normalized_id_part = id_part.upper()
-                if normalized_id_part.startswith("TS-"):
-                    return normalized_id_part
-            return f"{ONTOLOGY_PREFIXES[prefix]}{id_part}"
-    return None
-
-
-def _get_underscore_suffix(
-    value: str, prefix: str, canonical_prefix: str, upper_value: str
-) -> str | None:
-    upper_canonical = canonical_prefix.upper()
-    if upper_value.startswith(upper_canonical):
-        return value[len(upper_canonical) :]
-
-    underscore_prefix = f"{prefix}_"
-    if upper_value.startswith(underscore_prefix):
-        suffix = value[len(underscore_prefix) :]
-        if prefix == "CALOHA" and suffix.upper().startswith("TS-"):
-            return suffix.upper()
-        return suffix
-    return None
-
-
-def _normalize_underscore_format(value: str) -> str | None:
-    """Handle underscore format ontology IDs (already correct format)."""
-    upper_value = value.upper()
-    for prefix, canonical_prefix in ONTOLOGY_PREFIXES.items():
-        suffix = _get_underscore_suffix(value, prefix, canonical_prefix, upper_value)
-        if suffix is not None:
-            if prefix == "CALOHA" and suffix.upper().startswith("TS-"):
-                return suffix.upper()
-            return f"{canonical_prefix}{suffix}"
-    return None
-
-
-def _normalize_space_format(value: str) -> str | None:
-    """Handle space format ontology IDs (UBERON 7 -> UBERON_0000007)."""
-    parts = value.split()
-    if len(parts) == 2 and parts[0].upper() in ONTOLOGY_PREFIXES:
-        prefix = ONTOLOGY_PREFIXES[parts[0].upper()]
-        id_part = parts[1].zfill(7)
-        return f"{prefix}{id_part}"
-    return None
-
-
-def _normalize_obo_iri_format(value: str) -> str | None:
-    """Handle OBO IRIs such as purl.obolibrary.org/obo/GO_0008150."""
-    lowered = value.lower()
-    for prefix in _OBO_IRI_PREFIXES:
-        if lowered.startswith(prefix):
-            return _apply_normalization_strategies(value[len(prefix) :])
-    return None
-
-
-def _validate_input(value: object) -> str | None:
-    """Validate and preprocess input value."""
-    if value is None:
-        return None
-    if not isinstance(value, str):
-        return None
-    from bioetl.domain.normalization.text import normalize_string
-
-    normalized = normalize_string(value)
-    if normalized is not None:
-        return normalized
-    if value == "":
-        return ""
-    return None
-
-
-def _apply_normalization_strategies(normalized: str) -> str:
-    """Apply normalization strategies in priority order."""
-    strategies = [
-        _normalize_obo_iri_format,
-        _normalize_colon_format,
-        _normalize_underscore_format,
-        _normalize_space_format,
-    ]
-
-    for strategy in strategies:
-        result = strategy(normalized)
-        if result is not None:
-            return result
-
-    return normalized
+_CANONICAL_PREFIXES = tuple(ONTOLOGY_PREFIXES.values())
 
 
 def normalize_ontology_id(value: str) -> str | None:
     """Canonicalize ontology IDs with consistent prefix format."""
-    normalized = _validate_input(value)
-    if normalized is None:
+    if type(value) is not str:
         return None
+    normalized = normalize_string(value)
+    if normalized is None:
+        return "" if value == "" else None
 
-    return _apply_normalization_strategies(normalized)
+    upper_val = normalized.upper()
+
+    # 1. Very fast path: already canonical or correct prefix format
+    if upper_val.startswith(_CANONICAL_PREFIXES):
+        for canonical in _CANONICAL_PREFIXES:
+            if upper_val.startswith(canonical):
+                suffix = normalized[len(canonical) :]
+                # Special case for CALOHA already starting with TS-
+                if canonical == ONTOLOGY_PREFIXES[
+                    "CALOHA"
+                ] and suffix.upper().startswith("TS-"):
+                    return suffix.upper()
+                return canonical + suffix
+
+    # Quick exclusion
+    if not (
+        ":" in normalized or " " in normalized or "_" in normalized or "/" in normalized
+    ):
+        return normalized
+
+    # OBO IRI format
+    lowered = normalized.lower()
+    for prefix in _OBO_IRI_PREFIXES:
+        if lowered.startswith(prefix):
+            return normalize_ontology_id(normalized[len(prefix) :])
+
+    # Colon format (GO:000001)
+    if ":" in normalized:
+        prefix, id_part = normalized.split(":", 1)
+        prefix_upper = prefix.upper()
+        canonical_prefix = _PREFIX_TO_CANONICAL.get(prefix_upper)
+        if canonical_prefix:
+            if prefix_upper == "CALOHA":
+                id_part_upper = id_part.upper()
+                if id_part_upper.startswith("TS-"):
+                    return id_part_upper
+            return f"{canonical_prefix}{id_part}"
+
+    # Alternate underscore format (e.g. go_000001)
+    if "_" in normalized:
+        prefix, suffix = normalized.split("_", 1)
+        prefix_upper = prefix.upper()
+        canonical_prefix = _PREFIX_TO_CANONICAL.get(prefix_upper)
+        if canonical_prefix:
+            if prefix_upper == "CALOHA" and suffix.upper().startswith("TS-"):
+                return suffix.upper()
+            return f"{canonical_prefix}{suffix}"
+
+    # Space format (GO 000001)
+    if " " in normalized:
+        parts = normalized.split()
+        if len(parts) == 2:
+            canonical_prefix = _PREFIX_TO_CANONICAL.get(parts[0].upper())
+            if canonical_prefix:
+                return f"{canonical_prefix}{parts[1].zfill(7)}"
+
+    return normalized
 
 
 def normalize_ontology_id_strict(value: str) -> str | None:
