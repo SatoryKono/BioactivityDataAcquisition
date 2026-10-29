@@ -254,6 +254,25 @@ def test_shadow_compare_routes_epoch2208_variant_b_evidence() -> None:
     assert report["covers_full_suite"] is False
 
 
+def test_shadow_compare_routes_12375_a_evidence() -> None:
+    """Issue 12375 A evidence selects the cleanup-inventory contract."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        [
+            "reports/engineering/12375-a/consumers.md",
+            "reports/engineering/12375-a/handoff.md",
+            "reports/engineering/12375-a/profile_summary.md",
+        ],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/architecture/test_documentation_cleanup_inventory.py"
+    ]
+    assert report["covers_full_suite"] is False
+
+
 def test_shadow_compare_routes_historical_secret_fingerprints() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare([".gitleaksignore"], repo_root=repo_root)
