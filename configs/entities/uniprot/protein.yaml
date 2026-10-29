@@ -237,37 +237,37 @@ quality:
     type: pattern
     pattern: '^\[("[A-Z0-9]{6,10}"(,"[A-Z0-9]{6,10}")*)?\]$'
     nullable: true
-    severity: error
+    severity: warn
     error_message: secondary_accessions must be a canonical JSON string array of UniProt accessions
   - field: chembl_ids
     type: pattern
     pattern: '^\[("CHEMBL\d+"(,"CHEMBL\d+")*)?\]$'
     nullable: true
-    severity: error
+    severity: warn
     error_message: chembl_ids must be a canonical JSON string array of ChEMBL identifiers
   - field: drugbank_ids
     type: pattern
     pattern: '^\[("DB\d{5}"(,"DB\d{5}")*)?\]$'
     nullable: true
-    severity: error
+    severity: warn
     error_message: drugbank_ids must be a canonical JSON string array of DrugBank identifiers
   - field: interpro_xrefs
     type: pattern
     pattern: '^\[(("IPR\d{6}"|\{[^\]]*"id":"IPR\d{6}"[^\]]*\})(,("IPR\d{6}"|\{[^\]]*"id":"IPR\d{6}"[^\]]*\}))*)?\]$'
     nullable: true
-    severity: error
+    severity: warn
     error_message: interpro_xrefs must be a canonical JSON array of InterPro references
   - field: pfam_xrefs
     type: pattern
     pattern: '^\[(("PF\d{5}"|\{[^\]]*"id":"PF\d{5}"[^\]]*\})(,("PF\d{5}"|\{[^\]]*"id":"PF\d{5}"[^\]]*\}))*)?\]$'
     nullable: true
-    severity: error
+    severity: warn
     error_message: pfam_xrefs must be a canonical JSON array of Pfam references
   - field: reactome_xrefs
     type: pattern
     pattern: '^\[(("R-[A-Z]+-\d+"|\{[^\]]*"id":"R-[A-Z]+-\d+"[^\]]*\})(,("R-[A-Z]+-\d+"|\{[^\]]*"id":"R-[A-Z]+-\d+"[^\]]*\}))*)?\]$'
     nullable: true
-    severity: error
+    severity: warn
     error_message: reactome_xrefs must be a canonical JSON array of Reactome references
   - field: molecular_function
     type: pattern

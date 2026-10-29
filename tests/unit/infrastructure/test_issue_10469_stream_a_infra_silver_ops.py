@@ -239,43 +239,6 @@ class TestSchemaDriftAndReplay:
         )
         assert critical.status == "critical"
 
-    async def test_type_drift_preserves_complete_diff_and_metadata(self) -> None:
-        """Type drift remains critical and reports simultaneous field changes."""
-        existing = pa.schema(
-            [("id", pa.string()), ("value", pa.string()), ("removed", pa.string())]
-        )
-        incoming = pa.schema(
-            [("id", pa.string()), ("value", pa.int64()), ("added", pa.string())]
-        )
-        records = [{"id": "1", "value": 1, "added": "x"}]
-        diff = _build_silver_schema_drift_diff(
-            existing,
-            records,
-            incoming_schema=incoming,
-        )
-        assert diff is not None
-
-        info = _build_schema_drift_info(diff)
-        assert info.status == "critical"
-        assert info.changed_fields == (("value", "string", "int64"),)
-        assert info.has_drift is True
-
-        host = SimpleNamespace(
-            logger=MagicMock(),
-            _get_table_schema=AsyncMock(return_value=existing),
-        )
-        with pytest.raises(SchemaEvolutionError) as caught:
-            await _check_schema_drift(
-                host,
-                "t",
-                records,
-                "error",
-                incoming_schema=incoming,
-            )
-        assert caught.value.new_fields == {"added"}
-        assert caught.value.removed_fields == {"removed"}
-        assert caught.value.changed_fields == {"value": ("string", "int64")}
-
     def test_replay_safe_merge_contract(self) -> None:
         assert _strict_replay_merge_contract_required(SimpleNamespace()) is False
         required = SimpleNamespace(

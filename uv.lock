@@ -12,7 +12,6 @@ resolution-markers = [
 constraints = [
     { name = "boto3", specifier = ">=1.43.1,<=1.43.116" },
     { name = "botocore", specifier = ">=1.43.1,<=1.43.116" },
-    { name = "langgraph-sdk", specifier = ">=0.4.6" },
     { name = "litellm", specifier = ">=1.102.2,<1.103.0" },
     { name = "msgpack", specifier = ">=1.2.3" },
     { name = "virtualenv", specifier = ">=21.14.7" },

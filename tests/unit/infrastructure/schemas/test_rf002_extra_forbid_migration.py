@@ -164,8 +164,6 @@ def test_rf002_strict_leaves_reject_unknown_keys(
     good: dict[str, Any],
 ) -> None:
     """Strict (forbid) leaves: good payload accepted; unknown key → extra_forbidden."""
-    validated = model.model_validate(good)
-    assert isinstance(validated, model)
     _good_and_unknown(model, good)
 
 

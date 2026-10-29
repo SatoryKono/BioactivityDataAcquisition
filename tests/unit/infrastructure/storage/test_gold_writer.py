@@ -774,7 +774,7 @@ class TestGoldWriterSCD2:
         mock_merge = MagicMock()
         mock_table_instance.merge.return_value = mock_merge
         mock_merge.when_matched_update.return_value = mock_merge
-        mock_merge.when_not_matched_insert.return_value = mock_merge
+        mock_merge.when_not_matched_insert_all.return_value = mock_merge
 
         scd_config = {
             "business_key": "entity_id",
@@ -791,10 +791,7 @@ class TestGoldWriterSCD2:
 
         mock_table_instance.merge.assert_called_once()
         mock_merge.when_matched_update.assert_called_once()
-        mock_merge.when_not_matched_insert.assert_called_once()
-        insert_kwargs = mock_merge.when_not_matched_insert.call_args.kwargs
-        assert insert_kwargs["predicate"] == "source.__bioetl_scd2_expire = 'insert'"
-        assert insert_kwargs["updates"]["entity_id"] == "source.entity_id"
+        mock_merge.when_not_matched_insert_all.assert_called_once()
 
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_write_gold_scd2_with_list_business_key(
@@ -806,7 +803,7 @@ class TestGoldWriterSCD2:
         mock_merge = MagicMock()
         mock_table_instance.merge.return_value = mock_merge
         mock_merge.when_matched_update.return_value = mock_merge
-        mock_merge.when_not_matched_insert.return_value = mock_merge
+        mock_merge.when_not_matched_insert_all.return_value = mock_merge
 
         scd_config = {
             "business_key": ["provider", "entity_id"],
@@ -850,7 +847,7 @@ class TestGoldWriterSCD2:
         mock_merge = MagicMock()
         mock_table_instance.merge.return_value = mock_merge
         mock_merge.when_matched_update.return_value = mock_merge
-        mock_merge.when_not_matched_insert.return_value = mock_merge
+        mock_merge.when_not_matched_insert_all.return_value = mock_merge
 
         schema = DataFrameSchema(
             {

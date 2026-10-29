@@ -505,7 +505,6 @@ class TestSilverWriterPreparePayloadExecutor:
             "test.table",
             records,
             "ignore",
-            incoming_schema=expected_table.schema,
         )
 
     @pytest.mark.asyncio
@@ -532,7 +531,7 @@ class TestSilverWriterPreparePayloadExecutor:
                 arrow_data=expected_table,
             )
 
-        async def schema_stage(*_: object, **__: object) -> None:
+        async def schema_stage(*_: object) -> None:
             await asyncio.sleep(0)
             call_order.append("schema")
 

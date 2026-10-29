@@ -88,59 +88,15 @@ def _remote_main_sha(repo_root: Path, *, remote: str, branch: str) -> str:
 
 
 def _git_blob(repo_root: Path, revision: str, path: str) -> bytes | None:
-    def run_git(
-        args: list[str], *, operation: str
-    ) -> subprocess.CompletedProcess[bytes]:
-        try:
-            result = subprocess.run(
-                ["git", *args],
-                cwd=repo_root,
-                check=False,
-                capture_output=True,
-            )
-        except OSError as exc:
-            raise RuntimeError(f"Git {operation} failed: {exc}") from exc
-        if result.returncode != 0:
-            detail = result.stderr.decode("utf-8", errors="replace").strip()
-            raise RuntimeError(
-                f"Git {operation} failed for {revision!r}: {detail or result.returncode}"
-            )
-        return result
-
-    resolved = (
-        run_git(
-            ["rev-parse", "--verify", f"{revision}^{{commit}}"],
-            operation="commit resolution",
-        )
-        .stdout.strip()
-        .decode("ascii")
+    result = subprocess.run(
+        ["git", "show", f"{revision}:{path}"],
+        cwd=repo_root,
+        check=False,
+        capture_output=True,
     )
-    tree_entries = run_git(
-        ["ls-tree", "-r", "-t", "--full-tree", "-z", resolved, "--", path],
-        operation="tree lookup",
-    ).stdout.split(b"\0")
-    expected_path = path.encode("utf-8")
-    object_type: bytes | None = None
-    for entry in tree_entries:
-        if not entry:
-            continue
-        header, separator, entry_path = entry.partition(b"\t")
-        metadata = header.split()
-        if not separator or len(metadata) != 3:
-            raise RuntimeError(f"Git tree lookup returned a malformed entry: {entry!r}")
-        if entry_path == expected_path:
-            object_type = metadata[1]
-            break
-    if object_type is None:
+    if result.returncode != 0:
         return None
-    if object_type != b"blob":
-        decoded_type = object_type.decode("ascii", errors="replace")
-        raise RuntimeError(f"Git tree entry for {path!r} is {decoded_type}, not a blob")
-
-    return run_git(
-        ["show", f"{resolved}:{path}"],
-        operation=f"blob read for {path}",
-    ).stdout
+    return result.stdout
 
 
 _CONFLICT_MARKER_PREFIXES = ("<<<<<<<", "|||||||", "=======", ">>>>>>>")

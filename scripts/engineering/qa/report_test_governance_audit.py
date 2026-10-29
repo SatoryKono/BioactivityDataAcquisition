@@ -605,22 +605,12 @@ def _has_module_pytestmark(tree: ast.Module) -> bool:
 
 
 class _TestBodyVisitor(ast.NodeVisitor):
-    def __init__(
-        self,
-        helper_functions: dict[str, ast.FunctionDef | ast.AsyncFunctionDef]
-        | None = None,
-        *,
-        visited_helpers: set[str] | None = None,
-    ) -> None:
+    def __init__(self) -> None:
         self.has_assertion_signal = False
         self.uuid4_call_sites = 0
         self.date_today_call_sites = 0
         self.helper_assertion_calls: list[str] = []
         self.called_names: list[str] = []
-        self._helper_functions = helper_functions or {}
-        self._visited_helpers = (
-            visited_helpers if visited_helpers is not None else set()
-        )
 
     def visit_Assert(self, node: ast.Assert) -> None:
         self.has_assertion_signal = True
@@ -635,37 +625,14 @@ class _TestBodyVisitor(ast.NodeVisitor):
         qualified = _qualified_name(node.func)
         leaf = qualified.rsplit(".", 1)[-1]
 
-        if leaf.startswith(("check_", "validate_", "verify_", "expect_")):
-            # Keep delegated checks in the assertless-candidate stream so the
-            # classifier can assign the semantically precise helper_asserted
-            # category instead of silently omitting them from the report.
-            self.helper_assertion_calls.append(qualified)
-        elif _call_is_assertion_signal(node):
+        if _call_is_assertion_signal(node):
             self.has_assertion_signal = True
+        if leaf.startswith(("check_", "validate_", "verify_", "expect_")):
+            self.has_assertion_signal = True
+            self.helper_assertion_calls.append(qualified)
 
         if qualified:
             self.called_names.append(qualified)
-
-        helper = (
-            self._helper_functions.get(node.func.id)
-            if isinstance(node.func, ast.Name)
-            else None
-        )
-        if helper is not None and leaf not in self._visited_helpers:
-            self._visited_helpers.add(leaf)
-            helper_visitor = _TestBodyVisitor(
-                self._helper_functions,
-                visited_helpers=self._visited_helpers,
-            )
-            helper_visitor.visit(helper)
-            if (
-                helper_visitor.has_assertion_signal
-                or helper_visitor.helper_assertion_calls
-            ):
-                self.helper_assertion_calls.append(qualified)
-                self.helper_assertion_calls.extend(
-                    helper_visitor.helper_assertion_calls
-                )
 
         if qualified in {"uuid.uuid4", "uuid4"}:
             self.uuid4_call_sites += 1
@@ -1063,7 +1030,6 @@ def _update_critical_envelopes(
 def _scan_one_test_function(
     *,
     function: ast.FunctionDef | ast.AsyncFunctionDef,
-    helper_functions: dict[str, ast.FunctionDef | ast.AsyncFunctionDef],
     class_has_mark: bool,
     module_has_mark: bool,
     relative: str,
@@ -1085,7 +1051,7 @@ def _scan_one_test_function(
     """
     location = f"{relative}:{function.lineno}"
     test_name_locations[function.name].append(location)
-    visitor = _TestBodyVisitor(helper_functions)
+    visitor = _TestBodyVisitor()
     visitor.visit(function)
     assertless_category: str | None = None
     assertless_total = 0
@@ -1380,12 +1346,6 @@ def _collect_test_governance_report_cached(
         if tree is None:
             continue
         module_has_mark = _has_module_pytestmark(tree)
-        helper_functions = {
-            node.name: node
-            for node in tree.body
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-            and not node.name.startswith(TEST_FUNCTION_PREFIX)
-        }
         for function, class_has_mark in _test_functions(tree):
             (
                 fn_delta,
@@ -1397,7 +1357,6 @@ def _collect_test_governance_report_cached(
                 reachability_delta,
             ) = _scan_one_test_function(
                 function=function,
-                helper_functions=helper_functions,
                 class_has_mark=class_has_mark,
                 module_has_mark=module_has_mark,
                 relative=relative,

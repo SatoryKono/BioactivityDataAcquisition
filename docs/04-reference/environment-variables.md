@@ -10,7 +10,7 @@ variables, see [README.md](../../README.md#installation) and `.env.example`.
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `BIOETL_ENV` | Environment mode (`dev`, `staging`, `prod`). `test` is not a valid mode. | `dev` | No |
-| `BIOETL_DATA_DIR` | Directory for data storage | `data` | No |
+| `BIOETL_DATA_DIR` | Directory for data storage | `./data` | No |
 | `BIOETL_JSON_ENCODER` | JSON encoder implementation (orjson or stdlib) | `""` | No |
 | `BIOETL_SILVER_DEDUP_TIMEOUT_SECONDS` | Timeout budget in seconds for Silver deduplication executor work | `60.0` | No |
 | `BIOETL_STRICT_MEDALLION` | When True, schema drift in Silver layer raises SchemaEvolutionError | `False` | No |

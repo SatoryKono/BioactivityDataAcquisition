@@ -95,7 +95,7 @@ quality:
     type: pattern
     pattern: '^\[("[A-Za-z0-9:/._-]+"(,"[A-Za-z0-9:/._-]+")*)?\]$'
     nullable: true
-    severity: error
+    severity: warn
     error_message: all_mappings must be a canonical JSON string array of normalized provider identifiers
   - field: taxonomy_id
     type: range

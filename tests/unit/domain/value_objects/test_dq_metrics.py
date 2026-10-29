@@ -106,7 +106,6 @@ class TestSchemaDriftInfo:
         assert drift.status == "info"
         assert drift.new_fields == ()
         assert drift.missing_fields == ()
-        assert drift.changed_fields == ()
         assert drift.has_drift is False
 
     def test_with_new_fields(self) -> None:
@@ -127,27 +126,15 @@ class TestSchemaDriftInfo:
         assert drift.missing_fields == ("old_field",)
         assert drift.has_drift is True
 
-    def test_with_changed_fields(self) -> None:
-        """Type changes are retained as critical drift metadata."""
-        drift = SchemaDriftInfo(
-            status="critical",
-            changed_fields=(("value", "string", "int64"),),
-        )
-
-        assert drift.has_drift is True
-        assert drift.to_schema_drift().changed_fields == {"value": ("string", "int64")}
-
     def test_schema_drift_info__to_tuple_conversion__758d8154(self) -> None:
         """Test that lists are converted to tuples for immutability."""
         drift = SchemaDriftInfo(
             status="info",
             new_fields=["field1", "field2"],  # type: ignore[arg-type]
             missing_fields=["old_field"],  # type: ignore[arg-type]
-            changed_fields=[("value", "int64", "double")],  # type: ignore[arg-type]
         )
         assert isinstance(drift.new_fields, tuple)
         assert isinstance(drift.missing_fields, tuple)
-        assert isinstance(drift.changed_fields, tuple)
 
     def test_to_schema_drift(self) -> None:
         """Test conversion to SchemaDrift model."""
@@ -155,13 +142,11 @@ class TestSchemaDriftInfo:
             status="warn",
             new_fields=("new1", "new2"),
             missing_fields=("old1",),
-            changed_fields=(("value", "int64", "double"),),
         )
         schema_drift = drift.to_schema_drift()
         assert schema_drift.status == "warn"
         assert schema_drift.new_fields == ["new1", "new2"]
         assert schema_drift.missing_fields == ["old1"]
-        assert schema_drift.changed_fields == {"value": ("int64", "double")}
 
     def test_has_drift_false_when_no_changes(self) -> None:
         """Test has_drift is False when no fields changed."""

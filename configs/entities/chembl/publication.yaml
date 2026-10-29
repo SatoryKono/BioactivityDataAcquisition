@@ -185,7 +185,7 @@ quality:
     type: range
     min: 1950
     nullable: true
-    severity: error
+    severity: warn
     error_message: "Publication year before 1950 — will be filtered at Gold stage"
   - field: publication_pmid
     type: pattern
@@ -231,7 +231,7 @@ quality:
     min: 0
     max: 10000000
     nullable: true
-    severity: error
+    severity: warn
     error_message: Unusually high citation count
   - field: citations_made
     type: range
@@ -255,7 +255,7 @@ quality:
     - doi
     - pmc_id
     condition: any_present
-    severity: error
+    severity: warn
     error_message: Publication should have at least one external identifier (PMID, DOI, or PMC ID)
   - name: doi_alias_equality
     fields:

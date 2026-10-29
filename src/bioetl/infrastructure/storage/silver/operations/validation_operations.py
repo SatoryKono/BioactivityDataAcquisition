@@ -60,8 +60,6 @@ class _SilverPayloadPreparationRuntimeProtocol(Protocol):
         table_name: str,
         records: list[BronzeRecord],
         on_schema_mismatch: Literal["error", "evolve", "ignore"],
-        *,
-        incoming_schema: pa.Schema | None = None,
     ) -> None: ...
 
 
@@ -156,7 +154,6 @@ async def _prepare_silver_write_payload_impl(
         schema_request.table_name,
         schema_request.records,
         schema_request.on_schema_mismatch,
-        incoming_schema=schema_request.arrow_data.schema,
     )
     return _build_prepared_silver_write_payload(
         table_path=runtime_host._resolve_table_path(schema_request.table_name),
@@ -229,17 +226,9 @@ class _SilverValidationOperationFacade:
         table_name: str,
         records: list[BronzeRecord],
         on_schema_mismatch: Literal["error", "evolve", "ignore"],
-        *,
-        incoming_schema: pa.Schema | None = None,
     ) -> None:
         """Check schema drift and handle according to configured policy."""
-        await _check_schema_drift(
-            self,
-            table_name,
-            records,
-            on_schema_mismatch,
-            incoming_schema=incoming_schema,
-        )
+        await _check_schema_drift(self, table_name, records, on_schema_mismatch)
 
     async def _detect_schema_drift(
         self,

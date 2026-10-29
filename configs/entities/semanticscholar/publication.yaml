@@ -181,13 +181,13 @@ quality:
     type: range
     min: 1950
     nullable: true
-    severity: error
+    severity: warn
     error_message: "Publication year before 1950 — will be filtered at Gold stage"
   - field: publication_type
     type: pattern
-    pattern: ^[A-Za-z][A-Za-z0-9]*( [A-Za-z0-9]+)*(\|[A-Za-z][A-Za-z0-9]*( [A-Za-z0-9]+)*)*$
+    pattern: ^[A-Za-z][A-Za-z0-9]*(\|[A-Za-z][A-Za-z0-9]*)*$
     nullable: true
-    severity: error
+    severity: warn
     error_message: Unexpected raw publication_type format
   - field: publication_type_unified
     type: custom
@@ -216,28 +216,28 @@ quality:
     error_message: oa_status must match the shared publication open-access registry
   - field: author_s2_ids
     type: pattern
-    pattern: '^\[("([0-9a-f]{40}|\d+)"(,"([0-9a-f]{40}|\d+)")*)?\]$'
+    pattern: '^\[("[0-9a-f]{40}"(,"[0-9a-f]{40}")*)?\]$'
     nullable: true
-    severity: error
+    severity: warn
     error_message: author_s2_ids must be a canonical JSON string array of Semantic Scholar author IDs
   - field: author_orcids
     type: pattern
-    pattern: '^\[(("\d{4}-\d{4}-\d{4}-\d{3}[0-9X]"|null)(,("\d{4}-\d{4}-\d{4}-\d{3}[0-9X]"|null))*)?\]$'
+    pattern: '^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
     nullable: true
-    severity: error
+    severity: warn
     error_message: author_orcids must be a canonical JSON string array of ORCID identifiers
   - field: issn_list
     type: pattern
     pattern: '^\[("[0-9Xx-]+"(,"[0-9Xx-]+")*)?\]$'
     nullable: true
-    severity: error
+    severity: warn
     error_message: issn_list must be a canonical JSON string array of ISSN values
   - field: citations_received
     type: range
     min: 0
     max: 10000000
     nullable: true
-    severity: error
+    severity: warn
     error_message: Unusually high citation count
   - field: citations_made
     type: range

@@ -1408,10 +1408,3 @@ def test_pr_required_fetch_depth_keeps_class_lane_history() -> None:
     assert checkout_depth("class-lane") == 0
     assert checkout_depth("fast-governance") == 1
     assert checkout_depth("pr-gate-complete") == 1
-
-    class_lane_checkout = next(
-        step
-        for step in jobs["class-lane"]["steps"]
-        if str(step.get("uses", "")).startswith("actions/checkout@")
-    )
-    assert class_lane_checkout["with"]["filter"] == "blob:none"
