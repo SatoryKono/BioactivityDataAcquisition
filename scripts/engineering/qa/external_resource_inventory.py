@@ -305,10 +305,14 @@ def _check_history(payload: dict[str, Any], identities: set[str]) -> list[str]:
 
 
 def _check_alias_links(payload: dict[str, Any], identities: set[str]) -> list[str]:
-    for alias in payload.get("operation_aliases", []):
-        identity = alias.get("resource_identity")
-        if not isinstance(identity, str) or identity not in identities:
-            return ["operation alias links a missing resource identity"]
+    for section in [payload, *payload["resources"]]:
+        aliases = section.get("operation_aliases", [])
+        if _reference_schema(aliases, "operation_aliases"):
+            continue  # The owning schema check already reports malformed aliases.
+        for alias in aliases:
+            identity = alias.get("resource_identity")
+            if not isinstance(identity, str) or identity not in identities:
+                return ["operation alias links a missing resource identity"]
     return []
 
 

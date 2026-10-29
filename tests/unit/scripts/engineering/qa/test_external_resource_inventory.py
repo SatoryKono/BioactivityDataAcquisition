@@ -469,16 +469,33 @@ def test_repository_catalog_and_projection_are_current() -> None:
     assert main(["--check"]) == 0
 
 
-def test_operation_alias_requires_existing_resource(inventory_case: tuple) -> None:
+@pytest.mark.parametrize("nested", [False, True])
+@pytest.mark.parametrize("identity", [None, "missing.resource", "fixture.file"])
+def test_operation_alias_requires_existing_resource(
+    inventory_case: tuple, nested: bool, identity: str | None
+) -> None:
     payload, sources, blobs = inventory_case
     alias = dict(
         payload["resources"][0]["creation_sites"][0],
-        resource_identity="missing.resource",
+        resource_identity=identity,
     )
-    payload["operation_aliases"] = [alias]
-    assert "operation alias links a missing resource identity" in validate_inventory(
-        payload, sources, blobs
-    )
+    section = payload["resources"][0] if nested else payload
+    section["operation_aliases"] = [alias]
+    errors = validate_inventory(payload, sources, blobs)
+    if identity == "fixture.file":
+        assert errors == []
+    else:
+        assert "operation alias links a missing resource identity" in errors
+
+
+@pytest.mark.parametrize("aliases", [None, "invalid", [None], [{}]])
+def test_malformed_nested_aliases_are_diagnostics(
+    inventory_case: tuple, aliases: object
+) -> None:
+    payload, sources, blobs = inventory_case
+    payload["resources"][0]["operation_aliases"] = aliases
+    errors = validate_inventory(payload, sources, blobs)
+    assert any("invalid provenance schema" in error for error in errors)
 
 
 @pytest.mark.parametrize("change", ["owner", "resource_count"])
