@@ -103,6 +103,10 @@ for p, c in list(_PREFIX_TO_CANONICAL.items()):
 _CANONICAL_PREFIXES = tuple(ONTOLOGY_PREFIXES.values())
 
 
+def _contains_whitespace(value: str) -> bool:
+    return any(character.isspace() for character in value)
+
+
 def _fast_path_canonical(normalized: str, upper_val: str) -> str | None:
     if not upper_val.startswith(_CANONICAL_PREFIXES):
         return None
@@ -184,7 +188,7 @@ def _fallback_normalize_ontology_id(normalized: str) -> str | None:
         ":" in normalized
         or "_" in normalized
         or "/" in normalized
-        or any(character.isspace() for character in normalized)
+        or _contains_whitespace(normalized)
     ):
         return normalized
 
@@ -210,7 +214,7 @@ def _process_slow_paths_fallback(normalized: str) -> str | None:
         if underscore_match is not None:
             return underscore_match
 
-    if any(character.isspace() for character in normalized):
+    if _contains_whitespace(normalized):
         space_match = _fast_path_space(normalized)
         if space_match is not None:
             return space_match
