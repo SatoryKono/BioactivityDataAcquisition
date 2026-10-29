@@ -1,5 +1,7 @@
 """Source-bound inventory check in the architecture lane with Git history."""
 
+from __future__ import annotations
+
 import pytest
 
 from scripts.engineering.qa.external_resource_inventory import main
