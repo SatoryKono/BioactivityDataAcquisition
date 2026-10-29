@@ -4018,13 +4018,15 @@
       "identity": "control.file_lineage_store.file-lock",
       "type": "file-lock",
       "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "lifetime": "owner/operation",
+      "lifetime": "one lineage save / quarantine append context; platform-specific OS lock tied to its raw descriptor",
       "creator": [
-        "_acquire_exclusive_lock"
+        "_acquire_exclusive_lock",
+        "_acquire_msvcrt_lock",
+        "locking callback only with LK_LOCK"
       ],
-      "owner": "_acquire_exclusive_lock owning operation (see exact source sites)",
-      "closer": "os.close at src/bioetl/infrastructure/control_plane/file_lineage_store.py:124; _release_exclusive_lock at src/bioetl/infrastructure/control_plane/file_lineage_store.py:122",
-      "shutdown_contract": "Actual normal-path close/descriptor-to-stream transfer points are listed explicitly. Raw descriptor ownership starts at successful allocation; failed fdopen/open construction has not transferred ownership to a stream. No cleanup guarantee is inferred from a later with-block. Temp-path unlink and descriptor close are separate obligations.",
+      "owner": "_exclusive_base_lock context manager owns the lock through its yielded operation; acquisition helper returns while the context keeps ownership",
+      "closer": "_release_exclusive_lock at src/bioetl/infrastructure/control_plane/file_lineage_store.py:122: Windows LK_UNLCK via _lock_byte_range at 106, POSIX LOCK_UN at 108; outer finally os.close at 124",
+      "shutdown_contract": "The owning _exclusive_base_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553.",
       "production_entrypoint": "run/workflow/maintenance/report/health -> control-plane store builders",
       "production_binding": [
         {
@@ -4081,12 +4083,64 @@
           "source_segment": "fcntl.flock(lock_fd, fcntl.LOCK_EX)"
         },
         {
-          "file": "src/bioetl/composition/bootstrap/control_plane_store_builders.py",
+          "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+          "line": 92,
           "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "ada45f654cad8493a1f697fe69afb3b70e0fbf4e",
-          "content_sha256": "40fdea0205def95edfc602a50a0c81f3ddfe53c2149a3e130e19a71a205dcfbc",
-          "line": 33,
-          "source_segment": "return FileRunManifestStore("
+          "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
+          "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
+          "source_segment": "_acquire_msvcrt_lock(",
+          "binding_relation": "win32 -> _acquire_msvcrt_lock; concrete msvcrt.locking / LK_LOCK binding",
+          "expression": "_acquire_msvcrt_lock(lock_fd, locking=msvcrt.locking, lock_mode=int(msvcrt.LK_LOCK))"
+        },
+        {
+          "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+          "line": 79,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
+          "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
+          "source_segment": "_lock_byte_range(lock_fd, locking=locking, mode=lock_mode)",
+          "binding_relation": "_acquire_msvcrt_lock -> _lock_byte_range; retry only EDEADLK",
+          "expression": "_lock_byte_range(lock_fd, locking=locking, mode=lock_mode)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+          "line": 63,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
+          "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
+          "source_segment": "locking(lock_fd, mode, 1)",
+          "binding_relation": "primitive callback bound by the win32 acquisition path; LK_LOCK mode",
+          "expression": "locking(lock_fd, mode, 1)"
+        },
+        {
+          "file": "src/bioetl/composition/factories/storage/_bronze.py",
+          "line": 60,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "121abc6b7147afcafd6c9fc8f222ae72544fe0ba",
+          "content_sha256": "1580ddf572e7a72b1c684f67667fd7c0d09b02b6544ecfe1e17d6d31a32d9b5d",
+          "source_segment": "FileLineageStore(",
+          "binding_relation": "concrete FileLineageStore construction for configured storage layer",
+          "expression": "FileLineageStore(base_path=lineage_base_path or base_path.parent / 'control' / 'lineage')"
+        },
+        {
+          "file": "src/bioetl/composition/factories/storage/_silver.py",
+          "line": 92,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "b7d1dbd40e6510a4d9027a53d49e9ad83b8be7f0",
+          "content_sha256": "be0e374ea993144775364eebac96887d990155bfb6d13a8696740ff508349f1b",
+          "source_segment": "FileLineageStore(base_path=request.base_path.parent / \"control\" / \"lineage\")",
+          "binding_relation": "concrete FileLineageStore construction for configured storage layer",
+          "expression": "FileLineageStore(base_path=request.base_path.parent / 'control' / 'lineage')"
+        },
+        {
+          "file": "src/bioetl/composition/factories/storage/_gold.py",
+          "line": 61,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "bec5618b39ac5c8029c3a602a5562752b8f69e30",
+          "content_sha256": "7382476c1b4a48ebb5cf527765f04bb3b234ec8631850f8fa7e74f579edc794a",
+          "source_segment": "FileLineageStore(base_path=base_path.parent / \"control\" / \"lineage\")",
+          "binding_relation": "concrete FileLineageStore construction for configured storage layer",
+          "expression": "FileLineageStore(base_path=base_path.parent / 'control' / 'lineage')"
         }
       ],
       "call_path": [
@@ -4096,7 +4150,9 @@
         "bioetl.infrastructure.control_plane.file_lineage_store.FileLineageStore -> bioetl.infrastructure.control_plane.file_lineage_store.FileLineageStore.save",
         "bioetl.composition.bootstrap.assembly.health_server._create_control_plane_ports -> bioetl.infrastructure.control_plane.file_lineage_store.FileLineageStore",
         " -> concrete allocation inside _acquire_exclusive_lock",
-        " -> configured factory"
+        " -> configured factory",
+        "_exclusive_base_lock -> _acquire_exclusive_lock -> win32 _acquire_msvcrt_lock -> _lock_byte_range -> msvcrt.locking(LK_LOCK)",
+        "_exclusive_base_lock finally -> _release_exclusive_lock -> win32 _lock_byte_range -> msvcrt.locking(LK_UNLCK) -> os.close"
       ],
       "creation_sites": [
         {
@@ -4108,86 +4164,182 @@
           "creator": "_acquire_exclusive_lock",
           "call": "fcntl.flock",
           "expression": "fcntl.flock(lock_fd, fcntl.LOCK_EX)",
-          "context_manager": false
+          "context_manager": false,
+          "platform_predicate": "sys.platform != 'win32'"
+        },
+        {
+          "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+          "line": 63,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
+          "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
+          "source_segment": "locking(lock_fd, mode, 1)",
+          "creator": "_acquire_msvcrt_lock",
+          "call": "locking",
+          "context_manager": false,
+          "platform_predicate": "sys.platform == 'win32'",
+          "acquisition_predicate": "callback bound to msvcrt.locking; mode == int(msvcrt.LK_LOCK); same source primitive also receives LK_UNLCK only in cleanup",
+          "expression": "locking(lock_fd, mode, 1)"
         }
       ],
       "scenarios": {
         "normal": {
           "applicability": "applicable",
-          "expected": "Actual normal-path close/descriptor-to-stream transfer points are listed explicitly. Raw descriptor ownership starts at successful allocation; failed fdopen/open construction has not transferred ownership to a stream. No cleanup guarantee is inferred from a later with-block. Temp-path unlink and descriptor close are separate obligations.",
-          "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
+          "expected": "The owning _exclusive_base_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553.",
+          "observation": "Observe platform branch, successful LK_LOCK/LOCK_EX, yielded operation, release mode and final fd close at src/bioetl/infrastructure/control_plane/file_lineage_store.py:124.",
           "runtime_result": "NOT_RUN_12553"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
-          "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
+          "expected": "The owning _exclusive_base_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553.",
+          "observation": "Inject before open, after open/before acquisition, at native lock, in yielded body and at unlock; EACCES must propagate; record descriptor close even if acquisition did not complete; suppressed unlock error is distinct from close.",
           "runtime_result": "NOT_RUN_12553"
         },
         "cancellation": {
-          "applicability": "applicable at owning async operation",
-          "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
-          "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
+          "applicability": "outer async owner only; synchronous OS lock has no cancellation API; quarantine append is offloaded via asyncio.to_thread",
+          "expected": "The owning _exclusive_base_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553.",
+          "observation": "Cancel outer await while Windows acquisition blocks/retries or yielded body runs; observe actual worker return, unlock and fd close separately.",
           "runtime_result": "NOT_RUN_12553"
         },
         "timeout": {
-          "applicability": "configured owner/request deadline where present",
-          "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
+          "applicability": "no intrinsic overall deadline; outer deadline may expire while OS lock worker continues",
+          "expected": "The owning _exclusive_base_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
           "runtime_result": "NOT_RUN_12553"
         },
         "retry": {
-          "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
-          "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
-          "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
+          "applicability": "Windows internal loop only on errno.EDEADLK; POSIX primitive has no Python retry loop; outer owner retries separately",
+          "expected": "The owning _exclusive_base_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553.",
+          "observation": "#12553: distinguish LK_LOCK's own blocking attempt from EDEADLK retry; EACCES/other OSError must escape immediately; same fd retained across internal retries; verify final physical release.",
           "runtime_result": "NOT_RUN_12553"
         }
       },
       "cleanup_sources": [
         {
           "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
-          "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
-          "line": 124,
-          "expression": "os.close(lock_fd)"
-        },
-        {
-          "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
-          "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
-          "line": 271,
-          "expression": "fragment_path.unlink()"
-        },
-        {
-          "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
-          "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
-          "line": 124,
-          "expression": "os.close(lock_fd)",
-          "cleanup_relation": "actual close/transfer in enclosing implementation"
-        },
-        {
-          "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
-          "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
           "line": 122,
-          "expression": "_release_exclusive_lock(lock_fd)",
-          "cleanup_relation": "actual close/transfer in enclosing implementation"
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
+          "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
+          "source_segment": "_release_exclusive_lock(lock_fd)",
+          "cleanup_relation": "owner context finally invokes release, suppressing OSError",
+          "expression": "_release_exclusive_lock(lock_fd)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+          "line": 106,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
+          "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
+          "source_segment": "_lock_byte_range(lock_fd, locking=msvcrt.locking, mode=int(msvcrt.LK_UNLCK))",
+          "cleanup_relation": "win32 release uses LK_UNLCK; same byte-lock helper, no acquisition retry",
+          "expression": "_lock_byte_range(lock_fd, locking=msvcrt.locking, mode=int(msvcrt.LK_UNLCK))"
+        },
+        {
+          "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+          "line": 108,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
+          "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
+          "source_segment": "fcntl.flock(lock_fd, fcntl.LOCK_UN)",
+          "cleanup_relation": "POSIX release-only LOCK_UN",
+          "expression": "fcntl.flock(lock_fd, fcntl.LOCK_UN)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+          "line": 124,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
+          "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
+          "source_segment": "os.close(lock_fd)",
+          "cleanup_relation": "outer finally closes raw descriptor, including failed acquisition",
+          "expression": "os.close(lock_fd)"
         }
       ],
-      "configuration_predicates": [],
+      "configuration_predicates": [
+        {
+          "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+          "line": 89,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
+          "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
+          "source_segment": "if sys.platform == \"win32\":",
+          "condition": "sys.platform == 'win32' selects CRT byte lock; else POSIX flock"
+        }
+      ],
       "shutdown_by_site": [
         {
           "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
           "line": 98,
-          "closer": "os.close at src/bioetl/infrastructure/control_plane/file_lineage_store.py:124; _release_exclusive_lock at src/bioetl/infrastructure/control_plane/file_lineage_store.py:122",
-          "contract": "Actual normal-path close/descriptor-to-stream transfer points are listed explicitly. Raw descriptor ownership starts at successful allocation; failed fdopen/open construction has not transferred ownership to a stream. No cleanup guarantee is inferred from a later with-block. Temp-path unlink and descriptor close are separate obligations."
+          "closer": "_release_exclusive_lock at src/bioetl/infrastructure/control_plane/file_lineage_store.py:122: Windows LK_UNLCK via _lock_byte_range at 106, POSIX LOCK_UN at 108; outer finally os.close at 124",
+          "contract": "The owning _exclusive_base_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553."
+        },
+        {
+          "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+          "line": 63,
+          "closer": "_release_exclusive_lock at src/bioetl/infrastructure/control_plane/file_lineage_store.py:122: Windows LK_UNLCK via _lock_byte_range at 106, POSIX LOCK_UN at 108; outer finally os.close at 124",
+          "contract": "The owning _exclusive_base_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553."
         }
-      ]
+      ],
+      "platform_variants": {
+        "win32": {
+          "predicate": "sys.platform == 'win32'",
+          "acquire": {
+            "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+            "line": 92,
+            "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+            "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
+            "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
+            "source_segment": "_acquire_msvcrt_lock(",
+            "expression": "_acquire_msvcrt_lock(lock_fd, locking=msvcrt.locking, lock_mode=int(msvcrt.LK_LOCK))"
+          },
+          "primitive": {
+            "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+            "line": 63,
+            "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+            "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
+            "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
+            "source_segment": "locking(lock_fd, mode, 1)",
+            "expression": "locking(lock_fd, mode, 1)"
+          },
+          "release": {
+            "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+            "line": 106,
+            "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+            "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
+            "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
+            "source_segment": "_lock_byte_range(lock_fd, locking=msvcrt.locking, mode=int(msvcrt.LK_UNLCK))",
+            "expression": "_lock_byte_range(lock_fd, locking=msvcrt.locking, mode=int(msvcrt.LK_UNLCK))"
+          },
+          "retry": "EDEADLK only; CRT LK_LOCK may block about ten seconds per attempt; no total retry budget or timeout; EACCES propagates",
+          "observation": "#12553: record raw fd, callback mode and physical lock-holding worker across EDEADLK and nonretry error; do not equate cancelled outer await with released OS lock"
+        },
+        "posix": {
+          "predicate": "sys.platform != 'win32'",
+          "acquire": {
+            "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+            "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+            "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
+            "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
+            "line": 98,
+            "creator": "_acquire_exclusive_lock",
+            "call": "fcntl.flock",
+            "expression": "fcntl.flock(lock_fd, fcntl.LOCK_EX)",
+            "context_manager": false,
+            "platform_predicate": "sys.platform != 'win32'"
+          },
+          "release": {
+            "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+            "line": 108,
+            "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+            "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
+            "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
+            "source_segment": "fcntl.flock(lock_fd, fcntl.LOCK_UN)",
+            "expression": "fcntl.flock(lock_fd, fcntl.LOCK_UN)"
+          },
+          "retry": "blocking flock; no Python retry loop"
+        }
+      }
     },
     {
       "identity": "control.file_provider_health_evidence.file",
@@ -10642,199 +10794,6 @@
           "line": 70,
           "closer": "_load_yaml_with_timeout context __exit__/__aexit__ at src/bioetl/infrastructure/config/contract_registry_loader.py:70",
           "contract": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier."
-        }
-      ]
-    },
-    {
-      "identity": "infrastructure.control_plane._file_artifact_lifecycle_bronze_refs._append_cached_bronze_candidates.executor",
-      "type": "executor",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "lifetime": "owner/operation",
-      "creator": [
-        "_append_cached_bronze_candidates"
-      ],
-      "owner": "infrastructure.control_plane._file_artifact_lifecycle_bronze_refs._append_cached_bronze_candidates",
-      "closer": "executor context exit or explicit finally shutdown in defining scope",
-      "shutdown_contract": "Operation-local executor joins running work on context/finally exit. Future timeout does not cancel running filesystem work; #12553 must observe join and remaining workers.",
-      "production_entrypoint": "run/workflow/maintenance/report/health -> control-plane store builders",
-      "production_binding": [
-        {
-          "file": "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_bronze_refs.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "a304a5d8469ef220a94fd75d6657397b99c4cfcc",
-          "content_sha256": "f95ec56a83b3fc9ebd41cfafc3fd9a043e44ac18757dfeeac208c7b789297410",
-          "line": 62,
-          "binding_relation": "concrete allocation inside _append_cached_bronze_candidates",
-          "source_segment": "with ThreadPoolExecutor(max_workers=4) as executor:"
-        },
-        {
-          "file": "src/bioetl/composition/bootstrap/control_plane_store_builders.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "ada45f654cad8493a1f697fe69afb3b70e0fbf4e",
-          "content_sha256": "40fdea0205def95edfc602a50a0c81f3ddfe53c2149a3e130e19a71a205dcfbc",
-          "line": 33,
-          "source_segment": "return FileRunManifestStore("
-        }
-      ],
-      "call_path": [
-        "run/workflow/maintenance/report/health -> control-plane store builders",
-        " -> concrete allocation inside _append_cached_bronze_candidates",
-        " -> configured factory"
-      ],
-      "creation_sites": [
-        {
-          "file": "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_bronze_refs.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "a304a5d8469ef220a94fd75d6657397b99c4cfcc",
-          "content_sha256": "f95ec56a83b3fc9ebd41cfafc3fd9a043e44ac18757dfeeac208c7b789297410",
-          "line": 62,
-          "creator": "_append_cached_bronze_candidates",
-          "call": "ThreadPoolExecutor",
-          "expression": "ThreadPoolExecutor(max_workers=4)",
-          "context_manager": true
-        }
-      ],
-      "scenarios": {
-        "normal": {
-          "applicability": "applicable",
-          "expected": "Complete use, then executor context exit or explicit finally shutdown in defining scope. Operation-local executor joins running work on context/finally exit. Future timeout does not cancel running filesystem work; #12553 must observe join and remaining workers.",
-          "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
-          "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "cancellation": {
-          "applicability": "applicable at owning async operation",
-          "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
-          "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "configured owner/request deadline where present",
-          "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
-          "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
-          "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
-          "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "cleanup_sources": [
-        {
-          "file": "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_bronze_refs.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "a304a5d8469ef220a94fd75d6657397b99c4cfcc",
-          "content_sha256": "f95ec56a83b3fc9ebd41cfafc3fd9a043e44ac18757dfeeac208c7b789297410",
-          "line": 62,
-          "cleanup_relation": "_append_cached_bronze_candidates context __exit__/__aexit__ at src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_bronze_refs.py:62",
-          "source_segment": "with ThreadPoolExecutor(max_workers=4) as executor:"
-        }
-      ],
-      "configuration_predicates": [],
-      "shutdown_by_site": [
-        {
-          "file": "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_bronze_refs.py",
-          "line": 62,
-          "closer": "_append_cached_bronze_candidates context __exit__/__aexit__ at src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_bronze_refs.py:62",
-          "contract": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier."
-        }
-      ]
-    },
-    {
-      "identity": "infrastructure.control_plane._file_artifact_lifecycle_checkpoint_refs.directory-enumeration",
-      "type": "directory-enumeration",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "lifetime": "one synchronous operation/traversal",
-      "creator": [
-        "_append_checkpoint_history_dir"
-      ],
-      "owner": "_append_checkpoint_history_dir operation",
-      "closer": "pathlib/os directory-enumeration internal scandir context exit",
-      "shutdown_contract": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
-      "production_entrypoint": "production filesystem operation _append_checkpoint_history_dir; concrete composition binding in production_binding",
-      "production_binding": [
-        {
-          "file": "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_checkpoint_refs.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "f6e126005210e67ffc2435ec7d6d9405ea80da89",
-          "content_sha256": "3573282d9703d091e08aa4e50d6789f0e14f538754d8182ad154e42e3c3d9204",
-          "line": 38,
-          "source_segment": "for path in run_dir.iterdir():"
-        }
-      ],
-      "call_path": [
-        "production filesystem operation _append_checkpoint_history_dir; concrete composition binding in production_binding",
-        "_append_checkpoint_history_dir -> run_dir.iterdir"
-      ],
-      "creation_sites": [
-        {
-          "file": "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_checkpoint_refs.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "f6e126005210e67ffc2435ec7d6d9405ea80da89",
-          "content_sha256": "3573282d9703d091e08aa4e50d6789f0e14f538754d8182ad154e42e3c3d9204",
-          "line": 38,
-          "creator": "_append_checkpoint_history_dir",
-          "call": "run_dir.iterdir",
-          "expression": "run_dir.iterdir()",
-          "context_manager": false
-        }
-      ],
-      "scenarios": {
-        "normal": {
-          "applicability": "applicable",
-          "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
-          "observation": "Observe infrastructure.control_plane._file_artifact_lifecycle_checkpoint_refs.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
-          "observation": "Observe infrastructure.control_plane._file_artifact_lifecycle_checkpoint_refs.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "cancellation": {
-          "applicability": "applicable at owning async operation",
-          "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
-          "observation": "Observe infrastructure.control_plane._file_artifact_lifecycle_checkpoint_refs.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "configured owner/request deadline where present",
-          "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
-          "observation": "Observe infrastructure.control_plane._file_artifact_lifecycle_checkpoint_refs.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
-          "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
-          "observation": "Observe infrastructure.control_plane._file_artifact_lifecycle_checkpoint_refs.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "cleanup_sources": [
-        {
-          "file": "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_checkpoint_refs.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "f6e126005210e67ffc2435ec7d6d9405ea80da89",
-          "content_sha256": "3573282d9703d091e08aa4e50d6789f0e14f538754d8182ad154e42e3c3d9204",
-          "line": 38,
-          "cleanup_relation": "pathlib/os directory-enumeration internal scandir context exit"
-        }
-      ],
-      "configuration_predicates": [],
-      "shutdown_by_site": [
-        {
-          "file": "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_checkpoint_refs.py",
-          "line": 38,
-          "closer": "pathlib/os directory-enumeration internal scandir context exit",
-          "contract": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately."
         }
       ]
     }

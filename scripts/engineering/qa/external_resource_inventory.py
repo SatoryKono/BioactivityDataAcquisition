@@ -31,7 +31,7 @@ _ACQUISITION_NAMES = frozenset(
     "scandir iterdir glob rglob walk listdir stream_reader stream_writer new_file "
     "new_stream open_file to_thread run_in_executor read_csv write_csv read_parquet "
     "write_parquet scan_parquet scan_csv read_table to_excel copyfile copytree copy2 "
-    "move rmtree push_gateway delete_gateway start_http_server_fn".split()
+    "move rmtree push_gateway delete_gateway start_http_server_fn flock locking".split()
 )
 
 

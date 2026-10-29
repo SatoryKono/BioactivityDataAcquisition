@@ -2,6 +2,839 @@
   "schema_version": 1,
   "resources": [
     {
+      "identity": "storage.bronze.compression",
+      "type": "compression",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "lifetime": "owner/operation",
+      "creator": [
+        "BronzeWriterIOMixin._compressed_payload_matches",
+        "BronzeWriterIOMixin._write_atomic_stream",
+        "BronzeWriterReadMixin.read_bronze._read_and_decompress"
+      ],
+      "owner": "BronzeWriterIOMixin._compressed_payload_matches; BronzeWriterIOMixin._write_atomic_stream; BronzeWriterReadMixin.read_bronze._read_and_decompress owning operation (see exact source sites)",
+      "closer": "BronzeWriterIOMixin._compressed_payload_matches context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/io_mixin.py:163; BronzeWriterIOMixin._write_atomic_stream context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/io_mixin.py:120; BronzeWriterReadMixin.read_bronze._read_and_decompress context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py:92",
+      "shutdown_contract": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier.",
+      "production_entrypoint": "pipeline/workflow runtime -> StorageFactory -> configured layer writer",
+      "production_binding": [
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "20459b460c3a816fa1f74ffecad93bab3dcacb9c",
+          "content_sha256": "d488728b048a02ac098a9c59e8bb28e51f5ad8963f0900fbd907b31cc8b6ddb2",
+          "line": 27,
+          "source_segment": "class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin",
+          "binding_caller": "bioetl.infrastructure.storage.bronze.io_mixin.BronzeWriterIOMixin",
+          "binding_relation": "BronzeWriterReadCleanupMixin"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze_writer.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "08ea9349c3cc63868572fe4e9c471ed224afe743",
+          "content_sha256": "c8c85b9e84159797f539d146ac22619abd1c9726a64f994e8e8d97136586d467",
+          "line": 109,
+          "source_segment": "BronzeWriterIOMixin,",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.io_mixin.BronzeWriterIOMixin",
+          "binding_caller": "bioetl.infrastructure.storage.bronze_writer.BronzeWriter",
+          "binding_relation": "BronzeWriterIOMixin"
+        },
+        {
+          "file": "src/bioetl/composition/bootstrap/assembly/storage.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "cdc53ed7397f7580f42b2dd6568e3ff834ef47ad",
+          "content_sha256": "a3f9b808338f97e733361f0d0fcf067c42ee69d2c905df0f2561b60f34fe37f3",
+          "line": 150,
+          "source_segment": "bronze_writer=BronzeWriter(",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze_writer.BronzeWriter",
+          "binding_caller": "bioetl.composition.bootstrap.assembly.storage.bootstrap_storage_adapter",
+          "binding_relation": "BronzeWriter"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "e423b842d75f2772b3ced1bae92dc3a03d03f21f",
+          "content_sha256": "5d14c38f302a4446dc03ae77e4e05de5f34969bb88727dcef866627f80312a68",
+          "line": 75,
+          "source_segment": "class BronzeWriterReadMixin:",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadMixin.read_bronze._read_and_decompress",
+          "binding_caller": "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadMixin",
+          "binding_relation": "implementation method owned by bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadMixin"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "e423b842d75f2772b3ced1bae92dc3a03d03f21f",
+          "content_sha256": "5d14c38f302a4446dc03ae77e4e05de5f34969bb88727dcef866627f80312a68",
+          "line": 150,
+          "source_segment": "BronzeWriterReadMixin, BronzeCleanupPlannerMixin, BronzeCleanupPreviewMixin",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadMixin",
+          "binding_caller": "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin",
+          "binding_relation": "BronzeWriterReadMixin"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "20459b460c3a816fa1f74ffecad93bab3dcacb9c",
+          "content_sha256": "d488728b048a02ac098a9c59e8bb28e51f5ad8963f0900fbd907b31cc8b6ddb2",
+          "line": 166,
+          "binding_relation": "concrete allocation inside BronzeWriterIOMixin._compressed_payload_matches",
+          "source_segment": "left_dctx.stream_reader(left_file) as left_reader,"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "20459b460c3a816fa1f74ffecad93bab3dcacb9c",
+          "content_sha256": "d488728b048a02ac098a9c59e8bb28e51f5ad8963f0900fbd907b31cc8b6ddb2",
+          "line": 167,
+          "binding_relation": "concrete allocation inside BronzeWriterIOMixin._compressed_payload_matches",
+          "source_segment": "right_dctx.stream_reader(right_file) as right_reader,"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "20459b460c3a816fa1f74ffecad93bab3dcacb9c",
+          "content_sha256": "d488728b048a02ac098a9c59e8bb28e51f5ad8963f0900fbd907b31cc8b6ddb2",
+          "line": 122,
+          "binding_relation": "concrete allocation inside BronzeWriterIOMixin._write_atomic_stream",
+          "source_segment": "compressor.stream_writer("
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "e423b842d75f2772b3ced1bae92dc3a03d03f21f",
+          "content_sha256": "5d14c38f302a4446dc03ae77e4e05de5f34969bb88727dcef866627f80312a68",
+          "line": 92,
+          "binding_relation": "concrete allocation inside BronzeWriterReadMixin.read_bronze._read_and_decompress",
+          "source_segment": "with decompressor.stream_reader(compressed_data) as reader:"
+        },
+        {
+          "file": "src/bioetl/composition/factories/storage/factory.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "d5a68c742335226f3e42153d32ede17951eaba22",
+          "content_sha256": "e5f06acd881943590095aa0dbc30fb21e26ff508924863c7e4a3ddf506861f54",
+          "line": 69,
+          "source_segment": "class StorageFactory:"
+        }
+      ],
+      "call_path": [
+        "pipeline/workflow runtime -> StorageFactory -> configured layer writer",
+        "bioetl.infrastructure.storage.bronze.io_mixin.BronzeWriterIOMixin -> bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin",
+        "bioetl.infrastructure.storage.bronze_writer.BronzeWriter -> bioetl.infrastructure.storage.bronze.io_mixin.BronzeWriterIOMixin",
+        "bioetl.composition.bootstrap.assembly.storage.bootstrap_storage_adapter -> bioetl.infrastructure.storage.bronze_writer.BronzeWriter",
+        "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadMixin -> bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadMixin.read_bronze._read_and_decompress",
+        "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin -> bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadMixin",
+        " -> concrete allocation inside BronzeWriterIOMixin._compressed_payload_matches",
+        " -> concrete allocation inside BronzeWriterIOMixin._compressed_payload_matches",
+        " -> concrete allocation inside BronzeWriterIOMixin._write_atomic_stream",
+        " -> concrete allocation inside BronzeWriterReadMixin.read_bronze._read_and_decompress",
+        " -> configured factory"
+      ],
+      "creation_sites": [
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "20459b460c3a816fa1f74ffecad93bab3dcacb9c",
+          "content_sha256": "d488728b048a02ac098a9c59e8bb28e51f5ad8963f0900fbd907b31cc8b6ddb2",
+          "line": 166,
+          "creator": "BronzeWriterIOMixin._compressed_payload_matches",
+          "call": "left_dctx.stream_reader",
+          "expression": "left_dctx.stream_reader(left_file)",
+          "context_manager": true
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "20459b460c3a816fa1f74ffecad93bab3dcacb9c",
+          "content_sha256": "d488728b048a02ac098a9c59e8bb28e51f5ad8963f0900fbd907b31cc8b6ddb2",
+          "line": 167,
+          "creator": "BronzeWriterIOMixin._compressed_payload_matches",
+          "call": "right_dctx.stream_reader",
+          "expression": "right_dctx.stream_reader(right_file)",
+          "context_manager": true
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "20459b460c3a816fa1f74ffecad93bab3dcacb9c",
+          "content_sha256": "d488728b048a02ac098a9c59e8bb28e51f5ad8963f0900fbd907b31cc8b6ddb2",
+          "line": 122,
+          "creator": "BronzeWriterIOMixin._write_atomic_stream",
+          "call": "compressor.stream_writer",
+          "expression": "compressor.stream_writer(f_out, closefd=False, write_size=self.COMPRESSION_CHUNK_SIZE)",
+          "context_manager": true
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "e423b842d75f2772b3ced1bae92dc3a03d03f21f",
+          "content_sha256": "5d14c38f302a4446dc03ae77e4e05de5f34969bb88727dcef866627f80312a68",
+          "line": 92,
+          "creator": "BronzeWriterReadMixin.read_bronze._read_and_decompress",
+          "call": "decompressor.stream_reader",
+          "expression": "decompressor.stream_reader(compressed_data)",
+          "context_manager": true
+        }
+      ],
+      "scenarios": {
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier.",
+          "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
+          "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "owning async/thread boundary; primitive itself synchronous",
+          "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
+          "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
+          "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
+          "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
+          "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
+          "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "cleanup_sources": [
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "20459b460c3a816fa1f74ffecad93bab3dcacb9c",
+          "content_sha256": "d488728b048a02ac098a9c59e8bb28e51f5ad8963f0900fbd907b31cc8b6ddb2",
+          "line": 280,
+          "expression": "source.unlink()"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "20459b460c3a816fa1f74ffecad93bab3dcacb9c",
+          "content_sha256": "d488728b048a02ac098a9c59e8bb28e51f5ad8963f0900fbd907b31cc8b6ddb2",
+          "line": 326,
+          "expression": "temp_path.unlink()"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "20459b460c3a816fa1f74ffecad93bab3dcacb9c",
+          "content_sha256": "d488728b048a02ac098a9c59e8bb28e51f5ad8963f0900fbd907b31cc8b6ddb2",
+          "line": 117,
+          "expression": "os.close(fd)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "20459b460c3a816fa1f74ffecad93bab3dcacb9c",
+          "content_sha256": "d488728b048a02ac098a9c59e8bb28e51f5ad8963f0900fbd907b31cc8b6ddb2",
+          "line": 148,
+          "expression": "os.close(fd)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "20459b460c3a816fa1f74ffecad93bab3dcacb9c",
+          "content_sha256": "d488728b048a02ac098a9c59e8bb28e51f5ad8963f0900fbd907b31cc8b6ddb2",
+          "line": 153,
+          "expression": "temp_path.unlink()"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "20459b460c3a816fa1f74ffecad93bab3dcacb9c",
+          "content_sha256": "d488728b048a02ac098a9c59e8bb28e51f5ad8963f0900fbd907b31cc8b6ddb2",
+          "line": 163,
+          "cleanup_relation": "BronzeWriterIOMixin._compressed_payload_matches context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/io_mixin.py:163",
+          "source_segment": "with ("
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "20459b460c3a816fa1f74ffecad93bab3dcacb9c",
+          "content_sha256": "d488728b048a02ac098a9c59e8bb28e51f5ad8963f0900fbd907b31cc8b6ddb2",
+          "line": 120,
+          "cleanup_relation": "BronzeWriterIOMixin._write_atomic_stream context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/io_mixin.py:120",
+          "source_segment": "with ("
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "e423b842d75f2772b3ced1bae92dc3a03d03f21f",
+          "content_sha256": "5d14c38f302a4446dc03ae77e4e05de5f34969bb88727dcef866627f80312a68",
+          "line": 92,
+          "cleanup_relation": "BronzeWriterReadMixin.read_bronze._read_and_decompress context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py:92",
+          "source_segment": "with decompressor.stream_reader(compressed_data) as reader:"
+        }
+      ],
+      "configuration_predicates": [],
+      "shutdown_by_site": [
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "line": 166,
+          "closer": "BronzeWriterIOMixin._compressed_payload_matches context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/io_mixin.py:163",
+          "contract": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier."
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "line": 167,
+          "closer": "BronzeWriterIOMixin._compressed_payload_matches context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/io_mixin.py:163",
+          "contract": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier."
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "line": 122,
+          "closer": "BronzeWriterIOMixin._write_atomic_stream context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/io_mixin.py:120",
+          "contract": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier."
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+          "line": 92,
+          "closer": "BronzeWriterReadMixin.read_bronze._read_and_decompress context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py:92",
+          "contract": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier."
+        }
+      ]
+    },
+    {
+      "identity": "storage.bronze.directory",
+      "type": "directory",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "lifetime": "owner/operation",
+      "creator": [
+        "BronzeCleanupPreviewMixin._count_preview_date_files",
+        "BronzeCleanupPreviewMixin._iter_bounded_dirs",
+        "GroupJournal._directory_names",
+        "GroupRecordStore._discard_created_empty_dir",
+        "scan_dir_entries"
+      ],
+      "owner": "BronzeCleanupPreviewMixin._count_preview_date_files; BronzeCleanupPreviewMixin._iter_bounded_dirs; GroupJournal._directory_names; GroupRecordStore._discard_created_empty_dir; scan_dir_entries owning operation (see exact source sites)",
+      "closer": "GroupJournal._directory_names context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py:210; GroupRecordStore._discard_created_empty_dir context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py:109; BronzeCleanupPreviewMixin._iter_bounded_dirs context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py:139; BronzeCleanupPreviewMixin._count_preview_date_files context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py:169; scan_dir_entries context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/cleanup_support.py:199",
+      "shutdown_contract": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier.",
+      "production_entrypoint": "pipeline/workflow runtime -> StorageFactory -> configured layer writer",
+      "production_binding": [
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "53e543d6447c173d987ad6d026b3fe74fc0cf519",
+          "content_sha256": "ff3c951d652caabf2e3b325b6d582fe9ee49717bada152590211fa7bc68fc219",
+          "line": 181,
+          "source_segment": "for name in self._directory_names(fd) if fd is not None else ():",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.cleanup_group_journal.GroupJournal._directory_names",
+          "binding_caller": "bioetl.infrastructure.storage.bronze.cleanup_group_journal.GroupJournal.pending",
+          "binding_relation": "self._directory_names"
+        },
+        {
+          "file": "src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "6dd7f12cce5e35f80d588f108900ff96808dd0a8",
+          "content_sha256": "d7c0d68d8434907ee0188d41d82336d2dec90799091c39cff1f639bf3d3551af",
+          "line": 165,
+          "source_segment": "completed, pending = wait(pending, return_when=FIRST_COMPLETED)",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.cleanup_group_journal.GroupJournal.pending",
+          "binding_caller": "bioetl.infrastructure.control_plane.file_workflow_manifest_store.FileWorkflowManifestStore._read_catalog",
+          "binding_relation": "pending"
+        },
+        {
+          "file": "src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "6dd7f12cce5e35f80d588f108900ff96808dd0a8",
+          "content_sha256": "d7c0d68d8434907ee0188d41d82336d2dec90799091c39cff1f639bf3d3551af",
+          "line": 30,
+          "source_segment": "class FileWorkflowManifestStore(WorkflowManifestPort):",
+          "binding_symbol": "bioetl.infrastructure.control_plane.file_workflow_manifest_store.FileWorkflowManifestStore._read_catalog",
+          "binding_caller": "bioetl.infrastructure.control_plane.file_workflow_manifest_store.FileWorkflowManifestStore",
+          "binding_relation": "implementation method owned by bioetl.infrastructure.control_plane.file_workflow_manifest_store.FileWorkflowManifestStore"
+        },
+        {
+          "file": "src/bioetl/composition/bootstrap/assembly/health_server.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "4669748161409c9e97f7fe89b2ed689664072adc",
+          "content_sha256": "733972182a60bbc77a676caf79bed55dd2b8b0cbc9de004bcd297765452d32df",
+          "line": 141,
+          "source_segment": "workflow_manifest_port=FileWorkflowManifestStore(",
+          "binding_symbol": "bioetl.infrastructure.control_plane.file_workflow_manifest_store.FileWorkflowManifestStore",
+          "binding_caller": "bioetl.composition.bootstrap.assembly.health_server._create_control_plane_ports",
+          "binding_relation": "FileWorkflowManifestStore"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8ffd4611a48c95e55b3334bfc193a0d6f797c566",
+          "content_sha256": "70e63ea1f41ab34ef339f3c3b03b9bd39b6d700aab28d61467ce9bc38f0e61bf",
+          "line": 98,
+          "source_segment": "self._discard_created_empty_dir(name, fd)",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.cleanup_group_records.GroupRecordStore._discard_created_empty_dir",
+          "binding_caller": "bioetl.infrastructure.storage.bronze.cleanup_group_records.GroupRecordStore._private_dir",
+          "binding_relation": "self._discard_created_empty_dir"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "53e543d6447c173d987ad6d026b3fe74fc0cf519",
+          "content_sha256": "ff3c951d652caabf2e3b325b6d582fe9ee49717bada152590211fa7bc68fc219",
+          "line": 178,
+          "source_segment": "fd = self._private_dir(_JOURNAL_DIR, create=False)",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.cleanup_group_records.GroupRecordStore._private_dir",
+          "binding_caller": "bioetl.infrastructure.storage.bronze.cleanup_group_journal.GroupJournal.pending",
+          "binding_relation": "self._private_dir"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "63bf64e14ad55562b32a9c8c09f25402936ebd1d",
+          "content_sha256": "21760951a369a03618c5d7340fb8019f53d4d098984798c6de91bdf3f3380dc2",
+          "line": 33,
+          "source_segment": "class BronzeCleanupPreviewMixin:",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.cleanup_preview_mixin.BronzeCleanupPreviewMixin._count_preview_date_files",
+          "binding_caller": "bioetl.infrastructure.storage.bronze.cleanup_preview_mixin.BronzeCleanupPreviewMixin",
+          "binding_relation": "implementation method owned by bioetl.infrastructure.storage.bronze.cleanup_preview_mixin.BronzeCleanupPreviewMixin"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "e423b842d75f2772b3ced1bae92dc3a03d03f21f",
+          "content_sha256": "5d14c38f302a4446dc03ae77e4e05de5f34969bb88727dcef866627f80312a68",
+          "line": 150,
+          "source_segment": "BronzeWriterReadMixin, BronzeCleanupPlannerMixin, BronzeCleanupPreviewMixin",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.cleanup_preview_mixin.BronzeCleanupPreviewMixin",
+          "binding_caller": "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin",
+          "binding_relation": "BronzeCleanupPreviewMixin"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "20459b460c3a816fa1f74ffecad93bab3dcacb9c",
+          "content_sha256": "d488728b048a02ac098a9c59e8bb28e51f5ad8963f0900fbd907b31cc8b6ddb2",
+          "line": 27,
+          "source_segment": "class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin",
+          "binding_caller": "bioetl.infrastructure.storage.bronze.io_mixin.BronzeWriterIOMixin",
+          "binding_relation": "BronzeWriterReadCleanupMixin"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze_writer.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "08ea9349c3cc63868572fe4e9c471ed224afe743",
+          "content_sha256": "c8c85b9e84159797f539d146ac22619abd1c9726a64f994e8e8d97136586d467",
+          "line": 109,
+          "source_segment": "BronzeWriterIOMixin,",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.io_mixin.BronzeWriterIOMixin",
+          "binding_caller": "bioetl.infrastructure.storage.bronze_writer.BronzeWriter",
+          "binding_relation": "BronzeWriterIOMixin"
+        },
+        {
+          "file": "src/bioetl/composition/bootstrap/assembly/storage.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "cdc53ed7397f7580f42b2dd6568e3ff834ef47ad",
+          "content_sha256": "a3f9b808338f97e733361f0d0fcf067c42ee69d2c905df0f2561b60f34fe37f3",
+          "line": 150,
+          "source_segment": "bronze_writer=BronzeWriter(",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze_writer.BronzeWriter",
+          "binding_caller": "bioetl.composition.bootstrap.assembly.storage.bootstrap_storage_adapter",
+          "binding_relation": "BronzeWriter"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_planner.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "aeb562d5fbfb9b79c26b5143b34633da5f0c765f",
+          "content_sha256": "1770af78a6266f6556ef8291aa08a4069be10b4242c509ea50f61bec16fcb1c7",
+          "line": 119,
+          "source_segment": "entries = scan_dir_entries(date_dir)",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.cleanup_support.scan_dir_entries",
+          "binding_caller": "bioetl.infrastructure.storage.bronze.cleanup_planner.BronzeCleanupPlannerMixin._plan_old_dir_files",
+          "binding_relation": "scan_dir_entries"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "e423b842d75f2772b3ced1bae92dc3a03d03f21f",
+          "content_sha256": "5d14c38f302a4446dc03ae77e4e05de5f34969bb88727dcef866627f80312a68",
+          "line": 287,
+          "source_segment": "plan = self._plan_old_dir_files(",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.cleanup_planner.BronzeCleanupPlannerMixin._plan_old_dir_files",
+          "binding_caller": "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin._cleanup_old_files_locked_sync",
+          "binding_relation": "self._plan_old_dir_files"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "e423b842d75f2772b3ced1bae92dc3a03d03f21f",
+          "content_sha256": "5d14c38f302a4446dc03ae77e4e05de5f34969bb88727dcef866627f80312a68",
+          "line": 213,
+          "source_segment": "return self._cleanup_old_files_locked_sync(",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin._cleanup_old_files_locked_sync",
+          "binding_caller": "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin._cleanup_old_files_sync",
+          "binding_relation": "self._cleanup_old_files_locked_sync"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "e423b842d75f2772b3ced1bae92dc3a03d03f21f",
+          "content_sha256": "5d14c38f302a4446dc03ae77e4e05de5f34969bb88727dcef866627f80312a68",
+          "line": 398,
+          "source_segment": "self._cleanup_old_files_sync,",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin._cleanup_old_files_sync",
+          "binding_caller": "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin.cleanup_old_files",
+          "binding_relation": "self._cleanup_old_files_sync"
+        },
+        {
+          "file": "src/bioetl/composition/factories/storage/maintenance_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "aa70b53cd164cd088cbea983c3430e813a97dd61",
+          "content_sha256": "4afb722b0d829e89b3299559f805dbbe7dc92b778f4f6933b29245f52b2ceea6",
+          "line": 93,
+          "source_segment": "await self.bronze.cleanup_old_files(",
+          "binding_symbol": "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin.cleanup_old_files",
+          "binding_caller": "bioetl.composition.factories.storage.maintenance_mixin.StorageBundleMaintenanceMixin.optimize",
+          "binding_relation": "self.bronze.cleanup_old_files"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "53e543d6447c173d987ad6d026b3fe74fc0cf519",
+          "content_sha256": "ff3c951d652caabf2e3b325b6d582fe9ee49717bada152590211fa7bc68fc219",
+          "line": 210,
+          "binding_relation": "concrete allocation inside GroupJournal._directory_names",
+          "source_segment": "with os.scandir(fd) as entries:"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8ffd4611a48c95e55b3334bfc193a0d6f797c566",
+          "content_sha256": "70e63ea1f41ab34ef339f3c3b03b9bd39b6d700aab28d61467ce9bc38f0e61bf",
+          "line": 109,
+          "binding_relation": "concrete allocation inside GroupRecordStore._discard_created_empty_dir",
+          "source_segment": "with os.scandir(fd) as entries:"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "63bf64e14ad55562b32a9c8c09f25402936ebd1d",
+          "content_sha256": "21760951a369a03618c5d7340fb8019f53d4d098984798c6de91bdf3f3380dc2",
+          "line": 139,
+          "binding_relation": "concrete allocation inside BronzeCleanupPreviewMixin._iter_bounded_dirs",
+          "source_segment": "with os.scandir(parent) as entries:"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "63bf64e14ad55562b32a9c8c09f25402936ebd1d",
+          "content_sha256": "21760951a369a03618c5d7340fb8019f53d4d098984798c6de91bdf3f3380dc2",
+          "line": 169,
+          "binding_relation": "concrete allocation inside BronzeCleanupPreviewMixin._count_preview_date_files",
+          "source_segment": "with os.scandir(date_dir) as entries:"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "7c06ea2ff0745b584bb2c5266c7f21a61731fb20",
+          "content_sha256": "7345b9fcd0ea62e8aad34b6399dd39931129bce898c79d67a650a3c72d667628",
+          "line": 199,
+          "binding_relation": "concrete allocation inside scan_dir_entries",
+          "source_segment": "with os.scandir(parent) as it:"
+        },
+        {
+          "file": "src/bioetl/composition/factories/storage/factory.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "d5a68c742335226f3e42153d32ede17951eaba22",
+          "content_sha256": "e5f06acd881943590095aa0dbc30fb21e26ff508924863c7e4a3ddf506861f54",
+          "line": 69,
+          "source_segment": "class StorageFactory:"
+        }
+      ],
+      "call_path": [
+        "pipeline/workflow runtime -> StorageFactory -> configured layer writer",
+        "bioetl.infrastructure.storage.bronze.cleanup_group_journal.GroupJournal.pending -> bioetl.infrastructure.storage.bronze.cleanup_group_journal.GroupJournal._directory_names",
+        "bioetl.infrastructure.control_plane.file_workflow_manifest_store.FileWorkflowManifestStore._read_catalog -> bioetl.infrastructure.storage.bronze.cleanup_group_journal.GroupJournal.pending",
+        "bioetl.infrastructure.control_plane.file_workflow_manifest_store.FileWorkflowManifestStore -> bioetl.infrastructure.control_plane.file_workflow_manifest_store.FileWorkflowManifestStore._read_catalog",
+        "bioetl.composition.bootstrap.assembly.health_server._create_control_plane_ports -> bioetl.infrastructure.control_plane.file_workflow_manifest_store.FileWorkflowManifestStore",
+        "bioetl.infrastructure.storage.bronze.cleanup_group_records.GroupRecordStore._private_dir -> bioetl.infrastructure.storage.bronze.cleanup_group_records.GroupRecordStore._discard_created_empty_dir",
+        "bioetl.infrastructure.storage.bronze.cleanup_group_journal.GroupJournal.pending -> bioetl.infrastructure.storage.bronze.cleanup_group_records.GroupRecordStore._private_dir",
+        "bioetl.infrastructure.storage.bronze.cleanup_preview_mixin.BronzeCleanupPreviewMixin -> bioetl.infrastructure.storage.bronze.cleanup_preview_mixin.BronzeCleanupPreviewMixin._count_preview_date_files",
+        "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin -> bioetl.infrastructure.storage.bronze.cleanup_preview_mixin.BronzeCleanupPreviewMixin",
+        "bioetl.infrastructure.storage.bronze.io_mixin.BronzeWriterIOMixin -> bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin",
+        "bioetl.infrastructure.storage.bronze_writer.BronzeWriter -> bioetl.infrastructure.storage.bronze.io_mixin.BronzeWriterIOMixin",
+        "bioetl.composition.bootstrap.assembly.storage.bootstrap_storage_adapter -> bioetl.infrastructure.storage.bronze_writer.BronzeWriter",
+        "bioetl.infrastructure.storage.bronze.cleanup_planner.BronzeCleanupPlannerMixin._plan_old_dir_files -> bioetl.infrastructure.storage.bronze.cleanup_support.scan_dir_entries",
+        "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin._cleanup_old_files_locked_sync -> bioetl.infrastructure.storage.bronze.cleanup_planner.BronzeCleanupPlannerMixin._plan_old_dir_files",
+        "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin._cleanup_old_files_sync -> bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin._cleanup_old_files_locked_sync",
+        "bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin.cleanup_old_files -> bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin._cleanup_old_files_sync",
+        "bioetl.composition.factories.storage.maintenance_mixin.StorageBundleMaintenanceMixin.optimize -> bioetl.infrastructure.storage.bronze.read_cleanup_mixin.BronzeWriterReadCleanupMixin.cleanup_old_files",
+        " -> concrete allocation inside GroupJournal._directory_names",
+        " -> concrete allocation inside GroupRecordStore._discard_created_empty_dir",
+        " -> concrete allocation inside BronzeCleanupPreviewMixin._iter_bounded_dirs",
+        " -> concrete allocation inside BronzeCleanupPreviewMixin._count_preview_date_files",
+        " -> concrete allocation inside scan_dir_entries",
+        " -> configured factory"
+      ],
+      "creation_sites": [
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "53e543d6447c173d987ad6d026b3fe74fc0cf519",
+          "content_sha256": "ff3c951d652caabf2e3b325b6d582fe9ee49717bada152590211fa7bc68fc219",
+          "line": 210,
+          "creator": "GroupJournal._directory_names",
+          "call": "os.scandir",
+          "expression": "os.scandir(fd)",
+          "context_manager": true
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8ffd4611a48c95e55b3334bfc193a0d6f797c566",
+          "content_sha256": "70e63ea1f41ab34ef339f3c3b03b9bd39b6d700aab28d61467ce9bc38f0e61bf",
+          "line": 109,
+          "creator": "GroupRecordStore._discard_created_empty_dir",
+          "call": "os.scandir",
+          "expression": "os.scandir(fd)",
+          "context_manager": true
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "63bf64e14ad55562b32a9c8c09f25402936ebd1d",
+          "content_sha256": "21760951a369a03618c5d7340fb8019f53d4d098984798c6de91bdf3f3380dc2",
+          "line": 139,
+          "creator": "BronzeCleanupPreviewMixin._iter_bounded_dirs",
+          "call": "os.scandir",
+          "expression": "os.scandir(parent)",
+          "context_manager": true
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "63bf64e14ad55562b32a9c8c09f25402936ebd1d",
+          "content_sha256": "21760951a369a03618c5d7340fb8019f53d4d098984798c6de91bdf3f3380dc2",
+          "line": 169,
+          "creator": "BronzeCleanupPreviewMixin._count_preview_date_files",
+          "call": "os.scandir",
+          "expression": "os.scandir(date_dir)",
+          "context_manager": true
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "7c06ea2ff0745b584bb2c5266c7f21a61731fb20",
+          "content_sha256": "7345b9fcd0ea62e8aad34b6399dd39931129bce898c79d67a650a3c72d667628",
+          "line": 199,
+          "creator": "scan_dir_entries",
+          "call": "os.scandir",
+          "expression": "os.scandir(parent)",
+          "context_manager": true
+        }
+      ],
+      "scenarios": {
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier.",
+          "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
+          "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "owning async/thread boundary; primitive itself synchronous",
+          "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
+          "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
+          "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
+          "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
+          "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
+          "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "cleanup_sources": [
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "53e543d6447c173d987ad6d026b3fe74fc0cf519",
+          "content_sha256": "ff3c951d652caabf2e3b325b6d582fe9ee49717bada152590211fa7bc68fc219",
+          "line": 272,
+          "expression": "os.close(sidecar_fd)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "53e543d6447c173d987ad6d026b3fe74fc0cf519",
+          "content_sha256": "ff3c951d652caabf2e3b325b6d582fe9ee49717bada152590211fa7bc68fc219",
+          "line": 325,
+          "expression": "os.close(journal_fd)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "53e543d6447c173d987ad6d026b3fe74fc0cf519",
+          "content_sha256": "ff3c951d652caabf2e3b325b6d582fe9ee49717bada152590211fa7bc68fc219",
+          "line": 186,
+          "expression": "os.close(fd)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "53e543d6447c173d987ad6d026b3fe74fc0cf519",
+          "content_sha256": "ff3c951d652caabf2e3b325b6d582fe9ee49717bada152590211fa7bc68fc219",
+          "line": 238,
+          "expression": "os.close(stage)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8ffd4611a48c95e55b3334bfc193a0d6f797c566",
+          "content_sha256": "70e63ea1f41ab34ef339f3c3b03b9bd39b6d700aab28d61467ce9bc38f0e61bf",
+          "line": 112,
+          "expression": "os.rmdir(name, dir_fd=self._root_fd)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8ffd4611a48c95e55b3334bfc193a0d6f797c566",
+          "content_sha256": "70e63ea1f41ab34ef339f3c3b03b9bd39b6d700aab28d61467ce9bc38f0e61bf",
+          "line": 90,
+          "expression": "os.close(fd)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8ffd4611a48c95e55b3334bfc193a0d6f797c566",
+          "content_sha256": "70e63ea1f41ab34ef339f3c3b03b9bd39b6d700aab28d61467ce9bc38f0e61bf",
+          "line": 142,
+          "expression": "os.close(fd)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8ffd4611a48c95e55b3334bfc193a0d6f797c566",
+          "content_sha256": "70e63ea1f41ab34ef339f3c3b03b9bd39b6d700aab28d61467ce9bc38f0e61bf",
+          "line": 163,
+          "expression": "os.close(journal_fd)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8ffd4611a48c95e55b3334bfc193a0d6f797c566",
+          "content_sha256": "70e63ea1f41ab34ef339f3c3b03b9bd39b6d700aab28d61467ce9bc38f0e61bf",
+          "line": 252,
+          "expression": "os.close(fd)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8ffd4611a48c95e55b3334bfc193a0d6f797c566",
+          "content_sha256": "70e63ea1f41ab34ef339f3c3b03b9bd39b6d700aab28d61467ce9bc38f0e61bf",
+          "line": 100,
+          "expression": "os.close(fd)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8ffd4611a48c95e55b3334bfc193a0d6f797c566",
+          "content_sha256": "70e63ea1f41ab34ef339f3c3b03b9bd39b6d700aab28d61467ce9bc38f0e61bf",
+          "line": 248,
+          "expression": "os.unlink(temp_name, dir_fd=journal_fd)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "53e543d6447c173d987ad6d026b3fe74fc0cf519",
+          "content_sha256": "ff3c951d652caabf2e3b325b6d582fe9ee49717bada152590211fa7bc68fc219",
+          "line": 210,
+          "cleanup_relation": "GroupJournal._directory_names context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py:210",
+          "source_segment": "with os.scandir(fd) as entries:"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8ffd4611a48c95e55b3334bfc193a0d6f797c566",
+          "content_sha256": "70e63ea1f41ab34ef339f3c3b03b9bd39b6d700aab28d61467ce9bc38f0e61bf",
+          "line": 109,
+          "cleanup_relation": "GroupRecordStore._discard_created_empty_dir context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py:109",
+          "source_segment": "with os.scandir(fd) as entries:"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "63bf64e14ad55562b32a9c8c09f25402936ebd1d",
+          "content_sha256": "21760951a369a03618c5d7340fb8019f53d4d098984798c6de91bdf3f3380dc2",
+          "line": 139,
+          "cleanup_relation": "BronzeCleanupPreviewMixin._iter_bounded_dirs context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py:139",
+          "source_segment": "with os.scandir(parent) as entries:"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "63bf64e14ad55562b32a9c8c09f25402936ebd1d",
+          "content_sha256": "21760951a369a03618c5d7340fb8019f53d4d098984798c6de91bdf3f3380dc2",
+          "line": 169,
+          "cleanup_relation": "BronzeCleanupPreviewMixin._count_preview_date_files context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py:169",
+          "source_segment": "with os.scandir(date_dir) as entries:"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "7c06ea2ff0745b584bb2c5266c7f21a61731fb20",
+          "content_sha256": "7345b9fcd0ea62e8aad34b6399dd39931129bce898c79d67a650a3c72d667628",
+          "line": 199,
+          "cleanup_relation": "scan_dir_entries context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/cleanup_support.py:199",
+          "source_segment": "with os.scandir(parent) as it:"
+        }
+      ],
+      "configuration_predicates": [],
+      "shutdown_by_site": [
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py",
+          "line": 210,
+          "closer": "GroupJournal._directory_names context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py:210",
+          "contract": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier."
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py",
+          "line": 109,
+          "closer": "GroupRecordStore._discard_created_empty_dir context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py:109",
+          "contract": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier."
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py",
+          "line": 139,
+          "closer": "BronzeCleanupPreviewMixin._iter_bounded_dirs context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py:139",
+          "contract": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier."
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py",
+          "line": 169,
+          "closer": "BronzeCleanupPreviewMixin._count_preview_date_files context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py:169",
+          "contract": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier."
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+          "line": 199,
+          "closer": "scan_dir_entries context __exit__/__aexit__ at src/bioetl/infrastructure/storage/bronze/cleanup_support.py:199",
+          "contract": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier."
+        }
+      ]
+    },
+    {
       "identity": "storage.bronze.file",
       "type": "file",
       "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
@@ -2283,9 +3116,9 @@
       "creator": [
         "_locked_bronze_root"
       ],
-      "owner": "_locked_bronze_root owning operation (see exact source sites)",
-      "closer": "os.close at src/bioetl/infrastructure/storage/bronze/cleanup_core.py:413",
-      "shutdown_contract": "Actual normal-path close/descriptor-to-stream transfer points are listed explicitly. Raw descriptor ownership starts at successful allocation; failed fdopen/open construction has not transferred ownership to a stream. No cleanup guarantee is inferred from a later with-block. Temp-path unlink and descriptor close are separate obligations.",
+      "owner": "bronze_tree_lock / _locked_bronze_root context; lock_fd tied to yielded BronzeRootLease; shared fallback can yield without any lock allocation",
+      "closer": "os.close(lock_fd) in _locked_bronze_root finally at src/bioetl/infrastructure/storage/bronze/cleanup_core.py:413; outer root_fd close at 378; no explicit LOCK_UN call",
+      "shutdown_contract": "On POSIX capability-supported path, callback fcntl.__dict__['flock'] is bound at 366 and acquires LOCK_EX or LOCK_SH at 405; finally closes lock_fd at 413, then root_fd at 378. Acquisition failure still closes an opened fd. Missing capabilities: exclusive operation raises NotImplementedError before lock allocation; shared operation may yield a fallback lease with no OS lock. With create_lock=False a missing lock file can also yield shared fallback. Blocking flock has no intrinsic deadline/cancellation API; observe physical worker/fd release in #12553.",
       "production_entrypoint": "pipeline/workflow runtime -> StorageFactory -> configured layer writer",
       "production_binding": [
         {
@@ -2359,6 +3192,15 @@
           "content_sha256": "e5f06acd881943590095aa0dbc30fb21e26ff508924863c7e4a3ddf506861f54",
           "line": 69,
           "source_segment": "class StorageFactory:"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+          "line": 366,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
+          "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
+          "source_segment": "flock_fn: Callable[[int, int], None] = fcntl.__dict__[\"flock\"]",
+          "binding_relation": "flock callback bound from fcntl.__dict__['flock']"
         }
       ],
       "call_path": [
@@ -2387,31 +3229,31 @@
       "scenarios": {
         "normal": {
           "applicability": "applicable",
-          "expected": "Actual normal-path close/descriptor-to-stream transfer points are listed explicitly. Raw descriptor ownership starts at successful allocation; failed fdopen/open construction has not transferred ownership to a stream. No cleanup guarantee is inferred from a later with-block. Temp-path unlink and descriptor close are separate obligations.",
+          "expected": "On POSIX capability-supported path, callback fcntl.__dict__['flock'] is bound at 366 and acquires LOCK_EX or LOCK_SH at 405; finally closes lock_fd at 413, then root_fd at 378. Acquisition failure still closes an opened fd. Missing capabilities: exclusive operation raises NotImplementedError before lock allocation; shared operation may yield a fallback lease with no OS lock. With create_lock=False a missing lock file can also yield shared fallback. Blocking flock has no intrinsic deadline/cancellation API; observe physical worker/fd release in #12553.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
           "runtime_result": "NOT_RUN_12553"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
+          "expected": "On POSIX capability-supported path, callback fcntl.__dict__['flock'] is bound at 366 and acquires LOCK_EX or LOCK_SH at 405; finally closes lock_fd at 413, then root_fd at 378. Acquisition failure still closes an opened fd. Missing capabilities: exclusive operation raises NotImplementedError before lock allocation; shared operation may yield a fallback lease with no OS lock. With create_lock=False a missing lock file can also yield shared fallback. Blocking flock has no intrinsic deadline/cancellation API; observe physical worker/fd release in #12553.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
           "runtime_result": "NOT_RUN_12553"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
-          "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
+          "expected": "On POSIX capability-supported path, callback fcntl.__dict__['flock'] is bound at 366 and acquires LOCK_EX or LOCK_SH at 405; finally closes lock_fd at 413, then root_fd at 378. Acquisition failure still closes an opened fd. Missing capabilities: exclusive operation raises NotImplementedError before lock allocation; shared operation may yield a fallback lease with no OS lock. With create_lock=False a missing lock file can also yield shared fallback. Blocking flock has no intrinsic deadline/cancellation API; observe physical worker/fd release in #12553.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
           "runtime_result": "NOT_RUN_12553"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
-          "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
+          "expected": "On POSIX capability-supported path, callback fcntl.__dict__['flock'] is bound at 366 and acquires LOCK_EX or LOCK_SH at 405; finally closes lock_fd at 413, then root_fd at 378. Acquisition failure still closes an opened fd. Missing capabilities: exclusive operation raises NotImplementedError before lock allocation; shared operation may yield a fallback lease with no OS lock. With create_lock=False a missing lock file can also yield shared fallback. Blocking flock has no intrinsic deadline/cancellation API; observe physical worker/fd release in #12553.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
           "runtime_result": "NOT_RUN_12553"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
-          "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
+          "expected": "On POSIX capability-supported path, callback fcntl.__dict__['flock'] is bound at 366 and acquires LOCK_EX or LOCK_SH at 405; finally closes lock_fd at 413, then root_fd at 378. Acquisition failure still closes an opened fd. Missing capabilities: exclusive operation raises NotImplementedError before lock allocation; shared operation may yield a fallback lease with no OS lock. With create_lock=False a missing lock file can also yield shared fallback. Blocking flock has no intrinsic deadline/cancellation API; observe physical worker/fd release in #12553.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
           "runtime_result": "NOT_RUN_12553"
         }
@@ -2419,101 +3261,60 @@
       "cleanup_sources": [
         {
           "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
-          "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
-          "line": 440,
-          "expression": "os.rmdir(name, dir_fd=root_fd)"
-        },
-        {
-          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
-          "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
-          "line": 103,
-          "expression": "os.close(fd)"
-        },
-        {
-          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
-          "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
-          "line": 285,
-          "expression": "os.close(fd)"
-        },
-        {
-          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
-          "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
-          "line": 317,
-          "expression": "os.close(stage_fd)"
-        },
-        {
-          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
-          "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
-          "line": 378,
-          "expression": "os.close(root_fd)"
-        },
-        {
-          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
-          "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
           "line": 413,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
+          "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
+          "source_segment": "os.close(lock_fd)",
+          "cleanup_relation": "descriptor finally close releases its OS lock / root lease",
           "expression": "os.close(lock_fd)"
         },
         {
           "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+          "line": 378,
           "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
           "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
           "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
-          "line": 66,
-          "expression": "os.close(fd)"
-        },
-        {
-          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
-          "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
-          "line": 77,
-          "expression": "os.close(fd)"
-        },
-        {
-          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
-          "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
-          "line": 320,
-          "expression": "os.unlink(marker, dir_fd=root_fd)"
-        },
-        {
-          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
-          "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
-          "line": 163,
-          "expression": "os.close(fd)"
-        },
-        {
-          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
-          "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
-          "line": 413,
-          "expression": "os.close(lock_fd)",
-          "cleanup_relation": "actual close/transfer in enclosing implementation"
+          "source_segment": "os.close(root_fd)",
+          "cleanup_relation": "descriptor finally close releases its OS lock / root lease",
+          "expression": "os.close(root_fd)"
         }
       ],
-      "configuration_predicates": [],
+      "configuration_predicates": [
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+          "line": 349,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
+          "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
+          "source_segment": "platform = _platform_cleanup_supported()",
+          "condition": "platform cleanup capability check"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+          "line": 352,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
+          "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
+          "source_segment": "caps = platform and (not exclusive or _directory_xattr_supported(base_path))",
+          "condition": "caps must hold; exclusive requires directory xattr support"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+          "line": 353,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "48b5be449c04090717ba73309cbf4f51e30b62fd",
+          "content_sha256": "a8ddc3933b8a1b8c7942c97f680c65e7c419ab78325ac47996fab9911a5ffc5a",
+          "source_segment": "if not caps:",
+          "condition": "if not caps: exclusive raises; shared yields fallback without lock"
+        }
+      ],
       "shutdown_by_site": [
         {
           "file": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
           "line": 405,
-          "closer": "os.close at src/bioetl/infrastructure/storage/bronze/cleanup_core.py:413",
-          "contract": "Actual normal-path close/descriptor-to-stream transfer points are listed explicitly. Raw descriptor ownership starts at successful allocation; failed fdopen/open construction has not transferred ownership to a stream. No cleanup guarantee is inferred from a later with-block. Temp-path unlink and descriptor close are separate obligations."
+          "closer": "os.close(lock_fd) in _locked_bronze_root finally at src/bioetl/infrastructure/storage/bronze/cleanup_core.py:413; outer root_fd close at 378; no explicit LOCK_UN call",
+          "contract": "On POSIX capability-supported path, callback fcntl.__dict__['flock'] is bound at 366 and acquires LOCK_EX or LOCK_SH at 405; finally closes lock_fd at 413, then root_fd at 378. Acquisition failure still closes an opened fd. Missing capabilities: exclusive operation raises NotImplementedError before lock allocation; shared operation may yield a fallback lease with no OS lock. With create_lock=False a missing lock file can also yield shared fallback. Blocking flock has no intrinsic deadline/cancellation API; observe physical worker/fd release in #12553."
         }
       ]
     },
@@ -5906,13 +6707,15 @@
       "identity": "storage.quarantine.file-lock",
       "type": "file-lock",
       "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "lifetime": "owner/operation",
+      "lifetime": "one lineage save / quarantine append context; platform-specific OS lock tied to its raw descriptor",
       "creator": [
-        "_acquire_exclusive_lock"
+        "_acquire_exclusive_lock",
+        "_acquire_windows_lock",
+        "locking callback only with LK_LOCK"
       ],
-      "owner": "_acquire_exclusive_lock owning operation (see exact source sites)",
-      "closer": "os.close at src/bioetl/infrastructure/quarantine/write_lock.py:64; _release_exclusive_lock at src/bioetl/infrastructure/quarantine/write_lock.py:62",
-      "shutdown_contract": "Actual normal-path close/descriptor-to-stream transfer points are listed explicitly. Raw descriptor ownership starts at successful allocation; failed fdopen/open construction has not transferred ownership to a stream. No cleanup guarantee is inferred from a later with-block. Temp-path unlink and descriptor close are separate obligations.",
+      "owner": "_file_lock context manager owns the lock through its yielded operation; acquisition helper returns while the context keeps ownership",
+      "closer": "_release_exclusive_lock at src/bioetl/infrastructure/quarantine/write_lock.py:62: Windows LK_UNLCK via _lock_byte at 82, POSIX LOCK_UN at 84; outer finally os.close at 64",
+      "shutdown_contract": "The owning _file_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553.",
       "production_entrypoint": "pipeline/workflow runtime -> StorageFactory -> configured layer writer",
       "production_binding": [
         {
@@ -5997,6 +6800,36 @@
           "content_sha256": "e5f06acd881943590095aa0dbc30fb21e26ff508924863c7e4a3ddf506861f54",
           "line": 69,
           "source_segment": "class StorageFactory:"
+        },
+        {
+          "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
+          "line": 72,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
+          "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
+          "source_segment": "_acquire_windows_lock(lock_fd, msvcrt.locking, int(msvcrt.LK_LOCK))",
+          "binding_relation": "win32 -> _acquire_windows_lock; concrete msvcrt.locking / LK_LOCK binding",
+          "expression": "_acquire_windows_lock(lock_fd, msvcrt.locking, int(msvcrt.LK_LOCK))"
+        },
+        {
+          "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
+          "line": 91,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
+          "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
+          "source_segment": "_lock_byte(lock_fd, locking, mode)",
+          "binding_relation": "_acquire_windows_lock -> _lock_byte; retry only EDEADLK",
+          "expression": "_lock_byte(lock_fd, locking, mode)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
+          "line": 104,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
+          "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
+          "source_segment": "locking(lock_fd, mode, 1)",
+          "binding_relation": "primitive callback bound by the win32 acquisition path; LK_LOCK mode",
+          "expression": "locking(lock_fd, mode, 1)"
         }
       ],
       "call_path": [
@@ -6008,7 +6841,9 @@
         "bioetl.infrastructure.quarantine.unified.UnifiedQuarantineAdapter -> bioetl.infrastructure.quarantine.unified.UnifiedQuarantineAdapter.write_many",
         "bioetl.composition.bootstrap.assembly.checkpoint.bootstrap_quarantine_adapter -> bioetl.infrastructure.quarantine.unified.UnifiedQuarantineAdapter",
         " -> concrete allocation inside _acquire_exclusive_lock",
-        " -> configured factory"
+        " -> configured factory",
+        "_file_lock -> _acquire_exclusive_lock -> win32 _acquire_windows_lock -> _lock_byte -> msvcrt.locking(LK_LOCK)",
+        "_file_lock finally -> _release_exclusive_lock -> win32 _lock_byte -> msvcrt.locking(LK_UNLCK) -> os.close"
       ],
       "creation_sites": [
         {
@@ -6020,78 +6855,182 @@
           "creator": "_acquire_exclusive_lock",
           "call": "fcntl.flock",
           "expression": "fcntl.flock(lock_fd, fcntl.LOCK_EX)",
-          "context_manager": false
+          "context_manager": false,
+          "platform_predicate": "sys.platform != 'win32'"
+        },
+        {
+          "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
+          "line": 104,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
+          "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
+          "source_segment": "locking(lock_fd, mode, 1)",
+          "creator": "_acquire_windows_lock",
+          "call": "locking",
+          "context_manager": false,
+          "platform_predicate": "sys.platform == 'win32'",
+          "acquisition_predicate": "callback bound to msvcrt.locking; mode == int(msvcrt.LK_LOCK); same source primitive also receives LK_UNLCK only in cleanup",
+          "expression": "locking(lock_fd, mode, 1)"
         }
       ],
       "scenarios": {
         "normal": {
           "applicability": "applicable",
-          "expected": "Actual normal-path close/descriptor-to-stream transfer points are listed explicitly. Raw descriptor ownership starts at successful allocation; failed fdopen/open construction has not transferred ownership to a stream. No cleanup guarantee is inferred from a later with-block. Temp-path unlink and descriptor close are separate obligations.",
-          "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
+          "expected": "The owning _file_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553.",
+          "observation": "Observe platform branch, successful LK_LOCK/LOCK_EX, yielded operation, release mode and final fd close at src/bioetl/infrastructure/quarantine/write_lock.py:64.",
           "runtime_result": "NOT_RUN_12553"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
-          "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
+          "expected": "The owning _file_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553.",
+          "observation": "Inject before open, after open/before acquisition, at native lock, in yielded body and at unlock; EACCES must propagate; record descriptor close even if acquisition did not complete; suppressed unlock error is distinct from close.",
           "runtime_result": "NOT_RUN_12553"
         },
         "cancellation": {
-          "applicability": "applicable at owning async operation",
-          "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
-          "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
+          "applicability": "outer async owner only; synchronous OS lock has no cancellation API; quarantine append is offloaded via asyncio.to_thread",
+          "expected": "The owning _file_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553.",
+          "observation": "Cancel outer await while Windows acquisition blocks/retries or yielded body runs; observe actual worker return, unlock and fd close separately.",
           "runtime_result": "NOT_RUN_12553"
         },
         "timeout": {
-          "applicability": "configured owner/request deadline where present",
-          "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
+          "applicability": "no intrinsic overall deadline; outer deadline may expire while OS lock worker continues",
+          "expected": "The owning _file_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
           "runtime_result": "NOT_RUN_12553"
         },
         "retry": {
-          "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
-          "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
-          "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
+          "applicability": "Windows internal loop only on errno.EDEADLK; POSIX primitive has no Python retry loop; outer owner retries separately",
+          "expected": "The owning _file_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553.",
+          "observation": "#12553: distinguish LK_LOCK's own blocking attempt from EDEADLK retry; EACCES/other OSError must escape immediately; same fd retained across internal retries; verify final physical release.",
           "runtime_result": "NOT_RUN_12553"
         }
       },
       "cleanup_sources": [
         {
           "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
-          "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
-          "line": 64,
-          "expression": "os.close(lock_fd)"
-        },
-        {
-          "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
-          "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
-          "line": 64,
-          "expression": "os.close(lock_fd)",
-          "cleanup_relation": "actual close/transfer in enclosing implementation"
-        },
-        {
-          "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
-          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
-          "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
-          "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
           "line": 62,
-          "expression": "_release_exclusive_lock(lock_fd)",
-          "cleanup_relation": "actual close/transfer in enclosing implementation"
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
+          "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
+          "source_segment": "_release_exclusive_lock(lock_fd)",
+          "cleanup_relation": "owner context finally invokes release, suppressing OSError",
+          "expression": "_release_exclusive_lock(lock_fd)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
+          "line": 82,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
+          "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
+          "source_segment": "_lock_byte(lock_fd, msvcrt.locking, int(msvcrt.LK_UNLCK))",
+          "cleanup_relation": "win32 release uses LK_UNLCK; same byte-lock helper, no acquisition retry",
+          "expression": "_lock_byte(lock_fd, msvcrt.locking, int(msvcrt.LK_UNLCK))"
+        },
+        {
+          "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
+          "line": 84,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
+          "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
+          "source_segment": "fcntl.flock(lock_fd, fcntl.LOCK_UN)",
+          "cleanup_relation": "POSIX release-only LOCK_UN",
+          "expression": "fcntl.flock(lock_fd, fcntl.LOCK_UN)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
+          "line": 64,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
+          "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
+          "source_segment": "os.close(lock_fd)",
+          "cleanup_relation": "outer finally closes raw descriptor, including failed acquisition",
+          "expression": "os.close(lock_fd)"
         }
       ],
-      "configuration_predicates": [],
+      "configuration_predicates": [
+        {
+          "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
+          "line": 69,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
+          "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
+          "source_segment": "if sys.platform == \"win32\":",
+          "condition": "sys.platform == 'win32' selects CRT byte lock; else POSIX flock"
+        }
+      ],
       "shutdown_by_site": [
         {
           "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
           "line": 74,
-          "closer": "os.close at src/bioetl/infrastructure/quarantine/write_lock.py:64; _release_exclusive_lock at src/bioetl/infrastructure/quarantine/write_lock.py:62",
-          "contract": "Actual normal-path close/descriptor-to-stream transfer points are listed explicitly. Raw descriptor ownership starts at successful allocation; failed fdopen/open construction has not transferred ownership to a stream. No cleanup guarantee is inferred from a later with-block. Temp-path unlink and descriptor close are separate obligations."
+          "closer": "_release_exclusive_lock at src/bioetl/infrastructure/quarantine/write_lock.py:62: Windows LK_UNLCK via _lock_byte at 82, POSIX LOCK_UN at 84; outer finally os.close at 64",
+          "contract": "The owning _file_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553."
+        },
+        {
+          "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
+          "line": 104,
+          "closer": "_release_exclusive_lock at src/bioetl/infrastructure/quarantine/write_lock.py:62: Windows LK_UNLCK via _lock_byte at 82, POSIX LOCK_UN at 84; outer finally os.close at 64",
+          "contract": "The owning _file_lock context releases after yielded operation in finally, suppressing release OSError, then closes its descriptor in outer finally. If acquisition fails before yield, outer finally still closes the opened descriptor. win32 uses msvcrt.locking on one initialized byte (LK_LOCK acquire / LK_UNLCK release); other platforms use fcntl.flock. Windows retries only CRT EDEADLK; EACCES and all other errors propagate. No intrinsic overall deadline or cancellation interrupt exists for the blocking call/retry loop; physical worker/lock release must be observed separately in #12553."
         }
-      ]
+      ],
+      "platform_variants": {
+        "win32": {
+          "predicate": "sys.platform == 'win32'",
+          "acquire": {
+            "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
+            "line": 72,
+            "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+            "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
+            "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
+            "source_segment": "_acquire_windows_lock(lock_fd, msvcrt.locking, int(msvcrt.LK_LOCK))",
+            "expression": "_acquire_windows_lock(lock_fd, msvcrt.locking, int(msvcrt.LK_LOCK))"
+          },
+          "primitive": {
+            "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
+            "line": 104,
+            "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+            "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
+            "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
+            "source_segment": "locking(lock_fd, mode, 1)",
+            "expression": "locking(lock_fd, mode, 1)"
+          },
+          "release": {
+            "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
+            "line": 82,
+            "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+            "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
+            "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
+            "source_segment": "_lock_byte(lock_fd, msvcrt.locking, int(msvcrt.LK_UNLCK))",
+            "expression": "_lock_byte(lock_fd, msvcrt.locking, int(msvcrt.LK_UNLCK))"
+          },
+          "retry": "EDEADLK only; CRT LK_LOCK may block about ten seconds per attempt; no total retry budget or timeout; EACCES propagates",
+          "observation": "#12553: record raw fd, callback mode and physical lock-holding worker across EDEADLK and nonretry error; do not equate cancelled outer await with released OS lock"
+        },
+        "posix": {
+          "predicate": "sys.platform != 'win32'",
+          "acquire": {
+            "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
+            "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+            "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
+            "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
+            "line": 74,
+            "creator": "_acquire_exclusive_lock",
+            "call": "fcntl.flock",
+            "expression": "fcntl.flock(lock_fd, fcntl.LOCK_EX)",
+            "context_manager": false,
+            "platform_predicate": "sys.platform != 'win32'"
+          },
+          "release": {
+            "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
+            "line": 84,
+            "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+            "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
+            "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
+            "source_segment": "fcntl.flock(lock_fd, fcntl.LOCK_UN)",
+            "expression": "fcntl.flock(lock_fd, fcntl.LOCK_UN)"
+          },
+          "retry": "blocking flock; no Python retry loop"
+        }
+      }
     },
     {
       "identity": "storage.retention.delta",

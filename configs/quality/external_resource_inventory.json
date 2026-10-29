@@ -1399,6 +1399,28 @@
       "expression": "import_module(module_name)",
       "scope": "module wiring / lazy registry; source-bound, no execution",
       "decision": "Controlled local module/constants or registry wiring; no runtime trace claimed."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+      "line": 94,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
+      "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
+      "source_segment": "locking=msvcrt.locking,",
+      "binding_relation": "msvcrt.locking passed to _acquire_msvcrt_lock/_lock_byte_range; LK_LOCK acquisition and LK_UNLCK cleanup distinguished by source-bound callers",
+      "expression": "msvcrt.locking",
+      "creation_mode": "callback-reference"
+    },
+    {
+      "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
+      "line": 72,
+      "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+      "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
+      "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
+      "source_segment": "_acquire_windows_lock(lock_fd, msvcrt.locking, int(msvcrt.LK_LOCK))",
+      "binding_relation": "msvcrt.locking passed to _acquire_windows_lock/_lock_byte; LK_LOCK acquisition and LK_UNLCK cleanup distinguished by source-bound callers",
+      "expression": "_acquire_windows_lock",
+      "creation_mode": "callback-reference"
     }
   ],
   "source_files": {
@@ -7146,7 +7168,7 @@
     "source_revision": "not recorded in recovered heuristic rows; never substituted with target SHA"
   },
   "scope_statement": "Owned production definitions in tracked src/bioetl, reached through shipped bioetl CLI, public composition/runtime factories, configured provider/storage/control-plane and optional health/telemetry paths. Includes OS files/temp descriptors, locks and compressed streams, native Delta reads/writes, HTTP clients/responses, processes/pipes, executors/threads/tasks and servers/exporters. In-memory DTOs, Arrow buffers and semaphores are not distinct external resources; injected resources retain caller ownership. Tests, scripts, IDE/MCP/Jules infrastructure, product data and user memory are outside the runtime resource denominator.",
-  "completeness_method": "Review every tracked production Python file and supported CLI lazy-command/provider/factory/config wiring; enumerate direct acquisition primitives, delegated I/O and dynamic wiring; reconcile the 377 preserved heuristic candidates separately. Group repeated call sites by concrete ownership definition, retaining every file/line/expression and Git blob. The whole-source census invalidates this inventory when any production file changes; static inventory is input to #12553, never evidence that unexecuted paths are leak-free.",
+  "completeness_method": "Review every tracked production Python file and supported CLI lazy-command/provider/factory/config wiring; enumerate direct acquisition primitives, delegated I/O and dynamic wiring; reconcile the 377 preserved heuristic candidates separately. Group repeated call sites by concrete ownership definition, retaining every file/line/expression and Git blob. The whole-source census invalidates this inventory when any production file changes; static inventory is input to #12553, never evidence that unexecuted paths are leak-free. Platform/file-lock correction: independent source census includes every flock/locking primitive (7 additional calls; total 541). Windows callbacks at lineage63 and quarantine104 are LK_LOCK acquisitions with source-bound msvcrt delegates92/72 and LK_UNLCK cleanup106/82; POSIX release-only calls108/84 remain addressed exclusions. Bronze capability fallbacks and descriptor-based release are explicit. No platform runtime scenario was executed.",
   "history_statement": "Reuses merged PR #12615 as the initial three-row report, without inheriting its acceptance claims. Recovered the actual 377 heuristic rows and original patch from PAUSED session 413567682956614 activity aeb434fecfd8475e8c48ded8a0cc29e2. Originals and histories are preserved outside Git with recorded hashes; no session resumed, deleted or newly dispatched. Attempt/budget provenance remains rooted at #12478.",
   "reuse_statement": "#12106 crash/restart store matrix and #12479 cancellation propagation review remain independent evidence; this inventory supplies resource owners and observation points, without replaying their scenarios. #12469 remains open for subprocess hardening; subprocess owners/closers here do not assert its security properties. No lifecycle/shutdown runtime PASS is inherited from closed issues.",
   "accepted_site_keys": [
@@ -7952,6 +7974,11 @@
     ],
     [
       "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+      63,
+      "locking(lock_fd, mode, 1)"
+    ],
+    [
+      "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
       98,
       "fcntl.flock(lock_fd, fcntl.LOCK_EX)"
     ],
@@ -8479,6 +8506,11 @@
       "src/bioetl/infrastructure/quarantine/write_lock.py",
       74,
       "fcntl.flock(lock_fd, fcntl.LOCK_EX)"
+    ],
+    [
+      "src/bioetl/infrastructure/quarantine/write_lock.py",
+      104,
+      "locking(lock_fd, mode, 1)"
     ],
     [
       "src/bioetl/infrastructure/storage/base_delta_writer.py",
@@ -9906,23 +9938,23 @@
     },
     {
       "file": "configs/quality/external_resource_inventory/part-02.json",
-      "sha256": "c63da13bc56a363c1e41e77c40ffc397144b7235009aa82f668ed959c4c43399",
-      "resource_count": 52
+      "sha256": "10de7c50aea731dc801e023bcffccbb9ef10092b5c593cbbd4a321300d48b621",
+      "resource_count": 50
     },
     {
       "file": "configs/quality/external_resource_inventory/part-03.json",
-      "sha256": "521e19d3a5b2ed485d5c8faa1399c69407fe54fa993c774705d2217b6e4210a2",
-      "resource_count": 28
+      "sha256": "c79adc49926ac223010b6f54edfb7eecf8d2d721940d754d2b5f38dcdb7a7cb9",
+      "resource_count": 29
     },
     {
       "file": "configs/quality/external_resource_inventory/part-04.json",
-      "sha256": "aabe807321c8d7729353a43e074cc56f5ee594c0188b2de0e7e4c59ff0e965f8",
-      "resource_count": 49
+      "sha256": "7f0f28436728ba316a735ae74f0e1fdbb5c5a653558b6134904b0760fcb8fd73",
+      "resource_count": 48
     },
     {
       "file": "configs/quality/external_resource_inventory/part-05.json",
-      "sha256": "0149e261bb676421ed811e0e0d5782a36ccc6986f22166560935514f4c5c69c2",
-      "resource_count": 29
+      "sha256": "57216cbc6bda3627cc277b5585937f4d3d6a2973312502755e3da7450c45df68",
+      "resource_count": 31
     }
   ]
 }

@@ -440,3 +440,20 @@ def test_working_checkout_failure_is_not_missing_evidence(
     assert "CHECK FAILED" in output
     assert "MISSING EVIDENCE" not in output
     assert "git ls-files" in output and "128" in output
+
+
+@pytest.mark.parametrize("expression", ["locking(1, 2, 1)", "flock(1, 2)"])
+def test_omitted_platform_lock_primitive_is_rejected(
+    inventory_case: tuple, expression: str
+) -> None:
+    payload, sources, blobs = inventory_case
+    path = "src/bioetl/fixture.py"
+    sources[path] += ("\n" + expression + "\n").encode()
+    digest = hashlib.sha256(sources[path]).hexdigest()
+    blobs[path] = SourceBlob(blobs[path].oid, digest)
+    for field in ("production_binding", "creation_sites"):
+        payload["resources"][0][field][0]["content_sha256"] = digest
+    assert any(
+        "unreconciled source acquisition" in error
+        for error in validate_inventory(payload, sources, blobs)
+    )
