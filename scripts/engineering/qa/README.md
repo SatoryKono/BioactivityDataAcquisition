@@ -15,6 +15,9 @@ COMP-004 resource catalog: `python -m scripts.engineering.qa check-external-reso
 The canonical source-qualified definitions live in `configs/quality/external_resource_inventory.json`;
 `--update` deterministically rewrites the canonical `part-NN.json` files, recalculates
 their SHA256 digests in the index, and refreshes `reports/quality/external-resource-inventory.md`.
+After editing a canonical part, `--update` validates its content and safe paths before
+rebuilding derived digests/counts. `--check` always requires the stored digests/counts
+and the readable projection to match. The owning suite checks the real repository catalog.
 The tool never runs
 the runtime lifecycle scenarios reserved for #12553.
 

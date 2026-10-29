@@ -31,7 +31,8 @@ _ACQUISITION_NAMES = frozenset(
     "scandir iterdir glob rglob walk listdir stream_reader stream_writer new_file "
     "new_stream open_file to_thread run_in_executor read_csv write_csv read_parquet "
     "write_parquet scan_parquet scan_csv read_table to_excel copyfile copytree copy2 "
-    "move rmtree push_gateway delete_gateway start_http_server_fn flock locking".split()
+    "move rmtree push_gateway delete_gateway start_http_server_fn flock locking "
+    "Workbook save".split()
 )
 
 
@@ -303,6 +304,14 @@ def _check_history(payload: dict[str, Any], identities: set[str]) -> list[str]:
     return []
 
 
+def _check_alias_links(payload: dict[str, Any], identities: set[str]) -> list[str]:
+    for alias in payload.get("operation_aliases", []):
+        identity = alias.get("resource_identity")
+        if not isinstance(identity, str) or identity not in identities:
+            return ["operation alias links a missing resource identity"]
+    return []
+
+
 def validate_inventory(
     payload: dict[str, Any],  # Any: JSON inventory boundary, checked below.
     sources: Mapping[str, bytes],
@@ -337,6 +346,7 @@ def validate_inventory(
     for ref in _references(payload):
         errors.extend(_check_reference(ref, sources, blobs, str(commit)))
     errors.extend(_check_acquisition_census(payload, sources, sites))
+    errors.extend(_check_alias_links(payload, seen))
     expected_sites = payload.get("accepted_site_keys")
     if (
         not isinstance(expected_sites, list)
@@ -400,6 +410,7 @@ def render(payload: dict[str, Any]) -> str:  # Any: validated JSON catalog.
             + " | ".join(str(x).replace("|", r"\|").replace("\n", " ") for x in fields)
             + " |"
         )
+    out += _render_components(payload)
     out += [
         "",
         "## Coverage and history",
@@ -430,8 +441,48 @@ def render(payload: dict[str, Any]) -> str:  # Any: validated JSON catalog.
     return "\n".join(out)
 
 
-def load_catalog(root: Path = ROOT) -> dict[str, Any]:  # Any: validated JSON envelope.
-    """Load hash-bound parts while keeping every source file below size policy."""
+def _render_components(payload: dict[str, Any]) -> list[str]:
+    components = [
+        component
+        for row in payload["resources"]
+        for component in row.get("resource_components", [])
+    ]
+    if not components:
+        return []
+    lines = [
+        "",
+        "## Delegated resource components",
+        "",
+        "| Identity / type | Creator / owner / lifetime | Closer / shutdown | Dependency source |",
+        "| --- | --- | --- | --- |",
+    ]
+    for component in components:
+        fields = [
+            component["identity"] + " / " + component["type"],
+            component["creator"]
+            + " / "
+            + component["owner"]
+            + " / "
+            + component["lifetime"],
+            component["closer"] + "; " + component["shutdown_contract"],
+            f"{component['source']}:{component['source_line']}; version {component['version']}; SHA256 {component['source_sha256']}",
+        ]
+        lines.append(
+            "| "
+            + " | ".join(
+                field.replace("|", r"\|").replace("\n", " ") for field in fields
+            )
+            + " |"
+        )
+    return lines
+
+
+def load_catalog(
+    root: Path = ROOT,
+    *,
+    verify_manifest: bool = True,
+) -> dict[str, Any]:  # Any: validated JSON envelope.
+    """Load safe parts; strict checks verify derived digests/counts by default."""
     payload = json.loads((root / CATALOG).read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError("Catalog index must be an object")
@@ -449,12 +500,14 @@ def load_catalog(root: Path = ROOT) -> dict[str, Any]:  # Any: validated JSON en
             raise ValueError("Catalog part is outside its root or duplicated")
         seen.add(path)
         data = path.read_bytes()
-        if hashlib.sha256(data).hexdigest() != part["sha256"]:
+        if verify_manifest and hashlib.sha256(data).hexdigest() != part["sha256"]:
             raise ValueError(f"Catalog part digest differs: {relative}")
         rows = json.loads(data)
         if (
-            rows.get("schema_version") != 1
-            or len(rows["resources"]) != part["resource_count"]
+            not isinstance(rows, dict)
+            or rows.get("schema_version") != 1
+            or not isinstance(rows.get("resources"), list)
+            or (verify_manifest and len(rows["resources"]) != part["resource_count"])
         ):
             raise ValueError(f"Catalog part schema/count differs: {relative}")
         resources.extend(rows["resources"])
@@ -543,7 +596,7 @@ def _git_failure_message(error: subprocess.CalledProcessError) -> str:
 
 
 def _run(args: argparse.Namespace) -> int:
-    payload = load_catalog()
+    payload = load_catalog(verify_manifest=not args.update)
     commit = payload.get("source_commit", "")
     if not _OID.fullmatch(str(commit)):
         print("Invalid source commit")

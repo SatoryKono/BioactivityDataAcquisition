@@ -4625,6 +4625,350 @@
       ]
     },
     {
+      "identity": "infrastructure.export.debug_export_ops.xlsx-save",
+      "type": "xlsx-save-resource-set",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "lifetime": "one enabled debug XLSX save; failed-operation XML temp paths may survive to openpyxl atexit cleanup",
+      "creator": [
+        "write_debug_xlsx -> Workbook.save -> openpyxl.writer.excel.save_workbook / ExcelWriter"
+      ],
+      "owner": "one DebugExportAdapter._write_xlsx operation; openpyxl owns ZIP/output handle and worksheet XML writer/temp paths",
+      "closer": "openpyxl 3.1.5 ExcelWriter.save: archive.close after write_data on normal path; WorksheetWriter.cleanup after archive.write; remaining temp paths registered for atexit. No operation-local finally or guaranteed immediate error cleanup; Workbook.close is not a save-archive closer.",
+      "shutdown_contract": "DebugExportAdapter delegates synchronous Workbook.save without a repository cleanup finally. openpyxl3.1.5 save_workbook opens ZipFile(output_path,'w'); ExcelWriter.save closes its archive only after write_data succeeds. Normal worksheet cleanup follows archive.write. NamedTemporaryFile(delete=False) closes its initial descriptor immediately, but XML temp path remains until WorksheetWriter.cleanup or atexit; later XML stream lifetime is distinct. Failure before these normal close/cleanup points has no local-finally guarantee. Workbook.close only closes a workbook._archive and does not own the archive created by default save_workbook. No claim of leak freedom or immediate cancellation cleanup is made; #12553 must observe archive fd, worksheet writer streams and temp paths separately.",
+      "production_entrypoint": "pipeline processing components factory -> enabled DebugExportService -> DebugExportAdapter.write_pack (xlsx requested, openpyxl available)",
+      "production_binding": [
+        {
+          "file": "src/bioetl/composition/factories/services/pipeline_processing_components_builder.py",
+          "line": 149,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "0c16c624600f9752ae1930fd691694f6c7bf5fe3",
+          "content_sha256": "30cad3a2694f5ba132c945951f549e6751a9a7daad35329937081b49f70b6977",
+          "source_segment": "writer=DebugExportAdapter(),",
+          "binding_relation": "concrete DebugExportAdapter writer injection",
+          "expression": "DebugExportAdapter()"
+        },
+        {
+          "file": "src/bioetl/application/services/export_lineage/debug_export_service.py",
+          "line": 159,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8037f88b654e2b49899704f1ad09e3a128a6100a",
+          "content_sha256": "6d75c23ddcd91a7a61f14a9ffa5b205bc7888cbf747b6da10bdf372e5a8312de",
+          "source_segment": "result = self._writer.write_pack(pack=self.build_pack(status=status))",
+          "binding_relation": "enabled service invokes configured writer.write_pack",
+          "expression": "self._writer.write_pack(pack=self.build_pack(status=status))"
+        },
+        {
+          "file": "src/bioetl/application/services/export_lineage/debug_export_service.py",
+          "line": 174,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8037f88b654e2b49899704f1ad09e3a128a6100a",
+          "content_sha256": "6d75c23ddcd91a7a61f14a9ffa5b205bc7888cbf747b6da10bdf372e5a8312de",
+          "source_segment": "return self._writer.write_pack(pack=self.build_pack(status=status))",
+          "binding_relation": "finalize path invokes the same configured writer",
+          "expression": "self._writer.write_pack(pack=self.build_pack(status=status))"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/debug_export_adapter.py",
+          "line": 76,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "85b05eadd39566f56608e0821eff2b718e9bd338",
+          "content_sha256": "bf94047047beb066e0a35350b742534dfc51891739bb5543158b3ff25c0dede3",
+          "source_segment": "self._write_xlsx(",
+          "binding_relation": "xlsx branch invokes _write_xlsx",
+          "expression": "self._write_xlsx(candidate_path, tables, max_rows_per_sheet=pack.max_rows_per_sheet)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/debug_export_adapter.py",
+          "line": 151,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "85b05eadd39566f56608e0821eff2b718e9bd338",
+          "content_sha256": "bf94047047beb066e0a35350b742534dfc51891739bb5543158b3ff25c0dede3",
+          "source_segment": "write_debug_xlsx(",
+          "binding_relation": "adapter delegates to write_debug_xlsx",
+          "expression": "write_debug_xlsx(output_path, tables, max_rows_per_sheet=max_rows_per_sheet)"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/debug_export_ops.py",
+          "line": 162,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "5da38ba6e84d6d0e292623b1c2ed1401d89cf95f",
+          "content_sha256": "010e88dfb189ab84e4048ea192da80b6d2579f78f66efad55400e394ebe6f7d5",
+          "source_segment": "workbook = Workbook()",
+          "binding_relation": "in-memory Workbook constructor; no external file yet",
+          "expression": "Workbook()"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/debug_export_ops.py",
+          "line": 176,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "5da38ba6e84d6d0e292623b1c2ed1401d89cf95f",
+          "content_sha256": "010e88dfb189ab84e4048ea192da80b6d2579f78f66efad55400e394ebe6f7d5",
+          "source_segment": "workbook.save(output_path)",
+          "binding_relation": "actual external XLSX archive/temp acquisition boundary",
+          "expression": "workbook.save(output_path)"
+        }
+      ],
+      "call_path": [
+        "pipeline_processing_components_builder._build_debug_export_service -> DebugExportAdapter() injected as writer",
+        "DebugExportService.persist/finalize -> writer.write_pack -> DebugExportAdapter._write_xlsx -> write_debug_xlsx -> workbook.save(output_path)",
+        "openpyxl.save_workbook -> ZipFile -> ExcelWriter.save -> worksheet writer XML temporary files / normal close or atexit fallback"
+      ],
+      "creation_sites": [
+        {
+          "file": "src/bioetl/infrastructure/export/debug_export_ops.py",
+          "line": 176,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "5da38ba6e84d6d0e292623b1c2ed1401d89cf95f",
+          "content_sha256": "010e88dfb189ab84e4048ea192da80b6d2579f78f66efad55400e394ebe6f7d5",
+          "source_segment": "workbook.save(output_path)",
+          "creator": "write_debug_xlsx",
+          "call": "workbook.save",
+          "context_manager": false,
+          "acquisition_predicate": "enabled debug export, xlsx in pack.formats and optional openpyxl installed",
+          "expression": "workbook.save(output_path)"
+        }
+      ],
+      "scenarios": {
+        "normal": {
+          "applicability": "applicable",
+          "expected": "DebugExportAdapter delegates synchronous Workbook.save without a repository cleanup finally. openpyxl3.1.5 save_workbook opens ZipFile(output_path,'w'); ExcelWriter.save closes its archive only after write_data succeeds. Normal worksheet cleanup follows archive.write. NamedTemporaryFile(delete=False) closes its initial descriptor immediately, but XML temp path remains until WorksheetWriter.cleanup or atexit; later XML stream lifetime is distinct. Failure before these normal close/cleanup points has no local-finally guarantee. Workbook.close only closes a workbook._archive and does not own the archive created by default save_workbook. No claim of leak freedom or immediate cancellation cleanup is made; #12553 must observe archive fd, worksheet writer streams and temp paths separately.",
+          "observation": "#12553 only: observe ZIP native fd/stream, every worksheet XML stream/path, normal library close and atexit fallback as separate boundaries; no runtime evidence in this task",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "missing optional dependency before allocation; errors during ZIP open, worksheet XML/ZIP write, archive close and subsequent manifest work",
+          "expected": "DebugExportAdapter delegates synchronous Workbook.save without a repository cleanup finally. openpyxl3.1.5 save_workbook opens ZipFile(output_path,'w'); ExcelWriter.save closes its archive only after write_data succeeds. Normal worksheet cleanup follows archive.write. NamedTemporaryFile(delete=False) closes its initial descriptor immediately, but XML temp path remains until WorksheetWriter.cleanup or atexit; later XML stream lifetime is distinct. Failure before these normal close/cleanup points has no local-finally guarantee. Workbook.close only closes a workbook._archive and does not own the archive created by default save_workbook. No claim of leak freedom or immediate cancellation cleanup is made; #12553 must observe archive fd, worksheet writer streams and temp paths separately.",
+          "observation": "#12553 only: observe ZIP native fd/stream, every worksheet XML stream/path, normal library close and atexit fallback as separate boundaries; no runtime evidence in this task",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "synchronous save has no cancellation API; outer async cancellation does not interrupt an already running synchronous save",
+          "expected": "DebugExportAdapter delegates synchronous Workbook.save without a repository cleanup finally. openpyxl3.1.5 save_workbook opens ZipFile(output_path,'w'); ExcelWriter.save closes its archive only after write_data succeeds. Normal worksheet cleanup follows archive.write. NamedTemporaryFile(delete=False) closes its initial descriptor immediately, but XML temp path remains until WorksheetWriter.cleanup or atexit; later XML stream lifetime is distinct. Failure before these normal close/cleanup points has no local-finally guarantee. Workbook.close only closes a workbook._archive and does not own the archive created by default save_workbook. No claim of leak freedom or immediate cancellation cleanup is made; #12553 must observe archive fd, worksheet writer streams and temp paths separately.",
+          "observation": "#12553 only: observe ZIP native fd/stream, every worksheet XML stream/path, normal library close and atexit fallback as separate boundaries; no runtime evidence in this task",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic save deadline; outer deadline/worker/process boundary only",
+          "expected": "DebugExportAdapter delegates synchronous Workbook.save without a repository cleanup finally. openpyxl3.1.5 save_workbook opens ZipFile(output_path,'w'); ExcelWriter.save closes its archive only after write_data succeeds. Normal worksheet cleanup follows archive.write. NamedTemporaryFile(delete=False) closes its initial descriptor immediately, but XML temp path remains until WorksheetWriter.cleanup or atexit; later XML stream lifetime is distinct. Failure before these normal close/cleanup points has no local-finally guarantee. Workbook.close only closes a workbook._archive and does not own the archive created by default save_workbook. No claim of leak freedom or immediate cancellation cleanup is made; #12553 must observe archive fd, worksheet writer streams and temp paths separately.",
+          "observation": "#12553 only: observe ZIP native fd/stream, every worksheet XML stream/path, normal library close and atexit fallback as separate boundaries; no runtime evidence in this task",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "no internal save retry; outer caller may repeat after partial CSV/XLSX creation",
+          "expected": "DebugExportAdapter delegates synchronous Workbook.save without a repository cleanup finally. openpyxl3.1.5 save_workbook opens ZipFile(output_path,'w'); ExcelWriter.save closes its archive only after write_data succeeds. Normal worksheet cleanup follows archive.write. NamedTemporaryFile(delete=False) closes its initial descriptor immediately, but XML temp path remains until WorksheetWriter.cleanup or atexit; later XML stream lifetime is distinct. Failure before these normal close/cleanup points has no local-finally guarantee. Workbook.close only closes a workbook._archive and does not own the archive created by default save_workbook. No claim of leak freedom or immediate cancellation cleanup is made; #12553 must observe archive fd, worksheet writer streams and temp paths separately.",
+          "observation": "#12553 only: observe ZIP native fd/stream, every worksheet XML stream/path, normal library close and atexit fallback as separate boundaries; no runtime evidence in this task",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "cleanup_sources": [],
+      "configuration_predicates": [
+        {
+          "file": "src/bioetl/application/services/export_lineage/debug_export_service.py",
+          "line": 35,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8037f88b654e2b49899704f1ad09e3a128a6100a",
+          "content_sha256": "6d75c23ddcd91a7a61f14a9ffa5b205bc7888cbf747b6da10bdf372e5a8312de",
+          "source_segment": "enabled: bool = False",
+          "condition": "DebugExportConfig.enabled defaults false"
+        },
+        {
+          "file": "src/bioetl/application/services/export_lineage/debug_export_service.py",
+          "line": 36,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8037f88b654e2b49899704f1ad09e3a128a6100a",
+          "content_sha256": "6d75c23ddcd91a7a61f14a9ffa5b205bc7888cbf747b6da10bdf372e5a8312de",
+          "source_segment": "formats: tuple[str, ...] = (\"csv\", \"xlsx\")",
+          "condition": "default formats(csv,xlsx) when debug export enabled"
+        },
+        {
+          "file": "src/bioetl/application/services/export_lineage/debug_export_service.py",
+          "line": 155,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "8037f88b654e2b49899704f1ad09e3a128a6100a",
+          "content_sha256": "6d75c23ddcd91a7a61f14a9ffa5b205bc7888cbf747b6da10bdf372e5a8312de",
+          "source_segment": "if not self.enabled or self._writer is None:",
+          "condition": "persist rejects disabled/missing writer"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/debug_export_adapter.py",
+          "line": 73,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "85b05eadd39566f56608e0821eff2b718e9bd338",
+          "content_sha256": "bf94047047beb066e0a35350b742534dfc51891739bb5543158b3ff25c0dede3",
+          "source_segment": "if \"xlsx\" in pack.formats:",
+          "condition": "xlsx must be requested"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/debug_export_adapter.py",
+          "line": 82,
+          "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+          "source_blob": "85b05eadd39566f56608e0821eff2b718e9bd338",
+          "content_sha256": "bf94047047beb066e0a35350b742534dfc51891739bb5543158b3ff25c0dede3",
+          "source_segment": "if exc.name != \"openpyxl\":",
+          "condition": "missing openpyxl skips XLSX; CSV remains; other missing module errors propagate"
+        }
+      ],
+      "shutdown_by_site": [
+        {
+          "file": "src/bioetl/infrastructure/export/debug_export_ops.py",
+          "line": 176,
+          "closer": "openpyxl 3.1.5 ExcelWriter.save: archive.close after write_data on normal path; WorksheetWriter.cleanup after archive.write; remaining temp paths registered for atexit. No operation-local finally or guaranteed immediate error cleanup; Workbook.close is not a save-archive closer.",
+          "contract": "DebugExportAdapter delegates synchronous Workbook.save without a repository cleanup finally. openpyxl3.1.5 save_workbook opens ZipFile(output_path,'w'); ExcelWriter.save closes its archive only after write_data succeeds. Normal worksheet cleanup follows archive.write. NamedTemporaryFile(delete=False) closes its initial descriptor immediately, but XML temp path remains until WorksheetWriter.cleanup or atexit; later XML stream lifetime is distinct. Failure before these normal close/cleanup points has no local-finally guarantee. Workbook.close only closes a workbook._archive and does not own the archive created by default save_workbook. No claim of leak freedom or immediate cancellation cleanup is made; #12553 must observe archive fd, worksheet writer streams and temp paths separately."
+        }
+      ],
+      "dependency_sources": [
+        {
+          "distribution": "openpyxl",
+          "version": "3.1.5",
+          "file": "openpyxl/writer/excel.py",
+          "content_sha256": "ea2a179f78521c72149e45b6c02c8180f0380a770ee855cbe72192033b2aa7a6",
+          "source_lines": [
+            {
+              "line": 205,
+              "source_segment": "writer.cleanup()"
+            },
+            {
+              "line": 273,
+              "source_segment": "def save(self):"
+            },
+            {
+              "line": 276,
+              "source_segment": "self._archive.close()"
+            },
+            {
+              "line": 279,
+              "source_segment": "def save_workbook(workbook, filename):"
+            },
+            {
+              "line": 291,
+              "source_segment": "archive = ZipFile(filename, 'w', ZIP_DEFLATED, allowZip64=True)"
+            },
+            {
+              "line": 294,
+              "source_segment": "writer.save()"
+            }
+          ],
+          "inspection": "source bytes only; matches pinned uv.lock version; no Workbook/save executed"
+        },
+        {
+          "distribution": "openpyxl",
+          "version": "3.1.5",
+          "file": "openpyxl/worksheet/_writer.py",
+          "content_sha256": "6c3b70e81579b5dced0114049103e9ac4c51afc859545923d03ca896ac55bb69",
+          "source_lines": [
+            {
+              "line": 29,
+              "source_segment": "def _openpyxl_shutdown():"
+            },
+            {
+              "line": 35,
+              "source_segment": "def create_temporary_file(suffix=''):"
+            },
+            {
+              "line": 36,
+              "source_segment": "fobj = NamedTemporaryFile(mode='w+', suffix=suffix,"
+            },
+            {
+              "line": 39,
+              "source_segment": "fobj.close()"
+            },
+            {
+              "line": 288,
+              "source_segment": "with xmlfile(self.out) as xf:"
+            },
+            {
+              "line": 385,
+              "source_segment": "def cleanup(self):"
+            },
+            {
+              "line": 389,
+              "source_segment": "os.remove(self.out)"
+            }
+          ],
+          "inspection": "source bytes only; matches pinned uv.lock version; no Workbook/save executed"
+        },
+        {
+          "distribution": "openpyxl",
+          "version": "3.1.5",
+          "file": "openpyxl/workbook/workbook.py",
+          "content_sha256": "a1a12bbd21f5a94a615003ce6530878f6507c8a783aac8f60f270a083720a3b3",
+          "source_lines": [
+            {
+              "line": 373,
+              "source_segment": "def save(self, filename):"
+            },
+            {
+              "line": 386,
+              "source_segment": "save_workbook(self, filename)"
+            },
+            {
+              "line": 417,
+              "source_segment": "def close(self):"
+            },
+            {
+              "line": 422,
+              "source_segment": "self._archive.close()"
+            }
+          ],
+          "inspection": "source bytes only; matches pinned uv.lock version; no Workbook/save executed"
+        }
+      ],
+      "resource_components": [
+        {
+          "identity": "infrastructure.export.debug_export_ops.xlsx-save.zip-output",
+          "type": "ZIP/output-file handle",
+          "creator": "openpyxl.save_workbook -> zipfile.ZipFile",
+          "owner": "openpyxl.ExcelWriter for this operation",
+          "lifetime": "save attempt; no immediate error close guarantee",
+          "closer": "ExcelWriter.save calls archive.close after successful write_data",
+          "shutdown_contract": "no try/finally around write_data/close; observe archive.fp/OS fd on failure; Workbook.close is not this archive owner",
+          "source": "openpyxl/writer/excel.py",
+          "version": "3.1.5",
+          "source_sha256": "ea2a179f78521c72149e45b6c02c8180f0380a770ee855cbe72192033b2aa7a6",
+          "source_line": 291,
+          "repo_source": {
+            "file": "src/bioetl/infrastructure/export/debug_export_ops.py",
+            "line": 176,
+            "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+            "source_blob": "5da38ba6e84d6d0e292623b1c2ed1401d89cf95f",
+            "content_sha256": "010e88dfb189ab84e4048ea192da80b6d2579f78f66efad55400e394ebe6f7d5",
+            "source_segment": "workbook.save(output_path)",
+            "creator": "write_debug_xlsx",
+            "call": "workbook.save",
+            "context_manager": false,
+            "acquisition_predicate": "enabled debug export, xlsx in pack.formats and optional openpyxl installed",
+            "expression": "workbook.save(output_path)"
+          }
+        },
+        {
+          "identity": "infrastructure.export.debug_export_ops.xlsx-save.worksheet-xml",
+          "type": "worksheet XML temporary path and writer stream",
+          "creator": "WorksheetWriter -> create_temporary_file / xmlfile",
+          "owner": "openpyxl.WorksheetWriter; process ALL_TEMP_FILES registry for residual paths",
+          "lifetime": "each worksheet write; failed paths may last until process atexit",
+          "closer": "initial NamedTemporaryFile fd closes immediately; normal WorksheetWriter.cleanup removes path after archive.write; atexit removes remaining registered paths",
+          "shutdown_contract": "initial fd close does not remove delete=False temp path or prove downstream XML stream closure; no immediate per-operation error cleanup guarantee",
+          "source": "openpyxl/worksheet/_writer.py",
+          "version": "3.1.5",
+          "source_sha256": "6c3b70e81579b5dced0114049103e9ac4c51afc859545923d03ca896ac55bb69",
+          "source_line": 36,
+          "repo_source": {
+            "file": "src/bioetl/infrastructure/export/debug_export_ops.py",
+            "line": 176,
+            "source_commit": "f8c89d66cc9a96600b8a1a8f0ecc61ee5255d37a",
+            "source_blob": "5da38ba6e84d6d0e292623b1c2ed1401d89cf95f",
+            "content_sha256": "010e88dfb189ab84e4048ea192da80b6d2579f78f66efad55400e394ebe6f7d5",
+            "source_segment": "workbook.save(output_path)",
+            "creator": "write_debug_xlsx",
+            "call": "workbook.save",
+            "context_manager": false,
+            "acquisition_predicate": "enabled debug export, xlsx in pack.formats and optional openpyxl installed",
+            "expression": "workbook.save(output_path)"
+          }
+        }
+      ]
+    },
+    {
       "identity": "infrastructure.export.export_catalog_adapter.directory-enumeration",
       "type": "directory-enumeration",
       "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
