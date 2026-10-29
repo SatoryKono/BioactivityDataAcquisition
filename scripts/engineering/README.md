@@ -8,6 +8,8 @@ tooling and the scripts governance index.
 - `scripts/engineering/ci` — CI orchestration, resiliency runners, and compatibility telemetry.
 - `scripts/engineering/dev` — local developer setup and test utilities.
 - `scripts/engineering/qa` — architecture and quality-gate checks.
+- `scripts/engineering/quality` — shared quality-policy implementation imported
+  by QA/CI tooling; this is a library surface, not another set of CLI commands.
 - `scripts/engineering/repo` — repository governance, inventory, and catalog validation.
 - `scripts/engineering/diagnostics` — manual diagnostics helpers.
 - `scripts/engineering/baselines` — baseline artifacts consumed by quality gates.
@@ -41,6 +43,31 @@ For manual, non-gating structural inspection, the bounded supporting utilities
 `scripts/engineering/qa/get_large_modules.py` remain available. Their output is
 diagnostic only; committed module-coverage and hotspot artifacts remain the
 authoritative quality inputs.
+
+## Quality tooling and generated artifacts
+
+Quality consumers import `scripts.engineering.quality`. The dedicated unit tests
+live under `tests/unit/scripts/engineering/quality`; mixed consumer tests retain
+their existing locations. Continue using the existing QA/CI entrypoints. The
+analyzed product tree remains `src/bioetl`; moving the tool does not move its
+analysis scope or turn a smaller product-only denominator into a code reduction.
+
+The supported basename-inventory writer uses the same tracked `tests/**/*.py`
+and `test_*.py` selection as its architecture gate:
+
+```bash
+python -m scripts.engineering.qa report-test-basename-collisions --check
+python -m scripts.engineering.qa report-test-basename-collisions --update
+```
+
+`--check` is read-only and fails on any stale content. `--update` writes the full
+inventory atomically and preserves an already current file. Neither mode adds
+untracked files to the inventory. Both modes use the repository root rather than
+the current directory; `--root` supports an explicit fixture checkout.
+
+See the [quality artifact refresh runbook](../../docs/05-operations/runbooks/quality-tooling-artifact-refresh.md)
+for generator order, both scorecard outputs, retained measurements, and the
+final read-only validation contract.
 
 ## Catalog
 

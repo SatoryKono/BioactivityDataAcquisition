@@ -33,6 +33,26 @@ Local architecture feedback should prefer `architecture-fast-boundary` over full
 
 ## 1. Стек Тестирования
 
+Quality tooling is owned by `scripts.engineering.quality`, with dedicated tests
+under `tests/unit/scripts/engineering/quality`. Its mixed consumer tests stay in
+their existing directories. Source tooling requires the repository root and
+`src` on the locked development interpreter's import path. This source-only
+bootstrap is not permitted in non-editable wheel isolation tests.
+
+For the tracked test-file basename inventory, run:
+
+```bash
+python -m scripts.engineering.qa report-test-basename-collisions --check
+python -m scripts.engineering.qa report-test-basename-collisions --update
+```
+
+The check compares the complete sorted basename/path mapping, including path
+existence and counts, not just the number of collisions. Fixture regressions
+cover moves, deletion, addition, untracked files and an unchanged second update.
+The existing QA/CI commands and named pytest lanes retain their meanings. Follow
+the [quality artifact refresh runbook](../05-operations/runbooks/quality-tooling-artifact-refresh.md)
+when source, tests or documentation inputs change.
+
 - **Фреймворк**: `pytest`
 - **Покрытие**: `pytest-cov`
 - **Запись HTTP**: `VCR.py`

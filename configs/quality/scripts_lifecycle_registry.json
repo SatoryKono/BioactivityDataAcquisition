@@ -1381,6 +1381,12 @@
       "owner": "@bioetl-architecture",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/qa/report_test_basename_collisions.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the deterministic basename-collision inventory implementation behind python -m scripts.engineering.qa report-test-basename-collisions; owning tests import its collector. Keep routed through the existing QA dispatcher, with no new active-script surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
     "scripts/engineering/qa/report_test_governance_audit.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
