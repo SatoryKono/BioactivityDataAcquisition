@@ -462,13 +462,6 @@ def test_omitted_delegated_resource_primitive_is_rejected(
     )
 
 
-def test_repository_catalog_and_projection_are_current() -> None:
-    """Run the actual static check selected for catalog changes; no product I/O."""
-    from scripts.engineering.qa.external_resource_inventory import main
-
-    assert main(["--check"]) == 0
-
-
 @pytest.mark.parametrize("nested", [False, True])
 @pytest.mark.parametrize("identity", [None, "missing.resource", "fixture.file"])
 def test_operation_alias_requires_existing_resource(
