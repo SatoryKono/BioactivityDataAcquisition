@@ -312,6 +312,7 @@ jobs:
           # Affected pytest runs `git diff base...head`, and gitleaks scans
           # commits. fetch-depth 1 makes that diff exit 128.
           fetch-depth: 0
+          filter: blob:none
 
       - name: Set up Python + uv
         id: setup-python

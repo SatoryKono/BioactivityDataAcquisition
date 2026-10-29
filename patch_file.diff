@@ -1,0 +1,485 @@
+diff --git a/configs/_schema/dq.json b/configs/_schema/dq.json
+index 38b2512f4..e9daaaeb4 100644
+--- a/configs/_schema/dq.json
++++ b/configs/_schema/dq.json
+@@ -476,7 +476,7 @@
+       "description": "DQ threshold configuration"
+     },
+     "strict_validation": {
+-      "default": false,
++      "default": true,
+       "description": "Normalized quality-config property corresponding to the canonical contract-YAML key strict_dq_validation under configs/contracts/*",
+       "title": "Strict Validation",
+       "type": "boolean"
+diff --git a/configs/base/quality.yaml b/configs/base/quality.yaml
+index 84dbeab6d..84e91a4a0 100644
+--- a/configs/base/quality.yaml
++++ b/configs/base/quality.yaml
+@@ -8,7 +8,7 @@ thresholds:
+   soft_fail: 0.05
+   hard_fail: 0.50
+
+-strict_validation: false
++strict_validation: true
+ invalid_record_policy: quarantine
+
+ report:
+diff --git a/configs/contracts/chembl/activity.yaml b/configs/contracts/chembl/activity.yaml
+index fbe42d075..f640f0980 100644
+--- a/configs/contracts/chembl/activity.yaml
++++ b/configs/contracts/chembl/activity.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ disposition_overrides:
+   "activity_id_required": "fail"
+diff --git a/configs/contracts/chembl/assay.yaml b/configs/contracts/chembl/assay.yaml
+index cddc6a495..516d24660 100644
+--- a/configs/contracts/chembl/assay.yaml
++++ b/configs/contracts/chembl/assay.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/chembl/assay_parameters.yaml b/configs/contracts/chembl/assay_parameters.yaml
+index cbf52e4ef..6e788bc11 100644
+--- a/configs/contracts/chembl/assay_parameters.yaml
++++ b/configs/contracts/chembl/assay_parameters.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/chembl/cell_line.yaml b/configs/contracts/chembl/cell_line.yaml
+index ea10ef50d..43afdf7b7 100644
+--- a/configs/contracts/chembl/cell_line.yaml
++++ b/configs/contracts/chembl/cell_line.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/chembl/compound_record.yaml b/configs/contracts/chembl/compound_record.yaml
+index b61c28c6f..e5a95f922 100644
+--- a/configs/contracts/chembl/compound_record.yaml
++++ b/configs/contracts/chembl/compound_record.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/chembl/molecule.yaml b/configs/contracts/chembl/molecule.yaml
+index bd6f09e66..930263f6d 100644
+--- a/configs/contracts/chembl/molecule.yaml
++++ b/configs/contracts/chembl/molecule.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ disposition_overrides:
+   "molecule_id_required": "fail"
+diff --git a/configs/contracts/chembl/protein_class.yaml b/configs/contracts/chembl/protein_class.yaml
+index e4ed5c6cf..cc6ab8ce9 100644
+--- a/configs/contracts/chembl/protein_class.yaml
++++ b/configs/contracts/chembl/protein_class.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/chembl/publication.yaml b/configs/contracts/chembl/publication.yaml
+index 3574c8e79..c689a7442 100644
+--- a/configs/contracts/chembl/publication.yaml
++++ b/configs/contracts/chembl/publication.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/chembl/publication_similarity.yaml b/configs/contracts/chembl/publication_similarity.yaml
+index 10842db13..b2fc0d4cb 100644
+--- a/configs/contracts/chembl/publication_similarity.yaml
++++ b/configs/contracts/chembl/publication_similarity.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/chembl/publication_term.yaml b/configs/contracts/chembl/publication_term.yaml
+index a57ebc4b0..48325a74e 100644
+--- a/configs/contracts/chembl/publication_term.yaml
++++ b/configs/contracts/chembl/publication_term.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/chembl/subcellular_fraction.yaml b/configs/contracts/chembl/subcellular_fraction.yaml
+index bf967732a..e355cfffa 100644
+--- a/configs/contracts/chembl/subcellular_fraction.yaml
++++ b/configs/contracts/chembl/subcellular_fraction.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/chembl/target.yaml b/configs/contracts/chembl/target.yaml
+index a619da050..1f917537b 100644
+--- a/configs/contracts/chembl/target.yaml
++++ b/configs/contracts/chembl/target.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/chembl/target_component.yaml b/configs/contracts/chembl/target_component.yaml
+index bbafb2e8e..076a0860c 100644
+--- a/configs/contracts/chembl/target_component.yaml
++++ b/configs/contracts/chembl/target_component.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/chembl/tissue.yaml b/configs/contracts/chembl/tissue.yaml
+index b4962cb47..b144eb985 100644
+--- a/configs/contracts/chembl/tissue.yaml
++++ b/configs/contracts/chembl/tissue.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/crossref/publication.yaml b/configs/contracts/crossref/publication.yaml
+index ceccdc6cf..01f02c6ef 100644
+--- a/configs/contracts/crossref/publication.yaml
++++ b/configs/contracts/crossref/publication.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/openalex/publication.yaml b/configs/contracts/openalex/publication.yaml
+index a3ed05445..54181a95e 100644
+--- a/configs/contracts/openalex/publication.yaml
++++ b/configs/contracts/openalex/publication.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/pubchem/compound.yaml b/configs/contracts/pubchem/compound.yaml
+index 036e78809..6e5f8ceb0 100644
+--- a/configs/contracts/pubchem/compound.yaml
++++ b/configs/contracts/pubchem/compound.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/pubmed/publication.yaml b/configs/contracts/pubmed/publication.yaml
+index af5208f40..bc06bf631 100644
+--- a/configs/contracts/pubmed/publication.yaml
++++ b/configs/contracts/pubmed/publication.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/semanticscholar/publication.yaml b/configs/contracts/semanticscholar/publication.yaml
+index 72bc63442..8f28876bc 100644
+--- a/configs/contracts/semanticscholar/publication.yaml
++++ b/configs/contracts/semanticscholar/publication.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/uniprot/idmapping.yaml b/configs/contracts/uniprot/idmapping.yaml
+index a5209772a..1b4d08129 100644
+--- a/configs/contracts/uniprot/idmapping.yaml
++++ b/configs/contracts/uniprot/idmapping.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/configs/contracts/uniprot/protein.yaml b/configs/contracts/uniprot/protein.yaml
+index e569e2c65..7abaf2268 100644
+--- a/configs/contracts/uniprot/protein.yaml
++++ b/configs/contracts/uniprot/protein.yaml
+@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
+ strictness_mode: "moderate"
+ soft_fail_threshold: 0.05
+ hard_fail_threshold: 0.50
+-strict_dq_validation: false
++strict_dq_validation: true
+ invalid_record_policy: "quarantine"
+ report:
+   enabled: true
+diff --git a/tests/contract/test_gold_schema_strict_violations.py b/tests/contract/test_gold_schema_strict_violations.py
+index 85f8f07b5..cb18ef1c2 100644
+--- a/tests/contract/test_gold_schema_strict_violations.py
++++ b/tests/contract/test_gold_schema_strict_violations.py
+@@ -35,6 +35,31 @@ from typing import Any
+ import pandas as pd
+ import pandera as pa
+ import pytest
+
+-from bioetl.domain.contracts.gold import ChEMBLAssayGoldSchema
++from bioetl.domain.contracts.gold import ChEMBLActivityGoldSchema
++from bioetl.domain.contracts.gold import ChEMBLAssayGoldSchema
++from bioetl.domain.contracts.gold import ChEMBLAssayParametersGoldSchema
++from bioetl.domain.contracts.gold import ChEMBLCellLineGoldSchema
++from bioetl.domain.contracts.gold import ChEMBLCompoundRecordGoldSchema
++from bioetl.domain.contracts.gold import ChEMBLMoleculeGoldSchema
++from bioetl.domain.contracts.gold import ChEMBLProteinClassGoldSchema
++from bioetl.domain.contracts.gold import ChEMBLPublicationGoldSchema
++from bioetl.domain.contracts.gold import ChEMBLPublicationSimilarityGoldSchema
++from bioetl.domain.contracts.gold import ChEMBLPublicationTermGoldSchema
++from bioetl.domain.contracts.gold import ChEMBLSubcellularFractionGoldSchema
++from bioetl.domain.contracts.gold import ChEMBLTargetComponentGoldSchema
++from bioetl.domain.contracts.gold import ChEMBLTargetGoldSchema
++from bioetl.domain.contracts.gold import ChEMBLTargetProteinClassificationGoldSchema
++from bioetl.domain.contracts.gold import ChEMBLTissueGoldSchema
++from bioetl.domain.contracts.gold import CompositeActivityGoldSchema
++from bioetl.domain.contracts.gold import CompositeAssayGoldSchema
++from bioetl.domain.contracts.gold import CompositeMoleculeGoldSchema
++from bioetl.domain.contracts.gold import CompositePublicationGoldSchema
++from bioetl.domain.contracts.gold import CompositeTargetGoldSchema
++from bioetl.domain.contracts.gold.publications_crossref import CrossRefPublicationGoldSchema
++from bioetl.domain.contracts.gold.publications_openalex import OpenAlexPublicationGoldSchema
++from bioetl.domain.contracts.gold.publications_pubmed import PubMedPublicationGoldSchema
++from bioetl.domain.contracts.gold.publications_semanticscholar import SemanticScholarPublicationGoldSchema
++from bioetl.domain.contracts.gold.uniprot import UniProtIDMappingGoldSchema
++from bioetl.domain.contracts.gold.uniprot import UniProtProteinGoldSchema
+ from bioetl.domain.contracts.gold.pubchem import PubChemCompoundGoldSchema
+ from tests.contract.schemas._schema_row_helpers import minimal_schema_dataframe
+
+@@ -73,34 +98,42 @@ def _strict_gold_dataframe(schema_cls: type[Any], row: dict[str, Any]) -> pd.Dat
+     return frame
+
+
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+ @pytest.mark.parametrize(
+     ("entity", "schema_cls"),
+     [
++        ("chembl_activity", ChEMBLActivityGoldSchema),
++        ("chembl_assay", ChEMBLAssayGoldSchema),
++        ("chembl_assay_parameters", ChEMBLAssayParametersGoldSchema),
++        ("chembl_cell_line", ChEMBLCellLineGoldSchema),
++        ("chembl_compound_record", ChEMBLCompoundRecordGoldSchema),
++        ("chembl_molecule", ChEMBLMoleculeGoldSchema),
++        ("chembl_protein_class", ChEMBLProteinClassGoldSchema),
++        ("chembl_publication", ChEMBLPublicationGoldSchema),
++        ("chembl_publication_similarity", ChEMBLPublicationSimilarityGoldSchema),
++        ("chembl_publication_term", ChEMBLPublicationTermGoldSchema),
++        ("chembl_subcellular_fraction", ChEMBLSubcellularFractionGoldSchema),
++        ("chembl_target_component", ChEMBLTargetComponentGoldSchema),
++        ("chembl_target", ChEMBLTargetGoldSchema),
++        ("chembl_target_protein_classification", ChEMBLTargetProteinClassificationGoldSchema),
++        ("chembl_tissue", ChEMBLTissueGoldSchema),
++        ("composite_activity", CompositeActivityGoldSchema),
++        ("composite_assay", CompositeAssayGoldSchema),
++        ("composite_molecule", CompositeMoleculeGoldSchema),
++        ("composite_publication", CompositePublicationGoldSchema),
++        ("composite_target", CompositeTargetGoldSchema),
++        ("crossref_publication", CrossRefPublicationGoldSchema),
++        ("openalex_publication", OpenAlexPublicationGoldSchema),
+         ("pubchem_compound", PubChemCompoundGoldSchema),
++        ("pubmed_publication", PubMedPublicationGoldSchema),
++        ("semanticscholar_publication", SemanticScholarPublicationGoldSchema),
++        ("uniprot_idmapping", UniProtIDMappingGoldSchema),
++        ("uniprot_protein", UniProtProteinGoldSchema),
+     ],
+ )
+ def test_strict_gold_schema_rejects_unknown_columns(
+     entity: str,  # noqa: ARG001 - keeps parametrized ids aligned with registry entity.
+     schema_cls: type[Any],
+ ) -> None:
+-    df = _minimal_pubchem_gold_df()
++    df = _minimal_valid_df(schema_cls)
+     polluted = df.copy()
+     polluted["__unexpected_column__"] = "blocked"
+     with pytest.raises((pa.errors.SchemaError, pa.errors.SchemaErrors)):
+         schema_cls.validate(polluted)
+
+
+-def test_pubchem_gold_strict_minimal_row_validates() -> None:
+-    validated = PubChemCompoundGoldSchema.validate(_minimal_pubchem_gold_df())
+-    assert validated["molecule_id"].iloc[0] == "CID2244"
++def test_strict_gold_schema_minimal_row_validates(
++    entity: str,  # noqa: ARG001
++    schema_cls: type[Any],
++) -> None:
++    validated = schema_cls.validate(_minimal_valid_df(schema_cls))
++    assert not validated.empty
+
+
+-def test_pubchem_gold_strict_rejects_null_required_molecule_id() -> None:
+-    df = _minimal_pubchem_gold_df()
+-    df.loc[0, "molecule_id"] = None
+-    with pytest.raises(pa.errors.SchemaError):
+-        PubChemCompoundGoldSchema.validate(df)
+-
+-
+-def test_pubchem_gold_strict_rejects_null_required_entity_id() -> None:
+-    df = _minimal_pubchem_gold_df()
++def test_strict_gold_schema_rejects_null_required_entity_id(
++    entity: str,  # noqa: ARG001
++    schema_cls: type[Any],
++) -> None:
++    df = _minimal_valid_df(schema_cls)
+     df.loc[0, "entity_id"] = None
+     with pytest.raises((pa.errors.SchemaError, pa.errors.SchemaErrors)):
+-        PubChemCompoundGoldSchema.validate(df)
+-
+-
+-def test_chembl_assay_gold_strict_minimal_row_validates() -> None:
+-    validated = ChEMBLAssayGoldSchema.validate(_minimal_chembl_assay_gold_df())
+-    assert validated["assay_id"].iloc[0] == "CHEMBL1234"
+-
+-
+-def test_chembl_assay_gold_rejects_invalid_content_hash() -> None:
+-    df = _minimal_chembl_assay_gold_df()
+-    df.loc[0, "content_hash"] = "not-a-sha256"
+-    with pytest.raises((pa.errors.SchemaError, pa.errors.SchemaErrors)):
+-        ChEMBLAssayGoldSchema.validate(df)
+-
+-
+-def test_chembl_assay_gold_rejects_out_of_range_confidence_score() -> None:
+-    df = _minimal_chembl_assay_gold_df()
+-    df.loc[0, "confidence_score"] = -1.0
+-    with pytest.raises((pa.errors.SchemaError, pa.errors.SchemaErrors)):
+-        ChEMBLAssayGoldSchema.validate(df)
++        schema_cls.validate(df)
++
++
++def _minimal_valid_df(schema_cls: type[Any]) -> pd.DataFrame:
++    row = _minimal_strict_gold_row(schema_cls)
++    if schema_cls.__name__ == "PubChemCompoundGoldSchema":
++        row["entity_id"] = "pubchem_compound:2244"
++        row["molecule_id"] = "CID2244"
++        row["content_hash"] = "a" * 64
++        row["canonical_smiles"] = "CC(=O)OC1=CC=CC=C1C(=O)O"
++        row["chemical_standardization_status"] = "standardized"
++    elif schema_cls.__name__ == "ChEMBLAssayGoldSchema":
++        row["entity_id"] = "chembl_assay:CHEMBL1234"
++        row["assay_id"] = "CHEMBL1234"
++        row["content_hash"] = "a" * 64
++        row["confidence_score"] = 9.0
++    elif schema_cls.__name__ == "ChEMBLActivityGoldSchema":
++        row["entity_id"] = "chembl_activity:CHEMBL1234"
++        row["activity_id"] = "CHEMBL1234"
++        row["molecule_id"] = "CHEMBL1234"
++        row["content_hash"] = "a" * 64
++    elif "content_hash" in schema_cls.to_schema().columns:
++        row["content_hash"] = "a" * 64
++    elif schema_cls.__name__ == "ChEMBLAssayParametersGoldSchema":
++        row["entity_id"] = "chembl_assay_param:CHEMBL1234"
++        row["assay_param_id"] = 1234
++        row["assay_id"] = "CHEMBL1234"
++        row["type"] = "type"
++        row["content_hash"] = "a" * 64
++
++    return _strict_gold_dataframe(schema_cls, row)
