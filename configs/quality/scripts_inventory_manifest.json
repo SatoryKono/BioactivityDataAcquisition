@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-29T19:46:21.396526+00:00",
+  "generated_at": "2026-10-29T19:58:17.962579+00:00",
   "summary": {
     "total_scripts": 700,
     "status_counts": {
@@ -7950,7 +7950,7 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 76,
+          "line": 89,
           "source_group": "tests",
           "text": "svg2png_path = \"/\".join([\"scripts\", \"diagrams\", \"svg2png.mjs\"])"
         },
@@ -11334,7 +11334,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": "pyproject.toml",
@@ -11347,6 +11347,18 @@
           "line": 38,
           "source_group": "tests",
           "text": "target = \"scripts/engineering/common/build_backend.py\""
+        },
+        {
+          "path": "tests/architecture/test_scripts_inventory_discovery.py",
+          "line": 58,
+          "source_group": "tests",
+          "text": "upper.write_text(\"python scripts/engineering/common/build_backend.py\\n\")"
+        },
+        {
+          "path": "tests/architecture/test_scripts_inventory_discovery.py",
+          "line": 60,
+          "source_group": "tests",
+          "text": "lower.write_text(\"python scripts/engineering/common/build_backend.py\\n\")"
         },
         {
           "path": "tests/unit/scripts/engineering/common/test_build_backend.py",
@@ -14242,13 +14254,13 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 183,
+          "line": 196,
           "source_group": "tests",
           "text": "target = root / \"scripts\" / \"engineering\" / \"qa\" / \"check_docs_drift.py\""
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 199,
+          "line": 212,
           "source_group": "tests",
           "text": "for item in refs[\"scripts/engineering/qa/check_docs_drift.py\"]"
         }
