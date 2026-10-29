@@ -9,6 +9,8 @@ import json
 import re
 import subprocess
 from collections.abc import Mapping
+from dataclasses import dataclass
+from io import BytesIO
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +22,86 @@ _OID = re.compile(r"[0-9a-f]{40}")
 _REFERENCE_FIELDS = frozenset(
     {"file", "line", "source_commit", "source_blob", "content_sha256"}
 )
+_ACQUISITION_NAMES = frozenset(
+    "AsyncClient ThreadPoolExecutor ProcessPoolExecutor Thread create_task "
+    "ensure_future start_server Popen popen_factory DeltaTable _DeltaTable "
+    "write_deltalake _write_deltalake open fdopen mkstemp NamedTemporaryFile "
+    "TemporaryFile TemporaryDirectory FileHandler TracerProvider BatchSpanProcessor "
+    "ConsoleSpanExporter exporter_class read_text read_bytes write_text write_bytes "
+    "scandir iterdir glob rglob walk listdir stream_reader stream_writer new_file "
+    "new_stream open_file to_thread run_in_executor read_csv write_csv read_parquet "
+    "write_parquet scan_parquet scan_csv read_table to_excel copyfile copytree copy2 "
+    "move rmtree push_gateway delete_gateway start_http_server_fn".split()
+)
+
+
+@dataclass(frozen=True)
+class SourceBlob:
+    """Git-provided object identity and SHA256 of its actual blob bytes."""
+
+    oid: str
+    sha256: str
+
+
+def _load_source_blobs(oids: Mapping[str, str]) -> dict[str, SourceBlob]:
+    raw = subprocess.check_output(
+        ["git", "cat-file", "--batch"],
+        input="".join(f"{oid}\n" for oid in oids.values()).encode(),
+        cwd=ROOT,
+    )
+    stream = BytesIO(raw)
+    result = {}
+    for path, oid in oids.items():
+        actual, kind, size = stream.readline().decode().split()
+        if actual != oid or kind != "blob":
+            raise ValueError(f"invalid pinned Git blob: {path}")
+        content = stream.read(int(size))
+        if len(content) != int(size) or stream.read(1) != b"\n":
+            raise ValueError(f"truncated pinned Git blob: {path}")
+        result[path] = SourceBlob(oid, hashlib.sha256(content).hexdigest())
+    return result
+
+
+def _reference_schema(value: object, label: str) -> list[str]:
+    if not isinstance(value, list) or any(
+        not isinstance(ref, dict) or not _REFERENCE_FIELDS.issubset(ref)
+        for ref in value
+    ):
+        return [f"{label}: invalid provenance schema"]
+    return []
+
+
+def _check_acquisition_census(
+    payload: dict[str, Any],
+    sources: Mapping[str, bytes],
+    sites: set[tuple[str, int, str]],
+) -> list[str]:
+    """Enumerate source calls independently of the authored acceptance ledger."""
+    covered = sites | {
+        (ref.get("file"), ref.get("line"), ref.get("expression"))
+        for ref in payload.get("operation_aliases", [])
+    }
+    excluded = {
+        (ref.get("file"), ref.get("line"), ref.get("call"))
+        for ref in payload.get("delegations_and_exclusions", [])
+    }
+    errors = []
+    for path, content in sources.items():
+        for node in ast.walk(ast.parse(content)):
+            if not isinstance(node, ast.Call):
+                continue
+            call = ast.unparse(node.func)
+            if (
+                call.rsplit(".", 1)[-1] not in _ACQUISITION_NAMES
+                and call != "subprocess.run"
+            ):
+                continue
+            key = (path, node.lineno, ast.unparse(node))
+            if key not in covered and (path, node.lineno, call) not in excluded:
+                errors.append(
+                    f"unreconciled source acquisition: {path}:{node.lineno}: {call}"
+                )
+    return errors
 
 
 def _references(value: object) -> list[dict[str, Any]]:  # Any: recursive JSON envelope.
@@ -34,7 +116,7 @@ def _references(value: object) -> list[dict[str, Any]]:  # Any: recursive JSON e
 def _check_reference(
     ref: dict[str, Any],  # Any: JSON source reference validated here.
     sources: Mapping[str, bytes],
-    blobs: Mapping[str, str],
+    blobs: Mapping[str, SourceBlob],
     commit: str,
 ) -> list[str]:
     path = ref.get("file")
@@ -42,37 +124,52 @@ def _check_reference(
         return [f"source path missing or outside inventory: {path}"]
     errors: list[str] = []
     data = sources[path].replace(b"\r\n", b"\n")
-    if ref.get("source_commit") != commit or ref.get("source_blob") != blobs.get(path):
+    blob = blobs.get(path)
+    if (
+        ref.get("source_commit") != commit
+        or blob is None
+        or ref.get("source_blob") != blob.oid
+    ):
         errors.append(f"inconsistent source provenance: {path}")
     if ref.get("content_sha256") != hashlib.sha256(data).hexdigest():
         errors.append(f"source content changed: {path}")
+    errors.extend(_check_location(ref, data, path))
+    errors.extend(_check_expression(ref, data, path))
+    return errors
+
+
+def _check_location(ref: dict[str, Any], data: bytes, path: str) -> list[str]:
     line = ref.get("line")
     if type(line) is not int or not 1 <= line <= len(data.splitlines()):
-        errors.append(f"invalid source line: {path}:{line}")
-    elif (
+        return [f"invalid source line: {path}:{line}"]
+    if (
         "source_segment" in ref
         and ref["source_segment"] != data.decode().splitlines()[line - 1].strip()
     ):
-        errors.append(f"source segment differs: {path}:{line}")
-    if "expression" in ref:
-        mode = ref.get("creation_mode", "call")
-        if mode not in {"call", "callback", "callback-reference"}:
-            errors.append(f"unsupported creation mode: {mode}")
-        kinds = (
-            (ast.Call,)
-            if mode == "call"
-            else (ast.Attribute, ast.Name)
-            if mode == "callback-reference"
-            else (ast.AsyncFunctionDef, ast.FunctionDef)
-        )
-        calls = {
-            ast.unparse(node)
-            for node in ast.walk(ast.parse(data))
-            if isinstance(node, kinds) and node.lineno == line
-        }
-        if ref["expression"] not in calls:
-            errors.append(f"source expression differs: {path}:{line}")
-    return errors
+        return [f"source segment differs: {path}:{line}"]
+    return []
+
+
+def _check_expression(ref: dict[str, Any], data: bytes, path: str) -> list[str]:
+    if "expression" not in ref:
+        return []
+    mode = ref.get("creation_mode", "call")
+    modes: dict[str, tuple[type[ast.AST], ...]] = {
+        "call": (ast.Call,),
+        "callback-reference": (ast.Attribute, ast.Name),
+        "callback": (ast.AsyncFunctionDef, ast.FunctionDef),
+    }
+    if mode not in modes:
+        return [f"unsupported creation mode: {mode}"]
+    line = ref.get("line")
+    calls = {
+        ast.unparse(node)
+        for node in ast.walk(ast.parse(data))
+        if isinstance(node, modes[mode]) and getattr(node, "lineno", None) == line
+    }
+    if ref["expression"] not in calls:
+        return [f"source expression differs: {path}:{line}"]
+    return []
 
 
 def _check_record(
@@ -101,25 +198,48 @@ def _check_record(
     ):
         if not record.get(field):
             errors.append(f"{identity}: missing {field}")
-    for field in ("creation_sites", "production_binding", "cleanup_sources"):
-        references = record.get(field, [])
-        if not isinstance(references, list) or any(
-            not isinstance(ref, dict) or not _REFERENCE_FIELDS.issubset(ref)
-            for ref in references
-        ):
-            errors.append(f"{identity}: invalid {field} provenance schema")
+    for field in (
+        "creation_sites",
+        "production_binding",
+        "cleanup_sources",
+        "configuration_predicates",
+        "operation_aliases",
+    ):
+        errors.extend(_reference_schema(record.get(field, []), f"{identity}: {field}"))
     if record.get("qualification") != "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED":
         errors.append(f"{identity}: unsupported runtime claim")
+    errors.extend(_check_scenarios(record))
+    errors.extend(_check_sites(record, sites))
+    return errors
+
+
+def _check_scenarios(record: dict[str, Any]) -> list[str]:
     scenarios = record.get("scenarios", {})
-    if set(scenarios) != SCENARIOS or any(
-        not value.get("applicability")
+    if not isinstance(scenarios, dict) or set(scenarios) != SCENARIOS:
+        return [
+            f"{record.get('identity')}: incomplete scenarios or unsupported runtime result"
+        ]
+    if any(
+        not isinstance(value, dict)
+        or not value.get("applicability")
         or not value.get("expected")
         or not value.get("observation")
         or value.get("runtime_result") != "NOT_RUN_12553"
         for value in scenarios.values()
     ):
-        errors.append(f"{identity}: incomplete scenarios or unsupported runtime result")
-    for site in record.get("creation_sites", []):
+        return [
+            f"{record.get('identity')}: incomplete scenarios or unsupported runtime result"
+        ]
+    return []
+
+
+def _check_sites(record: dict[str, Any], sites: set[tuple[str, int, str]]) -> list[str]:
+    errors = []
+    identity = record.get("identity")
+    references = record.get("creation_sites", [])
+    if _reference_schema(references, "creation_sites"):
+        return [f"{identity}: incomplete creation provenance"]
+    for site in references:
         if not all(
             key in site for key in ("file", "line", "expression", "source_blob")
         ):
@@ -132,35 +252,83 @@ def _check_record(
     return errors
 
 
+def _check_source_census(
+    payload: dict[str, Any],
+    sources: Mapping[str, bytes],
+    blobs: Mapping[str, SourceBlob],
+) -> list[str]:
+    errors = []
+    if payload.get("source_files") != {path: blob.oid for path, blob in blobs.items()}:
+        errors.append("source census missing, added, removed, or rebound files")
+    if set(sources) != set(blobs):
+        errors.append("missing source content or unexpected source file")
+    for path, content in sources.items():
+        canonical = content.replace(b"\r\n", b"\n")
+        blob = blobs.get(path)
+        if blob is None or hashlib.sha256(canonical).hexdigest() != blob.sha256:
+            errors.append(f"working source blob differs: {path}")
+    return errors
+
+
+def _valid_disposition(row: dict[str, Any], identities: set[str]) -> bool:
+    disposition = row.get("disposition")
+    return bool(
+        row.get("object")
+        and row.get("file")
+        and isinstance(disposition, str)
+        and disposition.strip()
+        and set(row.get("resource_definitions", [])).issubset(identities)
+    )
+
+
+def _check_history(payload: dict[str, Any], identities: set[str]) -> list[str]:
+    history = payload.get("prior_candidate_dispositions", [])
+    expected = payload.get("prior_candidates_input", {}).get("count")
+    if (
+        not isinstance(expected, int)
+        or expected < 1
+        or len(history) != expected
+        or len({row.get("candidate_id") for row in history}) != len(history)
+        or not all(_valid_disposition(row, identities) for row in history)
+    ):
+        return ["historical candidate coverage/identity linkage is inconsistent"]
+    return []
+
+
 def validate_inventory(
     payload: dict[str, Any],  # Any: JSON inventory boundary, checked below.
     sources: Mapping[str, bytes],
-    blobs: Mapping[str, str],
+    blobs: Mapping[str, SourceBlob],
 ) -> list[str]:
     """Check catalog integrity without importing product code or opening endpoints."""
     errors: list[str] = []
     commit = payload.get("source_commit", "")
     if payload.get("schema_version") != 1 or not _OID.fullmatch(str(commit)):
         errors.append("invalid schema/source commit")
-    recorded = payload.get("source_files")
-    if not isinstance(recorded, dict) or recorded != dict(blobs):
-        errors.append("source census missing, added, removed, or rebound files")
-    if set(sources) != set(blobs):
-        errors.append("missing source content or unexpected source file")
-    for path, content in sources.items():
-        canonical = content.replace(b"\r\n", b"\n")
-        header = b"blob " + str(len(canonical)).encode() + b"\0"
-        if hashlib.sha1(header + canonical).hexdigest() != blobs.get(path):
-            errors.append(f"working source blob differs: {path}")
+    errors.extend(_check_source_census(payload, sources, blobs))
     records = payload.get("resources")
     if not isinstance(records, list) or not records:
         return errors + ["missing resources"]
+    if not all(isinstance(record, dict) for record in records):
+        return errors + ["invalid resource record schema"]
     seen: set[str] = set()
     sites: set[tuple[str, int, str]] = set()
     for record in records:
         errors.extend(_check_record(record, seen, sites))
+    schema_errors = [
+        error
+        for field in (
+            "dynamic_wiring",
+            "delegations_and_exclusions",
+            "operation_aliases",
+        )
+        for error in _reference_schema(payload.get(field, []), field)
+    ]
+    if schema_errors:
+        return errors + schema_errors
     for ref in _references(payload):
         errors.extend(_check_reference(ref, sources, blobs, str(commit)))
+    errors.extend(_check_acquisition_census(payload, sources, sites))
     expected_sites = payload.get("accepted_site_keys")
     if (
         not isinstance(expected_sites, list)
@@ -169,23 +337,7 @@ def validate_inventory(
         errors.append(
             "resource missing or acquisition coverage differs from reviewed census"
         )
-    history = payload.get("prior_candidate_dispositions", [])
-    expected_count = payload.get("prior_candidates_input", {}).get("count")
-    if (
-        not isinstance(expected_count, int)
-        or expected_count < 1
-        or (
-            len(history) != expected_count
-            or len({row.get("candidate_id") for row in history}) != len(history)
-            or any(
-                not row.get("object")
-                or not row.get("file")
-                or not set(row.get("resource_definitions", [])).issubset(seen)
-                for row in history
-            )
-        )
-    ):
-        errors.append("historical candidate coverage/identity linkage is inconsistent")
+    errors.extend(_check_history(payload, seen))
     return errors
 
 
@@ -349,12 +501,25 @@ def write_catalog(
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Check source provenance and check/update only the readable projection."""
+    """Check provenance; update canonical partitions, index digests and Markdown."""
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--check", action="store_true")
     mode.add_argument("--update", action="store_true")
     args = parser.parse_args(argv)
+    try:
+        return _run(args)
+    except subprocess.CalledProcessError:
+        print(
+            "MISSING EVIDENCE: pinned Git history unavailable; fetch full repository history"
+        )
+        return 1
+    except (OSError, ValueError) as error:
+        print(f"Inventory input unavailable or invalid: {error}")
+        return 1
+
+
+def _run(args: argparse.Namespace) -> int:
     payload = load_catalog()
     commit = payload.get("source_commit", "")
     if not _OID.fullmatch(str(commit)):
@@ -371,12 +536,13 @@ def main(argv: list[str] | None = None) -> int:
     entries = subprocess.check_output(
         ["git", "ls-tree", "-rz", commit, "--", "src/bioetl"], cwd=ROOT
     ).split(b"\0")
-    blobs = {}
+    oids = {}
     for entry in entries:
         if entry:
             meta, name = entry.split(b"\t", 1)
             if name.endswith(b".py"):
-                blobs[name.decode()] = meta.decode().split()[2]
+                oids[name.decode()] = meta.decode().split()[2]
+    blobs = _load_source_blobs(oids)
     errors = validate_inventory(payload, sources, blobs)
     tree = (
         subprocess.check_output(["git", "rev-parse", f"{commit}^{{tree}}"], cwd=ROOT)

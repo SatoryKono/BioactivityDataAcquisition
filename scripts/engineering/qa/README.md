@@ -13,7 +13,9 @@ python -m scripts.engineering.qa <command> [args...]
 
 COMP-004 resource catalog: `python -m scripts.engineering.qa check-external-resource-inventory --check`.
 The canonical source-qualified definitions live in `configs/quality/external_resource_inventory.json`;
-`--update` refreshes `reports/quality/external-resource-inventory.md`. The tool never runs
+`--update` deterministically rewrites the canonical `part-NN.json` files, recalculates
+their SHA256 digests in the index, and refreshes `reports/quality/external-resource-inventory.md`.
+The tool never runs
 the runtime lifecycle scenarios reserved for #12553.
 
 | Command                          | Script                                                | Description                                                                                       |
