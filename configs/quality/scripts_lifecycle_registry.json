@@ -1,6 +1,12 @@
 {
   "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
   "entries": {
+    "scripts/engineering/qa/external_resource_inventory.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the source-bound COMP-004 catalog integrity and Markdown projection implementation behind the unified QA check-external-resource-inventory command; no runtime lifecycle execution belongs here.",
+      "owner": "@bioetl-architecture",
+      "review_by": "2027-01-29"
+    },
     "scripts/ai/codex/helper/check-env.ps1": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the Windows-side environment-check helper invoked by Codex launcher and setup flows; keep it supporting unless it becomes a standalone documented entrypoint.",

@@ -1,0 +1,459 @@
+"""Isolated integrity controls for the COMP-004 source inventory (no runtime I/O)."""
+
+from __future__ import annotations
+
+import copy
+import hashlib
+from typing import Any
+
+import pytest
+
+from scripts.engineering.qa.external_resource_inventory import (
+    SCENARIOS,
+    SourceBlob,
+    validate_inventory,
+)
+
+pytestmark = pytest.mark.unit
+
+
+@pytest.fixture
+def inventory_case() -> tuple[dict[str, Any], dict[str, bytes], dict[str, SourceBlob]]:
+    """One real source expression; no product imports or external endpoints."""
+    source = b"def acquire():\n    with open('fixture') as stream:\n        return stream.read()\n"
+    path = "src/bioetl/fixture.py"
+    blob = "b" * 40
+    reference = {
+        "file": path,
+        "line": 2,
+        "source_commit": "a" * 40,
+        "source_blob": blob,
+        "content_sha256": hashlib.sha256(source).hexdigest(),
+        "expression": "open('fixture')",
+    }
+    record = {
+        "identity": "fixture.file",
+        "type": "file",
+        "creator": ["acquire"],
+        "owner": "acquire operation",
+        "closer": "file context exit",
+        "shutdown_contract": "close on context exit",
+        "production_entrypoint": "fixture.acquire",
+        "call_path": ["acquire", "open"],
+        "production_binding": [dict(reference)],
+        "creation_sites": [reference],
+        "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+        "scenarios": {
+            name: {
+                "applicability": "owner boundary",
+                "expected": "close handle",
+                "observation": "inspect handle after exit",
+                "runtime_result": "NOT_RUN_12553",
+            }
+            for name in SCENARIOS
+        },
+    }
+    payload = {
+        "schema_version": 1,
+        "source_commit": "a" * 40,
+        "source_files": {path: blob},
+        "resources": [record],
+        "accepted_site_keys": [[path, 2, "open('fixture')"]],
+        "prior_candidates_input": {"count": 1},
+        "prior_candidate_dispositions": [
+            {
+                "candidate_id": "legacy-1",
+                "object": "FixtureOwner",
+                "file": path,
+                "disposition": "accepted concrete fixture",
+                "resource_definitions": ["fixture.file"],
+            }
+        ],
+    }
+    return (
+        payload,
+        {path: source},
+        {path: SourceBlob(blob, hashlib.sha256(source).hexdigest())},
+    )
+
+
+def test_correct_inventory_is_accepted(inventory_case: tuple) -> None:
+    assert validate_inventory(*inventory_case) == []
+
+
+def test_duplicate_identity_is_rejected(inventory_case: tuple) -> None:
+    payload, sources, blobs = inventory_case
+    payload["resources"].append(copy.deepcopy(payload["resources"][0]))
+    assert any(
+        "duplicate identity" in item
+        for item in validate_inventory(payload, sources, blobs)
+    )
+
+
+@pytest.mark.parametrize("identity", [None, "", " "])
+def test_missing_identity_is_rejected(inventory_case: tuple, identity: object) -> None:
+    payload, sources, blobs = inventory_case
+    payload["resources"][0]["identity"] = identity
+    assert "missing identity" in validate_inventory(payload, sources, blobs)
+
+
+def test_missing_resource_is_rejected(inventory_case: tuple) -> None:
+    payload, sources, blobs = inventory_case
+    payload["resources"] = []
+    assert "missing resources" in validate_inventory(payload, sources, blobs)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("source_commit", "b" * 40),
+        ("source_blob", "c" * 40),
+        ("content_sha256", "0" * 64),
+        ("line", 20),
+        ("expression", "open('different')"),
+    ],
+)
+def test_inconsistent_source_provenance_is_rejected(
+    inventory_case: tuple,
+    field: str,
+    value: object,
+) -> None:
+    payload, sources, blobs = inventory_case
+    payload["resources"][0]["creation_sites"][0][field] = value
+    assert validate_inventory(payload, sources, blobs)
+
+
+def test_changed_source_census_is_rejected(inventory_case: tuple) -> None:
+    payload, sources, blobs = inventory_case
+    blobs["src/bioetl/new.py"] = SourceBlob(
+        "d" * 40, hashlib.sha256(b"pass\n").hexdigest()
+    )
+    sources["src/bioetl/new.py"] = b"pass\n"
+    assert any("census" in item for item in validate_inventory(payload, sources, blobs))
+
+
+def test_missing_acquisition_is_rejected(inventory_case: tuple) -> None:
+    payload, sources, blobs = inventory_case
+    payload["accepted_site_keys"].append(["src/bioetl/fixture.py", 3, "other()"])
+    assert any(
+        "coverage differs" in item
+        for item in validate_inventory(payload, sources, blobs)
+    )
+
+
+def test_runtime_pass_cannot_be_invented(inventory_case: tuple) -> None:
+    payload, sources, blobs = inventory_case
+    payload["resources"][0]["scenarios"]["normal"]["runtime_result"] = "PASS"
+    assert any(
+        "runtime result" in item for item in validate_inventory(payload, sources, blobs)
+    )
+
+
+def test_made_up_binding_provenance_is_rejected(inventory_case: tuple) -> None:
+    payload, sources, blobs = inventory_case
+    payload["resources"][0]["production_binding"] = [{"made_up_binding": True}]
+    assert any(
+        "provenance schema" in e for e in validate_inventory(payload, sources, blobs)
+    )
+
+
+def test_callback_location_and_expression_are_checked(inventory_case: tuple) -> None:
+    payload, sources, blobs = inventory_case
+    site = payload["resources"][0]["creation_sites"][0]
+    site.update(creation_mode="callback", line=1, expression="not a source expression")
+    payload["accepted_site_keys"] = [[site["file"], 1, site["expression"]]]
+    assert any(
+        "source expression differs" in e
+        for e in validate_inventory(payload, sources, blobs)
+    )
+
+
+def test_missing_history_is_rejected(inventory_case: tuple) -> None:
+    payload, sources, blobs = inventory_case
+    payload["prior_candidate_dispositions"] = []
+    assert any(
+        "historical candidate" in e for e in validate_inventory(payload, sources, blobs)
+    )
+
+
+def test_duplicate_history_identity_is_rejected(inventory_case: tuple) -> None:
+    payload, sources, blobs = inventory_case
+    payload["prior_candidates_input"]["count"] = 2
+    payload["prior_candidate_dispositions"] *= 2
+    assert any(
+        "historical candidate" in e for e in validate_inventory(payload, sources, blobs)
+    )
+
+
+def test_missing_unreferenced_source_is_rejected(inventory_case: tuple) -> None:
+    payload, sources, blobs = inventory_case
+    name = "src/bioetl/unreferenced.py"
+    blobs[name] = SourceBlob("d" * 40, hashlib.sha256(b"pass\n").hexdigest())
+    payload["source_files"] = {path: blob.oid for path, blob in blobs.items()}
+    assert any(
+        "missing source content" in e
+        for e in validate_inventory(payload, sources, blobs)
+    )
+
+
+def test_partitioned_catalog_roundtrip(inventory_case: tuple, tmp_path: Any) -> None:
+    from scripts.engineering.qa.external_resource_inventory import (
+        load_catalog,
+        write_catalog,
+    )
+
+    payload, _, _ = inventory_case
+    write_catalog(payload, tmp_path)
+    loaded = load_catalog(tmp_path)
+    assert loaded["resources"] == payload["resources"]
+    assert loaded["source_files"] == payload["source_files"]
+
+
+def test_partition_digest_rejects_changed_content(
+    inventory_case: tuple, tmp_path: Any
+) -> None:
+    from scripts.engineering.qa.external_resource_inventory import (
+        load_catalog,
+        write_catalog,
+    )
+
+    payload, _, _ = inventory_case
+    write_catalog(payload, tmp_path)
+    part = tmp_path / "configs/quality/external_resource_inventory/part-01.json"
+    part.write_bytes(part.read_bytes() + b" ")
+    with pytest.raises(ValueError, match="digest"):
+        load_catalog(tmp_path)
+
+
+def test_partition_path_escape_is_rejected(
+    inventory_case: tuple, tmp_path: Any
+) -> None:
+    import json
+    from scripts.engineering.qa.external_resource_inventory import (
+        CATALOG,
+        load_catalog,
+        write_catalog,
+    )
+
+    payload, _, _ = inventory_case
+    write_catalog(payload, tmp_path)
+    index = tmp_path / CATALOG
+    data = json.loads(index.read_text())
+    data["resource_parts"][0]["file"] = "outside.json"
+    index.write_text(json.dumps(data))
+    with pytest.raises(ValueError, match="outside"):
+        load_catalog(tmp_path)
+
+
+def test_duplicate_partition_is_rejected(inventory_case: tuple, tmp_path: Any) -> None:
+    import json
+    from scripts.engineering.qa.external_resource_inventory import (
+        CATALOG,
+        load_catalog,
+        write_catalog,
+    )
+
+    payload, _, _ = inventory_case
+    write_catalog(payload, tmp_path)
+    index = tmp_path / CATALOG
+    data = json.loads(index.read_text())
+    data["resource_parts"] *= 2
+    index.write_text(json.dumps(data))
+    with pytest.raises(ValueError, match="duplicated"):
+        load_catalog(tmp_path)
+
+
+def test_changed_working_source_is_rejected(inventory_case: tuple) -> None:
+    payload, sources, blobs = inventory_case
+    sources["src/bioetl/fixture.py"] = sources["src/bioetl/fixture.py"].replace(
+        b"return", b"yield"
+    )
+    assert any(
+        "content changed" in item
+        for item in validate_inventory(payload, sources, blobs)
+    )
+
+
+def test_synchronized_site_and_ledger_removal_is_rejected(
+    inventory_case: tuple,
+) -> None:
+    payload, sources, blobs = inventory_case
+    path = "src/bioetl/fixture.py"
+    sources[path] += b"\nopen('omitted')\n"
+    digest = hashlib.sha256(sources[path]).hexdigest()
+    blobs[path] = SourceBlob(blobs[path].oid, digest)
+    for field in ("production_binding", "creation_sites"):
+        payload["resources"][0][field][0]["content_sha256"] = digest
+    # Both catalog and ledger omit the second allocation; the source census must catch it.
+    assert any(
+        "unreconciled source acquisition" in e
+        for e in validate_inventory(payload, sources, blobs)
+    )
+
+
+@pytest.mark.parametrize(
+    "section", ["dynamic_wiring", "delegations_and_exclusions", "operation_aliases"]
+)
+def test_missing_reference_marker_cannot_bypass_provenance(
+    inventory_case: tuple, section: str
+) -> None:
+    payload, sources, blobs = inventory_case
+    ref = dict(payload["resources"][0]["creation_sites"][0])
+    del ref["source_blob"]
+    payload[section] = [ref]
+    assert any(
+        "provenance schema" in e for e in validate_inventory(payload, sources, blobs)
+    )
+
+
+@pytest.mark.parametrize("disposition", [None, "", " "])
+def test_empty_historical_disposition_is_rejected(
+    inventory_case: tuple, disposition: object
+) -> None:
+    payload, sources, blobs = inventory_case
+    payload["prior_candidate_dispositions"][0]["disposition"] = disposition
+    assert any(
+        "historical candidate" in e for e in validate_inventory(payload, sources, blobs)
+    )
+
+
+def test_git_batch_snapshot_uses_actual_blob_bytes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from scripts.engineering.qa import external_resource_inventory as inventory
+
+    oid = "e" * 40
+    content = b"pass\n"
+    response = f"{oid} blob {len(content)}\n".encode() + content + b"\n"
+    calls = []
+
+    def batch(command: list[str], *, input: bytes, cwd: Any) -> bytes:
+        calls.append((command, input, cwd))
+        return response
+
+    monkeypatch.setattr(inventory.subprocess, "check_output", batch)
+    assert inventory._load_source_blobs({"fixture.py": oid}) == {
+        "fixture.py": SourceBlob(oid, hashlib.sha256(content).hexdigest())
+    }
+    assert calls == [
+        (["git", "cat-file", "--batch"], f"{oid}\n".encode(), inventory.ROOT)
+    ]
+
+
+@pytest.mark.parametrize(
+    "response",
+    [
+        b"wrong blob 5\npass\n\n",
+        b"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee tree 5\npass\n\n",
+        b"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee blob 8\npass\n",
+    ],
+)
+def test_invalid_git_batch_snapshot_is_rejected(
+    monkeypatch: pytest.MonkeyPatch, response: bytes
+) -> None:
+    from scripts.engineering.qa import external_resource_inventory as inventory
+
+    monkeypatch.setattr(
+        inventory.subprocess, "check_output", lambda *args, **kwargs: response
+    )
+    with pytest.raises(ValueError, match="pinned Git blob"):
+        inventory._load_source_blobs({"fixture.py": "e" * 40})
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("scenarios", None),
+        ("scenarios", {"normal": None}),
+        ("creation_sites", [None]),
+        ("creation_sites", None),
+    ],
+)
+def test_malformed_record_returns_diagnostic(
+    inventory_case: tuple, field: str, value: object
+) -> None:
+    payload, sources, blobs = inventory_case
+    payload["resources"][0][field] = value
+    assert validate_inventory(payload, sources, blobs)
+
+
+def test_unavailable_pinned_history_is_explicit(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    import subprocess
+    from scripts.engineering.qa import external_resource_inventory as inventory
+
+    def unavailable(args: Any) -> int:
+        raise subprocess.CalledProcessError(128, ["git", "ls-tree"])
+
+    monkeypatch.setattr(inventory, "_run", unavailable)
+    assert inventory.main(["--check"]) == 1
+    assert "MISSING EVIDENCE" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("prior_candidates_input", None),
+        ("prior_candidates_input", []),
+        ("prior_candidate_dispositions", None),
+        ("prior_candidate_dispositions", [None]),
+        ("prior_candidate_dispositions", ["not a record"]),
+    ],
+)
+def test_malformed_history_returns_diagnostic(
+    inventory_case: tuple, field: str, value: object
+) -> None:
+    payload, sources, blobs = inventory_case
+    payload[field] = value
+    assert any(
+        "historical candidate" in error
+        for error in validate_inventory(payload, sources, blobs)
+    )
+
+
+@pytest.mark.parametrize("definitions", [None, "fixture.file", [{}]])
+def test_malformed_history_links_return_diagnostic(
+    inventory_case: tuple, definitions: object
+) -> None:
+    payload, sources, blobs = inventory_case
+    payload["prior_candidate_dispositions"][0]["resource_definitions"] = definitions
+    assert any(
+        "historical candidate" in error
+        for error in validate_inventory(payload, sources, blobs)
+    )
+
+
+@pytest.mark.parametrize("command", [["git", "ls-files"], "git ls-files"])
+def test_working_checkout_failure_is_not_missing_evidence(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], command: object
+) -> None:
+    import subprocess
+    from scripts.engineering.qa import external_resource_inventory as inventory
+
+    def failed(args: Any) -> int:
+        raise subprocess.CalledProcessError(128, command)
+
+    monkeypatch.setattr(inventory, "_run", failed)
+    assert inventory.main(["--check"]) == 1
+    output = capsys.readouterr().out
+    assert "CHECK FAILED" in output
+    assert "MISSING EVIDENCE" not in output
+    assert "git ls-files" in output and "128" in output
+
+
+@pytest.mark.parametrize("expression", ["locking(1, 2, 1)", "flock(1, 2)"])
+def test_omitted_platform_lock_primitive_is_rejected(
+    inventory_case: tuple, expression: str
+) -> None:
+    payload, sources, blobs = inventory_case
+    path = "src/bioetl/fixture.py"
+    sources[path] += ("\n" + expression + "\n").encode()
+    digest = hashlib.sha256(sources[path]).hexdigest()
+    blobs[path] = SourceBlob(blobs[path].oid, digest)
+    for field in ("production_binding", "creation_sites"):
+        payload["resources"][0][field][0]["content_sha256"] = digest
+    assert any(
+        "unreconciled source acquisition" in error
+        for error in validate_inventory(payload, sources, blobs)
+    )

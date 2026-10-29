@@ -180,6 +180,9 @@ COMMAND_MODULES: dict[str, str] = {
     "report-cast-any-typing-census": (
         "scripts.engineering.qa.report_cast_any_typing_census"
     ),
+    "check-external-resource-inventory": (
+        "scripts.engineering.qa.external_resource_inventory"
+    ),
     "report-composition-protocol-inventory": (
         "scripts.engineering.qa.report_composition_protocol_inventory"
     ),
