@@ -162,7 +162,7 @@ def _check_obo_iri(normalized: str) -> str | None:
 
 def normalize_ontology_id(value: str) -> str | None:
     """Canonicalize ontology IDs with consistent prefix format."""
-    if type(value) is not str:
+    if not isinstance(value, str):
         return None
     from bioetl.domain.normalization.text import normalize_string
 
@@ -181,7 +181,10 @@ def normalize_ontology_id(value: str) -> str | None:
 def _fallback_normalize_ontology_id(normalized: str) -> str | None:
     # Quick exclusion
     if not (
-        ":" in normalized or " " in normalized or "_" in normalized or "/" in normalized
+        ":" in normalized
+        or "_" in normalized
+        or "/" in normalized
+        or any(character.isspace() for character in normalized)
     ):
         return normalized
 
@@ -207,7 +210,7 @@ def _process_slow_paths_fallback(normalized: str) -> str | None:
         if underscore_match is not None:
             return underscore_match
 
-    if " " in normalized:
+    if any(character.isspace() for character in normalized):
         space_match = _fast_path_space(normalized)
         if space_match is not None:
             return space_match
