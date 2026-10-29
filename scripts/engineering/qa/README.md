@@ -11,6 +11,11 @@ python -m scripts.engineering.qa <command> [args...]
 
 ## Commands
 
+COMP-004 resource catalog: `python -m scripts.engineering.qa check-external-resource-inventory --check`.
+The canonical source-qualified definitions live in `configs/quality/external_resource_inventory.json`;
+`--update` refreshes `reports/quality/external-resource-inventory.md`. The tool never runs
+the runtime lifecycle scenarios reserved for #12553.
+
 | Command                          | Script                                                | Description                                                                                       |
 | -------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `check-naming`                   | `naming_audit.py`                                     | Naming convention audit (RULES.md §2) with `configs/naming_exceptions.yaml` as exception registry |
