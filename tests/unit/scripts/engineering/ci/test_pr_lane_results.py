@@ -1146,6 +1146,7 @@ def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
             "docs/reports/generated/documentation-cleanup-inventory.json",
             "docs/reports/generated/documentation-cleanup-inventory.md",
             "reports/performance/benchmark-summary.json",
+            "reports/quality/external-resource-inventory.md",
             "reports/security/blocker-CVE-out-of-scope.md",
             (
                 "reports/performance/evidence/deadbeef/raw/"

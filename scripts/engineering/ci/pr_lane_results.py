@@ -262,6 +262,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/quality/total-tech-debt-audit-main-current.md": (
         "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
     ),
+    "reports/quality/external-resource-inventory.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
     **dict.fromkeys(
         (
             "reports/epoch2208/b/12371_b_handoff.md",
