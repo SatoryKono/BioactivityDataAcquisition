@@ -1,5 +1,7 @@
 """Engineering discovery stays Git-aware without contaminating installed runtime."""
 
+from __future__ import annotations
+
 import subprocess
 
 import pytest

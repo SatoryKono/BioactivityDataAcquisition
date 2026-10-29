@@ -71,7 +71,8 @@ _SUPPORT_ROOTS = {
 def _supported_path(path: str) -> bool:
     candidate = Path(path)
     if (
-        candidate.is_absolute()
+        not candidate.parts
+        or candidate.is_absolute()
         or ".." in candidate.parts
         or any(p.startswith(".env") for p in candidate.parts)
     ):
@@ -102,6 +103,12 @@ def _supported_path(path: str) -> bool:
     )
 
 
+def _git_environment() -> dict[str, str]:
+    return {
+        key: value for key, value in os.environ.items() if not key.startswith("GIT_")
+    }
+
+
 def _support_paths(root: Path) -> list[str]:
     receipt = root / _RECEIPT
     if receipt.is_file():
@@ -112,11 +119,7 @@ def _support_paths(root: Path) -> list[str]:
         cwd=root,
         check=True,
         capture_output=True,
-        env={
-            key: value
-            for key, value in os.environ.items()
-            if not key.startswith("GIT_")
-        },
+        env=_git_environment(),
     )
     return sorted(
         name
@@ -125,10 +128,63 @@ def _support_paths(root: Path) -> list[str]:
     )
 
 
-def _add_bytes(archive: tarfile.TarFile, name: str, data: bytes) -> None:
+def _canonical_mode(mode: int) -> int:
+    """Keep executability without carrying setuid, setgid or sticky bits."""
+    return 0o755 if mode & 0o111 else 0o644
+
+
+def _receipt_modes(
+    root: Path, paths: list[str], payload: dict[str, object]
+) -> dict[str, int]:
+    modes = payload.get("file_modes")
+    if modes is None:
+        # Legacy receipts lack Git mode metadata; preserve the extracted mode.
+        return {name: _canonical_mode((root / name).stat().st_mode) for name in paths}
+    if not isinstance(modes, dict):
+        raise ValueError("Source-tooling file_modes must be a mapping")
+    result = {}
+    for name in paths:
+        mode = modes.get(name)
+        if type(mode) is not int or mode not in {0o644, 0o755}:
+            raise ValueError(f"Missing or invalid source-tooling mode: {name}")
+        result[name] = mode
+    return result
+
+
+def _support_modes(root: Path, paths: list[str]) -> dict[str, int]:
+    receipt = root / _RECEIPT
+    if receipt.is_file():
+        return _receipt_modes(
+            root, paths, json.loads(receipt.read_text(encoding="utf-8"))
+        )
+    result = subprocess.run(
+        ["git", "ls-files", "--stage", "-z"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        env=_git_environment(),
+    )
+    selected = set(paths)
+    modes = {}
+    for record in result.stdout.decode("utf-8").split("\0"):
+        header, _, name = record.partition("\t")
+        if name not in selected:
+            continue
+        mode, _, stage = header.split()
+        if mode not in {"100644", "100755"} or stage != "0":
+            raise ValueError(f"Unsupported or unmerged source-tooling mode: {name}")
+        modes[name] = _canonical_mode(int(mode, 8))
+    if set(modes) != selected:
+        raise ValueError("Source-tooling Git modes do not cover the selected files")
+    return modes
+
+
+def _add_bytes(
+    archive: tarfile.TarFile, name: str, data: bytes, *, mode: int = 0o644
+) -> None:
     member = tarfile.TarInfo(name)
     member.size = len(data)
-    member.mode = 0o644
+    member.mode = _canonical_mode(mode)
     member.mtime = 0
     archive.addfile(member, io.BytesIO(data))
 
@@ -171,6 +227,7 @@ def build_sdist(
         if path.is_symlink() or not path.resolve().is_relative_to(root):
             raise ValueError(f"Source-tooling file escapes root: {name}")
         files[name] = path.read_bytes()
+    modes = _support_modes(root, paths)
     receipt = {
         "schema_version": 1,
         "support": [
@@ -183,6 +240,7 @@ def build_sdist(
             name: hashlib.sha256(data).hexdigest()
             for name, data in sorted(files.items())
         },
+        "file_modes": modes,
     }
     with tempfile.TemporaryDirectory(prefix="bioetl-sdist-") as temporary:
         filename = _backend.build_sdist(temporary, config_settings)
@@ -204,9 +262,10 @@ def build_sdist(
                                 output,
                                 PurePosixPath(member.name).as_posix(),
                                 stream.read(),
+                                mode=member.mode,
                             )
                 for name, data in sorted(files.items()):
-                    _add_bytes(output, f"{prefix}/{name}", data)
+                    _add_bytes(output, f"{prefix}/{name}", data, mode=modes[name])
                 _add_bytes(
                     output,
                     f"{prefix}/{_RECEIPT}",

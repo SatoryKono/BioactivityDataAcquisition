@@ -1376,6 +1376,27 @@ def test_load_drift_allowlist_rejects_expired_cardinality_review_dates(
         raise AssertionError(
             "runtime_cardinality_review_required must reject expired lifecycle entries"
         )
+    from datetime import UTC, date, datetime, timedelta, timezone
+    from bioetl.infrastructure.observability import metric_inventory_policy as policy
+
+    class HostLocalInstant(datetime):
+        def astimezone(self, tz=None):
+            local_zone = timezone(timedelta(hours=-8)) if tz is None else tz
+            return super().astimezone(local_zone)
+
+    instant = HostLocalInstant(2026, 10, 29, 0, 30, tzinfo=UTC)
+    arguments = {
+        "key": "runtime_cardinality_review_required",
+        "metric_name": "bioetl_hotspot_total",
+        "raw_review_date": "2026-10-28",
+    }
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(policy, "current_utc_time", lambda: instant)
+        assert policy._validate_allowlist_review_date(**arguments) is None
+        with pytest.raises(ValueError, match="expired review_date"):
+            policy._validate_allowlist_review_date(
+                **arguments, today=date(2026, 10, 29)
+            )
 
 
 def test_load_drift_allowlist_rejects_non_iso_review_dates(

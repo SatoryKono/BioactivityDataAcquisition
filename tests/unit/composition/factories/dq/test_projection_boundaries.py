@@ -1,5 +1,7 @@
 """Sink DTO projections reject malformed dumps and respect optional fields."""
 
+from __future__ import annotations
+
 from types import SimpleNamespace
 from pydantic import BaseModel
 import pytest
@@ -19,6 +21,8 @@ def test_optional_scalar_union_is_not_treated_as_a_nested_dto():
     class Projection(BaseModel):
         count: None | int = None  # noqa: RUF036 - exercise None-first union inspection.
         dq_report: NestedProjection | None = None
+
+    Projection.model_rebuild(_types_namespace={"NestedProjection": NestedProjection})
 
     sink = SimpleNamespace(
         model_dump=lambda: {

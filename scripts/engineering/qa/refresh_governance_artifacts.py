@@ -188,17 +188,20 @@ def _sync_config_surface_metrics(
     scorecard: dict[str, object], baseline: dict[str, object]
 ) -> int:
     """Bind aggregate and family counts without raising any existing maximum."""
-    policy = scorecard["config_surface_ratchet"]
+    policy = scorecard.get("config_surface_ratchet")
     if not isinstance(policy, dict):
         raise ValueError("Invalid config-surface policy")
-    planned = _plan_config_metric_counts(policy["metrics"], baseline["metrics"])
-    families = baseline["families"]
-    family_policies = policy["families"]
+    planned = _plan_config_metric_counts(policy.get("metrics"), baseline.get("metrics"))
+    families = baseline.get("families")
+    family_policies = policy.get("families")
     if not isinstance(families, dict) or not isinstance(family_policies, dict):
         raise ValueError("Invalid config-surface families")
     for name, metrics in families.items():
+        family_policy = family_policies.get(name)
+        if not isinstance(family_policy, dict):
+            raise ValueError(f"Missing config-surface family policy: {name}")
         planned.extend(
-            _plan_config_metric_counts(family_policies[name]["metrics"], metrics)
+            _plan_config_metric_counts(family_policy.get("metrics"), metrics)
         )
     return sum(_bind_config_metric_counts(metric, value) for metric, value in planned)
 
@@ -220,8 +223,12 @@ def _sync_scorecard_hotspot_metrics_from_baseline(*, check_only: bool = False) -
         )
 
     baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
+    if not isinstance(baseline, dict):
+        raise ValueError("Hotspot baseline must be a mapping")
     by_name = _baseline_families_by_name(baseline)
     scorecard = yaml.safe_load(scorecard_path.read_text(encoding="utf-8"))
+    if not isinstance(scorecard, dict):
+        raise ValueError("Scorecard must be a mapping")
     families = (
         scorecard.get("hotspot_family_ratchets", {}).get("families", [])
         if isinstance(scorecard, dict)
@@ -231,13 +238,10 @@ def _sync_scorecard_hotspot_metrics_from_baseline(*, check_only: bool = False) -
     for family in families:
         if isinstance(family, dict):
             changed += _sync_one_scorecard_family(family, by_name)
-    if isinstance(scorecard, dict) and "config_surface_ratchet" in scorecard:
-        config_baseline = json.loads(
-            (ROOT / "reports/quality/config-discrepancy-baseline.json").read_text(
-                encoding="utf-8"
-            )
+    if "config_surface_ratchet" in scorecard:
+        changed += _sync_config_surface_metrics(
+            scorecard, _read_config_surface_baseline()
         )
-        changed += _sync_config_surface_metrics(scorecard, config_baseline)
 
     if changed and check_only:
         raise SystemExit(
@@ -256,6 +260,19 @@ def _sync_scorecard_hotspot_metrics_from_baseline(*, check_only: bool = False) -
         print(f"SYNC scorecard baseline metrics ({changed} field updates)")
     else:
         print("SYNC scorecard hotspot metrics: already aligned")
+
+
+def _read_config_surface_baseline() -> dict[str, object]:
+    path = ROOT / "reports/quality/config-discrepancy-baseline.json"
+    if not path.is_file():
+        raise FileNotFoundError(
+            "scorecard sync requires existing inputs: "
+            "reports/quality/config-discrepancy-baseline.json"
+        )
+    baseline = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(baseline, dict):
+        raise ValueError("Config-surface baseline must be a mapping")
+    return baseline
 
 
 def _run_check_only() -> None:

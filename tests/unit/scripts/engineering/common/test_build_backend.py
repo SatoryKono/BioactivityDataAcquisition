@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import io
+import hashlib
+import json
 import subprocess
 import sys
 import tarfile
@@ -80,15 +82,40 @@ def test_support_closure_includes_reference_search_roots_and_excludes_history():
     assert not backend._supported_path("docs/99-archive/old.md")
     assert not backend._supported_path(".env")
     assert not backend._supported_path("scripts/.env.secret")
+    assert not backend._supported_path("")
 
 
 def test_source_discovery_ignores_inherited_git_redirects(tmp_path, monkeypatch):
     subprocess.run(["git", "init", str(tmp_path)], check=True, capture_output=True)
     (tmp_path / "Makefile").write_text("all:\n", encoding="utf-8")
-    subprocess.run(["git", "-C", str(tmp_path), "add", "Makefile"], check=True)
+    (tmp_path / "scripts").mkdir()
+    (tmp_path / "scripts/tool.sh").write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "add", "Makefile", "scripts/tool.sh"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "update-index", "--chmod=+x", "scripts/tool.sh"],
+        check=True,
+    )
     monkeypatch.setenv("GIT_DIR", str(tmp_path / "wrong-git-dir"))
     monkeypatch.setenv("GIT_INDEX_FILE", str(tmp_path / "wrong-index"))
-    assert backend._support_paths(tmp_path) == ["Makefile"]
+    paths = backend._support_paths(tmp_path)
+    assert paths == ["Makefile", "scripts/tool.sh"]
+    modes = backend._support_modes(tmp_path, paths)
+    assert modes == {"Makefile": 0o644, "scripts/tool.sh": 0o755}
+    (tmp_path / backend._RECEIPT).write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "files": {
+                    name: hashlib.sha256((tmp_path / name).read_bytes()).hexdigest()
+                    for name in paths
+                },
+                "file_modes": modes,
+            }
+        )
+    )
+    assert backend._support_modes(tmp_path, paths) == modes
 
 
 def test_sdist_repack_copies_only_validated_content_and_canonical_metadata(
@@ -98,7 +125,19 @@ def test_sdist_repack_copies_only_validated_content_and_canonical_metadata(
     root.mkdir()
     (root / "Makefile").write_text("all:\n", encoding="utf-8")
     monkeypatch.chdir(root)
-    monkeypatch.setattr(backend, "_support_paths", lambda _root: ["Makefile"])
+    (root / backend._RECEIPT).write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "files": {
+                    "Makefile": hashlib.sha256(
+                        (root / "Makefile").read_bytes()
+                    ).hexdigest()
+                },
+                "file_modes": {"Makefile": 0o755},
+            }
+        )
+    )
 
     def upstream(directory, _config_settings):
         name = "pkg-1.tar.gz"
@@ -106,6 +145,7 @@ def test_sdist_repack_copies_only_validated_content_and_canonical_metadata(
             member = tarfile.TarInfo("pkg-1/PKG-INFO")
             member.size = 2
             member.mtime = 123456
+            member.mode = 0o4755
             member.pax_headers = {"comment": "upstream metadata"}
             archive.addfile(member, io.BytesIO(b"OK"))
         return name
@@ -117,6 +157,8 @@ def test_sdist_repack_copies_only_validated_content_and_canonical_metadata(
         member = archive.getmember("pkg-1/PKG-INFO")
         assert member.mtime == 0
         assert member.pax_headers == {}
+        assert member.mode == 0o755
         assert archive.extractfile(member).read() == b"OK"
         assert "pkg-1/Makefile" in archive.getnames()
+        assert archive.getmember("pkg-1/Makefile").mode == 0o755
         assert "pkg-1/quality-tooling-support.json" in archive.getnames()

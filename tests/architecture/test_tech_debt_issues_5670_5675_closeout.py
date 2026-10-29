@@ -249,6 +249,6 @@ def test_issue_5675_compatibility_tests_and_snapshot_lane_are_bounded() -> None:
     assert snapshot_policy["shared_snapshot_cache_required"] is False
 
     unit_text = MEMORY_GRAPH_UNIT_TEST.read_text(encoding="utf-8")
-    assert "pytestmark = pytest.mark.memory" in unit_text
+    assert "pytestmark = pytest.mark.unit" in unit_text
     assert "pytest.skip(" not in unit_text
     assert "memory.graph.sync_pkg" in unit_text

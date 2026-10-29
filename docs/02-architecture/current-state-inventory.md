@@ -43,7 +43,7 @@ nonregressing adoption retains prior accepted values where the fresh raw
 measurement is lower. Those 2566-module figures and the summary table below are
 historical measurement evidence for that commit, not the live source-module
 count. The current source inventory binding at the end of this document reports
-the live projection (`source_module_count=2571`). This is local measurement
+the authoritative live projection. This is local measurement
 evidence, not CircleCI acceptance or lifecycle ADMIT for the final PR head.
 
 | Artifact | Historical measurement (`912f4839`) | Source |

@@ -53,6 +53,11 @@ def _validate_allowlist_review_date(
     raw_review_date: str,
     today: date | None = None,
 ) -> None:
+    """Keep legacy host-local calendar semantics; inject ``today`` for a fixed date.
+
+    The canonical UTC clock supplies the instant, while local conversion preserves
+    the original ``date.today()`` contract at timezone boundaries.
+    """
     try:
         review_date = date.fromisoformat(raw_review_date)
     except ValueError as exc:

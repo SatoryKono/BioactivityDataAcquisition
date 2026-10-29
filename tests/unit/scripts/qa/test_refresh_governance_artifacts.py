@@ -281,6 +281,10 @@ def test_scorecard_sync_fails_when_required_input_is_missing(
     ] == {"current_count": 0, "max_count": 0}
     refresh._sync_scorecard_hotspot_metrics_from_baseline(check_only=True)
     assert config.read_bytes() == updated
+    (quality / "config-discrepancy-baseline.json").unlink()
+    with pytest.raises(FileNotFoundError, match="config-discrepancy-baseline.json"):
+        refresh._sync_scorecard_hotspot_metrics_from_baseline(check_only=True)
+    assert config.read_bytes() == updated
 
 
 def test_scorecard_budget_sync_is_shrink_only() -> None:
@@ -354,6 +358,14 @@ def test_scorecard_budget_sync_is_shrink_only() -> None:
     assert (
         config == stable
     )  # A later family failure must not partly update aggregate counts.
+    for malformed in (
+        {},
+        {"metrics": {}},
+        {"metrics": baseline["metrics"], "families": {"unowned": {}}},
+    ):
+        with pytest.raises(ValueError):
+            refresh._sync_config_surface_metrics(config, malformed)
+        assert config == stable
 
 
 def test_atomic_writer_uses_utf8_lf_and_replaces_target(tmp_path: Path) -> None:

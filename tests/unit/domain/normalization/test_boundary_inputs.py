@@ -1,5 +1,7 @@
 """Reject nonbinary source values and preserve CALOHA identifier aliases."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.domain.normalization.rules import normalize_boolean, normalize_binary_flag

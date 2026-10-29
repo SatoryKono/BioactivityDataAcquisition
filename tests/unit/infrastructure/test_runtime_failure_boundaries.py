@@ -1,5 +1,7 @@
 """Fail-closed IO, payload, redirect and cleanup boundaries from CI regressions."""
 
+from __future__ import annotations
+
 import io
 import contextlib
 import subprocess
