@@ -102,6 +102,21 @@ EXTERNAL_RESOURCE_INVENTORY_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    "mkdocs.yml": ("tests/architecture/test_documentation_sync.py",),
+    "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md": (
+        "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
+    ),
+    "reports/quality/pytest-nodeid-inventory.json": (
+        "tests/unit/scripts/qa/test_build_pytest_nodeid_inventory.py",
+    ),
+    "reports/quality/quality-move-qm08/reference_decisions.json": (
+        "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
+    ),
+    "scripts/engineering/README.md": (
+        "tests/architecture/test_scripts_inventory_manifest.py",
+        "tests/architecture/test_scripts_inventory_discovery.py",
+    ),
     ".gitleaksignore": (
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
     ),

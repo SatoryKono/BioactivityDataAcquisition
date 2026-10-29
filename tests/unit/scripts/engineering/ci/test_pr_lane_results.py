@@ -718,6 +718,12 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
             "docs/02-architecture/current-state-inventory.md",
             "docs/04-reference/api/infrastructure.md",
             "reports/quality/total-tech-debt-audit-main-current.md",
+            ".dockerignore",
+            "mkdocs.yml",
+            "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md",
+            "reports/quality/pytest-nodeid-inventory.json",
+            "reports/quality/quality-move-qm08/reference_decisions.json",
+            "scripts/engineering/README.md",
         ],
         repo_root=repo_root,
     )
@@ -727,6 +733,23 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
     )
     assert "tests/unit/scripts/qa/test_topology_source_binding.py" in report["selected"]
     assert "tests/architecture/test_scripts_lifecycle_registry.py" in report["selected"]
+    assert "tests/architecture/test_docker_runtime_contracts.py" in report["selected"]
+    assert "tests/architecture/test_documentation_sync.py" in report["selected"]
+    assert (
+        "tests/unit/scripts/qa/test_refresh_governance_artifacts.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/unit/scripts/qa/test_build_pytest_nodeid_inventory.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/unit/scripts/engineering/qa/test_verify_quality_move.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/architecture/test_scripts_inventory_discovery.py" in report["selected"]
+    )
     assert (
         "tests/architecture/test_api_reference_public_facades.py" in report["selected"]
     )
