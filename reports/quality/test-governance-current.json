@@ -566,7 +566,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1648",
+      "line": "1651",
       "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_merged_empty_records_returns"
@@ -699,35 +699,35 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "195",
+      "line": "251",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_schema_drift_evolve_mode_does_not_raise"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "226",
+      "line": "282",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_schema_drift_ignore_mode_does_not_raise"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "257",
+      "line": "313",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_schema_drift_no_error_when_no_drift"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "294",
+      "line": "350",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_schema_drift_skipped_for_new_table"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "316",
+      "line": "372",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_schema_drift_skipped_for_empty_records"
@@ -2007,7 +2007,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1648",
+        "line": "1651",
         "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_merged_empty_records_returns"
@@ -2140,35 +2140,35 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "195",
+        "line": "251",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_schema_drift_evolve_mode_does_not_raise"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "226",
+        "line": "282",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_schema_drift_ignore_mode_does_not_raise"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "257",
+        "line": "313",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_schema_drift_no_error_when_no_drift"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "294",
+        "line": "350",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_schema_drift_skipped_for_new_table"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "316",
+        "line": "372",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_schema_drift_skipped_for_empty_records"
@@ -2492,12 +2492,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3188,
-    "total_test_functions": 31531,
+    "total_test_functions": 31532,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "26c8f364dbce95219a01ddc3fadb78513b7cefa096114f6bc2edd4891ff317d8",
+  "source_tree_sha256": "5265e319e1f875458902dae9ebc661a0f88fb14d3022165f0d42370a714948ae",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 107,
@@ -2560,7 +2560,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3188,
-  "total_test_functions": 31531,
+  "total_test_functions": 31532,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
