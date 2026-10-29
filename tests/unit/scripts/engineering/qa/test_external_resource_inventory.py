@@ -389,3 +389,54 @@ def test_unavailable_pinned_history_is_explicit(
     monkeypatch.setattr(inventory, "_run", unavailable)
     assert inventory.main(["--check"]) == 1
     assert "MISSING EVIDENCE" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("prior_candidates_input", None),
+        ("prior_candidates_input", []),
+        ("prior_candidate_dispositions", None),
+        ("prior_candidate_dispositions", [None]),
+        ("prior_candidate_dispositions", ["not a record"]),
+    ],
+)
+def test_malformed_history_returns_diagnostic(
+    inventory_case: tuple, field: str, value: object
+) -> None:
+    payload, sources, blobs = inventory_case
+    payload[field] = value
+    assert any(
+        "historical candidate" in error
+        for error in validate_inventory(payload, sources, blobs)
+    )
+
+
+@pytest.mark.parametrize("definitions", [None, "fixture.file", [{}]])
+def test_malformed_history_links_return_diagnostic(
+    inventory_case: tuple, definitions: object
+) -> None:
+    payload, sources, blobs = inventory_case
+    payload["prior_candidate_dispositions"][0]["resource_definitions"] = definitions
+    assert any(
+        "historical candidate" in error
+        for error in validate_inventory(payload, sources, blobs)
+    )
+
+
+@pytest.mark.parametrize("command", [["git", "ls-files"], "git ls-files"])
+def test_working_checkout_failure_is_not_missing_evidence(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], command: object
+) -> None:
+    import subprocess
+    from scripts.engineering.qa import external_resource_inventory as inventory
+
+    def failed(args: Any) -> int:
+        raise subprocess.CalledProcessError(128, command)
+
+    monkeypatch.setattr(inventory, "_run", failed)
+    assert inventory.main(["--check"]) == 1
+    output = capsys.readouterr().out
+    assert "CHECK FAILED" in output
+    assert "MISSING EVIDENCE" not in output
+    assert "git ls-files" in output and "128" in output

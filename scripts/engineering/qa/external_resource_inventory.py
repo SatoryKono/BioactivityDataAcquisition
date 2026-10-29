@@ -270,26 +270,34 @@ def _check_source_census(
     return errors
 
 
-def _valid_disposition(row: dict[str, Any], identities: set[str]) -> bool:
-    disposition = row.get("disposition")
-    return bool(
-        row.get("object")
-        and row.get("file")
-        and isinstance(disposition, str)
-        and disposition.strip()
-        and set(row.get("resource_definitions", [])).issubset(identities)
-    )
+def _valid_disposition(row: object, identities: set[str]) -> bool:
+    if not isinstance(row, dict):
+        return False
+    for field in ("candidate_id", "object", "file", "disposition"):
+        value = row.get(field)
+        if not isinstance(value, str) or not value.strip():
+            return False
+    definitions = row.get("resource_definitions", [])
+    if not isinstance(definitions, list) or not all(
+        isinstance(value, str) for value in definitions
+    ):
+        return False
+    return set(definitions).issubset(identities)
 
 
 def _check_history(payload: dict[str, Any], identities: set[str]) -> list[str]:
     history = payload.get("prior_candidate_dispositions", [])
-    expected = payload.get("prior_candidates_input", {}).get("count")
+    meta = payload.get("prior_candidates_input")
+    expected = meta.get("count") if isinstance(meta, dict) else None
+    if not isinstance(history, list) or not all(
+        _valid_disposition(row, identities) for row in history
+    ):
+        return ["historical candidate coverage/identity linkage is inconsistent"]
     if (
-        not isinstance(expected, int)
+        type(expected) is not int
         or expected < 1
         or len(history) != expected
         or len({row.get("candidate_id") for row in history}) != len(history)
-        or not all(_valid_disposition(row, identities) for row in history)
     ):
         return ["historical candidate coverage/identity linkage is inconsistent"]
     return []
@@ -509,14 +517,29 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         return _run(args)
-    except subprocess.CalledProcessError:
-        print(
-            "MISSING EVIDENCE: pinned Git history unavailable; fetch full repository history"
-        )
+    except subprocess.CalledProcessError as error:
+        print(_git_failure_message(error))
         return 1
     except (OSError, ValueError) as error:
         print(f"Inventory input unavailable or invalid: {error}")
         return 1
+
+
+def _git_failure_message(error: subprocess.CalledProcessError) -> str:
+    args = error.cmd
+    if isinstance(args, str):
+        return f"CHECK FAILED: command exited {error.returncode}: {args}"
+    command = " ".join(map(str, args))
+    if (
+        len(args) > 1
+        and args[0] == "git"
+        and args[1] in {"ls-tree", "cat-file", "rev-parse"}
+    ):
+        return (
+            f"MISSING EVIDENCE: pinned Git command exited {error.returncode}: {command}; "
+            "fetch full repository history if the pinned commit is absent"
+        )
+    return f"CHECK FAILED: command exited {error.returncode}: {command}"
 
 
 def _run(args: argparse.Namespace) -> int:
