@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-29T20:18:15.160015+00:00",
+  "generated_at": "2026-10-29T20:28:24.220146+00:00",
   "summary": {
     "total_scripts": 698,
     "status_counts": {
@@ -15245,7 +15245,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 14,
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
@@ -15267,33 +15267,33 @@
         },
         {
           "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-          "line": 200,
+          "line": 105,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.external_resource_inventory import _render_components"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
+          "line": 315,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.external_resource_inventory import ("
         },
         {
           "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-          "line": 215,
+          "line": 330,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.external_resource_inventory import ("
         },
         {
           "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-          "line": 232,
+          "line": 347,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.external_resource_inventory import ("
         },
         {
           "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-          "line": 250,
+          "line": 365,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.external_resource_inventory import ("
-        },
-        {
-          "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-          "line": 323,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa import external_resource_inventory as inventory"
         }
       ],
       "owner": "@bioetl-architecture",

@@ -81,6 +81,121 @@ def test_correct_inventory_is_accepted(inventory_case: tuple) -> None:
     assert validate_inventory(*inventory_case) == []
 
 
+@pytest.fixture
+def resource_component(inventory_case: tuple) -> dict[str, Any]:
+    return {
+        "identity": "fixture.component",
+        "type": "dependency stream",
+        "creator": "dependency writer",
+        "owner": "save operation",
+        "lifetime": "one save",
+        "closer": "dependency close",
+        "shutdown_contract": "close after writing",
+        "source": "dependency/writer.py",
+        "version": "1.0",
+        "source_sha256": hashlib.sha256(b"dependency").hexdigest(),
+        "source_line": 1,
+        "repo_source": dict(inventory_case[0]["resources"][0]["creation_sites"][0]),
+    }
+
+
+def test_correct_component_is_accepted_and_rendered(
+    inventory_case: tuple, resource_component: dict[str, Any]
+) -> None:
+    from scripts.engineering.qa.external_resource_inventory import _render_components
+
+    payload, sources, blobs = inventory_case
+    payload["resources"][0]["resource_components"] = [resource_component]
+    assert validate_inventory(payload, sources, blobs) == []
+    assert "fixture.component" in "\n".join(_render_components(payload))
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "identity",
+        "type",
+        "creator",
+        "owner",
+        "lifetime",
+        "closer",
+        "shutdown_contract",
+        "source",
+        "version",
+        "source_sha256",
+        "source_line",
+        "repo_source",
+    ],
+)
+@pytest.mark.parametrize("replacement", [None, 3, ""])
+def test_invalid_component_fields_are_rejected(
+    inventory_case: tuple,
+    resource_component: dict[str, Any],
+    field: str,
+    replacement: object,
+) -> None:
+    if field == "source_line" and replacement == 3:
+        replacement = True
+    resource_component[field] = replacement
+    payload, sources, blobs = inventory_case
+    payload["resources"][0]["resource_components"] = [resource_component]
+    assert "invalid resource component schema" in validate_inventory(
+        payload, sources, blobs
+    )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("source_line", 0), ("source_line", -1), ("source_sha256", "not-a-digest")],
+)
+def test_component_source_coordinates_are_valid(
+    inventory_case: tuple, resource_component: dict[str, Any], field: str, value: object
+) -> None:
+    payload, sources, blobs = inventory_case
+    resource_component[field] = value
+    payload["resources"][0]["resource_components"] = [resource_component]
+    assert "invalid resource component schema" in validate_inventory(
+        payload, sources, blobs
+    )
+
+
+def test_component_requires_repository_source_provenance(
+    inventory_case: tuple, resource_component: dict[str, Any]
+) -> None:
+    payload, sources, blobs = inventory_case
+    resource_component["repo_source"].pop("source_blob")
+    payload["resources"][0]["resource_components"] = [resource_component]
+    assert "invalid resource component schema" in validate_inventory(
+        payload, sources, blobs
+    )
+
+
+@pytest.mark.parametrize("components", [None, "invalid", {}, [None], [{}]])
+def test_malformed_component_collections_are_rejected(
+    inventory_case: tuple, components: object
+) -> None:
+    payload, sources, blobs = inventory_case
+    payload["resources"][0]["resource_components"] = components
+    assert any(
+        "component" in error for error in validate_inventory(payload, sources, blobs)
+    )
+
+
+@pytest.mark.parametrize("identity", ["fixture.component", "fixture.file"])
+def test_component_identities_are_unique(
+    inventory_case: tuple, resource_component: dict[str, Any], identity: str
+) -> None:
+    payload, sources, blobs = inventory_case
+    payload["resources"][0]["resource_components"] = [
+        resource_component,
+        dict(resource_component, identity=identity),
+    ]
+    assert any(
+        "duplicate component identity" in error
+        for error in validate_inventory(payload, sources, blobs)
+    )
+
+
 def test_duplicate_identity_is_rejected(inventory_case: tuple) -> None:
     payload, sources, blobs = inventory_case
     payload["resources"].append(copy.deepcopy(payload["resources"][0]))
@@ -460,6 +575,18 @@ def test_omitted_delegated_resource_primitive_is_rejected(
         "unreconciled source acquisition" in error
         for error in validate_inventory(payload, sources, blobs)
     )
+
+
+@pytest.mark.parametrize("field", ["expression", "creation_mode"])
+@pytest.mark.parametrize("value", [[], {}])
+def test_component_reference_expression_types_are_diagnostics(
+    inventory_case: tuple, resource_component: dict[str, Any], field: str, value: object
+) -> None:
+    payload, sources, blobs = inventory_case
+    resource_component["repo_source"][field] = value
+    payload["resources"][0]["resource_components"] = [resource_component]
+    errors = validate_inventory(payload, sources, blobs)
+    assert any("expression" in error or "creation mode" in error for error in errors)
 
 
 @pytest.mark.parametrize("nested", [False, True])

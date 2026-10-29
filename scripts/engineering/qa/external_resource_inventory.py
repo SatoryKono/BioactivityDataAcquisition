@@ -22,6 +22,18 @@ _OID = re.compile(r"[0-9a-f]{40}")
 _REFERENCE_FIELDS = frozenset(
     {"file", "line", "source_commit", "source_blob", "content_sha256"}
 )
+_COMPONENT_TEXT_FIELDS = (
+    "identity",
+    "type",
+    "creator",
+    "owner",
+    "lifetime",
+    "closer",
+    "shutdown_contract",
+    "source",
+    "version",
+    "source_sha256",
+)
 _ACQUISITION_NAMES = frozenset(
     "AsyncClient ThreadPoolExecutor ProcessPoolExecutor Thread create_task "
     "ensure_future start_server Popen popen_factory DeltaTable _DeltaTable "
@@ -154,13 +166,16 @@ def _check_location(ref: dict[str, Any], data: bytes, path: str) -> list[str]:
 def _check_expression(ref: dict[str, Any], data: bytes, path: str) -> list[str]:
     if "expression" not in ref:
         return []
+    expression = ref["expression"]
+    if not isinstance(expression, str):
+        return [f"invalid source expression: {path}"]
     mode = ref.get("creation_mode", "call")
     modes: dict[str, tuple[type[ast.AST], ...]] = {
         "call": (ast.Call,),
         "callback-reference": (ast.Attribute, ast.Name),
         "callback": (ast.AsyncFunctionDef, ast.FunctionDef),
     }
-    if mode not in modes:
+    if not isinstance(mode, str) or mode not in modes:
         return [f"unsupported creation mode: {mode}"]
     line = ref.get("line")
     calls = {
@@ -168,7 +183,7 @@ def _check_expression(ref: dict[str, Any], data: bytes, path: str) -> list[str]:
         for node in ast.walk(ast.parse(data))
         if isinstance(node, modes[mode]) and getattr(node, "lineno", None) == line
     }
-    if ref["expression"] not in calls:
+    if expression not in calls:
         return [f"source expression differs: {path}:{line}"]
     return []
 
@@ -316,6 +331,40 @@ def _check_alias_links(payload: dict[str, Any], identities: set[str]) -> list[st
     return []
 
 
+def _valid_component(component: object) -> bool:
+    if not isinstance(component, dict) or not all(
+        isinstance(component.get(field), str) and component[field].strip()
+        for field in _COMPONENT_TEXT_FIELDS
+    ):
+        return False
+    line = component.get("source_line")
+    return (
+        type(line) is int
+        and line > 0
+        and re.fullmatch(r"[0-9a-f]{64}", component["source_sha256"]) is not None
+        and not _reference_schema([component.get("repo_source")], "component source")
+    )
+
+
+def _check_components(records: list[dict[str, Any]], identities: set[str]) -> list[str]:
+    errors: list[str] = []
+    seen = set(identities)
+    for record in records:
+        components = record.get("resource_components", [])
+        if not isinstance(components, list):
+            errors.append("invalid resource_components schema")
+            continue
+        for component in components:
+            if not _valid_component(component):
+                errors.append("invalid resource component schema")
+                continue
+            identity = component["identity"]
+            if identity in seen:
+                errors.append(f"duplicate component identity: {identity}")
+            seen.add(identity)
+    return errors
+
+
 def validate_inventory(
     payload: dict[str, Any],  # Any: JSON inventory boundary, checked below.
     sources: Mapping[str, bytes],
@@ -336,6 +385,7 @@ def validate_inventory(
     sites: set[tuple[str, int, str]] = set()
     for record in records:
         errors.extend(_check_record(record, seen, sites))
+    errors.extend(_check_components(records, seen))
     schema_errors = [
         error
         for field in (
