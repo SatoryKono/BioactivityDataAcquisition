@@ -196,6 +196,7 @@ jobs:
             -f grafana/tooling/router-v7-bridge/Dockerfile.host \
             -t bioetl-router-host:acceptance reports/qa/router-v7-image-context
       - name: Verify built image against declared delivery image
+        id: host_parity
         run: |
           image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
           docker pull "$image"
@@ -203,6 +204,51 @@ jobs:
           docker pull "$base_image"
           node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
             bioetl-router-host:acceptance
+      - name: Preserve complete rootfs differences when parity fails
+        if: ${{ !cancelled() && failure() && steps.host_parity.outcome == 'failure' }}
+        run: |
+          /usr/bin/python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+          from scripts.ops.observability.grafana import router_managed_image as native
+
+          owner = Path('grafana/tooling/router-v7-bridge')
+          manifest = json.loads((owner / 'host-image.json').read_text())
+          def config_id(reference):
+              return subprocess.check_output(
+                  [native.docker_path(), 'image', 'inspect', '--format', '{{.Id}}', '--', reference],
+                  text=True,
+              ).strip()
+          references = {
+              'built': config_id('bioetl-router-host:acceptance'),
+              'declared': manifest['image'],
+              'base': config_id(manifest['base_image']),
+          }
+          snapshots = {}
+          for name, reference in references.items():
+              records = native.records(reference)
+              snapshots[name] = records
+              payload = {
+                  'status': 'FAIL_DIAGNOSTIC_ONLY',
+                  'source_commit': os.environ['GITHUB_SHA'],
+                  'image': reference,
+                  'inspection': native.inspect(reference),
+                  'rootfs_sha256': hashlib.sha256(json.dumps(records, sort_keys=True, separators=(',', ':')).encode()).hexdigest(),
+                  'records': records,
+              }
+              Path(f'reports/qa/router-v7-rootfs-{name}.json').write_text(json.dumps(payload, sort_keys=True))
+          actual, expected = snapshots['built'], snapshots['declared']
+          differences = {
+              path: {'built': actual.get(path), 'declared': expected.get(path)}
+              for path in sorted(actual.keys() | expected.keys())
+              if actual.get(path) != expected.get(path)
+          }
+          Path('reports/qa/router-v7-rootfs-differences.json').write_text(json.dumps(differences, indent=2))
+          print('FAIL diagnostics only: rootfs paths differing:', len(differences))
+          PY
       - name: Build and verify managed image from the qualified parent
         run: |
           mkdir -p reports/qa/router-v7-managed-context
@@ -228,5 +274,6 @@ jobs:
             reports/qa/router-v7-image-parity.json
             reports/qa/router-v7-managed-image-build.json
             reports/qa/router-v7-managed-image-parity.json
+            reports/qa/router-v7-rootfs-*.json
           if-no-files-found: warn
           retention-days: 7
