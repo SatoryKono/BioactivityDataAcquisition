@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-30T09:33:01.729875+00:00",
+  "generated_at": "2026-10-30T12:21:17.003094+00:00",
   "summary": {
-    "total_scripts": 700,
+    "total_scripts": 703,
     "status_counts": {
-      "active": 334,
+      "active": 337,
       "supporting": 366
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 19,
       "ci": 75,
-      "docs": 291,
-      "other": 16,
-      "scripts": 587,
+      "docs": 293,
+      "other": 17,
+      "scripts": 589,
       "skills": 13,
-      "tests": 518
+      "tests": 521
     }
   },
   "scripts": [
@@ -10136,7 +10136,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 651,
+          "line": 658,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10423,7 +10423,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 835,
+          "line": 842,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10937,7 +10937,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 409,
+          "line": 416,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target \"${targets[@]}\" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-timeout"
         },
@@ -13917,7 +13917,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md",
-          "line": 68,
+          "line": 89,
           "source_group": "docs",
           "text": "| 2 | `python -m scripts.engineering.qa.build_pytest_nodeid_inventory --check` / `--update` | Actual pytest collection, test matrix and shard rules | `reports/quality/pytest-nodeid-inventory.json` |"
         },
@@ -15312,13 +15312,25 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 17,
       "references": [
+        {
+          "path": "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md",
+          "line": 66,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa.external_resource_inventory --check"
+        },
         {
           "path": "scripts/engineering/qa/__main__.py",
           "line": 184,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.external_resource_inventory\""
+        },
+        {
+          "path": "scripts/engineering/qa/requalify_external_resource_inventory.py",
+          "line": 21,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa import external_resource_inventory as inventory"
         },
         {
           "path": "tests/architecture/test_external_resource_inventory_catalog.py",
@@ -15347,18 +15359,6 @@
         {
           "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
           "line": 330,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa.external_resource_inventory import ("
-        },
-        {
-          "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-          "line": 347,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa.external_resource_inventory import ("
-        },
-        {
-          "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-          "line": 365,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.external_resource_inventory import ("
         }
@@ -18276,6 +18276,51 @@
       "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-weak-assert-inventory; keep contributor execution routed through the unified QA dispatcher."
     },
     {
+      "path": "scripts/engineering/qa/requalify_external_resource_inventory.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md",
+          "line": 63,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa.requalify_external_resource_inventory --review configs/quality/external_resource_inventory_qm08_review.json --check"
+        },
+        {
+          "path": "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md",
+          "line": 64,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa.requalify_external_resource_inventory --review configs/quality/external_resource_inventory_qm08_review.json --update"
+        },
+        {
+          "path": "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md",
+          "line": 65,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa.requalify_external_resource_inventory --review configs/quality/external_resource_inventory_qm08_review.json --check"
+        },
+        {
+          "path": "scripts/engineering/README.md",
+          "line": 56,
+          "source_group": "scripts",
+          "text": "`python -m scripts.engineering.qa.requalify_external_resource_inventory --review"
+        },
+        {
+          "path": "tests/architecture/test_external_resource_inventory_catalog.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.requalify_external_resource_inventory import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import requalify_external_resource_inventory as producer"
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/qa/run_architecture_audit_read_only.py",
       "type": "py",
       "status": "supporting",
@@ -20712,7 +20757,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 646,
+          "line": 653,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
@@ -20994,7 +21039,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md",
-          "line": 71,
+          "line": 92,
           "source_group": "docs",
           "text": "| 5 | `python -m scripts.engineering.repo check-inventory --check` / `--update` | Indexed scripts, callers, docs, catalog and lifecycle decisions | `configs/quality/scripts_inventory_manifest.json` |"
         }
@@ -21677,7 +21722,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 66,
+      "reference_count": 67,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -21704,6 +21749,12 @@
           "text": "uv run --frozen --no-build python -m scripts.ops run-grafana-audit-cycle \\"
         },
         {
+          "path": ".github/workflows/router-v7-bridge.yml",
+          "line": 218,
+          "source_group": "ci",
+          "text": "/usr/bin/python3 -m scripts.ops verify-router-managed-image \"$built\""
+        },
+        {
           "path": "Makefile",
           "line": 107,
           "source_group": "build",
@@ -21720,12 +21771,6 @@
           "line": 1809,
           "source_group": "docs",
           "text": "uv run python -m scripts.ops setup-plugins"
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 167,
-          "source_group": "docs",
-          "text": "plugins backend: [`scripts/ops/__main__.py`](../../../../../scripts/ops/__main__.py)"
         }
       ]
     },
@@ -24206,6 +24251,27 @@
       "next_step": "Retain only as a bounded optional renderer-only recovery helper while Grafana monitoring remains local and optional; consolidate it into the canonical observability command surface before promotion."
     },
     {
+      "path": "scripts/ops/observability/grafana/refresh_router_delivery.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "grafana/tooling/router-v7-bridge/HOST-ACCEPTANCE.md",
+          "line": 34,
+          "source_group": "other",
+          "text": "python -m scripts.ops.observability.grafana.refresh_router_delivery \\"
+        },
+        {
+          "path": "tests/unit/scripts/ops/test_refresh_router_delivery.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana import refresh_router_delivery as release"
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/observability/grafana/regression_acceptance.py",
       "type": "py",
       "status": "supporting",
@@ -24378,7 +24444,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -24391,6 +24457,12 @@
           "line": 91,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.router_managed_image\""
+        },
+        {
+          "path": "scripts/ops/observability/grafana/refresh_router_delivery.py",
+          "line": 22,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana import router_managed_image as native"
         },
         {
           "path": "tests/architecture/test_circleci_migration_contract.py",
@@ -24689,6 +24761,33 @@
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-11-17",
       "next_step": "Retain as the Windows-side compatibility launcher for the canonical scripts.ops ensure-quarantine-explorer command while Grafana local audit flows may still need a direct PowerShell entrypoint; retire it once Windows-specific observability launch wrappers are fully consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/trusted_docker.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/router_managed_image.py",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.trusted_docker import docker_path"
+        },
+        {
+          "path": "scripts/ops/observability/grafana/router_rootfs.py",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.trusted_docker import docker_path"
+        },
+        {
+          "path": "tests/unit/scripts/ops/test_trusted_docker.py",
+          "line": 7,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana import trusted_docker as trusted"
+        }
+      ]
     },
     {
       "path": "scripts/ops/observability/green_acceptance.py",
