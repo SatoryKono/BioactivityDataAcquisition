@@ -1699,4 +1699,7 @@ def test_resource_inventory_files_select_integrity_controls(changed_file: str) -
         "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py"
         in report["selected"]
     )
+    assert (
+        "tests/architecture/test_external_resource_inventory.py" in report["selected"]
+    )
     assert report["activation"] == "not_applied"

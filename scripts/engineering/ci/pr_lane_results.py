@@ -100,6 +100,9 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 EXTERNAL_RESOURCE_INVENTORY_TEST = (
     "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py"
 )
+EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
+    "tests/architecture/test_external_resource_inventory.py"
+)
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
@@ -282,10 +285,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/quality/external-resource-inventory.md": (
         EXTERNAL_RESOURCE_INVENTORY_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "scripts/engineering/qa/README.md": (
         EXTERNAL_RESOURCE_INVENTORY_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         "tests/architecture/test_scripts_inventory_manifest.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
@@ -298,7 +303,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory/part-04.json",
             "configs/quality/external_resource_inventory/part-05.json",
         ),
-        (EXTERNAL_RESOURCE_INVENTORY_TEST,),
+        (EXTERNAL_RESOURCE_INVENTORY_TEST, EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST),
     ),
     **dict.fromkeys(
         (

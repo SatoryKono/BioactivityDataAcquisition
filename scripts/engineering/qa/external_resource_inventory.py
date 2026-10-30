@@ -22,6 +22,18 @@ _OID = re.compile(r"[0-9a-f]{40}")
 _REFERENCE_FIELDS = frozenset(
     {"file", "line", "source_commit", "source_blob", "content_sha256"}
 )
+_COMPONENT_TEXT_FIELDS = (
+    "identity",
+    "type",
+    "creator",
+    "owner",
+    "lifetime",
+    "closer",
+    "shutdown_contract",
+    "source",
+    "version",
+    "source_sha256",
+)
 _ACQUISITION_NAMES = frozenset(
     "AsyncClient ThreadPoolExecutor ProcessPoolExecutor Thread create_task "
     "ensure_future start_server Popen popen_factory DeltaTable _DeltaTable "
@@ -31,7 +43,8 @@ _ACQUISITION_NAMES = frozenset(
     "scandir iterdir glob rglob walk listdir stream_reader stream_writer new_file "
     "new_stream open_file to_thread run_in_executor read_csv write_csv read_parquet "
     "write_parquet scan_parquet scan_csv read_table to_excel copyfile copytree copy2 "
-    "move rmtree push_gateway delete_gateway start_http_server_fn flock locking".split()
+    "move rmtree push_gateway delete_gateway start_http_server_fn flock locking "
+    "Workbook save".split()
 )
 
 
@@ -153,13 +166,16 @@ def _check_location(ref: dict[str, Any], data: bytes, path: str) -> list[str]:
 def _check_expression(ref: dict[str, Any], data: bytes, path: str) -> list[str]:
     if "expression" not in ref:
         return []
+    expression = ref["expression"]
+    if not isinstance(expression, str):
+        return [f"invalid source expression: {path}"]
     mode = ref.get("creation_mode", "call")
     modes: dict[str, tuple[type[ast.AST], ...]] = {
         "call": (ast.Call,),
         "callback-reference": (ast.Attribute, ast.Name),
         "callback": (ast.AsyncFunctionDef, ast.FunctionDef),
     }
-    if mode not in modes:
+    if not isinstance(mode, str) or mode not in modes:
         return [f"unsupported creation mode: {mode}"]
     line = ref.get("line")
     calls = {
@@ -167,7 +183,7 @@ def _check_expression(ref: dict[str, Any], data: bytes, path: str) -> list[str]:
         for node in ast.walk(ast.parse(data))
         if isinstance(node, modes[mode]) and getattr(node, "lineno", None) == line
     }
-    if ref["expression"] not in calls:
+    if expression not in calls:
         return [f"source expression differs: {path}:{line}"]
     return []
 
@@ -303,6 +319,52 @@ def _check_history(payload: dict[str, Any], identities: set[str]) -> list[str]:
     return []
 
 
+def _check_alias_links(payload: dict[str, Any], identities: set[str]) -> list[str]:
+    for section in [payload, *payload["resources"]]:
+        aliases = section.get("operation_aliases", [])
+        if _reference_schema(aliases, "operation_aliases"):
+            continue  # The owning schema check already reports malformed aliases.
+        for alias in aliases:
+            identity = alias.get("resource_identity")
+            if not isinstance(identity, str) or identity not in identities:
+                return ["operation alias links a missing resource identity"]
+    return []
+
+
+def _valid_component(component: object) -> bool:
+    if not isinstance(component, dict) or not all(
+        isinstance(component.get(field), str) and component[field].strip()
+        for field in _COMPONENT_TEXT_FIELDS
+    ):
+        return False
+    line = component.get("source_line")
+    return (
+        type(line) is int
+        and line > 0
+        and re.fullmatch(r"[0-9a-f]{64}", component["source_sha256"]) is not None
+        and not _reference_schema([component.get("repo_source")], "component source")
+    )
+
+
+def _check_components(records: list[dict[str, Any]], identities: set[str]) -> list[str]:
+    errors: list[str] = []
+    seen = set(identities)
+    for record in records:
+        components = record.get("resource_components", [])
+        if not isinstance(components, list):
+            errors.append("invalid resource_components schema")
+            continue
+        for component in components:
+            if not _valid_component(component):
+                errors.append("invalid resource component schema")
+                continue
+            identity = component["identity"]
+            if identity in seen:
+                errors.append(f"duplicate component identity: {identity}")
+            seen.add(identity)
+    return errors
+
+
 def validate_inventory(
     payload: dict[str, Any],  # Any: JSON inventory boundary, checked below.
     sources: Mapping[str, bytes],
@@ -323,6 +385,7 @@ def validate_inventory(
     sites: set[tuple[str, int, str]] = set()
     for record in records:
         errors.extend(_check_record(record, seen, sites))
+    errors.extend(_check_components(records, seen))
     schema_errors = [
         error
         for field in (
@@ -337,6 +400,7 @@ def validate_inventory(
     for ref in _references(payload):
         errors.extend(_check_reference(ref, sources, blobs, str(commit)))
     errors.extend(_check_acquisition_census(payload, sources, sites))
+    errors.extend(_check_alias_links(payload, seen))
     expected_sites = payload.get("accepted_site_keys")
     if (
         not isinstance(expected_sites, list)
@@ -400,6 +464,7 @@ def render(payload: dict[str, Any]) -> str:  # Any: validated JSON catalog.
             + " | ".join(str(x).replace("|", r"\|").replace("\n", " ") for x in fields)
             + " |"
         )
+    out += _render_components(payload)
     out += [
         "",
         "## Coverage and history",
@@ -430,8 +495,48 @@ def render(payload: dict[str, Any]) -> str:  # Any: validated JSON catalog.
     return "\n".join(out)
 
 
-def load_catalog(root: Path = ROOT) -> dict[str, Any]:  # Any: validated JSON envelope.
-    """Load hash-bound parts while keeping every source file below size policy."""
+def _render_components(payload: dict[str, Any]) -> list[str]:
+    components = [
+        component
+        for row in payload["resources"]
+        for component in row.get("resource_components", [])
+    ]
+    if not components:
+        return []
+    lines = [
+        "",
+        "## Delegated resource components",
+        "",
+        "| Identity / type | Creator / owner / lifetime | Closer / shutdown | Dependency source |",
+        "| --- | --- | --- | --- |",
+    ]
+    for component in components:
+        fields = [
+            component["identity"] + " / " + component["type"],
+            component["creator"]
+            + " / "
+            + component["owner"]
+            + " / "
+            + component["lifetime"],
+            component["closer"] + "; " + component["shutdown_contract"],
+            f"{component['source']}:{component['source_line']}; version {component['version']}; SHA256 {component['source_sha256']}",
+        ]
+        lines.append(
+            "| "
+            + " | ".join(
+                field.replace("|", r"\|").replace("\n", " ") for field in fields
+            )
+            + " |"
+        )
+    return lines
+
+
+def load_catalog(
+    root: Path = ROOT,
+    *,
+    verify_manifest: bool = True,
+) -> dict[str, Any]:  # Any: validated JSON envelope.
+    """Load safe parts; strict checks verify derived digests/counts by default."""
     payload = json.loads((root / CATALOG).read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError("Catalog index must be an object")
@@ -449,12 +554,14 @@ def load_catalog(root: Path = ROOT) -> dict[str, Any]:  # Any: validated JSON en
             raise ValueError("Catalog part is outside its root or duplicated")
         seen.add(path)
         data = path.read_bytes()
-        if hashlib.sha256(data).hexdigest() != part["sha256"]:
+        if verify_manifest and hashlib.sha256(data).hexdigest() != part["sha256"]:
             raise ValueError(f"Catalog part digest differs: {relative}")
         rows = json.loads(data)
         if (
-            rows.get("schema_version") != 1
-            or len(rows["resources"]) != part["resource_count"]
+            not isinstance(rows, dict)
+            or rows.get("schema_version") != 1
+            or not isinstance(rows.get("resources"), list)
+            or (verify_manifest and len(rows["resources"]) != part["resource_count"])
         ):
             raise ValueError(f"Catalog part schema/count differs: {relative}")
         resources.extend(rows["resources"])
@@ -543,7 +650,7 @@ def _git_failure_message(error: subprocess.CalledProcessError) -> str:
 
 
 def _run(args: argparse.Namespace) -> int:
-    payload = load_catalog()
+    payload = load_catalog(verify_manifest=not args.update)
     commit = payload.get("source_commit", "")
     if not _OID.fullmatch(str(commit)):
         print("Invalid source commit")
