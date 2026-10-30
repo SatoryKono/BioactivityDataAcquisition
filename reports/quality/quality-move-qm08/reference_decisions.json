@@ -8,12 +8,12 @@
       "path": "configs/quality/scripts_inventory_manifest.json",
       "literal": "src/bioetl/infrastructure/quality",
       "lines": [
-        20358
+        20364
       ],
       "context": "          \"text\": \"\\\"src/bioetl/infrastructure/quality/scoring.py\\\",\"",
       "purpose": "Retained exclusion/its generated evidence string for old namespace; it is neither an executable import nor active product owner.",
       "owner": "QM-08 / @bioetl-platform",
-      "reviewed_content_sha256": "ba6a50a2e39138ff6f99af54670fb5dbf70db595ba5d58dd81313c240b17852b",
+      "reviewed_content_sha256": "5c563ca2c8046842409788597fc759028445585877c98f748ace9757813e53a2",
       "review_by": "2026-11-30",
       "decision": "RETAIN_EXACT_REFERENCE",
       "exception_allowed": true,
@@ -23,12 +23,12 @@
       "path": "configs/quality/scripts_inventory_manifest.json",
       "literal": "bioetl/infrastructure/quality",
       "lines": [
-        20358
+        20364
       ],
       "context": "          \"text\": \"\\\"src/bioetl/infrastructure/quality/scoring.py\\\",\"",
       "purpose": "Retained exclusion/its generated evidence string for old namespace; it is neither an executable import nor active product owner.",
       "owner": "QM-08 / @bioetl-platform",
-      "reviewed_content_sha256": "ba6a50a2e39138ff6f99af54670fb5dbf70db595ba5d58dd81313c240b17852b",
+      "reviewed_content_sha256": "5c563ca2c8046842409788597fc759028445585877c98f748ace9757813e53a2",
       "review_by": "2026-11-30",
       "decision": "RETAIN_EXACT_REFERENCE",
       "exception_allowed": true,

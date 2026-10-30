@@ -386,6 +386,32 @@ def test_atomic_writer_uses_utf8_lf_and_replaces_target(tmp_path: Path) -> None:
     assert target.read_bytes() == "owner: architecture\nvalue: тест\n".encode()
     assert list(tmp_path.iterdir()) == [target]
 
+    from unittest.mock import patch
+    import json
+    from scripts.engineering.qa import report_module_coverage_inventory as coverage
+    from scripts.engineering.qa import report_config_surface_backlog as backlog
+
+    coverage_path = tmp_path / "coverage.json"
+    payload_text = '{"value": "тест"}\n'
+    coverage._write_text_atomically(coverage_path, payload_text, root=tmp_path)
+    assert coverage_path.read_bytes() == payload_text.encode("utf-8")
+    coverage._write_text_atomically(coverage_path, payload_text, root=tmp_path)
+    assert coverage_path.read_bytes() == payload_text.encode("utf-8")
+
+    backlog_path = tmp_path / "backlog.json"
+    payload = {"value": "тест"}
+    backlog._atomic_write(backlog_path, payload)
+    first = backlog_path.read_bytes()
+    assert b"\r" not in first
+    assert first.endswith(b"\n")
+    assert json.loads(first) == payload
+    backlog._atomic_write(backlog_path, payload)
+    assert backlog_path.read_bytes() == first
+    with patch.object(backlog.os, "replace", side_effect=OSError("sharing violation")):
+        backlog._atomic_write(backlog_path, payload)
+    assert backlog_path.read_bytes() == first
+    assert sorted(tmp_path.iterdir()) == sorted([target, coverage_path, backlog_path])
+
 
 @pytest.mark.parametrize("unmeasured", [0, 1])
 def test_application_core_closeout_preserves_measurement_history(
