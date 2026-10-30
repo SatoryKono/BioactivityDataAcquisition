@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-30T07:46:02.278539+00:00",
+  "generated_at": "2026-10-30T09:08:46.986111+00:00",
   "summary": {
     "total_scripts": 700,
     "status_counts": {
@@ -8091,7 +8091,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 219,
+      "reference_count": 218,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -8490,13 +8490,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 318,
+          "line": 326,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 727,
+          "line": 735,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
@@ -10154,19 +10154,19 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 16,
+          "line": 17,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.generated_artifact_checks import proven_deferral"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 228,
+          "line": 229,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import generated_artifact_checks as checks"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 339,
+          "line": 347,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import generated_artifact_checks as checks"
         }
@@ -10465,7 +10465,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 1082,
+          "line": 1098,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         }
@@ -11940,7 +11940,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 18,
+          "line": 19,
           "source_group": "tests",
           "text": "from scripts.engineering.dev.pytest_artifact_selection import ("
         }
@@ -14891,13 +14891,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 394,
+          "line": 402,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 415,
+          "line": 423,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_evaluators as evaluators"
         },
@@ -14934,7 +14934,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 414,
+          "line": 422,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_report as cli"
         },
@@ -20742,7 +20742,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 500,
+          "line": 504,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23742,7 +23742,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 577,
+          "line": 581,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -25187,7 +25187,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1280,
+          "line": 1281,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -27289,7 +27289,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1217,
+          "line": 1218,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -27357,7 +27357,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1217,
+          "line": 1218,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },

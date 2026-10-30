@@ -1,5 +1,5 @@
 {
-  "count": 42320,
+  "count": 42322,
   "duplicate_nodeids": [],
   "nodes": [
     {
@@ -43739,6 +43739,38 @@
         "vcr_markers"
       ],
       "nodeid": "tests/architecture/test_config_discrepancy_metrics_ratchets.py::test_profile_derived_organism_class_filter_is_outside_ratchet_vocabulary",
+      "overlap_rationale": null,
+      "semantic_production_criticality": "critical",
+      "type": "Function",
+      "workflow_job": "tests"
+    },
+    {
+      "canonical_owner": "Core",
+      "execution_policy": "architecture,architecture-slow-governance",
+      "file": "tests/architecture/test_config_discrepancy_report_drift.py",
+      "fixtures": [
+        "_bioetl_test_silver_validator",
+        "_guard_global_pathlib_state",
+        "_init_publication_type_classification",
+        "_manual_vcr_marker_runtime",
+        "_pin_test_cwd_to_project_root",
+        "_restore_runtime_bootstrap_pipeline_after_repo_backed_tests",
+        "_sanitize_bioetl_env_vars",
+        "_syrupy_apply_ide_patches",
+        "_vcr_marker",
+        "block_network",
+        "default_vcr_record_mode",
+        "event_loop_policy",
+        "monkeypatch",
+        "project_root",
+        "record_mode",
+        "request",
+        "vcr",
+        "vcr_cassette_dir",
+        "vcr_config",
+        "vcr_markers"
+      ],
+      "nodeid": "tests/architecture/test_config_discrepancy_report_drift.py::test_config_discrepancy_report_ends_with_one_lf",
       "overlap_rationale": null,
       "semantic_production_criticality": "critical",
       "type": "Function",
@@ -1319247,6 +1319279,38 @@
         "vcr_config",
         "vcr_markers"
       ],
+      "nodeid": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py::test_shadow_compare_routes_assertless_ratchet_config",
+      "overlap_rationale": null,
+      "semantic_production_criticality": "critical",
+      "type": "Function",
+      "workflow_job": "tests"
+    },
+    {
+      "canonical_owner": "Core",
+      "execution_policy": "unit-scripts-tooling",
+      "file": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+      "fixtures": [
+        "_bioetl_test_silver_validator",
+        "_guard_global_pathlib_state",
+        "_init_publication_type_classification",
+        "_manual_vcr_marker_runtime",
+        "_pin_test_cwd_to_project_root",
+        "_restore_runtime_bootstrap_pipeline_after_repo_backed_tests",
+        "_sanitize_bioetl_env_vars",
+        "_syrupy_apply_ide_patches",
+        "_vcr_marker",
+        "block_network",
+        "default_vcr_record_mode",
+        "event_loop_policy",
+        "monkeypatch",
+        "project_root",
+        "record_mode",
+        "request",
+        "vcr",
+        "vcr_cassette_dir",
+        "vcr_config",
+        "vcr_markers"
+      ],
       "nodeid": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py::test_shadow_compare_routes_billing_pr_non_code_changes",
       "overlap_rationale": null,
       "semantic_production_criticality": "critical",
@@ -1413355,7 +1413419,7 @@
     }
   ],
   "schema_version": 1,
-  "source_commit": "b2e9be297d07f200406ff143ef347b924686be37",
+  "source_commit": "2509ddd7d2d2790c1d412cd9b977166411e5329e",
   "unowned_count": 0,
   "unowned_nodeids": []
 }
