@@ -82,7 +82,7 @@ def manifest(guard):
 
 
 def test_complete_manifest_is_accepted(guard, manifest):
-    guard("MANIFEST")
+    assert guard("MANIFEST") is None
 
 
 @pytest.mark.parametrize(
@@ -125,7 +125,7 @@ def metadata(guard):
 
 
 def test_matching_clean_producer_is_accepted(guard, metadata):
-    guard("VERIFY")
+    assert guard("VERIFY") is None
 
 
 @pytest.mark.parametrize(

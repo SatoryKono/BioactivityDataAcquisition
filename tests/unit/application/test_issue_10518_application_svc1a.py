@@ -916,6 +916,7 @@ class TestFinalizeWorkflowChildren:
         store = _FsStore()
         report = _obs_report([_obs_row(pipeline_name=None, pipeline_run_id=None)])
         finalize_workflow_children(report, root=tmp_path, store=store)
+        assert list(tmp_path.iterdir()) == []
 
     def test_skips_children_without_snapshot(self, tmp_path):
         store = _FsStore()
@@ -1536,9 +1537,12 @@ class TestCoerceRuntimeOverrideLayer:
 
 class TestValidateRuntimeEnvironmentProvenance:
     def test_non_strict_profile_skips_validation(self):
-        validate_runtime_environment_provenance(
-            runtime_overrides={"env": {"anything": 1}},
-            required_persistence_profile="standard",
+        assert (
+            validate_runtime_environment_provenance(
+                runtime_overrides={"env": {"anything": 1}},
+                required_persistence_profile="standard",
+            )
+            is None
         )
 
     def test_unsupported_env_keys_rejected(self):
@@ -1570,9 +1574,12 @@ class TestValidateRuntimeEnvironmentProvenance:
             )
 
     def test_valid_materialized_environment_passes(self):
-        validate_runtime_environment_provenance(
-            runtime_overrides={"env": {"execution_environment": {"k": "v"}}},
-            required_persistence_profile="replay_ready",
+        assert (
+            validate_runtime_environment_provenance(
+                runtime_overrides={"env": {"execution_environment": {"k": "v"}}},
+                required_persistence_profile="replay_ready",
+            )
+            is None
         )
 
 

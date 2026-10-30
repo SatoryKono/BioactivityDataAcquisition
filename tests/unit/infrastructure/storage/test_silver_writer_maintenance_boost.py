@@ -82,6 +82,9 @@ class TestMaybeExportCsvEdgeCases:
             validated_mode=SilverWriteMode.MERGE,
             primary_keys=["id"],
         )
+        mixin.read_table.assert_not_awaited()
+        assert mixin._retention_manager.mock_calls == []
+        assert list(tmp_path.iterdir()) == []
 
     @pytest.mark.asyncio
     async def test_csv_exporter_snapshot_overwrite_sets_append_false(
@@ -168,6 +171,9 @@ class TestMaybeExportCsvEdgeCases:
 
         # Should not raise
         await mixin.finalize_csv_export("t", primary_keys=["id"])
+        mixin.read_table.assert_not_awaited()
+        assert mixin._retention_manager.mock_calls == []
+        assert list(tmp_path.iterdir()) == []
 
 
 @pytest.mark.unit

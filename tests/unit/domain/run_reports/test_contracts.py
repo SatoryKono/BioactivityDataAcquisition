@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 from jsonschema.validators import validator_for
@@ -43,33 +44,43 @@ CONTRACT_ROOT = ROOT / "configs" / "contracts" / "reports"
 FIXTURE_ROOT = ROOT / "tests" / "fixtures" / "reports"
 
 
-def validate_fixture(*, schema_name: str, fixture_name: str) -> None:
+def validate_fixture(*, schema_name: str, fixture_name: str) -> dict[str, Any]:
+    """Validate a golden payload against its schema and return it for assertions."""
     schema = json.loads((CONTRACT_ROOT / schema_name).read_text(encoding="utf-8"))
     payload = json.loads((FIXTURE_ROOT / fixture_name).read_text(encoding="utf-8"))
     validator_class = validator_for(schema)
     validator_class.check_schema(schema)
     validator_class(schema).validate(payload)
+    return payload
 
 
 def test_pipeline_run_report_golden_matches_v1_schema() -> None:
-    validate_fixture(
+    payload = validate_fixture(
         schema_name="pipeline_run_report.v1.json",
         fixture_name="pipeline_run_report_golden.json",
     )
+    assert payload["schema_version"] == "pipeline_run_report_v1"
+    assert payload["identity"]["pipeline_name"] == "chembl_activity"
+    assert payload["identity"]["run_type"] == "incremental"
 
 
 def test_chembl_assay_backfill_run_report_golden_matches_v1_schema() -> None:
-    validate_fixture(
+    payload = validate_fixture(
         schema_name="pipeline_run_report.v1.json",
         fixture_name="chembl_assay_backfill_run_report_golden.json",
     )
+    assert payload["identity"]["pipeline_name"] == "chembl_assay"
+    assert payload["identity"]["run_type"] == "backfill"
 
 
 def test_workflow_run_report_golden_matches_v1_schema() -> None:
-    validate_fixture(
+    payload = validate_fixture(
         schema_name="workflow_run_report.v1.json",
         fixture_name="workflow_run_report_golden.json",
     )
+    assert payload["schema_version"] == "workflow_run_report_v1"
+    assert payload["identity"]["workflow_name"] == "chembl_activity_composite"
+    assert payload["identity"]["status"] == "success"
 
 
 def test_golden_json_is_canonically_ordered() -> None:

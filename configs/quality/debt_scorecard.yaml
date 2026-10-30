@@ -272,8 +272,8 @@ config_surface_ratchet:
       rationale: Entity/composite config surface must stay bounded while contract drift is burned down.
       ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates the budget.
     unique_parameter_count:
-      current_count: 353
-      max_count: 353
+      current_count: 352
+      max_count: 352
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Flattened parameter vocabulary ratcheted down after removing inline composite field_priorities
@@ -315,8 +315,8 @@ config_surface_ratchet:
           rationale: Effective entity pipeline surface after base defaults merge.
           ratchet_policy: Non-growth fail-fast for governed entity configs.
         unique_parameter_count:
-          current_count: 261
-          max_count: 261
+          current_count: 260
+          max_count: 260
           rationale: Effective flattened vocabulary for entity configs only.
           ratchet_policy: Non-growth fail-fast unless reviewed schema expansion updates budget.
         inconsistent_parameter_count:

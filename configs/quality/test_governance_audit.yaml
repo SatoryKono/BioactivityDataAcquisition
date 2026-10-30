@@ -724,24 +724,23 @@ tracing:
 assertless_triage:
   categories:
     architecture_helper_guard:
-      count: 2
-      decision: retained
+      count: 0
+      decision: eliminated-from-inventory
       rationale:
-        Architecture policy tests delegate assertions to shared guard helpers or pytest.fail
-        paths.
+        Architecture schema guards now assert their successful validation result explicitly.
       next_review: "2026-09-30"
     benchmark_or_performance:
-      count: 1
-      decision: retained
-      rationale: Performance/benchmark tests use measurement infrastructure as the assertion surface.
+      count: 0
+      decision: eliminated-from-inventory
+      rationale: Performance value validation now asserts the successful validation result explicitly.
       next_review: "2026-09-30"
     helper_asserted:
-      count: 5
+      count: 1
       decision: retained
       rationale: Verification is delegated to explicit check/validate/verify helper calls.
       next_review: "2026-09-30"
     intentional_no_exception_contract:
-      count: 99
+      count: 68
       decision: retained-with-rationale
       rationale: No-op, close/aclose, smoke, or does-not-raise behavior is the contract under test.
       next_review: "2026-09-30"
