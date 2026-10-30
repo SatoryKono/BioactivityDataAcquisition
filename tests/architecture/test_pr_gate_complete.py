@@ -50,14 +50,14 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 def test_full_suite_affected_pass_has_bounded_workload_budget() -> None:
-    """A framework upgrade retains every target without a slice-sized watchdog."""
+    """The suite root gets the full budget even with residual architecture nodes."""
     job = _load_yaml(COORDINATOR)["jobs"]["class-lane"]
     step = next(step for step in job["steps"] if step.get("id") == "affected-pytest")
     script = step["run"]
     assert "parallel_timeout=900" in script
-    assert (
-        'if [[ ${#targets[@]} -eq 1 && "${targets[0]%/}" == "tests" ]]; then' in script
-    )
+    assert 'for target in "${targets[@]}"; do' in script
+    assert 'if [[ "${target%/}" == "tests" ]]; then' in script
+    assert 'if [[ "$full_suite" == "true" ]]; then' in script
     assert "parallel_timeout=2400" in script
     assert script.index("parallel_timeout=2400") < script.index("subtract-affected")
     assert script.index("subtract-affected") < script.index(
