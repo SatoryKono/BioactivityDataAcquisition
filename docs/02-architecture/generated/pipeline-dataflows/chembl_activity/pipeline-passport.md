@@ -2,7 +2,7 @@
 
 # `chembl_activity` Pipeline Dataflow Passport
 
-Generated: **2026-10-02**
+Generated: **2026-10-29**
 Generator: **1.0.0**  
 IR schema: **1.0.0**  
 Effective config SHA256: `55381d8cf6325f61a3b111816879352c735069482fb0ea57e059d358794ab65c`<br>
@@ -114,7 +114,7 @@ Machine-readable companions: [IR JSON](pipeline-dataflow-ir.json) and [field CSV
 
 - Soft-fail threshold: `0.05`
 - Hard-fail threshold: `0.5`
-- Strict validation: `false`
+- Strict validation: `true`
 - Invalid-record policy: `quarantine`
 
 ### Field validations
