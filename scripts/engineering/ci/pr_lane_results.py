@@ -1549,6 +1549,16 @@ TARGETS = (
 )
 
 
+def _unsuccessful_parity_cases(cases: Sequence[ET.Element]) -> list[str]:
+    """Keep every failed, errored or skipped testcase diagnostic in order."""
+    errors = []
+    for case in cases:
+        for tag in ("failure", "error", "skipped"):
+            if case.find(tag) is not None:
+                errors.append(f"{case.get('classname')}.{case.get('name')}: {tag}")
+    return errors
+
+
 def validate_junit(path: Path, targets: tuple[str, ...] = TARGETS) -> list[str]:
     """Require passing, nonempty, unskipped evidence for every selected module."""
     if not targets:
@@ -1562,10 +1572,7 @@ def validate_junit(path: Path, targets: tuple[str, ...] = TARGETS) -> list[str]:
     errors = []
     if not cases:
         errors.append("empty parity JUnit")
-    for case in cases:
-        for tag in ("failure", "error", "skipped"):
-            if case.find(tag) is not None:
-                errors.append(f"{case.get('classname')}.{case.get('name')}: {tag}")
+    errors.extend(_unsuccessful_parity_cases(cases))
     for target in targets:
         module = target.removesuffix(".py").replace("/", ".")
         if not any(

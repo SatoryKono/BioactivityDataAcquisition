@@ -702,24 +702,16 @@ def _git_failure_message(error: subprocess.CalledProcessError) -> str:
     return f"CHECK FAILED: command exited {error.returncode}: {command}"
 
 
-def _run(args: argparse.Namespace) -> int:
-    payload = load_catalog(verify_manifest=bool(args.source_commit) or not args.update)
+def _validate_source_update_args(args: argparse.Namespace) -> None:
+    """Reject incomplete or read-only source maintenance requests."""
     if (args.source_commit or args.reviewed_source) and not args.update:
         raise ValueError("Source requalification requires --update")
     if args.reviewed_source and not args.source_commit:
         raise ValueError("Reviewed source requires an explicit --source-commit")
-    commit = args.source_commit or payload.get("source_commit", "")
-    if not _OID.fullmatch(str(commit)):
-        print("Invalid source commit")
-        return 1
-    tracked = (
-        subprocess.check_output(["git", "ls-files", "-z", "--", "src/bioetl"], cwd=ROOT)
-        .decode()
-        .split("\0")
-    )
-    sources = {
-        name: (ROOT / name).read_bytes() for name in tracked if name.endswith(".py")
-    }
+
+
+def _pinned_git_snapshot(commit: str) -> tuple[dict[str, SourceBlob], str]:
+    """Read the exact source blobs and tree from the pinned Git commit."""
     entries = subprocess.check_output(
         ["git", "ls-tree", "-rz", commit, "--", "src/bioetl"], cwd=ROOT
     ).split(b"\0")
@@ -735,13 +727,35 @@ def _run(args: argparse.Namespace) -> int:
         .decode()
         .strip()
     )
+    return blobs, tree
+
+
+def _run(args: argparse.Namespace) -> int:
+    payload = load_catalog(verify_manifest=bool(args.source_commit) or not args.update)
+    _validate_source_update_args(args)
+    commit = args.source_commit or payload.get("source_commit", "")
+    if not _OID.fullmatch(str(commit)):
+        print("Invalid source commit")
+        return 1
+    tracked = (
+        subprocess.check_output(["git", "ls-files", "-z", "--", "src/bioetl"], cwd=ROOT)
+        .decode()
+        .split("\0")
+    )
+    sources = {
+        name: (ROOT / name).read_bytes() for name in tracked if name.endswith(".py")
+    }
+    blobs, tree = _pinned_git_snapshot(commit)
     if args.source_commit:
         subprocess.run(
             ["git", "merge-base", "--is-ancestor", commit, "HEAD"],
             cwd=ROOT,
             check=True,
         )
-        reviewed = dict(item.rsplit("=", 1) for item in args.reviewed_source)
+        reviewed = {}
+        for item in args.reviewed_source:
+            path, digest = item.rsplit("=", 1)
+            reviewed[path] = digest
         if len(reviewed) != len(args.reviewed_source):
             raise ValueError("Duplicate reviewed source path")
         payload = rebind_resource_free_sources(
