@@ -97,6 +97,12 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_quality_debt_scorecard.py",
     "tests/architecture/test_quality_exemptions_registry.py",
 )
+EXTERNAL_RESOURCE_INVENTORY_TEST = (
+    "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py"
+)
+EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
+    "tests/architecture/test_external_resource_inventory.py"
+)
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".gitleaksignore": (
@@ -263,7 +269,26 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
     ),
     "reports/quality/external-resource-inventory.md": (
-        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+        EXTERNAL_RESOURCE_INVENTORY_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "scripts/engineering/qa/README.md": (
+        EXTERNAL_RESOURCE_INVENTORY_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        "tests/architecture/test_scripts_inventory_manifest.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    **dict.fromkeys(
+        (
+            "configs/quality/external_resource_inventory.json",
+            "configs/quality/external_resource_inventory/part-01.json",
+            "configs/quality/external_resource_inventory/part-02.json",
+            "configs/quality/external_resource_inventory/part-03.json",
+            "configs/quality/external_resource_inventory/part-04.json",
+            "configs/quality/external_resource_inventory/part-05.json",
+        ),
+        (EXTERNAL_RESOURCE_INVENTORY_TEST, EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST),
     ),
     **dict.fromkeys(
         (
