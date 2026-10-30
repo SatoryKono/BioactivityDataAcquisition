@@ -332,7 +332,7 @@
   "provenance": {
     "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:8c5713fd77345dcf20d92d01f5c53d818ebb405bcc43de5e79309161a08711e8",
-    "source_revision": "sha256:c6bd54ba3398f526ac8fe381917f50bd5bcc249498835195fc9dd710b3a322b5"
+    "source_revision": "sha256:63f4c3fee674b6cdaf053e690430e1dcb31818cbb1ab4ece216f7ccd98ab2bdd"
   },
   "silver": {
     "column_projection": {
@@ -364,7 +364,7 @@
       "hard_fail_threshold": 0.5,
       "invalid_record_policy": "quarantine",
       "soft_fail_threshold": 0.05,
-      "strict_validation": true
+      "strict_validation": false
     },
     "normalization_profile": "openalex.publication",
     "write": {}

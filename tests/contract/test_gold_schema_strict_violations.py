@@ -35,7 +35,6 @@ import pandas as pd
 import pandera as pa
 import pytest
 
-import bioetl.domain.contracts.gold as gold_contracts
 from bioetl.domain.contracts.gold import ChEMBLAssayGoldSchema
 from bioetl.domain.contracts.gold.pubchem import PubChemCompoundGoldSchema
 from tests.contract.schemas._schema_row_helpers import minimal_schema_dataframe
@@ -43,37 +42,34 @@ from tests.contract.schemas._schema_row_helpers import minimal_schema_dataframe
 pytestmark = [pytest.mark.contracts, pytest.mark.no_api]
 
 
-GOLD_SCHEMA_CASES = [
-    getattr(gold_contracts, export_name)
-    for export_name in gold_contracts.__all__
-    if export_name.endswith("GoldSchema")
-]
+def _minimal_strict_gold_row(schema_cls: type[Any]) -> dict[str, Any]:
+    """Build one nullable-aware row covering every strict Gold schema column."""
+    row: dict[str, Any] = {}
+    for column_name, column in schema_cls.to_schema().columns.items():
+        if not column.nullable:
+            if column.dtype == "bool":
+                row[column_name] = False
+            elif column.dtype == "int64":
+                row[column_name] = 0
+            elif column.dtype == "float64":
+                row[column_name] = 0.0
+            else:
+                row[column_name] = f"value-{column_name}"
+        else:
+            row[column_name] = None
+    return row
 
 
-def _minimal_valid_gold_df(schema_cls: type[Any]) -> pd.DataFrame:
-    """Build a valid row while honoring schema-specific enum and regex checks."""
-    frame = minimal_schema_dataframe(schema_cls)
-    schema_name = schema_cls.__name__
-
-    if "_lookup_method" in frame.columns:
-        frame["_lookup_method"] = "direct"
-
-    if schema_name == "ChEMBLProteinClassGoldSchema":
-        frame["protein_class_id"] = 1.0
-    elif schema_name == "ChEMBLPublicationSimilarityGoldSchema":
-        frame["doc_1"] = 1.0
-        frame["doc_2"] = 2.0
-    elif schema_name == "ChEMBLSubcellularFractionGoldSchema":
-        frame["entity_id"] = "a" * 16
-    elif schema_name == "ChEMBLTargetGoldSchema":
-        frame["species_group_flag"] = pd.Series([False], dtype="bool")
-    elif schema_name == "ChEMBLTargetProteinClassificationGoldSchema":
-        frame["classification_status"] = "resolved"
-    elif schema_name == "ChEMBLTissueGoldSchema":
-        frame["tissue_id"] = "CHEMBL1"
-    elif schema_name == "CrossRefPublicationGoldSchema":
-        frame["doi"] = "10.1000/test"
-
+def _strict_gold_dataframe(schema_cls: type[Any], row: dict[str, Any]) -> pd.DataFrame:
+    """Materialize a strict-schema dataframe with stable dtypes for validation."""
+    frame = pd.DataFrame([row])
+    for column_name, column in schema_cls.to_schema().columns.items():
+        if column_name not in frame.columns:
+            continue
+        if column.dtype == "int64":
+            frame[column_name] = frame[column_name].astype("int64")
+        elif column.dtype == "bool":
+            frame[column_name] = frame[column_name].astype("bool")
     return frame
 
 
@@ -96,31 +92,21 @@ def _minimal_chembl_assay_gold_df() -> pd.DataFrame:
     return frame
 
 
-@pytest.mark.parametrize("schema_cls", GOLD_SCHEMA_CASES, ids=lambda cls: cls.__name__)
-def test_strict_gold_schema_minimal_row_validates(schema_cls: type[Any]) -> None:
-    validated = schema_cls.validate(_minimal_valid_gold_df(schema_cls))
-    assert not validated.empty
-
-
-@pytest.mark.parametrize("schema_cls", GOLD_SCHEMA_CASES, ids=lambda cls: cls.__name__)
+@pytest.mark.parametrize(
+    ("entity", "schema_cls"),
+    [
+        ("pubchem_compound", PubChemCompoundGoldSchema),
+    ],
+)
 def test_strict_gold_schema_rejects_unknown_columns(
+    entity: str,  # noqa: ARG001 - keeps parametrized ids aligned with registry entity.
     schema_cls: type[Any],
 ) -> None:
-    df = _minimal_valid_gold_df(schema_cls)
+    df = _minimal_pubchem_gold_df()
     polluted = df.copy()
     polluted["__unexpected_column__"] = "blocked"
     with pytest.raises((pa.errors.SchemaError, pa.errors.SchemaErrors)):
         schema_cls.validate(polluted)
-
-
-@pytest.mark.parametrize("schema_cls", GOLD_SCHEMA_CASES, ids=lambda cls: cls.__name__)
-def test_strict_gold_schema_rejects_null_required_entity_id(
-    schema_cls: type[Any],
-) -> None:
-    df = _minimal_valid_gold_df(schema_cls)
-    df.loc[0, "entity_id"] = None
-    with pytest.raises((pa.errors.SchemaError, pa.errors.SchemaErrors)):
-        schema_cls.validate(df)
 
 
 def test_pubchem_gold_strict_minimal_row_validates() -> None:

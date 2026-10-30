@@ -272,7 +272,7 @@
   "provenance": {
     "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:81e225608ce22107e0af439643817b6a73925f0b47eea161b7ee6fc11c72d209",
-    "source_revision": "sha256:c6bd54ba3398f526ac8fe381917f50bd5bcc249498835195fc9dd710b3a322b5"
+    "source_revision": "sha256:63f4c3fee674b6cdaf053e690430e1dcb31818cbb1ab4ece216f7ccd98ab2bdd"
   },
   "silver": {
     "column_projection": {
@@ -287,7 +287,7 @@
       "hard_fail_threshold": 0.5,
       "invalid_record_policy": "quarantine",
       "soft_fail_threshold": 0.05,
-      "strict_validation": true
+      "strict_validation": false
     },
     "normalization_profile": "uniprot.idmapping",
     "write": {}

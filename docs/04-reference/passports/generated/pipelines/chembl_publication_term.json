@@ -227,7 +227,7 @@
   "provenance": {
     "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:e702491bbba059b44e9017fe5b56387f792caad733b59274d59cf0f9ced72565",
-    "source_revision": "sha256:c6bd54ba3398f526ac8fe381917f50bd5bcc249498835195fc9dd710b3a322b5"
+    "source_revision": "sha256:63f4c3fee674b6cdaf053e690430e1dcb31818cbb1ab4ece216f7ccd98ab2bdd"
   },
   "silver": {
     "column_projection": {
@@ -242,7 +242,7 @@
       "hard_fail_threshold": 0.5,
       "invalid_record_policy": "quarantine",
       "soft_fail_threshold": 0.05,
-      "strict_validation": true
+      "strict_validation": false
     },
     "normalization_profile": "chembl.publication_term",
     "write": {

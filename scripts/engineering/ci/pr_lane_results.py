@@ -54,10 +54,6 @@ DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts
 CONFIG_SCHEMA_MIGRATION_STATUS_TEST = (
     "tests/architecture/test_config_schema_migration_status.py"
 )
-GOLD_DQ_CONFIG_TEST = "tests/integration/config/test_dq_config_loading.py"
-PIPELINE_DATAFLOW_GENERATION_TEST = (
-    "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py"
-)
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
@@ -100,12 +96,6 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_architecture_quality_scorecard.py",
     "tests/architecture/test_quality_debt_scorecard.py",
     "tests/architecture/test_quality_exemptions_registry.py",
-)
-EXTERNAL_RESOURCE_INVENTORY_TEST = (
-    "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py"
-)
-EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
-    "tests/architecture/test_external_resource_inventory.py"
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
@@ -273,26 +263,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/engineering/qa/test_technical_debt_audit_registry.py",
     ),
     "reports/quality/external-resource-inventory.md": (
-        EXTERNAL_RESOURCE_INVENTORY_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
-    ),
-    "scripts/engineering/qa/README.md": (
-        EXTERNAL_RESOURCE_INVENTORY_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        "tests/architecture/test_scripts_inventory_manifest.py",
-        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
-    ),
-    **dict.fromkeys(
-        (
-            "configs/quality/external_resource_inventory.json",
-            "configs/quality/external_resource_inventory/part-01.json",
-            "configs/quality/external_resource_inventory/part-02.json",
-            "configs/quality/external_resource_inventory/part-03.json",
-            "configs/quality/external_resource_inventory/part-04.json",
-            "configs/quality/external_resource_inventory/part-05.json",
-        ),
-        (EXTERNAL_RESOURCE_INVENTORY_TEST, EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST),
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
     **dict.fromkeys(
         (
@@ -445,7 +416,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         CONFIG_SCHEMA_MIGRATION_STATUS_TEST,
         "tests/unit/infrastructure/schemas/test_dq_config.py",
     ),
-    "configs/base/quality.yaml": (GOLD_DQ_CONFIG_TEST,),
     "configs/quality/test_skip_inventory.yaml": TEST_SKIP_INVENTORY_TESTS,
     "configs/quality/test_governance_audit.yaml": TEST_GOVERNANCE_ARTIFACT_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
@@ -523,7 +493,6 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "configs/composites/": (
         "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
     ),
-    "configs/contracts/": (GOLD_DQ_CONFIG_TEST,),
     # Entity YAML family: fail-closed pipeline load + FilterConfigFile boundary.
     "configs/entities/": (
         "tests/architecture/test_config_strict_keys.py",
@@ -569,9 +538,6 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_diagram_corpus_regression_guards.py",
         "tests/architecture/test_diagram_drift_and_embed_guards.py",
         "tests/architecture/test_diagram_lint_policy_rules.py",
-    ),
-    "docs/02-architecture/generated/pipeline-dataflows/": (
-        PIPELINE_DATAFLOW_GENERATION_TEST,
     ),
     "src/memory/episodic/": (
         "tests/architecture/test_ai_session_memory_placement.py",

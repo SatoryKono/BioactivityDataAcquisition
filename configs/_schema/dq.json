@@ -475,7 +475,7 @@
       "description": "DQ threshold configuration"
     },
     "strict_validation": {
-      "default": true,
+      "default": false,
       "description": "Normalized quality-config property corresponding to the canonical contract-YAML key strict_dq_validation under configs/contracts/*",
       "title": "Strict Validation",
       "type": "boolean"

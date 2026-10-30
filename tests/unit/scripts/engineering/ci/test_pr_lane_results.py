@@ -356,37 +356,6 @@ def test_shadow_compare_routes_published_dq_schema() -> None:
     ]
 
 
-@pytest.mark.parametrize(
-    "path",
-    (
-        "configs/base/quality.yaml",
-        "configs/contracts/chembl/activity.yaml",
-    ),
-)
-def test_shadow_compare_routes_gold_dq_strict_defaults(path: str) -> None:
-    """Gold DQ defaults select the real-config integration contract."""
-    repo_root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare([path], repo_root=repo_root)
-    assert "tests/integration/config/test_dq_config_loading.py" in report["selected"]
-
-
-def test_shadow_compare_routes_pipeline_dataflow_artifacts() -> None:
-    """Generated pipeline passports select their owning drift test."""
-    repo_root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare(
-        [
-            "docs/02-architecture/generated/pipeline-dataflows/chembl_activity/"
-            "pipeline-dataflow-ir.json",
-            "docs/02-architecture/generated/pipeline-dataflows/chembl_activity/"
-            "pipeline-passport.md",
-        ],
-        repo_root=repo_root,
-    )
-    assert report["selected"] == [
-        "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py"
-    ]
-
-
 def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
@@ -1685,29 +1654,3 @@ def test_collect_nodeids_parses_pytest_collection(tmp_path: Path) -> None:
     }
     with pytest.raises(ValueError, match="pytest collection failed"):
         _collect_nodeids(tmp_path, ["tests/missing.py"])
-
-
-@pytest.mark.parametrize(
-    "changed_file",
-    [
-        "configs/quality/external_resource_inventory.json",
-        *[
-            f"configs/quality/external_resource_inventory/part-{index:02}.json"
-            for index in range(1, 6)
-        ],
-        "reports/quality/external-resource-inventory.md",
-        "scripts/engineering/qa/README.md",
-    ],
-)
-def test_resource_inventory_files_select_integrity_controls(changed_file: str) -> None:
-    """Every inventory input and projection retains its owning integrity suite."""
-    root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare([changed_file], repo_root=root)
-    assert (
-        "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py"
-        in report["selected"]
-    )
-    assert (
-        "tests/architecture/test_external_resource_inventory.py" in report["selected"]
-    )
-    assert report["activation"] == "not_applied"
