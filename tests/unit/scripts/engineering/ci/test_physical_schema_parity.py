@@ -164,9 +164,16 @@ def test_one_canonical_schema_step_runs_real_matrix_and_retains_aggregation() ->
         (parity.REPO_ROOT / ".github/workflows/pr-required.yml").read_text()
     )
     steps = workflow["jobs"]["class-lane"]["steps"]
+    checkout = next(step for step in steps if step.get("id") == "checkout")
+    assert (
+        checkout["with"]["ref"] == "${{ needs['classify-changes'].outputs.head_sha }}"
+    )
     parity_steps = [step for step in steps if step.get("id") == "schema-parity"]
     assert len(parity_steps) == 1
     step = parity_steps[0]
+    assert steps.index(step) < next(
+        index for index, item in enumerate(steps) if item.get("id") == "ruff"
+    )
     assert "pr-lane-results physical-parity" in step["run"]
     assert "set -euo pipefail" in step["run"]
     assert "continue-on-error" not in step

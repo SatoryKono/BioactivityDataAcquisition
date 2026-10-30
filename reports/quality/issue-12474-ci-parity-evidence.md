@@ -138,3 +138,25 @@ An explicit dispatch negative-control input now forces `generated-artifacts` to
 required with reason `explicit_physical_parity_control`, including docs-only
 diffs. The ordinary PR default does not pass this flag to trusted-base gate code.
 Owning tests check the real catalog, workflow forwarding and skipped-step refusal.
+
+The class lane now checks out the classified candidate SHA explicitly. Its
+existing schema-artifacts/parity steps run immediately after dependency setup;
+a controlled mismatch fails before unrelated long-running scans. A positive
+run still executes every selected lint/type/security/test/duplication gate.
+
+The historical producer also failed module-coverage regression guards. The
+changed Silver module's missing defensive type-diff guard is now covered by
+two owning cases (no existing schema / empty batch). A focused current-source
+measurement including the existing detect/warn regressions passed 141 tests:
+71/71 statements covered (100% lines), 27/28 branches (96.43%), combined 98.99%.
+The remaining partial branch is the Protocol declaration exit. This targeted
+measurement does not replace the required complete telemetry producer and does
+not overwrite its global measured inventory.
+
+Checkpoint required run `41058632237` passed on PR head
+`59e8c26b15c71329301106f93ece564433e00e4d`. Its default GitHub merge execution
+`332fc4b7f0181f044dbe70be853be31124471601` was independently fetched and has
+exactly the candidate tree `b325472db0be42bda1ea178d4f614b761eca908f`.
+The corresponding negative dispatch `41058676623` was cancelled as superseded
+while still scanning history; its schema control was NOT_RUN and is not proof
+of mismatch propagation. New exact-head positive/negative runs remain required.

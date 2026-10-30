@@ -454,35 +454,35 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "251",
+      "line": "271",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_schema_drift_evolve_mode_does_not_raise"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "282",
+      "line": "302",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_schema_drift_ignore_mode_does_not_raise"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "313",
+      "line": "333",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_schema_drift_no_error_when_no_drift"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "350",
+      "line": "370",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_schema_drift_skipped_for_new_table"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "372",
+      "line": "392",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_schema_drift_skipped_for_empty_records"
@@ -1467,35 +1467,35 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "251",
+        "line": "271",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_schema_drift_evolve_mode_does_not_raise"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "282",
+        "line": "302",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_schema_drift_ignore_mode_does_not_raise"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "313",
+        "line": "333",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_schema_drift_no_error_when_no_drift"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "350",
+        "line": "370",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_schema_drift_skipped_for_new_table"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "372",
+        "line": "392",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_schema_drift_skipped_for_empty_records"
@@ -1798,12 +1798,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3192,
-    "total_test_functions": 31601,
+    "total_test_functions": 31602,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "7b6bba02f5dc579a5e0aa1f6bbd4f7ce3b222ce2ab8def077d7d7fc65d8cc622",
+  "source_tree_sha256": "ff51ca98f19602ec8dc4792a823ce9c3df02d94f88055a73e4906fc00bd5ca80",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 69,
@@ -1866,7 +1866,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3192,
-  "total_test_functions": 31601,
+  "total_test_functions": 31602,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

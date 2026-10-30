@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-30T12:44:00.570017+00:00",
+  "generated_at": "2026-10-30T13:22:48.919798+00:00",
   "summary": {
     "total_scripts": 698,
     "status_counts": {
@@ -10130,7 +10130,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 669,
+          "line": 338,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10417,7 +10417,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 872,
+          "line": 873,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10925,13 +10925,13 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 368,
+          "line": 398,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-mar"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 427,
+          "line": 457,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target \"${targets[@]}\" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-timeout"
         },
@@ -14007,7 +14007,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 355,
+          "line": 385,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -20584,7 +20584,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 664,
+          "line": 694,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
