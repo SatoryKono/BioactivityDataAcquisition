@@ -3,6 +3,20 @@
 Acceptance is pending the exact-head remote controls, required CI and independent
 review recorded below. A local passing test is not CI integration acceptance.
 
+Source-evidence preservation after squash uses the archival Git tag
+`evidence/issue-12474-checkpoint-63216d95433f1e111579303186c4baa12c87c9cb`,
+published by ordinary non-force push and independently read back at the same
+full commit. It retains both the pinned source `7db9b25e...` and catalog
+checkpoint `c83f5b8d...`; it is not a release or acceptance tag. Architecture
+consumers explicitly fetch only this task's archival tag prefix after their
+existing current-ref unshallow step. Validators retain their source/tree/blob
+checks and do not gain an implicit network fallback. Real-Git owning fixtures
+delete the source branch, clone shallow main without tags or alternates, prove
+the objects absent before explicit preparation and available afterwards, and
+reject replacement of an already pinned tag. This closes the source-object
+availability finding within this checkout route; it does not provide human
+K8/K10 approval or the pending final qualified producer.
+
 ## Ownership and accepted input
 
 The repository owner authorized this implementation on 2026-10-30 and confirmed
