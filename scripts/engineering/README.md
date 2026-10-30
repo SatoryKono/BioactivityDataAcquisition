@@ -53,7 +53,7 @@ analyzed product tree remains `src/bioetl`; moving the tool does not move its
 analysis scope or turn a smaller product-only denominator into a code reduction.
 
 For a reviewed production-source delta, the repository-only COMP-004 writer is
-`python -m scripts.engineering.qa.requalify_external_resource_inventory --review
+`python -m scripts.engineering.qa requalify-external-resource-inventory --review
 configs/quality/external_resource_inventory_qm08_review.json --check` (or
 `--update`). It requires the pinned Git history and a complete semantic source
 review; the original `external_resource_inventory --check` remains an independent

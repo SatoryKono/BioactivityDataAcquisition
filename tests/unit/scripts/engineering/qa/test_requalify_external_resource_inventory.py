@@ -12,6 +12,7 @@ import pytest
 
 from scripts.engineering.qa import external_resource_inventory as inventory
 from scripts.engineering.qa import requalify_external_resource_inventory as producer
+from scripts.engineering.qa.__main__ import main as qa_main
 
 pytestmark = pytest.mark.unit
 SOURCE = "src/bioetl/fixture.py"
@@ -125,7 +126,7 @@ def candidate(
 
 def invoke(root: Path, review: dict, mode: str) -> int:
     (root / REVIEW).write_text(json.dumps(review), encoding="utf-8")
-    return producer.main(["--review", REVIEW, mode])
+    return qa_main(["requalify-external-resource-inventory", "--review", REVIEW, mode])
 
 
 def outputs(root: Path) -> dict[str, bytes]:

@@ -60,9 +60,9 @@ definitions, resolves references against actual Git blobs, and retains the
 independent acquisition census and historical candidate dispositions:
 
 ```bash
-python -m scripts.engineering.qa.requalify_external_resource_inventory --review configs/quality/external_resource_inventory_qm08_review.json --check
-python -m scripts.engineering.qa.requalify_external_resource_inventory --review configs/quality/external_resource_inventory_qm08_review.json --update
-python -m scripts.engineering.qa.requalify_external_resource_inventory --review configs/quality/external_resource_inventory_qm08_review.json --check
+python -m scripts.engineering.qa requalify-external-resource-inventory --review configs/quality/external_resource_inventory_qm08_review.json --check
+python -m scripts.engineering.qa requalify-external-resource-inventory --review configs/quality/external_resource_inventory_qm08_review.json --update
+python -m scripts.engineering.qa requalify-external-resource-inventory --review configs/quality/external_resource_inventory_qm08_review.json --check
 python -m scripts.engineering.qa.external_resource_inventory --check
 ```
 

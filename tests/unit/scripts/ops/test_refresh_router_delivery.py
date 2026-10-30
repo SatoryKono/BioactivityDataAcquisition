@@ -8,6 +8,7 @@ import tarfile
 import pytest
 
 from scripts.ops.observability.grafana import refresh_router_delivery as release
+from scripts.ops.__main__ import main as ops_main
 
 pytestmark = pytest.mark.unit
 REFERENCE = "satorykono/bioetl-grafana-router7-canvas@sha256:" + "d" * 64
@@ -211,11 +212,11 @@ def test_check_never_writes_and_update_rejects_concurrent_edits(tmp_path, monkey
     monkeypatch.setattr(release.native, "ROOT", tmp_path)
     monkeypatch.setattr(release, "materialize", lambda *_: {path: b"generated"})
     monkeypatch.setattr(release, "git", lambda *_: b"original")
-    assert release.main([*arguments(), "--check"]) == 1
+    assert ops_main(["refresh-router-delivery", *arguments(), "--check"]) == 1
     assert path.read_bytes() == b"original"
-    assert release.main([*arguments(), "--update"]) == 0
+    assert ops_main(["refresh-router-delivery", *arguments(), "--update"]) == 0
     assert path.read_bytes() == b"generated"
-    assert release.main([*arguments(), "--check"]) == 0
+    assert ops_main(["refresh-router-delivery", *arguments(), "--check"]) == 0
     path.write_bytes(b"concurrent owner change")
-    assert release.main([*arguments(), "--update"]) == 1
+    assert ops_main(["refresh-router-delivery", *arguments(), "--update"]) == 1
     assert path.read_bytes() == b"concurrent owner change"

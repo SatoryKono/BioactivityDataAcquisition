@@ -199,6 +199,8 @@ jobs:
         run: |
           image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
           docker pull "$image"
+          base_image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').base_image")
+          docker pull "$base_image"
           node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
             bioetl-router-host:acceptance
       - name: Build and verify managed image from the qualified parent

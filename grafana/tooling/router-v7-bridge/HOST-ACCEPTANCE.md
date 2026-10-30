@@ -31,7 +31,7 @@ disposable source tree, the complete Docker build context tar, actual built
 image-config digests and registry manifest references read back after push:
 
 ```bash
-python -m scripts.ops.observability.grafana.refresh_router_delivery \
+python -m scripts.ops refresh-router-delivery \
   --source-ref "$SOURCE_REF" --source-root "$BUILT_SOURCE_ROOT" \
   --context "$BUILT_CONTEXT_TAR" \
   --built-host "$HOST_CONFIG_DIGEST" --built-managed "$MANAGED_CONFIG_DIGEST" \

@@ -2196,6 +2196,24 @@
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/engineering/qa/requalify_external_resource_inventory.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the source-review implementation behind python -m scripts.engineering.qa requalify-external-resource-inventory; owning tests exercise the dispatcher. Preserve the original catalog checker and NOT_RUN runtime claims. Direct module invocation remains compatible, not a separate public script surface."
+    },
+    "scripts/ops/observability/grafana/refresh_router_delivery.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the release verification/writer backend behind python -m scripts.ops refresh-router-delivery; owning tests exercise read-only check and atomic update through this dispatcher. Preserve full rootfs/config/layer parity and immutable registry identity. Direct module invocation remains compatible."
+    },
+    "scripts/ops/observability/grafana/trusted_docker.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the shared Docker identity library imported by both rootfs and managed-image verifiers; it has no standalone command. Preserve fixed protected Linux paths and the registered signed Windows installation check."
     }
   },
   "schema_version": "1.0"
