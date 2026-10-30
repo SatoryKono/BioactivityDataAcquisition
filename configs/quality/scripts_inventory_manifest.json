@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-30T06:35:57.150212+00:00",
+  "generated_at": "2026-10-30T07:46:02.278539+00:00",
   "summary": {
     "total_scripts": 700,
     "status_counts": {
@@ -25464,7 +25464,7 @@
         },
         {
           "path": "docs/04-reference/environment-variables.md",
-          "line": 123,
+          "line": 129,
           "source_group": "docs",
           "text": "| `BIOETL_RUNTIME_SOURCE_ID` | Opaque digest computed from the runtime root and mount roots and injected by `runtime_manager.py` | No |"
         },
