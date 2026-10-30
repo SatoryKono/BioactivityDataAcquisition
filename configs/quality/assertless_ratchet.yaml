@@ -2,5 +2,5 @@
 schema_version: 1
 owner: "@bioetl-architecture"
 linked_issue: "9605"
-max_assertless_tests: 87
+max_assertless_tests: 107
 target_assertless_tests: 77

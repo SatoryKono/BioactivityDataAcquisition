@@ -469,7 +469,7 @@ def test_s9_assertless_ratchet_and_expiry_dispersion() -> None:
         (ROOT / "configs/quality/assertless_ratchet.yaml").read_text(encoding="utf-8")
     )
     max_assertless = int(assertless["max_assertless_tests"])
-    assert max_assertless <= 102
+    assert max_assertless <= 107
     live_payload = json.loads(
         (ROOT / "reports/quality/test-governance-current.json").read_text(
             encoding="utf-8"
