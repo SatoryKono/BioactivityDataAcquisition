@@ -260,6 +260,7 @@ class TestValidTransitions:
         """Module-level validate_transition should not raise for valid transitions."""
         # Should not raise
         validate_transition(current, target)
+        assert current.can_transition_to(target)
 
 
 class TestInvalidTransitions:
