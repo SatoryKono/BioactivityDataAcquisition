@@ -491,7 +491,7 @@ class TestRealConfigValidation:
         # Defaults should be set
         assert config.soft_fail_threshold == pytest.approx(0.05)
         assert config.hard_fail_threshold == pytest.approx(0.50)
-        assert config.strict_validation is False
+        assert config.strict_validation is True
 
     def test_contract_dq_configs_use_explicit_dq_strict_flag_name(self) -> None:
         """Contract configs must not reuse Gold/runtime strict-validation wording."""
@@ -508,6 +508,7 @@ class TestRealConfigValidation:
             if payload.get("version") == "reason_catalog_v1" or "reasons" in payload:
                 continue
             assert "strict_dq_validation" in payload, path
+            assert payload["strict_dq_validation"] is True, path
             assert "strict_validation" not in payload, path
 
     def test_provider_configs_have_correct_metadata(

@@ -356,6 +356,38 @@ def test_shadow_compare_routes_published_dq_schema() -> None:
     ]
 
 
+@pytest.mark.parametrize(
+    "path",
+    (
+        "configs/base/quality.yaml",
+        "configs/contracts/chembl/activity.yaml",
+    ),
+)
+def test_shadow_compare_routes_gold_dq_strict_defaults(path: str) -> None:
+    """Gold DQ defaults select the real-config integration contract."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=repo_root)
+    assert "tests/integration/config/test_dq_config_loading.py" in report["selected"]
+
+
+def test_shadow_compare_routes_pipeline_dataflow_artifacts() -> None:
+    """Generated pipeline passports select their owning drift test."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            "docs/02-architecture/generated/pipeline-dataflows/chembl_activity/"
+            "pipeline-dataflow-ir.json",
+            "docs/02-architecture/generated/pipeline-dataflows/chembl_activity/"
+            "pipeline-passport.md",
+        ],
+        repo_root=repo_root,
+    )
+    assert report["selected"] == [
+        "tests/unit/repo_backed/scripts/diagrams/"
+        "test_generate_pipeline_dataflows.py"
+    ]
+
+
 def test_shadow_compare_routes_docker_and_remote_main_report() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
