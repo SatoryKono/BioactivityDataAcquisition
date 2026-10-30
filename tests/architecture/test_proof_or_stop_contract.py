@@ -30,7 +30,7 @@ def test_proof_bundle_schema_is_valid_draft_2020_12() -> None:
         (ROOT / "configs/quality/proof_or_stop_bundle.schema.json").read_text()
     )
 
-    Draft202012Validator.check_schema(schema)
+    assert Draft202012Validator.check_schema(schema) is None
 
 
 def test_staged_registry_promotes_proof_gate_to_soft_fail() -> None:

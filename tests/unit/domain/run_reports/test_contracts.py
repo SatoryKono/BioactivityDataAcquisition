@@ -52,16 +52,22 @@ def validate_fixture(*, schema_name: str, fixture_name: str) -> None:
 
 
 def test_pipeline_run_report_golden_matches_v1_schema() -> None:
-    validate_fixture(
-        schema_name="pipeline_run_report.v1.json",
-        fixture_name="pipeline_run_report_golden.json",
+    assert (
+        validate_fixture(
+            schema_name="pipeline_run_report.v1.json",
+            fixture_name="pipeline_run_report_golden.json",
+        )
+        is None
     )
 
 
 def test_chembl_assay_backfill_run_report_golden_matches_v1_schema() -> None:
-    validate_fixture(
-        schema_name="pipeline_run_report.v1.json",
-        fixture_name="chembl_assay_backfill_run_report_golden.json",
+    assert (
+        validate_fixture(
+            schema_name="pipeline_run_report.v1.json",
+            fixture_name="chembl_assay_backfill_run_report_golden.json",
+        )
+        is None
     )
 
 
