@@ -108,6 +108,8 @@ class TestValidateLock:
         writer = _TracingWriter(lock_validator=None)
         # Must not raise
         await writer._validate_lock("write_bronze")
+        writer._context.logger.error.assert_not_called()
+        writer._error_classifier.classify.assert_not_called()
 
     async def test_passes_when_lock_is_held(self):
         """_validate_lock completes without error when validator returns True."""

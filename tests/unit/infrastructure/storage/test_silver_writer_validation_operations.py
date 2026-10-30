@@ -204,6 +204,9 @@ class TestEnforceWritePolicy:
         host._write_policy = WriteModePolicy()
         host._to_policy_write_mode.return_value = WriteMode.MERGE
         _enforce_write_policy(host, SilverWriteMode.MERGE, "test_table")
+        host._to_policy_write_mode.assert_called_once_with(SilverWriteMode.MERGE)
+        host.logger.error.assert_not_called()
+        host._metrics.increment_counter.assert_not_called()
 
     def test_disallowed_mode_raises_and_logs(self) -> None:
         """Should raise PolicyViolationError and log error for disallowed mode."""
@@ -237,7 +240,10 @@ class TestValidateRecords:
         host = MagicMock()
         schema = pa.schema([("id", pa.int64())])
         records = [{"id": 1}]
+        before = [dict(record) for record in records]
         _validate_records(host, records, "test_table", schema)
+        assert records == before
+        assert host.mock_calls == []
 
     def test_valid_records_pass(self) -> None:
         """Silver validation accepts records regardless of runtime provenance fields."""
@@ -252,7 +258,10 @@ class TestValidateRecords:
                 "_ingestion_ts": "2025-01-01T00:00:00Z",
             }
         ]
+        before = [dict(record) for record in records]
         _validate_records(host, records, "test_table", schema)
+        assert records == before
+        assert host.mock_calls == []
 
     def test_null_source_batch_id_in_payload_is_ignored(self) -> None:
         """Runtime provenance should not be validated from row payload anymore."""
@@ -267,7 +276,10 @@ class TestValidateRecords:
                 "_ingestion_ts": "2025-01-01T00:00:00Z",
             }
         ]
+        before = [dict(record) for record in records]
         _validate_records(host, records, "test_table", schema)
+        assert records == before
+        assert host.mock_calls == []
 
     def test_blank_source_batch_id_in_payload_is_ignored(self) -> None:
         """Blank row-level provenance should not fail Silver validation."""
@@ -282,7 +294,10 @@ class TestValidateRecords:
                 "_ingestion_ts": "2025-01-01T00:00:00Z",
             }
         ]
+        before = [dict(record) for record in records]
         _validate_records(host, records, "test_table", schema)
+        assert records == before
+        assert host.mock_calls == []
 
 
 @pytest.mark.unit

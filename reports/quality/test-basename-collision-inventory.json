@@ -1,5 +1,5 @@
 {
-  "duplicate_basename_count": 72,
+  "duplicate_basename_count": 73,
   "duplicate_basenames": {
     "test_adapter.py": [
       "tests/integration/adapters/openalex/test_adapter.py",
@@ -104,6 +104,10 @@
     "test_enum_loader.py": [
       "tests/unit/domain/config/test_enum_loader.py",
       "tests/unit/infrastructure/config/test_enum_loader.py"
+    ],
+    "test_external_resource_inventory.py": [
+      "tests/architecture/test_external_resource_inventory.py",
+      "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py"
     ],
     "test_extractors.py": [
       "tests/unit/application/pipelines/common/test_extractors.py",

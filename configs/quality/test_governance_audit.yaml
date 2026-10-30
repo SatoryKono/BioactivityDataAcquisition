@@ -724,24 +724,24 @@ tracing:
 assertless_triage:
   categories:
     architecture_helper_guard:
-      count: 2
+      count: 0
       decision: retained
       rationale:
         Architecture policy tests delegate assertions to shared guard helpers or pytest.fail
         paths.
       next_review: "2026-09-30"
     benchmark_or_performance:
-      count: 1
+      count: 0
       decision: retained
       rationale: Performance/benchmark tests use measurement infrastructure as the assertion surface.
       next_review: "2026-09-30"
     helper_asserted:
-      count: 5
+      count: 0
       decision: retained
       rationale: Verification is delegated to explicit check/validate/verify helper calls.
       next_review: "2026-09-30"
     intentional_no_exception_contract:
-      count: 99
+      count: 85
       decision: retained-with-rationale
       rationale: No-op, close/aclose, smoke, or does-not-raise behavior is the contract under test.
       next_review: "2026-09-30"
@@ -879,20 +879,21 @@ compatibility_test_inventory:
   entries: []
 platform_sensitive_snapshot_tests:
   issue_ref: "#8406"
-  decision: canonical_fast_unit_lane
+  decision: canonical_dedicated_memory_lane
   owner: memory-governance
   review_date: "2026-12-31"
-  rationale:
-    Canonical memory graph behavior is exercised directly without platform skips or a duplicated
+  rationale: >-
+    Canonical memory graph behavior is exercised in the dedicated memory lane (#12373, #12447),
+    outside product coverage and fast unit selection, without platform skips or a duplicated
     repository snapshot cache.
   required_markers:
-    - unit
+    - memory
   min_timeout_seconds: 0
   windows_skip_required: false
   shared_snapshot_cache_required: false
   entries:
     - path: tests/unit/memory/test_graph_entrypoints.py
-      runtime_policy: fast_unit_lane
+      runtime_policy: dedicated_memory_lane
       platform_policy: cross_platform
 remediation_closeout:
   parent_issue: "#4200"

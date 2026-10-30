@@ -275,6 +275,71 @@ def _read_config_surface_baseline() -> dict[str, object]:
     return baseline
 
 
+def _replace_assertless_count_literals(source: str, counts: dict[str, int]) -> str:
+    """Replace only scanned scalar counts, preserving policy text and comments."""
+    import yaml
+
+    def fields(node: yaml.Node | None) -> dict[str, yaml.Node]:
+        if not isinstance(node, yaml.MappingNode):
+            raise ValueError("Invalid assertless policy YAML mapping")
+        return {key.value: value for key, value in node.value}
+
+    document = yaml.compose(source)
+    category_nodes = fields(fields(document)["assertless_triage"])["categories"]
+    categories = fields(category_nodes)
+    edits = []
+    for name, value in counts.items():
+        scalar = fields(categories[name])["count"]
+        if (
+            not isinstance(scalar, yaml.ScalarNode)
+            or source[scalar.start_mark.index : scalar.end_mark.index] != scalar.value
+        ):
+            raise ValueError(
+                "Assertless count requires a plain scalar, not an anchor or alias"
+            )
+        edits.append((scalar.start_mark.index, scalar.end_mark.index, str(value)))
+    for start, end, value in sorted(edits, reverse=True):
+        source = source[:start] + value + source[end:]
+    return source
+
+
+def _sync_assertless_triage_counts(*, check_only: bool = False) -> bool:
+    """Bind reviewed category counts to the fresh scan, with no growth allowed."""
+    import yaml
+
+    config_path = ROOT / "configs/quality/test_governance_audit.yaml"
+    source = config_path.read_text(encoding="utf-8")
+    policy = yaml.safe_load(source)
+    report = json.loads((ROOT / _TEST_GOVERNANCE_JSON).read_text(encoding="utf-8"))
+    categories = policy["assertless_triage"]["categories"]
+    measured = report["assertless_category_counts"]
+    if not isinstance(categories, dict) or not isinstance(measured, dict):
+        raise ValueError("Invalid assertless category bindings")
+    if set(categories) != set(measured):
+        raise ValueError("Assertless categories require explicit policy review")
+    planned = []
+    for name, entry in categories.items():
+        value = measured[name]
+        if not isinstance(entry, dict) or type(entry.get("count")) is not int:
+            raise ValueError(f"Invalid assertless category policy: {name}")
+        if type(value) is not int or value < 0 or value > entry["count"]:
+            raise ValueError(f"Assertless category growth is forbidden: {name}")
+        if entry["count"] != value:
+            planned.append((name, entry, value))
+    if planned and check_only:
+        raise SystemExit(
+            "Assertless category counts are stale; run the governance refresh"
+        )
+    if planned:
+        _write_text_atomically(
+            config_path,
+            _replace_assertless_count_literals(
+                source, {name: value for name, _, value in planned}
+            ),
+        )
+    return bool(planned)
+
+
 def _run_check_only() -> None:
     _sync_scorecard_hotspot_metrics_from_baseline(check_only=True)
     _run(
@@ -310,6 +375,7 @@ def _run_check_only() -> None:
             "--check",
         ]
     )
+    _sync_assertless_triage_counts(check_only=True)
     _run(
         [
             sys.executable,
@@ -409,6 +475,19 @@ def _run_refresh() -> None:
             _FIXTURE_DUPLICATION_JSON,
         ]
     )
+
+    if _sync_assertless_triage_counts():
+        _run(
+            [
+                sys.executable,
+                "-m",
+                _TEST_GOVERNANCE_MODULE,
+                "--json-out",
+                _TEST_GOVERNANCE_JSON,
+                "--fixture-duplication-out",
+                _FIXTURE_DUPLICATION_JSON,
+            ]
+        )
 
     # 4) Hotspot family baseline (measured)
     _run(

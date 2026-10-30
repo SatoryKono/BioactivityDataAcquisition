@@ -192,13 +192,35 @@ def test_issue_5663_test_inventory_and_snapshot_policy_are_bounded() -> None:
         assert (ROOT / entry["path"]).exists()
 
     assert snapshot_policy["issue_ref"] == "#8406"
-    assert snapshot_policy["decision"] == "canonical_fast_unit_lane"
-    assert snapshot_policy["required_markers"] == ["unit"]
+    assert snapshot_policy["decision"] == "canonical_dedicated_memory_lane"
+    assert snapshot_policy["required_markers"] == ["memory"]
     assert snapshot_policy["min_timeout_seconds"] == 0
     assert snapshot_policy["windows_skip_required"] is False
     assert snapshot_policy["shared_snapshot_cache_required"] is False
 
     unit_text = MEMORY_GRAPH_UNIT_TEST.read_text(encoding="utf-8")
-    assert "pytestmark = pytest.mark.unit" in unit_text
+    assert "pytestmark = pytest.mark.memory" in unit_text
+    assert "pytestmark = pytest.mark.unit" not in unit_text
+    matrix = _load_yaml(ROOT / "configs/quality/test_matrix.yaml")["test_lanes"]
+    memory_lanes = [
+        value["memory"]
+        for value in matrix.values()
+        if isinstance(value, dict) and isinstance(value.get("memory"), dict)
+    ]
+    assert memory_lanes, "Dedicated memory CI lane must remain configured"
+    for lane in memory_lanes:
+        assert "tests/unit/memory/test_graph_entrypoints.py" in lane["paths"]
+        assert "tests/unit/memory/test_graph_entrypoints.py" in lane["pytest_args"]
+        assert lane["marker_expression"] == "memory and not benchmark"
+    workflow_text = WORKFLOW.read_text(encoding="utf-8")
+    assert "memory-tests:" in workflow_text
+
+    assert snapshot_policy["entries"] == [
+        {
+            "path": "tests/unit/memory/test_graph_entrypoints.py",
+            "runtime_policy": "dedicated_memory_lane",
+            "platform_policy": "cross_platform",
+        }
+    ]
     assert "pytest.skip(" not in unit_text
     assert "memory.graph.sync_pkg" in unit_text

@@ -80,6 +80,9 @@ def test_local_telemetry_refresh_rejects_ci_identity_overrides(
 def test_check_routes_every_governed_artifact_through_fail_closed_runner(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(
+        refresh, "_sync_assertless_triage_counts", lambda **kwargs: False
+    )
     calls: list[list[str]] = []
 
     def fake_run(cmd: list[str], *, check: bool = True) -> int:
@@ -175,6 +178,9 @@ def test_run_propagates_subprocess_failure(monkeypatch: pytest.MonkeyPatch) -> N
 def test_refresh_propagates_generator_failure_before_later_steps(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(
+        refresh, "_sync_assertless_triage_counts", lambda **kwargs: False
+    )
     calls: list[list[str]] = []
 
     def fake_subprocess_run(cmd: list[str], **kwargs: object) -> SimpleNamespace:
@@ -206,6 +212,9 @@ def test_refresh_propagates_generator_failure_before_later_steps(
 def test_refresh_updates_remote_main_baseline_before_debt_rollup(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(
+        refresh, "_sync_assertless_triage_counts", lambda **kwargs: False
+    )
     calls: list[list[str]] = []
 
     def fake_run(cmd: list[str], *, check: bool = True) -> int:
@@ -716,3 +725,82 @@ def test_application_core_closeout_repairs_stale_status_in_place(
     )
     assert repaired["current_metrics"] == current
     refresh._refresh_application_core_closeout(check_only=True)
+
+
+def test_assertless_binding_checks_then_shrinks_without_policy_changes(
+    tmp_path, monkeypatch
+):
+    import json
+    import yaml
+
+    monkeypatch.setattr(refresh, "ROOT", tmp_path)
+    config = tmp_path / "configs/quality/test_governance_audit.yaml"
+    report = tmp_path / refresh._TEST_GOVERNANCE_JSON
+    config.parent.mkdir(parents=True)
+    report.parent.mkdir(parents=True)
+    policy = {
+        "assertless_triage": {
+            "categories": {
+                "intentional_no_exception_contract": {
+                    "count": 2,
+                    "decision": "retained",
+                },
+                "weak_no_value": {"count": 0, "decision": "zero-actionable-debt"},
+            }
+        },
+        "budgets": {"refined_assertless_max": 0},
+    }
+    config.write_text(yaml.safe_dump(policy), encoding="utf-8", newline="\n")
+    measured = {"intentional_no_exception_contract": 1, "weak_no_value": 0}
+    report.write_text(
+        json.dumps({"assertless_category_counts": measured}), encoding="utf-8"
+    )
+    before = config.read_bytes()
+    with pytest.raises(SystemExit, match="counts are stale"):
+        refresh._sync_assertless_triage_counts(check_only=True)
+    assert config.read_bytes() == before
+    assert refresh._sync_assertless_triage_counts() is True
+    actual = yaml.safe_load(config.read_text())
+    assert actual["assertless_triage"]["categories"][
+        "intentional_no_exception_contract"
+    ] == {"count": 1, "decision": "retained"}
+    assert actual["budgets"] == policy["budgets"]
+    after = config.read_bytes()
+    assert after == before.replace(b"count: 2", b"count: 1")
+    assert refresh._sync_assertless_triage_counts() is False
+    assert refresh._sync_assertless_triage_counts(check_only=True) is False
+    assert config.read_bytes() == after
+    for invalid in [2, -1, True, "1"]:
+        measured["intentional_no_exception_contract"] = invalid
+        report.write_text(
+            json.dumps({"assertless_category_counts": measured}), encoding="utf-8"
+        )
+        with pytest.raises(ValueError, match="growth is forbidden"):
+            refresh._sync_assertless_triage_counts()
+        assert config.read_bytes() == after
+    measured["unexpected"] = 0
+    report.write_text(
+        json.dumps({"assertless_category_counts": measured}), encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="explicit policy review"):
+        refresh._sync_assertless_triage_counts()
+    assert config.read_bytes() == after
+
+    anchored = yaml.safe_dump(policy).replace("count: 2", "count: &reviewed_count 2")
+    anchored += "historical_count: *reviewed_count\n"
+    config.write_text(anchored, encoding="utf-8", newline="\n")
+    report.write_text(
+        json.dumps(
+            {
+                "assertless_category_counts": {
+                    "intentional_no_exception_contract": 1,
+                    "weak_no_value": 0,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    before_anchor = config.read_bytes()
+    with pytest.raises(ValueError, match="plain scalar"):
+        refresh._sync_assertless_triage_counts()
+    assert config.read_bytes() == before_anchor

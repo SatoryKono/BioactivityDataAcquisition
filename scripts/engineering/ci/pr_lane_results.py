@@ -57,6 +57,9 @@ CONFIG_SCHEMA_MIGRATION_STATUS_TEST = (
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
+SCRIPTS_INVENTORY_MANIFEST_TEST = (
+    "tests/architecture/test_scripts_inventory_manifest.py"
+)
 INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST = (
     "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
 )
@@ -117,7 +120,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
     ),
     "scripts/engineering/README.md": (
-        "tests/architecture/test_scripts_inventory_manifest.py",
+        SCRIPTS_INVENTORY_MANIFEST_TEST,
         "tests/architecture/test_scripts_inventory_discovery.py",
     ),
     ".gitleaksignore": (
@@ -291,7 +294,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/engineering/qa/README.md": (
         EXTERNAL_RESOURCE_INVENTORY_TEST,
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        "tests/architecture/test_scripts_inventory_manifest.py",
+        SCRIPTS_INVENTORY_MANIFEST_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     **dict.fromkeys(
@@ -460,7 +463,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/test_governance_audit.yaml": TEST_GOVERNANCE_ARTIFACT_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
     "configs/quality/scripts_inventory_manifest.json": (
-        "tests/architecture/test_scripts_inventory_manifest.py",
+        SCRIPTS_INVENTORY_MANIFEST_TEST,
     ),
     "configs/quality/scripts_lifecycle_registry.json": (
         "tests/architecture/test_scripts_lifecycle_registry.py",

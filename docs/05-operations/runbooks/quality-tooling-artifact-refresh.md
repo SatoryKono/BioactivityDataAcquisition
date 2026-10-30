@@ -49,7 +49,8 @@ coupled rollup. For test/docs-only changes use the selected
 `refresh-ci-drift-families` families; do not run the full coupled writer merely
 to rebind fingerprints. Its `_ratchet_family_budgets` step may shrink
 `configs/quality/debt_scorecard.yaml`. Use the full coupled writer only when
-coverage, the dependency map or hotspot inputs changed, and review any shrink.
+coverage, the dependency map or hotspot inputs changed, or the live assertless
+category inventory decreased, and review any shrink.
 Budgets must never increase. Exact entrypoints and output families are:
 
 If the config-discrepancy baseline is stale, run
@@ -80,7 +81,13 @@ The full coupled owner runs, in source order:
 2. Module-coverage freshness → `reports/quality/module-coverage-inventory.json`.
 3. Architecture map → `docs/02-architecture/generated/module-dependency-map.{json,md}`.
 4. Test governance → `reports/quality/test-governance-current.json` and
-   `test-fixture-asset-duplication.json`.
+   `test-fixture-asset-duplication.json`. The fresh scan also supplies the
+   shrink-only `assertless_triage.categories.*.count` bindings in
+   `configs/quality/test_governance_audit.yaml`; changed counts trigger a second
+   test-governance write before downstream owners. New categories or count growth
+   stop the writer for policy review. `--check` reports stale bindings without
+   writing; update preserves the other policy values, comments and formatting.
+   Do not edit the measured category counts or historical closeouts by hand.
 5. Hotspot baseline and shrink-only scorecard synchronization →
    `reports/quality/hotspot-family-baseline.{json,md}` and existing scorecard metrics.
 6. Dead-code inventory → `reports/quality/dead-code-inventory.{json,md}`.

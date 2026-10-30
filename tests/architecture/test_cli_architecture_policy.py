@@ -82,6 +82,17 @@ ignore_imports =
 
 def test_cli_contract_schema_is_draft_2020_12() -> None:
     Draft202012Validator.check_schema(CLI_ARCHITECTURE_CONTRACT_SCHEMA)
+    from jsonschema.exceptions import SchemaError
+
+    assert (
+        CLI_ARCHITECTURE_CONTRACT_SCHEMA["$schema"]
+        .rstrip("#")
+        .endswith("2020-12/schema")
+    )
+    with pytest.raises(SchemaError):
+        Draft202012Validator.check_schema(
+            {**CLI_ARCHITECTURE_CONTRACT_SCHEMA, "type": "invalid-schema-type"}
+        )
 
 
 def test_repo_import_linter_contract_matches_cli_schema() -> None:
