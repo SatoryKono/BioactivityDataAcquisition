@@ -5,8 +5,9 @@ from __future__ import annotations
 import ast
 import errno
 import json
-import shlex
 from pathlib import Path
+import re
+import shlex
 import subprocess
 import sys
 
@@ -290,7 +291,7 @@ def test_real_daily_caller_and_command_partition_are_complete() -> None:
     architecture = next(
         step["run"]
         for step in pr_workflow["jobs"]["class-lane"]["steps"]
-        if "--target tests/architecture " in step.get("run", "")
+        if step.get("id") == "arch-pytest"
     )
     tokens = shlex.split(architecture)
     fallback = shlex.split(tokens[tokens.index("--fallback-addopts") + 1])
@@ -299,6 +300,13 @@ def test_real_daily_caller_and_command_partition_are_complete() -> None:
     assert {arg for arg in fallback if arg.startswith("--ignore")} == {
         arg for arg in parallel if arg.startswith("--ignore")
     }
+    affected = next(
+        step["run"]
+        for step in pr_workflow["jobs"]["class-lane"]["steps"]
+        if step.get("id") == "affected-pytest"
+    )
+    assert "--no-fallback" in affected.split()
+    assert "--fallback-addopts" not in affected.split()
     assert "cov-fail-under" not in pr
     assert "exit 5" not in pr
 
@@ -797,22 +805,37 @@ def test_source_checks_and_coverage_selection_survive_daily_partition():
         (ROOT / ".github/workflows/pr-required.yml").read_text(encoding="utf-8")
     )
     docs_lane = pr["jobs"]["docs-lane"]
-    assert docs_lane["uses"].startswith(
-        "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@"
+    needs = docs_lane["needs"]
+    assert ([needs] if isinstance(needs, str) else needs) == ["classify-changes"]
+    assert docs_lane["if"] == (
+        "needs['classify-changes'].outputs['docs-governance'] == 'required'"
     )
-    assert (
-        docs_lane["if"]
-        == "needs['classify-changes'].outputs['docs-governance'] == 'required'"
+    assert re.fullmatch(
+        r"SatoryKono/BioactivityDataAcquisition/\.github/workflows/docs\.yml@[0-9a-f]{40}",
+        docs_lane["uses"],
     )
-    docs = yaml.safe_load((ROOT / ".github/workflows/docs.yml").read_text())
-    commands = [
-        step.get("run", "")
-        for job in docs["jobs"].values()
-        for step in job.get("steps", [])
+    assert not docs_lane.get("continue-on-error", False)
+    docs_owner = yaml.safe_load(
+        (ROOT / ".github/workflows/docs.yml").read_text(encoding="utf-8")
+    )["jobs"]["docs-governance"]
+    passport_step = next(
+        step
+        for step in docs_owner["steps"]
+        if step.get("name") == "Check pipeline and workflow passport drift"
+    )
+    assert shlex.split(passport_step["run"]) == [
+        "uv",
+        "run",
+        "--frozen",
+        "--no-build",
+        "python",
+        "-m",
+        "scripts.docs",
+        "passports",
+        "check",
     ]
-    assert any(
-        "python -m scripts.docs passports check" in command for command in commands
-    )
+    assert "if" not in passport_step
+    assert not passport_step.get("continue-on-error", False)
 
 
 @pytest.mark.parametrize("new_importer", [False, True])

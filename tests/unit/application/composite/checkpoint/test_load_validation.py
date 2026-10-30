@@ -82,11 +82,14 @@ def _anchors() -> ExpectedCheckpointContext:
 
 
 def test_validate_resume_compatibility_accepts_matching_anchors() -> None:
-    validate_resume_compatibility(
-        state=_state(),
-        anchors=_anchors(),
-        logger=MagicMock(),
-        composite_name="publication",
+    assert (
+        validate_resume_compatibility(
+            state=_state(),
+            anchors=_anchors(),
+            logger=MagicMock(),
+            composite_name="publication",
+        )
+        is None
     )
 
 
