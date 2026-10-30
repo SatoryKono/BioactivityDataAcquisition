@@ -342,7 +342,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "317",
+      "line": "354",
       "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_merged_no_records"
@@ -1355,7 +1355,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "317",
+        "line": "354",
         "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_merged_no_records"
@@ -1798,12 +1798,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3192,
-    "total_test_functions": 31602,
+    "total_test_functions": 31622,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "184a8b98f3f127a31b779621da3c4b7af6b33cae0d502f03768a75aed5bf835b",
+  "source_tree_sha256": "f30aa9ff3b659a4963fac030d4c379ea78dac031958db4e91a65f6468ba7d598",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 69,
@@ -1866,7 +1866,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3192,
-  "total_test_functions": 31602,
+  "total_test_functions": 31622,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

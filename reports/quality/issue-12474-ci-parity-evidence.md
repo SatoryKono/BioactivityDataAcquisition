@@ -174,3 +174,29 @@ uses its existing explicit checkout/run identity builder before removing
 deliberately seeds a mismatching ambient SHA to prevent regression. Product
 evidence validation and wrong-checkout rejection are unchanged. This earlier
 ordinary run is a FAIL, not final candidate acceptance.
+
+### Authorized producer blocker remediation
+
+The repository owner explicitly authorized addressed ORCID, Grafana provenance
+and coverage blocker remediation without weakening checks. The stale identifier
+expectations now require the full four-digit final ORCID group, retain the
+approved author-alignment null slots for OpenAlex/Semantic Scholar, and retain
+the supported numeric or 40-hex Semantic Scholar identifier contract. Positive
+and negative fixtures reject truncated ORCIDs, invalid symbols, noncanonical
+arrays and unsupported nulls. All 37 owning integration cases pass.
+
+Seven existing owning unit files now cover the prior producer's exact missing
+error/boundary/cleanup paths: DQ structural projection, ontology/boolean flags,
+PubMed oversized stream closure without partial parsing, guarded HTTP redirect
+handling, Gold SCD2 preconditions/no-op, and Silver subprocess deadline/cleanup.
+The complete 202-case owning selection passes. The ontology defensive tuple-vs-
+member prefix fallback uses an explicitly inconsistent str-subclass fault fixture;
+it is not presented as an ordinary production-string scenario. Product code,
+budgets and thresholds are unchanged. Focused coverage is diagnostic and does
+not substitute for the required new complete 17-shard producer.
+
+The unmodified Grafana candidate workflow on the earlier head failed with real
+peer-dependency and stale packed-archive errors (`41077164501`); its host build
+was skipped, not accepted. Equivalent delivery remediation already exists in
+the separately owned PR #12616. Its branch and artifacts remain untouched; only
+accepted, input-qualified upstream results may be reused after integration.

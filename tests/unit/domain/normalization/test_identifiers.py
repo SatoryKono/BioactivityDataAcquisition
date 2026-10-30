@@ -47,6 +47,27 @@ from bioetl.domain.normalization.identifiers import (
 
 pytestmark = pytest.mark.unit
 
+
+@pytest.mark.parametrize(
+    "value,expected", [("TS-TS-0001", "TS-0001"), ("UNKNOWN_001", "UNKNOWN_001")]
+)
+def test_ontology_prefix_edge_contracts(value: str, expected: str) -> None:
+    from bioetl.domain.normalization.identifiers import normalize_ontology_id
+
+    assert normalize_ontology_id(value) == expected
+
+
+def test_canonical_fast_path_defensive_inconsistent_string_protocol() -> None:
+    """Fault fixture only: builtin str cannot disagree about tuple/member prefixes."""
+    from bioetl.domain.normalization.identifiers import _fast_path_canonical
+
+    class InconsistentPrefix(str):
+        def startswith(self, prefix, *args):
+            return isinstance(prefix, tuple)
+
+    assert _fast_path_canonical("BAO_001", InconsistentPrefix("BAO_001")) is None
+
+
 LEGACY_HTTP_DOI = "http" + "://doi.org/10.1234/test"
 
 

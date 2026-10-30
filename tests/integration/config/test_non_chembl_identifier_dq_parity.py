@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 from typing import Any
 
 import pytest
@@ -81,16 +82,16 @@ def test_governed_publication_identifier_arrays_publish_canonical_json_patterns(
 ):
     expected_patterns = {
         ("crossref", "publication", "author_orcids"): (
-            r'^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
+            r'^\[("\d{4}-\d{4}-\d{4}-\d{3}[0-9X]"(,"\d{4}-\d{4}-\d{4}-\d{3}[0-9X]")*)?\]$'
         ),
         ("crossref", "publication", "issn_list"): (
             r"^\[(\"[0-9Xx-]+\"(,\"[0-9Xx-]+\")*)?\]$"
         ),
         ("openalex", "publication", "author_openalex_ids"): (
-            r'^\[("A\d+"(,"A\d+")*)?\]$'
+            r'^\[(("A\d+"|null)(,("A\d+"|null))*)?\]$'
         ),
         ("openalex", "publication", "author_orcids"): (
-            r'^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
+            r'^\[(("\d{4}-\d{4}-\d{4}-\d{3}[0-9X]"|null)(,("\d{4}-\d{4}-\d{4}-\d{3}[0-9X]"|null))*)?\]$'
         ),
         ("openalex", "publication", "institution_ids"): (r'^\[("I\d+"(,"I\d+")*)?\]$'),
         ("openalex", "publication", "ror_ids"): (
@@ -100,16 +101,16 @@ def test_governed_publication_identifier_arrays_publish_canonical_json_patterns(
             r'^\[("[0-9Xx-]+"(,"[0-9Xx-]+")*)?\]$'
         ),
         ("pubmed", "publication", "author_orcids"): (
-            r'^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
+            r'^\[("\d{4}-\d{4}-\d{4}-\d{3}[0-9X]"(,"\d{4}-\d{4}-\d{4}-\d{3}[0-9X]")*)?\]$'
         ),
         ("pubmed", "publication", "issn_list"): (
             r'^\[("[0-9Xx-]+"(,"[0-9Xx-]+")*)?\]$'
         ),
         ("semanticscholar", "publication", "author_s2_ids"): (
-            r'^\[("[0-9a-f]{40}"(,"[0-9a-f]{40}")*)?\]$'
+            r'^\[("([0-9a-f]{40}|\d+)"(,"([0-9a-f]{40}|\d+)")*)?\]$'
         ),
         ("semanticscholar", "publication", "author_orcids"): (
-            r'^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
+            r'^\[(("\d{4}-\d{4}-\d{4}-\d{3}[0-9X]"|null)(,("\d{4}-\d{4}-\d{4}-\d{3}[0-9X]"|null))*)?\]$'
         ),
         ("semanticscholar", "publication", "issn_list"): (
             r'^\[("[0-9Xx-]+"(,"[0-9Xx-]+")*)?\]$'
@@ -143,6 +144,59 @@ def test_governed_publication_identifier_arrays_publish_canonical_json_patterns(
         rule = _field_validation(*key)
         assert rule["type"] == "pattern"
         assert rule["pattern"] == pattern
+
+
+@pytest.mark.parametrize(
+    "provider", ["crossref", "openalex", "pubmed", "semanticscholar"]
+)
+@pytest.mark.parametrize(
+    ("value", "accepted"),
+    [
+        ("[]", True),
+        ('["0000-0002-1825-0097"]', True),
+        ('["0000-0002-1825-0097","0000-0000-0000-000X"]', True),
+        ('["0000-0002-1825-7"]', False),
+        ('["0000-0002-1825-009A"]', False),
+        ('["0000-0002-1825-0097", "0000-0000-0000-000X"]', False),
+    ],
+)
+def test_publication_orcid_pattern_preserves_full_identifier_and_canonical_array(
+    provider: str, value: str, accepted: bool
+) -> None:
+    rule = _field_validation(provider, "publication", "author_orcids")
+    assert (re.fullmatch(rule["pattern"], value) is not None) is accepted
+
+
+@pytest.mark.parametrize(
+    "provider", ["crossref", "openalex", "pubmed", "semanticscholar"]
+)
+def test_orcid_null_slots_follow_existing_author_alignment_contract(
+    provider: str,
+) -> None:
+    pattern = _field_validation(provider, "publication", "author_orcids")["pattern"]
+    aligned = '["0000-0002-1825-0097",null]'
+    assert (re.fullmatch(pattern, aligned) is not None) is (
+        provider in {"openalex", "semanticscholar"}
+    )
+    assert re.fullmatch(pattern, '["0000-0002-1825-7",null]') is None
+
+
+@pytest.mark.parametrize(
+    ("value", "accepted"),
+    [
+        ('["12345"]', True),
+        ('["' + "a" * 40 + '"]', True),
+        ('["' + "g" * 40 + '"]', False),
+        ("[null]", False),
+    ],
+)
+def test_semanticscholar_author_id_pattern_retains_reviewed_identifier_shapes(
+    value: str, accepted: bool
+) -> None:
+    pattern = _field_validation("semanticscholar", "publication", "author_s2_ids")[
+        "pattern"
+    ]
+    assert (re.fullmatch(pattern, value) is not None) is accepted
 
 
 def test_uniprot_bridge_and_protein_configs_govern_reviewed_and_taxonomy_explicitly() -> (
