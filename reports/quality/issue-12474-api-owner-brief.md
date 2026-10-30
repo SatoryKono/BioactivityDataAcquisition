@@ -4,7 +4,7 @@
 
 Проверяемый source: `35e4c0a9a3a649d43b211c0efc5696c87dd13aed`, tree `2658859756e1f93f4f89dd6a9d88106855895c77` ([PR #12616](https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12616)). Это source checkpoint, не разрешение на merge; финальное человеческое заключение должно назвать актуальный согласованный head/tree после CI и регенераций.
 
-Опубликованный head на срезе подготовки: `59ead153392774f805b3d21bd9f39678cd778bcd`, tree `b0601ddb46ec7729df54c236c9c70d36e5be1223`. Рассматриваемые API/packaging blobs совпадают с source checkpoint. Однако изменён `scripts/engineering/ci/pr_lane_results.py`, входящий в `TEST_INPUTS`: прежний capture нельзя автоматически переносить через эту правку. Штатный `_source_relation(35e, 59e)` вернул `False`. [Новый Nightly 41112795630](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41112795630), обновлённые receipts и последующий exact head требуют отдельной финальной проверки.
+Опубликованный head на срезе подготовки: `59ead153392774f805b3d21bd9f39678cd778bcd`, tree `b0601ddb46ec7729df54c236c9c70d36e5be1223`. Рассматриваемые API/packaging blobs совпадают с source checkpoint. Однако изменён `scripts/engineering/ci/pr_lane_results.py`, входящий в `TEST_INPUTS`: прежний capture нельзя автоматически переносить через эту правку. Штатный `_source_relation(..., live=False)` для этих ревизий вернул `(False, None)`. [Новый Nightly 41112795630](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41112795630), обновлённые receipts и последующий exact head требуют отдельной финальной проверки.
 
 ## Что затронуто
 
