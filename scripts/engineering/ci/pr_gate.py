@@ -247,9 +247,9 @@ def collect_changed_files(
     head_sha: str,
 ) -> list[str]:
     """Collect an exact-SHA diff and fail closed when Git cannot resolve it."""
-    if event_name == "pull_request":
+    if event_name in {"pull_request", "workflow_dispatch"}:
         if not base_sha:
-            raise CatalogError("pull_request classification requires base_sha")
+            raise CatalogError(f"{event_name} classification requires base_sha")
         diff_range = f"{base_sha}...{head_sha}"
     elif before_sha and before_sha != ZERO_SHA:
         diff_range = f"{before_sha}...{head_sha}"

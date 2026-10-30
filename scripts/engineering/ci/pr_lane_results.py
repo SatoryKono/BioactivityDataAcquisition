@@ -164,6 +164,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/quality/low-coverage-6045-revalidation.xml": (
         "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
     ),
+    "reports/quality/issue-12474-ci-parity-evidence.md": (
+        *ISSUE_12475_PHYSICAL_PARITY_TESTS,
+        "tests/unit/scripts/engineering/ci/test_physical_schema_parity.py",
+    ),
     "reports/quality/issue-12475-physical-parity-evidence.md": (
         *ISSUE_12475_PHYSICAL_PARITY_TESTS,
     ),
