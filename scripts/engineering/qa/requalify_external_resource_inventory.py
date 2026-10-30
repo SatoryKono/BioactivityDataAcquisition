@@ -192,8 +192,7 @@ def _relocate(
         )
 
 
-def build_requalification(root: Path, review: dict[str, Any]) -> dict[str, Any]:
-    """Construct a candidate only after proving the old and new source closures."""
+def _validate_review_schema(review: dict[str, Any]) -> None:
     allowed = {
         "schema_version",
         "catalog_ref",
@@ -207,30 +206,9 @@ def build_requalification(root: Path, review: dict[str, Any]) -> dict[str, Any]:
     }
     if review["schema_version"] != 1 or set(review) - allowed:
         raise ValueError("Unsupported review schema")
-    original = _catalog(root, review["catalog_ref"])
-    old = _snapshot(root, original["source_commit"])
-    new = _snapshot(root, review["source_ref"])
-    errors = inventory.validate_inventory(original, old.sources, old.blobs)
-    if errors:
-        raise ValueError("Invalid original catalog: " + "; ".join(errors))
-    changed = {
-        p
-        for p in old.sources.keys() | new.sources.keys()
-        if old.sources.get(p) != new.sources.get(p)
-    }
-    decisions = review["source_reviews"]
-    if set(decisions) != changed or any(
-        not isinstance(v, str) or not v.strip() for v in decisions.values()
-    ):
-        raise ValueError(
-            "Every changed source requires an explicit review; no extra or missing decisions"
-        )
-    payload = deepcopy(original)
-    for ref in inventory._references(payload):
-        if ref["file"] in changed:
-            _relocate(
-                ref, old, new, review.get("expression_updates", {}).get(ref["file"], {})
-            )
+
+
+def _apply_resource_reviews(payload: dict, review: dict, new: Snapshot) -> None:
     records = {row["identity"]: row for row in payload["resources"]}
     for identity, update in review.get("resource_updates", {}).items():
         if set(update) - {
@@ -271,6 +249,36 @@ def build_requalification(root: Path, review: dict[str, Any]) -> dict[str, Any]:
         ref = _locate(new, selector)
         ref["scope"], ref["reason"] = selector["scope"], selector["reason"]
         payload["delegations_and_exclusions"].append(ref)
+
+
+def build_requalification(root: Path, review: dict[str, Any]) -> dict[str, Any]:
+    """Construct a candidate only after proving the old and new source closures."""
+    _validate_review_schema(review)
+    original = _catalog(root, review["catalog_ref"])
+    old = _snapshot(root, original["source_commit"])
+    new = _snapshot(root, review["source_ref"])
+    errors = inventory.validate_inventory(original, old.sources, old.blobs)
+    if errors:
+        raise ValueError("Invalid original catalog: " + "; ".join(errors))
+    changed = {
+        p
+        for p in old.sources.keys() | new.sources.keys()
+        if old.sources.get(p) != new.sources.get(p)
+    }
+    decisions = review["source_reviews"]
+    if set(decisions) != changed or any(
+        not isinstance(v, str) or not v.strip() for v in decisions.values()
+    ):
+        raise ValueError(
+            "Every changed source requires an explicit review; no extra or missing decisions"
+        )
+    payload = deepcopy(original)
+    for ref in inventory._references(payload):
+        if ref["file"] in changed:
+            _relocate(
+                ref, old, new, review.get("expression_updates", {}).get(ref["file"], {})
+            )
+    _apply_resource_reviews(payload, review, new)
     for ref in inventory._references(payload):
         path = ref["file"]
         ref.update(

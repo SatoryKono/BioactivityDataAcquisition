@@ -26,6 +26,9 @@ PLUGINS = ("bioetl-scenes-app", "bioetl-selectorshell-panel")
 FRONTEND = "usr/share/grafana/public/build"
 PLUGIN_ROOT = "usr/share/grafana/data/plugins-bundled"
 OWNER = "grafana/tooling/router-v7-bridge"
+PLUGIN_SOURCE = "grafana/plugins"
+TOOLING_SOURCE = ".github/tooling"
+HOST_MANIFEST = "host-image.json"
 
 
 def sha(data: bytes) -> str:
@@ -86,7 +89,7 @@ def git(root: Path, *args: str) -> bytes:
     elif (
         len(args) == 8
         and args[:3] == ("ls-tree", "-rz", "--name-only")
-        and args[4:] == ("--", "grafana/plugins", OWNER, ".github/tooling")
+        and args[4:] == ("--", PLUGIN_SOURCE, OWNER, TOOLING_SOURCE)
     ):
         command = [
             "git",
@@ -95,13 +98,59 @@ def git(root: Path, *args: str) -> bytes:
             "--name-only",
             commit_id(args[3]),
             "--",
-            "grafana/plugins",
+            PLUGIN_SOURCE,
             OWNER,
-            ".github/tooling",
+            TOOLING_SOURCE,
         ]
     else:
         raise ValueError("Unsupported Git operation")
     return subprocess.check_output(command, cwd=root)
+
+
+def context_entry(archive: tarfile.TarFile, entry: tarfile.TarInfo) -> tuple[str, list]:
+    """Validate one artifact member and derive its audited COPY record."""
+    name = entry.name.rstrip("/")
+    mapping = {"host-build": FRONTEND, **{p: f"{PLUGIN_ROOT}/{p}" for p in PLUGINS}}
+    prefix = name.split("/", 1)[0]
+    if (
+        prefix not in mapping
+        or not (entry.isdir() or entry.isfile())
+        or entry.mode & ~0o777
+    ):
+        raise ValueError("Unexpected build-context entry")
+    digest = None
+    if entry.isfile():
+        with archive.extractfile(entry) as member:
+            digest = hashlib.file_digest(member, "sha256").hexdigest()
+    return mapping[prefix] + name[len(prefix) :], [
+        "5" if entry.isdir() else "0",
+        entry.mode & ~0o222,
+        0,
+        0,
+        "",
+        0,
+        0,
+        digest,
+        {},
+    ]
+
+
+def context_recipe(
+    archive: tarfile.TarFile, entry: tarfile.TarInfo, recipe: bytes
+) -> None:
+    if not entry.isfile():
+        raise ValueError("Build recipe must be a regular file")
+    with archive.extractfile(entry) as member:
+        if member.read() != recipe:
+            raise ValueError("Build-context recipe differs from pinned source")
+
+
+def validate_context_scopes(records: dict, *, saw_recipe: bool) -> None:
+    if not saw_recipe:
+        raise ValueError("Missing build recipe")
+    for scope in (FRONTEND, *(f"{PLUGIN_ROOT}/{p}" for p in PLUGINS)):
+        if not any(n.startswith(scope + "/") and r[7] for n, r in records.items()):
+            raise ValueError("Missing complete artifact scope: " + scope)
 
 
 def context_records(path: Path, recipe: bytes, *, within: Path) -> dict:
@@ -122,48 +171,16 @@ def context_records(path: Path, recipe: bytes, *, within: Path) -> dict:
             ):
                 raise ValueError("Unsafe build-context path")
             if name == "Dockerfile.host":
-                if not entry.isfile():
-                    raise ValueError("Build recipe must be a regular file")
-                with archive.extractfile(entry) as member:
-                    actual_recipe = member.read()
-                if saw_recipe or actual_recipe != recipe:
+                if saw_recipe:
                     raise ValueError("Build-context recipe differs from pinned source")
+                context_recipe(archive, entry, recipe)
                 saw_recipe = True
                 continue
-            mapping = {
-                "host-build": FRONTEND,
-                **{p: f"{PLUGIN_ROOT}/{p}" for p in PLUGINS},
-            }
-            prefix = name.split("/", 1)[0]
-            if (
-                prefix not in mapping
-                or not (entry.isdir() or entry.isfile())
-                or entry.mode & ~0o777
-            ):
-                raise ValueError("Unexpected build-context entry")
-            target = mapping[prefix] + name[len(prefix) :]
+            target, record = context_entry(archive, entry)
             if target in records:
                 raise ValueError("Duplicate build-context path")
-            digest = None
-            if entry.isfile():
-                with archive.extractfile(entry) as member:
-                    digest = hashlib.file_digest(member, "sha256").hexdigest()
-            records[target] = [
-                "5" if entry.isdir() else "0",
-                entry.mode & ~0o222,
-                0,
-                0,
-                "",
-                0,
-                0,
-                digest,
-                {},
-            ]
-    if not saw_recipe:
-        raise ValueError("Missing build recipe")
-    for scope in (FRONTEND, *(f"{PLUGIN_ROOT}/{p}" for p in PLUGINS)):
-        if not any(n.startswith(scope + "/") and r[7] for n, r in records.items()):
-            raise ValueError("Missing complete artifact scope: " + scope)
+            records[target] = record
+    validate_context_scopes(records, saw_recipe=saw_recipe)
     return records
 
 
@@ -262,9 +279,9 @@ def source_inputs(root: Path, source_root: Path, ref: str) -> dict:
             "--name-only",
             ref,
             "--",
-            "grafana/plugins",
+            PLUGIN_SOURCE,
             OWNER,
-            ".github/tooling",
+            TOOLING_SOURCE,
         )
         .decode()
         .split("\0")
@@ -273,7 +290,7 @@ def source_inputs(root: Path, source_root: Path, ref: str) -> dict:
     excluded = {
         f"{OWNER}/{p}"
         for p in (
-            "host-image.json",
+            HOST_MANIFEST,
             "managed-image.json",
             "Dockerfile.managed",
             "compose.acceptance.yml",
@@ -298,7 +315,7 @@ def source_inputs(root: Path, source_root: Path, ref: str) -> dict:
 def rebuilt_plugins(source_root: Path) -> dict:
     result = {}
     for plugin in PLUGINS:
-        directory = source_root / "grafana/plugins" / plugin / "dist"
+        directory = source_root / PLUGIN_SOURCE / plugin / "dist"
         if not directory.is_dir() or directory.resolve() != directory:
             raise ValueError("Missing or redirected compiled plugin")
         result[plugin] = {}
@@ -330,8 +347,8 @@ def atomic_write(path: Path, data: bytes) -> None:
             os.unlink(name)
 
 
-def materialize(root: Path, args: argparse.Namespace) -> dict[Path, bytes]:
-    """Verify real bytes first; derive all release hashes/pins only afterwards."""
+def build_workspace(args: argparse.Namespace) -> Path:
+    """Normalize a real build root and return its dedicated input boundary."""
     declared_source_root = args.source_root
     args.source_root = Path(os.path.abspath(declared_source_root))
     if (
@@ -342,18 +359,38 @@ def materialize(root: Path, args: argparse.Namespace) -> dict[Path, bytes]:
     workspace = args.source_root.parent
     if workspace == Path(workspace.anchor):
         raise ValueError("A dedicated build workspace is required")
+    return workspace
+
+
+def artifact_hashes(root: Path, ref: str, old_host: dict, artifacts: dict) -> dict:
+    hashes = {
+        p: sha(git(root, "show", f"{ref}:{p}"))
+        for p in old_host["artifact_sha256"]
+        if "/dist/" not in p
+    }
+    for path, row in artifacts.items():
+        for plugin in PLUGINS:
+            prefix = f"{PLUGIN_ROOT}/{plugin}/"
+            if path.startswith(prefix) and row[7]:
+                hashes[f"{PLUGIN_SOURCE}/{plugin}/dist/{path.removeprefix(prefix)}"] = (
+                    row[7]
+                )
+    return hashes
+
+
+def materialize(root: Path, args: argparse.Namespace) -> dict[Path, bytes]:
+    """Verify real bytes first; derive all release hashes/pins only afterwards."""
+    workspace = build_workspace(args)
     inputs = source_inputs(root, args.source_root, args.source_ref)
     old_host = json.loads(
-        git(root, "show", f"{args.source_ref}:{OWNER}/host-image.json")
+        git(root, "show", f"{args.source_ref}:{OWNER}/{HOST_MANIFEST}")
     )
     old_managed = json.loads(
         git(root, "show", f"{args.source_ref}:{OWNER}/managed-image.json")
     )
     if (
         old_host["plugin_release_date"]
-        != json.loads((root / OWNER / "host-image.json").read_text())[
-            "plugin_release_date"
-        ]
+        != json.loads((root / OWNER / HOST_MANIFEST).read_text())["plugin_release_date"]
     ):
         raise ValueError("Plugin release input changed after build")
     recipe = git(root, "show", f"{args.source_ref}:{OWNER}/Dockerfile.host")
@@ -398,18 +435,7 @@ def materialize(root: Path, args: argparse.Namespace) -> dict[Path, bytes]:
         args.managed_image,
     )
     new_host = deepcopy(old_host)
-    hashes = {
-        p: sha(git(root, "show", f"{args.source_ref}:{p}"))
-        for p in old_host["artifact_sha256"]
-        if "/dist/" not in p
-    }
-    for path, row in artifacts.items():
-        for plugin in PLUGINS:
-            prefix = f"{PLUGIN_ROOT}/{plugin}/"
-            if path.startswith(prefix) and row[7]:
-                hashes[f"grafana/plugins/{plugin}/dist/{path.removeprefix(prefix)}"] = (
-                    row[7]
-                )
+    hashes = artifact_hashes(root, args.source_ref, old_host, artifacts)
     new_host.update(
         image=args.host_image,
         artifact_sha256=hashes,
@@ -454,7 +480,7 @@ def materialize(root: Path, args: argparse.Namespace) -> dict[Path, bytes]:
         },
     }
     for name, payload in (
-        ("host-image.json", new_host),
+        (HOST_MANIFEST, new_host),
         ("managed-image.json", new_managed),
     ):
         outputs[root / OWNER / name] = (json.dumps(payload, indent=2) + "\n").encode()
