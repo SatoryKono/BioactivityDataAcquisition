@@ -84,3 +84,29 @@ inputs. Only canonical generators may update their artifacts. Telemetry requires
 a new qualified producer on these test inputs; previous measurements are not
 rebound to this tree. Pending final exact-head receipts, CI links, independent
 review, merge and issue readback will be appended before closure.
+
+### Scoped CI corrections and static source maintenance
+
+The first remote runs exposed missing explicit artifact retention, a missing VCR
+inventory row for the new fixture, and Silver helper complexity 16 over the
+existing limit 15. Retention is now one day; the VCR inventory uses its canonical
+sync command; the pure helper uses equivalent set operations. The independent
+reviewer checked 78,897 combinations against the previous implementation with
+identical results. No complexity limit or test was relaxed.
+
+The frozen #12552 whole-source census also invalidates after this production
+helper changes. Its canonical checker now supports an explicit source maintenance
+update for reviewed resource-free files only: `--update --source-commit <full SHA>
+--reviewed-source <path>=<reviewed SHA256>`. It rejects changed resource-bearing
+files, new/removed files, incomplete reviewed sets, incorrect digests and any
+unreconciled acquisition. It retains the old source commit in maintenance history,
+preserves the 202 resource definitions and 377 historical dispositions, and keeps
+every runtime scenario `NOT_RUN_12553`. Actual Git blobs/tree and partition hashes
+are generated and checked, not hand-edited. The changed Silver file has no resource
+references and its modified pure function calls only `set()`.
+
+An independent security-producer failure was reproduced on clean main
+`0953a8f2b32c934eb9927389adfbc469c53b23c4`: the PII scanner reports `email` in
+`_api_request_sanitize.py`, despite the existing request-metadata redaction path.
+The unchanged test and product file are outside this parity implementation;
+their FAIL is retained and cannot qualify the new telemetry producer as PASS.

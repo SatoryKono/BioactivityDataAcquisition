@@ -65,36 +65,19 @@ def _diff_schema_fields(
     if existing_schema is None or not records:
         return None
 
-    if incoming_schema is None:
-        incoming_field_names = {
-            field_name for record in records for field_name in record
-        }
-    else:
-        incoming_schema_names = set(incoming_schema.names)
-        incoming_field_names = set(incoming_schema_names)
-        incoming_field_names.update(
-            field_name
-            for record in records
-            for field_name in record
-            if field_name not in incoming_schema_names
-        )
-    incoming_fields = {
-        field_name
-        for field_name in incoming_field_names
-        if field_name not in NONDETERMINISTIC_PERSISTED_FIELDS
-    }
-    existing_fields = {
-        field_name
-        for field_name in existing_schema.names
-        if field_name not in NONDETERMINISTIC_PERSISTED_FIELDS
-    }
+    record_fields = {field_name for record in records for field_name in record}
+    prepared_fields = (
+        record_fields if incoming_schema is None else set(incoming_schema.names)
+    )
+    incoming_fields = (
+        record_fields | prepared_fields
+    ) - NONDETERMINISTIC_PERSISTED_FIELDS
+    existing_fields = set(existing_schema.names) - NONDETERMINISTIC_PERSISTED_FIELDS
     # Raw extras must still be detected, but cannot hide fields dropped by the
     # prepared Arrow schema: that schema is what will actually be persisted.
-    record_fields = {field_name for record in records for field_name in record}
-    prepared_fields = record_fields
-    if incoming_schema is not None:
-        prepared_fields = record_fields & set(incoming_schema.names)
-    return incoming_fields - existing_fields, existing_fields - prepared_fields
+    return incoming_fields - existing_fields, existing_fields - (
+        record_fields & prepared_fields
+    )
 
 
 def _diff_schema_types(

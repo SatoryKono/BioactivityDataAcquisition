@@ -686,6 +686,7 @@ jobs:
           name: physical-schema-parity-${{ github.sha }}
           path: reports/quality/physical-schema-parity.xml
           if-no-files-found: error
+          retention-days: 1
 
       - name: Validate duplication/complexity exemption registry
         id: duplication-exemptions

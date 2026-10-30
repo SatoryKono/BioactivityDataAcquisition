@@ -621,6 +621,12 @@ def main(argv: list[str] | None = None) -> int:
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--check", action="store_true")
     mode.add_argument("--update", action="store_true")
+    parser.add_argument(
+        "--source-commit", help="Full commit for reviewed resource-free source changes"
+    )
+    parser.add_argument(
+        "--reviewed-source", action="append", default=[], metavar="PATH=SHA256"
+    )
     args = parser.parse_args(argv)
     try:
         return _run(args)
@@ -650,8 +656,12 @@ def _git_failure_message(error: subprocess.CalledProcessError) -> str:
 
 
 def _run(args: argparse.Namespace) -> int:
-    payload = load_catalog(verify_manifest=not args.update)
-    commit = payload.get("source_commit", "")
+    payload = load_catalog(verify_manifest=bool(args.source_commit) or not args.update)
+    if (args.source_commit or args.reviewed_source) and not args.update:
+        raise ValueError("Source requalification requires --update")
+    if args.reviewed_source and not args.source_commit:
+        raise ValueError("Reviewed source requires an explicit --source-commit")
+    commit = args.source_commit or payload.get("source_commit", "")
     if not _OID.fullmatch(str(commit)):
         print("Invalid source commit")
         return 1
@@ -673,12 +683,33 @@ def _run(args: argparse.Namespace) -> int:
             if name.endswith(b".py"):
                 oids[name.decode()] = meta.decode().split()[2]
     blobs = _load_source_blobs(oids)
-    errors = validate_inventory(payload, sources, blobs)
     tree = (
         subprocess.check_output(["git", "rev-parse", f"{commit}^{{tree}}"], cwd=ROOT)
         .decode()
         .strip()
     )
+    if args.source_commit:
+        subprocess.run(
+            ["git", "merge-base", "--is-ancestor", commit, "HEAD"],
+            cwd=ROOT,
+            check=True,
+        )
+        from scripts.engineering.qa._external_resource_source_rebind import (
+            rebind_resource_free_sources,
+        )
+
+        reviewed = dict(item.rsplit("=", 1) for item in args.reviewed_source)
+        if len(reviewed) != len(args.reviewed_source):
+            raise ValueError("Duplicate reviewed source path")
+        payload = rebind_resource_free_sources(
+            payload,
+            sources,
+            blobs,
+            commit=commit,
+            tree=tree,
+            reviewed=reviewed,
+        )
+    errors = validate_inventory(payload, sources, blobs)
     if payload.get("source_tree") != tree:
         errors.append("inconsistent source tree")
     if set(sources) != set(blobs):
