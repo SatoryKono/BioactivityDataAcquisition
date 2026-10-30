@@ -45,6 +45,7 @@ FIXTURE_ROOT = ROOT / "tests" / "fixtures" / "reports"
 
 
 def validate_fixture(*, schema_name: str, fixture_name: str) -> dict[str, Any]:
+    """Validate a golden payload against its schema and return it for assertions."""
     schema = json.loads((CONTRACT_ROOT / schema_name).read_text(encoding="utf-8"))
     payload = json.loads((FIXTURE_ROOT / fixture_name).read_text(encoding="utf-8"))
     validator_class = validator_for(schema)

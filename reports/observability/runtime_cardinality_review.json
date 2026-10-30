@@ -6,7 +6,7 @@
     "bioetl_pipeline_runs_total": 500
   },
   "degraded_reasons": [],
-  "generated_at": "2026-10-30T05:40:35Z",
+  "generated_at": "2026-10-30T05:57:01Z",
   "label_keys": {
     "bioetl_checkpoint_load_events_total": [
       "pipeline",
@@ -70,8 +70,8 @@
     "bioetl_pipeline_runs_total"
   ],
   "source_command": "python -m scripts.engineering.qa.report_observability_metric_inventory --check --fail-on-degraded-live-review --repo-root . --write-evidence 'reports\\observability\\runtime_cardinality_inventory.json' --review-json-out 'reports\\observability\\runtime_cardinality_review.json' --prometheus-base-url http://127.0.0.1:9090",
-  "source_revision": "df491ee7f365b8ed2a330c6050ef99303286b396",
-  "source_worktree_dirty": true,
+  "source_revision": "2836e7f7dc3fdd3b47ee01ecc1cca6f4191e0854",
+  "source_worktree_dirty": false,
   "static_threshold_violations": [],
   "status": "passed"
 }

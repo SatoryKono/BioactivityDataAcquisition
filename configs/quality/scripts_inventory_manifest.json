@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-29T20:55:11.680862+00:00",
+  "generated_at": "2026-10-30T06:00:43.758044+00:00",
   "summary": {
     "total_scripts": 698,
     "status_counts": {
@@ -15254,7 +15254,7 @@
           "text": "\"scripts.engineering.qa.external_resource_inventory\""
         },
         {
-          "path": "tests/architecture/test_external_resource_inventory.py",
+          "path": "tests/architecture/test_external_resource_inventory_catalog.py",
           "line": 7,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.external_resource_inventory import main"
