@@ -154,8 +154,8 @@ def test_registry_uses_enclosing_group_id():
 
 
 def test_public_validators_are_exported():
-    require_non_empty("x", "field")
-    validate_positive(1, "n")
+    assert require_non_empty("x", "field") is None
+    assert validate_positive(1, "n") is None
 
 
 def test_coerce_and_validate_composite_config():

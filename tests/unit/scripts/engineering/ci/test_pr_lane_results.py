@@ -941,6 +941,22 @@ def test_affected_targets_map_test_governance_audit_config() -> None:
     ]
 
 
+def test_shadow_compare_routes_assertless_ratchet_config() -> None:
+    """The shrink-only assertless ratchet has explicit owning tests."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        ["configs/quality/assertless_ratchet.yaml"],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/architecture/test_arch_s4_s9_gates.py",
+        "tests/architecture/test_test_governance_audit.py",
+        "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
+    ]
+
+
 def test_affected_targets_map_memory_source_without_test_diff() -> None:
     """A chunking-only PR must select its real RAG regression suite."""
     repo_root = Path(__file__).resolve().parents[5]
