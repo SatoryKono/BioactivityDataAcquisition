@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-30T06:59:46.100779+00:00",
+  "generated_at": "2026-10-30T09:19:00.802471+00:00",
   "summary": {
     "total_scripts": 698,
     "status_counts": {
@@ -8484,13 +8484,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 320,
+          "line": 332,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 729,
+          "line": 741,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
@@ -10160,7 +10160,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 341,
+          "line": 353,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import generated_artifact_checks as checks"
         }
@@ -10459,7 +10459,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 1059,
+          "line": 1075,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         }
@@ -14824,13 +14824,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 396,
+          "line": 408,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 417,
+          "line": 429,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_evaluators as evaluators"
         },
@@ -14867,7 +14867,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 416,
+          "line": 428,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_report as cli"
         },
@@ -20614,7 +20614,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 482,
+          "line": 486,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23614,7 +23614,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 559,
+          "line": 563,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -25059,7 +25059,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1275,
+          "line": 1276,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -25336,7 +25336,7 @@
         },
         {
           "path": "docs/04-reference/environment-variables.md",
-          "line": 123,
+          "line": 129,
           "source_group": "docs",
           "text": "| `BIOETL_RUNTIME_SOURCE_ID` | Opaque digest computed from the runtime root and mount roots and injected by `runtime_manager.py` | No |"
         },
@@ -27161,7 +27161,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1212,
+          "line": 1213,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -27229,7 +27229,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1212,
+          "line": 1213,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
