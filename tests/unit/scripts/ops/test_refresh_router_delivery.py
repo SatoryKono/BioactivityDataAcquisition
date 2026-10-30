@@ -2,6 +2,7 @@
 
 from copy import deepcopy
 import io
+import os
 from pathlib import Path
 import tarfile
 
@@ -91,7 +92,9 @@ def physical():
 
 
 def test_context_hashes_complete_outputs_and_applies_readonly_copy_metadata(tmp_path):
-    result = release.context_records(context(tmp_path), b"audited recipe")
+    result = release.context_records(
+        context(tmp_path), b"audited recipe", within=tmp_path
+    )
     scene = result[f"{release.PLUGIN_ROOT}/bioetl-scenes-app/module.js"]
     assert scene[1:4] == [0o444, 0, 0]
     assert scene[7] == release.sha(b"scenes")
@@ -99,6 +102,98 @@ def test_context_hashes_complete_outputs_and_applies_readonly_copy_metadata(tmp_
         7
     ] == release.sha(b"map")
     assert result[release.FRONTEND + "/app.js"][7] == release.sha(b"frontend")
+
+
+def test_input_reads_are_bounded_regular_files(tmp_path):
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    source = workspace / "input"
+    source.write_bytes(b"verified input")
+    assert release.file_sha(source, within=workspace) == release.sha(b"verified input")
+    (workspace / "nested").mkdir()
+    assert release.file_sha(
+        workspace / "nested" / ".." / "input", within=workspace
+    ) == release.sha(b"verified input")
+    outside = tmp_path / "outside"
+    outside.write_bytes(b"private")
+    with pytest.raises(ValueError):
+        release.file_sha(outside, within=workspace)
+    with pytest.raises(ValueError):
+        release.context_records(outside, b"recipe", within=workspace)
+    with pytest.raises(ValueError):
+        release.file_sha(workspace, within=workspace)
+    assert source.read_bytes() == b"verified input"
+    assert outside.read_bytes() == b"private"
+
+
+def test_linked_build_inputs_are_rejected(tmp_path):
+    source = tmp_path / "source"
+    source.write_bytes(b"original")
+    alias = tmp_path / "alias"
+    os.link(source, alias)
+    with pytest.raises(ValueError):
+        release.file_sha(alias, within=tmp_path)
+    with pytest.raises(ValueError):
+        release.context_records(alias, b"recipe", within=tmp_path)
+    assert source.read_bytes() == alias.read_bytes() == b"original"
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX symlink regression runs in Linux CI")
+@pytest.mark.parametrize("outside", [False, True])
+def test_symlinked_build_input_is_never_followed(tmp_path, outside):
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    target = (tmp_path if outside else workspace) / "source"
+    target.write_bytes(b"original")
+    link = workspace / "redirect"
+    link.symlink_to(target)
+    with pytest.raises(ValueError):
+        release.file_sha(link, within=workspace)
+    with pytest.raises(ValueError):
+        release.context_records(link, b"recipe", within=workspace)
+    assert target.read_bytes() == b"original"
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ("--exec-path=/untrusted",),
+        ("show", "--help"),
+        ("show", "a" * 40 + ":../outside"),
+        ("show", "a" * 40 + ":/absolute"),
+        ("merge-base", "--is-ancestor", "--help", "HEAD"),
+        ("ls-tree", "-rz", "--name-only", "a" * 40, "--", "--output=outside"),
+    ],
+)
+def test_git_argument_injection_never_executes(tmp_path, monkeypatch, args):
+    calls = []
+    monkeypatch.setattr(
+        release.subprocess, "check_output", lambda *a, **k: calls.append(a)
+    )
+    with pytest.raises(ValueError):
+        release.git(tmp_path, *args)
+    assert calls == []
+
+
+def test_git_blob_read_uses_a_pinned_commit_and_option_terminator(tmp_path):
+    import subprocess
+
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "config", "user.name", "Fixture"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "config", "user.email", "fixture@example.invalid"],
+        check=True,
+    )
+    source = tmp_path / "source"
+    source.write_bytes(b"pinned")
+    subprocess.run(["git", "-C", str(tmp_path), "add", "--", "source"], check=True)
+    subprocess.run(["git", "-C", str(tmp_path), "commit", "-qm", "fixture"], check=True)
+    ref = subprocess.check_output(
+        ["git", "-C", str(tmp_path), "rev-parse", "HEAD"], text=True
+    ).strip()
+    assert release.git(tmp_path, "show", ref + ":source") == b"pinned"
 
 
 @pytest.mark.parametrize(
@@ -116,7 +211,9 @@ def test_incomplete_or_foreign_context_is_rejected(tmp_path, fault):
     )
     with pytest.raises(ValueError):
         release.context_records(
-            path, b"other recipe" if fault == "wrong-recipe" else b"audited recipe"
+            path,
+            b"other recipe" if fault == "wrong-recipe" else b"audited recipe",
+            within=tmp_path,
         )
     assert set(tmp_path.iterdir()) == {path}
     assert not (tmp_path / "escape").exists()

@@ -15,6 +15,7 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import re
+import stat
 import subprocess
 import tarfile
 import tempfile
@@ -31,20 +32,87 @@ def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def file_sha(path: Path) -> str:
-    with path.open("rb") as stream:
+def checked_input(path: Path, *, within: Path) -> Path:
+    """Bound regular, unlinked build inputs to the verified workspace."""
+    boundary = within.resolve(strict=True)
+    candidate = Path(os.path.abspath(path))
+    resolved = path.resolve(strict=True)
+    relative = resolved.relative_to(boundary)
+    if resolved != candidate or not boundary.is_dir():
+        raise ValueError("Input path is redirected")
+    info = resolved.stat()
+    if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+        raise ValueError("Input must be a regular unlinked file")
+    return boundary.joinpath(*relative.parts)
+
+
+def file_sha(path: Path, *, within: Path) -> str:
+    with checked_input(path, within=within).open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
+def commit_id(value: str) -> str:
+    if re.fullmatch(r"[0-9a-f]{40}", value) is None:
+        raise ValueError("Full source commit required")
+    return bytes.fromhex(value).hex()
+
+
 def git(root: Path, *args: str) -> bytes:
-    return subprocess.check_output(["git", *args], cwd=root)
+    """Expose only the three read-only operations required by this producer."""
+    if len(args) == 2 and args[0] == "show":
+        ref, separator, name = args[1].partition(":")
+        path = PurePosixPath(name)
+        if (
+            not separator
+            or not name
+            or path.is_absolute()
+            or ".." in path.parts
+            or "\\" in name
+            or path.as_posix() != name
+        ):
+            raise ValueError("Expected a repository-relative blob path")
+        command = [
+            "git",
+            "show",
+            "--end-of-options",
+            commit_id(ref) + ":" + path.as_posix(),
+        ]
+    elif (
+        len(args) == 4
+        and args[:2] == ("merge-base", "--is-ancestor")
+        and args[3] == "HEAD"
+    ):
+        command = ["git", "merge-base", "--is-ancestor", commit_id(args[2]), "HEAD"]
+    elif (
+        len(args) == 8
+        and args[:3] == ("ls-tree", "-rz", "--name-only")
+        and args[4:] == ("--", "grafana/plugins", OWNER, ".github/tooling")
+    ):
+        command = [
+            "git",
+            "ls-tree",
+            "-rz",
+            "--name-only",
+            commit_id(args[3]),
+            "--",
+            "grafana/plugins",
+            OWNER,
+            ".github/tooling",
+        ]
+    else:
+        raise ValueError("Unsupported Git operation")
+    return subprocess.check_output(command, cwd=root)
 
 
-def context_records(path: Path, recipe: bytes) -> dict:
+def context_records(path: Path, recipe: bytes, *, within: Path) -> dict:
     """Read, never extract, the actual build context; apply audited COPY metadata."""
     records = {}
     saw_recipe = False
-    with tarfile.open(path, "r|*") as archive:
+    source = checked_input(path, within=within)
+    with (
+        source.open("rb") as stream,
+        tarfile.open(fileobj=stream, mode="r|*") as archive,
+    ):
         for entry in archive:
             name = entry.name.rstrip("/")
             if (
@@ -217,7 +285,8 @@ def source_inputs(root: Path, source_root: Path, ref: str) -> dict:
         if path in excluded or "/dist/" in path:
             continue
         expected = git(root, "show", f"{ref}:{path}")
-        actual, working = (source_root / path).read_bytes(), (root / path).read_bytes()
+        actual = checked_input(source_root / path, within=source_root).read_bytes()
+        working = checked_input(root / path, within=root).read_bytes()
         if actual != expected or working.replace(b"\r\n", b"\n") != expected.replace(
             b"\r\n", b"\n"
         ):
@@ -237,7 +306,9 @@ def rebuilt_plugins(source_root: Path) -> dict:
             if path.is_symlink():
                 raise ValueError("Unexpected plugin symlink")
             if path.is_file():
-                result[plugin][path.relative_to(directory).as_posix()] = file_sha(path)
+                result[plugin][path.relative_to(directory).as_posix()] = file_sha(
+                    path, within=source_root
+                )
     return result
 
 
@@ -261,6 +332,16 @@ def atomic_write(path: Path, data: bytes) -> None:
 
 def materialize(root: Path, args: argparse.Namespace) -> dict[Path, bytes]:
     """Verify real bytes first; derive all release hashes/pins only afterwards."""
+    declared_source_root = args.source_root
+    args.source_root = Path(os.path.abspath(declared_source_root))
+    if (
+        declared_source_root.resolve(strict=True) != args.source_root
+        or not args.source_root.is_dir()
+    ):
+        raise ValueError("Build source root must be a real directory")
+    workspace = args.source_root.parent
+    if workspace == Path(workspace.anchor):
+        raise ValueError("A dedicated build workspace is required")
     inputs = source_inputs(root, args.source_root, args.source_ref)
     old_host = json.loads(
         git(root, "show", f"{args.source_ref}:{OWNER}/host-image.json")
@@ -276,7 +357,7 @@ def materialize(root: Path, args: argparse.Namespace) -> dict[Path, bytes]:
     ):
         raise ValueError("Plugin release input changed after build")
     recipe = git(root, "show", f"{args.source_ref}:{OWNER}/Dockerfile.host")
-    artifacts = context_records(args.context, recipe)
+    artifacts = context_records(args.context, recipe, within=workspace)
     base_ref = old_host["base_image"]
     if not re.fullmatch(r"grafana/grafana@sha256:[0-9a-f]{64}", base_ref):
         raise ValueError("Unsupported official base")
@@ -336,7 +417,7 @@ def materialize(root: Path, args: argparse.Namespace) -> dict[Path, bytes]:
         delivery_source={
             "source_ref": args.source_ref,
             "inputs": inputs,
-            "context_sha256": file_sha(args.context),
+            "context_sha256": file_sha(args.context, within=workspace),
             "host_artifact_parity": host_proof,
         },
     )

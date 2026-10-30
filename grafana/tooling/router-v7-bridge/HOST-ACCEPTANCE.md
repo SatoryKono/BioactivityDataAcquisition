@@ -39,6 +39,12 @@ with the repository producer below. Supply the full source commit, its matching
 disposable source tree, the complete Docker build context tar, actual built
 image-config digests and registry manifest references read back after push:
 
+Use a dedicated build workspace: its verified source tree is `--source-root`,
+and `--context` must be a regular, unlinked file inside that tree's parent
+workspace. Filesystem-root workspaces and redirected inputs are refused before
+the context is read. Git input identities must be full commit SHAs; the writer
+only supports its fixed read-only Git operations.
+
 ```bash
 python -m scripts.ops refresh-router-delivery \
   --source-ref "$SOURCE_REF" --source-root "$BUILT_SOURCE_ROOT" \
