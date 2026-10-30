@@ -297,6 +297,7 @@ def test_singleton_metric_document_obeys_index(tmp_path: Path, monkeypatch):
     document.write_text("bioetl_pipeline_duration_seconds")
     monkeypatch.setattr(report, "_DOC_SCAN_ROOTS", (Path("grafana/README.md"),))
     assert report._scan_documented_metrics_from_docs(tmp_path) == set()
+
     _git(tmp_path, "add", ".")
     assert (
         "bioetl_pipeline_duration_seconds"
@@ -304,3 +305,29 @@ def test_singleton_metric_document_obeys_index(tmp_path: Path, monkeypatch):
     )
     _git(tmp_path, "rm", "--cached", "grafana/README.md")
     assert report._scan_documented_metrics_from_docs(tmp_path) == set()
+
+
+def test_sdist_support_closure_does_not_borrow_a_git_checkout(tmp_path: Path):
+    import hashlib
+    import json
+
+    source = tmp_path / "scripts/quality.py"
+    source.parent.mkdir()
+    source.write_text("pass\n", encoding="utf-8")
+    (tmp_path / "quality-tooling-support.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "files": {
+                    "scripts/quality.py": hashlib.sha256(
+                        source.read_bytes()
+                    ).hexdigest()
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert tracked_files(source.parent, "*.py") == (source,)
+    source.unlink()
+    with pytest.raises(ValueError, match="Invalid sdist quality-tooling support entry"):
+        tracked_files(tmp_path, "**/*.py")

@@ -30,6 +30,28 @@ SCRIPTS_INVENTORY_JSON_TIMEOUT_SECONDS = (
 pytestmark = pytest.mark.architecture
 
 
+def test_inventory_recognizes_local_pep517_backend_not_arbitrary_module_strings(
+    tmp_path: Path,
+) -> None:
+    from scripts.engineering.repo import check_scripts_inventory as inventory
+
+    target = "scripts/engineering/common/build_backend.py"
+    project = tmp_path / "pyproject.toml"
+    project.write_text(
+        '[build-system]\nbuild-backend = "scripts.engineering.common.build_backend:backend"\nbackend-path = ["."]\n',
+        encoding="utf-8",
+    )
+    hits = inventory._discover_refs_in_file(tmp_path, project, {target}, {})
+    assert [path for path, _ in hits] == [target]
+    assert hits[0][1].path == "pyproject.toml"
+    assert hits[0][1].source_group == "build"
+    project.write_text(
+        '[tool.example]\nbuild-backend = "scripts.engineering.common.build_backend"\n',
+        encoding="utf-8",
+    )
+    assert inventory._discover_refs_in_file(tmp_path, project, {target}, {}) == []
+
+
 def _load_inventory_module():
     root = repo_root()
     module_path = (
