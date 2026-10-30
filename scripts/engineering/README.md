@@ -52,6 +52,27 @@ their existing locations. Continue using the existing QA/CI entrypoints. The
 analyzed product tree remains `src/bioetl`; moving the tool does not move its
 analysis scope or turn a smaller product-only denominator into a code reduction.
 
+For a reviewed production-source delta, the repository-only COMP-004 writer is
+`python -m scripts.engineering.qa.requalify_external_resource_inventory --review
+configs/quality/external_resource_inventory_qm08_review.json --check` (or
+`--update`). It requires the pinned Git history and a complete semantic source
+review; the original `external_resource_inventory --check` remains an independent
+gate. The producer does not run product endpoints or qualify shutdown scenarios.
+Use check → update → check before dependent rollups. Runtime results remain
+`NOT_RUN_12553`; neither source qualification nor this refresh grants ADMIT.
+
+The Grafana plugin build uses peer-compatible TypeScript 6.0.3 and ESLint 9;
+lint/typecheck rules and the moderate audit gate remain enabled. The maintained
+root ESLint configs use Grafana's public flat-config export and preserve the
+scaffold overrides. The bridge's legacy-host tests import its explicit v5 alias.
+After changing the private bridge package metadata, regenerate its artifact with
+`npm pack --ignore-scripts --pack-destination .` in the bridge directory. In each
+plugin directory, run `npm update react-router-dom-v5-compat --package-lock-only
+--ignore-scripts` to derive the new local archive integrity, then perform the
+normal `npm ci --ignore-scripts`, audit, typecheck, lint, test and build sequence.
+Do not use force/legacy peer resolution or copy new lock hashes into an old
+delivery receipt without a real source/bundle/image parity check.
+
 The supported basename-inventory writer uses the same tracked `tests/**/*.py`
 and `test_*.py` selection as its architecture gate:
 

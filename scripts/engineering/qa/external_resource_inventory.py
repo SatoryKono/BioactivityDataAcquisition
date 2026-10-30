@@ -365,6 +365,39 @@ def _check_components(records: list[dict[str, Any]], identities: set[str]) -> li
     return errors
 
 
+def _check_source_review(
+    payload: dict[str, Any], source_count: int, site_count: int
+) -> list[str]:
+    review = payload.get("source_requalification")
+    if review is None:
+        return []
+    if not isinstance(review, dict):
+        return ["invalid source requalification schema"]
+    counts = {
+        "production_file_count": source_count,
+        "definition_count": len(payload["resources"]),
+        "creation_site_count": site_count,
+    }
+    valid_counts = all(
+        type(review.get(k)) is int and review[k] == n for k, n in counts.items()
+    )
+    valid_refs = all(
+        _OID.fullmatch(str(review.get(k, "")))
+        for k in ("catalog_ref", "source_ref", "baseline_source_ref")
+    )
+    if (
+        not valid_counts
+        or not valid_refs
+        or review.get("source_ref") != payload["source_commit"]
+        or re.fullmatch(r"[0-9a-f]{64}", str(review.get("review_sha256", ""))) is None
+        or review.get("runtime_result") != "NOT_RUN_12553"
+    ):
+        return [
+            "source review identity/counts/runtime claim differ from the actual source census"
+        ]
+    return []
+
+
 def validate_inventory(
     payload: dict[str, Any],  # Any: JSON inventory boundary, checked below.
     sources: Mapping[str, bytes],
@@ -385,6 +418,7 @@ def validate_inventory(
     sites: set[tuple[str, int, str]] = set()
     for record in records:
         errors.extend(_check_record(record, seen, sites))
+    errors.extend(_check_source_review(payload, len(sources), len(sites)))
     errors.extend(_check_components(records, seen))
     schema_errors = [
         error
@@ -416,6 +450,17 @@ def validate_inventory(
 def render(payload: dict[str, Any]) -> str:  # Any: validated JSON catalog.
     """Render every resource and source link without inventing runtime results."""
     commit = payload["source_commit"]
+    method = payload["completeness_method"]
+    review = payload.get("source_requalification")
+    if review is not None:
+        method = (
+            f"Current reviewed source: {review['source_ref']}; "
+            f"production files {review['production_file_count']}; "
+            f"definitions {review['definition_count']}; "
+            f"creation sites {review['creation_site_count']}. Runtime remains NOT_RUN_12553.\n\n"
+            f"Original baseline qualification narrative ({review['baseline_source_ref']}), "
+            f"preserved verbatim; its correction totals describe that baseline:\n\n{method}"
+        )
     out = [
         "# External Resource Inventory",
         "",
@@ -427,7 +472,7 @@ def render(payload: dict[str, Any]) -> str:  # Any: validated JSON catalog.
         "",
         payload["scope_statement"],
         "",
-        payload["completeness_method"],
+        method,
         "",
         "Static inventory only. Runtime results are NOT_RUN_12553. No production "
         "endpoint, data operation, lifecycle trace or leak test is run here.",

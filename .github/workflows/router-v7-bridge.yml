@@ -201,6 +201,21 @@ jobs:
           docker pull "$image"
           node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
             bioetl-router-host:acceptance
+      - name: Build and verify managed image from the qualified parent
+        run: |
+          mkdir -p reports/qa/router-v7-managed-context
+          cp grafana/tooling/router-v7-bridge/Dockerfile.managed reports/qa/router-v7-managed-context/Dockerfile
+          docker buildx build --platform linux/amd64 --load --provenance=false \
+            --metadata-file reports/qa/router-v7-managed-image-build.json \
+            -t bioetl-router-managed:acceptance reports/qa/router-v7-managed-context
+          image=$(node -p "require('./grafana/tooling/router-v7-bridge/managed-image.json').image")
+          docker pull "$image"
+          for plugin in bioetl-scenes-app bioetl-selectorshell-panel; do
+            mkdir -p "grafana/plugins/$plugin/dist"
+            cp -a "reports/qa/router-v7-image-context/$plugin/." "grafana/plugins/$plugin/dist/"
+          done
+          built=$(docker image inspect --format '{{.Id}}' bioetl-router-managed:acceptance)
+          /usr/bin/python3 -m scripts.ops verify-router-managed-image "$built"
       - name: Preserve image build and parity receipts
         if: ${{ !cancelled() && always() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -209,5 +224,7 @@ jobs:
           path: |
             reports/qa/router-v7-image-build.json
             reports/qa/router-v7-image-parity.json
+            reports/qa/router-v7-managed-image-build.json
+            reports/qa/router-v7-managed-image-parity.json
           if-no-files-found: warn
           retention-days: 7

@@ -25,6 +25,30 @@ Record source SHA, upstream SHA, patch hashes, bridge/lock hashes, build exits,
 test counts, frontend/plugin bundle hashes, image digest and SBOM. Production
 build success alone does not establish runtime acceptance.
 
+After a genuine source build and publication, materialize active delivery pins
+with the repository producer below. Supply the full source commit, its matching
+disposable source tree, the complete Docker build context tar, actual built
+image-config digests and registry manifest references read back after push:
+
+```bash
+python -m scripts.ops.observability.grafana.refresh_router_delivery \
+  --source-ref "$SOURCE_REF" --source-root "$BUILT_SOURCE_ROOT" \
+  --context "$BUILT_CONTEXT_TAR" \
+  --built-host "$HOST_CONFIG_DIGEST" --built-managed "$MANAGED_CONFIG_DIGEST" \
+  --host-image "$PUBLISHED_HOST_REF" --managed-image "$PUBLISHED_MANAGED_REF" \
+  --check
+```
+
+Run the same argv with `--update`, then `--check` again. No output is written
+before physical checks succeed. The producer derives source, context and delivery hashes
+from real inputs; it compares the complete host filesystem with its trusted
+official base plus the rebuilt frontend and both plugin trees, including modes
+and owners. It verifies the managed artifact as precisely that parent minus
+Scenes. Unknown concurrent edits stop materialization. Do not substitute an old
+image with new lock hashes. Source-built artifact parity does not grant runtime
+acceptance or Proof-or-Stop ADMIT. The Router workflow independently rebuilds
+both image variants and preserves both native parity receipts.
+
 On a separate Grafana database, verify all six Scene routes, navigation/history,
 dashboard variables, selector cancellation, malicious internal-navigation vectors
 and the bounded SSR applicability assessment. For panels 9482/3010, test no run,

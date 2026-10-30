@@ -53,6 +53,27 @@ coverage, the dependency map or hotspot inputs changed, or the live assertless
 category inventory decreased, and review any shrink.
 Budgets must never increase. Exact entrypoints and output families are:
 
+When a candidate changes the production source covered by COMP-004, qualify its
+delta before the rollup. The repository-only source requalifier requires full Git
+history and an explicit review for every changed source file. It reuses pinned
+definitions, resolves references against actual Git blobs, and retains the
+independent acquisition census and historical candidate dispositions:
+
+```bash
+python -m scripts.engineering.qa.requalify_external_resource_inventory --review configs/quality/external_resource_inventory_qm08_review.json --check
+python -m scripts.engineering.qa.requalify_external_resource_inventory --review configs/quality/external_resource_inventory_qm08_review.json --update
+python -m scripts.engineering.qa.requalify_external_resource_inventory --review configs/quality/external_resource_inventory_qm08_review.json --check
+python -m scripts.engineering.qa.external_resource_inventory --check
+```
+
+The writer derives source identities, partition hashes and counts. Do not edit
+them by hand. Ambiguous reference moves, missing acquisitions, dirty production
+sources and a runtime-PASS substitution stop generation before writing. This is
+source qualification only: all lifecycle scenarios remain `NOT_RUN_12553`.
+The requalifier is engineering repository tooling, not an installed runtime or
+a Git-free sdist command. Its baseline narrative and heuristic input provenance
+remain preserved separately from the derived current source counts.
+
 If the config-discrepancy baseline is stale, run
 `python -m scripts.schema generate-config-matrix --check` → `--update` →
 `--check` **before** the full coupled owner. This produces
