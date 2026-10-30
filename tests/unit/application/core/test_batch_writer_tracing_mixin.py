@@ -108,8 +108,9 @@ class TestValidateLock:
         writer = _TracingWriter(lock_validator=None)
         # Must not raise
         await writer._validate_lock("write_bronze")
-        writer._context.logger.error.assert_not_called()
-        writer._error_classifier.classify.assert_not_called()
+        assert writer._context.logger.mock_calls == []
+        assert writer._batch_metrics.mock_calls == []
+        assert writer._error_classifier.mock_calls == []
 
     async def test_passes_when_lock_is_held(self):
         """_validate_lock completes without error when validator returns True."""
@@ -283,9 +284,11 @@ class TestEndSpan:
 
     def test_no_op_when_span_is_none(self):
         """_end_span is a no-op when span is None."""
-        writer = _TracingWriter()
+        tracer = MagicMock()
+        writer = _TracingWriter(tracer=tracer)
         # Must not raise
         writer._end_span(None)
+        assert tracer.mock_calls == []
 
     def test_calls_exit_without_error(self):
         """span.__exit__ is called when no error provided."""

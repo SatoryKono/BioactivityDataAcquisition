@@ -104,7 +104,7 @@ EXTERNAL_RESOURCE_INVENTORY_TEST = (
     "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py"
 )
 EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
-    "tests/architecture/test_external_resource_inventory.py"
+    "tests/architecture/test_external_resource_inventory_catalog.py"
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {

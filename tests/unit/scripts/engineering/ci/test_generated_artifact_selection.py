@@ -301,12 +301,18 @@ def test_real_daily_caller_and_command_partition_are_complete() -> None:
         arg for arg in parallel if arg.startswith("--ignore")
     }
     affected = next(
-        step["run"]
+        step
         for step in pr_workflow["jobs"]["class-lane"]["steps"]
         if step.get("id") == "affected-pytest"
     )
-    assert "--no-fallback" in affected.split()
-    assert "--fallback-addopts" not in affected.split()
+    affected_command = affected["run"]
+    assert "scripts.engineering.ci.run_pytest_resilient" in affected_command
+    assert '--target "${targets[@]}"' in affected_command
+    assert '--parallel-marker "not serial"' in affected_command
+    assert '--serial-marker "serial"' in affected_command
+    assert "--no-fallback" in affected_command.split()
+    assert "--prove-artifact-deferral" in affected_command.split()
+    assert "--fallback-addopts" not in affected_command.split()
     assert "cov-fail-under" not in pr
     assert "exit 5" not in pr
 
