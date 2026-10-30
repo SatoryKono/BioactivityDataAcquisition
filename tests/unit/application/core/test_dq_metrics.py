@@ -58,7 +58,7 @@ def test_batch_metrics_quarantined_tracking():
 
 
 def test_batch_metrics_service_noop_when_no_metrics():
-    """Test that BatchMetricsRecorderService is a no-op when metrics=None."""
+    """Missing telemetry preserves error accounting without a backend."""
     recorder = BatchMetricsRecorder(None, "pipeline_test", "incremental")
 
     # Should not raise even with metrics=None
@@ -66,3 +66,5 @@ def test_batch_metrics_service_noop_when_no_metrics():
     recorder.track_processed_records("silver", 5)
     recorder.track_error("transform", ErrorType.DATA_QUALITY)
     recorder.track_quarantined_records(ErrorType.DATA_QUALITY, 3)
+    assert recorder.error_count == 1
+    assert recorder.batch_error_count == 1

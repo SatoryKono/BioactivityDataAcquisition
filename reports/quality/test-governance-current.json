@@ -55,13 +55,6 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "70",
-      "path": "tests/unit/application/test_issue_10518_app_runner_debug_evidence.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_debug_export_recording_is_noop_when_disabled"
-    },
-    {
-      "category": "intentional_no_exception_contract",
       "line": "43",
       "path": "tests/unit/application/test_issue_10518_application_coreobs_b.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -80,13 +73,6 @@
       "path": "tests/unit/application/test_issue_10518_application_pipelines_a.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_noop_without_counter"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "915",
-      "path": "tests/unit/application/test_issue_10518_application_svc1a.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_skips_rows_without_identity"
     },
     {
       "category": "helper_asserted",
@@ -125,52 +111,10 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "106",
-      "path": "tests/unit/application/core/test_batch_writer_tracing_mixin.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_no_op_when_lock_validator_is_none"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "282",
-      "path": "tests/unit/application/core/test_batch_writer_tracing_mixin.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_no_op_when_span_is_none"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "60",
-      "path": "tests/unit/application/core/test_dq_metrics.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_batch_metrics_service_noop_when_no_metrics"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "588",
-      "path": "tests/unit/application/core/test_otel_spans.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_postrun_run_explicit_noop_tracer"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "129",
-      "path": "tests/unit/application/core/test_postrun_cleanup_orchestrator.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_cleanup_tracer_none_skips_close"
-    },
-    {
-      "category": "intentional_no_exception_contract",
       "line": "297",
       "path": "tests/unit/application/observability/test_pipeline_metrics.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_noop_when_metrics_missing"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "326",
-      "path": "tests/unit/application/pipelines/crossref/test_crossref_transformer.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_pre_extract_validation_accepts_valid_doi"
     },
     {
       "category": "intentional_no_exception_contract",
@@ -209,20 +153,6 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "623",
-      "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_validate_stage_name_accepts_valid"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "670",
-      "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
-    },
-    {
-      "category": "intentional_no_exception_contract",
       "line": "178",
       "path": "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -241,13 +171,6 @@
       "path": "tests/unit/domain/ports/test_protocol_stubs.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_protocol_stubs_are_callable"
-    },
-    {
-      "category": "helper_asserted",
-      "line": "74",
-      "path": "tests/unit/domain/run_reports/test_contracts.py",
-      "rationale": "tests that delegate verification to check/validate/verify helper calls",
-      "test_name": "test_workflow_run_report_golden_matches_v1_schema"
     },
     {
       "category": "intentional_no_exception_contract",
@@ -311,20 +234,6 @@
       "path": "tests/unit/infrastructure/adapters/test_cached_bronze_support.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_raise_if_empty_batches_is_noop_when_batches_exist"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "308",
-      "path": "tests/unit/infrastructure/adapters/test_client_retry_mixin.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_record_retry_budget_exhausted_silent_without_logger"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "419",
-      "path": "tests/unit/infrastructure/adapters/test_client_retry_mixin.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_log_retry_silent_without_logger"
     },
     {
       "category": "intentional_no_exception_contract",
@@ -419,14 +328,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "100",
-      "path": "tests/unit/infrastructure/storage/test_bronze_writer_validation_mixin.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_validate_records_iterator_valid"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "119",
+      "line": "121",
       "path": "tests/unit/infrastructure/storage/test_bronze_writer_validation_mixin.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_utc_datetime_valid"
@@ -479,20 +381,6 @@
       "path": "tests/unit/infrastructure/storage/test_metadata_writer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_noop_aclose_is_idempotent"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "72",
-      "path": "tests/unit/infrastructure/storage/test_silver_writer_maintenance_boost.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_csv_exporter_none_skips_export"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "163",
-      "path": "tests/unit/infrastructure/storage/test_silver_writer_maintenance_boost.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_finalize_csv_without_exporter_does_nothing"
     },
     {
       "category": "intentional_no_exception_contract",
@@ -631,36 +519,36 @@
   "assertless_category_counts": {
     "architecture_helper_guard": 0,
     "benchmark_or_performance": 0,
-    "helper_asserted": 2,
-    "intentional_no_exception_contract": 83,
+    "helper_asserted": 1,
+    "intentional_no_exception_contract": 68,
     "weak_no_value": 0
   },
   "assertless_examples": [
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
     "tests/unit/application/test_issue_10518_app_leftovers_branches.py:100",
-    "tests/unit/application/test_issue_10518_app_runner_debug_evidence.py:70",
     "tests/unit/application/test_issue_10518_application_coreobs_b.py:43",
     "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
     "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
-    "tests/unit/application/test_issue_10518_application_svc1a.py:915",
     "tests/unit/application/test_issue_10518_application_svc2.py:807",
     "tests/unit/application/test_issue_10518_application_svc2.py:1552",
     "tests/unit/application/test_issue_10518_application_tail1a.py:986",
     "tests/unit/application/core/test_batch_metrics_accounting.py:48",
     "tests/unit/application/core/test_batch_tracing.py:137",
-    "tests/unit/application/core/test_batch_writer_tracing_mixin.py:106",
-    "tests/unit/application/core/test_batch_writer_tracing_mixin.py:282",
-    "tests/unit/application/core/test_dq_metrics.py:60",
-    "tests/unit/application/core/test_otel_spans.py:588",
-    "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129",
     "tests/unit/application/observability/test_pipeline_metrics.py:297",
-    "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:326",
     "tests/unit/application/services/test_checkpoint_telemetry_helpers.py:68",
     "tests/unit/composition/test_observability_contract.py:421",
     "tests/unit/composition/test_observability_contract.py:431",
     "tests/unit/composition/factories/storage/test_health_mixin.py:72",
-    "tests/unit/composition/factories/storage/test_health_mixin.py:103"
+    "tests/unit/composition/factories/storage/test_health_mixin.py:103",
+    "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py:178",
+    "tests/unit/domain/ports/test_noop_audit.py:90",
+    "tests/unit/domain/ports/test_protocol_stubs.py:235",
+    "tests/unit/domain/workflow/test_delete_orphans_scope.py:159",
+    "tests/unit/infrastructure/test_checkpoint.py:135",
+    "tests/unit/infrastructure/test_checkpoint.py:189",
+    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fifteen.py:44",
+    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py:221"
   ],
   "assertless_families": {
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py": {
@@ -687,37 +575,7 @@
         "intentional_no_exception_contract": 1
       }
     },
-    "tests/unit/application/core/test_batch_writer_tracing_mixin.py": {
-      "assertless_tests": 2,
-      "categories": {
-        "intentional_no_exception_contract": 2
-      }
-    },
-    "tests/unit/application/core/test_dq_metrics.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "intentional_no_exception_contract": 1
-      }
-    },
-    "tests/unit/application/core/test_otel_spans.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "intentional_no_exception_contract": 1
-      }
-    },
-    "tests/unit/application/core/test_postrun_cleanup_orchestrator.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "intentional_no_exception_contract": 1
-      }
-    },
     "tests/unit/application/observability/test_pipeline_metrics.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "intentional_no_exception_contract": 1
-      }
-    },
-    "tests/unit/application/pipelines/crossref/test_crossref_transformer.py": {
       "assertless_tests": 1,
       "categories": {
         "intentional_no_exception_contract": 1
@@ -735,12 +593,6 @@
         "intentional_no_exception_contract": 1
       }
     },
-    "tests/unit/application/test_issue_10518_app_runner_debug_evidence.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "intentional_no_exception_contract": 1
-      }
-    },
     "tests/unit/application/test_issue_10518_application_coreobs_b.py": {
       "assertless_tests": 2,
       "categories": {
@@ -748,12 +600,6 @@
       }
     },
     "tests/unit/application/test_issue_10518_application_pipelines_a.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "intentional_no_exception_contract": 1
-      }
-    },
-    "tests/unit/application/test_issue_10518_application_svc1a.py": {
       "assertless_tests": 1,
       "categories": {
         "intentional_no_exception_contract": 1
@@ -784,12 +630,6 @@
         "intentional_no_exception_contract": 2
       }
     },
-    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py": {
-      "assertless_tests": 2,
-      "categories": {
-        "intentional_no_exception_contract": 2
-      }
-    },
     "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py": {
       "assertless_tests": 1,
       "categories": {
@@ -808,12 +648,6 @@
         "intentional_no_exception_contract": 1
       }
     },
-    "tests/unit/domain/run_reports/test_contracts.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "helper_asserted": 1
-      }
-    },
     "tests/unit/domain/workflow/test_delete_orphans_scope.py": {
       "assertless_tests": 1,
       "categories": {
@@ -830,12 +664,6 @@
       "assertless_tests": 1,
       "categories": {
         "intentional_no_exception_contract": 1
-      }
-    },
-    "tests/unit/infrastructure/adapters/test_client_retry_mixin.py": {
-      "assertless_tests": 2,
-      "categories": {
-        "intentional_no_exception_contract": 2
       }
     },
     "tests/unit/infrastructure/audit/test_file_audit.py": {
@@ -899,9 +727,9 @@
       }
     },
     "tests/unit/infrastructure/storage/test_bronze_writer_validation_mixin.py": {
-      "assertless_tests": 3,
+      "assertless_tests": 2,
       "categories": {
-        "intentional_no_exception_contract": 3
+        "intentional_no_exception_contract": 2
       }
     },
     "tests/unit/infrastructure/storage/test_gold_writer.py": {
@@ -923,12 +751,6 @@
       }
     },
     "tests/unit/infrastructure/storage/test_metadata_writer.py": {
-      "assertless_tests": 2,
-      "categories": {
-        "intentional_no_exception_contract": 2
-      }
-    },
-    "tests/unit/infrastructure/storage/test_silver_writer_maintenance_boost.py": {
       "assertless_tests": 2,
       "categories": {
         "intentional_no_exception_contract": 2
@@ -1001,7 +823,7 @@
       }
     }
   },
-  "assertless_total_candidates": 85,
+  "assertless_total_candidates": 69,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1175,7 +997,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 83,
+  "intentional_no_exception_contract": 68,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -1246,13 +1068,6 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "70",
-        "path": "tests/unit/application/test_issue_10518_app_runner_debug_evidence.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_debug_export_recording_is_noop_when_disabled"
-      },
-      {
-        "category": "intentional_no_exception_contract",
         "line": "43",
         "path": "tests/unit/application/test_issue_10518_application_coreobs_b.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -1271,13 +1086,6 @@
         "path": "tests/unit/application/test_issue_10518_application_pipelines_a.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_noop_without_counter"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "915",
-        "path": "tests/unit/application/test_issue_10518_application_svc1a.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_skips_rows_without_identity"
       },
       {
         "category": "helper_asserted",
@@ -1316,52 +1124,10 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "106",
-        "path": "tests/unit/application/core/test_batch_writer_tracing_mixin.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_no_op_when_lock_validator_is_none"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "282",
-        "path": "tests/unit/application/core/test_batch_writer_tracing_mixin.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_no_op_when_span_is_none"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "60",
-        "path": "tests/unit/application/core/test_dq_metrics.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_batch_metrics_service_noop_when_no_metrics"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "588",
-        "path": "tests/unit/application/core/test_otel_spans.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_postrun_run_explicit_noop_tracer"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "129",
-        "path": "tests/unit/application/core/test_postrun_cleanup_orchestrator.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_cleanup_tracer_none_skips_close"
-      },
-      {
-        "category": "intentional_no_exception_contract",
         "line": "297",
         "path": "tests/unit/application/observability/test_pipeline_metrics.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_noop_when_metrics_missing"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "326",
-        "path": "tests/unit/application/pipelines/crossref/test_crossref_transformer.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_pre_extract_validation_accepts_valid_doi"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1400,20 +1166,6 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "623",
-        "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_validate_stage_name_accepts_valid"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "670",
-        "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
-      },
-      {
-        "category": "intentional_no_exception_contract",
         "line": "178",
         "path": "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -1432,13 +1184,6 @@
         "path": "tests/unit/domain/ports/test_protocol_stubs.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_protocol_stubs_are_callable"
-      },
-      {
-        "category": "helper_asserted",
-        "line": "74",
-        "path": "tests/unit/domain/run_reports/test_contracts.py",
-        "rationale": "tests that delegate verification to check/validate/verify helper calls",
-        "test_name": "test_workflow_run_report_golden_matches_v1_schema"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1502,20 +1247,6 @@
         "path": "tests/unit/infrastructure/adapters/test_cached_bronze_support.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_raise_if_empty_batches_is_noop_when_batches_exist"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "308",
-        "path": "tests/unit/infrastructure/adapters/test_client_retry_mixin.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_record_retry_budget_exhausted_silent_without_logger"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "419",
-        "path": "tests/unit/infrastructure/adapters/test_client_retry_mixin.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_log_retry_silent_without_logger"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1610,14 +1341,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "100",
-        "path": "tests/unit/infrastructure/storage/test_bronze_writer_validation_mixin.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_validate_records_iterator_valid"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "119",
+        "line": "121",
         "path": "tests/unit/infrastructure/storage/test_bronze_writer_validation_mixin.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_utc_datetime_valid"
@@ -1670,20 +1394,6 @@
         "path": "tests/unit/infrastructure/storage/test_metadata_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_noop_aclose_is_idempotent"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "72",
-        "path": "tests/unit/infrastructure/storage/test_silver_writer_maintenance_boost.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_csv_exporter_none_skips_export"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "163",
-        "path": "tests/unit/infrastructure/storage/test_silver_writer_maintenance_boost.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_finalize_csv_without_exporter_does_nothing"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1822,38 +1532,38 @@
     "assertless_category_counts": {
       "architecture_helper_guard": 0,
       "benchmark_or_performance": 0,
-      "helper_asserted": 2,
-      "intentional_no_exception_contract": 83,
+      "helper_asserted": 1,
+      "intentional_no_exception_contract": 68,
       "weak_no_value": 0
     },
     "assertless_examples": [
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
       "tests/unit/application/test_issue_10518_app_leftovers_branches.py:100",
-      "tests/unit/application/test_issue_10518_app_runner_debug_evidence.py:70",
       "tests/unit/application/test_issue_10518_application_coreobs_b.py:43",
       "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
       "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
-      "tests/unit/application/test_issue_10518_application_svc1a.py:915",
       "tests/unit/application/test_issue_10518_application_svc2.py:807",
       "tests/unit/application/test_issue_10518_application_svc2.py:1552",
       "tests/unit/application/test_issue_10518_application_tail1a.py:986",
       "tests/unit/application/core/test_batch_metrics_accounting.py:48",
       "tests/unit/application/core/test_batch_tracing.py:137",
-      "tests/unit/application/core/test_batch_writer_tracing_mixin.py:106",
-      "tests/unit/application/core/test_batch_writer_tracing_mixin.py:282",
-      "tests/unit/application/core/test_dq_metrics.py:60",
-      "tests/unit/application/core/test_otel_spans.py:588",
-      "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129",
       "tests/unit/application/observability/test_pipeline_metrics.py:297",
-      "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:326",
       "tests/unit/application/services/test_checkpoint_telemetry_helpers.py:68",
       "tests/unit/composition/test_observability_contract.py:421",
       "tests/unit/composition/test_observability_contract.py:431",
       "tests/unit/composition/factories/storage/test_health_mixin.py:72",
-      "tests/unit/composition/factories/storage/test_health_mixin.py:103"
+      "tests/unit/composition/factories/storage/test_health_mixin.py:103",
+      "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py:178",
+      "tests/unit/domain/ports/test_noop_audit.py:90",
+      "tests/unit/domain/ports/test_protocol_stubs.py:235",
+      "tests/unit/domain/workflow/test_delete_orphans_scope.py:159",
+      "tests/unit/infrastructure/test_checkpoint.py:135",
+      "tests/unit/infrastructure/test_checkpoint.py:189",
+      "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fifteen.py:44",
+      "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py:221"
     ],
-    "assertless_total_candidates": 85,
+    "assertless_total_candidates": 69,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2093,15 +1803,15 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "274b49483c142c7aab46172621d060d943751c4b54fd702e2bac28337b3fd08a",
+  "source_tree_sha256": "ad513e66e25ce71bb2c17b9d088b7f6c97f9d2dada23a1f3608bf422ace71bd6",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 85,
+    "assertless_total_candidates": 69,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 83,
+    "intentional_no_exception_contract": 68,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,

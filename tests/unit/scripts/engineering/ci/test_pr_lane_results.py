@@ -1692,7 +1692,7 @@ def test_resource_inventory_files_select_integrity_controls(changed_file: str) -
         "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py"
         in report["selected"]
     )
-    assert (
-        "tests/architecture/test_external_resource_inventory.py" in report["selected"]
-    )
+    catalog_test = "tests/architecture/test_external_resource_inventory_catalog.py"
+    assert catalog_test in report["selected"]
+    assert (root / catalog_test).is_file()
     assert report["activation"] == "not_applied"

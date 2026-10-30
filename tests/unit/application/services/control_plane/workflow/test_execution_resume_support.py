@@ -187,6 +187,9 @@ def test_validate_resume_state_accepts_skipped_steps() -> None:
         )
         is None
     )
+    assert support.resolve_skipped_step_ids(
+        state=state, force_steps=(), repair_steps=()
+    ) == frozenset({"seed"})
 
 
 def test_load_resume_manifest_errors_when_persisted_manifest_missing() -> None:
