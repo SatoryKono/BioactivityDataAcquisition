@@ -1,11 +1,11 @@
 {
   "source_branch": "codex/issue-12389-active-artifacts",
-  "source_commit": "14be32e809f4c0c2abdd044dc8fc780f8494f971",
-  "source_run_id": "41083116094",
+  "source_commit": "35e4c0a9a3a649d43b211c0efc5696c87dd13aed",
+  "source_run_id": "41106532481",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41083116094",
-  "source_tree_sha256": "8e46d7ccb738eb79fb3f97fd1203a48959361624a8294491681dcbba31d15b87",
-  "refreshed_at_utc": "2026-10-30T15:53:11.515778+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41106532481",
+  "source_tree_sha256": "83fde3b1e1df1edc58d75eae08f817e3cbebc28af6bb551af2a40ddf1edb0fe1",
+  "refreshed_at_utc": "2026-10-30T18:35:45.381874+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.76,
   "coverage": {

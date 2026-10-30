@@ -475,6 +475,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "configs/quality/test_governance_audit.yaml": TEST_GOVERNANCE_ARTIFACT_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
+    "reports/quality/quality-move-qm08/publication-provenance.json": (
+        "tests/unit/scripts/ci/test_test_telemetry_provenance.py",
+        "tests/architecture/test_external_resource_inventory_catalog.py",
+        "tests/unit/scripts/ops/test_refresh_router_delivery.py",
+    ),
     "configs/quality/scripts_inventory_manifest.json": (
         SCRIPTS_INVENTORY_MANIFEST_TEST,
     ),

@@ -562,6 +562,14 @@ routes:
       - reports/test-telemetry/history/
     notes: Preserves captured run identity and binds it to its reviewed GitHub PR; live verification resolves a future squash without inventing its SHA.
 
+  - id: quality-move-source-publication-provenance
+    generator: scripts/engineering/ci/test_telemetry_provenance.py
+    output_kind: test_report
+    commit_policy: tracked_quality_evidence
+    outputs:
+      - reports/quality/quality-move-qm08/publication-provenance.json
+    notes: Native artifact-bound CI capture records the exact catalog/build source refs and a pending live GitHub publication mapping. Actual merge/tree/ancestry are verified read-only; this is not a CI execution attestation or a trust upgrade.
+
   - id: dashboard-scenes-parity-ledger
     generator: scripts/engineering/qa/report_dashboard_scenes_parity.py
     output_kind: observability_evidence

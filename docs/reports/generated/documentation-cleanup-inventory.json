@@ -110408,6 +110408,34 @@
     {
       "canonical_successor": null,
       "catalog_lifecycle": null,
+      "commit_policy": "tracked_quality_evidence",
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "regenerate",
+      "generated_route": "quality-move-source-publication-provenance",
+      "generated_route_exception": null,
+      "generator": "scripts/engineering/ci/test_telemetry_provenance.py",
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/quality/quality-move-qm08/publication-provenance.json",
+      "recommended_action": "generate-automatically",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Generated",
+      "surface_family": "generated",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
       "commit_policy": null,
       "declared_class": null,
       "declared_status": null,
@@ -113507,6 +113535,16 @@
       ]
     },
     {
+      "commit_policy": "tracked_quality_evidence",
+      "generator": "scripts/engineering/ci/test_telemetry_provenance.py",
+      "id": "quality-move-source-publication-provenance",
+      "notes": "Native artifact-bound CI capture records the exact catalog/build source refs and a pending live GitHub publication mapping. Actual merge/tree/ancestry are verified read-only; this is not a CI execution attestation or a trust upgrade.",
+      "output_kind": "test_report",
+      "outputs": [
+        "reports/quality/quality-move-qm08/publication-provenance.json"
+      ]
+    },
+    {
       "commit_policy": "tracked_curated_generated_doc",
       "generator": "scripts/engineering/qa/generate_reproducibility_support_matrix.py",
       "id": "reproducibility-support-matrix-generated-doc",
@@ -113646,11 +113684,11 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 26,
       "reports_workspace_entrypoint": 1,
-      "working_report": 264
+      "working_report": 265
     },
     "by_recommended_action": {
       "archive-after-migration": 293,
-      "generate-automatically": 1066,
+      "generate-automatically": 1067,
       "keep": 2669
     },
     "by_section": {
@@ -113675,29 +113713,29 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 617,
+      "reports": 618,
       "security": 2
     },
     "by_status": {
       "Active": 752,
       "Archived": 1554,
       "Canonical": 76,
-      "Generated": 1066,
+      "Generated": 1067,
       "Working": 580
     },
     "by_surface_family": {
       "active": 752,
       "archive": 1554,
       "canonical": 76,
-      "generated": 1066,
+      "generated": 1067,
       "working": 580
     },
     "by_tracking_state": {
-      "tracked": 4028
+      "tracked": 4029
     },
     "docs_reports_local_count": 59,
     "duplicate_group_count": 80,
-    "generated_route_count": 76,
+    "generated_route_count": 77,
     "generated_without_route_count": 214,
     "generated_without_route_or_exception_count": 0,
     "github_issue_lifecycle_counts": {
@@ -113706,8 +113744,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4028,
+    "total_doc_like": 4029,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4028
+    "total_doc_like_tracked": 4029
   }
 }
