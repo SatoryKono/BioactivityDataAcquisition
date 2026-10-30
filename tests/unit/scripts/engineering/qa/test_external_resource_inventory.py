@@ -123,6 +123,12 @@ def test_reviewed_resource_free_rebind_preserves_facts_and_history(
         reviewed={path: digest},
     )
     assert payload == old
+    assert updated["source_commit"] == "e" * 40
+    assert updated["source_tree"] == "f" * 40
+    assert updated["source_files"] == {
+        **old["source_files"],
+        path: "d" * 40,
+    }
     assert validate_inventory(updated, sources, blobs) == []
     assert updated["source_rebindings"][0]["from_commit"] == old["source_commit"]
     assert (
@@ -135,11 +141,17 @@ def test_reviewed_resource_free_rebind_preserves_facts_and_history(
 
 
 @pytest.mark.parametrize(
-    "case",
-    ["unreviewed", "wrong_digest", "resource_file", "added_resource", "new_file"],
+    ("case", "message"),
+    [
+        ("unreviewed", "Reviewed source set must exactly match"),
+        ("wrong_digest", "Reviewed source digest differs"),
+        ("resource_file", "Resource-bearing source changes"),
+        ("added_resource", "unreconciled source acquisition"),
+        ("new_file", "Source census additions/removals"),
+    ],
 )
 def test_source_rebind_cannot_bypass_inventory_review(
-    inventory_case: tuple, case: str
+    inventory_case: tuple, case: str, message: str
 ) -> None:
     from scripts.engineering.qa.external_resource_inventory import (
         rebind_resource_free_sources,
@@ -160,7 +172,7 @@ def test_source_rebind_cannot_bypass_inventory_review(
     reviewed = {path: digest if case != "wrong_digest" else "0" * 64}
     if case == "unreviewed":
         reviewed = {}
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=message):
         rebind_resource_free_sources(
             payload,
             sources,
