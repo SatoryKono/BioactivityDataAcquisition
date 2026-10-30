@@ -383,8 +383,7 @@ def test_shadow_compare_routes_pipeline_dataflow_artifacts() -> None:
         repo_root=repo_root,
     )
     assert report["selected"] == [
-        "tests/unit/repo_backed/scripts/diagrams/"
-        "test_generate_pipeline_dataflows.py"
+        "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py"
     ]
 
 
