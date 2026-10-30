@@ -160,3 +160,17 @@ exactly the candidate tree `b325472db0be42bda1ea178d4f614b761eca908f`.
 The corresponding negative dispatch `41058676623` was cancelled as superseded
 while still scanning history; its schema control was NOT_RUN and is not proof
 of mismatch propagation. New exact-head positive/negative runs remain required.
+
+### Exact-head checkout fixture correction
+
+Run `41065194099` on `ae405b63999349197cfe74d2b5f1a356692e837a`
+proved the real negative chain: 1 schema mismatch / 112 passing cases, no
+errors/skips, failed class job and failed aggregate. Its ordinary counterpart
+passed all 113 physical cases, then exposed an inherited ambient event-SHA
+assumption in the benchmark reducer's local-environment fixture. The failure was
+reproduced locally with `GITHUB_SHA` set to a different commit. That fixture now
+uses its existing explicit checkout/run identity builder before removing
+`GITHUB_ACTIONS`; it still requires exactly `unproven_environment`. The test
+deliberately seeds a mismatching ambient SHA to prevent regression. Product
+evidence validation and wrong-checkout rejection are unchanged. This earlier
+ordinary run is a FAIL, not final candidate acceptance.

@@ -741,8 +741,12 @@ def test_missing_baseline_test_fails(tmp_path: Path) -> None:
     assert body["comparisons"][0]["verdict"] == "missing_baseline_test"
 
 
-def test_unknown_run_and_ancestry_do_not_pass(tmp_path: Path) -> None:
-    local = os.environ.copy()
+def test_unknown_run_and_ancestry_do_not_pass(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # PR event SHA can identify a synthetic merge while checkout uses its head.
+    monkeypatch.setenv("GITHUB_SHA", "0" * 40)
+    local = _github_env()
     local.pop("GITHUB_ACTIONS", None)
     result, gate, _manifest = _invoke(
         tmp_path, json.dumps(_measurement(90)).encode(), env=local
