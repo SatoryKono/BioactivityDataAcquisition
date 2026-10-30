@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import copy
+import hashlib
+import io
 import json
 import os
 import subprocess
 import urllib.error
 import urllib.request
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -675,10 +678,74 @@ def test_normal_ancestry_does_not_require_publication_or_network(
     provenance.require_published_ancestor(root, base)
 
 
-@pytest.mark.parametrize("qa_changed", ["unchanged", "committed", "dirty"])
-def test_native_ci_receipt_retains_real_run_and_survives_squash(
-    bridge, monkeypatch, qa_changed
-) -> None:
+def _ci_artifact_fixture(payload, monkeypatch):
+    context = {
+        "count_semantics": "non_skipped_junit_records",
+        "observed_count": 1,
+        "executed_count": 1,
+        "skipped_count": 0,
+        "junit_source_count": 1,
+    }
+    summary = {
+        "source_commit": payload["source_commit"],
+        "source_run_id": "github-123-1",
+        "total_cases": 1,
+        "top_slowest": [],
+        "execution_context": context,
+    }
+    payload["coverage"] = {
+        "threshold_percent": 85.0,
+        "actual_percent": 99.76,
+        "threshold_satisfied": True,
+    }
+    payload["duration_telemetry"] = {
+        "total_cases": 1,
+        "count_semantics": "non_skipped_junit_records",
+        "top_slowest": [],
+        "top_slowest_zones": [],
+        "execution_context": copy.deepcopy(context),
+    }
+    artifacts, archives = [], {}
+    for identity, name, member, data in (
+        (
+            1,
+            provenance.COVERAGE_ARTIFACT,
+            "coverage/coverage.xml",
+            b'<coverage line-rate="0.9976"/>',
+        ),
+        (
+            2,
+            provenance.DURATION_ARTIFACT,
+            "slowest-tests.json",
+            json.dumps(summary).encode(),
+        ),
+    ):
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w") as archive:
+            archive.writestr(member, data)
+        raw = buffer.getvalue()
+        archives[identity] = raw
+        artifacts.append(
+            {
+                "id": identity,
+                "name": name,
+                "size_in_bytes": len(raw),
+                "digest": "sha256:" + hashlib.sha256(raw).hexdigest(),
+                "expired": False,
+                "workflow_run": {
+                    "id": 123,
+                    "head_sha": payload["source_commit"],
+                    "head_branch": "fixture",
+                },
+            }
+        )
+    monkeypatch.setattr(
+        provenance, "_read_artifact_bytes", lambda identity, size: archives[identity]
+    )
+    return {"total_count": 2, "artifacts": artifacts}, archives
+
+
+def _native_ci_candidate(bridge, monkeypatch, qa_changed):
     root, merge, payload, receipt, git = bridge
     published = receipt["github_pull_request"]["head"]["sha"]
     git("checkout", "--detach", published)
@@ -690,6 +757,7 @@ def test_native_ci_receipt_retains_real_run_and_survives_squash(
         coverage={},
         duration_telemetry={},
     )
+    artifacts, _ = _ci_artifact_fixture(payload, monkeypatch)
     if qa_changed != "unchanged":
         changed = root / "scripts/engineering/qa/fixture.py"
         changed.write_text("changed = True\n")
@@ -721,6 +789,7 @@ def test_native_ci_receipt_retains_real_run_and_survives_squash(
         if path == "actions/runs/123":
             return {
                 "id": 123,
+                "run_attempt": 1,
                 "head_sha": payload["source_commit"],
                 "head_branch": "fixture",
                 "event": "workflow_dispatch",
@@ -740,9 +809,21 @@ def test_native_ci_receipt_retains_real_run_and_survives_squash(
                     )
                 ],
             }
+        if path == "actions/runs/123/artifacts?per_page=100":
+            return copy.deepcopy(artifacts)
         pytest.fail("Unexpected API path: " + path)
 
     monkeypatch.setattr(provenance, "_read_github_json", read)
+    return root, merge, payload, receipt, git, pr
+
+
+@pytest.mark.parametrize("qa_changed", ["unchanged", "committed", "dirty"])
+def test_native_ci_receipt_retains_real_run_and_survives_squash(
+    bridge, monkeypatch, qa_changed
+) -> None:
+    root, merge, payload, receipt, git, pr = _native_ci_candidate(
+        bridge, monkeypatch, qa_changed
+    )
     if qa_changed != "unchanged":
         with pytest.raises(ValueError, match="Producer inputs changed"):
             provenance.build_ci_squash_receipt(
@@ -772,6 +853,68 @@ def test_native_ci_receipt_retains_real_run_and_survives_squash(
     (root / provenance.RECEIPT).write_text("{}")
     provenance.require_published_ancestor(root, payload["source_commit"])
     assert publication.read_bytes() == before
+
+
+@pytest.mark.parametrize("field", ["coverage", "duration_telemetry"])
+def test_native_cli_rejects_metrics_tampered_before_reissuance(
+    bridge, monkeypatch, field
+) -> None:
+    import sys
+    import yaml
+
+    root, _, payload, _, _, _ = _native_ci_candidate(bridge, monkeypatch, "unchanged")
+    valid = provenance.build_ci_squash_receipt(
+        payload, root=root, pull_request=42, run_id=123
+    )
+    provenance.write_ci_publication_receipts(root, valid)
+    paths = [root / provenance.RECEIPT, root / provenance.PUBLICATION_RECEIPT]
+    before = [path.read_bytes() for path in paths]
+    if field == "coverage":
+        payload[field]["actual_percent"] = 99.99
+    else:
+        payload[field]["total_cases"] = 2
+        payload[field]["execution_context"].update(executed_count=2, observed_count=2)
+    (root / "configs/quality/test_telemetry_baseline.yaml").write_text(
+        yaml.safe_dump(payload)
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "provenance",
+            "--repo-root",
+            str(root),
+            "--ci-run-id",
+            "123",
+            "--pull-request",
+            "42",
+        ],
+    )
+    with pytest.raises(ValueError, match="Committed " + field):
+        provenance.main()
+    assert [path.read_bytes() for path in paths] == before
+
+
+@pytest.mark.parametrize("fault", ["head", "run", "digest", "bytes", "expired"])
+def test_original_ci_artifact_identity_and_bytes_are_required(
+    bridge, monkeypatch, fault
+) -> None:
+    _, _, payload, _, _ = bridge
+    listing, archives = _ci_artifact_fixture(payload, monkeypatch)
+    artifact = listing["artifacts"][0]
+    run = {"id": 123, "head_sha": payload["source_commit"], "head_branch": "fixture"}
+    if fault == "head":
+        artifact["workflow_run"]["head_sha"] = "0" * 40
+    elif fault == "run":
+        artifact["workflow_run"]["id"] = 999
+    elif fault == "digest":
+        artifact["digest"] = "sha256:" + "0" * 64
+    elif fault == "expired":
+        artifact["expired"] = True
+    else:
+        archives[1] += b"tampered"
+    with pytest.raises(ValueError):
+        provenance._verified_artifact_member(artifact, run, "coverage/coverage.xml")
 
 
 @pytest.mark.parametrize(

@@ -64,6 +64,8 @@ trend evidence only.
   artifacts, then run `python -m scripts.engineering.ci.test_telemetry_provenance
   --ci-run-id <actual-run-id> --pull-request <PR>` on its published candidate.
   The writer checks run identity, both producer jobs and unchanged TEST_INPUTS.
+  It verifies original artifact ZIP identity/size/SHA256 and reconstructs
+  expected metrics before writing; edited YAML cannot issue a matching receipt.
   It writes telemetry and independent QM-08 source-publication receipts.
   A pending receipt contains no future merge SHA; actual merge/tree/ancestry
   are resolved read-only after squash. This does not upgrade capture trust.

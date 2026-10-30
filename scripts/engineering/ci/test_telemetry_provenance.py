@@ -10,6 +10,7 @@ import base64
 import argparse
 import binascii
 import hashlib
+import io
 import json
 import os
 import re
@@ -17,11 +18,14 @@ import subprocess
 import tempfile
 import urllib.parse
 import urllib.request
+import zipfile
 from pathlib import Path
 from datetime import UTC, datetime
 from typing import Any
 
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
+COVERAGE_ARTIFACT = "coverage-report"
+DURATION_ARTIFACT = "test-duration-telemetry"
 RECEIPT = Path("reports/test-telemetry/squash-provenance.json")
 PUBLICATION_RECEIPT = Path(
     "reports/quality/quality-move-qm08/publication-provenance.json"
@@ -294,7 +298,8 @@ def _ci_receipt_matches(receipt: dict[str, Any], payload: dict[str, Any]) -> boo
     if "metrics_sha256" not in receipt:
         return True  # Retain the existing reviewed legacy receipt contract.
     try:
-        return receipt["metrics_sha256"] == telemetry_metrics_sha256(payload)
+        actual = receipt["metrics_sha256"]
+        return isinstance(actual, str) and actual == telemetry_metrics_sha256(payload)
     except (KeyError, TypeError, ValueError):
         return False
 
@@ -581,6 +586,118 @@ def _require_clean_producer_inputs(root: Path) -> None:
         raise ValueError("Producer inputs changed in the working tree")
 
 
+def _read_artifact_bytes(artifact_id: int, size: int) -> bytes:
+    """Download a fixed repository artifact without forwarding auth off-origin."""
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "BioETL-telemetry",
+    }
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    request = urllib.request.Request(
+        f"https://api.github.com/repos/{REPOSITORY}/actions/artifacts/{artifact_id}/zip",
+        headers=headers,
+    )
+    opener = urllib.request.build_opener(_SameOriginAuthRedirectHandler())
+    with opener.open(request, timeout=30) as response:
+        data = response.read(size + 1)
+    if not isinstance(data, bytes):
+        raise ValueError("Artifact response is not binary data")
+    return data
+
+
+def _verified_artifact_member(
+    artifact: dict[str, Any], run: dict[str, Any], member: str
+) -> bytes:
+    identity, size = artifact.get("id"), artifact.get("size_in_bytes")
+    workflow = artifact.get("workflow_run", {})
+    if (
+        not isinstance(identity, int)
+        or isinstance(identity, bool)
+        or identity <= 0
+        or not isinstance(size, int)
+        or isinstance(size, bool)
+        or size <= 0
+        or artifact.get("expired") is not False
+        or workflow.get("id") != run["id"]
+        or workflow.get("head_sha") != run["head_sha"]
+        or workflow.get("head_branch") != run["head_branch"]
+    ):
+        raise ValueError("Artifact identity does not match the captured run")
+    raw = _read_artifact_bytes(identity, size)
+    if (
+        len(raw) != size
+        or artifact.get("digest") != "sha256:" + hashlib.sha256(raw).hexdigest()
+    ):
+        raise ValueError("Original artifact size/digest mismatch")
+    with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+        entries = [entry for entry in archive.infolist() if entry.filename == member]
+        if len(entries) != 1 or entries[0].is_dir():
+            raise ValueError("Artifact member is missing or ambiguous: " + member)
+        return archive.read(entries[0])
+
+
+def _require_original_ci_metrics(
+    payload: dict[str, Any], run: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """Derive expected metrics from run-bound archives, never from the YAML values."""
+    from scripts.engineering.ci.update_test_telemetry_baseline import (
+        DEFAULT_COVERAGE_THRESHOLD,
+        build_baseline_payload,
+    )
+
+    listing = _read_github_json(f"actions/runs/{run['id']}/artifacts?per_page=100")
+    artifacts = listing["artifacts"]
+    if listing.get("total_count") != len(artifacts) or len(artifacts) > 100:
+        raise ValueError("Artifact listing is incomplete")
+    inputs = {}
+    receipts = []
+    for name, member in (
+        (COVERAGE_ARTIFACT, "coverage/coverage.xml"),
+        (DURATION_ARTIFACT, "slowest-tests.json"),
+    ):
+        matches = [a for a in artifacts if a.get("name") == name]
+        if len(matches) != 1:
+            raise ValueError("Capture artifact is missing or ambiguous: " + name)
+        artifact = matches[0]
+        inputs[name] = _verified_artifact_member(artifact, run, member)
+        receipts.append(
+            {
+                "artifact": artifact,
+                "member": member,
+                "member_sha256": hashlib.sha256(inputs[name]).hexdigest(),
+            }
+        )
+    slowest = json.loads(inputs[DURATION_ARTIFACT])
+    if (
+        slowest.get("source_commit") != run["head_sha"]
+        or slowest.get("source_run_id") != f"github-{run['id']}-{run['run_attempt']}"
+    ):
+        raise ValueError("Duration artifact does not identify the captured attempt")
+    with tempfile.TemporaryDirectory(prefix="bioetl-ci-capture-") as directory:
+        coverage = Path(directory) / "coverage.xml"
+        durations = Path(directory) / "slowest.json"
+        coverage.write_bytes(inputs[COVERAGE_ARTIFACT])
+        durations.write_bytes(inputs[DURATION_ARTIFACT])
+        expected = build_baseline_payload(
+            coverage_xml_path=coverage,
+            coverage_percent=None,
+            coverage_log_path=None,
+            slowest_json_path=durations,
+            junit_paths=[],
+            source_branch=run["head_branch"],
+            source_commit=run["head_sha"],
+            source_run_id=str(run["id"]),
+            coverage_threshold=DEFAULT_COVERAGE_THRESHOLD,
+            source_tree_sha256=payload["source_tree_sha256"],
+            source_event=run["event"],
+            source_run_url=run["html_url"],
+        )
+    require_capture_metrics(payload, expected)
+    return receipts
+
+
 def build_ci_squash_receipt(
     payload: dict[str, Any], *, root: Path, pull_request: int, run_id: int
 ) -> dict[str, Any]:
@@ -598,6 +715,7 @@ def build_ci_squash_receipt(
     related, _ = _source_relation(root, source, head, live=False)
     if not related:
         raise ValueError("Producer inputs changed after the captured run")
+    artifacts = _require_original_ci_metrics(payload, run)
     pr = _read_github_json(f"pulls/{pull_request}")
     if (
         pr.get("number") != pull_request
@@ -612,6 +730,7 @@ def build_ci_squash_receipt(
         "source_run_id": payload["source_run_id"],
         "source_tree_sha256": payload["source_tree_sha256"],
         "metrics_sha256": telemetry_metrics_sha256(payload),
+        "ci_artifact_inputs": artifacts,
         "reviewed_source_commits": _publication_sources(root, source),
         "retrieved_from": f"https://api.github.com/repos/{REPOSITORY}/pulls/{pull_request}",
         "retrieved_at_utc": datetime.now(UTC).isoformat(),
@@ -632,6 +751,7 @@ def build_ci_squash_receipt(
                 "status",
                 "conclusion",
                 "html_url",
+                "run_attempt",
             )
         },
         "git_object_proof": build_git_object_proof(root, source, head),

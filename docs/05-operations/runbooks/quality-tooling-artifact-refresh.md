@@ -180,7 +180,11 @@ python -m scripts.engineering.ci.test_telemetry_provenance --ci-run-id <actual-N
 ```
 
 The native writer checks producer identity, both producer job results and the
-unchanged `TEST_INPUTS`. It writes two active outputs atomically per file:
+unchanged `TEST_INPUTS`. Before issuance it downloads the unique original
+coverage/duration archives, verifies run/head identity, size and SHA256, and
+reconstructs expected metrics through the native baseline builder. Changed YAML
+values are rejected before either output is written; a self-computed digest is
+not measurement evidence. It writes two active outputs atomically per file:
 `reports/test-telemetry/squash-provenance.json` for captured measurements and
 `reports/quality/quality-move-qm08/publication-provenance.json` for the exact
 catalog/build source refs. Preserve prior before-bytes. The publication receipt
