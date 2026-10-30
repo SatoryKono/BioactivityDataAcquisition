@@ -125,3 +125,16 @@ group, and `test_private_host_delivery_binds_source_and_survives_data_volume`
 finds two plugin package-lock digests inconsistent with the accepted host manifest.
 They remain outside the authorized parity/security correction. A failed producer
 and its coverage artifact are not a qualified telemetry capture.
+
+### Canonical entrypoint and explicit-control review correction
+
+The scripts lifecycle cap remains 334. The new standalone runner/helper modules
+were consolidated into the existing `pr-lane-results physical-parity` command and
+the existing resource-inventory checker; only the two files introduced by this PR
+were removed. The canonical inventory/catalog report 698 scripts / 334 active.
+Independent AST comparison confirmed identical execution, JUnit and rebind guards.
+
+An explicit dispatch negative-control input now forces `generated-artifacts` to
+required with reason `explicit_physical_parity_control`, including docs-only
+diffs. The ordinary PR default does not pass this flag to trusted-base gate code.
+Owning tests check the real catalog, workflow forwarding and skipped-step refusal.
