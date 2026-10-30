@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-30T13:22:48.919798+00:00",
+  "generated_at": "2026-10-30T13:39:22.235071+00:00",
   "summary": {
     "total_scripts": 698,
     "status_counts": {
@@ -15279,19 +15279,19 @@
         },
         {
           "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-          "line": 144,
+          "line": 156,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.external_resource_inventory import ("
         },
         {
           "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-          "line": 195,
+          "line": 207,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.external_resource_inventory import _render_components"
         },
         {
           "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-          "line": 405,
+          "line": 417,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.external_resource_inventory import ("
         }
