@@ -395,8 +395,18 @@ jobs:
           fi
           parallel_timeout=900
           # Framework/toolchain updates select the entire suite, not a small
-          # affected slice. Keep a bounded pass within the existing 90m job.
-          if [[ ${#targets[@]} -eq 1 && "${targets[0]%/}" == "tests" ]]; then
+          # affected slice. Fixed-lane subtraction can append architecture
+          # nodeids skipped by the earlier lane, so detect the suite root
+          # anywhere in the execution plan. Keep a bounded pass within the
+          # existing 90m job.
+          full_suite=false
+          for target in "${targets[@]}"; do
+            if [[ "${target%/}" == "tests" ]]; then
+              full_suite=true
+              break
+            fi
+          done
+          if [[ "$full_suite" == "true" ]]; then
             parallel_timeout=2400
           fi
           parallel_addopts="-n auto --dist loadfile --max-worker-restart=0 -q --tb=line"
