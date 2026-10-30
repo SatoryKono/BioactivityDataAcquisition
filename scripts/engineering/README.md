@@ -81,6 +81,17 @@ python -m scripts.engineering.qa report-test-basename-collisions --check
 python -m scripts.engineering.qa report-test-basename-collisions --update
 ```
 
+For a Nightly capture crossing a squash-only publication, use the existing
+provenance owner after promoting its actual coverage/duration artifacts:
+`python -m scripts.engineering.ci.test_telemetry_provenance --ci-run-id <run-id> --pull-request <PR>`.
+The source candidate must already be the published PR head, with full Git
+history. Both successful producer jobs and unchanged test/source inputs are
+required. It writes the active telemetry and QM-08 publication receipts; pending
+metadata is not a merge, CI attestation or trust upgrade. Actual GitHub merge
+identity, tree equality and ancestry are checked read-only after squash. Preserve
+the publication branch and prior evidence; never replace these checks with an
+unverified SHA/tree match.
+
 `--check` is read-only and fails on any stale content. `--update` writes the full
 inventory atomically and preserves an already current file. Neither mode adds
 untracked files to the inventory. Both modes use the repository root rather than

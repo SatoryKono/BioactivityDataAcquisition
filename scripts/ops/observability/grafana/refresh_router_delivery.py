@@ -21,6 +21,7 @@ import tarfile
 import tempfile
 
 from scripts.ops.observability.grafana import router_managed_image as native
+from scripts.engineering.ci.test_telemetry_provenance import require_published_ancestor
 
 PLUGINS = ("bioetl-scenes-app", "bioetl-selectorshell-panel")
 FRONTEND = "usr/share/grafana/public/build"
@@ -270,7 +271,7 @@ def verify_host(
 def source_inputs(root: Path, source_root: Path, ref: str) -> dict:
     if re.fullmatch(r"[0-9a-f]{40}", ref) is None:
         raise ValueError("Full source commit required")
-    git(root, "merge-base", "--is-ancestor", ref, "HEAD")
+    require_published_ancestor(root, ref)
     paths = (
         git(
             root,

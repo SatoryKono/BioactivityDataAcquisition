@@ -12,6 +12,7 @@ import binascii
 import hashlib
 import json
 import os
+import re
 import subprocess
 import tempfile
 import urllib.parse
@@ -22,6 +23,9 @@ from typing import Any
 
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
 RECEIPT = Path("reports/test-telemetry/squash-provenance.json")
+PUBLICATION_RECEIPT = Path(
+    "reports/quality/quality-move-qm08/publication-provenance.json"
+)
 
 
 class ShallowMergeHistoryError(ValueError):
@@ -282,6 +286,19 @@ def build_git_object_proof(root: Path, source: str, pr_head: str) -> dict[str, A
     return proof
 
 
+def _ci_receipt_matches(receipt: dict[str, Any], payload: dict[str, Any]) -> bool:
+    if payload.get("source_event") == "local_coverage_verify":
+        return False
+    if receipt.get("source_tree_sha256") != payload.get("source_tree_sha256"):
+        return False
+    if "metrics_sha256" not in receipt:
+        return True  # Retain the existing reviewed legacy receipt contract.
+    try:
+        return receipt["metrics_sha256"] == telemetry_metrics_sha256(payload)
+    except (KeyError, TypeError, ValueError):
+        return False
+
+
 def _receipt_matches_capture(receipt: dict[str, Any], payload: dict[str, Any]) -> bool:
     if receipt.get("schema_version") != 1:
         return False
@@ -292,9 +309,7 @@ def _receipt_matches_capture(receipt: dict[str, Any], payload: dict[str, Any]) -
         return False
     measurement = payload.get("measurement_provenance")
     if not isinstance(measurement, dict):
-        return payload.get("source_event") != "local_coverage_verify" and receipt.get(
-            "source_tree_sha256"
-        ) == payload.get("source_tree_sha256")
+        return _ci_receipt_matches(receipt, payload)
     try:
         metrics_digest = telemetry_metrics_sha256(payload)
     except (KeyError, TypeError, ValueError):
@@ -462,6 +477,168 @@ def source_commit_is_reachable(payload: dict[str, Any], root: Path, head: str) -
         return _reject(f"{type(exc).__name__}: {exc}")
 
 
+def require_published_ancestor(root: Path, commit: str) -> None:
+    """Require Git ancestry, or the same ancestry across a verified GitHub squash.
+
+    This proves publication lineage only. Each caller must still verify all its
+    pinned source/review/artifact inputs; this never qualifies changed inputs.
+    """
+    if re.fullmatch(r"[0-9a-f]{40}", commit) is None:
+        raise ValueError("Full immutable source commit required")
+    commit = bytes.fromhex(commit).hex()
+    head = _git(root, "rev-parse", "HEAD").stdout.strip()
+    if _ancestor(root, commit, head):
+        return
+    receipt = json.loads((root / PUBLICATION_RECEIPT).read_text(encoding="utf-8"))
+    reviewed = receipt.get("reviewed_source_commits")
+    if (
+        receipt.get("schema_version") != 1
+        or receipt.get("verification_mode") != "live_github"
+        or not isinstance(reviewed, list)
+        or commit not in reviewed
+    ):
+        raise ValueError("Source lacks a reviewed publication bridge")
+    refreshed = _refresh_live_mapping(receipt)
+    mapping = _github_mapping(refreshed)
+    if mapping is None:
+        raise ValueError("GitHub has not confirmed the declared squash merge")
+    pr_head, merge = mapping
+    merged_tree, published_tree = _tree(root, merge), _tree(root, pr_head)
+    if (
+        not merged_tree
+        or merged_tree != published_tree
+        or not _ancestor(root, merge, head)
+        or not _ancestor(root, commit, pr_head)
+    ):
+        raise ValueError("Publication tree/ancestry does not prove the pinned source")
+
+
+def _ci_capture_run(payload: dict[str, Any], run_id: int) -> dict[str, Any]:
+    """Read actual producer identity; overall workflow success is a separate gate."""
+    if isinstance(run_id, bool) or run_id <= 0:
+        raise ValueError("Positive CI run ID required")
+    run = _read_github_json(f"actions/runs/{run_id}")
+    if (
+        str(run_id) != str(payload["source_run_id"])
+        or run.get("id") != run_id
+        or payload.get("source_event") != "workflow_dispatch"
+        or run.get("head_sha") != payload["source_commit"]
+        or run.get("head_branch") != payload["source_branch"]
+        or run.get("html_url") != payload["source_run_url"]
+        or run.get("html_url")
+        != f"https://github.com/{REPOSITORY}/actions/runs/{run_id}"
+        or run.get("event") != payload.get("source_event")
+        or run.get("path") != ".github/workflows/nightly.yml"
+        or run.get("status") != "completed"
+    ):
+        raise ValueError("CI run does not match the captured Nightly identity")
+    jobs = _read_github_json(f"actions/runs/{run_id}/jobs?per_page=100")
+    if jobs.get("total_count", 0) > 100 or jobs.get("total_count") != len(
+        jobs.get("jobs", [])
+    ):
+        raise ValueError("Producer job response is incomplete")
+    for name in ("tests / coverage-verify", "tests / duration-telemetry"):
+        matches = [j for j in jobs["jobs"] if j.get("name") == name]
+        if len(matches) != 1 or matches[0].get("conclusion") != "success":
+            raise ValueError("Required CI capture producer did not succeed: " + name)
+    return run
+
+
+def _publication_sources(root: Path, source: str) -> list[str]:
+    review = json.loads(
+        (
+            root / "configs/quality/external_resource_inventory_qm08_review.json"
+        ).read_text(encoding="utf-8")
+    )
+    host = json.loads(
+        (root / "grafana/tooling/router-v7-bridge/host-image.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    commits = sorted(
+        {
+            source,
+            review["catalog_ref"],
+            review["source_ref"],
+            host["delivery_source"]["source_ref"],
+        }
+    )
+    head = _git(root, "rev-parse", "HEAD").stdout.strip()
+    for commit in commits:
+        if re.fullmatch(r"[0-9a-f]{40}", commit) is None or not _ancestor(
+            root, commit, head
+        ):
+            raise ValueError("Publication input is not an immutable ancestor")
+    return commits
+
+
+def _require_clean_producer_inputs(root: Path) -> None:
+    changed = _git(root, "diff", "--quiet", "HEAD", "--", *TEST_INPUTS)
+    untracked = _git(
+        root, "ls-files", "--others", "--exclude-standard", "--", *TEST_INPUTS
+    )
+    if changed.returncode or untracked.returncode or untracked.stdout.strip():
+        raise ValueError("Producer inputs changed in the working tree")
+
+
+def build_ci_squash_receipt(
+    payload: dict[str, Any], *, root: Path, pull_request: int, run_id: int
+) -> dict[str, Any]:
+    """Materialize a pending live bridge; never invent a future merge identity."""
+    from scripts.engineering.ci.update_test_telemetry_baseline import (
+        compute_test_telemetry_source_tree_sha256,
+    )
+
+    _require_clean_producer_inputs(root)
+    run = _ci_capture_run(payload, run_id)
+    source = str(payload["source_commit"])
+    head = _git(root, "rev-parse", "HEAD").stdout.strip()
+    if payload["source_tree_sha256"] != compute_test_telemetry_source_tree_sha256(root):
+        raise ValueError("Captured test inputs changed")
+    related, _ = _source_relation(root, source, head, live=False)
+    if not related:
+        raise ValueError("Producer inputs changed after the captured run")
+    pr = _read_github_json(f"pulls/{pull_request}")
+    if (
+        pr.get("number") != pull_request
+        or pr.get("head", {}).get("sha") != head
+        or pr.get("base", {}).get("repo", {}).get("full_name") != REPOSITORY
+    ):
+        raise ValueError("Published PR head does not match this checkout")
+    return {
+        "schema_version": 1,
+        "verification_mode": "live_github",
+        "source_commit": source,
+        "source_run_id": payload["source_run_id"],
+        "source_tree_sha256": payload["source_tree_sha256"],
+        "metrics_sha256": telemetry_metrics_sha256(payload),
+        "reviewed_source_commits": _publication_sources(root, source),
+        "retrieved_from": f"https://api.github.com/repos/{REPOSITORY}/pulls/{pull_request}",
+        "retrieved_at_utc": datetime.now(UTC).isoformat(),
+        "github_pull_request": {
+            "number": pr["number"],
+            "merged": pr["merged"],
+            "base": {"repo": {"full_name": REPOSITORY}},
+            "head": {"sha": head},
+            "merge_commit_sha": pr["merge_commit_sha"] if pr["merged"] else None,
+        },
+        "ci_run": {
+            key: run[key]
+            for key in (
+                "id",
+                "head_sha",
+                "event",
+                "path",
+                "status",
+                "conclusion",
+                "html_url",
+            )
+        },
+        "git_object_proof": build_git_object_proof(root, source, head),
+        "trust_statement": "Reviewed publication mapping; not a CI execution attestation or trust upgrade.",
+    }
+
+
 def _write_receipt_atomically(destination: Path, receipt: dict[str, Any]) -> None:
     """Publish a complete receipt without truncating a prior valid one."""
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -485,6 +662,24 @@ def _write_receipt_atomically(destination: Path, receipt: dict[str, Any]) -> Non
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
+
+
+def write_ci_publication_receipts(root: Path, receipt: dict[str, Any]) -> None:
+    """Keep source publication lineage independent of future telemetry captures."""
+    publication = {
+        key: receipt[key]
+        for key in (
+            "schema_version",
+            "verification_mode",
+            "reviewed_source_commits",
+            "retrieved_from",
+            "retrieved_at_utc",
+            "github_pull_request",
+            "trust_statement",
+        )
+    }
+    _write_receipt_atomically(root / RECEIPT, receipt)
+    _write_receipt_atomically(root / PUBLICATION_RECEIPT, publication)
 
 
 def require_capture_metrics(payload: dict[str, Any], expected: dict[str, Any]) -> None:
@@ -573,8 +768,10 @@ def main() -> int:
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
-    parser.add_argument("--measurement-repo-root", type=Path, required=True)
-    parser.add_argument("--local-manifest", type=Path, required=True)
+    parser.add_argument("--measurement-repo-root", type=Path)
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--local-manifest", type=Path)
+    mode.add_argument("--ci-run-id", type=int)
     parser.add_argument("--pull-request", type=int, required=True)
     args = parser.parse_args()
     root = args.repo_root.resolve()
@@ -583,15 +780,22 @@ def main() -> int:
             encoding="utf-8"
         )
     )
-    receipt = build_reviewed_squash_receipt(
-        payload,
-        root=root,
-        measurement_root=args.measurement_repo_root.resolve(),
-        manifest_path=args.local_manifest.resolve(),
-        pull_request=args.pull_request,
-    )
-    destination = root / RECEIPT
-    _write_receipt_atomically(destination, receipt)
+    if args.ci_run_id is not None:
+        receipt = build_ci_squash_receipt(
+            payload, root=root, pull_request=args.pull_request, run_id=args.ci_run_id
+        )
+        write_ci_publication_receipts(root, receipt)
+    else:
+        if args.measurement_repo_root is None:
+            parser.error("--local-manifest requires --measurement-repo-root")
+        receipt = build_reviewed_squash_receipt(
+            payload,
+            root=root,
+            measurement_root=args.measurement_repo_root.resolve(),
+            manifest_path=args.local_manifest.resolve(),
+            pull_request=args.pull_request,
+        )
+        _write_receipt_atomically(root / RECEIPT, receipt)
     return 0
 
 

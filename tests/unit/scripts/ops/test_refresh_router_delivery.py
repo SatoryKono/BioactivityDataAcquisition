@@ -196,6 +196,70 @@ def test_git_blob_read_uses_a_pinned_commit_and_option_terminator(tmp_path):
     assert release.git(tmp_path, "show", ref + ":source") == b"pinned"
 
 
+def test_delivery_source_check_accepts_verified_squash_and_rejects_drift(
+    tmp_path, monkeypatch
+):
+    import json
+    import subprocess
+
+    from scripts.engineering.ci import test_telemetry_provenance as provenance
+
+    root = tmp_path / "repo"
+    root.mkdir()
+
+    def git(*args):
+        return subprocess.check_output(["git", *args], cwd=root, text=True).strip()
+
+    git("init", "-q")
+    git("config", "user.name", "Fixture")
+    git("config", "user.email", "fixture@example.invalid")
+    (root / "README").write_bytes(b"base")
+    git("add", "--", "README")
+    git("commit", "-qm", "base")
+    base = git("rev-parse", "HEAD")
+    path = "grafana/plugins/bioetl-scenes-app/package.json"
+    source = root / path
+    source.parent.mkdir(parents=True)
+    source.write_bytes(b"pinned build input")
+    git("add", "--", path)
+    git("commit", "-qm", "build source")
+    published = git("rev-parse", "HEAD")
+    tree = git("rev-parse", "HEAD^{tree}")
+    merge = git("commit-tree", tree, "-p", base, "-m", "squash fixture")
+    git("checkout", "--detach", merge)
+    pr = {
+        "number": 42,
+        "merged": True,
+        "base": {"repo": {"full_name": provenance.REPOSITORY}},
+        "head": {"sha": published},
+        "merge_commit_sha": merge,
+    }
+    receipt = root / provenance.PUBLICATION_RECEIPT
+    receipt.parent.mkdir(parents=True)
+    receipt.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "verification_mode": "live_github",
+                "reviewed_source_commits": [published],
+                "retrieved_from": f"https://api.github.com/repos/{provenance.REPOSITORY}/pulls/42",
+                "github_pull_request": pr,
+            }
+        )
+    )
+    monkeypatch.setattr(provenance, "_read_github_json", lambda _: deepcopy(pr))
+    build = tmp_path / "build"
+    built = build / path
+    built.parent.mkdir(parents=True)
+    built.write_bytes(source.read_bytes())
+    assert release.source_inputs(root, build, published) == {
+        path: release.sha(source.read_bytes())
+    }
+    built.write_bytes(b"unreviewed")
+    with pytest.raises(ValueError, match="Build source differs"):
+        release.source_inputs(root, build, published)
+
+
 @pytest.mark.parametrize(
     "fault", ["missing-plugin", "foreign-path", "traversal", "wrong-recipe"]
 )

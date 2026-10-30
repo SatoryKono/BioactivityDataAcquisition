@@ -160,6 +160,41 @@ Curated/episodic memory and pipeline data are outside this refresh. Rebuild only
 materialized memory projections if required by their owning mechanism; do not
 rebuild them solely because another report changed.
 
+### Squash-safe publication provenance
+
+When repository policy requires squash, preserve the published branch and its
+full Git objects. Normal ancestor checks remain unchanged. A pinned source that
+is no longer a main ancestor requires a reviewed publication receipt plus a
+read-only GitHub lookup confirming the actual merge, identical published/merged
+trees, source ancestry within the published head, and merge ancestry within the
+current checkout. Missing objects, an unmerged PR, API failure or changed inputs
+fail closed. This bridge does not replace source, semantic, acquisition or
+physical artifact checks.
+
+After promoting the real successful coverage/duration artifacts from the last
+source candidate, materialize the bridge while that candidate is the published
+PR head:
+
+```bash
+python -m scripts.engineering.ci.test_telemetry_provenance --ci-run-id <actual-Nightly-run-id> --pull-request <epic-PR-number>
+```
+
+The native writer checks producer identity, both producer job results and the
+unchanged `TEST_INPUTS`. It writes two active outputs atomically per file:
+`reports/test-telemetry/squash-provenance.json` for captured measurements and
+`reports/quality/quality-move-qm08/publication-provenance.json` for the exact
+catalog/build source refs. Preserve prior before-bytes. The publication receipt
+remains independent of future telemetry refreshes. A pending receipt records no
+future merge SHA and grants no acceptance; the actual merge is resolved only
+after GitHub reports it. Do not narrow `TEST_INPUTS`, restamp captured run IDs or
+treat the overall producer workflow's FAIL as PASS.
+
+Make only metadata changes after this capture; source/input changes require a
+new capture. Run the owning read-only checks and final CI on the resulting head.
+After merge, repeat the affected ancestry/source checks on the actual main tree.
+Full history must include the preserved publication branch/PR objects; a source
+object's absence is missing evidence, not permission to accept a tree alias.
+
 ## Verification
 
 After the last writer, record all tracked working-byte hashes and run the

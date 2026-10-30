@@ -60,6 +60,13 @@ trend evidence only.
   <original-worktree> --local-manifest <manifest.json> --pull-request <merged-PR>`.
   The generator validates the complete 17-shard capture and reads the merged
   PR mapping before writing the bridge. Keep the original capture available.
+- For a real Nightly CI capture, promote its successful coverage/duration
+  artifacts, then run `python -m scripts.engineering.ci.test_telemetry_provenance
+  --ci-run-id <actual-run-id> --pull-request <PR>` on its published candidate.
+  The writer checks run identity, both producer jobs and unchanged TEST_INPUTS.
+  It writes telemetry and independent QM-08 source-publication receipts.
+  A pending receipt contains no future merge SHA; actual merge/tree/ancestry
+  are resolved read-only after squash. This does not upgrade capture trust.
 - For a reviewed local coverage capture, run
   `python -m scripts.engineering.ci.update_test_telemetry_baseline
   --rebind-current-tree`, then the coupled `refresh-ci-drift-families`

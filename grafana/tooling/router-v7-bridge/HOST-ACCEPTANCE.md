@@ -130,6 +130,14 @@ plugin artifacts must reproduce the CI build tree. A local build in a different
 working directory is diagnostic evidence until the complete file comparison
 passes, because webpack source-map metadata can depend on that directory.
 
+Preserve the published build-source branch and full Git objects across a squash
+merge. The delivery producer retains its normal ancestor check; a pinned build
+source outside main history needs the native QM-08 publication receipt and an
+actual GitHub merge mapping with identical trees and proven ancestry. Unmerged
+or unavailable mappings fail closed. Source bytes and full physical artifact
+parity remain mandatory; a publication bridge never rebinds an old image or
+provides runtime acceptance.
+
 The runtime-probe plugin executes navigation and hydration fixtures through
 Grafana's shared react-router external. Install it only on the acceptance host,
 run its explicit button, preserve the rendered receipt and remove it afterward.

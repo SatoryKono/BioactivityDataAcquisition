@@ -162,6 +162,53 @@ def test_check_update_check_is_readonly_idempotent_and_preserves_history(
     assert current["source_requalification"]["runtime_result"] == "NOT_RUN_12553"
 
 
+def test_real_squash_preserves_source_review_without_qualifying_dirty_inputs(
+    candidate: tuple, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from scripts.engineering.ci import test_telemetry_provenance as provenance
+
+    root, review, _ = candidate
+    assert invoke(root, review, "--update") == 0
+    git(root, "add", "--", *outputs(root), REVIEW)
+    git(root, "commit", "-qm", "reviewed candidate")
+    published = git(root, "rev-parse", "HEAD")
+    tree = git(root, "rev-parse", "HEAD^{tree}")
+    merge = git(
+        root, "commit-tree", tree, "-p", review["catalog_ref"], "-m", "squash fixture"
+    )
+    git(root, "checkout", "--detach", merge)
+    pr = {
+        "number": 42,
+        "merged": True,
+        "base": {"repo": {"full_name": provenance.REPOSITORY}},
+        "head": {"sha": published},
+        "merge_commit_sha": merge,
+    }
+    receipt = root / provenance.PUBLICATION_RECEIPT
+    receipt.parent.mkdir(parents=True)
+    receipt.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "verification_mode": "live_github",
+                "reviewed_source_commits": [
+                    review["source_ref"],
+                    review["catalog_ref"],
+                ],
+                "retrieved_from": f"https://api.github.com/repos/{provenance.REPOSITORY}/pulls/42",
+                "github_pull_request": pr,
+            }
+        )
+    )
+    monkeypatch.setattr(provenance, "_read_github_json", lambda _: deepcopy(pr))
+    before = outputs(root)
+    assert invoke(root, review, "--check") == 0
+    assert outputs(root) == before
+    (root / SOURCE).write_text("\n\n\n" + TEXT, encoding="utf-8")
+    assert invoke(root, review, "--check") == 1
+    assert outputs(root) == before
+
+
 @pytest.mark.parametrize(
     "fault",
     [

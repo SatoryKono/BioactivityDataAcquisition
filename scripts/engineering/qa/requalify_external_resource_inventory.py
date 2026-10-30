@@ -19,6 +19,7 @@ import subprocess
 from typing import Any
 
 from scripts.engineering.qa import external_resource_inventory as inventory
+from scripts.engineering.ci.test_telemetry_provenance import require_published_ancestor
 
 
 @dataclass
@@ -38,7 +39,7 @@ def _git(root: Path, *args: str, data: bytes | None = None) -> bytes:
 def _snapshot(root: Path, commit: str) -> Snapshot:
     if re.fullmatch(r"[0-9a-f]{40}", commit) is None:
         raise ValueError("Review requires full immutable commit IDs")
-    _git(root, "merge-base", "--is-ancestor", commit, "HEAD")
+    require_published_ancestor(root, commit)
     entries = _git(root, "ls-tree", "-rz", commit, "--", "src/bioetl").split(b"\0")
     oids = {}
     for entry in filter(None, entries):
