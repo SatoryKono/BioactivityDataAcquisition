@@ -78,7 +78,15 @@ jobs:
       - name: Test plugin behavior
         run: npm run test:ci
       - name: Build plugin
-        run: npm run build
+        env:
+          BIOETL_PLUGIN: ${{ matrix.plugin }}
+        run: |
+          # Runtime sourcemaps contain hashes derived from the compiler root.
+          docker run --rm \
+            --mount "type=bind,source=$GITHUB_WORKSPACE,target=/work" \
+            --workdir "/work/grafana/plugins/$BIOETL_PLUGIN" \
+            node@sha256:e7add2a490bb17d97b485b8641bd88455fff7839ade0f5eba493c3508124d413 \
+            npm run build
       - name: Verify built bundle against shipped host manifest
         env:
           BIOETL_PLUGIN: ${{ matrix.plugin }}
@@ -93,6 +101,21 @@ jobs:
           plugin = os.environ["BIOETL_PLUGIN"]
           assert plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"), plugin
           manifest = json.loads((root / "grafana/tooling/router-v7-bridge/host-image.json").read_text())
+          prefix = f"grafana/plugins/{plugin}/dist/"
+          expected_files = {
+              path.removeprefix(prefix): digest
+              for path, digest in manifest["artifact_sha256"].items()
+              if path.startswith(prefix)
+          }
+          directory = root / prefix
+          actual_files = {}
+          for path in directory.rglob('*'):
+              assert not path.is_symlink(), f"Unexpected plugin symlink: {path}"
+              if path.is_file():
+                  actual_files[path.relative_to(directory).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
+          assert actual_files.keys() == expected_files.keys(), 'Complete plugin file set differs'
+          mismatches = [path for path in actual_files if actual_files[path] != expected_files[path]]
+          assert not mismatches, f"Complete plugin hashes differ, including maps: {mismatches}"
           for filename in ("module.js", "plugin.json"):
               relative = f"grafana/plugins/{plugin}/dist/{filename}"
               bundle = root / relative

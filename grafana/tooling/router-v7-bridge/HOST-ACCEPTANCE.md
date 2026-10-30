@@ -25,6 +25,15 @@ Record source SHA, upstream SHA, patch hashes, bridge/lock hashes, build exits,
 test counts, frontend/plugin bundle hashes, image digest and SBOM. Production
 build success alone does not establish runtime acceptance.
 
+Release plugin builds use Node image
+`node@sha256:e7add2a490bb17d97b485b8641bd88455fff7839ade0f5eba493c3508124d413`,
+with the repository mounted at `/work` and the working directory set to
+`/work/grafana/plugins/<plugin>`. Keep `npm run build` unchanged inside that
+container. Webpack runtime sourcemaps include structural hashes tied to the
+absolute compiler root; the source host directory may vary, but the compiler
+root must match the release build. CI verifies the entire dist file set and
+all hashes, including sourcemaps, before transferring plugin output.
+
 After a genuine source build and publication, materialize active delivery pins
 with the repository producer below. Supply the full source commit, its matching
 disposable source tree, the complete Docker build context tar, actual built
