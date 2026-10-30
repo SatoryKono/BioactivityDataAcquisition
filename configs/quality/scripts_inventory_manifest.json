@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-30T09:08:46.986111+00:00",
+  "generated_at": "2026-10-30T09:33:01.729875+00:00",
   "summary": {
     "total_scripts": 700,
     "status_counts": {
@@ -6057,7 +6057,7 @@
         },
         {
           "path": "tests/architecture/test_silver_filter_boundary_inventory.py",
-          "line": 428,
+          "line": 431,
           "source_group": "tests",
           "text": "\"Run: python scripts/data_quality/inventory_silver_filters_migration.py\\n\""
         }
@@ -8490,13 +8490,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 326,
+          "line": 332,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 735,
+          "line": 741,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
@@ -10166,7 +10166,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 347,
+          "line": 353,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import generated_artifact_checks as checks"
         }
@@ -14891,13 +14891,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 402,
+          "line": 408,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 423,
+          "line": 429,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_evaluators as evaluators"
         },
@@ -14934,7 +14934,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 422,
+          "line": 428,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_report as cli"
         },
@@ -15321,7 +15321,7 @@
           "text": "\"scripts.engineering.qa.external_resource_inventory\""
         },
         {
-          "path": "tests/architecture/test_external_resource_inventory.py",
+          "path": "tests/architecture/test_external_resource_inventory_catalog.py",
           "line": 7,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.external_resource_inventory import main"

@@ -73151,7 +73151,7 @@
     {
       "canonical_owner": "Core",
       "execution_policy": "architecture,architecture-fast-boundary",
-      "file": "tests/architecture/test_external_resource_inventory.py",
+      "file": "tests/architecture/test_external_resource_inventory_catalog.py",
       "fixtures": [
         "_bioetl_test_silver_validator",
         "_guard_global_pathlib_state",
@@ -73174,7 +73174,7 @@
         "vcr_config",
         "vcr_markers"
       ],
-      "nodeid": "tests/architecture/test_external_resource_inventory.py::test_repository_catalog_and_projection_are_current",
+      "nodeid": "tests/architecture/test_external_resource_inventory_catalog.py::test_repository_catalog_and_projection_are_current",
       "overlap_rationale": null,
       "semantic_production_criticality": "critical",
       "type": "Function",
@@ -1413419,7 +1413419,7 @@
     }
   ],
   "schema_version": 1,
-  "source_commit": "2509ddd7d2d2790c1d412cd9b977166411e5329e",
+  "source_commit": "2deb0d40822b46b1f8e4ed27c3b18c0b7102eedc",
   "unowned_count": 0,
   "unowned_nodeids": []
 }
