@@ -160,6 +160,7 @@ def classify_changes(
     changed_files: list[str],
     *,
     head_sha: str,
+    require_physical_parity: bool = False,
 ) -> dict[str, Any]:
     """Return a versioned decision matrix; unclassified paths fail closed."""
     normalized = sorted(
@@ -206,6 +207,16 @@ def classify_changes(
                 "decision": NOT_APPLICABLE,
                 "reason": "no_path_match",
             }
+
+    if require_physical_parity:
+        if "generated-artifacts" not in decisions:
+            raise CatalogError(
+                "Missing generated-artifacts gate for physical parity control"
+            )
+        decisions["generated-artifacts"] = {
+            "decision": REQUIRED,
+            "reason": "explicit_physical_parity_control",
+        }
 
     return {
         "schema_version": 1,
@@ -454,7 +465,12 @@ def _classify_command(args: argparse.Namespace) -> int:
         before_sha=args.before_sha,
         head_sha=args.head_sha,
     )
-    matrix = classify_changes(catalog, changed, head_sha=args.head_sha)
+    matrix = classify_changes(
+        catalog,
+        changed,
+        head_sha=args.head_sha,
+        require_physical_parity=getattr(args, "require_physical_parity", False),
+    )
     args.artifact.parent.mkdir(parents=True, exist_ok=True)
     args.artifact.write_text(
         json.dumps(matrix, indent=2, sort_keys=True) + "\n",
@@ -499,6 +515,7 @@ def build_parser() -> argparse.ArgumentParser:
     classify.add_argument("--before-sha", default="")
     classify.add_argument("--head-sha", required=True)
     classify.add_argument("--artifact", type=Path, required=True)
+    classify.add_argument("--require-physical-parity", action="store_true")
     classify.set_defaults(handler=_classify_command)
 
     aggregate = subparsers.add_parser("aggregate")

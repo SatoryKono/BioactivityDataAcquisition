@@ -8,7 +8,7 @@ import subprocess
 import pytest
 import yaml
 
-from scripts.engineering.ci import physical_schema_parity as parity
+from scripts.engineering.ci import pr_lane_results as parity
 from scripts.engineering.ci.pr_gate import classify_changes, load_catalog
 from scripts.engineering.ci.pr_lane_results import assert_step_outcomes, build_results
 
@@ -50,7 +50,9 @@ def test_missing_backend_is_not_a_skip(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     monkeypatch.setattr(parity.importlib.util, "find_spec", lambda name: None)
-    assert parity.main(["--junit", str(tmp_path / "result.xml")]) == 2
+    assert (
+        parity.main(["physical-parity", "--junit", str(tmp_path / "result.xml")]) == 2
+    )
     assert not (tmp_path / "result.xml").exists()
 
 
@@ -88,7 +90,12 @@ def test_child_exit_and_evidence_both_gate_success(
         return subprocess.CompletedProcess(command, code)
 
     monkeypatch.setattr(parity.subprocess, "run", child)
-    assert parity.main(["--junit", str(result_path), "--negative-control"]) == expected
+    assert (
+        parity.main(
+            ["physical-parity", "--junit", str(result_path), "--negative-control"]
+        )
+        == expected
+    )
 
 
 def test_stale_or_malformed_evidence_is_not_accepted(
@@ -98,7 +105,7 @@ def test_stale_or_malformed_evidence_is_not_accepted(
     path = tmp_path / "stale.xml"
     path.write_text("<not valid XML")
     assert "unreadable parity JUnit" in parity.validate_junit(path)[0]
-    assert parity.main(["--junit", str(path)]) == 2
+    assert parity.main(["physical-parity", "--junit", str(path)]) == 2
     assert path.read_text() == "<not valid XML"
 
 
@@ -108,7 +115,10 @@ def test_missing_or_empty_selection_fails_before_execution(
 ) -> None:
     for targets in ((), ("tests/missing_parity_module.py",)):
         monkeypatch.setattr(parity, "TARGETS", targets)
-        assert parity.main(["--junit", str(tmp_path / "result.xml")]) == 2
+        assert (
+            parity.main(["physical-parity", "--junit", str(tmp_path / "result.xml")])
+            == 2
+        )
     assert not (tmp_path / "result.xml").exists()
 
 
@@ -138,7 +148,7 @@ def test_schema_mismatch_or_missing_step_fails_required_gate(outcome: str) -> No
         "pyproject.toml",
         "uv.lock",
         *parity.TARGETS,
-        "scripts/engineering/ci/physical_schema_parity.py",
+        "scripts/engineering/ci/pr_lane_results.py",
     ],
 )
 def test_all_backend_inputs_select_canonical_gate(path: str) -> None:
@@ -157,7 +167,46 @@ def test_one_canonical_schema_step_runs_real_matrix_and_retains_aggregation() ->
     parity_steps = [step for step in steps if step.get("id") == "schema-parity"]
     assert len(parity_steps) == 1
     step = parity_steps[0]
-    assert "scripts.engineering.ci.physical_schema_parity" in step["run"]
+    assert "pr-lane-results physical-parity" in step["run"]
     assert "set -euo pipefail" in step["run"]
     assert "continue-on-error" not in step
     assert any("steps.schema-parity.outcome" in step.get("run", "") for step in steps)
+
+
+def test_explicit_negative_control_cannot_be_skipped_for_docs_only_diff() -> None:
+    """An explicitly requested mismatch is required even without schema changes."""
+    catalog = load_catalog(
+        parity.REPO_ROOT / "configs/quality/github_required_checks.yaml"
+    )
+    paths = ["docs/03-guides/developer-guide.md"]
+    normal = classify_changes(catalog, paths, head_sha="a" * 40)
+    forced = classify_changes(
+        catalog,
+        paths,
+        head_sha="a" * 40,
+        require_physical_parity=True,
+    )
+    assert normal["decisions"]["generated-artifacts"]["decision"] == "not_applicable"
+    assert forced["decisions"]["generated-artifacts"] == {
+        "decision": "required",
+        "reason": "explicit_physical_parity_control",
+    }
+    failures = assert_step_outcomes(
+        forced["decisions"],
+        {"schema-artifacts": "success", "schema-parity": "skipped"},
+        owner="class-lane",
+    )
+    assert "generated-artifacts:schema-parity=skipped" in failures
+
+
+def test_workflow_forwards_control_into_classifier_and_runner() -> None:
+    workflow = yaml.safe_load(
+        (parity.REPO_ROOT / ".github/workflows/pr-required.yml").read_text()
+    )
+    classify = workflow["jobs"]["classify-changes"]["steps"]
+    decide = next(step for step in classify if step.get("id") == "decide")
+    assert (
+        "inputs.physical-parity-negative-control"
+        in decide["env"]["PARITY_NEGATIVE_CONTROL"]
+    )
+    assert "classify_args+=(--require-physical-parity)" in decide["run"]

@@ -107,6 +107,7 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
           BEFORE_SHA: ${{ github.event.before || '' }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          PARITY_NEGATIVE_CONTROL: ${{ github.event_name == 'workflow_dispatch' && inputs.physical-parity-negative-control || false }}
         run: |
           set -euo pipefail
           base_sha="${BASE_SHA}"
@@ -123,6 +124,9 @@ jobs:
           )
           if [[ -n "${BEFORE_SHA}" ]]; then
             classify_args+=(--before-sha "${BEFORE_SHA}")
+          fi
+          if [[ "$PARITY_NEGATIVE_CONTROL" == 'true' ]]; then
+            classify_args+=(--require-physical-parity)
           fi
           uv run --no-sync --frozen --no-build python -m scripts.engineering.ci pr-gate classify "${classify_args[@]}"
           echo "base_sha=${base_sha}" >> "$GITHUB_OUTPUT"
@@ -676,7 +680,7 @@ jobs:
           if [[ "$PARITY_NEGATIVE_CONTROL" == 'true' ]]; then
             parity_args+=(--negative-control)
           fi
-          uv run --frozen --no-build python -m scripts.engineering.ci.physical_schema_parity \
+          uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results physical-parity \
             --junit reports/quality/physical-schema-parity.xml "${parity_args[@]}"
 
       - name: Upload physical schema parity evidence

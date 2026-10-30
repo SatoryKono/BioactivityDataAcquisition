@@ -103,7 +103,7 @@ def test_source_maintenance_requires_explicit_update_and_commit(
 def test_reviewed_resource_free_rebind_preserves_facts_and_history(
     inventory_case: tuple,
 ) -> None:
-    from scripts.engineering.qa._external_resource_source_rebind import (
+    from scripts.engineering.qa.external_resource_inventory import (
         rebind_resource_free_sources,
     )
 
@@ -141,7 +141,7 @@ def test_reviewed_resource_free_rebind_preserves_facts_and_history(
 def test_source_rebind_cannot_bypass_inventory_review(
     inventory_case: tuple, case: str
 ) -> None:
-    from scripts.engineering.qa._external_resource_source_rebind import (
+    from scripts.engineering.qa.external_resource_inventory import (
         rebind_resource_free_sources,
     )
 

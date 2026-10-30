@@ -10,7 +10,7 @@ import pyarrow as pa
 import pytest
 from deltalake import DeltaTable, write_deltalake
 
-from scripts.engineering.ci.physical_schema_parity import NEGATIVE_CONTROL_ENV
+from scripts.engineering.ci.pr_lane_results import NEGATIVE_CONTROL_ENV
 
 pytestmark = pytest.mark.integration
 

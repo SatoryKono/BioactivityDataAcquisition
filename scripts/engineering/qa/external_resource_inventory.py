@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import copy
 import hashlib
 import json
 import re
@@ -413,6 +414,52 @@ def validate_inventory(
     return errors
 
 
+def rebind_resource_free_sources(
+    payload: dict[str, Any],
+    sources: Mapping[str, bytes],
+    blobs: Mapping[str, SourceBlob],
+    *,
+    commit: str,
+    tree: str,
+    reviewed: Mapping[str, str],
+) -> dict[str, Any]:
+    """Requalify only explicitly reviewed, reference-free existing source files."""
+    original = payload["source_files"]
+    if set(original) != set(blobs) or set(sources) != set(blobs):
+        raise ValueError(
+            "Source census additions/removals require full inventory review"
+        )
+    changed = {path for path, blob in blobs.items() if original[path] != blob.oid}
+    if not changed or changed != set(reviewed):
+        raise ValueError("Reviewed source set must exactly match changed source blobs")
+    referenced = {ref["file"] for ref in _references(payload)}
+    if changed & referenced:
+        raise ValueError(
+            "Resource-bearing source changes require full inventory review"
+        )
+    for path in changed:
+        actual = hashlib.sha256(sources[path].replace(b"\r\n", b"\n")).hexdigest()
+        if reviewed[path] != actual or blobs[path].sha256 != actual:
+            raise ValueError(f"Reviewed source digest differs: {path}")
+    updated = copy.deepcopy(payload)
+    updated["source_commit"] = commit
+    updated["source_tree"] = tree
+    updated["source_files"] = {path: blob.oid for path, blob in blobs.items()}
+    for ref in _references(updated):
+        ref["source_commit"] = commit
+    updated.setdefault("source_rebindings", []).append(
+        {
+            "from_commit": payload["source_commit"],
+            "to_commit": commit,
+            "reviewed_resource_free_sources": dict(reviewed),
+        }
+    )
+    errors = validate_inventory(updated, sources, blobs)
+    if errors:
+        raise ValueError("Source requalification failed: " + "; ".join(errors))
+    return updated
+
+
 def render(payload: dict[str, Any]) -> str:  # Any: validated JSON catalog.
     """Render every resource and source link without inventing runtime results."""
     commit = payload["source_commit"]
@@ -694,10 +741,6 @@ def _run(args: argparse.Namespace) -> int:
             cwd=ROOT,
             check=True,
         )
-        from scripts.engineering.qa._external_resource_source_rebind import (
-            rebind_resource_free_sources,
-        )
-
         reviewed = dict(item.rsplit("=", 1) for item in args.reviewed_source)
         if len(reviewed) != len(args.reviewed_source):
             raise ValueError("Duplicate reviewed source path")

@@ -64,7 +64,7 @@ identity and output hashes are recorded with the validation artifacts.
 
 `.github/workflows/pr-required.yml` retains the single `schema-parity` step,
 first running the existing logical checker and then
-`python -m scripts.engineering.ci.physical_schema_parity --junit <new-path>`.
+`python -m scripts.engineering.ci pr-lane-results physical-parity --junit <new-path>`.
 The runner selects all six prerequisite owning files plus the new controlled
 physical fixture. Missing backend/module, absent/stale/empty JUnit, skipped/error/
 failed tests or a nonzero child exit cannot become success. Strict pytest config,
