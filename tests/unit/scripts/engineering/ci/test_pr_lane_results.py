@@ -709,6 +709,25 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
     """Quality-move configs and documentation retain explicit governing tests."""
     repo_root = Path(__file__).resolve().parents[5]
 
+    new_inputs = {
+        "configs/quality/external_resource_inventory/part-06.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
+        },
+        "configs/quality/external_resource_inventory_qm08_review.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        },
+        "docker-compose.monitoring.yml": {
+            "tests/architecture/test_docker_runtime_contracts.py",
+            "tests/integration/test_grafana_datasource_provisioning.py",
+        },
+    }
+    for path, owning_tests in new_inputs.items():
+        selection = build_shadow_compare([path], repo_root=repo_root)
+        assert owning_tests <= set(selection["selected"]), path
+        assert selection["covers_full_suite"] is False
+
     report = build_shadow_compare(
         [
             ".github/workflows/duplication-complexity.yml",

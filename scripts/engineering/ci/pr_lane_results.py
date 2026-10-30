@@ -305,8 +305,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory/part-03.json",
             "configs/quality/external_resource_inventory/part-04.json",
             "configs/quality/external_resource_inventory/part-05.json",
+            "configs/quality/external_resource_inventory/part-06.json",
         ),
         (EXTERNAL_RESOURCE_INVENTORY_TEST, EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST),
+    ),
+    "configs/quality/external_resource_inventory_qm08_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+    ),
+    "docker-compose.monitoring.yml": (
+        DOCKER_RUNTIME_CONTRACT_TEST,
+        "tests/integration/test_grafana_datasource_provisioning.py",
     ),
     **dict.fromkeys(
         (
