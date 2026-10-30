@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-30T06:00:43.758044+00:00",
+  "generated_at": "2026-10-30T06:59:46.100779+00:00",
   "summary": {
     "total_scripts": 698,
     "status_counts": {
@@ -6057,7 +6057,7 @@
         },
         {
           "path": "tests/architecture/test_silver_filter_boundary_inventory.py",
-          "line": 428,
+          "line": 431,
           "source_group": "tests",
           "text": "\"Run: python scripts/data_quality/inventory_silver_filters_migration.py\\n\""
         }
@@ -8085,7 +8085,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 218,
+      "reference_count": 217,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -8484,13 +8484,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 305,
+          "line": 320,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 714,
+          "line": 729,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
@@ -10148,19 +10148,19 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 15,
+          "line": 17,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.generated_artifact_checks import proven_deferral"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 227,
+          "line": 229,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import generated_artifact_checks as checks"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 326,
+          "line": 341,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import generated_artifact_checks as checks"
         }
@@ -11885,7 +11885,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 17,
+          "line": 19,
           "source_group": "tests",
           "text": "from scripts.engineering.dev.pytest_artifact_selection import ("
         }
@@ -14824,13 +14824,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 381,
+          "line": 396,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 402,
+          "line": 417,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_evaluators as evaluators"
         },
@@ -14867,7 +14867,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 401,
+          "line": 416,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_report as cli"
         },

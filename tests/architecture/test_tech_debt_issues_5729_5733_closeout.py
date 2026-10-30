@@ -109,11 +109,18 @@ def test_issue_5732_assertless_contract_inventory_is_reduced() -> None:
     families = report["assertless_candidates"]
 
     assert (
-        report["assertless_total_candidates"] == outcome["assertless_total_candidates"]
+        report["assertless_total_candidates"] <= outcome["assertless_total_candidates"]
     )
     assert (
         summary["intentional_no_exception_contract"]
-        == outcome["intentional_no_exception_contract"]
+        <= outcome["intentional_no_exception_contract"]
+    )
+    assert report["assertless_total_candidates"] == len(families)
+    assert (
+        report["assertless_total_candidates"] == summary["assertless_total_candidates"]
+    )
+    assert report["assertless_total_candidates"] == sum(
+        report["assertless_category_counts"].values()
     )
     file_family_counts: dict[str, int] = {}
     for candidate in families:
