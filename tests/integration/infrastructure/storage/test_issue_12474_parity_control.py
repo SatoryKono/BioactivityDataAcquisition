@@ -45,21 +45,38 @@ def test_prepared_schema_removal_is_not_hidden_by_raw_record() -> None:
     assert diff.new_fields == ("extra",)
 
 
-def test_nullable_value_with_present_key_is_not_a_removed_field() -> None:
-    """A present null value is distinct from an omitted field in strict drift."""
+@pytest.mark.parametrize("include_key", [True, False])
+def test_declared_nullable_field_survives_omitted_or_null_value(
+    include_key: bool,
+) -> None:
+    """The prepared schema retains a nullable field even when its raw key is absent."""
     from bioetl.infrastructure.storage.silver.schema_drift_operations import (
         _build_silver_schema_drift_diff,
     )
 
     schema = pa.schema([("entity_id", pa.string()), ("optional", pa.string())])
+    record: dict[str, str | None] = {"entity_id": "synthetic-1"}
+    if include_key:
+        record["optional"] = None
     assert (
         _build_silver_schema_drift_diff(
             schema,
-            [{"entity_id": "synthetic-1", "optional": None}],
+            [record],
             incoming_schema=schema,
         )
         is None
     )
+
+
+def test_raw_omission_without_prepared_schema_is_reported() -> None:
+    from bioetl.infrastructure.storage.silver.schema_drift_operations import (
+        _build_silver_schema_drift_diff,
+    )
+
+    schema = pa.schema([("entity_id", pa.string()), ("optional", pa.string())])
+    diff = _build_silver_schema_drift_diff(schema, [{"entity_id": "synthetic-1"}])
+    assert diff is not None
+    assert diff.missing_fields == ("optional",)
 
 
 @pytest.mark.parametrize("mode", ["overwrite", "scd2"])

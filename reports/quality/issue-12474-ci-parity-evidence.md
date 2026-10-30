@@ -47,7 +47,7 @@ nullability is inapplicable there.
 | Bronze | Compressed JSONL/Zstandard | Values/types/null preserved; no persisted-schema claim | Same file, Bronze round-trip |
 | Silver types/nullability | Temporary Delta, prepared Arrow schema | Exact physical readback; permitted int-to-float coercion does not report drift | Same file, evolve/coercion cases |
 | Silver evolution | Nullable field addition vs forbidden type change | Addition accepted; type change raises `SchemaEvolutionError`, exact `changed_fields`, persisted string type unchanged | Same file, type-change negative control |
-| Silver missing/extras | Prepared schema and raw records | Raw extras remain visible; prepared-schema removal cannot be masked by raw value; raw key omission retains existing strict error contract; present nullable `None` is distinct | `test_issue_12474_parity_control.py`, Silver unit files and schema-drift E2E |
+| Silver missing/extras | Prepared schema and raw records | Raw extras remain visible; prepared-schema removal cannot be masked by raw value; declared nullable fields remain valid with omitted/null raw values; without a prepared schema raw omission is reported | `test_issue_12474_parity_control.py`, Silver unit files and schema-drift E2E |
 | Gold SCD2 | Temporary Delta, strict publication schema | Types, explicit physical nullable finding; repeated versions/history/current row/idempotency and mixed batches | `test_gold_writer_versioning.py` |
 | Gold overwrite | Temporary Delta, strict schema | Types/nullability and repeated-write equality | Same file, overwrite test |
 | Gold logical required | Both SCD2 and overwrite | Exact required-field rejection before persisted commit | `test_issue_12474_parity_control.py` |
@@ -200,3 +200,25 @@ peer-dependency and stale packed-archive errors (`41077164501`); its host build
 was skipped, not accepted. Equivalent delivery remediation already exists in
 the separately owned PR #12616. Its branch and artifacts remain untouched; only
 accepted, input-qualified upstream results may be reused after integration.
+
+### Silver declared-schema contract correction
+
+The disposable integration exposed an incorrect inference in the earlier #12474
+helper change: a stale E2E expectation treated omitted nullable data as a schema
+removal even when the declared/prepared schema retained that field. Original main
+`0953a8f2` already permits this omission. The helper now preserves that behavior:
+new fields are `(raw | prepared) - existing`; removed fields are
+`existing - prepared` (prepared defaults to raw when no schema is supplied).
+The intended extra guard remains: a raw value cannot mask removal from the
+prepared schema. The earlier raw-key-omission interpretation is superseded.
+
+The E2E case reused from PR #12616, head `2b46de77b265b979da60c2979126021a1074f7f6`,
+checks actual Delta readback of the omitted nullable value and then still requires
+`SchemaEvolutionError` with the exact removed field when the declared schema drops
+it. This is an addressed correction to our helper, independent of the unmerged
+Grafana dependency; no other source from that PR is adopted here.
+Independent comparison over 78,897 combinations against original main confirmed
+that the only intentional difference is detection of a prepared-field removal
+masked by raw data. The 115-case real-backend suite passed in the disposable
+preview without failures/errors/skips. The new Silver blob is resource-free;
+its actual Git provenance must be regenerated before publication.
