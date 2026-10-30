@@ -110,3 +110,18 @@ An independent security-producer failure was reproduced on clean main
 `_api_request_sanitize.py`, despite the existing request-metadata redaction path.
 The unchanged test and product file are outside this parity implementation;
 their FAIL is retained and cannot qualify the new telemetry producer as PASS.
+
+On 2026-10-30 the user separately authorized only an addressed security-test
+correction: the exact request-sanitizer path qualifies only if its real function
+replaces email/Email/EMAIL with `[REDACTED]`. A negative control replaces the
+sanitizer with an identity function and requires the PII gate to reject it.
+Other paths and PII patterns retain their policy; no product code, credentials,
+security settings or global ignore changes are included.
+
+Two further producer failures also reproduce on clean main, without this PR:
+`test_governed_publication_identifier_arrays_publish_canonical_json_patterns`
+expects a one-character final ORCID group instead of the configured four-character
+group, and `test_private_host_delivery_binds_source_and_survives_data_volume`
+finds two plugin package-lock digests inconsistent with the accepted host manifest.
+They remain outside the authorized parity/security correction. A failed producer
+and its coverage artifact are not a qualified telemetry capture.
