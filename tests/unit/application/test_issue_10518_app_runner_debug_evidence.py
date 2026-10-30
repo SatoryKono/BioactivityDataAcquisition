@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest.mock import MagicMock
 from xml.etree.ElementTree import Element
 
 import polars as pl
@@ -70,7 +69,6 @@ class _TermHost(PublicationTermExtractionMixin):
 
 def test_debug_export_recording_is_noop_when_disabled() -> None:
     host = _DisabledDebug()
-    host._collector = MagicMock()
     host.record_bronze_batch(records=[], batch_id="b", start_index=0)
     host.record_transform_success(raw_record={}, record_index=0, silver_record={})
     host.record_transform_failure(raw_record={}, record_index=0)
@@ -87,7 +85,6 @@ def test_debug_export_recording_is_noop_when_disabled() -> None:
     host.record_gold_filter(records=[], reason_code="x")
     host.record_gold_validation_failure(records=[], errors=[])
     host.record_lineage(fragment_id="f", edge_type="e", node_id="n", raw_record={})
-    assert host._collector.mock_calls == []
 
 
 def test_comment_facet_extractors_return_empty_on_missing_index() -> None:

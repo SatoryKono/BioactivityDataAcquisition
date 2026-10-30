@@ -36,6 +36,37 @@ import pandera as pa
 import pytest
 
 from bioetl.domain.contracts.gold import ChEMBLAssayGoldSchema
+from bioetl.domain.contracts.gold import ChEMBLActivityGoldSchema
+from bioetl.domain.contracts.gold import ChEMBLAssayParametersGoldSchema
+from bioetl.domain.contracts.gold import ChEMBLCellLineGoldSchema
+from bioetl.domain.contracts.gold import ChEMBLCompoundRecordGoldSchema
+from bioetl.domain.contracts.gold import ChEMBLMoleculeGoldSchema
+from bioetl.domain.contracts.gold import ChEMBLProteinClassGoldSchema
+from bioetl.domain.contracts.gold import ChEMBLPublicationGoldSchema
+from bioetl.domain.contracts.gold import ChEMBLPublicationSimilarityGoldSchema
+from bioetl.domain.contracts.gold import ChEMBLPublicationTermGoldSchema
+from bioetl.domain.contracts.gold import ChEMBLSubcellularFractionGoldSchema
+from bioetl.domain.contracts.gold import ChEMBLTargetComponentGoldSchema
+from bioetl.domain.contracts.gold import ChEMBLTargetGoldSchema
+from bioetl.domain.contracts.gold import ChEMBLTargetProteinClassificationGoldSchema
+from bioetl.domain.contracts.gold import ChEMBLTissueGoldSchema
+from bioetl.domain.contracts.gold import CompositeActivityGoldSchema
+from bioetl.domain.contracts.gold import CompositeAssayGoldSchema
+from bioetl.domain.contracts.gold import CompositeMoleculeGoldSchema
+from bioetl.domain.contracts.gold import CompositePublicationGoldSchema
+from bioetl.domain.contracts.gold import CompositeTargetGoldSchema
+from bioetl.domain.contracts.gold.publications_crossref import (
+    CrossRefPublicationGoldSchema,
+)
+from bioetl.domain.contracts.gold.publications_openalex import (
+    OpenAlexPublicationGoldSchema,
+)
+from bioetl.domain.contracts.gold.publications_pubmed import PubMedPublicationGoldSchema
+from bioetl.domain.contracts.gold.publications_semanticscholar import (
+    SemanticScholarPublicationGoldSchema,
+)
+from bioetl.domain.contracts.gold.uniprot import UniProtIDMappingGoldSchema
+from bioetl.domain.contracts.gold.uniprot import UniProtProteinGoldSchema
 from bioetl.domain.contracts.gold.pubchem import PubChemCompoundGoldSchema
 from tests.contract.schemas._schema_row_helpers import minimal_schema_dataframe
 
@@ -95,7 +126,36 @@ def _minimal_chembl_assay_gold_df() -> pd.DataFrame:
 @pytest.mark.parametrize(
     ("entity", "schema_cls"),
     [
+        ("chembl_activity", ChEMBLActivityGoldSchema),
+        ("chembl_assay", ChEMBLAssayGoldSchema),
+        ("chembl_assay_parameters", ChEMBLAssayParametersGoldSchema),
+        ("chembl_cell_line", ChEMBLCellLineGoldSchema),
+        ("chembl_compound_record", ChEMBLCompoundRecordGoldSchema),
+        ("chembl_molecule", ChEMBLMoleculeGoldSchema),
+        ("chembl_protein_class", ChEMBLProteinClassGoldSchema),
+        ("chembl_publication", ChEMBLPublicationGoldSchema),
+        ("chembl_publication_similarity", ChEMBLPublicationSimilarityGoldSchema),
+        ("chembl_publication_term", ChEMBLPublicationTermGoldSchema),
+        ("chembl_subcellular_fraction", ChEMBLSubcellularFractionGoldSchema),
+        ("chembl_target_component", ChEMBLTargetComponentGoldSchema),
+        ("chembl_target", ChEMBLTargetGoldSchema),
+        (
+            "chembl_target_protein_classification",
+            ChEMBLTargetProteinClassificationGoldSchema,
+        ),
+        ("chembl_tissue", ChEMBLTissueGoldSchema),
+        ("composite_activity", CompositeActivityGoldSchema),
+        ("composite_assay", CompositeAssayGoldSchema),
+        ("composite_molecule", CompositeMoleculeGoldSchema),
+        ("composite_publication", CompositePublicationGoldSchema),
+        ("composite_target", CompositeTargetGoldSchema),
+        ("crossref_publication", CrossRefPublicationGoldSchema),
+        ("openalex_publication", OpenAlexPublicationGoldSchema),
         ("pubchem_compound", PubChemCompoundGoldSchema),
+        ("pubmed_publication", PubMedPublicationGoldSchema),
+        ("semanticscholar_publication", SemanticScholarPublicationGoldSchema),
+        ("uniprot_idmapping", UniProtIDMappingGoldSchema),
+        ("uniprot_protein", UniProtProteinGoldSchema),
     ],
 )
 def test_strict_gold_schema_rejects_unknown_columns(

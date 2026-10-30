@@ -20,7 +20,6 @@ import pytest
 import yaml
 
 from scripts.engineering.ci.validate_registry_dq_refs import build_diagnostics_payload
-from tests.architecture.quality_artifacts import assert_memory_test_has_required_lane
 
 pytestmark = pytest.mark.architecture
 
@@ -200,6 +199,6 @@ def test_issue_5663_test_inventory_and_snapshot_policy_are_bounded() -> None:
     assert snapshot_policy["shared_snapshot_cache_required"] is False
 
     unit_text = MEMORY_GRAPH_UNIT_TEST.read_text(encoding="utf-8")
-    assert_memory_test_has_required_lane(MEMORY_GRAPH_UNIT_TEST)
+    assert "pytestmark = pytest.mark.unit" in unit_text
     assert "pytest.skip(" not in unit_text
     assert "memory.graph.sync_pkg" in unit_text

@@ -397,7 +397,7 @@
           "type": "string"
         },
         "nullable": {
-          "default": false,
+          "default": true,
           "description": "Whether null values are allowed for this key field",
           "title": "Nullable",
           "type": "boolean"
@@ -475,7 +475,7 @@
       "description": "DQ threshold configuration"
     },
     "strict_validation": {
-      "default": false,
+      "default": true,
       "description": "Normalized quality-config property corresponding to the canonical contract-YAML key strict_dq_validation under configs/contracts/*",
       "title": "Strict Validation",
       "type": "boolean"

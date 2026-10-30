@@ -438,14 +438,14 @@ it is not a new coverage measurement or a complete topology re-audit.
 
 ## Current source inventory binding
 
-- `source_tree_sha256=5289367c205d17b8143e24ea642b56181008f1daacc06bb127012821cff875b0`
+- `source_tree_sha256=90b471a35481ac3b5cd86c890104729159b7f9aa68ff30363840a423b6f5b40c`
 - `source_module_count=2566`
 - Source modules: `2566`
 - `coverage_inventory_module_count=2566`
 - Accepted coverage inventory: `2566` modules
 - Accepted inventory: `2513` fully covered
 - Accepted inventory: `52` partially covered
-- Test inventory: `assertless_total_candidates=69`
+- Test inventory: `assertless_total_candidates=85`
 
 Derived by scripts/engineering/qa/report_topology_source_binding.py from
 the verified source tree and accepted inventory. This is a source-only projection, not a

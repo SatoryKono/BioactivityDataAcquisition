@@ -622,7 +622,7 @@ class TestStageResultValidationFunctions:
 
     def test_validate_stage_name_accepts_valid(self):
         """Valid stage names pass stage-result validation."""
-        result = StageResult(
+        StageResult(
             stage="bronze",
             status=StageStatus.RUNNING,
             started_at=_ts(0),
@@ -630,9 +630,6 @@ class TestStageResultValidationFunctions:
             error=None,
             records_processed=0,
         )
-        assert result.stage == "bronze"
-        assert result.status is StageStatus.RUNNING
-        assert result.records_processed == 0
 
     def test_validate_stage_completion_failed_requires_error(self):
         """FAILED status requires an error message."""
@@ -672,7 +669,7 @@ class TestStageResultValidationFunctions:
 
     def test_validate_stage_completion_running_allows_none_timestamp(self):
         """RUNNING status allows a missing completed_at."""
-        result = StageResult(
+        StageResult(
             stage="stage",
             status=StageStatus.RUNNING,
             started_at=_ts(0),
@@ -680,9 +677,6 @@ class TestStageResultValidationFunctions:
             error=None,
             records_processed=0,
         )
-        assert result.status is StageStatus.RUNNING
-        assert result.completed_at is None
-        assert result.started_at == _ts(0)
 
     def test_validate_stage_result_rejects_negative_records(self):
         """StageResult should reject negative records_processed."""

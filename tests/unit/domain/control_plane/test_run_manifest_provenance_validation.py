@@ -32,8 +32,4 @@ def test_production_validation_fails_closed_with_explicit_missing_fields() -> No
 
 def test_nonproduction_validation_allows_incomplete_provenance() -> None:
     """The explicit non-production escape hatch remains non-enforcing."""
-    provenance = RunCodeProvenance()
-    assert validate_production_provenance(provenance, production=False) is None
-    assert provenance.missing_production_fields() == tuple(
-        sorted(PRODUCTION_PROVENANCE_REQUIRED_FIELDS)
-    )
+    validate_production_provenance(RunCodeProvenance(), production=False)

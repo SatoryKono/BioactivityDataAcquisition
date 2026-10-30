@@ -657,7 +657,7 @@ def _build_discrepancy_report(
             "while its governance contract stays current.",
         ]
     )
-    return "\n".join(report_lines) + "\n"
+    return "\n".join(report_lines)
 
 
 def _build_artifact_state(

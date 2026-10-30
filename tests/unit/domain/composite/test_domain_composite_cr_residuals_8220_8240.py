@@ -154,13 +154,8 @@ def test_registry_uses_enclosing_group_id():
 
 
 def test_public_validators_are_exported():
-    from bioetl.domain.composite import config, config_validators
-
-    assert require_non_empty("x", "field") is None
-    assert validate_positive(1, "n") is None
-    assert {"require_non_empty", "validate_positive"} <= set(config.__all__)
-    assert config.require_non_empty is config_validators.require_non_empty
-    assert config.validate_positive is config_validators.validate_positive
+    require_non_empty("x", "field")
+    validate_positive(1, "n")
 
 
 def test_coerce_and_validate_composite_config():

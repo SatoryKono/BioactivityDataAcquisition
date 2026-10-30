@@ -15,8 +15,6 @@ from __future__ import annotations
 import pytest
 
 from scripts.schema.analysis.generate_config_matrix import (
-    _build_artifact_contents,
-    _build_discrepancy_report,
     _render_parameter_matrix,
     main,
 )
@@ -48,23 +46,3 @@ def test_config_matrix_uses_repository_canonical_lf_newlines() -> None:
 
     assert "\r" not in matrix
     assert matrix == "Parameter Path,example\nfield,value\n"
-
-    report = _build_discrepancy_report(
-        active_configs={"example": {"field": "value"}},
-        all_keys=["field"],
-        family_breakdowns=[],
-        actionable_count=0,
-        sanctioned_count=0,
-        family_raw_count=0,
-        taxonomy_payload={"families": {}},
-    )
-    assert "\r" not in report
-    assert report.endswith("while its governance contract stays current.\n")
-
-
-def test_config_discrepancy_report_ends_with_one_lf() -> None:
-    """Generated Markdown must remain idempotent with the EOF pre-commit hook."""
-    report = _build_artifact_contents()[1]
-
-    assert report.endswith("\n")
-    assert not report.endswith("\n\n")

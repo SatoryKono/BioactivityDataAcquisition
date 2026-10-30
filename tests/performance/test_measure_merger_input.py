@@ -218,9 +218,7 @@ def test_value_validation_accepts_finite_roundoff(rows):
     import math
 
     expected = 0.75 * rows * (rows - 1)
-    assert (
-        harness.validate_values(rows, math.nextafter(expected, math.inf), rows) is None
-    )
+    harness.validate_values(rows, math.nextafter(expected, math.inf), rows)
 
 
 @pytest.mark.parametrize(

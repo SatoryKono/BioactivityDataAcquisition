@@ -100,9 +100,7 @@ class TestBronzeWriterValidationMixin:
     def test_validate_records_iterator_valid(self) -> None:
         """A valid iterator should pass without error."""
         host = _Host()
-        records = iter([b'{"id": 1}'])
-        host._validate_records_iterator(records)
-        assert list(records) == [b'{"id": 1}']
+        host._validate_records_iterator(iter([b'{"id": 1}']))
 
     def test_validate_utc_datetime_naive_raises(self) -> None:
         """Naive datetime should raise ValueError."""

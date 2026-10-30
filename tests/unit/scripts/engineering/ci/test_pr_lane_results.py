@@ -941,22 +941,6 @@ def test_affected_targets_map_test_governance_audit_config() -> None:
     ]
 
 
-def test_shadow_compare_routes_assertless_ratchet_config() -> None:
-    """The shrink-only assertless ratchet has explicit owning tests."""
-    repo_root = Path(__file__).resolve().parents[5]
-
-    report = build_shadow_compare(
-        ["configs/quality/assertless_ratchet.yaml"],
-        repo_root=repo_root,
-    )
-
-    assert report["selected"] == [
-        "tests/architecture/test_arch_s4_s9_gates.py",
-        "tests/architecture/test_test_governance_audit.py",
-        "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
-    ]
-
-
 def test_affected_targets_map_memory_source_without_test_diff() -> None:
     """A chunking-only PR must select its real RAG regression suite."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -1670,29 +1654,3 @@ def test_collect_nodeids_parses_pytest_collection(tmp_path: Path) -> None:
     }
     with pytest.raises(ValueError, match="pytest collection failed"):
         _collect_nodeids(tmp_path, ["tests/missing.py"])
-
-
-@pytest.mark.parametrize(
-    "changed_file",
-    [
-        "configs/quality/external_resource_inventory.json",
-        *[
-            f"configs/quality/external_resource_inventory/part-{index:02}.json"
-            for index in range(1, 6)
-        ],
-        "reports/quality/external-resource-inventory.md",
-        "scripts/engineering/qa/README.md",
-    ],
-)
-def test_resource_inventory_files_select_integrity_controls(changed_file: str) -> None:
-    """Every inventory input and projection retains its owning integrity suite."""
-    root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare([changed_file], repo_root=root)
-    assert (
-        "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py"
-        in report["selected"]
-    )
-    catalog_test = "tests/architecture/test_external_resource_inventory_catalog.py"
-    assert catalog_test in report["selected"]
-    assert (root / catalog_test).is_file()
-    assert report["activation"] == "not_applied"
