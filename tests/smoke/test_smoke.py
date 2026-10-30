@@ -109,7 +109,7 @@ class TestRuntimeDependencies:
     )
     def test_runtime_dependency_importable(self, module_name: str) -> None:
         """Each critical dependency must be importable."""
-        self.check_module_importable_isolated(module_name)
+        assert self.check_module_importable_isolated(module_name) is None
 
 
 @pytest.mark.smoke

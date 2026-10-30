@@ -288,6 +288,18 @@ def test_real_daily_caller_and_command_partition_are_complete() -> None:
     assert '--serial-marker "serial"' in pr
     assert "--prove-artifact-deferral" in pr
     pr_workflow = yaml.safe_load(pr)
+    architecture = next(
+        step["run"]
+        for step in pr_workflow["jobs"]["class-lane"]["steps"]
+        if step.get("id") == "arch-pytest"
+    )
+    tokens = shlex.split(architecture)
+    fallback = shlex.split(tokens[tokens.index("--fallback-addopts") + 1])
+    assert fallback[:4] == ["-p", "no:xdist", "-q", "--tb=line"]
+    parallel = shlex.split(tokens[tokens.index("--parallel-addopts") + 1])
+    assert {arg for arg in fallback if arg.startswith("--ignore")} == {
+        arg for arg in parallel if arg.startswith("--ignore")
+    }
     affected = next(
         step
         for step in pr_workflow["jobs"]["class-lane"]["steps"]

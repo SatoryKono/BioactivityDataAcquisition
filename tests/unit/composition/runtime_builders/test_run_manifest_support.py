@@ -830,25 +830,28 @@ def test_validate_reproducible_sink_modes_rejects_append_without_contract() -> N
 def test_validate_reproducible_sink_modes_allows_non_strict_append_with_contract() -> (
     None
 ):
-    validate_reproducible_sink_modes(
-        yaml_config=SimpleNamespace(
-            sink={
-                "silver": SimpleNamespace(
-                    enabled=True,
-                    mode="append",
-                    idempotency_contract="append_log",
-                    idempotency_evidence={
-                        "occurrence_identity_fields": ["activity_id", "run_id"]
-                    },
-                ),
-                "gold": SimpleNamespace(
-                    enabled=False,
-                    mode="scd2",
-                    idempotency_contract="scd2",
-                ),
-            }
-        ),
-        strict_replay_requested=False,
+    assert (
+        validate_reproducible_sink_modes(
+            yaml_config=SimpleNamespace(
+                sink={
+                    "silver": SimpleNamespace(
+                        enabled=True,
+                        mode="append",
+                        idempotency_contract="append_log",
+                        idempotency_evidence={
+                            "occurrence_identity_fields": ["activity_id", "run_id"]
+                        },
+                    ),
+                    "gold": SimpleNamespace(
+                        enabled=False,
+                        mode="scd2",
+                        idempotency_contract="scd2",
+                    ),
+                }
+            ),
+            strict_replay_requested=False,
+        )
+        is None
     )
 
 
@@ -879,23 +882,26 @@ def test_validate_reproducible_sink_modes_rejects_append_without_evidence() -> N
 
 @pytest.mark.unit
 def test_validate_reproducible_sink_modes_allows_partition_append_evidence() -> None:
-    validate_reproducible_sink_modes(
-        yaml_config=SimpleNamespace(
-            sink={
-                "silver": SimpleNamespace(
-                    enabled=False,
-                    mode="merge",
-                    idempotency_contract="merge_upsert",
-                ),
-                "gold": SimpleNamespace(
-                    enabled=True,
-                    mode="append",
-                    idempotency_contract="partition_append_with_stable_partition_key",
-                    idempotency_evidence={"stable_partition_keys": ["run_date"]},
-                ),
-            }
-        ),
-        strict_replay_requested=False,
+    assert (
+        validate_reproducible_sink_modes(
+            yaml_config=SimpleNamespace(
+                sink={
+                    "silver": SimpleNamespace(
+                        enabled=False,
+                        mode="merge",
+                        idempotency_contract="merge_upsert",
+                    ),
+                    "gold": SimpleNamespace(
+                        enabled=True,
+                        mode="append",
+                        idempotency_contract="partition_append_with_stable_partition_key",
+                        idempotency_evidence={"stable_partition_keys": ["run_date"]},
+                    ),
+                }
+            ),
+            strict_replay_requested=False,
+        )
+        is None
     )
 
 

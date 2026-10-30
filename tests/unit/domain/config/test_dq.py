@@ -131,8 +131,12 @@ class TestDQConfig:
         assert isinstance(config.field_validations, tuple)
 
     def test_validate_thresholds_static(self) -> None:
-        # Should not raise
-        DQConfig.validate_thresholds(soft_fail_threshold=0.01, hard_fail_threshold=0.10)
+        assert (
+            DQConfig.validate_thresholds(
+                soft_fail_threshold=0.01, hard_fail_threshold=0.10
+            )
+            is None
+        )
 
     def test_validate_thresholds_static_raises(self) -> None:
         with pytest.raises(ValueError):

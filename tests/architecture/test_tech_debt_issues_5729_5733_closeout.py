@@ -19,6 +19,8 @@ from typing import Any
 import pytest
 import yaml
 
+from tests.architecture.quality_artifacts import assert_assertless_snapshot_non_growth
+
 pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -105,23 +107,10 @@ def test_issue_5732_assertless_contract_inventory_is_reduced() -> None:
     outcome = payload["outcomes"]["5732"]
     governance = _load_json(TEST_GOVERNANCE)
     report = governance["report"]
-    summary = governance["summary"]
     families = report["assertless_candidates"]
 
-    assert (
-        report["assertless_total_candidates"] <= outcome["assertless_total_candidates"]
-    )
-    assert (
-        summary["intentional_no_exception_contract"]
-        <= outcome["intentional_no_exception_contract"]
-    )
+    assert_assertless_snapshot_non_growth(governance, outcome)
     assert report["assertless_total_candidates"] == len(families)
-    assert (
-        report["assertless_total_candidates"] == summary["assertless_total_candidates"]
-    )
-    assert report["assertless_total_candidates"] == sum(
-        report["assertless_category_counts"].values()
-    )
     file_family_counts: dict[str, int] = {}
     for candidate in families:
         file_family_counts[candidate["path"]] = (

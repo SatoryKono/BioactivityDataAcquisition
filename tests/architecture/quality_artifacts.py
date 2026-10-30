@@ -36,6 +36,21 @@ def assert_retained_entrypoint_src_importers(entry: dict[str, Any]) -> None:
     assert list(entry.get("src_importers") or []) == []
 
 
+def assert_assertless_snapshot_non_growth(
+    governance: dict[str, Any], historical: dict[str, Any]
+) -> None:
+    """Keep historical ceilings while requiring an internally consistent live census."""
+    report, summary = governance["report"], governance["summary"]
+    current = report["assertless_total_candidates"]
+    assert current <= historical["assertless_total_candidates"]
+    assert (
+        summary["intentional_no_exception_contract"]
+        <= historical["intentional_no_exception_contract"]
+    )
+    assert current == summary["assertless_total_candidates"]
+    assert current == sum(report["assertless_category_counts"].values())
+
+
 def assert_memory_test_has_required_lane(test_path: Path) -> None:
     """Require the current canonical memory owner rather than historical unit labels."""
     markers: set[str] = set()
