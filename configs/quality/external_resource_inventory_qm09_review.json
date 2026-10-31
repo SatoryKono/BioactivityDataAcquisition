@@ -1,8 +1,9 @@
 {
   "schema_version": 1,
   "catalog_ref": "0fead443960ac9b19cf2fbf5cae6bddc13ac9a89",
-  "source_ref": "4a8c75c376d428401e75d0aa8aebe35ee526ddc6",
+  "source_ref": "57345972c893db7c71d293b70be089dda888105d",
   "source_reviews": {
+    "src/bioetl/domain/mapping/organism_classification.py": "Reviewed merged main performance change: reuse a compiled normalization regex while preserving the same pure in-memory string transformation. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
     "src/bioetl/infrastructure/storage/silver/schema_drift_operations.py": "Reviewed merged main fix: compare prepared Arrow persisted fields, not raw-only incoming fields. No resource creation, cleanup, endpoint or lifecycle change; owning storage tests passed."
   },
   "expression_updates": {},
