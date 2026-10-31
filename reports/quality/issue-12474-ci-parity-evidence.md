@@ -677,3 +677,37 @@ nonnullable string contract. The structural workbook export has exactly 384
 Pandera physical-type spelling changes from `str` to `string[pyarrow]`; logical
 types, optionality and required fields are unchanged. This metadata export is
 separate from the real Delta readback evidence.
+
+### Qualified CI measurement boundary
+
+Own Nightly `41230225124` on source `9ade25d56cfa9a780c77d5a97212547c279a7534`
+passed all 17 test shards and duration aggregation, but `coverage-verify`
+failed its unchanged per-module regression gate: `domain/schemas/validators.py`
+100% to 97.06%, and `infrastructure/validation/pandera_validator.py` 100% to
+97.65%. Its original coverage artifact `13053722188` has SHA256
+`5b76a2c5beda41a0729299a5798dfb1bf4da557891e28b6f65fbc264e3df7532`.
+The archive/API/XML were verified and retained for gap analysis only; this
+candidate is NOT_QUALIFIED and cannot supply accepted measurements.
+
+The addressed tests exercise the missing error contracts without product
+changes: JSON validation still rejects malformed data after either scalar-null
+backend failure, and real pandas/Pandera nullable integer/boolean casts retain
+invalid object payloads and reject them rather than silently nulling them.
+The initial Windows owning result is 58 tests, exit 0. Changed test inputs
+require a new complete CI producer; the previous 17 successes are not rebound.
+
+The local WSL diagnostic attempt on that same source finished with exit 1 in
+1092.261 seconds, with filesystem-contract, unit-infrastructure, unit-other
+and integration shard failures. Its 6,718 original files and hashes are
+preserved in a 192,573,440-byte archive. WSL's existing inline `to_thread`
+safeguard interferes with real worker/barrier observations; no safeguard,
+thread test, skip policy or timeout is altered for this task. No combined
+local XML is accepted and local evidence does not qualify CI or ADMIT.
+
+The active test matrix names successful SHA-bound native `coverage-verify`
+as the authoritative coverage measurement source. Acceptance therefore uses
+the exact immutable CI candidate only after all 17 shards and both source
+aggregators succeed, with original artifact/XML identity checks. The runbook
+is aligned to that active contract; currentness and final CI ADMIT remain
+mandatory. Generated passport source revisions are refreshed by their native
+generator; historical telemetry and measurements remain unchanged.
