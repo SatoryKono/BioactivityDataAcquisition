@@ -198,7 +198,7 @@
     "qualification": "Historical CI 4929 proof for source 8c0109b6 and the explicitly listed input hashes only; superseded by moderate_audit_revalidation for current package locks. Does not establish current image or RF-023 lifecycle acceptance."
   },
   "delivery_source": {
-    "source_ref": "1b91146589ecff2829ae65bae3b8db83ae27e47d",
+    "source_ref": "556b9c6f8c70d5236281a32ae90e72a8652ff7b0",
     "inputs": {
       ".github/tooling/braces-backport/BACKPORT.md": "2a8a561551e3383e99d53a5902fcf32d5de31681e14c81ce3698869917bc9134",
       ".github/tooling/braces-backport/LICENSE": "35bdd8a44339719441900fb50fbefc5e2dca1ca662cbaed7a687de842c8b70f2",
@@ -238,7 +238,7 @@
       "grafana/plugins/bioetl-scenes-app/README.md": "82127a57c8057f26d43840a8ce46343a18da1faef4a70676f65cb9a0b6467f6c",
       "grafana/plugins/bioetl-scenes-app/docs/scenes-parity-ledger.json": "8fd1d0c7044e48709d84934d2760111893cc17dfcefaa4b33583d452fad3df29",
       "grafana/plugins/bioetl-scenes-app/docs/scenes-parity-ledger.md": "20feedd317f7b40b782ec27e5c9e44f4c903e3a0afb5a648455b75a78a14a637",
-      "grafana/plugins/bioetl-scenes-app/eslint.config.mjs": "f086e7ba870b0134232d23adddd180c2680b51b5cd6a12bb570d13aab27a0efa",
+      "grafana/plugins/bioetl-scenes-app/eslint.config.mjs": "f97ee55a03e678066a755a4a3d74a55266eff1c68894feb423d574580a9c3f6f",
       "grafana/plugins/bioetl-scenes-app/jest-setup.js": "5413be35a27a4c1b5f65f904991af8b5ee995e9e0fa2aa42726356fc9a0afaea",
       "grafana/plugins/bioetl-scenes-app/jest.config.js": "834b1cdbce77b3bb499d2642ce50a8e5ef5666d1eea69c233cf1518f31d51c99",
       "grafana/plugins/bioetl-scenes-app/package-lock.json": "dde770e17d08af7bda7764f84e10333c1bedcbccabf6fb05735b7088252444da",
@@ -284,7 +284,7 @@
       "grafana/plugins/bioetl-selectorshell-panel/CHANGELOG.md": "bd93cf170e6c1ce56e2324a5a9406a325c223587ca3665328b6d343c27cdac0d",
       "grafana/plugins/bioetl-selectorshell-panel/LICENSE": "c5accbbd8546e94c34aed24afe689a617627d18eed5a6c48277e48db57c23851",
       "grafana/plugins/bioetl-selectorshell-panel/README.md": "21cbe16d6e1b1efb90b085f59b265d5bef9e5f55ac39a80639645245a860a672",
-      "grafana/plugins/bioetl-selectorshell-panel/eslint.config.mjs": "f086e7ba870b0134232d23adddd180c2680b51b5cd6a12bb570d13aab27a0efa",
+      "grafana/plugins/bioetl-selectorshell-panel/eslint.config.mjs": "f97ee55a03e678066a755a4a3d74a55266eff1c68894feb423d574580a9c3f6f",
       "grafana/plugins/bioetl-selectorshell-panel/jest-setup.js": "940c48918eb0d12409581edaa3105ef660dc6f4bd5c65e4b93c4e53587f2fe85",
       "grafana/plugins/bioetl-selectorshell-panel/jest.config.js": "1df69adcfff5d9fa95e6b822d532be040d7d39c36b8c1f73654cde531038c0bb",
       "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "f98676be3f0e1f6c6f82dbf79f58440986871d75c9d8f0c31cbb09c20d4de1a6",
@@ -310,8 +310,8 @@
       "grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch": "66c5f4d7cf91284963fa35876a56c70c6ba0acc0f0f9c0829612ee08734ca269",
       "grafana/tooling/router-v7-bridge/index.d.ts": "d80fd17760836b96b8ab8dccc4be57bb5589173d2c739435671ef0ae0cdb2b4e",
       "grafana/tooling/router-v7-bridge/index.mjs": "eb4c404b42c0af3f3d1715ad4b191bd9e73564873b0fb650ba807c56ab580c3c",
-      "grafana/tooling/router-v7-bridge/package-lock.json": "ddf10aae126c9f2efe8179af3515085663f7815a482e8cd5084f709e2d1cd9d9",
-      "grafana/tooling/router-v7-bridge/package.json": "a42d8e161a87fb725bf28489cff6070084461aca760a46d71ae52297c7608c76",
+      "grafana/tooling/router-v7-bridge/package-lock.json": "0fa2b65941e13651158382b2951e7770c5d90048ec529c32098f54b6766df034",
+      "grafana/tooling/router-v7-bridge/package.json": "84be47fc695d64d866c3f0968ce9d2413355b4405b1d36b0392c83b742495902",
       "grafana/tooling/router-v7-bridge/runtime-probe/logo.svg": "2ab24d908388a3502ec5588443c58093e062d7837dc5b8a396629bfa7c4f9c37",
       "grafana/tooling/router-v7-bridge/runtime-probe/module.js": "288741b2d5a660c7b0badb1bc57082b299da43f44c246020d5941e4f17063800",
       "grafana/tooling/router-v7-bridge/runtime-probe/module.test.mjs": "f8be6602a22490db33fc44726281222741ded845b5d944adceef6f51673191d5",
