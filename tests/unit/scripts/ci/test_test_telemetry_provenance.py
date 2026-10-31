@@ -756,9 +756,7 @@ def _assert_cli_rejects_metrics_tampered_before_reissuance(
 ) -> None:
     import sys
 
-    root, _, payload, _, _, _ = _native_ci_candidate(
-        bridge, monkeypatch, "unchanged"
-    )
+    root, _, payload, _, _, _ = _native_ci_candidate(bridge, monkeypatch, "unchanged")
     valid = provenance.build_ci_squash_receipt(
         payload, root=root, pull_request=42, run_id=123
     )
