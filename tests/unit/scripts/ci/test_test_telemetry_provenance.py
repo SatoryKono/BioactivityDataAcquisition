@@ -78,10 +78,14 @@ def bridge(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         "source_commit": source,
         "source_run_id": "local-real-run",
         "source_tree_sha256": captured_test_tree,
+        "source_event": "workflow_dispatch",
+        "coverage": {"actual_percent": 99.0},
+        "duration_telemetry": {"total_cases": 17},
     }
     receipt = {
         "schema_version": 1,
         **payload,
+        "metrics_sha256": provenance.telemetry_metrics_sha256(payload),
         "merged_tree": tree,
         "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/42",
         "github_pull_request": {
@@ -93,6 +97,22 @@ def bridge(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         },
     }
     return tmp_path, merge, payload, receipt, git
+
+
+def test_ci_receipt_rejects_removed_metrics_digest_even_with_reviewed_tree(
+    bridge,
+) -> None:
+    root, head, payload, receipt, _ = bridge
+    receipt["verification_mode"] = "reviewed_snapshot"
+    assert validate_squash_bridge(payload, receipt, root, head)
+
+    tampered_receipt = copy.deepcopy(receipt)
+    tampered_receipt.pop("metrics_sha256")
+    tampered_receipt.pop("verification_mode")
+    tampered_payload = copy.deepcopy(payload)
+    tampered_payload["coverage"]["actual_percent"] = 0.0
+
+    assert not validate_squash_bridge(tampered_payload, tampered_receipt, root, head)
 
 
 def test_rejected_scope_retries_public_github_read(
