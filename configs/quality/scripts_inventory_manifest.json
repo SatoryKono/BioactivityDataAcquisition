@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T21:31:31.417222+00:00",
+  "generated_at": "2026-10-31T21:43:34.217477+00:00",
   "summary": {
     "total_scripts": 700,
     "status_counts": {
@@ -12,7 +12,7 @@
       "build": 18,
       "ci": 75,
       "docs": 290,
-      "other": 19,
+      "other": 20,
       "scripts": 588,
       "skills": 13,
       "tests": 518
@@ -24005,7 +24005,7 @@
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 802,
+          "line": 803,
           "source_group": "other",
           "text": "\"docker-compose.monitoring.yml\": \"name: bioetl-monitoring\\n\\n# OPTIONAL operator stack (ADR-010). Not part of the default release bundle.\\n# Default local workflow: Python/venv only, or main stack alo"
         },
@@ -24262,7 +24262,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -24274,25 +24274,31 @@
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
           "line": 181,
           "source_group": "other",
-          "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"4cf4b6d70ae3eb2c02b653ec8aefa8661938b8e38e38cb044dbd201cf3ca4f9e\","
+          "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"cddb475e9f25823bee331770b1387409d27e8f8b474de663d8ff481dd08b0701\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 411,
+          "line": 412,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"4cf4b6d70ae3eb2c02b653ec8aefa8661938b8e38e38cb044dbd201cf3ca4f9e\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 942,
+          "line": 943,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"4cf4b6d70ae3eb2c02b653ec8aefa8661938b8e38e38cb044dbd201cf3ca4f9e\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1131,
+          "line": 1132,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"4cf4b6d70ae3eb2c02b653ec8aefa8661938b8e38e38cb044dbd201cf3ca4f9e\","
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 1321,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"cddb475e9f25823bee331770b1387409d27e8f8b474de663d8ff481dd08b0701\","
         },
         {
           "path": "scripts/ops/__main__.py",
@@ -24305,12 +24311,6 @@
           "line": 359,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.router_managed_image import verify"
-        },
-        {
-          "path": "scripts/ops/observability/refresh_router_host_provenance.py",
-          "line": 50,
-          "source_group": "scripts",
-          "text": "\"scripts/ops/observability/grafana/router_managed_image.py\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -24323,7 +24323,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -24335,25 +24335,31 @@
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
           "line": 182,
           "source_group": "other",
-          "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"ba5e025f7926fa535aff96f029cddb53eac5ba93eeca4bcfa30330209bf33013\","
+          "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"a5267d9ef6940478fb04369a7acd0b6db5eb4d538304f82c722d4e563fa01436\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 412,
+          "line": 413,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"ba5e025f7926fa535aff96f029cddb53eac5ba93eeca4bcfa30330209bf33013\""
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 943,
+          "line": 944,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"ba5e025f7926fa535aff96f029cddb53eac5ba93eeca4bcfa30330209bf33013\""
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1132,
+          "line": 1133,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"ba5e025f7926fa535aff96f029cddb53eac5ba93eeca4bcfa30330209bf33013\""
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 1322,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"a5267d9ef6940478fb04369a7acd0b6db5eb4d538304f82c722d4e563fa01436\","
         },
         {
           "path": "scripts/ops/__main__.py",
@@ -24366,12 +24372,6 @@
           "line": 15,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import router_rootfs as module"
-        },
-        {
-          "path": "scripts/ops/observability/promote_router_host_release.py",
-          "line": 360,
-          "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana.router_rootfs import filesystem_records"
         }
       ],
       "owner": "@bioetl-platform",
@@ -24703,8 +24703,20 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 9,
       "references": [
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 184,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"292e1b14787cc40687abda02327ccce2173b022f9bcc3382112f35d5d3270b11\""
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 1323,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"292e1b14787cc40687abda02327ccce2173b022f9bcc3382112f35d5d3270b11\""
+        },
         {
           "path": "scripts/ops/__main__.py",
           "line": 93,
@@ -24740,12 +24752,6 @@
           "line": 18,
           "source_group": "tests",
           "text": "/ \"scripts/ops/observability/refresh_router_host_provenance.py\","
-        },
-        {
-          "path": "tests/unit/scripts/ops/observability/grafana/test_refresh_router_host_provenance.py",
-          "line": 499,
-          "source_group": "tests",
-          "text": "root / \"scripts/ops/observability/refresh_router_host_provenance.py\""
         }
       ],
       "owner": "@bioetl-platform",

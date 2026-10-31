@@ -889,3 +889,19 @@ The shared JSON helper is included as an additional real build-support input;
 the existing Git fixture proves that changing this dependency rejects stale
 CI evidence. This source change requires another fresh producer and Router
 capture rather than adopting the unsuccessful `4608b706...` measurements.
+
+Fresh default-delivery Router run `41244192907` completed SUCCESS on
+`ffcecacf90d334387118fe9560d9699d2c965a93`, tree
+`10f277c3d5950b3b2af188e024f32e3a2579148c`. The native provenance
+precheck returned 1 (stale), update returned 0 and subsequent read-only check
+returned 0. All 116 actual inputs are bound to the original successful CI
+capture; the generated manifest SHA256 is
+`5cd13f52ca1a77f92b026477d9f81d8e16cce9a913c7bc0684e3a17eaa7b6857`.
+The declared immutable image, historical promotion record and prior source
+revalidations are retained. No image rollout is performed.
+
+Nightly `41244193190` started before that generated manifest was refreshed.
+Its integration job correctly failed the non-dist input digest guard at
+`test_grafana_datasource_provisioning.py:50`; this is preserved as FAIL and
+is not a qualified producer. The source and refreshed provenance must be
+published together before another complete producer can qualify the capture.
