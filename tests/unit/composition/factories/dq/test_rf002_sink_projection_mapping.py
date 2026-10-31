@@ -32,6 +32,50 @@ from bioetl.infrastructure.schemas.pipeline_config_common_schemas import (
 pytestmark = pytest.mark.unit
 
 
+def test_nested_projection_union_skips_none_and_rejects_non_models() -> None:
+    from pydantic import BaseModel
+    from bioetl.composition.factories.dq import _context_resolver_support as subject
+
+    class Nested(BaseModel):
+        enabled: bool = True
+
+    assert subject._nested_basemodel_type(type(None) | Nested) is Nested
+    assert subject._nested_basemodel_type(type(None) | int) is None
+
+
+def test_projection_rejects_non_mapping_model_dump() -> None:
+    from types import SimpleNamespace
+
+    sink = SimpleNamespace(model_dump=lambda: [])
+    with pytest.raises(TypeError, match="sink layer model_dump.*must return a mapping"):
+        project_sink_layer_to_extract_payload(sink, BronzeSinkConfig)
+
+
+def test_structural_projection_fallback_preserves_payload_on_subclass_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from types import SimpleNamespace
+    from unittest.mock import MagicMock
+    from bioetl.composition.factories.dq import _context_resolver_support as subject
+
+    report = SimpleNamespace(enabled=True)
+    payload = {"dq_report": {"enabled": True}}
+    dump = MagicMock(return_value=payload)
+
+    class StructuralConfig:
+        model_validate = MagicMock(return_value=SimpleNamespace(dq_report=report))
+
+    monkeypatch.setattr(
+        subject, "issubclass", MagicMock(side_effect=TypeError), raising=False
+    )
+    result = subject.extract_single_dq_config_impl(
+        {"bronze": SimpleNamespace(model_dump=dump)}, "bronze", StructuralConfig
+    )
+    assert result is report
+    dump.assert_called_once_with()
+    StructuralConfig.model_validate.assert_called_once_with(payload)
+
+
 def _assert_extra_forbidden(exc_info: pytest.ExceptionInfo[ValidationError]) -> None:
     assert any(err["type"] == "extra_forbidden" for err in exc_info.value.errors())
 

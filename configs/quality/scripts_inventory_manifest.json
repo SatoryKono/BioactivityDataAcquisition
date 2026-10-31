@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-30T09:19:00.802471+00:00",
+  "generated_at": "2026-10-30T13:39:22.235071+00:00",
   "summary": {
     "total_scripts": 698,
     "status_counts": {
@@ -2896,7 +2896,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 409,
+          "line": 415,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3678,7 +3678,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 408,
+          "line": 414,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3733,7 +3733,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 407,
+          "line": 413,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -9747,7 +9747,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 33,
+      "reference_count": 34,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -9787,13 +9787,13 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 121,
+          "line": 131,
           "source_group": "ci",
           "text": "uv run --no-sync --frozen --no-build python -m scripts.engineering.ci pr-gate classify \"${classify_args[@]}\""
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 282,
+          "line": 292,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results assert-steps \\"
         }
@@ -9918,7 +9918,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 23,
+          "line": 25,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci._python_dependency_changes import ("
         },
@@ -10130,7 +10130,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 649,
+          "line": 338,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10352,7 +10352,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
@@ -10413,11 +10413,11 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 22,
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 833,
+          "line": 873,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10446,22 +10446,22 @@
           "text": "from scripts.engineering.ci.pr_lane_results import DOCS_LANE, OWNER_STEPS"
         },
         {
-          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+          "path": "tests/integration/infrastructure/storage/test_issue_12474_parity_control.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pr_lane_results import NEGATIVE_CONTROL_ENV"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_physical_schema_parity.py",
           "line": 11,
           "source_group": "tests",
-          "text": "from scripts.engineering.ci.pr_lane_results import ("
+          "text": "from scripts.engineering.ci import pr_lane_results as parity"
         },
         {
-          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 155,
+          "path": "tests/unit/scripts/engineering/ci/test_physical_schema_parity.py",
+          "line": 13,
           "source_group": "tests",
-          "text": "from scripts.engineering.ci import pr_lane_results as lane"
-        },
-        {
-          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 1075,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci import pr_lane_results as lane"
+          "text": "from scripts.engineering.ci.pr_lane_results import assert_step_outcomes, build_results"
         }
       ],
       "owner": "@bioetl-platform",
@@ -10484,7 +10484,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 341,
+          "line": 347,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10527,7 +10527,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 421,
+          "line": 427,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -10925,13 +10925,13 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 358,
+          "line": 398,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-mar"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 407,
+          "line": 457,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target \"${targets[@]}\" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-timeout"
         },
@@ -12424,7 +12424,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 47,
+          "line": 49,
           "source_group": "scripts",
           "text": "from scripts.engineering.dev.run_tests import TESTS_ROOT as PYTEST_ALL_ROOT"
         },
@@ -12864,7 +12864,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 228,
+          "line": 234,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -13071,7 +13071,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 192,
+          "line": 202,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.diagnostics audit-structure --path ."
         },
@@ -14007,7 +14007,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 345,
+          "line": 385,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -15245,7 +15245,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 17,
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
@@ -15267,31 +15267,31 @@
         },
         {
           "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-          "line": 105,
+          "line": 97,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import external_resource_inventory as inventory"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
+          "line": 106,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.external_resource_inventory import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
+          "line": 156,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.external_resource_inventory import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
+          "line": 207,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.external_resource_inventory import _render_components"
         },
         {
           "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-          "line": 315,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa.external_resource_inventory import ("
-        },
-        {
-          "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-          "line": 330,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa.external_resource_inventory import ("
-        },
-        {
-          "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-          "line": 347,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa.external_resource_inventory import ("
-        },
-        {
-          "path": "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-          "line": 365,
+          "line": 417,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.external_resource_inventory import ("
         }
@@ -20578,13 +20578,13 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 167,
+          "line": 177,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/repo/check_github_actions_runtime_policy.py --pr-required-pins --check"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 644,
+          "line": 694,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
@@ -20614,7 +20614,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 486,
+          "line": 492,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23614,7 +23614,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 563,
+          "line": 569,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },

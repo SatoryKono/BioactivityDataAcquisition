@@ -81,6 +81,108 @@ def test_correct_inventory_is_accepted(inventory_case: tuple) -> None:
     assert validate_inventory(*inventory_case) == []
 
 
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ["--check", "--source-commit", "e" * 40],
+        ["--check", "--reviewed-source", "src/bioetl/pure.py=" + "f" * 64],
+        ["--update", "--reviewed-source", "src/bioetl/pure.py=" + "f" * 64],
+    ],
+)
+def test_source_maintenance_requires_explicit_update_and_commit(
+    inventory_case: tuple,
+    monkeypatch: pytest.MonkeyPatch,
+    argv: list[str],
+) -> None:
+    from scripts.engineering.qa import external_resource_inventory as inventory
+
+    monkeypatch.setattr(inventory, "load_catalog", lambda **kwargs: inventory_case[0])
+    assert inventory.main(argv) == 1
+
+
+def test_reviewed_resource_free_rebind_preserves_facts_and_history(
+    inventory_case: tuple,
+) -> None:
+    from scripts.engineering.qa.external_resource_inventory import (
+        rebind_resource_free_sources,
+    )
+
+    payload, sources, blobs = copy.deepcopy(inventory_case)
+    path = "src/bioetl/pure.py"
+    payload["source_files"][path] = "c" * 40
+    sources[path] = b"def pure():\n    return 2\n"
+    digest = hashlib.sha256(sources[path]).hexdigest()
+    blobs[path] = SourceBlob("d" * 40, digest)
+    old = copy.deepcopy(payload)
+    updated = rebind_resource_free_sources(
+        payload,
+        sources,
+        blobs,
+        commit="e" * 40,
+        tree="f" * 40,
+        reviewed={path: digest},
+    )
+    assert payload == old
+    assert updated["source_commit"] == "e" * 40
+    assert updated["source_tree"] == "f" * 40
+    assert updated["source_files"] == {
+        **old["source_files"],
+        path: "d" * 40,
+    }
+    assert validate_inventory(updated, sources, blobs) == []
+    assert updated["source_rebindings"][0]["from_commit"] == old["source_commit"]
+    assert (
+        updated["resources"][0]["shutdown_contract"]
+        == old["resources"][0]["shutdown_contract"]
+    )
+    assert (
+        updated["prior_candidate_dispositions"] == old["prior_candidate_dispositions"]
+    )
+
+
+@pytest.mark.parametrize(
+    ("case", "message"),
+    [
+        ("unreviewed", "Reviewed source set must exactly match"),
+        ("wrong_digest", "Reviewed source digest differs"),
+        ("resource_file", "Resource-bearing source changes"),
+        ("added_resource", "unreconciled source acquisition"),
+        ("new_file", "Source census additions/removals"),
+    ],
+)
+def test_source_rebind_cannot_bypass_inventory_review(
+    inventory_case: tuple, case: str, message: str
+) -> None:
+    from scripts.engineering.qa.external_resource_inventory import (
+        rebind_resource_free_sources,
+    )
+
+    payload, sources, blobs = copy.deepcopy(inventory_case)
+    path = "src/bioetl/pure.py"
+    if case == "resource_file":
+        path = "src/bioetl/fixture.py"
+    if case not in {"resource_file", "new_file"}:
+        payload["source_files"][path] = "c" * 40
+    source = b"def pure():\n    return 2\n"
+    if case == "added_resource":
+        source = b"def pure():\n    return open('new resource')\n"
+    sources[path] = source
+    digest = hashlib.sha256(source).hexdigest()
+    blobs[path] = SourceBlob("d" * 40, digest)
+    reviewed = {path: digest if case != "wrong_digest" else "0" * 64}
+    if case == "unreviewed":
+        reviewed = {}
+    with pytest.raises(ValueError, match=message):
+        rebind_resource_free_sources(
+            payload,
+            sources,
+            blobs,
+            commit="e" * 40,
+            tree="f" * 40,
+            reviewed=reviewed,
+        )
+
+
 @pytest.fixture
 def resource_component(inventory_case: tuple) -> dict[str, Any]:
     return {

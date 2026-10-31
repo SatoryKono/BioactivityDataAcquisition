@@ -33,6 +33,12 @@ on:
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
+    inputs:
+      physical-parity-negative-control:
+        description: "Fail the synthetic Delta schema mismatch control (#12474)"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -101,6 +107,7 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
           BEFORE_SHA: ${{ github.event.before || '' }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          PARITY_NEGATIVE_CONTROL: ${{ github.event_name == 'workflow_dispatch' && inputs.physical-parity-negative-control || false }}
         run: |
           set -euo pipefail
           base_sha="${BASE_SHA}"
@@ -117,6 +124,9 @@ jobs:
           )
           if [[ -n "${BEFORE_SHA}" ]]; then
             classify_args+=(--before-sha "${BEFORE_SHA}")
+          fi
+          if [[ "$PARITY_NEGATIVE_CONTROL" == 'true' ]]; then
+            classify_args+=(--require-physical-parity)
           fi
           uv run --no-sync --frozen --no-build python -m scripts.engineering.ci pr-gate classify "${classify_args[@]}"
           echo "base_sha=${base_sha}" >> "$GITHUB_OUTPUT"
@@ -309,6 +319,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ needs['classify-changes'].outputs.head_sha }}
           # Affected pytest runs `git diff base...head`, and gitleaks scans
           # commits. fetch-depth 1 makes that diff exit 128.
           fetch-depth: 0
@@ -320,6 +331,35 @@ jobs:
         with:
           python-version: "3.12"
           uv-extras: "dev"
+
+      - name: Check generated schema artifacts
+        id: schema-artifacts
+        if: needs['classify-changes'].outputs['generated-artifacts'] == 'required'
+        run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts
+
+      - name: Verify schema parity
+        id: schema-parity
+        if: needs['classify-changes'].outputs['generated-artifacts'] == 'required'
+        env:
+          PARITY_NEGATIVE_CONTROL: ${{ github.event_name == 'workflow_dispatch' && inputs.physical-parity-negative-control || false }}
+        run: |
+          set -euo pipefail
+          uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking
+          parity_args=()
+          if [[ "$PARITY_NEGATIVE_CONTROL" == 'true' ]]; then
+            parity_args+=(--negative-control)
+          fi
+          uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results physical-parity \
+            --junit reports/quality/physical-schema-parity.xml "${parity_args[@]}"
+
+      - name: Upload physical schema parity evidence
+        if: always() && !cancelled() && steps.schema-parity.outcome != 'skipped'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: physical-schema-parity-${{ github.sha }}
+          path: reports/quality/physical-schema-parity.xml
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Ruff check
         id: ruff
@@ -652,16 +692,6 @@ jobs:
         id: osv-gate
         if: needs['classify-changes'].outputs['security'] == 'required'
         run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json
-
-      - name: Check generated schema artifacts
-        id: schema-artifacts
-        if: needs['classify-changes'].outputs['generated-artifacts'] == 'required'
-        run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts
-
-      - name: Verify schema parity
-        id: schema-parity
-        if: needs['classify-changes'].outputs['generated-artifacts'] == 'required'
-        run: uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking
 
       - name: Validate duplication/complexity exemption registry
         id: duplication-exemptions
