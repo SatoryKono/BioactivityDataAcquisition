@@ -94,7 +94,7 @@ def _normalize_export_field_name(column_name: str) -> str:
 
 def _map_dtype_to_json_type(dtype_value: Any) -> str:
     dtype_str = str(dtype_value).lower()
-    if dtype_str == "str":
+    if dtype_str in {"str", "string[pyarrow]"}:
         return "string"
     if dtype_str == "float64":
         return "number"

@@ -359,3 +359,549 @@ historical Grafana build inputs equal the current tree. Own Router run
 `41202898231` failed its unchanged moderate npm audit gate before the build;
 its actual findings and original logs are preserved. Neither a skipped host
 build nor the prior donor success is presented as current Grafana acceptance.
+
+The owner then authorized addressed `glob`/`minimatch` remediation with consumer
+compatibility and security-negative controls. Both plugin graphs now select
+`glob@14.0.3` and a private callable/named entry point that delegates to the
+unmodified npm `minimatch@11.0.3` implementation. No legacy matching algorithm
+is retained. Node 20 remains within the declared engine range; removed legacy
+`makeRe` APIs are not represented as supported. Both normal clean installs and
+both nine-case contracts passed. Real vulnerable-version controls fail for
+the actual amplification/continued-filesystem-work assertions. The fixed
+matcher honors its explicit upstream expansion cap; this is not a claim of
+linear default globparts growth. Original development diagnostics are retained.
+
+The private archive has 1237 bytes, SHA256
+`7de54d9e68d54b6c2fd82dce7c4c584fbcd72b9e80c351c319fdee3628a6b736`;
+both npm-generated lockfiles retain its real SRI and the fixed upstream SRI.
+The existing Jest/NYC commands and worker limit remain; nine controls are appended
+through `&&` in both existing `test:ci` entry points. Both unchanged moderate
+audit gates pass with six LOW findings remaining through unfixed `deepmerge`;
+no advisory exclusion or severity change is introduced.
+
+The first combined Python owning run returned exit 1 only because the strict
+existing override dictionary rejected the two newly authorized bindings:
+532 PASS, one FAIL, four existing historical-render skips. The exact dictionary
+now includes only the approved pins, with added fixed-upstream/consumer checks;
+all router/uuid constraints remain. The affected recheck passed 63 cases with
+the same four skips. Windows Jest remains a preserved environment FAIL before
+test execution: the SWC native cache rejects local DACLs. No permissions or
+security settings were changed. Actual Linux Jest and host build acceptance
+remain mandatory and are not inferred from the local type/lint checks.
+
+The subsequent parallel `fa8d903223efda3c26c19af08933d8a4000b2a7a` update was
+preserved and integrated after a second explicit sole-writer handoff. It adds
+the workflow-selector contract and hoists an unchanged route string. Because
+it changes TEST_INPUTS, the complete successful 17+2 CI capture on
+`b4e4332b1d9a5924f999eba941a32837a1bb0443` is historical evidence, not a capture
+for the new head. Its original archives and source qualification are preserved.
+The interrupted local attempts, including the WSL launcher failure and the
+subsequent seven-successful-shard attempt stopped for that external input change,
+remain incomplete; none are combined or promoted as the final measurement.
+
+Fresh readback at 2026-10-31 14:15 UTC found external merge of PR #12626:
+merge commit `32903f5187961922f19cf14417aa19afdf30c208`, actor `SatoryKono`,
+merged at `2026-10-31T14:14:03Z`. Its tree is exactly the former published
+`fa8d903` tree, `e9ca7401d8fd53a322fd6ca1f06658bcb7eaafaa`; the author of
+this qualification did not perform that merge. Issue #12474 remains OPEN.
+The preserved staged changes were carried onto a new owned branch directly
+from that main commit without conflicts or source loss. The source-owning
+437-case validation and pre-commit passed before that identical-tree move.
+Remote-main pre-check then correctly failed for the advanced base; its actual
+canonical remote-main update is retained. No telemetry result or ADMIT is
+inferred from the external merge. A new full frozen-source capture and Linux
+Grafana qualification are required before issue acceptance.
+
+### Continued qualification after the external merge
+
+The continuation is published in PR #12633. Main subsequently advanced to
+`da58d2c13f4e2e2d4159effff83fff4c71a7f35f`, tree
+`508a180dfae88d9368f7bd0af3efdddb9d08ce41`; both incoming commits were preserved
+by a normal merge. The changed Router development metadata required a real
+`npm pack`: the resulting bridge archive has SHA256
+`93f02cd3c3420b1854a1c2228f70a99222a754286c2494dc9773145fef8614be`.
+Both plugin locks were regenerated with native Linux npm. Their only changed
+package field is the existing bridge alias integrity; no resolved dependency
+version changed. Windows npm attempts that pruned WASM optional dependencies
+were rejected and retained outside the repository.
+
+Own Nightly `41209731607` on `0e37d00f8d5100c5ed0b99d19fce1bae2d022a13`
+failed, including its integration producer. Successful aggregators therefore
+do not qualify this capture. The Linux local17 attempt also remains incomplete:
+six completed shards passed, one tooling shard rejected the installed system
+Node 18, and the attempt was stopped for the confirmed integration input defect.
+The actual outer exit was -15; all original measurement bytes were preserved.
+The locked Node 24 runtime is available for the next complete attempt.
+
+Router `41209731413` passed both plugin jobs but failed because BuildKit had
+not loaded the immutable base into Docker's inspectable store. The addressed
+pull-before-inspect correction preserves the original digest and all parity
+checks; 12 owning controls passed. Router `41210863632` then reached the real
+complete filesystem comparison and failed against the old delivery image.
+Original ZIP identity checks show exactly two changed Scenes source maps;
+JavaScript and all other plugin assets are unchanged. A local candidate built
+from those exact CI outputs matches the actual CI rebuild's complete rootfs
+`897a29cd108d9dc76655a2fd5b94c2915f4cbbbe53e0b5ddeafefb0632a17437`.
+Its managed variant equals that parent minus Scenes, with all 15,478 paths
+matching the previous managed runtime. These are local preparation receipts,
+not registry publication, current delivery acceptance or ADMIT.
+
+The source-only provenance generator rejects unsuccessful/foreign attempts,
+substituted ZIPs, incomplete parity and source additions/deletions. Independent
+review findings were fixed before adoption; its six isolated Python fixture
+methods run through the existing image verifier's 13 Node controls. It cannot
+relabel the changed image as an unchanged-image revalidation.
+
+The owner separately authorized narrow Gitleaks exclusions for historical
+metadata. Each of 57 findings was verified as a Git blob OID on its exact
+finding commit, yielding 29 exact source-path/OID pairs; six other findings
+are two exact public response metadata lines. Three AND-scoped generic-api-key
+entries preserve every other rule and path. Native Gitleaks 8.24.3, verified
+against the official release checksum, accepts all 29 pairs and both headers
+(exit 0, zero findings) and detects four synthetic credentials in the same
+three files (exit 1), including an arbitrary 40-hex value under an approved
+source-path key. Thirty affected Python owning tests pass. Real current CI,
+the complete frozen producer, registry/readback, independent final acceptance
+and native ADMIT remain required before closing #12474.
+
+The next main integration retained `ce48486bbf742c2a0d135d43dff56b78b9080f05`,
+tree `10fb6595f65fc9cfddf3c7c7dfe504f4d51e79f4`, including its organism mapping
+change and removal of the unused Router development dependency. A new native
+pack now has SHA256 `86995f918b30efa16931f99407f28368cfe5d529b130c48c9c1d53c1e9c209b1`;
+again, native Linux lock generation changed only the existing alias SRI.
+Native positive controls also cover the historical 29th OID and first-line
+CRLF metadata; the positive/negative exits remain 0/1 with zero/four findings.
+
+The reviewed source-ac307 archival candidates were then published and pulled
+back by immutable identity: host
+`sha256:2ef07e20ee5b6451f2386fdaa13d3ce72e411bbfae4053332e8e8dfa3575044e`
+and managed `sha256:09176a12590763ea1adeb844bd325074e79b4edd94cfc43f1012a1f03fba75c3`
+in `satorykono/bioetl-grafana-router7-canvas`. Complete registry exports verify
+15,534/15,478 paths and the exact prepared rootfs/config identities; raw records
+are preserved for both. This is archival candidate publication, not promotion
+of the current main source. The existing Router workflow now has an explicit
+owned immutable candidate input; its empty default still verifies declared
+delivery. Candidate qualification retains all complete image checks and labels
+its receipt separately. Fifteen Node controls and 58 CI-policy tests pass.
+
+### Own candidate qualification and release generation
+
+Router run `41216904530` on source
+`8799d3bd89705542258da73c023ffbd4f3244768` completed successfully in all four
+jobs, including the complete rebuilt/immutable candidate image comparison.
+The independent `telemetry_independent_review` accepted the scoped release
+generator after fixes for repeated-check Compose tampering, duplicate/quoted
+mapping keys and the managed verifier's exact Git source identity. Eight
+isolated Python fixture methods cover the positive history/idempotency case
+and negative capture, source, runtime asset and delivery-binding controls.
+
+`promote_host_release.py` consumed the original successful CI ZIPs and live
+immutable host/managed images. Its pre-check returned 1 solely because the
+six coupled release outputs were stale; the subsequent update returned 0.
+Both commands independently pulled, inspected and exported the images and
+rebuilt the managed variant. Original API responses, ZIPs, Docker argv/exits,
+stderr and complete filesystem records are preserved under evidence packets
+`router-release-native-precheck-v1` and `router-release-native-update-v1`.
+The streamed export tar itself is not retained. Prior manifests, recipe and
+Compose pins remain in the generated release history.
+
+Fresh main `542d68c3616a0152666e9fd91f907f8a15993fd0` was merged without
+discarding either side; source integration commit
+`7d8ad5ca56d94a1c1911a25b0b1deb7156592529` has tree
+`dcd2e2a316025274e3056174f148cf0d29258946`. Its affected route, telemetry
+provenance and Gitleaks owning selection completed 376 cases with exit 0.
+The complete planned routing check reports zero unmapped files. The full
+CI-family pre-check remains recorded as FAIL for stale test-governance
+inputs; the slim non-telemetry update returned 0 without budget ratcheting.
+Current default-delivery CI, complete source-bound producer, native ADMIT
+and final revision acceptance are still pending; this section claims none.
+
+The subsequent native `router-release-native-check-v1` returned 0; all six
+output hashes exactly match the update result. The independent reviewer
+accepted these outputs against the original API/ZIP evidence, 114 exact Git
+inputs and full host/managed filesystem records. The owning Grafana selection
+returned 0 with 26 passed cases and two pre-existing Windows POSIX-shell skips;
+the complete Linux producer must execute those applicable cases.
+
+Main subsequently advanced to `b7e66167b3c9f3c7cf38cded26a834c5f3c9b5f1`,
+including the newer dependency lock. Integration commit
+`1fea9f3be4759c277bd44bdf15bdd4f96944ccfa` preserves both parents;
+generated conflict resolutions used the canonical slim refresh, whose
+non-telemetry check returned 0. The first actual Linux pytest 9.2 bootstrap
+returned 3 before collection: WSL's obsolete `Config.inicfg` write raises a
+fatal deprecation warning. Its original stderr/receipt is retained as
+`linux1fea-owning-current-lock`. The scoped correction removes only that
+post-cache write, preserving configured/CLI/marker timeout values and the
+existing asyncio safeguard. Fourteen isolated controls prohibit deprecated
+access and require unchanged effective values on WSL and other platforms.
+Independent review rejected an earlier cache-override alternative because
+it would change effective timeouts; that alternative was never committed.
+
+Concurrent writer `Исправить открытые PR` stopped all writes after explicit
+coordination. Its full tracked patch and untracked originals were preserved.
+Independent review accepted the structure-audit remediation: both tools now
+live under `scripts/ops/observability/grafana/` as
+`promote_router_host_release.py` / `refresh_router_host_provenance.py`, and
+the eight fixture methods live in the owning unit-test tree. The real braces
+archive is now an explicit source-closure input. Fifteen Node controls pass
+after the move. Its proposed synthetic replacement for the real glob timeout
+was rejected; the original timeout/filesystem controls remain unchanged.
+The earlier promotion receipt retains its original generator identity.
+Fresh default-delivery CI and new captures remain necessary after these
+source/test changes; no historical receipt is relabeled as current evidence.
+
+### Default delivery and the next source qualification
+
+Default Router run `41221536167` on
+`61ac3cd9f5425b17d5d61c68a6d15312d4b584d7` completed successfully in all four
+jobs. The original parity receipt explicitly identifies `declared_delivery`.
+The canonical relocated source reporter independently checked all 115 real
+build inputs, including the braces archive. Its stale pre-check returned 1,
+update returned 0 and read-only check returned 0 with unchanged tracked bytes.
+The resulting host manifest SHA256 is
+`1a214d0ff42a40c2814c0966da68ae4bbb80044389e82a49c646d8b234ac894a`.
+Original CI ZIP/API identities and generator identity remain in the appended
+source revalidation; the earlier promotion is preserved unchanged.
+
+Own Nightly `41221531591` on that source finished FAIL. Its tooling producer
+failed `test_timeout_writes_runner_record_without_fake_collection`: a long
+diagnostic displaced the runner timeout header from the bounded error field.
+Coverage/duration aggregators passing does not qualify this failed capture.
+All original artifacts and raw failed-job logs are preserved. The scoped fix
+retains the controlled timeout header and diagnostic tail after existing
+redaction, within the unchanged 4000-character bound. The 42-case owning file
+passes; targeted strict mypy additionally exposed and corrected legacy result
+annotations/validated path typing without suppressions.
+
+The separate local `61ac` producer failed when inherited Windows PowerShell
+attempted a UNC script under the existing execution policy. Its actual outer
+exit is -15 after the verified owned process was stopped; 4,326 original
+measurement files and their hashes are preserved. The same owning PowerShell
+test passes on native Windows. A separately versioned native-Linux process
+PATH profile retains native tools and locked Node 24 while excluding imported
+Windows drive entries. The existing optional PowerShell capability skip stays
+SKIP; that Windows PASS is a separate complementary result.
+
+Source review also accepted the Sonar fixes: strict mapping parsing is split
+into bounded helpers, Docker FROM parsing uses tokens instead of a backtracking
+regex, and repeated literals use constants. Duplicate/quoted-key, wrong-image,
+multiple-parent and runtime-asset negative controls remain effective. The pure
+validator accepts the six actual generated release files with their original
+hashes. Fresh complete captures remain required after these source changes.
+
+Main `99947423b77c900f51f9ec3e59b907d07515340c`, tree
+`06e18a8a756e5c747b11c2b0ff82327a17967d86`, was integrated in
+`0aa2f8e2e1453263b9feaaf1c1c1ca969f568526` (tree
+`6b2e490cc878a587bacf234ac213c224903289b1`). Its pandas/VCR dependency inputs
+and Gold string-dtype fixture change are retained; the backend owning set must
+be rerun with the new frozen environment before final acceptance.
+
+### Sole-writer handoff and current integration
+
+The other repair chat preserved its checkpoint
+3b96963f3b315bef56088868b299b6d5a2bec735, tree
+69a3ab66b422ddc3e2d123304486306e3d1542b2, acknowledged the concurrent
+write and handed off the pending merge of main
+c2de7a73d6c363c5a128f2c330473dc9a2fad2ad. Its index, merge state,
+patches and measurement originals were preserved before further writes.
+The final active materializer paths are the parent observability directory:
+scripts/ops/observability/promote_router_host_release.py and
+scripts/ops/observability/refresh_router_host_provenance.py. The dashboard
+validation-only boundary is unchanged and no compatibility shim was added.
+
+The glob cancellation control uses a real AbortSignal.timeout(10) started
+at first actual filesystem traversal. The original delayed callback is awaited
+before asserting exactly one read. Current Scenes and Selector controls each
+passed 9/9. The separately preserved real glob 13.0.6 reference failed all four
+targeted cancellation cases with four reads rather than one; installation/I/O
+errors are not the negative result. The reference dependency tree and all
+files are hashed in the external immutable evidence packet.
+
+Canonical ADR enforcement regeneration returned pre-check 1, update 0 and
+check 0. The dependent debt report was regenerated natively, then the slim
+evidence/remote-main refresh and all five non-telemetry family checks returned
+0. No budget was raised and no telemetry measurement was rebound manually.
+Fresh frozen-source owning tests, all 17 producer shards, CI qualification,
+ADMIT and final acceptance remain required.
+
+### Frozen pandas/Pandera compatibility and consolidated tooling
+
+Published source `589041a5d4638143047788300d12b7a8ec760fa0`, tree
+`929aa697ef117656df3132642bd1fab141efc2c8`, passed all 115 mandatory
+physical-parity cases through the canonical runner with frozen Linux
+Python 3.13.18, pandas 3.1.0 and VCR 9.2.0. Its actual local17 failures and
+4,203 original files are preserved in a hashed 72,028,160-byte archive;
+the incomplete measurement does not qualify coverage or ADMIT.
+
+That source's own Nightly `41228210512` exposed the new Pandera string
+representation in Silver/Gold snapshots and runtime schema resolvers.
+The addressed compatibility fix recognizes only `string[pyarrow]` as the
+existing logical string type. Two production helpers are changed explicitly:
+composite field extraction and structural contract resolution. This is not
+reported as a test-only change. Snapshots, physical Arrow types, required
+fields and nullability remain strict; binary, large-string and unknown
+representations retain their existing handling. Positive and negative
+owning controls cover the exact alias and genuine contract changes.
+
+The same CI correctly rejected 336 active scripts against the unchanged
+334 cap. Release promotion and source revalidation are now implementation
+modules behind the existing `python -m scripts.ops` router, with explicit
+`shared_helper_module` lifecycle decisions and no standalone entrypoints.
+Their argument parsing and exit propagation are checked through that router.
+Canonical inventory regeneration reports 334 active scripts; the cap and
+governance validator are unchanged.
+
+The Linux tooling shard also exposed a copied npm launcher whose relative
+module lookup was broken. The original bytes were preserved and the local
+tool distribution's npm/npx symlinks restored to their identical installed
+targets. Node remains 24.16.0 and npm is 11.13.0; no repository setup script,
+system execution policy or security control was changed. A new complete
+measurement is required with this explicitly recorded tool environment.
+
+The frozen Linux follow-up on `06be36fa8f597e5f33337a50b4d83cbc11c6f6b8`
+passed 1,549 tests, with 74 existing network/pilot/optional-PowerShell skips
+reported separately. The earlier c67 capture's calendar-check FAIL remains
+preserved. Two further compatibility corrections are product changes: the
+ChEMBL calendar check explicitly produces a boolean mask, and the DataFrame
+contract-rule bridge restores missing values to `None` before record conversion.
+Invalid dates remain rejected; missing/NaN required values retain QUARANTINE;
+present `0`, `False` and strings are not converted to null. Strict warnings
+remain enabled. The benchmark child explicitly loads the existing asyncio
+entrypoint when excluding root conftest; strict-config and VCS-probe negative
+controls remain unchanged.
+
+The Gold JSON contract generator also recognizes exactly `string[pyarrow]` as
+JSON `string`, preserving the existing contract instead of regenerating it as
+`object`. Synthetic negative controls reject numeric and null values for that
+nonnullable string contract. The structural workbook export has exactly 384
+Pandera physical-type spelling changes from `str` to `string[pyarrow]`; logical
+types, optionality and required fields are unchanged. This metadata export is
+separate from the real Delta readback evidence.
+
+### Qualified CI measurement boundary
+
+Own Nightly `41230225124` on source `9ade25d56cfa9a780c77d5a97212547c279a7534`
+passed all 17 test shards and duration aggregation, but `coverage-verify`
+failed its unchanged per-module regression gate: `domain/schemas/validators.py`
+100% to 97.06%, and `infrastructure/validation/pandera_validator.py` 100% to
+97.65%. Its original coverage artifact `13053722188` has SHA256
+`5b76a2c5beda41a0729299a5798dfb1bf4da557891e28b6f65fbc264e3df7532`.
+The archive/API/XML were verified and retained for gap analysis only; this
+candidate is NOT_QUALIFIED and cannot supply accepted measurements.
+
+The addressed tests exercise the missing error contracts without product
+changes: JSON validation still rejects malformed data after either scalar-null
+backend failure, and real pandas/Pandera nullable integer/boolean casts retain
+invalid object payloads and reject them rather than silently nulling them.
+The initial Windows owning result is 58 tests, exit 0. Changed test inputs
+require a new complete CI producer; the previous 17 successes are not rebound.
+
+The local WSL diagnostic attempt on that same source finished with exit 1 in
+1092.261 seconds, with filesystem-contract, unit-infrastructure, unit-other
+and integration shard failures. Its 6,718 original files and hashes are
+preserved in a 192,573,440-byte archive. WSL's existing inline `to_thread`
+safeguard interferes with real worker/barrier observations; no safeguard,
+thread test, skip policy or timeout is altered for this task. No combined
+local XML is accepted and local evidence does not qualify CI or ADMIT.
+
+The active test matrix names successful SHA-bound native `coverage-verify`
+as the authoritative coverage measurement source. Acceptance therefore uses
+the exact immutable CI candidate only after all 17 shards and both source
+aggregators succeed, with original artifact/XML identity checks. The runbook
+is aligned to that active contract; currentness and final CI ADMIT remain
+mandatory. Generated passport source revisions are refreshed by their native
+generator; historical telemetry and measurements remain unchanged.
+
+### Own qualified CI capture: 2026-10-31
+
+Own [Nightly 41232471067](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41232471067)
+tested source `5d295539079288e40202c81c514aeeb32505eebe`, tree
+`ee434bc3ff34262e3aae6836713cfa82c23c6068`. All 17 canonical coverage
+producers, `coverage-verify` and `duration-telemetry` completed SUCCESS on
+that attempt. Both 85% gates and unchanged per-module regression gates passed:
+line coverage 99.81%, branch coverage 94.62%. The root run completed FAILURE
+because generated artifacts/currentness and their aggregators had not yet
+consumed these measurements; that failure is retained separately.
+
+Original immutable artifacts were verified against GitHub metadata, size,
+run/head identity and SHA256 before intake:
+
+| Artifact | ID | ZIP bytes | SHA256 |
+| --- | --- | --- | --- |
+| coverage-report | 13054386977 | 14246810 | `e4e04490fc28b693000ba2f5108542e438f10ce1bb9b3f82c8a77c3f2d241a7a` |
+| test-duration-telemetry | 13054341901 | 3962 | `27e9497576e07a8d9e7c7fea41ca0734796e3e705247b92665a17ec6beb3a2de` |
+
+The coverage XML raw SHA256 is
+`9285ede7c3282b8b7b7e1eb22441cd6611cc2be16e9e81112d608e39d21155b4`;
+the native reporter's semantic hash, which normalizes only the generation
+timestamp and line endings, is
+`79825e28257a7e54cf614863de88062d2d69630e198750f5848f2930914e0be7`.
+The exact original candidate was adopted. Original duration JSON was first
+copied byte-for-byte, then processed by the native telemetry updater; its
+final metadata/aliases are derived output, while original measurement rows
+remain preserved. Neither percentages nor captured identities were edited.
+
+The native updater used `--coverage-xml reports/coverage/coverage.xml
+--slowest-json reports/test-telemetry/slowest-tests.json --source-branch
+codex/issue-12474-final-qualification-20261031 --source-commit
+5d295539079288e40202c81c514aeeb32505eebe --source-run-id 41232471067
+--source-event workflow_dispatch --source-run-url
+https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41232471067`,
+exit 0. Native `scripts.engineering.ci.test_telemetry_provenance
+--ci-run-id 41232471067 --pull-request 12633` independently revalidated all
+19 jobs, original metrics, clean producer inputs and actual published PR head,
+exit 0. The full six-family stale precheck remains FAIL (exit 1), followed
+by real producer intake rather than a hash-only telemetry rebind.
+
+The original CI Proof-or-Stop verification for this source records
+`claim=ready_to_merge`, `claim_qualified=true`, `outcome=ADMIT`, exit 0,
+with no errors or degradations. Its bundle digest is
+`4d22bb5b960a49659bd15faa7e6fe91828b5106fd657e2324ffaa515f253b423`.
+This is source-bound ADMIT, not a claim that the failed root workflow passed.
+Final artifact-head required CI, fresh proof and actual positive/negative
+canonical schema-mismatch controls remain separate acceptance obligations.
+
+Independent reviewer `telemetry_independent_review` verified both ZIP identities,
+the exact coverage candidate/XML and the native semantic hash. No substantive
+intake issue was found. The initial external-helper raw-versus-semantic hash
+assertion failed before any repository write; its original FAIL and corrected
+native-hash validation receipt are both preserved. Local WSL setup/measurement
+failures remain NOT_QUALIFIED. No runtime mirror or product inputs changed
+during this intake.
+
+### Required Docs owner invocation
+
+Final-candidate Nightly `41234331953` on `498f4391148e375fc10c535899c894d4b7452fbe`
+completed SUCCESS and produced independently verified CI-trust ADMIT, bundle
+digest `6176b9fa772201c6f4b454082a16b96c806d560fed2e67fcc954e962d50ec175`.
+The ordinary PR Gate `41234318409` passed Class lane and Docker but its required
+aggregate failed because the Docs reusable owner did not start. That FAIL is
+preserved, not waived by the successful Nightly or source-bound ADMIT.
+
+The coordinator still invoked Docs at `feeaea060e81edb07d2c56dad6af1bbb201a3b6a`,
+whose inherited concurrency group collided with its caller. Accepted main
+commit `0deeafe064844e467b6c5943430dbfb3b80333ba` already fixes precisely that
+group by prefixing it with `docs-`. Comparing the two pinned Docs workflow
+blobs shows only that group change and its explanatory comments. This task
+reuses that accepted fix by updating the coordinator's exact SHA and its
+registry entry, exact allowlisted SHA and owning-test expectation together.
+The allowlist replaces the old SHA rather than accepting additional refs.
+It retains the same single Docs owner, required
+aggregation, tests, timeouts, permissions and fail-closed behavior.
+
+The earlier negative control on `498f439...` has 115 real cases, exactly one
+schema mismatch, no errors/skips and failed Class lane/aggregate; its JUnit
+SHA256 is `6c136f504c50eb7f70f3b46212c11c1cdb5d5bbbb382f97fed6efeea1172fd89`.
+Its aggregate also lacked the Docs owner, so that historical run does not
+isolate schema mismatch as the aggregate's sole cause of failure.
+Because the owner invocation changed, positive and negative canonical controls
+and required CI are repeated on the final integrated head. The owning-test pin
+literal changes measurement inputs, so a new qualified producer is required;
+historical captures are preserved and are not rebound to the new test digest.
+
+Actual original CI setup logs distinguish CPython 3.12.15 in Class lane and
+coverage aggregation from CPython 3.13.17 in the 3.13 test matrix. The local
+frozen Python 3.13.18 environment remains separately identified local evidence.
+
+### Qualified capture after the Docs pin correction
+
+Own [Nightly 41237446715](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41237446715)
+tested `3c2f90710b2e95808ca6964c6014d413d73fb7ad`, tree
+`a8c011aafd5846e9cf0693d97f646b1544037ebd`. All 17 canonical producers and
+both coverage/duration aggregators succeeded on that attempt. The native
+qualification and publication-provenance commands returned 0 after the run
+became terminal, independently rechecking original artifacts and published head.
+Its root FAILURE is retained: daily/S7 telemetry checks and their architecture
+aggregate still used the previous test digest before intake.
+
+| Original artifact | ID | ZIP bytes | SHA256 |
+| --- | --- | --- | --- |
+| coverage-report | 13056333761 | 14246822 | `95381835a7971dbda422eea579e6337973578312a1fbbbe3ac4f8485764b990f` |
+| test-duration-telemetry | 13056535623 | 4116 | `e44b3053bcca1b5da7ca125ca6367beb7a58de1738134fa4b0a24823ed4380c1` |
+
+The original XML raw SHA256 is
+`4cbf6eba61aa2c3fa196e159836ad43aaee938d6a770b09dc025dc99f3c086a0`.
+Coverage remains 99.81% lines / 94.62% branches, and the exact candidate is
+byte-identical to the previous module inventory. No measured module rows or
+quality budgets change. The native telemetry updater consumes this capture with
+`--source-commit 3c2f90710b2e95808ca6964c6014d413d73fb7ad
+--source-run-id 41237446715 --source-event workflow_dispatch` and the actual
+source branch/URL, original XML and duration JSON, exit 0. The resulting test
+digest is `06220ab6aae6f606dbea0276ca8215404b54cbe25cf7d7e548f696996319c721`.
+CI-family maintenance uses the slim canonical refresh; no broad hash-only
+hotspot-budget ratchet or manual SHA/percentage replacement is performed.
+
+The [corrected PR invocation](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41237395241)
+actually completed Docs governance, MkDocs, Mermaid validation and diagram-drift
+checks successfully. The Nightly's original Ubuntu JUnit confirms 109 unique pin/
+routing cases with zero failures, errors or skips, including the nine locally
+platform-limited cases. Windows owning evidence remains 106 PASS / 9 platform
+SKIP rather than being relabeled as 115 PASS. All measurement originals,
+replaced inputs, initial failed checks and the cancelled accidental old-source
+dispatch remain preserved. Final artifact-head CI, proof and isolated schema
+controls remain necessary before merge and issue completion.
+
+### Mandatory public-tool typing correction
+
+The historical classification of strict typing failures in the two newly
+introduced observability materializers as non-required auxiliary baseline is
+withdrawn. RULES requires new and changed public functions to pass strict mypy;
+the narrower canonical CI selection does not waive that requirement. The
+original failing commands and their raw logs remain preserved. The Windows
+mandatory precheck reproduced 43 errors, followed by an intermediate one-error
+result and then a successful strict check of both modules, exit 0.
+
+The correction defines recursive JSON types, validates actual JSON objects and
+lists before localized casts, and immediately validates results from the two
+legacy untyped integration boundaries. Valid objects retain their identity and
+values, including None, False and zero. Runtime import loading now explicitly
+rejects missing module specifications/loaders. There are no blanket Any
+annotations, type ignores, suppressed diagnostics or weakened configuration.
+Historical release-promotion tool identities remain unchanged.
+
+Owning controls include valid/invalid JSON boundaries, both missing-loader
+cases, the real strict check of the production modules and a deliberately
+ill-typed isolated fixture that must be rejected. The focused suite passed all
+17 cases; together with parent CLI dispatch controls it passed 26 cases, exit
+0. Ruff also returned 0. Independent read-only reviewer
+`telemetry_independent_review` verified the exact source diff and original
+receipt/log hashes and accepted the correction, while explicitly requiring new
+qualification after publication.
+
+The previously published `7ee48ff5aae6d360dc2ed900f1fcb25fe0a4a8f6`
+completed its own Nightly, positive canonical PR Gate and isolated negative
+schema control. Those originals are preserved as historical acceptance of that
+revision, not transferred to the changed tests. New TEST_INPUTS require a fresh
+qualified producer, native telemetry intake and current-head CI/Proof-or-Stop;
+the changed provenance generator also requires a fresh source revalidation.
+
+The fresh Ubuntu tooling job on `4608b7061e48262ca97ad355849dd5a87d59ee21`
+then exposed 30 strict errors in the imported rootfs/managed-image helpers.
+That FAIL is preserved and the capture is not qualified. The earlier local
+two-target success did not establish the complete imported typing closure.
+Both helpers now have concrete annotations, validated JSON boundaries and
+explicit missing-stream guards; the promoter calls their typed APIs directly.
+No import suppression, dynamic-import bypass or weakened mypy option is used.
+The regression explicitly checks all four modules for both Linux and Windows
+platforms and retains the rejected ill-typed fixture. Each strict command
+returned 0 and the combined CLI/rootfs/managed/provenance suite passed 43 cases.
+The shared JSON helper is included as an additional real build-support input;
+the existing Git fixture proves that changing this dependency rejects stale
+CI evidence. This source change requires another fresh producer and Router
+capture rather than adopting the unsuccessful `4608b706...` measurements.
+
+Fresh default-delivery Router run `41244192907` completed SUCCESS on
+`ffcecacf90d334387118fe9560d9699d2c965a93`, tree
+`10f277c3d5950b3b2af188e024f32e3a2579148c`. The native provenance
+precheck returned 1 (stale), update returned 0 and subsequent read-only check
+returned 0. All 116 actual inputs are bound to the original successful CI
+capture; the generated manifest SHA256 is
+`5cd13f52ca1a77f92b026477d9f81d8e16cce9a913c7bc0684e3a17eaa7b6857`.
+The declared immutable image, historical promotion record and prior source
+revalidations are retained. No image rollout is performed.
+
+Nightly `41244193190` started before that generated manifest was refreshed.
+Its integration job correctly failed the non-dist input digest guard at
+`test_grafana_datasource_provisioning.py:50`; this is preserved as FAIL and
+is not a qualified producer. The source and refreshed provenance must be
+published together before another complete producer can qualify the capture.

@@ -5,6 +5,12 @@ permissions:
 
 on:
   workflow_dispatch:
+    inputs:
+      candidate-delivery-image:
+        description: "Optional owned immutable image for full candidate qualification; empty verifies declared delivery"
+        required: false
+        default: ""
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -195,12 +201,22 @@ jobs:
             --metadata-file reports/qa/router-v7-image-build.json \
             -f grafana/tooling/router-v7-bridge/Dockerfile.host \
             -t bioetl-router-host:acceptance reports/qa/router-v7-image-context
-      - name: Verify built image against declared delivery image
+      - name: Verify complete built image against selected immutable delivery
+        env:
+          CANDIDATE_DELIVERY_IMAGE: ${{ inputs.candidate-delivery-image }}
         run: |
-          image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
+          image=$(node --input-type=module -e '
+            import { readFileSync } from "node:fs";
+            import { validateDeliveryImage } from "./grafana/tooling/router-v7-bridge/verify-host-image.mjs";
+            const declared = JSON.parse(readFileSync("grafana/tooling/router-v7-bridge/host-image.json", "utf8")).image;
+            process.stdout.write(validateDeliveryImage(process.env.CANDIDATE_DELIVERY_IMAGE || declared));
+          ')
           docker pull "$image"
-          node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
-            bioetl-router-host:acceptance
+          args=(bioetl-router-host:acceptance)
+          if [[ -n "$CANDIDATE_DELIVERY_IMAGE" ]]; then
+            args+=(--candidate-image "$image")
+          fi
+          node grafana/tooling/router-v7-bridge/verify-host-image.mjs "${args[@]}"
       - name: Preserve image build and parity receipts
         if: ${{ !cancelled() && always() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

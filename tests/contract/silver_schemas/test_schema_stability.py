@@ -48,11 +48,53 @@ import pytest
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 from tests.contract.silver_schemas.conftest import (
     SILVER_SCHEMAS,
+    _assert_field_attributes_match,
+    _normalize_dtype_name,
     assert_schema_matches_snapshot,
     extract_field_metadata,
 )
 
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
+
+
+@pytest.mark.contracts
+@pytest.mark.no_api
+@pytest.mark.parametrize(
+    ("dtype_name", "expected"),
+    [
+        ("str", "str"),
+        ("string[pyarrow]", "str"),
+        ("int64", "int64"),
+        ("binary[pyarrow]", "binary[pyarrow]"),
+        ("object", "object"),
+        ("large_string[pyarrow]", "large_string[pyarrow]"),
+    ],
+)
+def test_logical_string_alias_is_exact(dtype_name: str, expected: str) -> None:
+    """Storage spelling must not turn unrelated logical types into strings."""
+    assert _normalize_dtype_name("assay_type", dtype_name) == expected
+
+
+@pytest.mark.contracts
+@pytest.mark.no_api
+@pytest.mark.parametrize(
+    ("attribute", "changed"),
+    [("dtype", "int64"), ("nullable", True), ("required", False)],
+)
+def test_snapshot_still_rejects_contract_changes(
+    attribute: str, changed: object
+) -> None:
+    """The alias cannot waive real type, nullability or required-field drift."""
+    snapshot = {"dtype": "str", "nullable": False, "required": True}
+    current = dict(snapshot)
+    current[attribute] = changed
+    with pytest.raises(pytest.fail.Exception, match=f"{attribute} changed"):
+        _assert_field_attributes_match(
+            "chembl_activity",
+            "assay_type",
+            current_field=current,
+            snapshot_field=snapshot,
+        )
 
 
 @pytest.mark.contracts

@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "4dc66455506c3529b7ed2450c9131d9d64f9a513b9ca7757b340beac1e3495ce",
+  "coverage_xml_sha256": "79825e28257a7e54cf614863de88062d2d69630e198750f5848f2930914e0be7",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -703,7 +703,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.composite.helpers.preflight_schema_field_extraction",
       "path": "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py",
-      "source_lines": 125
+      "source_lines": 126
     },
     {
       "coverage_percent": 100.0,
@@ -13788,12 +13788,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 63,
-      "executable_lines": 63,
+      "covered_lines": 64,
+      "executable_lines": 64,
       "missing_lines": 0,
       "module": "bioetl.domain.mapping.organism_classification",
       "path": "src/bioetl/domain/mapping/organism_classification.py",
-      "source_lines": 202
+      "source_lines": 206
     },
     {
       "coverage_percent": 100.0,
@@ -16088,12 +16088,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 42,
-      "executable_lines": 42,
+      "covered_lines": 43,
+      "executable_lines": 43,
       "missing_lines": 0,
       "module": "bioetl.domain.schemas.chembl.publication",
       "path": "src/bioetl/domain/schemas/chembl/publication.py",
-      "source_lines": 150
+      "source_lines": 151
     },
     {
       "coverage_percent": 100.0,
@@ -23883,7 +23883,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.validation.contract_validator",
       "path": "src/bioetl/infrastructure/validation/contract_validator.py",
-      "source_lines": 288
+      "source_lines": 290
     },
     {
       "coverage_percent": 100.0,
@@ -26365,7 +26365,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.composite.helpers.preflight_schema_field_extraction",
       "path": "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py",
-      "source_lines": 125
+      "source_lines": 126
     },
     {
       "coverage_percent": 100.0,
@@ -39450,12 +39450,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 63,
-      "executable_lines": 63,
+      "covered_lines": 64,
+      "executable_lines": 64,
       "missing_lines": 0,
       "module": "bioetl.domain.mapping.organism_classification",
       "path": "src/bioetl/domain/mapping/organism_classification.py",
-      "source_lines": 202
+      "source_lines": 206
     },
     {
       "coverage_percent": 100.0,
@@ -41750,12 +41750,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 42,
-      "executable_lines": 42,
+      "covered_lines": 43,
+      "executable_lines": 43,
       "missing_lines": 0,
       "module": "bioetl.domain.schemas.chembl.publication",
       "path": "src/bioetl/domain/schemas/chembl/publication.py",
-      "source_lines": 150
+      "source_lines": 151
     },
     {
       "coverage_percent": 100.0,
@@ -49545,7 +49545,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.validation.contract_validator",
       "path": "src/bioetl/infrastructure/validation/contract_validator.py",
-      "source_lines": 288
+      "source_lines": 290
     },
     {
       "coverage_percent": 100.0,
@@ -51330,7 +51330,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "4321ec03c00e5f38eb0b1521242f6a7956e3c75e46f295692789436fd3c5db30",
+  "source_tree_sha256": "14c4652f7ed2c06ba30215c204c75ad0a260abbd0cf8c2cfc35726f822cc4d9d",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

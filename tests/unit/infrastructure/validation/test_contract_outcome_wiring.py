@@ -100,6 +100,31 @@ def test_apply_contract_validations_emits_real_outcomes() -> None:
     assert outcomes[0].config_path == "contracts/gold.molecule/dq_rules.yaml"
 
 
+@pytest.mark.parametrize("missing", [None, float("nan")])
+def test_dataframe_missing_values_keep_required_rule_outcomes(missing: object) -> None:
+    import pandas as pd
+
+    validator = ContractAwareGoldValidator(schema=_SCHEMA, dq_config=_policy())
+    frame = pd.DataFrame(
+        [
+            {"entity_id": "a", "name": missing, "smiles": "C"},
+            {"entity_id": "b", "name": "kept", "smiles": "C"},
+        ]
+    )
+    outcomes = validator._apply_contract_validations(frame)
+    assert [outcome.rule_id for outcome in outcomes] == ["field.name.required"]
+    assert outcomes[0].disposition == DQDisposition.QUARANTINE
+
+
+@pytest.mark.parametrize("present", [0, False, "kept"])
+def test_dataframe_present_values_are_not_converted_to_null(present: object) -> None:
+    import pandas as pd
+
+    validator = ContractAwareGoldValidator(schema=_SCHEMA, dq_config=_policy())
+    frame = pd.DataFrame([{"entity_id": "a", "name": present, "smiles": "C"}])
+    assert validator._apply_contract_validations(frame) == []
+
+
 def test_multiple_errors_share_one_source_index() -> None:
     validator = ContractAwareGoldValidator(schema=_SCHEMA, dq_config=_policy())
     records = [
