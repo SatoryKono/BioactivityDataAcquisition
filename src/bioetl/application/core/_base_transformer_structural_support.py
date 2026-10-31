@@ -8,8 +8,6 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core._base_transformer_execution_support import (
     TransformerExecutionOwner,
-)
-from bioetl.application.core.base_transformer._structural_policy_events import (
     classify_structural_action,
     classify_structural_shadow_comparison,
     optional_sources_for_field,
