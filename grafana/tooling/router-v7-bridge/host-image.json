@@ -84,7 +84,8 @@
     "grafana/plugins/bioetl-selectorshell-panel/dist/module.js": "5f8afa46e971d30bbd4bb662e3641be0012b897216d4c0ce559be473fb9cf760",
     "grafana/plugins/bioetl-selectorshell-panel/dist/module.js.map": "a2d02c407196717560c37cb7b34c148c11823d4b916a8bd99d3c74d70b20c0a9",
     "grafana/plugins/bioetl-selectorshell-panel/dist/plugin.json": "928a540525d8996d35459bbc54849026ae859ea3a8730a97c224cd97e8b33e15",
-    "grafana/plugins/bioetl-selectorshell-panel/dist/README.md": "21cbe16d6e1b1efb90b085f59b265d5bef9e5f55ac39a80639645245a860a672"
+    "grafana/plugins/bioetl-selectorshell-panel/dist/README.md": "21cbe16d6e1b1efb90b085f59b265d5bef9e5f55ac39a80639645245a860a672",
+    "grafana/tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz": "86995f918b30efa16931f99407f28368cfe5d529b130c48c9c1d53c1e9c209b1"
   },
   "acceptance": "Source-built artifact identity verified; CI reproduction and runtime rollout are independent acceptance gates.",
   "plugin_release_date": "2026-10-03",
@@ -198,7 +199,7 @@
     "qualification": "Historical CI 4929 proof for source 8c0109b6 and the explicitly listed input hashes only; superseded by moderate_audit_revalidation for current package locks. Does not establish current image or RF-023 lifecycle acceptance."
   },
   "delivery_source": {
-    "source_ref": "556b9c6f8c70d5236281a32ae90e72a8652ff7b0",
+    "source_ref": "167f0d275e1de0c040d1521af02bd6e5af7fb726",
     "inputs": {
       ".github/tooling/braces-backport/BACKPORT.md": "2a8a561551e3383e99d53a5902fcf32d5de31681e14c81ce3698869917bc9134",
       ".github/tooling/braces-backport/LICENSE": "35bdd8a44339719441900fb50fbefc5e2dca1ca662cbaed7a687de842c8b70f2",
@@ -301,7 +302,7 @@
       "grafana/plugins/bioetl-selectorshell-panel/webpack.config.ts": "4db8eb4dfc7042637cdcd201dafb0152be2d30b52fa97d497b1aabd98e552411",
       "grafana/tooling/router-v7-bridge/Dockerfile.host": "72133efc2b4e64b20730131a7da8597bca90d59bef964025e3ab9a9011f95812",
       "grafana/tooling/router-v7-bridge/README.md": "a8b520de96e9ef2928da8dd24f584e3a5f12809fe47ccfe57096ca75db9e3b91",
-      "grafana/tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz": "c2f633b4677be6d9f1738c34f9a9f926719d5039ee65c6d1894f3b585b3d6663",
+      "grafana/tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz": "86995f918b30efa16931f99407f28368cfe5d529b130c48c9c1d53c1e9c209b1",
       "grafana/tooling/router-v7-bridge/bridge.test.mjs": "856591ade96a2ea4f837a60d581d9ab3062b7d1cbca936bd44884899ceea6fc4",
       "grafana/tooling/router-v7-bridge/compose.managed-probe.yml": "2e1aacc9d2acf9ca155de2d53077919299a63aaa1bfb40ccb073d55027cb1eeb",
       "grafana/tooling/router-v7-bridge/compose.probe.yml": "170efee3bf803e69338f3f6ec16c0b8410214183a5930018bd98e85b5687a2fc",
