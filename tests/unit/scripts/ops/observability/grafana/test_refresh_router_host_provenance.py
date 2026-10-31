@@ -495,6 +495,13 @@ class ProvenanceControls(unittest.TestCase):
                 },
             )
             self.assertEqual(tree, git("rev-parse", "HEAD^{tree}").decode().strip())
+            dependency = (
+                root / "scripts/ops/observability/refresh_router_host_provenance.py"
+            )
+            dependency.write_bytes(b"changed JSON validation dependency\n")
+            with self.assertRaisesRegex(ValueError, "differs from actual CI"):
+                module.source_inputs(root, commit, manifest)
+            dependency.write_bytes(b"support fixture\n")
             git("rm", "-q", "grafana/plugins/bioetl-scenes-app/captured.js")
             with self.assertRaisesRegex(ValueError, "inventory added/deleted"):
                 module.source_inputs(root, commit, manifest)
@@ -565,8 +572,10 @@ def test_materializer_rejects_missing_module_loader(
 
 
 @pytest.mark.subprocess_backed
+@pytest.mark.parametrize("platform", ["linux", "win32"])
 def test_materializer_public_api_strict_mypy_and_negative_control(
     tmp_path: Path,
+    platform: str,
 ) -> None:
     root = Path(__file__).parents[6]
     command = [
@@ -576,9 +585,17 @@ def test_materializer_public_api_strict_mypy_and_negative_control(
         "--config-file",
         str(root / "pyproject.toml"),
         "--strict",
+        "--platform",
+        platform,
     ]
     positive = subprocess.run(
-        [*command, str(Path(module.__file__)), str(Path(promotion.__file__))],
+        [
+            *command,
+            str(Path(module.__file__)),
+            str(Path(promotion.__file__)),
+            str(root / "scripts/ops/observability/grafana/router_rootfs.py"),
+            str(root / "scripts/ops/observability/grafana/router_managed_image.py"),
+        ],
         cwd=root,
         capture_output=True,
         text=True,

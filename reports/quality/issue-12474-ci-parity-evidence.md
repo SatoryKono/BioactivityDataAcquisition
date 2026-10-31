@@ -874,3 +874,18 @@ schema control. Those originals are preserved as historical acceptance of that
 revision, not transferred to the changed tests. New TEST_INPUTS require a fresh
 qualified producer, native telemetry intake and current-head CI/Proof-or-Stop;
 the changed provenance generator also requires a fresh source revalidation.
+
+The fresh Ubuntu tooling job on `4608b7061e48262ca97ad355849dd5a87d59ee21`
+then exposed 30 strict errors in the imported rootfs/managed-image helpers.
+That FAIL is preserved and the capture is not qualified. The earlier local
+two-target success did not establish the complete imported typing closure.
+Both helpers now have concrete annotations, validated JSON boundaries and
+explicit missing-stream guards; the promoter calls their typed APIs directly.
+No import suppression, dynamic-import bypass or weakened mypy option is used.
+The regression explicitly checks all four modules for both Linux and Windows
+platforms and retains the rejected ill-typed fixture. Each strict command
+returned 0 and the combined CLI/rootfs/managed/provenance suite passed 43 cases.
+The shared JSON helper is included as an additional real build-support input;
+the existing Git fixture proves that changing this dependency rejects stale
+CI evidence. This source change requires another fresh producer and Router
+capture rather than adopting the unsuccessful `4608b706...` measurements.

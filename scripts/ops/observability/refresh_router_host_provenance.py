@@ -48,6 +48,7 @@ BUILD_SUPPORT = (
     "grafana/tooling/router-v7-bridge/verify-packed-bridge.mjs",
     "scripts/ops/observability/grafana/router_rootfs.py",
     "scripts/ops/observability/grafana/router_managed_image.py",
+    "scripts/ops/observability/refresh_router_host_provenance.py",
 )
 JOBS = {
     "bridge-tests",

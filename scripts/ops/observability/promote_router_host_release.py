@@ -17,7 +17,7 @@ import sys
 import zipfile
 from pathlib import Path, PurePosixPath
 from collections.abc import Callable
-from typing import IO, TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
@@ -412,11 +412,8 @@ def live_managed_parity(
                 try:
                     if process.stdout is None:
                         raise ValueError("Missing Docker export stdout")
-                    # This legacy tar reader is untyped; validate its JSON records
-                    # immediately rather than propagating its dynamic return.
-                    reader = cast(Callable[[IO[bytes]], object], filesystem_records)
                     result = provenance.json_object(
-                        reader(process.stdout), "Invalid filesystem records"
+                        filesystem_records(process.stdout), "Invalid filesystem records"
                     )
                 except BaseException:
                     process.kill()
@@ -498,25 +495,8 @@ def live_managed_parity(
         (evidence / (name + "-filesystem-records.json")).write_bytes(
             (json.dumps(data, sort_keys=True) + "\n").encode("utf-8")
         )
-    # The owned legacy verifier is untyped; keep its result behind the same
-    # recursively validated JSON boundary as external receipts.
-    verifier = cast(
-        Callable[
-            [
-                JsonObject,
-                JsonObject,
-                JsonObject,
-                JsonObject,
-                JsonObject,
-                JsonObject,
-                str,
-            ],
-            object,
-        ],
-        verify,
-    )
     receipt = provenance.json_object(
-        verifier(
+        verify(
             host,
             built,
             delivered,
