@@ -115,12 +115,18 @@ function fingerprint(image, scope) {
   return { tree_sha256: sha256(output), module_sha256: module?.split(/\s+/)[0] ?? null };
 }
 
+export function inspectTrustedBase(run = execFileSync, inspectImage = inspect) {
+  // BuildKit's content store does not populate Docker's inspectable image store.
+  run(docker, ['pull', baseImage], { stdio: 'inherit' });
+  return inspectImage(baseImage);
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const manifest = JSON.parse(readFileSync(new URL('./host-image.json', import.meta.url), 'utf8'));
   const recipe = readFileSync(new URL('./Dockerfile.host', import.meta.url));
   assert.equal(sha256(recipe), manifest.artifact_sha256['grafana/tooling/router-v7-bridge/Dockerfile.host']);
   const built = parseArguments(process.argv.slice(2));
-  const receipt = verifyImages(built, manifest, inspect, fingerprint, filesystem, inspect(baseImage));
+  const receipt = verifyImages(built, manifest, inspect, fingerprint, filesystem, inspectTrustedBase());
   writeReceipt(receipt);
   console.log('Built host image matches the declared image artifact set');
 }

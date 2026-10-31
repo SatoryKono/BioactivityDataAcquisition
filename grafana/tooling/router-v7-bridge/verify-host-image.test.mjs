@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { parseArguments, validateImage, verifyImages as verifyImagesImpl } from './verify-host-image.mjs';
+import { inspectTrustedBase, parseArguments, validateImage, verifyImages as verifyImagesImpl } from './verify-host-image.mjs';
 
 const digest = 'a'.repeat(64);
 const verifyImages = (built, manifest, inspect, fingerprint, filesystem = () => digest,
@@ -18,6 +18,28 @@ const inspect = (image) => ({
   RootFS: { Type: 'layers', Layers: ['sha256:' + digest] },
 });
 const fingerprint = () => ({ tree_sha256: digest, module_sha256: digest });
+
+test('trusted immutable base is pulled before inspection independently of BuildKit', () => {
+  const calls = [];
+  const expected = 'grafana/grafana@sha256:d84563330dc9d2fd2bc096d0fb96021b5319c75bf6ed555566709998e823dec4';
+  const result = inspectTrustedBase((program, args) => {
+    assert.match(program, /docker(?:\.exe)?$/);
+    assert.deepEqual(args, ['pull', expected]);
+    calls.push('pull');
+  }, (image) => {
+    assert.equal(image, expected);
+    assert.deepEqual(calls, ['pull']);
+    calls.push('inspect');
+    return { Id: 'sha256:' + digest };
+  });
+  assert.deepEqual(calls, ['pull', 'inspect']);
+  assert.equal(result.Id, 'sha256:' + digest);
+});
+
+test('base pull failure propagates without inspection or parity claims', () => {
+  assert.throws(() => inspectTrustedBase(() => { throw new Error('registry unavailable'); },
+    () => assert.fail('unavailable trusted base must not be inspected')), /registry unavailable/);
+});
 
 test('rebuilt and registry image digests are recorded separately with artifact parity', () => {
   const receipt = verifyImages('bioetl-router-host:acceptance', manifest, inspect, fingerprint);
