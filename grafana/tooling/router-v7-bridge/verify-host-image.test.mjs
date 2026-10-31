@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { inspectTrustedBase, parseArguments, validateImage, verifyImages as verifyImagesImpl } from './verify-host-image.mjs';
 
 const digest = 'a'.repeat(64);
@@ -18,6 +20,16 @@ const inspect = (image) => ({
   RootFS: { Type: 'layers', Layers: ['sha256:' + digest] },
 });
 const fingerprint = () => ({ tree_sha256: digest, module_sha256: digest });
+
+test('source provenance generator rejects unqualified captures and preserves history', () => {
+  const python = process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+  const result = spawnSync(python, ['refresh_host_provenance_test.py', '-v'], {
+    cwd: fileURLToPath(new URL('.', import.meta.url)), encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stderr, /Ran 6 tests/);
+  assert.match(result.stderr, /\bOK\b/);
+});
 
 test('trusted immutable base is pulled before inspection independently of BuildKit', () => {
   const calls = [];
