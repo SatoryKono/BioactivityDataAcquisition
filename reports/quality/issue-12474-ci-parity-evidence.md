@@ -236,3 +236,34 @@ that the only intentional difference is detection of a prepared-field removal
 masked by raw data. The 115-case real-backend suite passed in the disposable
 preview without failures/errors/skips. The new Silver blob is resource-free;
 its actual Git provenance must be regenerated before publication.
+
+### Own CI telemetry capture qualification
+
+PR #12624 was squash-merged as `2c31b0eed50a4100f5d3c871a4efd6673e4bc376`,
+with the same tree as its published `6a71d28e` head. This publication is distinct
+from telemetry acceptance. The fresh full drift check still returned exit 1:
+two telemetry fingerprint assertions failed. Their original receipts remain
+preserved; no old measurements were rebound to changed tests.
+
+The provenance CLI now supports `--ci-run-id <actual-run-id> --pull-request <PR>`
+for a newly measured Nightly capture. The existing local-manifest mode remains.
+The CI mode verifies immutable original artifact ZIP identity, size and digest,
+reconstructs coverage/duration metrics, requires unchanged producer inputs, and
+writes only the telemetry squash receipt. Its source is the addressed CI capture
+validator from PR #12616, head `0fead443960ac9b19cf2fbf5cae6bddc13ac9a89`;
+QM-08 publication decisions and quality API changes are excluded.
+
+Independent review found that a successful coverage combiner could receive
+files uploaded after failed tests. Qualification now additionally requires all
+17 actual coverage-producing jobs, plus coverage and duration aggregation, to
+be unique and completed successfully on the exact run, source SHA and attempt.
+The receipt retains those job identities. Missing, duplicate, skipped,
+cancelled, timed-out and foreign-source/attempt producers fail closed.
+
+The isolated owning suite passed 244 cases. Reviewer
+`/root/telemetry_independent_review` accepted the two-file code diff SHA256
+`10eee1de06d6548cd55b9dd2aa0d8e14664984116e5e9cb5983a4dae0637743e`.
+The reviewer also tested the guard against actual run `41190149102`: coverage
+and duration succeeded but integration failed, and qualification was correctly
+refused for that integration producer. This is code acceptance, not a qualified
+capture or ADMIT. PR #12616 remains unmerged; its human K8/K10 gate is independent.
