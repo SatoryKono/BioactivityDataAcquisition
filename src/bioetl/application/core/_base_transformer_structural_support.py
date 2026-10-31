@@ -6,14 +6,10 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core._base_transformer_execution_support import (
-    TransformerExecutionOwner,
-    classify_structural_action,
-    classify_structural_shadow_comparison,
-    optional_sources_for_field,
-)
-
 if TYPE_CHECKING:
+    from bioetl.application.core._base_transformer_execution_support import (
+        TransformerExecutionOwner,
+    )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import FilterDecision
     from bioetl.domain.types import GoldRecord, SilverRecord
@@ -26,6 +22,9 @@ def _raise_if_silver_filtered_out(
     decision: FilterDecision,
 ) -> None:
     """Raise FilteredOutError when a Silver filter decision rejects the record."""
+    from bioetl.application.core._base_transformer_execution_support import (
+        optional_sources_for_field,
+    )
     from bioetl.application.core.base_transformer.errors import FilteredOutError
 
     if decision.include:
@@ -148,6 +147,10 @@ def apply_structural_policy(
     index: int,
 ) -> SilverRecord | None:
     """Apply schema-aware structural policy before structural Silver filters."""
+    from bioetl.application.core._base_transformer_execution_support import (
+        classify_structural_action,
+        classify_structural_shadow_comparison,
+    )
     from bioetl.application.core.base_transformer.errors import FilteredOutError
 
     if result is None:
