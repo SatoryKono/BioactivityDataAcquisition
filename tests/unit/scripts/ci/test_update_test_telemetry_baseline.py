@@ -1297,6 +1297,8 @@ def test_build_branch_telemetry_reports_preserves_baseline_snapshot() -> None:
     assert "Slowest Tests" in reports["slowest-tests.md"]
     assert "Top Slow Zones" in reports["slowest-tests.md"]
     assert "Executed test cases: `321`" in reports["slowest-tests.md"]
+    assert reports["slowest-tests.md"].endswith("\n")
+    assert not reports["slowest-tests.md"].endswith("\n\n")
 
 
 def test_merge_existing_baseline_supplemental_fields_preserves_probe(

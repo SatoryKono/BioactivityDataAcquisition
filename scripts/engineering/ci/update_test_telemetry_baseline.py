@@ -881,7 +881,7 @@ def build_branch_telemetry_reports(payload: TelemetryPayload) -> dict[str, str]:
             indent=2,
         )
         + "\n",
-        "slowest-tests.md": render_branch_telemetry_markdown(payload) + "\n",
+        "slowest-tests.md": render_branch_telemetry_markdown(payload),
     }
 
 

@@ -8,12 +8,12 @@
       "path": "configs/quality/scripts_inventory_manifest.json",
       "literal": "src/bioetl/infrastructure/quality",
       "lines": [
-        20422
+        20426
       ],
       "context": "          \"text\": \"\\\"src/bioetl/infrastructure/quality/scoring.py\\\",\"",
       "purpose": "Retained exclusion/its generated evidence string for old namespace; it is neither an executable import nor active product owner.",
       "owner": "QM-08 / @bioetl-platform",
-      "reviewed_content_sha256": "070732e002b7d8aa4060a9d24026f0db889296d8b62479b1acb72179d66bb433",
+      "reviewed_content_sha256": "21098eae57d56b33d02a1b863dc90958050f7669f9e6f1c14df31dfdc54b1ac1",
       "review_by": "2026-11-30",
       "decision": "RETAIN_EXACT_REFERENCE",
       "exception_allowed": true,
@@ -23,12 +23,12 @@
       "path": "configs/quality/scripts_inventory_manifest.json",
       "literal": "bioetl/infrastructure/quality",
       "lines": [
-        20422
+        20426
       ],
       "context": "          \"text\": \"\\\"src/bioetl/infrastructure/quality/scoring.py\\\",\"",
       "purpose": "Retained exclusion/its generated evidence string for old namespace; it is neither an executable import nor active product owner.",
       "owner": "QM-08 / @bioetl-platform",
-      "reviewed_content_sha256": "070732e002b7d8aa4060a9d24026f0db889296d8b62479b1acb72179d66bb433",
+      "reviewed_content_sha256": "21098eae57d56b33d02a1b863dc90958050f7669f9e6f1c14df31dfdc54b1ac1",
       "review_by": "2026-11-30",
       "decision": "RETAIN_EXACT_REFERENCE",
       "exception_allowed": true,
@@ -8046,12 +8046,12 @@
       "path": "scripts/engineering/ci/pr_lane_results.py",
       "literal": "src/bioetl/infrastructure/quality",
       "lines": [
-        580
+        589
       ],
       "context": "    \"src/bioetl/infrastructure/quality/\": QUALITY_GOVERNANCE_TESTS,",
       "purpose": "Backward-compatible receipt label and owning fixture for historical command identity; no import from the retired namespace.",
       "owner": "QM-08 / @bioetl-platform",
-      "reviewed_content_sha256": "9f07aa072aa9eb94e40511351b66149f8b05d3cc14dd5e29ca29da2a6a791cb9",
+      "reviewed_content_sha256": "b0b0c5e6bbefc88cb492c1e93b3fd50c14f1991674ef23016e5ac203b7370f4e",
       "review_by": "2026-11-30",
       "decision": "RETAIN_EXACT_REFERENCE",
       "exception_allowed": true,
@@ -8061,12 +8061,12 @@
       "path": "scripts/engineering/ci/pr_lane_results.py",
       "literal": "bioetl/infrastructure/quality",
       "lines": [
-        580
+        589
       ],
       "context": "    \"src/bioetl/infrastructure/quality/\": QUALITY_GOVERNANCE_TESTS,",
       "purpose": "Backward-compatible receipt label and owning fixture for historical command identity; no import from the retired namespace.",
       "owner": "QM-08 / @bioetl-platform",
-      "reviewed_content_sha256": "9f07aa072aa9eb94e40511351b66149f8b05d3cc14dd5e29ca29da2a6a791cb9",
+      "reviewed_content_sha256": "b0b0c5e6bbefc88cb492c1e93b3fd50c14f1991674ef23016e5ac203b7370f4e",
       "review_by": "2026-11-30",
       "decision": "RETAIN_EXACT_REFERENCE",
       "exception_allowed": true,
@@ -8158,7 +8158,7 @@
       "context": "            \"src/bioetl/infrastructure/quality/scoring.py\",",
       "purpose": "Backward-compatible receipt label and owning fixture for historical command identity; no import from the retired namespace.",
       "owner": "QM-08 / @bioetl-platform",
-      "reviewed_content_sha256": "61151ad322c6c1708650459412d01429ad8435d6097096da19bc5a02510def96",
+      "reviewed_content_sha256": "beec278e764cfd5e7a195a24a21675c394f3a51dacb7114056433b3924d36096",
       "review_by": "2026-11-30",
       "decision": "RETAIN_EXACT_REFERENCE",
       "exception_allowed": true,
@@ -8173,7 +8173,7 @@
       "context": "            \"src/bioetl/infrastructure/quality/scoring.py\",",
       "purpose": "Backward-compatible receipt label and owning fixture for historical command identity; no import from the retired namespace.",
       "owner": "QM-08 / @bioetl-platform",
-      "reviewed_content_sha256": "61151ad322c6c1708650459412d01429ad8435d6097096da19bc5a02510def96",
+      "reviewed_content_sha256": "beec278e764cfd5e7a195a24a21675c394f3a51dacb7114056433b3924d36096",
       "review_by": "2026-11-30",
       "decision": "RETAIN_EXACT_REFERENCE",
       "exception_allowed": true,

@@ -1453,6 +1453,12 @@
       "owner": "@bioetl-observability",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/qa/check_quality_move_distributions.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the test-imported, read-only QM-09 distribution-content validator. Keep it supporting so the active script budget does not grow; promote only after a router slot is freed.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
     "scripts/engineering/qa/verify_quality_move.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the QM-02 before/after verifier invoked by its unit tests. Keep it supporting so the active script budget does not grow; promote only after a router slot is freed.",

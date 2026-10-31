@@ -23,7 +23,7 @@ def test_runtime_candidate_source_review_matches_materialized_catalog() -> None:
         requalification_main(
             [
                 "--review",
-                "configs/quality/external_resource_inventory_qm08_review.json",
+                "configs/quality/external_resource_inventory_qm09_review.json",
                 "--check",
             ]
         )

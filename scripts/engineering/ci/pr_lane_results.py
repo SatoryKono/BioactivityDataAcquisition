@@ -121,6 +121,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/quality/quality-move-qm08/reference_decisions.json": (
         "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
     ),
+    "configs/quality/quality_move_qm09_reference_decisions.json": (
+        "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
+    ),
     "scripts/engineering/README.md": (
         SCRIPTS_INVENTORY_MANIFEST_TEST,
         "tests/architecture/test_scripts_inventory_discovery.py",
@@ -319,9 +322,15 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (EXTERNAL_RESOURCE_INVENTORY_TEST, EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST),
     ),
-    "configs/quality/external_resource_inventory_qm08_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+    **dict.fromkeys(
+        (
+            "configs/quality/external_resource_inventory_qm08_review.json",
+            "configs/quality/external_resource_inventory_qm09_review.json",
+        ),
+        (
+            EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        ),
     ),
     "docker-compose.monitoring.yml": (
         DOCKER_RUNTIME_CONTRACT_TEST,
