@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import copy
 import hashlib
 import json
 import re
@@ -447,6 +448,52 @@ def validate_inventory(
     return errors
 
 
+def rebind_resource_free_sources(
+    payload: dict[str, Any],
+    sources: Mapping[str, bytes],
+    blobs: Mapping[str, SourceBlob],
+    *,
+    commit: str,
+    tree: str,
+    reviewed: Mapping[str, str],
+) -> dict[str, Any]:
+    """Requalify only explicitly reviewed, reference-free existing source files."""
+    original = payload["source_files"]
+    if set(original) != set(blobs) or set(sources) != set(blobs):
+        raise ValueError(
+            "Source census additions/removals require full inventory review"
+        )
+    changed = {path for path, blob in blobs.items() if original[path] != blob.oid}
+    if not changed or changed != set(reviewed):
+        raise ValueError("Reviewed source set must exactly match changed source blobs")
+    referenced = {ref["file"] for ref in _references(payload)}
+    if changed & referenced:
+        raise ValueError(
+            "Resource-bearing source changes require full inventory review"
+        )
+    for path in changed:
+        actual = hashlib.sha256(sources[path].replace(b"\r\n", b"\n")).hexdigest()
+        if reviewed[path] != actual or blobs[path].sha256 != actual:
+            raise ValueError(f"Reviewed source digest differs: {path}")
+    updated = copy.deepcopy(payload)
+    updated["source_commit"] = commit
+    updated["source_tree"] = tree
+    updated["source_files"] = {path: blob.oid for path, blob in blobs.items()}
+    for ref in _references(updated):
+        ref["source_commit"] = commit
+    updated.setdefault("source_rebindings", []).append(
+        {
+            "from_commit": payload["source_commit"],
+            "to_commit": commit,
+            "reviewed_resource_free_sources": dict(reviewed),
+        }
+    )
+    errors = validate_inventory(updated, sources, blobs)
+    if errors:
+        raise ValueError("Source requalification failed: " + "; ".join(errors))
+    return updated
+
+
 def render(payload: dict[str, Any]) -> str:  # Any: validated JSON catalog.
     """Render every resource and source link without inventing runtime results."""
     commit = payload["source_commit"]
@@ -666,6 +713,12 @@ def main(argv: list[str] | None = None) -> int:
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--check", action="store_true")
     mode.add_argument("--update", action="store_true")
+    parser.add_argument(
+        "--source-commit", help="Full commit for reviewed resource-free source changes"
+    )
+    parser.add_argument(
+        "--reviewed-source", action="append", default=[], metavar="PATH=SHA256"
+    )
     args = parser.parse_args(argv)
     try:
         return _run(args)
@@ -694,9 +747,38 @@ def _git_failure_message(error: subprocess.CalledProcessError) -> str:
     return f"CHECK FAILED: command exited {error.returncode}: {command}"
 
 
+def _validate_source_update_args(args: argparse.Namespace) -> None:
+    """Reject incomplete or read-only source maintenance requests."""
+    if (args.source_commit or args.reviewed_source) and not args.update:
+        raise ValueError("Source requalification requires --update")
+    if args.reviewed_source and not args.source_commit:
+        raise ValueError("Reviewed source requires an explicit --source-commit")
+
+
+def _pinned_git_snapshot(commit: str) -> tuple[dict[str, SourceBlob], str]:
+    """Read the exact source blobs and tree from the pinned Git commit."""
+    entries = subprocess.check_output(
+        ["git", "ls-tree", "-rz", commit, "--", "src/bioetl"], cwd=ROOT
+    ).split(b"\0")
+    oids = {}
+    for entry in entries:
+        if entry:
+            meta, name = entry.split(b"\t", 1)
+            if name.endswith(b".py"):
+                oids[name.decode()] = meta.decode().split()[2]
+    blobs = _load_source_blobs(oids)
+    tree = (
+        subprocess.check_output(["git", "rev-parse", f"{commit}^{{tree}}"], cwd=ROOT)
+        .decode()
+        .strip()
+    )
+    return blobs, tree
+
+
 def _run(args: argparse.Namespace) -> int:
-    payload = load_catalog(verify_manifest=not args.update)
-    commit = payload.get("source_commit", "")
+    payload = load_catalog(verify_manifest=bool(args.source_commit) or not args.update)
+    _validate_source_update_args(args)
+    commit = args.source_commit or payload.get("source_commit", "")
     if not _OID.fullmatch(str(commit)):
         print("Invalid source commit")
         return 1
@@ -708,22 +790,28 @@ def _run(args: argparse.Namespace) -> int:
     sources = {
         name: (ROOT / name).read_bytes() for name in tracked if name.endswith(".py")
     }
-    entries = subprocess.check_output(
-        ["git", "ls-tree", "-rz", commit, "--", "src/bioetl"], cwd=ROOT
-    ).split(b"\0")
-    oids = {}
-    for entry in entries:
-        if entry:
-            meta, name = entry.split(b"\t", 1)
-            if name.endswith(b".py"):
-                oids[name.decode()] = meta.decode().split()[2]
-    blobs = _load_source_blobs(oids)
+    blobs, tree = _pinned_git_snapshot(commit)
+    if args.source_commit:
+        subprocess.run(
+            ["git", "merge-base", "--is-ancestor", commit, "HEAD"],
+            cwd=ROOT,
+            check=True,
+        )
+        reviewed = {}
+        for item in args.reviewed_source:
+            path, digest = item.rsplit("=", 1)
+            reviewed[path] = digest
+        if len(reviewed) != len(args.reviewed_source):
+            raise ValueError("Duplicate reviewed source path")
+        payload = rebind_resource_free_sources(
+            payload,
+            sources,
+            blobs,
+            commit=commit,
+            tree=tree,
+            reviewed=reviewed,
+        )
     errors = validate_inventory(payload, sources, blobs)
-    tree = (
-        subprocess.check_output(["git", "rev-parse", f"{commit}^{{tree}}"], cwd=ROOT)
-        .decode()
-        .strip()
-    )
     if payload.get("source_tree") != tree:
         errors.append("inconsistent source tree")
     if set(sources) != set(blobs):

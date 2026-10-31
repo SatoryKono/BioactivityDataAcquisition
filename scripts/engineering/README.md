@@ -139,3 +139,25 @@ When adding or renaming a script:
   should not be used as canonical command targets.
 - Historical evidence under `docs/reports/evidence/**` may still mention removed
   paths; treat those references as archival, not canonical guidance.
+
+## QM-09 artifact and type qualification
+
+The full strict type gate is owned by GitHub Actions `pr-required.yml`:
+`mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory scripts/engineering/quality`.
+For QM-09, the API/release owner selected this GitHub Actions gate instead of
+running CircleCI. This changes neither strictness nor the existing required
+GitHub checks. The architecture owning test guards all three target roots and
+failure propagation. CircleCI configuration and execution are unchanged.
+
+After building the explicit sdist and its wheel, validate their content before
+isolated runtime smoke:
+
+```bash
+python -m scripts.engineering.qa.check_quality_move_distributions --wheel /absolute/path/bioetl-6.1.0-py3-none-any.whl --sdist /absolute/path/bioetl-6.1.0.tar.gz --manifest reports/quality/quality-move-qm01/file_move_plan.csv
+```
+
+This read-only gate rejects stale namespace payloads, incomplete quality/support
+closure, invalid hashes/modes and unsafe archive paths. Its owning tests include
+29/31 modules, missing parents/support, corrupt or missing archives and poisoned
+wheel payloads. Passing it does not replace a build receipt, external-cwd smoke,
+exact-SHA CI attestation or human K10 sign-off.

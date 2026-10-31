@@ -39,6 +39,43 @@ from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 pytestmark = pytest.mark.unit
 
+
+async def test_stream_budget_rejects_partial_xml_and_closes_response(
+    adapter: PubMedAdapter, mock_http_client: AsyncMock, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from bioetl.domain.exceptions import BioETLError
+    from bioetl.infrastructure.adapters.pubmed import _fetch as subject
+
+    response = MagicMock()
+    response.aclose = AsyncMock()
+
+    async def oversized_chunks():
+        chunk = b"x" * (1024 * 1024)
+        for _ in range(subject._MAX_XML_BYTES // len(chunk)):
+            yield chunk
+        yield b"x"
+
+    response.aiter_bytes.return_value = oversized_chunks()
+    mock_http_client.stream = AsyncMock(return_value=response)
+    mock_http_client.timeout = 10.0
+    mock_http_client.read_timeout_multiplier = 2.0
+    parser = MagicMock()
+    parse_response = MagicMock()
+    monkeypatch.setattr(subject.PubMedXmlProcessor, "extract_all_records", parser)
+    monkeypatch.setattr(subject.PubMedXmlProcessor, "parse_response", parse_response)
+    with pytest.raises(BioETLError) as caught:
+        await adapter._fetch_batch(["12345678"])
+    assert isinstance(caught.value.__cause__, ValueError)
+    assert (
+        str(caught.value.__cause__)
+        == f"PubMed XML response exceeds limit of {subject._MAX_XML_BYTES} bytes"
+    )
+    response.aclose.assert_awaited_once_with()
+    parser.assert_not_called()
+    parse_response.assert_not_called()
+    assert adapter.get_source_metadata().total_requests == 0
+
+
 _STREAM_XML = """<?xml version="1.0"?>
 <PubmedArticleSet>
   <PubmedArticle>

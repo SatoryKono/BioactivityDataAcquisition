@@ -149,6 +149,59 @@ def test_governed_publication_identifier_arrays_publish_canonical_json_patterns(
             assert not re.fullmatch(pattern, '["0000-0002-1825-7"]')
 
 
+@pytest.mark.parametrize(
+    "provider", ["crossref", "openalex", "pubmed", "semanticscholar"]
+)
+@pytest.mark.parametrize(
+    ("value", "accepted"),
+    [
+        ("[]", True),
+        ('["0000-0002-1825-0097"]', True),
+        ('["0000-0002-1825-0097","0000-0000-0000-000X"]', True),
+        ('["0000-0002-1825-7"]', False),
+        ('["0000-0002-1825-009A"]', False),
+        ('["0000-0002-1825-0097", "0000-0000-0000-000X"]', False),
+    ],
+)
+def test_publication_orcid_pattern_preserves_full_identifier_and_canonical_array(
+    provider: str, value: str, accepted: bool
+) -> None:
+    rule = _field_validation(provider, "publication", "author_orcids")
+    assert (re.fullmatch(rule["pattern"], value) is not None) is accepted
+
+
+@pytest.mark.parametrize(
+    "provider", ["crossref", "openalex", "pubmed", "semanticscholar"]
+)
+def test_orcid_null_slots_follow_existing_author_alignment_contract(
+    provider: str,
+) -> None:
+    pattern = _field_validation(provider, "publication", "author_orcids")["pattern"]
+    aligned = '["0000-0002-1825-0097",null]'
+    assert (re.fullmatch(pattern, aligned) is not None) is (
+        provider in {"openalex", "semanticscholar"}
+    )
+    assert re.fullmatch(pattern, '["0000-0002-1825-7",null]') is None
+
+
+@pytest.mark.parametrize(
+    ("value", "accepted"),
+    [
+        ('["12345"]', True),
+        ('["' + "a" * 40 + '"]', True),
+        ('["' + "g" * 40 + '"]', False),
+        ("[null]", False),
+    ],
+)
+def test_semanticscholar_author_id_pattern_retains_reviewed_identifier_shapes(
+    value: str, accepted: bool
+) -> None:
+    pattern = _field_validation("semanticscholar", "publication", "author_s2_ids")[
+        "pattern"
+    ]
+    assert (re.fullmatch(pattern, value) is not None) is accepted
+
+
 def test_uniprot_bridge_and_protein_configs_govern_reviewed_and_taxonomy_explicitly() -> (
     None
 ):

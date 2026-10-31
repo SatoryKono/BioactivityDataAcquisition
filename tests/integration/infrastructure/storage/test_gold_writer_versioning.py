@@ -310,6 +310,11 @@ async def test_gold_writer_overwrite_is_idempotent_for_identical_records(
         {"entity_id": "CHEMBL456", "value": 7.0},
     ]
     assert second_rows == first_rows
+    table_path = _versioned_table_path(tmp_path / "gold", "chembl.activity")
+    physical = load_delta_table(str(table_path)).schema().to_pyarrow()
+    expected = {"entity_id": pa.string(), "value": pa.float64()}
+    assert {field.name: field.type for field in physical} == expected
+    assert all(field.nullable for field in physical)
 
 
 @pytest.mark.integration

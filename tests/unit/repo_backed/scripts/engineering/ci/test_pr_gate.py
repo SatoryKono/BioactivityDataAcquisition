@@ -172,8 +172,10 @@ def test_name_status_parser_keeps_deletions_and_both_rename_paths() -> None:
     ]
 
 
+@pytest.mark.parametrize("event", ["pull_request", "workflow_dispatch"])
 def test_collect_changed_files_uses_nul_delimited_full_status_diff(
     monkeypatch: pytest.MonkeyPatch,
+    event: str,
 ) -> None:
     observed: dict[str, Any] = {}
 
@@ -189,7 +191,7 @@ def test_collect_changed_files_uses_nul_delimited_full_status_diff(
     monkeypatch.setattr("scripts.engineering.ci.pr_gate.subprocess.run", fake_run)
 
     paths = collect_changed_files(
-        event_name="pull_request",
+        event_name=event,
         base_sha="b" * 40,
         before_sha="",
         head_sha=HEAD_SHA,
@@ -197,6 +199,7 @@ def test_collect_changed_files_uses_nul_delimited_full_status_diff(
 
     assert paths == ["docs/deleted.md", "old.md", "new.md"]
     assert "--name-status" in observed["args"]
+    assert f"{'b' * 40}...{HEAD_SHA}" in observed["args"]
     assert "-z" in observed["args"]
     assert "--diff-filter=ACDMRTUXB" in observed["args"]
     assert observed["kwargs"]["text"] is False

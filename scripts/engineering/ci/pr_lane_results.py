@@ -9,10 +9,12 @@ from __future__ import annotations
 
 import argparse
 import ast
+import importlib.util
 import json
 import os
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -181,6 +183,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/quality/low-coverage-6045-revalidation.xml": (
         "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
+    ),
+    "reports/quality/issue-12474-api-owner-brief.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+        "tests/architecture/test_check_doc_links_guardrails.py",
+    ),
+    "reports/quality/issue-12474-ci-parity-evidence.md": (
+        *ISSUE_12475_PHYSICAL_PARITY_TESTS,
+        "tests/unit/scripts/engineering/ci/test_physical_schema_parity.py",
     ),
     "reports/quality/issue-12475-physical-parity-evidence.md": (
         *ISSUE_12475_PHYSICAL_PARITY_TESTS,
@@ -1551,7 +1561,104 @@ def build_parser() -> argparse.ArgumentParser:
     subtract.add_argument("--output", type=Path, required=True)
     subtract.add_argument("--ignore-file", type=Path, required=True)
     subtract.set_defaults(handler=_subtract_affected_command)
+    physical = subparsers.add_parser("physical-parity")
+    physical.add_argument("--junit", type=Path, required=True)
+    physical.add_argument("--negative-control", action="store_true")
+    physical.set_defaults(handler=_physical_parity_command)
     return parser
+
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+NEGATIVE_CONTROL_ENV = "BIOETL_PHYSICAL_PARITY_NEGATIVE_CONTROL"
+TARGETS = (
+    "tests/integration/infrastructure/storage/test_issue_12475_physical_parity.py",
+    "tests/integration/infrastructure/storage/test_gold_writer_versioning.py",
+    "tests/unit/domain/exceptions/test_storage.py",
+    "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
+    "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
+    "tests/e2e/test_pipeline_with_schema_drift_e2e.py",
+    "tests/integration/infrastructure/storage/test_issue_12474_parity_control.py",
+)
+
+
+def _unsuccessful_parity_cases(cases: Sequence[ET.Element]) -> list[str]:
+    """Keep every failed, errored or skipped testcase diagnostic in order."""
+    errors = []
+    for case in cases:
+        for tag in ("failure", "error", "skipped"):
+            if case.find(tag) is not None:
+                errors.append(f"{case.get('classname')}.{case.get('name')}: {tag}")
+    return errors
+
+
+def validate_junit(path: Path, targets: tuple[str, ...] = TARGETS) -> list[str]:
+    """Require passing, nonempty, unskipped evidence for every selected module."""
+    if not targets:
+        return ["empty parity selection"]
+    if not path.is_file():
+        return ["missing parity JUnit"]
+    try:
+        cases = list(ET.parse(path).getroot().iter("testcase"))
+    except (ET.ParseError, OSError) as exc:
+        return [f"unreadable parity JUnit: {exc}"]
+    errors = []
+    if not cases:
+        errors.append("empty parity JUnit")
+    errors.extend(_unsuccessful_parity_cases(cases))
+    for target in targets:
+        module = target.removesuffix(".py").replace("/", ".")
+        if not any(
+            (case.get("classname") or "") == module
+            or (case.get("classname") or "").startswith(module + ".")
+            for case in cases
+        ):
+            errors.append(f"missing parity module: {target}")
+    return errors
+
+
+def _physical_parity_command(args: argparse.Namespace) -> int:
+    """Run one canonical matrix with real Delta/Arrow and preserve its JUnit."""
+    missing = [target for target in TARGETS if not (REPO_ROOT / target).is_file()]
+    if not TARGETS or missing:
+        print(f"Missing/empty mandatory parity selection: {missing}", file=sys.stderr)
+        return 2
+    for backend in ("deltalake", "pyarrow", "zstandard"):
+        if importlib.util.find_spec(backend) is None:
+            print(f"Missing mandatory parity backend: {backend}", file=sys.stderr)
+            return 2
+    junit = args.junit.resolve()
+    junit.parent.mkdir(parents=True, exist_ok=True)
+    if junit.exists():
+        print(f"Refusing stale parity evidence: {junit}", file=sys.stderr)
+        return 2
+    env = dict(os.environ)
+    env.pop("PYTEST_ADDOPTS", None)
+    # Ambient values cannot accidentally enable or mask the controlled run.
+    env[NEGATIVE_CONTROL_ENV] = "1" if args.negative_control else "0"
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        *TARGETS,
+        "-q",
+        "-o",
+        "addopts=",
+        "--strict-markers",
+        "--strict-config",
+        "-o",
+        "xfail_strict=true",
+        "--import-mode=importlib",
+        "-p",
+        "no:benchmark",
+        "--junitxml",
+        str(junit),
+    ]
+    print(f"physical parity argv={command!r}; cwd={REPO_ROOT}", flush=True)
+    result = subprocess.run(command, cwd=REPO_ROOT, env=env, check=False)
+    errors = validate_junit(junit)
+    for error in errors:
+        print(error, file=sys.stderr)
+    return result.returncode or int(bool(errors))
 
 
 def _job_result_pair(raw: str) -> tuple[str, str]:
