@@ -1,0 +1,12 @@
+{
+  "name": "minimatch",
+  "version": "11.0.3-bioetl.1",
+  "private": true,
+  "description": "Callable CommonJS entry point delegating to patched upstream minimatch",
+  "main": "index.cjs",
+  "types": "index.d.ts",
+  "files": ["index.cjs", "index.d.ts", "README.md"],
+  "license": "Apache-2.0",
+  "dependencies": {"minimatch-fixed": "npm:minimatch@11.0.3"},
+  "engines": {"node": "18 || 20 || >=22"}
+}

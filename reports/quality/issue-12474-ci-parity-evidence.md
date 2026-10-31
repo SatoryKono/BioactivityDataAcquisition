@@ -359,3 +359,55 @@ historical Grafana build inputs equal the current tree. Own Router run
 `41202898231` failed its unchanged moderate npm audit gate before the build;
 its actual findings and original logs are preserved. Neither a skipped host
 build nor the prior donor success is presented as current Grafana acceptance.
+
+The owner then authorized addressed `glob`/`minimatch` remediation with consumer
+compatibility and security-negative controls. Both plugin graphs now select
+`glob@14.0.3` and a private callable/named entry point that delegates to the
+unmodified npm `minimatch@11.0.3` implementation. No legacy matching algorithm
+is retained. Node 20 remains within the declared engine range; removed legacy
+`makeRe` APIs are not represented as supported. Both normal clean installs and
+both nine-case contracts passed. Real vulnerable-version controls fail for
+the actual amplification/continued-filesystem-work assertions. The fixed
+matcher honors its explicit upstream expansion cap; this is not a claim of
+linear default globparts growth. Original development diagnostics are retained.
+
+The private archive has 1237 bytes, SHA256
+`7de54d9e68d54b6c2fd82dce7c4c584fbcd72b9e80c351c319fdee3628a6b736`;
+both npm-generated lockfiles retain its real SRI and the fixed upstream SRI.
+The existing Jest/NYC commands and worker limit remain; nine controls are appended
+through `&&` in both existing `test:ci` entry points. Both unchanged moderate
+audit gates pass with six LOW findings remaining through unfixed `deepmerge`;
+no advisory exclusion or severity change is introduced.
+
+The first combined Python owning run returned exit 1 only because the strict
+existing override dictionary rejected the two newly authorized bindings:
+532 PASS, one FAIL, four existing historical-render skips. The exact dictionary
+now includes only the approved pins, with added fixed-upstream/consumer checks;
+all router/uuid constraints remain. The affected recheck passed 63 cases with
+the same four skips. Windows Jest remains a preserved environment FAIL before
+test execution: the SWC native cache rejects local DACLs. No permissions or
+security settings were changed. Actual Linux Jest and host build acceptance
+remain mandatory and are not inferred from the local type/lint checks.
+
+The subsequent parallel `fa8d903223efda3c26c19af08933d8a4000b2a7a` update was
+preserved and integrated after a second explicit sole-writer handoff. It adds
+the workflow-selector contract and hoists an unchanged route string. Because
+it changes TEST_INPUTS, the complete successful 17+2 CI capture on
+`b4e4332b1d9a5924f999eba941a32837a1bb0443` is historical evidence, not a capture
+for the new head. Its original archives and source qualification are preserved.
+The interrupted local attempts, including the WSL launcher failure and the
+subsequent seven-successful-shard attempt stopped for that external input change,
+remain incomplete; none are combined or promoted as the final measurement.
+
+Fresh readback at 2026-10-31 14:15 UTC found external merge of PR #12626:
+merge commit `32903f5187961922f19cf14417aa19afdf30c208`, actor `SatoryKono`,
+merged at `2026-10-31T14:14:03Z`. Its tree is exactly the former published
+`fa8d903` tree, `e9ca7401d8fd53a322fd6ca1f06658bcb7eaafaa`; the author of
+this qualification did not perform that merge. Issue #12474 remains OPEN.
+The preserved staged changes were carried onto a new owned branch directly
+from that main commit without conflicts or source loss. The source-owning
+437-case validation and pre-commit passed before that identical-tree move.
+Remote-main pre-check then correctly failed for the advanced base; its actual
+canonical remote-main update is retained. No telemetry result or ADMIT is
+inferred from the external merge. A new full frozen-source capture and Linux
+Grafana qualification are required before issue acceptance.
