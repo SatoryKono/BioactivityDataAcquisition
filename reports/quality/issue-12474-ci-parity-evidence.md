@@ -411,3 +411,75 @@ Remote-main pre-check then correctly failed for the advanced base; its actual
 canonical remote-main update is retained. No telemetry result or ADMIT is
 inferred from the external merge. A new full frozen-source capture and Linux
 Grafana qualification are required before issue acceptance.
+
+### Continued qualification after the external merge
+
+The continuation is published in PR #12633. Main subsequently advanced to
+`da58d2c13f4e2e2d4159effff83fff4c71a7f35f`, tree
+`508a180dfae88d9368f7bd0af3efdddb9d08ce41`; both incoming commits were preserved
+by a normal merge. The changed Router development metadata required a real
+`npm pack`: the resulting bridge archive has SHA256
+`93f02cd3c3420b1854a1c2228f70a99222a754286c2494dc9773145fef8614be`.
+Both plugin locks were regenerated with native Linux npm. Their only changed
+package field is the existing bridge alias integrity; no resolved dependency
+version changed. Windows npm attempts that pruned WASM optional dependencies
+were rejected and retained outside the repository.
+
+Own Nightly `41209731607` on `0e37d00f8d5100c5ed0b99d19fce1bae2d022a13`
+failed, including its integration producer. Successful aggregators therefore
+do not qualify this capture. The Linux local17 attempt also remains incomplete:
+six completed shards passed, one tooling shard rejected the installed system
+Node 18, and the attempt was stopped for the confirmed integration input defect.
+The actual outer exit was -15; all original measurement bytes were preserved.
+The locked Node 24 runtime is available for the next complete attempt.
+
+Router `41209731413` passed both plugin jobs but failed because BuildKit had
+not loaded the immutable base into Docker's inspectable store. The addressed
+pull-before-inspect correction preserves the original digest and all parity
+checks; 12 owning controls passed. Router `41210863632` then reached the real
+complete filesystem comparison and failed against the old delivery image.
+Original ZIP identity checks show exactly two changed Scenes source maps;
+JavaScript and all other plugin assets are unchanged. A local candidate built
+from those exact CI outputs matches the actual CI rebuild's complete rootfs
+`897a29cd108d9dc76655a2fd5b94c2915f4cbbbe53e0b5ddeafefb0632a17437`.
+Its managed variant equals that parent minus Scenes, with all 15,478 paths
+matching the previous managed runtime. These are local preparation receipts,
+not registry publication, current delivery acceptance or ADMIT.
+
+The source-only provenance generator rejects unsuccessful/foreign attempts,
+substituted ZIPs, incomplete parity and source additions/deletions. Independent
+review findings were fixed before adoption; its six isolated Python fixture
+methods run through the existing image verifier's 13 Node controls. It cannot
+relabel the changed image as an unchanged-image revalidation.
+
+The owner separately authorized narrow Gitleaks exclusions for historical
+metadata. Each of 57 findings was verified as a Git blob OID on its exact
+finding commit, yielding 29 exact source-path/OID pairs; six other findings
+are two exact public response metadata lines. Three AND-scoped generic-api-key
+entries preserve every other rule and path. Native Gitleaks 8.24.3, verified
+against the official release checksum, accepts all 29 pairs and both headers
+(exit 0, zero findings) and detects four synthetic credentials in the same
+three files (exit 1), including an arbitrary 40-hex value under an approved
+source-path key. Thirty affected Python owning tests pass. Real current CI,
+the complete frozen producer, registry/readback, independent final acceptance
+and native ADMIT remain required before closing #12474.
+
+The next main integration retained `ce48486bbf742c2a0d135d43dff56b78b9080f05`,
+tree `10fb6595f65fc9cfddf3c7c7dfe504f4d51e79f4`, including its organism mapping
+change and removal of the unused Router development dependency. A new native
+pack now has SHA256 `86995f918b30efa16931f99407f28368cfe5d529b130c48c9c1d53c1e9c209b1`;
+again, native Linux lock generation changed only the existing alias SRI.
+Native positive controls also cover the historical 29th OID and first-line
+CRLF metadata; the positive/negative exits remain 0/1 with zero/four findings.
+
+The reviewed source-ac307 archival candidates were then published and pulled
+back by immutable identity: host
+`sha256:2ef07e20ee5b6451f2386fdaa13d3ce72e411bbfae4053332e8e8dfa3575044e`
+and managed `sha256:09176a12590763ea1adeb844bd325074e79b4edd94cfc43f1012a1f03fba75c3`
+in `satorykono/bioetl-grafana-router7-canvas`. Complete registry exports verify
+15,534/15,478 paths and the exact prepared rootfs/config identities; raw records
+are preserved for both. This is archival candidate publication, not promotion
+of the current main source. The existing Router workflow now has an explicit
+owned immutable candidate input; its empty default still verifies declared
+delivery. Candidate qualification retains all complete image checks and labels
+its receipt separately. Fifteen Node controls and 58 CI-policy tests pass.

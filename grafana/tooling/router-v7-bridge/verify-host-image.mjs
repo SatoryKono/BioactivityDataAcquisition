@@ -30,6 +30,21 @@ export function parseArguments(args) {
   return validateImage(args[0]);
 }
 
+export function validateDeliveryImage(image) {
+  assert.match(image, /^satorykono\/bioetl-grafana-router7-canvas@sha256:[0-9a-f]{64}$/,
+    'Delivery qualification requires an immutable image in the owned repository');
+  return image;
+}
+
+export function parseVerificationArguments(args, declaredImage) {
+  if (args.length === 1) {
+    return { built: parseArguments(args), deliveryImage: validateDeliveryImage(declaredImage), candidate: false };
+  }
+  assert.equal(args.length, 3, 'Unexpected image verification arguments');
+  assert.equal(args[1], '--candidate-image', 'Unsupported image verification option');
+  return { built: parseArguments([args[0]]), deliveryImage: validateDeliveryImage(args[2]), candidate: true };
+}
+
 function writeReceipt(receipt) {
   const root = realpathSync(fileURLToPath(new URL('../../../', import.meta.url)));
   const reports = join(root, 'reports');
@@ -125,8 +140,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const manifest = JSON.parse(readFileSync(new URL('./host-image.json', import.meta.url), 'utf8'));
   const recipe = readFileSync(new URL('./Dockerfile.host', import.meta.url));
   assert.equal(sha256(recipe), manifest.artifact_sha256['grafana/tooling/router-v7-bridge/Dockerfile.host']);
-  const built = parseArguments(process.argv.slice(2));
-  const receipt = verifyImages(built, manifest, inspect, fingerprint, filesystem, inspectTrustedBase());
-  writeReceipt(receipt);
-  console.log('Built host image matches the declared image artifact set');
+  const target = parseVerificationArguments(process.argv.slice(2), manifest.image);
+  const receipt = verifyImages(target.built, { ...manifest, image: target.deliveryImage },
+    inspect, fingerprint, filesystem, inspectTrustedBase());
+  writeReceipt({ ...receipt, qualification_target: target.candidate ? 'candidate' : 'declared_delivery' });
+  console.log(target.candidate
+    ? 'Built host image matches the explicitly selected candidate artifact set'
+    : 'Built host image matches the declared image artifact set');
 }

@@ -235,6 +235,63 @@ paths = ['''^tests/unit/application/test_issue_10518_application_compwf_b\.py$''
 regexTarget = "secret"
 regexes = ['''^normalization_policies=policies$''']
 
+# User-authorized precision exclusions; no whole-file or generic hash exclusion.
+
+[[rules.allowlists]]
+description = "Reviewed #12474 inventory source path and exact independently verified Git blob OID pairs"
+condition = "AND"
+paths = ['''^configs/quality/external_resource_inventory\.json$''']
+regexTarget = "line"
+regexes = [
+    '''^(?:\n)?[ \t]*"src/bioetl/application/composite/dependency_key_resolvers\.py"[ \t]*:[ \t]*"1ca10aede868bce657ed471975b31ea794121a4c",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/composite/helpers/dependency_chained_key_resolver\.py"[ \t]*:[ \t]*"0efa72cf099edc6e3bdce65d5f67c314d2fb81fd",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/composite/join_key_normalization\.py"[ \t]*:[ \t]*"61d05e2700461a78e58c98e9bd7d78980fdab602",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/composite/join_key_resolution\.py"[ \t]*:[ \t]*"1e69c2ba408cce16987606783ca5a433ab617bf5",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/composite/key_extractor\.py"[ \t]*:[ \t]*"4a23245178f92266979bd6e1796e82959b01bca8",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/composite/runner_pkg/runner_key_flow\.py"[ \t]*:[ \t]*"7fa416198499c485406e7252d159525dcbb0d30c",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/composite/runtime_wiring_api\.py"[ \t]*:[ \t]*"240843e2ba1a4442cb0225e52c5c15f3e9812fe9",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/core/factory_wiring_api\.py"[ \t]*:[ \t]*"c9f93df1eb4a5f12bd731bb4c595817d514cbed7",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/application/services/ops/admin_runtime_api\.py"[ \t]*:[ \t]*"ae1d21f87e4cc99c3e5183f67465a92b0ef5dbf4",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/execution_api\.py"[ \t]*:[ \t]*"5006964a11ad9f0c73930cbb3aedd3c57f1b0afe",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/factories/observability_api\.py"[ \t]*:[ \t]*"23f83f372c3eb7c524b3d8186124a3b25f5aa0e7",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/health_api\.py"[ \t]*:[ \t]*"45aa1fa7f6a1ad7dcd1c4bb860d280f101053a46",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/health_service_access\.py"[ \t]*:[ \t]*"cacb46c1f238a4b72f318dec6b88be3a0366f64d",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/maintenance_api\.py"[ \t]*:[ \t]*"e39233f5e414936a991c997fa1187715824b5773",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/registry_api\.py"[ \t]*:[ \t]*"6b0f8014dddfe7256ac4a1eb8ee8f6d3bcc2bd38",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/_config_access_loaders\.py"[ \t]*:[ \t]*"fa89cef06f9426b971aa365a5b794282ba125dbb",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/_effective_config_secret_support\.py"[ \t]*:[ \t]*"87369b2ef9c23af8f67ace60c433999bdd6d084b",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/config_access\.py"[ \t]*:[ \t]*"5b9af80fcf8f9ca538a25bffd7622ee1a7d620ff",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/domain/exceptions/internal_auth\.py"[ \t]*:[ \t]*"d259de469bf4fcb2e980bee28dfaf47f6b0f3386",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/domain/normalization/join_keys\.py"[ \t]*:[ \t]*"e1c426fcb255acb576cdf524d36d83d0a2a30e27",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/domain/normalization/open_access\.py"[ \t]*:[ \t]*"caefdcf3585a152ab10ec69e0e4ed77d2c81dca7",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/adapters/common/_api_request_sanitize\.py"[ \t]*:[ \t]*"033b2dd5f681d5a8bd676d479c051bbccef5baad",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/adapters/common/_api_request_sanitize\.py"[ \t]*:[ \t]*"de33f8b644c4f82affbf98057f232b24294706ec",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/config/composite_config_api\.py"[ \t]*:[ \t]*"6d65cc866bd46eb809c1a3e0e70b56fc93e8a9c7",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/config/pipeline_config_api\.py"[ \t]*:[ \t]*"f65bd2246b2930e0c646b7fd72ee145e35b805da",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/config/settings_api\.py"[ \t]*:[ \t]*"118542eea9bd4c70db73d0bedba86bec8fb17048",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/config/workflow_config_api\.py"[ \t]*:[ \t]*"5baa38f4a2e00144ea95f1fd2d51411fd248a92d",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/interfaces/cli/commands/domains/maintenance/service_access\.py"[ \t]*:[ \t]*"bc3d9d727fb2888a90d260cdbc1b29f0f376e139",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/interfaces/cli/commands/domains/quarantine/runtime_access\.py"[ \t]*:[ \t]*"4e3f2ee99746c5a323bc7f78401910eda6cdedd9",?[ \t]*\r?$''',
+]
+
+[[rules.allowlists]]
+description = "Reviewed #12474 exact public response metadata x-api-deployment-date"
+condition = "AND"
+paths = ['''^reports/evidence/12461/uniprot_headers\.txt$''']
+regexTarget = "line"
+regexes = [
+    '''^(?:\n)?[ \t]*x\-api\-deployment\-date:[ \t]*07\-October\-2026[ \t]*\r?$''',
+]
+
+[[rules.allowlists]]
+description = "Reviewed #12474 exact public response metadata x-amz-apigw-id"
+condition = "AND"
+paths = ['''^reports/evidence/12461/semanticscholar_headers\.txt$''']
+regexTarget = "line"
+regexes = [
+    '''^(?:\n)?[ \t]*x\-amz\-apigw\-id:[ \t]*Fz_WbG9FvHcEQxw=[ \t]*\r?$''',
+]
+
 [[rules]]
 id = "curl-auth-header"
 [[rules.allowlists]]
