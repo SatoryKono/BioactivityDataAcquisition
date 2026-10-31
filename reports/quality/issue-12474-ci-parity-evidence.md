@@ -1014,3 +1014,15 @@ the historical failure is retained. Linux/Windows strict typing and prior
 rootfs/plugin/security controls remain enforced. The changed test inputs
 require a fresh qualified producer and final acceptance; old ADMIT is not
 transferred and no stale measurements are rebound manually.
+
+Source `3126b776fc4bbb851ba24d559c688e2ee7d0f8ed` (tree
+`658986b2fbd0810056c1a399e9951de9492bf134`) passed fresh Router
+`41252890866` in all four jobs and SonarCloud Code Analysis with zero
+annotations. Native host provenance precheck/update/check returned 1/0/0;
+the expected stale FAIL and original ZIP/API receipts are retained.
+The new manifest SHA256 is
+`c870302cb6a22a99d36d84b2b9a4198d2fbdb4ee480e9af08a9f834c373271c1`,
+binding 116 source inputs plus the separately compared five build fields.
+Immutable delivery and historical records remain unchanged. The next
+source capture must measure the changed test inputs; final telemetry
+acceptance, final CI and native ADMIT remain pending that capture.
