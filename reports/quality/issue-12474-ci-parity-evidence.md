@@ -309,3 +309,15 @@ same function bytes on main and this candidate. This diagnostic remains FAIL;
 the configured required mypy targets (`src/bioetl`, `src/memory`, and
 `scripts/engineering/quality`) are unchanged and still mandatory. The unrelated
 YAML/security logic and mypy exclusions were not changed to silence it.
+
+The strict impact shadow compare subsequently identified two task-owned paths
+without routes: the monitoring compose file and Docker security runbook. Their
+exact routes now select existing owning tests; unmapped paths still fail.
+The Windows full producer also exposed a synthetic scanner fixture whose
+reviewed digest used LF text while its writer created CRLF bytes. That fixture
+now hashes the actual written bytes, matching the unchanged scanner contract;
+the wrong-digest negative control remains. All 147 focused owning cases passed.
+The complete actual diff plus 20 applicable future generated outputs was checked
+before freezing again: 56 unique paths, no unmapped input, 86 selected targets.
+The previous local attempt remains incomplete with its recorded failed shard;
+none of its partial measurements are promoted as a complete capture.
