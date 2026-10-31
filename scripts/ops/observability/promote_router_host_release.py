@@ -18,11 +18,10 @@ import zipfile
 from pathlib import Path, PurePosixPath
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[3]
+ROOT = HERE.parents[2]
 spec = importlib.util.spec_from_file_location(
     "host_provenance",
-    HERE.parents[3]
-    / "scripts/ops/observability/grafana/refresh_router_host_provenance.py",
+    ROOT / "scripts/ops/observability/refresh_router_host_provenance.py",
 )
 provenance = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(provenance)
@@ -32,6 +31,9 @@ IMAGE = re.compile(r"satorykono/bioetl-grafana-router7-canvas@sha256:[0-9a-f]{64
 HOST_PATH = "grafana/tooling/router-v7-bridge/host-image.json"
 MANAGED_PATH = "grafana/tooling/router-v7-bridge/managed-image.json"
 RECIPE_PATH = "grafana/tooling/router-v7-bridge/Dockerfile.managed"
+DIST_FRAGMENT = "/dist/"
+HOST_COMPOSE_SUFFIX = "/compose.acceptance.yml"
+FROM_PREFIX = "FROM "
 COMPOSE_PATHS = (
     "grafana/tooling/router-v7-bridge/compose.acceptance.yml",
     "grafana/tooling/router-v7-bridge/compose.managed-acceptance.yml",
@@ -39,60 +41,96 @@ COMPOSE_PATHS = (
 )
 
 
+def _canonical_mapping(lines: list[str], indent: int) -> dict:
+    """Parse only the owned plain-key block syntax, rejecting duplicate keys."""
+    entries = {}
+    current = None
+    for line in lines:
+        level = len(line) - len(line.lstrip())
+        if level == indent:
+            key = re.fullmatch(rf" {{{indent}}}([A-Za-z_][A-Za-z0-9_-]*):(.*)", line)
+            require(key is not None, "Unsupported Compose mapping key")
+            name, value = key.groups()
+            require(name not in entries, "Duplicate Compose mapping key")
+            entries[name] = (value, [])
+            current = name
+        else:
+            require(
+                level > indent and current is not None,
+                "Unsupported Compose indentation",
+            )
+            entries[current][1].append(line)
+    return entries
+
+
+def _grafana_image_binding(text: str) -> str:
+    require("\t" not in text, "Unsupported Compose indentation")
+    lines = [
+        line
+        for line in text.splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    root = _canonical_mapping(lines, 0)
+    require(
+        "services" in root and not root["services"][0].strip(),
+        "Noncanonical services block",
+    )
+    services = _canonical_mapping(root["services"][1], 2)
+    require("grafana" in services, "Missing Grafana service")
+    require(
+        all(not value.strip() for value, _ in services.values()),
+        "Noncanonical service block",
+    )
+    grafana = _canonical_mapping(services["grafana"][1], 4)
+    require(
+        "image" in grafana and not grafana["image"][1],
+        "Missing/scalar Grafana image required",
+    )
+    return grafana["image"][0].strip()
+
+
 def validate_delivery_bindings(
     outputs: dict[str, bytes], image: str, managed_image: str
 ):
     """Fail closed on departures from the owned block-style Compose bindings."""
     for path in COMPOSE_PATHS:
-        text = outputs[path].decode()
-        require("\t" not in text, "Unsupported Compose indentation: " + path)
-        services = 0
-        grafana = 0
-        in_services = False
-        in_grafana = False
-        images = []
-        top_keys = set()
-        service_keys = set()
-        grafana_keys = set()
-        for line in text.splitlines():
-            if not line.strip() or line.lstrip().startswith("#"):
-                continue
-            indent = len(line) - len(line.lstrip())
-            if indent == 0:
-                key = re.fullmatch(r"([A-Za-z_][A-Za-z0-9_-]*):(.*)", line)
-                require(key is not None, "Unsupported Compose top-level key: " + path)
-                name, value = key.groups()
-                require(name not in top_keys, "Duplicate Compose key: " + path)
-                top_keys.add(name)
-                in_services = name == "services"
-                require(
-                    not in_services or not value.strip(), "Noncanonical services block"
-                )
-                services += int(in_services)
-                in_grafana = False
-            elif in_services and indent == 2:
-                key = re.fullmatch(r"  ([A-Za-z_][A-Za-z0-9_-]*):", line)
-                require(key is not None, "Unsupported Compose service key: " + path)
-                name = key.group(1)
-                require(name not in service_keys, "Duplicate Compose service: " + path)
-                service_keys.add(name)
-                in_grafana = name == "grafana"
-                grafana += int(in_grafana)
-            elif in_grafana and indent == 4:
-                key = re.fullmatch(r"    ([A-Za-z_][A-Za-z0-9_-]*):(.*)", line)
-                require(key is not None, "Unsupported Grafana mapping key: " + path)
-                name, value = key.groups()
-                require(name not in grafana_keys, "Duplicate Grafana key: " + path)
-                grafana_keys.add(name)
-                if name == "image":
-                    images.append(value.strip())
-        expected = image if path.endswith("/compose.acceptance.yml") else managed_image
+        expected = image if path.endswith(HOST_COMPOSE_SUFFIX) else managed_image
         require(
-            services == 1 and grafana == 1 and images == [expected],
+            _grafana_image_binding(outputs[path].decode()) == expected,
             "Unexpected Grafana service delivery binding: " + path,
         )
-    parents = re.findall(r"(?im)^\s*FROM\s+([^\r\n]+)$", outputs[RECIPE_PATH].decode())
-    require(parents == [image], "Unexpected managed recipe parent")
+    instructions = [
+        line.split()
+        for line in outputs[RECIPE_PATH].decode().splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    parents = [parts[1:] for parts in instructions if parts[0].upper() == "FROM"]
+    require(parents == [[image]], "Unexpected managed recipe parent")
+
+
+def _validate_release_inventory(host: dict, dist: dict, inputs: dict) -> None:
+    old_dist = {
+        path: value
+        for path, value in host["artifact_sha256"].items()
+        if DIST_FRAGMENT in path
+    }
+    require(set(dist) == set(old_dist), "Release artifact inventory changed")
+    require(
+        all(
+            value == old_dist[path] or path.endswith(".js.map")
+            for path, value in dist.items()
+        ),
+        "Release would change runtime assets beyond source maps",
+    )
+    require(
+        inputs
+        and all(
+            path in inputs
+            for path in host["artifact_sha256"]
+            if DIST_FRAGMENT not in path
+        ),
+        "Source provenance inventory shrank",
+    )
 
 
 def build_release_files(
@@ -132,26 +170,7 @@ def build_release_files(
     require(
         managed_receipt.get("parent_image") == image, "Managed parent image mismatch"
     )
-    old_dist = {
-        path: value
-        for path, value in host["artifact_sha256"].items()
-        if "/dist/" in path
-    }
-    require(set(dist) == set(old_dist), "Release artifact inventory changed")
-    require(
-        all(
-            value == old_dist[path] or path.endswith(".js.map")
-            for path, value in dist.items()
-        ),
-        "Release would change runtime assets beyond source maps",
-    )
-    require(
-        inputs
-        and all(
-            path in inputs for path in host["artifact_sha256"] if "/dist/" not in path
-        ),
-        "Source provenance inventory shrank",
-    )
+    _validate_release_inventory(host, dist, inputs)
     result = copy.deepcopy(host)
     outputs = dict(original)
     promotion = {
@@ -186,19 +205,19 @@ def build_release_files(
         result["release_history"] = history
         recipe = original[RECIPE_PATH].decode()
         require(
-            recipe.count("FROM " + host["image"]) == 1,
+            recipe.count(FROM_PREFIX + host["image"]) == 1,
             "Unexpected managed recipe parent",
         )
         outputs[RECIPE_PATH] = recipe.replace(
-            "FROM " + host["image"], "FROM " + image
+            FROM_PREFIX + host["image"], FROM_PREFIX + image
         ).encode()
         for path in COMPOSE_PATHS:
             old = (
                 host["image"]
-                if path.endswith("/compose.acceptance.yml")
+                if path.endswith(HOST_COMPOSE_SUFFIX)
                 else managed["image"]
             )
-            new = image if path.endswith("/compose.acceptance.yml") else managed_image
+            new = image if path.endswith(HOST_COMPOSE_SUFFIX) else managed_image
             text = original[path].decode()
             require(
                 text.count(old) == 1, "Unexpected compose delivery binding: " + path
@@ -293,7 +312,7 @@ def original_plugin_digests(
                     and "\\" not in item.filename,
                     "Unsafe plugin artifact member",
                 )
-                key = "grafana/plugins/" + plugin + "/dist/" + item.filename
+                key = "grafana/plugins/" + plugin + DIST_FRAGMENT + item.filename
                 require(key not in result, "Duplicate plugin artifact member")
                 result[key] = sha256(archive.read(item))
     return result
@@ -339,8 +358,8 @@ def live_managed_parity(
                 "stderr_sha256": sha256(process.stderr),
             }
         )
-        (evidence / "docker-commands.json").write_text(
-            json.dumps(commands, indent=2) + "\n"
+        (evidence / "docker-commands.json").write_bytes(
+            (json.dumps(commands, indent=2) + "\n").encode("utf-8")
         )
         process.check_returncode()
         return process.stdout
@@ -383,8 +402,8 @@ def live_managed_parity(
                     "stdout_contract": "tar consumed by filesystem_records; original tar not retained",
                 }
             )
-            (evidence / "docker-commands.json").write_text(
-                json.dumps(commands, indent=2) + "\n"
+            (evidence / "docker-commands.json").write_bytes(
+                (json.dumps(commands, indent=2) + "\n").encode("utf-8")
             )
             require(code == 0, "Docker export failed")
             return result
@@ -432,8 +451,8 @@ def live_managed_parity(
         ("managed-built", built_files),
         ("managed-registry", delivered_files),
     ):
-        (evidence / (name + "-filesystem-records.json")).write_text(
-            json.dumps(data, sort_keys=True) + "\n"
+        (evidence / (name + "-filesystem-records.json")).write_bytes(
+            (json.dumps(data, sort_keys=True) + "\n").encode("utf-8")
         )
     receipt = verify(
         host,
@@ -546,7 +565,9 @@ def main() -> int:
         "default_delivery_ci_claimed": False,
         "admission_claimed": False,
     }
-    (evidence / "result.json").write_text(json.dumps(result, indent=2) + "\n")
+    (evidence / "result.json").write_bytes(
+        (json.dumps(result, indent=2) + "\n").encode("utf-8")
+    )
     sys.stdout.write(json.dumps(result, indent=2) + "\n")
     return 0
 

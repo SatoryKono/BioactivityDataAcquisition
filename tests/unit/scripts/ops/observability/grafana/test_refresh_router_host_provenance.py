@@ -13,7 +13,7 @@ from pathlib import Path
 spec = importlib.util.spec_from_file_location(
     "provenance",
     Path(__file__).parents[6]
-    / "scripts/ops/observability/grafana/refresh_router_host_provenance.py",
+    / "scripts/ops/observability/refresh_router_host_provenance.py",
 )
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
@@ -22,7 +22,7 @@ IMAGE = "satorykono/bioetl-grafana-router7-canvas@sha256:" + DIGEST
 promotion_spec = importlib.util.spec_from_file_location(
     "promotion",
     Path(__file__).parents[6]
-    / "scripts/ops/observability/grafana/promote_router_host_release.py",
+    / "scripts/ops/observability/promote_router_host_release.py",
 )
 promotion = importlib.util.module_from_spec(promotion_spec)
 promotion_spec.loader.exec_module(promotion)
@@ -175,6 +175,21 @@ class ProvenanceControls(unittest.TestCase):
             )
             self.assertIn(expected.encode(), outputs[path])
         self.assertEqual(promotion.build_release_files(outputs, *case[1:]), outputs)
+        expanded = dict(outputs)
+        for path in promotion.COMPOSE_PATHS:
+            expanded[path] += (
+                b"  renderer:\n    image: unrelated/renderer:fixed\nvolumes:\n  data:\n"
+            )
+        promotion.validate_delivery_bindings(expanded, IMAGE, managed["image"])
+        for recipe in (
+            "FROM " + IMAGE + "\nFROM " + IMAGE + "\n",
+            "FROM " + IMAGE + " AS second-stage\n",
+            "FROMimage " + IMAGE + "\n",
+        ):
+            corrupted = dict(outputs)
+            corrupted[promotion.RECIPE_PATH] = recipe.encode()
+            with self.assertRaises(ValueError):
+                promotion.validate_delivery_bindings(corrupted, IMAGE, managed["image"])
         for path in (*promotion.COMPOSE_PATHS, promotion.RECIPE_PATH):
             with self.subTest(tampered=path):
                 corrupted = dict(outputs)

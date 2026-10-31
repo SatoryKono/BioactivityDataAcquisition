@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T13:14:44.559094+00:00",
+  "generated_at": "2026-10-31T17:36:24.531998+00:00",
   "summary": {
-    "total_scripts": 698,
+    "total_scripts": 700,
     "status_counts": {
-      "active": 334,
+      "active": 336,
       "supporting": 364
     },
     "reference_group_coverage": {
@@ -12,10 +12,10 @@
       "build": 18,
       "ci": 75,
       "docs": 290,
-      "other": 16,
-      "scripts": 586,
+      "other": 19,
+      "scripts": 587,
       "skills": 13,
-      "tests": 516
+      "tests": 518
     }
   },
   "scripts": [
@@ -2896,7 +2896,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 434,
+          "line": 437,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3678,7 +3678,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 433,
+          "line": 436,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3733,7 +3733,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 432,
+          "line": 435,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -10240,7 +10240,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/test_telemetry_provenance.py",
-          "line": 809,
+          "line": 807,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.local_test_telemetry import ("
         },
@@ -10484,7 +10484,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 352,
+          "line": 355,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10527,7 +10527,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 446,
+          "line": 449,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -10695,7 +10695,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/engineering/ci/run_pytest_resilient.py",
@@ -10712,6 +10712,12 @@
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_receipts.py",
           "line": 964,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pytest_receipts import write_runner_terminal_receipt"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_pytest_receipts.py",
+          "line": 1003,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_receipts import write_runner_terminal_receipt"
         }
@@ -12858,13 +12864,13 @@
       "references": [
         {
           "path": "pyproject.toml",
-          "line": 363,
+          "line": 364,
           "source_group": "build",
           "text": "# (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py); memory"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 239,
+          "line": 242,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -12888,13 +12894,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 475,
+          "line": 485,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 488,
+          "line": 498,
           "source_group": "tests",
           "text": "if path == \"scripts/engineering/dev/zed_mypy.py\":"
         }
@@ -15712,7 +15718,7 @@
         },
         {
           "path": "tests/architecture/test_pytest_benchmark_caller_contract.py",
-          "line": 939,
+          "line": 940,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_hotspot_degradation_report import ("
         }
@@ -17644,7 +17650,7 @@
         },
         {
           "path": "scripts/engineering/ci/test_telemetry_provenance.py",
-          "line": 816,
+          "line": 814,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_module_coverage_inventory import ("
         },
@@ -20231,13 +20237,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 700,
+          "line": 710,
           "source_group": "tests",
           "text": "\"src/bioetl/infrastructure/quality/scoring.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 701,
+          "line": 711,
           "source_group": "tests",
           "text": "\"scripts/engineering/quality/scoring.py\","
         },
@@ -20614,7 +20620,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 511,
+          "line": 514,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -23614,7 +23620,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 588,
+          "line": 591,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -23989,13 +23995,19 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
           "line": 435,
           "source_group": "docs",
           "text": "# .\\scripts\\ops\\observability\\grafana\\recover_renderer.ps1"
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 802,
+          "source_group": "other",
+          "text": "\"docker-compose.monitoring.yml\": \"name: bioetl-monitoring\\n\\n# OPTIONAL operator stack (ADR-010). Not part of the default release bundle.\\n# Default local workflow: Python/venv only, or main stack alo"
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
@@ -24250,7 +24262,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 9,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -24259,22 +24271,46 @@
           "text": "git diff --name-only \"$base\"...HEAD -- 'grafana/tooling/router-v7-bridge/**' 'grafana/plugins/bioetl-scenes-app/**' 'grafana/plugins/bioetl-selectorshell-panel/**' '.github/workflows/router-v7-bridge."
         },
         {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 181,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"4cf4b6d70ae3eb2c02b653ec8aefa8661938b8e38e38cb044dbd201cf3ca4f9e\","
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 411,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"4cf4b6d70ae3eb2c02b653ec8aefa8661938b8e38e38cb044dbd201cf3ca4f9e\","
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 942,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"4cf4b6d70ae3eb2c02b653ec8aefa8661938b8e38e38cb044dbd201cf3ca4f9e\","
+        },
+        {
           "path": "scripts/ops/__main__.py",
           "line": 91,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.router_managed_image\""
         },
         {
+          "path": "scripts/ops/observability/promote_router_host_release.py",
+          "line": 331,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.router_managed_image import verify"
+        },
+        {
+          "path": "scripts/ops/observability/refresh_router_host_provenance.py",
+          "line": 44,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/observability/grafana/router_managed_image.py\","
+        },
+        {
           "path": "tests/architecture/test_circleci_migration_contract.py",
           "line": 542,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\","
-        },
-        {
-          "path": "tests/unit/scripts/ops/test_router_managed_image.py",
-          "line": 9,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana import router_managed_image as managed"
         }
       ],
       "owner": "@bioetl-platform",
@@ -24287,13 +24323,31 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 10,
       "references": [
         {
           "path": ".circleci/config.yml",
           "line": 147,
           "source_group": "ci",
           "text": "git diff --name-only \"$base\"...HEAD -- 'grafana/tooling/router-v7-bridge/**' 'grafana/plugins/bioetl-scenes-app/**' 'grafana/plugins/bioetl-selectorshell-panel/**' '.github/workflows/router-v7-bridge."
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 182,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"ba5e025f7926fa535aff96f029cddb53eac5ba93eeca4bcfa30330209bf33013\","
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 412,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"ba5e025f7926fa535aff96f029cddb53eac5ba93eeca4bcfa30330209bf33013\""
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 943,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"ba5e025f7926fa535aff96f029cddb53eac5ba93eeca4bcfa30330209bf33013\""
         },
         {
           "path": "scripts/ops/__main__.py",
@@ -24308,16 +24362,16 @@
           "text": "from scripts.ops.observability.grafana import router_rootfs as module"
         },
         {
-          "path": "tests/architecture/test_circleci_migration_contract.py",
-          "line": 541,
-          "source_group": "tests",
-          "text": "\"scripts/ops/observability/grafana/router_rootfs.py\","
+          "path": "scripts/ops/observability/promote_router_host_release.py",
+          "line": 332,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.router_rootfs import filesystem_records"
         },
         {
-          "path": "tests/unit/scripts/ops/test_router_rootfs.py",
-          "line": 10,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana import router_rootfs as rootfs"
+          "path": "scripts/ops/observability/refresh_router_host_provenance.py",
+          "line": 43,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/observability/grafana/router_rootfs.py\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -24616,6 +24670,42 @@
           "line": 138,
           "source_group": "tests",
           "text": "from scripts.ops.observability import green_acceptance as runner"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/observability/promote_router_host_release.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/ops/observability/grafana/test_refresh_router_host_provenance.py",
+          "line": 25,
+          "source_group": "tests",
+          "text": "/ \"scripts/ops/observability/promote_router_host_release.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/observability/refresh_router_host_provenance.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ops/observability/promote_router_host_release.py",
+          "line": 24,
+          "source_group": "scripts",
+          "text": "ROOT / \"scripts/ops/observability/refresh_router_host_provenance.py\","
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/grafana/test_refresh_router_host_provenance.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "/ \"scripts/ops/observability/refresh_router_host_provenance.py\","
         }
       ]
     },

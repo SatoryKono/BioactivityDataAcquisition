@@ -8,7 +8,6 @@ const { createRequire } = require("node:module");
 const { pathToFileURL } = require("node:url");
 const { spawnSync } = require("node:child_process");
 const { test } = require("node:test");
-const { setTimeout: delay } = require("node:timers/promises");
 
 const project = createRequire(path.resolve(process.cwd(), "package.json"));
 const fixed = project("minimatch-fixed");
@@ -138,26 +137,38 @@ for (const mode of ["promise", "stream"]) {
       const controller = new AbortController();
       const reason = new Error("synthetic glob cancellation");
       const timed = trigger === "timeout";
+      if (timed) reason.name = "TimeoutError";
       let reads = 0;
+      let completeFirstRead;
+      const firstReadCompleted = new Promise((resolve) => {
+        completeFirstRead = resolve;
+      });
       const instrumented = {
         ...fs,
         readdir(...args) {
           reads++;
+          const callback = args.pop();
           if (timed) {
-            const callback = args.pop();
             return fs.readdir(...args, (...result) => {
-              setTimeout(() => callback(...result), 30);
+              controller.abort(reason);
+              queueMicrotask(() => {
+                callback(...result);
+                if (reads === 1) completeFirstRead();
+              });
             });
           }
           if (reads === 1) controller.abort(reason);
-          return fs.readdir(...args);
+          return fs.readdir(...args, (...result) => {
+            callback(...result);
+            if (reads === 1) completeFirstRead();
+          });
         },
       };
       try {
         const options = {
           cwd: root,
           fs: instrumented,
-          signal: timed ? AbortSignal.timeout(10) : controller.signal,
+          signal: controller.signal,
         };
         const run = async () => {
           if (mode === "promise") await glob("**/*", options);
@@ -168,14 +179,9 @@ for (const mode of ["promise", "stream"]) {
           run(),
           timed ? { name: "TimeoutError" } : /synthetic glob cancellation/,
         );
-        const atReject = reads;
-        await delay(timed ? 120 : 80);
-        assert.equal(atReject, 1);
-        assert.equal(
-          reads,
-          atReject,
-          "filesystem work continued after rejection",
-        );
+        await firstReadCompleted;
+        await new Promise((resolve) => setImmediate(resolve));
+        assert.equal(reads, 1, "filesystem work continued after rejection");
       } finally {
         removeSyntheticTree(root);
       }

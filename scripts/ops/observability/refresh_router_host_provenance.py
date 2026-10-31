@@ -20,7 +20,7 @@ from pathlib import Path, PurePosixPath
 
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[3]
+ROOT = HERE.parents[2]
 MANIFEST = "grafana/tooling/router-v7-bridge/host-image.json"
 WORKFLOW = ".github/workflows/router-v7-bridge.yml"
 HEX_SHA256_PATTERN = r"[0-9a-f]{64}"

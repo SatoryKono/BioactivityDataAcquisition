@@ -549,3 +549,49 @@ was rejected; the original timeout/filesystem controls remain unchanged.
 The earlier promotion receipt retains its original generator identity.
 Fresh default-delivery CI and new captures remain necessary after these
 source/test changes; no historical receipt is relabeled as current evidence.
+
+### Default delivery and the next source qualification
+
+Default Router run `41221536167` on
+`61ac3cd9f5425b17d5d61c68a6d15312d4b584d7` completed successfully in all four
+jobs. The original parity receipt explicitly identifies `declared_delivery`.
+The canonical relocated source reporter independently checked all 115 real
+build inputs, including the braces archive. Its stale pre-check returned 1,
+update returned 0 and read-only check returned 0 with unchanged tracked bytes.
+The resulting host manifest SHA256 is
+`1a214d0ff42a40c2814c0966da68ae4bbb80044389e82a49c646d8b234ac894a`.
+Original CI ZIP/API identities and generator identity remain in the appended
+source revalidation; the earlier promotion is preserved unchanged.
+
+Own Nightly `41221531591` on that source finished FAIL. Its tooling producer
+failed `test_timeout_writes_runner_record_without_fake_collection`: a long
+diagnostic displaced the runner timeout header from the bounded error field.
+Coverage/duration aggregators passing does not qualify this failed capture.
+All original artifacts and raw failed-job logs are preserved. The scoped fix
+retains the controlled timeout header and diagnostic tail after existing
+redaction, within the unchanged 4000-character bound. The 42-case owning file
+passes; targeted strict mypy additionally exposed and corrected legacy result
+annotations/validated path typing without suppressions.
+
+The separate local `61ac` producer failed when inherited Windows PowerShell
+attempted a UNC script under the existing execution policy. Its actual outer
+exit is -15 after the verified owned process was stopped; 4,326 original
+measurement files and their hashes are preserved. The same owning PowerShell
+test passes on native Windows. A separately versioned native-Linux process
+PATH profile retains native tools and locked Node 24 while excluding imported
+Windows drive entries. The existing optional PowerShell capability skip stays
+SKIP; that Windows PASS is a separate complementary result.
+
+Source review also accepted the Sonar fixes: strict mapping parsing is split
+into bounded helpers, Docker FROM parsing uses tokens instead of a backtracking
+regex, and repeated literals use constants. Duplicate/quoted-key, wrong-image,
+multiple-parent and runtime-asset negative controls remain effective. The pure
+validator accepts the six actual generated release files with their original
+hashes. Fresh complete captures remain required after these source changes.
+
+Main `99947423b77c900f51f9ec3e59b907d07515340c`, tree
+`06e18a8a756e5c747b11c2b0ff82327a17967d86`, was integrated in
+`0aa2f8e2e1453263b9feaaf1c1c1ca969f568526` (tree
+`6b2e490cc878a587bacf234ac213c224903289b1`). Its pandas/VCR dependency inputs
+and Gold string-dtype fixture change are retained; the backend owning set must
+be rerun with the new frozen environment before final acceptance.
