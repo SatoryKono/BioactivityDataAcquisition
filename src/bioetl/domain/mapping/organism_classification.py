@@ -36,9 +36,6 @@ from bioetl.domain.mapping.organism_classification_constants import (
 from bioetl.domain.mapping.organism_classification_constants import (
     PARENTHESES_RE as _PARENTHESES_RE,
 )
-from bioetl.domain.mapping.organism_classification_constants import (
-    WHITESPACE_RE as _WHITESPACE_RE,
-)
 from bioetl.domain.mapping.organism_classification_taxonomy import (
     classify_by_taxonomy_id as _classify_by_taxonomy_id,
 )
@@ -79,8 +76,15 @@ def normalize_organism_name(organism_name: str | None) -> str | None:
     if organism_name is None:
         return None
 
-    normalized = _PARENTHESES_RE.sub("", organism_name.strip().lower())
-    normalized = _WHITESPACE_RE.sub(" ", normalized).strip()
+    # BOLT OPTIMIZATION:
+    # 1. Lower and strip first.
+    # 2. Conditionally run expensive regex only if parenthesis is present.
+    # 3. Use string join/split to collapse whitespace instead of regex.
+    normalized = organism_name.lower().strip()
+    if "(" in normalized:
+        normalized = _PARENTHESES_RE.sub("", normalized)
+
+    normalized = " ".join(normalized.split())
     if not normalized:
         return None
 
