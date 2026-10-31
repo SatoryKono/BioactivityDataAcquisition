@@ -19,7 +19,7 @@ name: PR Gate Complete
 # repo-side pin checker. That checker is not an independent trust boundary:
 # a hostile PR can rewrite the coordinator, the checker, and the registry
 # together. The four setup-python-uv steps are pinned to trusted SHA
-# 4d46594b319b39d24f0bb239b699362d7f4288bb (#12425), so a PR head cannot
+# e890a12b5232f1feb50722de6433c7391bc30a7d (#12425), so a PR head cannot
 # retarget those executions. Residual risk remains until an org ruleset
 # requires workflows from the default branch. This does not close #12046.
 # policy-anchor:deployment-provider deployment.provider=github_actions

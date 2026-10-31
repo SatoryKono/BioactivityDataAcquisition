@@ -36,12 +36,14 @@ ALLOWED_USES: dict[str, set[str]] = {
     "SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv": {
         "d86bb7b8a4e8407c8bc35392cb52192137d649ca",  # main
         "4d46594b319b39d24f0bb239b699362d7f4288bb",  # PR #12425
+        "e890a12b5232f1feb50722de6433c7391bc30a7d",  # PR #12425
     },
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml": {
         "89fbcab7461c6400f8b2df38ebd95375713e7d32",  # #12417
     },
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml": {
         "f377cff40abf52d63220346b9ab64814f3081ca6",  # #12374 docs concurrency
+        "feeaea060e81edb07d2c56dad6af1bbb201a3b6a",  # #12374 docs concurrency
     },
     "actions/attest-build-provenance": {
         "977bb373ede98d70efdf65b84cb5f73e068dcc2a",  # v3
@@ -169,6 +171,7 @@ ALLOWED_USES: dict[str, set[str]] = {
     "zizmorcore/zizmor-action": {
         "cc914d7f3750a2d13d75c7f184a1060aa0e9d482",  # v0.6.4
         "85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e",  # v0.7.1
+        "53290badfa369cb0bf7ad16342cb62c2fa47ac7b",  # v0.8.0
     },
 }
 
