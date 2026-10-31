@@ -6,54 +6,13 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core._base_transformer_execution_support import (
-    TransformerExecutionOwner,
-)
-
 if TYPE_CHECKING:
+    from bioetl.application.core._base_transformer_execution_support import (
+        TransformerExecutionOwner,
+    )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import FilterDecision
     from bioetl.domain.types import GoldRecord, SilverRecord
-
-_STRUCTURAL_ACTION_BY_REASON_CODE: dict[str, str] = {
-    "required_field_missing": "presence_quarantine",
-    "structural_policy_type_mismatch": "required_type_quarantine",
-    "structural_policy_null_optional_forbidden": "optional_nonnullable_quarantine",
-}
-_STRUCTURAL_ACTION_BY_EVENT: dict[str, str] = {
-    "silver_structural_type_coerced_to_null": "nullable_type_to_null",
-}
-
-
-def classify_structural_action(
-    details: dict[str, object] | None,
-    event_names: set[str],
-) -> str | None:
-    """Map structural details/events to a bounded telemetry action label."""
-    if details is not None:
-        reason_code = details.get("reason_code")
-        if isinstance(reason_code, str):
-            mapped = _STRUCTURAL_ACTION_BY_REASON_CODE.get(reason_code)
-            if mapped is not None:
-                return mapped
-    for event_name in event_names:
-        mapped = _STRUCTURAL_ACTION_BY_EVENT.get(event_name)
-        if mapped is not None:
-            return mapped
-    return None
-
-
-def classify_structural_shadow_comparison(
-    *,
-    structural_rejected: bool,
-    silver_filter_decision: FilterDecision | None,
-) -> str | None:
-    """Build a bounded comparison label for structural vs Silver filtering."""
-    if silver_filter_decision is None:
-        return None
-    silver_state = "reject" if not silver_filter_decision.include else "pass"
-    structural_state = "reject" if structural_rejected else "pass"
-    return f"structural_{structural_state}_silver_filter_{silver_state}"
 
 
 def _raise_if_silver_filtered_out(
@@ -63,6 +22,9 @@ def _raise_if_silver_filtered_out(
     decision: FilterDecision,
 ) -> None:
     """Raise FilteredOutError when a Silver filter decision rejects the record."""
+    from bioetl.application.core._base_transformer_execution_support import (
+        optional_sources_for_field,
+    )
     from bioetl.application.core.base_transformer.errors import FilteredOutError
 
     if decision.include:
@@ -79,7 +41,15 @@ def _raise_if_silver_filtered_out(
     )
     raise FilteredOutError(
         decision.message or "Record excluded by silver filters",
-        details={"policy_stage": "structural", **decision.to_dict()},
+        details={
+            "policy_stage": "structural",
+            **decision.to_dict(),
+            "optional_sources": optional_sources_for_field(
+                owner._structural_policy, decision.field
+            ),
+            "shadow_comparison": "structural_pass_silver_filter_reject",
+            "silver_filter_shadow_reason_code": decision.reason_code,
+        },
     )
 
 
@@ -177,6 +147,10 @@ def apply_structural_policy(
     index: int,
 ) -> SilverRecord | None:
     """Apply schema-aware structural policy before structural Silver filters."""
+    from bioetl.application.core._base_transformer_execution_support import (
+        classify_structural_action,
+        classify_structural_shadow_comparison,
+    )
     from bioetl.application.core.base_transformer.errors import FilteredOutError
 
     if result is None:

@@ -2,13 +2,13 @@
   "schema_version": 1,
   "issue": 12552,
   "parent": 12478,
-  "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
-  "source_tree": "3cbbf3584865f7ece0f740835dff545d6002ac17",
+  "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
+  "source_tree": "6381c791f8c3267599c77d9e46a2bc12f300e730",
   "qualification": "Static inventory only; no runtime shutdown or leak verification",
   "delegations_and_exclusions": [
     {
       "file": "src/bioetl/application/composite/helpers/dependency_chained_key_resolver.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "0efa72cf099edc6e3bdce65d5f67c314d2fb81fd",
       "content_sha256": "a5dd4208de41a72010e3de5f3018f68ad24d8a9fd00a4149b8f2655dfc14b406",
       "line": 82,
@@ -18,7 +18,7 @@
     },
     {
       "file": "src/bioetl/application/composite/key_extractor.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "4a23245178f92266979bd6e1796e82959b01bca8",
       "content_sha256": "c267bebb1a9aa8099dbbbe8e45044a298582416ffcbb242cbc7c18d9ad420d24",
       "line": 78,
@@ -28,7 +28,7 @@
     },
     {
       "file": "src/bioetl/application/composite/merger_input_mixin.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "1c080396b9d5d81352c4a67047c37fc93b5009b6",
       "content_sha256": "4762ec2782290efc6545a27de87e75a46a3de2f3136ea1dbb8e27a413989c618",
       "line": 151,
@@ -38,7 +38,7 @@
     },
     {
       "file": "src/bioetl/application/observability/current_metrics_rehydrate_payload.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "46ffff3ef9f82c9d368e44a7f6acf4f023a31f9e",
       "content_sha256": "5677147d227860b54c0275e79655be411cc2f92ad9fc67042587ae4a97bd4871",
       "line": 44,
@@ -48,7 +48,7 @@
     },
     {
       "file": "src/bioetl/application/services/export_lineage/export_execution.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "a20d010f5892398c19673365c662c111a9504c62",
       "content_sha256": "b331ef0ac9906f9767f32180de99cd00fd337ddbc240f7f1bad8949b7c52581e",
       "line": 88,
@@ -58,7 +58,7 @@
     },
     {
       "file": "src/bioetl/application/services/export_lineage/export_service.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "22e7de24fc2cf547e2cedd567ec657f587a5bd99",
       "content_sha256": "4faf689a5d3d4688f41c14c8b20f4f544527046d9c91872c546606da634a33e8",
       "line": 152,
@@ -68,7 +68,7 @@
     },
     {
       "file": "src/bioetl/application/services/run_reports/composite_report_support.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "e4018c06236d51842db08c39310aac59baf60b21",
       "content_sha256": "c786f7d83a1e3cb6356aae6bc66efea724133f5769a450d29d8655a29522415e",
       "line": 55,
@@ -78,7 +78,7 @@
     },
     {
       "file": "src/bioetl/application/services/run_reports/composite_report_support.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "e4018c06236d51842db08c39310aac59baf60b21",
       "content_sha256": "c786f7d83a1e3cb6356aae6bc66efea724133f5769a450d29d8655a29522415e",
       "line": 103,
@@ -88,7 +88,7 @@
     },
     {
       "file": "src/bioetl/application/services/run_reports/paths.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "e02a73ff1f7dfab893c84ba0e5ced9e6b0c90a1a",
       "content_sha256": "4dd7d48a24654345dfbf20b0aa7286951193716c05fa9af5aebdc40450dd8f35",
       "line": 130,
@@ -98,7 +98,7 @@
     },
     {
       "file": "src/bioetl/application/services/run_reports/query.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "38bcca6c63bee6eda5255a7d17cfe1d8eb3c93f8",
       "content_sha256": "c73fcee23924b4c21cfa5ff218b8b8aa9cae46c2d9984fb68efa9feb42bdedfe",
       "line": 53,
@@ -108,7 +108,7 @@
     },
     {
       "file": "src/bioetl/application/services/run_reports/query.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "38bcca6c63bee6eda5255a7d17cfe1d8eb3c93f8",
       "content_sha256": "c73fcee23924b4c21cfa5ff218b8b8aa9cae46c2d9984fb68efa9feb42bdedfe",
       "line": 120,
@@ -118,7 +118,7 @@
     },
     {
       "file": "src/bioetl/application/services/run_reports/snapshots.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8edba461e617499ddfa66b663ef53fe714fcf717",
       "content_sha256": "a9d97a53e1c9f3b6d5fd100830a694c4b721d9647315794a788c620f28cf79c1",
       "line": 54,
@@ -128,7 +128,7 @@
     },
     {
       "file": "src/bioetl/application/services/run_reports/snapshots.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8edba461e617499ddfa66b663ef53fe714fcf717",
       "content_sha256": "a9d97a53e1c9f3b6d5fd100830a694c4b721d9647315794a788c620f28cf79c1",
       "line": 50,
@@ -138,7 +138,7 @@
     },
     {
       "file": "src/bioetl/application/services/run_reports/workflow_observations.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "5f4b9c44793ac4332a1618255c41179bd42097de",
       "content_sha256": "caf35bdc2a049b79b35707faf610131cbbec0099092fb220935536a716e336f0",
       "line": 34,
@@ -148,7 +148,7 @@
     },
     {
       "file": "src/bioetl/application/services/run_reports/workflow_observations.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "5f4b9c44793ac4332a1618255c41179bd42097de",
       "content_sha256": "caf35bdc2a049b79b35707faf610131cbbec0099092fb220935536a716e336f0",
       "line": 105,
@@ -158,7 +158,7 @@
     },
     {
       "file": "src/bioetl/application/services/run_reports/writer.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "1c2002c5ab2f9dd6e0d36eecdc949f4d2e6cb34a",
       "content_sha256": "5dc8e7d117a5ed828ec971e8541330a96a0411a23025540b31cc58fa3425e9a5",
       "line": 107,
@@ -168,7 +168,7 @@
     },
     {
       "file": "src/bioetl/application/services/run_reports/writer.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "1c2002c5ab2f9dd6e0d36eecdc949f4d2e6cb34a",
       "content_sha256": "5dc8e7d117a5ed828ec971e8541330a96a0411a23025540b31cc58fa3425e9a5",
       "line": 218,
@@ -178,7 +178,7 @@
     },
     {
       "file": "src/bioetl/application/services/workflow/workflow_runner_reports.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "277935cb14db602c598a6f6a336c09b5be7dc586",
       "content_sha256": "91c706e93debef6f1ce6bc8882046fd41be874b7b232fb1e8fa44da94aa47e8b",
       "line": 117,
@@ -188,7 +188,7 @@
     },
     {
       "file": "src/bioetl/composition/bootstrap/assembly/workflow_transforms.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "de07408fe5a4ad5abfa7333ae998c537a3965579",
       "content_sha256": "05ab05d322ef093cba4dcc712af75b19b35b31fa337ceff378313e85cac906ec",
       "line": 164,
@@ -198,7 +198,7 @@
     },
     {
       "file": "src/bioetl/composition/bootstrap/runtime/assay_replay_capture.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8cd73145457adbb814cabb02ef1f949d2b036481",
       "content_sha256": "5b5b1cba608d67678ed1f43fd5a613fb504a68282ca4f53139048817de455bf3",
       "line": 64,
@@ -208,7 +208,7 @@
     },
     {
       "file": "src/bioetl/composition/bootstrap/runtime/assay_replay_capture.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8cd73145457adbb814cabb02ef1f949d2b036481",
       "content_sha256": "5b5b1cba608d67678ed1f43fd5a613fb504a68282ca4f53139048817de455bf3",
       "line": 140,
@@ -218,7 +218,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/datasource/pubchem.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "c566c28541c8ca53306967d164c1aeaeea523274",
       "content_sha256": "1f78e69e86cb934c3d0bcdd812f57ac773a4b399c2371f357174c5874f02b7aa",
       "line": 123,
@@ -228,7 +228,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/adapters/chembl/target_protein_classification_loading_mixin.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "56ce0a2bacf67d915f0a342f329594d9320d477e",
       "content_sha256": "46b9588e09129c03561b00884e87211f6a6f6d14c9bcd037ca1d06e91191e99e",
       "line": 199,
@@ -238,7 +238,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/adapters/sync_base.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "347d67d7e6279b577f66b6761bc48acde7c46421",
       "content_sha256": "03afedcba228d9bd321d305b91d9268de70e392b869b95bbf681b71d03b7558a",
       "line": 201,
@@ -248,7 +248,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
       "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
       "line": 108,
@@ -258,7 +258,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
       "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
       "line": 84,
@@ -268,7 +268,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "e423b842d75f2772b3ced1bae92dc3a03d03f21f",
       "content_sha256": "5d14c38f302a4446dc03ae77e4e05de5f34969bb88727dcef866627f80312a68",
       "line": 394,
@@ -278,7 +278,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/composite_replay_evidence.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "9f1a7425b46967443a8d8cff36df5898d1b71b47",
       "content_sha256": "feccc26685d16c0da00e8357a17281d6ffc27545a204b0bd14593c4d1789030c",
       "line": 155,
@@ -288,7 +288,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/composite_replay_inputs.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6bf316dabf71a212dcfae400517ffe6b25de1532",
       "content_sha256": "006ac0886a3177402ceac672fad881b8f3847f3edf021cae3a759a2c04a82385",
       "line": 26,
@@ -298,7 +298,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/composite_replay_inputs.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6bf316dabf71a212dcfae400517ffe6b25de1532",
       "content_sha256": "006ac0886a3177402ceac672fad881b8f3847f3edf021cae3a759a2c04a82385",
       "line": 74,
@@ -308,7 +308,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/composite_replay_inputs.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6bf316dabf71a212dcfae400517ffe6b25de1532",
       "content_sha256": "006ac0886a3177402ceac672fad881b8f3847f3edf021cae3a759a2c04a82385",
       "line": 80,
@@ -318,7 +318,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/composite_replay_inputs.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6bf316dabf71a212dcfae400517ffe6b25de1532",
       "content_sha256": "006ac0886a3177402ceac672fad881b8f3847f3edf021cae3a759a2c04a82385",
       "line": 176,
@@ -328,7 +328,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/composite_replay_inputs.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6bf316dabf71a212dcfae400517ffe6b25de1532",
       "content_sha256": "006ac0886a3177402ceac672fad881b8f3847f3edf021cae3a759a2c04a82385",
       "line": 182,
@@ -338,7 +338,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/composite_replay_inputs.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6bf316dabf71a212dcfae400517ffe6b25de1532",
       "content_sha256": "006ac0886a3177402ceac672fad881b8f3847f3edf021cae3a759a2c04a82385",
       "line": 157,
@@ -348,7 +348,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/composite_replay_inputs.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6bf316dabf71a212dcfae400517ffe6b25de1532",
       "content_sha256": "006ac0886a3177402ceac672fad881b8f3847f3edf021cae3a759a2c04a82385",
       "line": 58,
@@ -358,7 +358,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/composite_replay_inputs.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6bf316dabf71a212dcfae400517ffe6b25de1532",
       "content_sha256": "006ac0886a3177402ceac672fad881b8f3847f3edf021cae3a759a2c04a82385",
       "line": 64,
@@ -368,7 +368,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/delta_reader.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "2c5074dad7bcdaff5dc8a55137ac087b748391bc",
       "content_sha256": "dd5a12396140e8d28d39eeb627ee571a25116a0cce81a4c5f67f5fcc2578ae8d",
       "line": 159,
@@ -378,7 +378,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/delta_reader.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "2c5074dad7bcdaff5dc8a55137ac087b748391bc",
       "content_sha256": "dd5a12396140e8d28d39eeb627ee571a25116a0cce81a4c5f67f5fcc2578ae8d",
       "line": 176,
@@ -388,7 +388,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/silver/delta_write_execution.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "28d55098b453df7fa2770a0582bac69500341c52",
       "content_sha256": "a5cb7e2a5b0436f14846d98f068eb5429d8435c4fdeee5279154cb6c338f4d2e",
       "line": 199,
@@ -398,7 +398,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/silver/maintenance_mixin.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "d0d153145d8a4273c8bd9ad2394a09b4f63df039",
       "content_sha256": "9cf06d3feeb4aaeeb077cb1c39d574a18aed552d008ccefc141f0e7fa959faca",
       "line": 203,
@@ -408,7 +408,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/system/memory_monitor.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "afb829fd9f3f51810edce7e3d043f2b819befbe2",
       "content_sha256": "7de82f2c37c98d69576755777c102baf131b3300f9b63b281cd1d6439578bbc0",
       "line": 129,
@@ -418,7 +418,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/config/_yaml_settings_source.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "a5908b815d501cb2e8af5e7ff394952f2ef24e6b",
       "content_sha256": "1b2791a278de4b95a6339c647983601b761cc8a7f6bb2ed41a65bbd76019836a",
       "line": 25,
@@ -430,7 +430,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/config/semantic_field_registry_loader.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "402139f070a6b5e042aa447c68cb6e84609f1c1c",
       "content_sha256": "085690d64c170715176db77f542f4a42da0d5c9cdd82e4268748cc35367d862b",
       "line": 38,
@@ -442,7 +442,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/config/staged_enforcement_policy_loader.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "a2bef4b0c043c6ff286b90cc8316d302b1f4f2ef",
       "content_sha256": "452b442bf5858f82705531e53c29a245be6a6fe1cb7e8be983aad35499b9dbf9",
       "line": 33,
@@ -454,7 +454,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/control_plane/file_contract_registry_store.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "12e1b15651ff800ad9efccb95e7ef3a21611b199",
       "content_sha256": "9fcb09766da035bf64a2cb8306d08f4c52660fef2b18e465caac9762bd0dd4be",
       "line": 80,
@@ -466,7 +466,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/config/reason_catalog_loader.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "2597669640d0affbed086827c0bdeee6f5fe4a21",
       "content_sha256": "0d24b984447de433f7272ae27eb3ec81ad8344406454a75f344c90d797aee133",
       "line": 44,
@@ -478,7 +478,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/config/_composite_config_paths.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "4755172fcd6674d08ad629439f4d8049ccdf1c04",
       "content_sha256": "b5c486ad42c4bdd749fab7f17fb71b8eb4d229d0fbe484974be03b13a216690c",
       "line": 60,
@@ -490,7 +490,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/config/_composite_config_paths.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "4755172fcd6674d08ad629439f4d8049ccdf1c04",
       "content_sha256": "b5c486ad42c4bdd749fab7f17fb71b8eb4d229d0fbe484974be03b13a216690c",
       "line": 58,
@@ -503,7 +503,7 @@
     {
       "file": "src/bioetl/infrastructure/export/debug_export_ops.py",
       "line": 162,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "5da38ba6e84d6d0e292623b1c2ed1401d89cf95f",
       "content_sha256": "010e88dfb189ab84e4048ea192da80b6d2579f78f66efad55400e394ebe6f7d5",
       "source_segment": "workbook = Workbook()",
@@ -516,7 +516,7 @@
   "dynamic_wiring": [
     {
       "file": "src/bioetl/application/composite/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6f244b31fa415e7c0588997e853e7383e31c3435",
       "content_sha256": "ed552ea4eb3b839f6e32561bcf29fa3cb539a6b4af8b454ea2bd2dfb12716ad1",
       "line": 116,
@@ -526,7 +526,7 @@
     },
     {
       "file": "src/bioetl/application/composite/helpers/preflight_schema_registry.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "f630000177589b1c5164f2aaaefd62cff8cffcbe",
       "content_sha256": "dc9d8064767c619a69f56c371d708dda490ce71c3e529da8f06097994cce7397",
       "line": 42,
@@ -536,7 +536,7 @@
     },
     {
       "file": "src/bioetl/application/core/wiring/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "fd9a76ed5e865a0d84417a3870ee2b08e4615628",
       "content_sha256": "7e5b18bcda534eb772bd67f08e110a99bd3ae45d5a3f6253b77c6c41db54d4ea",
       "line": 81,
@@ -546,7 +546,7 @@
     },
     {
       "file": "src/bioetl/application/core/wiring/lazy_export_hooks.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "4ba4cb054112b1e131026913711342e3db629951",
       "content_sha256": "9fee82355b41f7bdbe6e14f8cd7b90b9d94e4a776ac94cb5189efef025c21329",
       "line": 30,
@@ -556,7 +556,7 @@
     },
     {
       "file": "src/bioetl/application/pipelines/common/blocks.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "5b815fde1aa0db7123ee78f632ed7020781691af",
       "content_sha256": "3aac206538c54b031194909e299e360ba364f11b028e76e4de3225396ac83c01",
       "line": 31,
@@ -566,7 +566,7 @@
     },
     {
       "file": "src/bioetl/application/services/control_plane/manifest/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "f177dc847db4d1670c2ae913725755b9a293e81a",
       "content_sha256": "18f09c5843932a5393d78a7100c0662acd4bfa02dc4be37efefc4cee9962f7aa",
       "line": 57,
@@ -576,7 +576,7 @@
     },
     {
       "file": "src/bioetl/application/services/control_plane/manifest/diagnostics/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "e22d6da1d17623d904a2665467fab406f7f13b66",
       "content_sha256": "0b764a39ec897c59e5ca125d29371c62d9068e440543c92f4289adff7261fa49",
       "line": 31,
@@ -586,7 +586,7 @@
     },
     {
       "file": "src/bioetl/application/services/control_plane/manifest/diagnostics/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "e22d6da1d17623d904a2665467fab406f7f13b66",
       "content_sha256": "0b764a39ec897c59e5ca125d29371c62d9068e440543c92f4289adff7261fa49",
       "line": 34,
@@ -596,7 +596,7 @@
     },
     {
       "file": "src/bioetl/application/services/control_plane/manifest/diagnostics/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "e22d6da1d17623d904a2665467fab406f7f13b66",
       "content_sha256": "0b764a39ec897c59e5ca125d29371c62d9068e440543c92f4289adff7261fa49",
       "line": 50,
@@ -606,7 +606,7 @@
     },
     {
       "file": "src/bioetl/application/services/control_plane/manifest/diagnostics/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "e22d6da1d17623d904a2665467fab406f7f13b66",
       "content_sha256": "0b764a39ec897c59e5ca125d29371c62d9068e440543c92f4289adff7261fa49",
       "line": 53,
@@ -616,7 +616,7 @@
     },
     {
       "file": "src/bioetl/application/services/control_plane/manifest/diagnostics/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "e22d6da1d17623d904a2665467fab406f7f13b66",
       "content_sha256": "0b764a39ec897c59e5ca125d29371c62d9068e440543c92f4289adff7261fa49",
       "line": 56,
@@ -626,7 +626,7 @@
     },
     {
       "file": "src/bioetl/application/services/control_plane/replay/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "b42c4553dc4edfb5748bb4aa4951d28927ea4dd0",
       "content_sha256": "179aad2601bc5764462560e81ee426d2909619482c04e90309ab25f51f7b3a90",
       "line": 121,
@@ -636,7 +636,7 @@
     },
     {
       "file": "src/bioetl/application/services/control_plane/replay/_bundle_descriptor_payloads.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "1d4acaad44a177b7d6ecc2ce6dc021ca57f42c36",
       "content_sha256": "cccd04aeff0a3c54898b3d21f021b22a0256b2b3e9613bb87508404c1483a5ec",
       "line": 54,
@@ -646,7 +646,7 @@
     },
     {
       "file": "src/bioetl/composition/_service_registry.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6ac1d437aedee399a799b34c0105075f220c7e83",
       "content_sha256": "5b219393d6d91546f9297635fa06cb60ef477222a44c77098944f29657f30d70",
       "line": 87,
@@ -656,7 +656,7 @@
     },
     {
       "file": "src/bioetl/composition/_service_registry.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6ac1d437aedee399a799b34c0105075f220c7e83",
       "content_sha256": "5b219393d6d91546f9297635fa06cb60ef477222a44c77098944f29657f30d70",
       "line": 105,
@@ -666,7 +666,7 @@
     },
     {
       "file": "src/bioetl/composition/bootstrap/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "84db2122d1feef44ce04104d725a8e869c55c2b1",
       "content_sha256": "d51b64e201d7f741cd7181ca031e070412b930155adce6215d678a8b9d7fc251",
       "line": 98,
@@ -676,7 +676,7 @@
     },
     {
       "file": "src/bioetl/composition/bootstrap/cli/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "d849b421402ec562a1b2a30a53562a753c2e9704",
       "content_sha256": "34de478827ae9bb1bd9a892abca8b9fbc57e63e1aca3d0d288bfb07720aae10e",
       "line": 107,
@@ -686,7 +686,7 @@
     },
     {
       "file": "src/bioetl/composition/bootstrap/runtime/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "87f60048c34694480d4c17ebf47523f030cd2b06",
       "content_sha256": "2eb55e151084a5058adef69033ff9381013dd6999d251aba63cfd168453b1509",
       "line": 60,
@@ -696,7 +696,7 @@
     },
     {
       "file": "src/bioetl/composition/bootstrap/runtime/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "87f60048c34694480d4c17ebf47523f030cd2b06",
       "content_sha256": "2eb55e151084a5058adef69033ff9381013dd6999d251aba63cfd168453b1509",
       "line": 66,
@@ -706,7 +706,7 @@
     },
     {
       "file": "src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "69ebe855bd01fc6bed4333bb5476f95be8f80971",
       "content_sha256": "c5eb02bef78c1a29126ff509b9a43edf4274500a65f5f0cdfe233c03a07e8eac",
       "line": 112,
@@ -716,7 +716,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "cf3362341c6300c02853be12d4f1b3a8c815c91f",
       "content_sha256": "81816a070d73d1585e0d4d0bdd660c7a79674a761e1eba88f3495ad41a6aacf3",
       "line": 129,
@@ -726,7 +726,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "cf3362341c6300c02853be12d4f1b3a8c815c91f",
       "content_sha256": "81816a070d73d1585e0d4d0bdd660c7a79674a761e1eba88f3495ad41a6aacf3",
       "line": 134,
@@ -736,7 +736,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "cf3362341c6300c02853be12d4f1b3a8c815c91f",
       "content_sha256": "81816a070d73d1585e0d4d0bdd660c7a79674a761e1eba88f3495ad41a6aacf3",
       "line": 137,
@@ -746,7 +746,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/dq/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "e665721e7ece05bb9b27a5aeecb9404a9d155241",
       "content_sha256": "a4a450cd15cdd5d1bc51de39a3920c30604ca0b970a69c1125bfbf3dfc852421",
       "line": 33,
@@ -756,7 +756,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/pipeline/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "504535589b95827710891b4d520fb30fb88234d9",
       "content_sha256": "4325190a00f142131822d5d8da1c808e4aeb3c67cc11d14acb0bc52e2f53c0a2",
       "line": 19,
@@ -766,7 +766,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/pipeline/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "504535589b95827710891b4d520fb30fb88234d9",
       "content_sha256": "4325190a00f142131822d5d8da1c808e4aeb3c67cc11d14acb0bc52e2f53c0a2",
       "line": 21,
@@ -776,7 +776,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/pipeline/_assembler_factory.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "df8bd648577cb001b1beca22dc883797e661b8e5",
       "content_sha256": "65ee1d62f5b9412227618ad2156c69bce0ec777357af086192ba1f9ec21b427c",
       "line": 69,
@@ -786,7 +786,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/pipeline_support/contract_validation_helpers.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "2fa3caef4347d1c890dfa839df0ec847c36a4be1",
       "content_sha256": "0dfd0328a883be0dfef38374bbffaa9a9aa5373eb7e79325b75d44e49e5f1a8a",
       "line": 69,
@@ -796,7 +796,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6884335c57e68009f78068de13538cc8258e7142",
       "content_sha256": "45cabb631446af70fc895930805f8209a61dc3109b29577b3fe7f3681f32cb6f",
       "line": 43,
@@ -806,7 +806,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6884335c57e68009f78068de13538cc8258e7142",
       "content_sha256": "45cabb631446af70fc895930805f8209a61dc3109b29577b3fe7f3681f32cb6f",
       "line": 46,
@@ -816,7 +816,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6884335c57e68009f78068de13538cc8258e7142",
       "content_sha256": "45cabb631446af70fc895930805f8209a61dc3109b29577b3fe7f3681f32cb6f",
       "line": 53,
@@ -826,7 +826,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/workflow_services.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8f9128e21e0be41470a773d7071a6e0a6262f1ff",
       "content_sha256": "2274bfbc760ba1413e3b9092ee1f60fb70859d9c1e8cb3d3d92ceb04f329791b",
       "line": 81,
@@ -836,7 +836,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/workflow_services.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8f9128e21e0be41470a773d7071a6e0a6262f1ff",
       "content_sha256": "2274bfbc760ba1413e3b9092ee1f60fb70859d9c1e8cb3d3d92ceb04f329791b",
       "line": 92,
@@ -846,7 +846,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/workflow_services.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8f9128e21e0be41470a773d7071a6e0a6262f1ff",
       "content_sha256": "2274bfbc760ba1413e3b9092ee1f60fb70859d9c1e8cb3d3d92ceb04f329791b",
       "line": 109,
@@ -856,7 +856,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/workflow_services.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8f9128e21e0be41470a773d7071a6e0a6262f1ff",
       "content_sha256": "2274bfbc760ba1413e3b9092ee1f60fb70859d9c1e8cb3d3d92ceb04f329791b",
       "line": 126,
@@ -866,7 +866,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/workflow_services.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8f9128e21e0be41470a773d7071a6e0a6262f1ff",
       "content_sha256": "2274bfbc760ba1413e3b9092ee1f60fb70859d9c1e8cb3d3d92ceb04f329791b",
       "line": 129,
@@ -876,7 +876,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/workflow_services.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8f9128e21e0be41470a773d7071a6e0a6262f1ff",
       "content_sha256": "2274bfbc760ba1413e3b9092ee1f60fb70859d9c1e8cb3d3d92ceb04f329791b",
       "line": 132,
@@ -886,7 +886,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/workflow_services.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8f9128e21e0be41470a773d7071a6e0a6262f1ff",
       "content_sha256": "2274bfbc760ba1413e3b9092ee1f60fb70859d9c1e8cb3d3d92ceb04f329791b",
       "line": 133,
@@ -896,7 +896,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/workflow_services.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8f9128e21e0be41470a773d7071a6e0a6262f1ff",
       "content_sha256": "2274bfbc760ba1413e3b9092ee1f60fb70859d9c1e8cb3d3d92ceb04f329791b",
       "line": 207,
@@ -906,7 +906,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/workflow_services.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8f9128e21e0be41470a773d7071a6e0a6262f1ff",
       "content_sha256": "2274bfbc760ba1413e3b9092ee1f60fb70859d9c1e8cb3d3d92ceb04f329791b",
       "line": 210,
@@ -916,7 +916,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/workflow_services.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8f9128e21e0be41470a773d7071a6e0a6262f1ff",
       "content_sha256": "2274bfbc760ba1413e3b9092ee1f60fb70859d9c1e8cb3d3d92ceb04f329791b",
       "line": 213,
@@ -926,7 +926,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/workflow_services.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8f9128e21e0be41470a773d7071a6e0a6262f1ff",
       "content_sha256": "2274bfbc760ba1413e3b9092ee1f60fb70859d9c1e8cb3d3d92ceb04f329791b",
       "line": 214,
@@ -936,7 +936,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/workflow_services.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8f9128e21e0be41470a773d7071a6e0a6262f1ff",
       "content_sha256": "2274bfbc760ba1413e3b9092ee1f60fb70859d9c1e8cb3d3d92ceb04f329791b",
       "line": 258,
@@ -946,7 +946,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/services/workflow_services.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8f9128e21e0be41470a773d7071a6e0a6262f1ff",
       "content_sha256": "2274bfbc760ba1413e3b9092ee1f60fb70859d9c1e8cb3d3d92ceb04f329791b",
       "line": 261,
@@ -956,7 +956,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/transformer_factory.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "92d1f8e77cfc7b7d164e73827a0b7b3f49f69bdb",
       "content_sha256": "217b7c8596e31ec416aa7f0d2b1e7e34323fd3aeaefb23cfc5a7e4f39f23064c",
       "line": 169,
@@ -966,7 +966,7 @@
       "resolution_sources": [
         {
           "file": "src/bioetl/composition/factories/transformer_factory.py",
-          "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+          "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
           "source_blob": "92d1f8e77cfc7b7d164e73827a0b7b3f49f69bdb",
           "content_sha256": "217b7c8596e31ec416aa7f0d2b1e7e34323fd3aeaefb23cfc5a7e4f39f23064c",
           "line": 35,
@@ -974,7 +974,7 @@
         },
         {
           "file": "src/bioetl/composition/factories/_transformer_spec_rows.py",
-          "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+          "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
           "source_blob": "5ddff53f670eb653cf517d7c5c819d22e5842499",
           "content_sha256": "9248210c334672b69c9c730af38401c9e57480dd6033cec4c8c05fbbf29eaeb8",
           "line": 9,
@@ -984,7 +984,7 @@
     },
     {
       "file": "src/bioetl/composition/lazy_exports.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "9d00e201c9251f8016710cbde3997d73a2fbaee5",
       "content_sha256": "07dbe058fa93af5fad0fcd47c478a04d8eb5e5be393700659fddec9f7ed7b935",
       "line": 32,
@@ -994,7 +994,7 @@
     },
     {
       "file": "src/bioetl/composition/providers/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "86234b05fc5acf6069909d7e31bc9a20d38cc646",
       "content_sha256": "e85407c0dca9cbc57287627db9736104a4a6a5a6e7d2cca5179ae437db66879d",
       "line": 94,
@@ -1004,7 +1004,7 @@
     },
     {
       "file": "src/bioetl/composition/providers/_default_registry.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "7341b27fbd60f1029e02e23e5fbff018177646e0",
       "content_sha256": "7242563bc558c2b78a901fb0ca6db1e9a4d5b284efe7bda66a4088731a4f5c90",
       "line": 94,
@@ -1014,7 +1014,7 @@
     },
     {
       "file": "src/bioetl/composition/providers/provider_registry.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "5103efb7269bb97bf8a4523cd5d8c2283c1f28a4",
       "content_sha256": "c46b9999e59cd81c12fba725634bc4ad2be0e1f4c93be9aaf1dc972f2e53e370",
       "line": 65,
@@ -1024,7 +1024,7 @@
     },
     {
       "file": "src/bioetl/composition/runtime_builders/run_manifest_data_roots.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "c95ba9218f9066b849d70a75a1730f7e07b3a000",
       "content_sha256": "7033d1af8cbe1a1d36c9d4e9536bd70947b005eb0ab6f68ded3d24d785f96e09",
       "line": 31,
@@ -1034,7 +1034,7 @@
     },
     {
       "file": "src/bioetl/domain/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "73827f2cc69f6614da748dfd4c7aea9dd03eba57",
       "content_sha256": "862d63669822de8364b9bf7122f221b515aca920e594ff0ce5763d529c4a2b25",
       "line": 143,
@@ -1044,7 +1044,7 @@
     },
     {
       "file": "src/bioetl/domain/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "73827f2cc69f6614da748dfd4c7aea9dd03eba57",
       "content_sha256": "862d63669822de8364b9bf7122f221b515aca920e594ff0ce5763d529c4a2b25",
       "line": 152,
@@ -1054,7 +1054,7 @@
     },
     {
       "file": "src/bioetl/domain/behavior/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "1828bbbadf7dd251d62db87f4e36dda9f75c1924",
       "content_sha256": "25675a53981aebf64c27b43e9a68589ac0ef32e7caab0e08d882c62fdf359923",
       "line": 189,
@@ -1064,7 +1064,7 @@
     },
     {
       "file": "src/bioetl/domain/config/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "c27d7a0407f0ece093f16299b85b157b5c94059a",
       "content_sha256": "b5bad369ba58a68012f2e057c43cdcaaba038c016503adab720c16b8ea576d1b",
       "line": 116,
@@ -1074,7 +1074,7 @@
     },
     {
       "file": "src/bioetl/domain/context.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "f5efb8ee0a79d6d9d47c9487ec80c8f29c9a57e4",
       "content_sha256": "53f94b30074e817c2d112c9504e39eb9f5f777abd7fdd80e5ee64ebed86afa7c",
       "line": 29,
@@ -1084,7 +1084,7 @@
     },
     {
       "file": "src/bioetl/domain/context.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "f5efb8ee0a79d6d9d47c9487ec80c8f29c9a57e4",
       "content_sha256": "53f94b30074e817c2d112c9504e39eb9f5f777abd7fdd80e5ee64ebed86afa7c",
       "line": 30,
@@ -1094,7 +1094,7 @@
     },
     {
       "file": "src/bioetl/domain/entities/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "9542e0fcc6c6f2f824241175105ef165333a2dda",
       "content_sha256": "2d42dce1521aa5c22915554ede4445c89105ba6fa8570a9c8a273420386d0ada",
       "line": 275,
@@ -1104,7 +1104,7 @@
     },
     {
       "file": "src/bioetl/domain/exceptions/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "a8ce12e1053a87b1719f77b8da36b95b58580567",
       "content_sha256": "850dfd57d3851d54addff942cbd4857d31d9a5aaadb8c33cb6b710195fa6ab8c",
       "line": 186,
@@ -1114,7 +1114,7 @@
     },
     {
       "file": "src/bioetl/domain/filtering/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "4b968d191308a13a4940a660c4e7f59a28912ee4",
       "content_sha256": "9c3c6c780c0239e1ceba29c8d15a1883e47c0a12213d99457b24ee7ee7f92a92",
       "line": 84,
@@ -1124,7 +1124,7 @@
     },
     {
       "file": "src/bioetl/domain/normalization/profiles/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "29354b6d3be57e4d1caec8aec791c23fd6bf6181",
       "content_sha256": "6e3c9b45ec73d83c44c6691ebf4db636b1121f1940f07a502e77077a59dd3de3",
       "line": 290,
@@ -1134,7 +1134,7 @@
     },
     {
       "file": "src/bioetl/domain/ports/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "e25114abe0b4505806128deb9bfc44a0f2967ace",
       "content_sha256": "5411e8e87c117992bf68b82bc04466ba98c98a30743cf98f8fa821cdef6bc51b",
       "line": 210,
@@ -1144,7 +1144,7 @@
     },
     {
       "file": "src/bioetl/domain/types/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "3bb9387ae98422f184275620e378b9712030d9c7",
       "content_sha256": "2ba17e0add9e7775dd444d17a23805e04f535d58be13112c309af43318dd09b9",
       "line": 222,
@@ -1154,7 +1154,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/adapters/crossref/models.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "d93ad054e968cc74579792f6652372926466b781",
       "content_sha256": "6dc948e5fee18d4ebd730eaa1a459950d318b834da083ee6ae1318f2dfcc64ec",
       "line": 67,
@@ -1164,7 +1164,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/control_plane/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6ddf56ff8d2410a2bcab204b1a1a83fa7d68edc0",
       "content_sha256": "9885f31240e928a60da804d76ea0e22747401b7688d0493d8dfa7e69848ce5dc",
       "line": 124,
@@ -1174,7 +1174,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/export/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "ac6d0ad61c4dbf811f62cfceedc33b2581c2100c",
       "content_sha256": "586b1d0c0e4941cff73d099481e6ee6fb4b17f750418f2d58e550141da668b5b",
       "line": 33,
@@ -1184,7 +1184,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/observability/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "e159b318f9a79178d1e11751b288d801b84f9752",
       "content_sha256": "41c2cccbc72f16303e33e9f40023d7aee4da941f20f729ab7c2bb3e667464f1d",
       "line": 106,
@@ -1194,7 +1194,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/observability/tracing.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8f5e9105a70281b677a3e89dc6a33d37aa0516e5",
       "content_sha256": "4792c08ce59df27f111e015d180494efc125ffa38ea653450d9bef2281b420ec",
       "line": 81,
@@ -1204,7 +1204,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/gold/io_helpers.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "83b5d316b8299448adf85cfe4c240e4aa1f11c13",
       "content_sha256": "86c006fe996509276e3a397a94c45a9f923a90a48721e950aafb6deae5efe39a",
       "line": 25,
@@ -1214,7 +1214,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/support/atomic_ops.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "4ad54d12ce228722d0d6d2de908148fab1bbdb6b",
       "content_sha256": "23d65076edb0e09de639bec920a804cc4dd4e835209481e28c81a5a36639c476",
       "line": 53,
@@ -1224,7 +1224,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6ee7db7062a16eb58cfd3d5fc10ab50228a1be93",
       "content_sha256": "4f60e98a5ac2b4f1cf3cb953fcfc2439a729eb5437a88f46b997616ce5dce8fe",
       "line": 23,
@@ -1234,7 +1234,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "707f84094b6678a8aabdf955f5fbfd9189d02699",
       "content_sha256": "cadb826016b3f89232e41638929019f04f948c53746536f7ef00acb43a07035e",
       "line": 87,
@@ -1244,7 +1244,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/debug.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6b8c61709ac94c6b70889eaa9a3aa4ebe3a3fedd",
       "content_sha256": "a0605bf006aad56893432b5011eb6f46c4e989efdc62b3c35cc530b417e405b2",
       "line": 53,
@@ -1254,7 +1254,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/debug.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6b8c61709ac94c6b70889eaa9a3aa4ebe3a3fedd",
       "content_sha256": "a0605bf006aad56893432b5011eb6f46c4e989efdc62b3c35cc530b417e405b2",
       "line": 101,
@@ -1264,7 +1264,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/domains/composite/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "e4df20ceec0e6c319a854fd3eff2d5eea1801e9e",
       "content_sha256": "f9e8089679393c4a1a747c83776833dd0a7f5cbd87a57b0080bda038fb148b54",
       "line": 21,
@@ -1274,7 +1274,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/domains/health/metrics_server_integration.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "2aac9a8b62b64f77415d1afcc75cdf578bc00cf7",
       "content_sha256": "6af66d16a760a6e1b8c10d7e870b370c0f5f862f732c401a6af9da07454fe349",
       "line": 25,
@@ -1284,7 +1284,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/domains/health/server_integration_observability.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "894b97c77475599f21bd678c1fe59b03a89ca519",
       "content_sha256": "7883935ad41464c6323a569313cdd4862738617533803936a2000c01337f8851",
       "line": 124,
@@ -1294,7 +1294,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/domains/maintenance/command_group.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "2ef22f907d06885212dbdd256f42741b265da7e7",
       "content_sha256": "4f4f498665217f4ffde48971ef37ea751554f842737582309caba34f86dad65f",
       "line": 98,
@@ -1304,7 +1304,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/domains/maintenance/command_group.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "2ef22f907d06885212dbdd256f42741b265da7e7",
       "content_sha256": "4f4f498665217f4ffde48971ef37ea751554f842737582309caba34f86dad65f",
       "line": 132,
@@ -1314,7 +1314,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "bc3d9d727fb2888a90d260cdbc1b29f0f376e139",
       "content_sha256": "dccd333fa3c9ccdbafcddfbb1899b4ddb69f42c8b1a43331ba392db6c304a2e8",
       "line": 38,
@@ -1324,7 +1324,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "bc3d9d727fb2888a90d260cdbc1b29f0f376e139",
       "content_sha256": "dccd333fa3c9ccdbafcddfbb1899b4ddb69f42c8b1a43331ba392db6c304a2e8",
       "line": 44,
@@ -1334,7 +1334,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "bc3d9d727fb2888a90d260cdbc1b29f0f376e139",
       "content_sha256": "dccd333fa3c9ccdbafcddfbb1899b4ddb69f42c8b1a43331ba392db6c304a2e8",
       "line": 56,
@@ -1344,7 +1344,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "bc3d9d727fb2888a90d260cdbc1b29f0f376e139",
       "content_sha256": "dccd333fa3c9ccdbafcddfbb1899b4ddb69f42c8b1a43331ba392db6c304a2e8",
       "line": 62,
@@ -1354,7 +1354,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "bc3d9d727fb2888a90d260cdbc1b29f0f376e139",
       "content_sha256": "dccd333fa3c9ccdbafcddfbb1899b4ddb69f42c8b1a43331ba392db6c304a2e8",
       "line": 50,
@@ -1364,7 +1364,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/domains/run/runtime_helpers.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "cf116cc67a31df54019ce933d1ba9be6b36664a0",
       "content_sha256": "e194dfd9cd746f0c5a1ba9414db4bd96e93e9f2a0364ff7b1aa2ce2788010b94",
       "line": 50,
@@ -1374,7 +1374,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/domains/run_all/__init__.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "5e4c7e5496c2f396897f0f2cc6d7effd653a27e7",
       "content_sha256": "985a6f3d8a77c45b57f75566e3c3139baeb7fee8dd03dd43fb8531186ae89ac1",
       "line": 21,
@@ -1384,7 +1384,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/domains/run_all/public_runtime.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "81df8e6c703538715e55d6a71d2f0d3375e1a1bb",
       "content_sha256": "720d104e7ac39122e677c0ee11fe93a1edf1249af7b935c93f3e6dc2eb01464e",
       "line": 78,
@@ -1394,7 +1394,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/commands/domains/shared/public_module_alias.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "9d99fd289740c2dc54722fa6addee9ebbf80c43d",
       "content_sha256": "660550aea0005b1c9739bb7206032d0d4049f60b0afa3a8262bb2da38eaed944",
       "line": 15,
@@ -1404,7 +1404,7 @@
     },
     {
       "file": "src/bioetl/interfaces/cli/main.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "fba5db2a70912f41b7bacd8bf2fb02a480f309dd",
       "content_sha256": "22a77d9436e71c9c2943cee850c80716b834409bd3d484aa2a48eb7ee73d11fa",
       "line": 150,
@@ -1415,7 +1415,7 @@
     {
       "file": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
       "line": 94,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "d14b6471e85acb873661d970ae2b2b559e0dfde3",
       "content_sha256": "d4ec1097ba968bde06d910ba57c2b4760ea7aa9a5f2ea2b6989a98b1a72580bc",
       "source_segment": "locking=msvcrt.locking,",
@@ -1426,7 +1426,7 @@
     {
       "file": "src/bioetl/infrastructure/quarantine/write_lock.py",
       "line": 72,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "7afe34cf6c34f6eafd3cfd0e9082e5989a88daa4",
       "content_sha256": "2ea0ba6136066f254b644f1991a4e49fcb0bffe588edb2fd4f2389068c6d43ce",
       "source_segment": "_acquire_windows_lock(lock_fd, msvcrt.locking, int(msvcrt.LK_LOCK))",
@@ -1505,7 +1505,7 @@
     "src/bioetl/application/composite/helpers/join_required_checks.py": "25c9bda7c32f328d4fc6acc34afc1d598a2afdd4",
     "src/bioetl/application/composite/helpers/lifecycle_observer_terminal_emit.py": "4630361edcb103d561eb6a341e30e12e34353d13",
     "src/bioetl/application/composite/helpers/merger_orchestration_types.py": "91226d82221a90c262fbde7c93ba6722290a23bf",
-    "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py": "6908caa693b2c950dc9244bb41bd419e7481ced4",
+    "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py": "2b5d810d3b04318a040a54698b618c58c5489812",
     "src/bioetl/application/composite/helpers/preflight_schema_registry.py": "f630000177589b1c5164f2aaaefd62cff8cffcbe",
     "src/bioetl/application/composite/helpers/preflight_type_and_aggregation.py": "e9c0f4eaece9598becb0cd496a538df633a67ec0",
     "src/bioetl/application/composite/helpers/replay_context.py": "d6c653abcc04dcdbd8284c63f881461aa7472439",
@@ -1587,8 +1587,8 @@
     "src/bioetl/application/composite/runtime_wiring_api.py": "240843e2ba1a4442cb0225e52c5c15f3e9812fe9",
     "src/bioetl/application/composite/target_protein_classification_summary.py": "642a7ff66d115af186878290db6a45da8e6fc7e1",
     "src/bioetl/application/core/__init__.py": "ae561d6764ffb0042f0a15b6352454139907d680",
-    "src/bioetl/application/core/_base_transformer_execution_support.py": "ac7be0e719acc6a29bdd52ddd3301dc887000a2c",
-    "src/bioetl/application/core/_base_transformer_structural_support.py": "ca11532b1305d2ac606943fa7a7fa01f505949af",
+    "src/bioetl/application/core/_base_transformer_execution_support.py": "4762c937cba6829d766f4aca2eb7fa4875489a69",
+    "src/bioetl/application/core/_base_transformer_structural_support.py": "f69b551ab2fcd75a821b9bdb022b594bfac0eb95",
     "src/bioetl/application/core/_batch_processing_layer_write_support.py": "15bd093b3cf3906cfdfee4621cb8fa9364e3ae42",
     "src/bioetl/application/core/_batch_processing_metrics_support.py": "b39e7c2ffddcf5155921c1a9364d3c4330acb256",
     "src/bioetl/application/core/_batch_tracing_support.py": "2223d48bffaf6a166a78981b36d8019a35e55044",
@@ -2551,14 +2551,14 @@
     "src/bioetl/domain/behavior/__init__.py": "1828bbbadf7dd251d62db87f4e36dda9f75c1924",
     "src/bioetl/domain/behavior/_author_helpers.py": "33930124a6761184f7a281c2c74b9fd5202b8258",
     "src/bioetl/domain/behavior/_dq_condition_matchers.py": "2106848fdcd3093ab26e9320d6a28ce3112727f4",
-    "src/bioetl/domain/behavior/_dq_rule_evaluators.py": "31f40c007f3202f588b030f21e1024412046e7cf",
+    "src/bioetl/domain/behavior/_dq_rule_evaluators.py": "50e5a448edea0657fa6475a74df5d7aa98bcc68a",
     "src/bioetl/domain/behavior/_dq_rule_evaluators_cross.py": "dace9c6ca1aff831ccaa76392ec54491d703cbfc",
     "src/bioetl/domain/behavior/_dq_rule_evaluators_vocab.py": "49d87a3e79b8aa418f3524777975c5c7a19de4c0",
     "src/bioetl/domain/behavior/_dq_serializer_html/__init__.py": "390d51098133f48d744ace8764ec632c1a73958a",
     "src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py": "f474de92547f455d98341f006c67426ae6884356",
     "src/bioetl/domain/behavior/_dq_serializer_html/_styles.py": "f23a55e906e8341728f126d3dfb785567c81132c",
     "src/bioetl/domain/behavior/_dq_serializer_yaml.py": "5adde3598459c41727432e0e96e6ae48c28e3b37",
-    "src/bioetl/domain/behavior/_dq_value_coercion.py": "3c8659eccbfbb1a668a56cd0530c395dc864bf62",
+    "src/bioetl/domain/behavior/_dq_value_coercion.py": "14a3a4575a26b8110c08fb88ded5474d79d61f75",
     "src/bioetl/domain/behavior/_preflight_governance_helpers.py": "b07c37245c623535027ec2c85aca21f5a56c7e6a",
     "src/bioetl/domain/behavior/_preflight_governance_types.py": "0f8fcb50b56fc534ea5874f600ac3412309b5404",
     "src/bioetl/domain/behavior/_staged_enforcement_diagnostics.py": "e26777a49f4dd730068bd622575979e88cd267cc",
@@ -3044,7 +3044,7 @@
     "src/bioetl/domain/schemas/chembl/compound_record.py": "3fa47c1bbd431a8b963726519763b65cc6eae3e9",
     "src/bioetl/domain/schemas/chembl/molecule.py": "b17ef14fe7f8280b23c8fd16f4b2930f5c08cd4a",
     "src/bioetl/domain/schemas/chembl/protein_classification.py": "867ddb6a989bc0bd788c6a71392dcda5a1a28990",
-    "src/bioetl/domain/schemas/chembl/publication.py": "f333df7bb5b54c83cdc6e28f64f5c22a4a645b3a",
+    "src/bioetl/domain/schemas/chembl/publication.py": "562907e769fe0b6341d48b702aeb9d30ed278ac3",
     "src/bioetl/domain/schemas/chembl/publication_similarity.py": "13fe6fcdc4dd16771295afffc07c40e792dad7be",
     "src/bioetl/domain/schemas/chembl/publication_term.py": "79b98ff61cd27e3119318d19ebcea0e75b9a8b06",
     "src/bioetl/domain/schemas/chembl/similarity_pair.py": "22b8ecc53bb7b2863953c26968ffd61a3ddccaa5",
@@ -9844,7 +9844,7 @@
   "operation_aliases": [
     {
       "file": "src/bioetl/application/services/run_reports/query.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "38bcca6c63bee6eda5255a7d17cfe1d8eb3c93f8",
       "content_sha256": "c73fcee23924b4c21cfa5ff218b8b8aa9cae46c2d9984fb68efa9feb42bdedfe",
       "line": 209,
@@ -9855,7 +9855,7 @@
     },
     {
       "file": "src/bioetl/application/services/run_reports/query.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "38bcca6c63bee6eda5255a7d17cfe1d8eb3c93f8",
       "content_sha256": "c73fcee23924b4c21cfa5ff218b8b8aa9cae46c2d9984fb68efa9feb42bdedfe",
       "line": 263,
@@ -9866,7 +9866,7 @@
     },
     {
       "file": "src/bioetl/interfaces/http/_report_selector_options.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "d131b85dca4fe15e41bf036700aed712f397e5b2",
       "content_sha256": "4daaea2b924a9739a6afd237aa08756bad5c151c77a0190ebf264a16d99200dd",
       "line": 209,
@@ -9877,7 +9877,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/control_plane/_file_run_manifest_persistence.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "4eddba7108b112c158f450ab0b2f9d0381cef61e",
       "content_sha256": "b932ce0ae27f64b2b5a7d34936b98a003dd2e55a1a4a01e8292f4160c3d31521",
       "line": 293,
@@ -9888,7 +9888,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/storage/maintenance_mixin.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "aa70b53cd164cd088cbea983c3430e813a97dd61",
       "content_sha256": "4afb722b0d829e89b3299559f805dbbe7dc92b778f4f6933b29245f52b2ceea6",
       "line": 173,
@@ -9899,7 +9899,7 @@
     },
     {
       "file": "src/bioetl/composition/factories/storage/maintenance_mixin.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "aa70b53cd164cd088cbea983c3430e813a97dd61",
       "content_sha256": "4afb722b0d829e89b3299559f805dbbe7dc92b778f4f6933b29245f52b2ceea6",
       "line": 187,
@@ -9910,7 +9910,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/delta/table_ops.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "2ecd0e1d7e0a14ce123e3bf3418978137ee5e63e",
       "content_sha256": "649a7d45827fde2c0b8be1ba097adda643f0898cd4694c58b4da09555479d2a6",
       "line": 161,
@@ -9921,7 +9921,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/delta/table_ops.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "2ecd0e1d7e0a14ce123e3bf3418978137ee5e63e",
       "content_sha256": "649a7d45827fde2c0b8be1ba097adda643f0898cd4694c58b4da09555479d2a6",
       "line": 168,
@@ -9932,7 +9932,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/storage/run_report_store_adapter.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "5d6e6217a3ec776466ee49bbb7f68805c15c681f",
       "content_sha256": "198fe142a41a9c34fcd9043003a042be49aa105f0e748d2976b31976de23cc33",
       "line": 115,
@@ -9943,7 +9943,7 @@
     },
     {
       "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "2ab2d0d7b4c82ba388382709b507f1d33ac449e7",
       "content_sha256": "cb0e4e8d0917d044dac21679b3628b914e49ab23a8a297a057f5015084a839b8",
       "line": 40,
@@ -9955,7 +9955,7 @@
     {
       "file": "src/bioetl/composition/runtime_builders/effective_config_artifact_builder.py",
       "line": 91,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "a2e402343fdb72d3469b89b7331d7c692130b54a",
       "content_sha256": "1952e8ecd5a198e623e8f0e7cbf80bede51630a0dedffb60b16ea0af96e7864f",
       "source_segment": "artifact_store.save(",
@@ -9967,7 +9967,7 @@
     {
       "file": "src/bioetl/composition/bootstrap/cli/run_manifest.py",
       "line": 193,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "53ed7fcc4160a3e1cafdde28bf3d628cb744b266",
       "content_sha256": "5d3d0a463908a80ecfe907415aad1f02fae83103ab9fbe16fbcf0b56bc6a749c",
       "source_segment": "return store.save(report)",
@@ -9979,7 +9979,7 @@
     {
       "file": "src/bioetl/composition/bootstrap/cli/run_manifest.py",
       "line": 202,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "53ed7fcc4160a3e1cafdde28bf3d628cb744b266",
       "content_sha256": "5d3d0a463908a80ecfe907415aad1f02fae83103ab9fbe16fbcf0b56bc6a749c",
       "source_segment": "return store.save(report)",
@@ -9991,7 +9991,7 @@
     {
       "file": "src/bioetl/application/services/workflow/control_plane/execution_preparation.py",
       "line": 107,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "56924b84e7d7e3003e26be96876b77a7fcf42424",
       "content_sha256": "ebcaa5c3910989893d721f5a15f07b52535efb01f9726c6bf61a99449332cf09",
       "source_segment": "workflow_state_port.save(state)",
@@ -10003,7 +10003,7 @@
     {
       "file": "src/bioetl/application/services/workflow/control_plane/execution_recording.py",
       "line": 82,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "f3cb8db00217ca89a8e299c68ae47489d4859660",
       "content_sha256": "0a2d894ff2d917fd72d6de0f62702f4f7c7d3b91a2b49b10a3a97c83f3923e65",
       "source_segment": "context.state_port.save(context.state)",
@@ -10015,7 +10015,7 @@
     {
       "file": "src/bioetl/application/services/workflow/control_plane/execution_recording.py",
       "line": 110,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "f3cb8db00217ca89a8e299c68ae47489d4859660",
       "content_sha256": "0a2d894ff2d917fd72d6de0f62702f4f7c7d3b91a2b49b10a3a97c83f3923e65",
       "source_segment": "context.state_port.save(context.state)",
@@ -10027,7 +10027,7 @@
     {
       "file": "src/bioetl/application/services/workflow/control_plane/execution_recording.py",
       "line": 141,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "f3cb8db00217ca89a8e299c68ae47489d4859660",
       "content_sha256": "0a2d894ff2d917fd72d6de0f62702f4f7c7d3b91a2b49b10a3a97c83f3923e65",
       "source_segment": "context.state_port.save(context.state)",
@@ -10039,7 +10039,7 @@
     {
       "file": "src/bioetl/application/services/workflow/control_plane/execution_recording.py",
       "line": 181,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "f3cb8db00217ca89a8e299c68ae47489d4859660",
       "content_sha256": "0a2d894ff2d917fd72d6de0f62702f4f7c7d3b91a2b49b10a3a97c83f3923e65",
       "source_segment": "context.state_port.save(context.state)",
@@ -10051,7 +10051,7 @@
     {
       "file": "src/bioetl/application/services/workflow/control_plane/_execution_recording_finish.py",
       "line": 78,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6184f7f3f931a422650e7dcae958cdc5193bf8a3",
       "content_sha256": "73fdfae8a56684799fe0b4be31076517ebea0219d80ae6f8d67b742b769a25d6",
       "source_segment": "context.state_port.save(context.state)",
@@ -10063,7 +10063,7 @@
     {
       "file": "src/bioetl/application/services/workflow/control_plane/_execution_recording_finish.py",
       "line": 103,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "6184f7f3f931a422650e7dcae958cdc5193bf8a3",
       "content_sha256": "73fdfae8a56684799fe0b4be31076517ebea0219d80ae6f8d67b742b769a25d6",
       "source_segment": "context.state_port.save(context.state)",
@@ -10075,7 +10075,7 @@
     {
       "file": "src/bioetl/application/services/workflow/control_plane/_execution_resume_support.py",
       "line": 213,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "834571d300111b5c4a62507aeb145ee33766cb40",
       "content_sha256": "ef06fa77db9db108f7c7f90726fab4009548dc9db89d227aedac4c25661fa28d",
       "source_segment": "workflow_state_port.save(normalized_state)",
@@ -10087,7 +10087,7 @@
     {
       "file": "src/bioetl/application/services/control_plane/manifest/service.py",
       "line": 120,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "24da53942a3a5b44b1b7375868ac0d239287d1d0",
       "content_sha256": "5332bff54df7386c2bb05f45dd322749b8095e4a9eef43e607b4aea01e06ba99",
       "source_segment": "self.manifest_port.save(manifest)",
@@ -10099,7 +10099,7 @@
     {
       "file": "src/bioetl/application/services/control_plane/workflow/manifest_service.py",
       "line": 82,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "15c4474011fc226730fe3377b3f67487dd42cfb4",
       "content_sha256": "e5625d2542eb2dcc667b714735488f9c873060c7bb237d298f2a4da884f51050",
       "source_segment": "self.manifest_port.save(manifest)",
@@ -10111,7 +10111,7 @@
     {
       "file": "src/bioetl/application/core/lifecycle/checkpoint_manager.py",
       "line": 207,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "95488c02708268a130cea89473a2c43cc1110125",
       "content_sha256": "9a3aafd022375a7ca92c8cd90da58529b8bc1babae74fa22cb2b2a9ee0671c67",
       "source_segment": "await self._checkpoint.save(",
@@ -10123,7 +10123,7 @@
     {
       "file": "src/bioetl/application/composite/checkpoint/service.py",
       "line": 182,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "8ce72dc95103e422b1f1e207d27983ff15fc5a9a",
       "content_sha256": "aaf1d7f741cfc95c9db3cbb12c2dcdcf9d642e21c84cf34f9d8fae4538a9b4b9",
       "source_segment": "self._persistence_service.save(self._load_service.synchronize_manifest(state))",
@@ -10135,7 +10135,7 @@
     {
       "file": "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py",
       "line": 49,
-      "source_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "source_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
       "source_blob": "1c0bfc98405b787c93717753b81e6388d25cb268",
       "content_sha256": "c8eb019ae8fa99c6dc90304111462db45b72a68ebf091227fe960bbfad61ea7e",
       "source_segment": "await host._checkpoint_manager.save(state)",
@@ -10166,32 +10166,60 @@
       "reviewed_resource_free_sources": {
         "src/bioetl/domain/mapping/organism_classification.py": "73027044344330ffe0eb3ad76d64a1d4182b4bdf8b41898b1ee675cc795127ba"
       }
+    },
+    {
+      "from_commit": "b2c11e0bac60b40807e68619b2d36d639e883c80",
+      "to_commit": "378522680a98faf4cecbe0730e7fef2314ce4ac0",
+      "reviewed_resource_free_sources": {
+        "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py": "d707b3dec856871910ff3b0e8c3f08dfddc8d275ebe6622b3325fc18c0eb9cc1",
+        "src/bioetl/application/core/_base_transformer_structural_support.py": "730992135d9969dbe3beb9a4234d6ce45c4cd42edb55e862fc88d9b561e0cf9a",
+        "src/bioetl/application/core/base_transformer/_structural_policy_events.py": "f4f13e4824dc511b55df2094cc8ac17c837cbfcc114f2ba506bb673a03f9a5a8",
+        "src/bioetl/domain/behavior/_dq_rule_evaluators.py": "1ccbe38a69775692b5e72693bd15ab5b5dd82d5492c5c591a2a8bca26095253f",
+        "src/bioetl/domain/behavior/_dq_value_coercion.py": "cdd1e42c81e91553f47d803a16b29edba93f412d31f71f1426374e4758ca253a",
+        "src/bioetl/domain/schemas/chembl/publication.py": "7489d3a2868a8f334f0cbafeda0a237e8147ad87a6dab6e6cfc4e0d2838ae966"
+      }
+    },
+    {
+      "from_commit": "378522680a98faf4cecbe0730e7fef2314ce4ac0",
+      "to_commit": "92ab74d4143e18a1d44c9ab5109b9fd7deedcd58",
+      "reviewed_resource_free_sources": {
+        "src/bioetl/application/core/_base_transformer_execution_support.py": "8929fd79aadd7a3b6ecb65c387c9dc7c28d76b6e6d48d6de0d1b1c3c8a0b0ebf",
+        "src/bioetl/application/core/_base_transformer_structural_support.py": "45d5b130de94f606d1f56ca4ce09324c708cb3dc6bbcd82c2b17362e95f7645f",
+        "src/bioetl/application/core/base_transformer/_structural_policy_events.py": "26542fe09ca91ae9a24256638693d764e0016400f516356666439b197559451a"
+      }
+    },
+    {
+      "from_commit": "92ab74d4143e18a1d44c9ab5109b9fd7deedcd58",
+      "to_commit": "03e4b1dda8be76d0173790c92b494c97b8cdb1f9",
+      "reviewed_resource_free_sources": {
+        "src/bioetl/application/core/_base_transformer_structural_support.py": "4f7714afb95d057b19293493fb10a2eecbc196d09b184d37d3ded186819c6333"
+      }
     }
   ],
   "resource_parts": [
     {
       "file": "configs/quality/external_resource_inventory/part-01.json",
-      "sha256": "6dcd0534f71dd67ba9c0eab5a130ab9f34afc8f50dbe7eddd78907c8b940cecc",
+      "sha256": "f4ad8d8e3f1095323c5020238c2f61fb8e7450ff61a865c2543824215547c587",
       "resource_count": 43
     },
     {
       "file": "configs/quality/external_resource_inventory/part-02.json",
-      "sha256": "ff2bfb995b63e3dc51b377e758296955fd3acaa00081e39070af7bfadc4181ca",
+      "sha256": "8bcbaa98ca900c2aa85e2b5eab14adaca1611dfbacc65c0d7b909083c95b10b9",
       "resource_count": 50
     },
     {
       "file": "configs/quality/external_resource_inventory/part-03.json",
-      "sha256": "f8d4527f90eb0467ce110f4805cca484c8d0792855d48814efb814a913d65e39",
+      "sha256": "72bb40ce0ac97c9bf754cea0779caa6d6e36922489a07686d44383e4f7cb886e",
       "resource_count": 30
     },
     {
       "file": "configs/quality/external_resource_inventory/part-04.json",
-      "sha256": "b11f0abb489518995bde6ca3ee4fd49d4e63aca12879a6af6483cd19faea5b98",
+      "sha256": "657c6ed75a3728203a654f0cdbc1d0ba80a7935ddb756b872323115bc89cc124",
       "resource_count": 48
     },
     {
       "file": "configs/quality/external_resource_inventory/part-05.json",
-      "sha256": "04b6779765dea92f976416e45df5380b00f0b5b6649d536f6c2e2ce8d688a51f",
+      "sha256": "54e1867f99a2397322d16efb2e01e8897f5c31966880cca44dfe4b3fba0af314",
       "resource_count": 31
     }
   ]

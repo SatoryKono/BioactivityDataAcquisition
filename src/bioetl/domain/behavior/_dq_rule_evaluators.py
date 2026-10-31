@@ -173,7 +173,7 @@ def _required_rule_violated(
     rule: FieldValidation,
     value: object,
 ) -> bool:
-    return rule.field not in record or value is None
+    return rule.field not in record or not _is_present(value)
 
 
 def _not_null_rule_violated(
@@ -182,7 +182,7 @@ def _not_null_rule_violated(
     value: object,
 ) -> bool:
     del record, rule
-    return value is None
+    return not _is_present(value)
 
 
 def _range_field_rule_violated(
