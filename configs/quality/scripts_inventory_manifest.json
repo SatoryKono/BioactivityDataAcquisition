@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T16:17:13.329840+00:00",
+  "generated_at": "2026-10-31T16:46:01.900588+00:00",
   "summary": {
     "total_scripts": 704,
     "status_counts": {
@@ -10423,7 +10423,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 873,
+          "line": 874,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10937,7 +10937,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 457,
+          "line": 458,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target \"${targets[@]}\" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-timeout"
         },
@@ -20780,7 +20780,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 694,
+          "line": 695,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
