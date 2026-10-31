@@ -287,3 +287,25 @@ synchronized. All runtime hardening assertions and the zero-CVE policy remain
 unchanged. Local owning tests and pre-commit passed; two native Windows skips
 require POSIX sh and remain distinct from PASS. Actual image build/scan and a
 fresh qualified capture are still required on the resulting committed inputs.
+
+The first addressed image build on `89fbcab7` produced Python 3.13.18, but its
+caller still selected the old immutable Docker workflow `843eb3f1c9410df7eccfebf3c8a810cc897ed0e9`.
+That old workflow required 3.13.16, so provenance failed before scanning. The
+caller, pin registry, strict allowlist and exact owning test now consistently
+select the reviewed published Docker workflow at
+`89fbcab7461c6400f8b2df38ebd95375713e7d32`. No old pin is retained as an additional
+allowlist exception. All 93 pin/runtime-policy owning cases passed.
+
+The prior local 17-shard attempt on `89fbcab7` was stopped with its original
+incomplete manifest and logs preserved when that required test-input change
+became known. Its three completed shards are not a complete capture. The CI
+coverage producers on that revision succeeded, but its separate currentness
+and generated-governance results remain failures. New measurements must bind
+the completed caller integration rather than inherit that earlier attempt.
+
+An extra strict-mypy diagnostic of the repo-side pin checker returned
+`no-any-return` in its unchanged YAML loader. Independent review confirmed the
+same function bytes on main and this candidate. This diagnostic remains FAIL;
+the configured required mypy targets (`src/bioetl`, `src/memory`, and
+`scripts/engineering/quality`) are unchanged and still mandatory. The unrelated
+YAML/security logic and mypy exclusions were not changed to silence it.
