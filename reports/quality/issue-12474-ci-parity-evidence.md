@@ -974,3 +974,16 @@ Linux/Windows typing and the invalid-type control. Test/product inputs did
 not change; six-family native precheck passed without telemetry rebind.
 Fresh Router evidence and host provenance are required before the next
 artifact head's final CI and native ADMIT. Earlier results remain historical.
+
+Source `34bfbe4309b8247d5276ccb24929cb718c644884` (tree
+`5194357401e107ce98b7089b87a524a604ae5372`) subsequently passed
+SonarCloud Code Analysis with zero new/accepted issues and Router CI
+`41249451435` in all four jobs. Native host provenance precheck/update/check
+returned 1/0/0: the expected stale precheck is preserved as FAIL. The fresh
+manifest binds 116 inputs; SHA256 is
+`620f23925ea4eb05c2fad164d0f0336e36fcc16800d6323f9b3fa0b660791002`.
+The immutable image and all historical receipts remain unchanged. Native
+telemetry publication provenance verified the unchanged qualified source
+`25386ce9320fbb9e3d472c3d686eba1c654c137c`; no measurement rebind was
+performed. Final acceptance still requires the new artifact head's CI,
+negative control and native ADMIT, plus independent review.
