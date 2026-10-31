@@ -987,3 +987,30 @@ telemetry publication provenance verified the unchanged qualified source
 `25386ce9320fbb9e3d472c3d686eba1c654c137c`; no measurement rebind was
 performed. Final acceptance still requires the new artifact head's CI,
 negative control and native ADMIT, plus independent review.
+
+### Host build-contract review follow-up (2026-10-31)
+
+Checkpoint `8970ed37b1a8b49eec9ad5bd1cb55e7fbf4acf21` (tree
+`1cd042e87cb810a6102f74a8f9e5c55600996321`) obtained terminal positive
+PR Gate `41250173604` SUCCESS (115 parity PASS), Nightly `41250190272`
+SUCCESS and native ADMIT (digest
+`2e0671593a85496bf996291e2fef470b8ab8a1ea250a127632bcb74f09c3638d`).
+Its isolated negative `41250194481` failed only Class lane/aggregate with
+114 PASS and one schema mismatch. All original ZIPs, logs and measurements
+remain preserved. These results did not authorize merge: fresh review
+comment `4433604192` identified unbound host-manifest build fields.
+
+The scoped fix centralizes the five build fields (`plugin_release_date`,
+`base_image`, `grafana_version`, `router_version`, `upstream_sha`) as one
+strict contract shared by refresh and promotion through `source_inputs`.
+Each value must be a nonempty string identical to the manifest read from
+the exact qualified Git commit. Qualification metadata is excluded from
+this scalar contract, avoiding a self-referential whole-manifest hash.
+All 99 owning cases pass: changed/missing/null/empty fields on either side,
+two missing/equal invalid values, unchanged metadata positive control,
+and a real Git fixture reproducing post-CI date drift. Against the old
+production module that same Git regression fails with `ValueError not raised`;
+the historical failure is retained. Linux/Windows strict typing and prior
+rootfs/plugin/security controls remain enforced. The changed test inputs
+require a fresh qualified producer and final acceptance; old ADMIT is not
+transferred and no stale measurements are rebound manually.

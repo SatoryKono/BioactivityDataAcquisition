@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T22:51:08.018566+00:00",
+  "generated_at": "2026-10-31T23:28:15.675595+00:00",
   "summary": {
     "total_scripts": 700,
     "status_counts": {
@@ -24688,7 +24688,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/grafana/test_refresh_router_host_provenance.py",
-          "line": 27,
+          "line": 35,
           "source_group": "tests",
           "text": "/ \"scripts/ops/observability/promote_router_host_release.py\","
         }

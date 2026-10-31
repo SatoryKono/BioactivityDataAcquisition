@@ -29,6 +29,13 @@ INCOMPLETE_ARTIFACT_LISTING = "Incomplete artifact listing"
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 MANIFEST = "grafana/tooling/router-v7-bridge/host-image.json"
+HOST_BUILD_FIELDS = (
+    "plugin_release_date",
+    "base_image",
+    "grafana_version",
+    "router_version",
+    "upstream_sha",
+)
 WORKFLOW = ".github/workflows/router-v7-bridge.yml"
 HEX_SHA256_PATTERN = r"[0-9a-f]{64}"
 PLUGIN_DIST_FRAGMENT = "/dist/"
@@ -365,12 +372,28 @@ def api(path: str) -> bytes:
     return subprocess.check_output(["gh", "api", f"repos/{REPOSITORY}/{path}"])
 
 
+def validate_host_build_contract(current: JsonObject, captured: JsonObject) -> None:
+    """Bind build parameters while allowing independent qualification history."""
+    for key in HOST_BUILD_FIELDS:
+        value, original = current.get(key), captured.get(key)
+        require(
+            isinstance(value, str)
+            and bool(value)
+            and isinstance(original, str)
+            and bool(original)
+            and value == original,
+            "Host build contract changed after CI: " + key,
+        )
+
+
 def source_inputs(
     root: Path, source: str, manifest: JsonObject
 ) -> tuple[dict[str, str], str]:
     def git(*args: str) -> bytes:
         return subprocess.check_output(["git", *args], cwd=root)
 
+    captured_manifest = json_object(json.loads(git("show", source + ":" + MANIFEST)))
+    validate_host_build_contract(manifest, captured_manifest)
     paths = {
         path
         for path in json_object(manifest["artifact_sha256"])

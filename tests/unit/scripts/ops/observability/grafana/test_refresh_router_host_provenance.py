@@ -21,6 +21,14 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 DIGEST = "a" * 64
 IMAGE = "satorykono/bioetl-grafana-router7-canvas@sha256:" + DIGEST
+BUILD_CONTRACT = {
+    "plugin_release_date": "2026-10-03",
+    "base_image": "grafana/grafana@sha256:" + DIGEST,
+    "grafana_version": "12.3.5",
+    "router_version": "7.0.0",
+    "upstream_sha": "b" * 40,
+}
+BUILD_CONTRACT_ERROR = "Host build contract changed after CI: "
 promotion_spec = importlib.util.spec_from_file_location(
     "promotion",
     Path(__file__).parents[6]
@@ -468,6 +476,12 @@ class ProvenanceControls(unittest.TestCase):
                 target = root / relative
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(b"support fixture\n")
+            manifest = {
+                **BUILD_CONTRACT,
+                "artifact_sha256": {"source.js": DIGEST},
+            }
+            manifest_path = root / module.MANIFEST
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
             git("add", ".")
             git(
                 "-c",
@@ -479,7 +493,6 @@ class ProvenanceControls(unittest.TestCase):
                 "fixture",
             )
             commit = git("rev-parse", "HEAD").decode().strip()
-            manifest = {"artifact_sha256": {"source.js": DIGEST}}
             inputs, tree = module.source_inputs(root, commit, manifest)
             self.assertEqual(
                 inputs,
@@ -495,6 +508,15 @@ class ProvenanceControls(unittest.TestCase):
                 },
             )
             self.assertEqual(tree, git("rev-parse", "HEAD^{tree}").decode().strip())
+            metadata_only = {**manifest, "ci_source_revalidations": [{"ci_run_id": 2}]}
+            self.assertEqual(
+                module.source_inputs(root, commit, metadata_only), (inputs, tree)
+            )
+            drifted = {**manifest, "plugin_release_date": "2026-10-30"}
+            with self.assertRaisesRegex(
+                ValueError, BUILD_CONTRACT_ERROR + "plugin_release_date"
+            ):
+                module.source_inputs(root, commit, drifted)
             dependency = (
                 root / "scripts/ops/observability/refresh_router_host_provenance.py"
             )
@@ -534,6 +556,52 @@ if __name__ == "__main__":
 import pytest
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize("field", list(BUILD_CONTRACT))
+@pytest.mark.parametrize("side", ["current", "captured"])
+@pytest.mark.parametrize("defect", ["changed", "missing", "null", "empty"])
+def test_host_build_contract_rejects_drift_and_invalid_values(
+    field: str, side: str, defect: str
+) -> None:
+    current, captured = copy.deepcopy(BUILD_CONTRACT), copy.deepcopy(BUILD_CONTRACT)
+    target = current if side == "current" else captured
+    if defect == "missing":
+        del target[field]
+    else:
+        target[field] = {"changed": "changed", "null": None, "empty": ""}[defect]
+    original = copy.deepcopy((current, captured))
+    with pytest.raises(ValueError, match=BUILD_CONTRACT_ERROR + field):
+        module.validate_host_build_contract(current, captured)
+    assert (current, captured) == original
+
+
+@pytest.mark.parametrize("field", list(BUILD_CONTRACT))
+def test_host_build_contract_rejects_two_missing_values(field: str) -> None:
+    current, captured = copy.deepcopy(BUILD_CONTRACT), copy.deepcopy(BUILD_CONTRACT)
+    del current[field]
+    del captured[field]
+    with pytest.raises(ValueError, match=BUILD_CONTRACT_ERROR + field):
+        module.validate_host_build_contract(current, captured)
+
+
+@pytest.mark.parametrize("field", list(BUILD_CONTRACT))
+@pytest.mark.parametrize("invalid", [None, ""])
+def test_host_build_contract_rejects_equal_invalid_values(
+    field: str, invalid: str | None
+) -> None:
+    current = {**BUILD_CONTRACT, field: invalid}
+    with pytest.raises(ValueError, match=BUILD_CONTRACT_ERROR + field):
+        module.validate_host_build_contract(current, copy.deepcopy(current))
+
+
+def test_host_build_contract_allows_only_qualification_metadata_changes() -> None:
+    captured = {**BUILD_CONTRACT, "ci_source_revalidations": [{"ci_run_id": 1}]}
+    current = {**BUILD_CONTRACT, "ci_source_revalidations": [{"ci_run_id": 2}]}
+    original = copy.deepcopy((current, captured))
+    module.validate_host_build_contract(current, captured)
+    assert (current, captured) == original
+    assert module.HOST_BUILD_FIELDS == tuple(BUILD_CONTRACT)
 
 
 def test_json_boundaries_preserve_valid_values_and_identity() -> None:

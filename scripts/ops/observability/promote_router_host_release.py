@@ -561,30 +561,6 @@ def main(argv: list[str] | None = None) -> int:
         for path in (HOST_PATH, MANAGED_PATH, RECIPE_PATH, *COMPOSE_PATHS)
     }
     host = provenance.json_object(json.loads(originals[HOST_PATH]))
-    captured = provenance.json_object(
-        json.loads(
-            subprocess.check_output(
-                [
-                    "git",
-                    "show",
-                    provenance.text(run["head_sha"], "Invalid source SHA")
-                    + ":"
-                    + HOST_PATH,
-                ],
-                cwd=ROOT,
-            )
-        )
-    )
-    for key in (
-        "plugin_release_date",
-        "base_image",
-        "grafana_version",
-        "router_version",
-        "upstream_sha",
-    ):
-        require(
-            host[key] == captured[key], "Host build contract changed after CI: " + key
-        )
     inputs, tree = provenance.source_inputs(
         ROOT, provenance.text(run["head_sha"], "Invalid source SHA"), host
     )
