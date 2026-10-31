@@ -21,7 +21,12 @@ from packaging.requirements import Requirement
 
 PYTHON_MANIFEST = "pyproject.toml"
 PYTHON_LOCK = "uv.lock"
-FULL_SUITE_CONFIGURATION_PREFIXES = ("tool.pytest.ini_options",)
+# The legacy pytest-asyncio table was moved under pytest.ini_options. Treat
+# removing that unsupported table as part of the same full-suite config change.
+FULL_SUITE_CONFIGURATION_PREFIXES = (
+    "tool.pytest.ini_options",
+    "tool.pytest-asyncio",
+)
 NARROW_CONFIGURATION_PREFIXES = ("tool.setuptools.packages.find.exclude",)
 # Stub-only wheels have no runtime import owner. Keep reviewed ownership explicit.
 STUB_RUNTIME_DISTRIBUTIONS = {"types-openpyxl": ("openpyxl", "openpyxl")}
