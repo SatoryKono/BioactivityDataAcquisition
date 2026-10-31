@@ -562,8 +562,10 @@ def _configure_windows_asyncio(config: pytest.Config) -> None:
 
     # On Windows/Python 3.13, function-scoped loop creation across thousands of
     # async tests can exhaust socket buffers during socketpair() setup.
-    config.inicfg["asyncio_default_test_loop_scope"] = "module"
-    config.inicfg["asyncio_default_fixture_loop_scope"] = "module"
+    # pytest 9.2 deprecates Config.inicfg; update the parsed ini cache directly
+    # before collection so pytest-asyncio reads the Windows-specific scopes.
+    config._inicache["asyncio_default_test_loop_scope"] = "module"
+    config._inicache["asyncio_default_fixture_loop_scope"] = "module"
 
 
 def _windows_xdist_worker_cap() -> int:

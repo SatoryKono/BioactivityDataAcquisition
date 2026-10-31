@@ -291,6 +291,9 @@ filterwarnings = [
     "error",
     # Deprecation warnings must fail by default; dedicated compatibility tests
     # should opt in locally if a retained public seam still emits them.
+    # AnyIO still imports pytest's deprecated CallSpec2 alias; pytest 9.2 keeps
+    # the alias and removes it only in pytest 10 or 11.
+    "ignore:.*CallSpec2 has been renamed to CallSpec.*:pytest.PytestRemovedIn10Warning",
     # NoOpMetrics warns when metrics are disabled (expected in tests)
     "ignore:NoOpMetrics is being used:UserWarning",
     # Explicit norecursedirs is intentional to avoid mixed Windows/WSL venv traversal.
