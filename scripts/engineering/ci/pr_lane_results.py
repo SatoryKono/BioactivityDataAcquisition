@@ -388,6 +388,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
     ),
     "Dockerfile.bioetl": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    "grafana/plugins/eslint-shared-config.mjs": (
+        "tests/architecture/test_braces_backport.py",
+        "tests/architecture/test_dashboard_scenes_contract.py",
+        RESIDUAL_OSV_TEST,
+    ),
     "docker-compose.monitoring.yml": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         "tests/integration/test_grafana_datasource_provisioning.py",

@@ -407,6 +407,7 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
             "grafana/tooling/router-v7-bridge/package-lock.json",
             "grafana/plugins/bioetl-scenes-app/package.json",
             "grafana/plugins/bioetl-selectorshell-panel/package-lock.json",
+            "grafana/plugins/eslint-shared-config.mjs",
         ],
         repo_root=repo_root,
     )

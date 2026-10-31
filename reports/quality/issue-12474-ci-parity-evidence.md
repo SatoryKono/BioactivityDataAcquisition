@@ -321,3 +321,41 @@ The complete actual diff plus 20 applicable future generated outputs was checked
 before freezing again: 56 unique paths, no unmapped input, 86 selected targets.
 The previous local attempt remains incomplete with its recorded failed shard;
 none of its partial measurements are promoted as a complete capture.
+
+The independent review of `9ffbc6f05305682ad6d11c74f55d267facdbbaac`
+corrected an earlier check summary: `route-fixture-final-nontel-check` actually
+returned exit 1 because the local main tracking ref was absent. That FAIL is
+preserved. After a fresh fetch, `routing9ff-nontel-check-after-fetch` returned
+exit 0 without changing the working tree. Actual Nightly `41201108375` completed
+with all 17 coverage producers and both aggregation jobs successful, while
+the old telemetry/currentness gates remained FAIL. Original artifact archives,
+API identities and digests are preserved; this is not final admission.
+
+The Windows local attempt on that source exposed another synthetic newline
+fixture and remains incomplete/failed. The synthetic time producer now writes
+the exact declared UTF-8 bytes; its strict digest comparison and all five
+success/failure outcomes remain. A complete tooling diagnostic then exposed
+`nul.csv`, a Windows device alias even with an extension. Only that temporary
+filename changes to `malformed.csv`; its null-byte payload, malformed-error
+contract and financial redaction assertions remain unchanged. The next full
+tooling validation returned exit 0: 3583 cases, no failures/errors, 54 existing
+platform/fixture skips. The targeted fixture/routing suite returned 149 PASS.
+
+A parallel authorized repair published `a4a0869a47a8cbb1a726c278e72d4cb8da4dedf9`
+before writer coordination. Both histories and the unique local patch were
+preserved in a verified bundle. Its author then explicitly handed off the sole
+writer role and stopped writing. The full six-file changeset was integrated
+without rewriting history. Its shared ESLint helper preserves the existing
+rules; the new exact helper route selects the existing plugin governance tests,
+and the fail-closed shadow comparison covers the actual full diff.
+
+That parallel changeset copied module coverage candidate artifact `13041464406`
+from run `41199002040`, source `0d09e1cfecc58948464ae32caf703443a9b1d666`.
+The author confirmed that no reporter was executed for that copy. It remains
+provisional historical input, not a qualified new measurement or acceptance.
+Our complete new capture and canonical reporter must replace it before closeout.
+The lint topology change also invalidates the earlier claim that all 123
+historical Grafana build inputs equal the current tree. Own Router run
+`41202898231` failed its unchanged moderate npm audit gate before the build;
+its actual findings and original logs are preserved. Neither a skipped host
+build nor the prior donor success is presented as current Grafana acceptance.
