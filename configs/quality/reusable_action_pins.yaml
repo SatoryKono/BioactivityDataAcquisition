@@ -22,6 +22,6 @@ pins:
   - path: "SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv"
     sha: "4d46594b319b39d24f0bb239b699362d7f4288bb"
   - path: "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml"
-    sha: "c21dabb5931f2be092a6203c63e05dbfe4240c0e"
+    sha: "89fbcab7461c6400f8b2df38ebd95375713e7d32"
   - path: "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml"
     sha: "f377cff40abf52d63220346b9ab64814f3081ca6"

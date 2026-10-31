@@ -416,21 +416,6 @@ jobs:
             echo "::error::tests gate has no affected pytest target"
             exit 1
           fi
-          parallel_timeout=900
-          # Framework/toolchain updates select the entire suite, not a small
-          # affected slice. Keep a bounded pass within the existing 90m job.
-          full_suite=false
-          for target in "${targets[@]}"; do
-            if [[ "${target%/}" == "tests" ]]; then
-              full_suite=true
-              break
-            fi
-          done
-          if [[ "$full_suite" == "true" ]]; then
-            parallel_timeout=2400
-          fi
-          # Preserve the original workload class before subtraction expands tests
-          # into individual node IDs; the existing full-suite budget still applies.
           uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results subtract-affected \
             --repo-root . \
             --fixed-targets tests/architecture \
@@ -441,6 +426,22 @@ jobs:
           if [[ ${#targets[@]} -eq 0 ]]; then
             echo "affected pytest targets are already covered by the fixed architecture lane"
             exit 0
+          fi
+          parallel_timeout=900
+          # Framework/toolchain updates select the entire suite, not a small
+          # affected slice. Fixed-lane subtraction can append architecture
+          # nodeids skipped by the earlier lane, so detect the suite root
+          # anywhere in the execution plan. Keep a bounded pass within the
+          # existing 90m job.
+          full_suite=false
+          for target in "${targets[@]}"; do
+            if [[ "${target%/}" == "tests" ]]; then
+              full_suite=true
+              break
+            fi
+          done
+          if [[ "$full_suite" == "true" ]]; then
+            parallel_timeout=2400
           fi
           parallel_addopts="-n auto --dist loadfile --max-worker-restart=0 -q --tb=line"
           serial_addopts="-p no:xdist -q --tb=line"
@@ -823,7 +824,7 @@ jobs:
       packages: write
       id-token: write
       attestations: write
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@c21dabb5931f2be092a6203c63e05dbfe4240c0e
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@89fbcab7461c6400f8b2df38ebd95375713e7d32
     with:
       caller-sha: ${{ needs.classify-changes.outputs.head_sha }}
 

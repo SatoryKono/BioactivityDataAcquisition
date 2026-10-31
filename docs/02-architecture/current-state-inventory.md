@@ -43,7 +43,7 @@ nonregressing adoption retains prior accepted values where the fresh raw
 measurement is lower. Those 2566-module figures and the summary table below are
 historical measurement evidence for that commit, not the live source-module
 count. The current source inventory binding at the end of this document reports
-the authoritative live projection. This is local measurement
+the live projection (`source_module_count=2571`). This is local measurement
 evidence, not CircleCI acceptance or lifecycle ADMIT for the final PR head.
 
 | Artifact | Historical measurement (`912f4839`) | Source |
@@ -335,14 +335,14 @@ by storage technology. Current owner boundaries:
 
 ## Current source inventory binding
 
-- `source_tree_sha256=bd53f861c03024008219feef1e9c587f344c559c4a77ecec08e2e289256fff60`
-- `source_module_count=2578`
-- Source modules: `2578`
-- `coverage_inventory_module_count=2578`
-- Accepted coverage inventory: `2578` modules
-- Accepted inventory: `2518` fully covered
-- Accepted inventory: `59` partially covered
-- Test inventory: `assertless_total_candidates=57`
+- `source_tree_sha256=e974330fd6c7465766ba86e63a656f73f18beeaa4bf00e1ba6f1d91017e209f1`
+- `source_module_count=2566`
+- Source modules: `2566`
+- `coverage_inventory_module_count=2566`
+- Accepted coverage inventory: `2566` modules
+- Accepted inventory: `2513` fully covered
+- Accepted inventory: `52` partially covered
+- Test inventory: `assertless_total_candidates=69`
 
 Derived by scripts/engineering/qa/report_topology_source_binding.py from
 the verified source tree and accepted inventory. This is a source-only projection, not a

@@ -26,6 +26,31 @@ from typing import Any
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
 COVERAGE_ARTIFACT = "coverage-report"
 DURATION_ARTIFACT = "test-duration-telemetry"
+# These are the 17 coverage-data owners in tests.yml, not artifact presence.
+# GitHub truncates long matrix display names, so their canonical prefix is used.
+COVERAGE_PRODUCER_JOBS = (
+    "tests / smoke-check",
+    "tests / contract-confidence",
+    *(f"tests / Repo-backed unit ({group})" for group in ("product", "tooling", "ops")),
+    *(
+        f"tests / Unit scripts tooling ({group})"
+        for group in ("passport", "debt-governance", "other")
+    ),
+    "tests / unit-filesystem-contracts",
+    "tests / unit-subprocess-backed",
+    *(
+        f"tests / test-matrix (3.13, {group}, "
+        for group in (
+            "unit-domain",
+            "unit-application",
+            "unit-infrastructure",
+            "unit-other",
+            "integration",
+            "security",
+        )
+    ),
+    "tests / serial-coverage",
+)
 RECEIPT = Path("reports/test-telemetry/squash-provenance.json")
 PUBLICATION_RECEIPT = Path(
     "reports/quality/quality-move-qm08/publication-provenance.json"
@@ -542,11 +567,60 @@ def _ci_capture_run(payload: dict[str, Any], run_id: int) -> dict[str, Any]:
         jobs.get("jobs", [])
     ):
         raise ValueError("Producer job response is incomplete")
-    for name in ("tests / coverage-verify", "tests / duration-telemetry"):
-        matches = [j for j in jobs["jobs"] if j.get("name") == name]
-        if len(matches) != 1 or matches[0].get("conclusion") != "success":
-            raise ValueError("Required CI capture producer did not succeed: " + name)
-    return run
+    selected = _qualified_capture_jobs(run, jobs["jobs"])
+    return {**run, "verified_capture_jobs": selected}
+
+
+def _qualified_capture_jobs(
+    run: dict[str, Any], jobs: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Reject coverage from failed, missing, duplicate or foreign producers."""
+    selected = []
+    for selector in (
+        *COVERAGE_PRODUCER_JOBS,
+        "tests / coverage-verify",
+        "tests / duration-telemetry",
+    ):
+        matches = [
+            job
+            for job in jobs
+            if (
+                str(job.get("name", "")).startswith(selector)
+                if selector.endswith(", ")
+                else job.get("name") == selector
+            )
+        ]
+        if len(matches) != 1:
+            raise ValueError(
+                "Required CI capture producer is missing or ambiguous: " + selector
+            )
+        job = matches[0]
+        if (
+            job.get("status") != "completed"
+            or job.get("conclusion") != "success"
+            or job.get("run_id") != run["id"]
+            or job.get("run_attempt") != run["run_attempt"]
+            or job.get("head_sha") != run["head_sha"]
+        ):
+            raise ValueError(
+                "Required CI capture producer did not succeed on this attempt: "
+                + selector
+            )
+        selected.append(
+            {
+                key: job[key]
+                for key in (
+                    "id",
+                    "name",
+                    "run_id",
+                    "run_attempt",
+                    "head_sha",
+                    "status",
+                    "conclusion",
+                )
+            }
+        )
+    return selected
 
 
 def _publication_sources(root: Path, source: str) -> list[str]:
@@ -731,6 +805,7 @@ def build_ci_squash_receipt(
         "source_tree_sha256": payload["source_tree_sha256"],
         "metrics_sha256": telemetry_metrics_sha256(payload),
         "ci_artifact_inputs": artifacts,
+        "ci_capture_producers": run["verified_capture_jobs"],
         "reviewed_source_commits": _publication_sources(root, source),
         "retrieved_from": f"https://api.github.com/repos/{REPOSITORY}/pulls/{pull_request}",
         "retrieved_at_utc": datetime.now(UTC).isoformat(),
