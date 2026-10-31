@@ -840,3 +840,37 @@ SKIP rather than being relabeled as 115 PASS. All measurement originals,
 replaced inputs, initial failed checks and the cancelled accidental old-source
 dispatch remain preserved. Final artifact-head CI, proof and isolated schema
 controls remain necessary before merge and issue completion.
+
+### Mandatory public-tool typing correction
+
+The historical classification of strict typing failures in the two newly
+introduced observability materializers as non-required auxiliary baseline is
+withdrawn. RULES requires new and changed public functions to pass strict mypy;
+the narrower canonical CI selection does not waive that requirement. The
+original failing commands and their raw logs remain preserved. The Windows
+mandatory precheck reproduced 43 errors, followed by an intermediate one-error
+result and then a successful strict check of both modules, exit 0.
+
+The correction defines recursive JSON types, validates actual JSON objects and
+lists before localized casts, and immediately validates results from the two
+legacy untyped integration boundaries. Valid objects retain their identity and
+values, including None, False and zero. Runtime import loading now explicitly
+rejects missing module specifications/loaders. There are no blanket Any
+annotations, type ignores, suppressed diagnostics or weakened configuration.
+Historical release-promotion tool identities remain unchanged.
+
+Owning controls include valid/invalid JSON boundaries, both missing-loader
+cases, the real strict check of the production modules and a deliberately
+ill-typed isolated fixture that must be rejected. The focused suite passed all
+17 cases; together with parent CLI dispatch controls it passed 26 cases, exit
+0. Ruff also returned 0. Independent read-only reviewer
+`telemetry_independent_review` verified the exact source diff and original
+receipt/log hashes and accepted the correction, while explicitly requiring new
+qualification after publication.
+
+The previously published `7ee48ff5aae6d360dc2ed900f1fcb25fe0a4a8f6`
+completed its own Nightly, positive canonical PR Gate and isolated negative
+schema control. Those originals are preserved as historical acceptance of that
+revision, not transferred to the changed tests. New TEST_INPUTS require a fresh
+qualified producer, native telemetry intake and current-head CI/Proof-or-Stop;
+the changed provenance generator also requires a fresh source revalidation.

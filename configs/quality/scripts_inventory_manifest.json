@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T19:12:31.140219+00:00",
+  "generated_at": "2026-10-31T21:16:47.125928+00:00",
   "summary": {
     "total_scripts": 700,
     "status_counts": {
@@ -24302,13 +24302,13 @@
         },
         {
           "path": "scripts/ops/observability/promote_router_host_release.py",
-          "line": 331,
+          "line": 359,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.router_managed_image import verify"
         },
         {
           "path": "scripts/ops/observability/refresh_router_host_provenance.py",
-          "line": 44,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\","
         }
@@ -24369,7 +24369,7 @@
         },
         {
           "path": "scripts/ops/observability/promote_router_host_release.py",
-          "line": 332,
+          "line": 360,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.router_rootfs import filesystem_records"
         }
@@ -24688,7 +24688,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/grafana/test_refresh_router_host_provenance.py",
-          "line": 25,
+          "line": 27,
           "source_group": "tests",
           "text": "/ \"scripts/ops/observability/promote_router_host_release.py\","
         }
@@ -24703,7 +24703,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/ops/__main__.py",
@@ -24713,13 +24713,19 @@
         },
         {
           "path": "scripts/ops/observability/promote_router_host_release.py",
-          "line": 24,
+          "line": 25,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability import refresh_router_host_provenance as provenance"
+        },
+        {
+          "path": "scripts/ops/observability/promote_router_host_release.py",
+          "line": 29,
           "source_group": "scripts",
           "text": "ROOT / \"scripts/ops/observability/refresh_router_host_provenance.py\","
         },
         {
           "path": "tests/unit/scripts/ops/observability/grafana/test_refresh_router_host_provenance.py",
-          "line": 16,
+          "line": 18,
           "source_group": "tests",
           "text": "/ \"scripts/ops/observability/refresh_router_host_provenance.py\","
         }

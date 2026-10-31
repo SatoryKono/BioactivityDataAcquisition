@@ -16,17 +16,25 @@ import subprocess
 import sys
 import zipfile
 from pathlib import Path, PurePosixPath
+from collections.abc import Callable
+from typing import IO, TYPE_CHECKING, cast
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
-spec = importlib.util.spec_from_file_location(
-    "host_provenance",
-    ROOT / "scripts/ops/observability/refresh_router_host_provenance.py",
-)
-provenance = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(provenance)
-require = provenance.require
-sha256 = provenance.sha256
+if TYPE_CHECKING:
+    from scripts.ops.observability import refresh_router_host_provenance as provenance
+else:
+    spec = importlib.util.spec_from_file_location(
+        "host_provenance",
+        ROOT / "scripts/ops/observability/refresh_router_host_provenance.py",
+    )
+    if spec is None or spec.loader is None:
+        raise ImportError("Unable to load host provenance module")
+    provenance = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(provenance)
+type JsonObject = provenance.JsonObject
+require: Callable[[bool, str], None] = provenance.require
+sha256: Callable[[bytes], str] = provenance.sha256
 IMAGE = re.compile(r"satorykono/bioetl-grafana-router7-canvas@sha256:[0-9a-f]{64}")
 HOST_PATH = "grafana/tooling/router-v7-bridge/host-image.json"
 MANAGED_PATH = "grafana/tooling/router-v7-bridge/managed-image.json"
@@ -41,24 +49,25 @@ COMPOSE_PATHS = (
 )
 
 
-def _canonical_mapping(lines: list[str], indent: int) -> dict:
+def _canonical_mapping(
+    lines: list[str], indent: int
+) -> dict[str, tuple[str, list[str]]]:
     """Parse only the owned plain-key block syntax, rejecting duplicate keys."""
-    entries = {}
-    current = None
+    entries: dict[str, tuple[str, list[str]]] = {}
+    current: str | None = None
     for line in lines:
         level = len(line) - len(line.lstrip())
         if level == indent:
             key = re.fullmatch(rf" {{{indent}}}([A-Za-z_][A-Za-z0-9_-]*):(.*)", line)
-            require(key is not None, "Unsupported Compose mapping key")
+            if key is None:
+                raise ValueError("Unsupported Compose mapping key")
             name, value = key.groups()
             require(name not in entries, "Duplicate Compose mapping key")
             entries[name] = (value, [])
             current = name
         else:
-            require(
-                level > indent and current is not None,
-                "Unsupported Compose indentation",
-            )
+            if level <= indent or current is None:
+                raise ValueError("Unsupported Compose indentation")
             entries[current][1].append(line)
     return entries
 
@@ -91,7 +100,7 @@ def _grafana_image_binding(text: str) -> str:
 
 def validate_delivery_bindings(
     outputs: dict[str, bytes], image: str, managed_image: str
-):
+) -> None:
     """Fail closed on departures from the owned block-style Compose bindings."""
     for path in COMPOSE_PATHS:
         expected = image if path.endswith(HOST_COMPOSE_SUFFIX) else managed_image
@@ -108,10 +117,14 @@ def validate_delivery_bindings(
     require(parents == [[image]], "Unexpected managed recipe parent")
 
 
-def _validate_release_inventory(host: dict, dist: dict, inputs: dict) -> None:
+def _validate_release_inventory(
+    host: JsonObject, dist: dict[str, str], inputs: dict[str, str]
+) -> None:
     old_dist = {
         path: value
-        for path, value in host["artifact_sha256"].items()
+        for path, value in provenance.string_map(
+            host["artifact_sha256"], "Invalid artifact digest map"
+        ).items()
         if DIST_FRAGMENT in path
     }
     require(set(dist) == set(old_dist), "Release artifact inventory changed")
@@ -123,10 +136,10 @@ def _validate_release_inventory(host: dict, dist: dict, inputs: dict) -> None:
         "Release would change runtime assets beyond source maps",
     )
     require(
-        inputs
+        bool(inputs)
         and all(
             path in inputs
-            for path in host["artifact_sha256"]
+            for path in provenance.json_object(host["artifact_sha256"])
             if DIST_FRAGMENT not in path
         ),
         "Source provenance inventory shrank",
@@ -134,14 +147,14 @@ def _validate_release_inventory(host: dict, dist: dict, inputs: dict) -> None:
 
 
 def build_release_files(
-    original: dict,
-    run: dict,
-    artifact: dict,
-    parity: dict,
-    inputs: dict,
+    original: dict[str, bytes],
+    run: JsonObject,
+    artifact: JsonObject,
+    parity: JsonObject,
+    inputs: dict[str, str],
     source_tree: str,
-    dist: dict,
-    managed_receipt: dict,
+    dist: dict[str, str],
+    managed_receipt: JsonObject,
     generator_digest: str,
 ) -> dict[str, bytes]:
     """Render owned outputs without inventing image/source/CI identities."""
@@ -149,10 +162,14 @@ def build_release_files(
         run.get("status") == "completed" and run.get("conclusion") == "success",
         "Release source CI must have succeeded",
     )
-    host = json.loads(original[HOST_PATH])
-    managed = json.loads(original[MANAGED_PATH])
-    image = parity.get("declared_image", "")
-    managed_image = managed_receipt.get("declared_image", "")
+    host = provenance.json_object(json.loads(original[HOST_PATH]))
+    managed = provenance.json_object(json.loads(original[MANAGED_PATH]))
+    image = provenance.text(
+        parity.get("declared_image", ""), "Unapproved immutable release image"
+    )
+    managed_image = provenance.text(
+        managed_receipt.get("declared_image", ""), "Unapproved immutable release image"
+    )
     require(
         parity.get("status") == "PASS"
         and parity.get("qualification_target") == "candidate",
@@ -173,14 +190,16 @@ def build_release_files(
     _validate_release_inventory(host, dist, inputs)
     result = copy.deepcopy(host)
     outputs = dict(original)
-    promotion = {
+    promotion: JsonObject = {
         "source_commit": run["head_sha"],
         "source_tree": source_tree,
         "ci_run_id": run["id"],
         "ci_run_attempt": run["run_attempt"],
         "ci_run_url": run["html_url"],
         "original_artifact_id": artifact["id"],
-        "original_zip_sha256": artifact["digest"].removeprefix("sha256:"),
+        "original_zip_sha256": provenance.text(
+            artifact["digest"], "Invalid artifact digest"
+        ).removeprefix("sha256:"),
         "generator_sha256": generator_digest,
         "qualification": "CI_CANDIDATE_IMAGE_ARTIFACT_PARITY",
         "default_delivery_ci_claimed": False,
@@ -191,7 +210,7 @@ def build_release_files(
             managed["parent_image"] == host["image"],
             "Existing managed parent is inconsistent",
         )
-        history = copy.deepcopy(host.get("release_history", []))
+        history = provenance.json_list(copy.deepcopy(host.get("release_history", [])))
         prior_host = copy.deepcopy(host)
         prior_host.pop("release_history", None)
         history.append(
@@ -205,17 +224,21 @@ def build_release_files(
         result["release_history"] = history
         recipe = original[RECIPE_PATH].decode()
         require(
-            recipe.count(FROM_PREFIX + host["image"]) == 1,
+            recipe.count(
+                FROM_PREFIX + provenance.text(host["image"], "Invalid host image")
+            )
+            == 1,
             "Unexpected managed recipe parent",
         )
         outputs[RECIPE_PATH] = recipe.replace(
-            FROM_PREFIX + host["image"], FROM_PREFIX + image
+            FROM_PREFIX + provenance.text(host["image"], "Invalid host image"),
+            FROM_PREFIX + image,
         ).encode()
         for path in COMPOSE_PATHS:
             old = (
-                host["image"]
+                provenance.text(host["image"], "Invalid host image")
                 if path.endswith(HOST_COMPOSE_SUFFIX)
-                else managed["image"]
+                else provenance.text(managed["image"], "Invalid managed image")
             )
             new = image if path.endswith(HOST_COMPOSE_SUFFIX) else managed_image
             text = original[path].decode()
@@ -238,12 +261,12 @@ def build_release_files(
         )
     validate_delivery_bindings(outputs, image, managed_image)
     result["image"] = image
-    result["artifact_sha256"].update(inputs)
-    result["artifact_sha256"].update(dist)
+    provenance.json_object(result["artifact_sha256"]).update(inputs)
+    provenance.json_object(result["artifact_sha256"]).update(dist)
     result["release_promotion"] = promotion
     result["delivery_source"] = {
         "source_ref": run["head_sha"],
-        "inputs": inputs,
+        "inputs": provenance.json_strings(inputs),
         "context_sha256": sha256(
             json.dumps(inputs, sort_keys=True, separators=(",", ":")).encode()
         ),
@@ -269,26 +292,31 @@ def build_release_files(
 
 
 def original_plugin_digests(
-    run: dict, jobs: dict, artifacts: dict, evidence: Path
-) -> dict:
-    result = {}
+    run: JsonObject, jobs: JsonObject, artifacts: JsonObject, evidence: Path
+) -> dict[str, str]:
+    result: dict[str, str] = {}
     for plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"):
         rows = [
             row
-            for row in artifacts["artifacts"]
+            for row in provenance.object_rows(
+                artifacts["artifacts"], "Incomplete artifact listing"
+            )
             if row["name"] == "host-plugin-" + plugin
         ]
         require(len(rows) == 1, "Missing/duplicate original plugin artifact")
         row = rows[0]
         job = next(
             job
-            for job in jobs["jobs"]
+            for job in provenance.object_rows(
+                jobs["jobs"], "Missing/duplicate Router jobs"
+            )
             if job["name"] == "plugin-tests (" + plugin + ")"
         )
         require(
             row.get("expired") is False
-            and row["workflow_run"]["id"] == run["id"]
-            and row["workflow_run"]["head_sha"] == run["head_sha"]
+            and provenance.json_object(row["workflow_run"])["id"] == run["id"]
+            and provenance.json_object(row["workflow_run"])["head_sha"]
+            == run["head_sha"]
             and provenance.timestamp(job["started_at"])
             <= provenance.timestamp(row["created_at"])
             <= provenance.timestamp(job["completed_at"]),
@@ -321,11 +349,11 @@ def original_plugin_digests(
 def live_managed_parity(
     host_image: str,
     managed_image: str,
-    parity: dict,
+    parity: JsonObject,
     recipe: bytes,
     run_id: int,
     evidence: Path,
-) -> dict:
+) -> JsonObject:
     """Inspect registered artifacts and independently rebuild the managed recipe."""
     sys.path.insert(0, str(ROOT))
     from scripts.ops.observability.grafana.router_managed_image import verify
@@ -341,7 +369,7 @@ def live_managed_parity(
     )
     docker = next((path for path in candidates if path.is_file()), None)
     require(docker is not None, "Trusted Docker executable is unavailable")
-    commands = []
+    commands: list[dict[str, object]] = []
 
     def execute(*args: str) -> bytes:
         argv = [str(docker), *args]
@@ -364,7 +392,7 @@ def live_managed_parity(
         process.check_returncode()
         return process.stdout
 
-    def records(image: str) -> dict:
+    def records(image: str) -> JsonObject:
         cid = (
             execute("create", "--entrypoint", "/bin/true", "--", image).decode().strip()
         )
@@ -382,7 +410,14 @@ def live_managed_parity(
                 ) as process,
             ):
                 try:
-                    result = filesystem_records(process.stdout)
+                    if process.stdout is None:
+                        raise ValueError("Missing Docker export stdout")
+                    # This legacy tar reader is untyped; validate its JSON records
+                    # immediately rather than propagating its dynamic return.
+                    reader = cast(Callable[[IO[bytes]], object], filesystem_records)
+                    result = provenance.json_object(
+                        reader(process.stdout), "Invalid filesystem records"
+                    )
                 except BaseException:
                     process.kill()
                     process.wait()
@@ -413,15 +448,22 @@ def live_managed_parity(
     for image in (host_image, managed_image):
         require(bool(IMAGE.fullmatch(image)), "Unapproved immutable image")
         execute("pull", image)
-    host = json.loads(execute("image", "inspect", host_image))[0]
-    delivered = json.loads(execute("image", "inspect", managed_image))[0]
+    host = provenance.object_rows(
+        json.loads(execute("image", "inspect", host_image)), "Invalid image inspection"
+    )[0]
+    delivered = provenance.object_rows(
+        json.loads(execute("image", "inspect", managed_image)),
+        "Invalid image inspection",
+    )[0]
     require(
-        host_image in host["RepoDigests"] and managed_image in delivered["RepoDigests"],
+        host_image in provenance.json_list(host["RepoDigests"])
+        and managed_image in provenance.json_list(delivered["RepoDigests"]),
         "Uninspected registry digest",
     )
     require(
         host["Id"] == parity["declared_image_config_digest"]
-        and host["RootFS"]["Layers"] == parity["declared_layers"],
+        and provenance.json_object(host["RootFS"])["Layers"]
+        == parity["declared_layers"],
         "Registry host differs from original CI parity",
     )
     parent_files = records(host_image)
@@ -444,7 +486,9 @@ def live_managed_parity(
         tag,
         str(evidence),
     )
-    built = json.loads(execute("image", "inspect", tag))[0]
+    built = provenance.object_rows(
+        json.loads(execute("image", "inspect", tag)), "Invalid image inspection"
+    )[0]
     built_files, delivered_files = records(tag), records(managed_image)
     for name, data in (
         ("host", parent_files),
@@ -454,14 +498,34 @@ def live_managed_parity(
         (evidence / (name + "-filesystem-records.json")).write_bytes(
             (json.dumps(data, sort_keys=True) + "\n").encode("utf-8")
         )
-    receipt = verify(
-        host,
-        built,
-        delivered,
-        parent_files,
-        built_files,
-        delivered_files,
-        managed_image,
+    # The owned legacy verifier is untyped; keep its result behind the same
+    # recursively validated JSON boundary as external receipts.
+    verifier = cast(
+        Callable[
+            [
+                JsonObject,
+                JsonObject,
+                JsonObject,
+                JsonObject,
+                JsonObject,
+                JsonObject,
+                str,
+            ],
+            object,
+        ],
+        verify,
+    )
+    receipt = provenance.json_object(
+        verifier(
+            host,
+            built,
+            delivered,
+            parent_files,
+            built_files,
+            delivered_files,
+            managed_image,
+        ),
+        "Invalid managed image receipt",
     )
     receipt["parent_image"] = host_image
     return receipt
@@ -483,7 +547,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     evidence = args.evidence_dir.resolve()
     evidence.mkdir(parents=True, exist_ok=False)
-    snapshots = {}
+    snapshots: dict[str, JsonObject] = {}
     prefix = f"actions/runs/{args.ci_run_id}"
     for name, endpoint in (
         ("run", prefix),
@@ -492,10 +556,16 @@ def main(argv: list[str] | None = None) -> int:
     ):
         raw = provenance.api(endpoint)
         (evidence / (name + ".json")).write_bytes(raw)
-        snapshots[name] = json.loads(raw)
+        snapshots[name] = provenance.json_object(json.loads(raw))
     run, jobs, artifacts = (snapshots[name] for name in ("run", "jobs", "artifacts"))
     require(run["id"] == args.ci_run_id, "CI run identity mismatch")
-    rows = [row for row in artifacts["artifacts"] if row["name"] == provenance.ARTIFACT]
+    rows = [
+        row
+        for row in provenance.object_rows(
+            artifacts["artifacts"], "Incomplete artifact listing"
+        )
+        if row["name"] == provenance.ARTIFACT
+    ]
     require(len(rows) == 1, "Missing/duplicate image parity artifact")
     raw = provenance.api(f"actions/artifacts/{rows[0]['id']}/zip")
     (evidence / "original-image-receipts.zip").write_bytes(raw)
@@ -509,10 +579,19 @@ def main(argv: list[str] | None = None) -> int:
         path: (ROOT / path).read_bytes()
         for path in (HOST_PATH, MANAGED_PATH, RECIPE_PATH, *COMPOSE_PATHS)
     }
-    host = json.loads(originals[HOST_PATH])
-    captured = json.loads(
-        subprocess.check_output(
-            ["git", "show", run["head_sha"] + ":" + HOST_PATH], cwd=ROOT
+    host = provenance.json_object(json.loads(originals[HOST_PATH]))
+    captured = provenance.json_object(
+        json.loads(
+            subprocess.check_output(
+                [
+                    "git",
+                    "show",
+                    provenance.text(run["head_sha"], "Invalid source SHA")
+                    + ":"
+                    + HOST_PATH,
+                ],
+                cwd=ROOT,
+            )
         )
     )
     for key in (
@@ -525,9 +604,14 @@ def main(argv: list[str] | None = None) -> int:
         require(
             host[key] == captured[key], "Host build contract changed after CI: " + key
         )
-    inputs, tree = provenance.source_inputs(ROOT, run["head_sha"], host)
+    inputs, tree = provenance.source_inputs(
+        ROOT, provenance.text(run["head_sha"], "Invalid source SHA"), host
+    )
     dist = original_plugin_digests(run, jobs, artifacts, evidence)
-    recipe = originals[RECIPE_PATH].replace(host["image"].encode(), args.image.encode())
+    recipe = originals[RECIPE_PATH].replace(
+        provenance.text(host["image"], "Invalid host image").encode(),
+        args.image.encode(),
+    )
     managed = live_managed_parity(
         args.image, args.managed_image, parity, recipe, args.ci_run_id, evidence
     )

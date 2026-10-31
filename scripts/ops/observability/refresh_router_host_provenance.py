@@ -17,6 +17,12 @@ import sys
 import zipfile
 from datetime import datetime
 from pathlib import Path, PurePosixPath
+from typing import cast
+
+type JsonValue = (
+    str | int | float | bool | list[JsonValue] | dict[str, JsonValue] | None
+)
+type JsonObject = dict[str, JsonValue]
 
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
 HERE = Path(__file__).resolve().parent
@@ -61,18 +67,69 @@ def require(condition: bool, message: str) -> None:
         raise ValueError(message)
 
 
+def _valid_json(value: object) -> bool:
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return True
+    if isinstance(value, list):
+        return all(_valid_json(item) for item in value)
+    if isinstance(value, dict):
+        return all(
+            isinstance(key, str) and _valid_json(item) for key, item in value.items()
+        )
+    return False
+
+
+def json_object(value: object, message: str = "Invalid JSON object") -> JsonObject:
+    """Narrow untyped JSON/integration data only after recursive validation."""
+    if not isinstance(value, dict) or not _valid_json(value):
+        raise ValueError(message)
+    return cast(JsonObject, value)
+
+
+def json_list(value: object, message: str = "Invalid JSON list") -> list[JsonValue]:
+    """Retain the validated list itself, including mutable history ownership."""
+    if not isinstance(value, list) or not _valid_json(value):
+        raise ValueError(message)
+    return cast(list[JsonValue], value)
+
+
+def object_rows(value: object, message: str) -> list[JsonObject]:
+    """Validate an API collection without accepting scalar or list rows."""
+    return [json_object(row, message) for row in json_list(value, message)]
+
+
+def text(value: object, message: str) -> str:
+    """Reject malformed receipt values instead of coercing them to strings."""
+    if not isinstance(value, str):
+        raise ValueError(message)
+    return value
+
+
+def string_map(value: object, message: str) -> dict[str, str]:
+    """Validate string-valued digest maps at their dynamic boundary."""
+    return {
+        key: text(item, message) for key, item in json_object(value, message).items()
+    }
+
+
+def json_strings(value: dict[str, str]) -> JsonObject:
+    """Copy a typed string map into the recursive JSON model."""
+    return dict(value)
+
+
 def sha256(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
-def timestamp(value: str) -> datetime:
-    require(isinstance(value, str) and bool(value), "Missing CI timestamp")
+def timestamp(value: object) -> datetime:
+    if not isinstance(value, str) or not value:
+        raise ValueError("Missing CI timestamp")
     parsed = datetime.fromisoformat(value)
     require(parsed.tzinfo is not None, "CI timestamp must include timezone")
     return parsed
 
 
-def _validated_jobs(run: dict, jobs: dict) -> list[dict]:
+def _validated_jobs(run: JsonObject, jobs: JsonObject) -> list[JsonObject]:
     """Require the complete successful job set for the source attempt."""
     require(
         run.get("status") == "completed" and run.get("conclusion") == "success",
@@ -87,10 +144,10 @@ def _validated_jobs(run: dict, jobs: dict) -> list[dict]:
         "Invalid source SHA",
     )
     require(
-        isinstance(run.get("run_attempt"), int) and run["run_attempt"] > 0,
+        isinstance(attempt := run.get("run_attempt"), int) and attempt > 0,
         "Missing run attempt",
     )
-    rows = jobs.get("jobs", [])
+    rows = object_rows(jobs.get("jobs", []), "Missing/duplicate Router jobs")
     require(
         jobs.get("total_count") == len(rows) == len(JOBS)
         and {row.get("name") for row in rows} == JOBS,
@@ -109,10 +166,10 @@ def _validated_jobs(run: dict, jobs: dict) -> list[dict]:
 
 
 def _selected_artifact(
-    artifacts: dict, run: dict, rows: list[dict], archive: bytes
-) -> dict:
+    artifacts: JsonObject, run: JsonObject, rows: list[JsonObject], archive: bytes
+) -> JsonObject:
     """Bind the original image receipt ZIP to the successful host-build job."""
-    entries = artifacts.get("artifacts", [])
+    entries = object_rows(artifacts.get("artifacts", []), "Incomplete artifact listing")
     require(
         artifacts.get("total_count") == len(entries) <= 100,
         "Incomplete artifact listing",
@@ -122,8 +179,9 @@ def _selected_artifact(
     artifact = matches[0]
     require(
         artifact.get("expired") is False
-        and artifact.get("workflow_run", {}).get("id") == run["id"]
-        and artifact.get("workflow_run", {}).get("head_sha") == run["head_sha"],
+        and json_object(artifact.get("workflow_run", {})).get("id") == run["id"]
+        and json_object(artifact.get("workflow_run", {})).get("head_sha")
+        == run["head_sha"],
         "Expired/foreign image receipt artifact",
     )
     host = next(row for row in rows if row["name"] == "host-build")
@@ -141,7 +199,7 @@ def _selected_artifact(
     return artifact
 
 
-def _receipt_payloads(archive: bytes) -> dict:
+def _receipt_payloads(archive: bytes) -> dict[str, JsonObject]:
     """Read exactly the two safe JSON receipts from the original ZIP."""
     with zipfile.ZipFile(io.BytesIO(archive)) as source:
         files = [row for row in source.infolist() if not row.is_dir()]
@@ -151,7 +209,7 @@ def _receipt_payloads(archive: bytes) -> dict:
             == {"router-v7-image-build.json", "router-v7-image-parity.json"},
             "Incomplete/duplicate image receipts",
         )
-        payloads = {}
+        payloads: dict[str, JsonObject] = {}
         for row in files:
             path = PurePosixPath(row.filename)
             require(
@@ -160,13 +218,13 @@ def _receipt_payloads(archive: bytes) -> dict:
                 and "\\" not in row.filename,
                 "Unsafe receipt archive member",
             )
-            payloads[path.name] = json.loads(source.read(row))
+            payloads[path.name] = json_object(json.loads(source.read(row)))
     return payloads
 
 
 def validate_capture(
-    run: dict, jobs: dict, artifacts: dict, archive: bytes
-) -> tuple[dict, dict]:
+    run: JsonObject, jobs: JsonObject, artifacts: JsonObject, archive: bytes
+) -> tuple[JsonObject, JsonObject]:
     """Authenticate original archive bytes against actual CI metadata."""
     rows = _validated_jobs(run, jobs)
     artifact = _selected_artifact(artifacts, run, rows, archive)
@@ -185,7 +243,8 @@ def validate_capture(
         "Build/image-parity identity mismatch",
     )
     require(
-        set(parity.get("artifacts", {})) == SCOPES, "Incomplete frontend/plugin parity"
+        set(json_object(parity.get("artifacts", {}))) == SCOPES,
+        "Incomplete frontend/plugin parity",
     )
     require(
         bool(re.fullmatch(HEX_SHA256_PATTERN, str(parity.get("rootfs_sha256")))),
@@ -201,7 +260,8 @@ def validate_capture(
             ),
             "Missing/invalid image layer evidence",
         )
-    for scope, record in parity["artifacts"].items():
+    for scope, value in json_object(parity["artifacts"]).items():
+        record = json_object(value, "Missing/invalid scope tree digest")
         require(
             bool(re.fullmatch(HEX_SHA256_PATTERN, str(record.get("tree_sha256")))),
             "Missing/invalid scope tree digest",
@@ -217,16 +277,18 @@ def validate_capture(
 
 
 def refresh(
-    manifest: dict,
-    run: dict,
-    artifact: dict,
-    parity: dict,
+    manifest: JsonObject,
+    run: JsonObject,
+    artifact: JsonObject,
+    parity: JsonObject,
     inputs: dict[str, str],
     source_tree: str,
     generator_sha256: str,
-) -> dict:
+) -> JsonObject:
     """Retain historical delivery while recording independently rebuilt equality."""
-    expected = manifest["delivery_source"]["host_artifact_parity"]
+    expected = json_object(
+        json_object(manifest["delivery_source"])["host_artifact_parity"]
+    )
     require(
         parity.get("declared_image") == manifest["image"] == expected["image"],
         "Pinned delivery image changed",
@@ -243,44 +305,48 @@ def refresh(
     for plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"):
         scope = "/usr/share/grafana/data/plugins-bundled/" + plugin
         require(
-            parity["artifacts"][scope]["module_sha256"]
-            == manifest["artifact_sha256"][f"grafana/plugins/{plugin}/dist/module.js"],
+            json_object(json_object(parity["artifacts"])[scope])["module_sha256"]
+            == json_object(manifest["artifact_sha256"])[
+                f"grafana/plugins/{plugin}/dist/module.js"
+            ],
             "Shipped plugin bytes changed",
         )
     require(
-        inputs
+        bool(inputs)
         and all(re.fullmatch(HEX_SHA256_PATTERN, value) for value in inputs.values()),
         "Missing/invalid source input digests",
     )
     require(
         all(
             path in inputs
-            for path in manifest["artifact_sha256"]
+            for path in json_object(manifest["artifact_sha256"])
             if PLUGIN_DIST_FRAGMENT not in path
         ),
         "Source input inventory shrank",
     )
-    record = {
+    record: JsonObject = {
         "ci_run_id": run["id"],
         "ci_run_attempt": run["run_attempt"],
         "ci_run_url": run["html_url"],
         "source_commit": run["head_sha"],
         "source_tree": source_tree,
         "original_artifact_id": artifact["id"],
-        "original_zip_sha256": artifact["digest"].removeprefix("sha256:"),
-        "verified_source_inputs": inputs,
+        "original_zip_sha256": text(
+            artifact["digest"], "Invalid artifact digest"
+        ).removeprefix("sha256:"),
+        "verified_source_inputs": json_strings(inputs),
         "generator_sha256": generator_sha256,
         "full_image_parity": parity,
         "qualification": "image_artifact_parity",
         "browser_acceptance_claimed": False,
     }
     result = copy.deepcopy(manifest)
-    history = result.setdefault("ci_source_revalidations", [])
+    history = json_list(result.setdefault("ci_source_revalidations", []))
     existing = [
         row
         for row in history
-        if row.get("ci_run_id") == run["id"]
-        and row.get("ci_run_attempt") == run["run_attempt"]
+        if json_object(row).get("ci_run_id") == run["id"]
+        and json_object(row).get("ci_run_attempt") == run["run_attempt"]
     ]
     if existing:
         require(
@@ -289,7 +355,7 @@ def refresh(
         )
     else:
         history.append(record)
-    result["artifact_sha256"].update(inputs)
+    json_object(result["artifact_sha256"]).update(inputs)
     return result
 
 
@@ -298,13 +364,15 @@ def api(path: str) -> bytes:
 
 
 def source_inputs(
-    root: Path, source: str, manifest: dict
+    root: Path, source: str, manifest: JsonObject
 ) -> tuple[dict[str, str], str]:
     def git(*args: str) -> bytes:
         return subprocess.check_output(["git", *args], cwd=root)
 
     paths = {
-        path for path in manifest["artifact_sha256"] if PLUGIN_DIST_FRAGMENT not in path
+        path
+        for path in json_object(manifest["artifact_sha256"])
+        if PLUGIN_DIST_FRAGMENT not in path
     }
     paths.update(BUILD_SUPPORT)
     paths.add(BRACES_ARCHIVE)
@@ -367,10 +435,14 @@ def main(argv: list[str] | None = None) -> int:
     for name, content in raw.items():
         (args.evidence_dir / (name + ".json")).write_bytes(content)
     run, jobs, artifacts = (
-        json.loads(raw[name]) for name in ("run", "jobs", "artifacts")
+        json_object(json.loads(raw[name])) for name in ("run", "jobs", "artifacts")
     )
     require(run.get("id") == args.ci_run_id, "CI run identity mismatch")
-    matches = [row for row in artifacts["artifacts"] if row["name"] == ARTIFACT]
+    matches = [
+        row
+        for row in object_rows(artifacts["artifacts"], "Incomplete artifact listing")
+        if row["name"] == ARTIFACT
+    ]
     require(len(matches) == 1, "Missing/duplicate receipt artifact")
     archive = api(f"actions/artifacts/{matches[0]['id']}/zip")
     (args.evidence_dir / "original.zip").write_bytes(archive)
@@ -378,8 +450,10 @@ def main(argv: list[str] | None = None) -> int:
     path = ROOT / MANIFEST
     before = path.read_bytes()
     (args.evidence_dir / "host-image.before.json").write_bytes(before)
-    manifest = json.loads(before)
-    inputs, tree = source_inputs(ROOT, run["head_sha"], manifest)
+    manifest = json_object(json.loads(before))
+    inputs, tree = source_inputs(
+        ROOT, text(run["head_sha"], "Invalid source SHA"), manifest
+    )
     result = refresh(
         manifest,
         run,

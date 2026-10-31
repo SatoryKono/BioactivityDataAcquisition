@@ -5,10 +5,12 @@ import importlib.util
 import io
 import json
 import subprocess
+import sys
 import tempfile
 import unittest
 import zipfile
 from pathlib import Path
+from importlib.machinery import ModuleSpec
 
 spec = importlib.util.spec_from_file_location(
     "provenance",
@@ -525,3 +527,74 @@ if __name__ == "__main__":
 import pytest
 
 pytestmark = pytest.mark.unit
+
+
+def test_json_boundaries_preserve_valid_values_and_identity() -> None:
+    payload = {"values": [None, False, 0, 1.25, "text", {"nested": []}]}
+    original = copy.deepcopy(payload)
+    assert module.json_object(payload) is payload
+    assert module.json_list(payload["values"]) is payload["values"]
+    assert payload == original
+    assert module.string_map({"source": DIGEST}, "bad digest map") == {"source": DIGEST}
+    with pytest.raises(ValueError, match="bad digest map"):
+        module.string_map({"source": None}, "bad digest map")
+
+
+@pytest.mark.parametrize(
+    "value", [None, [], {1: "bad"}, {"x": object()}, {"x": [b"bad"]}]
+)
+def test_json_boundary_rejects_non_json_objects(value: object) -> None:
+    with pytest.raises(ValueError, match="Invalid JSON object"):
+        module.json_object(value)
+
+
+@pytest.mark.parametrize("missing", [None, ModuleSpec("missing_loader", None)])
+def test_materializer_rejects_missing_module_loader(
+    monkeypatch: pytest.MonkeyPatch, missing: ModuleSpec | None
+) -> None:
+    outer = importlib.util.spec_from_file_location(
+        "loader_guard_fixture", promotion.__file__
+    )
+    assert outer is not None and outer.loader is not None
+    candidate = importlib.util.module_from_spec(outer)
+    monkeypatch.setattr(
+        importlib.util, "spec_from_file_location", lambda *_args: missing
+    )
+    with pytest.raises(ImportError, match="Unable to load host provenance module"):
+        outer.loader.exec_module(candidate)
+
+
+@pytest.mark.subprocess_backed
+def test_materializer_public_api_strict_mypy_and_negative_control(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[6]
+    command = [
+        sys.executable,
+        "-m",
+        "mypy",
+        "--config-file",
+        str(root / "pyproject.toml"),
+        "--strict",
+    ]
+    positive = subprocess.run(
+        [*command, str(Path(module.__file__)), str(Path(promotion.__file__))],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        timeout=45,
+        check=False,
+    )
+    assert positive.returncode == 0, positive.stdout + positive.stderr
+    invalid = tmp_path / "negative_mypy.py"
+    invalid.write_text("broken: str = 1\n", encoding="utf-8")
+    negative = subprocess.run(
+        [*command, str(invalid)],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        timeout=45,
+        check=False,
+    )
+    assert negative.returncode == 1
+    assert "[assignment]" in negative.stdout
