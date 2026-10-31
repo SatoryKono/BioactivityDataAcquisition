@@ -468,6 +468,7 @@ async def test_issue_12475_gold_scd2_repeat_write_keeps_history_and_current_row(
     physical_schema = load_delta_table(str(table_path)).schema().to_pyarrow()
     arrow_types = {
         "str": pa.string(),
+        "string[pyarrow]": pa.string(),
         "bool": pa.bool_(),
         "int64": pa.int64(),
         "float64": pa.float64(),
