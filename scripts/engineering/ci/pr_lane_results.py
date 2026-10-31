@@ -57,6 +57,7 @@ CONFIG_SCHEMA_MIGRATION_STATUS_TEST = (
     "tests/architecture/test_config_schema_migration_status.py"
 )
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
+BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
 INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST = (
@@ -388,6 +389,20 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
     ),
     "Dockerfile.bioetl": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    "grafana/plugins/eslint-shared-config.mjs": (
+        BRACES_BACKPORT_TEST,
+        "tests/architecture/test_dashboard_scenes_contract.py",
+        RESIDUAL_OSV_TEST,
+    ),
+    "docker-compose.monitoring.yml": (
+        DOCKER_RUNTIME_CONTRACT_TEST,
+        "tests/integration/test_grafana_datasource_provisioning.py",
+        "tests/integration/test_dashboard_operator_readability.py",
+    ),
+    "docs/05-operations/runbooks/docker-security-baseline.md": (
+        DOCKER_RUNTIME_CONTRACT_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "docs/04-reference/cli.md": (
         "tests/architecture/test_cli_doc_parity.py",
         DOCUMENTATION_SYNC_TEST,
@@ -551,12 +566,12 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         RESIDUAL_OSV_TEST,
     ),
     "grafana/plugins/bioetl-scenes-app/": (
-        "tests/architecture/test_braces_backport.py",
+        BRACES_BACKPORT_TEST,
         "tests/architecture/test_dashboard_scenes_contract.py",
         RESIDUAL_OSV_TEST,
     ),
     "grafana/plugins/bioetl-selectorshell-panel/": (
-        "tests/architecture/test_braces_backport.py",
+        BRACES_BACKPORT_TEST,
         RESIDUAL_OSV_TEST,
     ),
     "reports/audit-runs/12106-s6/": (

@@ -1086,7 +1086,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         )
         == 2
     )
-    assert dockerfile.count("python-3.13=3.13.16_git20261002-r2") == 2
+    assert dockerfile.count("python-3.13=3.13.18_git20261030-r0") == 2
     assert dockerfile.count("zlib=1.3.2.1_rc20260917-r0") == 2
     assert "python-3.14" not in dockerfile
     assert "FROM scratch" in dockerfile
@@ -1590,7 +1590,7 @@ def test_docker_workflow_probes_shellless_runtime_and_default_health() -> None:
     )
     probe = str(provenance["run"])
     for required in (
-        "sys.version_info[:3] == (3, 13, 16)",
+        "sys.version_info[:3] == (3, 13, 18)",
         "(os.getuid(), os.getgid()) == (999, 999)",
         'pwd.getpwuid(999).pw_name == "bioetl"',
         'pwd.getpwuid(999).pw_shell == "/sbin/nologin"',

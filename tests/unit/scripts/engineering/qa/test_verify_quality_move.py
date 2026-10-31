@@ -761,7 +761,7 @@ def test_after_leftover_import_exempt(
     consumer = "scripts/consumer.py"
     text = "from bioetl.test0 import moved\n"
     _commit_move(repo, extra={consumer: text})
-    digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    digest = hashlib.sha256((repo / consumer).read_bytes()).hexdigest()
     manifest = tmp_path / "manifest.csv"
     _write_bound_manifest(manifest, repo, commit)
     decisions = tmp_path / "decisions.json"
