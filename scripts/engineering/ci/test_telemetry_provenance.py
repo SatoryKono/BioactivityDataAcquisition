@@ -10,17 +10,46 @@ import base64
 import argparse
 import binascii
 import hashlib
+import io
 import json
 import os
 import subprocess
 import tempfile
 import urllib.parse
 import urllib.request
+import zipfile
 from pathlib import Path
 from datetime import UTC, datetime
 from typing import Any
 
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
+COVERAGE_ARTIFACT = "coverage-report"
+DURATION_ARTIFACT = "test-duration-telemetry"
+# These are the 17 coverage-data owners in tests.yml, not artifact presence.
+# GitHub truncates long matrix display names, so their canonical prefix is used.
+COVERAGE_PRODUCER_JOBS = (
+    "tests / smoke-check",
+    "tests / contract-confidence",
+    *(f"tests / Repo-backed unit ({group})" for group in ("product", "tooling", "ops")),
+    *(
+        f"tests / Unit scripts tooling ({group})"
+        for group in ("passport", "debt-governance", "other")
+    ),
+    "tests / unit-filesystem-contracts",
+    "tests / unit-subprocess-backed",
+    *(
+        f"tests / test-matrix (3.13, {group}, "
+        for group in (
+            "unit-domain",
+            "unit-application",
+            "unit-infrastructure",
+            "unit-other",
+            "integration",
+            "security",
+        )
+    ),
+    "tests / serial-coverage",
+)
 RECEIPT = Path("reports/test-telemetry/squash-provenance.json")
 
 
@@ -282,6 +311,18 @@ def build_git_object_proof(root: Path, source: str, pr_head: str) -> dict[str, A
     return proof
 
 
+def _ci_receipt_matches(receipt: dict[str, Any], payload: dict[str, Any]) -> bool:
+    if payload.get("source_event") == "local_coverage_verify":
+        return False
+    if receipt.get("source_tree_sha256") != payload.get("source_tree_sha256"):
+        return False
+    try:
+        actual = receipt["metrics_sha256"]
+        return isinstance(actual, str) and actual == telemetry_metrics_sha256(payload)
+    except (KeyError, TypeError, ValueError):
+        return False
+
+
 def _receipt_matches_capture(receipt: dict[str, Any], payload: dict[str, Any]) -> bool:
     if receipt.get("schema_version") != 1:
         return False
@@ -292,9 +333,7 @@ def _receipt_matches_capture(receipt: dict[str, Any], payload: dict[str, Any]) -
         return False
     measurement = payload.get("measurement_provenance")
     if not isinstance(measurement, dict):
-        return payload.get("source_event") != "local_coverage_verify" and receipt.get(
-            "source_tree_sha256"
-        ) == payload.get("source_tree_sha256")
+        return _ci_receipt_matches(receipt, payload)
     try:
         metrics_digest = telemetry_metrics_sha256(payload)
     except (KeyError, TypeError, ValueError):
@@ -462,6 +501,268 @@ def source_commit_is_reachable(payload: dict[str, Any], root: Path, head: str) -
         return _reject(f"{type(exc).__name__}: {exc}")
 
 
+def _ci_capture_run(payload: dict[str, Any], run_id: int) -> dict[str, Any]:
+    """Read actual producer identity; overall workflow success is a separate gate."""
+    if isinstance(run_id, bool) or run_id <= 0:
+        raise ValueError("Positive CI run ID required")
+    run = _read_github_json(f"actions/runs/{run_id}")
+    if (
+        str(run_id) != str(payload["source_run_id"])
+        or run.get("id") != run_id
+        or payload.get("source_event") != "workflow_dispatch"
+        or run.get("head_sha") != payload["source_commit"]
+        or run.get("head_branch") != payload["source_branch"]
+        or run.get("html_url") != payload["source_run_url"]
+        or run.get("html_url")
+        != f"https://github.com/{REPOSITORY}/actions/runs/{run_id}"
+        or run.get("event") != payload.get("source_event")
+        or run.get("path") != ".github/workflows/nightly.yml"
+        or run.get("status") != "completed"
+    ):
+        raise ValueError("CI run does not match the captured Nightly identity")
+    jobs = _read_github_json(f"actions/runs/{run_id}/jobs?per_page=100")
+    if jobs.get("total_count", 0) > 100 or jobs.get("total_count") != len(
+        jobs.get("jobs", [])
+    ):
+        raise ValueError("Producer job response is incomplete")
+    selected = _qualified_capture_jobs(run, jobs["jobs"])
+    return {**run, "verified_capture_jobs": selected}
+
+
+def _qualified_capture_jobs(
+    run: dict[str, Any], jobs: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Reject coverage from failed, missing, duplicate or foreign producers."""
+    selected = []
+    for selector in (
+        *COVERAGE_PRODUCER_JOBS,
+        "tests / coverage-verify",
+        "tests / duration-telemetry",
+    ):
+        matches = [
+            job
+            for job in jobs
+            if (
+                str(job.get("name", "")).startswith(selector)
+                if selector.endswith(", ")
+                else job.get("name") == selector
+            )
+        ]
+        if len(matches) != 1:
+            raise ValueError(
+                "Required CI capture producer is missing or ambiguous: " + selector
+            )
+        job = matches[0]
+        if (
+            job.get("status") != "completed"
+            or job.get("conclusion") != "success"
+            or job.get("run_id") != run["id"]
+            or job.get("run_attempt") != run["run_attempt"]
+            or job.get("head_sha") != run["head_sha"]
+        ):
+            raise ValueError(
+                "Required CI capture producer did not succeed on this attempt: "
+                + selector
+            )
+        selected.append(
+            {
+                key: job[key]
+                for key in (
+                    "id",
+                    "name",
+                    "run_id",
+                    "run_attempt",
+                    "head_sha",
+                    "status",
+                    "conclusion",
+                )
+            }
+        )
+    return selected
+
+
+def _require_clean_producer_inputs(root: Path) -> None:
+    changed = _git(root, "diff", "--quiet", "HEAD", "--", *TEST_INPUTS)
+    untracked = _git(
+        root, "ls-files", "--others", "--exclude-standard", "--", *TEST_INPUTS
+    )
+    if changed.returncode or untracked.returncode or untracked.stdout.strip():
+        raise ValueError("Producer inputs changed in the working tree")
+
+
+def _read_artifact_bytes(artifact_id: int, size: int) -> bytes:
+    """Download a fixed repository artifact without forwarding auth off-origin."""
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "BioETL-telemetry",
+    }
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    request = urllib.request.Request(
+        f"https://api.github.com/repos/{REPOSITORY}/actions/artifacts/{artifact_id}/zip",
+        headers=headers,
+    )
+    opener = urllib.request.build_opener(_SameOriginAuthRedirectHandler())
+    with opener.open(request, timeout=30) as response:
+        data = response.read(size + 1)
+    if not isinstance(data, bytes):
+        raise ValueError("Artifact response is not binary data")
+    return data
+
+
+def _verified_artifact_member(
+    artifact: dict[str, Any], run: dict[str, Any], member: str
+) -> bytes:
+    identity, size = artifact.get("id"), artifact.get("size_in_bytes")
+    workflow = artifact.get("workflow_run", {})
+    if (
+        not isinstance(identity, int)
+        or isinstance(identity, bool)
+        or identity <= 0
+        or not isinstance(size, int)
+        or isinstance(size, bool)
+        or size <= 0
+        or artifact.get("expired") is not False
+        or workflow.get("id") != run["id"]
+        or workflow.get("head_sha") != run["head_sha"]
+        or workflow.get("head_branch") != run["head_branch"]
+    ):
+        raise ValueError("Artifact identity does not match the captured run")
+    raw = _read_artifact_bytes(identity, size)
+    if (
+        len(raw) != size
+        or artifact.get("digest") != "sha256:" + hashlib.sha256(raw).hexdigest()
+    ):
+        raise ValueError("Original artifact size/digest mismatch")
+    with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+        entries = [entry for entry in archive.infolist() if entry.filename == member]
+        if len(entries) != 1 or entries[0].is_dir():
+            raise ValueError("Artifact member is missing or ambiguous: " + member)
+        return archive.read(entries[0])
+
+
+def _require_original_ci_metrics(
+    payload: dict[str, Any], run: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """Derive expected metrics from run-bound archives, never from the YAML values."""
+    from scripts.engineering.ci.update_test_telemetry_baseline import (
+        DEFAULT_COVERAGE_THRESHOLD,
+        build_baseline_payload,
+    )
+
+    listing = _read_github_json(f"actions/runs/{run['id']}/artifacts?per_page=100")
+    artifacts = listing["artifacts"]
+    if listing.get("total_count") != len(artifacts) or len(artifacts) > 100:
+        raise ValueError("Artifact listing is incomplete")
+    inputs = {}
+    receipts = []
+    for name, member in (
+        (COVERAGE_ARTIFACT, "coverage/coverage.xml"),
+        (DURATION_ARTIFACT, "slowest-tests.json"),
+    ):
+        matches = [a for a in artifacts if a.get("name") == name]
+        if len(matches) != 1:
+            raise ValueError("Capture artifact is missing or ambiguous: " + name)
+        artifact = matches[0]
+        inputs[name] = _verified_artifact_member(artifact, run, member)
+        receipts.append(
+            {
+                "artifact": artifact,
+                "member": member,
+                "member_sha256": hashlib.sha256(inputs[name]).hexdigest(),
+            }
+        )
+    slowest = json.loads(inputs[DURATION_ARTIFACT])
+    if (
+        slowest.get("source_commit") != run["head_sha"]
+        or slowest.get("source_run_id") != f"github-{run['id']}-{run['run_attempt']}"
+    ):
+        raise ValueError("Duration artifact does not identify the captured attempt")
+    with tempfile.TemporaryDirectory(prefix="bioetl-ci-capture-") as directory:
+        coverage = Path(directory) / "coverage.xml"
+        durations = Path(directory) / "slowest.json"
+        coverage.write_bytes(inputs[COVERAGE_ARTIFACT])
+        durations.write_bytes(inputs[DURATION_ARTIFACT])
+        expected = build_baseline_payload(
+            coverage_xml_path=coverage,
+            coverage_percent=None,
+            coverage_log_path=None,
+            slowest_json_path=durations,
+            junit_paths=[],
+            source_branch=run["head_branch"],
+            source_commit=run["head_sha"],
+            source_run_id=str(run["id"]),
+            coverage_threshold=DEFAULT_COVERAGE_THRESHOLD,
+            source_tree_sha256=payload["source_tree_sha256"],
+            source_event=run["event"],
+            source_run_url=run["html_url"],
+        )
+    require_capture_metrics(payload, expected)
+    return receipts
+
+
+def build_ci_squash_receipt(
+    payload: dict[str, Any], *, root: Path, pull_request: int, run_id: int
+) -> dict[str, Any]:
+    """Materialize a pending live bridge; never invent a future merge identity."""
+    from scripts.engineering.ci.update_test_telemetry_baseline import (
+        compute_test_telemetry_source_tree_sha256,
+    )
+
+    _require_clean_producer_inputs(root)
+    run = _ci_capture_run(payload, run_id)
+    source = str(payload["source_commit"])
+    head = _git(root, "rev-parse", "HEAD").stdout.strip()
+    if payload["source_tree_sha256"] != compute_test_telemetry_source_tree_sha256(root):
+        raise ValueError("Captured test inputs changed")
+    related, _ = _source_relation(root, source, head, live=False)
+    if not related:
+        raise ValueError("Producer inputs changed after the captured run")
+    artifacts = _require_original_ci_metrics(payload, run)
+    pr = _read_github_json(f"pulls/{pull_request}")
+    if (
+        pr.get("number") != pull_request
+        or pr.get("head", {}).get("sha") != head
+        or pr.get("base", {}).get("repo", {}).get("full_name") != REPOSITORY
+    ):
+        raise ValueError("Published PR head does not match this checkout")
+    return {
+        "schema_version": 1,
+        "verification_mode": "live_github",
+        "source_commit": source,
+        "source_run_id": payload["source_run_id"],
+        "source_tree_sha256": payload["source_tree_sha256"],
+        "metrics_sha256": telemetry_metrics_sha256(payload),
+        "ci_artifact_inputs": artifacts,
+        "ci_capture_producers": run["verified_capture_jobs"],
+        "retrieved_from": f"https://api.github.com/repos/{REPOSITORY}/pulls/{pull_request}",
+        "retrieved_at_utc": datetime.now(UTC).isoformat(),
+        "github_pull_request": {
+            "number": pr["number"],
+            "merged": pr["merged"],
+            "base": {"repo": {"full_name": REPOSITORY}},
+            "head": {"sha": head},
+            "merge_commit_sha": pr["merge_commit_sha"] if pr["merged"] else None,
+        },
+        "ci_run": {
+            key: run[key]
+            for key in (
+                "id",
+                "head_sha",
+                "event",
+                "path",
+                "status",
+                "conclusion",
+                "html_url",
+                "run_attempt",
+            )
+        },
+        "git_object_proof": build_git_object_proof(root, source, head),
+        "trust_statement": "Reviewed publication mapping; not a CI execution attestation or trust upgrade.",
+    }
+
+
 def _write_receipt_atomically(destination: Path, receipt: dict[str, Any]) -> None:
     """Publish a complete receipt without truncating a prior valid one."""
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -573,8 +874,10 @@ def main() -> int:
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
-    parser.add_argument("--measurement-repo-root", type=Path, required=True)
-    parser.add_argument("--local-manifest", type=Path, required=True)
+    parser.add_argument("--measurement-repo-root", type=Path)
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--local-manifest", type=Path)
+    mode.add_argument("--ci-run-id", type=int)
     parser.add_argument("--pull-request", type=int, required=True)
     args = parser.parse_args()
     root = args.repo_root.resolve()
@@ -583,15 +886,22 @@ def main() -> int:
             encoding="utf-8"
         )
     )
-    receipt = build_reviewed_squash_receipt(
-        payload,
-        root=root,
-        measurement_root=args.measurement_repo_root.resolve(),
-        manifest_path=args.local_manifest.resolve(),
-        pull_request=args.pull_request,
-    )
-    destination = root / RECEIPT
-    _write_receipt_atomically(destination, receipt)
+    if args.ci_run_id is not None:
+        receipt = build_ci_squash_receipt(
+            payload, root=root, pull_request=args.pull_request, run_id=args.ci_run_id
+        )
+        _write_receipt_atomically(root / RECEIPT, receipt)
+    else:
+        if args.measurement_repo_root is None:
+            parser.error("--local-manifest requires --measurement-repo-root")
+        receipt = build_reviewed_squash_receipt(
+            payload,
+            root=root,
+            measurement_root=args.measurement_repo_root.resolve(),
+            manifest_path=args.local_manifest.resolve(),
+            pull_request=args.pull_request,
+        )
+        _write_receipt_atomically(root / RECEIPT, receipt)
     return 0
 
 

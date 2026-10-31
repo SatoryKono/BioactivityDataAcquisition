@@ -236,3 +236,126 @@ that the only intentional difference is detection of a prepared-field removal
 masked by raw data. The 115-case real-backend suite passed in the disposable
 preview without failures/errors/skips. The new Silver blob is resource-free;
 its actual Git provenance must be regenerated before publication.
+
+### Own CI telemetry capture qualification
+
+PR #12624 was squash-merged as `2c31b0eed50a4100f5d3c871a4efd6673e4bc376`,
+with the same tree as its published `6a71d28e` head. This publication is distinct
+from telemetry acceptance. The fresh full drift check still returned exit 1:
+two telemetry fingerprint assertions failed. Their original receipts remain
+preserved; no old measurements were rebound to changed tests.
+
+The provenance CLI now supports `--ci-run-id <actual-run-id> --pull-request <PR>`
+for a newly measured Nightly capture. The existing local-manifest mode remains.
+The CI mode verifies immutable original artifact ZIP identity, size and digest,
+reconstructs coverage/duration metrics, requires unchanged producer inputs, and
+writes only the telemetry squash receipt. Its source is the addressed CI capture
+validator from PR #12616, head `0fead443960ac9b19cf2fbf5cae6bddc13ac9a89`;
+QM-08 publication decisions and quality API changes are excluded.
+
+Independent review found that a successful coverage combiner could receive
+files uploaded after failed tests. Qualification now additionally requires all
+17 actual coverage-producing jobs, plus coverage and duration aggregation, to
+be unique and completed successfully on the exact run, source SHA and attempt.
+The receipt retains those job identities. Missing, duplicate, skipped,
+cancelled, timed-out and foreign-source/attempt producers fail closed.
+
+The isolated owning suite passed 244 cases. Reviewer
+`/root/telemetry_independent_review` accepted the two-file code diff SHA256
+`10eee1de06d6548cd55b9dd2aa0d8e14664984116e5e9cb5983a4dae0637743e`.
+The reviewer also tested the guard against actual run `41190149102`: coverage
+and duration succeeded but integration failed, and qualification was correctly
+refused for that integration producer. This is code acceptance, not a qualified
+capture or ADMIT. PR #12616 remains unmerged; its human K8/K10 gate is independent.
+
+### Authorized addressed producer fixes
+
+The owner subsequently authorized the isolated Grafana input/delivery bundle
+and the Docker Python patch-version fix. The Grafana transfer is exactly nine
+build-input files plus seven coupled delivery manifests/pins and their owning
+assertion, copied from immutable donor `0fead443960ac9b19cf2fbf5cae6bddc13ac9a89`.
+All 123 declared inputs match the actual build source
+`1b91146589ecff2829ae65bae3b8db83ae27e47d` and the working bytes (no newline-only
+differences). The donor/build history is retained by the separately published
+archival tag `evidence/issue-12474-grafana-source-0fead443960ac9b19cf2fbf5cae6bddc13ac9a89`;
+this is source preservation, not a merge or acceptance of the quality migration.
+
+Docker pins now select `3.13.18_git20261030-r0`, the fixed version named by the
+original Trivy findings for CVE-2026-114583 and CVE-2026-115557. The exact-version
+CI probe, provenance text, owning assertions and current documentation remain
+synchronized. All runtime hardening assertions and the zero-CVE policy remain
+unchanged. Local owning tests and pre-commit passed; two native Windows skips
+require POSIX sh and remain distinct from PASS. Actual image build/scan and a
+fresh qualified capture are still required on the resulting committed inputs.
+
+The first addressed image build on `89fbcab7` produced Python 3.13.18, but its
+caller still selected the old immutable Docker workflow `843eb3f1c9410df7eccfebf3c8a810cc897ed0e9`.
+That old workflow required 3.13.16, so provenance failed before scanning. The
+caller, pin registry, strict allowlist and exact owning test now consistently
+select the reviewed published Docker workflow at
+`89fbcab7461c6400f8b2df38ebd95375713e7d32`. No old pin is retained as an additional
+allowlist exception. All 93 pin/runtime-policy owning cases passed.
+
+The prior local 17-shard attempt on `89fbcab7` was stopped with its original
+incomplete manifest and logs preserved when that required test-input change
+became known. Its three completed shards are not a complete capture. The CI
+coverage producers on that revision succeeded, but its separate currentness
+and generated-governance results remain failures. New measurements must bind
+the completed caller integration rather than inherit that earlier attempt.
+
+An extra strict-mypy diagnostic of the repo-side pin checker returned
+`no-any-return` in its unchanged YAML loader. Independent review confirmed the
+same function bytes on main and this candidate. This diagnostic remains FAIL;
+the configured required mypy targets (`src/bioetl`, `src/memory`, and
+`scripts/engineering/quality`) are unchanged and still mandatory. The unrelated
+YAML/security logic and mypy exclusions were not changed to silence it.
+
+The strict impact shadow compare subsequently identified two task-owned paths
+without routes: the monitoring compose file and Docker security runbook. Their
+exact routes now select existing owning tests; unmapped paths still fail.
+The Windows full producer also exposed a synthetic scanner fixture whose
+reviewed digest used LF text while its writer created CRLF bytes. That fixture
+now hashes the actual written bytes, matching the unchanged scanner contract;
+the wrong-digest negative control remains. All 147 focused owning cases passed.
+The complete actual diff plus 20 applicable future generated outputs was checked
+before freezing again: 56 unique paths, no unmapped input, 86 selected targets.
+The previous local attempt remains incomplete with its recorded failed shard;
+none of its partial measurements are promoted as a complete capture.
+
+The independent review of `9ffbc6f05305682ad6d11c74f55d267facdbbaac`
+corrected an earlier check summary: `route-fixture-final-nontel-check` actually
+returned exit 1 because the local main tracking ref was absent. That FAIL is
+preserved. After a fresh fetch, `routing9ff-nontel-check-after-fetch` returned
+exit 0 without changing the working tree. Actual Nightly `41201108375` completed
+with all 17 coverage producers and both aggregation jobs successful, while
+the old telemetry/currentness gates remained FAIL. Original artifact archives,
+API identities and digests are preserved; this is not final admission.
+
+The Windows local attempt on that source exposed another synthetic newline
+fixture and remains incomplete/failed. The synthetic time producer now writes
+the exact declared UTF-8 bytes; its strict digest comparison and all five
+success/failure outcomes remain. A complete tooling diagnostic then exposed
+`nul.csv`, a Windows device alias even with an extension. Only that temporary
+filename changes to `malformed.csv`; its null-byte payload, malformed-error
+contract and financial redaction assertions remain unchanged. The next full
+tooling validation returned exit 0: 3583 cases, no failures/errors, 54 existing
+platform/fixture skips. The targeted fixture/routing suite returned 149 PASS.
+
+A parallel authorized repair published `a4a0869a47a8cbb1a726c278e72d4cb8da4dedf9`
+before writer coordination. Both histories and the unique local patch were
+preserved in a verified bundle. Its author then explicitly handed off the sole
+writer role and stopped writing. The full six-file changeset was integrated
+without rewriting history. Its shared ESLint helper preserves the existing
+rules; the new exact helper route selects the existing plugin governance tests,
+and the fail-closed shadow comparison covers the actual full diff.
+
+That parallel changeset copied module coverage candidate artifact `13041464406`
+from run `41199002040`, source `0d09e1cfecc58948464ae32caf703443a9b1d666`.
+The author confirmed that no reporter was executed for that copy. It remains
+provisional historical input, not a qualified new measurement or acceptance.
+Our complete new capture and canonical reporter must replace it before closeout.
+The lint topology change also invalidates the earlier claim that all 123
+historical Grafana build inputs equal the current tree. Own Router run
+`41202898231` failed its unchanged moderate npm audit gate before the build;
+its actual findings and original logs are preserved. Neither a skipped host
+build nor the prior donor success is presented as current Grafana acceptance.
