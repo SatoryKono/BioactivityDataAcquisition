@@ -12,9 +12,12 @@ import hashlib
 import json
 from pathlib import Path, PurePosixPath
 import tarfile
+import tempfile
 import zipfile
 
 from scripts.engineering.common.build_backend import _supported_path, _validated_members
+
+ROOT = Path(__file__).resolve().parents[3]
 
 _BUILD_METADATA = {
     "src/bioetl.egg-info/" + name
@@ -27,6 +30,19 @@ _BUILD_METADATA = {
         "top_level.txt",
     )
 }
+
+
+def _confined_input(path: Path) -> Path:
+    """Resolve an input without allowing CLI paths outside owned local roots."""
+    resolved = path.resolve(strict=True)
+    allowed_roots = (ROOT.resolve(), Path(tempfile.gettempdir()).resolve())
+    if not resolved.is_file() or not any(
+        resolved.is_relative_to(root) for root in allowed_roots
+    ):
+        raise ValueError(
+            "Distribution inputs must be files inside the repository or temporary directory"
+        )
+    return resolved
 
 
 def _unique(names: list[str]) -> None:
@@ -127,6 +143,9 @@ def _verify_support_files(
 
 def validate(wheel: Path, sdist: Path, manifest: Path) -> dict[str, object]:
     """Reject missing, corrupt, poisoned or incomplete distribution content."""
+    wheel = _confined_input(wheel)
+    sdist = _confined_input(sdist)
+    manifest = _confined_input(manifest)
     with manifest.open(encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
     targets = [row["target_path"] for row in rows]

@@ -11,6 +11,7 @@ import zipfile
 
 import pytest
 
+from scripts.engineering.qa import check_quality_move_distributions as target
 from scripts.engineering.qa.check_quality_move_distributions import main, validate
 
 pytestmark = pytest.mark.unit
@@ -133,3 +134,17 @@ def test_ambiguous_artifact_selection_is_rejected(tmp_path):
             ]
         )
     assert caught.value.code != 0
+
+
+def test_validate_rejects_input_outside_owned_roots(tmp_path, monkeypatch):
+    allowed_repo = tmp_path / "repo"
+    allowed_temp = tmp_path / "temp"
+    outside = tmp_path / "outside"
+    for directory in (allowed_repo, allowed_temp, outside):
+        directory.mkdir()
+    wheel, sdist, manifest = artifacts(outside)
+    monkeypatch.setattr(target, "ROOT", allowed_repo)
+    monkeypatch.setattr(target.tempfile, "gettempdir", lambda: str(allowed_temp))
+
+    with pytest.raises(ValueError, match="inside the repository or temporary"):
+        validate(wheel, sdist, manifest)
