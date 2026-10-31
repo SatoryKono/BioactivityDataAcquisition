@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "c3d7e98a90c8d2c49ffef0d16bfc2af2958ab59d",
+  "source_ref": "e0df51185498a70c66a8597740f057b3fae8eb1f",
+  "source_reviews": {
+    "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py": "Reviewed pandas 3.1 compatibility change: normalize extension string dtype names to the existing in-memory str contract. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/application/core/_base_transformer_execution_support.py": "Reviewed structural contract support change: classify existing in-memory outcomes and resolve optional-field metadata from the already loaded policy. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/application/core/_base_transformer_structural_support.py": "Reviewed structural support change: defer internal imports and attach already available policy metadata to in-memory filter errors. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/behavior/_dq_rule_evaluators.py": "Reviewed pandas 3.1 compatibility change: reuse the in-memory presence predicate for required and non-null validation. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/behavior/_dq_value_coercion.py": "Reviewed pandas 3.1 compatibility change: classify floating NaN as absent during in-memory DQ coercion. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/schemas/chembl/publication.py": "Reviewed pandas 3.1 compatibility change: cast the mapped calendar predicate to boolean before the existing nullable Series check. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced."
+  },
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}

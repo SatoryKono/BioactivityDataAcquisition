@@ -39,7 +39,12 @@ commitlint.config.mjs
 data/
 logs/
 grafana/
-scripts/
+scripts/*
+!scripts/engineering/
+scripts/engineering/*
+!scripts/engineering/common/
+scripts/engineering/common/*
+!scripts/engineering/common/build_backend.py
 .codex/
 .cursor/
 .agents/

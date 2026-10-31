@@ -42,6 +42,8 @@ Commands:
     report-port-adapter-factory-coverage Generate/check core port-adapter-factory coverage matrix
     report-module-coverage Generate/check module-level coverage inventory
     check-branch-coverage Enforce branch coverage from reports/coverage/coverage.xml
+    report-test-basename-collisions Check/update tracked test-file basename collisions
+    requalify-external-resource-inventory Review/materialize a pinned source delta
     report-dead-code-inventory Generate repo-local static dead-code review inventory
     report-weak-assert-inventory Generate advisory weak-assert triage inventory
     report-vcr-corpus-budget Generate VCR corpus size budget report
@@ -130,6 +132,7 @@ COMMAND_MODULES: dict[str, str] = {
     "check-vcr-replay-preflight": ("scripts.engineering.qa.vcr.check_replay_preflight"),
     "report-provider-contract-drift": "scripts.engineering.qa.report_provider_contract_drift",
     "report-compatibility-importer-census": "scripts.engineering.qa.report_compatibility_importer_census",
+    "report-test-basename-collisions": "scripts.engineering.qa.report_test_basename_collisions",
     "report-pipeline-config-contract-ownership-map": "scripts.engineering.qa.report_pipeline_config_contract_ownership",
     "report-contract-coverage-matrix": "scripts.engineering.qa.report_contract_coverage_matrix",
     "report-domain-io-taint-inventory": (
@@ -180,6 +183,9 @@ COMMAND_MODULES: dict[str, str] = {
     ),
     "check-external-resource-inventory": (
         "scripts.engineering.qa.external_resource_inventory"
+    ),
+    "requalify-external-resource-inventory": (
+        "scripts.engineering.qa.requalify_external_resource_inventory"
     ),
     "report-composition-protocol-inventory": (
         "scripts.engineering.qa.report_composition_protocol_inventory"

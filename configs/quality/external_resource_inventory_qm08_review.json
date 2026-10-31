@@ -1,0 +1,503 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "637a5e89b5dc4318b864d311277da343d9a6b39d",
+  "source_ref": "637a5e89b5dc4318b864d311277da343d9a6b39d",
+  "source_reviews": {
+    "src/bioetl/infrastructure/observability/metric_inventory.py": "Reviewed new runtime inventory helper: actual text reads, directory scans and lock are enumerated separately; AST/string transformations allocate no additional external resources. Existing parsing/error branches remain source-defined; no runtime shutdown result is inferred.",
+    "src/bioetl/infrastructure/observability/metric_inventory_assembly.py": "Reviewed new runtime inventory helper: actual text reads, directory scans and lock are enumerated separately; AST/string transformations allocate no additional external resources. Existing parsing/error branches remain source-defined; no runtime shutdown result is inferred.",
+    "src/bioetl/infrastructure/observability/metric_inventory_ast.py": "Reviewed new runtime inventory helper: actual text reads, directory scans and lock are enumerated separately; AST/string transformations allocate no additional external resources. Existing parsing/error branches remain source-defined; no runtime shutdown result is inferred.",
+    "src/bioetl/infrastructure/observability/metric_inventory_bindings.py": "Reviewed new runtime inventory helper: actual text reads, directory scans and lock are enumerated separately; AST/string transformations allocate no additional external resources. Existing parsing/error branches remain source-defined; no runtime shutdown result is inferred.",
+    "src/bioetl/infrastructure/observability/metric_inventory_candidates.py": "Reviewed new runtime inventory helper: actual text reads, directory scans and lock are enumerated separately; AST/string transformations allocate no additional external resources. Existing parsing/error branches remain source-defined; no runtime shutdown result is inferred.",
+    "src/bioetl/infrastructure/observability/metric_inventory_discovery.py": "Reviewed new runtime inventory helper: actual text reads, directory scans and lock are enumerated separately; AST/string transformations allocate no additional external resources. Existing parsing/error branches remain source-defined; no runtime shutdown result is inferred.",
+    "src/bioetl/infrastructure/observability/metric_inventory_events.py": "Reviewed new runtime inventory helper: actual text reads, directory scans and lock are enumerated separately; AST/string transformations allocate no additional external resources. Existing parsing/error branches remain source-defined; no runtime shutdown result is inferred.",
+    "src/bioetl/infrastructure/observability/metric_inventory_policy.py": "Reviewed new runtime inventory helper: actual text reads, directory scans and lock are enumerated separately; AST/string transformations allocate no additional external resources. Existing parsing/error branches remain source-defined; no runtime shutdown result is inferred.",
+    "src/bioetl/infrastructure/observability/metric_inventory_report.py": "Reviewed new runtime inventory helper: actual text reads, directory scans and lock are enumerated separately; AST/string transformations allocate no additional external resources. Existing parsing/error branches remain source-defined; no runtime shutdown result is inferred.",
+    "src/bioetl/infrastructure/observability/metric_inventory_scan.py": "Reviewed new runtime inventory helper: actual text reads, directory scans and lock are enumerated separately; AST/string transformations allocate no additional external resources. Existing parsing/error branches remain source-defined; no runtime shutdown result is inferred.",
+    "src/bioetl/infrastructure/observability/metric_inventory_shared.py": "Reviewed new runtime inventory helper: actual text reads, directory scans and lock are enumerated separately; AST/string transformations allocate no additional external resources. Existing parsing/error branches remain source-defined; no runtime shutdown result is inferred.",
+    "src/bioetl/infrastructure/observability/metric_inventory_text.py": "Reviewed new runtime inventory helper: actual text reads, directory scans and lock are enumerated separately; AST/string transformations allocate no additional external resources. Existing parsing/error branches remain source-defined; no runtime shutdown result is inferred.",
+    "src/bioetl/composition/observability_runtime.py": "Reexports runtime-owned collector and policy; no engineering import or new acquisition. Existing Pushgateway bindings retain their targets and ownership.",
+    "src/bioetl/domain/normalization/identifiers.py": "Pure identifier fallback keeps domain independent of infrastructure; no external acquisition introduced.",
+    "src/bioetl/domain/observability_contract.py": "Pure runtime publication contract and static definitions; no external acquisition introduced.",
+    "src/bioetl/infrastructure/adapters/common/_api_request_sanitize.py": "Sanitizer/typing boundary changes introduce no external acquisition.",
+    "src/bioetl/infrastructure/provenance/code_revision.py": "Existing bounded subprocess.run sites add UTF-8/surrogateescape and an explicit optional environment. list_git_worktree_files uses environment={} and five seconds per attempt; Windows fallbacks remain separately bounded, not one aggregate five-second deadline. Existing metadata callers retain default environment semantics.",
+    "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py": "Metric inventory now resolves through composition to the installed runtime collector. Existing YAML/tracing reads and their owning functions remain unchanged; new helper I/O is qualified in the runtime definitions below."
+  },
+  "expression_updates": {
+    "src/bioetl/infrastructure/provenance/code_revision.py": {
+      "subprocess.run([git_executable, *arguments], cwd=_REPO_ROOT, capture_output=True, text=True, timeout=5, check=False)": "subprocess.run([git_executable, *arguments], cwd=_REPO_ROOT, capture_output=True, text=True, encoding='utf-8', errors='surrogateescape', timeout=5, check=False, env=environment)",
+      "subprocess.run([executable, *arguments], cwd=_REPO_ROOT, capture_output=True, text=True, timeout=5, check=False)": "subprocess.run([executable, *arguments], cwd=_REPO_ROOT, capture_output=True, text=True, encoding='utf-8', errors='surrogateescape', timeout=5, check=False, env=environment)"
+    }
+  },
+  "resource_updates": {
+    "infrastructure.provenance.code_revision._run_git_command.process": {
+      "closer": "subprocess.run completion/timeout ownership for each child and captured pipes",
+      "shutdown_contract": "Synchronous Git probes use subprocess.run(capture_output=True, timeout=5), owning the child and captured pipes per attempt. Normal completion waits; subprocess.run timeout cleanup kills/waits according to the Python library. There is no detached backend here. Windows fallback attempts each have their own five-second timeout, not one global deadline. list_git_worktree_files passes an empty environment; existing metadata calls retain their default environment. Runtime cleanup/interrupt observations remain NOT_RUN_12553.",
+      "scenarios": {
+        "normal": {
+          "applicability": "applicable",
+          "expected": "Synchronous Git probes use subprocess.run(capture_output=True, timeout=5), owning the child and captured pipes per attempt. Normal completion waits; subprocess.run timeout cleanup kills/waits according to the Python library. There is no detached backend here. Windows fallback attempts each have their own five-second timeout, not one global deadline. list_git_worktree_files passes an empty environment; existing metadata calls retain their default environment. Runtime cleanup/interrupt observations remain NOT_RUN_12553.",
+          "observation": "Observe Git child and stdout/stderr pipe ownership at normal/error/timeout/interrupt boundaries, including each Windows fallback separately; do not infer runtime success from source review.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Synchronous Git probes use subprocess.run(capture_output=True, timeout=5), owning the child and captured pipes per attempt. Normal completion waits; subprocess.run timeout cleanup kills/waits according to the Python library. There is no detached backend here. Windows fallback attempts each have their own five-second timeout, not one global deadline. list_git_worktree_files passes an empty environment; existing metadata calls retain their default environment. Runtime cleanup/interrupt observations remain NOT_RUN_12553.",
+          "observation": "Observe Git child and stdout/stderr pipe ownership at normal/error/timeout/interrupt boundaries, including each Windows fallback separately; do not infer runtime success from source review.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "owning async/thread boundary; primitive itself synchronous",
+          "expected": "Synchronous Git probes use subprocess.run(capture_output=True, timeout=5), owning the child and captured pipes per attempt. Normal completion waits; subprocess.run timeout cleanup kills/waits according to the Python library. There is no detached backend here. Windows fallback attempts each have their own five-second timeout, not one global deadline. list_git_worktree_files passes an empty environment; existing metadata calls retain their default environment. Runtime cleanup/interrupt observations remain NOT_RUN_12553.",
+          "observation": "Observe Git child and stdout/stderr pipe ownership at normal/error/timeout/interrupt boundaries, including each Windows fallback separately; do not infer runtime success from source review.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "five-second subprocess.run timeout per attempt; no aggregate fallback deadline",
+          "expected": "Synchronous Git probes use subprocess.run(capture_output=True, timeout=5), owning the child and captured pipes per attempt. Normal completion waits; subprocess.run timeout cleanup kills/waits according to the Python library. There is no detached backend here. Windows fallback attempts each have their own five-second timeout, not one global deadline. list_git_worktree_files passes an empty environment; existing metadata calls retain their default environment. Runtime cleanup/interrupt observations remain NOT_RUN_12553.",
+          "observation": "Observe Git child and stdout/stderr pipe ownership at normal/error/timeout/interrupt boundaries, including each Windows fallback separately; do not infer runtime success from source review.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "explicit Windows fallback after unavailable/unreliable launcher, with a separately owned bounded subprocess",
+          "expected": "Synchronous Git probes use subprocess.run(capture_output=True, timeout=5), owning the child and captured pipes per attempt. Normal completion waits; subprocess.run timeout cleanup kills/waits according to the Python library. There is no detached backend here. Windows fallback attempts each have their own five-second timeout, not one global deadline. list_git_worktree_files passes an empty environment; existing metadata calls retain their default environment. Runtime cleanup/interrupt observations remain NOT_RUN_12553.",
+          "observation": "Observe Git child and stdout/stderr pipe ownership at normal/error/timeout/interrupt boundaries, including each Windows fallback separately; do not infer runtime success from source review.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "call_path": [
+        "bioetl run / run-all / debug / run-composite / workflow",
+        "bioetl.infrastructure.provenance.code_revision.get_git_commit -> bioetl.infrastructure.provenance.code_revision._run_git_command",
+        "bioetl.composition.factories.pipeline._creation_metadata._build_metadata_coordinator -> bioetl.infrastructure.provenance.code_revision.get_git_commit",
+        "contract_checks -> collect_metric_inventory -> _optional_git_files -> list_git_worktree_files -> _run_git_command"
+      ]
+    }
+  },
+  "additional_bindings": {
+    "infrastructure.provenance.code_revision._run_git_command.process": [
+      {
+        "file": "src/bioetl/infrastructure/provenance/code_revision.py",
+        "scope": "list_git_worktree_files",
+        "call": "_run_git_command"
+      }
+    ]
+  },
+  "new_resources": [
+    {
+      "identity": "diagnostics.metric_inventory.file",
+      "type": "file",
+      "creator": [
+        "_collect_module_string_bindings",
+        "_installed_registered_metric_names",
+        "_load_declared_metric_definitions",
+        "_load_drift_allowlist",
+        "_load_retired_observability_event_names",
+        "_load_runtime_cardinality_thresholds",
+        "_read_cached_text",
+        "_scan_canonical_metric_mentions_via_direct_reads",
+        "_scan_domain_mapping_observability_events",
+        "_scan_registered_metric_names",
+        "_scan_rule_metric_mentions"
+      ],
+      "owner": "Temporary streams internal to pathlib.Path.read_text; only decoded strings/None enter invocation caches.",
+      "closer": "pathlib internal context exit; no persistent BioETL stream",
+      "shutdown_contract": "Successful reads close their stream before returning text. Helpers preserve their individual missing/Unicode/YAML/OSError branches; caches hold text/None until reset at the next collector invocation, not open handles.",
+      "production_entrypoint": "bioetl contract-checks -> _check_metric_inventory -> composition.observability_runtime.collect_metric_inventory (runtime reexport)",
+      "call_path": [
+        "contract_checks._check_metric_inventory",
+        "composition.observability_runtime.collect_metric_inventory (direct reexport)",
+        "metric_inventory.collect_metric_inventory",
+        "runtime callback table / registry discovery",
+        "_collect_module_string_bindings",
+        "_installed_registered_metric_names",
+        "_load_declared_metric_definitions",
+        "_load_drift_allowlist",
+        "_load_retired_observability_event_names",
+        "_load_runtime_cardinality_thresholds",
+        "_read_cached_text",
+        "_scan_canonical_metric_mentions_via_direct_reads",
+        "_scan_domain_mapping_observability_events",
+        "_scan_registered_metric_names",
+        "_scan_rule_metric_mentions"
+      ],
+      "site_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory_bindings.py",
+          "scope": "_collect_module_string_bindings",
+          "call": "path.read_text"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory_discovery.py",
+          "scope": "_scan_canonical_metric_mentions_via_direct_reads",
+          "call": "path.read_text"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory_events.py",
+          "scope": "_load_retired_observability_event_names",
+          "call": "path.read_text"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory_events.py",
+          "scope": "_load_runtime_cardinality_thresholds",
+          "call": "allowlist_path.read_text"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory_events.py",
+          "scope": "_scan_domain_mapping_observability_events",
+          "call": "mapping_path.read_text"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory_policy.py",
+          "scope": "_load_drift_allowlist",
+          "call": "safe.read_text"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory_report.py",
+          "scope": "_scan_rule_metric_mentions",
+          "call": "path.read_text"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory_scan.py",
+          "scope": "_load_declared_metric_definitions",
+          "call": "path.read_text"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory_scan.py",
+          "scope": "_scan_registered_metric_names",
+          "call": "path.read_text"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory_scan.py",
+          "scope": "_installed_registered_metric_names",
+          "call": "path.read_text"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory_text.py",
+          "scope": "_read_cached_text",
+          "call": "path.read_text"
+        }
+      ],
+      "binding_selectors": [
+        {
+          "file": "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
+          "scope": "_check_metric_inventory",
+          "call": "report_observability_metric_inventory.collect_metric_inventory"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
+          "scope": "collect_metric_inventory",
+          "call": "_collect_metric_inventory_impl"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
+          "scope": "collect_metric_inventory",
+          "segment": "sources = {"
+        }
+      ],
+      "cleanup_selectors": [],
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "normal": {
+          "applicability": "source-defined owning operation",
+          "expected": "Successful reads close their stream before returning text. Helpers preserve their individual missing/Unicode/YAML/OSError branches; caches hold text/None until reset at the next collector invocation, not open handles.",
+          "observation": "Observe acquisition/use/return and actual remaining file/directory/lock resources separately.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "before acquisition and while using the resource",
+          "expected": "Preserve the exact helper error/skip branch; distinguish failed acquisition from cleanup of an allocated resource. Successful reads close their stream before returning text. Helpers preserve their individual missing/Unicode/YAML/OSError branches; caches hold text/None until reset at the next collector invocation, not open handles.",
+          "observation": "Inject permission, decoding/parse or scanner errors; observe actual close/release, not only the returned report.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "synchronous primitive; cancellation belongs to an outer caller",
+          "expected": "No asynchronous cancellation hook or stopped-native-work claim. Successful reads close their stream before returning text. Helpers preserve their individual missing/Unicode/YAML/OSError branches; caches hold text/None until reset at the next collector invocation, not open handles.",
+          "observation": "Interrupt an owning caller and observe physical file/scanner/lock completion; a cancelled future is insufficient.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic filesystem/lock deadline in these helpers",
+          "expected": "Do not infer a bounded native operation or released lock from an outer timeout. Successful reads close their stream before returning text. Helpers preserve their individual missing/Unicode/YAML/OSError branches; caches hold text/None until reset at the next collector invocation, not open handles.",
+          "observation": "Record the outer deadline and actual close/release completion independently.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "next collector call; no internal retry in these primitives",
+          "expected": "A new collector call resets text caches under the same retained lock. File/scanner allocations are per operation; this implies no transactional/idempotency guarantee.",
+          "observation": "Compare per-attempt handles and the process-scoped lock identity before/after retry.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "lifetime": "one synchronous read or directory-discovery operation; no persistent stream retained"
+    },
+    {
+      "identity": "diagnostics.metric_inventory.directory-walk",
+      "type": "directory-walk",
+      "creator": [
+        "_iter_text_files"
+      ],
+      "owner": "Fallback source discovery _iter_text_files; used when optional Git discovery is unavailable.",
+      "closer": "os.walk internal directory scanners and exhaustion; no explicit BioETL scanner handle",
+      "shutdown_contract": "Normal execution exhausts os.walk into a sorted path list. BioETL does not retain scanner handles; exceptional/cancelled physical completion remains to be observed in #12553, not inferred from a future or list return.",
+      "production_entrypoint": "bioetl contract-checks -> _check_metric_inventory -> composition.observability_runtime.collect_metric_inventory (runtime reexport)",
+      "call_path": [
+        "contract_checks._check_metric_inventory",
+        "composition.observability_runtime.collect_metric_inventory (direct reexport)",
+        "metric_inventory.collect_metric_inventory",
+        "runtime callback table / registry discovery",
+        "_iter_text_files"
+      ],
+      "site_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory_discovery.py",
+          "scope": "_iter_text_files",
+          "call": "os.walk"
+        }
+      ],
+      "binding_selectors": [
+        {
+          "file": "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
+          "scope": "_check_metric_inventory",
+          "call": "report_observability_metric_inventory.collect_metric_inventory"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
+          "scope": "collect_metric_inventory",
+          "call": "_collect_metric_inventory_impl"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
+          "scope": "collect_metric_inventory",
+          "segment": "sources = {"
+        }
+      ],
+      "cleanup_selectors": [],
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "normal": {
+          "applicability": "source-defined owning operation",
+          "expected": "Normal execution exhausts os.walk into a sorted path list. BioETL does not retain scanner handles; exceptional/cancelled physical completion remains to be observed in #12553, not inferred from a future or list return.",
+          "observation": "Observe acquisition/use/return and actual remaining file/directory/lock resources separately.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "before acquisition and while using the resource",
+          "expected": "Preserve the exact helper error/skip branch; distinguish failed acquisition from cleanup of an allocated resource. Normal execution exhausts os.walk into a sorted path list. BioETL does not retain scanner handles; exceptional/cancelled physical completion remains to be observed in #12553, not inferred from a future or list return.",
+          "observation": "Inject permission, decoding/parse or scanner errors; observe actual close/release, not only the returned report.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "synchronous primitive; cancellation belongs to an outer caller",
+          "expected": "No asynchronous cancellation hook or stopped-native-work claim. Normal execution exhausts os.walk into a sorted path list. BioETL does not retain scanner handles; exceptional/cancelled physical completion remains to be observed in #12553, not inferred from a future or list return.",
+          "observation": "Interrupt an owning caller and observe physical file/scanner/lock completion; a cancelled future is insufficient.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic filesystem/lock deadline in these helpers",
+          "expected": "Do not infer a bounded native operation or released lock from an outer timeout. Normal execution exhausts os.walk into a sorted path list. BioETL does not retain scanner handles; exceptional/cancelled physical completion remains to be observed in #12553, not inferred from a future or list return.",
+          "observation": "Record the outer deadline and actual close/release completion independently.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "next collector call; no internal retry in these primitives",
+          "expected": "A new collector call resets text caches under the same retained lock. File/scanner allocations are per operation; this implies no transactional/idempotency guarantee.",
+          "observation": "Compare per-attempt handles and the process-scoped lock identity before/after retry.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "lifetime": "one synchronous read or directory-discovery operation; no persistent stream retained"
+    },
+    {
+      "identity": "diagnostics.metric_inventory.directory-glob",
+      "type": "directory-glob",
+      "creator": [
+        "_installed_registered_metric_names",
+        "_scan_registered_metric_names"
+      ],
+      "owner": "Runtime registry discovery for explicit source roots and installed module roots.",
+      "closer": "pathlib glob internals and exhaustion; no explicit BioETL close",
+      "shutdown_contract": "Both glob loops consume matching metric-definition paths. A read/parse failure follows its actual helper branch; no independent deadline or general cancellation/cleanup guarantee is asserted for interrupted native iteration.",
+      "production_entrypoint": "bioetl contract-checks -> _check_metric_inventory -> composition.observability_runtime.collect_metric_inventory (runtime reexport)",
+      "call_path": [
+        "contract_checks._check_metric_inventory",
+        "composition.observability_runtime.collect_metric_inventory (direct reexport)",
+        "metric_inventory.collect_metric_inventory",
+        "runtime callback table / registry discovery",
+        "_installed_registered_metric_names",
+        "_scan_registered_metric_names"
+      ],
+      "site_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory_scan.py",
+          "scope": "_scan_registered_metric_names",
+          "call": "(repo_root / _REGISTERED_SCAN_ROOT).glob"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory_scan.py",
+          "scope": "_installed_registered_metric_names",
+          "call": "Path(__file__).parent.glob"
+        }
+      ],
+      "binding_selectors": [
+        {
+          "file": "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
+          "scope": "_check_metric_inventory",
+          "call": "report_observability_metric_inventory.collect_metric_inventory"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
+          "scope": "collect_metric_inventory",
+          "call": "_collect_metric_inventory_impl"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
+          "scope": "collect_metric_inventory",
+          "segment": "sources = {"
+        }
+      ],
+      "cleanup_selectors": [],
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "normal": {
+          "applicability": "source-defined owning operation",
+          "expected": "Both glob loops consume matching metric-definition paths. A read/parse failure follows its actual helper branch; no independent deadline or general cancellation/cleanup guarantee is asserted for interrupted native iteration.",
+          "observation": "Observe acquisition/use/return and actual remaining file/directory/lock resources separately.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "before acquisition and while using the resource",
+          "expected": "Preserve the exact helper error/skip branch; distinguish failed acquisition from cleanup of an allocated resource. Both glob loops consume matching metric-definition paths. A read/parse failure follows its actual helper branch; no independent deadline or general cancellation/cleanup guarantee is asserted for interrupted native iteration.",
+          "observation": "Inject permission, decoding/parse or scanner errors; observe actual close/release, not only the returned report.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "synchronous primitive; cancellation belongs to an outer caller",
+          "expected": "No asynchronous cancellation hook or stopped-native-work claim. Both glob loops consume matching metric-definition paths. A read/parse failure follows its actual helper branch; no independent deadline or general cancellation/cleanup guarantee is asserted for interrupted native iteration.",
+          "observation": "Interrupt an owning caller and observe physical file/scanner/lock completion; a cancelled future is insufficient.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic filesystem/lock deadline in these helpers",
+          "expected": "Do not infer a bounded native operation or released lock from an outer timeout. Both glob loops consume matching metric-definition paths. A read/parse failure follows its actual helper branch; no independent deadline or general cancellation/cleanup guarantee is asserted for interrupted native iteration.",
+          "observation": "Record the outer deadline and actual close/release completion independently.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "next collector call; no internal retry in these primitives",
+          "expected": "A new collector call resets text caches under the same retained lock. File/scanner allocations are per operation; this implies no transactional/idempotency guarantee.",
+          "observation": "Compare per-attempt handles and the process-scoped lock identity before/after retry.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "lifetime": "one synchronous read or directory-discovery operation; no persistent stream retained"
+    },
+    {
+      "identity": "diagnostics.metric_inventory.reentrant-lock",
+      "type": "reentrant-lock",
+      "creator": [
+        "<module>"
+      ],
+      "owner": "Process-scoped _COLLECTION_LOCK singleton, acquired by collect_metric_inventory.",
+      "closer": "with _COLLECTION_LOCK exits release each acquisition; singleton remains process-scoped",
+      "shutdown_contract": "The collector serializes cache resets and reads under the reentrant lock. Normal and Python-exception exits release the acquisition through the with statement. There is no lock acquisition timeout or explicit lock destruction; interruption/native worker behavior still requires #12553 observation.",
+      "production_entrypoint": "bioetl contract-checks -> _check_metric_inventory -> composition.observability_runtime.collect_metric_inventory (runtime reexport)",
+      "call_path": [
+        "contract_checks._check_metric_inventory",
+        "composition.observability_runtime.collect_metric_inventory (direct reexport)",
+        "metric_inventory.collect_metric_inventory",
+        "runtime callback table / registry discovery",
+        "<module> import"
+      ],
+      "site_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
+          "scope": "",
+          "call": "RLock"
+        }
+      ],
+      "binding_selectors": [
+        {
+          "file": "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
+          "scope": "_check_metric_inventory",
+          "call": "report_observability_metric_inventory.collect_metric_inventory"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
+          "scope": "collect_metric_inventory",
+          "call": "_collect_metric_inventory_impl"
+        },
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
+          "scope": "collect_metric_inventory",
+          "segment": "sources = {"
+        }
+      ],
+      "cleanup_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
+          "scope": "collect_metric_inventory",
+          "segment": "with _COLLECTION_LOCK:"
+        }
+      ],
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "normal": {
+          "applicability": "source-defined owning operation",
+          "expected": "The collector serializes cache resets and reads under the reentrant lock. Normal and Python-exception exits release the acquisition through the with statement. There is no lock acquisition timeout or explicit lock destruction; interruption/native worker behavior still requires #12553 observation.",
+          "observation": "Observe acquisition/use/return and actual remaining file/directory/lock resources separately.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "before acquisition and while using the resource",
+          "expected": "Preserve the exact helper error/skip branch; distinguish failed acquisition from cleanup of an allocated resource. The collector serializes cache resets and reads under the reentrant lock. Normal and Python-exception exits release the acquisition through the with statement. There is no lock acquisition timeout or explicit lock destruction; interruption/native worker behavior still requires #12553 observation.",
+          "observation": "Inject permission, decoding/parse or scanner errors; observe actual close/release, not only the returned report.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "synchronous primitive; cancellation belongs to an outer caller",
+          "expected": "No asynchronous cancellation hook or stopped-native-work claim. The collector serializes cache resets and reads under the reentrant lock. Normal and Python-exception exits release the acquisition through the with statement. There is no lock acquisition timeout or explicit lock destruction; interruption/native worker behavior still requires #12553 observation.",
+          "observation": "Interrupt an owning caller and observe physical file/scanner/lock completion; a cancelled future is insufficient.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic filesystem/lock deadline in these helpers",
+          "expected": "Do not infer a bounded native operation or released lock from an outer timeout. The collector serializes cache resets and reads under the reentrant lock. Normal and Python-exception exits release the acquisition through the with statement. There is no lock acquisition timeout or explicit lock destruction; interruption/native worker behavior still requires #12553 observation.",
+          "observation": "Record the outer deadline and actual close/release completion independently.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "next collector call; no internal retry in these primitives",
+          "expected": "A new collector call resets text caches under the same retained lock. File/scanner allocations are per operation; this implies no transactional/idempotency guarantee.",
+          "observation": "Compare per-attempt handles and the process-scoped lock identity before/after retry.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "lifetime": "process-scoped singleton; each acquisition lasts for one collector with block"
+    }
+  ],
+  "new_exclusions": [
+    {
+      "file": "src/bioetl/infrastructure/observability/metric_inventory_bindings.py",
+      "scope": "_iter_string_assignments",
+      "call": "ast.walk",
+      "reason": "ast.walk enumerates an in-memory syntax tree, not a filesystem directory or external resource."
+    },
+    {
+      "file": "src/bioetl/infrastructure/observability/metric_inventory_bindings.py",
+      "scope": "_import_from_nodes",
+      "call": "ast.walk",
+      "reason": "ast.walk enumerates an in-memory syntax tree, not a filesystem directory or external resource."
+    },
+    {
+      "file": "src/bioetl/infrastructure/observability/metric_inventory_bindings.py",
+      "scope": "_class_nodes",
+      "call": "ast.walk",
+      "reason": "ast.walk enumerates an in-memory syntax tree, not a filesystem directory or external resource."
+    },
+    {
+      "file": "src/bioetl/infrastructure/observability/metric_inventory_bindings.py",
+      "scope": "_call_nodes",
+      "call": "ast.walk",
+      "reason": "ast.walk enumerates an in-memory syntax tree, not a filesystem directory or external resource."
+    }
+  ]
+}

@@ -78,7 +78,15 @@ jobs:
       - name: Test plugin behavior
         run: npm run test:ci
       - name: Build plugin
-        run: npm run build
+        env:
+          BIOETL_PLUGIN: ${{ matrix.plugin }}
+        run: |
+          # Runtime sourcemaps contain hashes derived from the compiler root.
+          docker run --rm \
+            --mount "type=bind,source=$GITHUB_WORKSPACE,target=/work" \
+            --workdir "/work/grafana/plugins/$BIOETL_PLUGIN" \
+            node@sha256:e7add2a490bb17d97b485b8641bd88455fff7839ade0f5eba493c3508124d413 \
+            npm run build
       - name: Verify built bundle against shipped host manifest
         env:
           BIOETL_PLUGIN: ${{ matrix.plugin }}
@@ -93,6 +101,21 @@ jobs:
           plugin = os.environ["BIOETL_PLUGIN"]
           assert plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"), plugin
           manifest = json.loads((root / "grafana/tooling/router-v7-bridge/host-image.json").read_text())
+          prefix = f"grafana/plugins/{plugin}/dist/"
+          expected_files = {
+              path.removeprefix(prefix): digest
+              for path, digest in manifest["artifact_sha256"].items()
+              if path.startswith(prefix)
+          }
+          directory = root / prefix
+          actual_files = {}
+          for path in directory.rglob('*'):
+              assert not path.is_symlink(), f"Unexpected plugin symlink: {path}"
+              if path.is_file():
+                  actual_files[path.relative_to(directory).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
+          assert actual_files.keys() == expected_files.keys(), 'Complete plugin file set differs'
+          mismatches = [path for path in actual_files if actual_files[path] != expected_files[path]]
+          assert not mismatches, f"Complete plugin hashes differ, including maps: {mismatches}"
           for filename in ("module.js", "plugin.json"):
               relative = f"grafana/plugins/{plugin}/dist/{filename}"
               bundle = root / relative
@@ -196,11 +219,74 @@ jobs:
             -f grafana/tooling/router-v7-bridge/Dockerfile.host \
             -t bioetl-router-host:acceptance reports/qa/router-v7-image-context
       - name: Verify built image against declared delivery image
+        id: host_parity
         run: |
           image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
           docker pull "$image"
+          base_image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').base_image")
+          docker pull "$base_image"
           node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
             bioetl-router-host:acceptance
+      - name: Preserve complete rootfs differences when parity fails
+        if: ${{ !cancelled() && failure() && steps.host_parity.outcome == 'failure' }}
+        run: |
+          /usr/bin/python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+          from scripts.ops.observability.grafana import router_managed_image as native
+
+          owner = Path('grafana/tooling/router-v7-bridge')
+          manifest = json.loads((owner / 'host-image.json').read_text())
+          def config_id(reference):
+              return subprocess.check_output(
+                  [native.docker_path(), 'image', 'inspect', '--format', '{{.Id}}', '--', reference],
+                  text=True,
+              ).strip()
+          references = {
+              'built': config_id('bioetl-router-host:acceptance'),
+              'declared': manifest['image'],
+              'base': config_id(manifest['base_image']),
+          }
+          snapshots = {}
+          for name, reference in references.items():
+              records = native.records(reference)
+              snapshots[name] = records
+              payload = {
+                  'status': 'FAIL_DIAGNOSTIC_ONLY',
+                  'source_commit': os.environ['GITHUB_SHA'],
+                  'image': reference,
+                  'inspection': native.inspect(reference),
+                  'rootfs_sha256': hashlib.sha256(json.dumps(records, sort_keys=True, separators=(',', ':')).encode()).hexdigest(),
+                  'records': records,
+              }
+              Path(f'reports/qa/router-v7-rootfs-{name}.json').write_text(json.dumps(payload, sort_keys=True))
+          actual, expected = snapshots['built'], snapshots['declared']
+          differences = {
+              path: {'built': actual.get(path), 'declared': expected.get(path)}
+              for path in sorted(actual.keys() | expected.keys())
+              if actual.get(path) != expected.get(path)
+          }
+          Path('reports/qa/router-v7-rootfs-differences.json').write_text(json.dumps(differences, indent=2))
+          print('FAIL diagnostics only: rootfs paths differing:', len(differences))
+          PY
+      - name: Build and verify managed image from the qualified parent
+        run: |
+          mkdir -p reports/qa/router-v7-managed-context
+          cp grafana/tooling/router-v7-bridge/Dockerfile.managed reports/qa/router-v7-managed-context/Dockerfile
+          docker buildx build --platform linux/amd64 --load --provenance=false \
+            --metadata-file reports/qa/router-v7-managed-image-build.json \
+            -t bioetl-router-managed:acceptance reports/qa/router-v7-managed-context
+          image=$(node -p "require('./grafana/tooling/router-v7-bridge/managed-image.json').image")
+          docker pull "$image"
+          for plugin in bioetl-scenes-app bioetl-selectorshell-panel; do
+            mkdir -p "grafana/plugins/$plugin/dist"
+            cp -a "reports/qa/router-v7-image-context/$plugin/." "grafana/plugins/$plugin/dist/"
+          done
+          built=$(docker image inspect --format '{{.Id}}' bioetl-router-managed:acceptance)
+          /usr/bin/python3 -m scripts.ops verify-router-managed-image "$built"
       - name: Preserve image build and parity receipts
         if: ${{ !cancelled() && always() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -209,5 +295,8 @@ jobs:
           path: |
             reports/qa/router-v7-image-build.json
             reports/qa/router-v7-image-parity.json
+            reports/qa/router-v7-managed-image-build.json
+            reports/qa/router-v7-managed-image-parity.json
+            reports/qa/router-v7-rootfs-*.json
           if-no-files-found: warn
           retention-days: 7

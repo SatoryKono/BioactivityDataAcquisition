@@ -1,6 +1,7 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["setuptools==84.1.0"]
+build-backend = "scripts.engineering.common.build_backend"
+backend-path = ["."]
 
 [project]
 name = "bioetl"
@@ -181,6 +182,8 @@ dev = [
     "pre-commit>=4.5.1",
     "types-pyyaml>=6.0.12.20260906",
     "types-defusedxml>=0.7.0.20260504",
+    "setuptools==84.1.0",
+    "types-setuptools==84.0.0.20261006",
 ]
 docs = [
     "mkdocs>=1.6,<2.0",

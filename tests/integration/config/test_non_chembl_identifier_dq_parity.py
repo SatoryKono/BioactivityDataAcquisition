@@ -144,6 +144,9 @@ def test_governed_publication_identifier_arrays_publish_canonical_json_patterns(
         rule = _field_validation(*key)
         assert rule["type"] == "pattern"
         assert rule["pattern"] == pattern
+        if key[2] == "author_orcids":
+            assert re.fullmatch(pattern, '["0000-0002-1825-0097"]')
+            assert not re.fullmatch(pattern, '["0000-0002-1825-7"]')
 
 
 @pytest.mark.parametrize(

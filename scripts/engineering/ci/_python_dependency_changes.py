@@ -27,6 +27,9 @@ FULL_SUITE_CONFIGURATION_PREFIXES = (
     "tool.pytest.ini_options",
     "tool.pytest-asyncio",
 )
+FULL_SUITE_CONFIGURATION_KEYS = frozenset(
+    {"build-system.backend-path", "build-system.build-backend"}
+)
 NARROW_CONFIGURATION_PREFIXES = ("tool.setuptools.packages.find.exclude",)
 # Stub-only wheels have no runtime import owner. Keep reviewed ownership explicit.
 STUB_RUNTIME_DISTRIBUTIONS = {"types-openpyxl": ("openpyxl", "openpyxl")}
@@ -147,12 +150,21 @@ def pytest_configuration_changed(root: Path, base: str, head: str) -> bool:
         *FULL_SUITE_CONFIGURATION_PREFIXES,
         *NARROW_CONFIGURATION_PREFIXES,
     )
-    unknown = [path for path in paths if not path.startswith(classified_prefixes)]
+    unknown = [
+        path
+        for path in paths
+        if not path.startswith(classified_prefixes)
+        and path not in FULL_SUITE_CONFIGURATION_KEYS
+    ]
     if unknown:
         raise ValueError(
             "Unconfirmed Python manifest configuration route: " + ", ".join(unknown)
         )
-    return any(path.startswith(FULL_SUITE_CONFIGURATION_PREFIXES) for path in paths)
+    return any(
+        path.startswith(FULL_SUITE_CONFIGURATION_PREFIXES)
+        or path in FULL_SUITE_CONFIGURATION_KEYS
+        for path in paths
+    )
 
 
 def _configuration(document: dict[str, Any]) -> dict[str, Any]:

@@ -16,6 +16,7 @@ import importlib.util
 import json
 import re
 import sys
+import tomllib
 from collections import namedtuple
 from pathlib import Path
 from types import ModuleType
@@ -1101,7 +1102,11 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert "bioetl:x:999:" in dockerfile
     assert "COPY --from=runtime-root /runtime-fs/ /" in dockerfile
     assert "COPY --from=runtime-root / /" not in dockerfile
-    assert "setuptools==83.0.0" in dockerfile
+    build_requirements = tomllib.loads((ROOT / "pyproject.toml").read_text())[
+        "build-system"
+    ]["requires"]
+    assert "setuptools==84.1.0" in build_requirements
+    assert "setuptools==84.1.0" in dockerfile
     assert "--build-constraint /tmp/build-constraints.txt" in dockerfile
     assert (
         "4fad23465a06cc5149a541fbec6f87e234a64dc0550f6bfdd2d290d8f03240df"

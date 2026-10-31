@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "resources": [
+    {
+      "identity": "diagnostics.metric_inventory.reentrant-lock",
+      "type": "reentrant-lock",
+      "creator": [
+        "<module>"
+      ],
+      "owner": "Process-scoped _COLLECTION_LOCK singleton, acquired by collect_metric_inventory.",
+      "closer": "with _COLLECTION_LOCK exits release each acquisition; singleton remains process-scoped",
+      "shutdown_contract": "The collector serializes cache resets and reads under the reentrant lock. Normal and Python-exception exits release the acquisition through the with statement. There is no lock acquisition timeout or explicit lock destruction; interruption/native worker behavior still requires #12553 observation.",
+      "production_entrypoint": "bioetl contract-checks -> _check_metric_inventory -> composition.observability_runtime.collect_metric_inventory (runtime reexport)",
+      "call_path": [
+        "contract_checks._check_metric_inventory",
+        "composition.observability_runtime.collect_metric_inventory (direct reexport)",
+        "metric_inventory.collect_metric_inventory",
+        "runtime callback table / registry discovery",
+        "<module> import"
+      ],
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "normal": {
+          "applicability": "source-defined owning operation",
+          "expected": "The collector serializes cache resets and reads under the reentrant lock. Normal and Python-exception exits release the acquisition through the with statement. There is no lock acquisition timeout or explicit lock destruction; interruption/native worker behavior still requires #12553 observation.",
+          "observation": "Observe acquisition/use/return and actual remaining file/directory/lock resources separately.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "before acquisition and while using the resource",
+          "expected": "Preserve the exact helper error/skip branch; distinguish failed acquisition from cleanup of an allocated resource. The collector serializes cache resets and reads under the reentrant lock. Normal and Python-exception exits release the acquisition through the with statement. There is no lock acquisition timeout or explicit lock destruction; interruption/native worker behavior still requires #12553 observation.",
+          "observation": "Inject permission, decoding/parse or scanner errors; observe actual close/release, not only the returned report.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "synchronous primitive; cancellation belongs to an outer caller",
+          "expected": "No asynchronous cancellation hook or stopped-native-work claim. The collector serializes cache resets and reads under the reentrant lock. Normal and Python-exception exits release the acquisition through the with statement. There is no lock acquisition timeout or explicit lock destruction; interruption/native worker behavior still requires #12553 observation.",
+          "observation": "Interrupt an owning caller and observe physical file/scanner/lock completion; a cancelled future is insufficient.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic filesystem/lock deadline in these helpers",
+          "expected": "Do not infer a bounded native operation or released lock from an outer timeout. The collector serializes cache resets and reads under the reentrant lock. Normal and Python-exception exits release the acquisition through the with statement. There is no lock acquisition timeout or explicit lock destruction; interruption/native worker behavior still requires #12553 observation.",
+          "observation": "Record the outer deadline and actual close/release completion independently.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "next collector call; no internal retry in these primitives",
+          "expected": "A new collector call resets text caches under the same retained lock. File/scanner allocations are per operation; this implies no transactional/idempotency guarantee.",
+          "observation": "Compare per-attempt handles and the process-scoped lock identity before/after retry.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "lifetime": "process-scoped singleton; each acquisition lasts for one collector with block",
+      "creation_sites": [
+        {
+          "source_commit": "e0df51185498a70c66a8597740f057b3fae8eb1f",
+          "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
+          "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
+          "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
+          "line": 258,
+          "expression": "RLock()",
+          "call": "RLock",
+          "creator": "",
+          "creation_mode": "call",
+          "context_manager": false
+        }
+      ],
+      "production_binding": [
+        {
+          "source_commit": "e0df51185498a70c66a8597740f057b3fae8eb1f",
+          "source_blob": "9ca7f12907205933824494583cf79695570cef57",
+          "content_sha256": "1fa61e0ae6278265d2179d762a1679594a15119ff196a5b260b7f55530223e1f",
+          "file": "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
+          "line": 110,
+          "expression": "report_observability_metric_inventory.collect_metric_inventory(repo_root)",
+          "call": "report_observability_metric_inventory.collect_metric_inventory",
+          "creator": "_check_metric_inventory",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "e0df51185498a70c66a8597740f057b3fae8eb1f",
+          "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
+          "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
+          "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
+          "line": 288,
+          "expression": "_collect_metric_inventory_impl(repo_root, sources=sources)",
+          "call": "_collect_metric_inventory_impl",
+          "creator": "collect_metric_inventory",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "e0df51185498a70c66a8597740f057b3fae8eb1f",
+          "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
+          "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
+          "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
+          "line": 277,
+          "source_segment": "sources = {"
+        }
+      ],
+      "cleanup_sources": [
+        {
+          "source_commit": "e0df51185498a70c66a8597740f057b3fae8eb1f",
+          "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
+          "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
+          "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
+          "line": 267,
+          "source_segment": "with _COLLECTION_LOCK:"
+        }
+      ]
+    }
+  ]
+}

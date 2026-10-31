@@ -69,6 +69,7 @@ def test_chembl_assay_backfill_run_report_golden_matches_v1_schema() -> None:
         schema_name="pipeline_run_report.v1.json",
         fixture_name="chembl_assay_backfill_run_report_golden.json",
     )
+    assert payload["schema_version"] == "pipeline_run_report_v1"
     assert payload["identity"]["pipeline_name"] == "chembl_assay"
     assert payload["identity"]["run_type"] == "backfill"
 
