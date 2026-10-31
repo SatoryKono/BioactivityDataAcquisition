@@ -419,6 +419,25 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
     }
 
 
+def test_shadow_compare_routes_monitoring_and_docker_security_docs() -> None:
+    """Monitoring configuration and its security runbook select owner tests."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            "docker-compose.monitoring.yml",
+            "docs/05-operations/runbooks/docker-security-baseline.md",
+        ],
+        repo_root=repo_root,
+    )
+
+    assert set(report["selected"]) == {
+        "tests/architecture/test_docker_runtime_contracts.py",
+        "tests/integration/test_grafana_datasource_provisioning.py",
+        "tests/integration/test_dashboard_operator_readability.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+    }
+
+
 def test_n1_evidence_paths_have_shadow_compare_routes() -> None:
     """Nightly, docs, and the gap archive must not fail closed as unmapped."""
     root = Path(__file__).resolve().parents[5]

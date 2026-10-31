@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T12:20:19.772086+00:00",
+  "generated_at": "2026-10-31T12:42:27.672859+00:00",
   "summary": {
     "total_scripts": 698,
     "status_counts": {
@@ -12888,13 +12888,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 455,
+          "line": 474,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 468,
+          "line": 487,
           "source_group": "tests",
           "text": "if path == \"scripts/engineering/dev/zed_mypy.py\":"
         }
@@ -20231,13 +20231,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 680,
+          "line": 699,
           "source_group": "tests",
           "text": "\"src/bioetl/infrastructure/quality/scoring.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 681,
+          "line": 700,
           "source_group": "tests",
           "text": "\"scripts/engineering/quality/scoring.py\","
         },
