@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.base_transformer._structural_policy_types import (
     StructuralFieldSpec,
@@ -11,6 +11,50 @@ from bioetl.application.core.base_transformer._structural_policy_types import (
     StructuralPolicySignal,
 )
 from bioetl.domain.types import JsonDict, SilverRecord
+
+if TYPE_CHECKING:
+    from bioetl.domain.filtering import FilterDecision
+
+_STRUCTURAL_ACTION_BY_REASON_CODE: dict[str, str] = {
+    "required_field_missing": "presence_quarantine",
+    "structural_policy_type_mismatch": "required_type_quarantine",
+    "structural_policy_null_optional_forbidden": "optional_nonnullable_quarantine",
+}
+_STRUCTURAL_ACTION_BY_EVENT: dict[str, str] = {
+    "silver_structural_type_coerced_to_null": "nullable_type_to_null",
+}
+
+
+def classify_structural_action(
+    details: dict[str, object] | None,
+    event_names: set[str],
+) -> str | None:
+    """Map structural details/events to a bounded telemetry action label."""
+    if details is not None:
+        reason_code = details.get("reason_code")
+        if isinstance(reason_code, str):
+            mapped = _STRUCTURAL_ACTION_BY_REASON_CODE.get(reason_code)
+            if mapped is not None:
+                return mapped
+    for event_name in event_names:
+        mapped = _STRUCTURAL_ACTION_BY_EVENT.get(event_name)
+        if mapped is not None:
+            return mapped
+    return None
+
+
+def classify_structural_shadow_comparison(
+    *,
+    structural_rejected: bool,
+    silver_filter_decision: FilterDecision | None,
+) -> str | None:
+    """Build a bounded comparison label for structural vs Silver filtering."""
+    if silver_filter_decision is None:
+        return None
+    silver_state = "reject" if not silver_filter_decision.include else "pass"
+    structural_state = "reject" if structural_rejected else "pass"
+    return f"structural_{structural_state}_silver_filter_{silver_state}"
+
 
 _SENSITIVE_FIELD_NAME_TOKENS = frozenset(
     {"api_key", "apikey", "authorization", "password", "secret", "token"}
@@ -74,6 +118,19 @@ def build_structural_details(
     return details
 
 
+def optional_sources_for_field(
+    policy: object,
+    field_name: str | None,
+) -> list[str]:
+    """Return resolved optionality metadata for one policy field."""
+    if not field_name:
+        return []
+    for contract in getattr(policy, "contracts", ()):
+        if getattr(contract, "field_name", None) == field_name:
+            return list(getattr(contract, "optional_sources", ()))
+    return []
+
+
 def build_optional_nonnullable_events(
     details: JsonDict,
 ) -> tuple[StructuralPolicySignal, StructuralPolicySignal]:
@@ -112,5 +169,8 @@ __all__ = [
     "build_optional_nonnullable_events",
     "build_quarantine_outcome",
     "build_structural_details",
+    "classify_structural_action",
+    "classify_structural_shadow_comparison",
+    "optional_sources_for_field",
     "preview_value",
 ]
