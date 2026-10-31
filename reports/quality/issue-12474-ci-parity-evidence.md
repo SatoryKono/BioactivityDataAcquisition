@@ -768,3 +768,37 @@ assertion failed before any repository write; its original FAIL and corrected
 native-hash validation receipt are both preserved. Local WSL setup/measurement
 failures remain NOT_QUALIFIED. No runtime mirror or product inputs changed
 during this intake.
+
+### Required Docs owner invocation
+
+Final-candidate Nightly `41234331953` on `498f4391148e375fc10c535899c894d4b7452fbe`
+completed SUCCESS and produced independently verified CI-trust ADMIT, bundle
+digest `6176b9fa772201c6f4b454082a16b96c806d560fed2e67fcc954e962d50ec175`.
+The ordinary PR Gate `41234318409` passed Class lane and Docker but its required
+aggregate failed because the Docs reusable owner did not start. That FAIL is
+preserved, not waived by the successful Nightly or source-bound ADMIT.
+
+The coordinator still invoked Docs at `feeaea060e81edb07d2c56dad6af1bbb201a3b6a`,
+whose inherited concurrency group collided with its caller. Accepted main
+commit `0deeafe064844e467b6c5943430dbfb3b80333ba` already fixes precisely that
+group by prefixing it with `docs-`. Comparing the two pinned Docs workflow
+blobs shows only that group change and its explanatory comments. This task
+reuses that accepted fix by updating the coordinator's exact SHA and its
+registry entry, exact allowlisted SHA and owning-test expectation together.
+The allowlist replaces the old SHA rather than accepting additional refs.
+It retains the same single Docs owner, required
+aggregation, tests, timeouts, permissions and fail-closed behavior.
+
+The earlier negative control on `498f439...` has 115 real cases, exactly one
+schema mismatch, no errors/skips and failed Class lane/aggregate; its JUnit
+SHA256 is `6c136f504c50eb7f70f3b46212c11c1cdb5d5bbbb382f97fed6efeea1172fd89`.
+Its aggregate also lacked the Docs owner, so that historical run does not
+isolate schema mismatch as the aggregate's sole cause of failure.
+Because the owner invocation changed, positive and negative canonical controls
+and required CI are repeated on the final integrated head. The owning-test pin
+literal changes measurement inputs, so a new qualified producer is required;
+historical captures are preserved and are not rebound to the new test digest.
+
+Actual original CI setup logs distinguish CPython 3.12.15 in Class lane and
+coverage aggregation from CPython 3.13.17 in the 3.13 test matrix. The local
+frozen Python 3.13.18 environment remains separately identified local evidence.

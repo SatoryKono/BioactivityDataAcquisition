@@ -249,7 +249,7 @@ DOCKER_LANE_PIN = (
 )
 DOCS_LANE_PIN = (
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml"
-    "@feeaea060e81edb07d2c56dad6af1bbb201a3b6a"
+    "@0deeafe064844e467b6c5943430dbfb3b80333ba"
 )
 
 
