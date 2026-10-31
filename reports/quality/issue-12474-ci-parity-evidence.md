@@ -711,3 +711,60 @@ aggregators succeed, with original artifact/XML identity checks. The runbook
 is aligned to that active contract; currentness and final CI ADMIT remain
 mandatory. Generated passport source revisions are refreshed by their native
 generator; historical telemetry and measurements remain unchanged.
+
+### Own qualified CI capture: 2026-10-31
+
+Own [Nightly 41232471067](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41232471067)
+tested source `5d295539079288e40202c81c514aeeb32505eebe`, tree
+`ee434bc3ff34262e3aae6836713cfa82c23c6068`. All 17 canonical coverage
+producers, `coverage-verify` and `duration-telemetry` completed SUCCESS on
+that attempt. Both 85% gates and unchanged per-module regression gates passed:
+line coverage 99.81%, branch coverage 94.62%. The root run completed FAILURE
+because generated artifacts/currentness and their aggregators had not yet
+consumed these measurements; that failure is retained separately.
+
+Original immutable artifacts were verified against GitHub metadata, size,
+run/head identity and SHA256 before intake:
+
+| Artifact | ID | ZIP bytes | SHA256 |
+| --- | --- | --- | --- |
+| coverage-report | 13054386977 | 14246810 | `e4e04490fc28b693000ba2f5108542e438f10ce1bb9b3f82c8a77c3f2d241a7a` |
+| test-duration-telemetry | 13054341901 | 3962 | `27e9497576e07a8d9e7c7fea41ca0734796e3e705247b92665a17ec6beb3a2de` |
+
+The coverage XML raw SHA256 is
+`9285ede7c3282b8b7b7e1eb22441cd6611cc2be16e9e81112d608e39d21155b4`;
+the native reporter's semantic hash, which normalizes only the generation
+timestamp and line endings, is
+`79825e28257a7e54cf614863de88062d2d69630e198750f5848f2930914e0be7`.
+The exact original candidate was adopted. Original duration JSON was first
+copied byte-for-byte, then processed by the native telemetry updater; its
+final metadata/aliases are derived output, while original measurement rows
+remain preserved. Neither percentages nor captured identities were edited.
+
+The native updater used `--coverage-xml reports/coverage/coverage.xml
+--slowest-json reports/test-telemetry/slowest-tests.json --source-branch
+codex/issue-12474-final-qualification-20261031 --source-commit
+5d295539079288e40202c81c514aeeb32505eebe --source-run-id 41232471067
+--source-event workflow_dispatch --source-run-url
+https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41232471067`,
+exit 0. Native `scripts.engineering.ci.test_telemetry_provenance
+--ci-run-id 41232471067 --pull-request 12633` independently revalidated all
+19 jobs, original metrics, clean producer inputs and actual published PR head,
+exit 0. The full six-family stale precheck remains FAIL (exit 1), followed
+by real producer intake rather than a hash-only telemetry rebind.
+
+The original CI Proof-or-Stop verification for this source records
+`claim=ready_to_merge`, `claim_qualified=true`, `outcome=ADMIT`, exit 0,
+with no errors or degradations. Its bundle digest is
+`4d22bb5b960a49659bd15faa7e6fe91828b5106fd657e2324ffaa515f253b423`.
+This is source-bound ADMIT, not a claim that the failed root workflow passed.
+Final artifact-head required CI, fresh proof and actual positive/negative
+canonical schema-mismatch controls remain separate acceptance obligations.
+
+Independent reviewer `telemetry_independent_review` verified both ZIP identities,
+the exact coverage candidate/XML and the native semantic hash. No substantive
+intake issue was found. The initial external-helper raw-versus-semantic hash
+assertion failed before any repository write; its original FAIL and corrected
+native-hash validation receipt are both preserved. Local WSL setup/measurement
+failures remain NOT_QUALIFIED. No runtime mirror or product inputs changed
+during this intake.
