@@ -59,6 +59,36 @@ def suppress_pandera_future_warnings():
 class TestPanderaSilverValidator:
     """Tests for PanderaSilverValidator."""
 
+    @pytest.mark.parametrize("logical_type", ["integer", "boolean"])
+    def test_noncastable_nullable_payload_is_preserved_and_rejected(
+        self, logical_type: str
+    ) -> None:
+        """Failed nullable coercion cannot erase an invalid object into null."""
+        import pandas as pd
+        import pandera.pandas as pa
+
+        dtype = pd.Int64Dtype() if logical_type == "integer" else pd.BooleanDtype()
+        schema = pa.DataFrameSchema(
+            {"entity_id": pa.Column(str), "value": pa.Column(dtype, nullable=True)}
+        )
+        validator = PanderaSilverValidator(schema=schema)
+        records = [
+            {"entity_id": "CHEMBL1", "value": {"malformed": 1}},
+            {"entity_id": "CHEMBL2", "value": None},
+        ]
+        frame = pd.DataFrame(records)
+        normalize = (
+            validator._normalize_nullable_integer_columns
+            if logical_type == "integer"
+            else validator._normalize_nullable_boolean_columns
+        )
+        normalized = normalize(frame)
+        assert normalized.equals(frame)
+        assert normalized.iloc[0]["value"] == {"malformed": 1}
+        result = validator.validate(records)
+        assert result.valid is False
+        assert any("value" in error for error in result.errors)
+
     def test_validate_empty_records_returns_valid(self):
         """Test that empty records list returns valid result."""
         validator = PanderaSilverValidator()
