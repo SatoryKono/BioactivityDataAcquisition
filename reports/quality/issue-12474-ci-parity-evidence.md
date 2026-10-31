@@ -802,3 +802,41 @@ historical captures are preserved and are not rebound to the new test digest.
 Actual original CI setup logs distinguish CPython 3.12.15 in Class lane and
 coverage aggregation from CPython 3.13.17 in the 3.13 test matrix. The local
 frozen Python 3.13.18 environment remains separately identified local evidence.
+
+### Qualified capture after the Docs pin correction
+
+Own [Nightly 41237446715](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41237446715)
+tested `3c2f90710b2e95808ca6964c6014d413d73fb7ad`, tree
+`a8c011aafd5846e9cf0693d97f646b1544037ebd`. All 17 canonical producers and
+both coverage/duration aggregators succeeded on that attempt. The native
+qualification and publication-provenance commands returned 0 after the run
+became terminal, independently rechecking original artifacts and published head.
+Its root FAILURE is retained: daily/S7 telemetry checks and their architecture
+aggregate still used the previous test digest before intake.
+
+| Original artifact | ID | ZIP bytes | SHA256 |
+| --- | --- | --- | --- |
+| coverage-report | 13056333761 | 14246822 | `95381835a7971dbda422eea579e6337973578312a1fbbbe3ac4f8485764b990f` |
+| test-duration-telemetry | 13056535623 | 4116 | `e44b3053bcca1b5da7ca125ca6367beb7a58de1738134fa4b0a24823ed4380c1` |
+
+The original XML raw SHA256 is
+`4cbf6eba61aa2c3fa196e159836ad43aaee938d6a770b09dc025dc99f3c086a0`.
+Coverage remains 99.81% lines / 94.62% branches, and the exact candidate is
+byte-identical to the previous module inventory. No measured module rows or
+quality budgets change. The native telemetry updater consumes this capture with
+`--source-commit 3c2f90710b2e95808ca6964c6014d413d73fb7ad
+--source-run-id 41237446715 --source-event workflow_dispatch` and the actual
+source branch/URL, original XML and duration JSON, exit 0. The resulting test
+digest is `06220ab6aae6f606dbea0276ca8215404b54cbe25cf7d7e548f696996319c721`.
+CI-family maintenance uses the slim canonical refresh; no broad hash-only
+hotspot-budget ratchet or manual SHA/percentage replacement is performed.
+
+The [corrected PR invocation](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41237395241)
+actually completed Docs governance, MkDocs, Mermaid validation and diagram-drift
+checks successfully. The Nightly's original Ubuntu JUnit confirms 109 unique pin/
+routing cases with zero failures, errors or skips, including the nine locally
+platform-limited cases. Windows owning evidence remains 106 PASS / 9 platform
+SKIP rather than being relabeled as 115 PASS. All measurement originals,
+replaced inputs, initial failed checks and the cancelled accidental old-source
+dispatch remain preserved. Final artifact-head CI, proof and isolated schema
+controls remain necessary before merge and issue completion.
