@@ -804,7 +804,9 @@ jobs:
   docs-lane:
     name: Docs lane
     needs: classify-changes
-    if: needs['classify-changes'].outputs['docs-governance'] == 'required'
+    # Run fail-closed when a required output is missing or malformed. The
+    # aggregator decides whether docs-governance applies to this change.
+    if: needs['classify-changes'].outputs['docs-governance'] != 'not_applicable'
     permissions:
       contents: read
     # Pin must stay on trusted main (#11232). docs.yml owns diagram/docs

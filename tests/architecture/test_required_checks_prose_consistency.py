@@ -513,7 +513,7 @@ def test_prose_only_change_runs_pytest_without_lint_arch() -> None:
         encoding="utf-8"
     )
     docs_workflow = (ROOT / ".github/workflows/docs.yml").read_text(encoding="utf-8")
-    assert "docs-governance'] == 'required'" in coordinator
+    assert "docs-governance'] != 'not_applicable'" in coordinator
     assert (
         "uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@"
         in (coordinator)

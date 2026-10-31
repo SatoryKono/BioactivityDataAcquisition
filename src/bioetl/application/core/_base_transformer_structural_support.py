@@ -79,8 +79,28 @@ def _raise_if_silver_filtered_out(
     )
     raise FilteredOutError(
         decision.message or "Record excluded by silver filters",
-        details={"policy_stage": "structural", **decision.to_dict()},
+        details={
+            "policy_stage": "structural",
+            **decision.to_dict(),
+            "optional_sources": _optional_sources_for_field(owner, decision.field),
+            "shadow_comparison": "structural_pass_silver_filter_reject",
+            "silver_filter_shadow_reason_code": decision.reason_code,
+        },
     )
+
+
+def _optional_sources_for_field(
+    owner: TransformerExecutionOwner,
+    field_name: str | None,
+) -> list[str]:
+    """Return resolved structural optionality metadata for one filter field."""
+    if not field_name:
+        return []
+    contracts = getattr(owner._structural_policy, "contracts", ())
+    for contract in contracts:
+        if getattr(contract, "field_name", None) == field_name:
+            return list(getattr(contract, "optional_sources", ()))
+    return []
 
 
 def apply_silver_filter(

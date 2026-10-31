@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 def _is_present(value: object) -> bool:
-    return value is not None
+    return value is not None and not (isinstance(value, float) and math.isnan(value))
 
 
 def _coerce_list_like(value: object) -> list[object] | None:

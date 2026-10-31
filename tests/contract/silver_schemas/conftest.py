@@ -222,6 +222,8 @@ def _normalize_dtype_name(field_name: str, dtype_name: str) -> str:
 
     if normalized == "boolean":
         return "bool"
+    if normalized.lower().startswith("string["):
+        return "str"
 
     return normalized
 
