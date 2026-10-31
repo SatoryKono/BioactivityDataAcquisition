@@ -80,7 +80,7 @@ export = [
 tests = [
     "filelock>=4.2.1",
     # Testing frameworks
-    "pytest>=9.0.3,<9.2",
+    "pytest>=9.0.3,<9.3",
     "pytest-cov>=4.0",
     "pytest-asyncio>=1.4",
     "pytest-xdist>=3.5",
@@ -117,7 +117,7 @@ tests_full = [
 ]
 dev = [
     "filelock>=4.2.1",
-    "pytest>=9.0.3,<9.2",
+    "pytest>=9.0.3,<9.3",
     "pytest-cov>=4.0",
     "pytest-asyncio>=1.4",
     "pytest-xdist>=3.5",
