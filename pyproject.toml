@@ -214,6 +214,8 @@ exclude = ["scripts", "scripts.*", "bioetl.infrastructure.quality", "bioetl.infr
 # ============ PYTEST ============
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 norecursedirs = [
     ".venv",
     ".venv-win",
@@ -303,11 +305,6 @@ filterwarnings = [
     # pytest-benchmark warning when xdist is active (expected in parallel mode)
     "ignore:Benchmarks are automatically disabled",
 ]
-
-# ============ PYTEST-ASYNCIO ============
-[tool.pytest-asyncio]
-asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "function"
 
 # ============ COVERAGE ============
 [tool.coverage.run]
