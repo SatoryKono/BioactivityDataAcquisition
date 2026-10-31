@@ -10,7 +10,7 @@
     "grafana/tooling/router-v7-bridge/grafana-canvas-query-error.patch": "b70dc7ed11637b43764fccf7c9680d8616ea37c8be71ee461f39c2cc9519176f",
     "grafana/tooling/router-v7-bridge/grafana-router-jest-esm.patch": "c177d3f3663431138d3fd12a31692b8cf21471f96730ea749c3eec0e329200dd",
     "grafana/tooling/router-v7-bridge/index.mjs": "eb4c404b42c0af3f3d1715ad4b191bd9e73564873b0fb650ba807c56ab580c3c",
-    "grafana/tooling/router-v7-bridge/package-lock.json": "ddf10aae126c9f2efe8179af3515085663f7815a482e8cd5084f709e2d1cd9d9",
+    "grafana/tooling/router-v7-bridge/package-lock.json": "0fa2b65941e13651158382b2951e7770c5d90048ec529c32098f54b6766df034",
     "grafana/tooling/router-v7-bridge/Dockerfile.host": "72133efc2b4e64b20730131a7da8597bca90d59bef964025e3ab9a9011f95812",
     "grafana/plugins/bioetl-scenes-app/package-lock.json": "dde770e17d08af7bda7764f84e10333c1bedcbccabf6fb05735b7088252444da",
     "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "f98676be3f0e1f6c6f82dbf79f58440986871d75c9d8f0c31cbb09c20d4de1a6",
