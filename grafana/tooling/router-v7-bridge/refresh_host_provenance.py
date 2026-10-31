@@ -24,6 +24,18 @@ ROOT = HERE.parents[2]
 MANIFEST = "grafana/tooling/router-v7-bridge/host-image.json"
 WORKFLOW = ".github/workflows/router-v7-bridge.yml"
 ARTIFACT = "router-v7-host-image-receipts"
+BUILD_SUPPORT = (
+    ".github/workflows/router-v7-bridge.yml",
+    "grafana/tooling/router-v7-bridge/package.json",
+    "grafana/tooling/router-v7-bridge/package-lock.json",
+    "grafana/tooling/router-v7-bridge/index.d.ts",
+    "grafana/tooling/router-v7-bridge/README.md",
+    "grafana/tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz",
+    "grafana/tooling/router-v7-bridge/verify-host-image.mjs",
+    "grafana/tooling/router-v7-bridge/verify-packed-bridge.mjs",
+    "scripts/ops/observability/grafana/router_rootfs.py",
+    "scripts/ops/observability/grafana/router_managed_image.py",
+)
 JOBS = {
     "bridge-tests",
     "plugin-tests (bioetl-scenes-app)",
@@ -265,8 +277,7 @@ def source_inputs(
         return subprocess.check_output(["git", *args], cwd=root)
 
     paths = {path for path in manifest["artifact_sha256"] if "/dist/" not in path}
-    if (root / ".github/workflows/router-v7-bridge.yml").is_file():
-        paths.add(".github/workflows/router-v7-bridge.yml")
+    paths.update(BUILD_SUPPORT)
     roots = (
         "grafana/plugins/bioetl-scenes-app",
         "grafana/plugins/bioetl-selectorshell-panel",

@@ -50,7 +50,7 @@ test('source provenance generator rejects unqualified captures and preserves his
     cwd: fileURLToPath(new URL('.', import.meta.url)), encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
   });
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stderr, /Ran 6 tests/);
+  assert.match(result.stderr, /Ran 8 tests/);
   assert.match(result.stderr, /\bOK\b/);
 });
 

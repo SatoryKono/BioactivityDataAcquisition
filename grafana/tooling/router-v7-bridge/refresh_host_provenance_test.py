@@ -17,6 +17,11 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 DIGEST = "a" * 64
 IMAGE = "satorykono/bioetl-grafana-router7-canvas@sha256:" + DIGEST
+promotion_spec = importlib.util.spec_from_file_location(
+    "promotion", Path(__file__).with_name("promote_host_release.py")
+)
+promotion = importlib.util.module_from_spec(promotion_spec)
+promotion_spec.loader.exec_module(promotion)
 
 
 def fixture():
@@ -96,7 +101,170 @@ def fixture():
     return run, jobs, {"total_count": 1, "artifacts": [artifact]}, raw, manifest, parity
 
 
+def release_case():
+    run, _, artifacts, _, host, parity = fixture()
+    old = IMAGE.replace(DIGEST, "c" * 64)
+    old_managed = IMAGE.replace(DIGEST, "d" * 64)
+    host["image"] = old
+    host["delivery_source"]["host_artifact_parity"]["image"] = old
+    for name in ("528.js.map", "module.js.map"):
+        host["artifact_sha256"]["grafana/plugins/bioetl-scenes-app/dist/" + name] = (
+            DIGEST
+        )
+    managed = {"image": old_managed, "parent_image": old}
+    original = {
+        promotion.HOST_PATH: json.dumps(host).encode(),
+        promotion.MANAGED_PATH: json.dumps(managed).encode(),
+        promotion.RECIPE_PATH: ("FROM " + old + "\nUSER grafana\n").encode(),
+        **{
+            path: (
+                "services:\n  grafana:\n    image: "
+                + (old if path.endswith("/compose.acceptance.yml") else old_managed)
+                + "\n"
+            ).encode()
+            for path in promotion.COMPOSE_PATHS
+        },
+    }
+    parity["qualification_target"] = "candidate"
+    dist = dict(host["artifact_sha256"])
+    for path in dist:
+        if path.endswith(".js.map"):
+            dist[path] = "e" * 64
+    managed_receipt = {
+        "status": "PASS",
+        "scenes_installed": False,
+        "parent_image": IMAGE,
+        "declared_image": IMAGE.replace(DIGEST, "f" * 64),
+        "rootfs_sha256": DIGEST,
+    }
+    return (
+        original,
+        run,
+        artifacts["artifacts"][0],
+        parity,
+        {"source.js": DIGEST},
+        "b" * 40,
+        dist,
+        managed_receipt,
+        DIGEST,
+    )
+
+
 class ProvenanceControls(unittest.TestCase):
+    def test_release_promotion_preserves_history_and_all_coupled_pins(self):
+        case = release_case()
+        outputs = promotion.build_release_files(*case)
+        host = json.loads(outputs[promotion.HOST_PATH])
+        managed = json.loads(outputs[promotion.MANAGED_PATH])
+        original_host = json.loads(case[0][promotion.HOST_PATH])
+        self.assertEqual(host["release_history"][0]["host_manifest"], original_host)
+        self.assertEqual(host["image"], IMAGE)
+        self.assertEqual(managed["parent_image"], IMAGE)
+        self.assertEqual(
+            managed["dockerfile_sha256"], module.sha256(outputs[promotion.RECIPE_PATH])
+        )
+        self.assertFalse(host["release_promotion"]["default_delivery_ci_claimed"])
+        self.assertFalse(host["release_promotion"]["runtime_rollout_claimed"])
+        for path in promotion.COMPOSE_PATHS:
+            expected = (
+                IMAGE if path.endswith("/compose.acceptance.yml") else managed["image"]
+            )
+            self.assertIn(expected.encode(), outputs[path])
+        self.assertEqual(promotion.build_release_files(outputs, *case[1:]), outputs)
+        for path in (*promotion.COMPOSE_PATHS, promotion.RECIPE_PATH):
+            with self.subTest(tampered=path):
+                corrupted = dict(outputs)
+                corrupted[path] = corrupted[path].replace(
+                    (
+                        IMAGE
+                        if path == promotion.RECIPE_PATH
+                        or path.endswith("/compose.acceptance.yml")
+                        else managed["image"]
+                    ).encode(),
+                    b"foreign/image:latest",
+                )
+                with self.assertRaises(ValueError):
+                    promotion.build_release_files(corrupted, *case[1:])
+        for mode in (
+            "wrong_service",
+            "duplicate_image",
+            "duplicate_service",
+            "duplicate_services",
+            "commented_services",
+            "quoted_services",
+            "quoted_grafana",
+            "quoted_image",
+        ):
+            with self.subTest(tampered=mode):
+                corrupted = dict(outputs)
+                path = promotion.COMPOSE_PATHS[0]
+                text = corrupted[path].decode()
+                if mode == "wrong_service":
+                    text = text.replace("  grafana:", "  unrelated:")
+                elif mode == "duplicate_image":
+                    text += "    image: " + IMAGE + "\n"
+                elif mode == "duplicate_service":
+                    text += "  grafana:\n    image: " + IMAGE + "\n"
+                elif mode == "commented_services":
+                    text += "services: # replacement\n  grafana:\n    image: foreign/image:latest\n"
+                elif mode == "quoted_services":
+                    text += "'services':\n  grafana:\n    image: foreign/image:latest\n"
+                elif mode == "quoted_grafana":
+                    text += "  'grafana':\n    image: foreign/image:latest\n"
+                elif mode == "quoted_image":
+                    text += "    'image': foreign/image:latest\n"
+                else:
+                    text += "services:\n  grafana:\n    image: " + IMAGE + "\n"
+                corrupted[path] = text.encode()
+                with self.assertRaises(ValueError):
+                    promotion.build_release_files(corrupted, *case[1:])
+
+    def test_release_promotion_rejects_unqualified_sources_and_runtime_changes(self):
+        for mode in (
+            "failed_ci",
+            "declared_mode",
+            "foreign_image",
+            "managed_parent",
+            "scenes",
+            "runtime_asset",
+            "extra_artifact",
+            "missing_source",
+            "recipe",
+            "compose",
+        ):
+            with self.subTest(mode=mode):
+                case = list(release_case())
+                if mode == "failed_ci":
+                    case[1]["conclusion"] = "failure"
+                elif mode == "declared_mode":
+                    case[3]["qualification_target"] = "declared_delivery"
+                elif mode == "foreign_image":
+                    case[3]["declared_image"] = "foreign/image:latest"
+                elif mode == "managed_parent":
+                    case[7]["parent_image"] = IMAGE.replace(DIGEST, "1" * 64)
+                elif mode == "scenes":
+                    case[7]["scenes_installed"] = True
+                elif mode == "runtime_asset":
+                    case[6]["grafana/plugins/bioetl-scenes-app/dist/module.js"] = (
+                        "1" * 64
+                    )
+                elif mode == "extra_artifact":
+                    case[6]["grafana/plugins/bioetl-scenes-app/dist/extra.js.map"] = (
+                        DIGEST
+                    )
+                elif mode == "missing_source":
+                    host = json.loads(case[0][promotion.HOST_PATH])
+                    host["artifact_sha256"]["required.js"] = DIGEST
+                    case[0][promotion.HOST_PATH] = json.dumps(host).encode()
+                elif mode == "recipe":
+                    case[0][promotion.RECIPE_PATH] = b"FROM foreign/image:latest\n"
+                else:
+                    case[0][promotion.COMPOSE_PATHS[0]] = (
+                        b"image: foreign/image:latest\n"
+                    )
+                with self.assertRaises(ValueError):
+                    promotion.build_release_files(*case)
+
     def test_positive_original_capture_and_idempotent_history(self):
         run, jobs, artifacts, raw, original, parity = fixture()
         artifact, actual = module.validate_capture(run, jobs, artifacts, raw)
@@ -275,6 +443,11 @@ class ProvenanceControls(unittest.TestCase):
             plugin.parent.mkdir(parents=True)
             plugin.write_bytes(b"captured plugin\n")
             git("add", "grafana")
+            for relative in module.BUILD_SUPPORT:
+                target = root / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(b"support fixture\n")
+            git("add", ".")
             git(
                 "-c",
                 "user.name=Fixture",
@@ -294,6 +467,10 @@ class ProvenanceControls(unittest.TestCase):
                     "grafana/plugins/bioetl-scenes-app/captured.js": module.sha256(
                         b"captured plugin\n"
                     ),
+                    **{
+                        path: module.sha256(b"support fixture\n")
+                        for path in module.BUILD_SUPPORT
+                    },
                 },
             )
             self.assertEqual(tree, git("rev-parse", "HEAD^{tree}").decode().strip())

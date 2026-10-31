@@ -483,3 +483,42 @@ of the current main source. The existing Router workflow now has an explicit
 owned immutable candidate input; its empty default still verifies declared
 delivery. Candidate qualification retains all complete image checks and labels
 its receipt separately. Fifteen Node controls and 58 CI-policy tests pass.
+
+### Own candidate qualification and release generation
+
+Router run `41216904530` on source
+`8799d3bd89705542258da73c023ffbd4f3244768` completed successfully in all four
+jobs, including the complete rebuilt/immutable candidate image comparison.
+The independent `telemetry_independent_review` accepted the scoped release
+generator after fixes for repeated-check Compose tampering, duplicate/quoted
+mapping keys and the managed verifier's exact Git source identity. Eight
+isolated Python fixture methods cover the positive history/idempotency case
+and negative capture, source, runtime asset and delivery-binding controls.
+
+`promote_host_release.py` consumed the original successful CI ZIPs and live
+immutable host/managed images. Its pre-check returned 1 solely because the
+six coupled release outputs were stale; the subsequent update returned 0.
+Both commands independently pulled, inspected and exported the images and
+rebuilt the managed variant. Original API responses, ZIPs, Docker argv/exits,
+stderr and complete filesystem records are preserved under evidence packets
+`router-release-native-precheck-v1` and `router-release-native-update-v1`.
+The streamed export tar itself is not retained. Prior manifests, recipe and
+Compose pins remain in the generated release history.
+
+Fresh main `542d68c3616a0152666e9fd91f907f8a15993fd0` was merged without
+discarding either side; source integration commit
+`7d8ad5ca56d94a1c1911a25b0b1deb7156592529` has tree
+`dcd2e2a316025274e3056174f148cf0d29258946`. Its affected route, telemetry
+provenance and Gitleaks owning selection completed 376 cases with exit 0.
+The complete planned routing check reports zero unmapped files. The full
+CI-family pre-check remains recorded as FAIL for stale test-governance
+inputs; the slim non-telemetry update returned 0 without budget ratcheting.
+Current default-delivery CI, complete source-bound producer, native ADMIT
+and final revision acceptance are still pending; this section claims none.
+
+The subsequent native `router-release-native-check-v1` returned 0; all six
+output hashes exactly match the update result. The independent reviewer
+accepted these outputs against the original API/ZIP evidence, 114 exact Git
+inputs and full host/managed filesystem records. The owning Grafana selection
+returned 0 with 26 passed cases and two pre-existing Windows POSIX-shell skips;
+the complete Linux producer must execute those applicable cases.

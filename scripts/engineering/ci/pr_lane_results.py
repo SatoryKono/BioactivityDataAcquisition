@@ -108,6 +108,9 @@ EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".gitleaks.toml": (
+        "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
+    ),
     ".gitleaksignore": (
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
     ),
