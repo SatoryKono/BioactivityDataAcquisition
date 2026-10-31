@@ -84,7 +84,7 @@ class TestPanderaSilverValidator:
 
     def test_validate_with_schema_valid_records(self):
         """Test validation passes for records matching schema."""
-        import pandera as pa
+        import pandera.pandas as pa
 
         schema = pa.DataFrameSchema(
             {
@@ -103,7 +103,7 @@ class TestPanderaSilverValidator:
 
     def test_validate_with_schema_invalid_records(self):
         """Test validation fails for records not matching schema."""
-        import pandera as pa
+        import pandera.pandas as pa
 
         schema = pa.DataFrameSchema(
             {
@@ -121,7 +121,7 @@ class TestPanderaSilverValidator:
 
     def test_validate_with_schema_missing_column(self):
         """Test validation fails when required column is missing."""
-        import pandera as pa
+        import pandera.pandas as pa
 
         schema = pa.DataFrameSchema(
             {
@@ -139,7 +139,7 @@ class TestPanderaSilverValidator:
 
     def test_validate_non_strict_allows_extra_columns_and_seeds_dq(self):
         """Non-strict Silver validation ignores extras and seeds DQ flags."""
-        import pandera as pa
+        import pandera.pandas as pa
 
         schema = pa.DataFrameSchema(
             {
@@ -167,7 +167,7 @@ class TestPanderaSilverValidator:
         """Test validation passes with nullable columns when using valid types."""
         import math
 
-        import pandera as pa
+        import pandera.pandas as pa
 
         schema = pa.DataFrameSchema(
             {
@@ -186,7 +186,7 @@ class TestPanderaSilverValidator:
 
     def test_validate_with_ordered_schema_rejects_reordered_columns(self):
         """Columns in wrong order pass validation after reorder."""
-        import pandera as pa
+        import pandera.pandas as pa
 
         schema = pa.DataFrameSchema(
             columns={
@@ -303,7 +303,7 @@ class TestPanderaGoldValidator:
 
     def test_pandera_gold_validator__schema_valid_records__d3f54fff(self):
         """Test validation passes for records matching schema."""
-        import pandera as pa
+        import pandera.pandas as pa
 
         schema = pa.DataFrameSchema(
             {
@@ -547,7 +547,7 @@ class TestPanderaValidatorPropertyBased:
     @settings(deadline=None)
     def test_valid_records_pass_matching_schema(self, record: dict):
         """Property: Records matching schema structure always pass validation."""
-        import pandera as pa
+        import pandera.pandas as pa
 
         schema = pa.DataFrameSchema(
             {
