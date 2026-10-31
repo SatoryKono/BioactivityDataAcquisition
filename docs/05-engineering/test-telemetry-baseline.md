@@ -32,9 +32,9 @@ trend evidence only.
 - Source run id: `41219495772`
 - Source event: `workflow_dispatch`
 - Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41219495772`
-- Source tree sha256: `fc912470672b4bf51a378d7d4472a21c09fe214bd9df2cc06d272dd5f26f21c2`
+- Source tree sha256: `9762b0d4cc51c3462dd049b86edc9c29dad4a02be8f3e9f7d550af7754fbb708`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-31T16:44:59.191858+00:00`
+- Refreshed at (UTC): `2026-10-31T17:52:05.868013+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -43,8 +43,10 @@ trend evidence only.
   `.github/workflows/tests.yml`, and the live JUnit producers
   `scripts/engineering/ci/junit_duration_summary.py` and
   `scripts/engineering/dev/pytest_junit_subtests.py`.
-- `measurement_provenance.head` and `test_tree_sha256` retain the captured
-  run identity when the current audited test tree advances later.
+- Top-level `source_branch`, `source_commit`, `source_event`,
+  `source_run_id`, `source_run_url`, and `source_tree_sha256` retain the
+  captured run identity. `measurement_provenance.head` is optional local
+  capture detail and may be absent from CI-backed snapshots.
 - Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)
   and rejects future/stale `refreshed_at_utc` values.
 - `source_commit` must remain an ancestor of HEAD or have a reviewed squash
@@ -72,11 +74,11 @@ trend evidence only.
 - Reviewed snapshots retain `local_single_host` trust; they are not signed
   vendor attestations or CI execution receipts. Exact `source_commit == HEAD`
   remains opt-in via `BIOETL_REQUIRE_TELEMETRY_SOURCE_COMMIT_EQUALS_HEAD=1`.
-- GitHub evidence from a non-main branch requires `pull_request`;
-  a manually dispatched Nightly run may instead use `workflow_dispatch`.
-  Its run URL and id remain independently auditable.
-- Use `workflow_dispatch` only for a manually started `Nightly` run on the
-  PR branch. Start it with `gh workflow run nightly.yml --ref <branch>`,
+- GitHub evidence from a non-main branch requires `pull_request` or a
+  manually dispatched Nightly run. `workflow_dispatch` is also supported
+  for a Nightly run on `main`; the run URL and id remain auditable.
+- Use `workflow_dispatch` for a manually started `Nightly` run on `main`
+  or a PR branch. Start it with `gh workflow run nightly.yml --ref <branch>`,
   then download both source artifacts from that exact run:
   `gh run download <run-id> --name coverage-report --dir reports` and
   `gh run download <run-id> --name test-duration-telemetry
@@ -96,8 +98,8 @@ trend evidence only.
   --slowest-json reports/test-telemetry/slowest-tests.json
   --source-branch <branch> --source-commit <sha>
   --source-run-id <run-id> --source-event <event>
-  --source-run-url <url>`. Use `workflow_dispatch` only for the
-  manually started Nightly workflow described above.
+  --source-run-url <url>`. For `workflow_dispatch`, use the exact source
+  identity from the manually started Nightly workflow described above.
 
 ## Coverage
 
