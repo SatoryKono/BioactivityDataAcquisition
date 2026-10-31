@@ -1,7 +1,10 @@
 # #12474 — real-backend schema parity in canonical CI
 
-Acceptance is pending the exact-head remote controls, required CI and independent
-review recorded below. A local passing test is not CI integration acceptance.
+This source passport preserves the implementation scope and qualification
+history. The final acceptance passport belongs to PR #12633 and binds exact
+head/tree, terminal CI controls, independent review and lifecycle readback.
+Intermediate pending/failed stages below describe their recorded revisions;
+this file alone does not assert CI integration acceptance.
 
 Source-evidence preservation after squash uses the archival Git tag
 `evidence/issue-12474-checkpoint-63216d95433f1e111579303186c4baa12c87c9cb`,
@@ -905,3 +908,47 @@ Its integration job correctly failed the non-dist input digest guard at
 `test_grafana_datasource_provisioning.py:50`; this is preserved as FAIL and
 is not a qualified producer. The source and refreshed provenance must be
 published together before another complete producer can qualify the capture.
+
+### Complete producer after typed-source revalidation
+
+Nightly `41245104968` tested published source
+`25386ce9320fbb9e3d472c3d686eba1c654c137c`, tree
+`d4d25d261465b65920056e4d44c8a9fbb95dd08b`. All 17 canonical source jobs
+and both coverage/duration aggregators completed SUCCESS on the same attempt,
+including the real integration digest guard and the complete typing controls.
+The source-job validator independently checked all 19 identities/conclusions.
+After the run became terminal, both the native source qualification and
+publication-provenance commands returned 0. The root FAILURE is retained:
+daily/S7 telemetry checks and their architecture aggregate still used the
+previous test digest before intake. This does not claim that failed workflow
+passed; final artifact-head CI remains a separate acceptance obligation.
+
+| Original artifact | ID | ZIP bytes | SHA256 |
+| --- | --- | --- | --- |
+| coverage-report | 13059526608 | 14246631 | `3719013c5bf82a71e49bff16d3c74dac442d8a8f26b1cce604a2278bdcb7187c` |
+| test-duration-telemetry | 13058733121 | 3995 | `c1ff421f76184cd084120b204539007dee3ee65ff331f3067b4d857bf8b080df` |
+
+Original XML raw SHA256:
+`20bb7867f96df3e41e46f575fa1deb25cce055cbf26767d80cd6359e4e959928`;
+native semantic SHA256:
+`79825e28257a7e54cf614863de88062d2d69630e198750f5848f2930914e0be7`.
+The module candidate is byte-identical: no measured module rows or budgets
+change. Line/branch coverage remains 99.81% / 94.62%. Original duration JSON
+was copied byte-for-byte before native metadata/alias generation; every replaced
+input is preserved separately.
+
+The native telemetry updater consumed original XML/duration with actual source
+branch, `--source-commit 25386ce9320fbb9e3d472c3d686eba1c654c137c
+--source-run-id 41245104968 --source-event workflow_dispatch` and actual run URL,
+exit 0. It computed test digest
+`63bfcc854098bfaf6ddabda2ac59e93d8aae6496f4cc3c9e6b35b22dca856a25`.
+The stale six-family precheck retains its two real telemetry failures; no
+percentages, hashes or dates were manually rebound. CI-family regeneration
+uses the slim canonical command and avoids a broad hash-only budget ratchet.
+
+The superseded `ffcecacf...` Nightly retained its integration FAIL and was
+normally cancelled after originals were preserved, releasing the next run.
+Its terminal state is CANCELLED, not PASS. Late aggregate artifacts from both
+unqualified typing/digest attempts are also preserved. None is adopted into
+this capture. Exact-head final CI, positive/negative schema controls and
+independent acceptance remain required after the generated-output publication.
