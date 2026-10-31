@@ -27,20 +27,22 @@ IMAGE = re.compile(r"satorykono/bioetl-grafana-router7-canvas@sha256:[0-9a-f]{64
 CONFIG_ID = re.compile(r"sha256:[0-9a-f]{64}")
 
 
+def _trusted_docker_path(candidate: Path) -> str:
+    resolved = candidate.resolve()
+    for path in (resolved, *resolved.parents):
+        info = path.stat()
+        if info.st_uid != 0 or info.st_mode & 0o022:
+            raise ValueError("Docker executable path must be root-owned and protected")
+    return str(resolved)
+
+
 def docker_path() -> str:
     if sys.platform == "win32":
         return "C:/Program Files/Docker/Docker/resources/bin/docker.exe"
     else:
         for candidate in (Path("/usr/bin/docker"), Path("/usr/local/bin/docker")):
             if candidate.is_file():
-                resolved = candidate.resolve()
-                for path in (resolved, *resolved.parents):
-                    info = path.stat()
-                    if info.st_uid != 0 or info.st_mode & 0o022:
-                        raise ValueError(
-                            "Docker executable path must be root-owned and protected"
-                        )
-                return str(resolved)
+                return _trusted_docker_path(candidate)
         raise ValueError("Docker is absent from the fixed trusted locations")
 
 

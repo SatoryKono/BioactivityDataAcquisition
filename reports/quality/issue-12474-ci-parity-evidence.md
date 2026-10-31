@@ -952,3 +952,25 @@ Its terminal state is CANCELLED, not PASS. Late aggregate artifacts from both
 unqualified typing/digest attempts are also preserved. None is adopted into
 this capture. Exact-head final CI, positive/negative schema controls and
 independent acceptance remain required after the generated-output publication.
+### Post-qualification Sonar follow-up (2026-10-31)
+
+The published checkpoint `6c4158e2fc0a6008bbe54b36cb2fde2009c30142`
+(tree `8e6bce603596e58901974e35174038d2ce789292`) obtained terminal
+Nightly `41247302645` SUCCESS and native ADMIT, positive PR Gate
+`41247266835` SUCCESS with 115 parity cases, and isolated negative
+`41247302660` FAILURE with exactly one schema mismatch and 114 passes.
+The negative Class lane and aggregate failed; no errors or skips occurred.
+Original artifacts and receipts remain preserved. Native bundle digest:
+`7deedabcdb06c4fae29f2b1448caed6c16d8a3f7c993e894cb602bf7c3e2b811`.
+
+That checkpoint is not final acceptance: SonarCloud Code Analysis reported
+four duplicated error literals and cognitive complexity 17/15 in
+`router_managed_image.docker_path`. The scoped follow-up extracts constants
+with identical error text and a typed private trusted-path helper retaining
+the resolved-path, ancestor ownership and writable-mode checks. Platform
+selection, immutable image, rootfs and plugin checks stay unchanged.
+All 43 owning CLI/rootfs/managed/provenance tests pass, including strict
+Linux/Windows typing and the invalid-type control. Test/product inputs did
+not change; six-family native precheck passed without telemetry rebind.
+Fresh Router evidence and host provenance are required before the next
+artifact head's final CI and native ADMIT. Earlier results remain historical.

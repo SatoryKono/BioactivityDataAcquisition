@@ -19,6 +19,9 @@ from pathlib import Path, PurePosixPath
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+UNAPPROVED_RELEASE_IMAGE = "Unapproved immutable release image"
+INVALID_IMAGE_INSPECTION = "Invalid image inspection"
+INVALID_HOST_IMAGE = "Invalid host image"
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 if TYPE_CHECKING:
@@ -164,11 +167,9 @@ def build_release_files(
     )
     host = provenance.json_object(json.loads(original[HOST_PATH]))
     managed = provenance.json_object(json.loads(original[MANAGED_PATH]))
-    image = provenance.text(
-        parity.get("declared_image", ""), "Unapproved immutable release image"
-    )
+    image = provenance.text(parity.get("declared_image", ""), UNAPPROVED_RELEASE_IMAGE)
     managed_image = provenance.text(
-        managed_receipt.get("declared_image", ""), "Unapproved immutable release image"
+        managed_receipt.get("declared_image", ""), UNAPPROVED_RELEASE_IMAGE
     )
     require(
         parity.get("status") == "PASS"
@@ -177,7 +178,7 @@ def build_release_files(
     )
     require(
         bool(IMAGE.fullmatch(image)) and bool(IMAGE.fullmatch(managed_image)),
-        "Unapproved immutable release image",
+        UNAPPROVED_RELEASE_IMAGE,
     )
     require(
         managed_receipt.get("status") == "PASS"
@@ -225,18 +226,18 @@ def build_release_files(
         recipe = original[RECIPE_PATH].decode()
         require(
             recipe.count(
-                FROM_PREFIX + provenance.text(host["image"], "Invalid host image")
+                FROM_PREFIX + provenance.text(host["image"], INVALID_HOST_IMAGE)
             )
             == 1,
             "Unexpected managed recipe parent",
         )
         outputs[RECIPE_PATH] = recipe.replace(
-            FROM_PREFIX + provenance.text(host["image"], "Invalid host image"),
+            FROM_PREFIX + provenance.text(host["image"], INVALID_HOST_IMAGE),
             FROM_PREFIX + image,
         ).encode()
         for path in COMPOSE_PATHS:
             old = (
-                provenance.text(host["image"], "Invalid host image")
+                provenance.text(host["image"], INVALID_HOST_IMAGE)
                 if path.endswith(HOST_COMPOSE_SUFFIX)
                 else provenance.text(managed["image"], "Invalid managed image")
             )
@@ -446,11 +447,11 @@ def live_managed_parity(
         require(bool(IMAGE.fullmatch(image)), "Unapproved immutable image")
         execute("pull", image)
     host = provenance.object_rows(
-        json.loads(execute("image", "inspect", host_image)), "Invalid image inspection"
+        json.loads(execute("image", "inspect", host_image)), INVALID_IMAGE_INSPECTION
     )[0]
     delivered = provenance.object_rows(
         json.loads(execute("image", "inspect", managed_image)),
-        "Invalid image inspection",
+        INVALID_IMAGE_INSPECTION,
     )[0]
     require(
         host_image in provenance.json_list(host["RepoDigests"])
@@ -484,7 +485,7 @@ def live_managed_parity(
         str(evidence),
     )
     built = provenance.object_rows(
-        json.loads(execute("image", "inspect", tag)), "Invalid image inspection"
+        json.loads(execute("image", "inspect", tag)), INVALID_IMAGE_INSPECTION
     )[0]
     built_files, delivered_files = records(tag), records(managed_image)
     for name, data in (
@@ -589,7 +590,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     dist = original_plugin_digests(run, jobs, artifacts, evidence)
     recipe = originals[RECIPE_PATH].replace(
-        provenance.text(host["image"], "Invalid host image").encode(),
+        provenance.text(host["image"], INVALID_HOST_IMAGE).encode(),
         args.image.encode(),
     )
     managed = live_managed_parity(

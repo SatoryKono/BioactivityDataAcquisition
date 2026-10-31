@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T21:43:34.217477+00:00",
+  "generated_at": "2026-10-31T22:41:05.549540+00:00",
   "summary": {
     "total_scripts": 700,
     "status_counts": {
@@ -24308,7 +24308,7 @@
         },
         {
           "path": "scripts/ops/observability/promote_router_host_release.py",
-          "line": 359,
+          "line": 360,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.router_managed_image import verify"
         }
@@ -24737,13 +24737,13 @@
         },
         {
           "path": "scripts/ops/observability/promote_router_host_release.py",
-          "line": 25,
+          "line": 28,
           "source_group": "scripts",
           "text": "from scripts.ops.observability import refresh_router_host_provenance as provenance"
         },
         {
           "path": "scripts/ops/observability/promote_router_host_release.py",
-          "line": 29,
+          "line": 32,
           "source_group": "scripts",
           "text": "ROOT / \"scripts/ops/observability/refresh_router_host_provenance.py\","
         },

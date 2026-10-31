@@ -25,6 +25,7 @@ type JsonValue = (
 type JsonObject = dict[str, JsonValue]
 
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
+INCOMPLETE_ARTIFACT_LISTING = "Incomplete artifact listing"
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 MANIFEST = "grafana/tooling/router-v7-bridge/host-image.json"
@@ -170,10 +171,10 @@ def _selected_artifact(
     artifacts: JsonObject, run: JsonObject, rows: list[JsonObject], archive: bytes
 ) -> JsonObject:
     """Bind the original image receipt ZIP to the successful host-build job."""
-    entries = object_rows(artifacts.get("artifacts", []), "Incomplete artifact listing")
+    entries = object_rows(artifacts.get("artifacts", []), INCOMPLETE_ARTIFACT_LISTING)
     require(
         artifacts.get("total_count") == len(entries) <= 100,
-        "Incomplete artifact listing",
+        INCOMPLETE_ARTIFACT_LISTING,
     )
     matches = [row for row in entries if row.get("name") == ARTIFACT]
     require(len(matches) == 1, "Missing/duplicate original image receipt artifact")
@@ -441,7 +442,7 @@ def main(argv: list[str] | None = None) -> int:
     require(run.get("id") == args.ci_run_id, "CI run identity mismatch")
     matches = [
         row
-        for row in object_rows(artifacts["artifacts"], "Incomplete artifact listing")
+        for row in object_rows(artifacts["artifacts"], INCOMPLETE_ARTIFACT_LISTING)
         if row["name"] == ARTIFACT
     ]
     require(len(matches) == 1, "Missing/duplicate receipt artifact")
