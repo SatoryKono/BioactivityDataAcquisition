@@ -657,3 +657,23 @@ tool distribution's npm/npx symlinks restored to their identical installed
 targets. Node remains 24.16.0 and npm is 11.13.0; no repository setup script,
 system execution policy or security control was changed. A new complete
 measurement is required with this explicitly recorded tool environment.
+
+The frozen Linux follow-up on `06be36fa8f597e5f33337a50b4d83cbc11c6f6b8`
+passed 1,549 tests, with 74 existing network/pilot/optional-PowerShell skips
+reported separately. The earlier c67 capture's calendar-check FAIL remains
+preserved. Two further compatibility corrections are product changes: the
+ChEMBL calendar check explicitly produces a boolean mask, and the DataFrame
+contract-rule bridge restores missing values to `None` before record conversion.
+Invalid dates remain rejected; missing/NaN required values retain QUARANTINE;
+present `0`, `False` and strings are not converted to null. Strict warnings
+remain enabled. The benchmark child explicitly loads the existing asyncio
+entrypoint when excluding root conftest; strict-config and VCS-probe negative
+controls remain unchanged.
+
+The Gold JSON contract generator also recognizes exactly `string[pyarrow]` as
+JSON `string`, preserving the existing contract instead of regenerating it as
+`object`. Synthetic negative controls reject numeric and null values for that
+nonnullable string contract. The structural workbook export has exactly 384
+Pandera physical-type spelling changes from `str` to `string[pyarrow]`; logical
+types, optionality and required fields are unchanged. This metadata export is
+separate from the real Delta readback evidence.
