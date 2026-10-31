@@ -1,1 +1,83 @@
-{  "name": "bioetl-selectorshell-panel",  "version": "1.0.1",  "scripts": {    "build": "webpack -c ./webpack.config.ts --env production",    "dev": "webpack -w -c ./webpack.config.ts --env development",    "test": "jest --watch --onlyChanged",    "test:ci": "jest --maxWorkers 4 && node --test ../../../.github/tooling/nyc-yaml-compat.test.cjs",    "typecheck": "tsc --noEmit",    "lint": "eslint --cache .",    "lint:fix": "npm run lint -- --fix && prettier --write --list-different ."  },  "author": "Bioetl",  "license": "Apache-2.0",  "devDependencies": {    "@grafana/eslint-config": "^10.0.0",    "@grafana/tsconfig": "^2.0.1",    "@stylistic/eslint-plugin-ts": "^4.4.0",    "@swc/core": "^1.16.18",    "@swc/helpers": "^0.5.0",    "@swc/jest": "^0.2.0",    "@testing-library/jest-dom": "^7.0.1",    "@testing-library/react": "^16.3.3",    "@types/jest": "^30.0.0",    "@types/node": "^26.6.5",    "@types/react": "^19.3.0",    "@types/react-dom": "^19.3.0",    "@typescript-eslint/eslint-plugin": "^8.72.0",    "@typescript-eslint/parser": "^8.38.0",    "copy-webpack-plugin": "^14.0.0",    "css-loader": "^7.1.5",    "eslint": "^9.39.5",    "eslint-config-prettier": "^10.1.0",    "eslint-plugin-jsdoc": "^65.4.0",    "eslint-plugin-react": "^7.37.0",    "eslint-plugin-react-hooks": "^7.1.0",    "eslint-webpack-plugin": "^6.0.0",    "fork-ts-checker-webpack-plugin": "^9.1.0",    "glob": "^13.0.6",    "identity-obj-proxy": "^3.0.0",    "imports-loader": "^5.0.0",    "jest": "^30.5.2",    "jest-environment-jsdom": "^30.5.2",    "prettier": "^3.9.10",    "replace-in-file-webpack-plugin": "^1.0.0",    "sass": "^1.106.0",    "sass-loader": "^17.0.1",    "semver": "^7.7.0",    "style-loader": "^4.0.0",    "swc-loader": "^0.2.0",    "terser-webpack-plugin": "^5.3.0",    "ts-node": "^10.9.0",    "typescript": "6.0.3",    "webpack": "^5.112.0",    "webpack-cli": "^7.2.3",    "webpack-livereload-plugin": "^3.0.2",    "webpack-subresource-integrity": "^5.1.0",    "webpack-virtual-modules": "^0.6.2",    "braces": "file:../../../.github/tooling/braces-backport/braces-3.0.4-bioetl.1.tgz"  },  "engines": {    "node": ">=20"  },  "dependencies": {    "@emotion/css": "11.13.5",    "@grafana/data": "13.2.4",    "@grafana/i18n": "13.2.4",    "@grafana/runtime": "13.2.4",    "@grafana/ui": "13.2.4",    "@grafana/schema": "13.2.4",    "react": "^19.3.1",    "react-dom": "^19.3.1",    "react-router-dom-v5-compat": "file:../../tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz"  },  "packageManager": "npm@10.8.2",  "overrides": {    "react-router-dom-v5-compat": "$react-router-dom-v5-compat",    "braces": "$braces",    "@istanbuljs/load-nyc-config": {      "js-yaml": "4.3.2"    }  }}
+{
+  "name": "bioetl-selectorshell-panel",
+  "version": "1.0.1",
+  "scripts": {
+    "build": "webpack -c ./webpack.config.ts --env production",
+    "dev": "webpack -w -c ./webpack.config.ts --env development",
+    "test": "jest --watch --onlyChanged",
+    "test:ci": "jest --maxWorkers 4 && node --test ../../../.github/tooling/nyc-yaml-compat.test.cjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --cache .",
+    "lint:fix": "npm run lint -- --fix && prettier --write --list-different ."
+  },
+  "author": "Bioetl",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@grafana/eslint-config": "^10.0.0",
+    "@grafana/tsconfig": "^2.0.1",
+    "@stylistic/eslint-plugin-ts": "^4.4.0",
+    "@swc/core": "^1.16.18",
+    "@swc/helpers": "^0.5.0",
+    "@swc/jest": "^0.2.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.72.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "copy-webpack-plugin": "^14.0.0",
+    "css-loader": "^7.1.5",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.0",
+    "eslint-plugin-jsdoc": "^65.4.0",
+    "eslint-plugin-react": "^7.37.0",
+    "eslint-plugin-react-hooks": "^7.1.0",
+    "eslint-webpack-plugin": "^6.0.0",
+    "fork-ts-checker-webpack-plugin": "^9.1.0",
+    "glob": "^13.0.6",
+    "identity-obj-proxy": "^3.0.0",
+    "imports-loader": "^5.0.0",
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2",
+    "prettier": "^3.9.10",
+    "replace-in-file-webpack-plugin": "^1.0.0",
+    "sass": "^1.106.0",
+    "sass-loader": "^17.0.1",
+    "semver": "^7.7.0",
+    "style-loader": "^4.0.0",
+    "swc-loader": "^0.2.0",
+    "terser-webpack-plugin": "^5.3.0",
+    "ts-node": "^10.9.0",
+    "typescript": "6.0.3",
+    "webpack": "^5.112.0",
+    "webpack-cli": "^7.2.3",
+    "webpack-livereload-plugin": "^3.0.2",
+    "webpack-subresource-integrity": "^5.1.0",
+    "webpack-virtual-modules": "^0.6.2",
+    "braces": "file:../../../.github/tooling/braces-backport/braces-3.0.4-bioetl.1.tgz"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@emotion/css": "11.13.5",
+    "@grafana/data": "13.2.4",
+    "@grafana/i18n": "13.2.4",
+    "@grafana/runtime": "13.2.4",
+    "@grafana/ui": "13.2.4",
+    "@grafana/schema": "13.2.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom-v5-compat": "file:../../tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz"
+  },
+  "packageManager": "npm@10.8.2",
+  "overrides": {
+    "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
+    "braces": "$braces",
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "4.3.2"
+    }
+  }
+}
