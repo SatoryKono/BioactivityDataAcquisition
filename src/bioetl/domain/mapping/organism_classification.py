@@ -36,9 +36,6 @@ from bioetl.domain.mapping.organism_classification_constants import (
 from bioetl.domain.mapping.organism_classification_constants import (
     PARENTHESES_RE as _PARENTHESES_RE,
 )
-from bioetl.domain.mapping.organism_classification_constants import (
-    WHITESPACE_RE as _WHITESPACE_RE,
-)
 from bioetl.domain.mapping.organism_classification_taxonomy import (
     classify_by_taxonomy_id as _classify_by_taxonomy_id,
 )
