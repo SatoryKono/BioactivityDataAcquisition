@@ -510,6 +510,7 @@ class TestParameterSanitization:
             "authorization",
             "x-api-key",
             "bearer",
+            "email",
         ],
     )
     def test_sensitive_params_redacted(self, param_name: str) -> None:

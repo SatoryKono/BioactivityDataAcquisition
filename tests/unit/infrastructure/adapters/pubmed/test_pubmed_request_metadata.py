@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
+from collections.abc import AsyncIterator
 
 import httpx
 import pytest
@@ -186,7 +187,7 @@ async def test_fetch_batch_records_streamed_response_size(
     efetch_response.request = MagicMock(method="GET")
     efetch_response.aclose = AsyncMock()
 
-    async def mock_aiter():
+    async def mock_aiter() -> AsyncIterator[bytes]:
         yield xml_bytes
 
     efetch_response.aiter_bytes.return_value = mock_aiter()
@@ -204,34 +205,57 @@ async def test_fetch_batch_records_streamed_response_size(
     assert metadata.api_requests[0].status_code == 200
 
 
-def test_request_metadata__redacts_email_and_api_key__12592(
+@pytest.mark.asyncio
+async def test_request_metadata__redacts_email_and_api_key__12592(
     adapter: PubMedAdapter,
+    mock_http_client: AsyncMock,
 ) -> None:
-    """Metadata snapshot should redact sensitive query parameters."""
-    test_url = f"{ENTREZ_API_BASE}efetch.fcgi?db=pubmed&email=synthetic-user@example.invalid&api_key=synthetic-placeholder&other=val"
-    adapter._request_collector.record_request(
-        url=test_url,
-        method="GET",
-        duration_ms=18.0,
-        status_code=200,
+    """Metadata snapshot should redact sensitive query parameters but outbound request is unchanged."""
+    adapter.email = "synthetic-user@example.invalid"
+    adapter.api_key = "synthetic-placeholder"
+
+    xml_bytes = _STREAM_XML.encode("utf-8")
+    efetch_response = MagicMock()
+    efetch_response.status_code = 200
+    efetch_response.headers = httpx.Headers({})
+    efetch_response.url = httpx.URL(
+        f"{ENTREZ_API_BASE}efetch.fcgi?db=pubmed&email=synthetic-user@example.invalid&api_key=synthetic-placeholder&other=val"
     )
+    efetch_response.request = MagicMock(method="GET")
+    efetch_response.aclose = AsyncMock()
 
+    async def mock_aiter() -> AsyncIterator[bytes]:
+        yield xml_bytes
+
+    efetch_response.aiter_bytes.return_value = mock_aiter()
+    mock_http_client.stream = AsyncMock(return_value=efetch_response)
+    mock_http_client.timeout = 10.0
+    mock_http_client.read_timeout_multiplier = 2.0
+
+    # Act
+    await adapter._fetch_batch(["12345678"])
+
+    # 1. Verify the outbound request is intact
+    mock_http_client.stream.assert_called_once()
+    args, kwargs = mock_http_client.stream.call_args
+    assert "params" in kwargs
+    params = kwargs["params"]
+    assert "email" in params
+    assert params["email"] == "synthetic-user@example.invalid"
+    assert "api_key" in params
+    assert params["api_key"] == "synthetic-placeholder"
+
+    # Verify metadata is redacted
     metadata = adapter.get_source_metadata(api_version="v1")
-
     assert metadata.total_requests == 1
     req = metadata.api_requests[0]
 
-    # Check that parameters are redacted in the persisted metadata
     assert "email" in req.query_params
     assert req.query_params["email"] == "[REDACTED]"
     assert "api_key" in req.query_params
     assert req.query_params["api_key"] == "[REDACTED]"
-
-    # Check that non-sensitive parameters are intact
     assert "other" in req.query_params
     assert req.query_params["other"] == "val"
 
-    # Check that the recorded URL is sanitized (if url includes query params)
-    # The record_request method parses query parameters and strips them from the base URL or keeps them in the query params.
     assert "synthetic-user" not in req.base_url
     assert "synthetic-placeholder" not in req.base_url

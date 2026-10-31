@@ -595,3 +595,31 @@ Main `99947423b77c900f51f9ec3e59b907d07515340c`, tree
 `6b2e490cc878a587bacf234ac213c224903289b1`). Its pandas/VCR dependency inputs
 and Gold string-dtype fixture change are retained; the backend owning set must
 be rerun with the new frozen environment before final acceptance.
+
+### Sole-writer handoff and current integration
+
+The other repair chat preserved its checkpoint
+3b96963f3b315bef56088868b299b6d5a2bec735, tree
+69a3ab66b422ddc3e2d123304486306e3d1542b2, acknowledged the concurrent
+write and handed off the pending merge of main
+c2de7a73d6c363c5a128f2c330473dc9a2fad2ad. Its index, merge state,
+patches and measurement originals were preserved before further writes.
+The final active materializer paths are the parent observability directory:
+scripts/ops/observability/promote_router_host_release.py and
+scripts/ops/observability/refresh_router_host_provenance.py. The dashboard
+validation-only boundary is unchanged and no compatibility shim was added.
+
+The glob cancellation control uses a real AbortSignal.timeout(10) started
+at first actual filesystem traversal. The original delayed callback is awaited
+before asserting exactly one read. Current Scenes and Selector controls each
+passed 9/9. The separately preserved real glob 13.0.6 reference failed all four
+targeted cancellation cases with four reads rather than one; installation/I/O
+errors are not the negative result. The reference dependency tree and all
+files are hashed in the external immutable evidence packet.
+
+Canonical ADR enforcement regeneration returned pre-check 1, update 0 and
+check 0. The dependent debt report was regenerated natively, then the slim
+evidence/remote-main refresh and all five non-telemetry family checks returned
+0. No budget was raised and no telemetry measurement was rebound manually.
+Fresh frozen-source owning tests, all 17 producer shards, CI qualification,
+ADMIT and final acceptance remain required.

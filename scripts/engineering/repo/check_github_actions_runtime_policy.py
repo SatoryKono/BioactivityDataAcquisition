@@ -36,12 +36,14 @@ ALLOWED_USES: dict[str, set[str]] = {
     "SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv": {
         "d86bb7b8a4e8407c8bc35392cb52192137d649ca",  # main
         "4d46594b319b39d24f0bb239b699362d7f4288bb",  # PR #12425
+        "e890a12b5232f1feb50722de6433c7391bc30a7d",  # PR #12425
     },
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml": {
         "89fbcab7461c6400f8b2df38ebd95375713e7d32",  # #12417
     },
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml": {
         "f377cff40abf52d63220346b9ab64814f3081ca6",  # #12374 docs concurrency
+        "feeaea060e81edb07d2c56dad6af1bbb201a3b6a",  # #12374 docs concurrency
     },
     "actions/attest-build-provenance": {
         "977bb373ede98d70efdf65b84cb5f73e068dcc2a",  # v3
@@ -100,6 +102,7 @@ ALLOWED_USES: dict[str, set[str]] = {
         "20cfd1bf945f4377ade1205e4dbc17946fc9a30d",  # v10.0.1
         "bec219d24cd3e171d82865faccec33120bb574f4",  # v10.1.0
         "18d369b23da25a81e9458561248e1aafff6a70fa",  # v10.3.1
+        "68559e99cc807c1eb7e9238fd43a15bba460eec2",  # v10.3.3
     },
     "SonarSource/sonarqube-scan-action": {
         "fd88b7d7ccbaefd23d8f36f73b59db7a3d246602",
@@ -116,7 +119,10 @@ ALLOWED_USES: dict[str, set[str]] = {
         "ca052bb54ab0790a636c9b5f226502c73d547a25",  # v5.4.0
         "c3c9e263c25d99ce0380d002d59b67737d91b0dc",  # v7.4.0
     },
-    "docker/login-action": {"dbcb813823bdd20940b903addbd779551569679f"},  # v4.6.0
+    "docker/login-action": {
+        "dbcb813823bdd20940b903addbd779551569679f",  # v4.6.0
+        "81c6f93d4bc991e510b342a00b419b3bb4efc5c6",  # v4.7.0
+    },
     "docker/setup-buildx-action": {
         "bb05f3f5519dd87d3ba754cc423b652a5edd6d2c",  # v4.2.0
         "f87e5991a6d7451dcb8d9637bfbc97413f497069",  # v4.4.1
@@ -169,6 +175,7 @@ ALLOWED_USES: dict[str, set[str]] = {
     "zizmorcore/zizmor-action": {
         "cc914d7f3750a2d13d75c7f184a1060aa0e9d482",  # v0.6.4
         "85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e",  # v0.7.1
+        "53290badfa369cb0bf7ad16342cb62c2fa47ac7b",  # v0.8.0
     },
 }
 

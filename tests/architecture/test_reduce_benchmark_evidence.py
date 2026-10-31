@@ -748,6 +748,7 @@ def test_unknown_run_and_ancestry_do_not_pass(
     monkeypatch.setenv("GITHUB_SHA", "0" * 40)
     local = _github_env()
     local.pop("GITHUB_ACTIONS", None)
+    local.pop("GITHUB_SHA", None)
     result, gate, _manifest = _invoke(
         tmp_path, json.dumps(_measurement(90)).encode(), env=local
     )
