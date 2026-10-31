@@ -224,6 +224,8 @@ def _published_contract_path(entity: str) -> str:
 
 def _canonical_dtype_name(dtype: object) -> str:
     rendered = str(dtype).strip().lower()
+    if rendered.startswith("string["):
+        return "str"
     return {
         "boolean": "bool",
         "string": "str",
