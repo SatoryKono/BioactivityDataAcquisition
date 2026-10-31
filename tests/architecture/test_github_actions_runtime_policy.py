@@ -989,7 +989,7 @@ def test_canonical_uv_action_pair_is_setup_python_uv() -> None:
 def test_zizmor_workflow_is_path_filtered_and_sha_pinned() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/zizmor.yml")
     triggers = cast(dict[str, Any], workflow.get("on", workflow.get(True)))
-    zizmor_sha = "85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e"
+    zizmor_sha = "53290badfa369cb0bf7ad16342cb62c2fa47ac7b"
     assert zizmor_sha in policy.ALLOWED_USES["zizmorcore/zizmor-action"]
     zizmor_step = next(
         step

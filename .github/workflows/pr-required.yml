@@ -19,7 +19,7 @@ name: PR Gate Complete
 # repo-side pin checker. That checker is not an independent trust boundary:
 # a hostile PR can rewrite the coordinator, the checker, and the registry
 # together. The four setup-python-uv steps are pinned to trusted SHA
-# 4d46594b319b39d24f0bb239b699362d7f4288bb (#12425), so a PR head cannot
+# e890a12b5232f1feb50722de6433c7391bc30a7d (#12425), so a PR head cannot
 # retarget those executions. Residual risk remains until an org ruleset
 # requires workflows from the default branch. This does not close #12046.
 # policy-anchor:deployment-provider deployment.provider=github_actions
@@ -94,7 +94,7 @@ jobs:
           ref: ${{ github.event.pull_request.base.sha || github.sha }}
 
       - name: Set up Python + uv
-        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@4d46594b319b39d24f0bb239b699362d7f4288bb # PR #12425
+        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@e890a12b5232f1feb50722de6433c7391bc30a7d # PR #12425
         with:
           python-version: "3.12"
           dependency-profile: "ci-control"
@@ -166,7 +166,7 @@ jobs:
 
       - name: Set up Python + uv
         id: setup-python
-        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@4d46594b319b39d24f0bb239b699362d7f4288bb # PR #12425
+        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@e890a12b5232f1feb50722de6433c7391bc30a7d # PR #12425
         with:
           python-version: "3.12"
           uv-extras: "dev docs"
@@ -239,7 +239,7 @@ jobs:
 
       - name: Run zizmor
         id: zizmor
-        uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
+        uses: zizmorcore/zizmor-action@53290badfa369cb0bf7ad16342cb62c2fa47ac7b # v0.8.0
         with:
           inputs: |
             .github/workflows
@@ -327,7 +327,7 @@ jobs:
 
       - name: Set up Python + uv
         id: setup-python
-        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@4d46594b319b39d24f0bb239b699362d7f4288bb # PR #12425
+        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@e890a12b5232f1feb50722de6433c7391bc30a7d # PR #12425
         with:
           python-version: "3.12"
           uv-extras: "dev"
@@ -810,7 +810,7 @@ jobs:
       contents: read
     # Pin must stay on trusted main (#11232). docs.yml owns diagram/docs
     # governance so arch-pytest can ignore the expensive Mermaid modules (#12374).
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@f377cff40abf52d63220346b9ab64814f3081ca6
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@feeaea060e81edb07d2c56dad6af1bbb201a3b6a
 
   docker-lane:
     name: Docker lane
@@ -851,7 +851,7 @@ jobs:
           ref: ${{ github.event.pull_request.base.sha || github.sha }}
 
       - name: Set up Python + uv
-        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@4d46594b319b39d24f0bb239b699362d7f4288bb # PR #12425
+        uses: SatoryKono/BioactivityDataAcquisition/.github/actions/setup-python-uv@e890a12b5232f1feb50722de6433c7391bc30a7d # PR #12425
         with:
           python-version: "3.12"
           dependency-profile: "ci-control"
