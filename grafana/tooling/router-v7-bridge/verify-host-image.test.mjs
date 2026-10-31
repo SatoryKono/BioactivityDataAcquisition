@@ -46,8 +46,10 @@ test('candidate selection rejects flags, mutable tags and references outside the
 
 test('source provenance generator rejects unqualified captures and preserves history', () => {
   const python = process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
-  const result = spawnSync(python, ['refresh_host_provenance_test.py', '-v'], {
-    cwd: fileURLToPath(new URL('.', import.meta.url)), encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
+  const result = spawnSync(python, [
+    'tests/unit/scripts/ops/observability/grafana/test_refresh_router_host_provenance.py', '-v',
+  ], {
+    cwd: fileURLToPath(new URL('../../../', import.meta.url)), encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
   });
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stderr, /Ran 8 tests/);

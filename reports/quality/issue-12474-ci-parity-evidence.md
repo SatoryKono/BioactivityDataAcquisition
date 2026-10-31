@@ -522,3 +522,30 @@ accepted these outputs against the original API/ZIP evidence, 114 exact Git
 inputs and full host/managed filesystem records. The owning Grafana selection
 returned 0 with 26 passed cases and two pre-existing Windows POSIX-shell skips;
 the complete Linux producer must execute those applicable cases.
+
+Main subsequently advanced to `b7e66167b3c9f3c7cf38cded26a834c5f3c9b5f1`,
+including the newer dependency lock. Integration commit
+`1fea9f3be4759c277bd44bdf15bdd4f96944ccfa` preserves both parents;
+generated conflict resolutions used the canonical slim refresh, whose
+non-telemetry check returned 0. The first actual Linux pytest 9.2 bootstrap
+returned 3 before collection: WSL's obsolete `Config.inicfg` write raises a
+fatal deprecation warning. Its original stderr/receipt is retained as
+`linux1fea-owning-current-lock`. The scoped correction removes only that
+post-cache write, preserving configured/CLI/marker timeout values and the
+existing asyncio safeguard. Fourteen isolated controls prohibit deprecated
+access and require unchanged effective values on WSL and other platforms.
+Independent review rejected an earlier cache-override alternative because
+it would change effective timeouts; that alternative was never committed.
+
+Concurrent writer `Исправить открытые PR` stopped all writes after explicit
+coordination. Its full tracked patch and untracked originals were preserved.
+Independent review accepted the structure-audit remediation: both tools now
+live under `scripts/ops/observability/grafana/` as
+`promote_router_host_release.py` / `refresh_router_host_provenance.py`, and
+the eight fixture methods live in the owning unit-test tree. The real braces
+archive is now an explicit source-closure input. Fifteen Node controls pass
+after the move. Its proposed synthetic replacement for the real glob timeout
+was rejected; the original timeout/filesystem controls remain unchanged.
+The earlier promotion receipt retains its original generator identity.
+Fresh default-delivery CI and new captures remain necessary after these
+source/test changes; no historical receipt is relabeled as current evidence.

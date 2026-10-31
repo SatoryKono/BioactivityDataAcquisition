@@ -11,14 +11,18 @@ import zipfile
 from pathlib import Path
 
 spec = importlib.util.spec_from_file_location(
-    "provenance", Path(__file__).with_name("refresh_host_provenance.py")
+    "provenance",
+    Path(__file__).parents[6]
+    / "scripts/ops/observability/grafana/refresh_router_host_provenance.py",
 )
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 DIGEST = "a" * 64
 IMAGE = "satorykono/bioetl-grafana-router7-canvas@sha256:" + DIGEST
 promotion_spec = importlib.util.spec_from_file_location(
-    "promotion", Path(__file__).with_name("promote_host_release.py")
+    "promotion",
+    Path(__file__).parents[6]
+    / "scripts/ops/observability/grafana/promote_router_host_release.py",
 )
 promotion = importlib.util.module_from_spec(promotion_spec)
 promotion_spec.loader.exec_module(promotion)
@@ -501,3 +505,8 @@ class ProvenanceControls(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+# Standalone unittest.main exits before this pytest-only collection metadata.
+import pytest
+
+pytestmark = pytest.mark.unit

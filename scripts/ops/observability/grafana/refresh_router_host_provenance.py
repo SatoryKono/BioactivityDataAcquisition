@@ -20,17 +20,24 @@ from pathlib import Path, PurePosixPath
 
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[2]
+ROOT = HERE.parents[3]
 MANIFEST = "grafana/tooling/router-v7-bridge/host-image.json"
 WORKFLOW = ".github/workflows/router-v7-bridge.yml"
+HEX_SHA256_PATTERN = r"[0-9a-f]{64}"
+PLUGIN_DIST_FRAGMENT = "/dist/"
+ROUTER_ARCHIVE = (
+    "grafana/tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz"
+)
+BRACES_ARCHIVE = ".github/tooling/braces-backport/braces-3.0.4-bioetl.1.tgz"
 ARTIFACT = "router-v7-host-image-receipts"
 BUILD_SUPPORT = (
-    ".github/workflows/router-v7-bridge.yml",
+    WORKFLOW,
     "grafana/tooling/router-v7-bridge/package.json",
     "grafana/tooling/router-v7-bridge/package-lock.json",
     "grafana/tooling/router-v7-bridge/index.d.ts",
     "grafana/tooling/router-v7-bridge/README.md",
     "grafana/tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz",
+    ".github/tooling/braces-backport/braces-3.0.4-bioetl.1.tgz",
     "grafana/tooling/router-v7-bridge/verify-host-image.mjs",
     "grafana/tooling/router-v7-bridge/verify-packed-bridge.mjs",
     "scripts/ops/observability/grafana/router_rootfs.py",
@@ -65,10 +72,8 @@ def timestamp(value: str) -> datetime:
     return parsed
 
 
-def validate_capture(
-    run: dict, jobs: dict, artifacts: dict, archive: bytes
-) -> tuple[dict, dict]:
-    """Authenticate original archive bytes against actual CI metadata."""
+def _validated_jobs(run: dict, jobs: dict) -> list[dict]:
+    """Require the complete successful job set for the source attempt."""
     require(
         run.get("status") == "completed" and run.get("conclusion") == "success",
         "Router workflow must have completed successfully",
@@ -100,6 +105,13 @@ def validate_capture(
             and row.get("conclusion") == "success",
             "Unsuccessful or foreign Router job",
         )
+    return rows
+
+
+def _selected_artifact(
+    artifacts: dict, run: dict, rows: list[dict], archive: bytes
+) -> dict:
+    """Bind the original image receipt ZIP to the successful host-build job."""
     entries = artifacts.get("artifacts", [])
     require(
         artifacts.get("total_count") == len(entries) <= 100,
@@ -126,6 +138,11 @@ def validate_capture(
         and artifact.get("digest") == "sha256:" + sha256(archive),
         "Original ZIP digest/size mismatch",
     )
+    return artifact
+
+
+def _receipt_payloads(archive: bytes) -> dict:
+    """Read exactly the two safe JSON receipts from the original ZIP."""
     with zipfile.ZipFile(io.BytesIO(archive)) as source:
         files = [row for row in source.infolist() if not row.is_dir()]
         require(
@@ -144,6 +161,16 @@ def validate_capture(
                 "Unsafe receipt archive member",
             )
             payloads[path.name] = json.loads(source.read(row))
+    return payloads
+
+
+def validate_capture(
+    run: dict, jobs: dict, artifacts: dict, archive: bytes
+) -> tuple[dict, dict]:
+    """Authenticate original archive bytes against actual CI metadata."""
+    rows = _validated_jobs(run, jobs)
+    artifact = _selected_artifact(artifacts, run, rows, archive)
+    payloads = _receipt_payloads(archive)
     parity = payloads["router-v7-image-parity.json"]
     build = payloads["router-v7-image-build.json"]
     require(parity.get("status") == "PASS", "Full image parity did not pass")
@@ -161,7 +188,7 @@ def validate_capture(
         set(parity.get("artifacts", {})) == SCOPES, "Incomplete frontend/plugin parity"
     )
     require(
-        bool(re.fullmatch(r"[0-9a-f]{64}", str(parity.get("rootfs_sha256")))),
+        bool(re.fullmatch(HEX_SHA256_PATTERN, str(parity.get("rootfs_sha256")))),
         "Missing/invalid complete rootfs digest",
     )
     for field in ("built_layers", "declared_layers"):
@@ -176,12 +203,14 @@ def validate_capture(
         )
     for scope, record in parity["artifacts"].items():
         require(
-            bool(re.fullmatch(r"[0-9a-f]{64}", str(record.get("tree_sha256")))),
+            bool(re.fullmatch(HEX_SHA256_PATTERN, str(record.get("tree_sha256")))),
             "Missing/invalid scope tree digest",
         )
         if "/plugins-bundled/" in scope:
             require(
-                bool(re.fullmatch(r"[0-9a-f]{64}", str(record.get("module_sha256")))),
+                bool(
+                    re.fullmatch(HEX_SHA256_PATTERN, str(record.get("module_sha256")))
+                ),
                 "Missing/invalid plugin module digest",
             )
     return artifact, parity
@@ -220,14 +249,14 @@ def refresh(
         )
     require(
         inputs
-        and all(re.fullmatch(r"[0-9a-f]{64}", value) for value in inputs.values()),
+        and all(re.fullmatch(HEX_SHA256_PATTERN, value) for value in inputs.values()),
         "Missing/invalid source input digests",
     )
     require(
         all(
             path in inputs
             for path in manifest["artifact_sha256"]
-            if "/dist/" not in path
+            if PLUGIN_DIST_FRAGMENT not in path
         ),
         "Source input inventory shrank",
     )
@@ -265,9 +294,7 @@ def refresh(
 
 
 def api(path: str) -> bytes:
-    return subprocess.check_output(
-        ["gh", "api", "--allow-escape-sequences", f"repos/{REPOSITORY}/{path}"]
-    )
+    return subprocess.check_output(["gh", "api", f"repos/{REPOSITORY}/{path}"])
 
 
 def source_inputs(
@@ -276,8 +303,11 @@ def source_inputs(
     def git(*args: str) -> bytes:
         return subprocess.check_output(["git", *args], cwd=root)
 
-    paths = {path for path in manifest["artifact_sha256"] if "/dist/" not in path}
+    paths = {
+        path for path in manifest["artifact_sha256"] if PLUGIN_DIST_FRAGMENT not in path
+    }
     paths.update(BUILD_SUPPORT)
+    paths.add(BRACES_ARCHIVE)
     roots = (
         "grafana/plugins/bioetl-scenes-app",
         "grafana/plugins/bioetl-selectorshell-panel",
@@ -296,7 +326,7 @@ def source_inputs(
         captured_paths == current_paths, "Build source inventory added/deleted after CI"
     )
     paths.update(captured_paths)
-    paths = {path for path in paths if "/dist/" not in path}
+    paths = {path for path in paths if PLUGIN_DIST_FRAGMENT not in path}
     require(bool(paths), "Empty build source inventory")
     result = {}
     for path in sorted(paths):

@@ -18,9 +18,11 @@ import zipfile
 from pathlib import Path, PurePosixPath
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[2]
+ROOT = HERE.parents[3]
 spec = importlib.util.spec_from_file_location(
-    "host_provenance", HERE / "refresh_host_provenance.py"
+    "host_provenance",
+    HERE.parents[3]
+    / "scripts/ops/observability/grafana/refresh_router_host_provenance.py",
 )
 provenance = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(provenance)
