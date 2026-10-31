@@ -14,6 +14,7 @@ import zipfile
 from pathlib import Path
 
 import pytest
+import yaml
 
 from scripts.engineering.ci.test_telemetry_provenance import validate_squash_bridge
 from scripts.engineering.ci import test_telemetry_provenance as provenance
@@ -679,6 +680,47 @@ def _ci_jobs(source):
             start=1,
         )
     ]
+
+
+def _workflow_coverage_producer_selectors() -> tuple[str, ...]:
+    workflow_path = Path(__file__).resolve().parents[4] / ".github/workflows/tests.yml"
+    workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+    selectors: list[str] = []
+    for job_id, job in workflow["jobs"].items():
+        uploads_coverage = any(
+            "upload-artifact" in step.get("uses", "")
+            and str(step.get("with", {}).get("name", "")).startswith("coverage-data-")
+            for step in job.get("steps", [])
+        )
+        if not uploads_coverage:
+            continue
+
+        matrix = job.get("strategy", {}).get("matrix", {})
+        test_groups = matrix.get("test-group", [])
+        if not test_groups:
+            selectors.append(f"tests / {job_id}")
+            continue
+
+        for group in test_groups:
+            group_name = group["name"]
+            name_template = job.get("name")
+            if name_template:
+                display_name = name_template.replace(
+                    "${{ matrix.test-group.name }}", group_name
+                )
+                selectors.append(f"tests / {display_name}")
+            elif job_id == "test-matrix":
+                python_version = str(matrix["python-version"][0])
+                selectors.append(
+                    f"tests / test-matrix ({python_version}, {group_name}, "
+                )
+            else:
+                selectors.append(f"tests / {job_id} ({group_name})")
+    return tuple(selectors)
+
+
+def test_coverage_producer_jobs_match_tests_workflow() -> None:
+    assert _workflow_coverage_producer_selectors() == provenance.COVERAGE_PRODUCER_JOBS
 
 
 def _ci_artifact_fixture(payload, monkeypatch):
