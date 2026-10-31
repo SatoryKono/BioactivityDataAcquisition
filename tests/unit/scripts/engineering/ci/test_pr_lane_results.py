@@ -1208,6 +1208,7 @@ def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
             "configs/quality/generated_artifact_tests.json",
             "configs/quality/test_skip_inventory.yaml",
             "Dockerfile.bioetl",
+            "docs/05-operations/runbooks/docker-security-baseline.md",
             "docs/reports/generated/documentation-cleanup-inventory.json",
             "docs/reports/generated/documentation-cleanup-inventory.md",
             "reports/performance/benchmark-summary.json",

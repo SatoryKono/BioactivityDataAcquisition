@@ -424,6 +424,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
     ),
     "Dockerfile.bioetl": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    "docs/05-operations/runbooks/docker-security-baseline.md": (
+        DOCKER_RUNTIME_CONTRACT_TEST,
+    ),
     "docs/04-reference/cli.md": (
         "tests/architecture/test_cli_doc_parity.py",
         DOCUMENTATION_SYNC_TEST,
