@@ -824,7 +824,7 @@ jobs:
       packages: write
       id-token: write
       attestations: write
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@2c31b0eed50a4100f5d3c871a4efd6673e4bc376
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@89fbcab7461c6400f8b2df38ebd95375713e7d32
     with:
       caller-sha: ${{ needs.classify-changes.outputs.head_sha }}
 

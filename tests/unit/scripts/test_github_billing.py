@@ -490,7 +490,7 @@ def test_schema_and_csv_errors_do_not_echo_money(tmp_path: Path) -> None:
 
     mismatch = tmp_path / "mismatch.csv"
     extra = tmp_path / "extra.csv"
-    malformed = tmp_path / "nul.csv"
+    malformed = tmp_path / "malformed.csv"
     non_utf8 = tmp_path / "latin.csv"
     blank_currency = tmp_path / "blank-currency.csv"
     blank_amount = tmp_path / "blank-amount.csv"

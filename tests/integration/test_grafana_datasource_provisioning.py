@@ -196,7 +196,7 @@ def test_monitoring_images_are_pinned_and_pushgateway_is_not_a_datasource() -> N
     monitoring = _load_monitoring_compose()
     assert monitoring["services"]["grafana"]["image"] == (
         "satorykono/bioetl-grafana-router7-canvas@sha256:"
-        "2b258e26410093577e524761ebdcfbd0ba36c7ba460692d277e1333c39b53a14"
+        "6663692079097edcdf9c4d3cdea12932c68f459ed0a7c5716c6fad3964ceae11"
     )
     managed = json.loads(
         Path("grafana/tooling/router-v7-bridge/managed-image.json").read_text()

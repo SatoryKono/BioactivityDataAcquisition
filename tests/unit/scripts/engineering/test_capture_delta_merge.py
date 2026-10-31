@@ -28,7 +28,7 @@ def test_capture_preserves_raw_evidence_and_rejects_unsuccessful_producer(
     tmp_path, monkeypatch, outcome
 ):
     def producer(command, **kwargs):
-        Path(command[command.index("-o") + 1]).write_text(RAW_TIME)
+        Path(command[command.index("-o") + 1]).write_bytes(RAW_TIME.encode("utf-8"))
         kwargs["stdout"].write("synthetic pytest output\n")
         assert kwargs["env"]["LC_ALL"] == "C"
         if outcome != "skipped":
