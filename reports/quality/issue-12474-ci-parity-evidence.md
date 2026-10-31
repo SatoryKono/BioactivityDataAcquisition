@@ -267,3 +267,23 @@ The reviewer also tested the guard against actual run `41190149102`: coverage
 and duration succeeded but integration failed, and qualification was correctly
 refused for that integration producer. This is code acceptance, not a qualified
 capture or ADMIT. PR #12616 remains unmerged; its human K8/K10 gate is independent.
+
+### Authorized addressed producer fixes
+
+The owner subsequently authorized the isolated Grafana input/delivery bundle
+and the Docker Python patch-version fix. The Grafana transfer is exactly nine
+build-input files plus seven coupled delivery manifests/pins and their owning
+assertion, copied from immutable donor `0fead443960ac9b19cf2fbf5cae6bddc13ac9a89`.
+All 123 declared inputs match the actual build source
+`1b91146589ecff2829ae65bae3b8db83ae27e47d` and the working bytes (no newline-only
+differences). The donor/build history is retained by the separately published
+archival tag `evidence/issue-12474-grafana-source-0fead443960ac9b19cf2fbf5cae6bddc13ac9a89`;
+this is source preservation, not a merge or acceptance of the quality migration.
+
+Docker pins now select `3.13.18_git20261030-r0`, the fixed version named by the
+original Trivy findings for CVE-2026-114583 and CVE-2026-115557. The exact-version
+CI probe, provenance text, owning assertions and current documentation remain
+synchronized. All runtime hardening assertions and the zero-CVE policy remain
+unchanged. Local owning tests and pre-commit passed; two native Windows skips
+require POSIX sh and remain distinct from PASS. Actual image build/scan and a
+fresh qualified capture are still required on the resulting committed inputs.
