@@ -320,8 +320,6 @@ def _ci_receipt_matches(receipt: dict[str, Any], payload: dict[str, Any]) -> boo
         return False
     if receipt.get("source_tree_sha256") != payload.get("source_tree_sha256"):
         return False
-    if "metrics_sha256" not in receipt:
-        return True  # Retain the existing reviewed legacy receipt contract.
     try:
         actual = receipt["metrics_sha256"]
         return isinstance(actual, str) and actual == telemetry_metrics_sha256(payload)

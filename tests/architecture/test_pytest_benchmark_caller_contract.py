@@ -298,7 +298,7 @@ def _probe_env(tmp_path: Path) -> tuple[dict[str, str], Path, Path | None]:
     (probe_dir / "sitecustomize.py").write_text(_SITECUSTOMIZE, encoding="utf-8")
     log_path = tmp_path / "vcs-probes.jsonl"
     log_path.write_text("", encoding="utf-8")
-    pythonpath = [str(probe_dir)]
+    pythonpath = [str(probe_dir), str(ROOT), str(ROOT / "src")]
     locked_src: Path | None = None
     if _benchmark_under_test() != "installed":
         locked_src = _lock_resolved_benchmark_src(tmp_path / "locked-pytest-benchmark")
@@ -306,6 +306,7 @@ def _probe_env(tmp_path: Path) -> tuple[dict[str, str], Path, Path | None]:
             pythonpath.append(str(locked_src))
     env = os.environ.copy()
     env.pop("PYTEST_ADDOPTS", None)
+    env["PYTEST_ADDOPTS"] = "-o asyncio_default_fixture_loop_scope=function"
     for key in [name for name in env if name.startswith("PYTEST_XDIST_")]:
         del env[key]
     env["PYTHONPATH"] = os.pathsep.join(pythonpath)

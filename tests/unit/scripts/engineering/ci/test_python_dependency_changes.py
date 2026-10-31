@@ -658,6 +658,30 @@ def test_setuptools_package_exclusion_uses_narrow_classified_route(
         dependencies.pytest_configuration_changed(tmp_path, "base", "head")
 
 
+def test_legacy_pytest_asyncio_table_migration_uses_full_suite_route(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Moving pytest-asyncio settings into pytest.ini stays a full-suite change."""
+    before = {"tool": {"pytest-asyncio": {"asyncio_mode": "auto"}}}
+    after = {
+        "tool": {
+            "pytest": {
+                "ini_options": {
+                    "asyncio_mode": "auto",
+                    "asyncio_default_fixture_loop_scope": "function",
+                }
+            }
+        }
+    }
+    monkeypatch.setattr(
+        dependencies,
+        "_read_revision",
+        lambda _root, revision, _name: before if revision == "base" else after,
+    )
+
+    assert dependencies.pytest_configuration_changed(tmp_path, "base", "head")
+
+
 def test_test_only_dependency_selects_its_consumers(tmp_path: Path) -> None:
     _consumer(tmp_path, "tests/unit/test_snapshot.py", "syrupy")
     (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")

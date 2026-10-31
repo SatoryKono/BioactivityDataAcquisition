@@ -305,6 +305,18 @@ def _iter_canonical_docs(
     ]
 
 
+@pytest.fixture(scope="session")
+def project_root() -> Path:
+    """Return the project root for documentation contract checks."""
+    return get_project_root()
+
+
+@pytest.fixture(scope="session")
+def rules_version(project_root: Path) -> str:
+    """Return the current canonical RULES.md version."""
+    return extract_rules_version(project_root)
+
+
 class TestDocsVersionSync:
     """Тесты синхронизации версий документации."""
 
@@ -327,16 +339,6 @@ class TestDocsVersionSync:
                 f"{relative_path} RULES version drift: "
                 f"found {sorted(versions)}, expected only {expected_version}"
             )
-
-    @pytest.fixture(scope="session")
-    def project_root(self) -> Path:
-        """Получить корневую директорию проекта."""
-        return get_project_root()
-
-    @pytest.fixture(scope="session")
-    def rules_version(self, project_root: Path) -> str:
-        """Получить актуальную версию RULES.md."""
-        return extract_rules_version(project_root)
 
     def test_rules_version_extractable(self, project_root: Path) -> None:
         """RULES.md MUST содержать версию в заголовке.

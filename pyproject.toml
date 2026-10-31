@@ -81,7 +81,7 @@ export = [
 tests = [
     "filelock>=4.2.1",
     # Testing frameworks
-    "pytest>=9.0.3,<9.2",
+    "pytest>=9.0.3,<9.3",
     "pytest-cov>=4.0",
     "pytest-asyncio>=1.4",
     "pytest-xdist>=3.5",
@@ -118,7 +118,7 @@ tests_full = [
 ]
 dev = [
     "filelock>=4.2.1",
-    "pytest>=9.0.3,<9.2",
+    "pytest>=9.0.3,<9.3",
     "pytest-cov>=4.0",
     "pytest-asyncio>=1.4",
     "pytest-xdist>=3.5",
@@ -217,6 +217,8 @@ exclude = ["scripts", "scripts.*", "bioetl.infrastructure.quality", "bioetl.infr
 # ============ PYTEST ============
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 norecursedirs = [
     ".venv",
     ".venv-win",
@@ -294,6 +296,9 @@ filterwarnings = [
     "error",
     # Deprecation warnings must fail by default; dedicated compatibility tests
     # should opt in locally if a retained public seam still emits them.
+    # AnyIO still imports pytest's deprecated CallSpec2 alias; pytest 9.2 keeps
+    # the alias and removes it only in pytest 10 or 11.
+    "ignore:.*CallSpec2 has been renamed to CallSpec.*:pytest.PytestRemovedIn10Warning",
     # NoOpMetrics warns when metrics are disabled (expected in tests)
     "ignore:NoOpMetrics is being used:UserWarning",
     # Explicit norecursedirs is intentional to avoid mixed Windows/WSL venv traversal.
@@ -303,10 +308,6 @@ filterwarnings = [
     # pytest-benchmark warning when xdist is active (expected in parallel mode)
     "ignore:Benchmarks are automatically disabled",
 ]
-
-# ============ PYTEST-ASYNCIO ============
-[tool.pytest-asyncio]
-asyncio_mode = "auto"
 
 # ============ COVERAGE ============
 [tool.coverage.run]

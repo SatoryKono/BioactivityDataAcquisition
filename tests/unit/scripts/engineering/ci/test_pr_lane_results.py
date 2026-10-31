@@ -423,6 +423,15 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
 def test_shadow_compare_routes_monitoring_and_docker_security_docs() -> None:
     """Monitoring configuration and its security runbook select owner tests."""
     repo_root = Path(__file__).resolve().parents[5]
+    for changed_file in (
+        "docker-compose.monitoring.yml",
+        "docs/05-operations/runbooks/docker-security-baseline.md",
+    ):
+        route = build_shadow_compare([changed_file], repo_root=repo_root)
+        assert (
+            "tests/architecture/test_docker_runtime_contracts.py" in route["selected"]
+        )
+
     report = build_shadow_compare(
         [
             "docker-compose.monitoring.yml",
