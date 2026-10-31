@@ -623,3 +623,37 @@ evidence/remote-main refresh and all five non-telemetry family checks returned
 0. No budget was raised and no telemetry measurement was rebound manually.
 Fresh frozen-source owning tests, all 17 producer shards, CI qualification,
 ADMIT and final acceptance remain required.
+
+### Frozen pandas/Pandera compatibility and consolidated tooling
+
+Published source `589041a5d4638143047788300d12b7a8ec760fa0`, tree
+`929aa697ef117656df3132642bd1fab141efc2c8`, passed all 115 mandatory
+physical-parity cases through the canonical runner with frozen Linux
+Python 3.13.18, pandas 3.1.0 and VCR 9.2.0. Its actual local17 failures and
+4,203 original files are preserved in a hashed 72,028,160-byte archive;
+the incomplete measurement does not qualify coverage or ADMIT.
+
+That source's own Nightly `41228210512` exposed the new Pandera string
+representation in Silver/Gold snapshots and runtime schema resolvers.
+The addressed compatibility fix recognizes only `string[pyarrow]` as the
+existing logical string type. Two production helpers are changed explicitly:
+composite field extraction and structural contract resolution. This is not
+reported as a test-only change. Snapshots, physical Arrow types, required
+fields and nullability remain strict; binary, large-string and unknown
+representations retain their existing handling. Positive and negative
+owning controls cover the exact alias and genuine contract changes.
+
+The same CI correctly rejected 336 active scripts against the unchanged
+334 cap. Release promotion and source revalidation are now implementation
+modules behind the existing `python -m scripts.ops` router, with explicit
+`shared_helper_module` lifecycle decisions and no standalone entrypoints.
+Their argument parsing and exit propagation are checked through that router.
+Canonical inventory regeneration reports 334 active scripts; the cap and
+governance validator are unchanged.
+
+The Linux tooling shard also exposed a copied npm launcher whose relative
+module lookup was broken. The original bytes were preserved and the local
+tool distribution's npm/npx symlinks restored to their identical installed
+targets. Node remains 24.16.0 and npm is 11.13.0; no repository setup script,
+system execution policy or security control was changed. A new complete
+measurement is required with this explicitly recorded tool environment.

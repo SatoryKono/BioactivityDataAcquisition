@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T17:39:55.895079+00:00",
+  "generated_at": "2026-10-31T18:18:13.432631+00:00",
   "summary": {
     "total_scripts": 700,
     "status_counts": {
-      "active": 336,
-      "supporting": 364
+      "active": 334,
+      "supporting": 366
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -13,7 +13,7 @@
       "ci": 75,
       "docs": 290,
       "other": 19,
-      "scripts": 587,
+      "scripts": 588,
       "skills": 13,
       "tests": 518
     }
@@ -276,7 +276,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 100,
+          "line": 108,
           "source_group": "scripts",
           "text": "\"diagnose-codex-wsl\": \"../ai/codex/diagnose_wsl.sh\","
         },
@@ -1579,7 +1579,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 101,
+          "line": 109,
           "source_group": "scripts",
           "text": "\"setup-agents\": \"../ai/codex/setup_agents.sh\","
         },
@@ -8447,7 +8447,7 @@
         },
         {
           "path": "tests/unit/scripts/test_cli_dispatch.py",
-          "line": 163,
+          "line": 190,
           "source_group": "tests",
           "text": "from scripts.docs.checks import report_docs_kpi, verify"
         },
@@ -8496,7 +8496,7 @@
         },
         {
           "path": "tests/unit/scripts/test_cli_dispatch.py",
-          "line": 163,
+          "line": 190,
           "source_group": "tests",
           "text": "from scripts.docs.checks import report_docs_kpi, verify"
         }
@@ -21555,7 +21555,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 66,
+      "reference_count": 67,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -22639,7 +22639,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 57,
+          "line": 59,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"maintenance/security/salt_rotate.py\","
         },
@@ -22850,7 +22850,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 72,
+          "line": 74,
           "source_group": "scripts",
           "text": "\"archive-control-plane\": \"observability/archive_control_plane.py\","
         },
@@ -22875,7 +22875,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 70,
+          "line": 72,
           "source_group": "scripts",
           "text": "\"observability/check_bioetl_prometheus_scrape.py\""
         },
@@ -22933,7 +22933,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 58,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"check-observability-ports\": \"observability/check_published_observability_endpoints.py\","
         },
@@ -23502,7 +23502,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 62,
+          "line": 64,
           "source_group": "scripts",
           "text": "\"audit-live-grafana\": \"observability/grafana/audit_live_grafana_panels.py\","
         },
@@ -23553,7 +23553,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 61,
+          "line": 63,
           "source_group": "scripts",
           "text": "\"assess-grafana-captures\": \"observability/grafana/capture_acceptance.py\","
         },
@@ -23688,7 +23688,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 64,
+          "line": 66,
           "source_group": "scripts",
           "text": "\"observability/grafana/check_dashboard_panel_fill.py\""
         },
@@ -23743,7 +23743,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 67,
+          "line": 69,
           "source_group": "scripts",
           "text": "\"observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
@@ -23874,7 +23874,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 74,
+          "line": 76,
           "source_group": "scripts",
           "text": "\"observability/grafana/ensure_quarantine_explorer.py\""
         }
@@ -24227,7 +24227,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 59,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"rerender-grafana\": \"observability/grafana/rerender_grafana_screenshots.py\","
         },
@@ -24290,7 +24290,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 91,
+          "line": 99,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.router_managed_image\""
         },
@@ -24351,7 +24351,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 88,
+          "line": 96,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.router_rootfs\""
         },
@@ -24388,7 +24388,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 77,
+          "line": 79,
           "source_group": "scripts",
           "text": "\"observability/grafana/run_grafana_dashboard_audit_cycle.py\""
         },
@@ -24433,7 +24433,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 60,
+          "line": 62,
           "source_group": "scripts",
           "text": "\"render-grafana-matrix\": (\"observability/grafana/run_grafana_render_matrix.py\"),"
         },
@@ -24676,25 +24676,41 @@
     {
       "path": "scripts/ops/observability/promote_router_host_release.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 90,
+          "source_group": "scripts",
+          "text": "\"scripts.ops.observability.promote_router_host_release\""
+        },
         {
           "path": "tests/unit/scripts/ops/observability/grafana/test_refresh_router_host_provenance.py",
           "line": 25,
           "source_group": "tests",
           "text": "/ \"scripts/ops/observability/promote_router_host_release.py\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-01-29",
+      "next_step": "Keep the release materializer behind python -m scripts.ops promote-router-host-release; no standalone entrypoint. Preserve immutable image, source closure and original CI artifact validation."
     },
     {
       "path": "scripts/ops/observability/refresh_router_host_provenance.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 93,
+          "source_group": "scripts",
+          "text": "\"scripts.ops.observability.refresh_router_host_provenance\""
+        },
         {
           "path": "scripts/ops/observability/promote_router_host_release.py",
           "line": 24,
@@ -24707,7 +24723,11 @@
           "source_group": "tests",
           "text": "/ \"scripts/ops/observability/refresh_router_host_provenance.py\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-01-29",
+      "next_step": "Keep the provenance implementation behind python -m scripts.ops refresh-router-host-provenance and shared release validation; no standalone entrypoint. Retain fail-closed source and original receipt checks."
     },
     {
       "path": "scripts/ops/observability/refresh_visual_json_baseline.py",
@@ -24909,7 +24929,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 106,
+          "line": 114,
           "source_group": "scripts",
           "text": "\"deploy\": \"runtime/deploy/deploy-bioetl.sh\","
         }
@@ -26423,7 +26443,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 104,
+          "line": 112,
           "source_group": "scripts",
           "text": "\"check-skills\": \"support/skills/check_ai_skills_layout.sh\","
         },

@@ -15,6 +15,7 @@ from __future__ import annotations
 import pytest
 
 import os
+import importlib
 from pathlib import Path
 import subprocess
 import sys
@@ -27,6 +28,32 @@ from scripts.engineering.common.cli_dispatch import (
 
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    ("command", "module_name"),
+    [
+        ("promote-router-host-release", "promote_router_host_release"),
+        ("refresh-router-host-provenance", "refresh_router_host_provenance"),
+    ],
+)
+def test_ops_release_helpers_forward_arguments_and_exit(
+    command: str, module_name: str, monkeypatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from scripts.ops import __main__ as router
+
+    target = importlib.import_module(f"scripts.ops.observability.{module_name}")
+    assert router.main([command, "--help"]) == 0
+    assert "--evidence" in capsys.readouterr().out
+    received = []
+
+    def invoked(argv):
+        received.append(argv)
+        return 19
+
+    monkeypatch.setattr(target, "main", invoked)
+    assert router.main([command, "--evidence", "fixture-path", "--check"]) == 19
+    assert received == [["--evidence", "fixture-path", "--check"]]
 
 
 def _write_module(

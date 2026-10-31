@@ -304,6 +304,9 @@ class TestPreflightOrchestration:
         assert mixin._simplify_dtype("Int64") == "int"
         assert mixin._simplify_dtype("Float64") == "float"
         assert mixin._simplify_dtype("string") == "str"
+        assert mixin._simplify_dtype("string[pyarrow]") == "str"
+        assert mixin._simplify_dtype("binary[pyarrow]") == "binary[pyarrow]"
+        assert mixin._simplify_dtype("large_string[pyarrow]") == "large_string[pyarrow]"
         assert mixin._simplify_dtype("boolean") == "bool"
 
     def test_simplify_dtype_strips_prefix(self) -> None:

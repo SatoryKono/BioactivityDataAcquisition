@@ -1,6 +1,18 @@
 {
   "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
   "entries": {
+    "scripts/ops/observability/promote_router_host_release.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Keep the release materializer behind python -m scripts.ops promote-router-host-release; no standalone entrypoint. Preserve immutable image, source closure and original CI artifact validation.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-29"
+    },
+    "scripts/ops/observability/refresh_router_host_provenance.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Keep the provenance implementation behind python -m scripts.ops refresh-router-host-provenance and shared release validation; no standalone entrypoint. Retain fail-closed source and original receipt checks.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-29"
+    },
     "scripts/engineering/qa/external_resource_inventory.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the source-bound COMP-004 catalog integrity and Markdown projection implementation behind the unified QA check-external-resource-inventory command; no runtime lifecycle execution belongs here.",

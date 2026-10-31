@@ -223,6 +223,12 @@ def _normalize_dtype_name(field_name: str, dtype_name: str) -> str:
     if normalized == "boolean":
         return "bool"
 
+    # Pandera 0.35 with pandas 3 exposes the same logical string contract
+    # through its Arrow storage dtype. Snapshots describe the logical type;
+    # physical Arrow types/nullability are checked by the real Delta matrix.
+    if normalized == "string[pyarrow]":
+        return "str"
+
     return normalized
 
 

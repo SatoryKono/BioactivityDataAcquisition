@@ -35,6 +35,7 @@ from pathlib import Path
 import pytest
 
 from tests.contract._gold_schema_snapshot_registry import (
+    _canonical_dtype_name,
     assert_gold_schema_entity_matches_snapshot,
     assert_gold_schema_snapshot_registry_shape,
     gold_schema_entities,
@@ -45,6 +46,19 @@ UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 ROOT = Path(__file__).resolve().parents[2]
 
 pytestmark = [pytest.mark.contracts, pytest.mark.no_api]
+
+
+@pytest.mark.parametrize(
+    ("dtype", "expected"),
+    [
+        ("string[pyarrow]", "str"),
+        ("int64", "int64"),
+        ("binary[pyarrow]", "binary[pyarrow]"),
+        ("large_string[pyarrow]", "large_string[pyarrow]"),
+    ],
+)
+def test_gold_logical_dtype_alias_is_exact(dtype: str, expected: str) -> None:
+    assert _canonical_dtype_name(dtype) == expected
 
 
 def test_gold_schema_snapshot_registry_shape() -> None:

@@ -349,12 +349,12 @@ def source_inputs(
     return result, tree
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ci-run-id", type=int, required=True)
     parser.add_argument("--evidence-dir", type=Path, required=True)
     parser.add_argument("--check", action="store_true")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     require(args.ci_run_id > 0, "Positive CI run ID required")
     # A fresh directory keeps every original attempt; never overwrite evidence.
     args.evidence_dir.mkdir(parents=True, exist_ok=False)
@@ -409,7 +409,3 @@ def main() -> int:
         + "\n"
     )
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

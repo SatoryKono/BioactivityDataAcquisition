@@ -467,14 +467,14 @@ def live_managed_parity(
     return receipt
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ci-run-id", required=True, type=int)
     parser.add_argument("--image", required=True)
     parser.add_argument("--managed-image", required=True)
     parser.add_argument("--evidence-dir", type=Path, required=True)
     parser.add_argument("--check", action="store_true")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     require(
         args.ci_run_id > 0
         and bool(IMAGE.fullmatch(args.image))
@@ -570,7 +570,3 @@ def main() -> int:
     )
     sys.stdout.write(json.dumps(result, indent=2) + "\n")
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
