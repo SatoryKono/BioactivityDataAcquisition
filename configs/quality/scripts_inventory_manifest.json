@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T16:06:21.319315+00:00",
+  "generated_at": "2026-10-31T16:17:13.329840+00:00",
   "summary": {
     "total_scripts": 704,
     "status_counts": {
@@ -10246,7 +10246,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/test_telemetry_provenance.py",
-          "line": 896,
+          "line": 894,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.local_test_telemetry import ("
         },
@@ -12919,7 +12919,7 @@
       "references": [
         {
           "path": "pyproject.toml",
-          "line": 366,
+          "line": 367,
           "source_group": "build",
           "text": "# (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py); memory"
         },
@@ -12949,13 +12949,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 475,
+          "line": 484,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 488,
+          "line": 497,
           "source_group": "tests",
           "text": "if path == \"scripts/engineering/dev/zed_mypy.py\":"
         }
@@ -15816,7 +15816,7 @@
         },
         {
           "path": "tests/architecture/test_pytest_benchmark_caller_contract.py",
-          "line": 939,
+          "line": 940,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_hotspot_degradation_report import ("
         }
@@ -17778,7 +17778,7 @@
         },
         {
           "path": "scripts/engineering/ci/test_telemetry_provenance.py",
-          "line": 903,
+          "line": 901,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_module_coverage_inventory import ("
         },
@@ -20427,13 +20427,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 700,
+          "line": 709,
           "source_group": "tests",
           "text": "\"src/bioetl/infrastructure/quality/scoring.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 701,
+          "line": 710,
           "source_group": "tests",
           "text": "\"scripts/engineering/quality/scoring.py\","
         },
