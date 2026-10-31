@@ -744,6 +744,7 @@ def test_missing_baseline_test_fails(tmp_path: Path) -> None:
 def test_unknown_run_and_ancestry_do_not_pass(tmp_path: Path) -> None:
     local = os.environ.copy()
     local.pop("GITHUB_ACTIONS", None)
+    local.pop("GITHUB_SHA", None)
     result, gate, _manifest = _invoke(
         tmp_path, json.dumps(_measurement(90)).encode(), env=local
     )
