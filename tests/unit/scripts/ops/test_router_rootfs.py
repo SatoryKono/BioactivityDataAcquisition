@@ -76,7 +76,9 @@ class RootfsFingerprintTests(unittest.TestCase):
                     "check_output",
                     return_value="invalid-container-id",
                 ) as command,
-                patch.object(rootfs, "trusted_docker_path", return_value="/usr/bin/docker"),
+                patch.object(
+                    rootfs, "trusted_docker_path", return_value="/usr/bin/docker"
+                ),
             ):
                 with self.assertRaisesRegex(ValueError, "Invalid container ID"):
                     rootfs.main([image])
