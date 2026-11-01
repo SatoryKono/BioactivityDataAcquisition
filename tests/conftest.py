@@ -677,9 +677,9 @@ def _configure_wsl_timeout(config: pytest.Config) -> None:
     try:
         current_timeout = config.getini("timeout")
         if current_timeout and float(current_timeout) < 180:
-            config.inicfg["timeout"] = "180"
+            config._inicache["timeout"] = "180"
     except (ValueError, TypeError, AttributeError):
-        config.inicfg["timeout"] = "180"
+        config._inicache["timeout"] = "180"
 
 
 def _is_pycharm_pytest_runner() -> bool:

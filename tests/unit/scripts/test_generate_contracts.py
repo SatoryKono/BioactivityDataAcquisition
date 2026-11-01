@@ -49,6 +49,21 @@ def test_boolean_dtype_alias_maps_to_json_boolean() -> None:
     assert generator._map_dtype_to_json_type("boolean") == "boolean"
 
 
+@pytest.mark.parametrize("dtype", ["str", "string[pyarrow]"])
+def test_arrow_string_dtype_maps_to_json_string(dtype: str) -> None:
+    assert generator._map_dtype_to_json_type(dtype) == "string"
+
+
+def test_chembl_activity_contract_keeps_arrow_string_as_json_string() -> None:
+    from bioetl.domain.contracts.gold import ChEMBLActivityGoldSchema
+
+    contract = generator._build_contract(
+        ChEMBLActivityGoldSchema, "chembl_activity", "1.0.0"
+    )
+
+    assert contract["properties"]["activity_id"]["type"] == "string"
+
+
 def test_composite_nullable_integer_contract_overrides_remain_integer() -> None:
     """Physical float compatibility must not weaken semantic integer contracts."""
     artifacts = generator._expected_artifacts()
