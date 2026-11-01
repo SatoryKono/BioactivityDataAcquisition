@@ -179,7 +179,7 @@
     "grafana/tooling/router-v7-bridge/verify-host-image.mjs": "be2b00f462613e53a494ae09f7763119c4be42eeb2d5514ab8c03f39733e8170",
     "grafana/tooling/router-v7-bridge/verify-packed-bridge.mjs": "75d625535498f435806fa9c071600b34a5a3595f2237e73b925742baf04b4d30",
     "scripts/ops/observability/grafana/router_managed_image.py": "f48e0159d78251802a896a760e48e4cf2cd3a4f80d679a2411de3c362fe49645",
-    "scripts/ops/observability/grafana/router_rootfs.py": "8e3b299d9ae91fbfe53d6c13c62e1b04decfdc95ef9dc694527812412801beed",
+    "scripts/ops/observability/grafana/router_rootfs.py": "28c1914c4104413695381c6d44c73d6c81a6a8d7d6136e497e61cfcde2561dfc",
     ".github/tooling/braces-backport/braces-3.0.4-bioetl.1.tgz": "8069587ec1ceda074359881b76e3f045f8777efcb060eac4cc5847dc09664001",
     "scripts/ops/observability/refresh_router_host_provenance.py": "e1ff863ffebdb81b33fca3552099f8ccfab9f3fe42d64bd06d150185366693d1",
     "scripts/ops/observability/grafana/trusted_docker.py": "0e2f171c358b1930e336962463630f2638c736c2db8c2d40d0bd3160e7166c9f"
