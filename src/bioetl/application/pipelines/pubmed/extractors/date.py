@@ -19,8 +19,7 @@ __all__ = ["DateExtractor", "MedlineDateParser", "NormalizedDate", "RawDate"]
 
 import calendar
 import re
-from typing import ClassVar, TypedDict, cast
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar, TypedDict, cast
 
 if TYPE_CHECKING:
     from xml.etree.ElementTree import Element  # nosec B405

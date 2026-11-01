@@ -18,8 +18,7 @@ __all__ = ["EMAIL_PATTERN", "AuthorExtractor", "RawAuthor", "StructuredAffiliati
 
 
 import re
-from typing import TypedDict, cast, override
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict, cast, override
 
 if TYPE_CHECKING:
     from xml.etree.ElementTree import Element  # nosec B405
