@@ -119,6 +119,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".gitleaksignore": (
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
     ),
+    **dict.fromkeys(
+        (
+            "docs/reports/evidence/project-test-health/SUMMARY.md",
+            "docs/reports/evidence/project-test-health/metadata.yaml",
+            "docs/reports/evidence/project-test-health/shard_registry.yaml",
+        ),
+        ("tests/architecture/test_governance_freshness_protocol.py",),
+    ),
     "reports/architecture/f-09-conformance-matrix-report.md": (
         "tests/architecture/test_adapter_port_conformance.py",
     ),
