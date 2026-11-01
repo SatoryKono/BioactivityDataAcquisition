@@ -9,7 +9,10 @@ from urllib.request import urlopen as urlopen
 
 from prometheus_client.registry import Collector
 
-from bioetl.domain.events import ORDINARY_PIPELINE_STAGE_NAMES, PipelineEvent
+from bioetl.domain.observability_contract import (
+    ORDINARY_PIPELINE_STAGE_NAMES,
+    PipelineEvent,
+)
 from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _call_method_name,
     _call_nodes,

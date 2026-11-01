@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import os
-import shutil
-import subprocess
 from collections import defaultdict
 from pathlib import Path
 
@@ -15,43 +13,18 @@ from bioetl.infrastructure.observability.metric_inventory_shared import (
 from bioetl.infrastructure.observability.metric_inventory_text import (
     _normalize_mapping_lists,
 )
+from bioetl.infrastructure.provenance.code_revision import list_git_worktree_files
 
 
 def _optional_git_files(root: Path) -> list[Path] | None:
     """Use bounded Git discovery only when the caller supplied a checkout root."""
     checkout = next((p for p in (root, *root.parents) if (p / ".git").exists()), None)
     if checkout is not None:
-        executable = shutil.which("git")
-        if executable is None:
-            return None
-        try:
-            result = subprocess.run(
-                [
-                    executable,
-                    "-C",
-                    str(checkout.resolve()),
-                    "ls-files",
-                    "-z",
-                    "--cached",
-                    "--others",
-                    "--exclude-standard",
-                    "--",
-                    root.relative_to(checkout).as_posix(),
-                ],
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="surrogateescape",
-                timeout=5,
-                check=False,
-                env={"PATH": os.environ.get("PATH", "")},
-            )
-        except (subprocess.SubprocessError, OSError):
-            return None
-        if result.returncode == 0:
+        names = list_git_worktree_files(checkout, root.relative_to(checkout).as_posix())
+        if names is not None:
             return sorted(
                 checkout / name
-                for name in result.stdout.split("\0")
+                for name in names
                 if name
                 and Path(name).suffix in _TEXT_SUFFIXES
                 and (checkout / name).is_file()
