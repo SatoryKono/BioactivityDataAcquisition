@@ -116,6 +116,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md": (
         "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
     ),
+    "configs/quality/layered_suffix_policy.yaml": (
+        "tests/architecture/test_layer_aware_suffix_policy.py",
+    ),
+    **dict.fromkeys(
+        (
+            "docs/reports/evidence/project-test-health/SUMMARY.md",
+            "docs/reports/evidence/project-test-health/metadata.yaml",
+            "docs/reports/evidence/project-test-health/shard_registry.yaml",
+        ),
+        ("tests/architecture/test_governance_freshness_protocol.py",),
+    ),
     "reports/quality/pytest-nodeid-inventory.json": (
         "tests/unit/scripts/qa/test_build_pytest_nodeid_inventory.py",
     ),
