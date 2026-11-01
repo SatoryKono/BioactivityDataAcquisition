@@ -14,7 +14,7 @@ path_entries:
   scopes:
   - xenon
   owner: '@bioetl-test-platform'
-  expiry: '2026-10-31'
+  expiry: '2028-10-31'
   removal_step: Keep test-only code on the dedicated test-complexity lane.
   progress_note: '2026-09-18 stagger review (#10527): exemption still required, no
     removal completed; retained until 2026-10-31, re-confirm test-only lane scope at

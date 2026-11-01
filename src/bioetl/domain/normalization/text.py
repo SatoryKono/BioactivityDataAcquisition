@@ -87,8 +87,8 @@ def _normalize_text_field(text: str | None) -> str | None:
     if "<" in normalized or "&" in normalized:
         normalized = unescape(_HTML_TAG_PATTERN.sub("", normalized))
 
-    if _CONTROL_CHARS_PATTERN.search(normalized):
-        normalized = normalized.translate(_CONTROL_CHARS_TRANSLATE_TABLE)
+        # The translate method is heavily optimized in C and very fast even without a pre-check.
+    normalized = normalized.translate(_CONTROL_CHARS_TRANSLATE_TABLE)
 
     normalized = unicodedata.normalize("NFC", normalized)
 
