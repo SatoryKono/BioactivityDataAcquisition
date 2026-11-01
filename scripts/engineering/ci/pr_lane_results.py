@@ -534,6 +534,62 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         ("tests/architecture/test_silver_filter_boundary_inventory.py",),
     ),
+    ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    "mkdocs.yml": ("tests/architecture/test_documentation_sync.py",),
+    "docs/reports/evidence/project-test-health/SUMMARY.md": (
+        "tests/architecture/test_governance_freshness_protocol.py",
+    ),
+    "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md": (
+        "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
+    ),
+    "configs/quality/layered_suffix_policy.yaml": (
+        "tests/architecture/test_layer_aware_suffix_policy.py",
+    ),
+    **dict.fromkeys(
+        (
+            "docs/reports/evidence/project-test-health/SUMMARY.md",
+            "docs/reports/evidence/project-test-health/metadata.yaml",
+            "docs/reports/evidence/project-test-health/shard_registry.yaml",
+        ),
+        ("tests/architecture/test_governance_freshness_protocol.py",),
+    ),
+    "reports/quality/pytest-nodeid-inventory.json": (
+        "tests/unit/scripts/qa/test_build_pytest_nodeid_inventory.py",
+    ),
+    "reports/quality/quality-move-qm08/reference_decisions.json": (
+        "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
+    ),
+    "configs/quality/quality_move_qm09_reference_decisions.json": (
+        "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
+    ),
+    "scripts/engineering/README.md": (
+        SCRIPTS_INVENTORY_MANIFEST_TEST,
+        "tests/architecture/test_scripts_inventory_discovery.py",
+    ),
+    **dict.fromkeys(
+        (
+            "configs/quality/external_resource_inventory_qm08_review.json",
+            "configs/quality/external_resource_inventory_qm09_review.json",
+        ),
+        (
+            EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        ),
+    ),
+    "reports/quality/quality-move-qm08/publication-provenance.json": (
+        "tests/unit/scripts/ci/test_test_telemetry_provenance.py",
+        "tests/architecture/test_external_resource_inventory_catalog.py",
+        "tests/unit/scripts/ops/test_refresh_router_delivery.py",
+    ),
+    "reports/12592_report.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+        "tests/architecture/test_check_doc_links_guardrails.py",
+    ),
+    "reports/12592_scoped_patch.diff": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+        "tests/architecture/test_check_doc_links_guardrails.py",
+    ),
+
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
