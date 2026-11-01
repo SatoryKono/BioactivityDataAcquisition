@@ -996,6 +996,36 @@ def test_long_crash_log_keeps_the_terminal_line(receipts: Path, tmp_path: Path) 
     assert str(buried_payload["observed_error"]).startswith("[gw0] node down")
 
 
+@pytest.mark.parametrize("pass_name", ["parallel", "fallback"])
+def test_long_timeout_diagnostic_keeps_runner_classification_and_tail(
+    receipts: Path, tmp_path: Path, pass_name: str
+) -> None:
+    from scripts.engineering.ci.pytest_receipts import write_runner_terminal_receipt
+
+    header = f"[run_pytest_resilient] pass '{pass_name}' timed out after 16s."
+    observed = header + "\n" + ("diagnostic stack frame\n" * 500) + "diagnostic tail\n"
+    write_runner_terminal_receipt(
+        receipt_dir=receipts,
+        run_id="runLongTimeout",
+        attempt="1",
+        pass_name=pass_name,
+        repo_root=tmp_path,
+        exit_code=1,
+        terminal_kind="timeout",
+        observed_error=observed,
+    )
+    payload = _load(
+        receipts, run_id="runLongTimeout", pass_name=pass_name, worker="runner"
+    )
+    error = str(payload["observed_error"])
+    assert error.startswith(header)
+    assert error.endswith("diagnostic tail\n")
+    assert len(error) <= 4000
+    assert payload["terminal_kind"] == "timeout"
+    assert payload["collection"] == {"status": "unknown"}
+    assert payload["results"] is None
+
+
 def test_receipt_dir_given_to_workers_is_absolute(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

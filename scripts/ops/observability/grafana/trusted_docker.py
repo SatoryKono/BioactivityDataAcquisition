@@ -3,31 +3,34 @@
 from __future__ import annotations
 
 import base64
+import importlib
 import json
 import os
 from pathlib import Path
 import re
 import subprocess
 import sys
+from typing import Any, cast
 
 
 def _windows_installation() -> Path:
-    import winreg
-
+    winreg = importlib.import_module("winreg")
+    registry = cast(Any, winreg)
     key = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Docker Desktop"
-    with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key) as handle:
-        directory, _ = winreg.QueryValueEx(handle, "InstallLocation")
+    with registry.OpenKey(registry.HKEY_LOCAL_MACHINE, key) as handle:
+        directory, _ = registry.QueryValueEx(handle, "InstallLocation")
     root = Path(directory)
     if not root.is_absolute():
         raise ValueError("Docker installation must be registered with an absolute path")
     return root
 
 
-def _windows_signature(candidate: Path) -> dict:
+def _windows_signature(candidate: Path) -> dict[str, str]:
     import ctypes
 
     buffer = ctypes.create_unicode_buffer(32768)
-    length = ctypes.windll.kernel32.GetSystemDirectoryW(buffer, len(buffer))
+    windows_api = cast(Any, ctypes)
+    length = windows_api.windll.kernel32.GetSystemDirectoryW(buffer, len(buffer))
     if not 0 < length < len(buffer):
         raise ValueError("Cannot resolve the trusted Windows system directory")
     powershell = Path(buffer.value) / "WindowsPowerShell/v1.0/powershell.exe"
@@ -44,7 +47,7 @@ def _windows_signature(candidate: Path) -> dict:
     # A PowerShell 7 caller may export its module path. Windows PowerShell must
     # use its own protected system modules, never that inherited search path.
     environment = {**os.environ, "PSModulePath": str(powershell.parent / "Modules")}
-    return json.loads(
+    payload = json.loads(
         subprocess.check_output(
             [
                 str(powershell),
@@ -57,6 +60,7 @@ def _windows_signature(candidate: Path) -> dict:
             env=environment,
         )
     )
+    return cast(dict[str, str], payload)
 
 
 def _windows_docker() -> str:
@@ -75,7 +79,7 @@ def _windows_docker() -> str:
 
 
 def docker_path() -> str:
-    if sys.platform == "win32":
+    if _is_windows():
         return _windows_docker()
     for candidate in (Path("/usr/bin/docker"), Path("/usr/local/bin/docker")):
         if candidate.is_file():
@@ -88,3 +92,7 @@ def docker_path() -> str:
                     )
             return str(resolved)
     raise ValueError("Docker is absent from the fixed trusted locations")
+
+
+def _is_windows() -> bool:
+    return sys.platform == "win32"
