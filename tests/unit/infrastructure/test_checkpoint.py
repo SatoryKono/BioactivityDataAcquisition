@@ -138,6 +138,8 @@ class TestLocalCheckpoint:
 
         # Should not raise
         await cp.delete("nonexistent_pipeline")
+        assert await cp.load("nonexistent_pipeline") is None
+        assert list(tmp_path.glob("*.json")) == []
 
     async def test_exists_returns_true(self, tmp_path):
         """Test exists returns True for existing checkpoint.
@@ -189,7 +191,15 @@ class TestLocalCheckpoint:
     async def test_local_checkpoint__aclose__91c52df6(self, tmp_path):
         """Test aclose completes without error."""
         cp = LocalCheckpointAdapter(base_path=tmp_path)
+        await cp.save(
+            "preserved",
+            UUID("12345678-1234-5678-1234-567812345678"),
+            {"sentinel": "retained"},
+        )
         await cp.aclose()
+        loaded = await cp.load("preserved")
+        assert loaded is not None
+        assert loaded[1]["sentinel"] == "retained"
         # Should complete without error
 
     async def test_atomic_write(self, tmp_path):

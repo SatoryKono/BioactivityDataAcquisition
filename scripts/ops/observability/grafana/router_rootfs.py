@@ -12,6 +12,8 @@ from typing import IO
 
 from scripts.ops.observability.refresh_router_host_provenance import JsonObject
 
+from scripts.ops.observability.grafana.trusted_docker import docker_path
+
 
 def filesystem_records(stream: IO[bytes]) -> JsonObject:
     records: JsonObject = {}
@@ -76,11 +78,7 @@ def main(argv: list[str] | None = None) -> None:
     if len(args) != 1:
         raise ValueError("Unsupported image reference")
     image = canonical_image_reference(args[0])
-    docker = (
-        "C:/Program Files/Docker/Docker/resources/bin/docker.exe"
-        if sys.platform == "win32"
-        else "/usr/bin/docker"
-    )
+    docker = docker_path()
     container = subprocess.check_output(
         [docker, "create", "--entrypoint", "/bin/true", "--", image], text=True
     ).strip()

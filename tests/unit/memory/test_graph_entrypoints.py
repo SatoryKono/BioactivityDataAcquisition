@@ -16,8 +16,7 @@ from memory.graph.sync_pkg import snapshot as graph_sync_snapshot
 from memory.graph.sync_pkg import transport as graph_sync_transport
 
 
-pytestmark = pytest.mark.unit
-pytestmark = [pytestmark, pytest.mark.memory]
+pytestmark = pytest.mark.memory
 
 
 def _sync_symbol(name: str) -> Any:

@@ -73,6 +73,11 @@ async def test_storage_health_mixin__aclose_is_noop__f3bfdf25() -> None:
     """aclose completes without error."""
     mixin = _make_mixin()
     await mixin.aclose()
+    mixin.silver.get_table_path.assert_not_called()
+    mixin.gold.get_table_path.assert_not_called()
+    assert not hasattr(mixin.bronze, "_audit")
+    assert not hasattr(mixin.silver, "_audit")
+    assert not hasattr(mixin.gold, "_audit")
 
 
 @pytest.mark.unit
@@ -105,6 +110,11 @@ async def test_aclose_skips_writers_without_explicit_audit() -> None:
     mixin = _make_mixin()
 
     await mixin.aclose()
+    mixin.silver.get_table_path.assert_not_called()
+    mixin.gold.get_table_path.assert_not_called()
+    assert not hasattr(mixin.bronze, "_audit")
+    assert not hasattr(mixin.silver, "_audit")
+    assert not hasattr(mixin.gold, "_audit")
 
 
 @pytest.mark.unit

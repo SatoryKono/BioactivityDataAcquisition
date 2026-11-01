@@ -31,6 +31,7 @@ Stable commands:
     verify-router-managed-image  Verify managed image delivery against pinned host
     promote-router-host-release  Materialize a verified immutable host release
     refresh-router-host-provenance  Bind declared delivery to original CI evidence
+    refresh-router-delivery  Check/update pins from physically verified rebuilt images
     wsl-proxy          Start WSL proxy helper
     codex              Launch Codex via repo-local bootstrap adapter (shell)
     codex-exec         Launch Codex full-auto via repo-local bootstrap adapter (shell)
@@ -97,6 +98,9 @@ COMMAND_SPECS.update(
         ),
         "verify-router-managed-image": module_command(
             "scripts.ops.observability.grafana.router_managed_image"
+        ),
+        "refresh-router-delivery": module_command(
+            "scripts.ops.observability.grafana.refresh_router_delivery"
         ),
     }
 )

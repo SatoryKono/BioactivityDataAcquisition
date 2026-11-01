@@ -222,6 +222,8 @@ def _normalize_dtype_name(field_name: str, dtype_name: str) -> str:
 
     if normalized == "boolean":
         return "bool"
+    if normalized.lower().startswith("string["):
+        return "str"
 
     # Pandera 0.35 with pandas 3 exposes the same logical string contract
     # through its Arrow storage dtype. Snapshots describe the logical type;

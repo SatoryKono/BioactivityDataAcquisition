@@ -62,5 +62,14 @@ def test_basename_collision_inventory_exists_and_is_honest() -> None:
         by_base[path.name].append(path.relative_to(_REPO).as_posix())
     live_dups = {k: v for k, v in by_base.items() if len(v) > 1}
     assert payload["duplicate_basename_count"] == len(live_dups)
+    expected = {name: sorted(paths) for name, paths in live_dups.items()}
+    assert payload["duplicate_basenames"] == expected
+    assert set(payload) == {"duplicate_basename_count", "duplicate_basenames"}
+    for basename, paths in payload["duplicate_basenames"].items():
+        assert len(paths) >= 2
+        assert len(paths) == len(set(paths))
+        for relative in paths:
+            assert (_REPO / relative).is_file(), relative
+            assert Path(relative).name == basename
     # High-churn family must no longer collide.
     assert "test_request_metadata.py" not in live_dups

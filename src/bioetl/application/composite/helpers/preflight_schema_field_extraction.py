@@ -42,6 +42,8 @@ def simplify_dtype(dtype_str: str) -> str:
         "boolean": "bool",
         "datetime64[ns]": "datetime",
     }
+    if normalized.lower().startswith("string["):
+        return "str"
     return simplifications.get(normalized, normalized)
 
 

@@ -51,7 +51,11 @@ different inventory in `reports/quality/test-governance-current.json`.
 
 `source_commit` must be an ancestor of HEAD (`git merge-base --is-ancestor`).
 GitHub telemetry from a non-`main` `source_branch` requires
-`source_event: pull_request`. Complete local evidence uses the separate
+`source_event: pull_request`; a manually dispatched `Nightly` run on that same
+branch may use `source_event: workflow_dispatch` with its actual published SHA,
+run ID and URL. Both paths require successful SHA-bound producers; neither
+permits relabeling an earlier capture after its inputs change.
+Complete local evidence uses the separate
 `source_event: local_coverage_verify` contract with `--local-manifest <path>`;
 the updater validates all 17 canonical shards, source/test hashes, reachable
 commit, coverage XML and JUnit telemetry digests, and both 85% gates. It derives
