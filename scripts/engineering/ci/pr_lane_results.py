@@ -527,7 +527,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/quality/quality-move-qm08/publication-provenance.json": (
         "tests/unit/scripts/ci/test_test_telemetry_provenance.py",
         "tests/architecture/test_external_resource_inventory_catalog.py",
-        "tests/unit/scripts/ops/test_refresh_router_delivery.py",
     ),
     "reports/12592_report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     "reports/12592_scoped_patch.diff": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
