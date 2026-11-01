@@ -15,22 +15,26 @@ verification_scope: tracked_test_module_inventory
 
 ## Current source inventory
 
-On 2026-11-01 UTC, a source-only census re-verified 3,193 tracked `test_*.py`
-modules on commit `af43b497f4324b7cea08e6bf2761d16111609c73`, tree
-`b0d9880739364f2eacf4c78a27bf57b7abe586b1`. The command was
-`git ls-tree -r --name-only af43b497f4324b7cea08e6bf2761d16111609c73 -- tests`
+On 2026-11-01 UTC, a source-only census re-verified 3,194 tracked `test_*.py`
+modules on commit `d3d183b87748d964f858a553de8735d9547f0cbc`, tree
+`6e4ae18c108082998592734ffa5c1c5a2e3fac0b`. The command was
+`git ls-tree -r --name-only d3d183b87748d964f858a553de8735d9547f0cbc -- tests`
 (exit 0), followed by basename matching `test_*.py`. The sorted Git output's
 filtered newline-delimited inventory has SHA-256
-`2e3cd5731688df17371fcf3c6ca40bf1c8a7ac0e4253b4b758ab066de2a80eeb`.
+`819cbc06da9a752ce41a01282d35d5271c3be9152effd99d2e88cb73ed4a9e06`.
 The three canonical configuration files listed above were read and hashed as
 part of that check. The exact census, command, timestamps and source hashes
 are preserved in the #12474 qualification receipt
-`finalaf43-test-health-inventory-reverification`.
+`sourced3d1-current-test-health-census`.
 
 `last_verified` applies only to this tracked source inventory. It does not
 refresh historical test executions, coverage measurements or release admission.
-The additional mutation-harness fixture module under development is outside
-this committed census; it must be counted on its published source revision.
+The mutation-harness fixture module published in this source revision is included.
+The earlier source-only census on commit
+`af43b497f4324b7cea08e6bf2761d16111609c73` / tree
+`b0d9880739364f2eacf4c78a27bf57b7abe586b1` recorded 3,193 modules and
+inventory SHA-256 `2e3cd5731688df17371fcf3c6ca40bf1c8a7ac0e4253b4b758ab066de2a80eeb`;
+its original `finalaf43-test-health-inventory-reverification` receipt is retained.
 
 ## Historical coverage capture
 
@@ -74,7 +78,11 @@ coverage refresh:
 1. Complete remaining lifecycle, contract, and UTC metadata tests.
 2. Add security regression coverage for HTML output and recursive redaction.
 
-## Historical capture verification
+## Freshness note
+
+The front-matter verification date applies only to the source census above.
+The capture verification below retains its original historical date and is
+not refreshed by this source-only inventory check.
 
 Re-verified on 2026-10-08 against source HEAD
 `ceedc671b613ec3c2b25bbbae86b8b950719ddb6`. The manifest is complete, all 17

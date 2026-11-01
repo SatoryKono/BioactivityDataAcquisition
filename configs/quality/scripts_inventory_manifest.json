@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-01T00:53:28.126112+00:00",
+  "generated_at": "2026-11-01T01:42:30.980102+00:00",
   "summary": {
     "total_scripts": 701,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 20,
       "scripts": 588,
       "skills": 13,
-      "tests": 518
+      "tests": 519
     }
   },
   "scripts": [
@@ -10291,8 +10291,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/ci/test_mutation_protocol_contracts.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci import mutation_protocol_contracts as harness"
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-11-08",
