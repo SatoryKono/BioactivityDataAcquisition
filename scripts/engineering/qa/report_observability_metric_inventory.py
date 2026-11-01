@@ -756,7 +756,16 @@ def _combine_metric_emitters(
 
 
 def collect_metric_inventory(repo_root: Path) -> MetricInventoryReport:
-    """Collect the inventory after syncing compatibility overrides."""
+    """Collect a fresh inventory after syncing compatibility overrides."""
+    for cache in (
+        _TEXT_FILE_DISCOVERY_CACHE,
+        _METRIC_INVENTORY_CACHE,
+        _SOURCE_TEXT_CACHE,
+        _RUNTIME_CANDIDATE_TEXT_CACHE,
+        _RUNTIME_CANDIDATE_PATH_CACHE,
+        _RUNTIME_EVENT_CANDIDATE_PATH_CACHE,
+    ):
+        cache.clear()
     _sync_metric_scan_compatibility_seams()
     return _collect_metric_inventory_impl(repo_root)
 
