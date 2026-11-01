@@ -2,7 +2,7 @@ schema_version: 1
 policy_scope: domain_aggregate_classification
 linked_issue: "#6225"
 reviewed_on: "2026-07-12"
-review_by: "2026-10-31"
+review_by: "2026-11-30"
 owner: "@bioetl-domain"
 new_surface_policy: fail_fast_unclassified_domain_aggregate_surface
 rationale: >-
