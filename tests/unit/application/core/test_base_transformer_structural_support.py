@@ -48,6 +48,7 @@ from bioetl.application.core._base_transformer_structural_support import (
 from bioetl.application.core._base_transformer_execution_support import (
     classify_structural_action,
     classify_structural_shadow_comparison,
+    optional_sources_for_field,
 )
 from bioetl.application.core.base_transformer._structural_policy_types import (
     StructuralPolicyOutcome,
@@ -55,6 +56,11 @@ from bioetl.application.core.base_transformer._structural_policy_types import (
 )
 from bioetl.application.core.base_transformer.errors import FilteredOutError
 from bioetl.domain.filtering import FilterDecision
+
+
+def test_optional_sources_for_field_without_field_name() -> None:
+    assert optional_sources_for_field(object(), None) == []
+    assert optional_sources_for_field(object(), "") == []
 
 
 class TestClassifyStructuralAction:
