@@ -44,6 +44,31 @@ from bioetl.domain.schemas.validators import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("backend_error", [TypeError, ValueError])
+@pytest.mark.parametrize(
+    ("check", "valid_json"),
+    [
+        (rows_are_valid_json, "123"),
+        (rows_are_valid_json_array, "[1]"),
+        (rows_are_valid_json_object, '{"kept": 1}'),
+    ],
+)
+def test_missing_value_backend_failure_does_not_waive_json_validation(
+    monkeypatch: pytest.MonkeyPatch,
+    backend_error: type[Exception],
+    check,
+    valid_json: str,
+) -> None:
+    """An unavailable null classifier must still reject malformed JSON."""
+    values = pd.Series(["not-json", valid_json], dtype=object)
+
+    def unavailable_series(*args, **kwargs):
+        raise backend_error("synthetic scalar missing-value backend failure")
+
+    monkeypatch.setattr(pd, "Series", unavailable_series)
+    assert check(values).tolist() == [False, True]
+
+
 class TestRowsAreValidJson:
     """Tests for rows_are_valid_json validator."""
 

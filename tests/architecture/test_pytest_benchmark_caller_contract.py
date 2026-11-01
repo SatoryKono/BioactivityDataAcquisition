@@ -637,6 +637,8 @@ def test_default_pytest_skips_benchmark_and_does_not_probe(tmp_path: Path) -> No
             "asyncio",
             "-p",
             "timeout",
+            "-p",
+            "asyncio",
             "--confcutdir",
             str(ROOT / "tests" / "benchmarks"),
             "tests/benchmarks/test_baseline_assertions.py::TestContentHashBaselines::test_small_record_baseline",

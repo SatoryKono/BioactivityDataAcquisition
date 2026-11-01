@@ -183,6 +183,10 @@ def test_unknown_logical_type_returns_original_value() -> None:
     ("physical_type", "expected"),
     [
         ("UInt64", "integer"),
+        ("string[pyarrow]", "string"),
+        ("binary[pyarrow]", "unknown"),
+        ("large_string[pyarrow]", "unknown"),
+        ("customstring[pyarrow]", "unknown"),
         ("uint32[pyarrow]", "integer"),
         ("Float64", "float"),
         ("double", "float"),

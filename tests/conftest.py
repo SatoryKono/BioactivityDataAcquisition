@@ -655,7 +655,7 @@ def _is_wsl() -> bool:
         return False
 
 
-def _configure_wsl_timeout(config: pytest.Config) -> None:
+def _configure_wsl_timeout(_config: pytest.Config) -> None:
     """Apply WSL-specific safeguards for the cloud-mounted test runtime."""
     if not _is_wsl():
         return
@@ -673,13 +673,9 @@ def _configure_wsl_timeout(config: pytest.Config) -> None:
     # Tests then hang indefinitely in otherwise completed local filesystem I/O.
     asyncio.to_thread = _run_inline
 
-    # Increase timeout from default 60s to 180s on WSL
-    try:
-        current_timeout = config.getini("timeout")
-        if current_timeout and float(current_timeout) < 180:
-            config.inicfg["timeout"] = "180"
-    except (ValueError, TypeError, AttributeError):
-        config.inicfg["timeout"] = "180"
+    # Leave pytest-timeout's configured value and CLI/marker overrides intact.
+    # The former inicfg write happened after getini cached the value, so it
+    # never raised the effective timeout. It also became fatal in pytest 9.2.
 
 
 def _is_pycharm_pytest_runner() -> bool:
