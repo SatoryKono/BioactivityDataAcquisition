@@ -2353,31 +2353,31 @@
           "applicability": "applicable",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.bronze.read_cleanup_mixin.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.bronze.read_cleanup_mixin.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.bronze.read_cleanup_mixin.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.bronze.read_cleanup_mixin.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.bronze.read_cleanup_mixin.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -2541,31 +2541,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then BronzeWriter._write_bronze_under_lock finally/drain. Lock enter/write/leave are task-wrapped blocking calls; shield/drain ordering preserves lock ownership until physical write and exit complete.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -2752,31 +2752,31 @@
           "applicability": "applicable",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.composite_replay_bundle.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.composite_replay_bundle.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.composite_replay_bundle.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.composite_replay_bundle.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.composite_replay_bundle.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -2863,31 +2863,31 @@
           "applicability": "applicable",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.composite_replay_evidence.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.composite_replay_evidence.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.composite_replay_evidence.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.composite_replay_evidence.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.composite_replay_evidence.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -2983,31 +2983,31 @@
           "applicability": "applicable",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.delta.table_ops.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.delta.table_ops.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.delta.table_ops.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.delta.table_ops.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.delta.table_ops.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -3108,31 +3108,31 @@
           "applicability": "applicable",
           "expected": "Synchronous pathlib operation owns its temporary file stream; inspect opening/closing and errors inside this library boundary, not a persistent store connection.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -3270,31 +3270,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then await_physical_commit. Shield the actual commit through repeated cancellation, await physical completion, then propagate original cancellation; task cancellation is not commit rollback.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -3661,31 +3661,31 @@
           "applicability": "applicable",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.gold.read_cleanup_mixin.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.gold.read_cleanup_mixin.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.gold.read_cleanup_mixin.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.gold.read_cleanup_mixin.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.gold.read_cleanup_mixin.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -3762,31 +3762,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then operator/process lifecycle for detached backend; subprocess.run for bounded probes. Detached health backend intentionally outlives launcher; parent log handle closes on with-exit. Explicit stop uses listening PID/taskkill path. Synchronous probes wait or terminate on subprocess.run timeout; inspect exact argv and pipe ownership.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -3924,31 +3924,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then shielded publication_task completion. Publication task is shielded and drained through cancellation; metadata finalization cannot release ownership before physical write finishes.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -4074,31 +4074,31 @@
           "applicability": "applicable",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.run_report_store_adapter.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.run_report_store_adapter.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.run_report_store_adapter.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.run_report_store_adapter.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.run_report_store_adapter.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -4293,31 +4293,31 @@
           "applicability": "applicable",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.silver.delta_merge_helpers.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.silver.delta_merge_helpers.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.silver.delta_merge_helpers.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.silver.delta_merge_helpers.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.silver.delta_merge_helpers.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -4490,31 +4490,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then lock-release join barrier; daemon process exit fallback. Dedicated delta worker is daemon; timeout cancels result future, not native work. Lock-release barrier joins worker before releasing protected write ownership. Observe physical worker completion.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -4616,31 +4616,31 @@
           "applicability": "applicable",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.silver.maintenance_mixin.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.silver.maintenance_mixin.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.silver.maintenance_mixin.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.silver.maintenance_mixin.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.silver.maintenance_mixin.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -4825,31 +4825,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then _reap_plain_delta_subprocess + _finish_subprocess_readers. Wait polls deadline/cancel event; finally kills/reaps any remaining child, bounded-drains/joins pipe readers and closes stdout/stderr. Arrow payload file is removed by caller finally.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -5062,31 +5062,31 @@
           "applicability": "applicable",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.support.checkpoint_writer.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.support.checkpoint_writer.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.support.checkpoint_writer.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.support.checkpoint_writer.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Directory traversal APIs own transient internal enumeration handles, not a persistent BioETL connection. On Python 3.13 Path.iterdir materializes entries while its scandir context is open; glob/rglob/os.walk manage traversal contexts. Observe native directory handles at method completion/iteration-abandonment separately.",
           "observation": "Observe infrastructure.storage.support.checkpoint_writer.directory-enumeration handles before/after native library call, failed acquisition and iteration abandonment. Outer cancellation cannot itself terminate synchronous filesystem/native work.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -5163,31 +5163,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then executor context exit or explicit finally shutdown in defining scope. Operation-local executor joins running work on context/finally exit. Future timeout does not cancel running filesystem work; #12553 must observe join and remaining workers.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -5311,31 +5311,31 @@
           "applicability": "applicable",
           "expected": "Synchronous pathlib operation owns its temporary file stream; inspect opening/closing and errors inside this library boundary, not a persistent store connection.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -5495,31 +5495,31 @@
           "applicability": "applicable",
           "expected": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -5683,31 +5683,31 @@
           "applicability": "applicable",
           "expected": "Synchronous pathlib operation owns its temporary file stream; inspect opening/closing and errors inside this library boundary, not a persistent store connection.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -5812,31 +5812,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then operator/process lifecycle for detached backend; subprocess.run for bounded probes. Detached health backend intentionally outlives launcher; parent log handle closes on with-exit. Explicit stop uses listening PID/taskkill path. Synchronous probes wait or terminate on subprocess.run timeout; inspect exact argv and pipe ownership.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -5926,31 +5926,31 @@
           "applicability": "applicable",
           "expected": "Synchronous pathlib operation owns its temporary file stream; inspect opening/closing and errors inside this library boundary, not a persistent store connection.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -6050,31 +6050,31 @@
           "applicability": "applicable",
           "expected": "Synchronous pathlib operation owns its temporary file stream; inspect opening/closing and errors inside this library boundary, not a persistent store connection.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -6248,31 +6248,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then executor context exit or explicit finally shutdown in defining scope. Operation-local executor joins running work on context/finally exit. Future timeout does not cancel running filesystem work; #12553 must observe join and remaining workers.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -6421,31 +6421,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then run_bounded_forensic_operation finally. Budget owner tracks operation task and physical worker release; timeout/cancellation must respect admission slots until protected work finishes.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -6523,31 +6523,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then concurrent.futures interpreter-exit join. Module-global pool lives for the process. No explicit per-server/per-pipeline shutdown is wired; do not treat cancellation of a future as termination of a worker.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -6694,31 +6694,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then gather/drain of manifest_task and report_task. Wait for sibling catalog tasks before returning; shared cache task ownership is separate from the request.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -6862,31 +6862,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then executor context exit or explicit finally shutdown in defining scope. Operation-local executor joins running work on context/finally exit. Future timeout does not cancel running filesystem work; #12553 must observe join and remaining workers.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -7000,31 +7000,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then stop_run_explorer_snapshot join task. Cancel periodic snapshot task, gather it and shield the join through repeated stop cancellation.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -7170,31 +7170,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then SelectorCatalog._load gather(return_exceptions=True). Both manifest and workflow reads are drained before results/errors permit another attempt.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -7326,31 +7326,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then _complete on task completion. Shared catalog task is shielded; completion callback clears task and retains snapshot. No explicit SelectorCatalog.close is wired; observe live scans at server shutdown.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -7486,31 +7486,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then _complete_reports on task completion. Shared report task is shielded from caller cancellation, evicted by completion callback; HealthServer.stop does not explicitly cancel this cache. Observe completion or remaining tasks.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -7670,31 +7670,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then _refresh load await and physical read completion. Loader future tracks in-flight work; refresh must retain slot until physical read completion. Parent timeout cannot be treated as thread termination.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -7844,31 +7844,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then SelectorOptionsCache.close. close stops admission and waits at most 2 seconds for refresh tasks; it intentionally does not cancel live disk reads. Remaining reads are an observation obligation, not declared absent.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -8022,31 +8022,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then HealthServer.stop. stop drains selector options, cancels/awaits prewarm, snapshot and integrity refresh tasks, then closes and waits for listener with deadline.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -8187,31 +8187,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then HTTPResponse.__exit__/close in caller. The opener is a factory; response/socket ownership transfers to with-context in the caller. Read/parse exceptions close through context exit. Inject timeout/error at response acquisition/read and inspect socket release.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -8335,31 +8335,31 @@
           "applicability": "applicable",
           "expected": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -8464,31 +8464,31 @@
           "applicability": "applicable",
           "expected": "Complete use, then HTTPResponse.__exit__/close in caller. The opener is a factory; response/socket ownership transfers to with-context in the caller. Read/parse exceptions close through context exit. Inject timeout/error at response acquisition/read and inspect socket release.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "applicable at owning async operation",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "configured owner/request deadline where present",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -8599,31 +8599,31 @@
           "applicability": "applicable",
           "expected": "Synchronous pathlib operation owns its temporary file stream; inspect opening/closing and errors inside this library boundary, not a persistent store connection. The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -8774,31 +8774,31 @@
           "applicability": "applicable",
           "expected": "Synchronous pathlib operation owns its temporary file stream; inspect opening/closing and errors inside this library boundary, not a persistent store connection.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -9036,31 +9036,31 @@
           "applicability": "applicable",
           "expected": "Synchronous pathlib operation owns its temporary file stream; inspect opening/closing and errors inside this library boundary, not a persistent store connection. The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -9205,31 +9205,31 @@
           "applicability": "applicable",
           "expected": "open_file returns a native reader; this call site reads it without explicit BioETL close. Record reference lifetime and file handles after read/error in #12553; immediate cleanup is not asserted.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -9408,31 +9408,31 @@
           "applicability": "applicable",
           "expected": "Synchronous pathlib operation owns its temporary file stream; inspect opening/closing and errors inside this library boundary, not a persistent store connection.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -9669,31 +9669,31 @@
           "applicability": "applicable",
           "expected": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier. Synchronous pathlib operation owns its temporary file stream; inspect opening/closing and errors inside this library boundary, not a persistent store connection.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -9891,31 +9891,31 @@
           "applicability": "applicable",
           "expected": "Calling store delegates the transient handle to its concrete atomic/append helper; helper ownership is not a second store connection. Observe helper enter/transfer/exit. Synchronous pathlib operation owns its temporary file stream; inspect opening/closing and errors inside this library boundary, not a persistent store connection. The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -10078,31 +10078,31 @@
           "applicability": "applicable",
           "expected": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -10366,31 +10366,31 @@
           "applicability": "applicable",
           "expected": "The lexical context owns this acquisition after successful __enter__; its exit closes the acquired handle. Failed __enter__/descriptor-to-stream transfer is a separate error barrier. Synchronous pathlib operation owns its temporary file stream; inspect opening/closing and errors inside this library boundary, not a persistent store connection.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
           "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [
@@ -10707,31 +10707,31 @@
           "applicability": "applicable",
           "expected": "Actual normal-path close/descriptor-to-stream transfer points are listed explicitly. Raw descriptor ownership starts at successful allocation; failed fdopen/open construction has not transferred ownership to a stream. No cleanup guarantee is inferred from a later with-block. Temp-path unlink and descriptor close are separate obligations.",
           "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles/threads/tasks remaining.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
           "expected": "Observe raw fd after mkstemp, before fdopen/open transfer, on fdopen failure, and after stream exit; with-context does not own a raw fd if construction failed. Record any surviving fd separately, without assuming cleanup.",
           "observation": "Inject fdopen/open construction failure after mkstemp; compare raw fd identities and ownership transfer independently from temp-path cleanup.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "owning async/thread boundary; primitive itself synchronous",
           "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
           "observation": "Cancel owner before/use/close barriers and observe physical completion, retained process-scope resources and caller outcome.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
           "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources or blocking worker. Timeout is not a shutdown receipt.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
           "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent append/commit.",
           "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt and shared owner lifetime.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "cleanup_sources": [

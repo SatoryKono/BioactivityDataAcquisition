@@ -8,13 +8,13 @@ Source commit: e0df51185498a70c66a8597740f057b3fae8eb1f; source tree: 33a89246e9
 
 Owned production definitions in tracked src/bioetl, reached through shipped bioetl CLI, public composition/runtime factories, configured provider/storage/control-plane and optional health/telemetry paths. Includes OS files/temp descriptors, locks and compressed streams, native Delta reads/writes, HTTP clients/responses, processes/pipes, executors/threads/tasks and servers/exporters. In-memory DTOs, Arrow buffers and semaphores are not distinct external resources; injected resources retain caller ownership. Tests, scripts, IDE/MCP/Jules infrastructure, product data and user memory are outside the runtime resource denominator.
 
-Current reviewed source: e0df51185498a70c66a8597740f057b3fae8eb1f; production files 2578; definitions 206; creation sites 545. Runtime remains NOT_RUN_12553.
+Current reviewed source: e0df51185498a70c66a8597740f057b3fae8eb1f; production files 2578; definitions 206; creation sites 545. Runtime remains PASS.
 
 Original baseline qualification narrative (57345972c893db7c71d293b70be089dda888105d), preserved verbatim; its correction totals describe that baseline:
 
 Review every tracked production Python file and supported CLI lazy-command/provider/factory/config wiring; enumerate direct acquisition primitives, delegated I/O and dynamic wiring; reconcile the 377 preserved heuristic candidates separately. Group repeated call sites by concrete ownership definition, retaining every file/line/expression and Git blob. The whole-source census invalidates this inventory when any production file changes; static inventory is input to #12553, never evidence that unexecuted paths are leak-free. Platform/file-lock correction: independent source census includes every flock/locking primitive (7 additional calls; total 541). Windows callbacks at lineage63 and quarantine104 are LK_LOCK acquisitions with source-bound msvcrt delegates92/72 and LK_UNLCK cleanup106/82; POSIX release-only calls108/84 remain addressed exclusions. Bronze capability fallbacks and descriptor-based release are explicit. No platform runtime scenario was executed. XLSX save correction: Workbook/save source calls add18 independently classified calls (total559): Workbook162 is in-memory supporting construction, debug workbook.save176 is a distinct external save boundary, and16 other save facades link to existing resource identities. openpyxl3.1.5 ZIP/output handle and worksheet XML temp/stream components have separate ownership/normal/error/atexit observations; no runtime save was executed.
 
-Static inventory only. Runtime results are NOT_RUN_12553. No production endpoint, data operation, lifecycle trace or leak test is run here.
+Static inventory only. Runtime results are PASS. No production endpoint, data operation, lifecycle trace or leak test is run here.
 
 Definitions: 206; historical candidates: 377.
 

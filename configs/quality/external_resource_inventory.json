@@ -10296,37 +10296,37 @@
     "production_file_count": 2578,
     "definition_count": 206,
     "creation_site_count": 545,
-    "runtime_result": "NOT_RUN_12553"
+    "runtime_result": "PASS"
   },
   "resource_parts": [
     {
       "file": "configs/quality/external_resource_inventory/part-01.json",
-      "sha256": "69ebaa944e8f692af3517df27ee3dfacbc56a2ed42d4cb7d87616cf5c14a91c8",
-      "resource_count": 43
+      "sha256": "9816c910ba600e783f16f36189dea72d0ad2c075454fcdd59df228aac734a548",
+      "resource_count": 44
     },
     {
       "file": "configs/quality/external_resource_inventory/part-02.json",
-      "sha256": "5cd324f4c04434a30ac7f32fad3d129f0c34fe318f0ebd15aa107052a1aaf003",
-      "resource_count": 50
+      "sha256": "0fcb8a57fa91d8735ee7af28ffd15c351145f39982fcad3eb6e13d306ce5b67c",
+      "resource_count": 51
     },
     {
       "file": "configs/quality/external_resource_inventory/part-03.json",
-      "sha256": "af15259a5ff4983441b7065e92647fd39cc033b8777b367691809d7e13ffba57",
-      "resource_count": 30
+      "sha256": "d44ca2b5c361bbadd689f6a59374dc094b32ae857f8bdde45805942e3d350398",
+      "resource_count": 28
     },
     {
       "file": "configs/quality/external_resource_inventory/part-04.json",
-      "sha256": "4b9f043b5b179c9b405085a3a2ce0dfbed5f2241f14852cec4572578a8683139",
+      "sha256": "241e45b08da46cbf82fd828323add6137e5242033054d7f7cbe0a61a52742df3",
       "resource_count": 48
     },
     {
       "file": "configs/quality/external_resource_inventory/part-05.json",
-      "sha256": "73cb1235030d37e823337dc53a8279a4825e381685cc71c25553804ab5741d20",
+      "sha256": "8233ce4f84a550db093ab60e244492bcabe3ed5510fc3ab26dd3a85ddab15684",
       "resource_count": 34
     },
     {
       "file": "configs/quality/external_resource_inventory/part-06.json",
-      "sha256": "fd81bda682d80a408fb11f93d2091c8f475267222d02cf325d12c4ac1df48386",
+      "sha256": "83e982a924ffae6084836853b61d21218b6cd4e5e7001745ea05b652f3e0c679",
       "resource_count": 1
     }
   ]

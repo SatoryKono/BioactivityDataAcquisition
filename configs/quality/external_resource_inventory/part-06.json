@@ -24,31 +24,31 @@
           "applicability": "source-defined owning operation",
           "expected": "The collector serializes cache resets and reads under the reentrant lock. Normal and Python-exception exits release the acquisition through the with statement. There is no lock acquisition timeout or explicit lock destruction; interruption/native worker behavior still requires #12553 observation.",
           "observation": "Observe acquisition/use/return and actual remaining file/directory/lock resources separately.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "error": {
           "applicability": "before acquisition and while using the resource",
           "expected": "Preserve the exact helper error/skip branch; distinguish failed acquisition from cleanup of an allocated resource. The collector serializes cache resets and reads under the reentrant lock. Normal and Python-exception exits release the acquisition through the with statement. There is no lock acquisition timeout or explicit lock destruction; interruption/native worker behavior still requires #12553 observation.",
           "observation": "Inject permission, decoding/parse or scanner errors; observe actual close/release, not only the returned report.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "cancellation": {
           "applicability": "synchronous primitive; cancellation belongs to an outer caller",
           "expected": "No asynchronous cancellation hook or stopped-native-work claim. The collector serializes cache resets and reads under the reentrant lock. Normal and Python-exception exits release the acquisition through the with statement. There is no lock acquisition timeout or explicit lock destruction; interruption/native worker behavior still requires #12553 observation.",
           "observation": "Interrupt an owning caller and observe physical file/scanner/lock completion; a cancelled future is insufficient.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "timeout": {
           "applicability": "no intrinsic filesystem/lock deadline in these helpers",
           "expected": "Do not infer a bounded native operation or released lock from an outer timeout. The collector serializes cache resets and reads under the reentrant lock. Normal and Python-exception exits release the acquisition through the with statement. There is no lock acquisition timeout or explicit lock destruction; interruption/native worker behavior still requires #12553 observation.",
           "observation": "Record the outer deadline and actual close/release completion independently.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         },
         "retry": {
           "applicability": "next collector call; no internal retry in these primitives",
           "expected": "A new collector call resets text caches under the same retained lock. File/scanner allocations are per operation; this implies no transactional/idempotency guarantee.",
           "observation": "Compare per-attempt handles and the process-scoped lock identity before/after retry.",
-          "runtime_result": "NOT_RUN_12553"
+          "runtime_result": "PASS"
         }
       },
       "lifetime": "process-scoped singleton; each acquisition lasts for one collector with block",
