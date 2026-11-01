@@ -42,10 +42,12 @@ from bioetl.application.core._base_transformer_structural_support import (
     _log_structural_policy_events,
     apply_silver_filter,
     apply_structural_policy,
-    classify_structural_action,
-    classify_structural_shadow_comparison,
     evaluate_semantic_shadow_decision,
     record_structural_policy_metrics,
+)
+from bioetl.application.core._base_transformer_execution_support import (
+    classify_structural_action,
+    classify_structural_shadow_comparison,
 )
 from bioetl.application.core.base_transformer._structural_policy_types import (
     StructuralPolicyOutcome,

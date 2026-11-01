@@ -29,6 +29,7 @@ Stable commands:
                        Run preflight, screenshot refresh, and live Grafana audit
     fingerprint-router-rootfs  Hash trusted host Docker exports
     verify-router-managed-image  Verify managed image delivery against pinned host
+    refresh-router-delivery  Check/update pins from physically verified rebuilt images
     wsl-proxy          Start WSL proxy helper
     codex              Launch Codex via repo-local bootstrap adapter (shell)
     codex-exec         Launch Codex full-auto via repo-local bootstrap adapter (shell)
@@ -89,6 +90,9 @@ COMMAND_SPECS.update(
         ),
         "verify-router-managed-image": module_command(
             "scripts.ops.observability.grafana.router_managed_image"
+        ),
+        "refresh-router-delivery": module_command(
+            "scripts.ops.observability.grafana.refresh_router_delivery"
         ),
     }
 )
