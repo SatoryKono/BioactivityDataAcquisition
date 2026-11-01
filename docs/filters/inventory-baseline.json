@@ -1871,7 +1871,7 @@
       "symbol": "apply_silver_filter",
       "path": "src/bioetl/application/core/_base_transformer_structural_support.py",
       "occurrence_count": 1,
-      "first_line": 86,
+      "first_line": 56,
       "role": "Runtime Silver filter application callsite",
       "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
       "notes": ""
@@ -1937,7 +1937,7 @@
       "symbol": "_silver_filters.evaluate",
       "path": "src/bioetl/application/core/_base_transformer_structural_support.py",
       "occurrence_count": 2,
-      "first_line": 105,
+      "first_line": 75,
       "role": "Runtime Silver filter evaluator",
       "migration_relevance": "Evaluator sites are migration-sensitive because they can reject records before Gold.",
       "notes": ""

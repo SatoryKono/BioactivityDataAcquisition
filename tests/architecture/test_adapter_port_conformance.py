@@ -41,6 +41,76 @@ from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
+from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
+from bioetl.composition.bootstrap.runtime.assay_replay_capture import RequestReader
+from bioetl.domain.ports.adr import AdrServicePort
+from bioetl.domain.ports.config.publication_vocabulary_port import (
+    PublicationVocabularyPort,
+)
+from bioetl.domain.ports.control_plane.artifact_byte_comparison import (
+    ArtifactByteComparisonPort,
+)
+from bioetl.domain.ports.control_plane.lineage import LineageStorePort
+from bioetl.domain.ports.control_plane.run_ledger import RunLedgerPort
+from bioetl.domain.ports.control_plane.run_manifest import RunManifestPort
+from bioetl.domain.ports.control_plane.workflow_execution_state import (
+    WorkflowExecutionStatePort,
+)
+from bioetl.domain.ports.control_plane.workflow_ledger import WorkflowLedgerPort
+from bioetl.domain.ports.control_plane.workflow_manifest import WorkflowManifestPort
+from bioetl.domain.ports.data_source import DataSourcePort
+from bioetl.domain.ports.delta_reader import DeltaReaderPort
+from bioetl.domain.ports.export import ExportCatalogPort
+from bioetl.domain.ports.export import ExportWriterPort
+from bioetl.domain.ports.metadata.coordinator import MetadataCoordinatorPort
+from bioetl.domain.ports.observability.metrics import MetricsPort
+from bioetl.domain.ports.protein_classification import ProteinClassificationPort
+from bioetl.domain.ports.runtime.locking import LockPort
+from bioetl.domain.ports.stage_accounting import StageAccountingPort
+from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
+    ForeignKeyReconciliationPort,
+)
+from bioetl.domain.ports.workflow_row_reconciliation import RowReconciliationPort
+from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
+from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+from bioetl.infrastructure.adapters.chembl.protein_classification_graph import (
+    ChEMBLProteinClassificationGraph,
+)
+from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
+from bioetl.infrastructure.adr.fs_adr_service import FilesystemAdrCatalog
+from bioetl.infrastructure.config.publication_controlled_vocabulary_loader import (
+    PublicationControlledVocabularyLoader,
+)
+from bioetl.infrastructure.control_plane.artifact_byte_comparison import (
+    FileArtifactByteComparisonAdapter,
+)
+from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
+from bioetl.infrastructure.control_plane.file_run_ledger_store import FileRunLedgerStore
+from bioetl.infrastructure.control_plane.file_run_manifest_store import (
+    FileRunManifestStore,
+)
+from bioetl.infrastructure.control_plane.file_workflow_execution_state_store import (
+    FileWorkflowExecutionStateStore,
+)
+from bioetl.infrastructure.control_plane.file_workflow_ledger_store import (
+    FileWorkflowLedgerStore,
+)
+from bioetl.infrastructure.control_plane.file_workflow_manifest_store import (
+    FileWorkflowManifestStore,
+)
+from bioetl.infrastructure.export.export_catalog_adapter import ExportCatalogAdapter
+from bioetl.infrastructure.export.export_writer_adapter import ExportWriterAdapter
+from bioetl.infrastructure.locking.memory_lock import MemoryLock
+from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+from bioetl.infrastructure.storage.composite_replay_inputs import (
+    CompositeReplayInputReader,
+)
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation import (
+    SilverForeignKeyReconciliationAdapter,
+)
+from bioetl.infrastructure.storage.workflow_row_reconciliation import (
+    StorageRowReconciliationAdapter,
+)
 
 pytestmark = pytest.mark.architecture
 
@@ -58,13 +128,37 @@ class PortAdapterCase:
 
 
 PORT_ADAPTER_CASES = (
+    PortAdapterCase(AdrServicePort, FilesystemAdrCatalog),
+    PortAdapterCase(ArtifactByteComparisonPort, FileArtifactByteComparisonAdapter),
     PortAdapterCase(BronzeStoragePort, BronzeWriter),
-    PortAdapterCase(SilverStoragePort, SilverWriter),
-    PortAdapterCase(GoldStoragePort, GoldWriter),
-    PortAdapterCase(LoggerPort, NoOpLogger),
-    PortAdapterCase(LoggerPort, UnifiedLogger),
-    PortAdapterCase(LoggerPort, StructlogLogger),
     PortAdapterCase(CircuitBreakerPort, CircuitBreakerGuard),
+    PortAdapterCase(DataSourcePort, BaseHttpAdapter),
+    PortAdapterCase(DataSourcePort, BaseSyncAdapter),
+    PortAdapterCase(DeltaReaderPort, CompositeReplayInputReader),
+    PortAdapterCase(DeltaReaderPort, RequestReader),
+    PortAdapterCase(ExportCatalogPort, ExportCatalogAdapter),
+    PortAdapterCase(ExportWriterPort, ExportWriterAdapter),
+    PortAdapterCase(
+        ForeignKeyReconciliationPort, SilverForeignKeyReconciliationAdapter
+    ),
+    PortAdapterCase(GoldStoragePort, GoldWriter),
+    PortAdapterCase(LineageStorePort, FileLineageStore),
+    PortAdapterCase(LockPort, MemoryLock),
+    PortAdapterCase(LoggerPort, NoOpLogger),
+    PortAdapterCase(LoggerPort, StructlogLogger),
+    PortAdapterCase(LoggerPort, UnifiedLogger),
+    PortAdapterCase(MetadataCoordinatorPort, MetadataCoordinator),
+    PortAdapterCase(MetricsPort, PrometheusMetrics),
+    PortAdapterCase(ProteinClassificationPort, ChEMBLProteinClassificationGraph),
+    PortAdapterCase(PublicationVocabularyPort, PublicationControlledVocabularyLoader),
+    PortAdapterCase(RowReconciliationPort, StorageRowReconciliationAdapter),
+    PortAdapterCase(RunLedgerPort, FileRunLedgerStore),
+    PortAdapterCase(RunManifestPort, FileRunManifestStore),
+    PortAdapterCase(SilverStoragePort, SilverWriter),
+    PortAdapterCase(StageAccountingPort, StageAccountingAccumulator),
+    PortAdapterCase(WorkflowExecutionStatePort, FileWorkflowExecutionStateStore),
+    PortAdapterCase(WorkflowLedgerPort, FileWorkflowLedgerStore),
+    PortAdapterCase(WorkflowManifestPort, FileWorkflowManifestStore),
 )
 
 
