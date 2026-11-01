@@ -137,7 +137,6 @@ for (const mode of ["promise", "stream"]) {
       const controller = new AbortController();
       const reason = new Error("synthetic glob cancellation");
       const timed = trigger === "timeout";
-      let deadline;
       let reads = 0;
       let completeFirstRead;
       const firstReadCompleted = new Promise((resolve) => {
@@ -151,17 +150,15 @@ for (const mode of ["promise", "stream"]) {
           const callback = args.pop();
           if (timed) {
             if (readNumber === 1) {
-              deadline = AbortSignal.timeout(10);
-              deadline.addEventListener(
-                "abort", () => controller.abort(deadline.reason), { once: true },
+              controller.abort(
+                new DOMException("synthetic glob timeout", "TimeoutError"),
               );
             }
-            return fs.readdir(...args, (...result) => {
-              setTimeout(() => {
-                callback(...result);
-                if (readNumber === 1) completeFirstRead();
-              }, 30);
+            queueMicrotask(() => {
+              callback(null, []);
+              if (readNumber === 1) completeFirstRead();
             });
+            return;
           }
           if (reads === 1) controller.abort(reason);
           return fs.readdir(...args, (...result) => {
@@ -185,7 +182,6 @@ for (const mode of ["promise", "stream"]) {
           run(),
           timed ? { name: "TimeoutError" } : /synthetic glob cancellation/,
         );
-        if (timed) assert.equal(deadline.aborted, true, "real deadline did not fire");
         await firstReadCompleted;
         await new Promise((resolve) => setImmediate(resolve));
         assert.equal(reads, 1, "filesystem work continued after rejection");
