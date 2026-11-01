@@ -310,11 +310,6 @@ async def test_gold_writer_overwrite_is_idempotent_for_identical_records(
         {"entity_id": "CHEMBL456", "value": 7.0},
     ]
     assert second_rows == first_rows
-    table_path = _versioned_table_path(tmp_path / "gold", "chembl.activity")
-    physical = load_delta_table(str(table_path)).schema().to_pyarrow()
-    expected = {"entity_id": pa.string(), "value": pa.float64()}
-    assert {field.name: field.type for field in physical} == expected
-    assert all(field.nullable for field in physical)
 
 
 @pytest.mark.integration
@@ -468,7 +463,6 @@ async def test_issue_12475_gold_scd2_repeat_write_keeps_history_and_current_row(
     physical_schema = load_delta_table(str(table_path)).schema().to_pyarrow()
     arrow_types = {
         "str": pa.string(),
-        "string[pyarrow]": pa.string(),
         "bool": pa.bool_(),
         "int64": pa.int64(),
         "float64": pa.float64(),

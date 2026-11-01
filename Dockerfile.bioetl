@@ -23,8 +23,7 @@ RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
         glibc-2.44=2.44-r8 \
         ld-linux-2.44=2.44-r8 \
         libcrypt1-2.44=2.44-r8 \
-        py3-pip-wheel=26.2.2-r2 \
-        python-3.13=3.13.18_git20261030-r0 \
+        python-3.13=3.13.16_git20261002-r2 \
         uv=0.11.26-r0 \
         zlib=1.3.2.1_rc20260917-r0 \
     && python3.13 --version \
@@ -44,11 +43,10 @@ RUN printf '# BioETL\n' > README.md \
 # Source-only changes therefore invalidate the small project-wheel layer, not
 # the complete third-party environment.
 COPY src/ ./src/
-COPY scripts/engineering/common/build_backend.py ./scripts/engineering/common/build_backend.py
 
 # Build the local wheel in an isolated environment whose backend is constrained
 # Docker-locally, then install only that wheel into the locked environment.
-RUN printf 'setuptools==84.1.0\n' > /tmp/build-constraints.txt \
+RUN printf 'setuptools==83.0.0\n' > /tmp/build-constraints.txt \
     && UV_HTTP_TIMEOUT=300 uv build --wheel \
         --build-constraint /tmp/build-constraints.txt \
         --out-dir /tmp/bioetl-wheels --directory /app \
@@ -72,8 +70,7 @@ RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
         glibc-2.44=2.44-r8 \
         ld-linux-2.44=2.44-r8 \
         libcrypt1-2.44=2.44-r8 \
-        py3-pip-wheel=26.2.2-r2 \
-        python-3.13=3.13.18_git20261030-r0 \
+        python-3.13=3.13.16_git20261002-r2 \
         tzdata=2026c-r0 \
         zlib=1.3.2.1_rc20260917-r0 \
     && python3.13 --version \

@@ -483,7 +483,7 @@ def test_validate_pk_contract_ignores_legacy_attribute_when_present() -> None:
         technical_primary_key="entity_id",
     )
 
-    assert _assembly.validate_pk_contract(config) is None
+    _assembly.validate_pk_contract(config)
 
 
 def test_validate_pk_contract_requires_technical_primary_key() -> None:

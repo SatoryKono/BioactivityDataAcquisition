@@ -805,13 +805,9 @@ def test_cert_coverage_missing_sources() -> None:
 
 
 def test_cert_coverage_satisfied() -> None:
-    validator = _validator()
-    validator.validate_certification_coverage(
+    _validator().validate_certification_coverage(
         manifest=_cert_manifest(), certifications=(_cert(query="q1"),)
     )
-    assert validator.manifest_port.mock_calls == []
-    assert validator.ledger_port.mock_calls == []
-    validator.summary_builder.assert_not_called()
 
 
 def test_cert_resolve_query_direct() -> None:

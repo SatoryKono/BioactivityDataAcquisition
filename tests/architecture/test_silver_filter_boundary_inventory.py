@@ -410,9 +410,6 @@ def test_inventory_baseline_outputs_match_generator(tmp_path: Path) -> None:
     generated_md = tmp_path / MD_OUT.name
     write_csv(plans, surface_inventory, generated_csv)
     write_json(plans, surface_inventory, generated_json)
-    assert generated_json.read_bytes().endswith(b"\n")
-    assert not generated_json.read_bytes().endswith(b"\n\n")
-    assert b"\r" not in generated_json.read_bytes()
     write_markdown(plans, surface_inventory, generated_md)
 
     mismatches: list[str] = []

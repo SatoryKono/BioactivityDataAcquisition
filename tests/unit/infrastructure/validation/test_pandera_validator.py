@@ -84,7 +84,7 @@ class TestPanderaSilverValidator:
 
     def test_validate_with_schema_valid_records(self):
         """Test validation passes for records matching schema."""
-        import pandera.pandas as pa
+        import pandera as pa
 
         schema = pa.DataFrameSchema(
             {
@@ -103,7 +103,7 @@ class TestPanderaSilverValidator:
 
     def test_validate_with_schema_invalid_records(self):
         """Test validation fails for records not matching schema."""
-        import pandera.pandas as pa
+        import pandera as pa
 
         schema = pa.DataFrameSchema(
             {
@@ -121,7 +121,7 @@ class TestPanderaSilverValidator:
 
     def test_validate_with_schema_missing_column(self):
         """Test validation fails when required column is missing."""
-        import pandera.pandas as pa
+        import pandera as pa
 
         schema = pa.DataFrameSchema(
             {
@@ -139,7 +139,7 @@ class TestPanderaSilverValidator:
 
     def test_validate_non_strict_allows_extra_columns_and_seeds_dq(self):
         """Non-strict Silver validation ignores extras and seeds DQ flags."""
-        import pandera.pandas as pa
+        import pandera as pa
 
         schema = pa.DataFrameSchema(
             {
@@ -167,7 +167,7 @@ class TestPanderaSilverValidator:
         """Test validation passes with nullable columns when using valid types."""
         import math
 
-        import pandera.pandas as pa
+        import pandera as pa
 
         schema = pa.DataFrameSchema(
             {
@@ -184,43 +184,9 @@ class TestPanderaSilverValidator:
         result = validator.validate(records)
         assert result.valid is True
 
-    def test_nullable_dtype_cast_failures_leave_columns_unchanged(self, monkeypatch):
-        """A non-castable nullable column remains available for schema rejection."""
-        from types import SimpleNamespace
-
-        import pandas as pd
-
-        validator = PanderaSilverValidator()
-        validator._schema = SimpleNamespace(
-            columns={
-                "count": SimpleNamespace(nullable=True, dtype="Int64"),
-                "flag": SimpleNamespace(nullable=True, dtype="boolean"),
-            }
-        )
-        frame = pd.DataFrame(
-            {
-                "count": pd.Series(["not-an-integer"], dtype=object),
-                "flag": pd.Series(["not-a-boolean"], dtype=object),
-            }
-        )
-        original_astype = pd.Series.astype
-
-        def fail_nullable_cast(self, dtype, *args, **kwargs):
-            if dtype in {"Int64", "boolean"}:
-                raise ValueError("invalid nullable value")
-            return original_astype(self, dtype, *args, **kwargs)
-
-        monkeypatch.setattr(pd.Series, "astype", fail_nullable_cast)
-
-        integer_result = validator._normalize_nullable_integer_columns(frame)
-        boolean_result = validator._normalize_nullable_boolean_columns(frame)
-
-        assert integer_result.equals(frame)
-        assert boolean_result.equals(frame)
-
     def test_validate_with_ordered_schema_rejects_reordered_columns(self):
         """Columns in wrong order pass validation after reorder."""
-        import pandera.pandas as pa
+        import pandera as pa
 
         schema = pa.DataFrameSchema(
             columns={
@@ -337,7 +303,7 @@ class TestPanderaGoldValidator:
 
     def test_pandera_gold_validator__schema_valid_records__d3f54fff(self):
         """Test validation passes for records matching schema."""
-        import pandera.pandas as pa
+        import pandera as pa
 
         schema = pa.DataFrameSchema(
             {
@@ -581,7 +547,7 @@ class TestPanderaValidatorPropertyBased:
     @settings(deadline=None)
     def test_valid_records_pass_matching_schema(self, record: dict):
         """Property: Records matching schema structure always pass validation."""
-        import pandera.pandas as pa
+        import pandera as pa
 
         schema = pa.DataFrameSchema(
             {

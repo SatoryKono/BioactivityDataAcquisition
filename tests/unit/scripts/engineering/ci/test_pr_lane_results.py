@@ -407,7 +407,6 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
             "grafana/tooling/router-v7-bridge/package-lock.json",
             "grafana/plugins/bioetl-scenes-app/package.json",
             "grafana/plugins/bioetl-selectorshell-panel/package-lock.json",
-            "grafana/plugins/eslint-shared-config.mjs",
         ],
         repo_root=repo_root,
     )
@@ -417,34 +416,6 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
         "tests/architecture/test_circleci_migration_contract.py",
         "tests/architecture/test_dashboard_scenes_contract.py",
         "tests/architecture/test_residual_osv_9853.py",
-    }
-
-
-def test_shadow_compare_routes_monitoring_and_docker_security_docs() -> None:
-    """Monitoring configuration and its security runbook select owner tests."""
-    repo_root = Path(__file__).resolve().parents[5]
-    for changed_file in (
-        "docker-compose.monitoring.yml",
-        "docs/05-operations/runbooks/docker-security-baseline.md",
-    ):
-        route = build_shadow_compare([changed_file], repo_root=repo_root)
-        assert (
-            "tests/architecture/test_docker_runtime_contracts.py" in route["selected"]
-        )
-
-    report = build_shadow_compare(
-        [
-            "docker-compose.monitoring.yml",
-            "docs/05-operations/runbooks/docker-security-baseline.md",
-        ],
-        repo_root=repo_root,
-    )
-
-    assert set(report["selected"]) == {
-        "tests/architecture/test_docker_runtime_contracts.py",
-        "tests/integration/test_grafana_datasource_provisioning.py",
-        "tests/integration/test_dashboard_operator_readability.py",
-        "tests/architecture/test_documentation_cleanup_inventory.py",
     }
 
 
@@ -686,20 +657,6 @@ def test_shadow_compare_routes_quality_and_runtime_documentation() -> None:
     assert "tests/architecture/test_docker_runtime_contracts.py" in report["selected"]
 
 
-def test_shadow_compare_routes_current_policy_and_test_health_evidence() -> None:
-    repo_root = Path(__file__).resolve().parents[5]
-    changed_paths = [
-        "configs/quality/layered_suffix_policy.yaml",
-        "docs/reports/evidence/project-test-health/SUMMARY.md",
-        "docs/reports/evidence/project-test-health/metadata.yaml",
-        "docs/reports/evidence/project-test-health/shard_registry.yaml",
-    ]
-
-    for path in changed_paths:
-        report = build_shadow_compare([path], repo_root=repo_root)
-        assert report["selected_count"] > 0
-
-
 def test_shadow_compare_routes_lineage_crash_evidence() -> None:
     """Lineage crash reports select the test that produced the evidence."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -752,32 +709,6 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
     """Quality-move configs and documentation retain explicit governing tests."""
     repo_root = Path(__file__).resolve().parents[5]
 
-    new_inputs = {
-        "configs/quality/external_resource_inventory/part-06.json": {
-            "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
-        },
-        "configs/quality/external_resource_inventory_qm08_review.json": {
-            "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-        },
-        "configs/quality/external_resource_inventory_qm09_review.json": {
-            "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-        },
-        "configs/quality/quality_move_qm09_reference_decisions.json": {
-            "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
-        },
-        "docker-compose.monitoring.yml": {
-            "tests/architecture/test_docker_runtime_contracts.py",
-            "tests/integration/test_grafana_datasource_provisioning.py",
-        },
-    }
-    for path, owning_tests in new_inputs.items():
-        selection = build_shadow_compare([path], repo_root=repo_root)
-        assert owning_tests <= set(selection["selected"]), path
-        assert selection["covers_full_suite"] is False
-
     report = build_shadow_compare(
         [
             ".github/workflows/duplication-complexity.yml",
@@ -787,12 +718,6 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
             "docs/02-architecture/current-state-inventory.md",
             "docs/04-reference/api/infrastructure.md",
             "reports/quality/total-tech-debt-audit-main-current.md",
-            ".dockerignore",
-            "mkdocs.yml",
-            "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md",
-            "reports/quality/pytest-nodeid-inventory.json",
-            "reports/quality/quality-move-qm08/reference_decisions.json",
-            "scripts/engineering/README.md",
         ],
         repo_root=repo_root,
     )
@@ -802,23 +727,6 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
     )
     assert "tests/unit/scripts/qa/test_topology_source_binding.py" in report["selected"]
     assert "tests/architecture/test_scripts_lifecycle_registry.py" in report["selected"]
-    assert "tests/architecture/test_docker_runtime_contracts.py" in report["selected"]
-    assert "tests/architecture/test_documentation_sync.py" in report["selected"]
-    assert (
-        "tests/unit/scripts/qa/test_refresh_governance_artifacts.py"
-        in report["selected"]
-    )
-    assert (
-        "tests/unit/scripts/qa/test_build_pytest_nodeid_inventory.py"
-        in report["selected"]
-    )
-    assert (
-        "tests/unit/scripts/engineering/qa/test_verify_quality_move.py"
-        in report["selected"]
-    )
-    assert (
-        "tests/architecture/test_scripts_inventory_discovery.py" in report["selected"]
-    )
     assert (
         "tests/architecture/test_api_reference_public_facades.py" in report["selected"]
     )
@@ -1033,22 +941,6 @@ def test_affected_targets_map_test_governance_audit_config() -> None:
     ]
 
 
-def test_shadow_compare_routes_assertless_ratchet_config() -> None:
-    """The shrink-only assertless ratchet has explicit owning tests."""
-    repo_root = Path(__file__).resolve().parents[5]
-
-    report = build_shadow_compare(
-        ["configs/quality/assertless_ratchet.yaml"],
-        repo_root=repo_root,
-    )
-
-    assert report["selected"] == [
-        "tests/architecture/test_arch_s4_s9_gates.py",
-        "tests/architecture/test_test_governance_audit.py",
-        "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
-    ]
-
-
 def test_affected_targets_map_memory_source_without_test_diff() -> None:
     """A chunking-only PR must select its real RAG regression suite."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -1251,7 +1143,6 @@ def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
             "configs/quality/generated_artifact_tests.json",
             "configs/quality/test_skip_inventory.yaml",
             "Dockerfile.bioetl",
-            "docs/05-operations/runbooks/docker-security-baseline.md",
             "docs/reports/generated/documentation-cleanup-inventory.json",
             "docs/reports/generated/documentation-cleanup-inventory.md",
             "reports/performance/benchmark-summary.json",
@@ -1785,7 +1676,7 @@ def test_resource_inventory_files_select_integrity_controls(changed_file: str) -
         "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py"
         in report["selected"]
     )
-    catalog_test = "tests/architecture/test_external_resource_inventory_catalog.py"
-    assert catalog_test in report["selected"]
-    assert (root / catalog_test).is_file()
+    assert (
+        "tests/architecture/test_external_resource_inventory.py" in report["selected"]
+    )
     assert report["activation"] == "not_applied"

@@ -179,46 +179,38 @@ def _convert_complex_types(value: object) -> object | None:
     return None
 
 
-def _is_json_scalar(value: object) -> bool:
-    """Return whether a value is already a JSON scalar supported by this helper."""
-    vt = type(value)
-    return vt in (str, int, float, bool) or value is None
-
-
-def _convert_builtin_dict(value: object) -> dict[str, object]:
-    """Recursively normalize an exact built-in dictionary."""
-    dict_value = cast(dict[str, object], value)
-    return {str(key): to_jsonable(item) for key, item in sorted(dict_value.items())}
-
-
-def _convert_builtin_list(value: object) -> list[object]:
-    """Recursively normalize an exact built-in list."""
-    list_value = cast(list[object], value)
-    return [to_jsonable(item) for item in list_value]
-
-
-def _convert_json_builtin(value: object) -> tuple[bool, object]:
-    """Convert built-in containers while keeping their low-overhead fast path."""
-    if _is_json_scalar(value):
-        return True, value
-    vt = type(value)
-    if vt is dict:
-        return True, _convert_builtin_dict(value)
-    if vt is list:
-        return True, _convert_builtin_list(value)
-    return False, value
-
-
 def to_jsonable(value: object) -> object:
     """Convert nested dataclasses, datetimes, and mappings into JSON-safe values."""
-    builtin_handled, result = _convert_json_builtin(value)
-    if builtin_handled:
-        return result
-    special_value = _convert_special_types(value)
-    if special_value is not None:
-        return special_value
-    complex_value = _convert_complex_types(value)
-    return value if complex_value is None else complex_value
+    vt = type(value)
+    if _is_primitive(vt) or value is None:
+        return value
+    if vt is dict:
+        return _to_jsonable_dict(cast(dict[str, object], value))
+    if vt is list:
+        return _to_jsonable_list(cast(list[object], value))
+    return _to_jsonable_slow_path(value)
+
+
+def _is_primitive(vt: type) -> bool:
+    return vt is str or vt is int or vt is float or vt is bool
+
+
+def _to_jsonable_dict(value: dict[str, object]) -> dict[str, object]:
+    return {str(k): to_jsonable(v) for k, v in sorted(value.items())}
+
+
+def _to_jsonable_list(value: list[object]) -> list[object]:
+    return [to_jsonable(item) for item in value]
+
+
+def _to_jsonable_slow_path(value: object) -> object:
+    converted = _convert_special_types(value)
+    if converted is not None:
+        return converted
+    converted_complex = _convert_complex_types(value)
+    if converted_complex is not None:
+        return converted_complex
+    return value
 
 
 def stable_json_hash(

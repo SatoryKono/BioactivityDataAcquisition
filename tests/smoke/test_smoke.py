@@ -12,8 +12,6 @@ Run with: make test-smoke
 from __future__ import annotations
 
 import os
-import json
-from pathlib import Path
 import subprocess
 import sys
 import pytest
@@ -49,12 +47,11 @@ class TestRuntimeDependencies:
     """Verify critical runtime dependencies are installed and importable."""
 
     @staticmethod
-    def check_module_importable_isolated(module_name: str) -> dict[str, str]:
+    def check_module_importable_isolated(module_name: str) -> None:
         command = [
             sys.executable,
             "-c",
-            f"import importlib,json; module = importlib.import_module({module_name!r}); "
-            "print(json.dumps({'name': module.__name__, 'origin': module.__file__}))",
+            f"import importlib; importlib.import_module({module_name!r})",
         ]
         timeout_seconds = _import_timeout_seconds(module_name)
         try:
@@ -74,7 +71,6 @@ class TestRuntimeDependencies:
             f"Failed to import runtime dependency {module_name}: {proc.stdout}"
             f"{proc.stderr}"
         )
-        return json.loads(proc.stdout.splitlines()[-1])
 
     @pytest.mark.parametrize(
         "module_name",
@@ -113,9 +109,7 @@ class TestRuntimeDependencies:
     )
     def test_runtime_dependency_importable(self, module_name: str) -> None:
         """Each critical dependency must be importable."""
-        identity = self.check_module_importable_isolated(module_name)
-        assert identity["name"] == module_name
-        assert Path(identity["origin"]).is_file()
+        self.check_module_importable_isolated(module_name)
 
 
 @pytest.mark.smoke

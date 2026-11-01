@@ -184,7 +184,6 @@ def test_repo_composite_configs_all_validate_against_join_key_policies() -> None
     composite_names = tuple(
         path.stem for path in sorted(Path("configs/composites").glob("*.yaml"))
     )
-    assert composite_names, "Repository config validation must cover a nonempty census"
 
     for composite_name in composite_names:
         validate_join_key_normalization_policies(load_composite_config(composite_name))

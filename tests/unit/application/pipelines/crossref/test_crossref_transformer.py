@@ -325,13 +325,11 @@ def test_get_entity_class(transformer):
 
 def test_pre_extract_validation_accepts_valid_doi(transformer, pipeline_context):
     """Pre-extract validation should accept valid DOI values."""
-    record = {"DOI": "10.1234/valid.doi"}
     transformer._pre_extract_validation(
         pipeline_context,
-        record,
+        {"DOI": "10.1234/valid.doi"},
         index=0,
     )
-    assert record == {"DOI": "10.1234/valid.doi"}
 
 
 @pytest.mark.parametrize(

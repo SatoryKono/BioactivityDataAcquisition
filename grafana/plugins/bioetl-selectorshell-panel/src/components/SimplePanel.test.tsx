@@ -46,10 +46,10 @@ function deferredResponse() {
 }
 
 describe('selector context request lifecycle', () => {
-  const originalFetch = globalThis.fetch;
+  const originalFetch = global.fetch;
 
   afterEach(() => {
-    globalThis.fetch = originalFetch;
+    global.fetch = originalFetch;
     jest.clearAllMocks();
   });
 
@@ -57,7 +57,7 @@ describe('selector context request lifecycle', () => {
     let runId = 'run-123';
     const replaceVariables = (value: string) => (value.includes('run_id') ? runId : 'chembl');
     const fetchMock = jest.fn().mockResolvedValue(response());
-    globalThis.fetch = fetchMock;
+    global.fetch = fetchMock;
     const panelProps = { ...props(), replaceVariables };
     render(<SimplePanel {...panelProps} />);
     await screen.findByText(/Resolved run-123/);
@@ -75,7 +75,7 @@ describe('selector context request lifecycle', () => {
 
   it('shows loading until the current request resolves', async () => {
     const request = deferredResponse();
-    globalThis.fetch = jest.fn().mockReturnValue(request.promise);
+    global.fetch = jest.fn().mockReturnValue(request.promise);
     render(<SimplePanel {...props()} />);
     expect(screen.getByText('Syncing…')).toBeInTheDocument();
     await act(async () => request.resolve(response()));
@@ -85,7 +85,7 @@ describe('selector context request lifecycle', () => {
 
   it('hides the previous error while a new URL is loading', async () => {
     const pending = deferredResponse();
-    globalThis.fetch = jest.fn().mockRejectedValueOnce(new Error('request failed')).mockReturnValueOnce(pending.promise);
+    global.fetch = jest.fn().mockRejectedValueOnce(new Error('request failed')).mockReturnValueOnce(pending.promise);
     const view = render(<SimplePanel {...props()} />);
     expect(await screen.findByText('request failed')).toBeInTheDocument();
     view.rerender(<SimplePanel {...props('/new-selector-context')} />);
@@ -99,7 +99,7 @@ describe('selector context request lifecycle', () => {
     const previous = deferredResponse();
     const current = deferredResponse();
     const fetchMock = jest.fn().mockReturnValueOnce(previous.promise).mockReturnValueOnce(current.promise);
-    globalThis.fetch = fetchMock;
+    global.fetch = fetchMock;
     const view = render(<SimplePanel {...props()} />);
     const init = fetchMock.mock.calls[0][1] as RequestInit;
     view.rerender(<SimplePanel {...props('/new-selector-context')} />);

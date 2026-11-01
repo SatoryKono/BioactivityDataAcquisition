@@ -9,12 +9,10 @@ from __future__ import annotations
 
 import argparse
 import ast
-import importlib.util
 import json
 import os
 import subprocess
 import sys
-import xml.etree.ElementTree as ET
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -57,12 +55,8 @@ CONFIG_SCHEMA_MIGRATION_STATUS_TEST = (
     "tests/architecture/test_config_schema_migration_status.py"
 )
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
-BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
-SCRIPTS_INVENTORY_MANIFEST_TEST = (
-    "tests/architecture/test_scripts_inventory_manifest.py"
-)
 INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST = (
     "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
 )
@@ -107,42 +101,10 @@ EXTERNAL_RESOURCE_INVENTORY_TEST = (
     "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py"
 )
 EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
-    "tests/architecture/test_external_resource_inventory_catalog.py"
+    "tests/architecture/test_external_resource_inventory.py"
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
-    ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
-    "mkdocs.yml": ("tests/architecture/test_documentation_sync.py",),
-    "docs/reports/evidence/project-test-health/SUMMARY.md": (
-        "tests/architecture/test_governance_freshness_protocol.py",
-    ),
-    "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md": (
-        "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
-    ),
-    "configs/quality/layered_suffix_policy.yaml": (
-        "tests/architecture/test_layer_aware_suffix_policy.py",
-    ),
-    **dict.fromkeys(
-        (
-            "docs/reports/evidence/project-test-health/SUMMARY.md",
-            "docs/reports/evidence/project-test-health/metadata.yaml",
-            "docs/reports/evidence/project-test-health/shard_registry.yaml",
-        ),
-        ("tests/architecture/test_governance_freshness_protocol.py",),
-    ),
-    "reports/quality/pytest-nodeid-inventory.json": (
-        "tests/unit/scripts/qa/test_build_pytest_nodeid_inventory.py",
-    ),
-    "reports/quality/quality-move-qm08/reference_decisions.json": (
-        "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
-    ),
-    "configs/quality/quality_move_qm09_reference_decisions.json": (
-        "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
-    ),
-    "scripts/engineering/README.md": (
-        SCRIPTS_INVENTORY_MANIFEST_TEST,
-        "tests/architecture/test_scripts_inventory_discovery.py",
-    ),
     ".gitleaksignore": (
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
     ),
@@ -201,14 +163,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/quality/low-coverage-6045-revalidation.xml": (
         "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
-    ),
-    "reports/quality/issue-12474-api-owner-brief.md": (
-        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
-        "tests/architecture/test_check_doc_links_guardrails.py",
-    ),
-    "reports/quality/issue-12474-ci-parity-evidence.md": (
-        *ISSUE_12475_PHYSICAL_PARITY_TESTS,
-        "tests/unit/scripts/engineering/ci/test_physical_schema_parity.py",
     ),
     "reports/quality/issue-12475-physical-parity-evidence.md": (
         *ISSUE_12475_PHYSICAL_PARITY_TESTS,
@@ -322,7 +276,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/engineering/qa/README.md": (
         EXTERNAL_RESOURCE_INVENTORY_TEST,
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        SCRIPTS_INVENTORY_MANIFEST_TEST,
+        "tests/architecture/test_scripts_inventory_manifest.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     **dict.fromkeys(
@@ -333,19 +287,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory/part-03.json",
             "configs/quality/external_resource_inventory/part-04.json",
             "configs/quality/external_resource_inventory/part-05.json",
-            "configs/quality/external_resource_inventory/part-06.json",
         ),
         (EXTERNAL_RESOURCE_INVENTORY_TEST, EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST),
-    ),
-    **dict.fromkeys(
-        (
-            "configs/quality/external_resource_inventory_qm08_review.json",
-            "configs/quality/external_resource_inventory_qm09_review.json",
-        ),
-        (
-            EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-        ),
     ),
     **dict.fromkeys(
         (
@@ -435,20 +378,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
     ),
     "Dockerfile.bioetl": (DOCKER_RUNTIME_CONTRACT_TEST,),
-    "grafana/plugins/eslint-shared-config.mjs": (
-        BRACES_BACKPORT_TEST,
-        "tests/architecture/test_dashboard_scenes_contract.py",
-        RESIDUAL_OSV_TEST,
-    ),
-    "docker-compose.monitoring.yml": (
-        DOCKER_RUNTIME_CONTRACT_TEST,
-        "tests/integration/test_grafana_datasource_provisioning.py",
-        "tests/integration/test_dashboard_operator_readability.py",
-    ),
-    "docs/05-operations/runbooks/docker-security-baseline.md": (
-        DOCKER_RUNTIME_CONTRACT_TEST,
-        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
-    ),
     "docs/04-reference/cli.md": (
         "tests/architecture/test_cli_doc_parity.py",
         DOCUMENTATION_SYNC_TEST,
@@ -513,19 +442,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/infrastructure/schemas/test_dq_config.py",
     ),
     "configs/quality/test_skip_inventory.yaml": TEST_SKIP_INVENTORY_TESTS,
-    "configs/quality/assertless_ratchet.yaml": (
-        "tests/architecture/test_arch_s4_s9_gates.py",
-        *TEST_GOVERNANCE_ARTIFACT_TESTS,
-    ),
     "configs/quality/test_governance_audit.yaml": TEST_GOVERNANCE_ARTIFACT_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
-    "reports/quality/quality-move-qm08/publication-provenance.json": (
-        "tests/unit/scripts/ci/test_test_telemetry_provenance.py",
-        "tests/architecture/test_external_resource_inventory_catalog.py",
-        "tests/unit/scripts/ops/test_refresh_router_delivery.py",
-    ),
     "configs/quality/scripts_inventory_manifest.json": (
-        SCRIPTS_INVENTORY_MANIFEST_TEST,
+        "tests/architecture/test_scripts_inventory_manifest.py",
     ),
     "configs/quality/scripts_lifecycle_registry.json": (
         "tests/architecture/test_scripts_lifecycle_registry.py",
@@ -617,12 +537,12 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         RESIDUAL_OSV_TEST,
     ),
     "grafana/plugins/bioetl-scenes-app/": (
-        BRACES_BACKPORT_TEST,
+        "tests/architecture/test_braces_backport.py",
         "tests/architecture/test_dashboard_scenes_contract.py",
         RESIDUAL_OSV_TEST,
     ),
     "grafana/plugins/bioetl-selectorshell-panel/": (
-        BRACES_BACKPORT_TEST,
+        "tests/architecture/test_braces_backport.py",
         RESIDUAL_OSV_TEST,
     ),
     "reports/audit-runs/12106-s6/": (
@@ -1595,104 +1515,7 @@ def build_parser() -> argparse.ArgumentParser:
     subtract.add_argument("--output", type=Path, required=True)
     subtract.add_argument("--ignore-file", type=Path, required=True)
     subtract.set_defaults(handler=_subtract_affected_command)
-    physical = subparsers.add_parser("physical-parity")
-    physical.add_argument("--junit", type=Path, required=True)
-    physical.add_argument("--negative-control", action="store_true")
-    physical.set_defaults(handler=_physical_parity_command)
     return parser
-
-
-REPO_ROOT = Path(__file__).resolve().parents[3]
-NEGATIVE_CONTROL_ENV = "BIOETL_PHYSICAL_PARITY_NEGATIVE_CONTROL"
-TARGETS = (
-    "tests/integration/infrastructure/storage/test_issue_12475_physical_parity.py",
-    "tests/integration/infrastructure/storage/test_gold_writer_versioning.py",
-    "tests/unit/domain/exceptions/test_storage.py",
-    "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
-    "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
-    "tests/e2e/test_pipeline_with_schema_drift_e2e.py",
-    "tests/integration/infrastructure/storage/test_issue_12474_parity_control.py",
-)
-
-
-def _unsuccessful_parity_cases(cases: Sequence[ET.Element]) -> list[str]:
-    """Keep every failed, errored or skipped testcase diagnostic in order."""
-    errors = []
-    for case in cases:
-        for tag in ("failure", "error", "skipped"):
-            if case.find(tag) is not None:
-                errors.append(f"{case.get('classname')}.{case.get('name')}: {tag}")
-    return errors
-
-
-def validate_junit(path: Path, targets: tuple[str, ...] = TARGETS) -> list[str]:
-    """Require passing, nonempty, unskipped evidence for every selected module."""
-    if not targets:
-        return ["empty parity selection"]
-    if not path.is_file():
-        return ["missing parity JUnit"]
-    try:
-        cases = list(ET.parse(path).getroot().iter("testcase"))
-    except (ET.ParseError, OSError) as exc:
-        return [f"unreadable parity JUnit: {exc}"]
-    errors = []
-    if not cases:
-        errors.append("empty parity JUnit")
-    errors.extend(_unsuccessful_parity_cases(cases))
-    for target in targets:
-        module = target.removesuffix(".py").replace("/", ".")
-        if not any(
-            (case.get("classname") or "") == module
-            or (case.get("classname") or "").startswith(module + ".")
-            for case in cases
-        ):
-            errors.append(f"missing parity module: {target}")
-    return errors
-
-
-def _physical_parity_command(args: argparse.Namespace) -> int:
-    """Run one canonical matrix with real Delta/Arrow and preserve its JUnit."""
-    missing = [target for target in TARGETS if not (REPO_ROOT / target).is_file()]
-    if not TARGETS or missing:
-        print(f"Missing/empty mandatory parity selection: {missing}", file=sys.stderr)
-        return 2
-    for backend in ("deltalake", "pyarrow", "zstandard"):
-        if importlib.util.find_spec(backend) is None:
-            print(f"Missing mandatory parity backend: {backend}", file=sys.stderr)
-            return 2
-    junit = args.junit.resolve()
-    junit.parent.mkdir(parents=True, exist_ok=True)
-    if junit.exists():
-        print(f"Refusing stale parity evidence: {junit}", file=sys.stderr)
-        return 2
-    env = dict(os.environ)
-    env.pop("PYTEST_ADDOPTS", None)
-    # Ambient values cannot accidentally enable or mask the controlled run.
-    env[NEGATIVE_CONTROL_ENV] = "1" if args.negative_control else "0"
-    command = [
-        sys.executable,
-        "-m",
-        "pytest",
-        *TARGETS,
-        "-q",
-        "-o",
-        "addopts=",
-        "--strict-markers",
-        "--strict-config",
-        "-o",
-        "xfail_strict=true",
-        "--import-mode=importlib",
-        "-p",
-        "no:benchmark",
-        "--junitxml",
-        str(junit),
-    ]
-    print(f"physical parity argv={command!r}; cwd={REPO_ROOT}", flush=True)
-    result = subprocess.run(command, cwd=REPO_ROOT, env=env, check=False)
-    errors = validate_junit(junit)
-    for error in errors:
-        print(error, file=sys.stderr)
-    return result.returncode or int(bool(errors))
 
 
 def _job_result_pair(raw: str) -> tuple[str, str]:
