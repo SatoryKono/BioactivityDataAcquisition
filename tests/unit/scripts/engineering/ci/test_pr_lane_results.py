@@ -300,6 +300,32 @@ def test_shadow_compare_routes_composite_configs(path: str) -> None:
     )
 
 
+def test_shadow_compare_routes_composite_gold_quality_configs() -> None:
+    """Gold DQ config changes select both domain and schema regression tests."""
+    repo_root = Path(__file__).resolve().parents[5]
+    paths = [
+        "configs/quality/entities/composite/activity.yaml",
+        "configs/quality/entities/composite/assay.yaml",
+        "configs/quality/entities/composite/molecule.yaml",
+        "configs/quality/entities/composite/publication.yaml",
+        "configs/quality/entities/composite/target.yaml",
+        "scripts/engineering/ci/pr_lane_results.py",
+    ]
+    report = build_shadow_compare(paths, repo_root=repo_root)
+    assert (
+        "tests/unit/domain/behavior/test_composite_gold_dq_negative.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/unit/infrastructure/schemas/test_composite_gold_dq.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/unit/scripts/engineering/ci/test_pr_lane_results.py"
+        in report["selected"]
+    )
+
+
 @pytest.mark.parametrize(
     "path",
     (

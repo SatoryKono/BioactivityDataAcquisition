@@ -547,6 +547,10 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "configs/composites/": (
         "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
     ),
+    "configs/quality/entities/composite/": (
+        "tests/unit/domain/behavior/test_composite_gold_dq_negative.py",
+        "tests/unit/infrastructure/schemas/test_composite_gold_dq.py",
+    ),
     # Entity YAML family: fail-closed pipeline load + FilterConfigFile boundary.
     "configs/entities/": (
         "tests/architecture/test_config_strict_keys.py",
@@ -560,6 +564,9 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_gemini_cli_bootstrap.py",
     ),
     "scripts/engineering/quality/": QUALITY_GOVERNANCE_TESTS,
+    "scripts/engineering/ci/pr_lane_results.py": (
+        "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+    ),
     "src/bioetl/infrastructure/quality/": QUALITY_GOVERNANCE_TESTS,
     "grafana/tooling/router-v7-bridge/": (
         "tests/architecture/test_circleci_migration_contract.py",
