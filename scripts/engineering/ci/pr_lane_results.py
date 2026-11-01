@@ -108,6 +108,14 @@ EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    "mkdocs.yml": ("tests/architecture/test_documentation_sync.py",),
+    "configs/quality/layered_suffix_policy.yaml": ("tests/architecture/test_layer_aware_suffix_policy.py",),
+    "scripts/engineering/README.md": (
+        "tests/architecture/test_scripts_inventory_manifest.py",
+        "tests/architecture/test_scripts_inventory_discovery.py",
+    ),
+
     ".gitleaksignore": (
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
     ),
