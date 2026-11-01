@@ -18,7 +18,7 @@ from bioetl.domain.normalization.canonical_json_profile import (
 from bioetl.domain.types.dq_contracts import DQDisposition
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import JsonDict
+    from bioetl.domain.types.identifiers import JsonDict
 else:
     JsonDict = dict[str, object]
 
