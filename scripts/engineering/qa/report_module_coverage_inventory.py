@@ -54,7 +54,7 @@ def _write_text_atomically(path: Path, text: str, *, root: Path | None = None) -
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     try:
-        tmp_path.write_text(text, encoding="utf-8")
+        tmp_path.write_text(text, encoding="utf-8", newline="\n")
         tmp_path.replace(path)
     finally:
         if tmp_path.exists():

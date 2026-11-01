@@ -16,6 +16,7 @@ Exceptions (collectors that intentionally scan untracked files):
 from __future__ import annotations
 
 import os
+import json
 from fnmatch import fnmatch
 
 import subprocess
@@ -27,6 +28,27 @@ from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
 def _get_tracked_paths(repo_root: Path) -> set[str]:
     """Retrieve the set of tracked file paths via git ls-files. Read afresh so staged changes are visible."""
+    receipt = repo_root / "quality-tooling-support.json"
+    if not (repo_root / ".git").exists() and receipt.is_file():
+        payload = json.loads(receipt.read_text(encoding="utf-8"))
+        if payload.get("schema_version") != 1 or not isinstance(
+            payload.get("files"), dict
+        ):
+            raise ValueError("Invalid sdist quality-tooling support receipt")
+        paths = set()
+        for name, digest in payload["files"].items():
+            candidate = Path(name)
+            if (
+                candidate.is_absolute()
+                or ".." in candidate.parts
+                or not isinstance(digest, str)
+                or len(digest) != 64
+                or any(character not in "0123456789abcdef" for character in digest)
+                or not (repo_root / candidate).is_file()
+            ):
+                raise ValueError(f"Invalid sdist quality-tooling support entry: {name}")
+            paths.add(name)
+        return paths
     try:
         completed = subprocess.run(
             ensure_safe_cli_argv(["git", "ls-files", "-z"]),
@@ -63,7 +85,14 @@ def git_discovery_environment() -> dict[str, str]:
 
 
 def _find_repo_root(root: Path) -> Path:
-    return next((p for p in (root, *root.parents) if (p / ".git").exists()), root)
+    return next(
+        (
+            p
+            for p in (root, *root.parents)
+            if (p / ".git").exists() or (p / "quality-tooling-support.json").is_file()
+        ),
+        root,
+    )
 
 
 def _matches_path(parts: tuple[str, ...], pattern: tuple[str, ...]) -> bool:
