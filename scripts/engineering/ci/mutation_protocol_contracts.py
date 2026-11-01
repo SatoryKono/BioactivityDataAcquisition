@@ -27,7 +27,8 @@ from types import FunctionType, MethodType
 MANIFEST_ENV = "BIOETL_MUTATION_PROTOCOL_MANIFEST"
 ROOT_ENV = "BIOETL_MUTATION_SOURCE_ROOT"
 HELPER = re.compile(
-    r"xǁ(?P<owner>[^ǁ]+)ǁ(?P<method>.+)__mutmut_(?P<id>orig|[1-9][0-9]*)"
+    r"xǁ(?P<owner>[^ǁ]+)ǁ(?P<method>.+)__mutmut_(?P<id>orig|[1-9]\d*)",
+    re.ASCII,
 )
 
 

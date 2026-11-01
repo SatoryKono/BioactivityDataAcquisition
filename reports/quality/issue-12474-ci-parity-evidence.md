@@ -1243,3 +1243,42 @@ The scorecard's stale XML binding is regenerated from the actual new
 capture, preserving metrics and budgets. Final consumer checks, complete
 mutation scores, positive CI, ADMIT, final review, merge and issue closure
 remain required. No merge or closure is claimed.
+
+### ASCII helper identity and rejected startup hypothesis (2026-11-01)
+
+The metadata-only publication `cdc140717732b6dda6efeb5193aa933d8ee70cb2`,
+tree `6cea924ed874a7b7b391d82df5184e472974917a`, passed all six native
+CI-family checks on a clean tree (exit 0), following native evidence
+regeneration after report EOF formatting. Its 39 consumer cases passed
+without skips. The original stale evidence check remains a recorded FAIL;
+it was not relabeled. Independent `telemetry_independent_review` verified
+the native two-file evidence follow-up and supported publication only.
+
+Sonar finding `AaGUwSuuE-Km-bl-nM56` (`python:S6353`) requests the concise
+digit class in the mutation helper identity parser. Using `\d` with
+`re.ASCII` preserves the exact previous positive ASCII integer language.
+Four isolated negative controls reject Arabic, full-width, superscript
+digits and a leading zero; actual locked-instrumenter helper definitions
+remain accepted and authenticated. The complete 24-case helper suite,
+Ruff, strict mypy and targeted pre-commit returned 0. The independent
+reviewer checked source diff SHA-256
+`e60b0e71b1f73cd2fbad6b69410311024b40bb12ee79e16f77cbc20e1c46775e`.
+These added test inputs require a new measurement producer; measurements
+from `4eb3964…` are not rebound to them. Remote Sonar acceptance is pending.
+
+A separately preserved diagnostic used Python 3.12.15, the unchanged frozen
+lock, CI settings and 100 existing, tested domain mutants across distinct
+functions. Both stock `-p` and `PYTEST_PLUGINS` variants completed all 100
+with equal selected/collected test sets, outcomes and external plugin
+registries. Each performed 600 native entrypoint discovery calls. Median
+per-mutant times were 0.269797 and 0.264006 seconds; the latter does not
+prove the throughput needed by the full hourly gate. This hypothesis is
+rejected as a discovery optimization, and the workflow is unchanged.
+Three matching setup failures were traced to the active mutations in
+synthetic fixture construction, with exact mutant frames and exception
+payloads; they are not bootstrap failures. The initial observer import
+failure and the overly broad first comparison assertion are preserved.
+The corrected causal reader checks the same original observations;
+its summary SHA-256 is
+`0c2f5f1a097d210245954b6820bf363c5d894f4bd1363c68b31decfa986b943c`.
+This bounded experiment provides no complete mutation score or CI ADMIT.

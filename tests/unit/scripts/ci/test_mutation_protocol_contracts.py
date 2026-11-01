@@ -97,6 +97,17 @@ def test_real_instrumentation_restores_membership_without_removing_mutants(
     }
 
 
+@pytest.mark.parametrize("invalid_id", ["1٢", "1２", "1²", "01"])
+def test_protocol_helper_ids_require_canonical_ascii_digits(instrumented, invalid_id):
+    module, contract, _ = instrumented
+    valid = [name for name in vars(module.P) if harness.HELPER.fullmatch(name)]
+    assert valid
+    for name in valid:
+        harness._verify_helper(module.P, contract, name)
+    with pytest.raises(ValueError, match="Unexpected structural Protocol member"):
+        harness._verify_helper(module.P, contract, "xǁPǁaccept__mutmut_" + invalid_id)
+
+
 def test_active_body_mutants_remain_observable(instrumented):
     module, contract, mutants = instrumented
     harness.normalize_protocol(module.P, contract)
