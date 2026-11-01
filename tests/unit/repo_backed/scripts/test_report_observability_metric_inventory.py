@@ -20,6 +20,9 @@ from types import SimpleNamespace
 import pytest
 
 from scripts.engineering.qa import observability_metric_inventory_scan as inventory_scan
+from scripts.engineering.qa import (
+    observability_metric_inventory_scan as inventory_candidates,
+)
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
 
 # Repo-backed lane: two entrypoint tests spawn the module via subprocess with
@@ -1373,6 +1376,27 @@ def test_load_drift_allowlist_rejects_expired_cardinality_review_dates(
         raise AssertionError(
             "runtime_cardinality_review_required must reject expired lifecycle entries"
         )
+    from datetime import UTC, date, datetime, timedelta, timezone
+    from bioetl.infrastructure.observability import metric_inventory_policy as policy
+
+    class HostLocalInstant(datetime):
+        def astimezone(self, tz=None):
+            local_zone = timezone(timedelta(hours=-8)) if tz is None else tz
+            return super().astimezone(local_zone)
+
+    instant = HostLocalInstant(2026, 10, 29, 0, 30, tzinfo=UTC)
+    arguments = {
+        "key": "runtime_cardinality_review_required",
+        "metric_name": "bioetl_hotspot_total",
+        "raw_review_date": "2026-10-28",
+    }
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(policy, "current_utc_time", lambda: instant)
+        assert policy._validate_allowlist_review_date(**arguments) is None
+        with pytest.raises(ValueError, match="expired review_date"):
+            policy._validate_allowlist_review_date(
+                **arguments, today=date(2026, 10, 29)
+            )
 
 
 def test_load_drift_allowlist_rejects_non_iso_review_dates(
@@ -1429,7 +1453,7 @@ def test_iter_candidate_paths_with_git_grep_includes_no_color_flag(
         fake_run_text_discovery_command,
     )
 
-    paths = inventory_scan._iter_candidate_paths_with_git_grep(
+    paths = inventory_candidates._iter_candidate_paths_with_git_grep(
         scan_root,
         markers=("increment_counter",),
         excluded_parts=(),
