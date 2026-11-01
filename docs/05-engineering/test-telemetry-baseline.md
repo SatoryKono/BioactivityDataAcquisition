@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `codex/issue-12389-active-artifacts`
-- Source commit: `59ead153392774f805b3d21bd9f39678cd778bcd`
-- Source run id: `41112795630`
-- Source event: `workflow_dispatch`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41112795630`
-- Source tree sha256: `df5f496bd19440a611ed83b00238b80b3b9da98393ffac841286972c5e39e6aa`
+- Source branch: `main`
+- Source commit: `pending`
+- Source run id: `pending`
+- Source event: `push`
+- Source run URL: `pending`
+- Source tree sha256: `ecb4fa969c82b8577df89fa3137d742a9893c46cd3277e0d1edf08ce6961f67b`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-31T18:28:46.488470+00:00`
+- Refreshed at (UTC): `2026-11-01T14:17:54.224821+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -113,8 +113,8 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `99.76%`
-- Threshold satisfied: `True`
+- Actual coverage: `pending`
+- Threshold satisfied: `None`
 
 ## Duration Telemetry
 

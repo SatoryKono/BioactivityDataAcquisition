@@ -74,6 +74,12 @@ def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
     """Route mixed-provider tests to the canonical cassette name they reuse."""
     if request.node.name == "test_parallel_independent_pipelines":
         return "test_uniprot_protein_full_cycle"
+    if request.node.name in [
+        "test_run_normal_a_b_a",
+        "test_run_cancellation_and_restart",
+        "test_run_error_and_restart",
+    ]:
+        return "test_all_chembl_pipelines_chain"
     return request.node.name
 
 
@@ -284,3 +290,110 @@ async def test_rerun_same_pipeline_twice(e2e_data_dir: Path):
         f"Merge rerun changed row count: {first_count} -> {second_count}"
     )
     assert second_identity == first_identity, "Merge rerun changed identity set"
+
+
+@pytest.mark.e2e
+@pytest.mark.vcr(allow_playback_repeats=True)
+@pytest.mark.asyncio
+async def test_run_normal_a_b_a(e2e_data_dir: Path):
+    """E2E: Normal pipeline runs in A -> B -> A pattern in a single process.
+
+    Verifies state isolation between runs in the same process.
+    """
+    # Run A1 (Target)
+    ctx1 = create_test_context("chembl_target", limit=2)
+    runner1 = bootstrap_pipeline_runner(ctx1)
+    await runner1.run()
+
+    # Run B (Molecule)
+    ctx_b = create_test_context("chembl_molecule", limit=2)
+    runner_b = bootstrap_pipeline_runner(ctx_b)
+    await runner_b.run()
+
+    # Run A2 (Target)
+    ctx2 = create_test_context("chembl_target", limit=2)
+    runner2 = bootstrap_pipeline_runner(ctx2)
+    await runner2.run()
+
+    await assert_silver_table_has_records(e2e_data_dir, "chembl_target", expected_min=1)
+    await assert_silver_table_has_records(
+        e2e_data_dir, "chembl_molecule", expected_min=1
+    )
+
+
+@pytest.mark.e2e
+@pytest.mark.vcr(allow_playback_repeats=True)
+@pytest.mark.asyncio
+async def test_run_cancellation_and_restart(e2e_data_dir: Path):
+    """E2E: Pipeline cancellation followed by restart in a single process.
+
+    Verifies A -> B -> A pattern and cancellation safety.
+    """
+    import asyncio
+
+    # Run A1 (Target)
+    ctx1 = create_test_context("chembl_target", limit=2)
+    runner1 = bootstrap_pipeline_runner(ctx1)
+
+    task = asyncio.create_task(runner1.run())
+    await asyncio.sleep(0.1)  # Let it start
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
+
+    # Run B (Molecule)
+    ctx_b = create_test_context("chembl_molecule", limit=2)
+    runner_b = bootstrap_pipeline_runner(ctx_b)
+    await runner_b.run()
+
+    # Run A2 (Target)
+    ctx2 = create_test_context("chembl_target", limit=2)
+    runner2 = bootstrap_pipeline_runner(ctx2)
+    await runner2.run()
+
+    await assert_silver_table_has_records(e2e_data_dir, "chembl_target", expected_min=1)
+    await assert_silver_table_has_records(
+        e2e_data_dir, "chembl_molecule", expected_min=1
+    )
+
+
+@pytest.mark.e2e
+@pytest.mark.vcr(allow_playback_repeats=True)
+@pytest.mark.asyncio
+async def test_run_error_and_restart(
+    e2e_data_dir: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """E2E: Pipeline error followed by restart in a single process.
+
+    Verifies A -> B -> A pattern and error safety using a simulated network error
+    that propagates up the real execution path.
+    """
+
+    # Run A1 (Target) with invalid config to simulate error passing through real path
+    ctx1 = create_test_context(
+        "chembl_target", limit=3, query="invalid_field=something"
+    )
+    runner1 = bootstrap_pipeline_runner(ctx1)
+
+    try:
+        await runner1.run()
+        pytest.fail("Should have failed")
+    except Exception:
+        pass
+
+    # Run B (Molecule) - normal
+    ctx_b = create_test_context("chembl_molecule", limit=2)
+    runner_b = bootstrap_pipeline_runner(ctx_b)
+    await runner_b.run()
+
+    # Run A2 (Target) - normal
+    ctx2 = create_test_context("chembl_target", limit=2)
+    runner2 = bootstrap_pipeline_runner(ctx2)
+    await runner2.run()
+
+    await assert_silver_table_has_records(e2e_data_dir, "chembl_target", expected_min=1)
+    await assert_silver_table_has_records(
+        e2e_data_dir, "chembl_molecule", expected_min=1
+    )
