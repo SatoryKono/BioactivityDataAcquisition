@@ -413,6 +413,10 @@ class TestPIIHandling:
       Actual email values are hashed at the transformer level (RULES.md S5.4).
     """
 
+    REQUEST_METADATA_SANITIZER_PATH = (
+        "infrastructure/adapters/common/_api_request_sanitize.py"
+    )
+
     # Files with known technical email usage (NOT user PII)
     # These are API identifiers required by external services
     KNOWN_TECHNICAL_EMAIL_FILES = frozenset(
@@ -474,10 +478,47 @@ class TestPIIHandling:
             in self.KNOWN_TECHNICAL_EMAIL_PATHS
         ):
             return True
+        if (
+            pattern_name == "email"
+            and py_file.relative_to(SRC_DIR).as_posix()
+            == self.REQUEST_METADATA_SANITIZER_PATH
+        ):
+            # Request metadata is redacted, not a persisted Silver PII field.
+            # Gate on actual protection: returning the raw email must fail.
+            from bioetl.infrastructure.adapters.common._api_request_sanitize import (
+                sanitize_params,
+            )
+
+            return all(
+                sanitize_params({key: "fixture@example.invalid"}) == {key: "[REDACTED]"}
+                for key in ("email", "Email", "EMAIL")
+            )
         return (
             pattern_name == "address"
             and py_file.name in self.KNOWN_NON_PII_ADDRESS_FILES
         )
+
+    def test_request_metadata_redaction_guard_rejects_email_leak(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """The addressed metadata path must fail when its sanitizer leaks email."""
+        from bioetl.infrastructure.adapters.common import _api_request_sanitize
+
+        path = SRC_DIR / "infrastructure/adapters/common/_api_request_sanitize.py"
+        assert self._file_is_allowlisted_for_pattern(path, "email")
+        monkeypatch.setattr(
+            _api_request_sanitize, "sanitize_params", lambda values: values
+        )
+        assert not self._file_is_allowlisted_for_pattern(path, "email")
+        assert any("'email'" in row for row in self._pii_violations_for_file(path))
+
+    def test_request_metadata_redaction_is_not_a_global_exception(self) -> None:
+        """Other paths and other PII patterns retain their original policy."""
+        path = SRC_DIR / "infrastructure/adapters/common/_api_request_sanitize.py"
+        other = SRC_DIR / "infrastructure/other/_api_request_sanitize.py"
+        assert not self._file_is_allowlisted_for_pattern(path, "phone")
+        assert not self._file_is_allowlisted_for_pattern(other, "email")
 
     def _file_mentions_hashing(self, content: str) -> bool:
         return bool(re.search(r"sha256|hash|anonymize", content, re.IGNORECASE))
@@ -490,7 +531,12 @@ class TestPIIHandling:
                 continue
             if self._file_is_allowlisted_for_pattern(py_file, pattern_name):
                 continue
-            if self._file_mentions_hashing(content):
+            requires_runtime_redaction = (
+                pattern_name == "email"
+                and py_file.relative_to(SRC_DIR).as_posix()
+                == self.REQUEST_METADATA_SANITIZER_PATH
+            )
+            if self._file_mentions_hashing(content) and not requires_runtime_redaction:
                 continue
             rel_path = py_file.relative_to(PROJECT_ROOT)
             violations.append(f"{rel_path}: PII field '{pattern_name}' without hashing")

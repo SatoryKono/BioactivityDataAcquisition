@@ -311,7 +311,12 @@ def test_record_retry_budget_exhausted_silent_without_logger(
     """Should not raise when no logger is configured."""
     client = _ConcreteRetryClient(retry_config=default_config, logger=None)
     client._record_retry_budget_exhausted(method="GET", url="https://example.com")
-    # If no exception is raised, the test passes
+    client._metrics.increment_counter.assert_called_once_with(
+        "bioetl_http_retry_budget_exhausted_total",
+        1,
+        {"provider": "test_provider", "method": "GET"},
+    )
+    assert client._client.mock_calls == []
 
 
 # ---------------------------------------------------------------------------
@@ -423,6 +428,8 @@ def test_log_retry_silent_without_logger(default_config: RetryConfig) -> None:
     client._log_retry(
         url="https://example.com", method="GET", attempt=0, wait_seconds=1.0
     )
+    assert client._metrics.mock_calls == []
+    assert client._client.mock_calls == []
 
 
 def test_log_retry_uses_reason_when_no_status_code(

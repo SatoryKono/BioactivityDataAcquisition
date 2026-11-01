@@ -31,6 +31,11 @@ def test_proof_bundle_schema_is_valid_draft_2020_12() -> None:
     )
 
     Draft202012Validator.check_schema(schema)
+    from jsonschema.exceptions import SchemaError
+
+    assert schema["$schema"].rstrip("#").endswith("2020-12/schema")
+    with pytest.raises(SchemaError):
+        Draft202012Validator.check_schema({**schema, "type": "invalid-schema-type"})
 
 
 def test_staged_registry_promotes_proof_gate_to_soft_fail() -> None:

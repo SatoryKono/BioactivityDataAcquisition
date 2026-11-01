@@ -161,6 +161,7 @@ def _build_schema_error_message(
     table: str,
     new_fields: set[str],
     removed_fields: set[str],
+    changed_fields: dict[str, tuple[str, str]] | None = None,
 ) -> str:
     """Build message for schema evolution mismatch."""
     parts = [f"Schema drift detected for '{table}'"]
@@ -168,6 +169,8 @@ def _build_schema_error_message(
         parts.append(f"new fields: {sorted(new_fields)}")
     if removed_fields:
         parts.append(f"removed fields: {sorted(removed_fields)}")
+    if changed_fields:
+        parts.append(f"changed field types: {changed_fields}")
     return ", ".join(parts)
 
 
@@ -181,12 +184,19 @@ class SchemaEvolutionError(StorageError):
         table: str,
         new_fields: set[str] | None = None,
         removed_fields: set[str] | None = None,
+        changed_fields: dict[str, tuple[str, str]] | None = None,
     ) -> None:
         self.table = table
         self.new_fields = new_fields or set()
         self.removed_fields = removed_fields or set()
+        self.changed_fields = changed_fields or {}
         super().__init__(
-            _build_schema_error_message(table, self.new_fields, self.removed_fields)
+            _build_schema_error_message(
+                table,
+                self.new_fields,
+                self.removed_fields,
+                self.changed_fields,
+            )
         )
 
 

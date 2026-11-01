@@ -4,32 +4,32 @@ Linked issue: #10596 (AUD-006). Schema: `cast-any-typing-census-v1`.
 
 Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`, `Any: JSON`, `as_mixin_host(`.
 
-- total_cast_any_count: 304
-- justified_count: 241
-- unjustified_count: 63
-- file_count: 99
+- total_cast_any_count: 300
+- justified_count: 242
+- unjustified_count: 58
+- file_count: 97
 
 ## By category
 
 | Category | Count |
 | --- | ---: |
-| `pd3_host_attr_default` | 131 |
+| `pd3_host_attr_default` | 132 |
 | `pd6_host_attr_default` | 90 |
 | `type_002_policy` | 2 |
 | `any_mixin_host` | 2 |
 | `any_host_attr` | 16 |
 | `any_json` | 0 |
 | `as_mixin_host_call` | 0 |
-| `unjustified` | 63 |
+| `unjustified` | 58 |
 
 ## By layer
 
 | Layer | Total | Unjustified |
 | --- | ---: | ---: |
-| `application` | 141 | 18 |
+| `application` | 140 | 17 |
 | `composition` | 18 | 4 |
 | `domain` | 12 | 2 |
-| `infrastructure` | 130 | 38 |
+| `infrastructure` | 127 | 34 |
 | `interfaces` | 3 | 1 |
 
 ## Unjustified by sub-bucket (triage only)
@@ -37,7 +37,7 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | Sub-bucket | Count |
 | --- | ---: |
 | `pd4_host_default_pending_protocol` | 0 |
-| `free_form_reason` | 63 |
+| `free_form_reason` | 58 |
 | `no_reason_tag` | 0 |
 
 ## Top files
@@ -45,7 +45,6 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | Path | Total | Justified | Unjustified |
 | --- | ---: | ---: | ---: |
 | `src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py` | 5 | 0 | 5 |
-| `src/bioetl/infrastructure/quality/exemptions_registry.py` | 4 | 0 | 4 |
 | `src/bioetl/application/services/export_lineage/export_execution.py` | 3 | 0 | 3 |
 | `src/bioetl/infrastructure/observability/observability_backend_process.py` | 3 | 0 | 3 |
 | `src/bioetl/application/composite/helpers/dependency_chained_key_resolver.py` | 2 | 0 | 2 |
@@ -64,17 +63,17 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | `src/bioetl/application/composite/merger_input_mixin.py` | 1 | 0 | 1 |
 | `src/bioetl/application/core/base_transformer/base.py` | 1 | 0 | 1 |
 | `src/bioetl/application/core/batch_processing_support.py` | 1 | 0 | 1 |
-| `src/bioetl/application/core/preflight/service.py` | 1 | 0 | 1 |
 | `src/bioetl/application/pipelines/chembl/subcellular_fraction_transformer.py` | 1 | 0 | 1 |
 | `src/bioetl/application/services/control_plane/replay/historical_closure_models.py` | 1 | 0 | 1 |
 | `src/bioetl/composition/factories/pipeline/_registry_factory_catalog.py` | 1 | 0 | 1 |
 | `src/bioetl/composition/factories/pipeline/registry_core.py` | 1 | 0 | 1 |
+| `src/bioetl/composition/factories/services/pipeline_batch_executor_builder.py` | 1 | 0 | 1 |
+| `src/bioetl/composition/runtime_builders/runner_input_assembly.py` | 1 | 0 | 1 |
 
 ## Unjustified free-form reason tags
 
 | Reason | Count |
 | --- | ---: |
-| `dynamic compat patch target` | 4 |
 | `Windows STARTUPINFO duck-type` | 3 |
 | `export port accepts Arrow/table duck-type` | 3 |
 | `pyarrow Table after read boundary` | 3 |
@@ -102,7 +101,6 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | `heterogeneous factory config union` | 1 |
 | `heterogeneous schema adapter` | 1 |
 | `host method duck-type` | 1 |
-| `inspect accepts arbitrary callables` | 1 |
 | `legacy breaker attribute` | 1 |
 | `legacy breaker duck type` | 1 |
 | `openpyxl Workbook duck-type` | 1 |

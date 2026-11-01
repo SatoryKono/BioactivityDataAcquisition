@@ -217,6 +217,8 @@ jobs:
                 run: |
                     set -euo pipefail
                     git fetch --unshallow --filter=blob:none --no-tags
+                    # Preserve pinned source/catalog objects after squash and PR-branch deletion.
+                    git fetch --filter=blob:none --no-tags origin 'refs/tags/evidence/issue-12474-*:refs/tags/evidence/issue-12474-*'
 
             -   name: Reject Git LFS pointer cassettes
                 run: |
@@ -281,6 +283,8 @@ jobs:
                 run: |
                     set -euo pipefail
                     git fetch --unshallow --filter=blob:none --no-tags
+                    # Preserve pinned source/catalog objects after squash and PR-branch deletion.
+                    git fetch --filter=blob:none --no-tags origin 'refs/tags/evidence/issue-12474-*:refs/tags/evidence/issue-12474-*'
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv

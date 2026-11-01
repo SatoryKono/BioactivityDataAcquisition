@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-10-24"
+last_verified: "2026-11-01"
 freshness_window_days: 7
 owner: quality
 canonical_sources:
@@ -56,6 +56,12 @@ coverage refresh:
 2. Add security regression coverage for HTML output and recursive redaction.
 
 ## Freshness note
+
+Re-verified on 2026-11-01 against source tree `4380e5d5702460b8179ab7acef353c137ede568b`:
+the canonical source list and historical shard manifest remain present, and the
+tracked test-module inventory is 3,206 files. This is an inventory check only;
+the 2026-10-08 17-shard capture below remains the latest measured coverage
+evidence in this summary.
 
 Re-verified on 2026-10-08 against source HEAD
 `ceedc671b613ec3c2b25bbbae86b8b950719ddb6`. The manifest is complete, all 17

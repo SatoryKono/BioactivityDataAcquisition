@@ -12,6 +12,9 @@
 
 from __future__ import annotations
 
+import re
+import subprocess
+
 import pytest
 
 from pathlib import Path
@@ -143,16 +146,32 @@ def test_project_test_health_summary_has_machine_readable_metadata() -> None:
     assert metadata["allowed_interpretation"] == "backlog_signal_only"
     assert metadata["canonical_sources"]
     assert metadata["verification_scope"] == "tracked_test_module_inventory"
-    assert metadata["source_ref"] == "c9d639733928a2b699be2cc5031a38c4b3a3707e"
-    assert metadata["test_module_inventory"] == {
+    source_ref = metadata["source_ref"]
+    assert isinstance(source_ref, str)
+    assert re.fullmatch(r"[0-9a-f]{40}", source_ref)
+    assert (
+        subprocess.run(
+            ["git", "merge-base", "--is-ancestor", source_ref, "HEAD"],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+        ).returncode
+        == 0
+    )
+    inventory = metadata["test_module_inventory"]
+    tracked_test_modules = subprocess.check_output(
+        ["git", "ls-files", "-z", "--", "tests/**/test_*.py"], cwd=ROOT
+    ).split(b"\0")
+    tracked_test_module_count = len([path for path in tracked_test_modules if path])
+    assert inventory == {
         "command": "git ls-files 'tests/**/test_*.py' | wc -l",
-        "count": 1988,
-        "counted_on": "2026-07-13",
+        "count": tracked_test_module_count,
+        "counted_on": metadata["last_verified"],
         "full_evidence_snapshot_date": "2026-03-23",
     }
     assert shard_registry["policy_scope"] == "project_test_health_evidence_shards"
     assert shard_registry["owner"]
-    assert shard_registry["last_inventory_rebaseline"] == "2026-07-13"
+    assert shard_registry["last_inventory_rebaseline"] == inventory["counted_on"]
     assert shard_registry["inventory_source_ref"] == metadata["source_ref"]
     assert shard_registry["inventory_scope"] == metadata["verification_scope"]
     assert shard_registry["shards"]

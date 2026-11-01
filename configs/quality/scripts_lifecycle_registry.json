@@ -1,6 +1,12 @@
 {
   "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
   "entries": {
+    "scripts/engineering/qa/external_resource_inventory.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the source-bound COMP-004 catalog integrity and Markdown projection implementation behind the unified QA check-external-resource-inventory command; no runtime lifecycle execution belongs here.",
+      "owner": "@bioetl-architecture",
+      "review_by": "2027-01-29"
+    },
     "scripts/ai/codex/helper/check-env.ps1": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the Windows-side environment-check helper invoked by Codex launcher and setup flows; keep it supporting unless it becomes a standalone documented entrypoint.",
@@ -653,25 +659,25 @@
       "decision": "shared_helper_module",
       "next_step": "Retain as the row-construction implementation imported by generate_pipeline_normalization_matrix.py; keep contributor execution on the canonical generator entrypoint.",
       "owner": "@bioetl-docs",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/docs/matrix/normalization_matrix_catalog.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the static registry and runtime-binding module behind generate_pipeline_normalization_matrix.py; do not expose it as a separate CLI.",
       "owner": "@bioetl-docs",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/docs/matrix/normalization_matrix_control_plane.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the control-plane KPI helper imported by generate_pipeline_normalization_matrix.py; keep the canonical generator as the active surface.",
       "owner": "@bioetl-docs",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/docs/matrix/normalization_matrix_report.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the rendering and persistence module behind generate_pipeline_normalization_matrix.py; keep contributor execution routed through the canonical generator.",
       "owner": "@bioetl-docs",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/docs/matrix/normalize_values.py": {
       "decision": "shared_helper_module",
@@ -761,25 +767,13 @@
       "decision": "shared_helper_module",
       "next_step": "Retain as the private diff/ownership analysis backend of pr_lane_results.py; it has no standalone runner or public CLI. All test execution stays with the governed existing affected-tests lane.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/ci/actions_timing_common.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the shared GitHub Actions attempt collector imported by the Docker and PR-gate timing reports and by nightly_shadow_archive. It has no standalone command surface; keep it supporting so active_script_count_max does not grow.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-10-31"
-    },
-    "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/ci/generated_artifact_checks.py": {
       "decision": "shared_helper_module",
@@ -791,13 +785,7 @@
       "decision": "shared_helper_module",
       "next_step": "Retain as the shared JUnit record-accounting backend imported by update_test_telemetry_baseline and invoked internally by the tests workflow. Its CLI has no operator inputs and only adapts CI environment/artifact paths; the owning tests workflow remains the public execution surface.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-10-31"
-    },
-    "scripts/engineering/ci/nightly_shadow_archive.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the N1 shadow partition, mandatory-skip guard, and immutable archive behind python -m scripts.engineering.ci nightly-shadow. Keep it supporting so active_script_count_max does not grow.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-12-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/ci/local_test_telemetry.py": {
       "decision": "shared_helper_module",
@@ -805,23 +793,29 @@
       "owner": "@bioetl-quality",
       "review_by": "2026-11-30"
     },
+    "scripts/engineering/ci/nightly_shadow_archive.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the N1 shadow partition, mandatory-skip guard, and immutable archive behind python -m scripts.engineering.ci nightly-shadow. Keep it supporting so active_script_count_max does not grow.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
+    },
     "scripts/engineering/ci/pr_gate.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the fail-closed classifier and aggregator implementation behind the canonical `python -m scripts.engineering.ci pr-gate` router command; keep direct CI and contributor usage routed through that public command.",
       "owner": "@bioetl-platform",
       "review_by": "2026-12-01"
     },
+    "scripts/engineering/ci/pr_lane_results.py": {
+      "review_by": "2026-12-31",
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "next_step": "Keep as the internal result-mapping implementation behind the canonical scripts.engineering.ci pr-lane-results command; do not expose a second workflow CLI surface."
+    },
     "scripts/engineering/ci/presubmit_gate.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the local Ruff, mypy, and affected-test implementation behind the canonical `python -m scripts.engineering.ci presubmit` router command. Keep it supporting so active_script_count_max does not grow; promote only after an active slot is freed.",
       "owner": "@bioetl-platform",
       "review_by": "2026-12-01"
-    },
-    "scripts/engineering/ci/pytest_event_journal.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the pytest receipt helper imported by run_pytest_resilient.py and verified from the serial-coverage job. The resilient runner stays the public entrypoint; do not promote this module to active or raise active_script_count_max.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
     },
     "scripts/engineering/ci/publish_docker_image.sh": {
       "decision": "shared_helper_module",
@@ -838,6 +832,12 @@
     "scripts/engineering/ci/pytest_abort_diagnostic_adapter.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the isolated pytest abort supervisor imported by run_pytest_resilient. The diagnostic manifest is not a JUnit completeness artifact. Keep it supporting so active_script_count_max does not grow.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
+    "scripts/engineering/ci/pytest_event_journal.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the pytest receipt helper imported by run_pytest_resilient.py and verified from the serial-coverage job. The resilient runner stays the public entrypoint; do not promote this module to active or raise active_script_count_max.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
@@ -865,10 +865,22 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/ci/sync_control.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the fixed-argv backend invoked by the setup-python-uv composite action; keep it supporting because CI callers use the governed action rather than a standalone command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
     "scripts/engineering/ci/test_telemetry_provenance.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the imported squash-provenance validation library used by telemetry governance tests; its standalone CLI builds a reviewed receipt from a validated local capture and merged PR. Keep it as supporting code behind the owning checks.",
       "owner": "@bioetl-quality",
+      "review_by": "2026-11-30"
+    },
+    "scripts/engineering/common/build_backend.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the PEP 517 build-system backend configured by pyproject.toml. It delegates wheel creation to setuptools and declares the source-only quality tooling closure for sdists; it has no standalone CLI.",
+      "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
     "scripts/engineering/common/cli_dispatch.py": {
@@ -935,7 +947,7 @@
       "decision": "shared_helper_module",
       "next_step": "Retain as the stdlib-only environment validation helper shared by the tracked Zed task adapters; keep `.zed/tasks.json` as the governed editor entry surface and do not promote this helper without offsetting an active script elsewhere.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/dev/zed_lint_imports.py": {
       "decision": "legacy_manual_utility",
@@ -947,7 +959,7 @@
       "decision": "internal_compatibility_launcher",
       "next_step": "Retain as the guarded Python launcher behind tracked native-Windows Zed tasks; keep `.zed/tasks.json` as the governed editor entry surface and do not promote this launcher without offsetting an active script elsewhere.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/dev/zed_vulture.py": {
       "decision": "legacy_manual_utility",
@@ -984,6 +996,24 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-05",
       "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
+    },
+    "scripts/engineering/finances/github_billing_pipeline.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal aggregation module behind the GitHub billing workflow; keep it supporting because it has no standalone invocation surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
+    "scripts/engineering/finances/github_billing_schema.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the shared billing record schema imported by the pipeline and validator; keep it supporting because it is a library module.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
+    "scripts/engineering/finances/github_billing_validator.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal billing validation module used by the workflow and tests; keep it supporting because it has no standalone invocation surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
     },
     "scripts/engineering/performance/capture_delta_merge.py": {
       "decision": "legacy_manual_utility",
@@ -1033,6 +1063,12 @@
       "review_by": "2026-11-05",
       "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
     },
+    "scripts/engineering/qa/_tracked_glob.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the imported Git-index discovery helper shared by QA collectors. It has no standalone CLI; keep execution routed through the owning collector entrypoints.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
     "scripts/engineering/qa/analyze_duplicate_functions.py": {
       "decision": "compatibility_wrapper",
       "next_step": "Retain only as the compatibility wrapper for the legacy AST duplicate-function analyzer under src/tools/scripts/duplicate_function_analyzer.py; remove the wrapper when documented callers move to the canonical implementation or the analyzer is retired. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
@@ -1073,13 +1109,13 @@
       "decision": "shared_helper_module",
       "next_step": "Retain as the policy-evaluator module behind report_debt_governance_gates.py; keep the routed report-debt-governance-gates command as the active entrypoint.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/qa/debt_governance_gate_report.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the rendering and persistence module behind report_debt_governance_gates.py; do not expose it as an independent reporting surface.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/qa/docker_stability_campaign/commands.py": {
       "decision": "shared_helper_module",
@@ -1181,43 +1217,43 @@
       "decision": "shared_helper_module",
       "next_step": "Retain as the CLI orchestration implementation imported by run_observability_closure_campaign.py; keep the routed campaign command as the active surface.",
       "owner": "@bioetl-observability",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/qa/observability_closure_campaign_validation.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the validation and evidence-scoring seam behind run_observability_closure_campaign.py; do not expose it as a separate command.",
       "owner": "@bioetl-observability",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/qa/observability_metric_inventory_cli.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the CLI implementation behind report_observability_metric_inventory.py; keep report-observability-metric-inventory as the active routed entrypoint.",
       "owner": "@bioetl-observability",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/qa/observability_metric_inventory_report.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the typed target analysis and report helper behind report_observability_metric_inventory.py; do not count it as an independent CLI.",
       "owner": "@bioetl-observability",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/qa/observability_metric_inventory_runtime.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the runtime-event and cardinality review implementation behind report_observability_metric_inventory.py; keep the routed report command as the active surface.",
       "owner": "@bioetl-observability",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/qa/observability_metric_inventory_scan.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the source-discovery and AST scanning implementation behind report_observability_metric_inventory.py; do not expose it as a standalone command.",
       "owner": "@bioetl-observability",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/qa/observability_metric_inventory_shared.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the shared typed report/allowlist helpers behind report_observability_metric_inventory.py; keep it supporting and do not expose it as a standalone command.",
       "owner": "@bioetl-observability",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/qa/private_import_exception_metadata.py": {
       "decision": "shared_helper_module",
@@ -1289,13 +1325,13 @@
       "decision": "shared_helper_module",
       "next_step": "Retain as the supporting QA helper behind dashboard PromQL scope checks while dashboard selector and forbidden-label governance remains split across static dashboard audits and live Grafana evidence; promote to active only with an explicit active-surface budget reduction elsewhere.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/qa/report_dashboard_scalar_density.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-dashboard-scalar-density; keep operator execution routed through the unified QA dispatcher while pure tests import the computation helpers directly.",
       "owner": "@bioetl-observability",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/qa/report_dashboard_scenes_parity.py": {
       "decision": "legacy_manual_utility",
@@ -1343,13 +1379,19 @@
       "decision": "shared_helper_module",
       "next_step": "Keep the implementation as an internal backend for the canonical scripts.engineering.qa report-pipeline-config-contract-ownership-map command; route standalone use through the unified QA entrypoint.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/qa/report_port_adapter_factory_coverage.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as a bounded architecture-audit evidence helper consumed by the read-only architecture audit lane; keep it non-active unless it becomes a separately documented public QA command surface.",
       "owner": "@bioetl-architecture",
       "review_by": "2026-09-30"
+    },
+    "scripts/engineering/qa/report_test_basename_collisions.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the deterministic basename-collision inventory implementation behind python -m scripts.engineering.qa report-test-basename-collisions; owning tests import its collector. Keep routed through the existing QA dispatcher, with no new active-script surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
     },
     "scripts/engineering/qa/report_test_governance_audit.py": {
       "decision": "legacy_manual_utility",
@@ -1361,7 +1403,7 @@
       "decision": "legacy_manual_utility",
       "next_step": "Retain as the bounded manual source-projection producer introduced by #12215; its direct script invocation only rebinds two delimited documentation blocks and does not produce measurements or expose a runtime entrypoint. Route through the canonical QA command surface before promoting it to an active operator command.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-10-31"
+      "review_by": "2027-01-30"
     },
     "scripts/engineering/qa/report_vcr_cassette_census.py": {
       "decision": "legacy_manual_utility",
@@ -1410,6 +1452,12 @@
       "next_step": "Retain as the test-imported content-contract checker; promote to an active QA router command only after it is owned by scripts.engineering.qa __main__ and a matching active slot is freed.",
       "owner": "@bioetl-observability",
       "review_by": "2026-09-30"
+    },
+    "scripts/engineering/qa/check_quality_move_distributions.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the test-imported, read-only QM-09 distribution-content validator. Keep it supporting so the active script budget does not grow; promote only after a router slot is freed.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
     },
     "scripts/engineering/qa/verify_quality_move.py": {
       "decision": "shared_helper_module",
@@ -1638,6 +1686,18 @@
       "next_step": "Retain only as a bounded manual prompt-printing helper for memory seeding; replace with canonical memory workflow documentation before promoting it to an active command surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
+    },
+    "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1": {
+      "decision": "legacy_manual_utility",
+      "next_step": "Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-09-30"
+    },
+    "scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1": {
+      "decision": "legacy_manual_utility",
+      "next_step": "Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-09-30"
     },
     "scripts/ops/_build_arch_review_report.py": {
       "decision": "shared_helper_module",
@@ -2143,41 +2203,23 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/engineering/ci/pr_lane_results.py": {
-      "review_by": "2026-12-31",
-      "owner": "@bioetl-platform",
+    "scripts/engineering/qa/requalify_external_resource_inventory.py": {
       "decision": "shared_helper_module",
-      "next_step": "Keep as the internal result-mapping implementation behind the canonical scripts.engineering.ci pr-lane-results command; do not expose a second workflow CLI surface."
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the source-review implementation behind python -m scripts.engineering.qa requalify-external-resource-inventory; owning tests exercise the dispatcher. Preserve the original catalog checker and NOT_RUN runtime claims. Direct module invocation remains compatible, not a separate public script surface."
     },
-    "scripts/engineering/qa/_tracked_glob.py": {
+    "scripts/ops/observability/grafana/refresh_router_delivery.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the imported Git-index discovery helper shared by QA collectors. It has no standalone CLI; keep execution routed through the owning collector entrypoints.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the release verification/writer backend behind python -m scripts.ops refresh-router-delivery; owning tests exercise read-only check and atomic update through this dispatcher. Preserve full rootfs/config/layer parity and immutable registry identity. Direct module invocation remains compatible."
     },
-    "scripts/engineering/ci/sync_control.py": {
+    "scripts/ops/observability/grafana/trusted_docker.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the fixed-argv backend invoked by the setup-python-uv composite action; keep it supporting because CI callers use the governed action rather than a standalone command.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
-    },
-    "scripts/engineering/finances/github_billing_pipeline.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the internal aggregation module behind the GitHub billing workflow; keep it supporting because it has no standalone invocation surface.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
-    },
-    "scripts/engineering/finances/github_billing_schema.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the shared billing record schema imported by the pipeline and validator; keep it supporting because it is a library module.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
-    },
-    "scripts/engineering/finances/github_billing_validator.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the internal billing validation module used by the workflow and tests; keep it supporting because it has no standalone invocation surface.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the shared Docker identity library imported by both rootfs and managed-image verifiers; it has no standalone command. Preserve fixed protected Linux paths and the registered signed Windows installation check."
     }
   },
   "schema_version": "1.0"

@@ -205,7 +205,7 @@ quality:
     type: range
     min: 1950
     nullable: true
-    severity: warn
+    severity: error
     error_message: "Publication year before 1950 — will be filtered at Gold stage"
   - field: publication_type
     type: pattern
@@ -228,15 +228,15 @@ quality:
     error_message: publication_class must match the shared publication taxonomy
   - field: author_orcids
     type: pattern
-    pattern: '^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
+    pattern: '^\[("\d{4}-\d{4}-\d{4}-\d{3}[0-9X]"(,"\d{4}-\d{4}-\d{4}-\d{3}[0-9X]")*)?\]$'
     nullable: true
-    severity: warn
+    severity: error
     error_message: author_orcids must be a canonical JSON string array of ORCID identifiers
   - field: issn_list
     type: pattern
     pattern: '^\[("[0-9Xx-]+"(,"[0-9Xx-]+")*)?\]$'
     nullable: true
-    severity: warn
+    severity: error
     error_message: issn_list must be a canonical JSON string array of ISSN values
   - field: publication_status
     type: enum
@@ -256,7 +256,7 @@ quality:
     min: 0
     max: 10000000
     nullable: true
-    severity: warn
+    severity: error
     error_message: Unusually high citation count
   - field: citations_made
     type: range

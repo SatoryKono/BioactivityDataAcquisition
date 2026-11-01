@@ -44,6 +44,67 @@ from bioetl.infrastructure.storage.silver.support import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize(
+    "error", [OSError("closed stream"), ValueError("closed stream")]
+)
+def test_bounded_reader_contains_closed_stream_errors(error):
+    from bioetl.infrastructure.storage.silver import support as subject
+
+    stream = MagicMock()
+    stream.read.side_effect = error
+    reader = subject._BoundedStreamReader(stream)
+    assert reader.run() is None
+    assert reader.get_decoded() == ""
+    stream.read.assert_called_once_with(4096)
+
+
+def test_expired_subprocess_deadline_never_waits(monkeypatch):
+    import subprocess
+    from bioetl.infrastructure.storage.silver import support as subject
+
+    times = iter([0.0, 2.0])
+    monkeypatch.setattr(subject.time, "monotonic", lambda: next(times))
+    proc = MagicMock(args=["synthetic-child"])
+    with pytest.raises(subprocess.TimeoutExpired) as caught:
+        subject._wait_for_plain_delta_subprocess(
+            proc, timeout_seconds=1.0, cancel_event=None
+        )
+    assert caught.value.cmd == ["synthetic-child"]
+    assert caught.value.timeout == 1.0
+    proc.wait.assert_not_called()
+
+
+def test_reader_join_deadline_expiring_inside_loop_does_not_block(monkeypatch):
+    from bioetl.infrastructure.storage.silver import support as subject
+
+    times = iter([0.0, 0.0, 2.0, 2.0])
+    monkeypatch.setattr(subject.time, "monotonic", lambda: next(times))
+    readers = (MagicMock(), MagicMock())
+    assert subject._join_bounded_readers(readers, timeout_seconds=1.0) is None
+    for reader in readers:
+        reader.join.assert_not_called()
+
+
+def test_first_reader_start_failure_reaps_child_and_closes_both_pipes(monkeypatch):
+    from bioetl.infrastructure.storage.silver import support as subject
+
+    proc = MagicMock(returncode=None)
+    monkeypatch.setattr(subject.subprocess, "Popen", MagicMock(return_value=proc))
+    reader = MagicMock()
+    failure = RuntimeError("synthetic thread start failure")
+    reader.start.side_effect = failure
+    monkeypatch.setattr(subject, "_BoundedStreamReader", MagicMock(return_value=reader))
+    with pytest.raises(RuntimeError, match="synthetic thread start failure") as caught:
+        subject._execute_bounded_subprocess(
+            ["synthetic-child"], timeout_seconds=1.0, cancel_event=None
+        )
+    assert caught.value is failure
+    proc.kill.assert_called_once_with()
+    proc.wait.assert_called_once_with(timeout=subject._SUBPROCESS_READER_JOIN_SECONDS)
+    proc.stdout.close.assert_called_once_with()
+    proc.stderr.close.assert_called_once_with()
+
+
 class TestResolveTablePath:
     """Test table path resolution."""
 

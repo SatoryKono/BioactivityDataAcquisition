@@ -37,6 +37,7 @@ from unittest.mock import MagicMock, patch
 
 import pandera.pandas as pa
 import pyarrow as pa_arrow
+import pyarrow.dataset as pa_dataset
 import pytest
 from deltalake.exceptions import TableNotFoundError
 from pandera.pandas import DataFrameSchema
@@ -45,6 +46,43 @@ from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_scd2_snapshot_requires_a_business_key(gold_writer):
+    with pytest.raises(
+        ValueError, match="SCD2 snapshot filter requires at least one business key"
+    ):
+        gold_writer._build_current_snapshot_filter(
+            business_keys=[], current_flag_col="is_current", records=[{}]
+        )
+
+
+async def test_empty_scd2_merge_does_not_touch_delta(gold_writer):
+    from datetime import UTC, datetime
+
+    table = MagicMock()
+    result = await gold_writer._merge_scd2(
+        table, [], "id", None, datetime(2026, 1, 1, tzinfo=UTC)
+    )
+    assert result is None
+    assert table.mock_calls == []
+
+
+async def test_reserved_scd2_marker_is_rejected_before_delta(gold_writer):
+    from datetime import UTC, datetime
+
+    table = MagicMock()
+    with pytest.raises(
+        ValueError, match="Reserved SCD2 source field: __bioetl_scd2_expire"
+    ):
+        await gold_writer._merge_scd2(
+            table,
+            [{"id": 1, "__bioetl_scd2_expire": True}],
+            "id",
+            None,
+            datetime(2026, 1, 1, tzinfo=UTC),
+        )
+    assert table.mock_calls == []
 
 
 @pytest.fixture
@@ -201,7 +239,7 @@ async def test_write_scd2_existing_table(gold_writer, valid_records, strict_sche
     mock_merge_builder = MagicMock()
     mock_dt_instance.merge.return_value = mock_merge_builder
     mock_merge_builder.when_matched_update.return_value = mock_merge_builder
-    mock_merge_builder.when_not_matched_insert_all.return_value = mock_merge_builder
+    mock_merge_builder.when_not_matched_insert.return_value = mock_merge_builder
 
     with patch(
         "bioetl.infrastructure.storage.gold_writer.DeltaTable",
@@ -223,6 +261,25 @@ async def test_write_scd2_existing_table(gold_writer, valid_records, strict_sche
 
         # Verify execution
         mock_merge_builder.execute.assert_called_once()
+
+
+def test_scd2_current_snapshot_filter_limits_rows_to_incoming_keys(gold_writer):
+    """The SCD2 lookup reads only current rows for keys in the active batch."""
+    table = pa_arrow.table(
+        {
+            "id": [1, 2, 2, 3],
+            "is_current": [True, True, False, True],
+        }
+    )
+    expression = gold_writer._build_current_snapshot_filter(
+        business_keys=["id"],
+        current_flag_col="is_current",
+        records=[{"id": 2}],
+    )
+
+    rows = pa_dataset.dataset(table).to_table(filter=expression).to_pylist()
+
+    assert rows == [{"id": 2, "is_current": True}]
 
 
 async def test_read_gold(gold_writer):

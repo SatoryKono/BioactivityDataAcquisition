@@ -39,7 +39,7 @@ pytestmark = pytest.mark.unit
 def test_validate_data_success():
     """Test validate_data function with valid data."""
     data = "test_data"
-    validate_data(data)  # Should not raise an exception
+    assert validate_data(data) is None
 
 
 def test_validate_data_failure():

@@ -1408,3 +1408,91 @@ def test_unittest_exception_assertions_require_execution():
         visitor.visit(tree)
         assert visitor.has_assertion_signal is expected, source
         assert _direct_assertion_signal(tree.body[0]) is expected, source
+
+
+@pytest.mark.architecture
+def test_helper_backed_assertions_and_empty_tests_are_classified_in_report(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Local assertion helpers are reported as helper-backed; empty tests stay weak."""
+    import ast
+
+    fixture_root = tmp_path / "fixture"
+    test_path = fixture_root / "tests" / "unit" / "test_helper_classifier.py"
+    test_path.parent.mkdir(parents=True)
+    source = (
+        "def _assert_extra_forbidden(error):\n"
+        "    assert error == 'extra_forbidden'\n\n"
+        "def _good_and_unknown():\n"
+        "    with pytest.raises(ValidationError) as exc_info:\n"
+        "        validate_unknown_key()\n"
+        "    _assert_extra_forbidden(exc_info.value)\n\n"
+        "def test_helper_backed_rejection():\n"
+        "    _good_and_unknown()\n\n"
+        "def test_no_value_body():\n"
+        "    pass\n"
+    )
+    test_path.write_text(source, encoding="utf-8")
+
+    module = ast.parse(source)
+    helper_functions = {
+        node.name: node
+        for node in module.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and not node.name.startswith("test_")
+    }
+    test_functions = {
+        node.name: node
+        for node in module.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and node.name.startswith("test_")
+    }
+    helper_test = test_functions["test_helper_backed_rejection"]
+    empty_test = test_functions["test_no_value_body"]
+    helper_visitor = governance_audit._TestBodyVisitor(helper_functions)
+    helper_visitor.visit(helper_test)
+    empty_visitor = governance_audit._TestBodyVisitor(helper_functions)
+    empty_visitor.visit(empty_test)
+
+    assert (
+        governance_audit._classify_assertless_candidate(
+            relative_path="tests/unit/test_helper_classifier.py",
+            function=helper_test,
+            visitor=helper_visitor,
+        )
+        == "helper_asserted"
+    )
+    assert (
+        governance_audit._classify_assertless_candidate(
+            relative_path="tests/unit/test_helper_classifier.py",
+            function=empty_test,
+            visitor=empty_visitor,
+        )
+        == "weak_no_value"
+    )
+
+    monkeypatch.setattr(
+        governance_audit,
+        "_read_text_file",
+        lambda path: path.read_text(encoding="utf-8"),
+    )
+    monkeypatch.setattr(
+        governance_audit,
+        "_compute_test_governance_source_tree_sha256",
+        lambda _root_str: "fixture-source-hash",
+    )
+    report = governance_audit._collect_test_governance_report_cached(
+        str(fixture_root), force_rescan=True
+    )
+    candidates = {
+        candidate["test_name"]: candidate["category"]
+        for candidate in report["assertless_candidates"]
+    }
+    assert candidates == {
+        "test_no_value_body": "weak_no_value",
+        "test_helper_backed_rejection": "helper_asserted",
+    }
+    assert report["assertless_category_counts"]["helper_asserted"] == 1
+    assert report["assertless_category_counts"]["weak_no_value"] == 1
+    assert report["refined_assertless_tests"] == 1

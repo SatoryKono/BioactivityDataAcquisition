@@ -80,6 +80,9 @@ def test_local_telemetry_refresh_rejects_ci_identity_overrides(
 def test_check_routes_every_governed_artifact_through_fail_closed_runner(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(
+        refresh, "_sync_assertless_triage_counts", lambda **kwargs: False
+    )
     calls: list[list[str]] = []
 
     def fake_run(cmd: list[str], *, check: bool = True) -> int:
@@ -88,8 +91,15 @@ def test_check_routes_every_governed_artifact_through_fail_closed_runner(
         return 0
 
     monkeypatch.setattr(refresh, "_run", fake_run)
+    sync_modes = []
+    monkeypatch.setattr(
+        refresh,
+        "_sync_scorecard_hotspot_metrics_from_baseline",
+        lambda **kwargs: sync_modes.append(kwargs),
+    )
 
     refresh._run_check_only()
+    assert sync_modes == [{"check_only": True}]
 
     assert calls == [
         [
@@ -168,6 +178,9 @@ def test_run_propagates_subprocess_failure(monkeypatch: pytest.MonkeyPatch) -> N
 def test_refresh_propagates_generator_failure_before_later_steps(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(
+        refresh, "_sync_assertless_triage_counts", lambda **kwargs: False
+    )
     calls: list[list[str]] = []
 
     def fake_subprocess_run(cmd: list[str], **kwargs: object) -> SimpleNamespace:
@@ -199,6 +212,9 @@ def test_refresh_propagates_generator_failure_before_later_steps(
 def test_refresh_updates_remote_main_baseline_before_debt_rollup(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(
+        refresh, "_sync_assertless_triage_counts", lambda **kwargs: False
+    )
     calls: list[list[str]] = []
 
     def fake_run(cmd: list[str], *, check: bool = True) -> int:
@@ -242,8 +258,47 @@ def test_scorecard_sync_fails_when_required_input_is_missing(
     with pytest.raises(FileNotFoundError, match="hotspot-family-baseline.json"):
         refresh._sync_scorecard_hotspot_metrics_from_baseline()
 
+    import json
+    import yaml
+
+    quality = tmp_path / "reports/quality"
+    quality.mkdir(parents=True)
+    config = tmp_path / "configs/quality/debt_scorecard.yaml"
+    config.parent.mkdir(parents=True)
+    config.write_text(
+        yaml.safe_dump(
+            {
+                "config_surface_ratchet": {
+                    "metrics": {"config_count": {"current_count": 1, "max_count": 1}},
+                    "families": {},
+                }
+            }
+        )
+    )
+    (quality / "hotspot-family-baseline.json").write_text('{"families": []}')
+    (quality / "config-discrepancy-baseline.json").write_text(
+        json.dumps({"metrics": {"config_count": 0}, "families": {}})
+    )
+    before = config.read_bytes()
+    with pytest.raises(SystemExit, match="metric bindings are stale"):
+        refresh._sync_scorecard_hotspot_metrics_from_baseline(check_only=True)
+    assert config.read_bytes() == before
+    refresh._sync_scorecard_hotspot_metrics_from_baseline()
+    updated = config.read_bytes()
+    assert yaml.safe_load(updated)["config_surface_ratchet"]["metrics"][
+        "config_count"
+    ] == {"current_count": 0, "max_count": 0}
+    refresh._sync_scorecard_hotspot_metrics_from_baseline(check_only=True)
+    assert config.read_bytes() == updated
+    (quality / "config-discrepancy-baseline.json").unlink()
+    with pytest.raises(FileNotFoundError, match="config-discrepancy-baseline.json"):
+        refresh._sync_scorecard_hotspot_metrics_from_baseline(check_only=True)
+    assert config.read_bytes() == updated
+
 
 def test_scorecard_budget_sync_is_shrink_only() -> None:
+    import copy
+
     family: dict[str, object] = {
         "bounded_growth_budgets": {
             "files_ge_250_loc": 4,
@@ -264,6 +319,62 @@ def test_scorecard_budget_sync_is_shrink_only() -> None:
         "files_ge_250_loc": 3,
         "max_internal_fan_in": 2,
     }
+    config = {
+        "config_surface_ratchet": {
+            "metrics": {
+                "unique_parameter_count": {"current_count": 353, "max_count": 353}
+            },
+            "families": {
+                "entity_effective": {
+                    "metrics": {
+                        "unique_parameter_count": {
+                            "current_count": 261,
+                            "max_count": 261,
+                        }
+                    }
+                }
+            },
+        }
+    }
+    baseline = {
+        "metrics": {"unique_parameter_count": 352},
+        "families": {"entity_effective": {"unique_parameter_count": 260}},
+    }
+    assert refresh._sync_config_surface_metrics(config, baseline) == 4
+    assert config["config_surface_ratchet"]["metrics"]["unique_parameter_count"] == {
+        "current_count": 352,
+        "max_count": 352,
+    }
+    assert config["config_surface_ratchet"]["families"]["entity_effective"]["metrics"][
+        "unique_parameter_count"
+    ] == {"current_count": 260, "max_count": 260}
+    stable = copy.deepcopy(config)
+    assert refresh._sync_config_surface_metrics(config, baseline) == 0
+    for rejected in (353, -1, True, "352"):
+        with pytest.raises(ValueError):
+            refresh._sync_config_surface_metrics(
+                config, {**baseline, "metrics": {"unique_parameter_count": rejected}}
+            )
+        assert config == stable
+    with pytest.raises(ValueError, match="budget growth"):
+        refresh._sync_config_surface_metrics(
+            config,
+            {
+                "metrics": {"unique_parameter_count": 351},
+                "families": {"entity_effective": {"unique_parameter_count": 261}},
+            },
+        )
+    assert (
+        config == stable
+    )  # A later family failure must not partly update aggregate counts.
+    for malformed in (
+        {},
+        {"metrics": {}},
+        {"metrics": baseline["metrics"], "families": {"unowned": {}}},
+    ):
+        with pytest.raises(ValueError):
+            refresh._sync_config_surface_metrics(config, malformed)
+        assert config == stable
 
 
 def test_atomic_writer_uses_utf8_lf_and_replaces_target(tmp_path: Path) -> None:
@@ -274,6 +385,32 @@ def test_atomic_writer_uses_utf8_lf_and_replaces_target(tmp_path: Path) -> None:
 
     assert target.read_bytes() == "owner: architecture\nvalue: тест\n".encode()
     assert list(tmp_path.iterdir()) == [target]
+
+    from unittest.mock import patch
+    import json
+    from scripts.engineering.qa import report_module_coverage_inventory as coverage
+    from scripts.engineering.qa import report_config_surface_backlog as backlog
+
+    coverage_path = tmp_path / "coverage.json"
+    payload_text = '{"value": "тест"}\n'
+    coverage._write_text_atomically(coverage_path, payload_text, root=tmp_path)
+    assert coverage_path.read_bytes() == payload_text.encode("utf-8")
+    coverage._write_text_atomically(coverage_path, payload_text, root=tmp_path)
+    assert coverage_path.read_bytes() == payload_text.encode("utf-8")
+
+    backlog_path = tmp_path / "backlog.json"
+    payload = {"value": "тест"}
+    backlog._atomic_write(backlog_path, payload)
+    first = backlog_path.read_bytes()
+    assert b"\r" not in first
+    assert first.endswith(b"\n")
+    assert json.loads(first) == payload
+    backlog._atomic_write(backlog_path, payload)
+    assert backlog_path.read_bytes() == first
+    with patch.object(backlog.os, "replace", side_effect=OSError("sharing violation")):
+        backlog._atomic_write(backlog_path, payload)
+    assert backlog_path.read_bytes() == first
+    assert sorted(tmp_path.iterdir()) == sorted([target, coverage_path, backlog_path])
 
 
 @pytest.mark.parametrize("unmeasured", [0, 1])
@@ -614,3 +751,82 @@ def test_application_core_closeout_repairs_stale_status_in_place(
     )
     assert repaired["current_metrics"] == current
     refresh._refresh_application_core_closeout(check_only=True)
+
+
+def test_assertless_binding_checks_then_shrinks_without_policy_changes(
+    tmp_path, monkeypatch
+):
+    import json
+    import yaml
+
+    monkeypatch.setattr(refresh, "ROOT", tmp_path)
+    config = tmp_path / "configs/quality/test_governance_audit.yaml"
+    report = tmp_path / refresh._TEST_GOVERNANCE_JSON
+    config.parent.mkdir(parents=True)
+    report.parent.mkdir(parents=True)
+    policy = {
+        "assertless_triage": {
+            "categories": {
+                "intentional_no_exception_contract": {
+                    "count": 2,
+                    "decision": "retained",
+                },
+                "weak_no_value": {"count": 0, "decision": "zero-actionable-debt"},
+            }
+        },
+        "budgets": {"refined_assertless_max": 0},
+    }
+    config.write_text(yaml.safe_dump(policy), encoding="utf-8", newline="\n")
+    measured = {"intentional_no_exception_contract": 1, "weak_no_value": 0}
+    report.write_text(
+        json.dumps({"assertless_category_counts": measured}), encoding="utf-8"
+    )
+    before = config.read_bytes()
+    with pytest.raises(SystemExit, match="counts are stale"):
+        refresh._sync_assertless_triage_counts(check_only=True)
+    assert config.read_bytes() == before
+    assert refresh._sync_assertless_triage_counts() is True
+    actual = yaml.safe_load(config.read_text())
+    assert actual["assertless_triage"]["categories"][
+        "intentional_no_exception_contract"
+    ] == {"count": 1, "decision": "retained"}
+    assert actual["budgets"] == policy["budgets"]
+    after = config.read_bytes()
+    assert after == before.replace(b"count: 2", b"count: 1")
+    assert refresh._sync_assertless_triage_counts() is False
+    assert refresh._sync_assertless_triage_counts(check_only=True) is False
+    assert config.read_bytes() == after
+    for invalid in [2, -1, True, "1"]:
+        measured["intentional_no_exception_contract"] = invalid
+        report.write_text(
+            json.dumps({"assertless_category_counts": measured}), encoding="utf-8"
+        )
+        with pytest.raises(ValueError, match="growth is forbidden"):
+            refresh._sync_assertless_triage_counts()
+        assert config.read_bytes() == after
+    measured["unexpected"] = 0
+    report.write_text(
+        json.dumps({"assertless_category_counts": measured}), encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="explicit policy review"):
+        refresh._sync_assertless_triage_counts()
+    assert config.read_bytes() == after
+
+    anchored = yaml.safe_dump(policy).replace("count: 2", "count: &reviewed_count 2")
+    anchored += "historical_count: *reviewed_count\n"
+    config.write_text(anchored, encoding="utf-8", newline="\n")
+    report.write_text(
+        json.dumps(
+            {
+                "assertless_category_counts": {
+                    "intentional_no_exception_contract": 1,
+                    "weak_no_value": 0,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    before_anchor = config.read_bytes()
+    with pytest.raises(ValueError, match="plain scalar"):
+        refresh._sync_assertless_triage_counts()
+    assert config.read_bytes() == before_anchor

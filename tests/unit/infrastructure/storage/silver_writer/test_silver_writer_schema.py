@@ -47,6 +47,26 @@ TEST_ROOT = synthetic_test_root("bioetl-silver-writer-schema")
 SILVER_BASE_PATH = TEST_ROOT / "silver"
 
 
+@pytest.mark.parametrize("missing_input", ["existing_schema", "records"])
+def test_type_diff_without_baseline_or_batch_reports_no_changes(
+    missing_input: str,
+) -> None:
+    """No type evolution is inferred without an existing schema or new rows."""
+    import pyarrow as pa
+
+    from bioetl.infrastructure.storage.silver.schema_drift_operations import (
+        _diff_schema_types,
+    )
+
+    existing = (
+        None
+        if missing_input == "existing_schema"
+        else pa.schema([("value", pa.int64())])
+    )
+    records = [] if missing_input == "records" else [{"value": 1}]
+    assert _diff_schema_types(existing, records) == ()
+
+
 class TestSilverWriterSchemaDrift:
     """Tests for schema drift detection and handling."""
 
@@ -137,6 +157,62 @@ class TestSilverWriterSchemaDrift:
 
             assert "value" in exc_info.value.new_fields
             assert exc_info.value.table == "test.table"
+
+    @pytest.mark.asyncio
+    async def test_schema_drift_detects_record_fields_outside_prepared_schema(
+        self, noop_logger
+    ):
+        """Prepared schema filtering must not hide new fields in input rows."""
+        import pyarrow as pa
+
+        from bioetl.domain.exceptions import SchemaEvolutionError
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        existing_schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
+        mock_delta_schema = MagicMock()
+        mock_delta_schema.to_arrow.return_value = existing_schema
+        mock_table = MagicMock()
+        mock_table.schema.return_value = mock_delta_schema
+        records = [
+            {
+                "entity_id": "CHEMBL123",
+                "value": 1.5,
+                "_run_id": "run-1",
+                "_run_type": "incremental",
+                "_source_batch_id": "batch-1",
+                "_ingestion_ts": "2025-01-15T12:00:00Z",
+            }
+        ]
+
+        with patch(
+            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+            return_value=mock_table,
+        ):
+            writer = SilverWriter(
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
+                base_path=str(SILVER_BASE_PATH),
+                logger=noop_logger,
+            )
+
+            with pytest.raises(SchemaEvolutionError) as exc_info:
+                await writer._check_schema_drift(
+                    "test.table",
+                    records,
+                    "error",
+                    incoming_schema=existing_schema,
+                )
+
+        assert exc_info.value.new_fields == {"value"}
 
     @pytest.mark.asyncio
     async def test_schema_drift_raises_error_on_removed_fields(self, noop_logger):

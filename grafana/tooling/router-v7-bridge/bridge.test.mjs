@@ -10,7 +10,7 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 const { default: React, act } = await import('react');
 const { createRoot } = await import('react-dom/client');
 const { renderToString } = await import('react-dom/server');
-const { default: legacy } = await import('react-router-dom');
+const { default: legacy } = await import('react-router-dom-v5');
 const bridge = await import('./index.mjs');
 
 async function mount(children, entries = ['/home']) {

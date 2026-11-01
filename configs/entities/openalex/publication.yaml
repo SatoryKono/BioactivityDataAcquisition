@@ -198,7 +198,7 @@ quality:
     type: range
     min: 1950
     nullable: true
-    severity: warn
+    severity: error
     error_message: "Publication year before 1950 — will be filtered at Gold stage"
   - field: publication_type
     type: pattern
@@ -232,33 +232,33 @@ quality:
     error_message: oa_status must match the shared publication open-access registry
   - field: author_openalex_ids
     type: pattern
-    pattern: '^\[("A\d+"(,"A\d+")*)?\]$'
+    pattern: '^\[(("A\d+"|null)(,("A\d+"|null))*)?\]$'
     nullable: true
-    severity: warn
+    severity: error
     error_message: author_openalex_ids must be a canonical JSON string array of OpenAlex author IDs
   - field: author_orcids
     type: pattern
-    pattern: '^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
+    pattern: '^\[(("\d{4}-\d{4}-\d{4}-\d{3}[0-9X]"|null)(,("\d{4}-\d{4}-\d{4}-\d{3}[0-9X]"|null))*)?\]$'
     nullable: true
-    severity: warn
+    severity: error
     error_message: author_orcids must be a canonical JSON string array of ORCID identifiers
   - field: institution_ids
     type: pattern
     pattern: '^\[("I\d+"(,"I\d+")*)?\]$'
     nullable: true
-    severity: warn
+    severity: error
     error_message: institution_ids must be a canonical JSON string array of OpenAlex institution IDs
   - field: ror_ids
     type: pattern
     pattern: '^\[("https://ror\.org/[a-z0-9]+"(,"https://ror\.org/[a-z0-9]+")*)?\]$'
     nullable: true
-    severity: warn
+    severity: error
     error_message: ror_ids must be a canonical JSON string array of canonical ROR URLs
   - field: issn_list
     type: pattern
     pattern: '^\[("[0-9Xx-]+"(,"[0-9Xx-]+")*)?\]$'
     nullable: true
-    severity: warn
+    severity: error
     error_message: issn_list must be a canonical JSON string array of ISSN values
   - field: citations_received
     type: range
@@ -270,7 +270,7 @@ quality:
     min: 0
     max: 10000000
     nullable: true
-    severity: warn
+    severity: error
     error_message: Unusually high citation count
   - field: fwci
     type: range

@@ -68,11 +68,13 @@ class SchemaDriftInfo:
         status: Drift severity (info, warn, critical).
         new_fields: List of new fields detected.
         missing_fields: List of missing fields detected.
+        changed_fields: Field names with existing and incoming Arrow types.
     """
 
     status: Literal["info", "warn", "critical"] = "info"
     new_fields: tuple[str, ...] = ()
     missing_fields: tuple[str, ...] = ()
+    changed_fields: tuple[tuple[str, str, str], ...] = ()
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
@@ -82,6 +84,9 @@ class SchemaDriftInfo:
         raw_missing_fields: object = self.missing_fields
         if isinstance(raw_missing_fields, list):
             object.__setattr__(self, "missing_fields", tuple(raw_missing_fields))
+        raw_changed_fields: object = self.changed_fields
+        if isinstance(raw_changed_fields, list):
+            object.__setattr__(self, "changed_fields", tuple(raw_changed_fields))
 
     def to_schema_drift(self) -> SchemaDrift:
         """Convert to SchemaDrift model for metadata.
@@ -95,12 +100,16 @@ class SchemaDriftInfo:
             status=self.status,
             new_fields=list(self.new_fields),
             missing_fields=list(self.missing_fields),
+            changed_fields={
+                name: (existing, incoming)
+                for name, existing, incoming in self.changed_fields
+            },
         )
 
     @property
     def has_drift(self) -> bool:
         """Check if any schema drift was detected."""
-        return bool(self.new_fields or self.missing_fields)
+        return bool(self.new_fields or self.missing_fields or self.changed_fields)
 
 
 @dataclass(frozen=True, slots=True)

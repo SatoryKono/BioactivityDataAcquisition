@@ -87,9 +87,9 @@ def test_preview_stops_scandir_within_one_oversized_partition(
 
 def test_validate_scope_filter_accepts_canonical_names() -> None:
     """Canonical provider/entity names pass validation."""
-    validate_scope_filter("chembl", "provider")
-    validate_scope_filter("pubchem_compound2", "entity")
-    validate_scope_filter(None, "provider")
+    assert validate_scope_filter("chembl", "provider") is None
+    assert validate_scope_filter("pubchem_compound2", "entity") is None
+    assert validate_scope_filter(None, "provider") is None
 
 
 def test_is_owned_artifact_contract() -> None:

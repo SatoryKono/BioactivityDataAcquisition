@@ -48,6 +48,28 @@ from bioetl.domain.normalization.rules import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize(
+    "normalizer,value,expected",
+    [
+        ("normalize_binary_flag", "", None),
+        ("normalize_boolean", 0, False),
+        ("normalize_boolean", 1, True),
+        ("normalize_boolean", 0.0, False),
+        ("normalize_boolean", 1.0, True),
+        ("normalize_binary_flag", 2, None),
+        ("normalize_binary_flag", 2.5, None),
+        ("normalize_binary_flag", True, 1),
+        ("normalize_binary_flag", False, 0),
+    ],
+)
+def test_boolean_and_binary_flag_type_boundaries(normalizer, value, expected) -> None:
+    from bioetl.domain.normalization import rules
+
+    result = getattr(rules, normalizer)(value)
+    assert result == expected
+    assert type(result) is type(expected)
+
+
 class TestNormalizeCase:
     """Test case normalization functions."""
 

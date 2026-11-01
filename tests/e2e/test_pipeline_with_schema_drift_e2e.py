@@ -228,13 +228,34 @@ class TestSchemaEvolutionErrorMode:
             on_schema_mismatch="error",
         )
 
-        # Second write with missing field should fail
+        # Omitted nullable data with the original declared schema is still valid.
+        await writer.write_silver(
+            table_name=table_name,
+            records=reduced_records,
+            primary_keys=["entity_id"],
+            schema=base_schema,
+            mode="merge",
+            on_schema_mismatch="error",
+        )
+        from deltalake import DeltaTable
+
+        persisted = DeltaTable(
+            str(e2e_data_dir / "silver" / table_name)
+        ).to_pyarrow_table()
+        omitted_row = next(
+            row for row in persisted.to_pylist() if row["entity_id"] == "entity_4"
+        )
+        assert omitted_row["name"] is None
+        assert "name" in persisted.schema.names
+
+        # Remove the field from the declared schema as well as the records.
+        # Omitted nullable values alone are not a schema removal.
         with pytest.raises(SchemaEvolutionError) as exc_info:
             await writer.write_silver(
                 table_name=table_name,
                 records=reduced_records,
                 primary_keys=["entity_id"],
-                schema=base_schema,
+                schema=base_schema.remove(base_schema.get_field_index("name")),
                 mode="merge",
                 on_schema_mismatch="error",
             )

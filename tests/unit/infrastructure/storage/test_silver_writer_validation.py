@@ -73,7 +73,7 @@ def _build_pandera_validator(
     *, min_value: float | None = None
 ) -> PanderaSilverValidator:
     """Create a simple validator for ``entity_id``/``value`` test records."""
-    import pandera as pa
+    import pandera.pandas as pa
 
     value_kwargs = {"checks": pa.Check.ge(min_value)} if min_value is not None else {}
     return PanderaSilverValidator(
@@ -505,6 +505,7 @@ class TestSilverWriterPreparePayloadExecutor:
             "test.table",
             records,
             "ignore",
+            incoming_schema=expected_table.schema,
         )
 
     @pytest.mark.asyncio
@@ -531,7 +532,7 @@ class TestSilverWriterPreparePayloadExecutor:
                 arrow_data=expected_table,
             )
 
-        async def schema_stage(*_: object) -> None:
+        async def schema_stage(*_: object, **__: object) -> None:
             await asyncio.sleep(0)
             call_order.append("schema")
 
