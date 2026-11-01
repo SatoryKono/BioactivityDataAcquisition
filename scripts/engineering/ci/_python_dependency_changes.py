@@ -26,6 +26,8 @@ PYTHON_LOCK = "uv.lock"
 FULL_SUITE_CONFIGURATION_PREFIXES = (
     "tool.pytest.ini_options",
     "tool.pytest-asyncio",
+    "build-system.backend-path",
+    "build-system.build-backend",
 )
 NARROW_CONFIGURATION_PREFIXES = ("tool.setuptools.packages.find.exclude",)
 # Stub-only wheels have no runtime import owner. Keep reviewed ownership explicit.

@@ -419,6 +419,14 @@ def test_field_rule_dispatch_covers_required_null_range_pattern_and_enum_rules()
         {"pmid": None},
         FieldValidation(field="pmid", validation_type="not_null"),
     )
+    assert _field_rule_violated(
+        {"pmid": float("nan")},
+        FieldValidation(field="pmid", validation_type="required"),
+    )
+    assert _field_rule_violated(
+        {"pmid": float("nan")},
+        FieldValidation(field="pmid", validation_type="not_null"),
+    )
     assert not _field_rule_violated(
         {"year": 2024},
         FieldValidation(

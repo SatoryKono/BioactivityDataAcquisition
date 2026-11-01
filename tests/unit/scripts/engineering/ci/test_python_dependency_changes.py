@@ -652,6 +652,21 @@ def test_legacy_pytest_asyncio_table_migration_uses_full_suite_route(
     assert dependencies.pytest_configuration_changed(tmp_path, "base", "head")
 
 
+@pytest.mark.parametrize("key", ["build-backend", "backend-path"])
+def test_build_backend_configuration_uses_full_suite_route(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, key: str
+) -> None:
+    before = {"build-system": {key: "old"}}
+    after = {"build-system": {key: "new"}}
+    monkeypatch.setattr(
+        dependencies,
+        "_read_revision",
+        lambda _root, revision, _name: before if revision == "base" else after,
+    )
+
+    assert dependencies.pytest_configuration_changed(tmp_path, "base", "head")
+
+
 def test_test_only_dependency_selects_its_consumers(tmp_path: Path) -> None:
     _consumer(tmp_path, "tests/unit/test_snapshot.py", "syrupy")
     (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")

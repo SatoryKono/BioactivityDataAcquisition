@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.composition import _services
@@ -55,6 +56,7 @@ if TYPE_CHECKING:
 __all__ = [
     "MetricsOperatorProfile",
     "ObservabilityDiagnosticsBundle",
+    "check_metric_inventory",
     "create_run_report_store",
     "delete_metrics_from_gateway",
     "get_audit_service",
@@ -86,6 +88,23 @@ class ObservabilityDiagnosticsBundle:
     run_manifest_service: RunManifestInspectionServiceProtocol
     lineage_service: LineageInspectionServiceProtocol
     workflow_service: ObservabilityWorkflowServiceProtocol
+
+
+def check_metric_inventory(
+    repo_root: Path,
+    allowlist: dict[str, set[str]],
+) -> tuple[Mapping[str, object], dict[str, list[str]]]:
+    """Collect and validate metric inventory through the runtime package seam."""
+    from bioetl.infrastructure.observability.metric_inventory import (
+        collect_metric_inventory,
+    )
+    from bioetl.infrastructure.observability.metric_inventory_policy import (
+        validate_metric_inventory,
+    )
+
+    report = collect_metric_inventory(repo_root)
+    violations = validate_metric_inventory(report, allowlist=allowlist)
+    return report, violations
 
 
 def start_metrics_server(

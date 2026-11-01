@@ -22,6 +22,24 @@ import pytest
 from scripts.engineering.qa import observability_metric_inventory_scan as inventory_scan
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
 
+
+def test_collect_metric_inventory_rebuilds_after_public_call(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    reports = iter([{"observed": 1}, {"observed": 2}])
+    calls = 0
+
+    def collect(_repo_root: Path) -> dict[str, int]:
+        nonlocal calls
+        calls += 1
+        return next(reports)
+
+    monkeypatch.setattr(inventory, "_collect_metric_inventory_impl", collect)
+    assert inventory.collect_metric_inventory(tmp_path) == {"observed": 1}
+    assert inventory.collect_metric_inventory(tmp_path) == {"observed": 2}
+    assert calls == 2
+
+
 # Repo-backed lane: two entrypoint tests spawn the module via subprocess with
 # cwd=repo_root over the real checkout (see governance
 # repo_backed_unit_test_exceptions in configs/quality/test_governance_audit.yaml).
