@@ -132,8 +132,6 @@ PORT_ADAPTER_CASES = (
     PortAdapterCase(ArtifactByteComparisonPort, FileArtifactByteComparisonAdapter),
     PortAdapterCase(BronzeStoragePort, BronzeWriter),
     PortAdapterCase(CircuitBreakerPort, CircuitBreakerGuard),
-    PortAdapterCase(DataSourcePort, BaseHttpAdapter),
-    PortAdapterCase(DataSourcePort, BaseSyncAdapter),
     PortAdapterCase(DeltaReaderPort, CompositeReplayInputReader),
     PortAdapterCase(DeltaReaderPort, RequestReader),
     PortAdapterCase(ExportCatalogPort, ExportCatalogAdapter),
@@ -298,8 +296,15 @@ def _assert_method_conforms(
     method_name: str,
     port_method: Any,
 ) -> None:
-    assert hasattr(case.adapter_cls, method_name), (
+    method_owner = next(
+        (cls for cls in case.adapter_cls.__mro__ if method_name in cls.__dict__),
+        None,
+    )
+    assert method_owner is not None, (
         f"{case.id} is missing method {method_name!r}"
+    )
+    assert method_owner is not case.port_cls, (
+        f"{case.id}.{method_name} is inherited only from the port protocol"
     )
     adapter_method = getattr(case.adapter_cls, method_name)
     assert inspect.iscoroutinefunction(adapter_method) is inspect.iscoroutinefunction(
@@ -344,6 +349,24 @@ def test_infrastructure_adapter_signatures_conform_to_ports(
             case=case,
             method_name=method_name,
             port_method=port_method,
+        )
+
+
+@pytest.mark.parametrize(
+    "adapter_cls",
+    [BaseHttpAdapter, BaseSyncAdapter],
+    ids=lambda cls: cls.__name__,
+)
+def test_protocol_stub_is_not_accepted_as_adapter_implementation(
+    adapter_cls: type[Any],
+) -> None:
+    """Base adapters cannot pass by inheriting the protocol's stub method."""
+    case = PortAdapterCase(DataSourcePort, adapter_cls)
+    with pytest.raises(AssertionError, match="inherited only from the port protocol"):
+        _assert_method_conforms(
+            case=case,
+            method_name="fetch",
+            port_method=DataSourcePort.fetch,
         )
 
 
