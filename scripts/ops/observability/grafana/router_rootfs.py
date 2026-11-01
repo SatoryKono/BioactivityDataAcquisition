@@ -9,6 +9,10 @@ import subprocess
 import sys
 import tarfile
 
+from scripts.ops.observability.grafana.trusted_docker import (
+    docker_path as trusted_docker_path,
+)
+
 
 def filesystem_records(stream):
     records = {}
@@ -71,11 +75,7 @@ def main(argv: list[str] | None = None):
     if len(args) != 1:
         raise ValueError("Unsupported image reference")
     image = canonical_image_reference(args[0])
-    docker = (
-        "C:/Program Files/Docker/Docker/resources/bin/docker.exe"
-        if sys.platform == "win32"
-        else "/usr/bin/docker"
-    )
+    docker = trusted_docker_path()
     container = subprocess.check_output(
         [docker, "create", "--entrypoint", "/bin/true", "--", image], text=True
     ).strip()
