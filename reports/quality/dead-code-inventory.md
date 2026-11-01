@@ -69,4 +69,3 @@
 | Module | Disposition | Evidence Lane | Owner Tests |
 | --- | --- | --- | --- |
 | `bioetl.interfaces.cli.commands.maintenance` | `retain_public_facade` | `compatibility_facade_contract` | `tests/unit/interfaces/cli/commands/test_runtime_wrapper_contracts.py`, `tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py` |
-
