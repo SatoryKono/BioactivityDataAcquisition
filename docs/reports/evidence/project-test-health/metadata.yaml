@@ -5,7 +5,7 @@ owner: "@bioetl-quality"
 last_verified: "2026-11-01"
 freshness_window_days: 30
 verification_scope: tracked_test_module_inventory
-source_ref: 92c964c9d245fdada5bba153688232b1d5cc25f1
+source_ref: db18d85918a1ff0724e026dc685a9ddd71666e3d
 test_module_inventory:
   command: "git ls-files 'tests/**/test_*.py' | wc -l"
   count: 3206
