@@ -110,6 +110,10 @@ EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
     "tests/architecture/test_external_resource_inventory_catalog.py"
 )
 
+CHECK_DOC_LINKS_GUARDRAILS_TEST = (
+    "tests/architecture/test_check_doc_links_guardrails.py"
+)
+
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "mkdocs.yml": ("tests/architecture/test_documentation_sync.py",),
@@ -204,7 +208,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/quality/issue-12474-api-owner-brief.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
-        "tests/architecture/test_check_doc_links_guardrails.py",
+        CHECK_DOC_LINKS_GUARDRAILS_TEST,
     ),
     "reports/quality/issue-12474-ci-parity-evidence.md": (
         *ISSUE_12475_PHYSICAL_PARITY_TESTS,
@@ -587,11 +591,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/12592_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
-        "tests/architecture/test_check_doc_links_guardrails.py",
+        CHECK_DOC_LINKS_GUARDRAILS_TEST,
     ),
     "reports/12592_scoped_patch.diff": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
-        "tests/architecture/test_check_doc_links_guardrails.py",
+        CHECK_DOC_LINKS_GUARDRAILS_TEST,
     ),
 }
 
