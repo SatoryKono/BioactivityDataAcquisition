@@ -2220,24 +2220,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30",
       "next_step": "Retain as the shared Docker identity library imported by both rootfs and managed-image verifiers; it has no standalone command. Preserve fixed protected Linux paths and the registered signed Windows installation check."
-    },
-    "scripts/engineering/ci/mutation_protocol_contracts.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the mutation-protocol contract helper imported by its owning unit tests; it has no runtime command surface. Keep it supporting so active_script_count_max stays unchanged.",
-      "owner": "@bioetl-platform",
-      "review_by": "2027-01-31"
-    },
-    "scripts/ops/observability/promote_router_host_release.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the release-promotion implementation behind the canonical `python -m scripts.ops promote-router-host-release` dispatcher; do not expose a separate script entrypoint or increase active_script_count_max.",
-      "owner": "@bioetl-platform",
-      "review_by": "2027-01-31"
-    },
-    "scripts/ops/observability/refresh_router_host_provenance.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the source-provenance implementation behind the canonical `python -m scripts.ops refresh-router-host-provenance` dispatcher and shared Router validators; keep direct operations routed through scripts.ops so active_script_count_max stays unchanged.",
-      "owner": "@bioetl-platform",
-      "review_by": "2027-01-31"
     }
   },
   "schema_version": "1.0"

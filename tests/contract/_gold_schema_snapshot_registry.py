@@ -229,7 +229,6 @@ def _canonical_dtype_name(dtype: object) -> str:
     return {
         "boolean": "bool",
         "string": "str",
-        "string[pyarrow]": "str",
     }.get(rendered, rendered)
 
 

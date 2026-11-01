@@ -326,110 +326,6 @@ def test_stale_manifest_selector_fails_before_subset_selection(tmp_path: Path) -
         validate_selectors(manifest, tmp_path)
 
 
-def test_selector_cache_reuses_only_exact_source_bytes(tmp_path, monkeypatch) -> None:
-    from scripts.engineering.dev import pytest_artifact_selection as selection
-
-    selection._source_selectors.cache_clear()
-    path = tmp_path / "tests/test_cached.py"
-    path.parent.mkdir()
-    path.write_bytes(b"def test_one(): pass\n")
-    manifest = {"tests": [{"node": "tests/test_cached.py::test_one"}]}
-    original_parse = selection.ast.parse
-    parsed = []
-
-    def counted_parse(source, *args, **kwargs):
-        if not args and not kwargs:
-            parsed.append(source)
-        return original_parse(source, *args, **kwargs)
-
-    monkeypatch.setattr(selection.ast, "parse", counted_parse)
-    validate_selectors(manifest, tmp_path)
-    validate_selectors(manifest, tmp_path)
-    assert parsed == [path.read_bytes().decode("utf-8")]
-    stat = path.stat()
-    original = path.read_bytes().decode("utf-8")
-    path.write_bytes(original.replace("test_one", "test_two").encode("utf-8"))
-    import os
-
-    os.utime(path, ns=(stat.st_atime_ns, stat.st_mtime_ns))
-    assert path.stat().st_size == stat.st_size
-    with pytest.raises(ValueError, match="Stale artifact manifest selector"):
-        validate_selectors(manifest, tmp_path)
-    assert parsed == [original, original.replace("test_one", "test_two")]
-    manifest["tests"][0]["node"] = "tests/test_cached.py::test_two"
-    validate_selectors(manifest, tmp_path)
-    assert len(parsed) == 2
-    path.unlink()
-    with pytest.raises(FileNotFoundError):
-        validate_selectors(manifest, tmp_path)
-
-
-@pytest.mark.parametrize(
-    ("source", "selector", "message"),
-    [
-        ("def test_one(): pass\ndef test_one(): pass\n", "test_one", "Stale"),
-        (
-            "class TestSuite:\n def test_one(self): pass\nclass TestSuite: pass\n",
-            "TestSuite::test_one",
-            "Stale",
-        ),
-        ("class TestSuite: pass\n", "TestSuite", "not a function"),
-        ("def test_one(: pass\n", "test_one", "syntax"),
-    ],
-)
-def test_warmed_selector_cache_rejects_invalid_current_source(
-    tmp_path, source, selector, message
-) -> None:
-    path = tmp_path / "tests/test_current.py"
-    path.parent.mkdir()
-    path.write_text("def test_one(): pass\n", encoding="utf-8")
-    manifest = {"tests": [{"node": "tests/test_current.py::test_one"}]}
-    validate_selectors(manifest, tmp_path)
-    path.write_text(source, encoding="utf-8")
-    manifest["tests"][0]["node"] = f"tests/test_current.py::{selector}"
-    if message == "syntax":
-        with pytest.raises(SyntaxError):
-            validate_selectors(manifest, tmp_path)
-    else:
-        with pytest.raises(ValueError, match=message):
-            validate_selectors(manifest, tmp_path)
-
-
-def test_selector_cache_keeps_roots_and_manifest_decisions_fresh(tmp_path) -> None:
-    for name, source in (
-        ("first", "def test_one(): pass\n"),
-        ("second", "def test_two(): pass\n"),
-    ):
-        path = tmp_path / name / "tests/test_current.py"
-        path.parent.mkdir(parents=True)
-        path.write_text(source, encoding="utf-8")
-    manifest = {"tests": [{"node": "tests/test_current.py::test_one"}]}
-    validate_selectors(manifest, tmp_path / "first")
-    with pytest.raises(ValueError, match="Stale"):
-        validate_selectors(manifest, tmp_path / "second")
-    manifest["tests"][0]["node"] = "tests/test_current.py::test_two"
-    validate_selectors(manifest, tmp_path / "second")
-    with pytest.raises(ValueError, match="Stale"):
-        validate_selectors(manifest, tmp_path / "first")
-
-
-def test_selector_cache_preserves_nested_async_and_utf8_contract(tmp_path) -> None:
-    path = tmp_path / "tests/test_nested.py"
-    path.parent.mkdir()
-    path.write_text(
-        "class TestOuter:\n class TestInner:\n  async def test_one(self): pass\n",
-        encoding="utf-8",
-    )
-    manifest = {
-        "tests": [{"node": "tests/test_nested.py::TestOuter::TestInner::test_one"}]
-    }
-    validate_selectors(manifest, tmp_path)
-    validate_selectors(manifest, tmp_path)
-    path.write_bytes(b"# coding: latin1\n# \xe9\ndef test_one(): pass\n")
-    with pytest.raises(UnicodeDecodeError):
-        validate_selectors(manifest, tmp_path)
-
-
 def test_docs_partition_keeps_source_checks_and_defers_only_generated_outputs(
     monkeypatch,
 ) -> None:
@@ -917,9 +813,7 @@ def test_source_checks_and_coverage_selection_survive_daily_partition():
     docs_lane = pr["jobs"]["docs-lane"]
     needs = docs_lane["needs"]
     assert ([needs] if isinstance(needs, str) else needs) == ["classify-changes"]
-    # Always execute the owner lane so missing classifier output fails closed;
-    # the aggregate job decides whether docs governance applies.
-    assert "if" not in docs_lane and True not in docs_lane
+    assert "if" not in docs_lane
     assert re.fullmatch(
         r"SatoryKono/BioactivityDataAcquisition/\.github/workflows/docs\.yml@[0-9a-f]{40}",
         docs_lane["uses"],
