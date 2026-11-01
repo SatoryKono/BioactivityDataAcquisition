@@ -19,6 +19,7 @@ from scripts.docs.matrix.structural_contract import (
     MatrixStructuralContractRow,
     NOT_APPLICABLE,
     QUARANTINE,
+    build_runtime_contract_rows,
     canonical_physical_type,
     contract_lookup_key,
     index_runtime_contract_rows,
@@ -27,6 +28,9 @@ from scripts.docs.matrix.structural_contract import (
     STRUCTURAL_BOOLEAN_VOCABULARY_VALIDATION,
     STRUCTURAL_CUSTOM_EMPTY_SEMANTICS_VALIDATION,
     STRUCTURAL_NO_STRING_COERCION_VALIDATION,
+)
+from bioetl.application.core.base_transformer._structural_policy_contracts import (
+    resolve_logical_type,
 )
 
 
@@ -44,6 +48,24 @@ def test_physical_type_export_is_stable_across_dtype_aliases(
     physical_type: str, expected: str
 ) -> None:
     assert canonical_physical_type(physical_type) == expected
+
+
+@pytest.mark.unit
+def test_arrow_string_dtype_resolves_to_the_string_logical_contract() -> None:
+    assert resolve_logical_type("string[pyarrow]") == "string"
+
+
+@pytest.mark.unit
+def test_required_activity_id_export_uses_runtime_string_contract() -> None:
+    activity_id = next(
+        row
+        for row in build_runtime_contract_rows()
+        if row.pipeline == "chembl_activity" and row.silver_column == "activity_id"
+    )
+
+    assert activity_id.logical_type == "string"
+    assert activity_id.silver_filter_tokens == ("structural_presence_guard",)
+    assert activity_id.silver_validation_tokens == ("structural:presence_required",)
 
 
 @pytest.mark.unit

@@ -373,10 +373,29 @@ async def test_run_cancellation_and_restart(
     monkeypatch.setattr(source, "extract_records", gated_extract_records)
 
     task = asyncio.create_task(runner1.run())
-    await asyncio.wait_for(first_record_ready.wait(), timeout=30)
-    task.cancel()
-    with pytest.raises(asyncio.CancelledError):
-        await task
+    first_record_waiter = asyncio.create_task(first_record_ready.wait())
+    try:
+        done, _ = await asyncio.wait(
+            {task, first_record_waiter},
+            timeout=30,
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+        if first_record_waiter not in done:
+            if task in done:
+                task.result()
+            pytest.fail("Pipeline did not reach the first-record cancellation point")
+        if task in done:
+            task.result()
+            pytest.fail("Pipeline finished before reaching the cancellation point")
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+    finally:
+        first_record_waiter.cancel()
+        await asyncio.gather(first_record_waiter, return_exceptions=True)
+        if not task.done():
+            task.cancel()
+        await asyncio.gather(task, return_exceptions=True)
     monkeypatch.setattr(source, "extract_records", original_extract)
 
     # Run B (Molecule)

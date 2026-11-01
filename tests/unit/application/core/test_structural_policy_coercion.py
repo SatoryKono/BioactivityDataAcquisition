@@ -51,6 +51,10 @@ from bioetl.application.core.base_transformer.field_policy import FieldCoercionP
 pytestmark = pytest.mark.unit
 
 
+def test_arrow_string_dtype_resolves_to_string() -> None:
+    assert resolve_logical_type("string[pyarrow]") == "string"
+
+
 def _contract(
     logical_type: LogicalType,
     *,
