@@ -37,11 +37,14 @@ Tests for get_text() and get_int() helper functions:
 
 from __future__ import annotations
 
+from typing import get_type_hints
+
 import pytest
 
 import xml.etree.ElementTree as ET
 
 from bioetl.application.pipelines.pubmed.xml_parser import get_int, get_text
+from bioetl.application.pipelines.pubmed.extractors.author import AuthorExtractor
 
 
 pytestmark = pytest.mark.unit
@@ -49,6 +52,10 @@ pytestmark = pytest.mark.unit
 
 class TestGetText:
     """Tests for get_text() function."""
+
+    def test_type_hints_resolve_at_runtime(self) -> None:
+        hints = get_type_hints(get_text)
+        assert hints["node"] == ET.Element | None
 
     def test_returns_text_from_element(self) -> None:
         elem = ET.fromstring("<Title>PubMed Article</Title>")
@@ -92,6 +99,10 @@ class TestGetText:
 class TestGetInt:
     """Tests for get_int() function."""
 
+    def test_type_hints_resolve_at_runtime(self) -> None:
+        hints = get_type_hints(get_int)
+        assert hints["node"] == ET.Element | None
+
     def test_parses_integer_from_element(self) -> None:
         elem = ET.fromstring("<Year>2024</Year>")
         assert get_int(elem) == 2024
@@ -131,3 +142,11 @@ class TestGetInt:
     def test_large_integer(self) -> None:
         elem = ET.fromstring("<PMID>39999999</PMID>")
         assert get_int(elem) == 39999999
+
+
+class TestExtractorTypeHints:
+    """Runtime type metadata remains introspectable for XML extractors."""
+
+    def test_author_extractor_type_hints_resolve_at_runtime(self) -> None:
+        hints = get_type_hints(AuthorExtractor.extract)
+        assert hints["element"] == ET.Element | None

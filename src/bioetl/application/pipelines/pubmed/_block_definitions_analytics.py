@@ -2,12 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry
-else:
-    from defusedxml import ElementTree as ET
+import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry
 from collections.abc import Callable, Sequence
 
 from bioetl.application.pipelines.pubmed._block_definitions_base import _PubMedXmlBlock

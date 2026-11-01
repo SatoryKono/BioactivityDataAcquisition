@@ -8,17 +8,12 @@ Extracted from the PubMed adapter module for better separation of concerns.
 
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry
 from typing import cast
 
+import defusedxml.ElementTree as defused_ET
+
 __all__ = ["PubMedXmlProcessor"]
-
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry - type annotations only, no runtime parsing
-else:
-    import defusedxml.ElementTree as ET
 
 
 from bioetl.domain.types import JsonDict
@@ -38,7 +33,7 @@ class PubMedXmlProcessor:
             Parsed XML root element, or None if parsing fails
         """
         try:
-            parsed_root: ET.Element = ET.fromstring(
+            parsed_root: ET.Element = defused_ET.fromstring(
                 xml_text,
                 # PubMed's normal EFetch response declares its public DTD. The
                 # parser does not fetch external DTDs, and entities stay blocked.
@@ -49,7 +44,10 @@ class PubMedXmlProcessor:
             return parsed_root
         except (
             ET.ParseError,
-            cast(type[BaseException], getattr(ET, "EntitiesForbidden", Exception)),
+            cast(
+                type[BaseException],
+                getattr(defused_ET, "EntitiesForbidden", Exception),
+            ),
         ):
             return None
 
