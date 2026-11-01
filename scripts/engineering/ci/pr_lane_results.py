@@ -563,7 +563,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
     ),
     "scripts/engineering/README.md": (
-        SCRIPTS_INVENTORY_MANIFEST_TEST,
+        "tests/architecture/test_scripts_inventory_manifest.py",
         "tests/architecture/test_scripts_inventory_discovery.py",
     ),
     **dict.fromkeys(
