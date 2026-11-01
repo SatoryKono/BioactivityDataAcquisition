@@ -8,6 +8,14 @@ from pathlib import Path
 
 import yaml
 
+from bioetl.infrastructure.observability.metric_inventory import (
+    collect_metric_inventory,
+)
+from bioetl.infrastructure.observability.metric_inventory_policy import (
+    _load_drift_allowlist,
+    validate_metric_inventory,
+)
+
 _METRIC_ALLOWLIST = Path(
     "configs/quality/observability_metric_inventory_allowlist.yaml"
 )
@@ -75,7 +83,7 @@ def _safe_contract_check(
 ) -> ContractCheck:
     try:
         return checker(repo_root)
-    except (OSError, ValueError, yaml.YAMLError) as exc:
+    except (ImportError, OSError, ValueError, yaml.YAMLError) as exc:
         return ContractCheck(
             name=name,
             passed=False,
@@ -105,13 +113,11 @@ def render_contract_check_report(report: ObservabilityContractCheckReport) -> st
 
 
 def _check_metric_inventory(repo_root: Path) -> ContractCheck:
-    from scripts.engineering.qa import report_observability_metric_inventory
-
-    report = report_observability_metric_inventory.collect_metric_inventory(repo_root)
+    report = collect_metric_inventory(repo_root)
     allowlist_path = repo_root / _METRIC_ALLOWLIST
-    violations = report_observability_metric_inventory.validate_metric_inventory(
+    violations = validate_metric_inventory(
         report,
-        allowlist=_load_metric_allowlist(allowlist_path),
+        allowlist=_load_drift_allowlist(allowlist_path),
     )
     return ContractCheck(
         name="metric_inventory_drift",
