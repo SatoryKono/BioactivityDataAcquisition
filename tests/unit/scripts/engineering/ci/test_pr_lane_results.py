@@ -10,6 +10,7 @@ from pathlib import Path
 import pytest
 from scripts.engineering.ci.pr_lane_results import (
     OWNER_STEPS,
+    PR_LANE_RESULTS_TEST,
     affected_pytest_targets,
     assert_step_outcomes,
     build_results,
@@ -320,10 +321,7 @@ def test_shadow_compare_routes_composite_gold_quality_configs() -> None:
         "tests/unit/infrastructure/schemas/test_composite_gold_dq.py"
         in report["selected"]
     )
-    assert (
-        "tests/unit/scripts/engineering/ci/test_pr_lane_results.py"
-        in report["selected"]
-    )
+    assert PR_LANE_RESULTS_TEST in report["selected"]
 
 
 @pytest.mark.parametrize(
@@ -1306,7 +1304,7 @@ def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
         "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
         "tests/architecture/test_test_governance_audit.py",
         "tests/unit/repo_backed/scripts/qa/test_validate_benchmark_evidence_repo.py",
-        "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+        PR_LANE_RESULTS_TEST,
     }
     registry = json.loads(
         (repo_root / "configs/quality/generated_artifact_tests.json").read_text(

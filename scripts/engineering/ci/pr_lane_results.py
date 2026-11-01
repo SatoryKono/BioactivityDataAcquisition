@@ -109,6 +109,7 @@ EXTERNAL_RESOURCE_INVENTORY_TEST = (
 EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
     "tests/architecture/test_external_resource_inventory_catalog.py"
 )
+PR_LANE_RESULTS_TEST = "tests/unit/scripts/engineering/ci/test_pr_lane_results.py"
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
@@ -460,9 +461,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/generated_artifact_routing.yaml": (
         "tests/architecture/test_generated_artifact_routing.py",
     ),
-    "configs/quality/generated_artifact_tests.json": (
-        "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-    ),
+    "configs/quality/generated_artifact_tests.json": (PR_LANE_RESULTS_TEST,),
     "tests/fixtures/contracts/coderabbit-schema.v2.json": (
         "tests/architecture/test_coderabbit_config.py",
     ),
@@ -492,9 +491,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/engineering/ci/publish_docker_image.sh": (
         "tests/unit/scripts/ci/test_docker_publication_guards.py",
     ),
-    "scripts/engineering/ci/pr_lane_results.py": (
-        "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-    ),
+    "scripts/engineering/ci/pr_lane_results.py": (PR_LANE_RESULTS_TEST,),
     PYPROJECT_TOML: ("tests/architecture/qm_07/test_distribution_isolation.py",),
     "configs/quality/integration_vcr_policy.yaml": (
         "tests/architecture/test_integration_vcr_policy.py",
@@ -615,9 +612,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_gemini_cli_bootstrap.py",
     ),
     "scripts/engineering/quality/": QUALITY_GOVERNANCE_TESTS,
-    "scripts/engineering/ci/pr_lane_results.py": (
-        "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-    ),
+    "scripts/engineering/ci/pr_lane_results.py": (PR_LANE_RESULTS_TEST,),
     "src/bioetl/infrastructure/quality/": QUALITY_GOVERNANCE_TESTS,
     "grafana/tooling/router-v7-bridge/": (
         "tests/architecture/test_circleci_migration_contract.py",
