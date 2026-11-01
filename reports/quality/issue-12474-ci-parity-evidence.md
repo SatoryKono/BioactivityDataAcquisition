@@ -1108,3 +1108,63 @@ threads are resolved after source-bound verification of the final Router
 provenance finding; that resolves the finding, not overall admission.
 Final CI, isolated-negative propagation, native ADMIT, independent final
 acceptance, merge and issue closure remain outstanding.
+
+### Mutation performance diagnosis after telemetry publication (2026-11-01)
+
+Published parent `677d1a32423e90c6822fee05c68a7f5d35f2bf87`, tree
+`fa3d36bfb54fa31879b367109a6c594ef1bf3571`, contains the qualified source
+capture above. Its required PR Gate `41272059628` remains **FAIL** on the
+expired naming entries; subsequent mandatory Class steps were skipped.
+No ADMIT or merge is claimed.
+
+Two preserved Linux probes used source `5948ac9b43c5d62a32c6bd83a4fb3986a810c082`,
+the official locked mutmut 3.8.1 wheel, Python 3.13.18 and pytest 9.2.0.
+Both retained the entire canonical `tests/unit/domain/` stats/clean selection,
+generated all 37,970 domain mutants, and executed the same 21 real
+`RelationOperator.from_string` mutants with one local worker. Forkserver's
+request also included three nonexistent IDs, which were excluded from the
+actual count. All 21 real mutants were killed by test-call failures with
+passing setup/teardown, not by collection or fixture failures. The mutation
+test sets match; duration-ranked fail-fast order differs. Median profiled
+pytest duration was 2.012886389 seconds with forkserver and 0.782493022 with
+stock fork. These bounded observations do not predict a full-gate runtime.
+The verified comparison manifest SHA256 is
+`a1fa132b4a9cce6d12449d3bd992fd921997782f72dc306013401ba674a898c8`.
+
+Actual child processes inherited warmed immutable source caches in both
+modes: each configuration made two fresh Git identity calls and no new
+committed-blob cache misses. Repeated generated-artifact selector parsing
+was another measured cost. The next correction uses stock fork and caches
+an immutable selector index by exact UTF-8 source bytes. Every invocation
+still reads current files, reloads and validates the current manifest,
+rejects ambiguous definitions and validates the full scheduling partition.
+No mutation target, owning selector, score threshold, timeout or debt limit
+changes. Native type annotations preserve runtime behavior.
+
+New controls reject same-size edits with restored mtime, missing files,
+duplicate functions/classes, nonfunction selectors, syntax errors and
+non-UTF-8 source despite an encoding cookie. Root/manifest changes remain
+fresh; nested async functions remain valid. Windows owning tests report
+99 PASS and nine existing platform skips; the final cache/workflow/harness
+set was also run in Linux with 108 PASS and zero skips. Targeted Ruff and mypy
+returned 0. Real backend positive control is 115 PASS; the negative control
+is exactly 114 PASS plus the expected `string not null` versus
+`int64 not null` schema mismatch, exit 1. That local negative is not a
+substitute for final remote failed-job/aggregate propagation.
+
+Independent `telemetry_independent_review` checked the real profiles,
+selector semantics and negative controls, and required a more precise
+workflow comment; that finding is resolved. This accepts the scoped fix,
+not final CI or admission. Changed test inputs require a new qualified
+producer; the previous measurements remain historical and are not rebound.
+
+The additional fork/cache diagnostic completed with the same 21 actual
+mutants and selected test sets, all killed by test-call failures, and a
+profiled median of 0.669683375 seconds. Its preserved manifest SHA256 is
+`423bdd495bf3ccc60f2d598d853bcce67ae501e078a653df017d177141d8133d`.
+This was an explicitly recorded candidate overlay on the source worktree,
+before final formatting and typing-only cleanup; it is not an exact-head
+full mutation result. Original files, runtime config, tool bytes, raw
+profiles and the final owned overlay are preserved separately. The final
+Linux owning run above used the final source bytes. Only a fresh complete
+remote run may establish the unchanged full mutation gates and admission.
