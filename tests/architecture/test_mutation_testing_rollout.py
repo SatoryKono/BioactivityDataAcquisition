@@ -63,7 +63,7 @@ class TestMutationTestingRollout:
 
         assert "paths_to_mutate: src/bioetl/domain/" in workflow
         assert "src/bioetl/application/services/control_plane/" in workflow
-        assert "tests/unit/application/services/control_plane/" in workflow
+        _assert_mutation_selection_matches_policy(yaml.safe_load(workflow), mutation)
         assert (
             "src/bioetl/application/services/export_lineage/export_manifests.py"
             in workflow
@@ -198,3 +198,44 @@ def test_mutation_workflow_python_blocks_compile_and_keep_exact_target(
         "scripts.engineering.ci.mutation_protocol_contracts",
     ]
     assert config["also_copy"] == ["src/bioetl", "scripts", "configs"]
+
+
+def _assert_mutation_selection_matches_policy(workflow, mutation):
+    rows = workflow["jobs"]["mutation-testing"]["strategy"]["matrix"]["target"]
+    actual = {target["id"].replace("-", "_"): target for target in rows}
+    assert len(rows) == len(actual)
+    expected = {
+        name: policy
+        for name, policy in mutation["targets"].items()
+        if policy["enforced"]
+    }
+    assert set(actual) == set(expected)
+    for name, policy in expected.items():
+        assert actual[name]["paths_to_mutate"] == policy["paths_to_mutate"]
+        assert actual[name]["tests_dir"] == policy["tests_dir"]
+        assert float(actual[name]["threshold"]) == policy["min_score"]
+
+
+@pytest.mark.architecture
+@pytest.mark.parametrize(
+    "defect",
+    ["narrowed_owners", "missing_target", "missing_selection", "duplicate_target"],
+)
+def test_mutation_selection_rejects_incomplete_owning_routes(defect):
+    workflow = yaml.safe_load((WORKFLOWS_DIR / "mutation-testing.yml").read_text())
+    targets = workflow["jobs"]["mutation-testing"]["strategy"]["matrix"]["target"]
+    control = next(
+        target for target in targets if target["id"] == "application-control-plane"
+    )
+    if defect == "narrowed_owners":
+        control["tests_dir"] = "tests/unit/application/services/control_plane/"
+    elif defect == "missing_target":
+        targets.remove(control)
+    elif defect == "duplicate_target":
+        targets.append(dict(control))
+    else:
+        control["tests_dir"] = ""
+    with pytest.raises(AssertionError):
+        _assert_mutation_selection_matches_policy(
+            workflow, load_matrix()["mutation_testing"]
+        )
