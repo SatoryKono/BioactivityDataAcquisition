@@ -8,7 +8,12 @@ from __future__ import annotations
 __all__ = ["get_int", "get_text"]
 
 
-import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry - see suppression registry
+else:
+    from defusedxml import ElementTree as ET  # type annotations only
 
 
 def get_text(node: ET.Element | None) -> str | None:

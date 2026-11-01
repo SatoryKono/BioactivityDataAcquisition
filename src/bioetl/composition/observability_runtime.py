@@ -35,12 +35,6 @@ from bioetl.composition.observability_metrics_profile import (
 from bioetl.composition.runtime_builders import config_access as _config_access
 from bioetl.domain.exceptions import MetricsServerError
 from bioetl.domain.runtime.composition_boundary_policy import resolve_seed_run_type
-from bioetl.infrastructure.observability.metric_inventory import (
-    collect_metric_inventory,
-)
-from bioetl.infrastructure.observability.metric_inventory_policy import (
-    validate_metric_inventory,
-)
 from bioetl.infrastructure.observability.required_publication_series import (
     ensure_required_control_plane_publication_series,
 )
@@ -61,7 +55,6 @@ if TYPE_CHECKING:
 __all__ = [
     "MetricsOperatorProfile",
     "ObservabilityDiagnosticsBundle",
-    "collect_metric_inventory",
     "create_run_report_store",
     "delete_metrics_from_gateway",
     "get_audit_service",
@@ -78,7 +71,6 @@ __all__ = [
     "load_repository_source_environment",
     "push_metrics_to_gateway",
     "start_metrics_server",
-    "validate_metric_inventory",
 ]
 
 

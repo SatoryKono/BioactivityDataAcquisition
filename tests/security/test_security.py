@@ -413,10 +413,6 @@ class TestPIIHandling:
       Actual email values are hashed at the transformer level (RULES.md S5.4).
     """
 
-    REQUEST_METADATA_SANITIZER_PATH = (
-        "infrastructure/adapters/common/_api_request_sanitize.py"
-    )
-
     # Files with known technical email usage (NOT user PII)
     # These are API identifiers required by external services
     KNOWN_TECHNICAL_EMAIL_FILES = frozenset(
@@ -481,7 +477,7 @@ class TestPIIHandling:
         if (
             pattern_name == "email"
             and py_file.relative_to(SRC_DIR).as_posix()
-            == self.REQUEST_METADATA_SANITIZER_PATH
+            == "infrastructure/adapters/common/_api_request_sanitize.py"
         ):
             # Request metadata is redacted, not a persisted Silver PII field.
             # Gate on actual protection: returning the raw email must fail.
@@ -531,12 +527,7 @@ class TestPIIHandling:
                 continue
             if self._file_is_allowlisted_for_pattern(py_file, pattern_name):
                 continue
-            requires_runtime_redaction = (
-                pattern_name == "email"
-                and py_file.relative_to(SRC_DIR).as_posix()
-                == self.REQUEST_METADATA_SANITIZER_PATH
-            )
-            if self._file_mentions_hashing(content) and not requires_runtime_redaction:
+            if self._file_mentions_hashing(content):
                 continue
             rel_path = py_file.relative_to(PROJECT_ROOT)
             violations.append(f"{rel_path}: PII field '{pattern_name}' without hashing")

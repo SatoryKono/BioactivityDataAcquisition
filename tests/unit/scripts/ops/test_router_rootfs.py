@@ -71,7 +71,6 @@ class RootfsFingerprintTests(unittest.TestCase):
         ):
             with (
                 self.subTest(image=image),
-                patch.object(rootfs, "docker_path", return_value="trusted-docker"),
                 patch.object(
                     rootfs.subprocess,
                     "check_output",
