@@ -87,8 +87,13 @@ ea8e7cddd44bf0dee7fd1f1d5c9d03cf01ab0c5f:reports/evidence/12461/uniprot_headers.
 6fff73d093591b4a43c9beb1e99863c229b80d40:reports/evidence/12461/uniprot_headers.txt:generic-api-key:8
 c08883508249e87d297f3b306e7a4d032e36de02:reports/evidence/12461/semanticscholar_headers.txt:generic-api-key:5
 c08883508249e87d297f3b306e7a4d032e36de02:reports/evidence/12461/uniprot_headers.txt:generic-api-key:8
+# Verified source-file SHA-1 values in the generated inventory, not credentials.
+# Keep the ignores scoped to these exact historical fingerprints.
 1b91146589ecff2829ae65bae3b8db83ae27e47d:configs/quality/external_resource_inventory.json:generic-api-key:3280
-
-# Reviewed Git blob IDs for internal_auth.py, not credentials; scoped to the two findings.
 258557176ce137076cb2cf8cec4adf29161f0df5:configs/quality/external_resource_inventory.json:generic-api-key:2831
 3d64273a395bb1dea3404c236d13e5d67383f20a:configs/quality/external_resource_inventory.json:generic-api-key:2831
+008a9790b27c879012c64a3b0069219183199d4e:configs/quality/external_resource_inventory.json:generic-api-key:3224
+a7f39b7cd84fab79f0e6506c96f4f1f0a1da2ad9:configs/quality/external_resource_inventory.json:generic-api-key:3224
+4663381c21cdf03d263ad2f1055f48e4759d9005:configs/quality/external_resource_inventory.json:generic-api-key:3224
+9e75ee1b4def9bb72adfd5ea91aa567affb0bc52:configs/quality/external_resource_inventory.json:generic-api-key:2831
+dcd6492f6b114a204665c70d3231102627b7a11e:configs/quality/external_resource_inventory.json:generic-api-key:3280
