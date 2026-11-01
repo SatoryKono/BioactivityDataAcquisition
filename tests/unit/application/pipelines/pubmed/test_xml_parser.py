@@ -53,7 +53,7 @@ pytestmark = pytest.mark.unit
 class TestGetText:
     """Tests for get_text() function."""
 
-    def test_type_hints_resolve_at_runtime(self) -> None:
+    def test_get_text_type_hints_resolve_at_runtime(self) -> None:
         hints = get_type_hints(get_text)
         assert hints["node"] == ET.Element | None
 
@@ -99,7 +99,7 @@ class TestGetText:
 class TestGetInt:
     """Tests for get_int() function."""
 
-    def test_type_hints_resolve_at_runtime(self) -> None:
+    def test_get_int_type_hints_resolve_at_runtime(self) -> None:
         hints = get_type_hints(get_int)
         assert hints["node"] == ET.Element | None
 

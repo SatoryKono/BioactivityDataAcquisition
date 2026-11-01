@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "7892151a1951212275b01f310ba641429de371d62fe02f596ce6964f7f148db4",
-      "limit": "7892151a1951212275b01f310ba641429de371d62fe02f596ce6964f7f148db4",
+      "current": "5eee04d88da7e846c45d08c1feb3b177d00e631b0ca3e79d5a79fb00aea367e6",
+      "limit": "5eee04d88da7e846c45d08c1feb3b177d00e631b0ca3e79d5a79fb00aea367e6",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,13 +57,13 @@
     {
       "current": {
         "source_module_count": 2578,
-        "source_tree_sha256": "7892151a1951212275b01f310ba641429de371d62fe02f596ce6964f7f148db4",
+        "source_tree_sha256": "5eee04d88da7e846c45d08c1feb3b177d00e631b0ca3e79d5a79fb00aea367e6",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2578,
-        "source_tree_sha256": "7892151a1951212275b01f310ba641429de371d62fe02f596ce6964f7f148db4",
+        "source_tree_sha256": "5eee04d88da7e846c45d08c1feb3b177d00e631b0ca3e79d5a79fb00aea367e6",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -427,7 +427,7 @@
       "status": "pass"
     },
     {
-      "current": "da77376cd2aef067a47f181a20565d618a93bd899446bda32a4ddf3de9b8213f",
+      "current": "3232badde7f2064fe475cd9aa679976749c2f344871562b594425a5d7a034dc7",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
