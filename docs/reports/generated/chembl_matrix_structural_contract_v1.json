@@ -5292,7 +5292,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_molecule",
       "silver_column": "black_box_warning",
       "silver_filter_tokens": [
@@ -5346,7 +5346,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_molecule",
       "silver_column": "chirality",
       "silver_filter_tokens": [
@@ -5508,7 +5508,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_molecule",
       "silver_column": "first_in_class",
       "silver_filter_tokens": [
@@ -5747,7 +5747,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_molecule",
       "silver_column": "inorganic_flag",
       "silver_filter_tokens": [
@@ -6124,7 +6124,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_molecule",
       "silver_column": "natural_product",
       "silver_filter_tokens": [
@@ -6155,7 +6155,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "boolean",
+      "physical_type": "bool",
       "pipeline": "chembl_molecule",
       "silver_column": "oral",
       "silver_filter_tokens": [
@@ -6186,7 +6186,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "boolean",
+      "physical_type": "bool",
       "pipeline": "chembl_molecule",
       "silver_column": "parenteral",
       "silver_filter_tokens": [
@@ -6248,7 +6248,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_molecule",
       "silver_column": "polymer_flag",
       "silver_filter_tokens": [
@@ -6302,7 +6302,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_molecule",
       "silver_column": "prodrug",
       "silver_filter_tokens": [
@@ -6501,7 +6501,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "boolean",
+      "physical_type": "bool",
       "pipeline": "chembl_molecule",
       "silver_column": "therapeutic_flag",
       "silver_filter_tokens": [
@@ -6533,7 +6533,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "boolean",
+      "physical_type": "bool",
       "pipeline": "chembl_molecule",
       "silver_column": "topical",
       "silver_filter_tokens": [
@@ -6664,7 +6664,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "boolean",
+      "physical_type": "bool",
       "pipeline": "chembl_molecule",
       "silver_column": "withdrawn_flag",
       "silver_filter_tokens": [
@@ -8515,7 +8515,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_publication_similarity",
       "silver_column": "doc_1",
       "silver_filter_tokens": [
@@ -8546,7 +8546,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_publication_similarity",
       "silver_column": "doc_2",
       "silver_filter_tokens": [
@@ -11609,7 +11609,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "boolean",
+      "physical_type": "bool",
       "pipeline": "chembl_target_protein_classification",
       "silver_column": "is_leaf",
       "silver_filter_tokens": [
@@ -11640,7 +11640,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "boolean",
+      "physical_type": "bool",
       "pipeline": "chembl_target_protein_classification",
       "silver_column": "l1_counts_for_target_type",
       "silver_filter_tokens": [
