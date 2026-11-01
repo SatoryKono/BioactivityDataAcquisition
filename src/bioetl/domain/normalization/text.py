@@ -87,12 +87,7 @@ def _normalize_text_field(text: str | None) -> str | None:
     if "<" in normalized or "&" in normalized:
         normalized = unescape(_HTML_TAG_PATTERN.sub("", normalized))
 
-    # Keep translate's fast path for ASCII. Regex avoids translate's per-codepoint
-    # lookup cost for the common non-ASCII publication text path.
-    if normalized.isascii():
-        normalized = normalized.translate(_CONTROL_CHARS_TRANSLATE_TABLE)
-    else:
-        normalized = _CONTROL_CHARS_PATTERN.sub("", normalized)
+    normalized = _strip_control_chars(normalized)
 
     normalized = unicodedata.normalize("NFC", normalized)
 
@@ -102,6 +97,13 @@ def _normalize_text_field(text: str | None) -> str | None:
     normalized = " ".join(normalized.split())
 
     return normalized if normalized else None
+
+
+def _strip_control_chars(text: str) -> str:
+    """Use translate for ASCII and regex for Unicode text."""
+    if text.isascii():
+        return text.translate(_CONTROL_CHARS_TRANSLATE_TABLE)
+    return _CONTROL_CHARS_PATTERN.sub("", text)
 
 
 def _collapse_whitespace(text: str) -> str:
