@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-10-24"
+last_verified: "2026-11-01"
 freshness_window_days: 7
 owner: quality
 canonical_sources:
@@ -57,10 +57,13 @@ coverage refresh:
 
 ## Freshness note
 
-Re-verified on 2026-10-08 against source HEAD
+The historical evidence record and its backlog-only interpretation were
+re-reviewed on 2026-11-01. The underlying test capture was completed on
+2026-10-08 against source HEAD
 `ceedc671b613ec3c2b25bbbae86b8b950719ddb6`. The manifest is complete, all 17
 required shard selections are present, and its test-tree hash matches the
-working tree. Local evidence at
+captured source tree. This review did not produce a new test run or coverage
+measurement. Local evidence at
 `reports/local/nav-tests-20260914/final-tests.xml` (1,199 passed, 11 skipped)
 remains historical. Recurrence of #7419 remains a backlog signal.
 

@@ -172,7 +172,7 @@ def _convert_complex_types(value: object) -> object | None:
     """Convert complex types (dataclass, mapping, sequence) if applicable."""
     if is_dataclass(value) and not isinstance(value, type):
         return _convert_dataclass(value)
-    if isinstance(value, Mapping):
+    if type(value) is dict or isinstance(value, Mapping):
         return _convert_mapping(value)
     if _should_convert_as_sequence(value):
         return _convert_sequence(value)
@@ -181,6 +181,16 @@ def _convert_complex_types(value: object) -> object | None:
 
 def to_jsonable(value: object) -> object:
     """Convert nested dataclasses, datetimes, and mappings into JSON-safe values."""
+    vt = type(value)
+    if vt in (str, int, float, bool) or value is None:
+        return value
+    if vt is dict:
+        dict_val = cast(dict[str, object], value)
+        return {str(k): to_jsonable(v) for k, v in sorted(dict_val.items())}
+    if vt is list:
+        list_val = cast(list[object], value)
+        return [to_jsonable(item) for item in list_val]
+
     converted = _convert_special_types(value)
     if converted is not None:
         return converted
