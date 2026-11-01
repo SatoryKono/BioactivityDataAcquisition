@@ -19,6 +19,7 @@ import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Any
 from pathlib import Path
 from types import FunctionType, MethodType
@@ -139,13 +140,14 @@ def _source_files(root: Path, target: Path) -> list[Path]:
     return files
 
 
-def _runtime_names(raw: bytes) -> list[str]:
-    return [
+@lru_cache(maxsize=4096)
+def _runtime_names(raw: bytes) -> tuple[str, ...]:
+    return tuple(
         node.name
         for node in ast.parse(raw).body
         if isinstance(node, ast.ClassDef)
         and any(_runtime_decorator(item) for item in node.decorator_list)
-    ]
+    )
 
 
 def _runtime_decorator(node: ast.expr) -> bool:
@@ -172,11 +174,17 @@ def _source_census(root: Path, target: Path) -> list[list[str]]:
     )
 
 
-def _committed_source(root: Path, path: Path) -> bytes:
-    raw = path.read_bytes()
-    committed = subprocess.check_output(
-        ["git", "-C", str(root), "show", "HEAD:" + path.relative_to(root).as_posix()]
+@lru_cache(maxsize=4096)
+def _committed_blob(root: Path, commit: str, relative: str) -> bytes:
+    """Cache immutable Git objects, never working files or a moving HEAD alias."""
+    return subprocess.check_output(
+        ["git", "-C", str(root), "show", commit + ":" + relative]
     )
+
+
+def _committed_source(root: Path, path: Path, commit: str) -> bytes:
+    raw = path.read_bytes()
+    committed = _committed_blob(root, commit, path.relative_to(root).as_posix())
     if raw != committed:
         raise ValueError("Pristine Protocol source differs from the checked-out commit")
     return raw
@@ -190,10 +198,12 @@ def capture(root: Path, target: Path, output: Path) -> None:
         raise ValueError("Protocol manifest must be an owned reports artifact")
     records: list[dict[str, object]] = []
     seen: set[tuple[str, str]] = set()
+    commit = _git(root, "HEAD")
+    tree = _git(root, commit + "^{tree}")
     sys.path.insert(0, str(root / "src"))
     try:
         for path in _source_files(root, target):
-            raw = _committed_source(root, path)
+            raw = _committed_source(root, path, commit)
             relative = path.relative_to(root).as_posix()
             names = _runtime_names(raw)
             if not names:
@@ -227,8 +237,8 @@ def capture(root: Path, target: Path, output: Path) -> None:
         "schema_version": 1,
         "source_root": str(root),
         "target": str(target),
-        "source_commit": _git(root, "HEAD"),
-        "source_tree": _git(root, "HEAD^{tree}"),
+        "source_commit": commit,
+        "source_tree": tree,
         "expected_identities": [list(identity) for identity in sorted(seen)],
         "contracts": records,
     }
@@ -264,15 +274,16 @@ def pytest_configure(config: object) -> None:
     payload = json.loads(manifest.read_text(encoding="utf-8"))
     if not isinstance(payload, dict) or payload.get("schema_version") != 1:
         raise ValueError("Invalid mutation Protocol manifest")
+    commit = _git(root, "HEAD")
     if (
         payload.get("source_root") != str(root)
-        or payload.get("source_commit") != _git(root, "HEAD")
-        or payload.get("source_tree") != _git(root, "HEAD^{tree}")
+        or payload.get("source_commit") != commit
+        or payload.get("source_tree") != _git(root, commit + "^{tree}")
     ):
         raise ValueError("Mutation Protocol manifest has stale source provenance")
     records = _manifest_records(payload, root)
     for record in records:
-        _apply_record(record, root, sandbox)
+        _apply_record(record, root, sandbox, commit)
 
 
 def _manifest_records(payload: dict[str, Any], root: Path) -> list[dict[str, Any]]:
@@ -297,7 +308,9 @@ def _manifest_records(payload: dict[str, Any], root: Path) -> list[dict[str, Any
     return records
 
 
-def _apply_record(record: dict[str, Any], root: Path, sandbox: Path) -> None:
+def _apply_record(
+    record: dict[str, Any], root: Path, sandbox: Path, commit: str
+) -> None:
     if not isinstance(record, dict):
         raise ValueError("Invalid Protocol record")
     module_name, name = _text(record.get("module")), _text(record.get("name"))
@@ -307,7 +320,8 @@ def _apply_record(record: dict[str, Any], root: Path, sandbox: Path) -> None:
     digest = _text(record.get("sha256"))
     if (
         original.is_symlink()
-        or hashlib.sha256(_committed_source(root, original)).hexdigest() != digest
+        or hashlib.sha256(_committed_source(root, original, commit)).hexdigest()
+        != digest
     ):
         raise ValueError("Pristine Protocol source provenance changed")
     module = importlib.import_module(module_name)

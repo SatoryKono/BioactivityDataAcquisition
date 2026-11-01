@@ -219,6 +219,7 @@ def test_sandbox_plugin_rejects_inconsistent_provenance(
     elif defect == "source_digest":
         source.write_text(SOURCE + "\n# drift\n", encoding="utf-8")
     elif defect == "source_and_digest":
+        harness.pytest_configure(None)
         source.write_bytes(source.read_bytes() + b"\n# forged digest\n")
         data["contracts"][0]["sha256"] = hashlib.sha256(source.read_bytes()).hexdigest()
     elif defect == "wrong_root":
@@ -239,6 +240,69 @@ def test_capture_rejects_dirty_pristine_source(sandbox):
             Path("src/mutation_manifest_fixture.py"),
             root / "reports" / "rejected.json",
         )
+
+
+def test_cached_commit_blob_still_rejects_working_drift_and_tracks_new_commit(sandbox):
+    root, _, source = sandbox
+    commit = harness._git(root, "HEAD")
+    original = harness._committed_source(root, source, commit)
+    hits = harness._committed_blob.cache_info().hits
+    assert harness._committed_source(root, source, commit) == original
+    assert harness._committed_blob.cache_info().hits == hits + 1
+    metadata = source.stat()
+    source.write_bytes(original.replace(b"value > 0", b"value < 0"))
+    os.utime(source, ns=(metadata.st_atime_ns, metadata.st_mtime_ns))
+    assert source.stat().st_size == len(original)
+    with pytest.raises(ValueError, match="differs from the checked-out commit"):
+        harness._committed_source(root, source, commit)
+    source.write_bytes(original + b"\n# new committed revision\n")
+    with pytest.raises(ValueError, match="differs from the checked-out commit"):
+        harness._committed_source(root, source, commit)
+    subprocess.run(["git", "-C", str(root), "add", "src"], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(root),
+            "-c",
+            "user.name=Fixture",
+            "-c",
+            "user.email=fixture@example.invalid",
+            "commit",
+            "-qm",
+            "next",
+        ],
+        check=True,
+    )
+    next_commit = harness._git(root, "HEAD")
+    assert next_commit != commit
+    assert harness._committed_source(root, source, next_commit) == source.read_bytes()
+    with pytest.raises(ValueError, match="differs from the checked-out commit"):
+        harness._committed_source(root, source, commit)
+
+
+def test_runtime_name_cache_is_content_bound_and_census_reads_current_files(sandbox):
+    root, _, source = sandbox
+    raw = source.read_bytes()
+    assert harness._runtime_names(raw) == ("P",)
+    hits = harness._runtime_names.cache_info().hits
+    assert harness._runtime_names(raw) == ("P",)
+    assert harness._runtime_names.cache_info().hits == hits + 1
+    changed = raw.replace(b"class P(", b"class Renamed(")
+    source.write_bytes(changed)
+    assert harness._source_census(root, Path("src")) == [
+        ["mutation_manifest_fixture", "Renamed"]
+    ]
+    extra = source.with_name("additional.py")
+    extra.write_bytes(raw)
+    assert harness._source_census(root, Path("src")) == [
+        ["additional", "P"],
+        ["mutation_manifest_fixture", "Renamed"],
+    ]
+    extra.unlink()
+    assert harness._source_census(root, Path("src")) == [
+        ["mutation_manifest_fixture", "Renamed"]
+    ]
 
 
 @pytest.mark.parametrize(

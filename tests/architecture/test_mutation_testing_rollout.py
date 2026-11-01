@@ -188,6 +188,8 @@ def test_mutation_workflow_python_blocks_compile_and_keep_exact_target(
     exec(blocks["Configure mutation target"], {})
     config = tomlkit.parse(path.read_text())["tool"]["mutmut"]
     assert config["source_paths"] == [os.environ["MUTMUT_SOURCE_PATH"]]
+    assert config["process_isolation"] == "forkserver"
+    assert config["forkserver_warmup"] == "collect"
     assert "paths_to_mutate" not in config
     assert config["pytest_add_cli_args_test_selection"] == [
         os.environ["MUTMUT_TESTS_DIR"]

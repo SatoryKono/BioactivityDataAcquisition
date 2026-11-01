@@ -80,6 +80,9 @@ jobs:
           config = document["tool"]["mutmut"]
           # The frozen mutmut 3.8.1 accepts source_paths; the old key warns.
           config["source_paths"] = [os.environ["MUTMUT_SOURCE_PATH"]]
+          # Collect once in the forkserver so workers inherit immutable source caches.
+          config["process_isolation"] = "forkserver"
+          config["forkserver_warmup"] = "collect"
           if "paths_to_mutate" in config:
               del config["paths_to_mutate"]
           # Subset mutation still needs the full package + tooling imports.

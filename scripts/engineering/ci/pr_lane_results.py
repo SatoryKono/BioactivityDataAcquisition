@@ -388,6 +388,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/reports/evidence/project-package-topology/SUMMARY.md": (
         "tests/unit/scripts/qa/test_topology_source_binding.py",
     ),
+    "docs/reports/evidence/project-test-health/SUMMARY.md": (
+        "tests/architecture/test_governance_freshness_protocol.py",
+        "tests/architecture/test_runtime_agent_docs_drift.py",
+        "tests/unit/scripts/docs/test_check_drift_evidence_age.py",
+    ),
     "Makefile": (
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
     ),
