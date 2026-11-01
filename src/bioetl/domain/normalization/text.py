@@ -16,6 +16,7 @@ __all__ = [
 ]
 
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
+_CONTROL_CHARS_PATTERN = re.compile(r"[\x00-\x08\x0e-\x1f\x7f-\x9f]")
 _CONTROL_CHARS_TRANSLATE_TABLE = str.maketrans(
     "",
     "",
@@ -86,7 +87,12 @@ def _normalize_text_field(text: str | None) -> str | None:
     if "<" in normalized or "&" in normalized:
         normalized = unescape(_HTML_TAG_PATTERN.sub("", normalized))
 
-    normalized = normalized.translate(_CONTROL_CHARS_TRANSLATE_TABLE)
+    # Keep translate's fast path for ASCII. Regex avoids translate's per-codepoint
+    # lookup cost for the common non-ASCII publication text path.
+    if normalized.isascii():
+        normalized = normalized.translate(_CONTROL_CHARS_TRANSLATE_TABLE)
+    else:
+        normalized = _CONTROL_CHARS_PATTERN.sub("", normalized)
 
     normalized = unicodedata.normalize("NFC", normalized)
 

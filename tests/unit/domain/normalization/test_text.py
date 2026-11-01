@@ -32,3 +32,7 @@ def test_normalize_title_strips_control_characters_and_preserves_whitespace() ->
 
     assert normalize_title(f"left{control_chars}right") == "leftright"
     assert normalize_title("left\t right\n") == "left right"
+
+
+def test_normalize_title_preserves_unicode_and_strips_control_characters() -> None:
+    assert normalize_title("β-catenin\x01 regulation") == "β-catenin regulation"
