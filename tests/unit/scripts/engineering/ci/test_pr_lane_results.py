@@ -686,6 +686,20 @@ def test_shadow_compare_routes_quality_and_runtime_documentation() -> None:
     assert "tests/architecture/test_docker_runtime_contracts.py" in report["selected"]
 
 
+def test_shadow_compare_routes_current_policy_and_test_health_evidence() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    changed_paths = [
+        "configs/quality/layered_suffix_policy.yaml",
+        "docs/reports/evidence/project-test-health/SUMMARY.md",
+        "docs/reports/evidence/project-test-health/metadata.yaml",
+        "docs/reports/evidence/project-test-health/shard_registry.yaml",
+    ]
+
+    for path in changed_paths:
+        report = build_shadow_compare([path], repo_root=repo_root)
+        assert report["selected_count"] > 0
+
+
 def test_shadow_compare_routes_lineage_crash_evidence() -> None:
     """Lineage crash reports select the test that produced the evidence."""
     repo_root = Path(__file__).resolve().parents[5]
