@@ -57,16 +57,17 @@ coverage refresh:
 
 ## Freshness note
 
-Re-verified on 2026-11-01 against source tree `3bd05b3f2dae074a8a9360d1de7b7b1831e06ab8`:
-the canonical source list and historical shard manifest remain present, and the
-tracked test-module inventory is 3,206 files. This is an inventory check only;
+Re-verified on 2026-11-01 at source commit
+`92c964c9d245fdada5bba153688232b1d5cc25f1`: the canonical source list and
+historical shard manifest remain present, and `git ls-files
+'tests/**/test_*.py'` counts 3,206 tracked modules. This is an inventory check only;
 the 2026-10-08 17-shard capture below remains the latest measured coverage
 evidence in this summary.
 
 Re-verified on 2026-10-08 against source HEAD
 `ceedc671b613ec3c2b25bbbae86b8b950719ddb6`. The manifest is complete, all 17
-required shard selections are present, and the manifest retains the test-tree
-hash recorded for the captured test inputs. Local evidence at
+required shard selections are present, and its test-tree hash matches the
+working tree. Local evidence at
 `reports/local/nav-tests-20260914/final-tests.xml` (1,199 passed, 11 skipped)
 remains historical. Recurrence of #7419 remains a backlog signal.
 
