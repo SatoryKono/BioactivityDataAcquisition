@@ -540,6 +540,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/security_suppression_registry.yaml": (
         "tests/architecture/test_security_suppression_registry.py",
     ),
+    "configs/quality/retirement_candidate_triage.yaml": (
+        "tests/architecture/test_retirement_candidate_triage.py",
+    ),
     "docs/04-reference/api/infrastructure.md": (
         "tests/architecture/test_api_reference_public_facades.py",
     ),
