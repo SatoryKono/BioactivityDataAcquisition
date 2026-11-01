@@ -39,15 +39,6 @@ repo_wide_zero_import_classification:
     - retain_compat_shim
     - retain_canonical_owner_module
   entries:
-    - module_path: src/bioetl/domain/ports/stage_accounting.py
-      module_name: bioetl.domain.ports.stage_accounting
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-07-23"
-      review_by: "2026-10-21"
-      linked_issue: "#4541"
-      rationale:
-        Canonical owner for the lazily exported StageAccountingPort protocol;
-        first-party consumers must import it through the bioetl.domain.ports facade.
     - module_path: src/bioetl/interfaces/cli/commands/maintenance.py
       module_name: bioetl.interfaces.cli.commands.maintenance
       disposition: retain_public_facade
