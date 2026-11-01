@@ -324,24 +324,54 @@ async def test_run_normal_a_b_a(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr(allow_playback_repeats=True)
 @pytest.mark.asyncio
-async def test_run_cancellation_and_restart(e2e_data_dir: Path):
+async def test_run_cancellation_and_restart(
+    e2e_data_dir: Path, monkeypatch: pytest.MonkeyPatch
+):
     """E2E: Pipeline cancellation followed by restart in a single process.
 
     Verifies A -> B -> A pattern and cancellation safety.
     """
     import asyncio
 
-    # Run A1 (Target)
+    # Run A1 (Target), pause after the source yields its first record so the
+    # cancellation always lands inside the active extraction path.
+    from collections.abc import AsyncIterator
+
     ctx1 = create_test_context("chembl_target", limit=2)
     runner1 = bootstrap_pipeline_runner(ctx1)
+    source = runner1._executor._extraction_loop_service._batch_processing_service
+    original_extract = source.extract_records
+    original_extract = source.extract_records
+    first_record_ready = asyncio.Event()
+    continue_extraction = asyncio.Event()
+
+    def gated_extract_records(*args: object, **kwargs: object) -> AsyncIterator[object]:
+        records = original_extract(*args, **kwargs)
+
+        async def gate_first_record() -> AsyncIterator[object]:
+            iterator = records.__aiter__()
+            try:
+                first_record = await anext(iterator)
+                first_record_ready.set()
+                await continue_extraction.wait()
+                yield first_record
+                async for record in iterator:
+                    yield record
+            finally:
+                aclose = getattr(iterator, "aclose", None)
+                if callable(aclose):
+                    await aclose()
+
+        return gate_first_record()
+
+    monkeypatch.setattr(source, "extract_records", gated_extract_records)
 
     task = asyncio.create_task(runner1.run())
-    await asyncio.sleep(0.1)  # Let it start
+    await asyncio.wait_for(first_record_ready.wait(), timeout=30)
     task.cancel()
-    try:
+    with pytest.raises(asyncio.CancelledError):
         await task
-    except asyncio.CancelledError:
-        pass
+    monkeypatch.setattr(source, "extract_records", original_extract)
 
     # Run B (Molecule)
     ctx_b = create_test_context("chembl_molecule", limit=2)
@@ -371,17 +401,29 @@ async def test_run_error_and_restart(
     that propagates up the real execution path.
     """
 
-    # Run A1 (Target) with invalid config to simulate error passing through real path
-    ctx1 = create_test_context(
-        "chembl_target", limit=3, query="invalid_field=something"
-    )
-    runner1 = bootstrap_pipeline_runner(ctx1)
+    # Inject a known failure from the source iterator used by the real runner.
+    from collections.abc import AsyncIterator
 
-    try:
+    ctx1 = create_test_context("chembl_target", limit=3)
+    runner1 = bootstrap_pipeline_runner(ctx1)
+    source = runner1._executor._extraction_loop_service._batch_processing_service
+    original_extract = source.extract_records
+
+    def failing_extract_records(
+        *args: object, **kwargs: object
+    ) -> AsyncIterator[object]:
+        async def fail_during_iteration() -> AsyncIterator[object]:
+            if False:
+                yield None
+            raise RuntimeError("injected ChEMBL source failure")
+
+        return fail_during_iteration()
+
+    monkeypatch.setattr(source, "extract_records", failing_extract_records)
+
+    with pytest.raises(RuntimeError, match="injected ChEMBL source failure"):
         await runner1.run()
-        pytest.fail("Should have failed")
-    except Exception:
-        pass
+    monkeypatch.setattr(source, "extract_records", original_extract)
 
     # Run B (Molecule) - normal
     ctx_b = create_test_context("chembl_molecule", limit=2)
