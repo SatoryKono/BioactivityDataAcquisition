@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T23:41:31.648417+00:00",
+  "generated_at": "2026-11-01T00:53:28.126112+00:00",
   "summary": {
-    "total_scripts": 700,
+    "total_scripts": 701,
     "status_counts": {
       "active": 334,
-      "supporting": 366
+      "supporting": 367
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -10285,6 +10285,18 @@
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-11-30",
       "next_step": "Internal evidence-validation functions imported by the canonical telemetry updater and local coverage producer; no CLI, main, or direct invocation exists. Retain as supporting code and expose operations only through those existing entrypoints."
+    },
+    {
+      "path": "scripts/engineering/ci/mutation_protocol_contracts.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-08",
+      "next_step": "Retain only as the source-bound pytest plugin and pristine Protocol manifest helper called by mutation-testing.yml; no standalone CLI. Preserve every mutant, assertion, target and score threshold. Reassess against the pinned instrumenter after upstream Protocol instrumentation changes."
     },
     {
       "path": "scripts/engineering/ci/nightly_shadow_archive.py",

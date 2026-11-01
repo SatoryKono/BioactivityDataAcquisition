@@ -2196,6 +2196,12 @@
       "next_step": "Retain as the internal billing validation module used by the workflow and tests; keep it supporting because it has no standalone invocation surface.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
+    },
+    "scripts/engineering/ci/mutation_protocol_contracts.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain only as the source-bound pytest plugin and pristine Protocol manifest helper called by mutation-testing.yml; no standalone CLI. Preserve every mutant, assertion, target and score threshold. Reassess against the pinned instrumenter after upstream Protocol instrumentation changes.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-08"
     }
   },
   "schema_version": "1.0"

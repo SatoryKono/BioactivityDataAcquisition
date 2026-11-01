@@ -155,3 +155,46 @@ class TestMutationTestingRollout:
                 assert entry["target_resolution_date"].startswith("2026-")
                 assert entry["next_step"]
                 assert entry["promotion_criteria"]
+
+
+@pytest.mark.architecture
+def test_mutation_workflow_python_blocks_compile_and_keep_exact_target(
+    tmp_path, monkeypatch
+):
+    """Execute the actual CI configuration block with isolated synthetic inputs."""
+    import os
+    import tomlkit
+
+    workflow = yaml.safe_load((WORKFLOWS_DIR / "mutation-testing.yml").read_text())
+    steps = workflow["jobs"]["mutation-testing"]["steps"]
+    blocks = {}
+    for step in steps:
+        run = step.get("run", "")
+        if "python - <<'PY'" in run:
+            code = run.split("python - <<'PY'", 1)[1].split("\nPY", 1)[0].lstrip("\n")
+            blocks[step["name"]] = compile(code, step["name"], "exec")
+    assert set(blocks) == {
+        "Configure mutation target",
+        "Run mutation testing",
+        "Check mutation score threshold",
+    }
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("MUTMUT_SOURCE_PATH", "src/synthetic/")
+    monkeypatch.setenv("MUTMUT_TESTS_DIR", "tests/unit/synthetic/")
+    path = tmp_path / "pyproject.toml"
+    path.write_text(
+        '[tool.mutmut]\npaths_to_mutate=["old"]\npytest_add_cli_args=["--strict-markers"]\n'
+    )
+    exec(blocks["Configure mutation target"], {})
+    config = tomlkit.parse(path.read_text())["tool"]["mutmut"]
+    assert config["source_paths"] == [os.environ["MUTMUT_SOURCE_PATH"]]
+    assert "paths_to_mutate" not in config
+    assert config["pytest_add_cli_args_test_selection"] == [
+        os.environ["MUTMUT_TESTS_DIR"]
+    ]
+    assert config["pytest_add_cli_args"] == [
+        "--strict-markers",
+        "-p",
+        "scripts.engineering.ci.mutation_protocol_contracts",
+    ]
+    assert config["also_copy"] == ["src/bioetl", "scripts", "configs"]

@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-10-24"
+last_verified: "2026-11-01"
 freshness_window_days: 7
 owner: quality
 canonical_sources:
@@ -13,7 +13,26 @@ verification_scope: tracked_test_module_inventory
 
 # Project Test Health
 
-## Current status
+## Current source inventory
+
+On 2026-11-01 UTC, a source-only census re-verified 3,193 tracked `test_*.py`
+modules on commit `af43b497f4324b7cea08e6bf2761d16111609c73`, tree
+`b0d9880739364f2eacf4c78a27bf57b7abe586b1`. The command was
+`git ls-tree -r --name-only af43b497f4324b7cea08e6bf2761d16111609c73 -- tests`
+(exit 0), followed by basename matching `test_*.py`. The sorted Git output's
+filtered newline-delimited inventory has SHA-256
+`2e3cd5731688df17371fcf3c6ca40bf1c8a7ac0e4253b4b758ab066de2a80eeb`.
+The three canonical configuration files listed above were read and hashed as
+part of that check. The exact census, command, timestamps and source hashes
+are preserved in the #12474 qualification receipt
+`finalaf43-test-health-inventory-reverification`.
+
+`last_verified` applies only to this tracked source inventory. It does not
+refresh historical test executions, coverage measurements or release admission.
+The additional mutation-harness fixture module under development is outside
+this committed census; it must be counted on its published source revision.
+
+## Historical coverage capture
 
 On 2026-10-08, CircleCI run [17286](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/17286)
 completed the canonical 17-shard coverage plan for source commit
@@ -55,7 +74,7 @@ coverage refresh:
 1. Complete remaining lifecycle, contract, and UTC metadata tests.
 2. Add security regression coverage for HTML output and recursive redaction.
 
-## Freshness note
+## Historical capture verification
 
 Re-verified on 2026-10-08 against source HEAD
 `ceedc671b613ec3c2b25bbbae86b8b950719ddb6`. The manifest is complete, all 17

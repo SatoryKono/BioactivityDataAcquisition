@@ -77,10 +77,10 @@ jobs:
           path = Path("pyproject.toml")
           document = tomlkit.parse(path.read_text(encoding="utf-8"))
           config = document["tool"]["mutmut"]
-          # mutmut 3.x reads paths_to_mutate (source_paths is ignored).
-          config["paths_to_mutate"] = [os.environ["MUTMUT_SOURCE_PATH"]]
-          if "source_paths" in config:
-              del config["source_paths"]
+          # The frozen mutmut 3.8.1 accepts source_paths; the old key warns.
+          config["source_paths"] = [os.environ["MUTMUT_SOURCE_PATH"]]
+          if "paths_to_mutate" in config:
+              del config["paths_to_mutate"]
           # Subset mutation still needs the full package + tooling imports.
           config["also_copy"] = [
               "src/bioetl",
@@ -90,6 +90,10 @@ jobs:
           config["pytest_add_cli_args_test_selection"] = [
               os.environ["MUTMUT_TESTS_DIR"]
           ]
+          config["pytest_add_cli_args"] = [
+              *config.get("pytest_add_cli_args", []),
+              "-p", "scripts.engineering.ci.mutation_protocol_contracts",
+          ]
           path.write_text(tomlkit.dumps(document), encoding="utf-8")
           PY
 
@@ -97,6 +101,9 @@ jobs:
         env:
           # mutmut executes pytest from a sandbox; ensure package + repo roots resolve.
           PYTHONPATH: ${{ github.workspace }}/src:${{ github.workspace }}
+          MUTMUT_SOURCE_PATH: ${{ matrix.target.paths_to_mutate }}
+          BIOETL_MUTATION_SOURCE_ROOT: ${{ github.workspace }}
+          BIOETL_MUTATION_PROTOCOL_MANIFEST: ${{ github.workspace }}/reports/mutation-protocol-contracts/${{ matrix.target.id }}.json
         run: |
           set -euo pipefail
           echo "Running mutation testing for ${{ matrix.target.id }}..."
@@ -104,6 +111,17 @@ jobs:
           # under the frozen CI environment (bare `mutmut` is not on runner PATH).
           export PYTHONPATH="${GITHUB_WORKSPACE}/src:${GITHUB_WORKSPACE}${PYTHONPATH:+:$PYTHONPATH}"
           uv run --frozen --no-build python -c "import bioetl.domain, scripts; print('mutation import preflight ok')"
+          uv run --frozen --no-build python - <<'PY'
+          import os
+          from pathlib import Path
+          from scripts.engineering.ci.mutation_protocol_contracts import capture
+
+          capture(
+              Path(os.environ["BIOETL_MUTATION_SOURCE_ROOT"]),
+              Path(os.environ["MUTMUT_SOURCE_PATH"]),
+              Path(os.environ["BIOETL_MUTATION_PROTOCOL_MANIFEST"]),
+          )
+          PY
           uv run --frozen --no-build mutmut run
 
       - name: Generate mutation report
