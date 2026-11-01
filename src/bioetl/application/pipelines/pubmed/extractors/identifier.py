@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from typing import cast
-from xml.etree.ElementTree import Element  # nosec B405 - see suppression registry
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from xml.etree.ElementTree import Element  # nosec B405
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
 from bioetl.application.pipelines.pubmed.extractors.identifier_types import (

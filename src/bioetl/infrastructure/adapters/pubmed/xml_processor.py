@@ -13,9 +13,14 @@ from typing import cast
 __all__ = ["PubMedXmlProcessor"]
 
 
-import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry
+from typing import TYPE_CHECKING
 
-import defusedxml.ElementTree as defused_ET
+if TYPE_CHECKING:
+    import xml.etree.ElementTree as ET  # nosec B405 - type annotations only, no runtime parsing
+else:
+    import defusedxml.ElementTree as ET
+
+
 
 from bioetl.domain.types import JsonDict
 
@@ -34,12 +39,12 @@ class PubMedXmlProcessor:
             Parsed XML root element, or None if parsing fails
         """
         try:
-            parsed_root: ET.Element = defused_ET.fromstring(xml_text)
+            parsed_root: ET.Element = ET.fromstring(xml_text, forbid_dtd=True, forbid_entities=True, forbid_external=True)  # type: ignore[call-arg]
             return parsed_root
         except (
             ET.ParseError,
             cast(
-                type[BaseException], getattr(defused_ET, "EntitiesForbidden", Exception)
+                type[BaseException], getattr(ET, "EntitiesForbidden", Exception)
             ),
         ):
             return None

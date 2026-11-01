@@ -9,7 +9,10 @@ __all__ = ["AbstractExtractor"]
 
 
 from typing import cast
-from xml.etree.ElementTree import Element  # nosec B405 - see suppression registry
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from xml.etree.ElementTree import Element  # nosec B405
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
 

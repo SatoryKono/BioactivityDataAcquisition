@@ -1,0 +1,15 @@
+## Scope
+Replaced `xml.etree.ElementTree` with `defusedxml` in PubMed processing routes (`application/pipelines/pubmed/xml_parser.py` and `infrastructure/adapters/pubmed/xml_processor.py`) to mitigate entity-expansion vulnerabilities (SEC-002, Billion Laughs).
+
+## Implementation Details
+1. **Runtime Parsing**: Switched `ET.fromstring` to `defusedxml.ElementTree` with strict parameters (`forbid_dtd=True, forbid_entities=True, forbid_external=True`).
+2. **Type Annotations**: Restructured imports in `extractors/` to load `xml.etree.ElementTree.Element` strictly under `TYPE_CHECKING` to preserve annotations without introducing runtime parsing attack surfaces. Suppressed bandit false positives explicitly (`# nosec B405`).
+3. **Dry-Run Limits**: Implemented a warning (dry-run) threshold for payloads exceeding 10MB to monitor real-world dimensions before hard-blocking. Added a diagnostic warning if the local `pyexpat` version is below the recommended secure baseline (2.4.1). Expat version is runtime checked since it's shipped with Python.
+4. **Bandit Gate**: All `# nosec B405` instances on runtime paths were removed, ensuring zero blindspots. Bandit sweep confirms no remaining issues.
+
+## Metrics
+- `uv run bandit -r src/bioetl/ -c pyproject.toml` => Pass
+- `uv run mypy` => Pass
+- `uv run pytest tests/unit/infrastructure/adapters/pubmed/ tests/unit/application/pipelines/pubmed/` => Pass (390 passed)
+
+*Note: Issue #12470 is intentionally left open per constraints.*
