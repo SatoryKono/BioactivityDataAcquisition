@@ -17,7 +17,7 @@ Note:
 from __future__ import annotations
 
 from bioetl.domain.exceptions.base import BioETLError
-from bioetl.domain.types import ErrorType
+from bioetl.domain.types.enums import ErrorType
 
 __all__ = [
     "DataQualityThresholdError",
