@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "catalog_ref": "c3d7e98a90c8d2c49ffef0d16bfc2af2958ab59d",
-  "source_ref": "b82bb4caf3c9b698093286b3eb464af5e0e7d8c5",
+  "source_ref": "e24a9601a2d709455da5dd7b007e7c004d4977a8",
   "source_reviews": {
     "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py": "Reviewed pandas 3.1 compatibility change: normalize extension string dtype names to the existing in-memory str contract. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
     "src/bioetl/application/core/_base_transformer_execution_support.py": "Reviewed structural contract support change: classify existing in-memory outcomes and resolve optional-field metadata from the already loaded policy. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
@@ -9,7 +9,21 @@
     "src/bioetl/domain/behavior/_dq_rule_evaluators.py": "Reviewed pandas 3.1 compatibility change: reuse the in-memory presence predicate for required and non-null validation. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
     "src/bioetl/domain/behavior/_dq_value_coercion.py": "Reviewed pandas 3.1 compatibility change: classify floating NaN as absent during in-memory DQ coercion. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
     "src/bioetl/domain/schemas/chembl/publication.py": "Reviewed pandas 3.1 compatibility change: cast the mapped calendar predicate to boolean before the existing nullable Series check. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
-    "src/bioetl/domain/normalization/json.py": "Reviewed optimization of JSON normalization for built-in scalars, dicts and lists, with existing recursive mapping/sequence handling retained for other types. This changes in-memory value conversion only; it introduces no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior."
+    "src/bioetl/domain/normalization/json.py": "Reviewed optimization of JSON normalization for built-in scalars, dicts and lists, with existing recursive mapping/sequence handling retained for other types. This changes in-memory value conversion only; it introduces no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/application/pipelines/pubmed/_block_definitions_analytics.py": "Reviewed PubMed analytics block TYPE_CHECKING import change; ElementTree is annotation/traversal support and XML parsing remains through defusedxml. No external resource lifecycle or acquisition behavior changes.",
+    "src/bioetl/application/pipelines/pubmed/_block_definitions_base.py": "Reviewed PubMed base block TYPE_CHECKING import change; ElementTree remains annotation/traversal support and parsing remains through defusedxml. No external resource lifecycle or acquisition behavior changes.",
+    "src/bioetl/application/pipelines/pubmed/_block_definitions_edition.py": "Reviewed PubMed edition block TYPE_CHECKING import change; ElementTree remains annotation/traversal support and parsing remains through defusedxml. No external resource lifecycle or acquisition behavior changes.",
+    "src/bioetl/application/pipelines/pubmed/_block_definitions_identifiers.py": "Reviewed PubMed identifier block TYPE_CHECKING import change; ElementTree remains annotation/traversal support and parsing remains through defusedxml. No external resource lifecycle or acquisition behavior changes.",
+    "src/bioetl/application/pipelines/pubmed/_block_helpers.py": "Reviewed PubMed block helper TYPE_CHECKING import change; ElementTree remains annotation/traversal support for defusedxml-parsed trees. No external resource lifecycle or acquisition behavior changes.",
+    "src/bioetl/application/pipelines/pubmed/extractors/abstract.py": "Reviewed PubMed abstract extractor TYPE_CHECKING Element import change; parsing and input flow are unchanged. No external resource lifecycle or acquisition behavior changes.",
+    "src/bioetl/application/pipelines/pubmed/extractors/author.py": "Reviewed PubMed author extractor TYPE_CHECKING Element import change; parsing and input flow are unchanged. No external resource lifecycle or acquisition behavior changes.",
+    "src/bioetl/application/pipelines/pubmed/extractors/base.py": "Reviewed PubMed extractor TYPE_CHECKING Element import change; parsing and input flow are unchanged. No external resource lifecycle or acquisition behavior changes.",
+    "src/bioetl/application/pipelines/pubmed/extractors/classification.py": "Reviewed PubMed classification extractor TYPE_CHECKING Element import change; parsing and input flow are unchanged. No external resource lifecycle or acquisition behavior changes.",
+    "src/bioetl/application/pipelines/pubmed/extractors/date.py": "Reviewed PubMed date extractor TYPE_CHECKING Element import change; parsing and input flow are unchanged. No external resource lifecycle or acquisition behavior changes.",
+    "src/bioetl/application/pipelines/pubmed/extractors/identifier.py": "Reviewed PubMed identifier extractor TYPE_CHECKING Element import change; parsing and input flow are unchanged. No external resource lifecycle or acquisition behavior changes.",
+    "src/bioetl/application/pipelines/pubmed/transformer.py": "Reviewed PubMed transformer TYPE_CHECKING ElementTree import change; runtime XML parsing remains through defusedxml. No external resource lifecycle or acquisition behavior changes.",
+    "src/bioetl/application/pipelines/pubmed/xml_parser.py": "Reviewed PubMed XML parser change; runtime parser binding uses defusedxml while ElementTree remains type-only. This hardens XML parsing without changing external acquisition or lifecycle behavior.",
+    "src/bioetl/infrastructure/adapters/pubmed/xml_processor.py": "Reviewed PubMed XML processor change; parsing uses defusedxml with DTD, entity and external-reference prohibitions, while ElementTree remains type-only. No new external resources or lifecycle behavior are introduced."
   },
   "expression_updates": {},
   "resource_updates": {},
