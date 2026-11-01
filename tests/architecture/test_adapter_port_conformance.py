@@ -300,9 +300,7 @@ def _assert_method_conforms(
         (cls for cls in case.adapter_cls.__mro__ if method_name in cls.__dict__),
         None,
     )
-    assert method_owner is not None, (
-        f"{case.id} is missing method {method_name!r}"
-    )
+    assert method_owner is not None, f"{case.id} is missing method {method_name!r}"
     assert method_owner is not case.port_cls, (
         f"{case.id}.{method_name} is inherited only from the port protocol"
     )
