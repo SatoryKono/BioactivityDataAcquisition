@@ -21,7 +21,6 @@ else:
     import defusedxml.ElementTree as ET
 
 
-
 from bioetl.domain.types import JsonDict
 
 
@@ -39,13 +38,16 @@ class PubMedXmlProcessor:
             Parsed XML root element, or None if parsing fails
         """
         try:
-            parsed_root: ET.Element = ET.fromstring(xml_text, forbid_dtd=True, forbid_entities=True, forbid_external=True)  # type: ignore[call-arg]
+            parsed_root: ET.Element = ET.fromstring(
+                xml_text,
+                forbid_dtd=True,
+                forbid_entities=True,
+                forbid_external=True,
+            )  # type: ignore[call-arg]
             return parsed_root
         except (
             ET.ParseError,
-            cast(
-                type[BaseException], getattr(ET, "EntitiesForbidden", Exception)
-            ),
+            cast(type[BaseException], getattr(ET, "EntitiesForbidden", Exception)),
         ):
             return None
 

@@ -8,8 +8,7 @@ from __future__ import annotations
 __all__ = ["ClassificationExtractor", "NormalizedClassification", "RawClassification"]
 
 
-from typing import TypedDict, cast
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict, cast
 
 if TYPE_CHECKING:
     from xml.etree.ElementTree import Element  # nosec B405
