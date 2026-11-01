@@ -13,7 +13,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_activity",
       "silver_column": "_dq_error",
       "silver_filter_tokens": [],
@@ -36,7 +36,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_activity",
       "silver_column": "_dq_warn",
       "silver_filter_tokens": [],
@@ -1035,7 +1035,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_activity",
       "silver_column": "manual_curation_flag",
       "silver_filter_tokens": [
@@ -1801,7 +1801,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_activity",
       "silver_column": "target_taxonomy_id",
       "silver_filter_tokens": [
@@ -2044,7 +2044,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_assay",
       "silver_column": "_dq_error",
       "silver_filter_tokens": [],
@@ -2067,7 +2067,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_assay",
       "silver_column": "_dq_warn",
       "silver_filter_tokens": [],
@@ -2518,7 +2518,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_assay",
       "silver_column": "assay_taxonomy_id",
       "silver_filter_tokens": [
@@ -3033,7 +3033,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_assay",
       "silver_column": "src_id",
       "silver_filter_tokens": [
@@ -3254,7 +3254,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_assay",
       "silver_column": "variant_taxonomy_id",
       "silver_filter_tokens": [
@@ -3285,7 +3285,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_assay_parameters",
       "silver_column": "_dq_error",
       "silver_filter_tokens": [],
@@ -3308,7 +3308,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_assay_parameters",
       "silver_column": "_dq_warn",
       "silver_filter_tokens": [],
@@ -4030,7 +4030,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_cell_line",
       "silver_column": "_dq_error",
       "silver_filter_tokens": [],
@@ -4053,7 +4053,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_cell_line",
       "silver_column": "_dq_warn",
       "silver_filter_tokens": [],
@@ -4296,7 +4296,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_cell_line",
       "silver_column": "cell_source_taxonomy_id",
       "silver_filter_tokens": [
@@ -4649,7 +4649,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_compound_record",
       "silver_column": "_dq_error",
       "silver_filter_tokens": [],
@@ -4672,7 +4672,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_compound_record",
       "silver_column": "_dq_warn",
       "silver_filter_tokens": [],
@@ -5046,7 +5046,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_molecule",
       "silver_column": "_dq_error",
       "silver_filter_tokens": [],
@@ -5069,7 +5069,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_molecule",
       "silver_column": "_dq_warn",
       "silver_filter_tokens": [],
@@ -5207,7 +5207,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_molecule",
       "silver_column": "aromatic_ring_count",
       "silver_filter_tokens": [
@@ -5423,7 +5423,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_molecule",
       "silver_column": "dosed_ingredient",
       "silver_filter_tokens": [
@@ -5539,7 +5539,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_molecule",
       "silver_column": "hba_count",
       "silver_filter_tokens": [
@@ -5570,7 +5570,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_molecule",
       "silver_column": "hbd_count",
       "silver_filter_tokens": [
@@ -5601,7 +5601,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_molecule",
       "silver_column": "heavy_atom_count",
       "silver_filter_tokens": [
@@ -6155,7 +6155,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_molecule",
       "silver_column": "oral",
       "silver_filter_tokens": [
@@ -6186,7 +6186,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_molecule",
       "silver_column": "parenteral",
       "silver_filter_tokens": [
@@ -6387,7 +6387,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_molecule",
       "silver_column": "ro5_violation_count",
       "silver_filter_tokens": [
@@ -6418,7 +6418,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_molecule",
       "silver_column": "rotatable_bond_count",
       "silver_filter_tokens": [
@@ -6501,7 +6501,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_molecule",
       "silver_column": "therapeutic_flag",
       "silver_filter_tokens": [
@@ -6533,7 +6533,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_molecule",
       "silver_column": "topical",
       "silver_filter_tokens": [
@@ -6664,7 +6664,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_molecule",
       "silver_column": "withdrawn_flag",
       "silver_filter_tokens": [
@@ -6695,7 +6695,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_protein_class",
       "silver_column": "_dq_error",
       "silver_filter_tokens": [],
@@ -6718,7 +6718,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_protein_class",
       "silver_column": "_dq_warn",
       "silver_filter_tokens": [],
@@ -6857,7 +6857,7 @@
         "silver_required_fields",
         "dq_key_nullability"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_protein_class",
       "silver_column": "class_level",
       "silver_filter_tokens": [
@@ -6988,7 +6988,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_protein_class",
       "silver_column": "parent_id",
       "silver_filter_tokens": [
@@ -7097,7 +7097,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_protein_class",
       "silver_column": "replaced_by",
       "silver_filter_tokens": [
@@ -7151,7 +7151,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_protein_class",
       "silver_column": "sort_order",
       "silver_filter_tokens": [
@@ -7182,7 +7182,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_publication",
       "silver_column": "_dq_error",
       "silver_filter_tokens": [],
@@ -7205,7 +7205,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_publication",
       "silver_column": "_dq_warn",
       "silver_filter_tokens": [],
@@ -7527,7 +7527,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_publication",
       "silver_column": "citations_made",
       "silver_filter_tokens": [
@@ -7558,7 +7558,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_publication",
       "silver_column": "citations_received",
       "silver_filter_tokens": [
@@ -8185,7 +8185,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_publication",
       "silver_column": "publication_year",
       "silver_filter_tokens": [
@@ -8216,7 +8216,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_publication",
       "silver_column": "src_id",
       "silver_filter_tokens": [
@@ -8300,7 +8300,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_publication_similarity",
       "silver_column": "_dq_error",
       "silver_filter_tokens": [],
@@ -8323,7 +8323,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_publication_similarity",
       "silver_column": "_dq_warn",
       "silver_filter_tokens": [],
@@ -8817,7 +8817,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_publication_term",
       "silver_column": "_dq_error",
       "silver_filter_tokens": [],
@@ -8840,7 +8840,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_publication_term",
       "silver_column": "_dq_warn",
       "silver_filter_tokens": [],
@@ -9160,7 +9160,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_subcellular_fraction",
       "silver_column": "_dq_error",
       "silver_filter_tokens": [],
@@ -9183,7 +9183,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_subcellular_fraction",
       "silver_column": "_dq_warn",
       "silver_filter_tokens": [],
@@ -9474,7 +9474,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_target",
       "silver_column": "_dq_error",
       "silver_filter_tokens": [],
@@ -9497,7 +9497,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_target",
       "silver_column": "_dq_warn",
       "silver_filter_tokens": [],
@@ -9954,7 +9954,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_target",
       "silver_column": "species_group_flag",
       "silver_filter_tokens": [
@@ -10700,7 +10700,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_target",
       "silver_column": "taxonomy_id",
       "silver_filter_tokens": [
@@ -10731,7 +10731,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_target_component",
       "silver_column": "_dq_error",
       "silver_filter_tokens": [],
@@ -10754,7 +10754,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_target_component",
       "silver_column": "_dq_warn",
       "silver_filter_tokens": [],
@@ -11186,7 +11186,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_target_component",
       "silver_column": "taxonomy_id",
       "silver_filter_tokens": [
@@ -11217,7 +11217,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_target_protein_classification",
       "silver_column": "_dq_error",
       "silver_filter_tokens": [],
@@ -11240,7 +11240,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_target_protein_classification",
       "silver_column": "_dq_warn",
       "silver_filter_tokens": [],
@@ -11477,7 +11477,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_target_protein_classification",
       "silver_column": "component_id",
       "silver_filter_tokens": [
@@ -11555,7 +11555,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_target_protein_classification",
       "silver_column": "depth",
       "silver_filter_tokens": [
@@ -11609,7 +11609,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_target_protein_classification",
       "silver_column": "is_leaf",
       "silver_filter_tokens": [
@@ -11640,7 +11640,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_target_protein_classification",
       "silver_column": "l1_counts_for_target_type",
       "silver_filter_tokens": [
@@ -12177,7 +12177,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_target_protein_classification",
       "silver_column": "protein_class_snapshot_row_count",
       "silver_filter_tokens": [
@@ -12300,7 +12300,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_target_protein_classification",
       "silver_column": "target_component_snapshot_row_count",
       "silver_filter_tokens": [
@@ -12361,7 +12361,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "Int64",
+      "physical_type": "int64",
       "pipeline": "chembl_target_protein_classification",
       "silver_column": "target_snapshot_row_count",
       "silver_filter_tokens": [
@@ -12415,7 +12415,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_tissue",
       "silver_column": "_dq_error",
       "silver_filter_tokens": [],
@@ -12438,7 +12438,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_tissue",
       "silver_column": "_dq_warn",
       "silver_filter_tokens": [],

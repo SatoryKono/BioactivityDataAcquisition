@@ -19,6 +19,7 @@ from scripts.docs.matrix.structural_contract import (
     MatrixStructuralContractRow,
     NOT_APPLICABLE,
     QUARANTINE,
+    canonical_physical_type,
     contract_lookup_key,
     index_runtime_contract_rows,
     build_structural_workbook_semantics,
@@ -27,6 +28,22 @@ from scripts.docs.matrix.structural_contract import (
     STRUCTURAL_CUSTOM_EMPTY_SEMANTICS_VALIDATION,
     STRUCTURAL_NO_STRING_COERCION_VALIDATION,
 )
+
+
+@pytest.mark.parametrize(
+    ("physical_type", "expected"),
+    [
+        ("Int64", "int64"),
+        ("int64", "int64"),
+        ("bool", "boolean"),
+        ("boolean", "boolean"),
+    ],
+)
+@pytest.mark.unit
+def test_physical_type_export_is_stable_across_dtype_aliases(
+    physical_type: str, expected: str
+) -> None:
+    assert canonical_physical_type(physical_type) == expected
 
 
 @pytest.mark.unit
