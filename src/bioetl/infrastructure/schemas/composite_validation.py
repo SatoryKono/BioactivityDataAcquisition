@@ -125,6 +125,8 @@ class CompositeDQSchema(BaseModel):
             for name, override in self.enricher_overrides.items()
         }
         return CompositeDQConfig(
+            strict_validation=self.strict_validation,
+            invalid_record_policy=self.invalid_record_policy,
             soft_fail_threshold=self.soft_fail_threshold,
             hard_fail_threshold=self.hard_fail_threshold,
             enricher_overrides=overrides,
