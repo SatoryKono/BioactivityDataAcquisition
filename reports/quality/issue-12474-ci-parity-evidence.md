@@ -1168,3 +1168,78 @@ full mutation result. Original files, runtime config, tool bytes, raw
 profiles and the final owned overlay are preserved separately. The final
 Linux owning run above used the final source bytes. Only a fresh complete
 remote run may establish the unchanged full mutation gates and admission.
+
+### Qualified measurement intake and remote negative control (2026-11-01)
+
+The published source is `4eb3964fe51336229063062f65c8af057cd467b7`, tree
+`5db24dcd5905367757a0579b9124802021b6d7ca`. Its [own Nightly `41275766265`](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41275766265)
+is terminal **FAILURE**. All 17 canonical measurement shards and both
+reducers succeeded. The terminal native measurement qualifier returned 0,
+with `source_jobs_qualified=true` and `admission_claimed=false`.
+Independent `telemetry_independent_review` verified the terminal identity,
+all 19 original execution logs, all 42 original ZIP/API identities, and
+the strict intake tool before its actual execution. The earlier snapshot
+showing an in-progress coordinator remains historical, without rewriting.
+
+Coverage artifact `13070728364` is 14,246,570 bytes, ZIP SHA256
+`58e5e7a84b7bb7b3429372a59f180c2ff29238d068a43e42915efe8557efa596`;
+duration artifact `13070894622` is 4,085 bytes, ZIP SHA256
+`0475d2d95e5e49d55c3f3e2e4ed0ea4a7632f9e735f44a3b75092d8a298ee888`.
+The original XML SHA256 is
+`78ce3990acd3f4553ae93fab17315b3ca092fb04aca6678d67a160e8e301a412`;
+its semantic digest is
+`407c6eb80de9cc72a00bb5432c5ca31db0a887c45773780138305e771c7c4de0`.
+Actual coverage.py 7.15.2 rates are 99.81% lines and 94.62% branches,
+passing both unchanged 85% gates. The candidate changes only its XML
+digest; measured module rows are unchanged. Native original-byte intake,
+telemetry update and scorecard generation returned 0. Replaced inputs are
+preserved; no source identity, measurement or timestamp was rebound by hand.
+The current test-input digest is
+`1257efffbc8f7112f7a918f5fa2791f2528fbea7da9521c9e193791eef2df6e4`.
+
+Original JUnit confirms each of 101 tooling cases (81 selection and 20
+mutation-harness cases), 99 Router/ops cases and 152 parity/routing cases,
+with no failure/error/skip records. The separate Linux owning run has 108
+cases, including seven architecture cases; that local result is not
+mislabelled as 108 remote tooling cases. CI logs retain actual runtime
+headers, including Python 3.12.15/pytest 9.2.0 where printed; matrix labels
+and local Python 3.13.18 do not establish the interpreter of other jobs.
+The unchanged lock contains pandas 3.1.0, Delta 0.25.5 and Arrow 25.0.1.
+
+The performance correction improved actual progress but did **not** finish
+the two large targets within 60 minutes. Control-plane reached
+13,637/14,576 and domain 21,529/37,970; both jobs are `cancelled` with the
+maximum-execution-time annotation. These partial results are not accepted
+full scores. Workflow runner and export manifests completed at 73.0% and
+63.4%, respectively, against their unchanged 60% thresholds. Further
+performance remediation remains necessary, with all tests and limits intact.
+
+The [independent negative run `41278534694`](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41278534694) executed the canonical
+`pr-required.yml` path on the exact same source. Its original 115-case
+JUnit contains 114 passes and exactly one real Delta mismatch:
+`string not null` expected versus persisted `int64 not null`; no errors
+or skips. XML SHA256 is
+`788edede4005c9f84746bff49a8bba8d32d6306cbbf6055d819fa3ab5771b22e`.
+Artifact `13071764041` has ZIP SHA256
+`baa4717ed67c01fccc62684522b8c1f9c1b5617cbc9cdb249e5c73be708a3442`.
+Actual Class job `124765742584` and required aggregate `124766371351`
+are the only failing jobs. Setup and the schema-artifact step succeeded;
+the schema step failed, followed by the fail-closed step-outcome check.
+Naming did not execute. Downstream Class skips mean expected stopping
+after the control, not PASS. All other required executed owners succeeded;
+diagram rendering and Docker publishing were conditional N/A. Native
+negative acceptance returned 0 while the actual CI conclusion remains
+`failure`. The independent reviewer verified the original packet and
+causal schema-to-job-to-aggregate propagation. This proves the required
+negative behavior, not positive admission of the entire issue.
+
+The [positive PR Gate `41275747207`](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41275747207) remains **FAIL** on 22 expired-naming
+failures, with subsequent required Class checks skipped. Seven deadline
+decisions remain unapproved and unapplied. The original CI-trust native
+proof remains **STOP**, exit 2, with failed debt/governance receipts and
+no degradations; its bundle digest is
+`6da2569e3adb139b79f766e33d4a29657050f0f7ace27db8b96e8426dfa8a173`.
+The scorecard's stale XML binding is regenerated from the actual new
+capture, preserving metrics and budgets. Final consumer checks, complete
+mutation scores, positive CI, ADMIT, final review, merge and issue closure
+remain required. No merge or closure is claimed.
