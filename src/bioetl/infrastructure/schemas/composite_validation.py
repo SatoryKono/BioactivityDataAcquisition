@@ -75,6 +75,14 @@ class CompositeDQSchema(BaseModel):
         default=None,
         description="Optional pointer to the external composite DQ bundle file",
     )
+    strict_validation: bool = Field(
+        default=False,
+        description="Apply stricter validation rules for inline pipeline quality config",
+    )
+    invalid_record_policy: Literal["quarantine", "skip", "fail"] = Field(
+        default="quarantine",
+        description="Policy for handling invalid records",
+    )
     soft_fail_threshold: float = Field(
         default=0.10, ge=0.0, le=1.0, description="Default soft threshold (0.0-1.0)"
     )

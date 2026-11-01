@@ -231,6 +231,23 @@
           "description": "Optional pointer to the external composite DQ bundle file",
           "title": "Dq Config File"
         },
+        "strict_validation": {
+          "default": false,
+          "description": "Apply stricter validation rules for inline pipeline quality config",
+          "title": "Strict Validation",
+          "type": "boolean"
+        },
+        "invalid_record_policy": {
+          "default": "quarantine",
+          "description": "Policy for handling invalid records",
+          "enum": [
+            "quarantine",
+            "skip",
+            "fail"
+          ],
+          "title": "Invalid Record Policy",
+          "type": "string"
+        },
         "soft_fail_threshold": {
           "default": 0.1,
           "description": "Default soft threshold (0.0-1.0)",
