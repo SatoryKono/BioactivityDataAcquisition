@@ -585,6 +585,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         ("tests/architecture/test_silver_filter_boundary_inventory.py",),
     ),
+    "reports/12592_report.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+        "tests/architecture/test_check_doc_links_guardrails.py",
+    ),
+    "reports/12592_scoped_patch.diff": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+        "tests/architecture/test_check_doc_links_guardrails.py",
+    ),
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
