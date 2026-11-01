@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-01T22:19:38.824401+00:00",
+  "generated_at": "2026-11-01T22:25:57.900067+00:00",
   "summary": {
     "total_scripts": 705,
     "status_counts": {
@@ -19626,19 +19626,19 @@
         },
         {
           "path": "tests/architecture/qm_07/test_qm07_cold_imports.py",
-          "line": 46,
+          "line": 47,
           "source_group": "tests",
           "text": "\"architecture_quality_scorecard.py\","
         },
         {
           "path": "tests/architecture/qm_07/test_qm07_cold_imports.py",
-          "line": 50,
+          "line": 51,
           "source_group": "tests",
           "text": "\"architecture_quality_scorecard.py\","
         },
         {
           "path": "tests/architecture/qm_07/test_qm07_cold_imports.py",
-          "line": 54,
+          "line": 55,
           "source_group": "tests",
           "text": "\"architecture_quality_scorecard.py\","
         }
@@ -19791,7 +19791,7 @@
         },
         {
           "path": "tests/architecture/qm_07/test_qm07_cold_imports.py",
-          "line": 57,
+          "line": 58,
           "source_group": "tests",
           "text": "(\"debt_scorecard.py\", \"scripts.engineering.common.repo_paths\"),"
         },
@@ -19920,7 +19920,7 @@
         },
         {
           "path": "tests/architecture/qm_07/test_qm07_cold_imports.py",
-          "line": 58,
+          "line": 59,
           "source_group": "tests",
           "text": "(\"exemptions_registry_access.py\", \"scripts.engineering.common.repo_paths\"),"
         }

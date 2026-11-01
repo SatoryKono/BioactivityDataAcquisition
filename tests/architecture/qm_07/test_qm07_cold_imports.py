@@ -39,6 +39,7 @@ def test_runtime_has_no_engineering_imports() -> None:
                     )
     assert violations == []
 
+
 @pytest.mark.parametrize(
     ("filename", "dependency"),
     [
