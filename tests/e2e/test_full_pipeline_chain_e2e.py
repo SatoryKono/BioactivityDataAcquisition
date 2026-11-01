@@ -446,6 +446,7 @@ async def test_run_error_and_restart(
         e2e_data_dir, "chembl_molecule", expected_min=1
     )
 
+
 @pytest.mark.e2e
 @pytest.mark.vcr(allow_playback_repeats=True)
 @pytest.mark.asyncio
