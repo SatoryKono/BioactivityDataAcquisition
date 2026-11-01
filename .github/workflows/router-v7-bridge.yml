@@ -89,8 +89,8 @@ jobs:
         run: |
           # Runtime sourcemaps contain hashes derived from the compiler root.
           docker run --rm \
-            --mount "type=bind,source=$GITHUB_WORKSPACE,target=/work" \
-            --workdir "/work/grafana/plugins/$BIOETL_PLUGIN" \
+            --mount "type=bind,source=$GITHUB_WORKSPACE,target=$GITHUB_WORKSPACE" \
+            --workdir "$GITHUB_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN" \
             node@sha256:e7add2a490bb17d97b485b8641bd88455fff7839ade0f5eba493c3508124d413 \
             npm run build
       - name: Verify built bundle against shipped host manifest
