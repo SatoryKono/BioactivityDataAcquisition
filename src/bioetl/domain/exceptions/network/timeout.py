@@ -9,7 +9,7 @@ retry with exponential backoff is appropriate (per RULES.md §3.1.3).
 from __future__ import annotations
 
 from bioetl.domain.exceptions.base import RecoverableError
-from bioetl.domain.types import ErrorType
+from bioetl.domain.types.enums import ErrorType
 
 __all__ = [
     "CircuitBreakerOpenError",

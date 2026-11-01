@@ -29,7 +29,7 @@ from uuid import UUID
 from bioetl.domain.deterministic_identity import deterministic_id
 from bioetl.domain.immutability import FrozenDict, FrozenList, deep_freeze_json
 from bioetl.domain.medallion import Layer
-from bioetl.domain.types import BatchID, ContentHash, MetaDict, RunID
+from bioetl.domain.types.identifiers import BatchID, ContentHash, MetaDict, RunID
 
 __all__ = [
     "BatchCreated",
