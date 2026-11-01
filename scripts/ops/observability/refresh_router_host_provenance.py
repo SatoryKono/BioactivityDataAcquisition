@@ -38,6 +38,7 @@ HOST_BUILD_FIELDS = (
 )
 WORKFLOW = ".github/workflows/router-v7-bridge.yml"
 HEX_SHA256_PATTERN = r"[0-9a-f]{64}"
+SHA256_DIGEST_PATTERN = rf"sha256:{HEX_SHA256_PATTERN}"
 PLUGIN_DIST_FRAGMENT = "/dist/"
 ROUTER_ARCHIVE = (
     "grafana/tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz"
@@ -246,7 +247,7 @@ def _receipt_payloads(archive: bytes) -> dict[str, JsonObject]:
                 parity.get(field), "Missing/invalid managed image config digest"
             )
             require(
-                bool(re.fullmatch(r"sha256:[0-9a-f]{64}", digest)),
+                bool(re.fullmatch(SHA256_DIGEST_PATTERN, digest)),
                 "Missing/invalid managed image config digest",
             )
         require(
@@ -276,7 +277,7 @@ def validate_capture(
     require(parity.get("status") == "PASS", "Full image parity did not pass")
     for field in ("built_image_config_digest", "declared_image_config_digest"):
         require(
-            bool(re.fullmatch(r"sha256:[0-9a-f]{64}", str(parity.get(field)))),
+            bool(re.fullmatch(SHA256_DIGEST_PATTERN, str(parity.get(field)))),
             "Missing/invalid image config digest",
         )
     require(
@@ -298,7 +299,7 @@ def validate_capture(
             isinstance(layers, list)
             and bool(layers)
             and all(
-                re.fullmatch(r"sha256:[0-9a-f]{64}", str(layer)) for layer in layers
+                re.fullmatch(SHA256_DIGEST_PATTERN, str(layer)) for layer in layers
             ),
             "Missing/invalid image layer evidence",
         )
