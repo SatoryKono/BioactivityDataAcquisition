@@ -10,16 +10,6 @@ rationale: 'Complexity exemptions are temporary reviewable debt. Every retained 
 
   '
 path_entries:
-- path: tests/*
-  scopes:
-  - xenon
-  owner: '@bioetl-test-platform'
-  expiry: '2026-11-30'
-  removal_step: Keep test-only code on the dedicated test-complexity lane.
-  progress_note: '2026-09-18 stagger review (#10527): exemption still required, no
-    removal completed; retained until 2026-11-30, re-confirm test-only lane scope at
-    next review.'
-  rationale: Production xenon budget tracks src-only maintainability, not test scaffolding.
 - path: src/memory/
   scopes:
   - xenon
