@@ -14,7 +14,8 @@ import subprocess
 from collections.abc import Mapping, Sequence
 from typing import IO, Any
 
-_MAX_OUTPUT_BYTES = 10 * 1024 * 1024 # 10MB
+_MAX_OUTPUT_BYTES = 10 * 1024 * 1024  # 10MB
+
 
 def _filter_env_secrets(env: Mapping[str, str] | None) -> dict[str, str] | None:
     if not env:
@@ -71,7 +72,9 @@ def run_protected_command(
 
     retcode = proc.poll()
     if check and retcode:
-        raise subprocess.CalledProcessError(retcode, proc.args, output=stdout, stderr=stderr)
+        raise subprocess.CalledProcessError(
+            retcode, proc.args, output=stdout, stderr=stderr
+        )
     return subprocess.CompletedProcess(proc.args, retcode or 0, stdout, stderr)
 
 

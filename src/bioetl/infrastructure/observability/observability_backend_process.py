@@ -287,7 +287,9 @@ def start_detached_ops_http_backend(
     python_executable: str | None = None,
     data_root: Path | None = None,
     current_env: Mapping[str, str],
-    popen_factory: Callable[..., subprocess.Popen[bytes]] = run_protected_subprocess_popen,
+    popen_factory: Callable[
+        ..., subprocess.Popen[bytes]
+    ] = run_protected_subprocess_popen,
 ) -> subprocess.Popen[bytes]:
     """Launch ``bioetl health server`` as a detached Ops HTTP backend process.
 
@@ -331,7 +333,9 @@ def start_detached_quarantine_backend(
     python_executable: str | None = None,
     data_root: Path | None = None,
     current_env: Mapping[str, str],
-    popen_factory: Callable[..., subprocess.Popen[bytes]] = run_protected_subprocess_popen,
+    popen_factory: Callable[
+        ..., subprocess.Popen[bytes]
+    ] = run_protected_subprocess_popen,
 ) -> subprocess.Popen[bytes]:
     """Compatibility alias for :func:`start_detached_ops_http_backend`.
 

@@ -252,7 +252,6 @@ def docker_engine_not_ready_message() -> str | None:
             capture_output=True,
             timeout=8,
             check=False,
-
         )
     except (OSError, subprocess.TimeoutExpired):
         return (
