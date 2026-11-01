@@ -1,10 +1,11 @@
 """Cold imports from a source checkout and an unrelated working directory.
 
-Both src and the checkout root are explicit: QM-07 wheel isolation is BLOCKED
-by core imports from scripts, recorded in test_qm07_cold_imports.py.
+Source and sdist expose the declared tooling closure; installed wheel smoke
+uses a separate environment without either source path.
 """
 
 import json
+import csv
 from pathlib import Path
 import subprocess
 import sys
@@ -15,40 +16,19 @@ import pytest
 @pytest.mark.architecture
 @pytest.mark.unit
 def test_cold_imports(tmp_path: Path) -> None:
-    modules = [
-        "scripts.engineering.quality",
-        "scripts.engineering.quality._baseline_validation",
-        "scripts.engineering.quality._decomposition_burndown_policy",
-        "scripts.engineering.quality._decomposition_owner_policy",
-        "scripts.engineering.quality._decomposition_program_policy",
-        "scripts.engineering.quality._decomposition_validation",
-        "scripts.engineering.quality._governance_validation",
-        "scripts.engineering.quality._grace_windows_validation",
-        "scripts.engineering.quality._primitives",
-        "scripts.engineering.quality._quarterly_targets_validation",
-        "scripts.engineering.quality.architecture_debt_artifact_tasks",
-        "scripts.engineering.quality.architecture_debt_reduction",
-        "scripts.engineering.quality.architecture_debt_task_generation",
-        "scripts.engineering.quality.architecture_debt_task_policy",
-        "scripts.engineering.quality.architecture_debt_task_support",
-        "scripts.engineering.quality.architecture_quality_scorecard",
-        "scripts.engineering.quality.architecture_quality_scoring",
-        "scripts.engineering.quality.budget_evaluator",
-        "scripts.engineering.quality.debt_scorecard",
-        "scripts.engineering.quality.debt_scorecard_validation",
-        "scripts.engineering.quality.exemptions_registry",
-        "scripts.engineering.quality.exemptions_registry_access",
-        "scripts.engineering.quality.exemptions_registry_paths",
-        "scripts.engineering.quality.exemptions_registry_policy",
-        "scripts.engineering.quality.exemptions_registry_targets",
-        "scripts.engineering.quality.exemptions_registry_validation",
-        "scripts.engineering.quality.inventory",
-        "scripts.engineering.quality.registry_sync_service",
-        "scripts.engineering.quality.report_formatter",
-        "scripts.engineering.quality.scoring",
-    ]
     repo_root = Path(__file__).resolve().parents[3]
     quality_root = repo_root / "scripts/engineering/quality"
+    manifest = repo_root / "reports/quality/quality-move-qm01/file_move_plan.csv"
+    with manifest.open(encoding="utf-8", newline="") as handle:
+        paths = [row["target_path"] for row in csv.DictReader(handle)]
+    assert len(paths) == len(set(paths)) == 30
+    assert set(paths) == {
+        path.relative_to(repo_root).as_posix() for path in quality_root.glob("*.py")
+    }
+    modules = [
+        path.removesuffix(".py").replace("/", ".").removesuffix(".__init__")
+        for path in paths
+    ]
 
     for module in modules:
         # -I ignores inherited PYTHONPATH and cwd. Each module gets a fresh process.

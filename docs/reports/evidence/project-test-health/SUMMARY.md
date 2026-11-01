@@ -57,6 +57,12 @@ coverage refresh:
 
 ## Freshness note
 
+Re-verified on 2026-11-01 against source tree `4380e5d5702460b8179ab7acef353c137ede568b`:
+the canonical source list and historical shard manifest remain present, and the
+tracked test-module inventory is 3,206 files. This is an inventory check only;
+the 2026-10-08 17-shard capture below remains the latest measured coverage
+evidence in this summary.
+
 Re-verified on 2026-10-08 against source HEAD
 `ceedc671b613ec3c2b25bbbae86b8b950719ddb6`. The manifest is complete, all 17
 required shard selections are present, and its test-tree hash matches the

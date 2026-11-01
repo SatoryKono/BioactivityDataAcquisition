@@ -14,7 +14,7 @@
     ],
     "test_architecture_quality_scorecard.py": [
       "tests/architecture/test_architecture_quality_scorecard.py",
-      "tests/unit/infrastructure/quality/test_architecture_quality_scorecard.py"
+      "tests/unit/scripts/engineering/quality/test_architecture_quality_scorecard.py"
     ],
     "test_base.py": [
       "tests/unit/domain/normalization/profiles/test_base.py",
@@ -216,7 +216,7 @@
     ],
     "test_primitives.py": [
       "tests/unit/domain/validation/test_primitives.py",
-      "tests/unit/infrastructure/quality/test_primitives.py"
+      "tests/unit/scripts/engineering/quality/test_primitives.py"
     ],
     "test_publication.py": [
       "tests/unit/domain/schemas/openalex/test_publication.py",

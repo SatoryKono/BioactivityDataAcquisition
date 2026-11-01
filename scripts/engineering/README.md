@@ -8,6 +8,8 @@ tooling and the scripts governance index.
 - `scripts/engineering/ci` — CI orchestration, resiliency runners, and compatibility telemetry.
 - `scripts/engineering/dev` — local developer setup and test utilities.
 - `scripts/engineering/qa` — architecture and quality-gate checks.
+- `scripts/engineering/quality` — shared quality-policy implementation imported
+  by QA/CI tooling; this is a library surface, not another set of CLI commands.
 - `scripts/engineering/repo` — repository governance, inventory, and catalog validation.
 - `scripts/engineering/diagnostics` — manual diagnostics helpers.
 - `scripts/engineering/baselines` — baseline artifacts consumed by quality gates.
@@ -41,6 +43,65 @@ For manual, non-gating structural inspection, the bounded supporting utilities
 `scripts/engineering/qa/get_large_modules.py` remain available. Their output is
 diagnostic only; committed module-coverage and hotspot artifacts remain the
 authoritative quality inputs.
+
+## Quality tooling and generated artifacts
+
+Quality consumers import `scripts.engineering.quality`. The dedicated unit tests
+live under `tests/unit/scripts/engineering/quality`; mixed consumer tests retain
+their existing locations. Continue using the existing QA/CI entrypoints. The
+analyzed product tree remains `src/bioetl`; moving the tool does not move its
+analysis scope or turn a smaller product-only denominator into a code reduction.
+
+For a reviewed production-source delta, the repository-only COMP-004 writer is
+`python -m scripts.engineering.qa requalify-external-resource-inventory --review
+configs/quality/external_resource_inventory_qm08_review.json --check` (or
+`--update`). It requires the pinned Git history and a complete semantic source
+review; the original `external_resource_inventory --check` remains an independent
+gate. The producer does not run product endpoints or qualify shutdown scenarios.
+Use check → update → check before dependent rollups. Runtime results remain
+`NOT_RUN_12553`; neither source qualification nor this refresh grants ADMIT.
+
+The Grafana plugin build uses peer-compatible TypeScript 6.0.3 and ESLint 9;
+lint/typecheck rules and the moderate audit gate remain enabled. The maintained
+root ESLint configs use Grafana's public flat-config export and preserve the
+scaffold overrides. The bridge's legacy-host tests import its explicit v5 alias.
+After changing the private bridge package metadata, regenerate its artifact with
+`npm pack --ignore-scripts --pack-destination .` in the bridge directory. In each
+plugin directory, run `npm update react-router-dom-v5-compat --package-lock-only
+--ignore-scripts` to derive the new local archive integrity, then perform the
+normal `npm ci --ignore-scripts`, audit, typecheck, lint, test and build sequence.
+Do not use force/legacy peer resolution or copy new lock hashes into an old
+delivery receipt without a real source/bundle/image parity check.
+
+The supported basename-inventory writer uses the same tracked `tests/**/*.py`
+and `test_*.py` selection as its architecture gate:
+
+```bash
+python -m scripts.engineering.qa report-test-basename-collisions --check
+python -m scripts.engineering.qa report-test-basename-collisions --update
+```
+
+For a Nightly capture crossing a squash-only publication, use the existing
+provenance owner after promoting its actual coverage/duration artifacts:
+`python -m scripts.engineering.ci.test_telemetry_provenance --ci-run-id <run-id> --pull-request <PR>`.
+The source candidate must already be the published PR head, with full Git
+history. Both successful producer jobs and unchanged test/source inputs are
+required. Original run-bound artifact ZIP sizes/digests are checked and native
+expected metrics must match before issuance. It writes the active telemetry and
+QM-08 publication receipts; pending
+metadata is not a merge, CI attestation or trust upgrade. Actual GitHub merge
+identity, tree equality and ancestry are checked read-only after squash. Preserve
+the publication branch and prior evidence; never replace these checks with an
+unverified SHA/tree match.
+
+`--check` is read-only and fails on any stale content. `--update` writes the full
+inventory atomically and preserves an already current file. Neither mode adds
+untracked files to the inventory. Both modes use the repository root rather than
+the current directory; `--root` supports an explicit fixture checkout.
+
+See the [quality artifact refresh runbook](../../docs/05-operations/runbooks/quality-tooling-artifact-refresh.md)
+for generator order, both scorecard outputs, retained measurements, and the
+final read-only validation contract.
 
 ## Catalog
 
@@ -78,3 +139,25 @@ When adding or renaming a script:
   should not be used as canonical command targets.
 - Historical evidence under `docs/reports/evidence/**` may still mention removed
   paths; treat those references as archival, not canonical guidance.
+
+## QM-09 artifact and type qualification
+
+The full strict type gate is owned by GitHub Actions `pr-required.yml`:
+`mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory scripts/engineering/quality`.
+For QM-09, the API/release owner selected this GitHub Actions gate instead of
+running CircleCI. This changes neither strictness nor the existing required
+GitHub checks. The architecture owning test guards all three target roots and
+failure propagation. CircleCI configuration and execution are unchanged.
+
+After building the explicit sdist and its wheel, validate their content before
+isolated runtime smoke:
+
+```bash
+python -m scripts.engineering.qa.check_quality_move_distributions --wheel /absolute/path/bioetl-6.1.0-py3-none-any.whl --sdist /absolute/path/bioetl-6.1.0.tar.gz --manifest reports/quality/quality-move-qm01/file_move_plan.csv
+```
+
+This read-only gate rejects stale namespace payloads, incomplete quality/support
+closure, invalid hashes/modes and unsafe archive paths. Its owning tests include
+29/31 modules, missing parents/support, corrupt or missing archives and poisoned
+wheel payloads. Passing it does not replace a build receipt, external-cwd smoke,
+exact-SHA CI attestation or human K10 sign-off.
