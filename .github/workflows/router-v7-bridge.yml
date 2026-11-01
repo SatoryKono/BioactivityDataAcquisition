@@ -77,8 +77,19 @@ jobs:
         run: npm run lint
       - name: Test plugin behavior
         run: npm run test:ci
-      - name: Build plugin
-        run: npm run build
+      - name: Build plugin in pinned Node image
+        env:
+          BIOETL_PLUGIN: ${{ matrix.plugin }}
+        run: |
+          docker run --rm \\
+            --user "$(id -u):$(id -g)" \\
+            --mount "type=bind,source=${GITHUB_WORKSPACE},target=/work" \\
+            --workdir "/work/grafana/plugins/${BIOETL_PLUGIN}" \\
+            --env NODE_ENV=production \\
+            --env NO_SOURCEMAP=0 \\
+            --env GOMAXPROCS=2 \\
+            node@sha256:e7add2a490bb17d97b485b8641bd88455fff7839ade0f5eba493c3508124d413 \\
+            npm run build
       - name: Verify built bundle against shipped host manifest
         env:
           BIOETL_PLUGIN: ${{ matrix.plugin }}
@@ -93,10 +104,26 @@ jobs:
           plugin = os.environ["BIOETL_PLUGIN"]
           assert plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"), plugin
           manifest = json.loads((root / "grafana/tooling/router-v7-bridge/host-image.json").read_text())
-          for filename in ("module.js", "plugin.json"):
-              relative = f"grafana/plugins/{plugin}/dist/{filename}"
+          prefix = f"grafana/plugins/{plugin}/dist/"
+          dist = root / f"grafana/plugins/{plugin}/dist"
+          expected_paths = {
+              name.removeprefix(prefix)
+              for name in manifest["artifact_sha256"]
+              if name.startswith(prefix)
+          }
+          actual_paths = {
+              path.relative_to(dist).as_posix()
+              for path in dist.rglob("*")
+              if path.is_file()
+          }
+          assert expected_paths, f"No shipped dist artifacts recorded for {plugin}"
+          assert actual_paths == expected_paths, (
+              f"Built dist file set mismatch: missing={sorted(expected_paths - actual_paths)}, "
+              f"unexpected={sorted(actual_paths - expected_paths)}"
+          )
+          for filename in sorted(expected_paths):
+              relative = prefix + filename
               bundle = root / relative
-              assert bundle.is_file(), f"Missing built artifact: {relative}"
               expected = manifest["artifact_sha256"][relative]
               actual = hashlib.sha256(bundle.read_bytes()).hexdigest()
               assert actual == expected, f"Artifact SHA-256 mismatch: {relative}: {actual} != {expected}"
@@ -198,7 +225,9 @@ jobs:
       - name: Verify built image against declared delivery image
         run: |
           image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
+          base_image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').base_image")
           docker pull "$image"
+          docker pull "$base_image"
           node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
             bioetl-router-host:acceptance
       - name: Preserve image build and parity receipts
