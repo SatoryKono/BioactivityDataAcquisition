@@ -301,6 +301,46 @@ def test_shadow_compare_routes_composite_configs(path: str) -> None:
     )
 
 
+def test_shadow_compare_routes_gold_dq_and_deleted_evidence() -> None:
+    """Changed Gold DQ configs and removed evidence keep explicit routes."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        [
+            *(
+                f"configs/quality/entities/composite/{entity}.yaml"
+                for entity in (
+                    "activity",
+                    "assay",
+                    "molecule",
+                    "publication",
+                    "target",
+                )
+            ),
+            "configs/quality/domain_aggregate_classification.yaml",
+            "reports/12592_report.md",
+            "reports/12592_scoped_patch.diff",
+        ],
+        repo_root=repo_root,
+    )
+
+    assert (
+        "tests/unit/composition/bootstrap/runtime/test_composite_config_loader.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/unit/infrastructure/schemas/test_composite_gold_dq.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/architecture/test_domain_aggregate_classification.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/architecture/test_documentation_cleanup_inventory.py"
+        in report["selected"]
+    )
+
+
 @pytest.mark.parametrize(
     "path",
     (
