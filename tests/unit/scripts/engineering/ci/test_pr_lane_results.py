@@ -686,6 +686,24 @@ def test_shadow_compare_routes_quality_and_runtime_documentation() -> None:
     assert "tests/architecture/test_docker_runtime_contracts.py" in report["selected"]
 
 
+def test_shadow_compare_routes_project_test_health_evidence() -> None:
+    """Project test-health evidence selects its governing freshness contract."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        [
+            "docs/reports/evidence/project-test-health/SUMMARY.md",
+            "docs/reports/evidence/project-test-health/metadata.yaml",
+            "docs/reports/evidence/project-test-health/shard_registry.yaml",
+        ],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/architecture/test_governance_freshness_protocol.py"
+    ]
+
+
 def test_shadow_compare_routes_lineage_crash_evidence() -> None:
     """Lineage crash reports select the test that produced the evidence."""
     repo_root = Path(__file__).resolve().parents[5]
