@@ -341,7 +341,6 @@ async def test_run_cancellation_and_restart(
     runner1 = bootstrap_pipeline_runner(ctx1)
     source = runner1._executor._extraction_loop_service._batch_processing_service
     original_extract = source.extract_records
-    original_extract = source.extract_records
     first_record_ready = asyncio.Event()
     continue_extraction = asyncio.Event()
 
