@@ -416,6 +416,7 @@ jobs:
             echo "::error::tests gate has no affected pytest target"
             exit 1
           fi
+          parallel_timeout=2400
           uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results subtract-affected \
             --repo-root . \
             --fixed-targets tests/architecture \

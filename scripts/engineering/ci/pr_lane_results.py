@@ -60,6 +60,9 @@ RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
+SCRIPTS_INVENTORY_MANIFEST_TEST = (
+    "tests/architecture/test_scripts_inventory_manifest.py"
+)
 INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST = (
     "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
 )
@@ -108,6 +111,24 @@ EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    "mkdocs.yml": ("tests/architecture/test_documentation_sync.py",),
+    "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md": (
+        "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
+    ),
+    "reports/quality/pytest-nodeid-inventory.json": (
+        "tests/unit/scripts/qa/test_build_pytest_nodeid_inventory.py",
+    ),
+    "reports/quality/quality-move-qm08/reference_decisions.json": (
+        "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
+    ),
+    "configs/quality/quality_move_qm09_reference_decisions.json": (
+        "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
+    ),
+    "scripts/engineering/README.md": (
+        SCRIPTS_INVENTORY_MANIFEST_TEST,
+        "tests/architecture/test_scripts_inventory_discovery.py",
+    ),
     ".gitleaksignore": (
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
     ),
@@ -287,7 +308,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/engineering/qa/README.md": (
         EXTERNAL_RESOURCE_INVENTORY_TEST,
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        "tests/architecture/test_scripts_inventory_manifest.py",
+        SCRIPTS_INVENTORY_MANIFEST_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     **dict.fromkeys(
@@ -298,8 +319,19 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory/part-03.json",
             "configs/quality/external_resource_inventory/part-04.json",
             "configs/quality/external_resource_inventory/part-05.json",
+            "configs/quality/external_resource_inventory/part-06.json",
         ),
         (EXTERNAL_RESOURCE_INVENTORY_TEST, EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST),
+    ),
+    **dict.fromkeys(
+        (
+            "configs/quality/external_resource_inventory_qm08_review.json",
+            "configs/quality/external_resource_inventory_qm09_review.json",
+        ),
+        (
+            EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        ),
     ),
     **dict.fromkeys(
         (
@@ -473,8 +505,13 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "configs/quality/test_governance_audit.yaml": TEST_GOVERNANCE_ARTIFACT_TESTS,
     "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
+    "reports/quality/quality-move-qm08/publication-provenance.json": (
+        "tests/unit/scripts/ci/test_test_telemetry_provenance.py",
+        "tests/architecture/test_external_resource_inventory_catalog.py",
+        "tests/unit/scripts/ops/test_refresh_router_delivery.py",
+    ),
     "configs/quality/scripts_inventory_manifest.json": (
-        "tests/architecture/test_scripts_inventory_manifest.py",
+        SCRIPTS_INVENTORY_MANIFEST_TEST,
     ),
     "configs/quality/scripts_lifecycle_registry.json": (
         "tests/architecture/test_scripts_lifecycle_registry.py",

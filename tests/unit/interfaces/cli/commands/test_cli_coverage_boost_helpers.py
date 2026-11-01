@@ -183,7 +183,7 @@ def test_observability_contract_checks_cover_metric_and_alert_paths(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    import scripts.engineering.qa as engineering_qa
+    import bioetl.composition.observability_runtime as composition
 
     metric_module = SimpleNamespace(
         collect_metric_inventory=lambda repo_root: {
@@ -193,10 +193,14 @@ def test_observability_contract_checks_cover_metric_and_alert_paths(
         validate_metric_inventory=lambda report, allowlist: {"registry": ["metric.a"]},
     )
     monkeypatch.setattr(
-        engineering_qa,
-        "report_observability_metric_inventory",
-        metric_module,
-        raising=False,
+        composition,
+        "collect_metric_inventory",
+        metric_module.collect_metric_inventory,
+    )
+    monkeypatch.setattr(
+        composition,
+        "validate_metric_inventory",
+        metric_module.validate_metric_inventory,
     )
     allowlist_path = tmp_path / "configs" / "quality"
     allowlist_path.mkdir(parents=True)
