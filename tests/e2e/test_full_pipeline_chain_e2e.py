@@ -316,6 +316,9 @@ async def test_run_normal_a_b_a(e2e_data_dir: Path):
     ctx2 = create_test_context("chembl_target", limit=2)
     runner2 = bootstrap_pipeline_runner(ctx2)
     await runner2.run()
+    assert runner2.execution_metrics["records_fetched"] > 0, (
+        "A2 fetched no Target records"
+    )
 
     await assert_silver_table_has_records(e2e_data_dir, "chembl_target", expected_min=1)
     await assert_silver_table_has_records(
@@ -437,6 +440,38 @@ async def test_run_error_and_restart(
     ctx2 = create_test_context("chembl_target", limit=2)
     runner2 = bootstrap_pipeline_runner(ctx2)
     await runner2.run()
+
+    await assert_silver_table_has_records(e2e_data_dir, "chembl_target", expected_min=1)
+    await assert_silver_table_has_records(
+        e2e_data_dir, "chembl_molecule", expected_min=1
+    )
+
+@pytest.mark.e2e
+@pytest.mark.vcr(allow_playback_repeats=True)
+@pytest.mark.asyncio
+@pytest.mark.timeout(E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT)
+async def test_run_config_error_and_restart(e2e_data_dir: Path):
+    """A config-load failure during bootstrap must not poison later runs."""
+    from typing import NoReturn
+
+    def fail_config_load(_pipeline_name: str) -> NoReturn:
+        raise RuntimeError("injected pipeline config load failure")
+
+    ctx1 = create_test_context("chembl_target", limit=2)
+    with pytest.raises(RuntimeError, match="injected pipeline config load failure"):
+        bootstrap_pipeline_runner(ctx1, load_pipeline_config_fn=fail_config_load)
+
+    # Run B (Molecule), then A (Target) after bootstrap failed post-registry setup.
+    ctx_b = create_test_context("chembl_molecule", limit=2)
+    runner_b = bootstrap_pipeline_runner(ctx_b)
+    await runner_b.run()
+
+    ctx2 = create_test_context("chembl_target", limit=2)
+    runner2 = bootstrap_pipeline_runner(ctx2)
+    await runner2.run()
+    assert runner2.execution_metrics["records_fetched"] > 0, (
+        "A2 fetched no Target records after the bootstrap config error"
+    )
 
     await assert_silver_table_has_records(e2e_data_dir, "chembl_target", expected_min=1)
     await assert_silver_table_has_records(
