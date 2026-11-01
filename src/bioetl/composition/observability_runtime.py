@@ -39,6 +39,12 @@ from bioetl.domain.runtime.composition_boundary_policy import resolve_seed_run_t
 from bioetl.infrastructure.observability.required_publication_series import (
     ensure_required_control_plane_publication_series,
 )
+from bioetl.infrastructure.observability.metric_inventory import (
+    collect_metric_inventory,
+)
+from bioetl.infrastructure.observability.metric_inventory_policy import (
+    validate_metric_inventory,
+)
 from bioetl.infrastructure.storage.run_report_store_adapter import (
     FileRunReportStoreAdapter,
 )
@@ -95,13 +101,6 @@ def check_metric_inventory(
     allowlist: dict[str, set[str]],
 ) -> tuple[Mapping[str, object], dict[str, list[str]]]:
     """Collect and validate metric inventory through the runtime package seam."""
-    from bioetl.infrastructure.observability.metric_inventory import (
-        collect_metric_inventory,
-    )
-    from bioetl.infrastructure.observability.metric_inventory_policy import (
-        validate_metric_inventory,
-    )
-
     report = collect_metric_inventory(repo_root)
     violations = validate_metric_inventory(report, allowlist=allowlist)
     return report, violations

@@ -1,4 +1,8 @@
+import pytest
+
 from bioetl.infrastructure.schemas.composite_validation import CompositeDQSchema
+
+pytestmark = pytest.mark.unit
 
 
 def test_composite_gold_dq_warning_mode_is_explicit():

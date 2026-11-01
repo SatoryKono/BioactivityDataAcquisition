@@ -395,6 +395,8 @@ jobs:
       - name: Architecture pytest slice
         id: arch-pytest
         if: needs['classify-changes'].outputs['lint-arch'] == 'required'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-marker "not slow and not benchmark and not memory and not serial" --parallel-addopts "-n auto --dist loadscope --max-worker-restart=0 -q --tb=line --ignore-glob=tests/architecture/test_diagram*.py --ignore=tests/architecture/test_check_diagram_visual_smoke.py --ignore=tests/architecture/test_run_diagram_checks_script.py --ignore=tests/architecture/test_validate_mermaid_syntax_script.py" --serial-marker "serial and not slow and not benchmark and not memory" --serial-addopts "-p no:xdist -q --tb=line --ignore-glob=tests/architecture/test_diagram*.py --ignore=tests/architecture/test_check_diagram_visual_smoke.py --ignore=tests/architecture/test_run_diagram_checks_script.py --ignore=tests/architecture/test_validate_mermaid_syntax_script.py" --fallback-addopts "-p no:xdist -q --tb=line --ignore-glob=tests/architecture/test_diagram*.py --ignore=tests/architecture/test_check_diagram_visual_smoke.py --ignore=tests/architecture/test_run_diagram_checks_script.py --ignore=tests/architecture/test_validate_mermaid_syntax_script.py"
 
       - name: Affected pytest
@@ -804,7 +806,8 @@ jobs:
   docs-lane:
     name: Docs lane
     needs: classify-changes
-    if: needs['classify-changes'].outputs['docs-governance'] == 'required'
+    # The aggregator decides whether docs-governance applies. Always execute
+    # its owner lane so a missing classifier output cannot silently skip it.
     permissions:
       contents: read
     # Pin must stay on trusted main (#11232). docs.yml owns diagram/docs

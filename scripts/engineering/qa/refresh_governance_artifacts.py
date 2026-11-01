@@ -259,47 +259,6 @@ def _sync_scorecard_hotspot_metrics_from_baseline(*, check_only: bool = False) -
         )
         print(f"SYNC scorecard baseline metrics ({changed} field updates)")
     else:
-        print("SYNC scorecard hotspot metrics: already aligned") -> None:
-    """Copy measured hotspot metrics from baseline into scorecard (no budget growth)."""
-    import yaml
-
-    baseline_path = ROOT / "reports/quality/hotspot-family-baseline.json"
-    scorecard_path = ROOT / "configs/quality/debt_scorecard.yaml"
-    if not baseline_path.exists() or not scorecard_path.exists():
-        missing = [
-            str(path.relative_to(ROOT))
-            for path in (baseline_path, scorecard_path)
-            if not path.exists()
-        ]
-        raise FileNotFoundError(
-            "scorecard sync requires existing inputs: " + ", ".join(missing)
-        )
-
-    baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
-    by_name = _baseline_families_by_name(baseline)
-    scorecard = yaml.safe_load(scorecard_path.read_text(encoding="utf-8"))
-    families = (
-        scorecard.get("hotspot_family_ratchets", {}).get("families", [])
-        if isinstance(scorecard, dict)
-        else []
-    )
-    changed = 0
-    for family in families:
-        if isinstance(family, dict):
-            changed += _sync_one_scorecard_family(family, by_name)
-
-    if changed:
-        _write_text_atomically(
-            scorecard_path,
-            yaml.safe_dump(
-                scorecard,
-                sort_keys=False,
-                allow_unicode=True,
-                width=100,
-            ),
-        )
-        print(f"SYNC scorecard hotspot metrics ({changed} field updates)")
-    else:
         print("SYNC scorecard hotspot metrics: already aligned")
 
 

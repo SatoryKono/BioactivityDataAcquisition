@@ -349,6 +349,8 @@ def test_composite_section_decoders_fail_closed_on_invalid_nested_shapes() -> No
     dq = build_dq_config(
         {
             "required_fields": ["doi"],
+            "strict_validation": True,
+            "invalid_record_policy": "skip",
             "enricher_overrides": {
                 "openalex": {
                     "soft_fail_threshold": 0.2,
@@ -357,6 +359,8 @@ def test_composite_section_decoders_fail_closed_on_invalid_nested_shapes() -> No
             },
         }
     )
+    assert dq.strict_validation is True
+    assert dq.invalid_record_policy == "skip"
     execution = build_execution_config({})
     lineage = build_lineage_config(
         {

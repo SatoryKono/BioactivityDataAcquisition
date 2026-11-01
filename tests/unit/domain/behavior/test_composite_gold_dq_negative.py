@@ -1,7 +1,11 @@
+import pytest
+
 from bioetl.domain.behavior.dq_rule_evaluator import evaluate_dq_rules_for_record
 from bioetl.domain.config import DQConfig
 from bioetl.domain.config.validation import FieldValidation
 from bioetl.domain.types.dq_contracts import DQDisposition, DQViolationKind
+
+pytestmark = pytest.mark.unit
 
 # Simulate composite Gold schemas
 # This verifies that the mandatory rules block correctly.

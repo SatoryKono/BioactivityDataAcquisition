@@ -141,7 +141,8 @@ rows below to diagnose a specific artifact family.
 | Config discrepancy drift | `pytest tests/architecture/test_config_discrepancy_report_drift.py tests/architecture/test_config_discrepancy_metrics_ratchets.py` | `python -m scripts.schema generate-config-matrix --update` |
 | Module coverage semantics (fast) | `pytest tests/architecture/test_module_coverage_inventory.py -q --tb=short` | No refresh; fix the invalid committed payload or policy. |
 | Module coverage source-tree freshness (slow) | `python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml` | `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml` (preserves measured rows); verify with `pytest tests/architecture/test_module_coverage_inventory_freshness.py -q --tb=short`. |
-| Module coverage measurements | `python -m scripts.engineering.qa.run_local_coverage_verify` completes all 17 local shards on one committed source tree; its manifest records every exit code and the combined XML passes line and branch gates at 85% | Copy the validated XML to `reports/coverage/coverage.xml`, then run `python -m scripts.engineering.qa report-module-coverage --refresh-from-coverage-xml --enforce-module-thresholds block-regression --fail-on-regression`. Never use an incomplete or failing local XML. GitHub Actions is not an acceptance source. |
+| Module coverage measurements | The canonical `coverage-verify` CI producer succeeds on the exact source SHA after all 17 shards, line/branch gates at 85%, and per-module regression gates | Consume the exact `module-coverage-inventory.candidate.json` from its verified immutable `coverage-report` artifact. Preserve the original archive/XML hashes and source identity. The separate required `coverage-inventory-currentness` gate must then pass against the committed candidate. Never use partial/failing local XML or mix captures. |
+| Local coverage diagnostics | `python -m scripts.engineering.qa.run_local_coverage_verify` completes all 17 local shards on one committed source tree; its validated manifest records every exit and both 85% gates | A complete validated local XML can support local diagnostics and source maintenance; it retains `local_single_host` trust and does not provide CI PASS or lifecycle ADMIT. Preserve failed/incomplete attempts without publishing them as qualified measurements. |
 | Module coverage monotonic adoption | SHA-bound combined coverage XML plus `--enforce-module-thresholds block-regression --fail-on-regression` | `python -m scripts.engineering.qa report-module-coverage --refresh-nonregressing-from-coverage-xml --enforce-module-thresholds block-regression --fail-on-regression`; adds absent rows and accepts only equal or improved measurements. |
 | Test governance snapshots | `python -m scripts.engineering.qa.report_test_governance_audit --check` | `python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json` |
 | Documentation cleanup inventory | `python -m scripts.docs generate-cleanup-inventory --check` | `python -m scripts.docs generate-cleanup-inventory --update` |
@@ -158,6 +159,14 @@ rows below to diagnose a specific artifact family.
 | Debt closeout inventory | `pytest tests/architecture/test_tech_debt_issues_5343_5346_closeout.py tests/architecture/test_tech_debt_issues_5387_5394_closeout.py` | Add issue-specific closeout evidence and guard tests. |
 | Hotspot family baseline | `python -m scripts.engineering.qa report-family-baseline --check` | `python -m scripts.engineering.qa report-family-baseline --update` |
 | Contract coverage matrix | `python -m scripts.engineering.qa report-contract-coverage-matrix --check` | `python -m scripts.engineering.qa report-contract-coverage-matrix` |
+
+The authoritative coverage producer and currentness contract is
+[`module_coverage_inventory` in the active test matrix](../../../configs/quality/test_matrix.yaml),
+implemented by [`coverage-verify` and `coverage-inventory-currentness`](../../../.github/workflows/tests.yml).
+A successful producer remains a valid measurement source when currentness
+fails only because its candidate has not yet been consumed. This does not
+admit a merge: currentness, every other mandatory check, independent acceptance
+and the final revision's Proof-or-Stop ADMIT are still required.
 
 ### 3. Classify the debt outcome
 

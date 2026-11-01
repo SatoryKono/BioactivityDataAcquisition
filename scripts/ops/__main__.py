@@ -29,6 +29,9 @@ Stable commands:
                        Run preflight, screenshot refresh, and live Grafana audit
     fingerprint-router-rootfs  Hash trusted host Docker exports
     verify-router-managed-image  Verify managed image delivery against pinned host
+    promote-router-host-release  Materialize a verified immutable host release
+    refresh-router-host-provenance  Bind declared delivery to original CI evidence
+    refresh-router-delivery  Check/update pins from physically verified rebuilt images
     wsl-proxy          Start WSL proxy helper
     codex              Launch Codex via repo-local bootstrap adapter (shell)
     codex-exec         Launch Codex full-auto via repo-local bootstrap adapter (shell)
@@ -84,11 +87,20 @@ COMMAND_SPECS = {
 
 COMMAND_SPECS.update(
     {
+        "promote-router-host-release": module_command(
+            "scripts.ops.observability.promote_router_host_release"
+        ),
+        "refresh-router-host-provenance": module_command(
+            "scripts.ops.observability.refresh_router_host_provenance"
+        ),
         "fingerprint-router-rootfs": module_command(
             "scripts.ops.observability.grafana.router_rootfs"
         ),
         "verify-router-managed-image": module_command(
             "scripts.ops.observability.grafana.router_managed_image"
+        ),
+        "refresh-router-delivery": module_command(
+            "scripts.ops.observability.grafana.refresh_router_delivery"
         ),
     }
 )

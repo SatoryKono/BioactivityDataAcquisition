@@ -824,14 +824,7 @@
     }
   },
   "assertless_total_candidates": 69,
-  "budget_violations": [
-    {
-      "actual": 9,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1005,18 +998,8 @@
     ]
   },
   "intentional_no_exception_contract": 68,
-  "markerless_examples": [
-    "tests/unit/domain/behavior/test_composite_gold_dq_negative.py:10",
-    "tests/unit/domain/behavior/test_composite_gold_dq_negative.py:35",
-    "tests/unit/domain/behavior/test_composite_gold_dq_negative.py:58",
-    "tests/unit/domain/behavior/test_composite_gold_dq_negative.py:81",
-    "tests/unit/domain/behavior/test_composite_gold_dq_negative.py:104",
-    "tests/unit/infrastructure/schemas/test_composite_gold_dq.py:4",
-    "tests/unit/infrastructure/schemas/test_composite_gold_dq.py:30",
-    "tests/unit/infrastructure/schemas/test_composite_gold_dq.py:53",
-    "tests/unit/infrastructure/schemas/test_composite_gold_dq.py:76"
-  ],
-  "markerless_test_functions": 9,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -1753,18 +1736,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/domain/behavior/test_composite_gold_dq_negative.py:10",
-      "tests/unit/domain/behavior/test_composite_gold_dq_negative.py:35",
-      "tests/unit/domain/behavior/test_composite_gold_dq_negative.py:58",
-      "tests/unit/domain/behavior/test_composite_gold_dq_negative.py:81",
-      "tests/unit/domain/behavior/test_composite_gold_dq_negative.py:104",
-      "tests/unit/infrastructure/schemas/test_composite_gold_dq.py:4",
-      "tests/unit/infrastructure/schemas/test_composite_gold_dq.py:30",
-      "tests/unit/infrastructure/schemas/test_composite_gold_dq.py:53",
-      "tests/unit/infrastructure/schemas/test_composite_gold_dq.py:76"
-    ],
-    "markerless_test_functions": 9,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -1782,8 +1755,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3194,
-      "test_python_file_count": 3444,
+      "test_glob_file_count": 3198,
+      "test_python_file_count": 3448,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1824,13 +1797,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3194,
-    "total_test_functions": 31642,
+    "total_test_files": 3198,
+    "total_test_functions": 31707,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "b2bef93edc5f5d87b9b26327bc0e2f90af97d40eef025991cfcc25264809b382",
+  "source_tree_sha256": "7c142999d60cbafdeb869d3fe118c2c478427512e9dbf20335123f7a1c1a3175",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 69,
@@ -1839,18 +1812,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 68,
-    "markerless_examples": [
-      "tests/unit/domain/behavior/test_composite_gold_dq_negative.py:10",
-      "tests/unit/domain/behavior/test_composite_gold_dq_negative.py:35",
-      "tests/unit/domain/behavior/test_composite_gold_dq_negative.py:58",
-      "tests/unit/domain/behavior/test_composite_gold_dq_negative.py:81",
-      "tests/unit/domain/behavior/test_composite_gold_dq_negative.py:104",
-      "tests/unit/infrastructure/schemas/test_composite_gold_dq.py:4",
-      "tests/unit/infrastructure/schemas/test_composite_gold_dq.py:30",
-      "tests/unit/infrastructure/schemas/test_composite_gold_dq.py:53",
-      "tests/unit/infrastructure/schemas/test_composite_gold_dq.py:76"
-    ],
-    "markerless_test_functions": 9,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -1860,8 +1823,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3194,
-    "test_python_file_count": 3444,
+    "test_glob_file_count": 3198,
+    "test_python_file_count": 3448,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -1902,8 +1865,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3194,
-  "total_test_functions": 31642,
+  "total_test_files": 3198,
+  "total_test_functions": 31707,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
