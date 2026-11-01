@@ -1026,3 +1026,33 @@ binding 116 source inputs plus the separately compared five build fields.
 Immutable delivery and historical records remain unchanged. The next
 source capture must measure the changed test inputs; final telemetry
 acceptance, final CI and native ADMIT remain pending that capture.
+
+### Qualified host-contract telemetry intake (2026-11-01)
+
+Source `2150e52c1cb8f751cd25a8d5bff03527029f92a1` (tree
+`589959a47b478f56a6e00540d086fdd8e664c916`) completed its own Nightly
+`41253723166`. All 17 canonical test shards, coverage-verify and
+duration-telemetry succeeded. The root remains **FAIL**: only the stale
+daily/S7 telemetry guards and the architecture aggregate failed before
+intake. E2E, security and other jobs completed; their success does not
+rename the root failure.
+
+Native terminal source qualification returned 0. Original coverage ZIP
+SHA256 `c75d0e5967de21f6ca8b9e235d697f89bfc9467e258594a57d8bfa28917db217`
+and duration ZIP SHA256
+`4dad85c48b93439675b9a0b30154535334403b5e3413c28af8f5d3f4f45d2eaf`
+match actual GitHub artifact identities. Raw coverage XML SHA256 is
+`2321753b9b3f987c52f7cf5d6700422d0cacbd4e687d20c3e526bf1261acc977`.
+Line/branch rates are 99.81%/94.62%, both thresholds remain 85%, and the
+module inventory candidate is byte-identical. The prior input bytes,
+42 original artifacts and 19 raw job logs are preserved.
+
+The native updater and publication-provenance command returned 0 using
+the real capture and computed test-input digest
+`e58ea4fa50e3d169c1b6a6e7d01b294bf46d53cb9ee5f97284d9cde2c534b5c6`.
+No hashes, measurements or timestamps were rebound manually. Exact
+collection identities of all 99 owning cases match the original Ubuntu
+JUnit, with zero failures/errors/skips; this is stronger than a total PASS
+count. Independent review verified originals, gates and identities.
+The resulting artifact head still requires its own final CI, native
+ADMIT, positive/isolated-negative controls and independent acceptance.
