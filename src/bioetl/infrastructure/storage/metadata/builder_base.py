@@ -30,12 +30,14 @@ def _get_git_commit_cached() -> str | None:
     import subprocess
     from shutil import which
 
+    from bioetl.infrastructure.system.subprocess_boundary import run_protected_command
+
     git_executable = which("git")
     if not git_executable:
         return None
 
     try:
-        result = subprocess.run(  # nosec B603 - Git path resolved via which(); see suppression registry
+        result = run_protected_command(  # nosec B603 - Git path resolved via which(); see suppression registry
             [git_executable, "rev-parse", "--short", "HEAD"],
             capture_output=True,
             text=True,
@@ -43,7 +45,7 @@ def _get_git_commit_cached() -> str | None:
             check=False,
         )
         if result.returncode == 0:
-            return result.stdout.strip()
+            return str(result.stdout).strip() if result.stdout else None
         return None
     except (subprocess.SubprocessError, FileNotFoundError, OSError):
         return None

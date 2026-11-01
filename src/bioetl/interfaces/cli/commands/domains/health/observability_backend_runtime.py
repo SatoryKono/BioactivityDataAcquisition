@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import shutil
-import subprocess  # nosec B404 - see suppression registry
+import subprocess
+
+# nosec B404 - see suppression registry
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from os import environ as os_environ
@@ -41,6 +43,7 @@ from bioetl.composition.observability_backend import (
 from bioetl.composition.observability_backend import (
     start_detached_quarantine_backend as _composition_start_detached_quarantine_backend,
 )
+from bioetl.infrastructure.system.subprocess_boundary import run_protected_command
 from bioetl.interfaces.cli.commands.domains.health._observability_backend_ensure_parts import (
     _observability_backend_runtime_hooks,
     _require_integral_backend_port,
@@ -244,12 +247,12 @@ def docker_engine_not_ready_message() -> str | None:
     if docker is None:
         return None
     try:
-        completed = subprocess.run(  # nosec B603 - see suppression registry
+        completed = run_protected_command(  # nosec B603 - see suppression registry
             [docker, "info"],
             capture_output=True,
             timeout=8,
             check=False,
-            shell=False,
+
         )
     except (OSError, subprocess.TimeoutExpired):
         return (

@@ -6,6 +6,8 @@ from collections.abc import Callable, Mapping
 from pathlib import Path
 
 import subprocess  # nosec B404 - see suppression registry
+from bioetl.infrastructure.system.subprocess_boundary import run_protected_subprocess_popen
+  # nosec B404 - see suppression registry
 
 from bioetl.infrastructure.observability.observability_backend_process import (
     DEFAULT_HEALTH_SERVER_PORT,
@@ -45,7 +47,7 @@ def start_detached_ops_http_backend(
     python_executable: str | None = None,
     data_root: Path | None = None,
     current_env: Mapping[str, str],
-    popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
+    popen_factory: Callable[..., subprocess.Popen[bytes]] = run_protected_subprocess_popen,
 ) -> subprocess.Popen[bytes]:
     return _infra_start_detached_ops_http_backend(
         bind_host=bind_host,
@@ -64,7 +66,7 @@ def start_detached_quarantine_backend(
     python_executable: str | None = None,
     data_root: Path | None = None,
     current_env: Mapping[str, str],
-    popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
+    popen_factory: Callable[..., subprocess.Popen[bytes]] = run_protected_subprocess_popen,
 ) -> subprocess.Popen[bytes]:
     return _infra_start_detached_quarantine_backend(
         bind_host=bind_host,

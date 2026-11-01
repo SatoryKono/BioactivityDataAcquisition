@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import os
 import signal
-import subprocess  # nosec B404 - see suppression registry
+import subprocess
+
+# nosec B404 - see suppression registry
 import sys
 import time
 from collections.abc import Mapping
@@ -14,6 +16,10 @@ from shutil import which
 from typing import TYPE_CHECKING, Any, cast
 
 import bioetl
+from bioetl.infrastructure.system.subprocess_boundary import (
+    run_protected_command,
+    run_protected_subprocess_popen,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
@@ -84,7 +90,7 @@ def _posix_ss_listener_process_field(line: str, *, suffix: str) -> str | None:
 
 def _run_listener_probe(command: list[str]) -> str:
     try:
-        result = subprocess.run(  # nosec B603 - see suppression registry
+        result = run_protected_command(  # nosec B603 - see suppression registry
             command,
             check=False,
             capture_output=True,
@@ -93,7 +99,7 @@ def _run_listener_probe(command: list[str]) -> str:
         )
     except subprocess.TimeoutExpired:
         return ""
-    return result.stdout
+    return str(result.stdout) if result.stdout else ""
 
 
 def _find_windows_listener_pids_by_port(port: int) -> tuple[int, ...]:
@@ -163,7 +169,7 @@ def _run_taskkill(pid: int) -> subprocess.CompletedProcess[str]:
         return subprocess.CompletedProcess(args=(), returncode=1)
     command = [taskkill, "/PID", str(pid), "/T", "/F"]
     try:
-        return subprocess.run(  # nosec B603 - see suppression registry
+        return run_protected_command(  # nosec B603 - see suppression registry
             command,
             check=False,
             capture_output=True,
@@ -281,7 +287,7 @@ def start_detached_ops_http_backend(
     python_executable: str | None = None,
     data_root: Path | None = None,
     current_env: Mapping[str, str],
-    popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
+    popen_factory: Callable[..., subprocess.Popen[bytes]] = run_protected_subprocess_popen,
 ) -> subprocess.Popen[bytes]:
     """Launch ``bioetl health server`` as a detached Ops HTTP backend process.
 
@@ -325,7 +331,7 @@ def start_detached_quarantine_backend(
     python_executable: str | None = None,
     data_root: Path | None = None,
     current_env: Mapping[str, str],
-    popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
+    popen_factory: Callable[..., subprocess.Popen[bytes]] = run_protected_subprocess_popen,
 ) -> subprocess.Popen[bytes]:
     """Compatibility alias for :func:`start_detached_ops_http_backend`.
 
