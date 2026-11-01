@@ -45,6 +45,7 @@ from tests.helpers.vcr_config import build_cassette_dir
 
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from .conftest import (
+    E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT,
     assert_silver_table_has_records,
     create_test_context,
     get_silver_records,
@@ -295,6 +296,7 @@ async def test_rerun_same_pipeline_twice(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr(allow_playback_repeats=True)
 @pytest.mark.asyncio
+@pytest.mark.timeout(E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT)
 async def test_run_normal_a_b_a(e2e_data_dir: Path):
     """E2E: Normal pipeline runs in A -> B -> A pattern in a single process.
 
@@ -324,6 +326,7 @@ async def test_run_normal_a_b_a(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr(allow_playback_repeats=True)
 @pytest.mark.asyncio
+@pytest.mark.timeout(E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT)
 async def test_run_cancellation_and_restart(
     e2e_data_dir: Path, monkeypatch: pytest.MonkeyPatch
 ):
@@ -391,6 +394,7 @@ async def test_run_cancellation_and_restart(
 @pytest.mark.e2e
 @pytest.mark.vcr(allow_playback_repeats=True)
 @pytest.mark.asyncio
+@pytest.mark.timeout(E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT)
 async def test_run_error_and_restart(
     e2e_data_dir: Path, monkeypatch: pytest.MonkeyPatch
 ):
