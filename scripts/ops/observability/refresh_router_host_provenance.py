@@ -56,6 +56,7 @@ BUILD_SUPPORT = (
     "grafana/tooling/router-v7-bridge/verify-packed-bridge.mjs",
     "scripts/ops/observability/grafana/router_rootfs.py",
     "scripts/ops/observability/grafana/router_managed_image.py",
+    "scripts/ops/observability/grafana/trusted_docker.py",
     "scripts/ops/observability/refresh_router_host_provenance.py",
 )
 JOBS = {
@@ -209,13 +210,21 @@ def _selected_artifact(
 
 
 def _receipt_payloads(archive: bytes) -> dict[str, JsonObject]:
-    """Read exactly the two safe JSON receipts from the original ZIP."""
+    """Read the required host receipts and optional managed receipt pair."""
+    host_receipts = {"router-v7-image-build.json", "router-v7-image-parity.json"}
+    managed_receipts = {
+        "router-v7-managed-image-build.json",
+        "router-v7-managed-image-parity.json",
+    }
     with zipfile.ZipFile(io.BytesIO(archive)) as source:
         files = [row for row in source.infolist() if not row.is_dir()]
+        names = [PurePosixPath(row.filename).name for row in files]
+        name_set = set(names)
         require(
-            len(files) == 2
-            and {PurePosixPath(row.filename).name for row in files}
-            == {"router-v7-image-build.json", "router-v7-image-parity.json"},
+            host_receipts <= name_set
+            and name_set <= host_receipts | managed_receipts
+            and len(names) == len(name_set)
+            and (not (name_set & managed_receipts) or managed_receipts <= name_set),
             "Incomplete/duplicate image receipts",
         )
         payloads: dict[str, JsonObject] = {}
@@ -228,6 +237,30 @@ def _receipt_payloads(archive: bytes) -> dict[str, JsonObject]:
                 "Unsafe receipt archive member",
             )
             payloads[path.name] = json_object(json.loads(source.read(row)))
+    if managed_receipts <= payloads.keys():
+        build = payloads["router-v7-managed-image-build.json"]
+        parity = payloads["router-v7-managed-image-parity.json"]
+        require(parity.get("status") == "PASS", "Managed image parity did not pass")
+        for field in ("built_image_config_digest", "declared_image_config_digest"):
+            digest = text(
+                parity.get(field), "Missing/invalid managed image config digest"
+            )
+            require(
+                bool(re.fullmatch(r"sha256:[0-9a-f]{64}", digest)),
+                "Missing/invalid managed image config digest",
+            )
+        require(
+            build.get("containerimage.config.digest")
+            == parity.get("built_image_config_digest"),
+            "Managed build/image-parity identity mismatch",
+        )
+        rootfs_digest = text(
+            parity.get("rootfs_sha256"), "Missing/invalid managed rootfs digest"
+        )
+        require(
+            bool(re.fullmatch(HEX_SHA256_PATTERN, rootfs_digest)),
+            "Missing/invalid managed rootfs digest",
+        )
     return payloads
 
 

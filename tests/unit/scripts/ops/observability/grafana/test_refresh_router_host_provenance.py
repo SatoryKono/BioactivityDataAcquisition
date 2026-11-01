@@ -115,6 +115,19 @@ def fixture():
     return run, jobs, {"total_count": 1, "artifacts": [artifact]}, raw, manifest, parity
 
 
+def archive_with_extra_receipts(raw, receipts):
+    archive = io.BytesIO()
+    with (
+        zipfile.ZipFile(io.BytesIO(raw)) as source,
+        zipfile.ZipFile(archive, "w") as target,
+    ):
+        for row in source.infolist():
+            target.writestr(row.filename, source.read(row))
+        for name, payload in receipts.items():
+            target.writestr(name, json.dumps(payload))
+    return archive.getvalue()
+
+
 def release_case():
     run, _, artifacts, _, host, parity = fixture()
     old = IMAGE.replace(DIGEST, "c" * 64)
@@ -315,6 +328,63 @@ class ProvenanceControls(unittest.TestCase):
             result,
         )
         self.assertNotIn("ci_source_revalidations", original)
+
+    def test_positive_capture_accepts_managed_image_receipts(self):
+        run, jobs, artifacts, raw, _, parity = fixture()
+        managed_parity = {
+            "status": "PASS",
+            "declared_image": IMAGE,
+            "built_image_config_digest": "sha256:" + "b" * 64,
+            "declared_image_config_digest": "sha256:" + "c" * 64,
+            "rootfs_sha256": "d" * 64,
+        }
+        raw = archive_with_extra_receipts(
+            raw,
+            {
+                "router-v7-managed-image-build.json": {
+                    "containerimage.config.digest": "sha256:" + "b" * 64
+                },
+                "router-v7-managed-image-parity.json": managed_parity,
+            },
+        )
+        artifacts["artifacts"][0].update(
+            size_in_bytes=len(raw), digest="sha256:" + module.sha256(raw)
+        )
+
+        _, actual = module.validate_capture(run, jobs, artifacts, raw)
+
+        self.assertEqual(actual, parity)
+
+    def test_managed_receipts_must_be_complete_and_bound(self):
+        invalid_receipt_sets = (
+            {"router-v7-managed-image-build.json": {}},
+            {
+                "router-v7-managed-image-build.json": {
+                    "containerimage.config.digest": "sha256:" + "b" * 64
+                },
+                "router-v7-managed-image-parity.json": {"status": "FAIL"},
+            },
+            {
+                "router-v7-managed-image-build.json": {
+                    "containerimage.config.digest": "sha256:" + "b" * 64
+                },
+                "router-v7-managed-image-parity.json": {
+                    "status": "PASS",
+                    "built_image_config_digest": "sha256:" + "c" * 64,
+                    "declared_image_config_digest": "sha256:" + "d" * 64,
+                    "rootfs_sha256": "e" * 64,
+                },
+            },
+        )
+        for receipts in invalid_receipt_sets:
+            with self.subTest(receipts=receipts):
+                run, jobs, artifacts, raw, _, _ = fixture()
+                raw = archive_with_extra_receipts(raw, receipts)
+                artifacts["artifacts"][0].update(
+                    size_in_bytes=len(raw), digest="sha256:" + module.sha256(raw)
+                )
+                with self.assertRaises(ValueError):
+                    module.validate_capture(run, jobs, artifacts, raw)
 
     def test_failed_missing_skipped_duplicate_foreign_jobs(self):
         for mode in (
