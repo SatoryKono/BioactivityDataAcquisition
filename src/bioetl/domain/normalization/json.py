@@ -179,17 +179,46 @@ def _convert_complex_types(value: object) -> object | None:
     return None
 
 
+def _is_json_scalar(value: object) -> bool:
+    """Return whether a value is already a JSON scalar supported by this helper."""
+    vt = type(value)
+    return vt in (str, int, float, bool) or value is None
+
+
+def _convert_builtin_dict(value: object) -> dict[str, object]:
+    """Recursively normalize an exact built-in dictionary."""
+    dict_value = cast(dict[str, object], value)
+    return {str(key): to_jsonable(item) for key, item in sorted(dict_value.items())}
+
+
+def _convert_builtin_list(value: object) -> list[object]:
+    """Recursively normalize an exact built-in list."""
+    list_value = cast(list[object], value)
+    return [to_jsonable(item) for item in list_value]
+
+
+def _convert_json_builtin(value: object) -> tuple[bool, object]:
+    """Convert built-in containers while keeping their low-overhead fast path."""
+    if _is_json_scalar(value):
+        return True, value
+    vt = type(value)
+    if vt is dict:
+        return True, _convert_builtin_dict(value)
+    if vt is list:
+        return True, _convert_builtin_list(value)
+    return False, value
+
+
 def to_jsonable(value: object) -> object:
     """Convert nested dataclasses, datetimes, and mappings into JSON-safe values."""
-    converted = _convert_special_types(value)
-    if converted is not None:
-        return converted
-
-    converted = _convert_complex_types(value)
-    if converted is not None:
-        return converted
-
-    return value
+    builtin_handled, result = _convert_json_builtin(value)
+    if builtin_handled:
+        return result
+    special_value = _convert_special_types(value)
+    if special_value is not None:
+        return special_value
+    complex_value = _convert_complex_types(value)
+    return value if complex_value is None else complex_value
 
 
 def stable_json_hash(
