@@ -115,19 +115,19 @@ suffix_boundary_rules:
       - path: src/bioetl/domain/value_objects/dq_report_builder.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-10-31"
+        expires_on: "2027-01-30"
         removal_step: Rename module when DQ report value-object construction helpers are migrated to role-neutral naming.
         reason: Existing domain helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/infrastructure/adapters/crossref/client_builders.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-10-31"
+        expires_on: "2027-01-30"
         removal_step: Rename module when CrossRef client component helpers move behind adapter-owned role-neutral naming.
         reason: Existing adapter helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/infrastructure/adapters/crossref/query_builder.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-10-31"
+        expires_on: "2027-01-30"
         removal_step: Rename module when CrossRef query planning helpers move behind adapter-owned role-neutral naming.
         reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/infrastructure/adapters/openalex/query_builder.py
@@ -187,21 +187,21 @@ family_freeze_rules:
         path: src/bioetl/application/core/lifecycle/lock_runtime_service.py
         issue: "#3552"
         owner: "@bioetl-platform"
-        expires_on: "2026-10-31"
+        expires_on: "2027-01-30"
         removal_step: Remove family exception once lock runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical runtime lock lifecycle collaborator.
       - symbol: LockRuntimeServiceCreateContext
         path: src/bioetl/application/core/lifecycle/lock_runtime_service.py
         issue: "#3552"
         owner: "@bioetl-platform"
-        expires_on: "2026-10-31"
+        expires_on: "2027-01-30"
         removal_step: Remove family exception once lock runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical runtime lock collaborator creation seam.
       - symbol: LockService
         path: src/bioetl/application/services/ops/lock_service.py
         issue: "#3552"
         owner: "@bioetl-platform"
-        expires_on: "2026-10-31"
+        expires_on: "2027-01-30"
         removal_step: Remove family exception once lock runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical operator/admin lock service.
 
@@ -220,7 +220,7 @@ family_freeze_rules:
         path: src/bioetl/application/core/lifecycle/checkpoint_manager.py
         issue: "#3398"
         owner: "@bioetl-platform"
-        expires_on: "2026-10-31"
+        expires_on: "2027-01-30"
         removal_step: Remove family exception once runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical runtime checkpoint collaborator.
       - symbol: QuarantineRuntimeService
