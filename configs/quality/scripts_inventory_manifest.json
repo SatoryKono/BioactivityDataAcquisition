@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T17:16:40.625292+00:00",
+  "generated_at": "2026-11-01T10:19:02.589385+00:00",
   "summary": {
     "total_scripts": 704,
     "status_counts": {
@@ -9106,7 +9106,7 @@
       ],
       "owner": "@bioetl-docs",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the row-construction implementation imported by generate_pipeline_normalization_matrix.py; keep contributor execution on the canonical generator entrypoint."
     },
     {
@@ -9131,7 +9131,7 @@
       ],
       "owner": "@bioetl-docs",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the static registry and runtime-binding module behind generate_pipeline_normalization_matrix.py; do not expose it as a separate CLI."
     },
     {
@@ -9150,7 +9150,7 @@
       ],
       "owner": "@bioetl-docs",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the control-plane KPI helper imported by generate_pipeline_normalization_matrix.py; keep the canonical generator as the active surface."
     },
     {
@@ -9175,7 +9175,7 @@
       ],
       "owner": "@bioetl-docs",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the rendering and persistence module behind generate_pipeline_normalization_matrix.py; keep contributor execution routed through the canonical generator."
     },
     {
@@ -9937,7 +9937,7 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the private diff/ownership analysis backend of pr_lane_results.py; it has no standalone runner or public CLI. All test execution stays with the governed existing affected-tests lane."
     },
     {
@@ -9968,7 +9968,7 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the shared GitHub Actions attempt collector imported by the Docker and PR-gate timing reports and by nightly_shadow_archive. It has no standalone command surface; keep it supporting so active_script_count_max does not grow."
     },
     {
@@ -10234,7 +10234,7 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the shared JUnit record-accounting backend imported by update_test_telemetry_baseline and invoked internally by the tests workflow. Its CLI has no operator inputs and only adapts CI environment/artifact paths; the owning tests workflow remains the public execution surface."
     },
     {
@@ -10252,7 +10252,7 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 1023,
+          "line": 1025,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.local_test_telemetry import build_local_baseline"
         },
@@ -11061,19 +11061,19 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 663,
+          "line": 665,
           "source_group": "scripts",
           "text": "\"  `python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root\","
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 668,
+          "line": 670,
           "source_group": "scripts",
           "text": "\"  artifacts, then run `python -m scripts.engineering.ci.test_telemetry_provenance\","
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 959,
+          "line": 961,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.test_telemetry_provenance import ("
         },
@@ -12870,7 +12870,7 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the stdlib-only environment validation helper shared by the tracked Zed task adapters; keep `.zed/tasks.json` as the governed editor entry surface and do not promote this helper without offsetting an active script elsewhere."
     },
     {
@@ -13028,7 +13028,7 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "internal_compatibility_launcher",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the guarded Python launcher behind tracked native-Windows Zed tasks; keep `.zed/tasks.json` as the governed editor entry surface and do not promote this launcher without offsetting an active script elsewhere."
     },
     {
@@ -14947,7 +14947,7 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the policy-evaluator module behind report_debt_governance_gates.py; keep the routed report-debt-governance-gates command as the active entrypoint."
     },
     {
@@ -14984,7 +14984,7 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the rendering and persistence module behind report_debt_governance_gates.py; do not expose it as an independent reporting surface."
     },
     {
@@ -16139,7 +16139,7 @@
       ],
       "owner": "@bioetl-observability",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the CLI orchestration implementation imported by run_observability_closure_campaign.py; keep the routed campaign command as the active surface."
     },
     {
@@ -16158,7 +16158,7 @@
       ],
       "owner": "@bioetl-observability",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the validation and evidence-scoring seam behind run_observability_closure_campaign.py; do not expose it as a separate command."
     },
     {
@@ -16207,7 +16207,7 @@
       ],
       "owner": "@bioetl-observability",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the CLI implementation behind report_observability_metric_inventory.py; keep report-observability-metric-inventory as the active routed entrypoint."
     },
     {
@@ -16244,7 +16244,7 @@
       ],
       "owner": "@bioetl-observability",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the typed target analysis and report helper behind report_observability_metric_inventory.py; do not count it as an independent CLI."
     },
     {
@@ -16281,7 +16281,7 @@
       ],
       "owner": "@bioetl-observability",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the runtime-event and cardinality review implementation behind report_observability_metric_inventory.py; keep the routed report command as the active surface."
     },
     {
@@ -16342,7 +16342,7 @@
       ],
       "owner": "@bioetl-observability",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the source-discovery and AST scanning implementation behind report_observability_metric_inventory.py; do not expose it as a standalone command."
     },
     {
@@ -16391,7 +16391,7 @@
       ],
       "owner": "@bioetl-observability",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the shared typed report/allowlist helpers behind report_observability_metric_inventory.py; keep it supporting and do not expose it as a standalone command."
     },
     {
@@ -17156,7 +17156,7 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the supporting QA helper behind dashboard PromQL scope checks while dashboard selector and forbidden-label governance remains split across static dashboard audits and live Grafana evidence; promote to active only with an explicit active-surface budget reduction elsewhere."
     },
     {
@@ -17220,7 +17220,7 @@
       ],
       "owner": "@bioetl-observability",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-dashboard-scalar-density; keep operator execution routed through the unified QA dispatcher while pure tests import the computation helpers directly."
     },
     {
@@ -17954,7 +17954,7 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Keep the implementation as an internal backend for the canonical scripts.engineering.qa report-pipeline-config-contract-ownership-map command; route standalone use through the unified QA entrypoint."
     },
     {
@@ -18195,7 +18195,7 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-10-31",
+      "review_by": "2027-01-30",
       "next_step": "Retain as the bounded manual source-projection producer introduced by #12215; its direct script invocation only rebinds two delimited documentation blocks and does not produce measurements or expose a runtime entrypoint. Route through the canonical QA command surface before promoting it to an active operator command."
     },
     {

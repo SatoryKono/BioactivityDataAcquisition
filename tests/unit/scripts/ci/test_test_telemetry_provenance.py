@@ -58,6 +58,9 @@ def bridge(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     git("add", ".")
     git("commit", "-qm", "base")
     base = git("rev-parse", "HEAD")
+    catalog = tmp_path / "configs/quality/external_resource_inventory.json"
+    catalog.parent.mkdir(parents=True, exist_ok=True)
+    catalog.write_text(json.dumps({"source_commit": base}) + "\n")
     (tmp_path / "tests/test_source.py").write_text("value = 2\n")
     git("add", ".")
     git("commit", "-qm", "source run")
@@ -699,6 +702,64 @@ def test_normal_ancestry_does_not_require_publication_or_network(
     provenance.require_published_ancestor(root, base)
 
 
+def test_publication_receipt_refresh_uses_confirmed_pr_and_all_review_refs(
+    bridge, monkeypatch
+) -> None:
+    root, merge, _, receipt, git = bridge
+    pr_head = receipt["github_pull_request"]["head"]["sha"]
+    base = git("rev-parse", f"{pr_head}^^")
+    source = git("rev-parse", f"{pr_head}^")
+    git("checkout", "--detach", pr_head)
+    git("update-ref", "refs/remotes/origin/main", merge)
+    (root / "configs/quality").mkdir(parents=True, exist_ok=True)
+    (root / "configs/quality/external_resource_inventory_qm08_review.json").write_text(
+        json.dumps({"catalog_ref": base, "source_ref": source})
+    )
+    (root / "configs/quality/external_resource_inventory_qm09_review.json").write_text(
+        json.dumps({"catalog_ref": source, "source_ref": pr_head})
+    )
+    host = root / "grafana/tooling/router-v7-bridge/host-image.json"
+    host.parent.mkdir(parents=True, exist_ok=True)
+    host.write_text(json.dumps({"delivery_source": {"source_ref": base}}))
+    pr = {
+        "number": 42,
+        "merged": True,
+        "base": {"repo": {"full_name": provenance.REPOSITORY}},
+        "head": {"sha": pr_head},
+        "merge_commit_sha": merge,
+    }
+    monkeypatch.setattr(provenance, "_read_github_json", lambda _: pr)
+
+    result = provenance.build_publication_receipt(root=root, pull_request=42)
+
+    assert set(result["reviewed_source_commits"]) == {base, source, pr_head}
+    assert result["github_pull_request"]["merged"] is True
+    previous = copy.deepcopy(result)
+    previous["github_pull_request"]["number"] = 41
+    previous["retrieved_from"] = (
+        f"https://api.github.com/repos/{provenance.REPOSITORY}/pulls/41"
+    )
+    publication_path = root / provenance.PUBLICATION_RECEIPT
+    publication_path.parent.mkdir(parents=True, exist_ok=True)
+    publication_path.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "verification_mode": "live_github",
+                "publication_bridges": [previous],
+            }
+        )
+    )
+
+    provenance.write_ci_publication_receipts(root, result)
+
+    stored = json.loads(publication_path.read_text())
+    assert {
+        bridge["github_pull_request"]["number"]
+        for bridge in stored["publication_bridges"]
+    } == {41, 42}
+
+
 def _assert_ci_receipt_retains_real_run_and_survives_squash(
     bridge, monkeypatch, qa_changed, *, publication: bool
 ) -> None:
@@ -715,6 +776,7 @@ def _assert_ci_receipt_retains_real_run_and_survives_squash(
     result = provenance.build_ci_squash_receipt(
         payload, root=root, pull_request=42, run_id=123
     )
+    assert git("rev-parse", "HEAD^^") in result["reviewed_source_commits"]
     assert result["github_pull_request"]["merged"] is False
     assert result["github_pull_request"]["merge_commit_sha"] is None
     assert (
@@ -1109,6 +1171,15 @@ def _native_ci_candidate(bridge, monkeypatch, qa_changed):
         json.dumps(
             {
                 "catalog_ref": payload["source_commit"],
+                "source_ref": payload["source_commit"],
+            }
+        )
+    )
+    qm09_review = root / "configs/quality/external_resource_inventory_qm09_review.json"
+    qm09_review.write_text(
+        json.dumps(
+            {
+                "catalog_ref": git("rev-parse", "HEAD^^"),
                 "source_ref": payload["source_commit"],
             }
         )
