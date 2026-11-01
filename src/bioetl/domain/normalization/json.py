@@ -168,25 +168,12 @@ def _convert_special_types(value: object) -> object | None:
     return None
 
 
-def _is_dataclass_instance(value: object) -> bool:
-    """Return whether a value is a dataclass instance rather than its type."""
-    return is_dataclass(value) and not isinstance(value, type)
-
-
-def _convert_dataclass_or_mapping(value: object) -> object | None:
-    """Convert dataclasses and mappings, leaving other values untouched."""
-    if _is_dataclass_instance(value):
+def _convert_complex_types(value: object) -> object | None:
+    """Convert complex types (dataclass, mapping, sequence) if applicable."""
+    if is_dataclass(value) and not isinstance(value, type):
         return _convert_dataclass(value)
     if isinstance(value, Mapping):
         return _convert_mapping(value)
-    return None
-
-
-def _convert_complex_types(value: object) -> object | None:
-    """Convert complex types (dataclass, mapping, sequence) if applicable."""
-    converted = _convert_dataclass_or_mapping(value)
-    if converted is not None:
-        return converted
     if _should_convert_as_sequence(value):
         return _convert_sequence(value)
     return None
@@ -222,24 +209,16 @@ def _convert_json_builtin(value: object) -> tuple[bool, object]:
     return False, value
 
 
-def _convert_non_builtin(value: object) -> object:
-    """Convert non-built-in supported values, preserving unknown objects."""
-    converted = _convert_special_types(value)
-    if converted is not None:
-        return converted
-    converted = _convert_complex_types(value)
-    if converted is not None:
-        return converted
-    return value
-
-
 def to_jsonable(value: object) -> object:
     """Convert nested dataclasses, datetimes, and mappings into JSON-safe values."""
-    converted, result = _convert_json_builtin(value)
-    if converted:
+    builtin_handled, result = _convert_json_builtin(value)
+    if builtin_handled:
         return result
-
-    return _convert_non_builtin(value)
+    special_value = _convert_special_types(value)
+    if special_value is not None:
+        return special_value
+    complex_value = _convert_complex_types(value)
+    return value if complex_value is None else complex_value
 
 
 def stable_json_hash(
