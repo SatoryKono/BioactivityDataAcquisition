@@ -268,3 +268,17 @@ def test_docs_generated_and_archive_surfaces_are_skipped_from_inventory_scan() -
     assert module._is_skipped_rel_path("docs/02-architecture/generated/diagram.svg")
     assert module._is_skipped_rel_path("docs/plans/wip.md")
     assert not module._is_skipped_rel_path("docs/03-guides/script-management/README.md")
+
+
+def test_fallback_search_deduplicates_paths_seen_under_multiple_roots(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Fallback scans should not count the same path through duplicate roots."""
+    module = _load_inventory_module()
+    script = tmp_path / "scripts" / "inventory_target.py"
+    script.parent.mkdir()
+    script.write_text("VALUE = 1\n", encoding="utf-8")
+    monkeypatch.setattr(module, "SEARCH_ROOTS", ("scripts", "scripts"))
+    monkeypatch.setattr(module, "_iter_git_tracked_search_files", lambda _root: None)
+
+    assert module._iter_search_files(tmp_path) == [script]
