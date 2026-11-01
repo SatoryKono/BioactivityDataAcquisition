@@ -573,13 +573,13 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            "tests/architecture/test_external_resource_inventory_catalog.py",
         ),
     ),
     "reports/quality/quality-move-qm08/publication-provenance.json": (
         "tests/unit/scripts/ci/test_test_telemetry_provenance.py",
         "tests/architecture/test_external_resource_inventory_catalog.py",
-        "tests/unit/scripts/ops/test_refresh_router_delivery.py",
+        "tests/architecture/test_external_resource_inventory_catalog.py",
     ),
     "reports/12592_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
@@ -589,10 +589,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
         "tests/architecture/test_check_doc_links_guardrails.py",
     ),
-
 }
 
-# Directory-level edges for generated artifacts and diagrams where an exact
+# Directory-level edges/ for generated artifacts and diagrams where an exact
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
