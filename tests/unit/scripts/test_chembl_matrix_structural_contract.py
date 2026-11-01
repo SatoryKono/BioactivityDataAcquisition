@@ -20,6 +20,7 @@ from scripts.docs.matrix.structural_contract import (
     NOT_APPLICABLE,
     QUARANTINE,
     canonical_physical_type,
+    resolve_logical_type,
     contract_lookup_key,
     index_runtime_contract_rows,
     build_structural_workbook_semantics,
@@ -37,6 +38,9 @@ from scripts.docs.matrix.structural_contract import (
         ("int64", "int64"),
         ("bool", "boolean"),
         ("boolean", "boolean"),
+        ("str", "str"),
+        ("string", "str"),
+        ("string[pyarrow]", "str"),
     ],
 )
 @pytest.mark.unit
@@ -44,6 +48,12 @@ def test_physical_type_export_is_stable_across_dtype_aliases(
     physical_type: str, expected: str
 ) -> None:
     assert canonical_physical_type(physical_type) == expected
+
+
+@pytest.mark.unit
+def test_arrow_string_dtype_resolves_to_the_string_logical_contract() -> None:
+    physical_type = canonical_physical_type("string[pyarrow]")
+    assert resolve_logical_type(physical_type) == "string"
 
 
 @pytest.mark.unit

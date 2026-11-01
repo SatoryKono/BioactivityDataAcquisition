@@ -20,6 +20,7 @@ ensure_repo_imports(include_src=True)
 
 from bioetl.application.core.base_transformer._structural_policy_contracts import (  # noqa: E402
     resolve_field_contracts,
+    resolve_logical_type,
     resolve_pandera_schema,
 )
 from bioetl.application.core.base_transformer.field_policy import (  # noqa: E402
@@ -121,8 +122,9 @@ def contract_lookup_key(
 def canonical_physical_type(physical_type: str) -> str:
     """Normalize Pandera dtype spellings so exports are stable across runtimes."""
     normalized = physical_type.strip().lower()
-    # NumPy and pandas may spell the same boolean field as ``bool`` or
-    # ``boolean`` depending on the installed dependency/runtime versions.
+    # NumPy and pandas may spell equivalent fields differently across runtimes.
+    if normalized == "string" or normalized.startswith("string["):
+        return "str"
     return "boolean" if normalized == "bool" else normalized
 
 
@@ -238,8 +240,12 @@ def build_runtime_contract_rows() -> list[MatrixStructuralContractRow]:
             schema=schema,
             field_policy_resolver=field_policy_resolver,
         ):
+            physical_type = canonical_physical_type(contract.physical_type)
+            logical_type = contract.logical_type
+            if logical_type == "unknown":
+                logical_type = resolve_logical_type(physical_type)
             semantics = build_structural_workbook_semantics(
-                logical_type=contract.logical_type,
+                logical_type=logical_type,
                 nullable=contract.nullable,
                 optional=contract.optional,
                 empty_as_missing=contract.empty_as_missing,
@@ -254,8 +260,8 @@ def build_runtime_contract_rows() -> list[MatrixStructuralContractRow]:
                     source_table=source_table,
                     pipeline=pipeline_name,
                     silver_column=contract.field_name,
-                    logical_type=contract.logical_type,
-                    physical_type=canonical_physical_type(contract.physical_type),
+                    logical_type=logical_type,
+                    physical_type=physical_type,
                     nullable=contract.nullable,
                     optional=contract.optional,
                     optionality_sources=tuple(
