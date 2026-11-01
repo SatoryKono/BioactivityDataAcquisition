@@ -58,7 +58,7 @@ coverage refresh:
 ## Freshness note
 
 Re-verified on 2026-11-02 at source commit
-`92c964c9d245fdada5bba153688232b1d5cc25f1`: the canonical source list and
+`70c538263eadb13e4f1538f0b7e5d30237a2a660`: the canonical source list and
 historical shard manifest remain present, and `git ls-files 'tests/**/test_*.py'`
 counts 3,208 tracked modules. This is an inventory check only;
 the 2026-10-08 17-shard capture below remains the latest measured coverage
