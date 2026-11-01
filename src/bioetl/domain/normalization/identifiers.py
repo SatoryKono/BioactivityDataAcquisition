@@ -108,8 +108,6 @@ def _contains_whitespace(value: str) -> bool:
 
 
 def _fast_path_canonical(normalized: str, upper_val: str) -> str | None:
-    if not upper_val.startswith(_CANONICAL_PREFIXES):
-        return None
     for canonical in _CANONICAL_PREFIXES:
         if upper_val.startswith(canonical):
             return _fast_path_canonical_matched(normalized, canonical)

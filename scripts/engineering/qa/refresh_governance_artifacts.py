@@ -155,8 +155,59 @@ def _sync_one_scorecard_family(
     return _sync_family_metrics(metrics, base) + _ratchet_family_budgets(family, base)
 
 
-def _sync_scorecard_hotspot_metrics_from_baseline() -> None:
-    """Copy measured hotspot metrics from baseline into scorecard (no budget growth)."""
+def _bind_config_metric_counts(metric: dict[str, object], value: int) -> int:
+    """Return the number of changed count fields while preserving policy metadata."""
+    changed = sum(
+        metric.get(field) != value for field in ("current_count", "max_count")
+    )
+    metric.update(current_count=value, max_count=value)
+    return changed
+
+
+def _plan_config_metric_counts(
+    policy: object, measured: object
+) -> list[tuple[dict[str, object], int]]:
+    """Validate every binding before changing any scorecard count."""
+    if not isinstance(policy, dict):
+        raise ValueError("Invalid config-surface metric policy")
+    if not isinstance(measured, dict):
+        raise ValueError("Missing config-surface baseline metrics")
+    planned = []
+    for name, value in measured.items():
+        metric = policy.get(name)
+        if type(value) is not int or value < 0 or not isinstance(metric, dict):
+            raise ValueError(f"Invalid config-surface metric: {name}")
+        maximum = metric.get("max_count")
+        if type(maximum) is not int or value > maximum:
+            raise ValueError(f"Config-surface budget growth is forbidden: {name}")
+        planned.append((metric, value))
+    return planned
+
+
+def _sync_config_surface_metrics(
+    scorecard: dict[str, object], baseline: dict[str, object]
+) -> int:
+    """Bind aggregate and family counts without raising any existing maximum."""
+    policy = scorecard.get("config_surface_ratchet")
+    if not isinstance(policy, dict):
+        raise ValueError("Invalid config-surface policy")
+    planned = _plan_config_metric_counts(policy.get("metrics"), baseline.get("metrics"))
+    families = baseline.get("families")
+    family_policies = policy.get("families")
+    if not isinstance(families, dict) or not isinstance(family_policies, dict):
+        raise ValueError("Invalid config-surface families")
+    for name, metrics in families.items():
+        family_policy = family_policies.get(name)
+        if not isinstance(family_policy, dict):
+            raise ValueError(f"Missing config-surface family policy: {name}")
+        planned.extend(
+            _plan_config_metric_counts(family_policy.get("metrics"), metrics)
+        )
+    return sum(_bind_config_metric_counts(metric, value) for metric, value in planned)
+
+
+def _sync_scorecard_hotspot_metrics_from_baseline(*, check_only: bool = False) -> None:
+    """Align hotspot/config metrics with generated inputs without budget growth."""
     import yaml
 
     baseline_path = ROOT / "reports/quality/hotspot-family-baseline.json"
@@ -172,8 +223,12 @@ def _sync_scorecard_hotspot_metrics_from_baseline() -> None:
         )
 
     baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
+    if not isinstance(baseline, dict):
+        raise ValueError("Hotspot baseline must be a mapping")
     by_name = _baseline_families_by_name(baseline)
     scorecard = yaml.safe_load(scorecard_path.read_text(encoding="utf-8"))
+    if not isinstance(scorecard, dict):
+        raise ValueError("Scorecard must be a mapping")
     families = (
         scorecard.get("hotspot_family_ratchets", {}).get("families", [])
         if isinstance(scorecard, dict)
@@ -183,7 +238,15 @@ def _sync_scorecard_hotspot_metrics_from_baseline() -> None:
     for family in families:
         if isinstance(family, dict):
             changed += _sync_one_scorecard_family(family, by_name)
+    if "config_surface_ratchet" in scorecard:
+        changed += _sync_config_surface_metrics(
+            scorecard, _read_config_surface_baseline()
+        )
 
+    if changed and check_only:
+        raise SystemExit(
+            "Scorecard metric bindings are stale; run the governance refresh"
+        )
     if changed:
         _write_text_atomically(
             scorecard_path,
@@ -194,12 +257,91 @@ def _sync_scorecard_hotspot_metrics_from_baseline() -> None:
                 width=100,
             ),
         )
-        print(f"SYNC scorecard hotspot metrics ({changed} field updates)")
+        print(f"SYNC scorecard baseline metrics ({changed} field updates)")
     else:
         print("SYNC scorecard hotspot metrics: already aligned")
 
 
+def _read_config_surface_baseline() -> dict[str, object]:
+    path = ROOT / "reports/quality/config-discrepancy-baseline.json"
+    if not path.is_file():
+        raise FileNotFoundError(
+            "scorecard sync requires existing inputs: "
+            "reports/quality/config-discrepancy-baseline.json"
+        )
+    baseline = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(baseline, dict):
+        raise ValueError("Config-surface baseline must be a mapping")
+    return baseline
+
+
+def _replace_assertless_count_literals(source: str, counts: dict[str, int]) -> str:
+    """Replace only scanned scalar counts, preserving policy text and comments."""
+    import yaml
+
+    def fields(node: yaml.Node | None) -> dict[str, yaml.Node]:
+        if not isinstance(node, yaml.MappingNode):
+            raise ValueError("Invalid assertless policy YAML mapping")
+        return {key.value: value for key, value in node.value}
+
+    document = yaml.compose(source)
+    category_nodes = fields(fields(document)["assertless_triage"])["categories"]
+    categories = fields(category_nodes)
+    edits = []
+    for name, value in counts.items():
+        scalar = fields(categories[name])["count"]
+        if (
+            not isinstance(scalar, yaml.ScalarNode)
+            or source[scalar.start_mark.index : scalar.end_mark.index] != scalar.value
+        ):
+            raise ValueError(
+                "Assertless count requires a plain scalar, not an anchor or alias"
+            )
+        edits.append((scalar.start_mark.index, scalar.end_mark.index, str(value)))
+    for start, end, value in sorted(edits, reverse=True):
+        source = source[:start] + value + source[end:]
+    return source
+
+
+def _sync_assertless_triage_counts(*, check_only: bool = False) -> bool:
+    """Bind reviewed category counts to the fresh scan, with no growth allowed."""
+    import yaml
+
+    config_path = ROOT / "configs/quality/test_governance_audit.yaml"
+    source = config_path.read_text(encoding="utf-8")
+    policy = yaml.safe_load(source)
+    report = json.loads((ROOT / _TEST_GOVERNANCE_JSON).read_text(encoding="utf-8"))
+    categories = policy["assertless_triage"]["categories"]
+    measured = report["assertless_category_counts"]
+    if not isinstance(categories, dict) or not isinstance(measured, dict):
+        raise ValueError("Invalid assertless category bindings")
+    if set(categories) != set(measured):
+        raise ValueError("Assertless categories require explicit policy review")
+    planned = []
+    for name, entry in categories.items():
+        value = measured[name]
+        if not isinstance(entry, dict) or type(entry.get("count")) is not int:
+            raise ValueError(f"Invalid assertless category policy: {name}")
+        if type(value) is not int or value < 0 or value > entry["count"]:
+            raise ValueError(f"Assertless category growth is forbidden: {name}")
+        if entry["count"] != value:
+            planned.append((name, entry, value))
+    if planned and check_only:
+        raise SystemExit(
+            "Assertless category counts are stale; run the governance refresh"
+        )
+    if planned:
+        _write_text_atomically(
+            config_path,
+            _replace_assertless_count_literals(
+                source, {name: value for name, _, value in planned}
+            ),
+        )
+    return bool(planned)
+
+
 def _run_check_only() -> None:
+    _sync_scorecard_hotspot_metrics_from_baseline(check_only=True)
     _run(
         [
             sys.executable,
@@ -233,6 +375,7 @@ def _run_check_only() -> None:
             "--check",
         ]
     )
+    _sync_assertless_triage_counts(check_only=True)
     _run(
         [
             sys.executable,
@@ -332,6 +475,19 @@ def _run_refresh() -> None:
             _FIXTURE_DUPLICATION_JSON,
         ]
     )
+
+    if _sync_assertless_triage_counts():
+        _run(
+            [
+                sys.executable,
+                "-m",
+                _TEST_GOVERNANCE_MODULE,
+                "--json-out",
+                _TEST_GOVERNANCE_JSON,
+                "--fixture-duplication-out",
+                _FIXTURE_DUPLICATION_JSON,
+            ]
+        )
 
     # 4) Hotspot family baseline (measured)
     _run(

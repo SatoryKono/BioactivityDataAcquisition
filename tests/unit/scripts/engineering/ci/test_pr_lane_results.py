@@ -712,6 +712,20 @@ def test_shadow_compare_routes_quality_and_runtime_documentation() -> None:
     assert "tests/architecture/test_docker_runtime_contracts.py" in report["selected"]
 
 
+def test_shadow_compare_routes_current_policy_and_test_health_evidence() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    changed_paths = [
+        "configs/quality/layered_suffix_policy.yaml",
+        "docs/reports/evidence/project-test-health/SUMMARY.md",
+        "docs/reports/evidence/project-test-health/metadata.yaml",
+        "docs/reports/evidence/project-test-health/shard_registry.yaml",
+    ]
+
+    for path in changed_paths:
+        report = build_shadow_compare([path], repo_root=repo_root)
+        assert report["selected_count"] > 0
+
+
 def test_shadow_compare_routes_lineage_crash_evidence() -> None:
     """Lineage crash reports select the test that produced the evidence."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -764,6 +778,32 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
     """Quality-move configs and documentation retain explicit governing tests."""
     repo_root = Path(__file__).resolve().parents[5]
 
+    new_inputs = {
+        "configs/quality/external_resource_inventory/part-06.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
+        },
+        "configs/quality/external_resource_inventory_qm08_review.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        },
+        "configs/quality/external_resource_inventory_qm09_review.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        },
+        "configs/quality/quality_move_qm09_reference_decisions.json": {
+            "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
+        },
+        "docker-compose.monitoring.yml": {
+            "tests/architecture/test_docker_runtime_contracts.py",
+            "tests/integration/test_grafana_datasource_provisioning.py",
+        },
+    }
+    for path, owning_tests in new_inputs.items():
+        selection = build_shadow_compare([path], repo_root=repo_root)
+        assert owning_tests <= set(selection["selected"]), path
+        assert selection["covers_full_suite"] is False
+
     report = build_shadow_compare(
         [
             ".github/workflows/duplication-complexity.yml",
@@ -773,6 +813,12 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
             "docs/02-architecture/current-state-inventory.md",
             "docs/04-reference/api/infrastructure.md",
             "reports/quality/total-tech-debt-audit-main-current.md",
+            ".dockerignore",
+            "mkdocs.yml",
+            "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md",
+            "reports/quality/pytest-nodeid-inventory.json",
+            "reports/quality/quality-move-qm08/reference_decisions.json",
+            "scripts/engineering/README.md",
         ],
         repo_root=repo_root,
     )
@@ -782,6 +828,23 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
     )
     assert "tests/unit/scripts/qa/test_topology_source_binding.py" in report["selected"]
     assert "tests/architecture/test_scripts_lifecycle_registry.py" in report["selected"]
+    assert "tests/architecture/test_docker_runtime_contracts.py" in report["selected"]
+    assert "tests/architecture/test_documentation_sync.py" in report["selected"]
+    assert (
+        "tests/unit/scripts/qa/test_refresh_governance_artifacts.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/unit/scripts/qa/test_build_pytest_nodeid_inventory.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/unit/scripts/engineering/qa/test_verify_quality_move.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/architecture/test_scripts_inventory_discovery.py" in report["selected"]
+    )
     assert (
         "tests/architecture/test_api_reference_public_facades.py" in report["selected"]
     )
@@ -1214,6 +1277,7 @@ def test_benchmark_and_governance_artifacts_have_impact_routes() -> None:
             "configs/quality/generated_artifact_tests.json",
             "configs/quality/test_skip_inventory.yaml",
             "Dockerfile.bioetl",
+            "docs/05-operations/runbooks/docker-security-baseline.md",
             "docs/reports/generated/documentation-cleanup-inventory.json",
             "docs/reports/generated/documentation-cleanup-inventory.md",
             "reports/performance/benchmark-summary.json",

@@ -43,7 +43,7 @@ ALLOWED_USES: dict[str, set[str]] = {
     },
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml": {
         "f377cff40abf52d63220346b9ab64814f3081ca6",  # #12374 docs concurrency
-        "feeaea060e81edb07d2c56dad6af1bbb201a3b6a",  # #12374 docs concurrency
+        "0deeafe064844e467b6c5943430dbfb3b80333ba",  # #12565 docs concurrency
     },
     "actions/attest-build-provenance": {
         "977bb373ede98d70efdf65b84cb5f73e068dcc2a",  # v3

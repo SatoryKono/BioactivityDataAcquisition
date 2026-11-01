@@ -171,6 +171,8 @@ log_test.txt
 /reports/quality/*
 !/reports/quality/quality-move-qm01/
 !/reports/quality/quality-move-qm01/**
+!/reports/quality/quality-move-qm08/
+!/reports/quality/quality-move-qm08/reference_decisions.json
 !/reports/quality/ci-family-refresh-evidence-20261012.json
 
 # Sonar residual ledgers (SNR-R / SNR-R2)

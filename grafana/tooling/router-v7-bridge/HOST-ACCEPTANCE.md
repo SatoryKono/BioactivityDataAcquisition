@@ -25,6 +25,45 @@ Record source SHA, upstream SHA, patch hashes, bridge/lock hashes, build exits,
 test counts, frontend/plugin bundle hashes, image digest and SBOM. Production
 build success alone does not establish runtime acceptance.
 
+Release plugin builds use Node image
+`node@sha256:e7add2a490bb17d97b485b8641bd88455fff7839ade0f5eba493c3508124d413`,
+with the repository mounted at `/work` and the working directory set to
+`/work/grafana/plugins/<plugin>`. Keep `npm run build` unchanged inside that
+container. Webpack runtime sourcemaps include structural hashes tied to the
+absolute compiler root; the source host directory may vary, but the compiler
+root must match the release build. CI verifies the entire dist file set and
+all hashes, including sourcemaps, before transferring plugin output.
+
+After a genuine source build and publication, materialize active delivery pins
+with the repository producer below. Supply the full source commit, its matching
+disposable source tree, the complete Docker build context tar, actual built
+image-config digests and registry manifest references read back after push:
+
+Use a dedicated build workspace: its verified source tree is `--source-root`,
+and `--context` must be a regular, unlinked file inside that tree's parent
+workspace. Filesystem-root workspaces and redirected inputs are refused before
+the context is read. Git input identities must be full commit SHAs; the writer
+only supports its fixed read-only Git operations.
+
+```bash
+python -m scripts.ops refresh-router-delivery \
+  --source-ref "$SOURCE_REF" --source-root "$BUILT_SOURCE_ROOT" \
+  --context "$BUILT_CONTEXT_TAR" \
+  --built-host "$HOST_CONFIG_DIGEST" --built-managed "$MANAGED_CONFIG_DIGEST" \
+  --host-image "$PUBLISHED_HOST_REF" --managed-image "$PUBLISHED_MANAGED_REF" \
+  --check
+```
+
+Run the same argv with `--update`, then `--check` again. No output is written
+before physical checks succeed. The producer derives source, context and delivery hashes
+from real inputs; it compares the complete host filesystem with its trusted
+official base plus the rebuilt frontend and both plugin trees, including modes
+and owners. It verifies the managed artifact as precisely that parent minus
+Scenes. Unknown concurrent edits stop materialization. Do not substitute an old
+image with new lock hashes. Source-built artifact parity does not grant runtime
+acceptance or Proof-or-Stop ADMIT. The Router workflow independently rebuilds
+both image variants and preserves both native parity receipts.
+
 On a separate Grafana database, verify all six Scene routes, navigation/history,
 dashboard variables, selector cancellation, malicious internal-navigation vectors
 and the bounded SSR applicability assessment. For panels 9482/3010, test no run,
@@ -90,6 +129,14 @@ files block delivery even when module.js and plugin.json hashes match. Release
 plugin artifacts must reproduce the CI build tree. A local build in a different
 working directory is diagnostic evidence until the complete file comparison
 passes, because webpack source-map metadata can depend on that directory.
+
+Preserve the published build-source branch and full Git objects across a squash
+merge. The delivery producer retains its normal ancestor check; a pinned build
+source outside main history needs the native QM-08 publication receipt and an
+actual GitHub merge mapping with identical trees and proven ancestry. Unmerged
+or unavailable mappings fail closed. Source bytes and full physical artifact
+parity remain mandatory; a publication bridge never rebinds an old image or
+provides runtime acceptance.
 
 The runtime-probe plugin executes navigation and hydration fixtures through
 Grafana's shared react-router external. Install it only on the acceptance host,

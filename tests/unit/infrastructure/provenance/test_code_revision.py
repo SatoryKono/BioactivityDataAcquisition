@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 import subprocess
+import sys
+import shutil
 import pytest
 from bioetl.infrastructure.provenance import code_revision as revision
 
@@ -15,6 +17,7 @@ pytestmark = pytest.mark.unit
 def test_revision_state_preserves_git_failure_provenance(
     monkeypatch, returncode, expected
 ):
+    run_git = revision._run_git_command
     revision.get_code_revision_provenance.cache_clear()
     monkeypatch.setattr(revision, "get_git_commit", lambda: "a" * 40)
     monkeypatch.setattr(revision, "get_dependency_lock_hash", lambda: "sha256:lock")
@@ -30,6 +33,20 @@ def test_revision_state_preserves_git_failure_provenance(
         assert result.dependency_lock_hash == "sha256:lock"
     finally:
         revision.get_code_revision_provenance.cache_clear()
+    # A Git filename/diagnostic may contain non-UTF-8 bytes on POSIX. Exercise
+    # the real subprocess decoder without creating platform-specific filenames.
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(shutil, "which", lambda _name: sys.executable)
+        decoded = run_git(
+            "-I",
+            "-c",
+            "import sys; sys.stdout.buffer.write(b'file_\\xff.md\\x00')",
+            environment={},
+        )
+    assert decoded is not None and decoded.returncode == 0
+    assert (
+        decoded.stdout.encode("utf-8", errors="surrogateescape") == b"file_\xff.md\x00"
+    )
 
 
 def test_config_hash_is_order_independent_but_preserves_sequence_order():
