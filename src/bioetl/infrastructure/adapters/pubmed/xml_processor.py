@@ -40,7 +40,9 @@ class PubMedXmlProcessor:
         try:
             parsed_root: ET.Element = ET.fromstring(
                 xml_text,
-                forbid_dtd=True,
+                # PubMed's normal EFetch response declares its public DTD. The
+                # parser does not fetch external DTDs, and entities stay blocked.
+                forbid_dtd=False,
                 forbid_entities=True,
                 forbid_external=True,
             )  # type: ignore[call-arg]

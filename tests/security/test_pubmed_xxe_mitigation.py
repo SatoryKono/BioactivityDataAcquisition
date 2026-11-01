@@ -48,6 +48,19 @@ def test_xml_processor_xxe_mitigation():
     assert result is None
 
 
+def test_xml_processor_accepts_pubmed_public_doctype():
+    """A normal PubMed DTD declaration is accepted without loading it."""
+    payload = (
+        '<!DOCTYPE PubmedArticleSet PUBLIC "-//NLM//DTD PubMedArticle//EN" '
+        '"https://example.org/pubmed.dtd"><PubmedArticleSet/>'
+    )
+
+    result = PubMedXmlProcessor.parse_response(payload)
+
+    assert result is not None
+    assert result.tag == "PubmedArticleSet"
+
+
 def test_transformer_billion_laughs_mitigation():
     """Verify that PubMedPublicationTransformer blocks Entity Expansion (Billion Laughs)."""
     transformer = instantiate_test_transformer(
