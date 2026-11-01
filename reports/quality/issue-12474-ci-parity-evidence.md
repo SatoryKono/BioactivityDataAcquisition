@@ -1056,3 +1056,55 @@ JUnit, with zero failures/errors/skips; this is stronger than a total PASS
 count. Independent review verified originals, gates and identities.
 The resulting artifact head still requires its own final CI, native
 ADMIT, positive/isolated-negative controls and independent acceptance.
+
+### Current source capture and bounded mutation result (2026-11-01)
+
+Source `5948ac9b43c5d62a32c6bd83a4fb3986a810c082`, tree
+`dd33105ef5acb18012897cddf2c7ce8bb914ffa2`, is retained by the published
+`evidence/issue-12474-checkpoint-5948ac9b43c5d62a32c6bd83a4fb3986a810c082`
+tag. Its [own Nightly](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41266750011)
+completed with GitHub conclusion `failure`. All 17 canonical measurement
+shards and both reducers succeeded. Native terminal source qualification,
+verified original-output intake, telemetry updater and publication-provenance
+builder returned 0. Qualification explicitly records
+`source_jobs_qualified=true` and `admission_claimed=false`; it does not
+convert the failed coordinator into CI PASS.
+
+The original coverage ZIP is artifact `13067273509`, SHA256
+`fc0812b9d895ad85d5fc53a159f689105d84e41728902aab4a1f0f6b86709cab`;
+duration ZIP `13067512797` has SHA256
+`ed3e891e85074c613d7bc5b660c20c73e62bc3af9b853f04bb26baa7284e6e55`.
+Raw coverage XML SHA256 is
+`48193c629f357f1e4154f5931891fc68f625e86ff7e0ea3c643327e2067ab648`.
+Its coverage.py version is 7.15.2, line rate 99.81% and branch rate 94.63%;
+both thresholds remain 85%. The module candidate changes only its XML
+digest; measured module rows remain unchanged. The real current test-input
+digest is `bf9973045559e65daa58442ce8a237f15bc583a46f56cb24bf3dd09860fb57ab`.
+All replaced bytes, 42 original ZIPs and 19 original source-job logs are
+retained. Independent `telemetry_independent_review` verified ZIP/API
+identities, source bindings and the intake. Original Ubuntu JUnit confirms
+each of 20 mutation-harness, 99 Router/ops and 152 parity/routing owning
+case identities, with zero failures/errors/skips.
+
+The two large mutation targets did **not** complete within the unchanged
+60-minute limit. GitHub records both as `cancelled`, with explicit
+maximum-execution-time annotations: control-plane reached 7,286/14,576,
+domain 9,385/37,970; neither produced an accepted mutation score.
+Workflow runner reached 73.0% and export manifests 63.4%, each above its
+unchanged 60% threshold. Zizmor and all security jobs succeeded.
+Immutable-source cache controls passed, but the forkserver performance
+attempt has not established completion of the large targets. Further
+performance diagnosis must retain all tests, targets, thresholds and limits.
+
+Native Proof remains **STOP**, exit 2, `claim_qualified=false`, with
+`failed_receipt:debt` and `failed_receipt:governance`, and no degradations.
+The [positive PR Gate](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/41266744148)
+also remains **FAIL**: physical parity and shadow routing passed, while
+the naming architecture failure prevented subsequent mandatory Class
+steps from running. Their `skipped` outcomes are not PASS. Docs, Docker
+and Fast governance passed. Seven naming entries expired on 2026-10-31;
+their owner proposal remains unapproved and unapplied. All seven review
+threads are resolved after source-bound verification of the final Router
+provenance finding; that resolves the finding, not overall admission.
+Final CI, isolated-negative propagation, native ADMIT, independent final
+acceptance, merge and issue closure remain outstanding.
