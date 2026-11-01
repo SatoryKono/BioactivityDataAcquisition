@@ -113,6 +113,9 @@ EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "mkdocs.yml": ("tests/architecture/test_documentation_sync.py",),
+    "docs/reports/evidence/project-test-health/SUMMARY.md": (
+        "tests/architecture/test_governance_freshness_protocol.py",
+    ),
     "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md": (
         "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
     ),

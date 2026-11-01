@@ -168,38 +168,78 @@ def _convert_special_types(value: object) -> object | None:
     return None
 
 
+def _is_dataclass_instance(value: object) -> bool:
+    """Return whether a value is a dataclass instance rather than its type."""
+    return is_dataclass(value) and not isinstance(value, type)
+
+
+def _convert_dataclass_or_mapping(value: object) -> object | None:
+    """Convert dataclasses and mappings, leaving other values untouched."""
+    if _is_dataclass_instance(value):
+        return _convert_dataclass(value)
+    if isinstance(value, Mapping):
+        return _convert_mapping(value)
+    return None
+
+
 def _convert_complex_types(value: object) -> object | None:
     """Convert complex types (dataclass, mapping, sequence) if applicable."""
-    if is_dataclass(value) and not isinstance(value, type):
-        return _convert_dataclass(value)
-    if type(value) is dict or isinstance(value, Mapping):
-        return _convert_mapping(value)
+    converted = _convert_dataclass_or_mapping(value)
+    if converted is not None:
+        return converted
     if _should_convert_as_sequence(value):
         return _convert_sequence(value)
     return None
 
 
-def to_jsonable(value: object) -> object:
-    """Convert nested dataclasses, datetimes, and mappings into JSON-safe values."""
+def _is_json_scalar(value: object) -> bool:
+    """Return whether a value is already a JSON scalar supported by this helper."""
     vt = type(value)
-    if vt in (str, int, float, bool) or value is None:
-        return value
-    if vt is dict:
-        dict_val = cast(dict[str, object], value)
-        return {str(k): to_jsonable(v) for k, v in sorted(dict_val.items())}
-    if vt is list:
-        list_val = cast(list[object], value)
-        return [to_jsonable(item) for item in list_val]
+    return vt in (str, int, float, bool) or value is None
 
+
+def _convert_builtin_dict(value: object) -> dict[str, object]:
+    """Recursively normalize an exact built-in dictionary."""
+    dict_value = cast(dict[str, object], value)
+    return {str(key): to_jsonable(item) for key, item in sorted(dict_value.items())}
+
+
+def _convert_builtin_list(value: object) -> list[object]:
+    """Recursively normalize an exact built-in list."""
+    list_value = cast(list[object], value)
+    return [to_jsonable(item) for item in list_value]
+
+
+def _convert_json_builtin(value: object) -> tuple[bool, object]:
+    """Convert built-in containers while keeping their low-overhead fast path."""
+    if _is_json_scalar(value):
+        return True, value
+    vt = type(value)
+    if vt is dict:
+        return True, _convert_builtin_dict(value)
+    if vt is list:
+        return True, _convert_builtin_list(value)
+    return False, value
+
+
+def _convert_non_builtin(value: object) -> object:
+    """Convert non-built-in supported values, preserving unknown objects."""
     converted = _convert_special_types(value)
     if converted is not None:
         return converted
-
     converted = _convert_complex_types(value)
     if converted is not None:
         return converted
-
     return value
+
+
+def to_jsonable(value: object) -> object:
+    """Convert nested dataclasses, datetimes, and mappings into JSON-safe values."""
+    converted, result = _convert_json_builtin(value)
+    if converted:
+        return result
+
+    return _convert_non_builtin(value)
 
 
 def stable_json_hash(
