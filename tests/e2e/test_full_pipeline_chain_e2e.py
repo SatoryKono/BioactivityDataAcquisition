@@ -79,6 +79,7 @@ def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
         "test_run_normal_a_b_a",
         "test_run_cancellation_and_restart",
         "test_run_error_and_restart",
+        "test_run_config_error_and_restart",
     ]:
         return "test_all_chembl_pipelines_chain"
     return request.node.name

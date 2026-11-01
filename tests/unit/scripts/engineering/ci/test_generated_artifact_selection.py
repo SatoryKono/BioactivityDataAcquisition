@@ -813,9 +813,7 @@ def test_source_checks_and_coverage_selection_survive_daily_partition():
     docs_lane = pr["jobs"]["docs-lane"]
     needs = docs_lane["needs"]
     assert ([needs] if isinstance(needs, str) else needs) == ["classify-changes"]
-    assert docs_lane["if"] == (
-        "needs['classify-changes'].outputs['docs-governance'] == 'required'"
-    )
+    assert "if" not in docs_lane
     assert re.fullmatch(
         r"SatoryKono/BioactivityDataAcquisition/\.github/workflows/docs\.yml@[0-9a-f]{40}",
         docs_lane["uses"],
