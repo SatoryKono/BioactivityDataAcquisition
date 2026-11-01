@@ -59,6 +59,10 @@ def test_full_suite_affected_pass_has_bounded_workload_budget() -> None:
     assert 'if [[ "${target%/}" == "tests" ]]; then' in script
     assert 'if [[ "$full_suite" == "true" ]]; then' in script
     assert "parallel_timeout=2400" in script
+    assert script.index("parallel_timeout=2400") < script.index("subtract-affected")
+    assert script.index("subtract-affected") < script.index(
+        "mapfile -t targets < reports/quality/affected-nodes-deduplicated.txt"
+    )
     assert '--parallel-timeout-seconds "$parallel_timeout"' in script
     assert '--target "${targets[@]}"' in script
     assert '--parallel-marker "not serial"' in script
