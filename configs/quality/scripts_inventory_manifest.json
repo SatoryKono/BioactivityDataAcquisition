@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-01T22:14:35.951900+00:00",
+  "generated_at": "2026-11-01T22:19:38.824401+00:00",
   "summary": {
     "total_scripts": 705,
     "status_counts": {
@@ -8288,7 +8288,7 @@
         },
         {
           "path": "tests/architecture/test_governance_freshness_protocol.py",
-          "line": 174,
+          "line": 193,
           "source_group": "tests",
           "text": "text = _read(\"scripts/docs/checks/check_drift.py\")"
         },
