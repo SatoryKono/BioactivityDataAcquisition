@@ -8,18 +8,12 @@ Extracted from the PubMed adapter module for better separation of concerns.
 
 from __future__ import annotations
 
-from typing import cast
+import xml.etree.ElementTree as ET  # nosec B405 - element types and serialization only
+
+from defusedxml import ElementTree as SafeET
+from defusedxml.common import DefusedXmlException
 
 __all__ = ["PubMedXmlProcessor"]
-
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    import xml.etree.ElementTree as ET  # nosec B405 - type annotations only, see suppression registry
-else:
-    import defusedxml.ElementTree as ET
-
 
 
 from bioetl.domain.types import JsonDict
@@ -39,16 +33,14 @@ class PubMedXmlProcessor:
             Parsed XML root element, or None if parsing fails
         """
         try:
-            parsed_root: ET.Element = ET.fromstring(
-                xml_text, forbid_dtd=True, forbid_entities=True, forbid_external=True
+            parsed_root: ET.Element = SafeET.fromstring(
+                xml_text,
+                forbid_dtd=False,
+                forbid_entities=True,
+                forbid_external=True,
             )  # type: ignore[call-arg]
             return parsed_root
-        except (
-            ET.ParseError,
-            cast(
-                type[BaseException], getattr(ET, "EntitiesForbidden", Exception)
-            ),
-        ):
+        except (ET.ParseError, DefusedXmlException):
             return None
 
     @staticmethod
