@@ -16,7 +16,7 @@ __all__ = ["PubMedXmlProcessor"]
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import xml.etree.ElementTree as ET  # nosec B405 - type annotations only, no runtime parsing
+    import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry - type annotations only, no runtime parsing
 else:
     import defusedxml.ElementTree as ET
 

@@ -6,7 +6,7 @@ import re
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import xml.etree.ElementTree as ET  # nosec B405
+    import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry
 else:
     from defusedxml import ElementTree as ET
 from collections.abc import Callable, Sequence

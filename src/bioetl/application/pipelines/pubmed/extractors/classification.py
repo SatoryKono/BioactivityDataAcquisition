@@ -11,7 +11,7 @@ __all__ = ["ClassificationExtractor", "NormalizedClassification", "RawClassifica
 from typing import TYPE_CHECKING, TypedDict, cast
 
 if TYPE_CHECKING:
-    from xml.etree.ElementTree import Element  # nosec B405
+    from xml.etree.ElementTree import Element  # nosec B405 - see suppression registry
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
 from bioetl.domain.types import JsonDict

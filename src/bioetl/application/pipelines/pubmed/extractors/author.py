@@ -21,7 +21,7 @@ import re
 from typing import TYPE_CHECKING, TypedDict, cast, override
 
 if TYPE_CHECKING:
-    from xml.etree.ElementTree import Element  # nosec B405
+    from xml.etree.ElementTree import Element  # nosec B405 - see suppression registry
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
 from bioetl.application.pipelines.pubmed.xml_parser import get_text
