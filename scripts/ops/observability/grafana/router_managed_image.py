@@ -22,20 +22,8 @@ CONFIG_ID = re.compile(r"sha256:[0-9a-f]{64}")
 
 
 def docker_path():
-    if sys.platform == "win32":
-        return "C:/Program Files/Docker/Docker/resources/bin/docker.exe"
-    for candidate in (Path("/usr/bin/docker"), Path("/usr/local/bin/docker")):
-        if candidate.is_file():
-            resolved = candidate.resolve()
-            for path in (resolved, *resolved.parents):
-                info = path.stat()
-                if info.st_uid != 0 or info.st_mode & 0o022:
-                    raise ValueError(
-                        "Docker executable path must be root-owned and protected"
-                    )
-            return str(resolved)
-    raise ValueError("Docker is absent from the fixed trusted locations")
-
+    """Use the shared trusted Docker installation resolver."""
+    return module.docker_path()
 
 def immutable_reference(image):
     if not (IMAGE.fullmatch(image) or CONFIG_ID.fullmatch(image)):
