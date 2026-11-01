@@ -339,6 +339,7 @@ def test_shadow_compare_routes_gold_dq_and_deleted_evidence() -> None:
         "tests/architecture/test_documentation_cleanup_inventory.py"
         in report["selected"]
     )
+    assert "tests/architecture/test_check_doc_links_guardrails.py" in report["selected"]
 
 
 @pytest.mark.parametrize(

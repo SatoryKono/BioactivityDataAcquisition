@@ -532,8 +532,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/scripts/ci/test_test_telemetry_provenance.py",
         "tests/architecture/test_external_resource_inventory_catalog.py",
     ),
-    "reports/12592_report.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
-    "reports/12592_scoped_patch.diff": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/12592_report.md": (
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        CHECK_DOC_LINKS_GUARDRAILS_TEST,
+    ),
+    "reports/12592_scoped_patch.diff": (
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        CHECK_DOC_LINKS_GUARDRAILS_TEST,
+    ),
     "configs/quality/scripts_inventory_manifest.json": (
         SCRIPTS_INVENTORY_MANIFEST_TEST,
     ),
@@ -600,14 +606,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "docs/filters/inventory-baseline.md",
         ),
         ("tests/architecture/test_silver_filter_boundary_inventory.py",),
-    ),
-    "reports/12592_report.md": (
-        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
-        CHECK_DOC_LINKS_GUARDRAILS_TEST,
-    ),
-    "reports/12592_scoped_patch.diff": (
-        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
-        CHECK_DOC_LINKS_GUARDRAILS_TEST,
     ),
 }
 
