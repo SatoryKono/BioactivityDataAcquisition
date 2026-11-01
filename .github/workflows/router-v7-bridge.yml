@@ -81,14 +81,14 @@ jobs:
         env:
           BIOETL_PLUGIN: ${{ matrix.plugin }}
         run: |
-          docker run --rm \\
-            --user "$(id -u):$(id -g)" \\
-            --mount "type=bind,source=${GITHUB_WORKSPACE},target=/work" \\
-            --workdir "/work/grafana/plugins/${BIOETL_PLUGIN}" \\
-            --env NODE_ENV=production \\
-            --env NO_SOURCEMAP=0 \\
-            --env GOMAXPROCS=2 \\
-            node@sha256:e7add2a490bb17d97b485b8641bd88455fff7839ade0f5eba493c3508124d413 \\
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            --mount "type=bind,source=${GITHUB_WORKSPACE},target=/work" \
+            --workdir "/work/grafana/plugins/${BIOETL_PLUGIN}" \
+            --env NODE_ENV=production \
+            --env NO_SOURCEMAP=0 \
+            --env GOMAXPROCS=2 \
+            node@sha256:e7add2a490bb17d97b485b8641bd88455fff7839ade0f5eba493c3508124d413 \
             npm run build
       - name: Verify built bundle against shipped host manifest
         env:
