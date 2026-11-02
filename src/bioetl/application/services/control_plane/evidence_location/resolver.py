@@ -26,9 +26,7 @@ from bioetl.domain.control_plane.run_evidence_location import (
 )
 from bioetl.domain.control_plane.run_manifest import RunManifest
 from bioetl.domain.control_plane.workflow_manifest import WorkflowManifest
-from bioetl.domain.ports.control_plane.run_evidence_location import (
-    RunEvidenceLocationReadPort,
-)
+from bioetl.domain.ports import RunEvidenceLocationReadPort
 from bioetl.domain.types import RunID
 
 __all__ = [
