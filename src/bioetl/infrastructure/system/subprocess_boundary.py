@@ -15,12 +15,25 @@ import os
 import shutil
 import signal
 import subprocess
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from contextlib import suppress
-from typing import IO, Any
+from typing import IO, TypedDict, Unpack, cast
 
 _MAX_OUTPUT_BYTES = 10 * 1024 * 1024  # 10MB
 _CLEANUP_TIMEOUT_SECONDS = 0.5
+
+
+class _PopenPlatformOptions(TypedDict, total=False):
+    creationflags: int
+    start_new_session: bool
+
+
+class _PopenReaderOptions(TypedDict, total=False):
+    bufsize: int
+    env: Mapping[str, str] | None
+    shell: bool
+    stderr: int | IO[bytes] | None
+    stdout: int | IO[bytes] | None
 
 
 def _filter_env_secrets(env: Mapping[str, str] | None) -> dict[str, str] | None:
@@ -33,13 +46,21 @@ def _filter_env_secrets(env: Mapping[str, str] | None) -> dict[str, str] | None:
     return filtered_env
 
 
-def _terminate_process_tree(proc: subprocess.Popen[Any]) -> bool:
+def _terminate_process_tree(
+    proc: subprocess.Popen[bytes] | subprocess.Popen[str],
+) -> bool:
     """Terminate the command and its descendants where the OS supports groups."""
     tree_terminated = False
     try:
         if os.name == "posix":
-            os.killpg(proc.pid, signal.SIGKILL)
-            tree_terminated = True
+            kill_process_group = cast(
+                Callable[[int, int], None] | None,
+                getattr(os, "killpg", None),
+            )
+            sigkill = getattr(signal, "SIGKILL", None)
+            if kill_process_group is not None and isinstance(sigkill, int):
+                kill_process_group(proc.pid, sigkill)
+                tree_terminated = True
         elif os.name == "nt":
             taskkill = shutil.which("taskkill")
             if taskkill is not None:
@@ -66,7 +87,7 @@ def _terminate_process_tree(proc: subprocess.Popen[Any]) -> bool:
     return tree_terminated
 
 
-def _cleanup_process(proc: subprocess.Popen[Any]) -> None:
+def _cleanup_process(proc: subprocess.Popen[bytes] | subprocess.Popen[str]) -> None:
     """Stop a failed command and close pipes without waiting for inherited EOF."""
     tree_terminated = _terminate_process_tree(proc)
     # A descendant may have inherited stdout/stderr even after the direct
@@ -94,30 +115,33 @@ def run_protected_command(
     text: bool = False,
     encoding: str | None = None,
     errors: str | None = None,
-) -> subprocess.CompletedProcess[Any]:
+) -> subprocess.CompletedProcess[bytes | str]:
     """Run a subprocess with strict security boundaries (SEC-001)."""
     safe_env = _filter_env_secrets(env)
 
     # Run the process
-    popen_options: dict[str, Any] = {}
+    popen_options: _PopenPlatformOptions = {}
     if os.name == "posix":
         popen_options["start_new_session"] = True
     elif os.name == "nt":
         popen_options["creationflags"] = getattr(
             subprocess, "CREATE_NEW_PROCESS_GROUP", 0
         )
-    proc = subprocess.Popen(
-        list(command),
-        cwd=cwd,
-        env=safe_env,
-        shell=False,
-        stdout=subprocess.PIPE if capture_output else None,
-        stderr=subprocess.PIPE if capture_output else None,
-        stdin=stdin,
-        text=text,
-        encoding=encoding,
-        errors=errors,
-        **popen_options,
+    proc = cast(
+        subprocess.Popen[bytes] | subprocess.Popen[str],
+        subprocess.Popen(
+            list(command),
+            cwd=cwd,
+            env=safe_env,
+            shell=False,
+            stdout=subprocess.PIPE if capture_output else None,
+            stderr=subprocess.PIPE if capture_output else None,
+            stdin=stdin,
+            text=text,
+            encoding=encoding,
+            errors=errors,
+            **popen_options,
+        ),
     )
 
     try:
@@ -144,7 +168,7 @@ def run_protected_command(
 
 def run_protected_subprocess_popen(
     command: Sequence[str],
-    **kwargs: Any,
+    **kwargs: Unpack[_PopenReaderOptions],
 ) -> subprocess.Popen[bytes]:
     """Start a subprocess with strict security boundaries (SEC-001)."""
     kwargs["shell"] = False
