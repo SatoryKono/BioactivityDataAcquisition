@@ -1,116 +1,150 @@
 {
   "schema_version": 1,
-  "catalog_ref": "2e5f70acf3df9b4b0e713098be5aeee2533618f8",
-  "source_ref": "c9ab4044ef7a6333431dde80ee3b844d3025a86d",
+  "catalog_ref": "70f9a4c383951c7069746bcce38f1f8ba5a5f16c",
+  "source_ref": "4748265cf87886841b7afa3e72b6842981b7b3d4",
   "source_reviews": {
-    "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/core/_base_transformer_execution_support.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/core/_base_transformer_structural_support.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/normalization/_chembl_units.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/pipelines/pubmed/_block_definitions_analytics.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/pipelines/pubmed/_block_definitions_base.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/pipelines/pubmed/_block_definitions_edition.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/pipelines/pubmed/_block_definitions_identifiers.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/pipelines/pubmed/_block_helpers.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/pipelines/pubmed/extractors/abstract.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/pipelines/pubmed/extractors/author.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/pipelines/pubmed/extractors/base.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/pipelines/pubmed/extractors/classification.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/pipelines/pubmed/extractors/date.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/pipelines/pubmed/extractors/identifier.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/pipelines/pubmed/transformer.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/pipelines/pubmed/xml_parser.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/serialization/snapshot_serialization.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/services/control_plane/effective_config/config_source_hashing.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/services/control_plane/manifest/diagnostics/selected_run_replay_readiness.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/services/quality/config_dq_service.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/application/services/quality/exceptions_context.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/composition/composite_catalog.py": "Reviewed public composition seam for selected-run contract fields. Retains the existing entities_root.glob pipeline-name census already inventoried for composite_catalog; no new lifecycle acquisition is introduced.",
-    "src/bioetl/composition/factories/pipeline/factory_method_helpers.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/composition/runtime_builders/_effective_config_source_refs_support.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/composition/selected_run_contract_exclusions.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/composition/snapshot_serialization.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/domain/control_plane/config_source_hashing.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/domain/control_plane/contract_registry_helpers.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/domain/control_plane/effective_config_artifact.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/domain/control_plane/selected_run_contract_exclusions.py": "Reviewed in-memory funnel stage-map / exclusion-rate helpers. Pure mapping over already-loaded funnel payloads; no external acquisition or lifecycle behavior is introduced.",
-    "src/bioetl/domain/exceptions/__init__.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/domain/exceptions/_redaction.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/domain/exceptions/base.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/domain/lineage/_shared.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/domain/normalization/_chembl_units.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/domain/normalization/identifiers.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/domain/normalization/json.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/domain/schemas/chembl/publication.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/domain/serialization/__init__.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/domain/serialization/snapshot_serialization.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/infrastructure/adapters/common/_api_request_sanitize.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/infrastructure/adapters/pubmed/xml_processor.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/infrastructure/control_plane/file_contract_registry_store.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/infrastructure/observability/observability_backend_process.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/infrastructure/provenance/code_revision.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/infrastructure/storage/silver/support.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_failure_details.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/interfaces/cli/commands/domains/shared/_execution_failure_support.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/interfaces/http/_control_plane_selector_payloads.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/interfaces/http/_control_plane_selector_records.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/interfaces/http/_health_server_control_plane_scope.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/interfaces/http/_health_server_routing_support.py": "Reviewed selector-context A2 wiring. Retains existing asyncio.to_thread / create_task forensic boundaries already inventoried for health routing.",
-    "src/bioetl/interfaces/http/_report_selector_options.py": "Reviewed report-selector identity narrowing. Retains existing ThreadPoolExecutor / store.iterdir report catalog boundaries already inventoried.",
-    "src/bioetl/interfaces/http/_selected_run_a2_resolve.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/interfaces/http/_selected_run_contract_exclusions.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/interfaces/http/_selected_run_presentation.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/interfaces/http/_selected_run_unavailable.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/interfaces/http/control_plane_selector_context.py": "Reviewed source delta for ops-http A2 / Class-lane follow-up on the published COMP-004 ancestor catalog. Acquisition census confirms no new external resource site beyond already inventoried control-plane ports and forensic asyncio / thread-pool boundaries; no resource creation/cleanup lifecycle behavior changed.",
-    "src/bioetl/interfaces/http/selected_run_status.py": "Reviewed selected-run-status A2 / contract projection. Retains existing asyncio.to_thread forensic boundary already inventoried for this endpoint."
+    "src/bioetl/domain/_observability_contract_core.py": "Reviewed source delta from main merge (#12654/#12677) and Sonar S1192 / selector-context limiter wrap on published COMP-004 catalog 70f9a4c383. No new external acquisition or lifecycle behavior.",
+    "src/bioetl/domain/schemas/chembl/publication.py": "Reviewed source delta from main merge (#12654/#12677) and Sonar S1192 / selector-context limiter wrap on published COMP-004 catalog 70f9a4c383. No new external acquisition or lifecycle behavior.",
+    "src/bioetl/infrastructure/validation/contract_validator.py": "Reviewed source delta from main merge (#12654/#12677) and Sonar S1192 / selector-context limiter wrap on published COMP-004 catalog 70f9a4c383. No new external acquisition or lifecycle behavior.",
+    "src/bioetl/interfaces/http/_health_server_routing_support.py": "Reviewed selector-context forensic limiter wrap into _selector_context_bounded_payload and Sonar S1192 endpoint constant. Reuses existing asyncio.to_thread / create_task / _selector_endpoint_limiter boundaries already inventoried; no new external acquisition.",
+    "src/bioetl/interfaces/http/_report_selector_options.py": "Reviewed explicit UUID report-identity keep when started_at is missing; A2 candidate catalog still gates on timestamps. Retains ThreadPoolExecutor catalog boundary already inventoried; no new external acquisition."
   },
-  "expression_updates": {
-    "src/bioetl/interfaces/http/_health_server_routing_support.py": {
-      "asyncio.to_thread(build_selector_context_payload, manifests=manifests, ledger_port=host._run_ledger_port, workflow_manifests=workflow_manifests, selected_workflows=host._read_scope_csv_param(query, 'workflow'), selected_pipelines=host._read_scope_csv_param(query, 'pipeline'), selected_run_types=host._read_scope_csv_param(query, 'run_type'), selected_run_statuses=host._read_scope_csv_param(query, 'run_status'), selected_run_id=read_selected_run_id(host, query))": "asyncio.to_thread(_selector_context_payload_with_a2, host, manifests=manifests, workflow_manifests=workflow_manifests, query=query)"
-    },
-    "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py": {
-      "report_observability_metric_inventory.collect_metric_inventory(repo_root)": "metric_inventory.collect_metric_inventory(repo_root)",
-      "report_observability_metric_inventory.validate_metric_inventory(report, allowlist)": "metric_inventory.validate_metric_inventory(report, allowlist)"
-    }
-  },
-  "resource_updates": {},
-  "additional_bindings": {},
-  "new_resources": [],
-  "new_exclusions": [],
+  "expression_updates": {},
   "segment_updates": {},
   "reference_moves": [
     {
-      "identity": "health._selected_run_artifact_probes.file",
+      "identity": "asyncio.default-executor",
       "fields": [
-        "production_binding"
+        "creation_sites"
       ],
       "from": {
-        "file": "src/bioetl/interfaces/http/selected_run_status.py",
-        "line": 372,
-        "source_segment": "result = load_selected_run_status("
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "line": 369,
+        "expression": "asyncio.to_thread(host._run_manifest_port.list_all)"
       },
       "to": {
-        "file": "src/bioetl/interfaces/http/selected_run_status.py",
-        "scope": "_load_selected_with_live_fallback",
-        "segment": "result = load_selected_run_status("
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "scope": "_selector_context_bounded_payload",
+        "call": "asyncio.to_thread",
+        "expression": "asyncio.to_thread(host._run_manifest_port.list_all)"
       }
     },
     {
-      "identity": "health._selected_run_report_assessment.file",
+      "identity": "asyncio.default-executor",
+      "fields": [
+        "creation_sites"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "line": 371,
+        "expression": "asyncio.to_thread(_selector_context_payload_with_a2, host, manifests=manifests, workflow_manifests=workflow_manifests, query=query)"
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "scope": "_selector_context_bounded_payload",
+        "call": "asyncio.to_thread",
+        "expression": "asyncio.to_thread(_selector_context_payload_with_a2, host, manifests=manifests, workflow_manifests=workflow_manifests, query=query)"
+      }
+    },
+    {
+      "identity": "asyncio.default-executor",
       "fields": [
         "production_binding"
       ],
       "from": {
-        "file": "src/bioetl/interfaces/http/selected_run_status.py",
-        "line": 372,
-        "source_segment": "result = load_selected_run_status("
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "line": 369,
+        "source_segment": "manifests = await asyncio.to_thread(host._run_manifest_port.list_all)"
       },
       "to": {
-        "file": "src/bioetl/interfaces/http/selected_run_status.py",
-        "scope": "_load_selected_with_live_fallback",
-        "segment": "result = load_selected_run_status("
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "scope": "_selector_context_bounded_payload",
+        "segment": "manifests = await asyncio.to_thread(host._run_manifest_port.list_all)"
+      }
+    },
+    {
+      "identity": "asyncio.default-executor",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "line": 371,
+        "source_segment": "payload = await asyncio.to_thread("
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "scope": "_selector_context_bounded_payload",
+        "segment": "return await asyncio.to_thread("
+      }
+    },
+    {
+      "identity": "infrastructure.export.csv_exporter.directory-enumeration",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "line": 369,
+        "source_segment": "manifests = await asyncio.to_thread(host._run_manifest_port.list_all)"
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "scope": "_selector_context_bounded_payload",
+        "segment": "manifests = await asyncio.to_thread(host._run_manifest_port.list_all)"
+      }
+    },
+    {
+      "identity": "infrastructure.export.csv_exporter.directory-enumeration",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "line": 371,
+        "source_segment": "payload = await asyncio.to_thread("
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "scope": "_selector_context_bounded_payload",
+        "segment": "return await asyncio.to_thread("
+      }
+    },
+    {
+      "identity": "infrastructure.storage.bronze.read_cleanup_mixin.directory-enumeration",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "line": 369,
+        "source_segment": "manifests = await asyncio.to_thread(host._run_manifest_port.list_all)"
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "scope": "_selector_context_bounded_payload",
+        "segment": "manifests = await asyncio.to_thread(host._run_manifest_port.list_all)"
+      }
+    },
+    {
+      "identity": "infrastructure.storage.bronze.read_cleanup_mixin.directory-enumeration",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "line": 371,
+        "source_segment": "payload = await asyncio.to_thread("
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+        "scope": "_selector_context_bounded_payload",
+        "segment": "return await asyncio.to_thread("
       }
     }
-  ]
+  ],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
 }
