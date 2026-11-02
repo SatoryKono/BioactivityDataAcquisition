@@ -33,6 +33,9 @@ from __future__ import annotations
 
 import os
 import signal
+import subprocess
+import sys
+import time
 from io import BytesIO
 from pathlib import Path
 from types import SimpleNamespace
@@ -42,9 +45,11 @@ from urllib.error import HTTPError
 from urllib.request import Request
 
 import bioetl.infrastructure.observability.observability_backend_probes as probe_subject
+import bioetl.composition.observability_backend as composition_subject
 import bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details as failure_details_subject
 import bioetl.infrastructure.observability.observability_backend_process as process_subject
 import bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime as runtime_subject
+import bioetl.infrastructure.system.subprocess_boundary as subprocess_boundary_subject
 import pytest
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     ObservabilityBackendEnsureResult,
@@ -65,6 +70,98 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_protected_command_rejects_output_over_limit(monkeypatch) -> None:
+    class FakeProcess:
+        args = ["fixture"]
+        returncode = 0
+        pid = 123
+        stdin = stdout = stderr = None
+
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def communicate(self, timeout=None):
+            del timeout
+            return b"x" * (subprocess_boundary_subject._MAX_OUTPUT_BYTES + 1), b""
+
+        def poll(self):
+            return self.returncode
+
+    monkeypatch.setattr(subprocess_boundary_subject.subprocess, "Popen", FakeProcess)
+
+    with pytest.raises(subprocess.SubprocessError, match="output exceeds"):
+        subprocess_boundary_subject.run_protected_command(["fixture"])
+
+
+def test_protected_command_cleans_up_when_interrupted(monkeypatch) -> None:
+    class FakeProcess:
+        args = ["fixture"]
+        returncode = None
+        pid = 123
+        stdin = stdout = stderr = None
+        calls = 0
+        killed = False
+        waited = False
+
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def communicate(self, timeout=None):
+            del timeout
+            self.calls += 1
+            if self.calls == 1:
+                raise KeyboardInterrupt
+            self.returncode = -9
+            return b"", b""
+
+        def poll(self):
+            return self.returncode
+
+        def wait(self, timeout=None):
+            del timeout
+            self.waited = True
+            self.returncode = -9
+            return self.returncode
+
+    process = FakeProcess()
+    monkeypatch.setattr(
+        subprocess_boundary_subject.subprocess,
+        "Popen",
+        lambda *_args, **_kwargs: process,
+    )
+    monkeypatch.setattr(
+        subprocess_boundary_subject,
+        "_terminate_process_tree",
+        lambda proc: setattr(proc, "killed", True),
+    )
+
+    with pytest.raises(KeyboardInterrupt):
+        subprocess_boundary_subject.run_protected_command(["fixture"])
+
+    assert process.killed is True
+    assert process.calls == 1
+    assert process.waited is True
+
+
+@pytest.mark.skipif(os.name != "posix", reason="process groups are POSIX-specific")
+def test_protected_command_timeout_kills_pipe_holding_descendant() -> None:
+    command = [
+        sys.executable,
+        "-c",
+        (
+            "import subprocess, sys, time; "
+            "subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(5)']); "
+            "time.sleep(5)"
+        ),
+    ]
+    started = time.monotonic()
+
+    with pytest.raises(subprocess.TimeoutExpired):
+        subprocess_boundary_subject.run_protected_command(command, timeout=0.1)
+
+    assert time.monotonic() - started < 1.5
 
 
 @pytest.mark.parametrize("scheme", ["http", "https"])
@@ -764,7 +861,7 @@ def test_drop_listening_backend_on_port_terminates_all_windows_listeners(
         "_find_listening_backend_pids_by_port",
         fake_find,
     )
-    monkeypatch.setattr(process_subject.subprocess, "run", fake_run)
+    monkeypatch.setattr(process_subject, "run_protected_command", fake_run)
 
     assert process_subject.drop_listening_backend_on_port(
         8081,
@@ -842,7 +939,7 @@ def test_listener_and_taskkill_timeouts_are_nonfatal(
     def _timeout(command: list[str], **_kwargs: object) -> object:
         raise process_subject.subprocess.TimeoutExpired(command, timeout=5.0)
 
-    monkeypatch.setattr(process_subject.subprocess, "run", _timeout)
+    monkeypatch.setattr(process_subject, "run_protected_command", _timeout)
     monkeypatch.setattr(
         process_subject,
         "_resolve_system_executable",
@@ -1006,13 +1103,13 @@ _DOCKER_READINESS_PROBE = runtime_subject.docker_engine_not_ready_message
 def test_docker_readiness_uses_fixed_argv_without_shell(monkeypatch):
     executable = "C:/Program Files/Docker/docker.exe"
     calls = []
-    monkeypatch.setattr(runtime_subject.shutil, "which", lambda name: executable)
+    monkeypatch.setattr(composition_subject.shutil, "which", lambda name: executable)
 
     def run(command, **kwargs):
         calls.append((command, kwargs))
         return SimpleNamespace(returncode=0)
 
-    monkeypatch.setattr(runtime_subject.subprocess, "run", run)
+    monkeypatch.setattr(composition_subject, "run_protected_command", run)
     assert _DOCKER_READINESS_PROBE() is None
     assert calls == [
         (
@@ -1021,30 +1118,31 @@ def test_docker_readiness_uses_fixed_argv_without_shell(monkeypatch):
                 "capture_output": True,
                 "timeout": 8,
                 "check": False,
-                "shell": False,
             },
         )
     ]
 
 
 def test_docker_readiness_skips_absent_cli(monkeypatch):
-    monkeypatch.setattr(runtime_subject.shutil, "which", lambda name: None)
+    monkeypatch.setattr(composition_subject.shutil, "which", lambda name: None)
     run = MagicMock()
-    monkeypatch.setattr(runtime_subject.subprocess, "run", run)
+    monkeypatch.setattr(composition_subject, "run_protected_command", run)
     assert _DOCKER_READINESS_PROBE() is None
     run.assert_not_called()
 
 
 @pytest.mark.parametrize("failure", ["exit", "oserror", "timeout"])
 def test_docker_readiness_contains_probe_failures(monkeypatch, failure):
-    monkeypatch.setattr(runtime_subject.shutil, "which", lambda name: "/usr/bin/docker")
+    monkeypatch.setattr(
+        composition_subject.shutil, "which", lambda name: "/usr/bin/docker"
+    )
 
     def run(command, **kwargs):
         if failure == "oserror":
             raise OSError("unavailable")
         if failure == "timeout":
-            raise runtime_subject.subprocess.TimeoutExpired(command, kwargs["timeout"])
+            raise subprocess.TimeoutExpired(command, kwargs["timeout"])
         return SimpleNamespace(returncode=1)
 
-    monkeypatch.setattr(runtime_subject.subprocess, "run", run)
+    monkeypatch.setattr(composition_subject, "run_protected_command", run)
     assert "Docker engine is not" in _DOCKER_READINESS_PROBE()

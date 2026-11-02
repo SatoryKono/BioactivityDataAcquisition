@@ -90,7 +90,7 @@ def _posix_ss_listener_process_field(line: str, *, suffix: str) -> str | None:
 
 def _run_listener_probe(command: list[str]) -> str:
     try:
-        result = run_protected_command(  # nosec B603 - see suppression registry
+        result = run_protected_command(
             command,
             check=False,
             capture_output=True,
@@ -169,7 +169,7 @@ def _run_taskkill(pid: int) -> subprocess.CompletedProcess[str]:
         return subprocess.CompletedProcess(args=(), returncode=1)
     command = [taskkill, "/PID", str(pid), "/T", "/F"]
     try:
-        return run_protected_command(  # nosec B603 - see suppression registry
+        return run_protected_command(
             command,
             check=False,
             capture_output=True,
