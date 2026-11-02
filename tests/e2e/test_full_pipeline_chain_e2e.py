@@ -48,7 +48,6 @@ from tests.helpers.vcr_config import build_cassette_dir
 
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from .conftest import (
-    E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT,
     assert_silver_table_has_records,
     create_test_context,
     get_silver_records,
