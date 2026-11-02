@@ -1,17 +1,37 @@
 """URI parsing helpers for QUDT / legacy OpenPhacts unit identifiers.
 
-Thin wrappers over the domain host/path normalizer so application/tests keep a
-stable import path without duplicating URI authority parsing.
+Application-owned copy keeps ChEMBL URI matrix-parameter semantics without a
+cross-owner import of the domain private normalizer module.
 """
 
 from __future__ import annotations
-
-from bioetl.domain.normalization._chembl_units import _uri_host_and_path
 
 __all__ = [
     "_legacy_qudt_identifier_from_uri",
     "_qudt_identifier_from_uri",
 ]
+
+
+def _uri_host_and_path(value: str) -> tuple[str, str] | None:
+    """Extract a simple HTTP(S) host and path without urllib edge cases."""
+    candidate = value.strip()
+    scheme, separator, remainder = candidate.partition("://")
+    if not separator or scheme.casefold() not in {"http", "https"}:
+        return None
+    # Strip query/fragment before authority/path split so `/` inside query
+    # cannot be treated as a path (e.g. `?ref=/vocab/unit/...`).
+    remainder = remainder.split("?", maxsplit=1)[0].split("#", maxsplit=1)[0]
+    authority, slash, suffix = remainder.partition("/")
+    authority = authority.rsplit("@", maxsplit=1)[-1].casefold()
+    host = authority.split(":", maxsplit=1)[0]
+    path = f"/{suffix}" if slash else ""
+    path_prefix, path_separator, last_segment = path.rpartition("/")
+    path = (
+        f"{path_prefix}/{last_segment.partition(';')[0]}"
+        if path_separator
+        else path.partition(";")[0]
+    )
+    return host, path
 
 
 def _qudt_identifier_from_uri(value: str) -> str | None:

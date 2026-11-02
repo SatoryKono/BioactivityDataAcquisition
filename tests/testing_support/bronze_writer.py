@@ -1897,7 +1897,7 @@ class TestBronzeWriterJsonValidation:
             original_error="Unterminated string",
         )
 
-        from bioetl.application.core.exceptions_context import get_exception_context
+        from bioetl.application.services.exceptions_context import get_exception_context
 
         context = get_exception_context(error)
         assert context["record_index"] == 10

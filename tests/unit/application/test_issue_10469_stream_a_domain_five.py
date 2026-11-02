@@ -10,7 +10,7 @@ import pytest
 
 import bioetl.domain.serialization as serialization
 from bioetl.domain.constants import META_FIELDS
-from bioetl.application.core.exceptions_context import _redact, redact_string
+from bioetl.application.services.exceptions_context import _redact, redact_string
 from bioetl.domain.filtering._filter_primitives import (
     check_required_fields,
     check_single_column,

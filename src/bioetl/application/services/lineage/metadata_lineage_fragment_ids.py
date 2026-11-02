@@ -6,11 +6,11 @@ import hashlib
 import json
 from datetime import datetime
 
-from bioetl.application.lineage.serialization import mapping_to_plain
 from bioetl.domain.lineage import (
     LineageEdge,
     LineageNodeRef,
     LineageNodeType,
+    mapping_to_plain,
 )
 
 

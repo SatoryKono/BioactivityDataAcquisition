@@ -67,7 +67,7 @@ from bioetl.domain.control_plane.effective_config_environment import (
     SEMANTIC_RUNTIME_ENV_DEPENDENCIES,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import RunnerInputs
-from bioetl.application.control_plane.config_source_hashing import (
+from bioetl.application.services.control_plane.config_source_hashing import (
     compute_canonical_yaml_sha256,
 )
 from bioetl.domain.context import PipelineRunContext

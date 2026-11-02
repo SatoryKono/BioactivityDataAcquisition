@@ -81,20 +81,28 @@ def _uri_host_and_path(value: str) -> tuple[str, str] | None:
     return host, path
 
 
+def _identifier_from_parsed_uri(hostname: str, path: str) -> str | None:
+    """Map a parsed HTTP host/path pair to a QUDT unit identifier."""
+    if hostname == "qudt.org" and path.startswith("/vocab/unit/"):
+        return path.rsplit("/", maxsplit=1)[-1]
+    if hostname == "www.openphacts.org" and path.casefold() == "/units/nanomolar":
+        return "NanoMOL-PER-L"
+    return None
+
+
+def _identifier_from_unit_token(value: str) -> str | None:
+    """Map a normalized activity-unit token to a QUDT unit identifier."""
+    normalized_unit = normalize_standard_unit(value)
+    if normalized_unit is None:
+        return None
+    return _QUDT_UNIT_IDENTIFIER_BY_UNIT.get(normalized_unit)
+
+
 def resolve_qudt_unit_identifier(value: str) -> str | None:
     """Resolve a canonical QUDT unit identifier from token or URI."""
     parsed = _uri_host_and_path(value)
     if parsed is not None:
-        hostname, path = parsed
-        if hostname == "qudt.org" and path.startswith("/vocab/unit/"):
-            return path.rsplit("/", maxsplit=1)[-1]
-        if hostname == "www.openphacts.org" and path.casefold() == "/units/nanomolar":
-            return "NanoMOL-PER-L"
-
-    normalized_unit = normalize_standard_unit(value)
-    if normalized_unit is not None:
-        mapped_identifier = _QUDT_UNIT_IDENTIFIER_BY_UNIT.get(normalized_unit)
-        if mapped_identifier is not None:
-            return mapped_identifier
-
-    return None
+        from_uri = _identifier_from_parsed_uri(*parsed)
+        if from_uri is not None:
+            return from_uri
+    return _identifier_from_unit_token(value)

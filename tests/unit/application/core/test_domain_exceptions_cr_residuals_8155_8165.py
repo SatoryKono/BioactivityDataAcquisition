@@ -17,7 +17,7 @@ from bioetl.domain.exceptions import (
     ValidationError,
     get_domain_exception_context,
 )
-from bioetl.application.core.exceptions_context import (
+from bioetl.application.services.exceptions_context import (
     _redact_sequence,
     get_structured_context,
 )

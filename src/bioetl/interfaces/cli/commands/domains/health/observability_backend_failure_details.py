@@ -9,7 +9,7 @@ from typing import Protocol, Self, cast
 from urllib.error import HTTPError, URLError
 from urllib.request import build_opener
 
-from bioetl.application.core.exceptions_context import redact_string
+from bioetl.application.services.exceptions_context import redact_string
 
 
 class _HttpProbeResponse(Protocol):

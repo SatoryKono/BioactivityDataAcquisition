@@ -7,6 +7,7 @@ from bioetl.domain.lineage.metadata_bundle import (
     MetadataLineageBundleResult,
     MetadataT,
 )
+from bioetl.domain.lineage._shared import mapping_to_plain
 from bioetl.domain.lineage.models import (
     DatasetRef,
     LineageEdge,
@@ -30,4 +31,5 @@ __all__ = [
     "MetadataT",
     "SchemaRef",
     "TransformRef",
+    "mapping_to_plain",
 ]

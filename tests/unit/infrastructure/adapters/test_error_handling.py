@@ -38,7 +38,7 @@ from unittest.mock import MagicMock
 import httpx
 import pytest
 
-from bioetl.application.core.exceptions_context import get_exception_context
+from bioetl.application.services.exceptions_context import get_exception_context
 from bioetl.domain.exceptions import (
     CriticalError,
     RateLimitExceededError,
