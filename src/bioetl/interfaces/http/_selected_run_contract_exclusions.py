@@ -97,7 +97,8 @@ def _limits_for_pipeline(
 ) -> tuple[float | None, float | None]:
     if not pipeline or pipeline in {".*", "-", "All", "$__all", "unknown"}:
         return None, None
-    limits = _pipeline_limits_map(str(resolve_configs_root(configs_root)))
+    root = resolve_configs_root(configs_root)
+    limits = _pipeline_limits_map(str(root), _configs_signature(root))
     pair = limits.get(pipeline)
     if pair is None:
         return None, None
@@ -105,8 +106,29 @@ def _limits_for_pipeline(
     return soft, hard
 
 
-@lru_cache(maxsize=4)
-def _pipeline_limits_map(configs_root_key: str) -> dict[str, tuple[float, float]]:
+def _configs_signature(root: Path) -> str:
+    """Invalidate limits cache when DQ-related YAML mtimes/sizes change."""
+    parts: list[str] = []
+    for relative in ("entities", "providers", "base"):
+        base = root / relative
+        if not base.is_dir():
+            continue
+        pattern = "*/*.yaml" if relative == "entities" else "*.yaml"
+        for path in sorted(base.glob(pattern)):
+            try:
+                stat = path.stat()
+            except OSError:
+                parts.append(f"{path.as_posix()}:missing")
+                continue
+            parts.append(f"{path.as_posix()}:{stat.st_mtime_ns}:{stat.st_size}")
+    return "|".join(parts)
+
+
+@lru_cache(maxsize=8)
+def _pipeline_limits_map(
+    configs_root_key: str, signature: str
+) -> dict[str, tuple[float, float]]:
+    del signature  # participates in the cache key only
     root = Path(configs_root_key)
     loader = DQConfigLoader(root)
     limits: dict[str, tuple[float, float]] = {}
@@ -114,59 +136,100 @@ def _pipeline_limits_map(configs_root_key: str) -> dict[str, tuple[float, float]
     if not entities_root.is_dir():
         return limits
     for path in sorted(entities_root.glob("*/*.yaml")):
-        try:
-            entity = yaml.safe_load(path.read_text(encoding="utf-8"))
-        except (OSError, UnicodeError, yaml.YAMLError):
+        pair = _limits_from_entity_path(loader, path)
+        if pair is None:
             continue
-        if not isinstance(entity, dict):
-            continue
-        pipeline_block = entity.get("pipeline")
-        if not isinstance(pipeline_block, dict):
-            continue
-        pipeline = pipeline_block.get("pipeline_name")
-        if not isinstance(pipeline, str) or not pipeline:
-            continue
-        try:
-            config = loader.load(path.parent.name, path.stem)
-        except (OSError, ValueError, TypeError, KeyError):
-            continue
-        soft = float(config.soft_fail_threshold)
-        hard = float(config.hard_fail_threshold)
-        if soft > hard:
-            soft, hard = hard, soft
+        pipeline, soft, hard = pair
         limits[pipeline] = (soft, hard)
     return limits
 
 
+def _limits_from_entity_path(
+    loader: DQConfigLoader, path: Path
+) -> tuple[str, float, float] | None:
+    try:
+        entity = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, yaml.YAMLError):
+        return None
+    if not isinstance(entity, dict):
+        return None
+    pipeline_block = entity.get("pipeline")
+    if not isinstance(pipeline_block, dict):
+        return None
+    pipeline = pipeline_block.get("pipeline_name")
+    if not isinstance(pipeline, str) or not pipeline:
+        return None
+    try:
+        config = loader.load(path.parent.name, path.stem)
+    except (OSError, ValueError, TypeError, KeyError):
+        return None
+    soft = float(config.soft_fail_threshold)
+    hard = float(config.hard_fail_threshold)
+    if soft > hard:
+        soft, hard = hard, soft
+    return pipeline, soft, hard
+
+
 def _exclusion_rate(funnel: object) -> float | None:
+    """Rate over bronze/silver/gold; extra stages (e.g. extract) are allowed."""
     stages = _stage_map(funnel)
-    if set(stages) != set(_STAGE_IDS) or len(stages) != 3:
+    ordered = _required_stages(stages)
+    if ordered is None:
         return None
-    ordered = [stages[stage_id] for stage_id in _STAGE_IDS]
-    if not all(_stage_fully_tracked(stage) for stage in ordered):
+    base = _non_negative_int(ordered[0].get("records_out"))
+    if base is None:
         return None
-    base = ordered[0].get("records_out")
-    if isinstance(base, bool) or not isinstance(base, int) or base < 0:
-        return None
-    excluded_total = 0
-    for stage in ordered:
-        removals = stage.get("removals")
-        if not isinstance(removals, Sequence) or isinstance(removals, (str, bytes)):
-            return None
-        for removal in removals:
-            if not isinstance(removal, Mapping):
-                return None
-            if removal.get("outcome") != _EXCLUDED:
-                continue
-            count = removal.get("count")
-            if isinstance(count, bool) or not isinstance(count, int) or count < 0:
-                return None
-            excluded_total += count
-    if excluded_total > base:
+    excluded_total = _excluded_total(ordered)
+    if excluded_total is None or excluded_total > base:
         return None
     if base == 0:
         return 0.0
     return excluded_total / base
+
+
+def _required_stages(
+    stages: dict[str, Mapping[str, Any]],
+) -> list[Mapping[str, Any]] | None:
+    """Return bronze/silver/gold only; ignore extract and other extras."""
+    if any(stage_id not in stages for stage_id in _STAGE_IDS):
+        return None
+    ordered = [stages[stage_id] for stage_id in _STAGE_IDS]
+    if not all(_stage_fully_tracked(stage) for stage in ordered):
+        return None
+    return ordered
+
+
+def _excluded_total(stages: Sequence[Mapping[str, Any]]) -> int | None:
+    total = 0
+    for stage in stages:
+        count = _stage_excluded_count(stage)
+        if count is None:
+            return None
+        total += count
+    return total
+
+
+def _stage_excluded_count(stage: Mapping[str, Any]) -> int | None:
+    removals = stage.get("removals")
+    if not isinstance(removals, Sequence) or isinstance(removals, (str, bytes)):
+        return None
+    total = 0
+    for removal in removals:
+        if not isinstance(removal, Mapping):
+            return None
+        if removal.get("outcome") != _EXCLUDED:
+            continue
+        count = _non_negative_int(removal.get("count"))
+        if count is None:
+            return None
+        total += count
+    return total
+
+
+def _non_negative_int(value: object) -> int | None:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        return None
+    return value
 
 
 def _stage_fully_tracked(stage: Mapping[str, Any]) -> bool:

@@ -36,6 +36,7 @@ from bioetl.interfaces.http._reconciliation_display import (
     unavailable_reconciliation,
 )
 from bioetl.interfaces.http._selected_run_a2_resolve import (
+    CATALOG_UNAVAILABLE_REASON,
     NO_RUNS_REASON,
     NO_RUNS_STATUS,
     is_unresolved_run_id,
@@ -382,6 +383,64 @@ def _merge_active_diagnostics(
     return merged
 
 
+def _resolve_a2_run_id(
+    host: _HealthObservabilityRoutingHost,
+    *,
+    pipeline: str,
+    query: dict[str, str],
+) -> str | dict[str, object]:
+    """Return concrete run_id or an unavailable payload for A2 auto-select."""
+    if host._run_manifest_port is None:
+        return unavailable_status(
+            pipeline, "-", _QUERY_ERROR, CATALOG_UNAVAILABLE_REASON
+        )
+    manifests, workflow_manifests = list_a2_catalog(
+        host._run_manifest_port,
+        getattr(host, "_workflow_manifest_port", None),
+    )
+    latest = resolve_a2_latest_run_id(
+        manifests=manifests,
+        ledger_port=host._run_ledger_port,
+        workflow_manifests=workflow_manifests,
+        pipeline=pipeline,
+        query=query,
+    )
+    if latest is None:
+        return unavailable_status(pipeline, "-", _NO_RUNS, NO_RUNS_REASON)
+    return latest
+
+
+def _load_selected_with_live_fallback(
+    host: _HealthObservabilityRoutingHost,
+    *,
+    pipeline: str,
+    run_id: str,
+    query: dict[str, str],
+    skip_scope_check: bool,
+) -> dict[str, object]:
+    result = load_selected_run_status(
+        pipeline=pipeline,
+        run_id=run_id,
+        manifest_port=host._run_manifest_port,
+        store=host._run_report_store,
+    )
+    if result.get("reason") == "run_not_found":
+        # URL/explicit run_id stays bound; never substitute a different latest.
+        active = active_run_diagnostics(host, pipeline, run_id)
+        if active is not None:
+            result = _merge_active_diagnostics(
+                active, pipeline=pipeline, run_id=run_id
+            )
+    if skip_scope_check:
+        return result
+    state = result.get("execution_state")
+    if state not in {None, "UNKNOWN"} and not scope_matches(result, query):
+        return unavailable_status(
+            pipeline, run_id, "ERROR", "selector_context_mismatch"
+        )
+    return result
+
+
 async def handle_selected_run_status(
     host: _HealthObservabilityRoutingHost,
     writer: asyncio.StreamWriter,
@@ -391,46 +450,29 @@ async def handle_selected_run_status(
 
     Mode A2: unresolved ``run_id`` auto-selects latest in scope; empty catalog
     returns «НЕТ ЗАПУСКОВ». An explicit URL ``run_id`` wins over auto-select.
+    Missing manifest catalog is QUERY ERROR, not an empty catalog.
     """
     pipeline = host._read_required_param(query, "pipeline")
     requested_run_id = host._read_optional_param(query, "run_id") or "-"
 
     def load() -> dict[str, object]:
         run_id = requested_run_id
+        a2_resolved = False
         if is_unresolved_run_id(run_id):
-            manifests, workflow_manifests = list_a2_catalog(
-                host._run_manifest_port,
-                getattr(host, "_workflow_manifest_port", None),
-            )
-            latest = resolve_a2_latest_run_id(
-                manifests=manifests,
-                ledger_port=host._run_ledger_port,
-                workflow_manifests=workflow_manifests,
-                pipeline=pipeline,
-                query=query,
-            )
-            if latest is None:
-                return unavailable_status(pipeline, "-", _NO_RUNS, NO_RUNS_REASON)
-            run_id = latest
-        result = load_selected_run_status(
+            resolved = _resolve_a2_run_id(host, pipeline=pipeline, query=query)
+            if isinstance(resolved, dict):
+                return resolved
+            run_id = resolved
+            a2_resolved = True
+        # A2 catalog membership already enforced filters (incl. workflow aliases);
+        # do not re-reject via report.workflow_id vs Grafana workflow alias.
+        return _load_selected_with_live_fallback(
+            host,
             pipeline=pipeline,
             run_id=run_id,
-            manifest_port=host._run_manifest_port,
-            store=host._run_report_store,
+            query=query,
+            skip_scope_check=a2_resolved,
         )
-        if result.get("reason") == "run_not_found":
-            # URL/explicit run_id stays bound; never substitute a different latest.
-            active = active_run_diagnostics(host, pipeline, run_id)
-            if active is not None:
-                result = _merge_active_diagnostics(
-                    active, pipeline=pipeline, run_id=run_id
-                )
-        state = result.get("execution_state")
-        if state not in {None, "UNKNOWN"} and not scope_matches(result, query):
-            return unavailable_status(
-                pipeline, run_id, "ERROR", "selector_context_mismatch"
-            )
-        return result
 
     try:
         payload = await run_bounded_forensic_operation(

@@ -9,9 +9,10 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.control_plane import RunManifest, WorkflowManifest, WorkflowManifestStep
 from bioetl.domain.types import RunID, RunType
 from bioetl.interfaces.http._selected_run_a2_resolve import (
+    CATALOG_UNAVAILABLE_REASON,
     NO_RUNS_REASON,
     is_unresolved_run_id,
     resolve_a2_latest_run_id,
@@ -27,8 +28,16 @@ def _run_id(index: int) -> RunID:
     return RunID(UUID(int=index))
 
 
-def _manifest(index: int, *, pipeline: str = "chembl_assay") -> RunManifest:
+def _manifest(
+    index: int,
+    *,
+    pipeline: str = "chembl_assay",
+    workflow: str | None = None,
+) -> RunManifest:
     provider, entity = pipeline.split("_", 1)
+    launch: dict[str, object] = {}
+    if workflow is not None:
+        launch["workflow_name"] = workflow
     return RunManifest(
         manifest_id=f"manifest-{index}",
         execution_fingerprint=f"fingerprint-{index}",
@@ -39,9 +48,32 @@ def _manifest(index: int, *, pipeline: str = "chembl_assay") -> RunManifest:
         pipeline_name=pipeline,
         provider=provider,
         entity=entity,
-        launch_context={},
+        launch_context=launch,
         runtime_config={},
         resolved_config={},
+    )
+
+
+def _workflow(name: str, pipeline: str = "chembl_assay", index: int = 50) -> WorkflowManifest:
+    return WorkflowManifest(
+        manifest_id=f"workflow-manifest-{index}",
+        workflow_run_id=_run_id(index),
+        execution_fingerprint=f"workflow-fingerprint-{index}",
+        schema_version="1.0",
+        created_at=_NOW,
+        workflow_name=name,
+        workflow_version="1",
+        launch_context={},
+        defaults={"run_type": "incremental"},
+        selected_step_ids=(pipeline,),
+        steps=(
+            WorkflowManifestStep(
+                step_id=pipeline,
+                kind="pipeline",
+                pipeline_name=pipeline,
+                run_options={"run_type": "incremental"},
+            ),
+        ),
     )
 
 
@@ -104,6 +136,37 @@ def test_filter_change_reselects_latest_in_new_scope() -> None:
         )
         == str(activity.run_id)
     )
+
+
+def test_declared_workflow_beats_pipeline_wide_aliases() -> None:
+    """Newer chembl_core run must not win when workflow=chembl_assay is selected."""
+    older_matching = _manifest(1, workflow="chembl_assay")
+    newer_foreign = _manifest(2, workflow="chembl_core")
+    workflows = (
+        _workflow("chembl_assay", index=50),
+        _workflow("chembl_core", index=51),
+    )
+    latest = resolve_a2_latest_run_id(
+        manifests=(older_matching, newer_foreign),
+        ledger_port=None,
+        workflow_manifests=workflows,
+        pipeline="chembl_assay",
+        query={"pipeline": "chembl_assay", "workflow": "chembl_assay"},
+    )
+    assert latest == str(older_matching.run_id)
+
+
+def test_alias_fallback_when_run_has_no_declared_workflow() -> None:
+    undeclared = _manifest(3)  # no launch_context workflow
+    workflows = (_workflow("chembl_assay", index=52),)
+    latest = resolve_a2_latest_run_id(
+        manifests=(undeclared,),
+        ledger_port=None,
+        workflow_manifests=workflows,
+        pipeline="chembl_assay",
+        query={"pipeline": "chembl_assay", "workflow": "chembl_assay"},
+    )
+    assert latest == str(undeclared.run_id)
 
 
 def _host() -> MagicMock:
@@ -179,6 +242,18 @@ async def test_handle_empty_catalog_emits_no_runs(
     assert payload["verdict"] == "НЕТ ЗАПУСКОВ"
     assert payload["reason"] == NO_RUNS_REASON
     assert payload["presentation_summary"][0]["execution_state"] == "НЕТ ЗАПУСКОВ"
+
+
+async def test_handle_missing_manifest_port_is_query_error() -> None:
+    host = _host()
+    host._run_manifest_port = None
+    await handle_selected_run_status(
+        host, MagicMock(), {"pipeline": "chembl_assay", "run_id": "-"}
+    )
+    payload = host._send_payload_response.await_args.args[2]
+    assert payload["verdict"] == "QUERY ERROR"
+    assert payload["reason"] == CATALOG_UNAVAILABLE_REASON
+    assert payload["verdict"] != "НЕТ ЗАПУСКОВ"
 
 
 async def test_handle_explicit_url_run_id_wins(

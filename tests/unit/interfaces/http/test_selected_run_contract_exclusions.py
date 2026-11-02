@@ -69,6 +69,23 @@ def test_ok_warn_crit_boundaries_for_chembl_activity() -> None:
     assert crit["contract_exclusions_rate"] == pytest.approx(0.5)
 
 
+def test_four_stage_funnel_with_extract_computes_rate() -> None:
+    """Saved reports include extract; rate still uses bronze/silver/gold only."""
+    funnel = [
+        {
+            "stage_id": "extract",
+            "records_in": 120,
+            "records_out": 100,
+            "tracking": "full",
+            "removals": [],
+        },
+        *_full_funnel(excluded=50, bronze_out=100),
+    ]
+    fields = evaluate_contract_exclusions("chembl_activity", funnel)
+    assert fields["contract_exclusions_status"] == "CRIT"
+    assert fields["contract_exclusions_rate"] == pytest.approx(0.5)
+
+
 def test_incomplete_funnel_keeps_limits_but_unknown_rate() -> None:
     fields = evaluate_contract_exclusions(
         "chembl_activity",
