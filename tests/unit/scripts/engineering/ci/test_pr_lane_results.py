@@ -366,6 +366,10 @@ def test_shadow_compare_routes_run_report_contracts_and_docs() -> None:
     )
     assert report["covers_full_suite"] is False
     assert "tests/unit/domain/run_reports/test_contracts.py" in report["selected"]
+    assert (
+        "tests/unit/domain/control_plane/test_run_evidence_location.py"
+        in report["selected"]
+    )
     assert "tests/architecture/test_documentation_sync.py" in report["selected"]
 
 

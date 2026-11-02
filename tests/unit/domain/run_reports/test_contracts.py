@@ -149,6 +149,32 @@ def test_evidence_location_schema_rejects_unsafe_and_incompatible_values() -> No
     assert list(validator.iter_errors(invalid_workflow))
 
 
+def test_every_report_schema_is_valid_json_schema() -> None:
+    for schema_path in sorted(CONTRACT_ROOT.glob("*.json")):
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        validator_for(schema).check_schema(schema)
+
+
+def test_evidence_location_schema_rejects_unsafe_and_incompatible_values() -> None:
+    schema = json.loads(
+        (CONTRACT_ROOT / "run_evidence_location.v1.json").read_text(encoding="utf-8")
+    )
+    payload = json.loads(
+        (FIXTURE_ROOT / "run_evidence_location_golden.json").read_text(encoding="utf-8")
+    )
+    validator = validator_for(schema)(schema)
+    for field, value in (
+        ("owner", ".."),
+        ("run_id", "."),
+        ("root_alias", ".."),
+        ("relative_data_root", "a/../b"),
+    ):
+        invalid = {**payload, field: value}
+        assert list(validator.iter_errors(invalid))
+    invalid_workflow = {**payload, "kind": "workflow", "workflow_run_id": "wf-1"}
+    assert list(validator.iter_errors(invalid_workflow))
+
+
 def test_golden_json_is_canonically_ordered() -> None:
     for path in sorted(FIXTURE_ROOT.glob("*_run_report_golden.json")):
         payload = json.loads(path.read_text(encoding="utf-8"))

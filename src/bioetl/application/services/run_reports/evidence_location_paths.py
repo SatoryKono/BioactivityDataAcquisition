@@ -6,6 +6,7 @@ never by reading process environment maps inside this module.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path

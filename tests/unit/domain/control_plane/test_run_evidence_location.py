@@ -3,6 +3,9 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pytest
 
 from bioetl.domain.control_plane.run_evidence_location import (
@@ -30,6 +33,7 @@ pytestmark = pytest.mark.unit
 
 _SOURCE_A = "a" * 64
 _SOURCE_B = "b" * 64
+ROOT = Path(__file__).resolve().parents[4]
 
 
 def _location(**overrides: object) -> RunEvidenceLocation:
