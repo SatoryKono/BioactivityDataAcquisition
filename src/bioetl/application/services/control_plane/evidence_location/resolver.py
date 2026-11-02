@@ -8,7 +8,7 @@ evidence, or invent READY / objects verdicts from the locator alone.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import StrEnum
 from pathlib import Path
 from typing import Protocol, runtime_checkable
@@ -100,6 +100,7 @@ class EvidenceLocationResolveResult:
     """Resolver outcome; lookup codes stay distinct from replay verdicts."""
 
     lookup: EvidenceLocationLookupResult
+    requested_run_id: str | None = None
     requested_kind: EvidenceLocationKind | str | None = None
     data_root: Path | None = None
     context: EvidenceReadContext | None = None
@@ -152,15 +153,17 @@ class EvidenceLocationResolver:
         )
         if lookup.code is EvidenceLocationLookupCode.FOUND:
             assert lookup.location is not None
-            return self._open_from_location(lookup, requested_kind=kind)
-        if lookup.code is EvidenceLocationLookupCode.LOCATION_MISSING:
-            return self._open_legacy_or_missing(lookup, requested_kind=kind)
-        # identity_conflict / location_invalid — fail closed
-        return EvidenceLocationResolveResult(
-            lookup=lookup,
-            requested_kind=kind,
-            detail=lookup.detail,
-        )
+            result = self._open_from_location(lookup, requested_kind=kind)
+        elif lookup.code is EvidenceLocationLookupCode.LOCATION_MISSING:
+            result = self._open_legacy_or_missing(lookup, requested_kind=kind)
+        else:
+            # identity_conflict / location_invalid — fail closed
+            result = EvidenceLocationResolveResult(
+                lookup=lookup,
+                requested_kind=kind,
+                detail=lookup.detail,
+            )
+        return replace(result, requested_run_id=str(run_id))
 
     def load_manifest(
         self,
@@ -169,6 +172,12 @@ class EvidenceLocationResolver:
         run_id: object,
     ) -> EvidenceLocationLookupResult:
         """Post-resolve manifest layer; keeps ``manifest_missing`` distinct."""
+        if result.requested_run_id is None or str(run_id) != result.requested_run_id:
+            return EvidenceLocationLookupResult(
+                code=EvidenceLocationLookupCode.IDENTITY_CONFLICT,
+                location=result.location,
+                detail="manifest_run_id_mismatch",
+            )
         if result.context is None:
             return EvidenceLocationLookupResult(
                 code=(

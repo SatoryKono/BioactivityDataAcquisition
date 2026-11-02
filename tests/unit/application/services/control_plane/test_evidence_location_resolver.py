@@ -263,6 +263,28 @@ def test_manifest_missing_stays_distinct_after_resolve(tmp_path: Path) -> None:
     assert manifest_lookup.code is EvidenceLocationLookupCode.MANIFEST_MISSING
 
 
+def test_load_manifest_rejects_run_id_different_from_resolved_identity(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    resolver, store, _data_root = _resolver(tmp_path)
+    store.register(_location())
+    resolved = resolver.resolve(kind="pipeline", owner="chembl_assay", run_id=_RUN_A)
+    calls: list[object] = []
+
+    def get_manifest(_self: object, run_id: object) -> None:
+        calls.append(run_id)
+        return None
+
+    monkeypatch.setattr(FileRunManifestStore, "get_by_run_id", get_manifest)
+
+    lookup = resolver.load_manifest(resolved, run_id=UUID(_RUN_B))
+
+    assert lookup.code is EvidenceLocationLookupCode.IDENTITY_CONFLICT
+    assert lookup.detail == "manifest_run_id_mismatch"
+    assert calls == []
+
+
 def test_resolved_context_uses_standard_verifier_on_real_bytes(
     tmp_path: Path,
 ) -> None:
