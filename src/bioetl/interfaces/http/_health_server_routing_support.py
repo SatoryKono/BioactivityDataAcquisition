@@ -37,6 +37,7 @@ from bioetl.interfaces.http._report_selector_options import (
     load_report_selector_entries,
     supplement_report_options,
 )
+from bioetl.interfaces.http._selected_run_a2_resolve import resolve_a2_latest_run_id
 from bioetl.interfaces.http._selector_catalog import (
     SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
 )
@@ -280,20 +281,51 @@ async def handle_control_plane_selector_context(
     writer: asyncio.StreamWriter,
     query: dict[str, str],
 ) -> None:
-    """Resolve a coherent selector tuple for dashboard selector shells."""
+    """Resolve a coherent selector tuple for dashboard selector shells.
+
+    Unresolved ``run_id`` (``-`` / omitted) is resolved to the same A2 latest
+    as selected-run-status, including saved report-only runs, so Grafana panels
+    that read ``selected.run_id`` stay in sync with the status panel.
+    """
     assert host._run_manifest_port is not None
     manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
     workflow_manifests = await _list_workflow_manifests(host)
+    selected_workflows = host._read_scope_csv_param(query, "workflow")
+    selected_pipelines = host._read_scope_csv_param(query, "pipeline")
+    selected_run_types = host._read_scope_csv_param(query, "run_type")
+    selected_run_statuses = host._read_scope_csv_param(query, "run_status")
+    selected_run_id = read_selected_run_id(host, query)
+    if selected_run_id is None:
+        pipeline = (
+            selected_pipelines[0]
+            if len(selected_pipelines) == 1
+            else (host._read_optional_param(query, "pipeline") or "All")
+        )
+        a2_query = {
+            "workflow": query.get("workflow", ""),
+            "pipeline": query.get("pipeline", ""),
+            "run_type": query.get("run_type", ""),
+            "run_status": query.get("run_status", ""),
+        }
+        selected_run_id = await asyncio.to_thread(
+            resolve_a2_latest_run_id,
+            manifests=manifests,
+            ledger_port=host._run_ledger_port,
+            workflow_manifests=workflow_manifests,
+            pipeline=pipeline,
+            query=a2_query,
+            report_store=getattr(host, "_run_report_store", None),
+        )
     payload = await asyncio.to_thread(
         build_selector_context_payload,
         manifests=manifests,
         ledger_port=host._run_ledger_port,
         workflow_manifests=workflow_manifests,
-        selected_workflows=host._read_scope_csv_param(query, "workflow"),
-        selected_pipelines=host._read_scope_csv_param(query, "pipeline"),
-        selected_run_types=host._read_scope_csv_param(query, "run_type"),
-        selected_run_statuses=host._read_scope_csv_param(query, "run_status"),
-        selected_run_id=read_selected_run_id(host, query),
+        selected_workflows=selected_workflows,
+        selected_pipelines=selected_pipelines,
+        selected_run_types=selected_run_types,
+        selected_run_statuses=selected_run_statuses,
+        selected_run_id=selected_run_id,
     )
     await host._send_payload_response(writer, 200, payload)
 

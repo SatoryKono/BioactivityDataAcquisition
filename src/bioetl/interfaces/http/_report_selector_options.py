@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 from bioetl.application.services.run_reports.query import (
@@ -153,6 +153,59 @@ def supplement_report_options(
         if option is not None:
             items.append(option)
     return {**payload, "items": items}
+
+
+def filtered_report_run_candidates(
+    scopes: dict[str, tuple[str, ...]],
+    *,
+    root: Path | None = None,
+    store: RunReportStorePort | None = None,
+    entries: list[ReportIndexEntry] | None = None,
+) -> tuple[tuple[str, datetime], ...]:
+    """Return identity-checked ``(run_id, started_at)`` rows for A2 / selector sync.
+
+    Uses the same scope + identity gates as ``supplement_report_options`` so
+    report-only runs that appear in filter-options also participate in latest
+    selection and empty-scope checks.
+    """
+    root = configured_report_root(root=root)
+    if entries is None:
+        entries = load_report_selector_entries(scopes, root=root, store=store)
+    rows: list[tuple[str, datetime]] = []
+    seen: set[str] = set()
+    for entry in sorted(entries, key=lambda item: item.started_at or "", reverse=True):
+        if not _entry_matches_catalog(entry, scopes):
+            continue
+        try:
+            identity = _checked_identity(entry, root)
+        except ValueError:
+            continue
+        if not _identity_matches_scopes(identity, scopes):
+            continue
+        run_id = identity.get("run_id")
+        if not isinstance(run_id, str) or not run_id or run_id in seen:
+            continue
+        started = _identity_started_at(identity, entry)
+        if started is None:
+            continue
+        seen.add(run_id)
+        rows.append((run_id, started))
+    return tuple(rows)
+
+
+def _identity_started_at(
+    identity: dict[str, object], entry: ReportIndexEntry
+) -> datetime | None:
+    raw = identity.get("started_at") or entry.started_at
+    if raw is None:
+        return None
+    try:
+        moment = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+    if moment.tzinfo is None:
+        return moment.replace(tzinfo=UTC)
+    return moment
 
 
 def load_report_selector_entries(

@@ -8,10 +8,14 @@ caller can emit the canonical empty state «НЕТ ЗАПУСКОВ».
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
+from datetime import datetime
+from pathlib import Path
 from typing import Protocol
 
+from bioetl.application.services.run_reports.query import ReportIndexEntry
 from bioetl.domain.control_plane import RunManifest, WorkflowManifest
+from bioetl.domain.ports import RunReportStorePort
 from bioetl.interfaces.http._control_plane_selector_filters import filter_records
 from bioetl.interfaces.http._control_plane_selector_payloads import RUN_ID_NO_SELECTION
 from bioetl.interfaces.http._control_plane_selector_records import (
@@ -21,6 +25,7 @@ from bioetl.interfaces.http._control_plane_selector_records import (
     narrow_manifest_catalog,
     selected_pipeline_scope,
 )
+from bioetl.interfaces.http._report_selector_options import filtered_report_run_candidates
 from bioetl.interfaces.http.run_report_index import _normalize_list_owner
 
 _UNRESOLVED_RUN_IDS = frozenset(
@@ -57,6 +62,9 @@ def resolve_a2_latest_run_id(
     workflow_manifests: tuple[WorkflowManifest, ...] = (),
     pipeline: str,
     query: Mapping[str, str],
+    report_store: RunReportStorePort | None = None,
+    report_root: Path | None = None,
+    report_entries: Sequence[ReportIndexEntry] | None = None,
 ) -> str | None:
     """Return newest-by-started_at run_id for the query scope, or None if empty.
 
@@ -68,6 +76,10 @@ def resolve_a2_latest_run_id(
     otherwise catalog aliases. Latest is chosen from the union of both
     matching sets so an older declared hit does not hide a newer
     alias-fallback run in the same scope.
+
+    Saved pipeline-run reports that ``supplement_report_options`` already
+    exposes are merged into the same filtered catalog so report-only runs
+    participate in empty-scope and latest selection.
     """
     selected_workflows = _scope_values(query.get("workflow"))
     selected_run_types = _scope_values(query.get("run_type"))
@@ -101,8 +113,22 @@ def resolve_a2_latest_run_id(
         selected_run_id=None,
     )
     candidates = _apply_workflow_preference(base, selected_workflows)
-    selected = _newest_started_record(candidates)
-    return None if selected is None else selected.run_id
+    scopes = {
+        "workflow": selected_workflows,
+        "pipeline": selected_pipelines,
+        "run_type": selected_run_types,
+        "run_status": selected_run_statuses,
+        "run_id": (),
+    }
+    report_rows: tuple[tuple[str, datetime], ...] = ()
+    if report_store is not None or report_root is not None or report_entries is not None:
+        report_rows = filtered_report_run_candidates(
+            scopes,
+            root=report_root,
+            store=report_store,
+            entries=None if report_entries is None else list(report_entries),
+        )
+    return _newest_merged_run_id(candidates, report_rows)
 
 
 def _apply_workflow_preference(
@@ -155,6 +181,26 @@ def _newest_started_record(
         records,
         key=lambda record: (record.started_at, record.manifest_id, record.run_id),
     )
+
+
+def _newest_merged_run_id(
+    records: tuple[SelectorRecord, ...],
+    report_rows: tuple[tuple[str, datetime], ...],
+) -> str | None:
+    """Newest started_at across filtered manifests and report-only runs."""
+    best_id: str | None = None
+    best_key: tuple[datetime, str, str] | None = None
+    for record in records:
+        key = (record.started_at, record.manifest_id, record.run_id)
+        if best_key is None or key > best_key:
+            best_key = key
+            best_id = record.run_id
+    for run_id, started_at in report_rows:
+        key = (started_at, "", run_id)
+        if best_key is None or key > best_key:
+            best_key = key
+            best_id = run_id
+    return best_id
 
 
 def list_a2_catalog(

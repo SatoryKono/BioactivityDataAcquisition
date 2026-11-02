@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID
@@ -121,6 +122,66 @@ def test_resolve_empty_scope_returns_none() -> None:
         query={"pipeline": "chembl_assay", "run_type": "backfill"},
     )
     assert latest is None
+
+
+def _write_pipeline_report(
+    root: Path,
+    *,
+    pipeline: str = "chembl_assay",
+    run_id: str = "report-only-run",
+    started_at: str = "2026-09-15T12:00:00+00:00",
+    run_type: str = "incremental",
+    workflow_id: str = "chembl_assay",
+) -> None:
+    import json
+
+    path = root / "pipeline" / pipeline / run_id / "pipeline-run-report.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": "pipeline_run_report_v1",
+                "identity": {
+                    "pipeline_name": pipeline,
+                    "run_id": run_id,
+                    "workflow_id": workflow_id,
+                    "run_type": run_type,
+                    "started_at": started_at,
+                    "status": "success",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def test_report_only_catalog_selects_saved_run(tmp_path: Path) -> None:
+    _write_pipeline_report(tmp_path)
+    latest = resolve_a2_latest_run_id(
+        manifests=(),
+        ledger_port=None,
+        pipeline="chembl_assay",
+        query={"pipeline": "chembl_assay"},
+        report_root=tmp_path,
+    )
+    assert latest == "report-only-run"
+
+
+def test_newer_report_beats_older_manifest(tmp_path: Path) -> None:
+    older = _manifest(1)
+    _write_pipeline_report(
+        tmp_path,
+        run_id="report-newer",
+        started_at="2026-09-15T18:00:00+00:00",
+    )
+    latest = resolve_a2_latest_run_id(
+        manifests=(older,),
+        ledger_port=None,
+        pipeline="chembl_assay",
+        query={"pipeline": "chembl_assay"},
+        report_root=tmp_path,
+    )
+    assert latest == "report-newer"
 
 
 def test_filter_change_reselects_latest_in_new_scope() -> None:

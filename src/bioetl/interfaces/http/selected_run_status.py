@@ -274,6 +274,7 @@ def _resolve_a2_run_id(
         workflow_manifests=workflow_manifests,
         pipeline=pipeline,
         query=query,
+        report_store=getattr(host, "_run_report_store", None),
     )
     if latest is None:
         return unavailable_status(pipeline, "-", _NO_RUNS, NO_RUNS_REASON)
