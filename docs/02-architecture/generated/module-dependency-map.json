@@ -1,18 +1,18 @@
 {
   "summary": {
     "scanned_modules": 2599,
-    "total_internal_imports": 8436,
+    "total_internal_imports": 8441,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "6b6ecb0e6084e791a6010c1ca981dba9d6e1801b8bb173bd6ba21739310fe601"
+    "source_fingerprint": "a1bc2c687bdf6f8f2a016e9449507dc93eb7cdc750ead8d1f1242ecc8eb83f89"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1656,
+      "imports": 1658,
       "allowed": true
     },
     {
@@ -24,13 +24,13 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 235,
+      "imports": 237,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 655,
+      "imports": 656,
       "allowed": true
     },
     {
@@ -310,6 +310,11 @@
       "imports": 19
     },
     {
+      "source": "composition.runtime_builders",
+      "target": "application.services",
+      "imports": 18
+    },
+    {
       "source": "application.observability",
       "target": "domain.control_plane",
       "imports": 17
@@ -343,11 +348,6 @@
       "source": "interfaces.http",
       "target": "domain.ports",
       "imports": 17
-    },
-    {
-      "source": "composition.runtime_builders",
-      "target": "application.services",
-      "imports": 16
     },
     {
       "source": "infrastructure.control_plane",
