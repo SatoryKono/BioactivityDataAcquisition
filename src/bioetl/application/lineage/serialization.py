@@ -1,100 +1,25 @@
-"""Application-layer JSON-safe serialization helpers for lineage attributes."""
+"""Application-layer JSON-safe serialization helpers for lineage attributes.
+
+Thin wrapper over the domain lineage serializer so application services keep a
+stable import path without duplicating the JSON-plain conversion body.
+"""
 
 from __future__ import annotations
 
-import math
 from collections.abc import Mapping
-from datetime import date, datetime
-from enum import Enum
-from pathlib import PurePath
-from uuid import UUID
+from typing import cast
 
-from bioetl.domain.normalization._control_plane_primitives import (
-    normalize_control_plane_datetime,
-)
-from bioetl.domain.normalization.json import serialize_json_canonical
+from bioetl.domain.lineage._shared import mapping_to_plain as _domain_mapping_to_plain
 
-_UNHANDLED = object()
 __all__ = ["mapping_to_plain"]
 
 
 def mapping_to_plain(values: Mapping[str, object]) -> dict[str, object]:
     """Return a JSON-safe deep plain-dict copy of a (possibly frozen) mapping."""
-    return {str(key): _plain_value(value) for key, value in values.items()}
-
-
-def _plain_set(value: set[object] | frozenset[object]) -> list[object]:
-    # Deterministic order for set-valued attributes (JSON/export stability).
-    plain_items = [_plain_value(item) for item in value]
-    return sorted(plain_items, key=lambda item: serialize_json_canonical([item]))
-
-
-def _plain_mapping(value: Mapping[object, object]) -> dict[str, object]:
-    return {str(key): _plain_value(item) for key, item in value.items()}
-
-
-def _plain_sequence(value: list[object] | tuple[object, ...]) -> list[object]:
-    return [_plain_value(item) for item in value]
-
-
-def _plain_value(value: object) -> object:
-    container = _plain_container(value)
-    if container is not _UNHANDLED:
-        return container
-    return _plain_leaf(value)
-
-
-def _plain_container(value: object) -> object:
-    """Return a recursively normalized container or the unhandled sentinel."""
-    if isinstance(value, Mapping):
-        return _plain_mapping(value)
-    if isinstance(value, (list, tuple)):
-        return _plain_sequence(value)
-    if isinstance(value, (set, frozenset)):
-        return _plain_set(value)
-    return _UNHANDLED
-
-
-def _plain_leaf(value: object) -> object:
-    """Normalize one leaf to a JSON scalar, failing closed otherwise."""
-    if isinstance(value, float):
-        return _plain_float(value)
-    if _is_json_scalar(value):
-        return value
-    temporal = _plain_temporal(value)
-    if temporal is not _UNHANDLED:
-        return temporal
-    identifier = _plain_identifier(value)
-    if identifier is not _UNHANDLED:
-        return identifier
-    raise TypeError(
-        f"Lineage attributes require JSON-safe values; got {type(value).__name__}"
-    )
-
-
-def _plain_float(value: float) -> float:
-    if not math.isfinite(value):
-        raise ValueError("Lineage attributes do not allow NaN or Infinity")
-    return value
-
-
-def _is_json_scalar(value: object) -> bool:
-    return value is None or isinstance(value, (str, int, bool))
-
-
-def _plain_temporal(value: object) -> object:
-    if isinstance(value, datetime):
-        return normalize_control_plane_datetime(value)
-    if isinstance(value, date):
-        return value.isoformat()
-    return _UNHANDLED
-
-
-def _plain_identifier(value: object) -> object:
-    if isinstance(value, UUID):
-        return str(value)
-    if isinstance(value, PurePath):
-        return value.as_posix()
-    if isinstance(value, Enum):
-        return _plain_value(value.value)
-    return _UNHANDLED
+    plain = _domain_mapping_to_plain(values)
+    if not isinstance(plain, dict):
+        raise TypeError(
+            "Lineage mapping_to_plain expected a mapping result; "
+            f"got {type(plain).__name__}"
+        )
+    return cast(dict[str, object], plain)

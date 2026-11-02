@@ -9,7 +9,7 @@
 - Internal import edges (raw): `8358`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `334`
+- Cross-layer module-group edges (total): `335`
 - Cross-layer module-group edges (top 55): `55`
 
 ## Layer Dependency Graph

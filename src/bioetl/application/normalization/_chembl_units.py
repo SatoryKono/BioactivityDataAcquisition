@@ -1,21 +1,34 @@
-"""URI parsing helpers for QUDT / legacy OpenPhacts unit identifiers."""
+"""URI parsing helpers for QUDT / legacy OpenPhacts unit identifiers.
 
-from urllib.parse import urlparse
+Thin wrappers over the domain host/path normalizer so application/tests keep a
+stable import path without duplicating URI authority parsing.
+"""
+
+from __future__ import annotations
+
+from bioetl.domain.normalization._chembl_units import _uri_host_and_path
+
+__all__ = [
+    "_legacy_qudt_identifier_from_uri",
+    "_qudt_identifier_from_uri",
+]
 
 
 def _qudt_identifier_from_uri(value: str) -> str | None:
-    parsed = urlparse(value.strip())
-    hostname = parsed.hostname.casefold() if parsed.hostname is not None else None
-    if hostname == "qudt.org" and parsed.path.startswith("/vocab/unit/"):
-        return parsed.path.rsplit("/", maxsplit=1)[-1]
+    parsed = _uri_host_and_path(value)
+    if parsed is None:
+        return None
+    hostname, path = parsed
+    if hostname == "qudt.org" and path.startswith("/vocab/unit/"):
+        return path.rsplit("/", maxsplit=1)[-1]
     return None
 
 
 def _legacy_qudt_identifier_from_uri(value: str) -> str | None:
-    parsed = urlparse(value.strip())
-    hostname = parsed.hostname.casefold() if parsed.hostname is not None else None
-    if hostname != "www.openphacts.org":
+    parsed = _uri_host_and_path(value)
+    if parsed is None:
         return None
-    if parsed.path.casefold() == "/units/nanomolar":
+    hostname, path = parsed
+    if hostname == "www.openphacts.org" and path.casefold() == "/units/nanomolar":
         return "NanoMOL-PER-L"
     return None
