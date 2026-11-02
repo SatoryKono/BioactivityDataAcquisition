@@ -24,6 +24,8 @@ class PreflightSchemaFieldExtractionHost(Protocol):
 def simplify_dtype(dtype_str: str) -> str:
     """Simplify a dtype string for comparison."""
     normalized = dtype_str.strip()
+    if normalized.startswith("string[") and normalized.endswith("]"):
+        return "str"
     for prefix in ("pandas.core.arrays.integer.", "pandas.", "pandera."):
         if normalized.startswith(prefix):
             normalized = normalized[len(prefix) :]
@@ -37,13 +39,10 @@ def simplify_dtype(dtype_str: str) -> str:
         "float64": "float",
         "object": "str",
         "string": "str",
-        "string[pyarrow]": "str",
         "String": "str",
         "boolean": "bool",
         "datetime64[ns]": "datetime",
     }
-    if normalized.lower().startswith("string["):
-        return "str"
     return simplifications.get(normalized, normalized)
 
 

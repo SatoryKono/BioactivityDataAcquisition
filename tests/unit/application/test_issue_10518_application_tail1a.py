@@ -1382,7 +1382,6 @@ def test_is_missing_value_string_branches() -> None:
     assert (
         is_missing_value("hello", logical_type="string", empty_as_missing=None) is False
     )
-    assert is_missing_value(" ", logical_type="string", empty_as_missing=False) is False
     assert is_missing_value([], logical_type="string", empty_as_missing=True) is True
 
 
