@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 12613)
-Total output lines: 668
-
 ______________________________________________________________________
 
 Version: 1.1.0
@@ -81,7 +78,6 @@ Index: [sequence/README.md](sequence/README.md)
 ## Provider Data Flow Diagrams — issue #6545
 
 Index: [providers/README.md](./providers/README.md)
-
 Per provider (4 flows: API, transform, medallion, errors): `chembl`, `pubchem`,
 `uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar` under `providers/`.
 
@@ -160,8 +156,7 @@ ______________________________________________________________________
 | 35  | Batch Aggregate Seal Write Commit Failure Lifecycle             | `architecture/35-batch-aggregate-seal-write-commit-failure-lifecycle.mmd`                        | Batch aggregate lifecycle |
 | 36  | Quarantine Entry Review Resolution And Discard Flow             | `architecture/36-quarantine-entry-review-resolution-and-discard-flow.mmd`                        | Quarantine entry state transitions |
 | 37  | Observability Bootstrap Bundle From Settings To Ports           | `architecture/37-observability-bootstrap-bundle-from-settings-to-ports.mmd`                      | Logger/metrics/tracer bootstrap bundle |
-| 38  | ChEMBL Activity Extraction To Bronze Artifact Publication       | `architecture/38-chembl-bronze-activity-extraction-to-artifact-publication.mmd`                  | ChEMBL activity bronze publication path |
-| 39  | CrossRef Publication Search Fallback And Batch DOI Fetch        | `architecture/39-crossref-search-fallback-and-batch-doi-fetch-publications.mmd`                  | CrossRef publication fallback path |
+| 38  | ChEMBL Activity Extraction To Bronze Artifact Publication       | `architecture/38-chembl-bronze-activity-extraction-to-artifact-publication.mmd`                  | ChEMBL activity bronze publication path || 39  | CrossRef Publication Search Fallback And Batch DOI Fetch        | `architecture/39-crossref-search-fallback-and-batch-doi-fetch-publications.mmd`                  | CrossRef publication fallback path |
 | 40  | PubMed Search Fetch XML Parse And Publication Mapping           | `architecture/40-pubmed-search-fetch-xml-parse-and-publication-mapping.mmd`                      | PubMed XML publication mapping path |
 | 41  | OpenAlex Cursor Pagination And Response Mapping Path            | `architecture/41-openalex-cursor-pagination-and-response-mapping-path.mmd`                       | OpenAlex cursor pagination path |
 | 42  | SemanticScholar Search Fallback And Batch Request Flow          | `architecture/42-semanticscholar-search-fallback-and-batch-request-flow.mmd`                     | Semantic Scholar search and batch flow |
@@ -215,7 +210,21 @@ classes that was not already covered by the curated set.
 | --- | ----------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | 1   | Domain Ports                  | `class-diagrams/01-domain-ports.mmd`                            | Domain port overview with narrow storage ports plus aggregate compat facade |
 | 2   | Domain Ports (L2 Methods)     | `class-diagrams/01a-domain-ports-method-catalog.mmd`            | Method-level catalog for key port protocols                                 |
-| 3   | Entities & Aggregates         | `class-diagrams/02-entities-aggregates.mmd`                     | BaseEntity, Batch, PipelineRun, BatchRecord             …613 tokens truncated…thods)    | `class-diagrams/14a-observability-method-catalog.mmd`           | Method-level catalog for logging/metrics/tracing                            |
+| 3   | Entities & Aggregates         | `class-diagrams/02-entities-aggregates.mmd`                     | BaseEntity, Batch, PipelineRun, BatchRecord                                 |
+| 4   | Value Objects                 | `class-diagrams/03-value-objects.mmd`                           | BronzeWriteResult, SilverWriteResult, FencingToken, etc.                    |
+| 5   | Types & Enums                 | `class-diagrams/04-types-enums.mmd`                             | RunType, PublicationType, HealthStatus, NewTypes                            |
+| 6   | Exceptions                    | `class-diagrams/05-exceptions.mmd`                              | BioETLError hierarchy: Critical, Recoverable, DataQuality                   |
+| 7   | Configuration                 | `class-diagrams/06-config-classes.mmd`                          | PipelineConfig, RuntimeConfig, CompositeConfig                              |
+| 8   | Application Core              | `class-diagrams/07-application-core-services.mmd`               | PipelineRunner, BatchExecutor, LockRuntimeService                           |
+| 9   | Application Services          | `class-diagrams/08-application-services.mmd`                    | DQ, Health, Export, Vacuum, Quarantine services                             |
+| 10  | Application Services (L2 Ops) | `class-diagrams/08a-application-services-operation-catalog.mmd` | Operation-level catalog for application services                            |
+| 11  | Transformers                  | `class-diagrams/09-transformers.mmd`                            | BaseTransformer → ChEMBL/Publication/UniProt/PubChem                        |
+| 12  | Adapters                      | `class-diagrams/10-adapters.mmd`                                | BaseHttpAdapter, all provider adapters, resilience                          |
+| 13  | Storage                       | `class-diagrams/11-storage.mmd`                                 | BronzeWriter, SilverWriter, GoldWriter, DeltaReader                         |
+| 14  | Composite Pipeline            | `class-diagrams/12-composite-pipeline.mmd`                      | Runner, coordinators, merger, FSM                                           |
+| 15  | Domain Services               | `class-diagrams/13-domain-services.mmd`                         | EntityIdentityGenerator, Normalization, UnitConverter                               |
+| 16  | Observability                 | `class-diagrams/14-observability.mmd`                           | Logger, Metrics, Tracing implementations                                    |
+| 17  | Observability (L2 Methods)    | `class-diagrams/14a-observability-method-catalog.mmd`           | Method-level catalog for logging/metrics/tracing                            |
 | 18  | Extractors                    | `class-diagrams/15-extractors.mmd`                              | BaseFieldExtractor, PubMed & UniProt extractors                             |
 | 19  | Factories & Bootstrap         | `class-diagrams/16-factories-bootstrap.mmd`                     | Current composition factories, registries, and runtime assembly seams       |
 
@@ -226,8 +235,7 @@ Historical/foundational diagrams consolidated from `docs/02-architecture/diagram
 ### Foundation 01–25
 
 | #   | File                                                   | Description                                 |
-| --- | ------------------------------------------------------ | ------------------------------------------- |
-| 01a | `foundation/01-full-system-component.mmd`              | Full system component diagram (C4-style)    |
+| --- | ------------------------------------------------------ | ------------------------------------------- || 01a | `foundation/01-full-system-component.mmd`              | Full system component diagram (C4-style)    |
 | 01b | `foundation/01-high-level.mmd`                         | High-level system overview                  |
 | 02a | `foundation/02-full-medallion-data-flow.mmd`           | Medallion architecture data flow (detailed) |
 | 03a | `foundation/03-pipeline-execution-happy-path.mmd`      | Pipeline execution sequence (happy path)    |
@@ -306,8 +314,7 @@ ______________________________________________________________________
 | Layer      | Fill      | Border    |
 | ---------- | --------- | --------- |
 | Bronze     | `#fff7ed` | `#f59e0b` |
-| Silver     | `#f8fafc` | `#475569` |
-| Gold       | `#fefce8` | `#ca8a04` |
+| Silver     | `#f8fafc` | `#475569` || Gold       | `#fefce8` | `#ca8a04` |
 | Quarantine | `#ffe4e6` | `#e11d48` |
 
 ______________________________________________________________________
@@ -386,7 +393,6 @@ Description coverage policy:
 - `architecture/`, `foundation/`, and `views/` require one narrative card in `descriptions/<collection>/<stem>.md` for every active source file.
 - `class-diagrams/` requires narrative cards for the 16 primary curated family diagrams (`01-*` through `16-*`).
 - Focused class method catalogs (`01a`, `08a`, `14a`), the frontmatter sandbox copy, and generated `90-pkg-*` supplemental package slices are inventory/render surfaces; they are covered by their parent family cards or package-level generated context and are not required to have individual narrative cards.
-
 ### Render options
 
 ```bash
@@ -466,8 +472,7 @@ docs/02-architecture/diagrams/
     *.mmd           # source diagrams (89)
     svg/*.svg       # rendered vector (scalable)
     png/*.png       # rendered raster (300 DPI)
-  class-diagrams/
-    *.mmd           # source diagrams (94 total:
+  class-diagrams/    *.mmd           # source diagrams (94 total:
                     #   19 curated families
                     #   1 frontmatter sandbox copy
                     #   generated 90-pkg-* supplemental package slices)
@@ -549,8 +554,7 @@ uv run python -m scripts.diagrams check-quality-gates \
 uv run python scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json \
   > reports/diagrams/diagram-lint-report.json
 uv run python -m scripts.diagrams lint-budget \
-  --mode pr \
-  --quality-report reports/diagrams/diagram-quality-report.json \
+  --mode pr \  --quality-report reports/diagrams/diagram-quality-report.json \
   --lint-report reports/diagrams/diagram-lint-report.json \
   --max-hard-failures 0 \
   --max-diag-t022 0 \
@@ -629,8 +633,7 @@ participating in any edge or message.
 **Skipped:** `classDiagram`, `stateDiagram`, `erDiagram`, `mindmap`, legend files.
 
 ```bash
-# Report orphans (CI mode)
-python scripts/diagrams/fix/prune_orphan_nodes.py --check
+# Report orphans (CI mode)python scripts/diagrams/fix/prune_orphan_nodes.py --check
 
 # Machine-readable output
 python scripts/diagrams/fix/prune_orphan_nodes.py --check --json
@@ -654,4 +657,3 @@ Insert anywhere in the file (commonly after the diagram-type declaration).
 **Lenient subgraph rule:** nodes inside a subgraph whose *name* appears in an
 edge (e.g. `Bronze --> Silver`) are **not** flagged — they are considered
 descriptive children of a connected subgraph container.
-
