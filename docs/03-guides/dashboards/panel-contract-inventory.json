@@ -274,7 +274,7 @@
       "kind": "http",
       "panel_id": 9403,
       "panel_title": "Inspect Processed Records",
-      "query": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query": "/ops/observability/processed-records?pipeline=${selected_pipeline}&run_type=${run_type:csv}&run_id=${selected_run_id}",
       "query_tokens": [
         "/ops/observability/processed-records",
         "pipeline",
@@ -297,7 +297,7 @@
       "kind": "http",
       "panel_id": 9403,
       "panel_title": "Inspect Processed Records",
-      "query": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+      "query": "/ops/observability/pipeline-run-report?pipeline=${selected_pipeline}&run_id=${selected_run_id}",
       "query_tokens": [
         "/ops/observability/pipeline-run-report",
         "pipeline",
@@ -415,7 +415,7 @@
       "kind": "http",
       "panel_id": 9460,
       "panel_title": "Inspect Selected Run Stages",
-      "query": "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+      "query": "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
       "query_tokens": [
         "/ops/observability/pipeline-run-report-artifact",
         "pipeline",
@@ -3439,15 +3439,15 @@
           "value": null
         },
         {
-          "color": "orange",
+          "color": "#555555",
           "value": 1
         },
         {
-          "color": "red",
+          "color": "orange",
           "value": 2
         },
         {
-          "color": "#555555",
+          "color": "red",
           "value": 3
         }
       ],
@@ -3536,7 +3536,7 @@
       "kind": "http",
       "panel_id": 9460,
       "panel_title": "Inspect Selected Run Stages",
-      "query": "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+      "query": "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
       "query_tokens": [
         "/ops/observability/pipeline-run-report-artifact",
         "pipeline",
@@ -3876,12 +3876,16 @@
           "value": null
         },
         {
-          "color": "orange",
+          "color": "#555555",
           "value": 1
         },
         {
-          "color": "red",
+          "color": "orange",
           "value": 2
+        },
+        {
+          "color": "red",
+          "value": 3
         }
       ],
       "unit": "none"
@@ -3990,7 +3994,7 @@
       "kind": "http",
       "panel_id": 9460,
       "panel_title": "Inspect Selected Run Stages",
-      "query": "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+      "query": "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
       "query_tokens": [
         "/ops/observability/pipeline-run-report-artifact",
         "pipeline",
@@ -4013,7 +4017,7 @@
       "kind": "http",
       "panel_id": 9460,
       "panel_title": "Inspect Selected Run Stages",
-      "query": "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+      "query": "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
       "query_tokens": [
         "/ops/observability/pipeline-run-report-artifact",
         "pipeline",
@@ -4072,7 +4076,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "#555555",
           "value": null
         }
       ],

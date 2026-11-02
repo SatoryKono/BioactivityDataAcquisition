@@ -588,7 +588,7 @@ async def test_filter_options_deadline_does_not_send_late_success(monkeypatch) -
     release = asyncio.Event()
     completed = asyncio.Event()
 
-    async def slow_options(_host, _query):
+    async def slow_options(_host, _query, **_kwargs):
         """Delay the filter payload beyond the patched response deadline."""
         await release.wait()
         completed.set()
