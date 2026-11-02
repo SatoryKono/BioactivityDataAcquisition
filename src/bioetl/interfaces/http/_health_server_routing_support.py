@@ -47,7 +47,6 @@ from bioetl.interfaces.http.control_plane_selector_context import (
     RUN_ID_NO_SELECTION,
     build_selector_context_payload,
     build_selector_filter_options_payload,
-    finalize_run_id_empty_catalog_label,
 )
 
 _NOT_FOUND_MESSAGE = "Not Found"

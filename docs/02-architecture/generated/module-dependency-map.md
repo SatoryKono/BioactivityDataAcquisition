@@ -88,7 +88,6 @@ flowchart LR
 | `interfaces.http`              | `domain.control_plane`                     |      26 |
 | `application.services`         | `domain.value_objects`                     |      25 |
 | `composition.bootstrap`        | `infrastructure.control_plane`             |      25 |
-| `interfaces.http`              | `domain.control_plane`                     |      25 |
 | `infrastructure.adapters`      | `domain.exceptions`                        |      24 |
 | `application.services`         | `domain.exceptions`                        |      23 |
 | `composition.runtime_builders` | `infrastructure.config`                    |      23 |
