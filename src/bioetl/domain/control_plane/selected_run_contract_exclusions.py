@@ -131,13 +131,21 @@ def _stage_fully_tracked(stage: Mapping[str, object]) -> bool:
 
 
 def _stage_map(funnel: object) -> dict[str, Mapping[str, object]]:
+    return dict(_iter_stage_entries(funnel))
+
+
+def _iter_stage_entries(
+    funnel: object,
+) -> list[tuple[str, Mapping[str, object]]]:
     if not isinstance(funnel, Sequence) or isinstance(funnel, (str, bytes)):
-        return {}
-    stages: dict[str, Mapping[str, object]] = {}
-    for item in funnel:
-        if not isinstance(item, Mapping):
-            continue
-        stage_id = item.get("stage_id")
-        if isinstance(stage_id, str) and stage_id:
-            stages[stage_id] = item
-    return stages
+        return []
+    return [entry for item in funnel if (entry := _stage_entry(item)) is not None]
+
+
+def _stage_entry(item: object) -> tuple[str, Mapping[str, object]] | None:
+    if not isinstance(item, Mapping):
+        return None
+    stage_id = item.get("stage_id")
+    if isinstance(stage_id, str) and stage_id:
+        return stage_id, item
+    return None
