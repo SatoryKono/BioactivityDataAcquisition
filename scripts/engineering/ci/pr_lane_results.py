@@ -387,6 +387,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "reports/engineering/blocker-12364.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/engineering/12380_acceptance_report.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
     "reports/12371-restart-c/handoff_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
