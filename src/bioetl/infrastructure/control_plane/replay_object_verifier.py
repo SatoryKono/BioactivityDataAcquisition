@@ -77,6 +77,50 @@ class ReplayObjectVerifier:
             return None
         return resolved if resolved.is_relative_to(base) else None
 
+    def _load_contained_effective_config(
+        self, run_id: object
+    ) -> dict[str, object] | None:
+        """Load effective-config JSON only when index + record stay trusted."""
+        run_index = self.config_root / "_by_run_id" / f"{run_id}.txt"
+        if self._contained(run_index) is None or not run_index.exists():
+            return None
+        artifact_id = run_index.read_text(encoding="utf-8").strip()
+        if not artifact_id:
+            return None
+        artifact_path = self.config_root / f"{artifact_id}.json"
+        if self._contained(artifact_path) is None:
+            return None
+        return FileEffectiveConfigArtifactStore(self.config_root).get(artifact_id)
+
+    @staticmethod
+    def _effective_config_hash_matches(
+        payload: dict[str, object],
+        *,
+        expected_artifact_id: object,
+        expected_digest: str,
+    ) -> bool | None:
+        """Compare persisted effective-config bytes to the manifest digest."""
+        if payload.get("artifact_id") != expected_artifact_id:
+            return False
+        semantic = payload.get("semantic_artifact", payload)
+        if not isinstance(semantic, dict):
+            return None
+        section = semantic.get("effective_execution_config")
+        if not isinstance(section, dict) or "config_data" not in section:
+            return None
+        version = section.get("identity_version")
+        if version != "effective-config-v1":
+            return None
+        return (
+            stable_json_hash(
+                {
+                    "identity_version": version,
+                    "config_data": section["config_data"],
+                }
+            )
+            == expected_digest
+        )
+
     def _config(self, manifest: RunManifest) -> bool | None:
         expected = _digest(manifest.code_provenance.effective_config_hash)
         if expected is None:
@@ -84,44 +128,15 @@ class ReplayObjectVerifier:
         try:
             # Contain index + selected JSON before reading so an outward
             # symlink under config_root cannot forge effective_config_hash.
-            run_index = self.config_root / "_by_run_id" / f"{manifest.run_id}.txt"
-            if self._contained(run_index) is None:
-                return None
-            if not run_index.exists():
-                return None
-            artifact_id = run_index.read_text(encoding="utf-8").strip()
-            if not artifact_id:
-                return None
-            artifact_path = self.config_root / f"{artifact_id}.json"
-            if self._contained(artifact_path) is None:
-                return None
-            payload = FileEffectiveConfigArtifactStore(self.config_root).get(
-                artifact_id
-            )
+            payload = self._load_contained_effective_config(manifest.run_id)
             if payload is None:
                 return None
-            if (
-                payload.get("artifact_id")
-                != manifest.code_provenance.effective_config_artifact_id
-            ):
-                return False
-            semantic = payload.get("semantic_artifact", payload)
-            if not isinstance(semantic, dict):
-                return None
-            section = semantic.get("effective_execution_config")
-            if not isinstance(section, dict) or "config_data" not in section:
-                return None
-            version = section.get("identity_version")
-            if version != "effective-config-v1":
-                return None
-            return (
-                stable_json_hash(
-                    {
-                        "identity_version": version,
-                        "config_data": section["config_data"],
-                    }
-                )
-                == expected
+            return self._effective_config_hash_matches(
+                payload,
+                expected_artifact_id=(
+                    manifest.code_provenance.effective_config_artifact_id
+                ),
+                expected_digest=expected,
             )
         except (OSError, ValueError, TypeError):
             return None
