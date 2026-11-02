@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-02T10:14:04.180598+00:00",
+  "generated_at": "2026-11-02T10:21:05.035626+00:00",
   "summary": {
     "total_scripts": 704,
     "status_counts": {
@@ -6133,7 +6133,7 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 112,
+          "line": 113,
           "source_group": "ci",
           "text": "python3 -c 'import json,sys; payload=json.load(open(sys.argv[1], encoding=\"utf-8\")); rows=[item for item in payload.get(\"issues\", []) if item.get(\"rule\") == \"STALE-001\"]; print(\"Scheduled diagram fres"
         },
@@ -6208,13 +6208,13 @@
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 356,
+          "line": 357,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/check/check_class_method_render_integrity.py\" \\"
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 369,
+          "line": 370,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/check/check_class_method_render_integrity.py\" \\"
         },
@@ -6241,7 +6241,7 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 48,
+          "line": 49,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
@@ -6292,7 +6292,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 80,
+          "line": 81,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
@@ -6347,7 +6347,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -6357,19 +6357,19 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 60,
+          "line": 61,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 66,
+          "line": 67,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 73,
+          "line": 74,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
@@ -6387,7 +6387,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 463,
+          "line": 458,
           "source_group": "docs",
           "text": ".\\.venv-win\\Scripts\\python.exe scripts/diagrams/check/check_diagram_visual_smoke.py `"
         },
@@ -6408,7 +6408,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 393,
+          "line": 389,
           "source_group": "docs",
           "text": "- post-check: `scripts/diagrams/check/check_pdf_image_bounds.py`"
         },
@@ -6447,13 +6447,13 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 54,
+          "line": 55,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 237,
+          "line": 240,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py --manifest \"$manifest_tmp\""
         },
@@ -6845,13 +6845,13 @@
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 321,
+          "line": 322,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix/fix_mermaid_operators.py\" \\"
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 324,
+          "line": 325,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix/fix_mermaid_operators.py\" \\"
         },
@@ -6980,19 +6980,19 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 633,
+          "line": 630,
           "source_group": "docs",
           "text": "`scripts/diagrams/fix/prune_orphan_nodes.py` detects nodes defined in a diagram but not"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 641,
+          "line": 637,
           "source_group": "docs",
-          "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --check"
+          "text": "# Report orphans (CI mode)python scripts/diagrams/fix/prune_orphan_nodes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 644,
+          "line": 640,
           "source_group": "docs",
           "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --check --json"
         }
@@ -7064,19 +7064,19 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 580,
+          "line": 577,
           "source_group": "docs",
           "text": "Use `scripts/diagrams/fix/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 584,
+          "line": 581,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/fix/uniform_diagram_sizes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 587,
+          "line": 584,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/fix/uniform_diagram_sizes.py --fix -f docs/02-architecture/diagrams/class-diagrams/07-application-core-services.mmd"
         },
@@ -7115,13 +7115,13 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 134,
+          "line": 135,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/enforce_diagram_quality_budget.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 536,
+          "line": 533,
           "source_group": "docs",
           "text": "`scripts/diagrams/lint/enforce_diagram_quality_budget.py`."
         },
@@ -7139,13 +7139,13 @@
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 378,
+          "line": 379,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/lint/enforce_diagram_quality_budget.py\""
         },
         {
           "path": "tests/architecture/test_diagram_quality_budget_security.py",
-          "line": 33,
+          "line": 35,
           "source_group": "tests",
           "text": "/ \"enforce_diagram_quality_budget.py\""
         }
@@ -7174,7 +7174,7 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 87,
+          "line": 88,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json \\"
         },
@@ -7252,7 +7252,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 349,
+          "line": 345,
           "source_group": "docs",
           "text": "- repo scripts now use `scripts/diagrams/mmdc_wrapper.sh` as the default `mmdc` entrypoint;"
         },
@@ -7270,7 +7270,7 @@
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 237,
+          "line": 238,
           "source_group": "scripts",
           "text": "local mmdc_bin=\"${MMDC_BIN:-$REPO_ROOT/scripts/diagrams/mmdc_wrapper.sh}\""
         },
@@ -7303,25 +7303,25 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 439,
+          "line": 434,
           "source_group": "docs",
           "text": "Run the renderer through `scripts/diagrams/render.ps1` from PowerShell. The"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 455,
+          "line": 450,
           "source_group": "docs",
           "text": ".\\scripts\\diagrams\\render.ps1"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 456,
+          "line": 451,
           "source_group": "docs",
           "text": ".\\scripts\\diagrams\\render.ps1 --svg-only"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 457,
+          "line": 452,
           "source_group": "docs",
           "text": ".\\scripts\\diagrams\\render.ps1 --filter \"01-*\""
         },
@@ -7525,7 +7525,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 205,
+          "line": 203,
           "source_group": "docs",
           "text": "- Supplemental generator: `scripts/diagrams/render/generate_package_family_class_diagrams.py`"
         },
@@ -7597,7 +7597,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 390,
+          "line": 386,
           "source_group": "docs",
           "text": "- `scripts/diagrams/render/generate_with_descriptions_docx.py`"
         },
@@ -7642,7 +7642,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 389,
+          "line": 385,
           "source_group": "docs",
           "text": "- `scripts/diagrams/render/generate_with_descriptions_pdf.py`"
         },
@@ -7757,7 +7757,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
         {
           "path": "Makefile",
@@ -7767,13 +7767,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 572,
+          "line": 569,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile pr --enforce-budget"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 573,
+          "line": 570,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile nightly --enforce-budget"
         },
@@ -7818,13 +7818,13 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 384,
+          "line": 380,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_docs_agent.sh"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 391,
+          "line": 387,
           "source_group": "docs",
           "text": "- unified orchestrator: `scripts/diagrams/run_diagram_docs_agent.sh`"
         },
@@ -7863,7 +7863,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 125,
+          "line": 126,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/run_diagram_nightly_suite.py \\"
         },
@@ -7899,13 +7899,13 @@
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 467,
+          "line": 469,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/run_diagram_nightly_suite.py\""
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 531,
+          "line": 537,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/run_diagram_nightly_suite.py\" \\"
         }
@@ -7985,7 +7985,7 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 213,
+          "line": 216,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -8003,13 +8003,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 434,
+          "line": 429,
           "source_group": "docs",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 452,
+          "line": 447,
           "source_group": "docs",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json"
         }
