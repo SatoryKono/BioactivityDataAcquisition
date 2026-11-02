@@ -34,8 +34,8 @@ from bioetl.domain.control_plane.run_evidence_location_path import (
 
 __all__ = [
     "DEFAULT_EVIDENCE_ROOT_ALIAS",
-    "EVIDENCE_LOCATION_SCHEMA_VERSION",
     "EVIDENCE_LOCATIONS_DIRNAME",
+    "EVIDENCE_LOCATION_SCHEMA_VERSION",
     "EvidenceLocationConflictError",
     "EvidenceLocationIdentityConflictError",
     "EvidenceLocationInvalidError",
