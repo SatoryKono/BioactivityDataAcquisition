@@ -32,7 +32,7 @@
 
 ### C.1 Revision-bound command evidence (E3–E5)
 
-Pinned audit revision: `a5243cb4bbed67b267daecdc097b8c48501e140a`.  
+Pinned audit revision: `a5243cb4bbed67b267daecdc097b8c48501e140a`.
 Evidence executed on a docs-only descendant of the pinned revision (`git diff a5243cb4bbed67b267daecdc097b8c48501e140a -- configs/ src/bioetl/infrastructure/config/ src/bioetl/infrastructure/schemas/ scripts/schema/analysis/ scripts/engineering/qa/report_pipeline_config_contract_ownership.py` empty at capture time).
 
 | ID | Command | Script blob (tip ≡ pinned) | Result |

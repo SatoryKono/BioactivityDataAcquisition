@@ -113,7 +113,7 @@ The Medallion layer policies are well-defined in the domain (`bioetl.domain.meda
 | V5 | `.venv/bin/python -m scripts.docs generate-cleanup-inventory --update` | 0 | n/a | n/a | n/a |
 | V6 | `.venv/bin/python -m scripts.docs.checks.documentation_cleanup_inventory --check` | 0 | n/a | n/a | n/a |
 
-V5 output: `[documentation-cleanup-inventory] inventory already synchronized` (no tree change).  
+V5 output: `[documentation-cleanup-inventory] inventory already synchronized` (no tree change).
 V6 output: `[documentation-cleanup-inventory] inventory is synchronized`.
 
 **declared_status tracking:** `_extract_declared_status` in `scripts/docs/checks/documentation_cleanup_inventory.py` reads only header-like lines starting with `Status:` / `status:` / `*Status:` in the first 1500 chars. Local body markers like `**Status:** NOT_VERIFIABLE` in P07 Local Output are **not** tracked as `declared_status`. Inventory entry for this report: `declared_status: null`, lifecycle `working_report`, status `Working`.
