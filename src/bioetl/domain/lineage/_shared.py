@@ -6,6 +6,7 @@ import math
 from collections.abc import Mapping
 from datetime import date, datetime
 from enum import Enum
+from pathlib import PurePath
 from types import MappingProxyType
 from uuid import UUID
 
