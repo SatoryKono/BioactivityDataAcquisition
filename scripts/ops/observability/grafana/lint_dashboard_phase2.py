@@ -351,7 +351,7 @@ def lint_donor_jsonata() -> list[str]:
 
     try:
         _assert_donor_jsonata_balanced()
-    except SystemExit as exc:
+    except ValueError as exc:
         return [str(exc)]
     return []
 

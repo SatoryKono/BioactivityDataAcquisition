@@ -405,7 +405,7 @@ def _assert_donor_jsonata_balanced() -> None:
         name for name, expr in donors.items() if not _jsonata_brackets_balanced(expr)
     ]
     if broken:
-        raise SystemExit(f"unbalanced JSONata donor expression(s): {', '.join(broken)}")
+        raise ValueError(f"unbalanced JSONata donor expression(s): {', '.join(broken)}")
 
 
 def _regex_pattern(item: Any) -> str | None:
@@ -960,7 +960,10 @@ def inventory(data: dict[str, Any]) -> tuple[int, int]:
 
 
 def main() -> None:
-    _assert_donor_jsonata_balanced()
+    try:
+        _assert_donor_jsonata_balanced()
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
     files = {
         "bioetl-overview-v2.json": apply_overview,
         "bioetl-dq-v2.json": apply_dq,
