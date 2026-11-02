@@ -99,6 +99,54 @@
       "schema_version": 1,
       "trust_statement": "Reviewed live GitHub publication mapping; not a signature or CI execution receipt.",
       "verification_mode": "live_github"
+    },
+    {
+      "github_pull_request": {
+        "base": {
+          "repo": {
+            "full_name": "SatoryKono/BioactivityDataAcquisition"
+          }
+        },
+        "head": {
+          "sha": "88834d797b4e0f76b74787cd1c60ea04d876cd48"
+        },
+        "merge_commit_sha": "acc8d0f344a048f8d659671f59da2de279a20616",
+        "merged": true,
+        "number": 12661
+      },
+      "retrieved_at_utc": "2026-11-02T07:24:55.091485+00:00",
+      "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/12661",
+      "reviewed_source_commits": [
+        "88834d797b4e0f76b74787cd1c60ea04d876cd48",
+        "9f53cd2c8e29b87f3430e0310d6cfe0c4bfdad0a"
+      ],
+      "schema_version": 1,
+      "trust_statement": "Reviewed live GitHub publication mapping; not a signature or CI execution receipt.",
+      "verification_mode": "live_github"
+    },
+    {
+      "github_pull_request": {
+        "base": {
+          "repo": {
+            "full_name": "SatoryKono/BioactivityDataAcquisition"
+          }
+        },
+        "head": {
+          "sha": "3a8422e0f8bcc58358bace8251c621908ebe1132"
+        },
+        "merge_commit_sha": "9b928d6a07dd818f4833ca70777c42a2c2aa2451",
+        "merged": true,
+        "number": 12656
+      },
+      "retrieved_at_utc": "2026-11-02T09:22:18.761015+00:00",
+      "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/12656",
+      "reviewed_source_commits": [
+        "3a8422e0f8bcc58358bace8251c621908ebe1132",
+        "eab7409268002909b50631e2e837086de0a9cb67"
+      ],
+      "schema_version": 1,
+      "trust_statement": "Reviewed live GitHub publication mapping; not a signature or CI execution receipt.",
+      "verification_mode": "live_github"
     }
   ],
   "schema_version": 1,

@@ -202,6 +202,14 @@ def test_normalize_observability_pipeline_label_rejects_uuid_like_values() -> No
     )
 
 
+def test_normalize_observability_pipeline_label_collapses_ascii_and_unicode_runs() -> (
+    None
+):
+    assert normalize_observability_pipeline_label("ÄBC__activity---part") == (
+        "bc_activity_part"
+    )
+
+
 def test_metric_labels_normalization_collapses_path_like_pipeline_values() -> None:
     labels = normalize_observability_metric_labels(
         {

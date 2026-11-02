@@ -218,6 +218,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/quality/issue-12475-physical-parity-evidence.md": (
         *ISSUE_12475_PHYSICAL_PARITY_TESTS,
     ),
+    **dict.fromkeys(
+        (
+            "reports/quality/12478-evidence/test_pipeline_graceful_shutdown_e2e_exit_code.txt",
+            "reports/quality/12478-evidence/test_pipeline_graceful_shutdown_e2e_stderr.log",
+            "reports/quality/12478-evidence/test_pipeline_graceful_shutdown_e2e_stdout.log",
+        ),
+        ("tests/e2e/test_pipeline_graceful_shutdown_e2e.py",),
+    ),
     "docs/05-operations/runbooks/incident-response.md": (
         "tests/integration/test_prometheus_rules_config.py",
         INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
@@ -348,9 +356,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_qm09_review.json",
         ),
         (
+            EXTERNAL_RESOURCE_INVENTORY_TEST,
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
         ),
+    ),
+    "configs/quality/external_resource_inventory_pr12651_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+    ),
+    "configs/quality/external_resource_inventory_pr12651_main_merge_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
     ),
     **dict.fromkeys(
         (
@@ -372,6 +388,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "reports/engineering/blocker-12364.md": DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    "reports/engineering/12380_acceptance_report.md": (
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
     "reports/12371-restart-c/handoff_report.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
@@ -659,6 +678,11 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ),
     "scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh": (
         NPM_RUNTIME_TEST,
+    ),
+    "scripts/diagrams/": (
+        "tests/architecture/test_diagram_quality_budget_security.py",
+        "tests/architecture/test_run_diagram_checks_script.py",
+        "tests/architecture/test_diagram_issues_6205_6211_closeout.py",
     ),
     "docs/02-architecture/diagrams/": (
         "tests/architecture/test_diagram_corpus_regression_guards.py",

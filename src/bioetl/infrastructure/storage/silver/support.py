@@ -24,6 +24,9 @@ from bioetl.infrastructure.storage.delta.table_ops import (
     normalize_delta_filesystem_path,
     resolve_delta_table_path,
 )
+from bioetl.infrastructure.system.subprocess_boundary import (
+    run_protected_subprocess_popen,
+)
 
 __all__ = [
     "get_table_schema",
@@ -268,7 +271,7 @@ def _execute_bounded_subprocess(
     still reaps the child.
     """
     # No shell or user-controlled command is involved.
-    proc = subprocess.Popen(  # nosec B603 - see suppression registry
+    proc = run_protected_subprocess_popen(  # nosec B603 - see suppression registry
         list(command),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

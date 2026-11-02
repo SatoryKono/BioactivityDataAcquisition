@@ -80,6 +80,31 @@ def test_error_rule_outcome_honors_invalid_record_policy(
     assert outcomes[0].config_path == "contracts/chembl.activity/dq_rules.yaml"
 
 
+@pytest.mark.parametrize("validation_type", ["required", "not_null"])
+def test_nan_is_missing_for_required_and_not_null_rules(
+    validation_type: str,
+) -> None:
+    config = DQConfig(
+        contract_ref="chembl.activity",
+        field_validations=(
+            FieldValidation(
+                field="required_field",
+                validation_type=validation_type,
+                nullable=False,
+            ),
+        ),
+        invalid_record_policy="fail",
+    )
+
+    outcomes = evaluate_dq_rules_for_record(
+        {"required_field": math.nan},
+        dq_config=config,
+    )
+
+    assert len(outcomes) == 1
+    assert outcomes[0].disposition == DQDisposition.FAIL
+
+
 def test_warning_rule_outcome_does_not_override_warn_disposition() -> None:
     config = DQConfig(
         contract_ref="chembl.activity",

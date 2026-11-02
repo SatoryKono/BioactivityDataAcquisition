@@ -877,12 +877,6 @@
       "owner": "@bioetl-quality",
       "review_by": "2026-11-30"
     },
-    "scripts/engineering/common/build_backend.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the PEP 517 build-system backend configured by pyproject.toml. It delegates wheel creation to setuptools and declares the source-only quality tooling closure for sdists; it has no standalone CLI.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
-    },
     "scripts/engineering/common/cli_dispatch.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
@@ -1387,12 +1381,6 @@
       "owner": "@bioetl-architecture",
       "review_by": "2026-09-30"
     },
-    "scripts/engineering/qa/report_test_basename_collisions.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the deterministic basename-collision inventory implementation behind python -m scripts.engineering.qa report-test-basename-collisions; owning tests import its collector. Keep routed through the existing QA dispatcher, with no new active-script surface.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
-    },
     "scripts/engineering/qa/report_test_governance_audit.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
@@ -1452,12 +1440,6 @@
       "next_step": "Retain as the test-imported content-contract checker; promote to an active QA router command only after it is owned by scripts.engineering.qa __main__ and a matching active slot is freed.",
       "owner": "@bioetl-observability",
       "review_by": "2026-09-30"
-    },
-    "scripts/engineering/qa/check_quality_move_distributions.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the test-imported, read-only QM-09 distribution-content validator. Keep it supporting so the active script budget does not grow; promote only after a router slot is freed.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
     },
     "scripts/engineering/qa/verify_quality_move.py": {
       "decision": "shared_helper_module",
