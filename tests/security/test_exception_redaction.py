@@ -33,6 +33,7 @@ def test_structured_exception_context_redacts_hostile_nested_secrets() -> None:
     )
 
     from bioetl.application.core.exceptions_context import get_structured_context
+
     payload = get_structured_context(error)
     serialized = json.dumps(payload)
 
