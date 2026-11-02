@@ -24,9 +24,12 @@ from bioetl.domain.control_plane.run_evidence_location import (
     EvidenceLocationLookupResult,
     RunEvidenceLocation,
 )
+from bioetl.domain.control_plane.run_manifest import RunManifest
+from bioetl.domain.control_plane.workflow_manifest import WorkflowManifest
 from bioetl.domain.ports.control_plane.run_evidence_location import (
     RunEvidenceLocationReadPort,
 )
+from bioetl.domain.types import RunID
 
 __all__ = [
     "EvidenceLocationLegacyRootPolicy",
@@ -59,15 +62,15 @@ class EvidenceReadContext(Protocol):
         """Absolute data root selected for this resolve."""
         ...
 
-    def get_manifest_by_run_id(self, run_id: object) -> object | None:
+    def get_manifest_by_run_id(self, run_id: RunID) -> RunManifest | None:
         """Load a manifest by run id from the bound root, or ``None``."""
         ...
 
-    def get_workflow_manifest_by_run_id(self, run_id: object) -> object | None:
+    def get_workflow_manifest_by_run_id(self, run_id: RunID) -> WorkflowManifest | None:
         """Load a workflow manifest by run id from the bound root, or ``None``."""
         ...
 
-    def verify_replay_objects(self, manifest: object) -> Mapping[str, bool]:
+    def verify_replay_objects(self, manifest: RunManifest) -> Mapping[str, bool]:
         """Re-validate saved config / lock / Bronze bytes for ``manifest``."""
         ...
 
@@ -157,7 +160,7 @@ class EvidenceLocationResolver:
         self,
         result: EvidenceLocationResolveResult,
         *,
-        run_id: object,
+        run_id: RunID,
     ) -> EvidenceLocationLookupResult:
         """Post-resolve manifest layer; keeps ``manifest_missing`` distinct."""
         if result.context is None:
