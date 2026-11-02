@@ -131,24 +131,7 @@ def _run_e3(*, skip: bool) -> E3Evidence:
     combined = "\n".join(
         part for part in (proc.stdout.strip(), proc.stderr.strip()) if part
     )
-    summary_line = ""
-    for line in reversed(combined.splitlines()):
-        if re.search(r"\d+\s+passed|\d+\s+failed|no tests ran|error", line, re.I):
-            summary_line = " ".join(line.strip().split())
-            break
-    if not summary_line:
-        # pytest -q may only print progress dots + [n%]; count dots as passed.
-        dots = sum(1 for ch in combined if ch == ".")
-        failed_marks = sum(1 for ch in combined if ch == "F")
-        error_marks = sum(1 for ch in combined if ch == "E")
-        if proc.returncode == 0 and dots and not failed_marks and not error_marks:
-            summary_line = f"{dots} passed (pytest -q progress dots; no summary line)"
-        else:
-            summary_line = (
-                f"no pytest summary line; dots={dots} F={failed_marks} E={error_marks}"
-            )
-    # Keep ledger cells single-line (markdown table safe).
-    summary_line = summary_line.replace("`", "'").replace("|", "/")
+    summary_line = _summarize_pytest_output(combined, exit_code=proc.returncode)
     result = f"exit={proc.returncode}; {summary_line}"
     return E3Evidence(
         command=E3_COMMAND_DISPLAY,
@@ -157,6 +140,37 @@ def _run_e3(*, skip: bool) -> E3Evidence:
         verified=True,
         exit_code=proc.returncode,
     )
+
+
+def _looks_like_pytest_summary(line: str) -> bool:
+    """Detect pytest summary lines without backtracking regex (Sonar S8786)."""
+    lowered = line.lower()
+    if "no tests ran" in lowered:
+        return True
+    has_digit = any(ch.isdigit() for ch in line)
+    return has_digit and ("passed" in lowered or "failed" in lowered)
+
+
+def _summarize_pytest_output(combined: str, *, exit_code: int) -> str:
+    """Build a single-line E3 result from pytest stdout/stderr."""
+    summary_line = ""
+    for line in reversed(combined.splitlines()):
+        if _looks_like_pytest_summary(line):
+            summary_line = " ".join(line.strip().split())
+            break
+    if not summary_line:
+        # pytest -q may only print progress dots + [n%]; count dots as passed.
+        dots = sum(1 for ch in combined if ch == ".")
+        failed_marks = sum(1 for ch in combined if ch == "F")
+        error_marks = sum(1 for ch in combined if ch == "E")
+        if exit_code == 0 and dots and not failed_marks and not error_marks:
+            summary_line = f"{dots} passed (pytest -q progress dots; no summary line)"
+        else:
+            summary_line = (
+                f"no pytest summary line; dots={dots} F={failed_marks} E={error_marks}"
+            )
+    # Keep ledger cells single-line (markdown table safe).
+    return summary_line.replace("`", "'").replace("|", "/")
 
 
 def _unique(items: list[str]) -> list[str]:
@@ -172,6 +186,42 @@ def _unique(items: list[str]) -> list[str]:
 def _options_before_def(chunk: str) -> list[str]:
     before_def = chunk.split("\ndef ", 1)[0]
     return _unique([m.group(2) for m in _OPTION_RE.finditer(before_def)])
+
+
+def _quarantine_stats_helper_options() -> list[str]:
+    """Options from add_quarantine_stats_options() when the command has none inline."""
+    helper = CLI_COMMANDS_DIR / "domains" / "shared" / "inspection_commands.py"
+    if not helper.is_file():
+        return []
+    helper_text = helper.read_text(encoding="utf-8")
+    start = helper_text.find("def add_quarantine_stats_options")
+    if start < 0:
+        return []
+    return _unique(
+        [m.group(2) for m in _OPTION_RE.finditer(helper_text[start : start + 2500])]
+    )
+
+
+def _cli_row_status(group: str, sub: str) -> str:
+    if group == "quarantine" and sub == "serve":
+        return "CURRENT (legacy long-lived helper; prefer `bioetl health server`)"
+    return "CURRENT"
+
+
+def _matrix_row_for_subcommand(group: str, sub: str, body: str) -> MatrixRow:
+    opts = _options_before_def(body)
+    if group == "quarantine" and sub == "stats" and not opts:
+        opts = _quarantine_stats_helper_options()
+    option_text = ", ".join(f"`{opt}`" for opt in opts) if opts else "(none)"
+    return MatrixRow(
+        name=f"`bioetl {group} {sub}`",
+        kind="CLI",
+        options=option_text,
+        output="Text/JSON" if "--json" in opts else "Text",
+        exits="0 (OK) / 1 (FAIL) / 2 (Click usage)",
+        status=_cli_row_status(group, sub),
+        tests="Yes",
+    )
 
 
 def _extract_group_rows(path: Path) -> list[MatrixRow]:
@@ -194,37 +244,7 @@ def _extract_group_rows(path: Path) -> list[MatrixRow]:
         index += 3
         if group_name != group:
             continue
-        opts = _options_before_def(body)
-        # quarantine stats uses add_quarantine_stats_options() helper.
-        if group == "quarantine" and sub == "stats" and not opts:
-            helper = CLI_COMMANDS_DIR / "domains" / "shared" / "inspection_commands.py"
-            if helper.is_file():
-                helper_text = helper.read_text(encoding="utf-8")
-                start = helper_text.find("def add_quarantine_stats_options")
-                if start >= 0:
-                    opts = _unique(
-                        [
-                            m.group(2)
-                            for m in _OPTION_RE.finditer(
-                                helper_text[start : start + 2500]
-                            )
-                        ]
-                    )
-        option_text = ", ".join(f"`{opt}`" for opt in opts) if opts else "(none)"
-        status = "CURRENT"
-        if group == "quarantine" and sub == "serve":
-            status = "CURRENT (legacy long-lived helper; prefer `bioetl health server`)"
-        rows.append(
-            MatrixRow(
-                name=f"`bioetl {group} {sub}`",
-                kind="CLI",
-                options=option_text,
-                output="Text/JSON" if "--json" in opts else "Text",
-                exits="0 (OK) / 1 (FAIL) / 2 (Click usage)",
-                status=status,
-                tests="Yes",
-            )
-        )
+        rows.append(_matrix_row_for_subcommand(group, sub, body))
     return rows
 
 
