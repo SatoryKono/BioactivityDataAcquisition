@@ -60,7 +60,7 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 512,
-      "pattern": "^(?:\\.|[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*)$"
+      "pattern": "^[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$"
     },
     "revision": {
       "description": "SHA-256 hex digest of the canonical location body excluding this field. Integrity of the locator bytes only — not replay readiness.",

@@ -12,9 +12,9 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Mapping
 
 __all__ = [
     "DEFAULT_EVIDENCE_ROOT_ALIAS",
@@ -43,7 +43,9 @@ DEFAULT_EVIDENCE_ROOT_ALIAS = "dashboard_data"
 
 _OWNER_SEGMENT = re.compile(r"^[A-Za-z0-9._-]+$")
 _SOURCE_ID = re.compile(r"^[0-9a-f]{64}$")
-_RELATIVE_ROOT = re.compile(r"^(?:\.|[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*)$")
+# Single-segment "." is allowed via the character class (not a separate
+# alternative — that would be redundant with [A-Za-z0-9._-]+).
+_RELATIVE_ROOT = re.compile(r"^[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$")
 
 
 class EvidenceLocationKind(StrEnum):

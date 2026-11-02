@@ -485,6 +485,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_cli_doc_parity.py",
         DOCUMENTATION_SYNC_TEST,
     ),
+    "docs/04-reference/reports/run-reports.md": (
+        DOCUMENTATION_SYNC_TEST,
+        "tests/unit/domain/run_reports/test_contracts.py",
+    ),
     ".github/workflows/docker.yml": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "reports/quality/architecture-debt-remote-main-baseline.md": (
         "tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py",
@@ -639,6 +643,13 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "docs/02-architecture/decisions/": (
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
+    ),
+    # Run-report JSON contracts + golden fixtures → schema/golden contract suite.
+    "configs/contracts/reports/": (
+        "tests/unit/domain/run_reports/test_contracts.py",
+    ),
+    "tests/fixtures/reports/": (
+        "tests/unit/domain/run_reports/test_contracts.py",
     ),
     "configs/composites/": (
         "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
