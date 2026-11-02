@@ -18,10 +18,23 @@ import signal
 import subprocess  # nosec B404 - see suppression registry
 from collections.abc import Callable, Mapping, Sequence
 from contextlib import suppress
-from typing import IO, Any, cast
+from typing import IO, Any, TypedDict, Unpack, cast
 
 _MAX_OUTPUT_BYTES = 10 * 1024 * 1024  # 10MB
 _CLEANUP_TIMEOUT_SECONDS = 0.5
+
+
+class _PopenPlatformOptions(TypedDict, total=False):
+    creationflags: int
+    start_new_session: bool
+
+
+class _PopenReaderOptions(TypedDict, total=False):
+    bufsize: int
+    env: Mapping[str, str] | None
+    shell: bool
+    stderr: int | IO[bytes] | None
+    stdout: int | IO[bytes] | None
 
 
 def _filter_env_secrets(env: Mapping[str, str] | None) -> dict[str, str] | None:
@@ -119,7 +132,7 @@ def run_protected_command(
     safe_env = _filter_env_secrets(env)
 
     # Run the process
-    popen_options: dict[str, Any] = {}  # Any: Popen platform options have OS-specific value types.
+    popen_options: _PopenPlatformOptions = {}
     if os.name == "posix":
         popen_options["start_new_session"] = True
     elif os.name == "nt":
@@ -165,7 +178,7 @@ def run_protected_command(
 
 def run_protected_subprocess_popen(
     command: Sequence[str],
-    **kwargs: Any,  # Any: Preserve the stdlib Popen keyword API for injected factories.
+    **kwargs: Unpack[_PopenReaderOptions],
 ) -> subprocess.Popen[bytes]:
     """Start a subprocess with strict security boundaries (SEC-001)."""
     kwargs["shell"] = False
