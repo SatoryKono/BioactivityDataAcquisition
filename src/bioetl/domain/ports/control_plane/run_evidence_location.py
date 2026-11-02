@@ -33,7 +33,13 @@ class RunEvidenceLocationReadPort(Protocol):
         owner: str,
         run_id: str,
     ) -> RunEvidenceLocation | None:
-        """Return the locator for one ownership key, or ``None`` when missing."""
+        """Return the locator for one ownership key, or ``None`` when missing.
+
+        Args:
+            kind: Catalog kind (``pipeline`` or ``workflow``).
+            owner: Owning pipeline or workflow identifier segment.
+            run_id: Run identifier segment for the locator record.
+        """
         ...
 
     def lookup(
@@ -44,7 +50,15 @@ class RunEvidenceLocationReadPort(Protocol):
         run_id: str,
         expected_runtime_source_id: str | None = None,
     ) -> EvidenceLocationLookupResult:
-        """Classify found / missing / invalid / identity conflict without a verdict."""
+        """Classify found / missing / invalid / identity conflict without a verdict.
+
+        Args:
+            kind: Catalog kind (``pipeline`` or ``workflow``).
+            owner: Owning pipeline or workflow identifier segment.
+            run_id: Run identifier segment for the locator record.
+            expected_runtime_source_id: Optional runtime/bind source digest to
+                compare against the stored locator; ``None`` skips identity check.
+        """
         ...
 
 
@@ -60,5 +74,8 @@ class RunEvidenceLocationRegisterPort(Protocol):
         ``EvidenceLocationRegisterOutcome.CONFLICT`` consistently with the
         domain ``decide_register_outcome`` contract; adapters that raise must
         use ``EvidenceLocationConflictError``.
+
+        Args:
+            location: Validated evidence-location locator to register.
         """
         ...
