@@ -23,6 +23,8 @@ from typing import IO, Any, TypedDict, Unpack, cast
 _MAX_OUTPUT_BYTES = 10 * 1024 * 1024  # 10MB
 _CLEANUP_TIMEOUT_SECONDS = 0.5
 
+_PopenResult = subprocess.Popen[bytes] | subprocess.Popen[str]
+
 
 class _PopenPlatformOptions(TypedDict, total=False):
     creationflags: int
@@ -47,7 +49,9 @@ def _filter_env_secrets(env: Mapping[str, str] | None) -> dict[str, str] | None:
     return filtered_env
 
 
-def _output_size(output: str | bytes | None, *, encoding: str, errors: str | None) -> int:
+def _output_size(
+    output: str | bytes | None, *, encoding: str, errors: str | None
+) -> int:
     if output is None:
         return 0
     if isinstance(output, bytes):
@@ -56,7 +60,9 @@ def _output_size(output: str | bytes | None, *, encoding: str, errors: str | Non
 
 
 def _terminate_process_tree(
-    proc: subprocess.Popen[Any],  # Any: Popen stream type follows its text-mode setting.
+    proc: subprocess.Popen[
+        Any
+    ],  # Any: Popen stream type follows its text-mode setting.
 ) -> bool:
     """Terminate the command and its descendants where the OS supports groups."""
     tree_terminated = False
@@ -98,7 +104,9 @@ def _terminate_process_tree(
 
 
 def _cleanup_process(
-    proc: subprocess.Popen[Any],  # Any: Popen stream type follows its text-mode setting.
+    proc: subprocess.Popen[
+        Any
+    ],  # Any: Popen stream type follows its text-mode setting.
 ) -> None:
     """Stop a failed command and close pipes without waiting for inherited EOF."""
     tree_terminated = _terminate_process_tree(proc)
@@ -161,8 +169,10 @@ def run_protected_command(
 
     output_encoding = encoding or locale.getpreferredencoding(False)
     if capture_output and (
-        _output_size(stdout, encoding=output_encoding, errors=errors) > _MAX_OUTPUT_BYTES
-        or _output_size(stderr, encoding=output_encoding, errors=errors) > _MAX_OUTPUT_BYTES
+        _output_size(stdout, encoding=output_encoding, errors=errors)
+        > _MAX_OUTPUT_BYTES
+        or _output_size(stderr, encoding=output_encoding, errors=errors)
+        > _MAX_OUTPUT_BYTES
     ):
         raise subprocess.SubprocessError(
             f"Command output exceeds {_MAX_OUTPUT_BYTES} bytes"
