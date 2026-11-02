@@ -96,7 +96,9 @@ def _move_data_links_to_panel_links(panel: dict[str, Any]) -> None:
         return
     existing = panel.get("links")
     links = list(existing) if isinstance(existing, list) else []
-    seen = {(link.get("title"), link.get("url")) for link in links if isinstance(link, dict)}
+    seen = {
+        (link.get("title"), link.get("url")) for link in links if isinstance(link, dict)
+    }
     for link in data_links:
         if not isinstance(link, dict):
             continue

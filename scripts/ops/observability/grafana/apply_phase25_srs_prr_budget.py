@@ -119,10 +119,7 @@ def _infinity_uql(jsonata: str) -> dict[str, Any]:
 
 def _tag_rows(expr: str, frame: str) -> str:
     """Wrap a JSONata array expression with ``_bioetl_frame`` on each row."""
-    return (
-        f"$map({expr}, function($row){{"
-        f"$merge([$row, {{'{FRAME}': '{frame}'}}])}})"
-    )
+    return f"$map({expr}, function($row){{$merge([$row, {{'{FRAME}': '{frame}'}}])}})"
 
 
 # --- Overview multi-section JSONata (single SRS HTTP) ---------------------
@@ -216,6 +213,7 @@ _OV_EXCL = (
     f"'{FRAME}': 'exclusions'}}]"
 )
 
+
 def _append_many(*parts: str) -> str:
     """Nest binary JSONata ``$append`` calls across many arrays."""
     if not parts:
@@ -294,9 +292,7 @@ _DQ_STAGEINPUT = (
     + "}) }))"
 )
 
-_DQ_DONOR = _append_many(
-    _DQ_STATUS, _DQ_DOMAINS, _DQ_STAGES, _DQ_STAGEINPUT
-)
+_DQ_DONOR = _append_many(_DQ_STATUS, _DQ_DOMAINS, _DQ_STAGES, _DQ_STAGEINPUT)
 
 # --- Incident donor -------------------------------------------------------
 
@@ -345,26 +341,32 @@ _CP_REPLAY_CHECKS = (
 _CP_DONOR = _append_many(_CP_TRUST, _CP_REPLAY_READY, _CP_REPLAY_CHECKS)
 
 
+def _advance_jsonata_string(expression: str, index: int) -> int:
+    """Return the index after a single-quoted JSONata literal starting at ``index``."""
+    escape = False
+    cursor = index + 1
+    while cursor < len(expression):
+        char = expression[cursor]
+        if escape:
+            escape = False
+        elif char == "\\":
+            escape = True
+        elif char == "'":
+            return cursor + 1
+        cursor += 1
+    return len(expression)
+
+
 def _jsonata_brackets_balanced(expression: str) -> bool:
     """Return True when ``()[]{}`` are balanced outside single-quoted literals."""
     stack: list[str] = []
     pairs = {")": "(", "]": "[", "}": "{"}
     opens = set(pairs.values())
-    in_string = False
-    escape = False
-    for char in expression:
-        if in_string:
-            if escape:
-                escape = False
-                continue
-            if char == "\\":
-                escape = True
-                continue
-            if char == "'":
-                in_string = False
-            continue
+    index = 0
+    while index < len(expression):
+        char = expression[index]
         if char == "'":
-            in_string = True
+            index = _advance_jsonata_string(expression, index)
             continue
         if char in opens:
             stack.append(char)
@@ -372,6 +374,7 @@ def _jsonata_brackets_balanced(expression: str) -> bool:
             if not stack or stack[-1] != pairs[char]:
                 return False
             stack.pop()
+        index += 1
     return not stack
 
 
@@ -387,7 +390,9 @@ def _assert_donor_jsonata_balanced() -> None:
         "_DQ_STAGES": _DQ_STAGES,
         "_INC_STATUS": _INC_STATUS,
     }
-    broken = [name for name, expr in donors.items() if not _jsonata_brackets_balanced(expr)]
+    broken = [
+        name for name, expr in donors.items() if not _jsonata_brackets_balanced(expr)
+    ]
     if broken:
         raise SystemExit(f"unbalanced JSONata donor expression(s): {', '.join(broken)}")
 
@@ -425,7 +430,9 @@ def _ensure_exclusions_crit_color(panel: dict[str, Any]) -> None:
         defaults["mappings"] = mappings
     description = str(panel.get("description") or "")
     if "hard limit ERROR" in description:
-        panel["description"] = description.replace("hard limit ERROR", "hard limit CRIT")
+        panel["description"] = description.replace(
+            "hard limit ERROR", "hard limit CRIT"
+        )
 
 
 def _status_donor_transforms() -> list[dict[str, Any]]:
@@ -502,9 +509,7 @@ def apply_overview(data: dict[str, Any]) -> None:
         {
             "id": "filterFieldsByName",
             "options": {
-                "include": {
-                    "names": ["domain", "status_display", "reason_display"]
-                }
+                "include": {"names": ["domain", "status_display", "reason_display"]}
             },
         },
         {
@@ -649,6 +654,7 @@ def apply_overview(data: dict[str, Any]) -> None:
         },
     ]
 
+
 def apply_dq(data: dict[str, Any]) -> None:
     donor = _by_id(data, 9406)
     donor["datasource"] = dict(OPS)
@@ -778,9 +784,7 @@ def apply_dq(data: dict[str, Any]) -> None:
     _replace_with_handoff(
         _by_id(data, 9452),
         title="Inspect Selected Run Identity",
-        description=(
-            "SELECTED RUN · Canonical identity is Overview 9300 (rev7 §2.4)."
-        ),
+        description=("SELECTED RUN · Canonical identity is Overview 9300 (rev7 §2.4)."),
         content=(
             "**Canonical identity:** [Open Review Run Identity on Overview]"
             f"({OV_IDENTITY})"
@@ -814,9 +818,7 @@ def apply_incident(data: dict[str, Any]) -> None:
     _replace_with_handoff(
         _by_id(data, 9452),
         title="Inspect Selected Run Identity",
-        description=(
-            "SELECTED RUN · Canonical identity is Overview 9300 (rev7 §2.4)."
-        ),
+        description=("SELECTED RUN · Canonical identity is Overview 9300 (rev7 §2.4)."),
         content=(
             "**Canonical identity:** [Open Review Run Identity on Overview]"
             f"({OV_IDENTITY})"
@@ -903,18 +905,21 @@ def _fix_reasons_count_visibility(overrides: list[Any]) -> None:
         override["properties"] = props
 
 
+def _rewrite_link_urls(links: list[Any]) -> None:
+    for link in links:
+        if not isinstance(link, dict):
+            continue
+        url = link.get("url") or ""
+        if VIEW_PANEL_TRUST_SELF in url:
+            link["url"] = url.replace(VIEW_PANEL_TRUST_SELF, VIEW_PANEL_TRUST_SIBLING)
+
+
 def _rewrite_trust_self_links(overrides: list[Any]) -> None:
     """Self-link viewPanel=9418 → 9414 on trust_reasons_action."""
     for override in overrides:
         for prop in override.get("properties") or []:
-            if prop.get("id") != "links":
-                continue
-            for link in prop.get("value") or []:
-                url = link.get("url") or ""
-                if VIEW_PANEL_TRUST_SELF in url:
-                    link["url"] = url.replace(
-                        VIEW_PANEL_TRUST_SELF, VIEW_PANEL_TRUST_SIBLING
-                    )
+            if prop.get("id") == "links":
+                _rewrite_link_urls(prop.get("value") or [])
 
 
 def apply_control_plane(data: dict[str, Any]) -> None:

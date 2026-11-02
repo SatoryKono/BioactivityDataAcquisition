@@ -265,7 +265,7 @@ NAV_DESCRIPTION = (
     "Sanitizer-compatible navigation bus with native keyboard focus. "
     "Shared five-chip bus (19.5% each): Run Explorer / Replay Readiness / "
     "Run Overview / Data Quality / Incident Workspace. "
-    "Current workspace is a non-interactive <span class=\"bioetl-nav-current\"> "
+    'Current workspace is a non-interactive <span class="bioetl-nav-current"> '
     "(aria-current=page, underlined) so active state is not color-only and is "
     "not a link. Handoffs open same-tab, preserve current time range, and "
     "document scope reset or context mapping on cross-scope transitions. "
@@ -2767,9 +2767,7 @@ def apply_to_dashboard(
     return True
 
 
-def _apply_phase25_srs_prr_budget(
-    payload: dict[str, Any], *, current_uid: str
-) -> None:
+def _apply_phase25_srs_prr_budget(payload: dict[str, Any], *, current_uid: str) -> None:
     """Re-apply Phase 2.5 donors after nav/layout builders (idempotent)."""
     from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
         apply_control_plane,

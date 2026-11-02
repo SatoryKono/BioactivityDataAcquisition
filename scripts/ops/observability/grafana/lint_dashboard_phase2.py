@@ -48,6 +48,15 @@ _NAV_CHIP_TITLES = (
     "Data Quality",
     "6. Incident Workspace",
 )
+_STATUS_TOKENS = (
+    "OK",
+    "WARN",
+    "CRIT",
+    "ERROR",
+    "UNKNOWN",
+    "SELECT RUN",
+    "INCOMPLETE",
+)
 
 
 def _walk(panels: list[Any]) -> list[dict[str, Any]]:
@@ -65,12 +74,9 @@ def _walk(panels: list[Any]) -> list[dict[str, Any]]:
 
 
 def _ids(panels: list[dict[str, Any]]) -> set[int]:
-    result: set[int] = set()
-    for panel in panels:
-        panel_id = panel.get("id")
-        if isinstance(panel_id, int):
-            result.add(panel_id)
-    return result
+    return {
+        panel_id for panel in panels if isinstance((panel_id := panel.get("id")), int)
+    }
 
 
 def _iter_urls(value: Any) -> list[tuple[str, str]]:
@@ -107,101 +113,167 @@ def parse_dashboard_view_panel(url: str) -> tuple[str | None, int | None]:
         except (TypeError, ValueError):
             return dest_uid, None
     # Grafana template fragments may leave viewPanel outside parse_qs keys.
-    fallback = re.search(r"(?:^|[&])viewPanel=(\d+)", parts.query)
+    fallback = re.search(r"(?:^|&)viewPanel=(\d+)", parts.query)
     if fallback:
         return dest_uid, int(fallback.group(1))
     return dest_uid, None
 
 
-def _lint_nav(path: Path, panels: list[dict[str, Any]]) -> list[str]:
+def _nav_content_findings(path_name: str, content: str) -> list[str]:
     findings: list[str] = []
+    if "bioetl-nav" not in content:
+        findings.append(f"{path_name}: panel 1000 missing bioetl-nav markup")
+    chip_count = content.count("19.5%")
+    if chip_count < 5:
+        findings.append(
+            f"{path_name}: panel 1000 expected five 19.5% chips, found {chip_count}"
+        )
+    if "16.5%" in content:
+        findings.append(f"{path_name}: panel 1000 still uses legacy 16.5% chip width")
+    if "<span" not in content or "bioetl-nav-current" not in content:
+        findings.append(
+            f"{path_name}: panel 1000 current chip must be "
+            '<span class="bioetl-nav-current">'
+        )
+    if re.search(r'<a[^>]*class="[^"]*bioetl-nav-current', content):
+        findings.append(f"{path_name}: panel 1000 current chip must not be an <a>")
+    findings.extend(
+        f"{path_name}: panel 1000 missing chip {title!r}"
+        for title in _NAV_CHIP_TITLES
+        if title not in content
+    )
+    return findings
+
+
+def _lint_nav(path: Path, panels: list[dict[str, Any]]) -> list[str]:
     nav = next((p for p in panels if p.get("id") == 1000), None)
     if nav is None:
         return [f"{path.name}: missing navigation panel id=1000"]
     content = str((nav.get("options") or {}).get("content") or "")
-    if "bioetl-nav" not in content:
-        findings.append(f"{path.name}: panel 1000 missing bioetl-nav markup")
-    chip_count = content.count("19.5%")
-    if chip_count < 5:
-        findings.append(
-            f"{path.name}: panel 1000 expected five 19.5% chips, found {chip_count}"
+    return _nav_content_findings(path.name, content)
+
+
+def _organize_collisions(panel: dict[str, Any]) -> list[tuple[Any, list[str]]]:
+    collisions: list[tuple[Any, list[str]]] = []
+    for transform in panel.get("transformations") or []:
+        if not isinstance(transform, dict) or transform.get("id") != "organize":
+            continue
+        index = (transform.get("options") or {}).get("indexByName") or {}
+        if not isinstance(index, dict):
+            continue
+        seen: dict[Any, list[str]] = {}
+        for name, position in index.items():
+            seen.setdefault(position, []).append(str(name))
+        collisions.extend(
+            (position, names) for position, names in seen.items() if len(names) > 1
         )
-    if "16.5%" in content:
-        findings.append(f"{path.name}: panel 1000 still uses legacy 16.5% chip width")
-    if "<span" not in content or "bioetl-nav-current" not in content:
-        findings.append(
-            f"{path.name}: panel 1000 current chip must be "
-            '<span class="bioetl-nav-current">'
-        )
-    if re.search(r'<a[^>]*class="[^"]*bioetl-nav-current', content):
-        findings.append(f"{path.name}: panel 1000 current chip must not be an <a>")
-    for title in _NAV_CHIP_TITLES:
-        if title not in content:
-            findings.append(f"{path.name}: panel 1000 missing chip {title!r}")
-    return findings
+    return collisions
 
 
 def _lint_organize(path: Path, panels: list[dict[str, Any]]) -> list[str]:
-    findings: list[str] = []
-    for panel in panels:
-        for transform in panel.get("transformations") or []:
-            if not isinstance(transform, dict) or transform.get("id") != "organize":
-                continue
-            index = (transform.get("options") or {}).get("indexByName") or {}
-            if not isinstance(index, dict):
-                continue
-            seen: dict[Any, list[str]] = {}
-            for name, position in index.items():
-                seen.setdefault(position, []).append(str(name))
-            for position, names in seen.items():
-                if len(names) > 1:
-                    findings.append(
-                        f"{path.name}: panel {panel.get('id')} indexByName "
-                        f"collision at {position}: {names}"
-                    )
-    return findings
+    return [
+        (
+            f"{path.name}: panel {panel.get('id')} indexByName "
+            f"collision at {position}: {names}"
+        )
+        for panel in panels
+        for position, names in _organize_collisions(panel)
+    ]
+
+
+def _mapping_has_status_token(item: dict[str, Any]) -> bool:
+    kind = item.get("type")
+    options = item.get("options") or {}
+    if kind == "regex":
+        pattern = str(options.get("pattern") or "")
+        return any(token in pattern for token in _STATUS_TOKENS)
+    if kind != "value" or not isinstance(options, dict):
+        return False
+    for key in options:
+        text = str(key)
+        if any(token in text for token in _STATUS_TOKENS) or not text.isdigit():
+            return True
+    return False
 
 
 def _mappings_look_like_text_status(mappings: list[Any]) -> bool:
     """True when mappings encode OK/WARN/CRIT-style labels (not numeric counts)."""
-    status_tokens = ("OK", "WARN", "CRIT", "ERROR", "UNKNOWN", "SELECT RUN", "INCOMPLETE")
-    for item in mappings:
-        if not isinstance(item, dict):
-            continue
-        kind = item.get("type")
-        options = item.get("options") or {}
-        if kind == "regex":
-            pattern = str(options.get("pattern") or "")
-            if any(token in pattern for token in status_tokens):
-                return True
-        if kind == "value" and isinstance(options, dict):
-            for key in options:
-                if any(token in str(key) for token in status_tokens):
-                    return True
-                if not str(key).isdigit():
-                    return True
-    return False
+    return any(
+        isinstance(item, dict) and _mapping_has_status_token(item) for item in mappings
+    )
+
+
+def _stat_green_base(panel: dict[str, Any]) -> str | None:
+    if panel.get("type") != "stat":
+        return None
+    defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
+    mappings = defaults.get("mappings") or []
+    if not mappings or not _mappings_look_like_text_status(mappings):
+        return None
+    steps = (defaults.get("thresholds") or {}).get("steps") or []
+    if not steps or not isinstance(steps[0], dict):
+        return None
+    color = str(steps[0].get("color") or "").strip()
+    if color.lower() in GREEN or color == "green":
+        return color
+    return None
 
 
 def _lint_thresholds(path: Path, panels: list[dict[str, Any]]) -> list[str]:
     findings: list[str] = []
     for panel in panels:
-        if panel.get("type") != "stat":
+        color = _stat_green_base(panel)
+        if color is None:
             continue
-        defaults = ((panel.get("fieldConfig") or {}).get("defaults") or {})
-        mappings = defaults.get("mappings") or []
-        if not mappings or not _mappings_look_like_text_status(mappings):
-            continue  # numeric gauges / digit value maps may use green
-        steps = (defaults.get("thresholds") or {}).get("steps") or []
-        if not steps:
-            continue
-        base = steps[0] if isinstance(steps[0], dict) else {}
-        color = str(base.get("color") or "").strip()
-        if color.lower() in GREEN or color == "green":
-            findings.append(
-                f"{path.name}: panel {panel.get('id')} text-stat base threshold "
-                f"is green ({color})"
-            )
+        findings.append(
+            f"{path.name}: panel {panel.get('id')} text-stat base threshold "
+            f"is green ({color})"
+        )
+    return findings
+
+
+def _url_transport_findings(path_name: str, title: str, url: str) -> list[str]:
+    findings: list[str] = []
+    if (
+        "/${__data.fields.action_path}&" in url
+        or "/${__data.fields.action_path}&amp;" in url
+    ):
+        findings.append(f"{path_name}: action_path glued with & ({title or url[:60]})")
+    if "github.com/" in url and (
+        "var-" in url or "${__url_time_range}" in url or "${pipeline" in url
+    ):
+        findings.append(f"{path_name}: GitHub URL carries Grafana params ({url[:80]})")
+    if title and "Provider Health" in title and "bioetl-overview-v2" in url:
+        findings.append(
+            f"{path_name}: link title {title!r} points at Overview — "
+            "prefer Run Overview wording (F-25)"
+        )
+    return findings
+
+
+def _view_panel_findings(
+    path_name: str,
+    title: str,
+    url: str,
+    *,
+    uid: str,
+    id_set: set[int],
+    id_by_uid: dict[str, set[int]],
+) -> list[str]:
+    dest_uid, view_panel = parse_dashboard_view_panel(url)
+    if dest_uid is None or view_panel is None or dest_uid.startswith("${"):
+        return []
+    findings: list[str] = []
+    dest_ids = id_by_uid.get(dest_uid)
+    if dest_ids is not None and view_panel not in dest_ids:
+        findings.append(
+            f"{path_name}: broken viewPanel={view_panel} on {dest_uid} "
+            f"(title={title!r})"
+        )
+    if dest_uid == uid and view_panel not in id_set:
+        findings.append(
+            f"{path_name}: local viewPanel={view_panel} missing (title={title!r})"
+        )
     return findings
 
 
@@ -215,31 +287,17 @@ def _lint_urls(
 ) -> list[str]:
     findings: list[str] = []
     for title, url in _iter_urls(payload):
-        if "/${__data.fields.action_path}&" in url or "/${__data.fields.action_path}&amp;" in url:
-            findings.append(f"{path.name}: action_path glued with & ({title or url[:60]})")
-        if "github.com/" in url and (
-            "var-" in url or "${__url_time_range}" in url or "${pipeline" in url
-        ):
-            findings.append(f"{path.name}: GitHub URL carries Grafana params ({url[:80]})")
-        dest_uid, view_panel = parse_dashboard_view_panel(url)
-        if dest_uid is not None and view_panel is not None:
-            if dest_uid.startswith("${"):
-                continue
-            dest_ids = id_by_uid.get(dest_uid)
-            if dest_ids is not None and view_panel not in dest_ids:
-                findings.append(
-                    f"{path.name}: broken viewPanel={view_panel} on {dest_uid} "
-                    f"(title={title!r})"
-                )
-            if dest_uid == uid and view_panel not in id_set:
-                findings.append(
-                    f"{path.name}: local viewPanel={view_panel} missing (title={title!r})"
-                )
-        if title and "Provider Health" in title and "bioetl-overview-v2" in url:
-            findings.append(
-                f"{path.name}: link title {title!r} points at Overview — "
-                "prefer Run Overview wording (F-25)"
+        findings.extend(_url_transport_findings(path.name, title, url))
+        findings.extend(
+            _view_panel_findings(
+                path.name,
+                title,
+                url,
+                uid=uid,
+                id_set=id_set,
+                id_by_uid=id_by_uid,
             )
+        )
     return findings
 
 
@@ -250,7 +308,11 @@ def lint_dashboard(path: Path) -> list[str]:
     id_set = _ids(panels)
     id_by_uid = {
         UID_BY_FILE[name]: _ids(
-            _walk(json.loads((DASH_DIR / name).read_text(encoding="utf-8")).get("panels", []))
+            _walk(
+                json.loads((DASH_DIR / name).read_text(encoding="utf-8")).get(
+                    "panels", []
+                )
+            )
         )
         for name in FILES
         if (DASH_DIR / name).exists()
@@ -267,12 +329,10 @@ def lint_dashboard(path: Path) -> list[str]:
 
 def lint_donor_jsonata() -> list[str]:
     """Validate Phase 2.5 donor JSONata bracket balance when the module loads."""
-    try:
-        from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
-            _assert_donor_jsonata_balanced,
-        )
-    except Exception as exc:  # pragma: no cover - import surface only
-        return [f"phase25 donor import failed: {exc}"]
+    from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
+        _assert_donor_jsonata_balanced,
+    )
+
     try:
         _assert_donor_jsonata_balanced()
     except SystemExit as exc:
