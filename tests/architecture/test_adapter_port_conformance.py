@@ -41,6 +41,7 @@ from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
+from bioetl.infrastructure.storage.delta_reader import DeltaReader
 from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.bootstrap.runtime.assay_replay_capture import RequestReader
 from bioetl.domain.ports.adr import AdrServicePort
@@ -132,6 +133,7 @@ PORT_ADAPTER_CASES = (
     PortAdapterCase(ArtifactByteComparisonPort, FileArtifactByteComparisonAdapter),
     PortAdapterCase(BronzeStoragePort, BronzeWriter),
     PortAdapterCase(CircuitBreakerPort, CircuitBreakerGuard),
+    PortAdapterCase(DeltaReaderPort, DeltaReader),
     PortAdapterCase(DeltaReaderPort, CompositeReplayInputReader),
     PortAdapterCase(DeltaReaderPort, RequestReader),
     PortAdapterCase(ExportCatalogPort, ExportCatalogAdapter),
@@ -442,21 +444,20 @@ def test_missing_production_binding_detected() -> None:
     )
     instantiated_adapters = set()
 
-    for py_file in composition_dir.rglob("*.py"):
-        try:
-            content = py_file.read_text(encoding="utf-8")
-            tree = ast.parse(content)
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
-                    if node.func.id in known_adapters:
-                        instantiated_adapters.add(node.func.id)
-                elif isinstance(node, ast.Call) and isinstance(
-                    node.func, ast.Attribute
-                ):
-                    if node.func.attr in known_adapters:
-                        instantiated_adapters.add(node.func.attr)
-        except Exception:
-            continue
+    assert composition_dir.is_dir(), f"Composition directory is missing: {composition_dir}"
+    py_files = sorted(composition_dir.rglob("*.py"))
+    assert py_files, f"No production composition modules found under {composition_dir}"
+
+    for py_file in py_files:
+        content = py_file.read_text(encoding="utf-8")
+        tree = ast.parse(content, filename=str(py_file))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+                if node.func.id in known_adapters:
+                    instantiated_adapters.add(node.func.id)
+            elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+                if node.func.attr in known_adapters:
+                    instantiated_adapters.add(node.func.attr)
 
     tracked_adapters = {case.adapter_cls.__name__ for case in PORT_ADAPTER_CASES}
     missing = instantiated_adapters - tracked_adapters
