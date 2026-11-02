@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import cast
 
 from bioetl.domain.exceptions.base import CriticalError, RecoverableError
-from bioetl.domain.types.enums import ErrorType
+from bioetl.domain.types import ErrorType
 
 
 class StorageError(RecoverableError):

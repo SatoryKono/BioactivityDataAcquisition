@@ -17,15 +17,6 @@ __all__ = [
 
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 _CONTROL_CHARS_PATTERN = re.compile(r"[\x00-\x08\x0e-\x1f\x7f-\x9f]")
-_CONTROL_CHARS_TRANSLATE_TABLE = str.maketrans(
-    "",
-    "",
-    "".join(
-        [chr(i) for i in range(9)]
-        + [chr(i) for i in range(14, 32)]
-        + [chr(i) for i in range(127, 160)]
-    ),
-)
 
 
 def normalize_string(value: str | None) -> str | None:
@@ -87,8 +78,7 @@ def _normalize_text_field(text: str | None) -> str | None:
     if "<" in normalized or "&" in normalized:
         normalized = unescape(_HTML_TAG_PATTERN.sub("", normalized))
 
-    normalized = _strip_control_chars(normalized)
-
+    normalized = _CONTROL_CHARS_PATTERN.sub("", normalized)
     normalized = unicodedata.normalize("NFC", normalized)
 
     # BOLT OPTIMIZATION:
@@ -97,13 +87,6 @@ def _normalize_text_field(text: str | None) -> str | None:
     normalized = " ".join(normalized.split())
 
     return normalized if normalized else None
-
-
-def _strip_control_chars(text: str) -> str:
-    """Use translate for ASCII and regex for Unicode text."""
-    if text.isascii():
-        return text.translate(_CONTROL_CHARS_TRANSLATE_TABLE)
-    return _CONTROL_CHARS_PATTERN.sub("", text)
 
 
 def _collapse_whitespace(text: str) -> str:

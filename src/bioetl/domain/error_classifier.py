@@ -10,7 +10,7 @@ from __future__ import annotations
 from bioetl.domain.exceptions import (
     BioETLError,
 )
-from bioetl.domain.types.enums import ErrorType
+from bioetl.domain.types import ErrorType
 
 __all__ = [
     "ErrorClassifier",

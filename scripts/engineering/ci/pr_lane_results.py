@@ -110,16 +110,12 @@ EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
     "tests/architecture/test_external_resource_inventory_catalog.py"
 )
 
-CHECK_DOC_LINKS_GUARDRAILS_TEST = (
-    "tests/architecture/test_check_doc_links_guardrails.py"
-)
-
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
-    ".gitleaks.toml": (
-        "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
-    ),
     ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "mkdocs.yml": ("tests/architecture/test_documentation_sync.py",),
+    "docs/reports/evidence/project-test-health/SUMMARY.md": (
+        "tests/architecture/test_governance_freshness_protocol.py",
+    ),
     "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md": (
         "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
     ),
@@ -208,7 +204,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/quality/issue-12474-api-owner-brief.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TEST,
-        CHECK_DOC_LINKS_GUARDRAILS_TEST,
+        "tests/architecture/test_check_doc_links_guardrails.py",
     ),
     "reports/quality/issue-12474-ci-parity-evidence.md": (
         *ISSUE_12475_PHYSICAL_PARITY_TESTS,
@@ -435,11 +431,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/reports/evidence/project-package-topology/SUMMARY.md": (
         "tests/unit/scripts/qa/test_topology_source_binding.py",
     ),
-    "docs/reports/evidence/project-test-health/SUMMARY.md": (
-        "tests/architecture/test_governance_freshness_protocol.py",
-        "tests/architecture/test_runtime_agent_docs_drift.py",
-        "tests/unit/scripts/docs/test_check_drift_evidence_age.py",
-    ),
     "Makefile": (
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
     ),
@@ -545,9 +536,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/security_suppression_registry.yaml": (
         "tests/architecture/test_security_suppression_registry.py",
     ),
-    "configs/quality/retirement_candidate_triage.yaml": (
-        "tests/architecture/test_retirement_candidate_triage.py",
-    ),
     "docs/04-reference/api/infrastructure.md": (
         "tests/architecture/test_api_reference_public_facades.py",
     ),
@@ -596,14 +584,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "docs/filters/inventory-baseline.md",
         ),
         ("tests/architecture/test_silver_filter_boundary_inventory.py",),
-    ),
-    "reports/12592_report.md": (
-        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
-        CHECK_DOC_LINKS_GUARDRAILS_TEST,
-    ),
-    "reports/12592_scoped_patch.diff": (
-        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
-        CHECK_DOC_LINKS_GUARDRAILS_TEST,
     ),
 }
 

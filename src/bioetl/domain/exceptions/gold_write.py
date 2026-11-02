@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions.base import BioETLError
-from bioetl.domain.types.enums import ErrorType
+from bioetl.domain.types import ErrorType
 
 if TYPE_CHECKING:
     from bioetl.domain.types.gold_contracts import GoldWriteReceipt

@@ -19,7 +19,7 @@ from bioetl.domain.exceptions.base import RecoverableError
 from bioetl.domain.exceptions.network_rate_limit_helpers import (
     resolve_rate_limit_params as _resolve_rate_limit_params,
 )
-from bioetl.domain.types.enums import ErrorType
+from bioetl.domain.types import ErrorType
 
 __all__ = [
     "ApiError",

@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, ClassVar, Literal
 from bioetl.domain.exceptions import PolicyViolationError
 
 if TYPE_CHECKING:
-    from bioetl.domain.types.enums import RunType
+    from bioetl.domain.types import RunType
 
 
 class Layer(StrEnum):
@@ -176,7 +176,7 @@ class MedallionPolicy:
         Returns:
             MedallionPolicy with SILVER_AND_GOLD clear for rebuild/backfill, NEVER otherwise.
         """
-        from bioetl.domain.types.enums import RunType
+        from bioetl.domain.types import RunType
 
         if run_type in (RunType.REBUILD, RunType.BACKFILL):
             return cls(clear_policy=ClearPolicy.SILVER_AND_GOLD)

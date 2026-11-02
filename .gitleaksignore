@@ -88,7 +88,3 @@ ea8e7cddd44bf0dee7fd1f1d5c9d03cf01ab0c5f:reports/evidence/12461/uniprot_headers.
 c08883508249e87d297f3b306e7a4d032e36de02:reports/evidence/12461/semanticscholar_headers.txt:generic-api-key:5
 c08883508249e87d297f3b306e7a4d032e36de02:reports/evidence/12461/uniprot_headers.txt:generic-api-key:8
 1b91146589ecff2829ae65bae3b8db83ae27e47d:configs/quality/external_resource_inventory.json:generic-api-key:3280
-
-# Reviewed Git blob IDs for internal_auth.py, not credentials; scoped to the two findings.
-258557176ce137076cb2cf8cec4adf29161f0df5:configs/quality/external_resource_inventory.json:generic-api-key:2831
-3d64273a395bb1dea3404c236d13e5d67383f20a:configs/quality/external_resource_inventory.json:generic-api-key:2831

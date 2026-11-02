@@ -17,7 +17,7 @@ from enum import Enum
 from typing import ClassVar
 
 from bioetl.domain.exceptions.base import CriticalError
-from bioetl.domain.types.enums import ErrorType
+from bioetl.domain.types import ErrorType
 
 __all__ = ["PipelineShutdownError", "ShutdownReason"]
 

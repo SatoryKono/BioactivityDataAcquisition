@@ -7,7 +7,7 @@ from bioetl.domain.exceptions.storage._storage import (
     StorageError,
     StorageQuotaExceededError,
 )
-from bioetl.domain.types.enums import ErrorType
+from bioetl.domain.types import ErrorType
 
 
 class DeltaWriteConflictError(StorageError):

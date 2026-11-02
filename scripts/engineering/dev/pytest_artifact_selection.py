@@ -9,8 +9,6 @@ from __future__ import annotations
 import ast
 import json
 import os
-from collections.abc import Generator
-from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -23,7 +21,7 @@ STATE = pytest.StashKey[dict[str, Any]]()
 
 def load_manifest(path: Path = MANIFEST) -> dict[str, Any]:
     """Read and validate the explicit scheduling inventory."""
-    payload: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(path.read_text(encoding="utf-8"))
     if payload.get("schema_version") != 1:
         raise ValueError("Unsupported generated artifact test manifest")
     nodes = payload["tests"]
@@ -40,48 +38,24 @@ def load_manifest(path: Path = MANIFEST) -> dict[str, Any]:
     return payload
 
 
-@lru_cache(maxsize=1024)
-def _source_selectors(
-    source: bytes,
-) -> tuple[frozenset[tuple[str, ...]], frozenset[tuple[str, ...]]]:
-    """Index exact source bytes; never cache mutable files or manifest decisions."""
-    scopes: set[tuple[str, ...]] = set()
-    functions: set[tuple[str, ...]] = set()
-
-    def visit(scope: ast.AST, prefix: tuple[str, ...]) -> None:
-        named: dict[str, list[ast.AST]] = {}
-        for node in getattr(scope, "body", []):
-            name = getattr(node, "name", None)
-            if name is not None:
-                named.setdefault(name, []).append(node)
-        for name, matches in named.items():
-            if len(matches) != 1:
-                continue
-            node = matches[0]
-            selector = (*prefix, name)
-            scopes.add(selector)
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                functions.add(selector)
-            visit(node, selector)
-
-    visit(ast.parse(source.decode("utf-8")), ())
-    return frozenset(scopes), frozenset(functions)
-
-
 def validate_selectors(payload: dict[str, Any], root: Path = ROOT) -> None:
     """Reject stale manifest functions before an ordinary CI subset can hide them."""
-    sources: dict[
-        str, tuple[frozenset[tuple[str, ...]], frozenset[tuple[str, ...]]]
-    ] = {}
+    trees: dict[str, ast.Module] = {}
     for row in payload["tests"]:
         path, *names = row["node"].split("::")
-        if path not in sources:
-            sources[path] = _source_selectors((root / path).read_bytes())
-        scopes, functions = sources[path]
-        selector = tuple(names)
-        if selector not in scopes:
-            raise ValueError(f"Stale artifact manifest selector: {row['node']}")
-        if selector not in functions:
+        if path not in trees:
+            trees[path] = ast.parse((root / path).read_text(encoding="utf-8"))
+        scope: ast.AST = trees[path]
+        for name in names:
+            matches = [
+                node
+                for node in getattr(scope, "body", [])
+                if getattr(node, "name", None) == name
+            ]
+            if len(matches) != 1:
+                raise ValueError(f"Stale artifact manifest selector: {row['node']}")
+            scope = matches[0]
+        if not isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef)):
             raise ValueError(f"Artifact selector is not a function: {row['node']}")
 
 
@@ -108,9 +82,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
 
 
 @pytest.hookimpl(wrapper=True, tryfirst=True)
-def pytest_collection_modifyitems(
-    config: pytest.Config, items: list[pytest.Item]
-) -> Generator[None]:
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]):
     """Mark before pytest -m, partition afterwards, and retain collection proof."""
     try:
         manifest = load_manifest()
@@ -167,8 +139,7 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
     destination = session.config.getoption("artifact_selection_report")
     if not destination:
         return
-    stored: dict[str, Any] = session.config.stash.get(STATE, {})
-    payload = dict(stored)
+    payload = dict(session.config.stash.get(STATE, {}))
     payload["pytest_exit_code"] = int(exitstatus)
     payload["collection_errors"] = session.testsfailed
     payload["status"] = "executed" if exitstatus == 0 else "failed"

@@ -11,7 +11,7 @@ missing fields, etc.).
 from __future__ import annotations
 
 from bioetl.domain.exceptions.base import DataQualityError
-from bioetl.domain.types.enums import ErrorType
+from bioetl.domain.types import ErrorType
 
 __all__ = [
     "SchemaViolationError",

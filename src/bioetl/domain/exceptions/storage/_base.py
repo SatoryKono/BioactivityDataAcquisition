@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.exceptions.base import CriticalError
-from bioetl.domain.types.enums import ErrorType
+from bioetl.domain.types import ErrorType
 
 
 class InfrastructureError(CriticalError):
