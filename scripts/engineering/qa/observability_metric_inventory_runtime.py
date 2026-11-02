@@ -60,36 +60,9 @@ _load_retired_observability_event_names = (
 )
 
 
-def _resolve_observability_event_expr(node: ast.expr) -> set[str]:
-    if isinstance(node, ast.Constant) and isinstance(node.value, str):
-        return {node.value}
-    if (
-        isinstance(node, ast.Attribute)
-        and isinstance(node.value, ast.Name)
-        and node.value.id == "PipelineEvent"
-    ):
-        resolved = getattr(PipelineEvent, node.attr, None)
-        return {resolved} if isinstance(resolved, str) else set()
-    if (
-        isinstance(node, ast.Call)
-        and isinstance(node.func, ast.Attribute)
-        and isinstance(node.func.value, ast.Name)
-        and node.func.value.id == "PipelineEvent"
-        and node.func.attr in {"phase_started", "phase_completed"}
-    ):
-        resolver = (
-            PipelineEvent.phase_started
-            if node.func.attr == "phase_started"
-            else PipelineEvent.phase_completed
-        )
-        if (
-            node.args
-            and isinstance(node.args[0], ast.Constant)
-            and isinstance(node.args[0].value, str)
-        ):
-            return {resolver(node.args[0].value)}
-        return {resolver(stage_name) for stage_name in ORDINARY_PIPELINE_STAGE_NAMES}
-    return set()
+_resolve_observability_event_expr = (
+    _metric_inventory_events._resolve_observability_event_expr
+)
 
 
 _scan_domain_mapping_observability_events = (
@@ -118,18 +91,7 @@ _load_runtime_cardinality_thresholds = (
 _sample_matches_metric = _metric_inventory_events._sample_matches_metric
 
 
-def _observed_labelsets_for_metric(
-    metric: Any, metric_name: str
-) -> set[tuple[tuple[str, str], ...]]:
-    observed_labelsets: set[tuple[tuple[str, str], ...]] = set()
-    for family in metric.collect():
-        for sample in family.samples:
-            if not _sample_matches_metric(str(sample.name), metric_name):
-                continue
-            observed_labelsets.add(
-                tuple(sorted((str(k), str(v)) for k, v in sample.labels.items()))
-            )
-    return observed_labelsets
+_observed_labelsets_for_metric = _metric_inventory_events._observed_labelsets_for_metric
 
 
 _observed_runtime_series_counts = (
