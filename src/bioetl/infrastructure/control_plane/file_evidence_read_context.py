@@ -41,6 +41,9 @@ __all__ = [
     "FileEvidenceReadContextFactory",
 ]
 
+# Shared Sonar-safe suffix for control-plane JSON records (manifest / config).
+_CONTROL_PLANE_JSON_RECORD_SUFFIX = ".json"
+
 
 @dataclass(frozen=True, slots=True)
 class FileEvidenceReadContext:
@@ -60,7 +63,7 @@ class FileEvidenceReadContext:
         self._assert_concrete_run_index(
             self.data_root / "output" / "control" / "run_manifest",
             run_id,
-            suffix=".json",
+            suffix=_CONTROL_PLANE_JSON_RECORD_SUFFIX,
         )
         return self.manifest_port.get_by_run_id(run_id)
 
@@ -70,7 +73,7 @@ class FileEvidenceReadContext:
         self._assert_concrete_run_index(
             self.data_root / "output" / "control" / "workflow_manifest",
             run_id,
-            suffix=".json",
+            suffix=_CONTROL_PLANE_JSON_RECORD_SUFFIX,
         )
         return self.workflow_manifest_port.get_by_run_id(run_id)
 
@@ -82,7 +85,7 @@ class FileEvidenceReadContext:
         self._assert_concrete_run_index(
             self.data_root / "output" / "control" / "effective_config",
             manifest.run_id,
-            suffix=".json",
+            suffix=_CONTROL_PLANE_JSON_RECORD_SUFFIX,
         )
         return self.replay_object_verifier.verify(manifest)
 
