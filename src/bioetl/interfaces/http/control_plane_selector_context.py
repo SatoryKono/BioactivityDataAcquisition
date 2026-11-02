@@ -6,19 +6,19 @@ from dataclasses import dataclass
 from datetime import UTC
 
 from bioetl.domain.control_plane import RunManifest, WorkflowManifest
+from bioetl.interfaces.http._control_plane_selector_context_build import (
+    build_selector_context_payload,
+)
 from bioetl.interfaces.http._control_plane_selector_filters import (
     filter_records,
-    latest_record,
 )
 from bioetl.interfaces.http._control_plane_selector_payloads import (
+    RUN_ID_NO_RUNS_LABEL,
     RUN_ID_NO_SELECTION,
     SELECTOR_CONTEXT_CONTRACT,
     UNKNOWN_SCOPE,
-    defaults_payload,
     exact_run_only_fallback_values,
     options_payload,
-    resolved_via,
-    selected_payload,
 )
 from bioetl.interfaces.http._control_plane_selector_records import (
     RunLedgerLookup,
@@ -37,6 +37,7 @@ __all__ = (
     "RunIdOptionPolicy",
     "build_selector_context_payload",
     "build_selector_filter_options_payload",
+    "finalize_run_id_empty_catalog_label",
 )
 
 
@@ -49,50 +50,6 @@ class RunIdOptionPolicy:
 
 
 _DEFAULT_RUN_ID_OPTION_POLICY = RunIdOptionPolicy()
-
-
-def build_selector_context_payload(
-    *,
-    manifests: tuple[RunManifest, ...],
-    ledger_port: RunLedgerLookup | None,
-    selected_workflows: tuple[str, ...] = (),
-    selected_pipelines: tuple[str, ...] = (),
-    selected_run_types: tuple[str, ...] = (),
-    selected_run_statuses: tuple[str, ...] = (),
-    selected_run_id: str | None = None,
-    workflow_manifests: tuple[WorkflowManifest, ...] = (),
-) -> dict[str, object]:
-    """Resolve a coherent dashboard selector tuple from local control-plane data."""
-    workflow_aliases = build_workflow_aliases(workflow_manifests)
-    records = build_selector_records(
-        narrow_manifest_catalog(
-            manifests,
-            selected_workflows=selected_workflows,
-            selected_pipelines=selected_pipelines,
-            selected_run_types=selected_run_types,
-            selected_run_id=selected_run_id,
-            workflow_aliases=workflow_aliases,
-        ),
-        ledger_port,
-        workflow_aliases=workflow_aliases,
-    )
-    candidates = filter_records(
-        records,
-        selected_workflows=selected_workflows,
-        selected_pipelines=selected_pipelines,
-        selected_run_types=selected_run_types,
-        selected_run_statuses=selected_run_statuses,
-        selected_run_id=selected_run_id,
-    )
-    selected = latest_record(candidates)
-    option_records = candidates if candidates else records
-    return {
-        "contract": SELECTOR_CONTEXT_CONTRACT,
-        "resolved_via": resolved_via(selected, selected_run_id),
-        "selected": selected_payload(selected),
-        "options": options_payload(option_records),
-        "defaults": defaults_payload(),
-    }
 
 
 def _selector_ledger_for_dimension(
@@ -174,11 +131,17 @@ def _filter_options_response(
 
 
 def _run_option_label(
-    value: str, record: SelectorRecord | None, *, timezone: str = "UTC"
+    value: str,
+    record: SelectorRecord | None,
+    *,
+    timezone: str = "UTC",
+    empty_catalog: bool = False,
 ) -> str:
     """Readable catalog label; Grafana value stays the stable UUID."""
     if value == RUN_ID_NO_SELECTION:
-        return "SELECT RUN"
+        # A2 empty catalog uses «НЕТ ЗАПУСКОВ»; SELECT RUN remains only as the
+        # legacy A1 sentinel label when concrete runs exist (JSON may still send -).
+        return RUN_ID_NO_RUNS_LABEL if empty_catalog else "SELECT RUN"
     if record is None:
         return f"UNKNOWN · {value}"
     timestamp = record.started_at
@@ -194,15 +157,57 @@ def _run_option_labels(
     *,
     timezone: str = "UTC",
 ) -> dict[str, object]:
+    """Label run_id options from the manifest catalog only.
+
+    Empty catalogs keep ``-`` as ``SELECT RUN`` here so report supplements can
+    still append report-only UUIDs without dual-labeling ``-`` as
+    «НЕТ ЗАПУСКОВ». Call ``finalize_run_id_empty_catalog_label`` after the
+    merged catalog is complete.
+    """
     by_id = {record.run_id: record for record in records}
     items = [
         {
-            "text": _run_option_label(value, by_id.get(value), timezone=timezone),
+            "text": _run_option_label(
+                value,
+                by_id.get(value),
+                timezone=timezone,
+                empty_catalog=False,
+            ),
             "value": value,
         }
         for value in values
     ]
     return {"items": items}
+
+
+def finalize_run_id_empty_catalog_label(
+    payload: dict[str, object],
+) -> dict[str, object]:
+    """Apply «НЕТ ЗАПУСКОВ» only after manifest + report options are merged."""
+    raw_items = payload.get("items")
+    if not isinstance(raw_items, list):
+        return payload
+
+    def _value(item: object) -> object:
+        return item.get("value") if isinstance(item, dict) else item
+
+    concrete = [
+        item
+        for item in raw_items
+        if _value(item) not in {None, "", RUN_ID_NO_SELECTION}
+    ]
+    if concrete:
+        items: list[object] = []
+        for item in raw_items:
+            if isinstance(item, dict) and item.get("value") == RUN_ID_NO_SELECTION:
+                items.append({**item, "text": "SELECT RUN"})
+            else:
+                items.append(item)
+        return {**payload, "items": items}
+    return {
+        **payload,
+        "items": [{"text": RUN_ID_NO_RUNS_LABEL, "value": RUN_ID_NO_SELECTION}],
+    }
 
 
 def build_selector_filter_options_payload(

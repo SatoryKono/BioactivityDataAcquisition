@@ -26,6 +26,9 @@ from typing import Any
 import pytest
 import structlog
 
+from bioetl.application.services.quality.config_dq_service import (
+    DQConfigLoaderProtocol,
+)
 from bioetl.domain.ports import (
     BronzeStoragePort,
     CircuitBreakerPort,
@@ -99,6 +102,7 @@ from bioetl.infrastructure.control_plane.file_workflow_ledger_store import (
 from bioetl.infrastructure.control_plane.file_workflow_manifest_store import (
     FileWorkflowManifestStore,
 )
+from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.export.export_catalog_adapter import ExportCatalogAdapter
 from bioetl.infrastructure.export.export_writer_adapter import ExportWriterAdapter
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
@@ -211,6 +215,7 @@ PORT_ADAPTER_CASES = (
     PortAdapterCase(DataSourcePort, PubChemAdapter),
     PortAdapterCase(DebugExportPort, DebugExportAdapter),
     PortAdapterCase(DQReportWriterPort, DQReportWriter),
+    PortAdapterCase(DQConfigLoaderProtocol, DQConfigLoader),
     PortAdapterCase(EffectiveConfigArtifactStorePort, FileEffectiveConfigArtifactStore),
     PortAdapterCase(HealthMetricsExpositionPort, HealthMetricsExpositionAdapter),
     PortAdapterCase(IDMappingSourceReaderPort, IDMappingCsvReaderAdapter),

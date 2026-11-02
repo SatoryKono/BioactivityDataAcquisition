@@ -180,6 +180,12 @@ def test_control_plane_scope_resolves_unknown_exact_and_latest_paths() -> None:
     assert missing_scope.resolved_manifest is None
 
 
+@pytest.mark.parametrize("token", ("All", "$__all", "__all", "*", "", "-"))
+def test_read_selected_run_id_treats_a2_sentinels_as_unresolved(token: str) -> None:
+    host = _Host(_ManifestPort((), by_run_id={}))
+    assert scope.read_selected_run_id(host, {"run_id": token}) is None
+
+
 def test_control_plane_scope_uses_bounded_latest_lookup() -> None:
     selected = _manifest(pipeline_name="chembl_activity", run_id=_RUN_ID)
     manifest_port = _ManifestPort((selected,), by_run_id={_RUN_ID: selected})

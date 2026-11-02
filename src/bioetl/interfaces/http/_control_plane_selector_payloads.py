@@ -11,22 +11,34 @@ from bioetl.interfaces.http._control_plane_selector_records import (
 )
 
 RUN_ID_NO_SELECTION = "-"
+RUN_ID_NO_RUNS_LABEL = "НЕТ ЗАПУСКОВ"
 UNKNOWN_SCOPE = "unknown"
 RUN_TYPE_FALLBACK = "backfill"
 SELECTOR_CONTEXT_CONTRACT = "control_plane_selector_context_v1"
 DEFAULTS_POLICY = "last_run_truthful"
 RUN_ID_LIST_ORDER = "started_at_desc"
+RESOLVED_VIA_A2 = "latest_a2_for_scope"
 
 
 def resolved_via(
     selected: SelectorRecord | None,
     selected_run_id: str | None,
+    *,
+    auto_selected: bool = False,
+    selected_present: bool = False,
 ) -> str:
-    if selected is None:
+    if selected is None and not selected_present:
         return "no_manifest_for_scope"
+    if auto_selected:
+        # Distinct from explicit URL/UI run_id so Grafana last-run defaults
+        # (applyRunId=false) still write var-run_id from selected.run_id.
+        return RESOLVED_VIA_A2
     if selected_run_id:
         return "selected_run_id"
-    if selected.completed_at_source == "run_ledger_terminal_event":
+    if (
+        selected is not None
+        and selected.completed_at_source == "run_ledger_terminal_event"
+    ):
         return "latest_terminal_run_for_scope"
     return "latest_manifest_created_at_for_scope"
 
@@ -45,21 +57,7 @@ def defaults_payload() -> dict[str, object]:
 
 def selected_payload(record: SelectorRecord | None) -> dict[str, object]:
     if record is None:
-        return {
-            "workflow": ALL_SCOPE,
-            "pipeline": UNKNOWN_SCOPE,
-            "run_type": RUN_TYPE_FALLBACK,
-            "run_id": RUN_ID_NO_SELECTION,
-            "run_status": UNKNOWN_SCOPE,
-            "provider": UNKNOWN_SCOPE,
-            "entity": UNKNOWN_SCOPE,
-            "manifest_id": "",
-            "started_at": "",
-            "started_at_source": "none",
-            "completed_at": "",
-            "completed_at_source": "none",
-            "terminal_event_type": "",
-        }
+        return _empty_selected_payload()
     return {
         "workflow": record.workflow,
         "pipeline": record.pipeline,
@@ -74,6 +72,67 @@ def selected_payload(record: SelectorRecord | None) -> dict[str, object]:
         "completed_at": record.completed_at.isoformat(),
         "completed_at_source": record.completed_at_source,
         "terminal_event_type": record.terminal_event_type or "",
+    }
+
+
+def selected_payload_from_report_identity(
+    identity: dict[str, object],
+) -> dict[str, object]:
+    """Build ``selected`` from a verified pipeline-run-report identity."""
+    pipeline = str(identity.get("pipeline_name") or UNKNOWN_SCOPE)
+    provider, entity = _provider_entity_from_pipeline(pipeline)
+    completed_at = _coerce_identity_str(identity.get("completed_at"), default="")
+    return {
+        "workflow": _coerce_identity_str(
+            identity.get("workflow_id"), default=ALL_SCOPE
+        ),
+        "pipeline": pipeline,
+        "run_type": _coerce_identity_str(
+            identity.get("run_type"), default=RUN_TYPE_FALLBACK
+        ),
+        "run_id": _coerce_identity_str(
+            identity.get("run_id"), default=RUN_ID_NO_SELECTION
+        ),
+        "run_status": _coerce_identity_str(
+            identity.get("status"), default=UNKNOWN_SCOPE
+        ),
+        "provider": provider,
+        "entity": entity,
+        "manifest_id": "",
+        "started_at": _coerce_identity_str(identity.get("started_at"), default=""),
+        "started_at_source": "pipeline_run_report",
+        "completed_at": completed_at,
+        "completed_at_source": ("pipeline_run_report" if completed_at else "none"),
+        "terminal_event_type": "",
+    }
+
+
+def _coerce_identity_str(value: object, *, default: str) -> str:
+    return str(value) if isinstance(value, str) and value else default
+
+
+def _provider_entity_from_pipeline(pipeline: str) -> tuple[str, str]:
+    provider, separator, entity = pipeline.partition("_")
+    if not separator:
+        return UNKNOWN_SCOPE, UNKNOWN_SCOPE
+    return provider or UNKNOWN_SCOPE, entity or UNKNOWN_SCOPE
+
+
+def _empty_selected_payload() -> dict[str, object]:
+    return {
+        "workflow": ALL_SCOPE,
+        "pipeline": UNKNOWN_SCOPE,
+        "run_type": RUN_TYPE_FALLBACK,
+        "run_id": RUN_ID_NO_SELECTION,
+        "run_status": UNKNOWN_SCOPE,
+        "provider": UNKNOWN_SCOPE,
+        "entity": UNKNOWN_SCOPE,
+        "manifest_id": "",
+        "started_at": "",
+        "started_at_source": "none",
+        "completed_at": "",
+        "completed_at_source": "none",
+        "terminal_event_type": "",
     }
 
 

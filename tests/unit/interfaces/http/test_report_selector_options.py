@@ -227,6 +227,9 @@ async def test_filter_catalog_reads_overlap_without_losing_options(monkeypatch) 
     from threading import Barrier
     from unittest.mock import AsyncMock, Mock
 
+    from bioetl.interfaces.http import (
+        _health_server_filter_options_payload as filter_payload,
+    )
     from bioetl.interfaces.http import _health_server_routing_support as module
     from bioetl.interfaces.http.health_server_routing_mixin import (
         HealthServerRoutingMixin,
@@ -259,7 +262,8 @@ async def test_filter_catalog_reads_overlap_without_losing_options(monkeypatch) 
     host._run_ledger_port = None
     host._workflow_manifest_port = None
     host._send_payload_response = AsyncMock()
-    monkeypatch.setattr(module, "load_report_selector_entries", reports)
+    # load_report_selector_entries is bound in filter-options payload after extract.
+    monkeypatch.setattr(filter_payload, "load_report_selector_entries", reports)
     monkeypatch.setattr(module, "build_selector_filter_options_payload", build_options)
     budget = AsyncMock(wraps=module.run_bounded_forensic_operation)
     monkeypatch.setattr(module, "run_bounded_forensic_operation", budget)
@@ -290,6 +294,79 @@ def test_corrupt_reports_are_errors(tmp_path: Path, damage: str) -> None:
         path.write_text("{" if damage == "json" else "{}", encoding="utf-8")
     with pytest.raises(ValueError, match="selector report"):
         _options(tmp_path)
+
+
+def test_verified_identity_for_run_ignores_unrelated_corrupt_report(
+    tmp_path: Path,
+) -> None:
+    """Exact run_id scope must not trip on a sibling corrupt report."""
+    from bioetl.interfaces.http._report_selector_options import (
+        verified_report_identity_for_run,
+    )
+
+    _report(tmp_path, run_id="selected")
+    _report(tmp_path, run_id="unrelated", pipeline_name="chembl_activity")
+    identity = verified_report_identity_for_run(
+        "selected",
+        {
+            "workflow": (),
+            "pipeline": ("chembl_assay",),
+            "run_type": (),
+            "run_status": (),
+            "run_id": (),
+        },
+        root=tmp_path,
+    )
+    assert identity is not None
+    assert identity["run_id"] == "selected"
+    assert identity["pipeline_name"] == "chembl_assay"
+
+
+def test_explicit_uuid_keeps_identity_without_started_at(tmp_path: Path) -> None:
+    """Missing started_at gates A2 catalog only; explicit UUID still resolves."""
+    from bioetl.interfaces.http._report_selector_options import (
+        filtered_report_run_candidates,
+        verified_report_identity_for_run,
+    )
+
+    path = tmp_path / "pipeline" / "chembl_assay" / "run-x" / "pipeline-run-report.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": "pipeline_run_report_v1",
+                "identity": {
+                    "pipeline_name": "chembl_assay",
+                    "run_id": "run-x",
+                    "workflow_id": "chembl_baseline",
+                    "run_type": "backfill",
+                    "status": "success",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    scopes = {
+        "workflow": (),
+        "pipeline": ("chembl_assay",),
+        "run_type": (),
+        "run_status": (),
+        "run_id": (),
+    }
+    identity = verified_report_identity_for_run("run-x", scopes, root=tmp_path)
+    assert identity is not None
+    assert identity["run_id"] == "run-x"
+    assert "started_at" not in identity
+    assert filtered_report_run_candidates(scopes, root=tmp_path) == ()
+    options = supplement_report_options(
+        {"items": []},
+        dimension="run_id",
+        response_shape="options",
+        scopes=scopes,
+        root=tmp_path,
+    )
+    assert options["items"][0]["value"] == "run-x"
+    assert str(options["items"][0]["text"]).startswith("UNKNOWN ·")
 
 
 def test_report_run_id_label_and_catalog_value_deduplicate(tmp_path: Path) -> None:
