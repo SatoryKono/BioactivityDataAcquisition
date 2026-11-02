@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+
 @pytest.mark.architecture
 def test_root_path_seams() -> None:
     repo_root = Path(__file__).resolve().parents[3]
@@ -23,7 +24,13 @@ def test_root_path_seams() -> None:
         }
         for name, code in scripts.items():
             result = subprocess.run(
-                [sys.executable, "-I", "-c", f"import sys; sys.path.insert(0, {str(repo_root)!r}); sys.path.insert(0, {str(repo_root / 'src')!r}); " + code],
+                [
+                    sys.executable,
+                    "-I",
+                    "-c",
+                    f"import sys; sys.path.insert(0, {str(repo_root)!r}); sys.path.insert(0, {str(repo_root / 'src')!r}); "
+                    + code,
+                ],
                 cwd=tmp_path,
                 capture_output=True,
                 text=True,

@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+
 @pytest.mark.architecture
 def test_script_consumers_report_architecture_quality_scorecard() -> None:
     repo_root = Path(__file__).resolve().parents[3]
@@ -17,7 +18,13 @@ def test_script_consumers_report_architecture_quality_scorecard() -> None:
         # Import check
         code = "from scripts.engineering.qa.report_architecture_quality_scorecard import __name__; print(__name__)"
         result = subprocess.run(
-            [sys.executable, "-I", "-c", f"import sys; sys.path.insert(0, {str(repo_root)!r}); sys.path.insert(0, {str(repo_root / 'src')!r}); " + code],
+            [
+                sys.executable,
+                "-I",
+                "-c",
+                f"import sys; sys.path.insert(0, {str(repo_root)!r}); sys.path.insert(0, {str(repo_root / 'src')!r}); "
+                + code,
+            ],
             cwd=tmp_path,
             capture_output=True,
             text=True,

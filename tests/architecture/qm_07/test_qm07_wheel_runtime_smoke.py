@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 import pytest
 
+
 @pytest.mark.architecture
 def test_wheel_runtime_smoke(tmp_path: Path) -> None:
     repo_root = Path(__file__).resolve().parents[3]
@@ -13,7 +14,7 @@ def test_wheel_runtime_smoke(tmp_path: Path) -> None:
         subprocess.run(
             [sys.executable, "-m", "build", "--sdist", "--wheel"],
             cwd=repo_root,
-            check=True
+            check=True,
         )
         wheel_files = list((repo_root / "dist").glob("*.whl"))
 
@@ -57,4 +58,6 @@ sys.meta_path.insert(0, BlockScriptsHook())
             capture_output=True,
             text=True,
         )
-        assert result.returncode == 0, f"Scenario failed: {scenario}\n{result.stderr}\n{result.stdout}"
+        assert result.returncode == 0, (
+            f"Scenario failed: {scenario}\n{result.stderr}\n{result.stdout}"
+        )
