@@ -1008,16 +1008,7 @@ def _require_targets(targets: list[str], root: Path) -> None:
 def _path_targets(path: str, root: Path) -> list[str]:
     """Return the test path or unit directory implied by one changed path."""
     if path.startswith("tests/helpers/") and path.endswith(".py"):
-        module = ".".join(Path(path).with_suffix("").parts)
-        test_roots = (root / "tests",)
-        importing_tests = _importing_script_tests(test_roots, module)
-        helpers_init = root / "tests" / "helpers" / "__init__.py"
-        # Package re-exports (from tests.helpers import …) must count as consumers.
-        if helpers_init.is_file() and _imports_module(helpers_init, module):
-            importing_tests |= _importing_script_tests(test_roots, "tests.helpers")
-        if importing_tests:
-            return sorted(test.relative_to(root).as_posix() for test in importing_tests)
-        return _helper_suite(path, root)
+        return _helper_path_targets(path, root)
     if path.startswith(TESTS_PREFIX) and path.endswith(".py"):
         return [path] if (root / path).is_file() else []
     if path.startswith(SRC_BIOETL_PREFIX) and path.endswith(".py"):
@@ -1027,6 +1018,20 @@ def _path_targets(path: str, root: Path) -> list[str]:
     if path.startswith(SCRIPTS_PREFIX) and path.endswith(".py"):
         return _script_targets(path, root)
     return []
+
+
+def _helper_path_targets(path: str, root: Path) -> list[str]:
+    """Map a changed tests/helpers module to importing tests or its suite."""
+    module = ".".join(Path(path).with_suffix("").parts)
+    test_roots = (root / "tests",)
+    importing_tests = _importing_script_tests(test_roots, module)
+    helpers_init = root / "tests" / "helpers" / "__init__.py"
+    # Package re-exports (from tests.helpers import …) must count as consumers.
+    if helpers_init.is_file() and _imports_module(helpers_init, module):
+        importing_tests |= _importing_script_tests(test_roots, "tests.helpers")
+    if importing_tests:
+        return sorted(test.relative_to(root).as_posix() for test in importing_tests)
+    return _helper_suite(path, root)
 
 
 def _script_targets(path: str, root: Path) -> list[str]:
