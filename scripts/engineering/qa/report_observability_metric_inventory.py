@@ -14,30 +14,13 @@ The report is intentionally static and repo-local. It reconciles:
 
 from __future__ import annotations
 
-from bioetl.infrastructure.observability import (
-    metric_inventory_assembly as _metric_inventory_assembly,
-    metric_inventory_ast as _metric_inventory_ast,
-    metric_inventory_scan as _metric_inventory_scan,
-)
-
-import sys
-
-# `python -m scripts.engineering.qa.report_observability_metric_inventory` loads
-# this file as ``__main__``. The scan helper imports the same module by package
-# name; alias the in-flight module so that import does not start a second copy
-# and trip the circular import with observability_metric_inventory_scan.
-if __name__ == "__main__":
-    sys.modules.setdefault(
-        "scripts.engineering.qa.report_observability_metric_inventory",
-        sys.modules[__name__],
-    )
-
 import argparse
 import ast
 import json
 import os
 import re
 import subprocess
+import sys
 import types
 from collections import defaultdict
 from collections.abc import Callable, Sequence
@@ -47,6 +30,26 @@ from typing import Any, Final, Protocol, TypedDict, cast
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
+
+# Keep direct `python -m` execution working from an uninstalled source checkout.
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+_SRC_ROOT = _REPO_ROOT / "src"
+if str(_SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(_SRC_ROOT))
+
+# Alias the in-flight module before importing the scan helper to avoid a second
+# copy and the circular import with observability_metric_inventory_scan.
+if __name__ == "__main__":
+    sys.modules.setdefault(
+        "scripts.engineering.qa.report_observability_metric_inventory",
+        sys.modules[__name__],
+    )
+
+from bioetl.infrastructure.observability import (
+    metric_inventory_assembly as _metric_inventory_assembly,
+    metric_inventory_ast as _metric_inventory_ast,
+    metric_inventory_scan as _metric_inventory_scan,
+)
 
 from scripts.engineering.qa.observability_metric_inventory_shared import (
     _REPO_ROOT,
@@ -77,8 +80,7 @@ from scripts.engineering.qa.observability_metric_inventory_shared import (
     _RUNTIME_CANDIDATE_PATH_CACHE,
     _RUNTIME_EVENT_CANDIDATE_PATH_CACHE,
     _TEXT_DISCOVERY_TIMEOUT_SECONDS,
-    _METRIC_MENTION_GREP_TIMEOUT_SECONDS,
-    _METRIC_MENTION_GREP_CHUNK_SIZE,
+    _METRIC_MENTION_GREP_TIMEOUT_SECONDS,    _METRIC_MENTION_GREP_CHUNK_SIZE,
     _PROMETHEUS_QUERY_TIMEOUT_SECONDS,
     _PROMETHEUS_BASE_URL_ENV_VAR,
     _PROMETHEUS_BEARER_TOKEN_ENV_VAR,
@@ -157,8 +159,7 @@ from scripts.engineering.qa.observability_metric_inventory_scan import (
     _looks_like_imported_string_constant_name,
     _imported_string_constant_aliases,
     _module_string_bindings,
-    _merge_imported_string_aliases,
-    _class_nodes,
+    _merge_imported_string_aliases,    _class_nodes,
     _class_attribute_string_bindings,
     _call_nodes,
     _metric_names_for_call,
@@ -237,8 +238,7 @@ def _iter_text_files_with_git_ls_files(root: Path) -> list[Path] | None:
 
 
 from scripts.engineering.qa.observability_metric_inventory_report import (
-    _coerce_int,
-    _iter_dashboard_panels,
+    _coerce_int,    _iter_dashboard_panels,
     _field_config_link_candidates,
     _runbook_urls_from_link_candidates,
     _panel_runbook_urls,
@@ -317,8 +317,7 @@ from scripts.engineering.qa.observability_metric_inventory_runtime import (
     _finalize_live_cardinality_review,
 )
 
-_query_prometheus_scalar_impl = _metric_runtime._query_prometheus_scalar
-_query_prometheus_label_values_impl = _metric_runtime._query_prometheus_label_values
+_query_prometheus_scalar_impl = _metric_runtime._query_prometheus_scalar_query_prometheus_label_values_impl = _metric_runtime._query_prometheus_label_values
 _build_runtime_cardinality_review_summary_impl = (
     _metric_runtime._build_runtime_cardinality_review_summary
 )
@@ -399,7 +398,6 @@ _canonical_runtime_sets = _metric_inventory_assembly._canonical_runtime_sets
 
 _allowlisted_metric_diff = _metric_inventory_assembly._allowlisted_metric_diff
 
-
 _cardinality_review_fields = _metric_inventory_assembly._cardinality_review_fields
 
 
@@ -477,8 +475,7 @@ def _collect_metric_inventory_impl(
     runtime_observability_contract = get_runtime_observability_publication_contract()
 
     registered_set = set(registered)
-    (
-        runtime_set,
+    (        runtime_set,
         runtime_counter_bases,
         canonical_runtime_set,
         canonical_direct_runtime_set,
@@ -557,8 +554,7 @@ def _collect_metric_inventory_impl(
         "emitted_without_declaration": sorted(runtime_without_registry),
         "dashboarded_without_declaration": sorted(docs_set - registered_set),
         "alerted_without_declaration": sorted(rules_set - registered_set),
-        "dashboarded_without_emission": sorted(documented_without_runtime),
-        "alerted_without_emission": sorted(ruled_without_runtime),
+        "dashboarded_without_emission": sorted(documented_without_runtime),        "alerted_without_emission": sorted(ruled_without_runtime),
         "runtime_cardinality_review_candidates": cardinality_fields[
             "runtime_cardinality_candidates"
         ],
@@ -637,8 +633,7 @@ def collect_metric_inventory(repo_root: Path) -> MetricInventoryReport:
         _RUNTIME_CANDIDATE_PATH_CACHE,
         _RUNTIME_EVENT_CANDIDATE_PATH_CACHE,
     ):
-        cache.clear()
-    _sync_metric_scan_compatibility_seams()
+        cache.clear()    _sync_metric_scan_compatibility_seams()
     return _collect_metric_inventory_impl(repo_root)
 
 
