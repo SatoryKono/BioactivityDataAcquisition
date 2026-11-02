@@ -1,15 +1,11 @@
 {
   "schema_version": 1,
-  "catalog_ref": "97ad6ca6bc9950d2359c2bc23d9898bd8a829478",
-  "source_ref": "6703f6b4da5a04d22e615d1a04b45eb3b86b160d",
+  "catalog_ref": "703ad806b67b7e469204367bde83fa15d2ec0dc0",
+  "source_ref": "5e86ca3cf9995383042f4c34297e4c72bdeb7683",
   "source_reviews": {
-    "src/bioetl/application/services/control_plane/config_source_hashing.py": "Removed from control_plane flat root; rehomed under effective_config for ownership boundaries.",
-    "src/bioetl/application/services/control_plane/effective_config/config_source_hashing.py": "Moved config-source hashing into effective_config responsibility package; hashing-only, no acquisition-site changes.",
-    "src/bioetl/application/services/exceptions_context.py": "Removed from application/services root; rehomed under quality BC package.",
-    "src/bioetl/application/services/quality/exceptions_context.py": "Moved exception redaction/context helpers into services.quality; string redaction only, no acquisition sites.",
-    "src/bioetl/composition/runtime_builders/_effective_config_source_refs_support.py": "Import retarget to effective_config.config_source_hashing; acquisition expressions unchanged.",
-    "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_failure_details.py": "Import retarget to services.quality.exceptions_context; probe/log acquisition expressions preserved.",
-    "src/bioetl/interfaces/cli/commands/domains/shared/_execution_failure_support.py": "Import retarget to services.quality.exceptions_context; no acquisition-site changes."
+    "src/bioetl/infrastructure/observability/observability_backend_process.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed.",
+    "src/bioetl/infrastructure/provenance/code_revision.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed.",
+    "src/bioetl/infrastructure/storage/silver/support.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed."
   },
   "expression_updates": {},
   "resource_updates": {},
