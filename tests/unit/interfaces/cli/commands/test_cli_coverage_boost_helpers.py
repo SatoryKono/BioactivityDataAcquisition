@@ -847,8 +847,8 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
         )
     )
     monkeypatch.setattr(
-        backend_process.subprocess,
-        "run",
+        backend_process,
+        "run_protected_command",
         lambda *args, **kwargs: fake_result,
     )
     monkeypatch.setattr(backend_process.os, "name", "posix")
@@ -953,13 +953,12 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
             ]
         )
     )
-    import os as os_module
-    import subprocess as subprocess_module
-
     monkeypatch.setattr(
-        subprocess_module, "run", lambda *args, **kwargs: windows_result
+        backend_process,
+        "run_protected_command",
+        lambda *args, **kwargs: windows_result,
     )
-    monkeypatch.setattr(os_module, "name", "nt")
+    monkeypatch.setattr(backend_process.os, "name", "nt")
     monkeypatch.setattr(
         backend_process, "_resolve_system_executable", lambda x: "netstat"
     )
