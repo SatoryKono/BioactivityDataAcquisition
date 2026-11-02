@@ -3,7 +3,7 @@
 
 - Incident collapsed row 8808: fill each y-band so panel widths sum to 24
   (F-24). Keeps existing 1–3 panel groupings; expands widths in place.
-- Incident panel 9451: height 12 → 8 at limitField 6 (F-30 / residual №10).
+- Incident + DQ panel 9451: height → 8 at limitField 6 (F-30 / residual №10).
 - Documents the width-fill rule on the 8808 row description.
 
 Does not start Docker, touch ``.env``, or inflate tech-debt budgets.
@@ -19,6 +19,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[4]
 DASH = ROOT / "grafana" / "dashboards"
 INCIDENT = DASH / "bioetl-incident-v1.json"
+DQ = DASH / "bioetl-dq-v2.json"
 FLEET_ROW_ID = 8808
 DOMAINS_PANEL_ID = 9451
 TARGET_WIDTH = 24
@@ -110,17 +111,47 @@ def reflow_fleet_row(row: dict[str, Any]) -> int:
     return adjusted
 
 
+def _shrink_domains_height(data: dict[str, Any]) -> dict[str, int]:
+    """Set domains panel 9451 to ``DOMAINS_HEIGHT`` and pull later panels up."""
+    domains = _by_id(data, DOMAINS_PANEL_ID)
+    grid = domains.setdefault("gridPos", {})
+    height_before = int(grid.get("h") or 0)
+    y = int(grid.get("y") or 0)
+    delta = height_before - DOMAINS_HEIGHT
+    grid["h"] = DOMAINS_HEIGHT
+    shifted = 0
+    if delta > 0:
+        cutoff = y + DOMAINS_HEIGHT
+        for panel in _walk(data.get("panels")):
+            if panel is domains:
+                continue
+            gp = panel.get("gridPos")
+            if not isinstance(gp, dict):
+                continue
+            panel_y = int(gp.get("y") or 0)
+            if panel_y >= cutoff + delta:
+                gp["y"] = panel_y - delta
+                shifted += 1
+    return {
+        "domains_height_before": height_before,
+        "domains_height_after": DOMAINS_HEIGHT,
+        "panels_shifted_up": shifted,
+    }
+
+
 def apply_incident(data: dict[str, Any]) -> dict[str, int]:
     row = _by_id(data, FLEET_ROW_ID)
     bands = reflow_fleet_row(row)
-    domains = _by_id(data, DOMAINS_PANEL_ID)
-    height_before = int((domains.get("gridPos") or {}).get("h") or 0)
-    domains.setdefault("gridPos", {})["h"] = DOMAINS_HEIGHT
+    height_stats = _shrink_domains_height(data)
     return {
         "fleet_bands_adjusted": bands,
-        "domains_height_before": height_before,
-        "domains_height_after": DOMAINS_HEIGHT,
+        **height_stats,
     }
+
+
+def apply_dq(data: dict[str, Any]) -> dict[str, int]:
+    """Apply F-30 domains height on Data Quality (panel 9451)."""
+    return _shrink_domains_height(data)
 
 
 def incomplete_bands(data: dict[str, Any]) -> list[tuple[int, int]]:
@@ -139,17 +170,21 @@ def incomplete_bands(data: dict[str, Any]) -> list[tuple[int, int]]:
 
 
 def main() -> int:
-    data = json.loads(INCIDENT.read_text(encoding="utf-8"))
-    before = incomplete_bands(data)
-    stats = apply_incident(data)
-    after = incomplete_bands(data)
+    incident = json.loads(INCIDENT.read_text(encoding="utf-8"))
+    before = incomplete_bands(incident)
+    incident_stats = apply_incident(incident)
+    after = incomplete_bands(incident)
     INCIDENT.write_text(
-        json.dumps(data, indent=2, ensure_ascii=False) + "\n",
+        json.dumps(incident, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
-    print("Phase 4.2/4.3 Incident reflow")
+    dq = json.loads(DQ.read_text(encoding="utf-8"))
+    dq_stats = apply_dq(dq)
+    DQ.write_text(json.dumps(dq, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print("Phase 4.2/4.3 Incident + DQ reflow")
     print(f"  incomplete bands before: {len(before)} {before[:8]}...")
-    print(f"  stats: {stats}")
+    print(f"  incident stats: {incident_stats}")
+    print(f"  dq stats: {dq_stats}")
     print(f"  incomplete bands after: {len(after)} {after}")
     return 0 if not after else 1
 

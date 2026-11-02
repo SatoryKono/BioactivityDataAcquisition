@@ -68,7 +68,7 @@ BUS: list[dict[str, str]] = [
     },
     {
         "uid": "bioetl-incident-v1",
-        "title": "6. Incident Workspace",
+        "title": "Incident Workspace",
         "path": "6-incident-workspace",
     },
 ]

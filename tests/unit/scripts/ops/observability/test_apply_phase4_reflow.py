@@ -11,6 +11,7 @@ from scripts.ops.observability.grafana.apply_phase4_reflow import (
     DOMAINS_HEIGHT,
     DOMAINS_PANEL_ID,
     FLEET_ROW_ID,
+    apply_dq,
     apply_incident,
     incomplete_bands,
 )
@@ -19,6 +20,7 @@ from scripts.ops.observability.grafana.apply_phase4_reflow import (
 pytestmark = pytest.mark.unit
 
 INCIDENT = Path("grafana/dashboards/bioetl-incident-v1.json")
+DQ = Path("grafana/dashboards/bioetl-dq-v2.json")
 
 
 def test_incident_fleet_bands_sum_to_24() -> None:
@@ -49,3 +51,27 @@ def test_reflow_is_idempotent() -> None:
     assert incomplete_bands(data) == []
     assert first["domains_height_after"] == DOMAINS_HEIGHT
     assert second["fleet_bands_adjusted"] == 0
+
+
+def test_dq_domains_height_matches_limit_field_budget() -> None:
+    data = json.loads(DQ.read_text(encoding="utf-8"))
+
+    def walk(panels):
+        for panel in panels or []:
+            yield panel
+            yield from walk(panel.get("panels"))
+
+    domains = next(p for p in walk(data["panels"]) if p.get("id") == DOMAINS_PANEL_ID)
+    assert domains["gridPos"]["h"] == DOMAINS_HEIGHT
+    limits = [t for t in domains.get("transformations") or [] if t.get("id") == "limit"]
+    assert limits and limits[0]["options"]["limitField"] == 6
+    follower = next(p for p in walk(data["panels"]) if p.get("id") == 9452)
+    assert follower["gridPos"]["y"] == domains["gridPos"]["y"] + DOMAINS_HEIGHT
+
+
+def test_dq_reflow_is_idempotent() -> None:
+    data = json.loads(DQ.read_text(encoding="utf-8"))
+    first = apply_dq(data)
+    second = apply_dq(data)
+    assert first["domains_height_after"] == DOMAINS_HEIGHT
+    assert second["panels_shifted_up"] == 0

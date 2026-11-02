@@ -7,7 +7,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 The approved JSON portfolio contains five dashboards (ADR-053 cutover,
 2026-10-02). The visible bus is:
 
-`Run Explorer` · `Replay Readiness` · `Run Overview` · `6. Incident Workspace`
+`Run Explorer` · `Replay Readiness` · `Run Overview` · `Incident Workspace`
 
 The current workspace is disabled (`aria-current="page"`) when it is a bus
 item; machine-readable links on panel `1000` omit that self-link. Data Quality

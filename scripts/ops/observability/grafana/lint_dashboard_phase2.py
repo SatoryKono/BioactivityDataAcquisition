@@ -48,7 +48,7 @@ _NAV_CHIP_TITLES = (
     "Replay Readiness",
     "Run Overview",
     "Data Quality",
-    "6. Incident Workspace",
+    "Incident Workspace",
 )
 _STATUS_TOKENS = (
     "OK",
@@ -136,7 +136,7 @@ _NAV_DESTINATIONS = {
     "Replay Readiness": "bioetl-control-plane-v1",
     "Run Overview": "bioetl-overview-v2",
     "Data Quality": "bioetl-dq-v2",
-    "6. Incident Workspace": "bioetl-incident-v1",
+    "Incident Workspace": "bioetl-incident-v1",
 }
 _NAV_CHIP_WIDTH_RE = re.compile(r"(?:^|;)\s*width:19\.5%\s*(?:;|$)")
 _NAV_ELEMENT_RE = re.compile(

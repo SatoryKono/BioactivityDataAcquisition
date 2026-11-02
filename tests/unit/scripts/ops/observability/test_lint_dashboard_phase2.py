@@ -99,7 +99,7 @@ def test_nav_linter_checks_real_elements_and_destinations() -> None:
         'href="/d/bioetl-dq-v2/5-data-quality">Data Quality</a>'
         '<a class="bioetl-nav-link" style="width:19.5%" '
         'href="/d/bioetl-incident-v1/6-incident-workspace">'
-        "6. Incident Workspace</a></div>"
+        "Incident Workspace</a></div>"
     )
     assert lint._nav_content_findings("fixture.json", content) == []
 
@@ -147,7 +147,7 @@ def test_lint_flags_broken_view_panel_mid_query(
                         '<span class="bioetl-nav-current">x</span>'
                         "19.5% 19.5% 19.5% 19.5% 19.5%"
                         "Run Explorer Replay Readiness Run Overview "
-                        "Data Quality 6. Incident Workspace"
+                        "Data Quality Incident Workspace"
                         "</div>"
                     )
                 },
@@ -203,7 +203,7 @@ def test_nav_lint_requires_real_chip_elements() -> None:
             '<span class="bioetl-nav-current">x</span>'
             "19.5% 19.5% 19.5% 19.5% 19.5%"
             "Run Explorer Replay Readiness Run Overview "
-            "Data Quality 6. Incident Workspace"
+            "Data Quality Incident Workspace"
             "</div>"
         ),
     )

@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "Incident Workspace — read-only triage. First screen answers the highest-confidence active suspect. Monitor Current Alerts is on the first screen; deeper alert history and impact notes sit in collapsed Review Alert Evidence. Not a lifecycle/working record.",
+  "description": "Incident Workspace — read-only triage. First screen answers the highest-confidence active suspect. Monitor Global Alerts is on the first screen; deeper alert history and impact notes sit in collapsed Review Alert Evidence. Not a lifecycle/working record.",
   "editable": true,
   "graphTooltip": 1,
   "id": null,
@@ -327,7 +327,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "6. Incident Workspace",
+  "title": "Incident Workspace",
   "uid": "bioetl-incident-v1",
   "version": 3,
   "style": "dark",
@@ -343,7 +343,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Overview (Run Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Preserves selected scope and time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Data Quality</a><span class=\"bioetl-nav-current\" aria-current=\"page\" data-current=\"page\" title=\"6. Incident Workspace (Incident Workspace)\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none;display:inline-block\">6. Incident Workspace</span></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Overview (Run Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Preserves selected scope and time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Data Quality</a><span class=\"bioetl-nav-current\" aria-current=\"page\" data-current=\"page\" title=\"Incident Workspace (Incident Workspace)\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none;display:inline-block\">Incident Workspace</span></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared five-chip bus (19.5% each): Run Explorer / Replay Readiness / Run Overview / Data Quality / Incident Workspace. Current workspace is a non-interactive <span class=\"bioetl-nav-current\"> (aria-current=page, underlined) so active state is not color-only and is not a link. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -4167,7 +4167,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 80,
+            "y": 76,
             "w": 12,
             "h": 6
           },
@@ -4263,7 +4263,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 80,
+            "y": 76,
             "w": 12,
             "h": 6
           },
@@ -4320,7 +4320,7 @@
           "title": "Review Runtime Escalation",
           "gridPos": {
             "x": 0,
-            "y": 86,
+            "y": 82,
             "w": 24,
             "h": 3
           },
@@ -4379,7 +4379,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 89,
+            "y": 85,
             "w": 8,
             "h": 4
           },
@@ -4472,7 +4472,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 89,
+            "y": 85,
             "w": 8,
             "h": 4
           },
@@ -4562,7 +4562,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 89,
+            "y": 85,
             "w": 8,
             "h": 4
           },
@@ -4654,7 +4654,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 93,
+            "y": 89,
             "w": 10,
             "h": 4
           },
@@ -4759,7 +4759,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 93,
+            "y": 89,
             "w": 14,
             "h": 4
           },
@@ -4844,7 +4844,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 97,
+            "y": 93,
             "w": 10,
             "h": 4
           },
@@ -4949,7 +4949,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 97,
+            "y": 93,
             "w": 14,
             "h": 4
           },
@@ -5050,7 +5050,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 101,
+            "y": 97,
             "w": 10,
             "h": 4
           },
@@ -5215,7 +5215,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 101,
+            "y": 97,
             "w": 14,
             "h": 6
           },
@@ -5375,7 +5375,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 107,
+            "y": 103,
             "w": 13,
             "h": 6
           },
@@ -5499,7 +5499,7 @@
             "h": 4,
             "w": 5,
             "x": 13,
-            "y": 107
+            "y": 103
           },
           "id": 891,
           "options": {
@@ -5592,7 +5592,7 @@
             "h": 4,
             "w": 6,
             "x": 18,
-            "y": 107
+            "y": 103
           },
           "id": 892,
           "options": {
@@ -5720,7 +5720,7 @@
             "h": 4,
             "w": 13,
             "x": 0,
-            "y": 113
+            "y": 109
           },
           "id": 893,
           "options": {
@@ -5830,7 +5830,7 @@
             "h": 4,
             "w": 11,
             "x": 13,
-            "y": 113
+            "y": 109
           },
           "id": 907,
           "options": {
@@ -5879,7 +5879,7 @@
           "title": "Review Cross-Domain Handoffs",
           "gridPos": {
             "x": 0,
-            "y": 117,
+            "y": 113,
             "w": 24,
             "h": 3
           },
@@ -5997,7 +5997,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 120,
+            "y": 116,
             "w": 24,
             "h": 10
           },
@@ -6081,7 +6081,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 130,
+            "y": 126,
             "w": 8,
             "h": 4
           },
@@ -6177,7 +6177,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 130,
+            "y": 126,
             "w": 8,
             "h": 4
           },
@@ -6267,7 +6267,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 130,
+            "y": 126,
             "w": 8,
             "h": 4
           },
@@ -6325,7 +6325,7 @@
             "h": 2,
             "w": 24,
             "x": 0,
-            "y": 134
+            "y": 130
           },
           "options": {
             "mode": "html",
@@ -6364,7 +6364,7 @@
         {
           "gridPos": {
             "x": 0,
-            "y": 136,
+            "y": 132,
             "w": 24,
             "h": 5
           },
@@ -6436,7 +6436,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 141,
+            "y": 137,
             "w": 24,
             "h": 4
           },
@@ -6516,7 +6516,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 145,
+            "y": 141,
             "w": 24,
             "h": 4
           },
@@ -6620,7 +6620,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 149,
+            "y": 145,
             "w": 12,
             "h": 4
           },
@@ -6725,7 +6725,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 149,
+            "y": 145,
             "w": 12,
             "h": 3
           },
@@ -6825,7 +6825,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 153,
+            "y": 149,
             "w": 14,
             "h": 3
           },
@@ -6926,7 +6926,7 @@
           },
           "gridPos": {
             "x": 14,
-            "y": 153,
+            "y": 149,
             "w": 10,
             "h": 3
           },
@@ -7026,7 +7026,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 156,
+            "y": 152,
             "w": 8,
             "h": 3
           },
@@ -7126,7 +7126,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 156,
+            "y": 152,
             "w": 8,
             "h": 3
           },
@@ -7219,7 +7219,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 156,
+            "y": 152,
             "w": 8,
             "h": 3
           },
@@ -7332,7 +7332,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 159,
+            "y": 155,
             "w": 24,
             "h": 9
           },
@@ -7531,7 +7531,7 @@
           "description": "CURRENT · Expected stage coverage for Pipeline / Run Type. Missing lag/backlog signals are listed individually. Undefined expected stages are UNKNOWN. VALID EMPTY requires a recorded complete stage catalog and every expected signal. Query failures are QUERY ERROR.",
           "gridPos": {
             "x": 0,
-            "y": 168,
+            "y": 164,
             "w": 24,
             "h": 14
           },
@@ -7661,7 +7661,7 @@
           "title": "Review Global Process Signals",
           "gridPos": {
             "x": 0,
-            "y": 182,
+            "y": 178,
             "w": 24,
             "h": 3
           },
@@ -7732,7 +7732,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 185,
+            "y": 181,
             "w": 24,
             "h": 6
           },
@@ -7823,7 +7823,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 191,
+            "y": 187,
             "w": 8,
             "h": 3
           },
@@ -7924,7 +7924,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 191,
+            "y": 187,
             "w": 8,
             "h": 3
           },
@@ -8024,7 +8024,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 191,
+            "y": 187,
             "w": 8,
             "h": 3
           },
@@ -8181,7 +8181,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 194,
+            "y": 190,
             "w": 24,
             "h": 6
           },
@@ -8286,7 +8286,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 200,
+            "y": 196,
             "w": 12,
             "h": 3
           },
@@ -8386,7 +8386,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 200,
+            "y": 196,
             "w": 12,
             "h": 3
           },
@@ -8476,7 +8476,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 203,
+            "y": 199,
             "w": 14,
             "h": 6
           },
@@ -8570,7 +8570,7 @@
           },
           "gridPos": {
             "x": 14,
-            "y": 203,
+            "y": 199,
             "w": 10,
             "h": 3
           },
@@ -8670,7 +8670,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 209,
+            "y": 205,
             "w": 10,
             "h": 3
           },
@@ -8760,7 +8760,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 209,
+            "y": 205,
             "w": 14,
             "h": 6
           },
@@ -8854,7 +8854,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 215,
+            "y": 211,
             "w": 24,
             "h": 3
           },
@@ -8949,7 +8949,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 218,
+            "y": 214,
             "w": 24,
             "h": 8
           },
@@ -9083,7 +9083,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 226,
+            "y": 222,
             "w": 24,
             "h": 3
           },
@@ -9168,7 +9168,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 229,
+            "y": 225,
             "w": 24,
             "h": 10
           },
@@ -9237,7 +9237,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 239,
+            "y": 235,
             "w": 24,
             "h": 9
           },
@@ -9327,7 +9327,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 248,
+            "y": 244,
             "w": 24,
             "h": 3
           },
@@ -9398,7 +9398,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 251,
+            "y": 247,
             "w": 24,
             "h": 7
           },
@@ -9469,7 +9469,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 258,
+            "y": 254,
             "w": 24,
             "h": 6
           },
@@ -9508,7 +9508,7 @@
           "description": "TIME RANGE · Shows selected-range stage lag in seconds for Pipeline, Run Type, and Stage. No data means no emitted lag samples or unavailable telemetry, never zero lag. Use Worst Stage Lag and current blockers for severity",
           "gridPos": {
             "x": 0,
-            "y": 264,
+            "y": 260,
             "w": 24,
             "h": 10
           },
@@ -9679,7 +9679,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 274,
+            "y": 270,
             "w": 24,
             "h": 6
           },
@@ -9737,7 +9737,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 280,
+            "y": 276,
             "w": 24,
             "h": 7
           },
@@ -9812,7 +9812,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 287,
+            "y": 283,
             "w": 24,
             "h": 6
           },
@@ -9870,7 +9870,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 293,
+            "y": 289,
             "w": 24,
             "h": 12
           },
@@ -10177,7 +10177,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 305,
+            "y": 301,
             "w": 24,
             "h": 9
           },
@@ -10297,7 +10297,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 314,
+            "y": 310,
             "w": 24,
             "h": 7
           },
@@ -10394,7 +10394,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 321,
+            "y": 317,
             "w": 24,
             "h": 7
           },
@@ -10490,7 +10490,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 328,
+            "y": 324,
             "w": 24,
             "h": 7
           },
@@ -10587,7 +10587,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 335,
+            "y": 331,
             "w": 24,
             "h": 7
           },
@@ -10687,7 +10687,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 342,
+            "y": 338,
             "w": 24,
             "h": 3
           },
@@ -10749,7 +10749,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 345,
+            "y": 341,
             "w": 24,
             "h": 6
           },
@@ -12118,7 +12118,7 @@
           "description": "SELECTED RUN · Canonical identity is Overview 9300 (rev7 §2.4).",
           "gridPos": {
             "x": 0,
-            "y": 71,
+            "y": 67,
             "w": 24,
             "h": 8
           },

@@ -1376,7 +1376,7 @@ def test_control_plane_dashboard_links_are_scoped() -> None:
         "Run Explorer",
         "Run Overview",
         "Data Quality",
-        "6. Incident Workspace",
+        "Incident Workspace",
     }
     for link in links:
         assert link["includeVars"] is False
