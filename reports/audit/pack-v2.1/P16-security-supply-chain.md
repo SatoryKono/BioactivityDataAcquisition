@@ -7,12 +7,13 @@
 
 ## A. Audit Manifest
 - **Audit ID**: pack-v2.1/P16
-- **Pinned Revision**: ddbb7a0ee687365258bc407110e38601c4c3b765
-- **Branch**: main
+- **Pinned Revision**: a06384063113094698e342b3f0e294f5ec338741
+- **Branch**: `chore/audit-p16-security-7103150260510390917` (honesty tip; originally sampled from `main` @ `ddbb7a0ee687365258bc407110e38601c4c3b765`)
 - **Scope**: repository, CI, dependencies, provider credentials, local runtime
 - **Date**: 2026-11-02
 - **Tools Evaluated**: `detect-secrets`, `bandit`, `gitleaks`, `osv-scanner`
 - **Missing / Not Verifiable**: Third-party runtime cloud environment configuration (e.g. AWS IAM roles outside the repo), CI execution history.
+- **Pin note**: Pinned Revision equals the tip on which local `rg` verification was re-run (below). A follow-up docs-only commit that only realigns these stamps does not change `yaml.load` call sites.
 
 ## B. Scope/ownership и exclusions
 - **In-Scope**: BioETL codebase `src`, test suites `tests`, CI configurations `.github/workflows`, dependencies in `uv.lock` and `pyproject.toml`.
@@ -71,7 +72,7 @@ Statuses below distinguish **workflow/config presence** from **executed CI outco
 - **.env governance**: `.env` / `.env.*` entries present in `.gitignore` (**E2 STATIC**). Live secret-manager posture: **NOT_VERIFIABLE**.
 - **GitHub Actions**: Least-privilege/`permissions` and action SHA pins observed in workflow YAML (**E2 STATIC** / **Configured**). Successful green history of those jobs: **NOT_VERIFIABLE**.
 - **Dependencies**: `uv.lock` pinning + `pip-audit` / `osv-scanner` jobs **Configured** in `security.yml` (**E2 STATIC**). Note: `osv-scanner` step uses `continue-on-error: true` (outcome gated elsewhere in workflow — config only here). Scanner exit codes from CI: **NOT_VERIFIABLE**.
-- **Unsafe parsing (YAML)**: **Verified (local E2)** — command `rg -n 'yaml\.load\(' src tests scripts`; revision `1e96c67f69e88f7192fe0e926311ec23432358d3`; date `2026-11-02T21:34:04Z`; exit `0`; artifact: local stdout (5 hits, all SafeLoader/BaseLoader; zero under `src/`). Bare/`UnsafeLoader` not found.
+- **Unsafe parsing (YAML)**: **Verified (local E2)** — command `rg -n 'yaml\.load\(' src tests scripts`; revision `a06384063113094698e342b3f0e294f5ec338741` (= **Pinned Revision**); date `2026-11-02T21:39:12Z`; exit `0`; artifact: local stdout (5 hits, all SafeLoader/BaseLoader; zero under `src/`). Bare/`UnsafeLoader` not found.
 - **Unsafe parsing (XML)**: PubMed paths import `defusedxml` (**E2 STATIC**); no full XML attack-suite re-run (**NOT_VERIFIABLE** as dynamic proof).
 - **Subprocess injection**: `subprocess_boundary.py` enforces `shell=False` in source (**E2 STATIC**). Runtime fuzz/red-team of the boundary: **NOT_VERIFIABLE**.
 
@@ -117,7 +118,7 @@ The repository exhibits a mature security and supply chain posture: subprocess b
 
 **Provenance:**
 - audit_id: pack-v2.1/P16
-- audited_sha: ddbb7a0ee687365258bc407110e38601c4c3b765
+- audited_sha: a06384063113094698e342b3f0e294f5ec338741
 - root_cause_id: yaml-load-api-surface
 - source_finding_ids: pack-v2.1/P16-AREA-001
 - severity: P3
