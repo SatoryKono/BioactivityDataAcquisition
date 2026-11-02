@@ -9,6 +9,8 @@ from enum import Enum
 from types import MappingProxyType
 from uuid import UUID
 
+from bioetl.domain.normalization.json import serialize_json_canonical
+
 from bioetl.domain.normalization._control_plane_primitives import (
     normalize_control_plane_datetime,
 )
@@ -51,16 +53,45 @@ def _detach_value(value: object) -> object:
     return value
 
 
-def mapping_to_plain(value: object) -> object:
-    """Return a recursively JSON-compatible copy of immutable attribute values."""
-    if isinstance(value, Mapping):
-        return {str(key): mapping_to_plain(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple)):
-        return [mapping_to_plain(item) for item in value]
-    if isinstance(value, (set, frozenset)):
-        return [mapping_to_plain(item) for item in sorted(value, key=repr)]
-    return value
+_UNHANDLED = object()
 
+
+def mapping_to_plain(value: object) -> object:
+    """Return a JSON-safe deep plain copy of immutable lineage attribute values."""
+    return _plain_value(value)
+
+
+def _plain_set(value: set[object] | frozenset[object]) -> list[object]:
+    plain_items = [_plain_value(item) for item in value]
+    return sorted(plain_items, key=lambda item: serialize_json_canonical([item]))
+
+
+def _plain_value(value: object) -> object:
+    if isinstance(value, Mapping):
+        return {str(key): _plain_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_plain_value(item) for item in value]
+    if isinstance(value, (set, frozenset)):
+        return _plain_set(value)
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("Lineage attributes do not allow NaN or Infinity")
+        return value
+    if value is None or isinstance(value, (str, int, bool)):
+        return value
+    if isinstance(value, datetime):
+        return normalize_control_plane_datetime(value)
+    if isinstance(value, date):
+        return value.isoformat()
+    if isinstance(value, UUID):
+        return str(value)
+    if isinstance(value, PurePath):
+        return value.as_posix()
+    if isinstance(value, Enum):
+        return _plain_value(value.value)
+    raise TypeError(
+        f"Lineage attributes require JSON-safe values; got {type(value).__name__}"
+    )
 
 def normalize_mapping(values: Mapping[str, object]) -> Mapping[str, object]:
     """Return an immutable, recursively detached attribute mapping.
