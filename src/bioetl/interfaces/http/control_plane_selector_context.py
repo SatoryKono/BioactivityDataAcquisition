@@ -427,7 +427,7 @@ def finalize_run_id_empty_catalog_label(
     concrete = [
         item
         for item in raw_items
-        if (value := _value(item)) not in {None, "", RUN_ID_NO_SELECTION}
+        if _value(item) not in {None, "", RUN_ID_NO_SELECTION}
     ]
     if concrete:
         items: list[object] = []
