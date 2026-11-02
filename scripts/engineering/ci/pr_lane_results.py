@@ -43,6 +43,7 @@ PYPROJECT_TOML = "pyproject.toml"
 UV_LOCK = "uv.lock"
 PYTHON_DEPENDENCY_FILES = frozenset({PYPROJECT_TOML, UV_LOCK})
 TEST_FILE_GLOB = "test_*.py"
+CONFTEST_FILENAME = "conftest.py"
 GENERATED_ARTIFACT_TESTS = Path("configs/quality/generated_artifact_tests.json")
 GENERATED_ARTIFACT_ROUTING = Path("configs/quality/generated_artifact_routing.yaml")
 
@@ -105,6 +106,9 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 )
 EXTERNAL_RESOURCE_INVENTORY_TEST = (
     "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py"
+)
+EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST = (
+    "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py"
 )
 EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
     "tests/architecture/test_external_resource_inventory_catalog.py"
@@ -355,8 +359,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_qm09_review.json",
         ),
         (
-            EXTERNAL_RESOURCE_INVENTORY_TEST,
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+            EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         ),
     ),
     "configs/quality/external_resource_inventory_pr12651_review.json": (
@@ -1037,6 +1041,8 @@ def _require_targets(targets: list[str], root: Path) -> None:
 
 def _path_targets(path: str, root: Path) -> list[str]:
     """Return the test path or unit directory implied by one changed path."""
+    if path.startswith("tests/helpers/") and path.endswith(".py"):
+        return _helper_path_targets(path, root)
     if path.startswith(TESTS_PREFIX) and path.endswith(".py"):
         return [path] if (root / path).is_file() else []
     if path.startswith(SRC_BIOETL_PREFIX) and path.endswith(".py"):
@@ -1046,6 +1052,60 @@ def _path_targets(path: str, root: Path) -> list[str]:
     if path.startswith(SCRIPTS_PREFIX) and path.endswith(".py"):
         return _script_targets(path, root)
     return []
+
+
+def _helper_path_targets(path: str, root: Path) -> list[str]:
+    """Map a changed tests/helpers module to importing tests or its suite."""
+    module = ".".join(Path(path).with_suffix("").parts)
+    test_roots = (root / "tests",)
+    importing_tests = _importing_script_tests(test_roots, module, root)
+    helpers_init = root / "tests" / "helpers" / "__init__.py"
+    # Package re-exports (from tests.helpers import …) must count as consumers.
+    if helpers_init.is_file() and _imports_module(helpers_init, module, root):
+        importing_tests |= _importing_script_tests(test_roots, "tests.helpers", root)
+    # One-hop: support modules (helpers or other non-test modules under tests/)
+    # that import this module expose it to their consumers.
+    importing_tests |= _helper_consumer_tests(path, module, root, test_roots)
+    if importing_tests:
+        targets = {
+            test.parent if test.name == CONFTEST_FILENAME else test
+            for test in importing_tests
+        }
+        return sorted(test.relative_to(root).as_posix() for test in targets)
+    return _helper_suite(path, root)
+
+
+def _test_support_modules(root: Path) -> list[Path]:
+    """Return non-test Python modules under tests/ (helpers, suite support, …)."""
+    tests_root = root / "tests"
+    if not tests_root.is_dir():
+        return []
+    return sorted(
+        path
+        for path in tests_root.rglob("*.py")
+        if path.name != CONFTEST_FILENAME
+        and not path.name.startswith("test_")
+        and path.name != "__init__.py"
+    )
+
+
+def _helper_consumer_tests(
+    path: str,
+    module: str,
+    root: Path,
+    test_roots: tuple[Path, ...],
+) -> set[Path]:
+    """Return tests that import support modules which themselves import ``module``."""
+    changed = (root / path).resolve()
+    consumers: set[Path] = set()
+    for support in _test_support_modules(root):
+        if support.resolve() == changed:
+            continue
+        if not _imports_module(support, module, root):
+            continue
+        support_module = ".".join(support.relative_to(root).with_suffix("").parts)
+        consumers |= _importing_script_tests(test_roots, support_module, root)
+    return consumers
 
 
 def _script_targets(path: str, root: Path) -> list[str]:
@@ -1062,7 +1122,11 @@ def _script_targets(path: str, root: Path) -> list[str]:
         if (candidate := directory / direct_name).is_file()
     }
     module = ".".join(("scripts", *relative.with_suffix("").parts))
-    selected = sorted(direct | _importing_script_tests(test_roots, module))
+    importing_tests = _importing_script_tests(test_roots, module, root)
+    selected = direct | {
+        test.parent if test.name == CONFTEST_FILENAME else test
+        for test in importing_tests
+    }
     if selected:
         return [test.relative_to(root).as_posix() for test in selected]
     return [
@@ -1072,14 +1136,17 @@ def _script_targets(path: str, root: Path) -> list[str]:
     ]
 
 
-def _importing_script_tests(roots: tuple[Path, Path], module: str) -> set[Path]:
-    """Return test files that statically import the script module."""
+def _importing_script_tests(
+    roots: tuple[Path, ...], module: str, repo_root: Path
+) -> set[Path]:
+    """Return tests and conftest files that statically import a module."""
     return {
         test
         for root in roots
         if root.is_dir()
-        for test in root.rglob(TEST_FILE_GLOB)
-        if _imports_module(test, module)
+        for pattern in (TEST_FILE_GLOB, CONFTEST_FILENAME)
+        for test in root.rglob(pattern)
+        if _imports_module(test, module, repo_root)
     }
 
 
@@ -1110,7 +1177,7 @@ def _consumer_targets(
         _require_targets(selected, root)
         return selected
     if consumer.startswith(TESTS_PREFIX):
-        if Path(consumer).name == "conftest.py":
+        if Path(consumer).name == CONFTEST_FILENAME:
             return [Path(consumer).parent.as_posix()]
         if not Path(consumer).name.startswith("test_"):
             return _helper_suite(consumer, root)
@@ -1133,7 +1200,7 @@ def _helper_suite(consumer: str, root: Path) -> list[str]:
     return [suite.as_posix()]
 
 
-def _imports_module(test_path: Path, module_name: str) -> bool:
+def _imports_module(test_path: Path, module_name: str, repo_root: Path) -> bool:
     """Return whether a test statically imports the selected script module."""
     tree = ast.parse(test_path.read_text(encoding="utf-8"), filename=str(test_path))
     parent_module, _, leaf_name = module_name.rpartition(".")
@@ -1143,9 +1210,26 @@ def _imports_module(test_path: Path, module_name: str) -> bool:
             module_name=module_name,
             parent_module=parent_module,
             leaf_name=leaf_name,
+            test_path=test_path,
+            repo_root=repo_root,
         )
         for node in ast.walk(tree)
     )
+
+
+def _containing_package_parts(path: Path, repo_root: Path) -> tuple[str, ...] | None:
+    """Return package parts under tests/scripts/src relative to the checkout."""
+    try:
+        parts = path.relative_to(repo_root).with_suffix("").parts
+    except ValueError:
+        return None
+    for anchor in ("tests", "scripts", "src"):
+        if anchor not in parts:
+            continue
+        idx = parts.index(anchor)
+        # Drop the module/__init__ leaf — remaining is the containing package.
+        return tuple(parts[idx:-1])
+    return None
 
 
 def _matches_module_import(
@@ -1154,6 +1238,8 @@ def _matches_module_import(
     module_name: str,
     parent_module: str,
     leaf_name: str,
+    test_path: Path,
+    repo_root: Path,
 ) -> bool:
     """Return whether one AST node imports the selected module."""
     if isinstance(node, ast.Import):
@@ -1161,12 +1247,23 @@ def _matches_module_import(
             alias.name == module_name or alias.name.startswith(f"{module_name}.")
             for alias in node.names
         )
-    return isinstance(node, ast.ImportFrom) and (
-        node.module == module_name
-        or (
-            node.module == parent_module
-            and any(alias.name == leaf_name for alias in node.names)
-        )
+    if not isinstance(node, ast.ImportFrom):
+        return False
+    imported_module = node.module or ""
+    if node.level:
+        package_parts = _containing_package_parts(test_path, repo_root)
+        if package_parts is None:
+            return False
+        ascend = node.level - 1
+        if ascend > len(package_parts):
+            return False
+        if ascend:
+            package_parts = package_parts[:-ascend]
+        suffix = imported_module.split(".") if imported_module else []
+        imported_module = ".".join((*package_parts, *suffix))
+    return imported_module == module_name or (
+        imported_module == parent_module
+        and any(alias.name == leaf_name for alias in node.names)
     )
 
 

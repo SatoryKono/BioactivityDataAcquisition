@@ -1061,6 +1061,126 @@ def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
     assert targets == ["tests/unit/domain"]
 
 
+def test_affected_targets_map_shared_helper_to_importing_tests(
+    tmp_path: Path,
+) -> None:
+    """Changed test helpers resolve imports from the checkout root."""
+    # Nested under …/tests/… so absolute path.parts would mis-anchor without
+    # repo_root-relative package resolution (CodeRabbit nested-checkout case).
+    repo_root = tmp_path / "tests" / "project"
+    helper = repo_root / "tests" / "helpers" / "cli_process.py"
+    helper.parent.mkdir(parents=True)
+    helper.write_text("def run() -> None: ...\n", encoding="utf-8")
+    (helper.parent / "__init__.py").write_text(
+        "from .cli_process import run\n",
+        encoding="utf-8",
+    )
+    owner = repo_root / "tests" / "unit" / "sample" / "test_owner.py"
+    owner.parent.mkdir(parents=True)
+    owner.write_text(
+        "from tests.helpers.cli_process import run\n\ndef test_owner(): pass\n",
+        encoding="utf-8",
+    )
+    via_package = repo_root / "tests" / "unit" / "sample" / "test_via_package.py"
+    via_package.write_text(
+        "from tests.helpers import run\n\ndef test_via_package(): pass\n",
+        encoding="utf-8",
+    )
+
+    conftest = repo_root / "tests" / "unit" / "conftest" / "conftest.py"
+    conftest.parent.mkdir(parents=True)
+    conftest.write_text(
+        "from tests.helpers import run\n",
+        encoding="utf-8",
+    )
+
+    assert affected_pytest_targets(
+        [helper.relative_to(repo_root).as_posix()], repo_root=repo_root
+    ) == [
+        "tests/unit/conftest",
+        "tests/unit/sample/test_owner.py",
+        "tests/unit/sample/test_via_package.py",
+    ]
+
+
+def test_affected_targets_map_transitive_helper_consumers(
+    tmp_path: Path,
+) -> None:
+    """Helper→helper imports select tests of the intermediate helper."""
+    ids = tmp_path / "tests" / "helpers" / "deterministic_ids.py"
+    ids.parent.mkdir(parents=True)
+    ids.write_text(
+        "def deterministic_run_id(n: str) -> str: return n\n", encoding="utf-8"
+    )
+    (ids.parent / "__init__.py").write_text("", encoding="utf-8")
+    fixtures = tmp_path / "tests" / "helpers" / "metadata_fixtures.py"
+    fixtures.write_text(
+        "from tests.helpers.deterministic_ids import deterministic_run_id\n"
+        "def build_meta():\n"
+        "    return deterministic_run_id('x')\n",
+        encoding="utf-8",
+    )
+    direct = tmp_path / "tests" / "unit" / "ids" / "test_direct.py"
+    direct.parent.mkdir(parents=True)
+    direct.write_text(
+        "from tests.helpers.deterministic_ids import deterministic_run_id\n"
+        "def test_direct(): pass\n",
+        encoding="utf-8",
+    )
+    via_helper = tmp_path / "tests" / "unit" / "meta" / "test_via_helper.py"
+    via_helper.parent.mkdir(parents=True)
+    via_helper.write_text(
+        "from tests.helpers.metadata_fixtures import build_meta\n"
+        "def test_via_helper(): pass\n",
+        encoding="utf-8",
+    )
+
+    assert affected_pytest_targets(
+        [ids.relative_to(tmp_path).as_posix()], repo_root=tmp_path
+    ) == [
+        "tests/unit/ids/test_direct.py",
+        "tests/unit/meta/test_via_helper.py",
+    ]
+
+
+def test_affected_targets_map_transitive_support_outside_helpers(
+    tmp_path: Path,
+) -> None:
+    """Support modules outside tests/helpers also select their consumers."""
+    replay = tmp_path / "tests" / "helpers" / "control_plane_replay.py"
+    replay.parent.mkdir(parents=True)
+    replay.write_text(
+        "def run_tracked_fixture_replay_pair() -> None: ...\n",
+        encoding="utf-8",
+    )
+    (replay.parent / "__init__.py").write_text("", encoding="utf-8")
+    support = tmp_path / "tests" / "integration" / "_consolidation_suite_support.py"
+    support.parent.mkdir(parents=True)
+    support.write_text(
+        "from tests.helpers.control_plane_replay import run_tracked_fixture_replay_pair\n"
+        "def run_pair():\n"
+        "    run_tracked_fixture_replay_pair()\n",
+        encoding="utf-8",
+    )
+    gate = (
+        tmp_path
+        / "tests"
+        / "integration"
+        / "idempotency"
+        / "test_reproducibility_idempotency_gate.py"
+    )
+    gate.parent.mkdir(parents=True)
+    gate.write_text(
+        "from tests.integration._consolidation_suite_support import run_pair\n"
+        "def test_gate(): pass\n",
+        encoding="utf-8",
+    )
+
+    assert affected_pytest_targets(
+        [replay.relative_to(tmp_path).as_posix()], repo_root=tmp_path
+    ) == ["tests/integration/idempotency/test_reproducibility_idempotency_gate.py"]
+
+
 def test_affected_targets_map_integration_vcr_policy() -> None:
     """VCR policy edits select the inventory architecture test."""
     repo_root = Path(__file__).resolve().parents[5]
