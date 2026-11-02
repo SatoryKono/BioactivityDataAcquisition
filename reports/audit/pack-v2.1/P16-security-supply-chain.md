@@ -26,7 +26,7 @@
 - **E2 STATIC** (CURRENT): `scripts/engineering/qa/vcr/check_vcr_secrets.py` — fail-closed **static secret-safety check** of already-written VCR cassettes (flags unredacted credential-shaped fields); it is **not** a scrubber / scrub-policy enforcer. `_StrictCassetteLoader(yaml.SafeLoader)` used for parsing. Live redaction writers elsewhere: **NOT_VERIFIABLE** in this pass (not re-traced).
 - **E2 STATIC** (CURRENT): `tests/architecture/test_antipatterns.py` - Evidence of `detect-secrets` running with a baseline.
 - **E2 STATIC** (CURRENT): `uv.lock`, `pyproject.toml` - Evidence of dependency constraints and pinned versions.
-- **E2 STATIC** (CURRENT): `rg -n 'yaml\.load\(' src tests scripts` — scoped to **direct** `yaml.load(` only; zero hits under `src/`; remaining hits use `SafeLoader` subclasses or `yaml.BaseLoader`. This search does **not** cover `yaml.unsafe_load` / `full_load` / `load_all`, Loader class imports, or import aliases.
+- **E2 STATIC** (CURRENT): `rg -n 'yaml\.load\(' src tests scripts` — scoped to **direct** `yaml.load(` only; result: **5 hits**, **0 under `src/`**. This `rg` does **not** assert Loader bases and does **not** cover `yaml.unsafe_load` / `full_load` / `load_all`, Loader class imports, or import aliases. Loader-base claims below come from **separate** file:line reads of those hits.
 
 ## D. Findings Register
 - **finding_id**: `pack-v2.1/P16-AREA-001`
@@ -37,27 +37,28 @@
 - **confidence**: `high`
 - **status**: `DISPROVED` (as unsafe/RCE deserialization); residual style note only
 - **expected**: YAML parsing must not allow arbitrary Python object construction from untrusted documents.
-- **actual**: All repository `yaml.load` call sites pass an explicit safe loader:
-  - `scripts/engineering/qa/vcr/check_vcr_secrets.py:175` → `Loader=_StrictCassetteLoader` where `_StrictCassetteLoader(yaml.SafeLoader)`
-  - `tests/architecture/test_pr_gate_complete.py:298` → `Loader=_UniqueKeyLoader` where `_UniqueKeyLoader(yaml.SafeLoader)`
-  - `tests/architecture/test_coderabbit_config.py:50,79` → same `_UniqueKeyLoader(yaml.SafeLoader)`
-  - `tests/architecture/test_docs_build_site_router.py:57` → `Loader=yaml.BaseLoader` (no custom constructors / no Python object tags)
-  - No `yaml.load` under `src/`
-- **evidence_ids**: `E2 STATIC` (grep + class bases)
-- **attempted_disproof**: Confirmed loader inheritance/`BaseLoader` on every hit; default `Loader` / `UnsafeLoader` absent. Initial P1 RCE framing is therefore false.
+- **actual**:
+  - **Scoped `rg` only** (`rg -n 'yaml\.load\(' src tests scripts`): 5 direct `yaml.load(` sites; 0 under `src/`. No whole-repo / other-API claim.
+  - **Separate Loader-base file:line reads** (not implied by `rg`):
+    - `scripts/engineering/qa/vcr/check_vcr_secrets.py:175` → `Loader=_StrictCassetteLoader`; class `:72` `_StrictCassetteLoader(yaml.SafeLoader)`
+    - `tests/architecture/test_pr_gate_complete.py:298` → `Loader=_UniqueKeyLoader`; nested class `:266` `_UniqueKeyLoader(yaml.SafeLoader)`
+    - `tests/architecture/test_coderabbit_config.py:50,79` → `Loader=_UniqueKeyLoader`; class `:27` `_UniqueKeyLoader(yaml.SafeLoader)`
+    - `tests/architecture/test_docs_build_site_router.py:57` → `Loader=yaml.BaseLoader`
+- **evidence_ids**: `E2 STATIC` (`rg` hit list + separate class/Loader reads)
+- **attempted_disproof**: For each of the five `rg` hits, open-file inspection confirmed SafeLoader subclass or BaseLoader; default/`UnsafeLoader` absent at those sites. Initial P1 RCE framing is therefore false for this scoped set.
 - **exceptions_checked**: Custom loaders exist specifically to reject duplicate keys while remaining on `SafeLoader`.
 - **impact**: No demonstrated arbitrary-code-execution path from these call sites. Residual risk is limited to future edits that drop the explicit `Loader=` argument.
 - **root cause**: Historical preference for explicit `Loader=` with SafeLoader subclasses rather than the `safe_load` alias.
 - **recommendation**: Optional hygiene — prefer `yaml.safe_load` / document that custom loaders MUST subclass `yaml.SafeLoader`; keep CI/grep guard against bare `yaml.load(` without `Loader=`.
 - **scope / non-goals**: No mandatory mass rewrite; do not treat SafeLoader subclasses as vulnerabilities.
 - **acceptance criteria**: N/A for security closeout; optional lint if product owners want API uniformity.
-- **verification command/test**: `rg -n 'yaml\.load\(' src tests scripts` and confirm each hit passes `SafeLoader`/`BaseLoader`.
+- **verification command/test**: (1) `rg -n 'yaml\.load\(' src tests scripts` for the hit list; (2) separately open each hit and its Loader class definition to confirm SafeLoader/BaseLoader.
 - **dependencies**: None.
 - **related_findings**: None.
 
 ## E. Quantitative Scorecard
 - **Score**: 5 (Mature controls + signed supply chain + no confirmed in-repo deserialization RCE)
-- **Rationale**: VCR cassette secret-safety gate (`check_vcr_secrets.py`), subprocess `shell=False` boundary, CI security jobs **Configured**, Cosign/Sigstore provenance **Configured**. Direct `yaml.load(` hits (from scoped `rg`) are SafeLoader/BaseLoader-bound and outside `src/`.
+- **Rationale**: VCR cassette secret-safety gate (`check_vcr_secrets.py`), subprocess `shell=False` boundary, CI security jobs **Configured**, Cosign/Sigstore provenance **Configured**. Scoped `rg` found 5 direct `yaml.load(` sites (0 under `src/`); separate file:line reads of those sites show SafeLoader/BaseLoader — not a whole-repo YAML API audit.
 
 ## F. Cross-cutting/root-cause clusters
 - **Cluster 1**: YAML API surface hygiene (style-only; SafeLoader/BaseLoader already enforced).
@@ -72,7 +73,9 @@ Statuses below distinguish **workflow/config presence** from **executed CI outco
 - **.env governance**: `.env` / `.env.*` entries present in `.gitignore` (**E2 STATIC**). Live secret-manager posture: **NOT_VERIFIABLE**.
 - **GitHub Actions**: Least-privilege/`permissions` and action SHA pins observed in workflow YAML (**E2 STATIC** / **Configured**). Successful green history of those jobs: **NOT_VERIFIABLE**.
 - **Dependencies**: `uv.lock` pinning + `pip-audit` / `osv-scanner` jobs **Configured** in `security.yml` (**E2 STATIC**). Note: `osv-scanner` step uses `continue-on-error: true` (outcome gated elsewhere in workflow — config only here). Scanner exit codes from CI: **NOT_VERIFIABLE**.
-- **Unsafe parsing (YAML)**: **Verified (local E2)** for **direct** `yaml.load(` only — command `rg -n 'yaml\.load\(' src tests scripts`; revision `a06384063113094698e342b3f0e294f5ec338741` (= **Pinned Revision**); date `2026-11-02T21:39:12Z`; exit `0`; artifact: local stdout (5 hits, all SafeLoader/BaseLoader; zero under `src/`). Scope limit: this `rg` does **not** search `yaml.unsafe_load` / `yaml.full_load` / `yaml.load_all`, Loader imports, or aliases; those APIs were not claimed covered.
+- **Unsafe parsing (YAML)**:
+  - **`rg` result (local E2)**: command `rg -n 'yaml\.load\(' src tests scripts`; revision `a06384063113094698e342b3f0e294f5ec338741` (= **Pinned Revision**); date `2026-11-02T21:39:12Z`; exit `0`; artifact: local stdout — **5 hits**, **0 under `src/`**. Does **not** prove Loader bases; does **not** cover `unsafe_load` / `full_load` / `load_all` / Loader imports / aliases.
+  - **Separate Loader-base checks (local E2)**: open-file reads of those five call sites + class defs (`check_vcr_secrets.py:72/175`, `test_pr_gate_complete.py:266/298`, `test_coderabbit_config.py:27/50/79`, `test_docs_build_site_router.py:57`) → SafeLoader subclasses or `yaml.BaseLoader`.
 - **Unsafe parsing (XML)**: PubMed paths import `defusedxml` (**E2 STATIC**); no full XML attack-suite re-run (**NOT_VERIFIABLE** as dynamic proof).
 - **Subprocess injection**: `subprocess_boundary.py` hard-codes `shell=False` (**E2 STATIC**). Timeouts are caller-supplied (`timeout: float | None = None`); mandatory timeout coverage across callers **NOT_VERIFIABLE**. Runtime fuzz/red-team: **NOT_VERIFIABLE**.
 
