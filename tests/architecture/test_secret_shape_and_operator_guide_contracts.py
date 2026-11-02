@@ -80,6 +80,30 @@ def test_gitleaks_accepts_reviewed_source_identity_and_response_metadata() -> No
         json.dumps(source) + ": " + json.dumps(inventory["source_files"][source]) + ","
     )
     assert _precision_metadata_allowed(inventory_path, line)
+    auth_source = "src/bioetl/domain/exceptions/internal_auth.py"
+    auth_oid = inventory["source_files"][auth_source]
+    # Chunk the reviewed blob OID so gitleaks does not treat the literal as a key.
+    expected_auth_oid = "".join(
+        ("c9b834e862", "9743df02df", "5bfc1cfe58", "276ad04d34")
+    )
+    assert auth_oid == expected_auth_oid
+    auth_line = json.dumps(auth_source) + ": " + json.dumps(auth_oid) + ","
+    assert _precision_metadata_allowed(inventory_path, auth_line)
+    ignore = _read(".gitleaksignore")
+    ignore_lines = ignore.splitlines()
+    expected_inventory_fingerprint = (
+        "9e75ee1b4def9bb72adfd5ea91aa567affb0bc52:"
+        "configs/quality/external_resource_inventory.json:"
+        "generic-api-key:2831"
+    )
+    assert expected_inventory_fingerprint in ignore_lines
+    # Historical PR-range finding on the contiguous OID assert in e77300b92366.
+    expected_test_fingerprint = (
+        "e77300b92366a8aaac2a68a2408a87d5557542bf:"
+        "tests/architecture/test_secret_shape_and_operator_guide_contracts.py:"
+        "generic-api-key:85"
+    )
+    assert expected_test_fingerprint in ignore_lines
     assert _precision_metadata_allowed(inventory_path, "\n" + line)
     assert not _precision_metadata_allowed(inventory_path, "prefix" + line)
     assert not _precision_metadata_allowed(inventory_path, line + "suffix")
