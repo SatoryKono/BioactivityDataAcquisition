@@ -9,13 +9,13 @@ Extracted from the PubMed adapter module for better separation of concerns.
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET  # nosec B405 - type annotations only, see suppression registry
+
 from defusedxml import ElementTree as SafeET
 from defusedxml.common import DefusedXmlException
 
-__all__ = ["PubMedXmlProcessor"]
-
-
 from bioetl.domain.types import JsonDict
+
+__all__ = ["PubMedXmlProcessor"]
 
 
 class PubMedXmlProcessor:
