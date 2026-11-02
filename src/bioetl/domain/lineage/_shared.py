@@ -20,6 +20,7 @@ __all__ = [
     "load_optional_int",
     "load_optional_str",
     "load_optional_version",
+    "mapping_to_plain",
     "normalize_mapping",
 ]
 
@@ -47,6 +48,17 @@ def _detach_value(value: object) -> object:
         return _detach_set(value)
     if isinstance(value, (list, tuple)):
         return _detach_sequence(value)
+    return value
+
+
+def mapping_to_plain(value: object) -> object:
+    """Return a recursively JSON-compatible copy of immutable attribute values."""
+    if isinstance(value, Mapping):
+        return {str(key): mapping_to_plain(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [mapping_to_plain(item) for item in value]
+    if isinstance(value, (set, frozenset)):
+        return [mapping_to_plain(item) for item in sorted(value, key=repr)]
     return value
 
 
