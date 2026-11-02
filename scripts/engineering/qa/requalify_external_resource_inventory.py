@@ -16,7 +16,7 @@ import json
 from pathlib import Path
 import re
 import subprocess
-from typing import Any
+from typing import Any, cast
 
 from scripts.engineering.qa import external_resource_inventory as inventory
 from scripts.engineering.ci.test_telemetry_provenance import require_published_ancestor
@@ -41,29 +41,32 @@ def _snapshot(root: Path, commit: str) -> Snapshot:
         raise ValueError("Review requires full immutable commit IDs")
     require_published_ancestor(root, commit)
     entries = _git(root, "ls-tree", "-rz", commit, "--", "src/bioetl").split(b"\0")
-    oids = {}
+    oids: dict[str, str] = {}
     for entry in filter(None, entries):
-        meta, path = entry.split(b"\t", 1)
-        if path.endswith(b".py"):
-            oids[path.decode()] = meta.decode().split()[2]
+        meta, source_path = entry.split(b"\t", 1)
+        if source_path.endswith(b".py"):
+            oids[source_path.decode()] = meta.decode().split()[2]
     raw = _git(
         root,
         "cat-file",
         "--batch",
         data="".join(f"{v}\n" for v in oids.values()).encode(),
     )
-    sources, blobs = {}, {}
+    sources: dict[str, bytes] = {}
+    blobs: dict[str, inventory.SourceBlob] = {}
     offset = 0
-    for path, oid in oids.items():
+    for relative_path, oid in oids.items():
         end = raw.index(b"\n", offset)
-        actual, kind, size = raw[offset:end].decode().split()
-        if actual != oid or kind != "blob":
+        actual_oid, kind, size = raw[offset:end].decode().split()
+        if actual_oid != oid or kind != "blob":
             raise ValueError("Invalid source object")
         offset = end + 1
         content = raw[offset : offset + int(size)]
         offset += int(size) + 1
-        sources[path] = content
-        blobs[path] = inventory.SourceBlob(oid, hashlib.sha256(content).hexdigest())
+        sources[relative_path] = content
+        blobs[relative_path] = inventory.SourceBlob(
+            oid, hashlib.sha256(content).hexdigest()
+        )
     return Snapshot(
         commit,
         _git(root, "rev-parse", f"{commit}^{{tree}}").decode().strip(),
@@ -76,7 +79,10 @@ def _catalog(root: Path, commit: str) -> dict[str, Any]:
     _snapshot(
         root, commit
     )  # Reject symbolic/unreachable references before Git path reads.
-    payload = json.loads(_git(root, "show", f"{commit}:{inventory.CATALOG.as_posix()}"))
+    payload = cast(
+        dict[str, Any],
+        json.loads(_git(root, "show", f"{commit}:{inventory.CATALOG.as_posix()}")),
+    )
     if "resource_parts" not in payload:
         return payload
     rows = []
@@ -169,13 +175,15 @@ def _relocate(
             "callback-reference": (ast.Name, ast.Attribute),
             "callback": (ast.FunctionDef, ast.AsyncFunctionDef),
         }
-        candidates = [
-            n.lineno
-            for n in ast.walk(new_tree)
-            if isinstance(n, kinds[ref.get("creation_mode", "call")])
-            and ast.unparse(n) == expression
-            and _scope(new_tree, n.lineno) == scope
-        ]
+        candidates = []
+        for node in ast.walk(new_tree):
+            if not isinstance(node, kinds[ref.get("creation_mode", "call")]):
+                continue
+            if ast.unparse(node) != expression:
+                continue
+            node_line = getattr(node, "lineno", None)
+            if isinstance(node_line, int) and _scope(new_tree, node_line) == scope:
+                candidates.append(node_line)
         ref["expression"] = expression
     else:
         segment = ref.get(
@@ -223,24 +231,46 @@ def _apply_reference_moves(
     records = {row["identity"]: row for row in payload["resources"]}
     allowed_fields = {"creation_sites", "production_binding", "cleanup_sources"}
     for move in review.get("reference_moves", []):
-        if set(move) != {"identity", "fields", "from", "to"}:
-            raise ValueError("Invalid reviewed reference move schema")
-        if move["identity"] not in records or not set(move["fields"]) <= allowed_fields:
-            raise ValueError("Reference move must name an existing resource and fields")
-        source = move["from"]
-        if set(source) - {"file", "line", "expression", "source_segment"}:
-            raise ValueError("Invalid reference move source selector")
-        matches = 0
-        record = records[move["identity"]]
-        for field in move["fields"]:
-            refs = record.get(field, [])
-            for index, ref in enumerate(refs):
-                if any(ref.get(key) != value for key, value in source.items()):
-                    continue
-                refs[index] = _locate(new, move["to"])
-                matches += 1
-        if matches != len(move["fields"]):
+        record, fields, source, target = _validated_reference_move(
+            move, records, allowed_fields
+        )
+        matches = sum(
+            _move_matching_references(record.get(field, []), source, target, new)
+            for field in fields
+        )
+        if matches != len(fields):
             raise ValueError("Reviewed reference move was missing or ambiguous")
+
+
+def _validated_reference_move(
+    move: dict[str, Any],
+    records: dict[str, dict[str, Any]],
+    allowed_fields: set[str],
+) -> tuple[dict[str, Any], list[str], dict[str, Any], dict[str, Any]]:
+    if set(move) != {"identity", "fields", "from", "to"}:
+        raise ValueError("Invalid reviewed reference move schema")
+    fields = move["fields"]
+    if move["identity"] not in records or not set(fields) <= allowed_fields:
+        raise ValueError("Reference move must name an existing resource and fields")
+    source = move["from"]
+    if set(source) - {"file", "line", "expression", "source_segment"}:
+        raise ValueError("Invalid reviewed reference move source selector")
+    return records[move["identity"]], fields, source, move["to"]
+
+
+def _move_matching_references(
+    refs: list[dict[str, Any]],
+    source: dict[str, Any],
+    target: dict[str, Any],
+    new: Snapshot,
+) -> int:
+    matches = 0
+    for index, ref in enumerate(refs):
+        if not all(ref.get(key) == value for key, value in source.items()):
+            continue
+        refs[index] = _locate(new, target)
+        matches += 1
+    return matches
 
 
 def _apply_resource_reviews(

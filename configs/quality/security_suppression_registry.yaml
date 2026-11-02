@@ -246,7 +246,7 @@ entries:
       arrow payload file is always cleaned up.
   - id: SUP-SR-008
     path: src/bioetl/infrastructure/system/subprocess_boundary.py
-    line: 78
+    line: 84
     rule: B603
     symbol: subprocess.Popen
     owner: stream-a
@@ -256,7 +256,7 @@ entries:
       DEVNULL streams, and a bounded wait inside the protected boundary.
   - id: SUP-SR-009
     path: src/bioetl/infrastructure/system/subprocess_boundary.py
-    line: 142
+    line: 150
     rule: B603
     symbol: subprocess.Popen
     owner: stream-a
@@ -266,7 +266,7 @@ entries:
       constrained environment, optional timeout, and output-size validation.
   - id: SUP-SR-010
     path: src/bioetl/infrastructure/system/subprocess_boundary.py
-    line: 189
+    line: 199
     rule: B603
     symbol: subprocess.Popen
     owner: stream-a

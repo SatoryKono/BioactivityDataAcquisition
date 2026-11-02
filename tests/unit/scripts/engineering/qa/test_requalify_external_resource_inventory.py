@@ -172,8 +172,12 @@ def test_reviewed_reference_move_can_cross_source_files(candidate: tuple) -> Non
     git(root, "add", "--", SOURCE, moved)
     git(root, "commit", "-qm", "move fixture acquisition")
     review["source_ref"] = git(root, "rev-parse", "HEAD")
-    review["source_reviews"][SOURCE] = "The reviewed file read moved to its owning module."
-    review["source_reviews"][moved] = "The existing file read retains the same lifetime."
+    review["source_reviews"][SOURCE] = (
+        "The reviewed file read moved to its owning module."
+    )
+    review["source_reviews"][moved] = (
+        "The existing file read retains the same lifetime."
+    )
     review["reference_moves"] = [
         {
             "identity": "fixture.file",

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "catalog_ref": "c3d7e98a90c8d2c49ffef0d16bfc2af2958ab59d",
-  "source_ref": "f8bb929e95161e9a2319c78debc76bd97da16dba",
+  "source_ref": "eab7409268002909b50631e2e837086de0a9cb67",
   "source_reviews": {
     "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py": "Reviewed pandas 3.1 compatibility change: normalize extension string dtype names to the existing in-memory str contract. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
     "src/bioetl/application/core/_base_transformer_execution_support.py": "Reviewed structural contract support change: classify existing in-memory outcomes and resolve optional-field metadata from the already loaded policy. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
@@ -37,8 +37,9 @@
     "src/bioetl/infrastructure/observability/observability_backend_process.py": "Reviewed subprocess boundary migration: listener probes, taskkill fallback and detached startup use protected wrappers; caller lifetime and cleanup semantics are preserved.",
     "src/bioetl/infrastructure/provenance/code_revision.py": "Reviewed Git metadata migration to run_protected_command; resolved executable, fixed argv, explicit environment and five-second timeout remain enforced.",
     "src/bioetl/infrastructure/storage/metadata/builder_base.py": "Reviewed Git metadata migration to run_protected_command; resolved executable, fixed argv and five-second timeout remain enforced.",
+    "src/bioetl/infrastructure/storage/gold/writer_metrics.py": "Reviewed formatter-only layout changes in gold writer metric labels; no acquisition, cleanup or runtime behavior changed.",
     "src/bioetl/infrastructure/storage/silver/support.py": "Reviewed Delta subprocess migration to run_protected_subprocess_popen; fixed argv, pipe ownership and bounded reader cleanup remain with the existing resource owner.",
-    "src/bioetl/infrastructure/system/subprocess_boundary.py": "Reviewed the central SEC-001 subprocess transport and its typed Popen result alias. The alias change stabilizes test doubles without changing acquisitions; Popen sites remain caller-owned transport and excluded duplicate low-level census sites.",
+    "src/bioetl/infrastructure/system/subprocess_boundary.py": "Reviewed the central SEC-001 subprocess transport, typed Popen result alias, and environment-copy helper rename. Caller-provided environment values are copied without filtering or changing process acquisition; Popen sites remain caller-owned transport and excluded duplicate low-level census sites.",
     "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py": "Reviewed health backend composition move; Docker engine probe remains fixed argv, timeout bounded and shell-free in the composition owner."
   },
   "expression_updates": {
