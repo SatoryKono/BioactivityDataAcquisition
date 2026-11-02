@@ -6,9 +6,15 @@ import sys
 import shutil
 import pytest
 from bioetl.infrastructure.provenance import code_revision as revision
+from bioetl.infrastructure.system.subprocess_boundary import _filter_env_secrets
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_filter_env_secrets_preserves_empty_environment() -> None:
+    assert _filter_env_secrets(None) is None
+    assert _filter_env_secrets({}) == {}
 
 
 @pytest.mark.parametrize(

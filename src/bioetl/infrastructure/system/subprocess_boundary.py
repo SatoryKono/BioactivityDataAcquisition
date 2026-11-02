@@ -18,7 +18,7 @@ _MAX_OUTPUT_BYTES = 10 * 1024 * 1024  # 10MB
 
 
 def _filter_env_secrets(env: Mapping[str, str] | None) -> dict[str, str] | None:
-    if not env:
+    if env is None:
         return None
     filtered_env = dict(env)
     # Filter anything that looks like a secret if needed
