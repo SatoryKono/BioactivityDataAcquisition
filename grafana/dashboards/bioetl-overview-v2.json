@@ -873,7 +873,8 @@
             "renameByName": {
               "domain": "Domain",
               "status_display": "Status",
-              "reason_display": "Reason"
+              "reason_display": "Reason",
+              "saved_trust": "Trust"
             }
           }
         }
@@ -1258,9 +1259,16 @@
               "run_reason": 2
             },
             "renameByName": {
+              "domain": "Domain",
+              "verdict": "Status",
+              "execution_state": "Result",
+              "evidence_completeness": "Evidence",
+              "rules_version": "Rules",
+              "run_verdict": "Status",
               "run_execution": "Result",
               "run_reason": "Reason",
-              "saved_trust": "Trust"
+              "saved_trust": "Trust",
+              "reason_display": "Reason"
             },
             "excludeByName": {
               "__name__": true,

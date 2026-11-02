@@ -2392,6 +2392,9 @@
                   "Time": 11
                 },
                 "renameByName": {
+                  "pipeline": "Pipeline",
+                  "run_type": "Run type",
+                  "stage": "Stage",
                   "signal": "Signal",
                   "Value": "Value",
                   "unit": "Unit",
@@ -12084,8 +12087,15 @@
                 "renameByName": {
                   "domain": "Domain",
                   "verdict": "Status",
+                  "execution_state": "Result",
+                  "evidence_completeness": "Evidence",
+                  "rules_version": "Rules",
                   "action": "Action",
                   "evidence_ref": "Evidence reference",
+                  "pipeline": "Pipeline",
+                  "run_id": "Run ID",
+                  "completed_at": "Completed",
+                  "revision": "Revision",
                   "reason_display": "Reason"
                 }
               }
