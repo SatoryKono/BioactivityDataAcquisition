@@ -1,14 +1,11 @@
 {
   "schema_version": 1,
-  "catalog_ref": "b19169ea6972be1fd082df6a116baba1b2f30f41",
-  "source_ref": "0a7a66b8fa2870d38cc92fd910109380358c7c03",
+  "catalog_ref": "20a35c2b67faba08d345ebc9bfe3e10ff9c9ceab",
+  "source_ref": "20a35c2b67faba08d345ebc9bfe3e10ff9c9ceab",
   "source_reviews": {
-    "src/bioetl/application/services/run_reports/evidence_location_paths.py": "RF-002 (#12680/#12688): new application path/alias helpers for evidence-location catalog. Acquisition census confirms no new external resource site; Path joins only over DI-injected absolute alias bases.",
-    "src/bioetl/domain/control_plane/run_evidence_location.py": "RF-002 (#12680/#12688): pure domain locator rules (parse/canonicalize/register outcomes). No filesystem, network, or process acquisition calls.",
-    "src/bioetl/domain/control_plane/run_evidence_location_models.py": "RF-002 (#12680/#12688): extracted enums/errors/value objects for LOC/CC gate. No external resource acquisition.",
-    "src/bioetl/domain/ports/__init__.py": "RF-002 (#12680/#12688): facade exports RunEvidenceLocationReadPort/RegisterPort. Lazy import_module wiring expression relocated by two export lines; no new acquisition site.",
-    "src/bioetl/domain/ports/control_plane/__init__.py": "RF-002 (#12680/#12688): control_plane package re-exports for the new narrow evidence-location ports. No acquisition calls.",
-    "src/bioetl/domain/ports/control_plane/run_evidence_location.py": "RF-002 (#12680/#12688): narrow Protocol ports for evidence-location read/register. No acquisition calls."
+    "src/bioetl/application/services/run_reports/evidence_location_paths.py": "RF-002 (#12680/#12688): owner tip path-invariant validation on evidence-location helpers. Acquisition census confirms no new external resource site.",
+    "src/bioetl/domain/control_plane/run_evidence_location.py": "RF-002 (#12680/#12688): owner tip pure-domain path invariant tightening. No filesystem/network/process acquisition calls.",
+    "src/bioetl/domain/ports/control_plane/run_evidence_location.py": "RF-002 (#12680/#12688): Args docstring sections for get/lookup/register (Codex P1). Protocol surface only; no acquisition calls."
   },
   "expression_updates": {},
   "resource_updates": {},
