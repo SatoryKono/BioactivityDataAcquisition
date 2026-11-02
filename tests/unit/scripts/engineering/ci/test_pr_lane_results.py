@@ -1705,6 +1705,8 @@ def test_collect_nodeids_parses_pytest_collection(tmp_path: Path) -> None:
     "changed_file",
     [
         "configs/quality/external_resource_inventory.json",
+        "configs/quality/external_resource_inventory_qm08_review.json",
+        "configs/quality/external_resource_inventory_qm09_review.json",
         *[
             f"configs/quality/external_resource_inventory/part-{index:02}.json"
             for index in range(1, 6)
