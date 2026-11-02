@@ -65,14 +65,14 @@ def test_nightly_budget_requires_a_broad_report() -> None:
     [
         {},
         {
-            "schema_version": 1,
+            "schema_version": "diagram-visual-smoke-report-v1",
             "status": "error",
             "checked_count": 20,
             "changed_count": 0,
             "errors": ["missing SVG"],
         },
         {
-            "schema_version": 1,
+            "schema_version": "diagram-visual-smoke-report-v1",
             "status": "passed",
             "checked_count": 20,
             "changed_count": True,
@@ -99,7 +99,7 @@ def test_nightly_budget_uses_validated_broad_change_count(tmp_path: Path) -> Non
     report.write_text(
         json.dumps(
             {
-                "schema_version": 1,
+                "schema_version": "diagram-visual-smoke-report-v1",
                 "status": "passed",
                 "checked_count": 20,
                 "changed_count": 1,
@@ -115,3 +115,27 @@ def test_nightly_budget_uses_validated_broad_change_count(tmp_path: Path) -> Non
     assert check.value == 1
     assert check.passed is False
 
+
+
+
+def test_nightly_budget_applies_limit_to_failed_smoke_report(tmp_path: Path) -> None:
+    module = _load_module()
+    report = tmp_path / "broad.json"
+    report.write_text(
+        json.dumps(
+            {
+                "schema_version": "diagram-visual-smoke-report-v1",
+                "status": "failed",
+                "checked_count": 20,
+                "changed_count": 1,
+                "errors": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    [check] = module._broad_checks(
+        Namespace(mode="nightly", broad_report=report, max_broad_failures=1)
+    )
+    assert check.value == 1
+    assert check.passed is True
