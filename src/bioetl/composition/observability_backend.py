@@ -11,7 +11,6 @@ from bioetl.infrastructure.system.subprocess_boundary import (
     run_protected_command,
     run_protected_subprocess_popen,
 )
-# nosec B404 - see suppression registry
 
 from bioetl.infrastructure.observability.observability_backend_process import (
     DEFAULT_HEALTH_SERVER_PORT,
