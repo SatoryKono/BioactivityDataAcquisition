@@ -98,4 +98,3 @@ def resolve_qudt_unit_identifier(value: str) -> str | None:
             return mapped_identifier
 
     return None
-
