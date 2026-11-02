@@ -80,10 +80,7 @@ def resolve_qudt_unit_identifier(value: str) -> str | None:
         hostname, path = parsed
         if hostname == "qudt.org" and path.startswith("/vocab/unit/"):
             return path.rsplit("/", maxsplit=1)[-1]
-        if (
-            hostname == "www.openphacts.org"
-            and path.casefold() == "/units/nanomolar"
-        ):
+        if hostname == "www.openphacts.org" and path.casefold() == "/units/nanomolar":
             return "NanoMOL-PER-L"
 
     normalized_unit = normalize_standard_unit(value)
@@ -93,7 +90,3 @@ def resolve_qudt_unit_identifier(value: str) -> str | None:
             return mapped_identifier
 
     return None
-
-
-
-

@@ -98,4 +98,3 @@ def _plain_identifier(value: object) -> object:
     if isinstance(value, Enum):
         return _plain_value(value.value)
     return _UNHANDLED
-

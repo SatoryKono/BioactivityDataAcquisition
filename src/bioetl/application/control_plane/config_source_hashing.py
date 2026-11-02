@@ -149,4 +149,3 @@ def _to_canonical_jsonable(value: object) -> object:
     if isinstance(value, (list, tuple)):
         return _normalize_sequence(value)
     return value
-

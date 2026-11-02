@@ -161,8 +161,6 @@ def build_existing_version_issue(
     )
 
 
-
-
 def build_version_regression_message(
     existing_version_label: str,
     candidate_version_label: str,

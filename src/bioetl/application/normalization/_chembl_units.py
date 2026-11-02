@@ -19,4 +19,3 @@ def _legacy_qudt_identifier_from_uri(value: str) -> str | None:
     if parsed.path.casefold() == "/units/nanomolar":
         return "NanoMOL-PER-L"
     return None
-

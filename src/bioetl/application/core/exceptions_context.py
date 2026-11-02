@@ -273,4 +273,3 @@ def get_structured_context(
     structured.update(get_exception_context(exc))
     structured.update({key: _redact(value, key) for key, value in extra.items()})
     return {key: _redact(value, key) for key, value in structured.items()}
-

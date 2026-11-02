@@ -27,7 +27,6 @@ __all__ = [
 ]
 
 
-
 def _detach_mapping(value: Mapping[object, object]) -> MappingProxyType[str, object]:
     return MappingProxyType(
         {str(key): _detach_value(item) for key, item in value.items()}
@@ -92,6 +91,7 @@ def _plain_value(value: object) -> object:
     raise TypeError(
         f"Lineage attributes require JSON-safe values; got {type(value).__name__}"
     )
+
 
 def normalize_mapping(values: Mapping[str, object]) -> Mapping[str, object]:
     """Return an immutable, recursively detached attribute mapping.
