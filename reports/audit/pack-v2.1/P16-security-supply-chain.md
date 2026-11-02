@@ -50,7 +50,7 @@
 - **recommendation**: Optional hygiene — prefer `yaml.safe_load` / document that custom loaders MUST subclass `yaml.SafeLoader`; keep CI/grep guard against bare `yaml.load(` without `Loader=`.
 - **scope / non-goals**: No mandatory mass rewrite; do not treat SafeLoader subclasses as vulnerabilities.
 - **acceptance criteria**: N/A for security closeout; optional lint if product owners want API uniformity.
-- **verification command/test**: `rg -n 'yaml\\.load\\(' src tests scripts` and confirm each hit passes `SafeLoader`/`BaseLoader`.
+- **verification command/test**: `rg -n 'yaml\.load\(' src tests scripts` and confirm each hit passes `SafeLoader`/`BaseLoader`.
 - **dependencies**: None.
 - **related_findings**: None.
 
@@ -124,7 +124,7 @@ Call sites still use `yaml.load(..., Loader=SafeLoaderSubclass|BaseLoader)` rath
 - `tests/architecture/test_docs_build_site_router.py:57` — `yaml.BaseLoader`
 - `tests/architecture/test_pr_gate_complete.py:266,298` — `_UniqueKeyLoader(yaml.SafeLoader)`
 - `tests/architecture/test_coderabbit_config.py:27,50` — `_UniqueKeyLoader(yaml.SafeLoader)`
-- `rg 'yaml\\.load' src` → empty
+- `rg 'yaml\.load' src` → empty
 
 **Expected vs actual:**
 Unsafe/`default` Loader must not appear. Actual loaders are SafeLoader subclasses or BaseLoader.
@@ -145,7 +145,7 @@ Document the SafeLoader invariant; optional lint against bare `yaml.load(`.
 N/A for security closeout.
 
 **Verification commands/tests:**
-`rg -n 'yaml\\.load\\(' src tests scripts`
+`rg -n 'yaml\.load\(' src tests scripts`
 
 **Dependencies:**
 None.
