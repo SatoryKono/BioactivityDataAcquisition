@@ -30,10 +30,16 @@ def test_shadow_compare_routes_rf003_store_and_resolver() -> None:
     assert "tests/unit/domain/run_reports/test_contracts.py" in selected
 
 
-def test_shadow_compare_routes_rf003_inventory_review() -> None:
+@pytest.mark.parametrize(
+    "path",
+    (
+        "configs/quality/external_resource_inventory_pr12702_rf003_review.json",
+        "configs/quality/external_resource_inventory_pr12702_rf003_arch_review.json",
+    ),
+)
+def test_shadow_compare_routes_rf003_inventory_review(path: str) -> None:
     """COMP-004 RF-003 review JSON keeps catalog + requalify governing tests."""
     repo_root = Path(__file__).resolve().parents[5]
-    path = "configs/quality/external_resource_inventory_pr12702_rf003_review.json"
     report = build_shadow_compare([path], repo_root=repo_root)
     assert report["covers_full_suite"] is False
     selected = set(report["selected"])

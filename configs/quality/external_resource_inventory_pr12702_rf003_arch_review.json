@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "98d721243bd89fc84945353127d787f8f667249e",
+  "source_ref": "151b8c75ccb9209ea4d12198d9cf8719cd45b18e",
+  "source_reviews": {
+    "src/bioetl/application/services/control_plane/evidence_location/__init__.py": "RF-003 arch fix (#12681/#12702): package re-exports via resolver only to keep models fan-in at 1. No acquisition calls.",
+    "src/bioetl/application/services/control_plane/evidence_location/models.py": "RF-003 arch fix (#12681/#12702): extracted resolver models/protocols (EvidenceReadContextFactoryProtocol). Pure typing/value objects; no acquisition calls.",
+    "src/bioetl/application/services/control_plane/evidence_location/resolver.py": "RF-003 arch fix (#12681/#12702): resolver body under 250 LOC after models split; Opener renamed to EvidenceReadContextFactoryProtocol. self.opener.open remains factory bind (existing exclusions relocate).",
+    "src/bioetl/composition/factories/evidence_read_context_factory.py": "RF-003 arch fix (#12681/#12702): FileEvidenceReadContextFactory moved to composition/factories for DI compliance. Binds already-qualified control-plane file stores; no direct tempfile/pathlib/os acquisition calls.",
+    "src/bioetl/infrastructure/control_plane/__init__.py": "RF-003 arch fix (#12681/#12702): drop Factory export from infrastructure package after DI move. import_module lazy wiring relocated; no new acquisition owner.",
+    "src/bioetl/infrastructure/control_plane/file_evidence_read_context.py": "RF-003 arch fix (#12681/#12702): FileEvidenceReadContext remains infrastructure adapter; Factory class removed. No acquisition calls at this layer."
+  },
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "segment_updates": {},
+  "reference_moves": []
+}
