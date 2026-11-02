@@ -306,12 +306,31 @@ def _broad_checks(args: argparse.Namespace) -> list[BudgetCheck]:
     if args.mode != "nightly":
         return []
     if args.broad_report is None:
-        return []
+        raise ValueError("--broad-report is required in nightly mode")
     broad_payload = load_json(args.broad_report)
+    if broad_payload.get("schema_version") != 1:
+        raise ValueError("broad report has an unsupported schema_version")
+    if broad_payload.get("status") != "passed":
+        raise ValueError("broad visual-smoke report did not pass")
+    errors = broad_payload.get("errors")
+    if not isinstance(errors, list) or errors:
+        raise ValueError("broad visual-smoke report contains errors")
+    checked_count = broad_payload.get("checked_count")
+    changed_count = broad_payload.get("changed_count")
+    if (
+        isinstance(checked_count, bool)
+        or not isinstance(checked_count, int)
+        or checked_count <= 0
+        or isinstance(changed_count, bool)
+        or not isinstance(changed_count, int)
+        or changed_count < 0
+        or changed_count > checked_count
+    ):
+        raise ValueError("broad visual-smoke report has invalid counters")
     checks = [
         build_check(
             metric="broad.changed",
-            value=to_int(broad_payload, "changed_count", 0),
+            value=changed_count,
             limit=args.max_broad_failures,
             source="check_diagram_visual_smoke",
             message="broad tier failures exceed budget",
@@ -399,3 +418,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

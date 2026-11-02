@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 12613)
+Total output lines: 668
+
 ______________________________________________________________________
 
 Version: 1.1.0
@@ -212,21 +215,7 @@ classes that was not already covered by the curated set.
 | --- | ----------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | 1   | Domain Ports                  | `class-diagrams/01-domain-ports.mmd`                            | Domain port overview with narrow storage ports plus aggregate compat facade |
 | 2   | Domain Ports (L2 Methods)     | `class-diagrams/01a-domain-ports-method-catalog.mmd`            | Method-level catalog for key port protocols                                 |
-| 3   | Entities & Aggregates         | `class-diagrams/02-entities-aggregates.mmd`                     | BaseEntity, Batch, PipelineRun, BatchRecord                                 |
-| 4   | Value Objects                 | `class-diagrams/03-value-objects.mmd`                           | BronzeWriteResult, SilverWriteResult, FencingToken, etc.                    |
-| 5   | Types & Enums                 | `class-diagrams/04-types-enums.mmd`                             | RunType, PublicationType, HealthStatus, NewTypes                            |
-| 6   | Exceptions                    | `class-diagrams/05-exceptions.mmd`                              | BioETLError hierarchy: Critical, Recoverable, DataQuality                   |
-| 7   | Configuration                 | `class-diagrams/06-config-classes.mmd`                          | PipelineConfig, RuntimeConfig, CompositeConfig                              |
-| 8   | Application Core              | `class-diagrams/07-application-core-services.mmd`               | PipelineRunner, BatchExecutor, LockRuntimeService                           |
-| 9   | Application Services          | `class-diagrams/08-application-services.mmd`                    | DQ, Health, Export, Vacuum, Quarantine services                             |
-| 10  | Application Services (L2 Ops) | `class-diagrams/08a-application-services-operation-catalog.mmd` | Operation-level catalog for application services                            |
-| 11  | Transformers                  | `class-diagrams/09-transformers.mmd`                            | BaseTransformer → ChEMBL/Publication/UniProt/PubChem                        |
-| 12  | Adapters                      | `class-diagrams/10-adapters.mmd`                                | BaseHttpAdapter, all provider adapters, resilience                          |
-| 13  | Storage                       | `class-diagrams/11-storage.mmd`                                 | BronzeWriter, SilverWriter, GoldWriter, DeltaReader                         |
-| 14  | Composite Pipeline            | `class-diagrams/12-composite-pipeline.mmd`                      | Runner, coordinators, merger, FSM                                           |
-| 15  | Domain Services               | `class-diagrams/13-domain-services.mmd`                         | EntityIdentityGenerator, Normalization, UnitConverter                               |
-| 16  | Observability                 | `class-diagrams/14-observability.mmd`                           | Logger, Metrics, Tracing implementations                                    |
-| 17  | Observability (L2 Methods)    | `class-diagrams/14a-observability-method-catalog.mmd`           | Method-level catalog for logging/metrics/tracing                            |
+| 3   | Entities & Aggregates         | `class-diagrams/02-entities-aggregates.mmd`                     | BaseEntity, Batch, PipelineRun, BatchRecord             …613 tokens truncated…thods)    | `class-diagrams/14a-observability-method-catalog.mmd`           | Method-level catalog for logging/metrics/tracing                            |
 | 18  | Extractors                    | `class-diagrams/15-extractors.mmd`                              | BaseFieldExtractor, PubMed & UniProt extractors                             |
 | 19  | Factories & Bootstrap         | `class-diagrams/16-factories-bootstrap.mmd`                     | Current composition factories, registries, and runtime assembly seams       |
 
@@ -523,6 +512,9 @@ the smoke baseline set.
 Visual-smoke coverage is tiered: `visual-smoke.txt` is the PR-sized T0 set,
 `visual-smoke-extended.txt` is nightly blocking coverage, and
 `visual-smoke-broad.txt` is an enforced nightly tier
+when the nightly budget command receives a valid broad report. The repository's
+Phase 2 GitHub Actions job remains disabled under the Actions policy in #11196,
+so this configured budget is not currently run by scheduled CI.
 
 
 MkDocs is validation-only in the current repository workflow: `mkdocs.yml` is
@@ -662,3 +654,4 @@ Insert anywhere in the file (commonly after the diagram-type declaration).
 **Lenient subgraph rule:** nodes inside a subgraph whose *name* appears in an
 edge (e.g. `Bronze --> Silver`) are **not** flagged — they are considered
 descriptive children of a connected subgraph container.
+
