@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import errno
 from hashlib import sha256
 from pathlib import Path
 from types import SimpleNamespace
@@ -287,8 +288,15 @@ def test_context_rechecks_child_paths_before_manifest_read(tmp_path: Path) -> No
     outside.mkdir()
     try:
         (data_root / "output").symlink_to(outside, target_is_directory=True)
+    except NotImplementedError as exc:
+        pytest.skip(f"symlinks are not implemented: {exc}")
     except OSError as exc:
-        pytest.skip(f"symlink unavailable: {exc}")
+        unsupported_errors = {errno.EPERM, errno.ENOSYS}
+        if hasattr(errno, "EOPNOTSUPP"):
+            unsupported_errors.add(errno.EOPNOTSUPP)
+        if exc.errno in unsupported_errors or getattr(exc, "winerror", None) == 1314:
+            pytest.skip(f"symlinks are unavailable: {exc}")
+        raise
 
     with pytest.raises(EvidenceLocationInvalidError, match="escapes|symlink"):
         context.get_manifest_by_run_id(UUID(_RUN_A))
