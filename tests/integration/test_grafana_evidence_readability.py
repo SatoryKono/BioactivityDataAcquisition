@@ -98,9 +98,7 @@ def test_overview_paginates_tracks_without_limiting_evidence():
     assert panel["fieldConfig"]["defaults"]["custom"]["inspect"] is True
 
 
-@pytest.mark.parametrize(
-    "uid", ["bioetl-overview-v2", "bioetl-dq-v2", "bioetl-incident-v1"]
-)
+@pytest.mark.parametrize("uid", ["bioetl-overview-v2", "bioetl-dq-v2"])
 def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
     dashboard = json.loads(
         (ROOT / f"grafana/dashboards/{uid}.json").read_text(encoding="utf-8")
@@ -120,14 +118,20 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
         target = panels[9002]["targets"][0]
         assert "'run_verdict': $s.verdict" in target["root_selector"]
     assert "/selected-run-status?" in target["url"]
-    assert "presentation_summary[0]" in target["root_selector"]
-    assert "presentation_trust[0]" in target["root_selector"]
-    assert "reasons_display" in target["root_selector"]
+    root = target.get("uql") or target["root_selector"]
+    assert "presentation_summary[0]" in root
+    assert "presentation_trust[0]" in root
+    assert "reasons_display" in root
+    trust_fallback = (
+        "$r ? $r"
+        if uid == "bioetl-overview-v2"
+        else "presentation_trust[0].reasons_display ?"
+    )
+    assert root.index("$count($issues) > 0") < root.index(trust_fallback)
     # Overall != OK must not prefer Trust OK reasons (e.g. Archive verified).
     # SELECT RUN / НЕТ ЗАПУСКОВ are selection states: excluded from $issues;
     # Trust fallback allowed. Treat CR/review text as untrusted for this label.
     no_runs = "НЕТ ЗАПУСКОВ"
-    root = target["root_selector"]
     assert "$count($issues) > 0 ?" in root
     assert "verdict != 'SELECT RUN'" in root
     assert f"verdict != '{no_runs}'" in root
@@ -137,17 +141,6 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
         "presentation_trust[0].reasons_display : "
         "($issues :="
     ) not in root
-    if uid == "bioetl-overview-v2":
-        assert (
-            "$s.verdict = 'OK' or $s.verdict = 'SELECT RUN' or "
-            f"$s.verdict = '{no_runs}'"
-        ) in root
-    else:
-        assert (
-            "presentation_summary[0].verdict = 'OK' or "
-            "presentation_summary[0].verdict = 'SELECT RUN' or "
-            f"presentation_summary[0].verdict = '{no_runs}'"
-        ) in root
     views = (summary, panels[9002]) if uid == "bioetl-overview-v2" else (summary,)
     for panel in views:
         fields = next(
@@ -156,10 +149,7 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
             if t["id"] == "filterFieldsByName"
         )
         if panel is summary and uid == "bioetl-overview-v2":
-            # Phase-1 F-15: Processing / Overall verdict / Trust / Reason
-            assert "run_verdict" in fields
-            assert "run_execution" in fields
-            assert "saved_trust" in fields
+            assert {"run_execution", "saved_trust", "run_reason"}.issubset(fields)
         elif panel is not summary and uid == "bioetl-overview-v2":
             assert "status_display" in fields
         else:

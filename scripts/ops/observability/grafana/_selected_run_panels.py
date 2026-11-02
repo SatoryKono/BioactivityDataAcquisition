@@ -377,7 +377,7 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
                             "value": [
                                 {
                                     "title": "Open saved run report (JSON)",
-                                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+                                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
                                     "targetBlank": True,
                                 }
                             ],
@@ -736,6 +736,7 @@ def _style_provider_check(panels: list[dict]) -> None:
                         "FAIL": {"text": "FAIL", "color": "red"},
                         "FAILING": {"text": "FAILING", "color": "red"},
                         "CRIT": {"text": "CRIT", "color": "red"},
+                        "QUERY ERROR": {"text": "QUERY ERROR", "color": "red"},
                         "UNKNOWN": {"text": "UNKNOWN", "color": "gray"},
                         "N/A": {"text": "N/A", "color": "gray"},
                         "—": {"text": "—", "color": "gray"},
@@ -758,7 +759,7 @@ def _style_provider_check(panels: list[dict]) -> None:
             "color": {"mode": "thresholds"},
             "thresholds": {
                 "mode": "absolute",
-                "steps": [{"color": "green", "value": None}],
+                "steps": [{"color": "gray", "value": None}],
             },
         },
         "overrides": [],

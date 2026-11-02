@@ -985,8 +985,8 @@ def _correct_runtime_evidence_actions(panels: dict[int, dict[str, Any]]) -> None
                 "title": "Open saved run report",
                 "url": (
                     "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/"
-                    "pipeline-run-report-artifact?pipeline=${pipeline:percentencode}"
-                    "&run_id=${run_id:percentencode}&format=pipeline_run_report_json"
+                    "pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}"
+                    "&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json"
                 ),
                 "targetBlank": True,
             }
@@ -1175,9 +1175,30 @@ def _correct_dq(uid: str, panels: dict[int, dict[str, Any]]) -> None:
 
 
 def _correct_overview(uid: str, panels: dict[int, dict[str, Any]]) -> None:
-    if uid != "bioetl-overview-v2" or 215 not in panels:
+    if uid != "bioetl-overview-v2":
         return
-    _override(panels[215], "Action", _WIDTH, 150)
+    provider_check = panels.get(9481)
+    if provider_check is not None:
+        defaults = provider_check.setdefault("fieldConfig", {}).setdefault(
+            "defaults", {}
+        )
+        mappings = defaults.setdefault("mappings", [])
+        value_mapping = next(
+            (mapping for mapping in mappings if mapping.get("type") == "value"),
+            None,
+        )
+        if value_mapping is None:
+            value_mapping = {"type": "value", "options": {}}
+            mappings.append(value_mapping)
+        value_mapping.setdefault("options", {})["QUERY ERROR"] = {
+            "text": "QUERY ERROR",
+            "color": "red",
+        }
+        thresholds = defaults.setdefault("thresholds", {}).setdefault("steps", [])
+        if thresholds:
+            thresholds[0]["color"] = "gray"
+    if 215 in panels:
+        _override(panels[215], "Action", _WIDTH, 150)
 
 
 def _correct_run_explorer(uid: str, panels: dict[int, dict[str, Any]]) -> None:

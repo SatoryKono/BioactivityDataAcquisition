@@ -69,10 +69,10 @@ def test_accounting_links_reference_exact_saved_run_only() -> None:
     links = panels[9403]["fieldConfig"]["defaults"]["links"]
     assert len(links) == 1
     assert (
-        "pipeline-run-report-artifact?pipeline=${pipeline:percentencode}"
+        "pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}"
         in links[0]["url"]
     )
-    assert "run_id=${run_id:percentencode}" in links[0]["url"]
+    assert "run_id=${selected_run_id:percentencode}" in links[0]["url"]
     untouched = deepcopy(payload)
     _correct_runtime("another-dashboard", panels)
     assert payload == untouched
