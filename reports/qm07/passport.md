@@ -1,16 +1,16 @@
-# Паспорт закрытия issue #12388
+# Паспорт QM-07 / issue #12388
 
-**Цель:** Доказать cold imports, корректность root и изоляцию установленного runtime (Quality Move QM-07).
+**Цель:** Доказать cold imports, корректность root seams и изоляцию установленного runtime wheel.
+
+**Статус:** source cold imports, root seams и installed-wheel smoke закрыты harness'ом `tests/architecture/test_qm07_cold_imports.py`.
 
 **Результаты:**
-1. Разделены три окружения (Source CANDIDATE, sdist, установленный runtime wheel). Wheel установлен в изолированный `wheel_venv` (вне `system-site-packages`).
-2. Проведены **Source-проверки**:
-   - Все 30 новых модулей и facade из `scripts.engineering.quality` импортированы отдельно из временного `cwd`. Проверено отсутствие shadowing и ошибок eager `__init__`.
-   - Проверены root/path seams (`architecture_debt_reduction` и др.) и корректный fallback на repository root из внешнего cwd.
-   - Проверен `debt_governance_gate_evaluators` (отсутствие None bindings при импорте).
-3. Проведен **Runtime wheel smoke**:
-   - Wheel установлен из `dist/` в `wheel_venv`.
-   - Проведен smoke-тест без путей checkout и `PYTHONPATH`.
-   - Установлен import hook, запрещающий любые импорты из `scripts.*`. Сам `bioetl` (например, `bioetl.application.core.runner.PipelineRunner`) загружается успешно.
+1. **Source CANDIDATE**
+   - Все 30 модулей и facade `scripts.engineering.quality` импортируются из временного cwd с `-I` и явным `sys.path`; origin каждого модуля сверяется с путём в checkout.
+   - Root/path seams (`architecture_debt_reduction`, `architecture_debt_task_generation`, scorecard, exemptions) сходятся к repository root текущего checkout; path/error контракты `build_module_path_key` / `resolve_registry_path` проверяются отдельно.
+   - `debt_governance_gate_evaluators` не отдаёт `None` bindings (`callable`); `load_debt_scorecard` / `evaluate_debt_scorecard` и `build_architecture_quality_scorecard` вызываются успешно без записи артефактов через CLI `main()`.
+2. **Installed runtime wheel**
+   - Session fixture собирает wheel текущего checkout (`uv build --wheel`) и ставит его во временный venv.
+   - Smoke без `PYTHONPATH`/checkout path загружает `bioetl` + `PipelineRunner` из `site-packages`; import hook блокирует `scripts.*`.
 
-Тесты написаны в `tests/architecture/test_qm07_cold_imports.py` и успешно проходят mypy и ruff, а также `uv run pytest`.
+Известные source blockers quality→scripts по-прежнему зафиксированы в `tests/architecture/qm_07/test_qm07_cold_imports.py` (отдельный inventory, не отменяет wheel smoke для runtime package).
