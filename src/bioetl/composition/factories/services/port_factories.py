@@ -71,7 +71,7 @@ def create_metrics(settings: SettingsPort) -> MetricsPort:
     """Create metrics port based on settings."""
     metrics: object = resolve_metrics_port(
         metrics=None,
-        settings=settings,  # type: ignore[arg-type]
+        settings=settings,  # type: ignore[arg-type]  # tracked(#12721): Settings object type mismatch
     )
 
     if isinstance(metrics, MetricsPort):

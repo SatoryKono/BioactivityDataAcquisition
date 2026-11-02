@@ -65,7 +65,7 @@ async def _dispatch_http_request(
     async with asyncio.timeout(request_timeout):
         typed_kwargs = cast(_RequestKwargs, httpx_kwargs)
         if is_stream:
-            request = client.build_request(method, url, **typed_kwargs)  # type: ignore[misc]
+            request = client.build_request(method, url, **typed_kwargs)  # type: ignore[misc]  # tracked(#12721): httpx Kwargs expansion type mismatch
             return await client.send(request, stream=True)
         return await client.request(method, url, **typed_kwargs)
 

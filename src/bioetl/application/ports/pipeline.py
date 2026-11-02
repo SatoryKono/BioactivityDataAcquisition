@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from bioetl.domain.ports import (  # type: ignore[attr-defined]
+from bioetl.domain.ports import (  # type: ignore[attr-defined]  # tracked(#12721): Domain port definitions are incomplete
     DomainConfigMapperPort,
     EntityTypeExtractor,
 )

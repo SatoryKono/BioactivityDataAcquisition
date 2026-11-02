@@ -159,7 +159,7 @@ class PubChemAdapter(
             thread_pool=thread_pool,
             strict_error_handling=strict_error_handling,
             dependency_context=dependency_context,
-            error_handler=error_handler,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+            error_handler=error_handler,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]  # tracked(#12721): Argument type mismatch for error_handler
             owns_thread_pool=owns_thread_pool,
         )
         self._mapper = entity_mapper

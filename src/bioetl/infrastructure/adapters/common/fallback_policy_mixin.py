@@ -113,12 +113,12 @@ class FallbackPolicyMixin:
             fallback_handler_hook=self._get_fallback_handler(enabled),
         )
         fallback_fetch_service: FallbackFetchOrchestrator = (
-            self._fallback_fetch_service  # type: ignore[attr-defined]  # pyright: ignore[reportAttributeAccessIssue]
+            self._fallback_fetch_service  # type: ignore[attr-defined]  # pyright: ignore[reportAttributeAccessIssue]  # tracked(#12721): Mixin relies on parent class attributes
         )
         self._fallback_decorator = ComposableFallbackDecorator(  # pyright: ignore[reportUninitializedInstanceVariable]
             service=fallback_fetch_service,
             strategy=strategy,
             config=config,
-            logger=self._logger,  # type: ignore[attr-defined]  # pyright: ignore[reportAttributeAccessIssue]
+            logger=self._logger,  # type: ignore[attr-defined]  # pyright: ignore[reportAttributeAccessIssue]  # tracked(#12721): Mixin relies on parent class attributes
         )
         self._on_fallback_decorator_updated()
