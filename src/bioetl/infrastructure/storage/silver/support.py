@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-import subprocess
-
-# nosec B404 - see suppression registry
+import subprocess  # nosec B404 - see suppression registry
 import threading
 import time
 from collections.abc import Sequence
