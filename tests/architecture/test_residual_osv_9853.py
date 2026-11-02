@@ -152,6 +152,7 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
         "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
         "braces": "$braces",
         "@istanbuljs/load-nyc-config": {"js-yaml": "4.3.2"},
+        "minimatch": "$minimatch",
     }
     scenes_pkg = _json(SCENES_PKG)
     bridge_ref = (
@@ -164,6 +165,7 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
         "braces": "$braces",
         "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
         "@istanbuljs/load-nyc-config": {"js-yaml": "4.3.2"},
+        "minimatch": "$minimatch",
     }
     # This candidate has a real adapter for Grafana's legacy history contract;
     # a lockfile major alone is never host/runtime qualification evidence.
