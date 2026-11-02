@@ -37,6 +37,9 @@ Cassettes location: tests/fixtures/vcr/chembl/
 
 from __future__ import annotations
 
+import asyncio
+from typing import NoReturn
+
 from pathlib import Path
 
 import pytest
@@ -48,6 +51,16 @@ from .conftest import (
     assert_silver_table_has_records,
     create_test_context,
     get_silver_records,
+)
+from ._pipeline_restart_helpers import (
+    aba_restart_marks,
+    batch_processing_service,
+    bootstrap_target_runner,
+    cancel_after_first_record,
+    failing_extract_records,
+    gated_extract_factory,
+    patched_extract_records,
+    run_molecule_then_target_and_assert,
 )
 
 # Large multi-entity VCR chains (10–29 MiB) stay out of default -m "not slow".
@@ -74,13 +87,20 @@ def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
     """Route mixed-provider tests to the canonical cassette name they reuse."""
     if request.node.name == "test_parallel_independent_pipelines":
         return "test_uniprot_protein_full_cycle"
-    return request.node.name
+    if request.node.name in [
+        "test_run_normal_a_b_a",
+        "test_run_cancellation_and_restart",
+        "test_run_error_and_restart",
+        "test_run_config_error_and_restart",
+    ]:
+        return "test_all_chembl_pipelines_chain"
+    return str(request.node.name)
 
 
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_chembl_target_then_activity_chain(e2e_data_dir: Path):
+async def test_chembl_target_then_activity_chain(e2e_data_dir: Path) -> None:
     """E2E: Run Target pipeline, then Activity pipeline.
 
     Activities reference targets, so this tests a realistic data flow.
@@ -111,7 +131,7 @@ async def test_chembl_target_then_activity_chain(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_chembl_molecule_then_activity_chain(e2e_data_dir: Path):
+async def test_chembl_molecule_then_activity_chain(e2e_data_dir: Path) -> None:
     """E2E: Run Molecule pipeline, then Activity pipeline.
 
     Activities reference molecules, so this tests compound data flow.
@@ -143,7 +163,7 @@ async def test_chembl_molecule_then_activity_chain(e2e_data_dir: Path):
 @pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(600)  # Extended timeout: 5 pipelines × ~60s each + Gold validation
-async def test_all_chembl_pipelines_chain(e2e_data_dir: Path):
+async def test_all_chembl_pipelines_chain(e2e_data_dir: Path) -> None:
     """E2E: Run all ChEMBL pipelines in sequence.
 
     Order: Target → Molecule → Document → Activity → Assay
@@ -181,7 +201,7 @@ async def test_all_chembl_pipelines_chain(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_parallel_independent_pipelines(e2e_data_dir: Path):
+async def test_parallel_independent_pipelines(e2e_data_dir: Path) -> None:
     """E2E: Run independent pipelines that can run in parallel.
 
     PubMed and UniProt pipelines are independent and should not interfere.
@@ -202,7 +222,7 @@ async def test_parallel_independent_pipelines(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_pipeline_isolation(e2e_data_dir: Path):
+async def test_pipeline_isolation(e2e_data_dir: Path) -> None:
     """E2E: Verify pipelines are isolated and don't corrupt each other's data.
 
     Running multiple pipelines should not cause data mixing.
@@ -246,7 +266,7 @@ async def test_pipeline_isolation(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_rerun_same_pipeline_twice(e2e_data_dir: Path):
+async def test_rerun_same_pipeline_twice(e2e_data_dir: Path) -> None:
     """E2E: Merge-mode pipeline rerun preserves business identity set.
 
     ``chembl_target`` uses Silver merge semantics, so rerunning the same input
@@ -284,3 +304,66 @@ async def test_rerun_same_pipeline_twice(e2e_data_dir: Path):
         f"Merge rerun changed row count: {first_count} -> {second_count}"
     )
     assert second_identity == first_identity, "Merge rerun changed identity set"
+
+
+@aba_restart_marks
+async def test_run_normal_a_b_a(e2e_data_dir: Path) -> None:
+    """E2E: Normal pipeline runs in A -> B -> A pattern in a single process."""
+    runner1 = bootstrap_target_runner(limit=2)
+    await runner1.run()  # type: ignore[attr-defined]
+    await run_molecule_then_target_and_assert(
+        e2e_data_dir,
+        require_a2_records_fetched=True,
+    )
+
+
+@aba_restart_marks
+async def test_run_cancellation_and_restart(
+    e2e_data_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """E2E: cancel Target mid-extract, then Molecule → Target restart."""
+    runner1 = bootstrap_target_runner(limit=2)
+    source = batch_processing_service(runner1)
+    first_record_ready = asyncio.Event()
+    continue_extraction = asyncio.Event()
+    gated = gated_extract_factory(
+        source.extract_records,  # type: ignore[attr-defined]
+        first_record_ready,
+        continue_extraction,
+    )
+    with patched_extract_records(runner1, monkeypatch, gated):
+        await cancel_after_first_record(runner1, first_record_ready)
+    await run_molecule_then_target_and_assert(e2e_data_dir)
+
+
+@aba_restart_marks
+async def test_run_error_and_restart(
+    e2e_data_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """E2E: Target extract failure, then Molecule → Target restart."""
+    runner1 = bootstrap_target_runner(limit=3)
+    with patched_extract_records(runner1, monkeypatch, failing_extract_records):
+        with pytest.raises(RuntimeError, match="injected ChEMBL source failure"):
+            await runner1.run()  # type: ignore[attr-defined]
+    await run_molecule_then_target_and_assert(e2e_data_dir)
+
+
+@aba_restart_marks
+async def test_run_config_error_and_restart(e2e_data_dir: Path) -> None:
+    """A config-load failure during bootstrap must not poison later runs."""
+
+    def fail_config_load(_pipeline_name: str) -> NoReturn:
+        raise RuntimeError("injected pipeline config load failure")
+
+    with pytest.raises(RuntimeError, match="injected pipeline config load failure"):
+        bootstrap_pipeline_runner(
+            create_test_context("chembl_target", limit=2),
+            load_pipeline_config_fn=fail_config_load,
+        )
+    await run_molecule_then_target_and_assert(
+        e2e_data_dir,
+        require_a2_records_fetched=True,
+        a2_fetch_message=(
+            "A2 fetched no Target records after the bootstrap config error"
+        ),
+    )

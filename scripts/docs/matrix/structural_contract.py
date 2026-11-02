@@ -118,6 +118,14 @@ def contract_lookup_key(
     )
 
 
+def canonical_physical_type(physical_type: str) -> str:
+    """Normalize Pandera dtype spellings so exports are stable across runtimes."""
+    normalized = physical_type.strip().lower()
+    # NumPy and pandas may spell the same boolean field as ``bool`` or
+    # ``boolean`` depending on the installed dependency/runtime versions.
+    return "boolean" if normalized == "bool" else normalized
+
+
 def resolve_required_display(current_required: str, *, optional: bool) -> str:
     """Resolve workbook Required display without erasing richer non-optional labels."""
     if optional:
@@ -247,7 +255,7 @@ def build_runtime_contract_rows() -> list[MatrixStructuralContractRow]:
                     pipeline=pipeline_name,
                     silver_column=contract.field_name,
                     logical_type=contract.logical_type,
-                    physical_type=contract.physical_type,
+                    physical_type=canonical_physical_type(contract.physical_type),
                     nullable=contract.nullable,
                     optional=contract.optional,
                     optionality_sources=tuple(
@@ -375,6 +383,7 @@ __all__ = [
     "StructuralWorkbookSemantics",
     "build_runtime_contract_rows",
     "build_structural_workbook_semantics",
+    "canonical_physical_type",
     "chembl_pipeline_names",
     "contract_lookup_key",
     "index_runtime_contract_rows",

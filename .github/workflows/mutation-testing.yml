@@ -3,7 +3,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: mutation-${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 # Push and pull_request stay omitted so a code change cannot start four
@@ -30,17 +30,16 @@ jobs:
             threshold: "70.0"
           - id: application-control-plane
             paths_to_mutate: src/bioetl/application/services/control_plane/
-            # Public service/contract owners also live outside services/control_plane.
-            # Follow the canonical mutation target in configs/quality/test_matrix.yaml.
-            tests_dir: tests/unit/application/
+            tests_dir: tests/unit/application/services/control_plane/
             threshold: "60.0"
           - id: application-export-manifests
             paths_to_mutate: src/bioetl/application/services/export_lineage/export_manifests.py
             tests_dir: tests/unit/application/services/
             threshold: "60.0"
           - id: application-workflow-runner
-            # Keep this curated workflow target on its canonical policy helpers;
-            # the owning service tests exercise their workflow integration.
+            # mutmut 3.x intentionally skips decorated classes. Target the
+            # workflow runner's canonical, undecorated policy helpers so this
+            # lane exercises real mutants instead of a zero-mutant dataclass.
             paths_to_mutate: src/bioetl/application/services/workflow/workflow_runner_support.py
             tests_dir: tests/unit/repo_backed/application/services/test_workflow_runner_service.py
             threshold: "60.0"
@@ -78,13 +77,10 @@ jobs:
           path = Path("pyproject.toml")
           document = tomlkit.parse(path.read_text(encoding="utf-8"))
           config = document["tool"]["mutmut"]
-          # The frozen mutmut 3.8.1 accepts source_paths; the old key warns.
-          config["source_paths"] = [os.environ["MUTMUT_SOURCE_PATH"]]
-          # The bounded profile favors stock fork; clean tests prime inherited
-          # source caches without changing the mutation or owning-test selection.
-          config["process_isolation"] = "fork"
-          if "paths_to_mutate" in config:
-              del config["paths_to_mutate"]
+          # mutmut 3.x reads paths_to_mutate (source_paths is ignored).
+          config["paths_to_mutate"] = [os.environ["MUTMUT_SOURCE_PATH"]]
+          if "source_paths" in config:
+              del config["source_paths"]
           # Subset mutation still needs the full package + tooling imports.
           config["also_copy"] = [
               "src/bioetl",
