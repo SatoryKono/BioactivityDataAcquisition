@@ -1030,7 +1030,8 @@ def _helper_path_targets(path: str, root: Path) -> list[str]:
     # Package re-exports (from tests.helpers import …) must count as consumers.
     if helpers_init.is_file() and _imports_module(helpers_init, module, root):
         importing_tests |= _importing_script_tests(test_roots, "tests.helpers", root)
-    # One-hop: helpers that import this module expose it to their consumers.
+    # One-hop: support modules (helpers or other non-test modules under tests/)
+    # that import this module expose it to their consumers.
     importing_tests |= _helper_consumer_tests(path, module, root, test_roots)
     if importing_tests:
         targets = {
@@ -1041,25 +1042,36 @@ def _helper_path_targets(path: str, root: Path) -> list[str]:
     return _helper_suite(path, root)
 
 
+def _test_support_modules(root: Path) -> list[Path]:
+    """Return non-test Python modules under tests/ (helpers, suite support, …)."""
+    tests_root = root / "tests"
+    if not tests_root.is_dir():
+        return []
+    return sorted(
+        path
+        for path in tests_root.rglob("*.py")
+        if path.name != CONFTEST_FILENAME
+        and not path.name.startswith("test_")
+        and path.name != "__init__.py"
+    )
+
+
 def _helper_consumer_tests(
     path: str,
     module: str,
     root: Path,
     test_roots: tuple[Path, ...],
 ) -> set[Path]:
-    """Return tests that import helpers which themselves import ``module``."""
-    helpers_dir = root / "tests" / "helpers"
-    if not helpers_dir.is_dir():
-        return set()
+    """Return tests that import support modules which themselves import ``module``."""
     changed = (root / path).resolve()
     consumers: set[Path] = set()
-    for helper in sorted(helpers_dir.glob("*.py")):
-        if helper.name.startswith("_") or helper.resolve() == changed:
+    for support in _test_support_modules(root):
+        if support.resolve() == changed:
             continue
-        if not _imports_module(helper, module, root):
+        if not _imports_module(support, module, root):
             continue
-        helper_module = ".".join(helper.relative_to(root).with_suffix("").parts)
-        consumers |= _importing_script_tests(test_roots, helper_module, root)
+        support_module = ".".join(support.relative_to(root).with_suffix("").parts)
+        consumers |= _importing_script_tests(test_roots, support_module, root)
     return consumers
 
 

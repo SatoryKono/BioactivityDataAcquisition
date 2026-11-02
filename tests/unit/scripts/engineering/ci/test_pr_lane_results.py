@@ -1083,6 +1083,44 @@ def test_affected_targets_map_transitive_helper_consumers(
     ]
 
 
+def test_affected_targets_map_transitive_support_outside_helpers(
+    tmp_path: Path,
+) -> None:
+    """Support modules outside tests/helpers also select their consumers."""
+    replay = tmp_path / "tests" / "helpers" / "control_plane_replay.py"
+    replay.parent.mkdir(parents=True)
+    replay.write_text(
+        "def run_tracked_fixture_replay_pair() -> None: ...\n",
+        encoding="utf-8",
+    )
+    (replay.parent / "__init__.py").write_text("", encoding="utf-8")
+    support = tmp_path / "tests" / "integration" / "_consolidation_suite_support.py"
+    support.parent.mkdir(parents=True)
+    support.write_text(
+        "from tests.helpers.control_plane_replay import run_tracked_fixture_replay_pair\n"
+        "def run_pair():\n"
+        "    run_tracked_fixture_replay_pair()\n",
+        encoding="utf-8",
+    )
+    gate = (
+        tmp_path
+        / "tests"
+        / "integration"
+        / "idempotency"
+        / "test_reproducibility_idempotency_gate.py"
+    )
+    gate.parent.mkdir(parents=True)
+    gate.write_text(
+        "from tests.integration._consolidation_suite_support import run_pair\n"
+        "def test_gate(): pass\n",
+        encoding="utf-8",
+    )
+
+    assert affected_pytest_targets(
+        [replay.relative_to(tmp_path).as_posix()], repo_root=tmp_path
+    ) == ["tests/integration/idempotency/test_reproducibility_idempotency_gate.py"]
+
+
 def test_affected_targets_map_integration_vcr_policy() -> None:
     """VCR policy edits select the inventory architecture test."""
     repo_root = Path(__file__).resolve().parents[5]
