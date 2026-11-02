@@ -447,6 +447,7 @@ def test_missing_production_binding_detected() -> None:
     assert composition_dir.is_dir(), (
         f"Composition directory is missing: {composition_dir}"
     )
+
     def raise_walk_error(error: OSError) -> None:
         raise error
 
