@@ -14,6 +14,7 @@ from bioetl.domain.control_plane.run_evidence_location import (
     DEFAULT_EVIDENCE_ROOT_ALIAS,
     EVIDENCE_LOCATIONS_DIRNAME,
     EvidenceLocationInvalidError,
+    EvidenceLocationKind,
     canonicalize_relative_data_root,
     evidence_location_record_segments,
 )
@@ -80,7 +81,7 @@ def resolve_evidence_locations_root(*, report_root: Path | None = None) -> Path:
 
 def resolve_evidence_location_path(
     *,
-    kind: object,
+    kind: EvidenceLocationKind | str,
     owner: str,
     run_id: str,
     report_root: Path | None = None,

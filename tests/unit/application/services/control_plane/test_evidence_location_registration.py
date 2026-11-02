@@ -11,6 +11,7 @@ from bioetl.application.services.control_plane.evidence_location import (
     EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
     EvidenceLocationRegisterRequest,
     EvidenceLocationRegistrationService,
+    record_registration_soft_failure_observation,
 )
 from bioetl.application.services.run_reports.observations import (
     bind_run_observations,
@@ -120,6 +121,35 @@ def test_register_conflict_is_diagnostic(tmp_path: Path) -> None:
     assert conflict.code == "conflict"
 
 
+def test_soft_failure_observation_surfaces_conflict_not_success() -> None:
+    token = bind_run_observations()
+    try:
+        record_registration_soft_failure_observation(
+            code="registered",
+            facts={"kind": "pipeline"},
+        )
+        assert EVIDENCE_LOCATION_OBSERVATION_DOMAIN not in run_observations()
+
+        record_registration_soft_failure_observation(
+            code="skipped_missing_runtime_source_id",
+            facts={"kind": "pipeline"},
+        )
+        assert EVIDENCE_LOCATION_OBSERVATION_DOMAIN not in run_observations()
+
+        record_registration_soft_failure_observation(
+            code="conflict",
+            detail="binding_conflict",
+            facts={"kind": "workflow", "owner": "chembl_assay_pack"},
+        )
+        observations = run_observations()
+        assert observations[EVIDENCE_LOCATION_OBSERVATION_DOMAIN]["verdict"] == "ERROR"
+        assert (
+            observations[EVIDENCE_LOCATION_OBSERVATION_DOMAIN]["reason"] == "conflict"
+        )
+    finally:
+        reset_run_observations(token)
+
+
 def test_verify_observation_does_not_require_ready(tmp_path: Path) -> None:
     service = _service(tmp_path)
     token = bind_run_observations()
@@ -162,5 +192,56 @@ def test_verify_observation_does_not_require_ready(tmp_path: Path) -> None:
         )
         assert ok.code == "ok"
         assert ok.verdict == "OK"
+    finally:
+        reset_run_observations(token)
+
+
+def test_workflow_manifest_service_surfaces_register_exception_observation() -> None:
+    from datetime import UTC, datetime
+    from types import SimpleNamespace
+    from uuid import UUID
+
+    from bioetl.application.services.control_plane.workflow.manifest_models import (
+        WorkflowManifestCreateSpec,
+    )
+    from bioetl.application.services.control_plane.workflow.manifest_service import (
+        WorkflowManifestService,
+    )
+    from bioetl.domain.types import RunID
+    from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
+
+    def _boom(_manifest: object) -> None:
+        raise RuntimeError("locator boom")
+
+    service = WorkflowManifestService(
+        manifest_port=SimpleNamespace(save=lambda _manifest: None),
+        created_at_factory=lambda: datetime(2026, 1, 1, tzinfo=UTC),
+        _manifest_id_factory=lambda: "workflow-manifest-soft",
+        evidence_location_register=_boom,
+    )
+    token = bind_run_observations()
+    try:
+        manifest = service.create_manifest(
+            WorkflowManifestCreateSpec(
+                workflow_run_id=RunID(UUID(_WF)),
+                config=WorkflowConfig(
+                    name="chembl_assay_pack",
+                    steps=(
+                        WorkflowStepConfig(
+                            step_id="ingest",
+                            pipeline_name="chembl_assay",
+                        ),
+                    ),
+                ),
+                launch_context={},
+            )
+        )
+        assert manifest.workflow_name == "chembl_assay_pack"
+        observations = run_observations()
+        assert (
+            observations[EVIDENCE_LOCATION_OBSERVATION_DOMAIN]["reason"]
+            == "registration_exception"
+        )
+        assert observations[EVIDENCE_LOCATION_OBSERVATION_DOMAIN]["verdict"] == "ERROR"
     finally:
         reset_run_observations(token)

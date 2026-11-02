@@ -153,6 +153,9 @@ def _register_evidence_location_soft(
 ) -> None:
     """RF-004: publish locator after durable manifest save (never fail ETL)."""
     try:
+        from bioetl.application.services.control_plane.evidence_location.registration import (
+            record_registration_soft_failure_observation,
+        )
         from bioetl.composition.runtime_builders.evidence_location_registration import (
             register_pipeline_manifest_location,
         )
@@ -163,10 +166,33 @@ def _register_evidence_location_soft(
             return
         if not isinstance(settings, Settings):
             return
-        register_pipeline_manifest_location(manifest=manifest, settings=settings)
-    except Exception:
+        outcome = register_pipeline_manifest_location(
+            manifest=manifest, settings=settings
+        )
+        record_registration_soft_failure_observation(
+            code=outcome.code,
+            detail=outcome.detail,
+            facts={
+                "kind": "pipeline",
+                "owner": str(manifest.pipeline_name),
+                "run_id": str(manifest.run_id),
+                "revision": outcome.revision,
+            },
+        )
+    except Exception as exc:
         # Registration is additive diagnostics; processing success is independent.
-        return
+        try:
+            from bioetl.application.services.control_plane.evidence_location.registration import (
+                record_registration_soft_failure_observation,
+            )
+
+            record_registration_soft_failure_observation(
+                code="registration_exception",
+                detail=f"{type(exc).__name__}: {exc}",
+                facts={"kind": "pipeline"},
+            )
+        except Exception:
+            return
 
 
 def _strict_cached_bronze_require(

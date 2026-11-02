@@ -50,7 +50,10 @@ class WorkflowManifestService:
         default_factory=lambda: _missing_manifest_id_factory
     )
     # RF-004: optional post-save locator publisher (Composition-injected).
-    evidence_location_register: Callable[[WorkflowManifest], None] | None = None
+    # May return an outcome object with ``code``/``detail`` for soft diagnostics.
+    evidence_location_register: Callable[[WorkflowManifest], object | None] | None = (
+        None
+    )
 
     def _resolve_created_at(self) -> datetime:
         """Resolve workflow manifest creation time through the configured seam."""
@@ -84,10 +87,41 @@ class WorkflowManifestService:
         self.manifest_port.save(manifest)
         if self.evidence_location_register is not None:
             try:
-                self.evidence_location_register(manifest)
-            except Exception:
+                outcome = self.evidence_location_register(manifest)
+            except Exception as exc:
                 # Locator publication must not mask workflow processing success.
-                pass
+                from bioetl.application.services.control_plane.evidence_location.registration import (
+                    record_registration_soft_failure_observation,
+                )
+
+                record_registration_soft_failure_observation(
+                    code="registration_exception",
+                    detail=f"{type(exc).__name__}: {exc}",
+                    facts={
+                        "kind": "workflow",
+                        "owner": str(manifest.workflow_name),
+                        "run_id": str(manifest.workflow_run_id),
+                    },
+                )
+            else:
+                # Callbacks may return an outcome or None; surface non-success.
+                if outcome is not None:
+                    from bioetl.application.services.control_plane.evidence_location.registration import (
+                        record_registration_soft_failure_observation,
+                    )
+
+                    code = getattr(outcome, "code", None)
+                    if isinstance(code, str):
+                        record_registration_soft_failure_observation(
+                            code=code,
+                            detail=getattr(outcome, "detail", None),
+                            facts={
+                                "kind": "workflow",
+                                "owner": str(manifest.workflow_name),
+                                "run_id": str(manifest.workflow_run_id),
+                                "revision": getattr(outcome, "revision", None),
+                            },
+                        )
         return manifest
 
     def compute_execution_fingerprint(self, request: WorkflowManifestCreateSpec) -> str:

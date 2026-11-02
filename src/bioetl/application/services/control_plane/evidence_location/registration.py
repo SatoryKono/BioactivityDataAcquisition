@@ -31,9 +31,37 @@ __all__ = [
     "EvidenceLocationRegistrationOutcome",
     "EvidenceLocationRegistrationService",
     "EvidenceLocationVerifyOutcome",
+    "record_registration_soft_failure_observation",
 ]
 
 EVIDENCE_LOCATION_OBSERVATION_DOMAIN = "Evidence Location"
+
+_REGISTRATION_SUCCESS_CODES = frozenset({"registered", "already_identical"})
+
+
+def record_registration_soft_failure_observation(
+    *,
+    code: str,
+    detail: str | None = None,
+    facts: dict[str, object] | None = None,
+) -> None:
+    """Publish conflict/error/exception diagnostics without mutating status.
+
+    Success and explicit skip codes stay silent. Soft-register callers use this
+    so RF-004 failures remain visible on the Evidence Location observation
+    channel while processing_status stays untouched.
+    """
+    if code in _REGISTRATION_SUCCESS_CODES or code.startswith("skipped_"):
+        return
+    payload = dict(facts or {})
+    if detail is not None:
+        payload.setdefault("detail", detail)
+    record_run_observation(
+        EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
+        verdict="ERROR",
+        reason=code,
+        facts=payload,
+    )
 
 
 @dataclass(frozen=True, slots=True)

@@ -21,7 +21,11 @@ from bioetl.application.services.run_reports.evidence_location_paths import (
     default_evidence_root_alias_registry,
 )
 from bioetl.application.services.run_reports.source_identity import (
+    RUNTIME_SOURCE_ID_ENV,
     resolve_runtime_source_identity,
+)
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
+    load_repository_source_environment,
 )
 from bioetl.composition.runtime_builders.run_manifest_data_roots import (
     resolve_data_root,
@@ -109,18 +113,33 @@ def relative_data_root_under_alias(
     return canonicalize_relative_data_root(text)
 
 
+def _repository_root() -> Path:
+    # runtime_builders → composition → bioetl → src → repo root
+    return Path(__file__).resolve().parents[4]
+
+
 def resolve_registration_runtime_source_id(settings: Settings) -> str | None:
-    """Resolve bind/runtime source digest for locators (composition edge)."""
+    """Resolve bind/runtime source digest for locators (composition edge).
+
+    Precedence matches :func:`resolve_runtime_source_identity`: typed settings /
+    process env, then repository ``.env`` / ``.env.local``.
+    """
     configured = getattr(settings, "runtime_source_id", None)
-    env_map: dict[str, str] = {}
+    process_environment: dict[str, str] = {}
     if configured is not None and str(configured).strip():
-        env_map["BIOETL_RUNTIME_SOURCE_ID"] = str(configured).strip()
-    # Prefer typed settings; also accept process env already loaded into settings.
-    process_environment = env_map or None
-    if process_environment is None:
-        process_environment = dict(os.environ)
+        process_environment[RUNTIME_SOURCE_ID_ENV] = str(configured).strip()
+    else:
+        env_value = os.environ.get(RUNTIME_SOURCE_ID_ENV, "").strip()
+        if env_value:
+            process_environment[RUNTIME_SOURCE_ID_ENV] = env_value
+    repository_environment = load_repository_source_environment(
+        _repository_root(),
+        names=(RUNTIME_SOURCE_ID_ENV,),
+        process_environment=process_environment,
+    )
     resolution = resolve_runtime_source_identity(
         process_environment=process_environment,
+        repository_environment=repository_environment,
     )
     if resolution.is_resolved and resolution.value is not None:
         return resolution.value

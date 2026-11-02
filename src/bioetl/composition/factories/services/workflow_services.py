@@ -216,13 +216,15 @@ def _create_workflow_ledger_service(
     )
 
 
-def _workflow_evidence_location_register(manifest: WorkflowManifest) -> None:
+def _workflow_evidence_location_register(manifest: WorkflowManifest) -> object:
     """RF-004: publish workflow-parent locator after durable manifest save."""
     from bioetl.composition.runtime_builders.evidence_location_registration import (
         register_workflow_manifest_location,
     )
 
-    register_workflow_manifest_location(manifest=manifest, settings=get_settings())
+    return register_workflow_manifest_location(
+        manifest=manifest, settings=get_settings()
+    )
 
 
 def get_workflow_execution_service(

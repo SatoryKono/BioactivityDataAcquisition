@@ -15,6 +15,7 @@ from bioetl.composition.runtime_builders.evidence_location_registration import (
     register_pipeline_manifest_location,
     register_workflow_manifest_location,
     relative_data_root_under_alias,
+    resolve_registration_runtime_source_id,
 )
 from bioetl.domain.control_plane.run_evidence_location import EvidenceLocationKind
 from bioetl.domain.control_plane.run_manifest import RunManifest
@@ -178,3 +179,24 @@ def test_composite_path_does_not_call_evidence_location_register() -> None:
     source = Path(composite_mod.__file__).read_text(encoding="utf-8")
     assert "evidence_location" not in source
     assert "EvidenceLocation" not in source
+
+
+def test_resolve_registration_runtime_source_id_reads_env_local(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Registration identity must honor repository .env.local like Ops HTTP."""
+    from bioetl.application.services.run_reports.source_identity import (
+        RUNTIME_SOURCE_ID_ENV,
+    )
+    import bioetl.composition.runtime_builders.evidence_location_registration as mod
+
+    monkeypatch.delenv(RUNTIME_SOURCE_ID_ENV, raising=False)
+    (tmp_path / ".env").write_text(
+        f"{RUNTIME_SOURCE_ID_ENV}={'b' * 64}\n", encoding="utf-8"
+    )
+    (tmp_path / ".env.local").write_text(
+        f"{RUNTIME_SOURCE_ID_ENV}={_SOURCE}\n", encoding="utf-8"
+    )
+    monkeypatch.setattr(mod, "_repository_root", lambda: tmp_path)
+    settings = SimpleNamespace(runtime_source_id=None)
+    assert resolve_registration_runtime_source_id(settings) == _SOURCE  # type: ignore[arg-type]
