@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 from typing import Protocol, runtime_checkable
+from uuid import UUID
 
 from bioetl.application.services.run_reports.evidence_location_paths import (
     EvidenceRootAliasRegistry,
@@ -27,6 +28,7 @@ from bioetl.domain.control_plane.run_evidence_location import (
 from bioetl.domain.ports.control_plane.run_evidence_location import (
     RunEvidenceLocationReadPort,
 )
+from bioetl.domain.types import RunID
 
 __all__ = [
     "EvidenceLocationLegacyRootPolicy",
@@ -199,17 +201,18 @@ class EvidenceLocationResolver:
                 detail=result.detail or "context_not_open",
             )
         try:
+            typed_run_id = RunID(UUID(str(run_id)))
             if _is_workflow_kind(result.requested_kind):
-                manifest = result.context.get_workflow_manifest_by_run_id(run_id)
+                manifest = result.context.get_workflow_manifest_by_run_id(typed_run_id)
             else:
-                manifest = result.context.get_manifest_by_run_id(run_id)
+                manifest = result.context.get_manifest_by_run_id(typed_run_id)
         except EvidenceLocationInvalidError as exc:
             return EvidenceLocationLookupResult(
                 code=EvidenceLocationLookupCode.LOCATION_INVALID,
                 location=result.location,
                 detail=str(exc),
             )
-        except (OSError, ValueError) as exc:
+        except (OSError, TypeError, ValueError) as exc:
             return EvidenceLocationLookupResult(
                 code=EvidenceLocationLookupCode.LOCATION_INVALID,
                 location=result.location,
