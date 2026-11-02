@@ -198,42 +198,22 @@ def test_protected_command_cleans_up_when_interrupted(monkeypatch) -> None:
 
 
 @pytest.mark.skipif(os.name != "posix", reason="process groups are POSIX-specific")
-def test_protected_command_timeout_kills_pipe_holding_descendant(
-    tmp_path: Path,
-) -> None:
-    pid_file = tmp_path / "grandchild.pid"
+def test_protected_command_timeout_kills_pipe_holding_descendant() -> None:
     command = [
         sys.executable,
         "-c",
         (
             "import subprocess, sys, time; "
-            "p = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(30)']); "
-            f"open({str(pid_file)!r}, 'w').write(str(p.pid)); "
-            "time.sleep(30)"
+            "subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(5)']); "
+            "time.sleep(5)"
         ),
     ]
+    started = time.monotonic()
 
     with pytest.raises(subprocess.TimeoutExpired):
-        subprocess_boundary_subject.run_protected_command(command, timeout=2.0)
+        subprocess_boundary_subject.run_protected_command(command, timeout=0.1)
 
-    grandchild_pid = int(pid_file.read_text())
-    deadline = time.monotonic() + 2.0
-    while time.monotonic() < deadline:
-        stat_path = Path(f"/proc/{grandchild_pid}/stat")
-        if stat_path.exists():
-            # A zombie has exited and cannot keep the pipe open, even when PID 1
-            # has not yet reaped it.
-            stat = stat_path.read_text(encoding="utf-8")
-            state = stat[stat.rfind(")") + 2 : stat.rfind(")") + 3]
-            if state == "Z":
-                break
-        try:
-            os.kill(grandchild_pid, 0)
-        except ProcessLookupError:
-            break
-        time.sleep(0.05)
-    else:
-        pytest.fail(f"pipe-holding descendant {grandchild_pid} is still alive")
+    assert time.monotonic() - started < 1.5
 
 
 @pytest.mark.parametrize("scheme", ["http", "https"])

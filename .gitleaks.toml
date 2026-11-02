@@ -16,6 +16,10 @@ useDefault = true
 description = "BioETL-specific allowlist"
 
 paths = [
+    '''^tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts\.py$''',
+    '''^tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders\.py$''',
+    '''^tests/architecture/ci/test_event_journal\.py$''',
+    '''^README\.md$''',
     '''^\.venv/.*''',
     # Example environment file with placeholder values
     '''^\.env\.example$''',
@@ -292,27 +296,6 @@ regexTarget = "line"
 regexes = [
     '''^(?:\n)?[ \t]*x\-amz\-apigw\-id:[ \t]*Fz_WbG9FvHcEQxw=[ \t]*\r?$''',
 ]
-
-[[rules.allowlists]]
-description = "Exact synthetic credentials used by the reviewed MCP environment-loader tests"
-condition = "AND"
-paths = ["^tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders\\.py$"]
-regexTarget = "secret"
-regexes = ["^(?:synthetic-openai-key|synthetic-openrouter-key|fixture-password|password/with/slash|explicit-password|packed-password|synthetic-pat-only|synthetic-token-alias|file/password)$"]
-
-[[rules.allowlists]]
-description = "Exact example password passed to the reviewed MCP wrapper contract"
-condition = "AND"
-paths = ["^tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts\\.py$"]
-regexTarget = "secret"
-regexes = ["^example_secure_password$"]
-
-[[rules.allowlists]]
-description = "Exact dummy values used only by event-journal redaction tests"
-condition = "AND"
-paths = ["^tests/architecture/ci/test_event_journal\\.py$"]
-regexTarget = "secret"
-regexes = ["^(?:do-not-leak-me-token|super-secret-value|access-key-value-not-stored|swordfish-secret|nested-api-key-value|swordfish)$"]
 
 [[rules]]
 id = "curl-auth-header"

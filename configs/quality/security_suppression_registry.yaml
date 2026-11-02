@@ -214,7 +214,7 @@ entries:
   # --- subprocess.run without shell (B603) ---
   - id: SUP-SR-007
     path: src/bioetl/infrastructure/provenance/code_revision.py
-    line: 100
+    line: 95
     rule: B603
     symbol: subprocess.run
     owner: stream-a
@@ -225,7 +225,7 @@ entries:
       paths likewise fixed argv.
   - id: SUP-SR-005
     path: src/bioetl/infrastructure/storage/metadata/builder_base.py
-    line: 39
+    line: 38
     rule: B603
     symbol: subprocess.run
     owner: stream-a
@@ -235,7 +235,7 @@ entries:
       argv; no shell, timeout=5, returns None on failure.
   - id: SUP-SR-006
     path: src/bioetl/infrastructure/storage/silver/support.py
-    line: 276
+    line: 271
     rule: B603
     symbol: subprocess.Popen
     owner: stream-a
@@ -246,7 +246,7 @@ entries:
       arrow payload file is always cleaned up.
   - id: SUP-SR-008
     path: src/bioetl/infrastructure/system/subprocess_boundary.py
-    line: 81
+    line: 84
     rule: B603
     symbol: subprocess.Popen
     owner: stream-a
@@ -256,7 +256,7 @@ entries:
       DEVNULL streams, and a bounded wait inside the protected boundary.
   - id: SUP-SR-009
     path: src/bioetl/infrastructure/system/subprocess_boundary.py
-    line: 147
+    line: 150
     rule: B603
     symbol: subprocess.Popen
     owner: stream-a
@@ -266,7 +266,7 @@ entries:
       constrained environment, optional timeout, and output-size validation.
   - id: SUP-SR-010
     path: src/bioetl/infrastructure/system/subprocess_boundary.py
-    line: 196
+    line: 199
     rule: B603
     symbol: subprocess.Popen
     owner: stream-a

@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import os
 import signal
-import subprocess  # nosec B404 - see suppression registry
+import subprocess
+
+# nosec B404 - see suppression registry
 import sys
 import time
 from collections.abc import Mapping

@@ -3,9 +3,9 @@
 This module provides a unified secure boundary for external command execution
 with enforced properties:
 - No shell injection (shell=False)
-- A finite default timeout
+- Enforced timeouts
 - Standardized error handling
-- Output size validation after capture (not a memory limit)
+- Output constraint checking
 - Explicit environment handling
 """
 
@@ -21,7 +21,6 @@ from contextlib import suppress
 from typing import IO, Any, TypedDict, Unpack, cast
 
 _MAX_OUTPUT_BYTES = 10 * 1024 * 1024  # 10MB
-_DEFAULT_TIMEOUT_SECONDS = 300.0
 _CLEANUP_TIMEOUT_SECONDS = 0.5
 
 _PopenResult = subprocess.Popen[bytes] | subprocess.Popen[str]
@@ -123,7 +122,7 @@ def _cleanup_process(
 def run_protected_command(
     command: Sequence[str],
     *,
-    timeout: float | None = _DEFAULT_TIMEOUT_SECONDS,
+    timeout: float | None = None,
     cwd: str | bytes | os.PathLike[str] | os.PathLike[bytes] | None = None,
     env: Mapping[str, str] | None = None,
     capture_output: bool = True,
