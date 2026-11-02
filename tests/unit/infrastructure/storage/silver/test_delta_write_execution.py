@@ -401,10 +401,12 @@ time.sleep(10)
                 "mode": "append",
             },
             arrow_data=request.arrow_data,
-            timeout_seconds=0.1,
+            # Windows process startup can exceed 100 ms before the child
+            # executes the PID-file write below.
+            timeout_seconds=2.0,
         )
     elapsed = time.monotonic() - start_time
-    assert elapsed < 1.0
+    assert elapsed < 3.0
     pid = int(pid_path.read_text(encoding="utf-8"))
     assert not psutil.pid_exists(pid)
 
