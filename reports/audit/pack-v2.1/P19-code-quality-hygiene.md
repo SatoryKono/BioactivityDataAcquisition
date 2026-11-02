@@ -14,32 +14,32 @@
 - Аудит выполнен с помощью `vulture`, `radon`, `ruff`, `mypy`.
 
 ## C. Evidence Ledger
-- **E2 STATIC**: mypy reports 25 instances of `type: ignore` suppressions without justification or ticket references.
-- **E3 EXECUTABLE**: `uv run mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory scripts/engineering/quality`
-- **E3 EXECUTABLE**: `uv run ruff check .` (0 errors)
-- **E3 EXECUTABLE**: `uv run vulture src/bioetl scripts tests` (1909 dead code candidates, many with 60% confidence which require contextual manual confirmation).
-- **E3 EXECUTABLE**: `grep -rn "type: ignore" src/bioetl` (25 results).
+- **E2 STATIC**: At audited pin, `rg -n '# type:\s*ignore' src/bioetl` → **24** suppressions (nearly all with `[code]`); bare `rg -n 'type:\s*ignore' src/bioetl` → **25** hits including one prose mention in `arrow_typed.py`. Ticket/TODO refs on those lines: **0**.
+- **E3 CLAIMED (pin, no artifact attached in this PR)**: `uv run mypy --config-file pyproject.toml --strict --incremental src/bioetl src/memory scripts/engineering/quality` — exit/output not stored here; treat as **NOT_REATTACHED**.
+- **E3 TIP-SPOTCHECK**: `uv run --frozen --no-build ruff check src/bioetl` on post-rebase tip → exit 0 (scoped to `src/bioetl`, not full-tree `.`).
+- **E3 CLAIMED (pin, no artifact attached)**: `uv run vulture src/bioetl scripts tests` → **1909** candidates reported by original run; not re-executed on tip.
+- **E3 TIP-SPOTCHECK**: `rg -n '# type:\s*ignore' src/bioetl | wc -l` → **24** on tip after rebase onto `origin/main`.
 
 ## D. Findings Register
 
 ### finding_id: P19-HYGIENE-001
 - **root_cause_id**: `unjustified_type_ignores`
 - **owner_prompt**: P19
-- **concern**: Наличие 25 `type: ignore` директив в `src/bioetl` без привязки к конкретным тикетам техдолга или объяснений, что ослабляет type-safety гарантии и затрудняет аудит строгой типизации.
+- **concern**: В `src/bioetl` есть **24** `# type: ignore[...]` без ticket/TODO-ссылок; коды ошибок у большинства есть, но обоснование техдолга отсутствует — это ослабляет аудируемость type-safety.
 - **severity**: P2
 - **confidence**: high
 - **status**: CONFIRMED
-- **expected**: Все `type: ignore` должны быть либо удалены (с исправлением типов), либо сопровождаться комментарием с ID тикета/обоснованием, например, `# type: ignore[attr-defined]  # TODO(#123): Fix dynamically generated attributes`.
-- **actual**: Присутствует 25 голых или слабо обоснованных `type: ignore` директив.
-- **evidence_ids**: E2, E3
-- **attempted_disproof**: Проверены правила ruff. Ruff не настроен на запрет `type: ignore` без обоснований, поэтому проверки проходят.
-- **exceptions_checked**: Исключений для массовых `type: ignore` в BioETL `RULES.md` / `AGENTS.md` не найдено.
-- **impact**: Затруднение рефакторинга, риск runtime type errors на границах систем.
+- **expected**: Каждый `type: ignore` либо удалён (с исправлением типов), либо сопровождается ticket/обоснованием, например `# type: ignore[attr-defined]  # TODO(#123): dynamic attrs`.
+- **actual**: 24 директивы с кодами ошибок; **0** с ticket/TODO. Не «голые» без `[code]`, но без трассируемого долга.
+- **evidence_ids**: E2, E3 TIP-SPOTCHECK
+- **attempted_disproof**: Ruff не запрещает `type: ignore` без ticket-комментария; scoped `ruff check src/bioetl` на tip → 0.
+- **exceptions_checked**: Исключений для массовых `type: ignore` без ticket в BioETL `RULES.md` / `AGENTS.md` не найдено.
+- **impact**: Затруднение рефакторинга и аудита suppressions на границах систем.
 - **root cause**: Историческое накопление suppressions без оформления техдолга.
-- **recommendation**: Провести ревизию всех 25 случаев, удалить ненужные, для остальных создать локальные issues/TODO и снабдить комментарием.
-- **scope / non-goals**: Обновление только 25 найденных строк в `src/bioetl`.
-- **acceptance criteria**: Отсутствуют `type: ignore` без обоснования.
-- **verification command/test**: `grep -rn "type: ignore" src/bioetl`
+- **recommendation**: Ревизия 24 случаев: удалить ненужные; оставшиеся снабдить ticket/TODO.
+- **scope / non-goals**: Только строки `# type: ignore` в `src/bioetl` (не prose-упоминания).
+- **acceptance criteria**: Нет `type: ignore` без ticket/обоснования.
+- **verification command/test**: `rg -n '# type:\s*ignore' src/bioetl`
 - **dependencies**: None
 - **related_findings**: None
 
@@ -65,12 +65,14 @@
 - **related_findings**: None
 
 ## E. Quantitative Scorecard
-- Repository hygiene, naming: 4 (evidence: ruff 0 errors)
-- Duplication: 4 (evidence: radon complexity is generally low, mostly A/B grades)
-- Dead code: 2 (evidence: 1909 vulture candidates, requires tuning)
-- Static typing: 4 (evidence: strict mypy pass, but 25 unannotated ignores)
-- Build/package hygiene: 4
-- Debt budgets/ratchets: 3 (no explicit threshold enforcement tool found for type ignores)
+- **Scale:** 1 (критичный незакрытый hygiene/typing debt) … 5 (чистые ratchets, tuned dead-code, обоснованные ignores).
+- **Overall Score:** **3** (не 5): −1 dead-code noise/`NOT_VERIFIABLE` (1909 vulture, pin-claimed); −1 typing debt (24 ignores без ticket) + mypy pin-claim без артефакта.
+- Repository hygiene, naming: 4 (tip spotcheck: `ruff check src/bioetl` exit 0; full-tree `.` не перепроверялся)
+- Duplication: **NOT_VERIFIABLE** на tip (radon A/B — pin-claim без сохранённого вывода)
+- Dead code: 2 (pin-claim 1909 vulture; требует whitelist/тюнинга; на tip не перезапускался)
+- Static typing: 3 (24 `# type: ignore` без ticket; mypy `--strict` на pin **не** приложен артефактом → не ставить 4/5)
+- Build/package hygiene: **NOT_VERIFIABLE** в этом PR (отдельных команд не записывали)
+- Debt budgets/ratchets: 3 (нет явного CI-ratchet на «ignore без ticket»)
 
 ## F. Cross-cutting/root-cause clusters
 - **type-safety debt**: Накопление `type: ignore`.
@@ -81,22 +83,25 @@
 2. [P3] Внедрение vulture whitelist и разбор мертвого кода (Issue: high_volume_dead_code_candidates).
 
 ## H. Verification Matrix
-- Naming policy: Checked (ruff)
-- Dead/zero-reference candidates: Checked (vulture, 1909 candidates)
-- Static typing ignores: Checked (grep, 25 instances)
-- LOC/complexity/fan-in/out: Checked (radon, mostly A/B grades)
+- Naming/ruff (`src/bioetl`): tip spotcheck exit 0.
+- Dead/zero-reference candidates: pin-claimed vulture 1909 — **NOT_REATTACHED** on tip.
+- Static typing ignores: tip spotcheck 24× `# type: ignore` без ticket.
+- mypy `--strict`: pin-claimed — **NOT_REATTACHED** (нет сохранённого stdout/exit в PR).
+- LOC/complexity/radon: pin-claimed A/B — **NOT_VERIFIABLE** на tip.
 
 ## I. `NOT_VERIFIABLE` и missing evidence
-- Детальный разбор всех 1909 кандидатов на мертвый код невозможен статически без контекста использования (нужно проверять entrypoints, plugins, dynamic imports).
+- Полный разбор 1909 vulture-кандидатов без whitelist/entrypoints.
+- Повторный mypy `--strict` / full-tree ruff / radon на tip с артефактами.
+- Audited pin `7250ba1fee73d721ab78d4bac75763db24ef469e` ≠ текущий `origin/main` tip.
 
 ## J. Self-check
-- unsupported claims: None. All claims backed by standard static analysis tools.
-- stale evidence: None. Run on current HEAD.
-- exception handling: Noted for dead code (false positives).
-- score/severity consistency: Yes, severities match guidelines (P2 for contract debt, P3 for hygiene).
+- unsupported claims: Убраны абсолютные «ruff/mypy 100% PASS» и Overall без формулы; mypy/vulture/radon без артефакта → `NOT_REATTACHED` / `NOT_VERIFIABLE`.
+- stale evidence: Pin сохранён; tip spotcheck только для ruff(`src/bioetl`) и rg ignores. Self-check больше не утверждает «run on current HEAD».
+- exception handling: Vulture false positives / dynamic entrypoints отмечены.
+- score/severity consistency: Overall **3**; P2 для ignores без ticket; P3 для dead-code tooling gap.
 
 ## K. Verdict
-Проект демонстрирует высокую общую гигиену (ruff 100% pass, mypy strict 100% pass), однако имеет локальные очаги технического долга в виде необоснованных `type: ignore` директив и значительного числа неподтвержденных кандидатов на мертвый код (по результатам базового прогона vulture). Кодовая база пригодна для дальнейшего масштабирования при условии точечного погашения долга.
+**Overall Score 3/5.** На tip подтверждены: scoped ruff OK на `src/bioetl` и 24 `# type: ignore` без ticket. Pin-claims mypy `--strict`, full-tree ruff, radon и 1909 vulture **не** переприложены артефактами — не трактовать как Verified/PASS. Главный долг: трассируемые обоснования для type-suppressions и тюнинг dead-code анализа.
 
 ## Issue drafts
 (Учетные данные GitHub API отсутствуют, Issue созданы как черновики)
@@ -114,28 +119,28 @@
 - Status: CONFIRMED
 
 **Problem:**
-There are 25 instances of `type: ignore` in `src/bioetl` that lack ticket references or justification comments.
+There are 24 `# type: ignore[...]` directives in `src/bioetl` that lack ticket/TODO references (error codes are usually present).
 
 **Evidence:**
-- `grep -rn "type: ignore" src/bioetl` yields 25 results.
+- `rg -n '# type:\s*ignore' src/bioetl` → 24 on tip spotcheck.
 - See report: `reports/audit/pack-v2.1/P19-code-quality-hygiene.md`
 
 **Expected vs actual:**
-- *Expected:* All `type: ignore` directives should be justified with a ticket ID or technical reason.
-- *Actual:* Bare `type: ignore` directives exist.
+- *Expected:* Each `type: ignore` justified with a ticket ID or explicit technical reason.
+- *Actual:* Coded ignores exist without ticket/TODO trail.
 
 **Impact:**
 Weakens type safety guarantees and obscures genuine architectural type mismatches.
 
 **Scope / non-goals:**
-- Update or remove the 25 identified instances in `src/bioetl`.
+- Update or remove the 24 identified `# type: ignore` instances in `src/bioetl`.
 - Non-goal: Complete architecture type refactoring.
 
 **Architecture constraints:**
 - Must maintain strict mypy compliance (`--strict`).
 
 **Implementation outline:**
-- Review each of the 25 instances.
+- Review each of the 24 instances.
 - If the type can be fixed natively, fix it and remove the ignore.
 - If it cannot be fixed, append a comment referencing a specific TODO or ticket.
 
