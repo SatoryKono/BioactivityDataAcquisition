@@ -103,7 +103,7 @@ The repository exhibits a mature security and supply chain posture: subprocess b
 - **CI Secrets**: GitHub Actions secrets. Scanner jobs **Configured** (`detect-secrets`, `gitleaks`); run outcomes **NOT_VERIFIABLE** here.
 - **HTTP Communications**: Downstream scientific APIs. Cassette secret-safety **check** via `check_vcr_secrets.py` (**E2 STATIC**; not a scrub writer).
 - **Subprocesses**: Local OS execution. `shell=False` in `subprocess_boundary.py` (**E2 STATIC**); timeout not claimed enforced globally.
-- **Deserialization**: XML (`defusedxml` imports, **E2 STATIC**), YAML (SafeLoader/BaseLoader at direct `yaml.load(` sites from scoped `rg`; none in `src/`), JSON (`json.loads`).
+- **Deserialization**: XML (`defusedxml` imports, **E2 STATIC**), YAML (scoped `rg`: 5 direct `yaml.load(` / 0 in `src/`; Loader bases from separate file:line reads), JSON (`json.loads`).
 
 ### Dependency/Action Provenance Matrix
 - Python Dependencies: Locked via `uv.lock`; `osv-scanner` / `pip-audit` jobs **Configured** in CI YAML (run results **NOT_VERIFIABLE**).
