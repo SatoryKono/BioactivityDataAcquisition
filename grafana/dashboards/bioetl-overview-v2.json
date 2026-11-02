@@ -2329,7 +2329,7 @@
               },
               "constraint": {
                 "horizontal": "leftright",
-                "vertical": "center"
+                "vertical": "top"
               },
               "placement": {
                 "left": 8,
@@ -2362,7 +2362,7 @@
               },
               "constraint": {
                 "horizontal": "leftright",
-                "vertical": "center"
+                "vertical": "top"
               },
               "placement": {
                 "left": 8,

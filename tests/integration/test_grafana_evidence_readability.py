@@ -98,7 +98,9 @@ def test_overview_paginates_tracks_without_limiting_evidence():
     assert panel["fieldConfig"]["defaults"]["custom"]["inspect"] is True
 
 
-@pytest.mark.parametrize("uid", ["bioetl-overview-v2", "bioetl-dq-v2"])
+@pytest.mark.parametrize(
+    "uid", ["bioetl-overview-v2", "bioetl-dq-v2", "bioetl-incident-v1"]
+)
 def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
     dashboard = json.loads(
         (ROOT / f"grafana/dashboards/{uid}.json").read_text(encoding="utf-8")

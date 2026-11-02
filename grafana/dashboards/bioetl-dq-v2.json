@@ -527,8 +527,8 @@
             },
             "properties": [
               {
-                "id": "custom.wrapText",
-                "value": false
+                "id": "displayName",
+                "value": "Trust"
               },
               {
                 "id": "custom.cellOptions",
@@ -678,6 +678,21 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
               }
             ]
           }
@@ -751,16 +766,18 @@
         {
           "id": "organize",
           "options": {
-            "renameByName": {
-              "verdict": "Overall verdict",
-              "reason_display": "Reason",
-              "saved_trust": "Trust"
-            },
+            "excludeByName": {},
             "indexByName": {
               "execution_state": 0,
               "verdict": 1,
               "saved_trust": 2,
               "reason_display": 3
+            },
+            "renameByName": {
+              "execution_state": "Processing",
+              "verdict": "Overall verdict",
+              "saved_trust": "Trust",
+              "reason_display": "Reason"
             }
           }
         }

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import time
 from collections.abc import Callable
 from functools import partial
 
@@ -24,6 +25,8 @@ from bioetl.interfaces.http.control_plane_selector_context import (
     finalize_run_id_empty_catalog_label,
 )
 
+_DEFAULT_FILTER_OPTIONS_BUDGET_SECONDS = 20.0
+
 
 async def build_filter_options_payload(
     host: _HealthRoutingHost,
@@ -35,6 +38,8 @@ async def build_filter_options_payload(
     deadline: float,
 ) -> dict[str, object]:
     """Combine manifest and report catalogs into a filter-options payload."""
+    if deadline is None:
+        deadline = time.monotonic() + _DEFAULT_FILTER_OPTIONS_BUDGET_SECONDS
     manifest_port = host._run_manifest_port
     assert manifest_port is not None
     dimension = host._read_optional_param(query, "dimension") or "run_id"

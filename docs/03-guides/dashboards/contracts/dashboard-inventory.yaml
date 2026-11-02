@@ -138,6 +138,8 @@ dashboards:
       - run_id
       - read_latency_quantile
       - provider
+      - selected_run_id
+      - selected_pipeline
   - uid: bioetl-run-explorer-v1
     title: Run Explorer
     owner: "@bioetl-observability"
