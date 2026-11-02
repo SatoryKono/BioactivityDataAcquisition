@@ -158,6 +158,42 @@ def _locate(snapshot: Snapshot, selector: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _expression_candidate_lines(
+    new_tree: ast.AST,
+    expression: str,
+    creation_mode: str,
+    scope: str,
+) -> list[int]:
+    kinds = {
+        "call": (ast.Call,),
+        "callback-reference": (ast.Name, ast.Attribute),
+        "callback": (ast.FunctionDef, ast.AsyncFunctionDef),
+    }
+    candidates: list[int] = []
+    for node in ast.walk(new_tree):
+        if not isinstance(node, kinds[creation_mode]):
+            continue
+        if ast.unparse(node) != expression:
+            continue
+        node_line = getattr(node, "lineno", None)
+        if isinstance(node_line, int) and _scope(new_tree, node_line) == scope:
+            candidates.append(node_line)
+    return candidates
+
+
+def _segment_candidate_lines(
+    new_tree: ast.AST,
+    source: bytes,
+    segment: str,
+    scope: str,
+) -> list[int]:
+    return [
+        line
+        for line, text in enumerate(source.decode().splitlines(), 1)
+        if text.strip() == segment and _scope(new_tree, line) == scope
+    ]
+
+
 def _relocate(
     ref: dict[str, Any],
     old: Snapshot,
@@ -170,31 +206,18 @@ def _relocate(
     scope = _scope(old_tree, line)
     if "expression" in ref:
         expression = replacements.get(ref["expression"], ref["expression"])
-        kinds = {
-            "call": (ast.Call,),
-            "callback-reference": (ast.Name, ast.Attribute),
-            "callback": (ast.FunctionDef, ast.AsyncFunctionDef),
-        }
-        candidates = []
-        for node in ast.walk(new_tree):
-            if not isinstance(node, kinds[ref.get("creation_mode", "call")]):
-                continue
-            if ast.unparse(node) != expression:
-                continue
-            node_line = getattr(node, "lineno", None)
-            if isinstance(node_line, int) and _scope(new_tree, node_line) == scope:
-                candidates.append(node_line)
+        candidates = _expression_candidate_lines(
+            new_tree, expression, ref.get("creation_mode", "call"), scope
+        )
         ref["expression"] = expression
     else:
         segment = ref.get(
             "source_segment", old.sources[path].decode().splitlines()[line - 1].strip()
         )
         segment = segment_replacements.get(segment, segment)
-        candidates = [
-            i
-            for i, text in enumerate(new.sources[path].decode().splitlines(), 1)
-            if text.strip() == segment and _scope(new_tree, i) == scope
-        ]
+        candidates = _segment_candidate_lines(
+            new_tree, new.sources[path], segment, scope
+        )
     if len(candidates) != 1:
         raise ValueError(
             f"Reference relocation needs an explicit unambiguous review: {path}:{line}"
