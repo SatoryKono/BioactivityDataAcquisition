@@ -95,6 +95,58 @@ def test_protected_command_rejects_output_over_limit(monkeypatch) -> None:
         subprocess_boundary_subject.run_protected_command(["fixture"])
 
 
+def test_protected_command_preserves_empty_environment(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    class FakeProcess:
+        args = ["fixture"]
+        returncode = 0
+        pid = 123
+        stdin = stdout = stderr = None
+
+        def __init__(self, *_args, **kwargs):
+            captured.update(kwargs)
+
+        def communicate(self, timeout=None):
+            del timeout
+            return b"", b""
+
+        def poll(self):
+            return self.returncode
+
+    monkeypatch.setattr(subprocess_boundary_subject.subprocess, "Popen", FakeProcess)
+
+    subprocess_boundary_subject.run_protected_command(["fixture"], env={})
+
+    assert captured["env"] == {}
+
+
+def test_protected_command_enforces_byte_limit_for_text_output(monkeypatch) -> None:
+    class FakeProcess:
+        args = ["fixture"]
+        returncode = 0
+        pid = 123
+        stdin = stdout = stderr = None
+
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def communicate(self, timeout=None):
+            del timeout
+            output = "é" * (subprocess_boundary_subject._MAX_OUTPUT_BYTES // 2 + 1)
+            return output, ""
+
+        def poll(self):
+            return self.returncode
+
+    monkeypatch.setattr(subprocess_boundary_subject.subprocess, "Popen", FakeProcess)
+
+    with pytest.raises(subprocess.SubprocessError, match="output exceeds"):
+        subprocess_boundary_subject.run_protected_command(
+            ["fixture"], text=True, encoding="utf-8"
+        )
+
+
 def test_protected_command_cleans_up_when_interrupted(monkeypatch) -> None:
     class FakeProcess:
         args = ["fixture"]
@@ -900,7 +952,7 @@ def test_drop_listening_backend_on_port_falls_back_when_taskkill_fails(
         "_find_listening_backend_pids_by_port",
         fake_find,
     )
-    monkeypatch.setattr(process_subject.subprocess, "run", fake_run)
+    monkeypatch.setattr(process_subject, "run_protected_command", fake_run)
     monkeypatch.setattr(process_subject.os, "kill", fake_kill)
 
     assert process_subject.drop_listening_backend_on_port(
