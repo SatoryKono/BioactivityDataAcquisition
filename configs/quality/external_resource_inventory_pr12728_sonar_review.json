@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "f68958f4a0d8905df7eb3544a66d7b7c8ae6764b",
+  "source_ref": "70d6c7e23389a27b2966f3d3a5b3f9d846871e11",
+  "source_reviews": {
+    "src/bioetl/interfaces/http/_selected_run_status_cache.py": "SonarCloud PR #12728: remove duplicate QUERY ERROR reason keys in _is_query_error_payload. No new acquisition owner; create_task exclusion retained."
+  },
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "segment_updates": {},
+  "reference_moves": []
+}
