@@ -84,9 +84,9 @@ def _baseline_count(
     if not isinstance(message_entry, dict):
         return 0
     count = message_entry.get(code, 0)
-    if isinstance(count, bool) or not isinstance(count, int):
-        return 0
-    return count
+    if isinstance(count, int) and not isinstance(count, bool):
+        return count
+    return 0
 
 
 def _compare_diagnostics(
