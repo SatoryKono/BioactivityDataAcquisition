@@ -100,6 +100,45 @@ def _is_frame_filter(transform: dict[str, Any]) -> bool:
     return any(f.get("fieldName") == FRAME for f in filters)
 
 
+def _project_fields(names: tuple[str, ...]) -> dict[str, Any]:
+    """Keep only the named columns after a shared-donor frame filter."""
+    return {
+        "id": "filterFieldsByName",
+        "options": {"include": {"names": list(names)}},
+    }
+
+
+def _ensure_field_projection(panel: dict[str, Any], names: tuple[str, ...]) -> None:
+    """Insert/replace ``filterFieldsByName`` right after the frame row filter.
+
+    Shared donors ship every section's columns on each row; ``filterByValue`` on
+    ``_bioetl_frame`` keeps the right rows but leaves sibling-section fields on
+    the table. Consumers that previously owned a dedicated Infinity target need
+    an explicit column projection.
+    """
+    transforms = list(panel.get("transformations") or [])
+    without = [t for t in transforms if t.get("id") != "filterFieldsByName"]
+    insert_at = 0
+    while insert_at < len(without) and _is_frame_filter(without[insert_at]):
+        insert_at += 1
+    without.insert(insert_at, _project_fields(names))
+    panel["transformations"] = without
+
+
+# Canonical column sets for identity / FK-scope / replay-check tables.
+_IDENTITY_FIELDS = ("parameter", "value")
+_RECONCILIATION_FIELDS = (
+    "step_id",
+    "mode",
+    "scope",
+    "pins",
+    "limit",
+    "result",
+    "meaning",
+)
+_REPLAY_CHECK_FIELDS = ("code", "result", "reason", "evidence_ref")
+
+
 def _infinity_uql(jsonata: str) -> dict[str, Any]:
     # Mirror historical Infinity shape: raw JSONata in root_selector and the
     # same expression wrapped for the UQL parser (tests assert on both).
@@ -551,6 +590,31 @@ def apply_overview(data: dict[str, Any]) -> None:
         panel["targets"] = [_dash_target(9002)]
         _prepend_frame_filter(panel, frame)
 
+    # Row filter alone is not enough: project back to the prior column set.
+    _ensure_field_projection(_by_id(data, 9300), _IDENTITY_FIELDS)
+    _ensure_field_projection(_by_id(data, 9483), _RECONCILIATION_FIELDS)
+    recon = _by_id(data, 9483)
+    if not any(t.get("id") == "organize" for t in recon.get("transformations") or []):
+        recon.setdefault("transformations", []).append(
+            {
+                "id": "organize",
+                "options": {
+                    "indexByName": {
+                        name: index for index, name in enumerate(_RECONCILIATION_FIELDS)
+                    },
+                    "renameByName": {
+                        "step_id": "Workflow step",
+                        "mode": "Mode",
+                        "scope": "Row scope",
+                        "pins": "Compared snapshots",
+                        "limit": "Limit",
+                        "result": "Result",
+                        "meaning": "Interpretation",
+                    },
+                },
+            }
+        )
+
     _ensure_exclusions_crit_color(_by_id(data, 9482))
 
     stages = _by_id(data, 9460)
@@ -945,6 +1009,8 @@ def apply_control_plane(data: dict[str, Any]) -> None:
         panel["datasource"] = dict(DASH_DS)
         panel["targets"] = [_dash_target(9418)]
         _prepend_frame_filter(panel, frame)
+
+    _ensure_field_projection(_by_id(data, 9423), _REPLAY_CHECK_FIELDS)
 
 
 def inventory(data: dict[str, Any]) -> tuple[int, int]:

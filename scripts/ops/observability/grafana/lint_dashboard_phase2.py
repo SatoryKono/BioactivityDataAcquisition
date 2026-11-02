@@ -131,59 +131,77 @@ def parse_dashboard_view_panel(url: str) -> tuple[str | None, int | None]:
     return dest_uid, None
 
 
-def _nav_content_findings(path_name: str, content: str) -> list[str]:
-    findings: list[str] = []
-    if "bioetl-nav" not in content:
-        findings.append(f"{path_name}: panel 1000 missing bioetl-nav markup")
+_NAV_DESTINATIONS = {
+    "Run Explorer": "bioetl-run-explorer-v1",
+    "Replay Readiness": "bioetl-control-plane-v1",
+    "Run Overview": "bioetl-overview-v2",
+    "Data Quality": "bioetl-dq-v2",
+    "6. Incident Workspace": "bioetl-incident-v1",
+}
+_NAV_CHIP_WIDTH_RE = re.compile(r"(?:^|;)\s*width:19\.5%\s*(?:;|$)")
+_NAV_ELEMENT_RE = re.compile(
+    r"<(a|span)\b([^>]*)>(.*?)</\1>",
+    flags=re.IGNORECASE | re.DOTALL,
+)
+
+
+def _nav_chips(content: str) -> list[tuple[str, str, str]]:
     elements = [
         (
             match.group(1).lower(),
             match.group(2),
             re.sub(r"<[^>]+>", "", match.group(3)).strip(),
         )
-        for match in re.finditer(
-            r"<(a|span)\b([^>]*)>(.*?)</\1>",
-            content,
-            flags=re.IGNORECASE | re.DOTALL,
-        )
+        for match in _NAV_ELEMENT_RE.finditer(content)
     ]
-    chips = [
-        (tag.lower(), attrs, label)
+    return [
+        (tag, attrs, label)
         for tag, attrs, label in elements
         if "bioetl-nav-link" in attrs or "bioetl-nav-current" in attrs
     ]
+
+
+def _nav_chip_width_findings(
+    path_name: str, chips: list[tuple[str, str, str]], content: str
+) -> list[str]:
+    findings: list[str] = []
     if len(chips) != 5:
         findings.append(
             f"{path_name}: panel 1000 expected five navigation elements, found {len(chips)}"
         )
-    for tag, attrs, label in chips:
+    for _, attrs, label in chips:
         style = re.search(r'\bstyle="([^"]*)"', attrs)
-        if style is None or not re.search(
-            r"(?:^|;)\s*width:19\.5%\s*(?:;|$)", style.group(1)
-        ):
+        if style is None or not _NAV_CHIP_WIDTH_RE.search(style.group(1)):
             findings.append(
                 f"{path_name}: panel 1000 chip {label!r} must use width 19.5%"
             )
     if "16.5%" in content:
         findings.append(f"{path_name}: panel 1000 still uses legacy 16.5% chip width")
+    return findings
+
+
+def _nav_current_findings(
+    path_name: str, chips: list[tuple[str, str, str]]
+) -> list[str]:
     current = [chip for chip in chips if "bioetl-nav-current" in chip[1]]
-    if len(current) != 1 or current[0][0] != "span":
-        findings.append(
-            f"{path_name}: panel 1000 current chip must be "
-            '<span class="bioetl-nav-current">'
-        )
-    expected_destinations = {
-        "Run Explorer": "bioetl-run-explorer-v1",
-        "Replay Readiness": "bioetl-control-plane-v1",
-        "Run Overview": "bioetl-overview-v2",
-        "Data Quality": "bioetl-dq-v2",
-        "6. Incident Workspace": "bioetl-incident-v1",
-    }
+    if len(current) == 1 and current[0][0] == "span":
+        return []
+    return [
+        f"{path_name}: panel 1000 current chip must be "
+        '<span class="bioetl-nav-current">'
+    ]
+
+
+def _nav_destination_findings(
+    path_name: str, chips: list[tuple[str, str, str]]
+) -> list[str]:
+    findings: list[str] = []
     for title in _NAV_CHIP_TITLES:
         matches = [chip for chip in chips if chip[2] == title]
         if len(matches) != 1:
             findings.append(
-                f"{path_name}: panel 1000 expected one navigation element for {title!r}, found {len(matches)}"
+                f"{path_name}: panel 1000 expected one navigation element for "
+                f"{title!r}, found {len(matches)}"
             )
             continue
         tag, attrs, _ = matches[0]
@@ -194,10 +212,21 @@ def _nav_content_findings(path_name: str, content: str) -> list[str]:
             findings.append(
                 f"{path_name}: panel 1000 chip {title!r} must be a linked anchor"
             )
-        elif f"/d/{expected_destinations[title]}/" not in href.group(1):
+        elif f"/d/{_NAV_DESTINATIONS[title]}/" not in href.group(1):
             findings.append(
                 f"{path_name}: panel 1000 chip {title!r} has the wrong destination"
             )
+    return findings
+
+
+def _nav_content_findings(path_name: str, content: str) -> list[str]:
+    findings: list[str] = []
+    if "bioetl-nav" not in content:
+        findings.append(f"{path_name}: panel 1000 missing bioetl-nav markup")
+    chips = _nav_chips(content)
+    findings.extend(_nav_chip_width_findings(path_name, chips, content))
+    findings.extend(_nav_current_findings(path_name, chips))
+    findings.extend(_nav_destination_findings(path_name, chips))
     return findings
 
 

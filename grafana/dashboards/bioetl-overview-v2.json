@@ -1400,6 +1400,17 @@
           }
         },
         {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "parameter",
+                "value"
+              ]
+            }
+          }
+        },
+        {
           "id": "limit",
           "options": {
             "limitField": 5
@@ -2543,6 +2554,45 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "step_id",
+                "mode",
+                "scope",
+                "pins",
+                "limit",
+                "result",
+                "meaning"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "step_id": 0,
+              "mode": 1,
+              "scope": 2,
+              "pins": 3,
+              "limit": 4,
+              "result": 5,
+              "meaning": 6
+            },
+            "renameByName": {
+              "step_id": "Workflow step",
+              "mode": "Mode",
+              "scope": "Row scope",
+              "pins": "Compared snapshots",
+              "limit": "Limit",
+              "result": "Result",
+              "meaning": "Interpretation"
+            }
           }
         }
       ]

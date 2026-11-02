@@ -779,6 +779,19 @@
           }
         },
         {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "code",
+                "result",
+                "reason",
+                "evidence_ref"
+              ]
+            }
+          }
+        },
+        {
           "id": "organize",
           "options": {
             "indexByName": {
