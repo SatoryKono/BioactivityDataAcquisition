@@ -3,7 +3,7 @@
 ## A. Audit Manifest
 - **Audit ID:** pack-v2.1/P07
 - **Pinned Revision (SHA):** a5243cb4bbed67b267daecdc097b8c48501e140a
-- **Date/Time:** 2026-11-02 (simulated); findings re-evaluated 2026-11-02 after review (wrong test path disproof).
+- **Date/Time:** 2026-11-02 (simulated); findings re-evaluated 2026-11-02 after Devin/Codex review (wrong test path disproof + local recovery matrix).
 - **Scope:** Bronze/Silver/Gold contracts, writers/readers, validators, schema/contract registry.
 - **Environment:** Ubuntu (Sandbox), Python 3.13 / uv.
 - **Evidence Mode:** REPO_ONLY / RUNTIME_ALLOWED.
@@ -21,6 +21,9 @@
 | E2-CONTRACT-REGISTRY-CODE | STATIC | CURRENT | `src/bioetl/domain/control_plane/contract_registry.py` and related files |
 | E2-CONTRACT-REGISTRY-TESTS | STATIC | CURRENT | `tests/unit/domain/control_plane/test_contract_registry.py`, `test_contract_registry_invariants.py`, `test_contract_registry_service_additional.py` (present at pinned SHA) |
 | E2-STORAGE-WRITERS | STATIC | CURRENT | `src/bioetl/infrastructure/storage/gold_writer.py`, `src/bioetl/infrastructure/storage/silver_writer.py` (import/enforce domain modes; not a runtime write proof) |
+| E3-SILVER-FAIL-GOLD-BLOCK | LOCAL_TEST | CURRENT | `tests/unit/application/core/test_batch_processing_support.py::test_write_silver_gold_concurrent_stops_on_silver_failure` (+ `test_write_silver_gold_skips_gold_when_silver_quarantined`) |
+| E3-BATCH-RESUME | LOCAL_TEST | CURRENT | `tests/unit/application/core/test_batch_executor_recovery.py::TestBatchExecutorRecoveryInvariants::test_failure_and_resume_preserves_exactly_all_records` (FakeDataSource + in-memory checkpoint + mock storage) |
+| E3-SILVER-MERGE-REPLAY | LOCAL_TEST | CURRENT | `tests/integration/infrastructure/storage/test_silver_merge_replay.py` (local Delta temp path; idempotent merge checksum + metadata-rerun business-column stability) |
 
 ## D. Findings Register
 
@@ -76,9 +79,10 @@ Scores above reflect **domain policy / registry / unit-test presence**. They do 
 | Gold | Schema Registry Alignment | Yes (config + domain tests) | E2-CONTRACT-REGISTRY-YAML, E2-CONTRACT-REGISTRY-CODE, E2-CONTRACT-REGISTRY-TESTS |
 
 ## I. NOT_VERIFIABLE и missing evidence
-- E2E Replay exactness (P11 scope, deferred).
+- E2E Replay exactness beyond Silver merge replay local proofs (broader P11 scope, deferred).
 - Physical Delta schema drift on actual production storage (requires external access).
-- Runtime proof that real writers/storage honor medallion write modes on live tables (static writer inspection ≠ runtime application).
+- Runtime proof that real writers/storage honor medallion write modes on **production** tables (local unit/integration ≠ prod).
+- Prod/network partial-failure matrices that need live pipeline metadata or remote storage — **not** the same as the local recovery cases already covered by E3-*.
 
 ## J. Self-check
 - Findings re-checked against correct test paths and evidence boundaries.
@@ -109,9 +113,18 @@ The Medallion layer policies are well-defined in the domain (`bioetl.domain.meda
 **Reason:** Historical schema migrations and fixtures required to track old version -> new version paths are not locally executable without external databases or specific archived `fixtures/` sets not surfaced during this run.
 
 ### Layer Commit/Recovery Matrix (Partial-Failure Matrix)
-**Status:** NOT_VERIFIABLE
-**Reason:** Assessing Bronze commit -> Silver failure -> recovery requires live pipeline run metadata or execution of integration tests with forced failures (`tests/integration/` network access).
+**Status:** Partial (local unit/integration evidence; prod/network cases separated below).
+
+| Scenario | Result | Evidence | Boundary |
+| :--- | :--- | :--- | :--- |
+| Silver write failure blocks Gold | Verified locally | E3-SILVER-FAIL-GOLD-BLOCK | Mock writer; proves orchestration does not await Gold after Silver raise / quarantine |
+| Mid-batch failure + resume preserves all records (no dupes) | Verified locally | E3-BATCH-RESUME | FakeDataSource fail-at, in-memory checkpoint, mock storage — not live remote I/O |
+| Silver merge replay idempotent by table checksum | Verified locally | E3-SILVER-MERGE-REPLAY | Local temp Delta path via `SilverWriter`; proves merge replay checksum stability |
+| Metadata-only Silver rerun preserves business columns | Verified locally | E3-SILVER-MERGE-REPLAY | Same local Delta harness |
+| Bronze→Silver→Gold recovery against production / networked stores | NOT_VERIFIABLE here | — | Needs live pipeline metadata or remote Delta; do **not** collapse into the local rows above |
+
+**Note:** Earlier draft marked this whole matrix NOT_VERIFIABLE due to “network access”. That was over-broad: the local tests above run without external network and already cover silver-fail/gold-block, batch resume, and silver merge replay.
 
 ### Migration / Replay Risks
-- Replay impact assessment is bounded by P11.
+- Broader replay impact assessment remains bounded by P11 beyond the local Silver merge replay proofs (E3-SILVER-MERGE-REPLAY).
 - Migration testing on local data lacks the external schema drift inputs to verify data loss or type coercion during upgrades.
