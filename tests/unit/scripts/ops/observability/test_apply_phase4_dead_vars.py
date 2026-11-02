@@ -89,10 +89,12 @@ def test_apply_dashboard_data_rejects_unexpected_basename() -> None:
         phase4.apply_dashboard_data({}, path_name="not-a-dashboard.json")
 
 
-def test_literal_dashboard_path_only_allows_known_files() -> None:
-    assert phase4._literal_dashboard_path(phase4.FILE_DQ).name == phase4.FILE_DQ
-    with pytest.raises(ValueError, match="unexpected dashboard file"):
-        phase4._literal_dashboard_path("not-a-dashboard.json")
+def test_dashboard_targets_are_literal_repo_paths() -> None:
+    names = [name for _, name in phase4._DASHBOARD_TARGETS]
+    assert names == list(phase4.FILES)
+    for target, name in phase4._DASHBOARD_TARGETS:
+        assert target.name == name
+        assert target.parent == phase4.DASH
 
 
 def test_prune_dead_rename_by_name() -> None:
