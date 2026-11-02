@@ -178,7 +178,8 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         return
     _apply_run_explorer_templating(payload)
     panels = {panel["id"]: panel for panel in payload["panels"]}
-    panels[1]["gridPos"]["h"] = 3
+    # Keep helper strip to one row so it does not overlap table 3010 (y=3).
+    panels[1]["gridPos"].update(y=2, h=1)
     content = panels[1]["options"]["content"].replace(
         "Select a Run ID to view details.", "Select a status to view details."
     )
@@ -218,6 +219,9 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         "pipeline_passport_path",
     ]
     names = [*_COLUMNS, *hidden]
+    # Phase 4.3 / F-29: drop unused overview/diagnostics/provider/quality_handoff
+    # JSONata fields — they were filtered out by filterFieldsByName and polluted
+    # the Infinity payload for no UI gain.
     panel["targets"][0]["root_selector"] = (
         'index_state = "valid_empty" and $exists(items) and $count(items) = 0 '
         '? [{"pipeline": "VALID EMPTY"}] : items.($merge([$, '
@@ -225,9 +229,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         '"workflow_passport_path": $substringAfter(workflow_passport_url, '
         '"https://github.com/SatoryKono/BioactivityDataAcquisition/"), '
         '"pipeline_passport_path": $substringAfter(pipeline_passport_url, '
-        '"https://github.com/SatoryKono/BioactivityDataAcquisition/"), '
-        '"overview_handoff": "Open", "diagnostics_handoff": "Open", '
-        '"provider_handoff": "Open", "quality_handoff": "Open"}]))'
+        '"https://github.com/SatoryKono/BioactivityDataAcquisition/")}]))'
     )
     panel["transformations"] = [
         {
