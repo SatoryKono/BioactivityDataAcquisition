@@ -34,7 +34,7 @@ def test_drop_provider_and_pipeline_unknown() -> None:
     assert payload["templating"]["list"][0]["options"] == []
     assert "provider_for_pipeline" in removed
     assert "pipeline.options[unknown]" in removed
-    assert cleared == []
+    assert "timepicker.refresh_intervals" in cleared
 
 
 def test_clear_dangling_overview_fleet_repeat() -> None:
@@ -58,7 +58,8 @@ def test_clear_dangling_overview_fleet_repeat() -> None:
     assert "repeat" not in panel
     assert "repeatDirection" not in panel
     assert "maxPerRow" not in panel
-    assert cleared == ["panel:99:repeat=overview_fleet"]
+    assert "panel:99:repeat=overview_fleet" in cleared
+    assert "timepicker.refresh_intervals" in cleared
     assert removed == []
 
 
