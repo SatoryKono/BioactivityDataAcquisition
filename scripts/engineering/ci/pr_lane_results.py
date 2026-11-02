@@ -325,6 +325,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/unit/application/services/run_reports/test_composite_report.py",
         ),
     ),
+    # pack-v2.1 stage handoffs are working_report inventory surfaces (not runtime code).
+    **dict.fromkeys(
+        (
+            "reports/audit/pack-v2.1/P02-ddd-domain.md",
+            "reports/audit/pack-v2.1/P05-interfaces-contracts.md",
+        ),
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "reports/engineering/SEC-003_audit_report.md": (
         "tests/unit/domain/services/test_composite_metadata_helpers.py",
     ),
