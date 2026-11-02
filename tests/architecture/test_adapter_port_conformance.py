@@ -203,7 +203,8 @@ PORT_ADAPTER_CASES = (
     PortAdapterCase(StageAccountingPort, StageAccountingAccumulator),
     PortAdapterCase(WorkflowExecutionStatePort, FileWorkflowExecutionStateStore),
     PortAdapterCase(WorkflowLedgerPort, FileWorkflowLedgerStore),
-    PortAdapterCase(WorkflowManifestPort, FileWorkflowManifestStore    PortAdapterCase(AuditPort, FileAuditAdapter),
+    PortAdapterCase(WorkflowManifestPort, FileWorkflowManifestStore),
+    PortAdapterCase(AuditPort, FileAuditAdapter),
     PortAdapterCase(CheckpointPort, LocalCheckpointAdapter),
     PortAdapterCase(CompositeCheckpointPort, FileCompositeCheckpointWriter),
     PortAdapterCase(DataSourcePort, CrossRefAdapter),
@@ -219,7 +220,6 @@ PORT_ADAPTER_CASES = (
     PortAdapterCase(MetricsPublisherPort, MetricsPublisherAdapter),
     PortAdapterCase(MetricsServerPort, MetricsServerAdapter),
     PortAdapterCase(RunReportStorePort, FileRunReportStoreAdapter),
-),
 )
 
 
