@@ -54,7 +54,8 @@ def test_dq_v2_exposes_current_silver_reject_evidence_panels() -> None:
     panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9403)
     target = panel["targets"][0]
     assert "/ops/observability/processed-records?" in target["url"]
-    assert "run_id=${run_id}" in target["url"]
+    assert "run_id=${selected_run_id}" in target["url"]
+    assert "pipeline=${selected_pipeline}" in target["url"]
     stage_input = next(t for t in panel["targets"] if t["refId"] == "StageInput")
     for outcome in (
         "silver_filtered_out_records",

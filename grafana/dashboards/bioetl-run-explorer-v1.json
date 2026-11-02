@@ -198,7 +198,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Browse scope from the local control-plane catalog. Default All includes every run type. Explicit URL selections take precedence. Select a table row to inspect its exact pipeline and Run ID."
+        "description": "Browse scope from the local control-plane catalog. Default All includes every run type. Explicit URL selections take precedence."
       },
       {
         "allValue": null,
@@ -256,6 +256,132 @@
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "-",
+          "value": "-"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
+        "definition": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
+        "description": "Concrete SELECTED RUN identity from /ops/control-plane/selector-context (selected.run_id). When Grafana $run_id is still '-', A2 latest fills this value so pipeline-run-report / artifact queries do not stay unresolved_scope.",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Selected Run ID",
+        "multi": false,
+        "name": "selected_run_id",
+        "options": [
+          {
+            "selected": true,
+            "text": "-",
+            "value": "-"
+          }
+        ],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "($id := selected.run_id; $exists($id) and $string($id) != \"\" ? [{\"text\":$string($id),\"value\":$string($id)}] : [{\"text\":\"-\",\"value\":\"-\"}])",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": true,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
+        "definition": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
+        "description": "Concrete SELECTED RUN pipeline from /ops/control-plane/selector-context (selected.pipeline). When Grafana $pipeline is still All/aggregate and A2 fills selected_run_id, this carries the concrete pipeline so pipeline-run-report / artifact queries do not stay unresolved_scope.",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Selected Pipeline",
+        "multi": false,
+        "name": "selected_pipeline",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "All"
+          }
+        ],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "($p := selected.pipeline; $exists($p) and $string($p) != \"\" and $string($p) != \"unknown\" ? [{\"text\":$string($p),\"value\":$string($p)}] : [{\"text\":\"All\",\"value\":\"All\"}])",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": true,
         "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
