@@ -11,14 +11,13 @@ with enforced properties:
 
 from __future__ import annotations
 
-import locale
 import os
 import shutil
 import signal
-import subprocess  # nosec B404 - see suppression registry
+import subprocess
 from collections.abc import Callable, Mapping, Sequence
 from contextlib import suppress
-from typing import IO, Any, TypedDict, Unpack, cast
+from typing import IO, TypedDict, Unpack, cast
 
 _MAX_OUTPUT_BYTES = 10 * 1024 * 1024  # 10MB
 _CLEANUP_TIMEOUT_SECONDS = 0.5
@@ -47,35 +46,26 @@ def _filter_env_secrets(env: Mapping[str, str] | None) -> dict[str, str] | None:
     return filtered_env
 
 
-def _output_size(output: str | bytes | None, *, encoding: str, errors: str | None) -> int:
-    if output is None:
-        return 0
-    if isinstance(output, bytes):
-        return len(output)
-    return len(output.encode(encoding, errors=errors or "strict"))
-
-
 def _terminate_process_tree(
-    proc: subprocess.Popen[Any],  # Any: Popen stream type follows its text-mode setting.
+    proc: subprocess.Popen[bytes] | subprocess.Popen[str],
 ) -> bool:
     """Terminate the command and its descendants where the OS supports groups."""
     tree_terminated = False
     try:
         if os.name == "posix":
             kill_process_group = cast(
-                Callable[[int, int], None] | None, getattr(os, "killpg", None)
+                Callable[[int, int], None] | None,
+                getattr(os, "killpg", None),
             )
-            kill_signal = cast(int | None, getattr(signal, "SIGKILL", None))
-            if kill_process_group is None or kill_signal is None:
-                proc.kill()
-                return tree_terminated
-            kill_process_group(proc.pid, kill_signal)
-            tree_terminated = True
+            sigkill = getattr(signal, "SIGKILL", None)
+            if kill_process_group is not None and isinstance(sigkill, int):
+                kill_process_group(proc.pid, sigkill)
+                tree_terminated = True
         elif os.name == "nt":
             taskkill = shutil.which("taskkill")
             if taskkill is not None:
                 try:
-                    killer = subprocess.Popen(  # nosec B603 - see suppression registry
+                    killer = subprocess.Popen(
                         [taskkill, "/PID", str(proc.pid), "/T", "/F"],
                         shell=False,
                         stdout=subprocess.DEVNULL,
@@ -97,9 +87,7 @@ def _terminate_process_tree(
     return tree_terminated
 
 
-def _cleanup_process(
-    proc: subprocess.Popen[Any],  # Any: Popen stream type follows its text-mode setting.
-) -> None:
+def _cleanup_process(proc: subprocess.Popen[bytes] | subprocess.Popen[str]) -> None:
     """Stop a failed command and close pipes without waiting for inherited EOF."""
     tree_terminated = _terminate_process_tree(proc)
     # A descendant may have inherited stdout/stderr even after the direct
@@ -127,7 +115,7 @@ def run_protected_command(
     text: bool = False,
     encoding: str | None = None,
     errors: str | None = None,
-) -> subprocess.CompletedProcess[Any]:  # Any: stdout and stderr depend on text mode.
+) -> subprocess.CompletedProcess[bytes | str]:
     """Run a subprocess with strict security boundaries (SEC-001)."""
     safe_env = _filter_env_secrets(env)
 
@@ -139,18 +127,21 @@ def run_protected_command(
         popen_options["creationflags"] = getattr(
             subprocess, "CREATE_NEW_PROCESS_GROUP", 0
         )
-    proc = subprocess.Popen(  # nosec B603 - see suppression registry
-        list(command),
-        cwd=cwd,
-        env=safe_env,
-        shell=False,
-        stdout=subprocess.PIPE if capture_output else None,
-        stderr=subprocess.PIPE if capture_output else None,
-        stdin=stdin,
-        text=text,
-        encoding=encoding,
-        errors=errors,
-        **popen_options,
+    proc = cast(
+        subprocess.Popen[bytes] | subprocess.Popen[str],
+        subprocess.Popen(
+            list(command),
+            cwd=cwd,
+            env=safe_env,
+            shell=False,
+            stdout=subprocess.PIPE if capture_output else None,
+            stderr=subprocess.PIPE if capture_output else None,
+            stdin=stdin,
+            text=text,
+            encoding=encoding,
+            errors=errors,
+            **popen_options,
+        ),
     )
 
     try:
@@ -159,10 +150,9 @@ def run_protected_command(
         _cleanup_process(proc)
         raise
 
-    output_encoding = encoding or locale.getpreferredencoding(False)
     if capture_output and (
-        _output_size(stdout, encoding=output_encoding, errors=errors) > _MAX_OUTPUT_BYTES
-        or _output_size(stderr, encoding=output_encoding, errors=errors) > _MAX_OUTPUT_BYTES
+        (stdout and len(stdout) > _MAX_OUTPUT_BYTES)
+        or (stderr and len(stderr) > _MAX_OUTPUT_BYTES)
     ):
         raise subprocess.SubprocessError(
             f"Command output exceeds {_MAX_OUTPUT_BYTES} bytes"
@@ -186,7 +176,7 @@ def run_protected_subprocess_popen(
     if "env" in kwargs:
         kwargs["env"] = _filter_env_secrets(kwargs["env"])
 
-    return subprocess.Popen(  # nosec B603 - see suppression registry
+    return subprocess.Popen(
         list(command),
         **kwargs,
     )

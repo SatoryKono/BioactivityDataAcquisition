@@ -191,26 +191,6 @@ entries:
     rationale: >-
       Supports the Windows E2E isolation path that re-executes sys.executable
       with a fixed payload, no shell, and a timeout (see SUP-SR-006).
-  - id: SUP-SP-008
-    path: src/bioetl/infrastructure/storage/metadata/builder_base.py
-    line: 5
-    rule: B404
-    symbol: subprocess
-    owner: stream-a
-    review_date: "2027-03-18"
-    rationale: >-
-      Uses subprocess error types while executing Git only through the protected
-      command boundary with fixed argv, a resolved executable, and a timeout.
-  - id: SUP-SP-009
-    path: src/bioetl/infrastructure/system/subprocess_boundary.py
-    line: 18
-    rule: B404
-    symbol: subprocess
-    owner: stream-a
-    review_date: "2027-03-18"
-    rationale: >-
-      This module is the sole subprocess boundary; callers use its fixed-shell
-      and timeout-enforcing wrappers, while cleanup uses fixed OS commands.
   # --- subprocess.run without shell (B603) ---
   - id: SUP-SR-007
     path: src/bioetl/infrastructure/provenance/code_revision.py
@@ -244,36 +224,6 @@ entries:
       Re-executes sys.executable -c with a module-constant payload and JSON
       argv; no shell or user-controlled command; timeout enforced and the
       arrow payload file is always cleaned up.
-  - id: SUP-SR-008
-    path: src/bioetl/infrastructure/system/subprocess_boundary.py
-    line: 78
-    rule: B603
-    symbol: subprocess.Popen
-    owner: stream-a
-    review_date: "2027-03-18"
-    rationale: >-
-      Terminates the selected process tree with a fixed taskkill argv, no shell,
-      DEVNULL streams, and a bounded wait inside the protected boundary.
-  - id: SUP-SR-009
-    path: src/bioetl/infrastructure/system/subprocess_boundary.py
-    line: 142
-    rule: B603
-    symbol: subprocess.Popen
-    owner: stream-a
-    review_date: "2027-03-18"
-    rationale: >-
-      Central command execution applies shell=False, caller-bound argv,
-      constrained environment, optional timeout, and output-size validation.
-  - id: SUP-SR-010
-    path: src/bioetl/infrastructure/system/subprocess_boundary.py
-    line: 189
-    rule: B603
-    symbol: subprocess.Popen
-    owner: stream-a
-    review_date: "2027-03-18"
-    rationale: >-
-      Central Popen adapter forces shell=False and preserves explicit caller
-      environment values; process setup remains behind the infrastructure API.
   # --- hardcoded string assignments (B105): schema defaults / status literals ---
   - id: SUP-PW-001
     path: src/bioetl/application/pipelines/chembl/molecule_transformer.py

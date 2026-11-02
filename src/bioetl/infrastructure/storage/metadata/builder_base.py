@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import subprocess  # nosec B404 - see suppression registry
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from platform import node as hostname
@@ -15,7 +14,6 @@ from bioetl.domain.behavior.composite_metadata_helpers import (
 )
 from bioetl.domain.lineage import DatasetRef
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.system.subprocess_boundary import run_protected_command
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import (
@@ -29,7 +27,10 @@ if TYPE_CHECKING:
 
 def _get_git_commit_cached() -> str | None:
     """Get git commit hash directly via subprocess."""
+    import subprocess
     from shutil import which
+
+    from bioetl.infrastructure.system.subprocess_boundary import run_protected_command
 
     git_executable = which("git")
     if not git_executable:
