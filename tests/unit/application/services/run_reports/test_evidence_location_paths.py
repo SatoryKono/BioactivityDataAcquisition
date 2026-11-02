@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.application.services.run_reports.paths import (
+from bioetl.application.services.run_reports.evidence_location_paths import (
     EVIDENCE_LOCATIONS_DIRNAME,
-    default_evidence_root_alias_map,
+    default_evidence_root_alias_registry,
     resolve_evidence_location_path,
     resolve_evidence_locations_root,
 )
@@ -40,10 +40,12 @@ def test_evidence_locations_catalog_layout(tmp_path: Path) -> None:
     )
 
 
-def test_alias_map_resolves_standard_and_isolated_roots(tmp_path: Path) -> None:
+def test_alias_registry_resolves_standard_and_isolated_roots(tmp_path: Path) -> None:
     data_root = tmp_path / "data"
     data_root.mkdir()
-    aliases = default_evidence_root_alias_map(dashboard_data_root=data_root.resolve())
+    aliases = default_evidence_root_alias_registry(
+        dashboard_data_root=data_root.resolve()
+    )
     standard = aliases.resolve_data_root(
         root_alias=DEFAULT_EVIDENCE_ROOT_ALIAS,
         relative_data_root=".",
@@ -58,10 +60,10 @@ def test_alias_map_resolves_standard_and_isolated_roots(tmp_path: Path) -> None:
     )
 
 
-def test_alias_map_rejects_unknown_and_relative_bases(tmp_path: Path) -> None:
+def test_alias_registry_rejects_unknown_and_relative_bases(tmp_path: Path) -> None:
     with pytest.raises(EvidenceLocationInvalidError, match="absolute"):
-        default_evidence_root_alias_map(dashboard_data_root=Path("data"))
-    aliases = default_evidence_root_alias_map(
+        default_evidence_root_alias_registry(dashboard_data_root=Path("data"))
+    aliases = default_evidence_root_alias_registry(
         dashboard_data_root=(tmp_path / "data").resolve()
     )
     with pytest.raises(EvidenceLocationInvalidError, match="unknown"):

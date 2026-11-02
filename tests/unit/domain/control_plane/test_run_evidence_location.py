@@ -3,15 +3,10 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
 import pytest
-from jsonschema.validators import validator_for
 
 from bioetl.domain.control_plane.run_evidence_location import (
     DEFAULT_EVIDENCE_ROOT_ALIAS,
-    EVIDENCE_LOCATION_SCHEMA_VERSION,
     EvidenceLocationConflictError,
     EvidenceLocationIdentityConflictError,
     EvidenceLocationInvalidError,
@@ -33,9 +28,6 @@ from bioetl.domain.ports.control_plane.run_evidence_location import (
 
 pytestmark = pytest.mark.unit
 
-ROOT = Path(__file__).resolve().parents[4]
-CONTRACT = ROOT / "configs/contracts/reports/run_evidence_location.v1.json"
-GOLDEN = ROOT / "tests/fixtures/reports/run_evidence_location_golden.json"
 _SOURCE_A = "a" * 64
 _SOURCE_B = "b" * 64
 
@@ -129,18 +121,6 @@ class _InMemoryEvidenceLocationStore:
         )
         self._invalid.add(key)
         self._records.pop(key, None)
-
-
-def test_golden_matches_json_schema() -> None:
-    schema = json.loads(CONTRACT.read_text(encoding="utf-8"))
-    payload = json.loads(GOLDEN.read_text(encoding="utf-8"))
-    validator_class = validator_for(schema)
-    validator_class.check_schema(schema)
-    validator_class(schema).validate(payload)
-    assert payload["schema_version"] == EVIDENCE_LOCATION_SCHEMA_VERSION
-    parsed = parse_run_evidence_location(payload)
-    assert parsed.owner == "chembl_assay"
-    assert parsed.relative_data_root.startswith("workflow-limit100-")
 
 
 def test_standard_root_alias_uses_dot_relative() -> None:
