@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "catalog_ref": "84ef6e402c1b4eed08e8f2e8c8fc78e2075bef83",
-  "source_ref": "f7b958414b7533000c29a2113e14b81ef5d38e8a",
+  "catalog_ref": "24e7c8c183f41d02b3ba6c5a32d3910374f2807b",
+  "source_ref": "0e81c01f765208c8ad27350583c60060012f51c7",
   "source_reviews": {
-    "src/bioetl/infrastructure/observability/observability_backend_process.py": "Reviewed Bandit B404 nosec placement onto the subprocess import line; no external resource acquisition, cleanup, or runtime subprocess argv behavior changed.",
-    "src/bioetl/infrastructure/provenance/code_revision.py": "Reviewed Bandit B404 nosec placement onto the subprocess import line; no external resource acquisition, cleanup, or runtime git subprocess behavior changed.",
-    "src/bioetl/infrastructure/storage/silver/support.py": "Reviewed Bandit B404 nosec placement onto the subprocess import line; no external resource acquisition, cleanup, or runtime subprocess behavior changed."
+    "src/bioetl/domain/_observability_contract_core.py": "Reviewed pipeline label sanitization regex hardening (ASCII word-boundary); no external resource acquisition or cleanup behavior changed.",
+    "src/bioetl/domain/schemas/chembl/publication.py": "Reviewed creation_date calendar Series.map boolean typing cleanup; no external resource acquisition or cleanup behavior changed.",
+    "src/bioetl/infrastructure/validation/contract_validator.py": "Reviewed gold validator record materialization simplification; no external resource acquisition or cleanup behavior changed."
   },
   "expression_updates": {},
   "resource_updates": {},
