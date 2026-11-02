@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-02T14:34:24.947957+00:00",
+  "generated_at": "2026-11-02T15:03:38.442964+00:00",
   "summary": {
     "total_scripts": 704,
     "status_counts": {
@@ -10432,11 +10432,11 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 23,
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 865,
+          "line": 870,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -12919,13 +12919,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 541,
+          "line": 500,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 554,
+          "line": 513,
           "source_group": "tests",
           "text": "if path == \"scripts/engineering/dev/zed_mypy.py\":"
         }
@@ -15789,7 +15789,7 @@
         },
         {
           "path": "tests/integration/config/test_contract_registry_active_surface_coverage.py",
-          "line": 25,
+          "line": 27,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_semantic_pipeline_audit import ("
         },
@@ -20287,13 +20287,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 797,
+          "line": 756,
           "source_group": "tests",
           "text": "\"src/bioetl/infrastructure/quality/scoring.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 798,
+          "line": 757,
           "source_group": "tests",
           "text": "\"scripts/engineering/quality/scoring.py\","
         },
@@ -21145,7 +21145,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_github_actions_runtime_policy.py",
-          "line": 198,
+          "line": 197,
           "source_group": "scripts",
           "text": "vs this list is reviewed by `github_settings_review.py`, not here."
         },

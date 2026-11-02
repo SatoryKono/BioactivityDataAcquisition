@@ -54,7 +54,7 @@
       "lifetime": "process-scoped singleton; each acquisition lasts for one collector with block",
       "creation_sites": [
         {
-          "source_commit": "8d74a698fc74c0fe74216c062874894c631cac4e",
+          "source_commit": "cef4032ca1b77f549efd75a8ea56603d6536900b",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -68,7 +68,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "8d74a698fc74c0fe74216c062874894c631cac4e",
+          "source_commit": "cef4032ca1b77f549efd75a8ea56603d6536900b",
           "source_blob": "0f018e9cb4c8a52dfc7040e9848b8aa96c680c37",
           "content_sha256": "3dd970d0d99aff0c7fc21f3e549dd75316aed336dd5101fb223304133498df97",
           "file": "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
@@ -80,7 +80,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "8d74a698fc74c0fe74216c062874894c631cac4e",
+          "source_commit": "cef4032ca1b77f549efd75a8ea56603d6536900b",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -92,7 +92,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "8d74a698fc74c0fe74216c062874894c631cac4e",
+          "source_commit": "cef4032ca1b77f549efd75a8ea56603d6536900b",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -102,7 +102,7 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "8d74a698fc74c0fe74216c062874894c631cac4e",
+          "source_commit": "cef4032ca1b77f549efd75a8ea56603d6536900b",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
