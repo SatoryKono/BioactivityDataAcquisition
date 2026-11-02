@@ -264,6 +264,26 @@ def _newest_started_record(
     )
 
 
+def _newest_merged_run_id(
+    records: tuple[SelectorRecord, ...],
+    report_rows: tuple[tuple[str, datetime], ...],
+) -> str | None:
+    """Newest started_at across filtered manifests and report-only runs."""
+    best_id: str | None = None
+    best_key: tuple[datetime, str, str] | None = None
+    for record in records:
+        key = (record.started_at, record.manifest_id, record.run_id)
+        if best_key is None or key > best_key:
+            best_key = key
+            best_id = record.run_id
+    for run_id, started_at in report_rows:
+        key = (started_at, "", run_id)
+        if best_key is None or key > best_key:
+            best_key = key
+            best_id = run_id
+    return best_id
+
+
 def list_a2_catalog(
     manifest_port: _A2ManifestPort,
     workflow_manifest_port: _A2WorkflowManifestPort | None,
