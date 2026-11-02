@@ -16,6 +16,8 @@ from __future__ import annotations
 
 from bioetl.infrastructure.observability import (
     metric_inventory_assembly as _metric_inventory_assembly,
+    metric_inventory_ast as _metric_inventory_ast,
+    metric_inventory_scan as _metric_inventory_scan,
 )
 
 import sys
@@ -196,6 +198,12 @@ def _sync_metric_scan_compatibility_seams() -> None:
         REGISTERED_PROMETHEUS_METRIC_LABELS
         if "REGISTERED_PROMETHEUS_METRIC_LABELS" in globals()
         else {}
+    )
+    _metric_inventory_scan.REGISTERED_PROMETHEUS_METRIC_LABELS = (
+        _metric_scan.REGISTERED_PROMETHEUS_METRIC_LABELS
+    )
+    _metric_inventory_ast.REGISTERED_PROMETHEUS_METRIC_LABELS = (
+        _metric_scan.REGISTERED_PROMETHEUS_METRIC_LABELS
     )
 
 
