@@ -314,6 +314,8 @@ paths = ["^tests/architecture/ci/test_event_journal\\.py$"]
 regexTarget = "secret"
 regexes = ["^(?:do-not-leak-me-token|super-secret-value|access-key-value-not-stored|swordfish-secret|nested-api-key-value|swordfish)$"]
 
+[[rules]]
+id = "curl-auth-header"
 [[rules.allowlists]]
 description = "Literal YOUR_API_KEY/TOKEN placeholders in reviewed curl documentation"
 condition = "AND"
