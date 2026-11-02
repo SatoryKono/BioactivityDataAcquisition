@@ -10,11 +10,16 @@ from bioetl.domain.control_plane.run_evidence_location_models import (
 )
 
 __all__ = [
+    "EVIDENCE_LOCATIONS_DIRNAME",
     "canonicalize_relative_data_root",
+    "evidence_location_record_segments",
     "optional_workflow_run_id",
     "require_segment",
     "validate_runtime_source_id",
 ]
+
+# Additive catalog directory beside pipeline/workflow report trees (RF-002).
+EVIDENCE_LOCATIONS_DIRNAME = "_evidence-locations"
 
 _OWNER_SEGMENT = re.compile(r"^[A-Za-z0-9._-]+$")
 _SOURCE_ID = re.compile(r"^[0-9a-f]{64}$")
@@ -134,3 +139,25 @@ def optional_workflow_run_id(
             "workflow_run_id must be null for kind=workflow"
         )
     return require_segment(text, field_name="workflow_run_id")
+
+
+def evidence_location_record_segments(
+    *,
+    kind: EvidenceLocationKind | str,
+    owner: str,
+    run_id: str,
+) -> tuple[str, str, str]:
+    """Return ``(kind, owner, run_id.json)`` segments for one catalog record."""
+    kind_value = (
+        kind.value if isinstance(kind, EvidenceLocationKind) else str(kind).strip()
+    )
+    if kind_value not in {
+        EvidenceLocationKind.PIPELINE.value,
+        EvidenceLocationKind.WORKFLOW.value,
+    }:
+        raise EvidenceLocationInvalidError(
+            f"unsupported evidence location kind: {kind_value}"
+        )
+    owner_text = require_segment(owner, field_name="owner")
+    run_id_text = require_segment(run_id, field_name="run_id")
+    return (kind_value, owner_text, f"{run_id_text}.json")

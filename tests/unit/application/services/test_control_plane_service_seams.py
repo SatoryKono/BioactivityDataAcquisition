@@ -68,6 +68,7 @@ pytestmark = pytest.mark.unit
 
 EXPECTED_RESPONSIBILITY_SEAMS = {
     "effective_config",
+    "evidence_location",
     "forensic",
     "ledger",
     "manifest",
