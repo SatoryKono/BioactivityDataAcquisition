@@ -19,8 +19,8 @@ from bioetl.domain.control_plane.effective_config_artifact import (
 )
 
 __all__ = [
-    "ConfigSourceHashStrategy",
     "ConfigSourceHashSnapshot",
+    "ConfigSourceHashStrategy",
     "compute_canonical_yaml_sha256",
     "compute_config_source_hashes",
     "compute_raw_sha256",
