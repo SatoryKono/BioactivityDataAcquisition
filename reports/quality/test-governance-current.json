@@ -1610,7 +1610,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "5c70ec25f00792cb227b7fb3c9e96153dd114c8d52b1245ab2b938cc062ae782",
+  "source_tree_sha256": "1881c78db02ea7f16cb704c966c3381c59312fa23751387b5c7f0d8d99190355",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 57,
