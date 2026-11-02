@@ -29,49 +29,7 @@
 
 ## D. Findings Register
 
-### Finding 1
-- **finding_id**: `pack-v2.1/P10-COMPOSITE-001`
-- **root_cause_id**: `rc-many-to-one-config-missing`
-- **owner_prompt**: P10
-- **concern**: MANY_TO_ONE cardinality requirements cannot be verified without aggregation configs.
-- **severity**: P3
-- **confidence**: low
-- **status**: NOT_VERIFIABLE
-- **expected**: MANY_TO_ONE join requires an explicit aggregation config.
-- **actual**: No MANY_TO_ONE cardinality is explicitly visible in the YAML configs scanned, rendering static verification impossible.
-- **evidence_ids**: E3, E7
-- **attempted_disproof**: Checked `configs/entities/composite/molecule.yaml` and `activity.yaml` for aggregation blocks. None found.
-- **exceptions_checked**: Composite operations natively fallback to 1:1 or 1:N explosion.
-- **impact**: Cannot guarantee safe MANY_TO_ONE data aggregations.
-- **root cause**: Missing explicit cardinality definitions in test configs.
-- **recommendation**: Add an explicit MANY_TO_ONE mapping in the configs with aggregation functions to allow static verification.
-- **scope / non-goals**: Scope is static configuration.
-- **acceptance criteria**: A test config provides a MANY_TO_ONE aggregation example.
-- **verification command/test**: `grep -r "MANY_TO_ONE" configs/entities/composite/`
-- **dependencies**: None.
-- **related_findings**: None.
-
-### Finding 2
-- **finding_id**: `pack-v2.1/P10-COMPOSITE-002`
-- **root_cause_id**: `rc-normalization-profile-runtime-only`
-- **owner_prompt**: P10
-- **concern**: Normalization-profile compatibility before merge relies on dynamic runtime verification.
-- **severity**: P3
-- **confidence**: low
-- **status**: NOT_VERIFIABLE
-- **expected**: Static profiles can prove normalization compatibility before merge execution.
-- **actual**: The structural normalization check executes at runtime inside `MergeService`, not as a static DAG gate.
-- **evidence_ids**: E3, E6
-- **attempted_disproof**: Looked for static linters validating normalization against composite gold contracts; only runtime data validation is present.
-- **exceptions_checked**: This is an accepted dynamic execution boundary.
-- **impact**: Missed structural drifts could fail the merge phase instead of failing early.
-- **root cause**: Lack of static configuration validation.
-- **recommendation**: Include normalization profile hash verification in pre-flight composite DAGs.
-- **scope / non-goals**: Affects preflight orchestration.
-- **acceptance criteria**: Pre-flight composite validater checks `normalization_profile_hash`.
-- **verification command/test**: N/A
-- **dependencies**: None.
-- **related_findings**: None.
+No confirmed P10 defect was found in these two areas. The original candidate findings are withdrawn because existing runtime validation and tests already enforce the stated constraints; this audit does not create issue drafts for them.
 
 ## P10 Specific Output
 ### Composite FSM
@@ -80,15 +38,15 @@ Terminal: COMPLETED, FAILED.
 Source: `src/bioetl/domain/composite/state.py`
 
 ### Workflow FSM
-Step execution sequences bounded by `run_id` and tracked in `RunManifest`. Sub-steps maintain isolated outcomes mapping to `CompositePipelineState`.
+Workflow lifecycle is owned by `WorkflowExecutionState` (`created`, `running`, `success`, `failed`, `incomplete`) and step lifecycle by `WorkflowStepState`; `WorkflowManifest` records immutable intent. Recovery that requires operator action is explicit (`--repair-steps` / `--force-steps`). This is separate from the composite pipeline FSM in `src/bioetl/domain/composite/state.py`. See `docs/04-reference/domain/workflow-state-machine.md`.
 
 ### Identity Map
 - Workflow identity: `manifest_id`, `workflow_run_id`
 - Composite pipeline identity: `run_id`, `composite_run_identity`, `effective_config_hash`
 
 ### Join/Cardinality Matrix
-- Dependencies & Enrichers: 1:1 or 1:N implied statically.
-- `MANY_TO_ONE`: NOT_VERIFIABLE statically (requires explicit metric configs to trace).
+- `EnricherConfig` rejects `MANY_TO_ONE` when aggregation is absent (`src/bioetl/domain/composite/config_models.py::_validate`).
+- Unit tests cover both rejection without aggregation and acceptance with aggregation (`tests/unit/domain/composite/test_composite_config.py::test_enricher_config_many_to_one_requires_aggregation`, `::test_enricher_config_many_to_one_with_aggregation`).
 - Inner mappings verified for key presense (keys ⊆ seed outputs).
 
 ### Recovery/Equivalence Matrix
@@ -96,19 +54,22 @@ Step execution sequences bounded by `run_id` and tracked in `RunManifest`. Sub-s
 - Data replay fetches cached partitions based on `cached_bronze_date` indicating BYTE_EQUIVALENT intent.
 
 ### Invalid-state/test gaps
-- Structural normalization profile checks lack static safety enforcement.
-- Missing explicit MANY_TO_ONE cardinality examples in contracts.
+- No gap is claimed for the reviewed normalization mismatch or `MANY_TO_ONE` aggregation requirements; see the tests listed in the Verification Matrix.
 
 ## E. Quantitative Scorecard
 - 4/5: Strong implementation, mostly covered by configuration-as-code and FSMs. Some semantic checks remain NOT_VERIFIABLE without runtime. (Evidence: E1-E12)
 
 ## F. Cross-cutting/root-cause clusters
-- Both unverified findings relate to runtime vs static definitions of complex join behaviors (cardinality, profile alignment).
+- No confirmed cross-cutting defect remains from the two withdrawn candidate findings.
 
 ## G. Prioritized roadmap P0→P3
-1. [P3] Add dummy configs for MANY_TO_ONE to enable testing/verification.
+- No remediation item is proposed for these already-enforced validation rules.
 
 ## H. Verification Matrix
+- `tests/unit/domain/composite/test_composite_config.py::test_enricher_config_many_to_one_requires_aggregation`: rejects `MANY_TO_ONE` without aggregation.
+- `tests/unit/domain/composite/test_composite_config.py::test_enricher_config_many_to_one_with_aggregation`: accepts the valid aggregation config.
+- `tests/unit/repo_backed/application/composite/test_preflight_validator.py::test_validate_fails_on_field_level_normalization_mismatch_without_override`: preflight rejects a field-level normalization mismatch.
+- Workflow status ownership and transitions: `src/bioetl/domain/control_plane/workflow_execution_state.py`, `docs/04-reference/domain/workflow-state-machine.md`.
 - FSM Isolation: E10, E12
 - Merge Sequence: E6
 - Keys ⊆ Seed: E7
@@ -116,52 +77,13 @@ Step execution sequences bounded by `run_id` and tracked in `RunManifest`. Sub-s
 - State Recovery: E9, E10
 
 ## I. `NOT_VERIFIABLE` и missing evidence
-- `pack-v2.1/P10-COMPOSITE-001` - missing aggregation configuration evidence.
-- `pack-v2.1/P10-COMPOSITE-002` - missing static profile verification evidence.
+- None for the two withdrawn candidates. This report does not claim that composite and workflow FSMs are one state machine.
 
 ## J. Self-check
-- Attempted to disprove missing pieces by looking for them in tests and configs. Remaining unverified items properly documented and status set to NOT_VERIFIABLE. Strict finding schema followed. Evidence ledger strictly follows `Evidence ID | class | freshness | source` schema. Output contains required P10 section.
+- Verified candidate claims against the domain guard and focused unit tests. Workflow-level state is documented separately from composite pipeline state. Evidence ledger strictly follows `Evidence ID | class | freshness | source` schema. Output contains required P10 section.
 
 ## K. Verdict
-- Composite merge order and pipeline vs workflow separation conform strongly to architectural standards at this pinned revision. No manual code or config changes needed at this point. No issues created.
+- The reviewed configuration guard and preflight validation reject the cited invalid cases. Workflow execution and composite pipeline state have separate owners. No issue drafts are warranted for the withdrawn candidates.
 
 ## Issue Drafts
-### Draft Issue for `pack-v2.1/P10-COMPOSITE-001`
-- **audit_id**: `pack-v2.1/P10`
-- **audited SHA**: `a5243cb4bbed67b267daecdc097b8c48501e140a`
-- **root_cause_id**: `rc-many-to-one-config-missing`
-- **source finding IDs**: `pack-v2.1/P10-COMPOSITE-001`
-- **severity**: P3
-- **confidence**: low
-- **status**: NOT_VERIFIABLE
-- **Problem**: MANY_TO_ONE cardinality requirements cannot be verified without explicit aggregation configs.
-- **Evidence**: `configs/entities/composite/molecule.yaml`, `src/bioetl/application/composite/dependency_join_execution.py`
-- **Expected vs actual**: Expected MANY_TO_ONE join to require an explicit aggregation config. Actually, no MANY_TO_ONE cardinality is explicitly visible in the YAML configs scanned, rendering static verification impossible.
-- **Impact**: Cannot guarantee safe MANY_TO_ONE data aggregations.
-- **Scope / non-goals**: Scope is static configuration.
-- **Architecture constraints**: Hexagonal architecture and configuration mappings.
-- **Implementation outline**: Define a configuration example in a test config showcasing `MANY_TO_ONE`.
-- **Acceptance criteria**: A test config provides a MANY_TO_ONE aggregation example.
-- **Verification commands/tests**: `grep -r "MANY_TO_ONE" configs/entities/composite/`
-- **Dependencies**: None.
-- **Rollback/risk**: Very low.
-
-### Draft Issue for `pack-v2.1/P10-COMPOSITE-002`
-- **audit_id**: `pack-v2.1/P10`
-- **audited SHA**: `a5243cb4bbed67b267daecdc097b8c48501e140a`
-- **root_cause_id**: `rc-normalization-profile-runtime-only`
-- **source finding IDs**: `pack-v2.1/P10-COMPOSITE-002`
-- **severity**: P3
-- **confidence**: low
-- **status**: NOT_VERIFIABLE
-- **Problem**: Normalization-profile compatibility before merge relies on dynamic runtime verification.
-- **Evidence**: `configs/entities/composite/*.yaml`, `src/bioetl/application/composite/merger_orchestration.py`
-- **Expected vs actual**: Expected static profiles to be able to prove normalization compatibility before merge execution. Actually, the structural normalization check executes at runtime inside `MergeService`, not as a static DAG gate.
-- **Impact**: Missed structural drifts could fail the merge phase instead of failing early.
-- **Scope / non-goals**: Affects preflight orchestration.
-- **Architecture constraints**: Hexagonal architecture and configuration mappings.
-- **Implementation outline**: Add `normalization_profile_hash` verification checks in pre-flight composite tools.
-- **Acceptance criteria**: Pre-flight composite validater checks `normalization_profile_hash`.
-- **Verification commands/tests**: New pre-flight integration tests passing.
-- **Dependencies**: None.
-- **Rollback/risk**: Low.
+None. The candidates above duplicate existing validation controls and were withdrawn before P20.
