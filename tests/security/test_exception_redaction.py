@@ -51,6 +51,7 @@ def test_structured_exception_context_preserves_safe_url_shape() -> None:
     )
 
     from bioetl.application.core.exceptions_context import get_structured_context
+
     endpoint = get_structured_context(error)["endpoint"]
 
     assert endpoint == ("prefix https://example.org:8443/path?[REDACTED] suffix")
@@ -104,6 +105,7 @@ def test_malformed_quoted_secret_is_fail_closed_through_exception_context() -> N
     error = NetworkError(f'password="{secret}')
 
     from bioetl.application.core.exceptions_context import get_structured_context
+
     serialized = json.dumps(get_structured_context(error))
 
     assert secret not in serialized

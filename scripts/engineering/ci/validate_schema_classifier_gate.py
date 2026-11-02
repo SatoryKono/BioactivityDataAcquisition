@@ -24,7 +24,9 @@ import yaml
 from bioetl.domain.behavior.schema_classifier import create_schema_classifier
 from bioetl.domain.control_plane.contract_registry_helpers import parse_semver
 from bioetl.domain.types.schema_policy import ChangeClassification
-from bioetl.infrastructure.control_plane.file_contract_registry_store import resolve_path
+from bioetl.infrastructure.control_plane.file_contract_registry_store import (
+    resolve_path,
+)
 
 
 @dataclass(frozen=True)
