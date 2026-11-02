@@ -10,9 +10,10 @@ free of infrastructure/Settings imports.
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Mapping, NamedTuple
+from typing import NamedTuple
 
 from bioetl.application.services.run_reports.source_identity import (
     IDENTITY_STATE_ALIGNED,
