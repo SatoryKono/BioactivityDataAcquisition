@@ -59,7 +59,7 @@ class HandoffRecord:
             raise ValueError(
                 f"handoff context contains forbidden fields: {', '.join(unexpected)}"
             )
-        for field, values in self.context.items()
+        for field, values in self.context.items():
             _validate_string_sequence(values, field=field)
 
     def to_dict(self) -> dict[str, Any]:
