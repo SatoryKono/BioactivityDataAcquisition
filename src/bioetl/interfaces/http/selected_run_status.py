@@ -44,7 +44,7 @@ from bioetl.interfaces.http._selected_run_a2_resolve import (
     resolve_a2_latest_run_id,
 )
 from bioetl.interfaces.http._selected_run_artifact_probes import _artifact_probes
-from bioetl.interfaces.http._selected_run_contract_exclusions import (
+from bioetl.composition.selected_run_contract_exclusions import (
     attach_contract_fields,
 )
 from bioetl.interfaces.http._selected_run_live import (
@@ -428,9 +428,7 @@ def _load_selected_with_live_fallback(
         # URL/explicit run_id stays bound; never substitute a different latest.
         active = active_run_diagnostics(host, pipeline, run_id)
         if active is not None:
-            result = _merge_active_diagnostics(
-                active, pipeline=pipeline, run_id=run_id
-            )
+            result = _merge_active_diagnostics(active, pipeline=pipeline, run_id=run_id)
     if skip_scope_check:
         return result
     state = result.get("execution_state")
