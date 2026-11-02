@@ -530,6 +530,7 @@ The following rows record verified use-case → port → production binding edge
 | Port | Implementation | Status |
 |---|---|---|
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
+| `ClockPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
 
 ### `ErrorHandlerService`
 **Location:** `src/bioetl/application/services/ops/error_handler.py`
@@ -865,6 +866,7 @@ The following rows record verified use-case → port → production binding edge
 
 | Port | Implementation | Status |
 |---|---|---|
+| `MetricsPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
 | `QuarantinePort` | `UnifiedQuarantineAdapter` | RESOLVED |
 
 ### `QuarantineService`
