@@ -191,6 +191,21 @@ def test_alias_fallback_when_run_has_no_declared_workflow() -> None:
     assert latest == str(undeclared.run_id)
 
 
+def test_newer_alias_fallback_not_hidden_by_older_declared_match() -> None:
+    """Declared hits and alias-fallback hits share one latest pool per workflow."""
+    older_declared = _manifest(1, workflow="chembl_assay")
+    newer_undeclared = _manifest(2)  # pipeline alias only
+    workflows = (_workflow("chembl_assay", index=53),)
+    latest = resolve_a2_latest_run_id(
+        manifests=(older_declared, newer_undeclared),
+        ledger_port=None,
+        workflow_manifests=workflows,
+        pipeline="chembl_assay",
+        query={"pipeline": "chembl_assay", "workflow": "chembl_assay"},
+    )
+    assert latest == str(newer_undeclared.run_id)
+
+
 def _host() -> MagicMock:
     import asyncio
 

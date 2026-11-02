@@ -63,9 +63,11 @@ def resolve_a2_latest_run_id(
     Ordering matches filter-options ``run_id`` (started_at desc), not
     selector-context ``latest_record`` (completed_at).
 
-    Workflow filter prefers the run's declared membership
-    (launch/runtime/resolved ``workflow`` / ``workflow_name``). Catalog
-    aliases are used only as fallback when a run has no declared workflow.
+    Workflow membership is evaluated per run: declared
+    launch/runtime/resolved ``workflow`` / ``workflow_name`` when present,
+    otherwise catalog aliases. Latest is chosen from the union of both
+    matching sets so an older declared hit does not hide a newer
+    alias-fallback run in the same scope.
     """
     selected_workflows = _scope_values(query.get("workflow"))
     selected_run_types = _scope_values(query.get("run_type"))
@@ -109,20 +111,17 @@ def _apply_workflow_preference(
 ) -> tuple[SelectorRecord, ...]:
     if not selected_workflows:
         return records
-    declared_hits: list[SelectorRecord] = []
-    alias_fallback: list[SelectorRecord] = []
+    matching: list[SelectorRecord] = []
     selected = set(selected_workflows)
     for record in records:
         declared = _declared_workflows(record.manifest)
         if declared:
             if selected & set(declared):
-                declared_hits.append(record)
+                matching.append(record)
             continue
         if selected & set(record.workflow_candidates):
-            alias_fallback.append(record)
-    if declared_hits:
-        return tuple(declared_hits)
-    return tuple(alias_fallback)
+            matching.append(record)
+    return tuple(matching)
 
 
 def _declared_workflows(manifest: RunManifest) -> tuple[str, ...]:
