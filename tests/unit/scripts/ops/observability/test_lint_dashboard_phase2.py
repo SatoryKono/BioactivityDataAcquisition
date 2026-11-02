@@ -21,10 +21,12 @@ pytestmark = pytest.mark.unit
 
 
 def test_phase2_linter_passes_on_provisioned_dashboards() -> None:
-    assert lint.main([]) == 0
+    assert lint.main(["--profile", "phase2"]) == 0
 
 
 def test_phase4_linter_passes_on_provisioned_dashboards() -> None:
+    # Default profile is phase4 (CI/unit gate for full acceptance checks).
+    assert lint.main([]) == 0
     assert lint.main(["--profile", "phase4"]) == 0
 
 

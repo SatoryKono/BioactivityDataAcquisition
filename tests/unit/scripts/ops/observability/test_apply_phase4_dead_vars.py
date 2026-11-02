@@ -121,6 +121,13 @@ def test_prune_dead_rename_by_name() -> None:
     assert any(item.startswith("renameByName:pruned=") for item in cleared)
 
 
+def test_ensure_shared_timepicker_refresh_intervals() -> None:
+    payload: dict = {"templating": {"list": []}, "panels": [], "timepicker": {}}
+    _, cleared = phase4.apply_dashboard_data(payload, path_name=phase4.FILE_INCIDENT)
+    assert payload["timepicker"]["refresh_intervals"] == list(phase4._REFRESH_INTERVALS)
+    assert "timepicker.refresh_intervals" in cleared
+
+
 def test_drops_unused_selected_vars_on_incident() -> None:
     payload = {
         "templating": {

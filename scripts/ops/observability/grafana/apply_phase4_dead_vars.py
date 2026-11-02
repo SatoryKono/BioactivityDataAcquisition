@@ -42,6 +42,19 @@ DROP_PIPELINE_UNKNOWN_ON = frozenset({FILE_DQ, FILE_INCIDENT, FILE_CONTROL_PLANE
 _PIPELINE = "pipeline"
 _UNKNOWN = "unknown"
 _REPEAT_KEYS = ("repeat", "repeatDirection", "maxPerRow")
+# Phase 4.4: shared timepicker surface across the five provisioned boards.
+_REFRESH_INTERVALS = (
+    "5s",
+    "10s",
+    "30s",
+    "1m",
+    "5m",
+    "15m",
+    "30m",
+    "1h",
+    "2h",
+    "1d",
+)
 
 
 def _iter_panels(panels: list[Any] | None) -> Iterator[dict[str, Any]]:
@@ -151,6 +164,20 @@ def _prune_dead_renames(data: dict[str, Any]) -> int:
     return pruned
 
 
+def _ensure_timepicker(data: dict[str, Any]) -> bool:
+    """Align ``timepicker.refresh_intervals`` to the shared Phase 4.4 list."""
+    timepicker = data.setdefault("timepicker", {})
+    if not isinstance(timepicker, dict):
+        data["timepicker"] = {"refresh_intervals": list(_REFRESH_INTERVALS)}
+        return True
+    current = timepicker.get("refresh_intervals")
+    desired = list(_REFRESH_INTERVALS)
+    if current == desired:
+        return False
+    timepicker["refresh_intervals"] = desired
+    return True
+
+
 def apply_dashboard_data(
     data: dict[str, Any], *, path_name: str
 ) -> tuple[list[str], list[str]]:
@@ -162,6 +189,8 @@ def apply_dashboard_data(
     pruned = _prune_dead_renames(data)
     if pruned:
         cleared.append(f"renameByName:pruned={pruned}")
+    if _ensure_timepicker(data):
+        cleared.append("timepicker.refresh_intervals")
     return removed, cleared
 
 
