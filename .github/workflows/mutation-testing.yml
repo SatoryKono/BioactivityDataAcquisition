@@ -3,7 +3,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: mutation-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 # Push and pull_request stay omitted so a code change cannot start four
@@ -30,16 +30,17 @@ jobs:
             threshold: "70.0"
           - id: application-control-plane
             paths_to_mutate: src/bioetl/application/services/control_plane/
-            tests_dir: tests/unit/application/services/control_plane/
+            # Public service/contract owners also live outside services/control_plane.
+            # Follow the canonical mutation target in configs/quality/test_matrix.yaml.
+            tests_dir: tests/unit/application/
             threshold: "60.0"
           - id: application-export-manifests
             paths_to_mutate: src/bioetl/application/services/export_lineage/export_manifests.py
             tests_dir: tests/unit/application/services/
             threshold: "60.0"
           - id: application-workflow-runner
-            # mutmut 3.x intentionally skips decorated classes. Target the
-            # workflow runner's canonical, undecorated policy helpers so this
-            # lane exercises real mutants instead of a zero-mutant dataclass.
+            # Keep this curated workflow target on its canonical policy helpers;
+            # the owning service tests exercise their workflow integration.
             paths_to_mutate: src/bioetl/application/services/workflow/workflow_runner_support.py
             tests_dir: tests/unit/repo_backed/application/services/test_workflow_runner_service.py
             threshold: "60.0"
@@ -77,10 +78,13 @@ jobs:
           path = Path("pyproject.toml")
           document = tomlkit.parse(path.read_text(encoding="utf-8"))
           config = document["tool"]["mutmut"]
-          # mutmut 3.x reads paths_to_mutate (source_paths is ignored).
-          config["paths_to_mutate"] = [os.environ["MUTMUT_SOURCE_PATH"]]
-          if "source_paths" in config:
-              del config["source_paths"]
+          # The frozen mutmut 3.8.1 accepts source_paths; the old key warns.
+          config["source_paths"] = [os.environ["MUTMUT_SOURCE_PATH"]]
+          # The bounded profile favors stock fork; clean tests prime inherited
+          # source caches without changing the mutation or owning-test selection.
+          config["process_isolation"] = "fork"
+          if "paths_to_mutate" in config:
+              del config["paths_to_mutate"]
           # Subset mutation still needs the full package + tooling imports.
           config["also_copy"] = [
               "src/bioetl",
@@ -90,6 +94,10 @@ jobs:
           config["pytest_add_cli_args_test_selection"] = [
               os.environ["MUTMUT_TESTS_DIR"]
           ]
+          config["pytest_add_cli_args"] = [
+              *config.get("pytest_add_cli_args", []),
+              "-p", "scripts.engineering.ci.mutation_protocol_contracts",
+          ]
           path.write_text(tomlkit.dumps(document), encoding="utf-8")
           PY
 
@@ -97,6 +105,9 @@ jobs:
         env:
           # mutmut executes pytest from a sandbox; ensure package + repo roots resolve.
           PYTHONPATH: ${{ github.workspace }}/src:${{ github.workspace }}
+          MUTMUT_SOURCE_PATH: ${{ matrix.target.paths_to_mutate }}
+          BIOETL_MUTATION_SOURCE_ROOT: ${{ github.workspace }}
+          BIOETL_MUTATION_PROTOCOL_MANIFEST: ${{ github.workspace }}/reports/mutation-protocol-contracts/${{ matrix.target.id }}.json
         run: |
           set -euo pipefail
           echo "Running mutation testing for ${{ matrix.target.id }}..."
@@ -104,6 +115,17 @@ jobs:
           # under the frozen CI environment (bare `mutmut` is not on runner PATH).
           export PYTHONPATH="${GITHUB_WORKSPACE}/src:${GITHUB_WORKSPACE}${PYTHONPATH:+:$PYTHONPATH}"
           uv run --frozen --no-build python -c "import bioetl.domain, scripts; print('mutation import preflight ok')"
+          uv run --frozen --no-build python - <<'PY'
+          import os
+          from pathlib import Path
+          from scripts.engineering.ci.mutation_protocol_contracts import capture
+
+          capture(
+              Path(os.environ["BIOETL_MUTATION_SOURCE_ROOT"]),
+              Path(os.environ["MUTMUT_SOURCE_PATH"]),
+              Path(os.environ["BIOETL_MUTATION_PROTOCOL_MANIFEST"]),
+          )
+          PY
           uv run --frozen --no-build mutmut run
 
       - name: Generate mutation report

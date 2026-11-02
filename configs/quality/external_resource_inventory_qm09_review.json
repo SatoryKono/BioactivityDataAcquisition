@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "catalog_ref": "c3d7e98a90c8d2c49ffef0d16bfc2af2958ab59d",
-  "source_ref": "60d603a10fee2a92ab55ab5ea7b0548e31fac61e",
+  "source_ref": "9851eafa469a92c72898de0545b5872a75ae5e3c",
   "source_reviews": {
     "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py": "Reviewed pandas 3.1 compatibility change: normalize extension string dtype names to the existing in-memory str contract. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
     "src/bioetl/application/core/_base_transformer_execution_support.py": "Reviewed structural contract support change: classify existing in-memory outcomes and resolve optional-field metadata from the already loaded policy. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
@@ -29,7 +29,9 @@
     "src/bioetl/domain/exceptions/storage/_delta.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
     "src/bioetl/domain/exceptions/storage/_storage.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
     "src/bioetl/domain/exceptions/validation.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
-    "src/bioetl/domain/medallion.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced."
+    "src/bioetl/domain/medallion.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/application/core/base_transformer/_structural_policy_contracts.py": "Reviewed pandas 3.1 compatibility change: recognize the string[pyarrow] dtype as the existing logical string type. This is in-memory schema classification only and introduces no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/infrastructure/validation/contract_validator.py": "Reviewed pandas 3.1 compatibility change: normalize nullable DataFrame values to Python None before building in-memory contract-validation records. This changes in-memory conversion only and introduces no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior."
   },
   "expression_updates": {},
   "resource_updates": {},

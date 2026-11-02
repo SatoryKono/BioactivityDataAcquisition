@@ -188,7 +188,9 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
         """
         records = [
             {str(key): value for key, value in row.items()}
-            for row in df.to_dict(orient="records")
+            for row in df.astype(object)
+            .where(df.notna(), None)
+            .to_dict(orient="records")
         ]
         return [
             violation.outcome
