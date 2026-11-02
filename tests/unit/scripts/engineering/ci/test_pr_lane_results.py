@@ -792,11 +792,11 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
         },
         "configs/quality/external_resource_inventory_qm08_review.json": {
             "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
         },
         "configs/quality/external_resource_inventory_qm09_review.json": {
             "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
         },
         "configs/quality/quality_move_qm09_reference_decisions.json": {
             "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
