@@ -8,7 +8,10 @@ from datetime import datetime, timedelta, timezone
 import pandas as pd
 import pytest
 
-from bioetl.domain.schemas.chembl.publication import _is_iso_calendar_date
+from bioetl.domain.schemas.chembl.publication import (
+    ChemblPublicationSchema,
+    _is_iso_calendar_date,
+)
 from bioetl.domain.schemas.column_order import canonical_column_order
 from bioetl.domain.schemas.uniprot._core import UniprotCoreSchema
 from bioetl.domain.schemas.validators import rows_are_valid_json, str_matches_pattern
@@ -34,6 +37,26 @@ from bioetl.domain.value_objects.inchi import InChI
 from bioetl.domain.value_objects.molecular_descriptors import _coerce_int
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize("dtype", ["object", "string[pyarrow]"])
+@pytest.mark.parametrize(
+    ("values", "expected"),
+    [
+        ([], []),
+        ([None], [True]),
+        (["2024-02-29"], [True]),
+        (["2024-02-30"], [False]),
+        ([None, "2024-02-29", "not-a-date"], [True, True, False]),
+    ],
+)
+def test_creation_date_boolean_mask_preserves_null_and_invalid_dates(
+    dtype: str, values: list, expected: list[bool]
+) -> None:
+    series = pd.Series(values, index=range(10, 10 + len(values)), dtype=dtype)
+    result = ChemblPublicationSchema._check_creation_date(series)
+    assert result.tolist() == expected
+    assert result.index.equals(series.index)
 
 
 def test_concentration_rejects_non_enum_unit_and_trailing_text() -> None:
