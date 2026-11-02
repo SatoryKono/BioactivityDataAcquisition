@@ -110,13 +110,15 @@ def test_get_git_commit_cached_handles_success_failure_and_exceptions(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        "subprocess.run",
+        builder_base,
+        "run_protected_command",
         lambda *_args, **_kwargs: SimpleNamespace(returncode=0, stdout="abc123\n"),
     )
     assert _get_git_commit_cached() == "abc123"
 
     monkeypatch.setattr(
-        "subprocess.run",
+        builder_base,
+        "run_protected_command",
         lambda *_args, **_kwargs: SimpleNamespace(returncode=1, stdout=""),
     )
     assert _get_git_commit_cached() is None
@@ -124,7 +126,7 @@ def test_get_git_commit_cached_handles_success_failure_and_exceptions(
     def _raise_os_error(*_args: object, **_kwargs: object) -> object:
         raise OSError("git unavailable")
 
-    monkeypatch.setattr("subprocess.run", _raise_os_error)
+    monkeypatch.setattr(builder_base, "run_protected_command", _raise_os_error)
     assert _get_git_commit_cached() is None
 
 
