@@ -1007,6 +1007,12 @@ def _require_targets(targets: list[str], root: Path) -> None:
 
 def _path_targets(path: str, root: Path) -> list[str]:
     """Return the test path or unit directory implied by one changed path."""
+    if path.startswith("tests/helpers/") and path.endswith(".py"):
+        module = ".".join(Path(path).with_suffix("").parts)
+        importing_tests = _importing_script_tests((root / "tests",), module)
+        if importing_tests:
+            return sorted(test.relative_to(root).as_posix() for test in importing_tests)
+        return _helper_suite(path, root)
     if path.startswith(TESTS_PREFIX) and path.endswith(".py"):
         return [path] if (root / path).is_file() else []
     if path.startswith(SRC_BIOETL_PREFIX) and path.endswith(".py"):
