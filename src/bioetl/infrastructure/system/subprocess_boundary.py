@@ -6,7 +6,7 @@ with enforced properties:
 - Enforced timeouts
 - Standardized error handling
 - Output constraint checking
-- Secrets filtering / Redaction
+- Explicit environment handling
 """
 
 from __future__ import annotations
@@ -39,14 +39,10 @@ class _PopenReaderOptions(TypedDict, total=False):
     stdout: int | IO[bytes] | None
 
 
-def _filter_env_secrets(env: Mapping[str, str] | None) -> dict[str, str] | None:
+def _copy_env(env: Mapping[str, str] | None) -> dict[str, str] | None:
     if env is None:
         return None
-    filtered_env = dict(env)
-    # Filter anything that looks like a secret if needed
-    # But usually we just pass the env. For SEC-001, we might just be aware of them.
-    # We will just pass the filtered env.
-    return filtered_env
+    return dict(env)
 
 
 def _output_size(
@@ -137,7 +133,7 @@ def run_protected_command(
     errors: str | None = None,
 ) -> subprocess.CompletedProcess[Any]:  # Any: stdout and stderr depend on text mode.
     """Run a subprocess with strict security boundaries (SEC-001)."""
-    safe_env = _filter_env_secrets(env)
+    copied_env = _copy_env(env)
 
     # Run the process
     popen_options: _PopenPlatformOptions = {}
@@ -150,7 +146,7 @@ def run_protected_command(
     proc = subprocess.Popen(  # nosec B603 - see suppression registry
         list(command),
         cwd=cwd,
-        env=safe_env,
+        env=copied_env,
         shell=False,
         stdout=subprocess.PIPE if capture_output else None,
         stderr=subprocess.PIPE if capture_output else None,
@@ -194,7 +190,7 @@ def run_protected_subprocess_popen(
     kwargs["shell"] = False
 
     if "env" in kwargs:
-        kwargs["env"] = _filter_env_secrets(kwargs["env"])
+        kwargs["env"] = _copy_env(kwargs["env"])
 
     return subprocess.Popen(  # nosec B603 - see suppression registry
         list(command),
