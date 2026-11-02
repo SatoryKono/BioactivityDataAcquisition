@@ -113,16 +113,41 @@ async def build_filter_options_payload(
         )
     if dimension == "run_id" and response_shape == "options":
         payload = finalize_run_id_empty_catalog_label(payload)
-    if dimension == "run_type":
-        # Additive: keep telemetry-only run_type values selectable for PromQL.
-        # Skip when a workflow scope is set — universe metrics lack membership.
-        prometheus_base_url = getattr(host, "_prometheus_base_url", "") or ""
-        if prometheus_base_url and not selected_workflows:
-            # fmt: off
-            # One-line call keeps COMP-004 segment for report-options to_thread unique.
-            payload = await asyncio.to_thread(supplement_prometheus_run_type_options, payload, prometheus_base_url=prometheus_base_url, deadline=deadline, response_shape=response_shape, pipelines=selected_pipelines)  # noqa: E501
-            # fmt: on
+    payload = await _apply_prometheus_run_type_supplement(
+        host,
+        payload,
+        dimension=dimension,
+        response_shape=response_shape,
+        selected_workflows=selected_workflows,
+        selected_pipelines=selected_pipelines,
+        deadline=deadline,
+    )
     add_run_id_items(payload, response_shape=response_shape, dimension=dimension)
+    return payload
+
+
+async def _apply_prometheus_run_type_supplement(
+    host: _HealthRoutingHost,
+    payload: dict[str, object],
+    *,
+    dimension: str,
+    response_shape: str,
+    selected_workflows: tuple[str, ...],
+    selected_pipelines: tuple[str, ...],
+    deadline: float,
+) -> dict[str, object]:
+    """Optionally merge PromQL run_type universe labels (fail-open, budget-capped)."""
+    if dimension != "run_type":
+        return payload
+    # Additive: keep telemetry-only run_type values selectable for PromQL.
+    # Skip when a workflow scope is set — universe metrics lack membership.
+    prometheus_base_url = getattr(host, "_prometheus_base_url", "") or ""
+    if not prometheus_base_url or selected_workflows:
+        return payload
+    # fmt: off
+    # One-line call keeps COMP-004 segment for report-options to_thread unique.
+    payload = await asyncio.to_thread(supplement_prometheus_run_type_options, payload, prometheus_base_url=prometheus_base_url, deadline=deadline, response_shape=response_shape, pipelines=selected_pipelines)  # noqa: E501
+    # fmt: on
     return payload
 
 
