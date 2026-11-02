@@ -1,11 +1,15 @@
 {
   "schema_version": 1,
-  "catalog_ref": "a88cd605faab217358b4f9b224edc60df4186121",
-  "source_ref": "63cbf86bd632882acba762640b481ec0468d730d",
+  "catalog_ref": "97ad6ca6bc9950d2359c2bc23d9898bd8a829478",
+  "source_ref": "6703f6b4da5a04d22e615d1a04b45eb3b86b160d",
   "source_reviews": {
-    "src/bioetl/application/services/control_plane/config_source_hashing.py": "Owner RUF022 __all__ sort only; hashing semantics unchanged; no acquisition-site changes.",
-    "src/bioetl/domain/lineage/__init__.py": "Owner I001 import-order sort only; public mapping_to_plain export unchanged; no acquisition-site changes.",
-    "src/bioetl/interfaces/cli/commands/domains/shared/_execution_failure_support.py": "Owner I001/format wrap of get_structured_context import only; no acquisition-site changes."
+    "src/bioetl/application/services/control_plane/config_source_hashing.py": "Removed from control_plane flat root; rehomed under effective_config for ownership boundaries.",
+    "src/bioetl/application/services/control_plane/effective_config/config_source_hashing.py": "Moved config-source hashing into effective_config responsibility package; hashing-only, no acquisition-site changes.",
+    "src/bioetl/application/services/exceptions_context.py": "Removed from application/services root; rehomed under quality BC package.",
+    "src/bioetl/application/services/quality/exceptions_context.py": "Moved exception redaction/context helpers into services.quality; string redaction only, no acquisition sites.",
+    "src/bioetl/composition/runtime_builders/_effective_config_source_refs_support.py": "Import retarget to effective_config.config_source_hashing; acquisition expressions unchanged.",
+    "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_failure_details.py": "Import retarget to services.quality.exceptions_context; probe/log acquisition expressions preserved.",
+    "src/bioetl/interfaces/cli/commands/domains/shared/_execution_failure_support.py": "Import retarget to services.quality.exceptions_context; no acquisition-site changes."
   },
   "expression_updates": {},
   "resource_updates": {},
