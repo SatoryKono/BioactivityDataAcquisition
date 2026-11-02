@@ -128,17 +128,21 @@ def _apply_workflow_preference(
 def _declared_workflows(manifest: RunManifest) -> tuple[str, ...]:
     """Workflow names recorded on the run itself (not pipeline-wide aliases)."""
     values: list[str] = []
+
+    def _add(raw: object) -> None:
+        if isinstance(raw, str):
+            text = raw.strip()
+            if text and text not in values:
+                values.append(text)
+
+    _add(manifest.workflow_name)
     for payload in (
         manifest.launch_context,
         manifest.runtime_config,
         manifest.resolved_config,
     ):
-        for key in ("workflow_name", "workflow"):
-            raw = payload.get(key)
-            if isinstance(raw, str):
-                text = raw.strip()
-                if text and text not in values:
-                    values.append(text)
+        _add(payload.get("workflow_name"))
+        _add(payload.get("workflow"))
     return tuple(values)
 
 

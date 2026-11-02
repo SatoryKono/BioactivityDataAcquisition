@@ -37,6 +37,7 @@ def _manifest(
     *,
     pipeline: str = "chembl_assay",
     workflow: str | None = None,
+    top_level_workflow: str | None = None,
 ) -> RunManifest:
     provider, entity = pipeline.split("_", 1)
     launch: dict[str, object] = {}
@@ -52,6 +53,7 @@ def _manifest(
         pipeline_name=pipeline,
         provider=provider,
         entity=entity,
+        workflow_name=top_level_workflow,
         launch_context=launch,
         runtime_config={},
         resolved_config={},
@@ -156,8 +158,28 @@ def test_declared_workflow_beats_pipeline_wide_aliases() -> None:
     assert latest == str(older_matching.run_id)
 
 
+def test_top_level_workflow_name_beats_pipeline_wide_aliases() -> None:
+    """Declared membership may live on RunManifest.workflow_name, not nested ctx."""
+    older_matching = _manifest(1, top_level_workflow="chembl_assay")
+    newer_foreign = _manifest(2, top_level_workflow="chembl_core")
+    assert older_matching.launch_context == {}
+    assert newer_foreign.launch_context == {}
+    workflows = (
+        _workflow("chembl_assay", index=60),
+        _workflow("chembl_core", index=61),
+    )
+    latest = resolve_a2_latest_run_id(
+        manifests=(older_matching, newer_foreign),
+        ledger_port=None,
+        workflow_manifests=workflows,
+        pipeline="chembl_assay",
+        query={"pipeline": "chembl_assay", "workflow": "chembl_assay"},
+    )
+    assert latest == str(older_matching.run_id)
+
+
 def test_alias_fallback_when_run_has_no_declared_workflow() -> None:
-    undeclared = _manifest(3)  # no launch_context workflow
+    undeclared = _manifest(3)  # no launch_context / top-level workflow
     workflows = (_workflow("chembl_assay", index=52),)
     latest = resolve_a2_latest_run_id(
         manifests=(undeclared,),
