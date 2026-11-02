@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import asyncio
-import subprocess  # nosec B404 - see suppression registry
+import subprocess
+
+# nosec B404 - see suppression registry
 import threading
 import time
 from collections.abc import Sequence
@@ -23,6 +25,9 @@ from bioetl.infrastructure.storage.delta.schema_ops import (
 from bioetl.infrastructure.storage.delta.table_ops import (
     normalize_delta_filesystem_path,
     resolve_delta_table_path,
+)
+from bioetl.infrastructure.system.subprocess_boundary import (
+    run_protected_subprocess_popen,
 )
 
 __all__ = [
@@ -268,7 +273,7 @@ def _execute_bounded_subprocess(
     still reaps the child.
     """
     # No shell or user-controlled command is involved.
-    proc = subprocess.Popen(  # nosec B603 - see suppression registry
+    proc = run_protected_subprocess_popen(  # nosec B603 - see suppression registry
         list(command),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

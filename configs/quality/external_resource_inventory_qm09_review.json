@@ -1,11 +1,15 @@
 {
   "schema_version": 1,
-  "catalog_ref": "70c538263eadb13e4f1538f0b7e5d30237a2a660",
-  "source_ref": "70c538263eadb13e4f1538f0b7e5d30237a2a660",
-  "source_reviews": {},
+  "catalog_ref": "9b928d6a07dd818f4833ca70777c42a2c2aa2451",
+  "source_ref": "9b928d6a07dd818f4833ca70777c42a2c2aa2451",
+  "source_reviews": {
+    "src/bioetl/infrastructure/storage/gold/writer_metrics.py": "Reviewed formatter-only layout changes in gold writer metric labels; no acquisition, cleanup or runtime behavior changed."
+  },
   "expression_updates": {},
   "resource_updates": {},
   "additional_bindings": {},
   "new_resources": [],
-  "new_exclusions": []
+  "new_exclusions": [],
+  "segment_updates": {},
+  "reference_moves": []
 }
