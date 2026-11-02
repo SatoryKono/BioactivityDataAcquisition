@@ -149,6 +149,22 @@ def get_workflow_runner_service(
         if pipeline_runner_service_factory is None
         else pipeline_runner_service_factory
     )
+
+    def _verify_workflow_evidence_location(result: object) -> None:
+        from bioetl.composition.runtime_builders.evidence_location_registration import (
+            verify_workflow_run_location,
+        )
+
+        workflow_name = getattr(result, "workflow_name", None)
+        workflow_run_id = getattr(result, "workflow_run_id", None)
+        if not workflow_name or not workflow_run_id:
+            return
+        verify_workflow_run_location(
+            workflow_name=str(workflow_name),
+            workflow_run_id=str(workflow_run_id),
+            settings=settings,
+        )
+
     return cast(
         "WorkflowRunnerService",
         workflow_runner_service.WorkflowRunnerService(
@@ -164,6 +180,7 @@ def get_workflow_runner_service(
             ),
             metrics=metrics,
             workflow_transform_artifact_sink=artifact_sink,
+            evidence_location_verify=_verify_workflow_evidence_location,
         ),
     )
 
@@ -196,6 +213,17 @@ def _create_workflow_ledger_service(
         workflow_name=manifest.workflow_name,
         _entry_id_factory=lambda: create_runtime_occurrence_id("workflow_ledger_entry"),
         _occurred_at_factory=_system_clock_now(),
+    )
+
+
+def _workflow_evidence_location_register(manifest: WorkflowManifest) -> object:
+    """RF-004: publish workflow-parent locator after durable manifest save."""
+    from bioetl.composition.runtime_builders.evidence_location_registration import (
+        register_workflow_manifest_location,
+    )
+
+    return register_workflow_manifest_location(
+        manifest=manifest, settings=get_settings()
     )
 
 
@@ -238,6 +266,7 @@ def get_workflow_execution_service(
                 _manifest_id_factory=lambda: create_runtime_occurrence_id(
                     "workflow_manifest"
                 ),
+                evidence_location_register=_workflow_evidence_location_register,
             ),
             workflow_ledger_port=ledger_store,
             workflow_ledger_factory=_create_workflow_ledger_service,

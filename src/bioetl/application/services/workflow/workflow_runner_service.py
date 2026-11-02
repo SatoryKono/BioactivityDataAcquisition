@@ -10,11 +10,18 @@ from time import perf_counter
 from typing import TYPE_CHECKING
 
 from bioetl.application.runtime_clock import current_utc_time
+from bioetl.application.services.control_plane.evidence_location import (
+    record_verify_exception_observation,
+)
 from bioetl.application.services.execution.workflow_runner_step_execution import (
     TransformStepRuntimeOptions,
     apply_workflow_step_transition,
     execute_pipeline_step,
     execute_transform_step,
+)
+from bioetl.application.services.run_reports.observations import (
+    bind_run_observations_if_unbound,
+    reset_run_observations_if_bound,
 )
 from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowRunExecutionResult,
@@ -121,6 +128,8 @@ class WorkflowRunnerService:
         ]
         | None
     ) = None
+    # RF-004: Composition-injected finalize consistency check (soft diagnostics).
+    evidence_location_verify: Callable[[WorkflowRunExecutionResult], None] | None = None
 
     async def run_workflow(
         self,
@@ -229,19 +238,35 @@ class WorkflowRunnerService:
                 duration_seconds=perf_counter() - started_monotonic,
             )
         )
-        reported = attach_workflow_run_report(
-            config=config,
-            result=identified_result,
-            logger=getattr(self.pipeline_runner, "logger", None),
-            store=self.report_store,
-            report_root=self.report_root,
-        )
-        archive_workflow_children(
-            config,
-            reported,
-            getattr(self.pipeline_runner, "archive_control_plane", None),
-        )
-        return reported
+        # RF-004: reuse outer prepare→report scope when present; else bind locally.
+        observation_token = bind_run_observations_if_unbound()
+        try:
+            if self.evidence_location_verify is not None:
+                try:
+                    self.evidence_location_verify(identified_result)
+                except Exception as exc:
+                    # Consistency diagnostics must not mask processing success.
+                    record_verify_exception_observation(
+                        kind="workflow",
+                        owner=str(identified_result.workflow_name),
+                        run_id=str(identified_result.workflow_run_id or ""),
+                        exc=exc,
+                    )
+            reported = attach_workflow_run_report(
+                config=config,
+                result=identified_result,
+                logger=getattr(self.pipeline_runner, "logger", None),
+                store=self.report_store,
+                report_root=self.report_root,
+            )
+            archive_workflow_children(
+                config,
+                reported,
+                getattr(self.pipeline_runner, "archive_control_plane", None),
+            )
+            return reported
+        finally:
+            reset_run_observations_if_bound(observation_token)
 
     def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
         """Record planned pipeline scopes before workflow step execution."""

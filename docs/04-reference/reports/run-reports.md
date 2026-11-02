@@ -34,6 +34,29 @@ process env for this map. `runtime_source_id` is bind/runtime identity, not a
 Git commit. Missing location, missing manifest, and identity conflict stay
 distinct codes and must not silently fall back to another run.
 
+Safe resolver (RF-003 / #12681): `FileEvidenceLocationStore` publishes
+create-if-absent records under the catalog path; `EvidenceLocationResolver`
+opens a read-only control-plane context for the exact alias +
+`relative_data_root` (`.` = standard alias base). Legacy absence may open
+only that standard base via explicit RF-003 policy — never a foreign
+isolated workflow root via filesystem scan. Symlink/junction escape and
+path traversal fail closed. Ops GET paths must not register or rewrite
+evidence.
+
+Automatic registration (RF-004 / #12682): after a durable pipeline or
+workflow manifest save, Composition publishes a locator via
+`EvidenceLocationRegistrationService` using the write `data_root`, the
+trusted `dashboard_data` alias base (`BIOETL_DASHBOARD_DATA_ROOT` at the
+composition edge, else the write root), and `runtime_source_id`. When an
+explicit dashboard alias is set and the write root lies outside it,
+registration is skipped with diagnostics — the publisher never remaps
+`dashboard_data` onto a foreign write root. Report finalization verifies
+the locator **before** the report observation snapshot and records an
+`Evidence Location` observation without mutating `processing_status`.
+Composite report writes and late workflow child revisions do not register.
+Bronze successors keep the same `(kind, owner, run_id)` binding
+(idempotent identical).
+
 Optional additive blocks on pipeline reports (omit when unknown; never invent zeros):
 
 - `failure`, `io`, `quarantine`, `dq_summary`, `contract_summary`
@@ -44,6 +67,7 @@ Optional on workflow reports:
 
 - execution `top_reasons`, `skip_reason`, `pipeline_report_ref`
 - top-level `reasons_rollup`
+- top-level `observations` for checks recorded during workflow finalization
 
 ## Operator questions
 

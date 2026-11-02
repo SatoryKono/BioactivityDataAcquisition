@@ -206,6 +206,21 @@ def test_workflow_manifest_store_get_by_run_id_detects_index_corruption(
         store.get_by_run_id(run_id)
 
 
+def test_workflow_manifest_store_get_by_run_id_rejects_mismatched_workflow_run_id(
+    tmp_path: Path,
+) -> None:
+    store = FileWorkflowManifestStore(base_path=tmp_path / "workflow_manifest")
+    owned = _run_id("00000000-0000-0000-0000-000000000104")
+    requested = _run_id("00000000-0000-0000-0000-000000000105")
+    manifest = _manifest(manifest_id="manifest-owned", workflow_run_id=owned)
+    store.save(manifest)
+    requested_index = store.base_path / "_by_run_id" / f"{requested}.txt"
+    requested_index.write_text(manifest.manifest_id, encoding="utf-8")
+
+    with pytest.raises(ValueError, match="not requested workflow_run_id"):
+        store.get_by_run_id(requested)
+
+
 def test_workflow_execution_state_store_round_trip_with_manifest_and_latest_indexes(
     tmp_path: Path,
 ) -> None:

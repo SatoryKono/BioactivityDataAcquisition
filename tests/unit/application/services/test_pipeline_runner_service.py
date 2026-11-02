@@ -1014,3 +1014,50 @@ async def test_cancelled_execution_persists_snapshot_and_releases_observations(
     )
     assert run_observations() == {}
     service.capture_control_plane.assert_called_once()
+
+
+@pytest.mark.unit
+def test_finalize_report_records_verify_exception_without_status_change(
+    service, tmp_path
+) -> None:
+    from bioetl.application.services.control_plane.evidence_location import (
+        EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
+    )
+    from bioetl.application.services.run_reports.observations import (
+        bind_run_observations,
+        reset_run_observations,
+        run_observations,
+    )
+    from bioetl.infrastructure.storage.run_report_store_adapter import (
+        FileRunReportStoreAdapter,
+    )
+
+    service.report_root = tmp_path
+    service.report_store = FileRunReportStoreAdapter()
+    service.capture_control_plane = MagicMock()
+    service.archive_control_plane = MagicMock()
+
+    def _boom(_result: RunResult, _options: RunOptions | None) -> None:
+        raise RuntimeError("verify boom")
+
+    service.evidence_location_verify = _boom
+    result = RunResult(
+        status=PipelineRunResult.SUCCESS,
+        pipeline_name="chembl_assay",
+        run_id="ac0b4e22-6a6e-5b7e-818e-106aeaf41390",
+        run_type="full",
+        started_at=datetime(2026, 1, 1, tzinfo=UTC),
+        completed_at=datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC),
+    )
+    token = bind_run_observations()
+    try:
+        finalized = service._finalize_report(result, RunOptions())
+        assert finalized.status == PipelineRunResult.SUCCESS
+        observations = run_observations()
+        assert (
+            observations[EVIDENCE_LOCATION_OBSERVATION_DOMAIN]["reason"]
+            == "verify_exception"
+        )
+        assert observations[EVIDENCE_LOCATION_OBSERVATION_DOMAIN]["verdict"] == "ERROR"
+    finally:
+        reset_run_observations(token)

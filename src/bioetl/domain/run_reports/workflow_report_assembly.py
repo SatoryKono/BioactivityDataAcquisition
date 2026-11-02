@@ -284,6 +284,7 @@ def build_workflow_run_report(
     execution_steps: Sequence[
         Mapping[str, Any] | object
     ],  # Any: external workflow result payload
+    observations: Mapping[str, object] | None = None,
 ) -> WorkflowRunReport:
     """Project a deterministic workflow report with extraction rollups."""
     plan = tuple(_normalize_plan_step(step) for step in plan_steps)
@@ -296,4 +297,5 @@ def build_workflow_run_report(
         totals=_build_totals(execution, planned=len(plan) or len(execution)),
         index=_build_index(normalized),
         reasons_rollup=build_reasons_rollup(execution),
+        observations=None if observations is None else dict(observations),
     )
