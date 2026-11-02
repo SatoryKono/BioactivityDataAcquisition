@@ -1,0 +1,7 @@
+fix(benchmark): validate_benchmark_evidence fixes for AUD-003 to AUD-006
+
+Restores validate_benchmark_evidence.py from PR-12245 to run separately and handles
+the outstanding tasks from #12044 not covered by the parallel CF-040 branch.
+- AUD-003, AUD-004: implemented check for >0 rounds/iterations and verified provenance identities correctly in validate_benchmark_evidence.py.
+- AUD-005: correctly ignore top-level reports/performance artifacts while retaining reports/performance/evidence/ deeply nested durable artifact files in .gitignore.
+- AUD-006: explicitly check that budgets exist and are not empty before assuming passed status in generate_hotspot_degradation_report.py.
