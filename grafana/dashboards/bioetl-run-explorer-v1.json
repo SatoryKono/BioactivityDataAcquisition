@@ -664,7 +664,7 @@
             "properties": [
               {
                 "id": "custom.minWidth",
-                "value": 110
+                "value": 50
               },
               {
                 "id": "custom.inspect",
