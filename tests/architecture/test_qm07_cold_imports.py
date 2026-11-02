@@ -93,6 +93,14 @@ def _run_wheel(
     )
 
 
+def _uv_env_allowing_build() -> dict[str, str]:
+    """CI pins UV_NO_BUILD=1; wheel build must opt out in a child env only."""
+    env = os.environ.copy()
+    for key in ("UV_NO_BUILD", "UV_NO_SYNC"):
+        env.pop(key, None)
+    return env
+
+
 @pytest.fixture(scope="session")
 def wheel_venv_python(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path]:
     """Build the checkout wheel and install it into a temporary venv."""
@@ -100,10 +108,12 @@ def wheel_venv_python(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path
     dist_dir = root / "dist"
     venv_dir = root / "wheel_venv"
     dist_dir.mkdir(parents=True, exist_ok=True)
+    build_env = _uv_env_allowing_build()
 
     build = subprocess.run(
         ["uv", "build", "--wheel", "-o", str(dist_dir)],
         cwd=REPO_ROOT,
+        env=build_env,
         capture_output=True,
         text=True,
         check=False,
@@ -115,6 +125,7 @@ def wheel_venv_python(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path
     create = subprocess.run(
         ["uv", "venv", str(venv_dir), "--python", sys.executable],
         cwd=REPO_ROOT,
+        env=build_env,
         capture_output=True,
         text=True,
         check=False,
@@ -126,6 +137,7 @@ def wheel_venv_python(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path
     install = subprocess.run(
         ["uv", "pip", "install", "--python", str(python), str(wheels[0])],
         cwd=REPO_ROOT,
+        env=build_env,
         capture_output=True,
         text=True,
         check=False,
