@@ -175,7 +175,7 @@ class SelectedRunStatusCache:
             entry.completed_at = monotonic()
             entry.error = None
             return deepcopy(payload)
-        except Exception as exc:
+        except (ForensicEndpointUnavailable, ValueError, OSError, RuntimeError) as exc:
             entry.error = (
                 exc.reason
                 if isinstance(exc, ForensicEndpointUnavailable)

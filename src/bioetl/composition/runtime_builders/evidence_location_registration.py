@@ -1,12 +1,11 @@
 """Composition-edge wiring for RF-004 evidence-location registration.
 
-Reads process env only at the composition boundary. Application services
+Reads typed Settings at the composition boundary. Application services
 receive absolute paths, alias bases, and runtime_source_id as parameters.
 """
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -55,8 +54,6 @@ __all__ = [
     "resolve_registration_runtime_source_id",
 ]
 
-_DASHBOARD_DATA_ROOT_ENV = "BIOETL_DASHBOARD_DATA_ROOT"
-
 
 @dataclass(frozen=True, slots=True)
 class EvidenceLocationBindingContext:
@@ -77,17 +74,19 @@ class EvidenceLocationBindingContext:
         return self.skip_reason is None and self.runtime_source_id is not None
 
 
-def resolve_dashboard_data_alias_base(*, write_data_root: Path) -> Path | None:
-    """Resolve the trusted ``dashboard_data`` alias base at composition edge.
+def resolve_dashboard_data_alias_base(*, settings: Settings) -> Path | None:
+    """Resolve the trusted ``dashboard_data`` alias base from typed Settings.
 
-    Returns the configured ``BIOETL_DASHBOARD_DATA_ROOT`` when set, otherwise
+    Returns ``BIOETL_DASHBOARD_DATA_ROOT`` when configured on Settings, else
     ``None`` so callers may treat the write root as the alias base.
     """
-    raw = os.environ.get(_DASHBOARD_DATA_ROOT_ENV, "").strip()
-    if raw:
-        return Path(raw).expanduser().resolve(strict=False)
-    _ = write_data_root
-    return None
+    configured = getattr(settings, "dashboard_data_root", None)
+    if configured is None:
+        return None
+    text = str(configured).strip()
+    if not text:
+        return None
+    return Path(text).expanduser().resolve(strict=False)
 
 
 def relative_data_root_under_alias(
@@ -121,17 +120,13 @@ def _repository_root() -> Path:
 def resolve_registration_runtime_source_id(settings: Settings) -> str | None:
     """Resolve bind/runtime source digest for locators (composition edge).
 
-    Precedence matches :func:`resolve_runtime_source_identity`: typed settings /
-    process env, then repository ``.env`` / ``.env.local``.
+    Precedence matches :func:`resolve_runtime_source_identity`: typed settings,
+    then repository ``.env`` / ``.env.local``.
     """
     configured = getattr(settings, "runtime_source_id", None)
     process_environment: dict[str, str] = {}
     if configured is not None and str(configured).strip():
         process_environment[RUNTIME_SOURCE_ID_ENV] = str(configured).strip()
-    else:
-        env_value = os.environ.get(RUNTIME_SOURCE_ID_ENV, "").strip()
-        if env_value:
-            process_environment[RUNTIME_SOURCE_ID_ENV] = env_value
     repository_environment = load_repository_source_environment(
         _repository_root(),
         names=(RUNTIME_SOURCE_ID_ENV,),
@@ -156,7 +151,7 @@ def build_evidence_location_binding_context(
     registration is skipped with diagnostics.
     """
     write_root = resolve_data_root(settings).resolve(strict=False)
-    configured_alias = resolve_dashboard_data_alias_base(write_data_root=write_root)
+    configured_alias = resolve_dashboard_data_alias_base(settings=settings)
     report_root = getattr(settings, "report_root", None)
     runtime_source_id = resolve_registration_runtime_source_id(settings)
 

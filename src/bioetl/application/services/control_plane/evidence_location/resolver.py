@@ -25,9 +25,7 @@ from bioetl.domain.control_plane.run_evidence_location import (
     EvidenceLocationLookupResult,
     RunEvidenceLocation,
 )
-from bioetl.domain.ports.control_plane.run_evidence_location import (
-    RunEvidenceLocationReadPort,
-)
+from bioetl.domain.ports import RunEvidenceLocationReadPort
 from bioetl.domain.types import RunID
 
 __all__ = [
@@ -35,7 +33,7 @@ __all__ = [
     "EvidenceLocationResolveResult",
     "EvidenceLocationResolver",
     "EvidenceReadContext",
-    "EvidenceReadContextOpener",
+    "EvidenceReadContextFactoryProtocol",
 ]
 
 
@@ -84,7 +82,7 @@ class EvidenceReadContext(Protocol):
 
 
 @runtime_checkable
-class EvidenceReadContextOpener(Protocol):
+class EvidenceReadContextFactoryProtocol(Protocol):
     """Composition-injected factory that opens stores under a trusted base."""
 
     def open(
@@ -128,7 +126,7 @@ class EvidenceLocationResolver:
 
     locations: RunEvidenceLocationReadPort
     aliases: EvidenceRootAliasRegistry
-    opener: EvidenceReadContextOpener
+    opener: EvidenceReadContextFactoryProtocol
     legacy_root_policy: EvidenceLocationLegacyRootPolicy = (
         EvidenceLocationLegacyRootPolicy.ALLOW_STANDARD_ALIAS_BASE
     )

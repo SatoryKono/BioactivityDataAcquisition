@@ -7,6 +7,7 @@ mutates processing_status / identity.status and never invents READY.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -21,13 +22,14 @@ from bioetl.domain.control_plane.run_evidence_location import (
     RunEvidenceLocation,
     build_run_evidence_location,
 )
-from bioetl.domain.ports.control_plane.run_evidence_location import (
+from bioetl.domain.ports import (
     RunEvidenceLocationReadPort,
     RunEvidenceLocationRegisterPort,
 )
 
 __all__ = [
     "EVIDENCE_LOCATION_OBSERVATION_DOMAIN",
+    "EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS",
     "EvidenceLocationRegisterRequest",
     "EvidenceLocationRegistrationOutcome",
     "EvidenceLocationRegistrationService",
@@ -37,11 +39,22 @@ __all__ = [
     "record_registration_soft_failure_observation",
     "record_verify_exception_observation",
     "soft_failure_exception_detail",
+    "soft_invoke_evidence_location_verify",
 ]
 
 EVIDENCE_LOCATION_OBSERVATION_DOMAIN = "Evidence Location"
 
 _REGISTRATION_SUCCESS_CODES = frozenset({"registered", "already_identical"})
+
+# Soft RF-004/RF-003 callbacks must not mask processing success.
+EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS: tuple[type[BaseException], ...] = (
+    EvidenceLocationConflictError,
+    EvidenceLocationInvalidError,
+    OSError,
+    RuntimeError,
+    TypeError,
+    ValueError,
+)
 
 
 def soft_failure_exception_detail(exc: BaseException) -> str:
@@ -87,6 +100,24 @@ def record_verify_exception_observation(
         detail=soft_failure_exception_detail(exc),
         facts={"kind": kind, "owner": owner, "run_id": run_id},
     )
+
+
+def soft_invoke_evidence_location_verify(
+    callback: Callable[[], object] | None,
+    *,
+    kind: str,
+    owner: str,
+    run_id: str,
+) -> None:
+    """Run finalize verify; soft-fail so processing success stays intact."""
+    if callback is None:
+        return
+    try:
+        callback()
+    except EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS as exc:
+        record_verify_exception_observation(
+            kind=kind, owner=owner, run_id=run_id, exc=exc
+        )
 
 
 def record_registration_exception_observation(

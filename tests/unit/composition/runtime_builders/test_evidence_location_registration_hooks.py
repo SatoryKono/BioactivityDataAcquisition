@@ -61,12 +61,12 @@ def test_register_skips_when_write_root_outside_dashboard_alias(
     write_root.mkdir()
     report_root = tmp_path / "run-reports"
     report_root.mkdir()
-    monkeypatch.setenv("BIOETL_DASHBOARD_DATA_ROOT", str(alias))
     monkeypatch.setenv("BIOETL_RUNTIME_SOURCE_ID", _SOURCE)
     settings = SimpleNamespace(
         data_dir=write_root,
         report_root=report_root,
         runtime_source_id=_SOURCE,
+        dashboard_data_root=alias,
     )
     binding = build_evidence_location_binding_context(settings)  # type: ignore[arg-type]
     assert binding.skip_reason is not None
@@ -97,13 +97,13 @@ def test_register_pipeline_manifest_writes_catalog(
     data_root.mkdir()
     report_root = tmp_path / "run-reports"
     report_root.mkdir()
-    monkeypatch.setenv("BIOETL_DASHBOARD_DATA_ROOT", str(data_root))
     monkeypatch.setenv("BIOETL_RUNTIME_SOURCE_ID", _SOURCE)
 
     settings = SimpleNamespace(
         data_dir=data_root,
         report_root=report_root,
         runtime_source_id=_SOURCE,
+        dashboard_data_root=data_root,
     )
     binding = build_evidence_location_binding_context(settings)  # type: ignore[arg-type]
     assert binding.relative_data_root == "."
@@ -138,13 +138,13 @@ def test_register_workflow_manifest_parent(
     data_root.mkdir()
     report_root = tmp_path / "run-reports"
     report_root.mkdir()
-    monkeypatch.setenv("BIOETL_DASHBOARD_DATA_ROOT", str(data_root))
     monkeypatch.setenv("BIOETL_RUNTIME_SOURCE_ID", _SOURCE)
 
     settings = SimpleNamespace(
         data_dir=data_root,
         report_root=report_root,
         runtime_source_id=_SOURCE,
+        dashboard_data_root=data_root,
     )
     manifest = WorkflowManifest(
         manifest_id="wf-manifest-1",

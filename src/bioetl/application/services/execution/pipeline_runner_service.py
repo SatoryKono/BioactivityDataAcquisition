@@ -11,7 +11,7 @@ from __future__ import annotations
 import asyncio
 
 from bioetl.application.services.control_plane.evidence_location import (
-    record_verify_exception_observation,
+    soft_invoke_evidence_location_verify,
 )
 from bioetl.application.services.run_reports.control_plane_snapshot import (
     archive_run_completion,
@@ -378,18 +378,16 @@ class PipelineRunnerService:
     ) -> RunResult:
         """Capture control-plane evidence, persist the run report, then archive."""
         capture_run_completion(self.capture_control_plane, result, options)
-        # RF-004: record Evidence Location observation BEFORE report snapshot.
-        if self.evidence_location_verify is not None:
-            try:
-                self.evidence_location_verify(result, options)
-            except Exception as exc:
-                # Consistency diagnostics must not mask processing success.
-                record_verify_exception_observation(
-                    kind="pipeline",
-                    owner=str(result.pipeline_name),
-                    run_id=str(result.run_id),
-                    exc=exc,
-                )
+        soft_invoke_evidence_location_verify(
+            (
+                None
+                if self.evidence_location_verify is None
+                else (lambda: self.evidence_location_verify(result, options))
+            ),
+            kind="pipeline",
+            owner=str(result.pipeline_name),
+            run_id=str(result.run_id),
+        )
         finalized = finalize_pipeline_run_report(
             result=result,
             options=options,

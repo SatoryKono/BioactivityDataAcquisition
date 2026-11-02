@@ -6,7 +6,6 @@ from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Any
 
-
 def _copy_present_attributes(
     payload: dict[str, Any],  # Any: dynamic report serialization payload
     source: object,
@@ -286,15 +285,13 @@ class WorkflowRunReport:
     plan_steps: tuple[dict[str, Any], ...]  # Any: report/json payload shape is dynamic
     execution: tuple[WorkflowExecutionRow, ...]
     totals: dict[str, Any]  # Any: report/json payload shape is dynamic
-    index: dict[str, Any] = field(  # Any: dynamic workflow index payload
-        default_factory=dict
-    )  # Any: report/json payload shape is dynamic
+    index: dict[str, Any] = field(default_factory=dict)  # Any: dynamic index
     reasons_rollup: tuple[dict[str, Any], ...] = ()  # Any: aggregated child reasons
     observations: dict[str, object] | None = None
     schema_version: str = "workflow_run_report_v1"
 
     def to_dict(self) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
-        payload: dict[str, Any] = {  # Any: report/json payload shape is dynamic
+        payload: dict[str, Any] = {  # Any: dynamic report payload
             "schema_version": self.schema_version,
             "identity": dict(self.identity),
             "plan": {"steps": [dict(step) for step in self.plan_steps]},
