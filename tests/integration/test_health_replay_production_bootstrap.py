@@ -408,9 +408,7 @@ async def test_isolated_manifest_lost_under_default_data_root(tmp_path, monkeypa
     """
     default_data = tmp_path / "data"
     reports = tmp_path / "reports"
-    target_root = (
-        default_data / "workflow-limit100-20261102T144403Z" / "chembl_assay"
-    )
+    target_root = default_data / "workflow-limit100-20261102T144403Z" / "chembl_assay"
     foreign_root = (
         default_data / "workflow-limit100-foreign-20261102T150000Z" / "chembl_assay"
     )
@@ -486,7 +484,9 @@ async def test_isolated_manifest_lost_under_default_data_root(tmp_path, monkeypa
         checkpoint_port_factory=lambda _: AsyncMock(),
         data_root=default_data,
     )
-    assert default_deps.run_manifest_port.get_by_run_id(RunID(UUID(_TARGET_RUN))) is None
+    assert (
+        default_deps.run_manifest_port.get_by_run_id(RunID(UUID(_TARGET_RUN))) is None
+    )
     assert (
         target_deps.run_manifest_port.get_by_run_id(RunID(UUID(_TARGET_RUN)))
         is not None
