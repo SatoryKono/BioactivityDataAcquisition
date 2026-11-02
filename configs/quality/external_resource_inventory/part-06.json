@@ -54,7 +54,7 @@
       "lifetime": "process-scoped singleton; each acquisition lasts for one collector with block",
       "creation_sites": [
         {
-          "source_commit": "54290f9f0a3810addef18eed058a104af0364c38",
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -68,7 +68,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "54290f9f0a3810addef18eed058a104af0364c38",
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
           "source_blob": "d5aa2dc103b334fc0a1fef4f03cf225aaad3212d",
           "content_sha256": "04529f6059663600e405e54b150068d4582a9033e2fc776ea5c5b85de0cac544",
           "file": "src/bioetl/composition/observability_runtime.py",
@@ -80,7 +80,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "54290f9f0a3810addef18eed058a104af0364c38",
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -92,7 +92,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "54290f9f0a3810addef18eed058a104af0364c38",
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -102,12 +102,232 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "54290f9f0a3810addef18eed058a104af0364c38",
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
           "line": 267,
           "source_segment": "with _COLLECTION_LOCK:"
+        }
+      ]
+    },
+    {
+      "identity": "control.evidence_location_publish.temp",
+      "type": "temp",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "lifetime": "owner/operation",
+      "creator": [
+        "publish_bytes_if_absent"
+      ],
+      "owner": "publish_bytes_if_absent owning operation (see exact source sites)",
+      "closer": "temp_path.unlink in publish_bytes_if_absent finally; source.unlink after successful exclusive link in _publish_new_file_exclusive",
+      "shutdown_contract": "Raw descriptor ownership starts at successful mkstemp; fdopen transfers stream ownership. Temp-path unlink in finally is a separate obligation from descriptor close. Failed exclusive publish leaves the temp path for finally cleanup; successful hard-link removes the temp via source.unlink.",
+      "production_entrypoint": "run/workflow/maintenance/report/health -> control-plane evidence location register",
+      "call_path": [
+        "run/workflow/maintenance/report/health -> control-plane evidence location register",
+        "bioetl.infrastructure.control_plane.file_evidence_location_store.FileEvidenceLocationStore.register -> bioetl.infrastructure.control_plane._evidence_location_publish.publish_bytes_if_absent"
+      ],
+      "scenarios": {
+        "normal": {
+          "applicability": "applicable",
+          "expected": "Temp path exists only for the publish attempt; successful exclusive link removes it, failed/aborted attempts unlink in finally.",
+          "observation": "At allocation and owning return/exit: temp path presence, descriptor/stream close, retained files under trusted_base.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful allocation; no close obligation for a handle never created",
+          "expected": "Preserve original failure while executing finally unlink; record partial construction separately.",
+          "observation": "Inject before mkstemp, after mkstemp, during fdopen/write/link and during unlink; inspect retained temps.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "owning async/thread boundary; primitive itself synchronous",
+          "expected": "Propagate cancellation after documented cleanup; do not infer stopped native work from a cancelled future.",
+          "observation": "Cancel owner before/use/close barriers and observe physical completion and retained temps.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
+          "expected": "Apply the source-defined deadline; record any deliberately surviving temps. Timeout is not a shutdown receipt.",
+          "observation": "Observe deadline, finally unlink completion and remaining resources separately.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
+          "expected": "Record retained owner versus fresh allocation and close failed-attempt temps; do not infer idempotent overwrite.",
+          "observation": "Barrier before retry; compare opened/closed/remaining temp IDs per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "creation_sites": [
+        {
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
+          "source_blob": "58441fb68d9764b98e0db0604e3a97d30b546a37",
+          "content_sha256": "c7a87f550105adf76dce2b79f1b961ea30351cabf0b0b466317407a9bebabc76",
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "line": 77,
+          "expression": "tempfile.mkstemp(suffix='.tmp', prefix='.' + target.stem + '_', dir=target.parent)",
+          "call": "tempfile.mkstemp",
+          "creator": "publish_bytes_if_absent",
+          "creation_mode": "call",
+          "context_manager": false
+        }
+      ],
+      "production_binding": [
+        {
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
+          "source_blob": "9c874a601941781d3aa89dc82f40f177c9dd2012",
+          "content_sha256": "98e4276500f5b870c16608885f7669ff2e7ef645fd7043285f9d229dc57f8d18",
+          "file": "src/bioetl/infrastructure/control_plane/file_evidence_location_store.py",
+          "line": 232,
+          "source_segment": "created = publish_bytes_if_absent("
+        },
+        {
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
+          "source_blob": "58441fb68d9764b98e0db0604e3a97d30b546a37",
+          "content_sha256": "c7a87f550105adf76dce2b79f1b961ea30351cabf0b0b466317407a9bebabc76",
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "line": 77,
+          "source_segment": "fd, temp_path_str = tempfile.mkstemp("
+        }
+      ],
+      "cleanup_sources": [
+        {
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
+          "source_blob": "58441fb68d9764b98e0db0604e3a97d30b546a37",
+          "content_sha256": "c7a87f550105adf76dce2b79f1b961ea30351cabf0b0b466317407a9bebabc76",
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "line": 101,
+          "source_segment": "temp_path.unlink()"
+        },
+        {
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
+          "source_blob": "58441fb68d9764b98e0db0604e3a97d30b546a37",
+          "content_sha256": "c7a87f550105adf76dce2b79f1b961ea30351cabf0b0b466317407a9bebabc76",
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "line": 49,
+          "source_segment": "source.unlink()"
+        }
+      ]
+    },
+    {
+      "identity": "control.evidence_location_publish.file",
+      "type": "file",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "lifetime": "owner/operation",
+      "creator": [
+        "publish_bytes_if_absent",
+        "read_existing_bytes"
+      ],
+      "owner": "publish_bytes_if_absent; read_existing_bytes owning operation (see exact source sites)",
+      "closer": "os.fdopen context __exit__ at publish_bytes_if_absent; pathlib.Path.read_bytes internal file context exit",
+      "shutdown_contract": "The lexical context owns fdopen after successful construction; its exit closes the acquired handle. Synchronous pathlib read_bytes owns its temporary file stream; inspect opening/closing and errors inside this library boundary, not a persistent store connection.",
+      "production_entrypoint": "run/workflow/maintenance/report/health -> control-plane evidence location register/lookup",
+      "call_path": [
+        "run/workflow/maintenance/report/health -> control-plane evidence location register/lookup",
+        "bioetl.infrastructure.control_plane.file_evidence_location_store.FileEvidenceLocationStore.register -> bioetl.infrastructure.control_plane._evidence_location_publish.publish_bytes_if_absent",
+        "bioetl.infrastructure.control_plane.file_evidence_location_store.FileEvidenceLocationStore._load_at -> bioetl.infrastructure.control_plane._evidence_location_publish.read_existing_bytes"
+      ],
+      "scenarios": {
+        "normal": {
+          "applicability": "applicable",
+          "expected": "Synchronous pathlib/os stream operations own their temporary file streams; inspect opening/closing and errors inside this library boundary.",
+          "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
+          "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "owning async/thread boundary; primitive itself synchronous",
+          "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
+          "observation": "Cancel owner before/use/close barriers and observe physical completion and retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
+          "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources. Timeout is not a shutdown receipt.",
+          "observation": "Observe deadline, close/drain completion and remaining resources separately.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
+          "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent overwrite.",
+          "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "creation_sites": [
+        {
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
+          "source_blob": "58441fb68d9764b98e0db0604e3a97d30b546a37",
+          "content_sha256": "c7a87f550105adf76dce2b79f1b961ea30351cabf0b0b466317407a9bebabc76",
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "line": 84,
+          "expression": "os.fdopen(fd, 'wb')",
+          "call": "os.fdopen",
+          "creator": "publish_bytes_if_absent",
+          "creation_mode": "call",
+          "context_manager": false
+        },
+        {
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
+          "source_blob": "58441fb68d9764b98e0db0604e3a97d30b546a37",
+          "content_sha256": "c7a87f550105adf76dce2b79f1b961ea30351cabf0b0b466317407a9bebabc76",
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "line": 33,
+          "expression": "safe_path.read_bytes()",
+          "call": "safe_path.read_bytes",
+          "creator": "read_existing_bytes",
+          "creation_mode": "call",
+          "context_manager": false
+        }
+      ],
+      "production_binding": [
+        {
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
+          "source_blob": "9c874a601941781d3aa89dc82f40f177c9dd2012",
+          "content_sha256": "98e4276500f5b870c16608885f7669ff2e7ef645fd7043285f9d229dc57f8d18",
+          "file": "src/bioetl/infrastructure/control_plane/file_evidence_location_store.py",
+          "line": 232,
+          "source_segment": "created = publish_bytes_if_absent("
+        },
+        {
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
+          "source_blob": "9c874a601941781d3aa89dc82f40f177c9dd2012",
+          "content_sha256": "98e4276500f5b870c16608885f7669ff2e7ef645fd7043285f9d229dc57f8d18",
+          "file": "src/bioetl/infrastructure/control_plane/file_evidence_location_store.py",
+          "line": 119,
+          "source_segment": "raw = read_existing_bytes(safe_path, trusted_base=self._trusted_root())"
+        },
+        {
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
+          "source_blob": "58441fb68d9764b98e0db0604e3a97d30b546a37",
+          "content_sha256": "c7a87f550105adf76dce2b79f1b961ea30351cabf0b0b466317407a9bebabc76",
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "line": 84,
+          "source_segment": "with os.fdopen(fd, \"wb\") as handle:"
+        },
+        {
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
+          "source_blob": "58441fb68d9764b98e0db0604e3a97d30b546a37",
+          "content_sha256": "c7a87f550105adf76dce2b79f1b961ea30351cabf0b0b466317407a9bebabc76",
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "line": 33,
+          "source_segment": "return safe_path.read_bytes()"
+        }
+      ],
+      "cleanup_sources": [
+        {
+          "source_commit": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
+          "source_blob": "58441fb68d9764b98e0db0604e3a97d30b546a37",
+          "content_sha256": "c7a87f550105adf76dce2b79f1b961ea30351cabf0b0b466317407a9bebabc76",
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "line": 84,
+          "source_segment": "with os.fdopen(fd, \"wb\") as handle:"
         }
       ]
     }

@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "7c4cfac1525ce97516986099efb35cc41b0ef09b",
+  "source_ref": "a0a66245f64dc22380ead847c37f77f8bd836ff8",
+  "source_reviews": {
+    "src/bioetl/application/services/control_plane/__init__.py": "RF-003 (#12681/#12702): lazy export wiring for EvidenceLocationResolver. Package surface only; no acquisition calls.",
+    "src/bioetl/application/services/control_plane/evidence_location/__init__.py": "RF-003 (#12681/#12702): evidence-location service package exports. No filesystem/network/process acquisition calls.",
+    "src/bioetl/application/services/control_plane/evidence_location/resolver.py": "RF-003 (#12681/#12702): bounded EvidenceLocationResolver. self.opener.open is a factory bind to FileEvidenceReadContextFactory (not an OS acquisition); excluded below. No direct tempfile/pathlib/os open sites.",
+    "src/bioetl/application/services/run_reports/evidence_location_paths.py": "RF-003 (#12681/#12702): path helpers for evidence-location report roots. Pure path composition; no acquisition calls.",
+    "src/bioetl/domain/control_plane/run_evidence_location.py": "RF-003 (#12681/#12702): domain locator rules/models for run_evidence_location_v1. Pure domain; no filesystem/network/process acquisition calls.",
+    "src/bioetl/domain/control_plane/run_evidence_location_path.py": "RF-003 (#12681/#12702): pure path/segment validation helpers. No filesystem/network/process acquisition calls.",
+    "src/bioetl/infrastructure/control_plane/__init__.py": "RF-003 (#12681/#12702): lazy export wiring adds FileEvidenceLocationStore / FileEvidenceReadContext*. import_module site relocated; no new acquisition owner.",
+    "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py": "RF-003 (#12681/#12702): create-if-absent atomic publish helper. New acquisitions: tempfile.mkstemp, os.fdopen, Path.read_bytes — inventoried as control.evidence_location_publish.{temp,file}.",
+    "src/bioetl/infrastructure/control_plane/evidence_location_path_safety.py": "RF-003 (#12681/#12702): trusted-base path containment helpers. Pure validation; no acquisition calls.",
+    "src/bioetl/infrastructure/control_plane/file_evidence_location_store.py": "RF-003 (#12681/#12702): file-backed RunEvidenceLocation store. Delegates publish/read to _evidence_location_publish; no direct acquisition calls at this layer.",
+    "src/bioetl/infrastructure/control_plane/file_evidence_read_context.py": "RF-003 (#12681/#12702): FileEvidenceReadContextFactory binds existing control-plane file stores under a trusted data root. Factory open() is not an OS acquisition; no direct tempfile/pathlib/os open sites."
+  },
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [
+    {
+      "identity": "control.evidence_location_publish.temp",
+      "type": "temp",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "lifetime": "owner/operation",
+      "creator": ["publish_bytes_if_absent"],
+      "owner": "publish_bytes_if_absent owning operation (see exact source sites)",
+      "closer": "temp_path.unlink in publish_bytes_if_absent finally; source.unlink after successful exclusive link in _publish_new_file_exclusive",
+      "shutdown_contract": "Raw descriptor ownership starts at successful mkstemp; fdopen transfers stream ownership. Temp-path unlink in finally is a separate obligation from descriptor close. Failed exclusive publish leaves the temp path for finally cleanup; successful hard-link removes the temp via source.unlink.",
+      "production_entrypoint": "run/workflow/maintenance/report/health -> control-plane evidence location register",
+      "call_path": [
+        "run/workflow/maintenance/report/health -> control-plane evidence location register",
+        "bioetl.infrastructure.control_plane.file_evidence_location_store.FileEvidenceLocationStore.register -> bioetl.infrastructure.control_plane._evidence_location_publish.publish_bytes_if_absent"
+      ],
+      "scenarios": {
+        "normal": {
+          "applicability": "applicable",
+          "expected": "Temp path exists only for the publish attempt; successful exclusive link removes it, failed/aborted attempts unlink in finally.",
+          "observation": "At allocation and owning return/exit: temp path presence, descriptor/stream close, retained files under trusted_base.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful allocation; no close obligation for a handle never created",
+          "expected": "Preserve original failure while executing finally unlink; record partial construction separately.",
+          "observation": "Inject before mkstemp, after mkstemp, during fdopen/write/link and during unlink; inspect retained temps.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "owning async/thread boundary; primitive itself synchronous",
+          "expected": "Propagate cancellation after documented cleanup; do not infer stopped native work from a cancelled future.",
+          "observation": "Cancel owner before/use/close barriers and observe physical completion and retained temps.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
+          "expected": "Apply the source-defined deadline; record any deliberately surviving temps. Timeout is not a shutdown receipt.",
+          "observation": "Observe deadline, finally unlink completion and remaining resources separately.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
+          "expected": "Record retained owner versus fresh allocation and close failed-attempt temps; do not infer idempotent overwrite.",
+          "observation": "Barrier before retry; compare opened/closed/remaining temp IDs per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "site_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "scope": "publish_bytes_if_absent",
+          "call": "tempfile.mkstemp",
+          "expression": "tempfile.mkstemp(suffix='.tmp', prefix='.' + target.stem + '_', dir=target.parent)"
+        }
+      ],
+      "binding_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/control_plane/file_evidence_location_store.py",
+          "scope": "FileEvidenceLocationStore.register",
+          "segment": "created = publish_bytes_if_absent("
+        },
+        {
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "scope": "publish_bytes_if_absent",
+          "segment": "fd, temp_path_str = tempfile.mkstemp("
+        }
+      ],
+      "cleanup_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "scope": "publish_bytes_if_absent",
+          "segment": "temp_path.unlink()"
+        },
+        {
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "scope": "_publish_new_file_exclusive",
+          "segment": "source.unlink()"
+        }
+      ]
+    },
+    {
+      "identity": "control.evidence_location_publish.file",
+      "type": "file",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "lifetime": "owner/operation",
+      "creator": ["publish_bytes_if_absent", "read_existing_bytes"],
+      "owner": "publish_bytes_if_absent; read_existing_bytes owning operation (see exact source sites)",
+      "closer": "os.fdopen context __exit__ at publish_bytes_if_absent; pathlib.Path.read_bytes internal file context exit",
+      "shutdown_contract": "The lexical context owns fdopen after successful construction; its exit closes the acquired handle. Synchronous pathlib read_bytes owns its temporary file stream; inspect opening/closing and errors inside this library boundary, not a persistent store connection.",
+      "production_entrypoint": "run/workflow/maintenance/report/health -> control-plane evidence location register/lookup",
+      "call_path": [
+        "run/workflow/maintenance/report/health -> control-plane evidence location register/lookup",
+        "bioetl.infrastructure.control_plane.file_evidence_location_store.FileEvidenceLocationStore.register -> bioetl.infrastructure.control_plane._evidence_location_publish.publish_bytes_if_absent",
+        "bioetl.infrastructure.control_plane.file_evidence_location_store.FileEvidenceLocationStore._load_at -> bioetl.infrastructure.control_plane._evidence_location_publish.read_existing_bytes"
+      ],
+      "scenarios": {
+        "normal": {
+          "applicability": "applicable",
+          "expected": "Synchronous pathlib/os stream operations own their temporary file streams; inspect opening/closing and errors inside this library boundary.",
+          "observation": "At acquisition and owning return/exit: resource identity, open/close events, physical handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve original failure while executing the documented cleanup boundary; record partial construction separately.",
+          "observation": "Inject before allocation, after allocation, during use and during close; inspect actual cleanup and retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "cancellation": {
+          "applicability": "owning async/thread boundary; primitive itself synchronous",
+          "expected": "Propagate cancellation after documented cleanup/drain; do not infer stopped native work from a cancelled future.",
+          "observation": "Cancel owner before/use/close barriers and observe physical completion and retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "owning deadline; no intrinsic timeout claimed for synchronous primitive",
+          "expected": "Apply the source-defined deadline; record any deliberately surviving process/global resources. Timeout is not a shutdown receipt.",
+          "observation": "Observe deadline, close/drain completion and remaining resources separately.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; primitive does not imply an internal retry loop",
+          "expected": "Record retained owner versus fresh allocation and close failed-attempt resources; do not infer idempotent overwrite.",
+          "observation": "Barrier before retry; compare opened/closed/remaining IDs per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "site_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "scope": "publish_bytes_if_absent",
+          "call": "os.fdopen",
+          "expression": "os.fdopen(fd, 'wb')"
+        },
+        {
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "scope": "read_existing_bytes",
+          "call": "safe_path.read_bytes",
+          "expression": "safe_path.read_bytes()"
+        }
+      ],
+      "binding_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/control_plane/file_evidence_location_store.py",
+          "scope": "FileEvidenceLocationStore.register",
+          "segment": "created = publish_bytes_if_absent("
+        },
+        {
+          "file": "src/bioetl/infrastructure/control_plane/file_evidence_location_store.py",
+          "scope": "FileEvidenceLocationStore._load_at",
+          "segment": "raw = read_existing_bytes(safe_path, trusted_base=self._trusted_root())"
+        },
+        {
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "scope": "publish_bytes_if_absent",
+          "segment": "with os.fdopen(fd, \"wb\") as handle:"
+        },
+        {
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "scope": "read_existing_bytes",
+          "segment": "return safe_path.read_bytes()"
+        }
+      ],
+      "cleanup_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+          "scope": "publish_bytes_if_absent",
+          "segment": "with os.fdopen(fd, \"wb\") as handle:"
+        }
+      ]
+    }
+  ],
+  "new_exclusions": [
+    {
+      "file": "src/bioetl/application/services/control_plane/evidence_location/resolver.py",
+      "scope": "EvidenceLocationResolver._open_from_location",
+      "call": "self.opener.open",
+      "expression": "self.opener.open(data_root, trusted_alias_base=trusted_base)",
+      "reason": "Factory bind to EvidenceLocationOpenerPort / FileEvidenceReadContextFactory.open; constructs in-memory read context and reuses already-qualified control-plane file stores. Not an OS file/network/process acquisition site."
+    },
+    {
+      "file": "src/bioetl/application/services/control_plane/evidence_location/resolver.py",
+      "scope": "EvidenceLocationResolver._open_legacy_or_missing",
+      "call": "self.opener.open",
+      "expression": "self.opener.open(data_root, trusted_alias_base=trusted_base)",
+      "reason": "Factory bind to EvidenceLocationOpenerPort / FileEvidenceReadContextFactory.open for legacy standard-root fallback; not an OS file/network/process acquisition site."
+    }
+  ],
+  "segment_updates": {},
+  "reference_moves": []
+}
