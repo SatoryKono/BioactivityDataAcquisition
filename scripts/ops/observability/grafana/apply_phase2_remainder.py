@@ -111,6 +111,16 @@ def _move_data_links_to_panel_links(panel: dict[str, Any]) -> None:
     panel["links"] = links
 
 
+VIEW_PANEL_BROKEN_REPLAY = "viewPanel=130"
+VIEW_PANEL_REPLAY_CHECKS = "viewPanel=9423"
+_CP_SCOPE_VIEW_PANELS = frozenset({"9423", "9414", "9415", "9416"})
+_RUN_ID_QUERYPARAM = "${run_id:queryparam}"
+_RUN_ID_CLEARED = "var-run_id=-"
+_CONTEXT_QUERYPARAMS = (
+    f"${{pipeline:queryparam}}&amp;${{run_type:queryparam}}&amp;{_RUN_ID_QUERYPARAM}"
+)
+
+
 def _ensure_run_id_on_cp_scope_links(panel: dict[str, Any]) -> None:
     """CP panel 9400 deep-links need run_id when includeVars is false."""
     links = panel.get("links")
@@ -148,12 +158,6 @@ def _percentencode_data_fields(url: str) -> str:
     return url
 
 
-VIEW_PANEL_BROKEN_REPLAY = "viewPanel=130"
-VIEW_PANEL_REPLAY_CHECKS = "viewPanel=9423"
-_CP_SCOPE_VIEW_PANELS = frozenset({"9423", "9414", "9415", "9416"})
-_RUN_ID_QUERYPARAM = "${run_id:queryparam}"
-
-
 def _rewrite_static_slugs(url: str) -> str:
     for uid, path in PATH_BY_UID.items():
         bad = f"/d/{uid}/{uid}"
@@ -188,9 +192,9 @@ def _rewrite_url(url: str) -> str:
     if (
         "/d/bioetl-dq-v2/" in url
         and "var-pipeline=${__data.fields.pipeline" in url
-        and "${run_id:queryparam}" in url
+        and _RUN_ID_QUERYPARAM in url
     ):
-        url = url.replace("${run_id:queryparam}", "var-run_id=-")
+        url = url.replace(_RUN_ID_QUERYPARAM, _RUN_ID_CLEARED)
     return _percentencode_data_fields(url)
 
 
@@ -213,14 +217,14 @@ def _fix_incident_2542(panel: dict[str, Any]) -> None:
     options["content"] = (
         '<div style="font-size:16px;line-height:1.25;padding:0;white-space:normal;'
         'overflow-wrap:anywhere">Cross-domain action: inspect dependencies in '
-        '<a href="/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;'
-        "${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}"
+        f'<a href="/d/bioetl-overview-v2/2-overview?${{workflow:queryparam}}&amp;'
+        f"{_CONTEXT_QUERYPARAMS}"
         '&amp;${__url_time_range}"><b>Run Overview</b></a>, rejects in '
-        '<a href="/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;'
-        "${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}"
+        f'<a href="/d/bioetl-dq-v2/5-data-quality?${{workflow:queryparam}}&amp;'
+        f"{_CONTEXT_QUERYPARAMS}"
         '&amp;${__url_time_range}"><b>Data Quality</b></a>, replay in '
-        '<a href="/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;'
-        "${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}"
+        f'<a href="/d/bioetl-control-plane-v1/1-trust?${{workflow:queryparam}}&amp;'
+        f"{_CONTEXT_QUERYPARAMS}"
         '&amp;${__url_time_range}"><b>Replay Readiness</b></a>.</div>'
     )
 

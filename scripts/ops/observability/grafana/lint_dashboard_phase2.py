@@ -208,6 +208,51 @@ def _text_has_status_token(text: str) -> bool:
     return any(token in text for token in _STATUS_TOKENS)
 
 
+def _mapping_option_texts(key: Any, meta: Any) -> tuple[str, str]:
+    key_text = str(key)
+    value_text = str(meta.get("text") or "") if isinstance(meta, dict) else ""
+    return key_text, value_text
+
+
+def _non_digit_mapping_is_status(key_text: str, value_text: str) -> bool:
+    return (
+        _text_has_status_token(key_text)
+        or _text_has_status_token(value_text)
+        or bool(key_text)
+    )
+
+
+def _accumulate_digit_mapping(
+    key_text: str,
+    value_text: str,
+    *,
+    status_hits: int,
+    count_style_hits: int,
+) -> tuple[int, int]:
+    if _text_has_status_token(key_text) or _text_has_status_token(value_text):
+        return status_hits + 1, count_style_hits
+    if value_text and not value_text.isdigit():
+        # e.g. "0 blockers" — numeric count panel, not an OK/CRIT palette.
+        return status_hits, count_style_hits + 1
+    return status_hits, count_style_hits
+
+
+def _value_options_look_like_status(options: dict[Any, Any]) -> bool:
+    status_hits = 0
+    count_style_hits = 0
+    for key, meta in options.items():
+        key_text, value_text = _mapping_option_texts(key, meta)
+        if not key_text.isdigit():
+            return _non_digit_mapping_is_status(key_text, value_text)
+        status_hits, count_style_hits = _accumulate_digit_mapping(
+            key_text,
+            value_text,
+            status_hits=status_hits,
+            count_style_hits=count_style_hits,
+        )
+    return status_hits > 0 and count_style_hits == 0
+
+
 def _mapping_has_status_token(item: dict[str, Any]) -> bool:
     kind = item.get("type")
     options = item.get("options") or {}
@@ -215,23 +260,7 @@ def _mapping_has_status_token(item: dict[str, Any]) -> bool:
         return _text_has_status_token(str(options.get("pattern") or ""))
     if kind != "value" or not isinstance(options, dict):
         return False
-    status_hits = 0
-    count_style_hits = 0
-    for key, meta in options.items():
-        key_text = str(key)
-        value_text = str(meta.get("text") or "") if isinstance(meta, dict) else ""
-        if not key_text.isdigit():
-            return (
-                _text_has_status_token(key_text)
-                or _text_has_status_token(value_text)
-                or bool(key_text)
-            )
-        if _text_has_status_token(key_text) or _text_has_status_token(value_text):
-            status_hits += 1
-        elif value_text and not value_text.isdigit():
-            # e.g. "0 blockers" — numeric count panel, not an OK/CRIT palette.
-            count_style_hits += 1
-    return status_hits > 0 and count_style_hits == 0
+    return _value_options_look_like_status(options)
 
 
 def _mappings_look_like_text_status(mappings: list[Any]) -> bool:
