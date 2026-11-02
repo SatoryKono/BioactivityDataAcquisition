@@ -153,7 +153,11 @@ def _locate(snapshot: Snapshot, selector: dict[str, Any]) -> dict[str, Any]:
 
 
 def _relocate(
-    ref: dict[str, Any], old: Snapshot, new: Snapshot, replacements: dict[str, str]
+    ref: dict[str, Any],
+    old: Snapshot,
+    new: Snapshot,
+    replacements: dict[str, str],
+    segment_replacements: dict[str, str],
 ) -> None:
     path, line = ref["file"], ref["line"]
     old_tree, new_tree = ast.parse(old.sources[path]), ast.parse(new.sources[path])
@@ -177,6 +181,7 @@ def _relocate(
         segment = ref.get(
             "source_segment", old.sources[path].decode().splitlines()[line - 1].strip()
         )
+        segment = segment_replacements.get(segment, segment)
         candidates = [
             i
             for i, text in enumerate(new.sources[path].decode().splitlines(), 1)
@@ -200,6 +205,8 @@ def _validate_review_schema(review: dict[str, Any]) -> None:
         "source_ref",
         "source_reviews",
         "expression_updates",
+        "segment_updates",
+        "reference_moves",
         "resource_updates",
         "additional_bindings",
         "new_resources",
@@ -209,7 +216,36 @@ def _validate_review_schema(review: dict[str, Any]) -> None:
         raise ValueError("Unsupported review schema")
 
 
-def _apply_resource_reviews(payload: dict, review: dict, new: Snapshot) -> None:
+def _apply_reference_moves(
+    payload: dict[str, Any], review: dict[str, Any], new: Snapshot
+) -> None:
+    """Apply exact, reviewed moves for resource references that changed files."""
+    records = {row["identity"]: row for row in payload["resources"]}
+    allowed_fields = {"creation_sites", "production_binding", "cleanup_sources"}
+    for move in review.get("reference_moves", []):
+        if set(move) != {"identity", "fields", "from", "to"}:
+            raise ValueError("Invalid reviewed reference move schema")
+        if move["identity"] not in records or not set(move["fields"]) <= allowed_fields:
+            raise ValueError("Reference move must name an existing resource and fields")
+        source = move["from"]
+        if set(source) - {"file", "line", "expression", "source_segment"}:
+            raise ValueError("Invalid reference move source selector")
+        matches = 0
+        record = records[move["identity"]]
+        for field in move["fields"]:
+            refs = record.get(field, [])
+            for index, ref in enumerate(refs):
+                if any(ref.get(key) != value for key, value in source.items()):
+                    continue
+                refs[index] = _locate(new, move["to"])
+                matches += 1
+        if matches != len(move["fields"]):
+            raise ValueError("Reviewed reference move was missing or ambiguous")
+
+
+def _apply_resource_reviews(
+    payload: dict[str, Any], review: dict[str, Any], new: Snapshot
+) -> None:
     records = {row["identity"]: row for row in payload["resources"]}
     for identity, update in review.get("resource_updates", {}).items():
         if set(update) - {
@@ -274,10 +310,15 @@ def build_requalification(root: Path, review: dict[str, Any]) -> dict[str, Any]:
             "Every changed source requires an explicit review; no extra or missing decisions"
         )
     payload = deepcopy(original)
+    _apply_reference_moves(payload, review, new)
     for ref in inventory._references(payload):
-        if ref["file"] in changed:
+        if ref["file"] in changed and ref.get("source_commit") != new.commit:
             _relocate(
-                ref, old, new, review.get("expression_updates", {}).get(ref["file"], {})
+                ref,
+                old,
+                new,
+                review.get("expression_updates", {}).get(ref["file"], {}),
+                review.get("segment_updates", {}).get(ref["file"], {}),
             )
     _apply_resource_reviews(payload, review, new)
     for ref in inventory._references(payload):
