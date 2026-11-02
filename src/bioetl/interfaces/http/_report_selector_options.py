@@ -168,10 +168,42 @@ def filtered_report_run_candidates(
     report-only runs that appear in filter-options also participate in latest
     selection and empty-scope checks.
     """
+    return tuple(
+        (run_id, started)
+        for run_id, started, _identity in _iter_verified_report_identities(
+            scopes, root=root, store=store, entries=entries
+        )
+    )
+
+
+def verified_report_identity_for_run(
+    run_id: str,
+    scopes: dict[str, tuple[str, ...]],
+    *,
+    root: Path | None = None,
+    store: RunReportStorePort | None = None,
+    entries: list[ReportIndexEntry] | None = None,
+) -> dict[str, object] | None:
+    """Return the verified report identity for one run_id in scope, if present."""
+    for candidate_id, _started, identity in _iter_verified_report_identities(
+        scopes, root=root, store=store, entries=entries
+    ):
+        if candidate_id == run_id:
+            return identity
+    return None
+
+
+def _iter_verified_report_identities(
+    scopes: dict[str, tuple[str, ...]],
+    *,
+    root: Path | None = None,
+    store: RunReportStorePort | None = None,
+    entries: list[ReportIndexEntry] | None = None,
+) -> tuple[tuple[str, datetime, dict[str, object]], ...]:
     root = configured_report_root(root=root)
     if entries is None:
         entries = load_report_selector_entries(scopes, root=root, store=store)
-    rows: list[tuple[str, datetime]] = []
+    rows: list[tuple[str, datetime, dict[str, object]]] = []
     seen: set[str] = set()
     for entry in sorted(entries, key=lambda item: item.started_at or "", reverse=True):
         if not _entry_matches_catalog(entry, scopes):
@@ -189,7 +221,7 @@ def filtered_report_run_candidates(
         if started is None:
             continue
         seen.add(run_id)
-        rows.append((run_id, started))
+        rows.append((run_id, started, identity))
     return tuple(rows)
 
 

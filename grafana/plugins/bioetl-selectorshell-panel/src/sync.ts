@@ -98,7 +98,8 @@ export function buildNextShellUpdate(
 
   if (
     payload.resolved_via === 'latest_terminal_run_for_scope' ||
-    payload.resolved_via === 'latest_manifest_created_at_for_scope'
+    payload.resolved_via === 'latest_manifest_created_at_for_scope' ||
+    payload.resolved_via === 'latest_a2_for_scope'
   ) {
     return buildExactRunShellUpdate(current, payload, true);
   }
@@ -176,7 +177,8 @@ export function summarizeSyncState(
   }
   if (
     payload.resolved_via === 'latest_terminal_run_for_scope' ||
-    payload.resolved_via === 'latest_manifest_created_at_for_scope'
+    payload.resolved_via === 'latest_manifest_created_at_for_scope' ||
+    payload.resolved_via === 'latest_a2_for_scope'
   ) {
     const selected = payload.selected;
     return `Last-run defaults: ${selected.run_id} workflow=${selected.workflow} pipeline=${selected.pipeline} run_type=${selected.run_type}.`;

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC
 
@@ -20,6 +21,7 @@ from bioetl.interfaces.http._control_plane_selector_payloads import (
     options_payload,
     resolved_via,
     selected_payload,
+    selected_payload_from_report_identity,
 )
 from bioetl.interfaces.http._control_plane_selector_records import (
     RunLedgerLookup,
@@ -61,36 +63,82 @@ def build_selector_context_payload(
     selected_run_types: tuple[str, ...] = (),
     selected_run_statuses: tuple[str, ...] = (),
     selected_run_id: str | None = None,
+    auto_selected_run_id: str | None = None,
+    report_selected: Mapping[str, object] | None = None,
     workflow_manifests: tuple[WorkflowManifest, ...] = (),
 ) -> dict[str, object]:
-    """Resolve a coherent dashboard selector tuple from local control-plane data."""
+    """Resolve a coherent dashboard selector tuple from local control-plane data.
+
+    ``selected_run_id`` is an explicit client/URL choice (``resolved_via=
+    selected_run_id``). ``auto_selected_run_id`` is A2 fill from an unresolved
+    selector and keeps the last-run defaults signal (``latest_a2_for_scope``).
+    ``report_selected`` supplies a verified report identity when the auto-picked
+    UUID exists only in saved pipeline-run reports.
+    """
     workflow_aliases = build_workflow_aliases(workflow_manifests)
+    explicit_run_id = selected_run_id
+    auto_run_id = None if explicit_run_id else auto_selected_run_id
+    narrow_run_id = explicit_run_id
     records = build_selector_records(
         narrow_manifest_catalog(
             manifests,
             selected_workflows=selected_workflows,
             selected_pipelines=selected_pipelines,
             selected_run_types=selected_run_types,
-            selected_run_id=selected_run_id,
+            selected_run_id=narrow_run_id,
             workflow_aliases=workflow_aliases,
         ),
         ledger_port,
         workflow_aliases=workflow_aliases,
     )
-    candidates = filter_records(
+    scope_candidates = filter_records(
         records,
         selected_workflows=selected_workflows,
         selected_pipelines=selected_pipelines,
         selected_run_types=selected_run_types,
         selected_run_statuses=selected_run_statuses,
-        selected_run_id=selected_run_id,
+        selected_run_id=None,
     )
-    selected = latest_record(candidates)
-    option_records = candidates if candidates else records
+    if explicit_run_id:
+        candidates = filter_records(
+            records,
+            selected_workflows=selected_workflows,
+            selected_pipelines=selected_pipelines,
+            selected_run_types=selected_run_types,
+            selected_run_statuses=selected_run_statuses,
+            selected_run_id=explicit_run_id,
+        )
+        selected = latest_record(candidates)
+        option_records = candidates if candidates else records
+        selected_out = selected_payload(selected)
+        via = resolved_via(selected, explicit_run_id, auto_selected=False)
+    elif auto_run_id:
+        selected = next(
+            (record for record in scope_candidates if record.run_id == auto_run_id),
+            None,
+        )
+        option_records = scope_candidates if scope_candidates else records
+        if selected is not None:
+            selected_out = selected_payload(selected)
+            via = resolved_via(selected, None, auto_selected=True)
+        elif report_selected is not None:
+            selected_out = selected_payload_from_report_identity(dict(report_selected))
+            via = resolved_via(
+                None, None, auto_selected=True, selected_present=True
+            )
+        else:
+            selected_out = selected_payload(None)
+            via = resolved_via(None, None, auto_selected=False)
+    else:
+        candidates = scope_candidates
+        selected = latest_record(candidates)
+        option_records = candidates if candidates else records
+        selected_out = selected_payload(selected)
+        via = resolved_via(selected, None, auto_selected=False)
     return {
         "contract": SELECTOR_CONTEXT_CONTRACT,
-        "resolved_via": resolved_via(selected, selected_run_id),
-        "selected": selected_payload(selected),
+        "resolved_via": via,
+        "selected": selected_out,
         "options": options_payload(option_records),
         "defaults": defaults_payload(),
     }

@@ -391,3 +391,70 @@ async def test_handle_explicit_url_run_id_wins(
     resolve.assert_not_called()
     payload = host._send_payload_response.await_args.args[2]
     assert payload["run_id"] == explicit
+
+
+def test_auto_selected_report_only_fills_selected_and_a2_via(tmp_path: Path) -> None:
+    from bioetl.interfaces.http.control_plane_selector_context import (
+        build_selector_context_payload,
+    )
+    from bioetl.interfaces.http._control_plane_selector_payloads import RESOLVED_VIA_A2
+
+    _write_pipeline_report(tmp_path, run_id="report-uuid", started_at="2026-09-15T12:00:00+00:00")
+    identity = {
+        "pipeline_name": "chembl_assay",
+        "run_id": "report-uuid",
+        "workflow_id": "chembl_assay",
+        "run_type": "incremental",
+        "started_at": "2026-09-15T12:00:00+00:00",
+        "status": "success",
+    }
+    payload = build_selector_context_payload(
+        manifests=(),
+        ledger_port=None,
+        selected_pipelines=("chembl_assay",),
+        auto_selected_run_id="report-uuid",
+        report_selected=identity,
+    )
+    selected = payload["selected"]
+    assert payload["resolved_via"] == RESOLVED_VIA_A2
+    assert isinstance(selected, dict)
+    assert selected["run_id"] == "report-uuid"
+    assert selected["pipeline"] == "chembl_assay"
+
+
+def test_auto_selected_manifest_keeps_a2_via_not_explicit() -> None:
+    from bioetl.interfaces.http.control_plane_selector_context import (
+        build_selector_context_payload,
+    )
+    from bioetl.interfaces.http._control_plane_selector_payloads import RESOLVED_VIA_A2
+
+    newer = _manifest(2)
+    payload = build_selector_context_payload(
+        manifests=(newer,),
+        ledger_port=None,
+        selected_pipelines=("chembl_assay",),
+        auto_selected_run_id=str(newer.run_id),
+    )
+    assert payload["resolved_via"] == RESOLVED_VIA_A2
+    selected = payload["selected"]
+    assert isinstance(selected, dict)
+    assert selected["run_id"] == str(newer.run_id)
+
+
+def test_explicit_selected_run_id_still_marks_selected_run_id() -> None:
+    from bioetl.interfaces.http.control_plane_selector_context import (
+        build_selector_context_payload,
+    )
+
+    newer = _manifest(2)
+    payload = build_selector_context_payload(
+        manifests=(newer,),
+        ledger_port=None,
+        selected_pipelines=("chembl_assay",),
+        selected_run_id=str(newer.run_id),
+    )
+    assert payload["resolved_via"] == "selected_run_id"
+    selected = payload["selected"]
+    assert isinstance(selected, dict)
+    assert selected["run_id"] == str(newer.run_id)
+

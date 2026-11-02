@@ -36,6 +36,7 @@ from bioetl.interfaces.http._health_server_quarantine_routing import (
 from bioetl.interfaces.http._report_selector_options import (
     load_report_selector_entries,
     supplement_report_options,
+    verified_report_identity_for_run,
 )
 from bioetl.interfaces.http._selected_run_a2_resolve import resolve_a2_latest_run_id
 from bioetl.interfaces.http._selector_catalog import (
@@ -288,26 +289,42 @@ def _selector_context_payload_with_a2(
     selected_pipelines = host._read_scope_csv_param(query, "pipeline")
     selected_run_types = host._read_scope_csv_param(query, "run_type")
     selected_run_statuses = host._read_scope_csv_param(query, "run_status")
-    selected_run_id = read_selected_run_id(host, query)
-    if selected_run_id is None:
+    explicit_run_id = read_selected_run_id(host, query)
+    auto_selected_run_id: str | None = None
+    report_selected: dict[str, object] | None = None
+    if explicit_run_id is None:
         pipeline = (
             selected_pipelines[0]
             if len(selected_pipelines) == 1
             else (host._read_optional_param(query, "pipeline") or "All")
         )
-        selected_run_id = resolve_a2_latest_run_id(
+        a2_query = {
+            "workflow": query.get("workflow", ""),
+            "pipeline": query.get("pipeline", ""),
+            "run_type": query.get("run_type", ""),
+            "run_status": query.get("run_status", ""),
+        }
+        report_store = getattr(host, "_run_report_store", None)
+        auto_selected_run_id = resolve_a2_latest_run_id(
             manifests=manifests,
             ledger_port=host._run_ledger_port,
             workflow_manifests=workflow_manifests,
             pipeline=pipeline,
-            query={
-                "workflow": query.get("workflow", ""),
-                "pipeline": query.get("pipeline", ""),
-                "run_type": query.get("run_type", ""),
-                "run_status": query.get("run_status", ""),
-            },
-            report_store=getattr(host, "_run_report_store", None),
+            query=a2_query,
+            report_store=report_store,
         )
+        if auto_selected_run_id is not None:
+            report_selected = verified_report_identity_for_run(
+                auto_selected_run_id,
+                {
+                    "workflow": selected_workflows,
+                    "pipeline": selected_pipelines,
+                    "run_type": selected_run_types,
+                    "run_status": selected_run_statuses,
+                    "run_id": (),
+                },
+                store=report_store,
+            )
     return build_selector_context_payload(
         manifests=manifests,
         ledger_port=host._run_ledger_port,
@@ -316,7 +333,9 @@ def _selector_context_payload_with_a2(
         selected_pipelines=selected_pipelines,
         selected_run_types=selected_run_types,
         selected_run_statuses=selected_run_statuses,
-        selected_run_id=selected_run_id,
+        selected_run_id=explicit_run_id,
+        auto_selected_run_id=auto_selected_run_id,
+        report_selected=report_selected,
     )
 
 
