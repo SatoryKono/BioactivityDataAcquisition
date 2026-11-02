@@ -89,6 +89,8 @@ c08883508249e87d297f3b306e7a4d032e36de02:reports/evidence/12461/semanticscholar_
 c08883508249e87d297f3b306e7a4d032e36de02:reports/evidence/12461/uniprot_headers.txt:generic-api-key:8
 1b91146589ecff2829ae65bae3b8db83ae27e47d:configs/quality/external_resource_inventory.json:generic-api-key:3280
 
-# Reviewed Git blob IDs for internal_auth.py, not credentials; scoped to the two findings.
+# Reviewed Git blob IDs for internal_auth.py, not credentials; scoped to these findings.
 258557176ce137076cb2cf8cec4adf29161f0df5:configs/quality/external_resource_inventory.json:generic-api-key:2831
 3d64273a395bb1dea3404c236d13e5d67383f20a:configs/quality/external_resource_inventory.json:generic-api-key:2831
+# Nightly 41381437142 (CI-MAP-7 / #12582): same inventory key, new commit after #12652.
+9e75ee1b4def9bb72adfd5ea91aa567affb0bc52:configs/quality/external_resource_inventory.json:generic-api-key:2831

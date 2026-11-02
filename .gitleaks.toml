@@ -267,6 +267,7 @@ regexes = [
     '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/_effective_config_secret_support\.py"[ \t]*:[ \t]*"87369b2ef9c23af8f67ace60c433999bdd6d084b",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/composition/runtime_builders/config_access\.py"[ \t]*:[ \t]*"5b9af80fcf8f9ca538a25bffd7622ee1a7d620ff",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/domain/exceptions/internal_auth\.py"[ \t]*:[ \t]*"d259de469bf4fcb2e980bee28dfaf47f6b0f3386",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/domain/exceptions/internal_auth\.py"[ \t]*:[ \t]*"c9b834e8629743df02df5bfc1cfe58276ad04d34",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/domain/normalization/join_keys\.py"[ \t]*:[ \t]*"e1c426fcb255acb576cdf524d36d83d0a2a30e27",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/domain/normalization/open_access\.py"[ \t]*:[ \t]*"caefdcf3585a152ab10ec69e0e4ed77d2c81dca7",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/adapters/common/_api_request_sanitize\.py"[ \t]*:[ \t]*"033b2dd5f681d5a8bd676d479c051bbccef5baad",?[ \t]*\r?$''',
