@@ -198,22 +198,34 @@ def test_protected_command_cleans_up_when_interrupted(monkeypatch) -> None:
 
 
 @pytest.mark.skipif(os.name != "posix", reason="process groups are POSIX-specific")
-def test_protected_command_timeout_kills_pipe_holding_descendant() -> None:
+def test_protected_command_timeout_kills_pipe_holding_descendant(
+    tmp_path: Path,
+) -> None:
+    pid_file = tmp_path / "grandchild.pid"
     command = [
         sys.executable,
         "-c",
         (
             "import subprocess, sys, time; "
-            "subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(5)']); "
-            "time.sleep(5)"
+            "p = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(30)']); "
+            f"open({str(pid_file)!r}, 'w').write(str(p.pid)); "
+            "time.sleep(30)"
         ),
     ]
-    started = time.monotonic()
 
     with pytest.raises(subprocess.TimeoutExpired):
-        subprocess_boundary_subject.run_protected_command(command, timeout=0.1)
+        subprocess_boundary_subject.run_protected_command(command, timeout=2.0)
 
-    assert time.monotonic() - started < 1.5
+    grandchild_pid = int(pid_file.read_text())
+    deadline = time.monotonic() + 2.0
+    while time.monotonic() < deadline:
+        try:
+            os.kill(grandchild_pid, 0)
+        except ProcessLookupError:
+            break
+        time.sleep(0.05)
+    else:
+        pytest.fail(f"pipe-holding descendant {grandchild_pid} is still alive")
 
 
 @pytest.mark.parametrize("scheme", ["http", "https"])
