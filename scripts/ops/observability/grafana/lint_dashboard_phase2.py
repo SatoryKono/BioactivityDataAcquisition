@@ -41,6 +41,7 @@ UID_BY_FILE = {
     "bioetl-run-explorer-v1.json": "bioetl-run-explorer-v1",
 }
 GREEN = frozenset({"green", "#73BF69", "#73bf69", "#56A64B", "#56a64b"})
+_AMP = "&"
 _AMP_ENTITY = "&amp;"
 _NAV_CHIP_TITLES = (
     "Run Explorer",
@@ -84,7 +85,7 @@ def _urls_from_html(value: str) -> list[tuple[str, str]]:
     if "href=" not in value and "/d/" not in value:
         return []
     return [
-        ("", match.group(1).replace(_AMP_ENTITY, "&"))
+        ("", match.group(1).replace(_AMP_ENTITY, _AMP))
         for match in re.finditer(r'href="([^"]+)"', value)
     ]
 
@@ -110,7 +111,7 @@ def _iter_urls(value: Any) -> list[tuple[str, str]]:
 
 def parse_dashboard_view_panel(url: str) -> tuple[str | None, int | None]:
     """Extract ``/d/{uid}/…`` destination uid and ``viewPanel`` from any query position."""
-    cleaned = url.replace(_AMP_ENTITY, "&")
+    cleaned = url.replace(_AMP_ENTITY, _AMP)
     parts = urlsplit(cleaned)
     path_match = re.match(r"/d/([^/?#]+)/", parts.path)
     if path_match is None:
@@ -336,8 +337,8 @@ def _lint_thresholds(path: Path, panels: list[dict[str, Any]]) -> list[str]:
 
 def _url_transport_findings(path_name: str, title: str, url: str) -> list[str]:
     findings: list[str] = []
-    glued = "/${__data.fields.action_path}&"
-    if glued in url or glued.replace("&", _AMP_ENTITY) in url:
+    glued = f"/${{__data.fields.action_path}}{_AMP}"
+    if glued in url or glued.replace(_AMP, _AMP_ENTITY) in url:
         findings.append(f"{path_name}: action_path glued with & ({title or url[:60]})")
     grafana_on_github = "github.com/" in url and (
         "var-" in url or "${__url_time_range}" in url or "${pipeline" in url
