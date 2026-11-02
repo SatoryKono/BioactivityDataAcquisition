@@ -88,7 +88,7 @@ class PubMedXmlProcessor:
         Returns:
             List of article record dictionaries
         """
-        records = []
+        records: list[JsonDict] = []
         for article_node in PubMedXmlProcessor.find_articles(root):
             records.append(PubMedXmlProcessor.extract_record(article_node))
         return records
