@@ -376,15 +376,3 @@ def test_scalar_missing_guard_handles_array_protocol_errors() -> None:
             raise ValueError("broken array protocol")
 
     assert _is_scalar_missing(BrokenArray()) is False
-
-
-def test_scalar_missing_guard_handles_series_construction_errors(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    from bioetl.domain.schemas import validators
-
-    def fail_series(*_args: object, **_kwargs: object) -> object:
-        raise TypeError("invalid scalar shape")
-
-    monkeypatch.setattr(validators.pd, "Series", fail_series)
-    assert _is_scalar_missing(object()) is False

@@ -18,7 +18,6 @@ import os
 import re
 import sys
 import time
-import tomllib
 from collections import Counter, defaultdict
 from collections.abc import Set
 from dataclasses import dataclass
@@ -36,7 +35,6 @@ SCRIPT_EXTENSIONS: Final[tuple[str, ...]] = (
     ".sql",
 )
 SCRIPT_ROOTS: Final[tuple[str, ...]] = ("scripts",)
-_PYPROJECT: Final = "pyproject.toml"
 SEARCH_ROOTS: Final[tuple[str, ...]] = (
     "AGENTS.md",
     ".github/ISSUES",
@@ -47,7 +45,7 @@ SEARCH_ROOTS: Final[tuple[str, ...]] = (
     ".codex/skills",
     ".pre-commit-config.yaml",
     "grafana",
-    _PYPROJECT,
+    "pyproject.toml",
     "Makefile",
     "makefile",
     "docs",
@@ -368,7 +366,7 @@ def _iter_search_files(root: Path) -> list[Path]:
                 files.append(path)
             continue
         files.extend(_iter_dir_search_files(root, path))
-    return sorted(set(files))
+    return sorted(files)
 
 
 def _source_group(rel_path: str) -> str:
@@ -380,7 +378,7 @@ def _source_group(rel_path: str) -> str:
         return "skills"
     if rel_path.startswith(".codex/agents/"):
         return "agents"
-    if rel_path in {"Makefile", "makefile", _PYPROJECT}:
+    if rel_path in {"Makefile", "makefile", "pyproject.toml"}:
         return "build"
     if rel_path.startswith("tests/"):
         return "tests"
@@ -693,7 +691,6 @@ def _discover_refs_in_file(
         and ABSOLUTE_SCRIPT_IMPORT_CANDIDATE_PATTERN.search(text) is not None
     )
     has_dispatcher_module_refs = _has_dispatcher_module_refs(rel, normalized_text)
-    has_build_backend_refs = rel == _PYPROJECT and "build-backend" in text
     has_basename_refs = _line_has_basename_script_candidate(
         normalized_text, basename_map
     )
@@ -703,7 +700,6 @@ def _discover_refs_in_file(
         or has_relative_import_refs
         or has_absolute_script_import_refs
         or has_dispatcher_module_refs
-        or has_build_backend_refs
         or has_basename_refs
     ):
         return []
@@ -716,8 +712,6 @@ def _discover_refs_in_file(
         source_group=source_group,
         script_set=script_set,
     )
-    if has_build_backend_refs:
-        discovered.extend(_discover_build_backend_refs(text, source_group, script_set))
     if has_relative_import_refs or has_absolute_script_import_refs:
         discovered.extend(
             _discover_relative_import_refs(
@@ -755,51 +749,6 @@ def _discover_refs_in_file(
                 basename_map=basename_map,
             )
         )
-    return discovered
-
-
-def _local_backend_directories(directories: list[object]) -> list[Path]:
-    """Select relative backend roots without accepting parent traversal."""
-    return [
-        Path(directory)
-        for directory in directories
-        if isinstance(directory, str)
-        and not Path(directory).is_absolute()
-        and ".." not in Path(directory).parts
-    ]
-
-
-def _discover_build_backend_refs(
-    text: str,
-    source_group: str,
-    script_set: set[str],
-) -> list[tuple[str, RefEvidence]]:
-    """Recognize an actual local PEP 517 backend declaration, not a string hint."""
-    try:
-        build_system = tomllib.loads(text).get("build-system", {})
-    except tomllib.TOMLDecodeError:
-        return []
-    if not isinstance(build_system, dict):
-        return []
-    backend = build_system.get("build-backend", "")
-    directories = build_system.get("backend-path", [])
-    if not isinstance(backend, str) or not isinstance(directories, list):
-        return []
-    module = backend.partition(":")[0]
-    if not module or not all(part.isidentifier() for part in module.split(".")):
-        return []
-    line_no, raw_line = _get_first_module_string_line(text=text, module_name=module)
-    evidence = _make_ref_evidence(
-        rel=_PYPROJECT,
-        line_no=line_no,
-        raw_line=raw_line,
-        source_group=source_group,
-    )
-    discovered: list[tuple[str, RefEvidence]] = []
-    for base in _local_backend_directories(directories):
-        for candidate in _module_file_candidates(base / Path(*module.split("."))):
-            if candidate in script_set:
-                discovered.append((candidate, evidence))
     return discovered
 
 
