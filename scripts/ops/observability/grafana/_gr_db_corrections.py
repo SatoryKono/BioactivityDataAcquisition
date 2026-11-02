@@ -1004,21 +1004,22 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
         {
             "id": "organize",
             "options": {
-                "excludeByName": {"row_status": True, "Time": True},
+                "excludeByName": {
+                    "row_status": True,
+                    "Time": True,
+                    "count in": True,
+                    "value A": True,
+                    "percentage A": True,
+                },
                 "indexByName": {
                     "parameter": 0,
-                    "count in": 1,
                     "count in StageInput": 1,
                     "value": 2,
-                    "value A": 2,
                     "percentage": 3,
-                    "percentage A": 3,
                 },
                 "renameByName": {
                     "value": "count out",
-                    "value A": "count out",
                     "count in StageInput": "count in",
-                    "percentage A": "percentage",
                 },
             },
         },
@@ -1032,19 +1033,16 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
     for field in ("count in", "count out"):
         _override(panel, field, _WIDTH, 90)
         _override(panel, field, "custom.align", "right")
-    for field in ("value", "value A", "count", "count out"):
+    for field in ("value", "count", "count out"):
         _override(panel, field, _WIDTH, 100)
     _override(panel, "percentage", _WIDTH, 100)
     _override(panel, "percentage", "displayName", _BRONZE_PERCENTAGE_DISPLAY)
-    _override(panel, "percentage A", "displayName", _BRONZE_PERCENTAGE_DISPLAY)
     for field in (
         "value",
-        "value A",
         "count",
         "count in",
         "count out",
         "percentage",
-        "percentage A",
     ):
         _override(panel, field, "noValue", "N/A")
         _override(

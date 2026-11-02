@@ -634,7 +634,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#555555",
+                "color": "gray",
                 "value": null
               }
             ]
@@ -819,7 +819,7 @@
                 "value": [
                   {
                     "title": "Open saved run report",
-                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
                     "targetBlank": true
                   }
                 ]
@@ -965,7 +965,7 @@
           "links": [
             {
               "title": "Open Run Explorer",
-              "url": "/d/bioetl-run-explorer-v1/run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
             }
@@ -975,7 +975,63 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Processing"
+              "options": "action_dashboard_uid"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "SELECT RUN": {
+                        "text": "—",
+                        "color": "text"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "displayName",
+                "value": "Overall verdict"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pipeline"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Result"
             },
             "properties": [
               {
@@ -1032,12 +1088,31 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Overall verdict"
+              "options": "Rules"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Evidence"
             },
             "properties": [
               {
                 "id": "links",
-                "value": []
+                "value": [
+                  {
+                    "title": "Open Run Explorer",
+                    "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
+                  }
+                ]
               },
               {
                 "id": "mappings",
@@ -1046,32 +1121,12 @@
                     "type": "value",
                     "options": {
                       "SELECT RUN": {
-                        "text": "—",
+                        "text": "Choose a run",
                         "color": "text"
                       }
                     }
                   }
                 ]
-              },
-              {
-                "id": "displayName",
-                "value": "Overall verdict"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Trust"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Trust"
-              },
-              {
-                "id": "custom.width",
-                "value": 80
               }
             ]
           },
@@ -1151,6 +1206,22 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trust"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Trust"
+              },
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
           }
         ]
       },
@@ -1204,7 +1275,6 @@
             "include": {
               "names": [
                 "run_execution",
-                "run_verdict",
                 "saved_trust",
                 "run_reason"
               ]
@@ -1214,18 +1284,27 @@
         {
           "id": "organize",
           "options": {
-            "excludeByName": {},
             "indexByName": {
               "run_execution": 0,
-              "run_verdict": 1,
-              "saved_trust": 2,
-              "run_reason": 3
+              "saved_trust": 1,
+              "run_reason": 2
             },
             "renameByName": {
-              "run_execution": "Processing",
-              "run_verdict": "Overall verdict",
+              "domain": "Domain",
+              "verdict": "Status",
+              "execution_state": "Result",
+              "evidence_completeness": "Evidence",
+              "rules_version": "Rules",
+              "run_verdict": "Status",
+              "run_execution": "Result",
+              "run_reason": "Reason",
               "saved_trust": "Trust",
-              "run_reason": "Reason"
+              "reason_display": "Reason"
+            },
+            "excludeByName": {
+              "__name__": true,
+              "job": true,
+              "action_dashboard_uid": false
             }
           }
         }
@@ -1462,7 +1541,7 @@
                 "value": [
                   {
                     "title": "Open report",
-                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
                     "targetBlank": true
                   }
                 ]
@@ -1627,14 +1706,6 @@
                 "INCOMPLETE": {
                   "text": "INCOMPLETE",
                   "color": "orange"
-                },
-                "—": {
-                  "text": "—",
-                  "color": "gray"
-                },
-                "QUERY ERROR": {
-                  "text": "QUERY ERROR",
-                  "color": "red"
                 }
               }
             },
@@ -1656,7 +1727,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#555555",
+                "color": "gray",
                 "value": null
               }
             ]
@@ -1920,7 +1991,7 @@
                 "value": [
                   {
                     "title": "Open saved run report (JSON)",
-                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
                     "targetBlank": true
                   }
                 ]
@@ -1938,7 +2009,7 @@
                 "value": [
                   {
                     "title": "Open saved run report (JSON)",
-                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
                     "targetBlank": true
                   }
                 ]
@@ -2265,13 +2336,13 @@
               },
               "constraint": {
                 "horizontal": "leftright",
-                "vertical": "top"
+                "vertical": "center"
               },
               "placement": {
                 "left": 8,
                 "right": 8,
-                "top": 4,
-                "height": 48
+                "top": 30,
+                "height": 60
               },
               "background": {
                 "color": {
@@ -2298,13 +2369,13 @@
               },
               "constraint": {
                 "horizontal": "leftright",
-                "vertical": "top"
+                "vertical": "center"
               },
               "placement": {
                 "left": 8,
                 "right": 8,
-                "top": 56,
-                "height": 42
+                "top": -30,
+                "height": 60
               },
               "background": {
                 "color": {
@@ -2360,10 +2431,6 @@
               "options": {
                 "UNKNOWN": {
                   "text": "UNKNOWN",
-                  "color": "gray"
-                },
-                "SELECT RUN": {
-                  "text": "SELECT RUN",
                   "color": "gray"
                 }
               }

@@ -58,14 +58,6 @@ _STATUS_TOKENS = (
     "SELECT RUN",
     "INCOMPLETE",
 )
-_NAV_LINK_RE = re.compile(
-    r'<a\b[^>]*\bclass="[^"]*\bbioetl-nav-link\b[^"]*"[^>]*>',
-    re.IGNORECASE,
-)
-_NAV_CURRENT_RE = re.compile(
-    r'<span\b[^>]*\bclass="[^"]*\bbioetl-nav-current\b[^"]*"[^>]*>',
-    re.IGNORECASE,
-)
 
 
 def _walk(panels: list[Any]) -> list[dict[str, Any]]:
@@ -142,28 +134,69 @@ def _nav_content_findings(path_name: str, content: str) -> list[str]:
     findings: list[str] = []
     if "bioetl-nav" not in content:
         findings.append(f"{path_name}: panel 1000 missing bioetl-nav markup")
-    link_count = len(_NAV_LINK_RE.findall(content))
-    current_count = len(_NAV_CURRENT_RE.findall(content))
-    chip_count = link_count + current_count
-    if chip_count < 5:
-        findings.append(
-            f"{path_name}: panel 1000 expected five nav chips "
-            f"(links+current), found {chip_count}"
+    elements = [
+        (
+            match.group(1).lower(),
+            match.group(2),
+            re.sub(r"<[^>]+>", "", match.group(3)).strip(),
         )
-    if current_count != 1:
-        findings.append(
-            f"{path_name}: panel 1000 current chip must be exactly one "
-            '<span class="bioetl-nav-current">'
+        for match in re.finditer(
+            r"<(a|span)\b([^>]*)>(.*?)</\1>",
+            content,
+            flags=re.IGNORECASE | re.DOTALL,
         )
+    ]
+    chips = [
+        (tag.lower(), attrs, label)
+        for tag, attrs, label in elements
+        if "bioetl-nav-link" in attrs or "bioetl-nav-current" in attrs
+    ]
+    if len(chips) != 5:
+        findings.append(
+            f"{path_name}: panel 1000 expected five navigation elements, found {len(chips)}"
+        )
+    for tag, attrs, label in chips:
+        style = re.search(r'\bstyle="([^"]*)"', attrs)
+        if style is None or not re.search(
+            r"(?:^|;)\s*width:19\.5%\s*(?:;|$)", style.group(1)
+        ):
+            findings.append(
+                f"{path_name}: panel 1000 chip {label!r} must use width 19.5%"
+            )
     if "16.5%" in content:
         findings.append(f"{path_name}: panel 1000 still uses legacy 16.5% chip width")
-    if re.search(r'<a[^>]*class="[^"]*bioetl-nav-current', content):
-        findings.append(f"{path_name}: panel 1000 current chip must not be an <a>")
-    findings.extend(
-        f"{path_name}: panel 1000 missing chip {title!r}"
-        for title in _NAV_CHIP_TITLES
-        if title not in content
-    )
+    current = [chip for chip in chips if "bioetl-nav-current" in chip[1]]
+    if len(current) != 1 or current[0][0] != "span":
+        findings.append(
+            f"{path_name}: panel 1000 current chip must be "
+            '<span class="bioetl-nav-current">'
+        )
+    expected_destinations = {
+        "Run Explorer": "bioetl-run-explorer-v1",
+        "Replay Readiness": "bioetl-control-plane-v1",
+        "Run Overview": "bioetl-overview-v2",
+        "Data Quality": "bioetl-dq-v2",
+        "6. Incident Workspace": "bioetl-incident-v1",
+    }
+    for title in _NAV_CHIP_TITLES:
+        matches = [chip for chip in chips if chip[2] == title]
+        if len(matches) != 1:
+            findings.append(
+                f"{path_name}: panel 1000 expected one navigation element for {title!r}, found {len(matches)}"
+            )
+            continue
+        tag, attrs, _ = matches[0]
+        if "bioetl-nav-current" in attrs:
+            continue
+        href = re.search(r'\bhref="([^"]+)"', attrs)
+        if tag != "a" or "bioetl-nav-link" not in attrs or href is None:
+            findings.append(
+                f"{path_name}: panel 1000 chip {title!r} must be a linked anchor"
+            )
+        elif f"/d/{expected_destinations[title]}/" not in href.group(1):
+            findings.append(
+                f"{path_name}: panel 1000 chip {title!r} has the wrong destination"
+            )
     return findings
 
 

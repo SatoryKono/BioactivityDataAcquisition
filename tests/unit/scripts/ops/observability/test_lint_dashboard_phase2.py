@@ -51,6 +51,33 @@ def test_phase2_linter_flags_missing_nav_and_index_collision(
     assert any("indexByName collision" in item for item in findings)
 
 
+def test_nav_linter_checks_real_elements_and_destinations() -> None:
+    content = (
+        '<div class="bioetl-nav">'
+        '<a class="bioetl-nav-link" style="width:19.5%" '
+        'href="/d/bioetl-run-explorer-v1/run-explorer">Run Explorer</a>'
+        '<a class="bioetl-nav-link" style="width:19.5%" '
+        'href="/d/bioetl-control-plane-v1/1-trust">Replay Readiness</a>'
+        '<span class="bioetl-nav-current" style="width:19.5%">Run Overview</span>'
+        '<a class="bioetl-nav-link" style="width:19.5%" '
+        'href="/d/bioetl-dq-v2/5-data-quality">Data Quality</a>'
+        '<a class="bioetl-nav-link" style="width:19.5%" '
+        'href="/d/bioetl-incident-v1/6-incident-workspace">'
+        "6. Incident Workspace</a></div>"
+    )
+    assert lint._nav_content_findings("fixture.json", content) == []
+
+    fake_content = "19.5% " * 5 + " ".join(lint._NAV_CHIP_TITLES)
+    findings = lint._nav_content_findings("fixture.json", fake_content)
+    assert any("expected five navigation elements" in item for item in findings)
+
+
+def test_value_mapping_status_text_is_recognized() -> None:
+    assert lint._mapping_has_status_token(
+        {"type": "value", "options": {"0": {"text": "UNKNOWN"}}}
+    )
+
+
 def test_parse_dashboard_view_panel_when_not_first_query_param() -> None:
     uid, panel = lint.parse_dashboard_view_panel(
         "/d/bioetl-dq-v2/5-data-quality"
@@ -144,7 +171,7 @@ def test_nav_lint_requires_real_chip_elements() -> None:
             "</div>"
         ),
     )
-    assert any("expected five nav chips" in item for item in findings)
+    assert any("expected five navigation elements" in item for item in findings)
 
 
 def test_mapping_value_text_tokens_count_as_status() -> None:

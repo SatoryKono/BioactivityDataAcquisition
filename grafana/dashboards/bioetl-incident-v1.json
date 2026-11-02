@@ -490,7 +490,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Overview (Run Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Data Quality</a><span class=\"bioetl-nav-current\" aria-current=\"page\" data-current=\"page\" title=\"6. Incident Workspace (Incident Workspace)\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none;display:inline-block\">6. Incident Workspace</span></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Explorer (Run Explorer). Scope reset: workflow=All, pipeline=All, run type=All, selected run cleared, Run ID search cleared; preserves time range.\" href=\"/d/bioetl-run-explorer-v1/run-explorer?var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Replay Readiness (Replay Readiness). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Replay Readiness</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Run Overview (Run Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Run Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Data Quality</a><span class=\"bioetl-nav-current\" aria-current=\"page\" data-current=\"page\" title=\"6. Incident Workspace (Incident Workspace)\" style=\"box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none;display:inline-block\">6. Incident Workspace</span></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared five-chip bus (19.5% each): Run Explorer / Replay Readiness / Run Overview / Data Quality / Incident Workspace. Current workspace is a non-interactive <span class=\"bioetl-nav-current\"> (aria-current=page, underlined) so active state is not color-only and is not a link. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -1255,7 +1255,7 @@
                 "value": [
                   {
                     "title": "Open domain diagnostics",
-                    "url": "/d/${__data.fields.action_dashboard_uid}/?var-workflow=$__all&var-pipeline=${__data.fields.route_pipeline:percentencode}&var-run_type=$__all&var-run_id=-&${__data.fields.action_scope}&from=${__from}&to=${__to}",
+                    "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?var-workflow=$__all&var-pipeline=${__data.fields.route_pipeline:percentencode}&var-run_type=$__all&var-run_id=-&${__data.fields.action_scope}&from=${__from}&to=${__to}",
                     "targetBlank": false,
                     "includeVars": false
                   }
@@ -2772,7 +2772,7 @@
               "links": [
                 {
                   "title": "Open Run Explorer",
-                  "url": "/d/bioetl-run-explorer-v1/run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                  "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
                   "targetBlank": false,
                   "includeVars": false
                 },
@@ -2787,64 +2787,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Processing"
-                },
-                "properties": [
-                  {
-                    "id": "links",
-                    "value": []
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Processing"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "wrapText": false
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "SELECT RUN": {
-                            "text": "—",
-                            "color": "text"
-                          },
-                          "SUCCESS": {
-                            "text": "SUCCESS",
-                            "color": "green"
-                          },
-                          "FAILED": {
-                            "text": "FAILED",
-                            "color": "red"
-                          },
-                          "UNKNOWN": {
-                            "text": "UNKNOWN",
-                            "color": "gray"
-                          },
-                          "UNFINISHED": {
-                            "text": "UNFINISHED",
-                            "color": "orange"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 80
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Overall verdict"
+                  "options": "Result"
                 },
                 "properties": [
                   {
@@ -2864,39 +2807,15 @@
                         }
                       }
                     ]
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Overall verdict"
                   }
                 ]
               },
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Trust"
+                  "options": "Status"
                 },
                 "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Trust"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 80
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Reason"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Reason"
-                  },
                   {
                     "id": "links",
                     "value": []
@@ -2907,60 +2826,58 @@
                       {
                         "type": "value",
                         "options": {
-                          "execution_success": {
-                            "text": "Processing completed"
-                          },
-                          "standalone_pipeline": {
-                            "text": "Standalone pipeline"
-                          },
-                          "run_dq_threshold_evaluation": {
-                            "text": "Data quality checks"
-                          },
-                          "run_preflight_provider_observation": {
-                            "text": "Provider preflight check"
-                          },
-                          "run_gold_schema_validation": {
-                            "text": "Gold schema validation"
-                          },
-                          "run_observation_missing": {
-                            "text": "Result not recorded"
-                          },
-                          "no_gold_candidates": {
-                            "text": "No Gold candidates"
-                          },
-                          "Archive missing": {
-                            "text": "No verified archive"
-                          },
-                          "archive_evidence_not_recorded": {
-                            "text": "No verified archive"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^(Workflow: )?workflow_parent_not_finalized$",
-                          "result": {
-                            "text": "Parent workflow completion has not been recorded"
+                          "SELECT RUN": {
+                            "text": "—",
+                            "color": "text"
                           }
                         }
                       }
                     ]
-                  },
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Rules"
+                },
+                "properties": [
                   {
-                    "id": "custom.inspect",
+                    "id": "custom.hidden",
                     "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Evidence"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Open Run Explorer",
+                        "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                        "targetBlank": false,
+                        "includeVars": false
+                      }
+                    ]
                   },
                   {
-                    "id": "custom.wrapText",
-                    "value": true
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "SELECT RUN": {
+                            "text": "Choose a run",
+                            "color": "text"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               }
@@ -3105,7 +3022,7 @@
                     },
                     "1": {
                       "text": "UNKNOWN",
-                      "color": "#555555"
+                      "color": "text"
                     },
                     "2": {
                       "text": "WARN",
@@ -4696,7 +4613,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "gray",
                     "value": null
                   },
                   {
@@ -11582,7 +11499,7 @@
                     "value": [
                       {
                         "title": "Open domain diagnostics",
-                        "url": "/d/${__data.fields.action_dashboard_uid}/?var-workflow=$__all&var-pipeline=${__data.fields.route_pipeline:percentencode}&var-run_type=$__all&var-run_id=-&${__data.fields.action_scope}&from=${__from}&to=${__to}",
+                        "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?var-workflow=$__all&var-pipeline=${__data.fields.route_pipeline:percentencode}&var-run_type=$__all&var-run_id=-&${__data.fields.action_scope}&from=${__from}&to=${__to}",
                         "targetBlank": false,
                         "includeVars": false
                       }

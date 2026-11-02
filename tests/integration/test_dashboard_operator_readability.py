@@ -57,9 +57,16 @@ def test_overview_stages_and_quality_are_outside_saved_evidence() -> None:
     provider, stages, quality = (panels[i] for i in (9480, 9460, 9482))
     assert stages["gridPos"]["y"] == provider["gridPos"]["y"] + provider["gridPos"]["h"]
     assert quality["gridPos"] == {**stages["gridPos"], "x": 15, "w": 9}
+    assert stages["datasource"].get("uid") == "-- Mixed --"
     assert 9450 not in panels
     assert 9452 not in {p["id"] for p in get_dashboard_panels(dashboard)}
     assert quality["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert any(
+        item.get("type") == "regex"
+        and (item.get("options") or {}).get("pattern") == "^CRIT.*"
+        and ((item.get("options") or {}).get("result") or {}).get("color") == "red"
+        for item in quality["fieldConfig"]["defaults"]["mappings"]
+    )
     # Phase 2.5: quality canvas reuses donor 9002 exclusions frame
     # (backend contract_exclusions_* fields; $limits JSONata retired).
     assert quality["targets"][0].get("panelId") == 9002
@@ -617,6 +624,12 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
     assert "removals[outcome=" in removal_target["uql"]
     assert "$s.tracking = 'full' ? 0" in removal_target["uql"]
     transforms = ov_panel["transformations"]
+    keep_stage_rows = next(item for item in transforms if item["id"] == "filterByValue")
+    assert keep_stage_rows["options"]["match"] == "any"
+    assert {item["fieldName"] for item in keep_stage_rows["options"]["filters"]} == {
+        "_bioetl_frame",
+        "stage_id",
+    }
     assert any(item["id"] == "joinByField" for item in transforms)
     join = next(item for item in transforms if item["id"] == "joinByField")
     assert join["options"] == {"byField": "stage_id", "mode": "outerTabular"}
@@ -647,6 +660,30 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
     assert "per-stage saved funnel removals" in ov_panel["description"]
     assert dq_panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
     assert "per-stage saved funnel removals" in dq_panel["description"]
+
+    control = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    recovery = next(
+        item for item in get_dashboard_panels(control) if item.get("id") == 9400
+    )
+    replay_links = [
+        link
+        for link in recovery.get("links", [])
+        if "viewPanel=" in str(link.get("url", ""))
+    ]
+    assert replay_links
+    assert all("${run_id:queryparam}" in link["url"] for link in replay_links)
+
+    dq_domains = next(
+        item for item in get_dashboard_panels(dq) if item.get("id") == 9451
+    )
+    action_links = [
+        prop["value"]
+        for override in dq_domains["fieldConfig"]["overrides"]
+        if override.get("matcher", {}).get("options") == "Action"
+        for prop in override.get("properties", [])
+        if prop.get("id") == "links"
+    ]
+    assert action_links[0][0]["url"] == "/${__data.fields.action_path}"
 
 
 def test_dq_renderer_copy_matches_shipped() -> None:

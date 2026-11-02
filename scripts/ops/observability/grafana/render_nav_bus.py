@@ -2751,6 +2751,7 @@ def apply_to_dashboard(
     # re-running this generator does not wipe SRS/PRR donors or markdown handoffs.
     _apply_phase25_srs_prr_budget(payload, current_uid=current_uid)
     _migrate_grafana_schema42(payload)
+    _neutralize_mapped_status_thresholds(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:
@@ -2785,6 +2786,34 @@ def _apply_phase25_srs_prr_budget(payload: dict[str, Any], *, current_uid: str) 
     apply = applicators.get(current_uid)
     if apply is not None:
         apply(payload)
+
+
+def _neutralize_mapped_status_thresholds(payload: dict[str, Any]) -> None:
+    """Keep missing status values neutral when text mappings provide real colors."""
+    status_tokens = ("OK", "WARN", "CRIT", "ERROR", "UNKNOWN", "INCOMPLETE")
+    for panel in _walk_panels(payload.get("panels", [])):
+        if panel.get("type") != "stat":
+            continue
+        defaults = panel.get("fieldConfig", {}).get("defaults", {})
+        mappings = defaults.get("mappings", [])
+        mapped_status = any(
+            isinstance(mapping, dict)
+            and isinstance(mapping.get("options"), dict)
+            and any(
+                any(token in str(text).upper() for token in status_tokens)
+                for key, value in mapping["options"].items()
+                for text in (
+                    key,
+                    value.get("text", "") if isinstance(value, dict) else value,
+                )
+            )
+            for mapping in mappings
+        )
+        steps = defaults.get("thresholds", {}).get("steps", [])
+        if not mapped_status or not steps or not isinstance(steps[0], dict):
+            continue
+        if str(steps[0].get("color", "")).lower() in {"green", "#73bf69", "#56a64b"}:
+            steps[0]["color"] = "gray"
 
 
 def _migrate_grafana_schema42(payload: dict[str, Any]) -> None:

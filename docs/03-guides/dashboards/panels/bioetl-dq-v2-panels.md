@@ -58,10 +58,10 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | --- | --- | --- |
 | 9400 | Understand Evidence Scope | text |
 | 9406 | Review Selected Run Status | table |
-| 9402 | Inspect Run Identity | table |
+| 9402 | Inspect Run Identity | text |
 | 9403 | Inspect Processed Records | table |
 | 9450 | Inspect Saved Run Evidence | row |
 | 9460 | Inspect Selected Run Stages | table |
 | 9451 | Inspect Selected Run Domains | table |
-| 9452 | Inspect Selected Run Identity | table |
+| 9452 | Inspect Selected Run Identity | text |
 <!-- END SHIPPED PANEL INVENTORY -->
