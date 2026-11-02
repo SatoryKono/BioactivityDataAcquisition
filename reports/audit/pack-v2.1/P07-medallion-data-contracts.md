@@ -3,7 +3,7 @@
 ## A. Audit Manifest
 - **Audit ID:** pack-v2.1/P07
 - **Pinned Revision (SHA):** a5243cb4bbed67b267daecdc097b8c48501e140a
-- **Date/Time:** 2026-11-02 (simulated)
+- **Date/Time:** 2026-11-02 (simulated); findings re-evaluated 2026-11-02 after review (wrong test path disproof).
 - **Scope:** Bronze/Silver/Gold contracts, writers/readers, validators, schema/contract registry.
 - **Environment:** Ubuntu (Sandbox), Python 3.13 / uv.
 - **Evidence Mode:** REPO_ONLY / RUNTIME_ALLOWED.
@@ -16,119 +16,83 @@
 ## C. Evidence Ledger
 | Evidence ID | Class | Freshness | Source/Command |
 | :--- | :--- | :--- | :--- |
-| E1-MEDALLION-POLICY | STATIC | CURRENT | `src/bioetl/domain/medallion.py` |
+| E1-MEDALLION-POLICY | STATIC | CURRENT | `src/bioetl/domain/medallion.py` (`WriteMode`, `SilverWriteMode`, `GoldWriteMode`, `WriteModePolicy`) |
 | E2-CONTRACT-REGISTRY-YAML | STATIC | CURRENT | `configs/base/contract_registry.yaml` |
 | E2-CONTRACT-REGISTRY-CODE | STATIC | CURRENT | `src/bioetl/domain/control_plane/contract_registry.py` and related files |
-| E2-STORAGE-WRITERS | STATIC | CURRENT | `src/bioetl/infrastructure/storage/gold_writer.py`, `src/bioetl/infrastructure/storage/silver_writer.py` |
+| E2-CONTRACT-REGISTRY-TESTS | STATIC | CURRENT | `tests/unit/domain/control_plane/test_contract_registry.py`, `test_contract_registry_invariants.py`, `test_contract_registry_service_additional.py` (present at pinned SHA) |
+| E2-STORAGE-WRITERS | STATIC | CURRENT | `src/bioetl/infrastructure/storage/gold_writer.py`, `src/bioetl/infrastructure/storage/silver_writer.py` (import/enforce domain modes; not a runtime write proof) |
 
 ## D. Findings Register
 
-### Finding 1: Incomplete or Missing Domain Contract Registry Tests
+### Finding 1: Incomplete or Missing Domain Contract Registry Tests — DISPROVED
 - **finding_id:** P07-CONTRACT-REGISTRY-001
 - **root_cause_id:** rc-contract-registry-test-coverage
 - **owner_prompt:** P07
-- **concern:** Contract registry and ledger invariants are governance-critical but lack sufficient test coverage. Running `pytest tests/domain/control_plane/test_contract_registry.py` fails with "No such file or directory". This was also highlighted in previous tech debt audits.
-- **severity:** P2 (Maintainability/test debt without proven P0/P1 impact).
+- **concern:** Earlier draft claimed contract-registry domain tests were missing because `pytest tests/domain/control_plane/test_contract_registry.py` failed with "No such file or directory".
+- **severity:** n/a (retracted)
 - **confidence:** high
-- **status:** CONFIRMED
-- **expected:** Comprehensive unit tests for `src/bioetl/domain/control_plane/contract_registry*.py`.
-- **actual:** No dedicated tests found in `tests/domain/control_plane/` for the contract registry.
-- **evidence_ids:** E2-CONTRACT-REGISTRY-CODE, E3 (pytest execution result).
-- **attempted_disproof:** Searched for `test_contract_registry.py` and related files using `find` and `grep`. Tests exist in `integration/config/` but domain invariant tests are missing.
-- **exceptions_checked:** Checked known debt issues; it was flagged before but apparently not fully resolved or regressions occurred.
-- **impact:** Risk of silent breaks in governance-critical contract registry logic.
-- **root_cause:** Missing test implementations for domain control plane.
-- **recommendation:** Implement unit tests covering contract registry parsing, validation, and invariants in `tests/unit/domain/control_plane/`.
-- **scope / non-goals:** Add unit tests. Do not refactor the registry implementation itself.
-- **acceptance_criteria:** `pytest tests/unit/domain/control_plane/` passes and covers `contract_registry*.py`.
-- **verification command/test:** `pytest tests/unit/domain/control_plane/ --cov=src/bioetl/domain/control_plane`
+- **status:** DISPROVED
+- **expected:** Dedicated unit tests for `src/bioetl/domain/control_plane/contract_registry*.py` under the canonical domain unit-test tree.
+- **actual:** Tests exist at the pinned SHA under `tests/unit/domain/control_plane/`:
+  - `test_contract_registry.py` (exports smoke)
+  - `test_contract_registry_invariants.py` (deterministic issue ordering, rebind stability, registry hash, gold/run-manifest/run-ledger golden fixtures)
+  - `test_contract_registry_service_additional.py` (parse/validation coverage)
+- **evidence_ids:** E2-CONTRACT-REGISTRY-CODE, E2-CONTRACT-REGISTRY-TESTS
+- **attempted_disproof:** Re-checked paths on pinned revision `a5243cb4bb`. Wrong path `tests/domain/...` does not exist; correct path `tests/unit/domain/control_plane/` contains the three modules above. The earlier "No such file" result was a path error, not missing coverage.
+- **exceptions_checked:** No separate proven gap remains for "missing domain registry unit tests" after path correction. Residual coverage depth (breadth of edge cases) was not measured as a new CONFIRMED debt here.
+- **impact:** None for the original claim; scorecard/verdict updated accordingly.
+- **root_cause:** Auditor used a non-canonical test path (`tests/domain/...` instead of `tests/unit/domain/...`).
+- **recommendation:** Do not open an Issue to recreate existing tests. Any future coverage work must cite measured gaps against the existing suite.
+- **scope / non-goals:** Retract false debt only. Do not delete or rewrite existing tests in this audit PR.
+- **acceptance_criteria:** Finding status remains DISPROVED; no Issue draft for recreating existing files.
+- **verification command/test:** `pytest tests/unit/domain/control_plane/test_contract_registry.py tests/unit/domain/control_plane/test_contract_registry_invariants.py tests/unit/domain/control_plane/test_contract_registry_service_additional.py`
 - **dependencies:** None.
 - **related_findings:** None.
 
+No other CONFIRMED findings in this re-evaluation.
+
 ## E. Quantitative Scorecard
-- **Bronze Contract/Semantics:** 4 (Strong implementation, clear append-only policy in `medallion.py`). (Evidence: E1-MEDALLION-POLICY)
-- **Silver Contract/Semantics:** 4 (Merge/Append policies enforced, clear lifecycle). (Evidence: E1-MEDALLION-POLICY)
-- **Gold Contract/Semantics:** 3 (Policy exists, schemas defined, but domain registry test coverage is lacking). (Evidence: E1-MEDALLION-POLICY, E2-CONTRACT-REGISTRY-CODE, E2-CONTRACT-REGISTRY-YAML)
-- **Contract Registry:** 2 (Implementation exists, configuration mapped, but domain test coverage is missing). (Evidence: E2-CONTRACT-REGISTRY-CODE, E2-CONTRACT-REGISTRY-YAML)
+- **Bronze Contract/Semantics:** 4 (Strong domain policy: Bronze limited to append in `WriteModePolicy`). (Evidence: E1-MEDALLION-POLICY)
+- **Silver Contract/Semantics:** 4 (Merge/Append enums + policy in domain). (Evidence: E1-MEDALLION-POLICY)
+- **Gold Contract/Semantics:** 4 (Append/SCD2/Overwrite enums in domain; schemas + registry config present). (Evidence: E1-MEDALLION-POLICY, E2-CONTRACT-REGISTRY-CODE, E2-CONTRACT-REGISTRY-YAML)
+- **Contract Registry:** 4 (Implementation + YAML mapping + dedicated domain unit tests at pinned SHA). (Evidence: E2-CONTRACT-REGISTRY-CODE, E2-CONTRACT-REGISTRY-YAML, E2-CONTRACT-REGISTRY-TESTS)
+
+Scores above reflect **domain policy / registry / unit-test presence**. They do **not** certify that infrastructure writers applied those modes correctly at runtime against real storage.
 
 ## F. Cross-cutting/root-cause clusters
-- **Cluster 1:** Control Plane Domain Coverage. The domain logic for the contract registry lacks dedicated unit testing, making it vulnerable to accidental structural changes.
+- **Cluster 1 (audit process):** Wrong test-path probes can mint false CONFIRMED debt. Prefer `tests/unit/domain/...` for domain control-plane modules.
+- **Cluster 2 (evidence boundary):** Layer write-mode enums in `medallion.py` are not equivalent to end-to-end writer/storage proofs.
 
 ## G. Prioritized roadmap P0→P3
-1. **P2:** Implement missing domain unit tests for `contract_registry*.py` and related types.
+1. **P3 (optional, not CONFIRMED debt):** If deeper assurance is required, add focused writer/runtime evidence that Silver/Gold writers enforce domain modes on real Delta operations (out of static domain-test scope).
 
 ## H. Verification Matrix
-| Component | Contract/Invariant | Verified | Evidence |
+| Component | Contract/Invariant | Verified | Evidence / boundary |
 | :--- | :--- | :--- | :--- |
-| Bronze | Append-only mode | Yes | E1-MEDALLION-POLICY |
-| Silver | Merge/Append modes | Yes | E1-MEDALLION-POLICY |
-| Gold | Append/SCD2/Overwrite modes | Yes | E1-MEDALLION-POLICY |
-| Gold | Schema Registry Alignment | Partial | Registry config exists, but domain logic untested. |
+| Bronze | Append-only mode declared in domain policy | Yes (domain enum/policy only) | E1-MEDALLION-POLICY — proves `WriteModePolicy` allows Bronze=`append` only; does **not** prove Bronze writers/storage apply it |
+| Silver | Merge/Append modes declared | Yes (domain enum/policy only) | E1-MEDALLION-POLICY — proves `SilverWriteMode` / policy; does **not** prove `SilverWriter` runtime application |
+| Gold | Append/SCD2/Overwrite modes declared | Yes (domain enum only) | E1-MEDALLION-POLICY — proves `GoldWriteMode`; does **not** prove `GoldWriter` runtime application |
+| Silver/Gold writers | Modes imported / policy hooks present | Partial (static) | E2-STORAGE-WRITERS — static import/`_enforce_write_policy` style signals only; no live Delta write proof in this audit |
+| Gold | Schema Registry Alignment | Yes (config + domain tests) | E2-CONTRACT-REGISTRY-YAML, E2-CONTRACT-REGISTRY-CODE, E2-CONTRACT-REGISTRY-TESTS |
 
 ## I. NOT_VERIFIABLE и missing evidence
 - E2E Replay exactness (P11 scope, deferred).
 - Physical Delta schema drift on actual production storage (requires external access).
+- Runtime proof that real writers/storage honor medallion write modes on live tables (static writer inspection ≠ runtime application).
 
 ## J. Self-check
-- Findings are grounded in static and executable evidence.
-- Severity matches impact definition.
-- No changes made to repository code.
+- Findings re-checked against correct test paths and evidence boundaries.
+- No CONFIRMED finding remains for the false missing-tests claim.
+- Severity/status match the disproof.
+- No product-code changes in this audit PR beyond the report (and inventory rebind if required).
 
 ## K. Verdict
-The Medallion layer policies are well-defined in the domain (`bioetl.domain.medallion`). Write modes are strictly categorized. However, the domain implementation of the Contract Registry (`bioetl.domain.control_plane.contract_registry*.py`) suffers from a lack of dedicated unit tests, representing a P2 debt that needs addressing to ensure governance stability.
+The Medallion layer policies are well-defined in the domain (`bioetl.domain.medallion`): write-mode enums and `WriteModePolicy` categorize Bronze/Silver/Gold modes. **Verified: Yes** in the matrix for those rows means the modes are declared and constrained in `medallion.py`, not that infrastructure writers were runtime-proven against storage. The Contract Registry domain implementation has dedicated unit tests under `tests/unit/domain/control_plane/` at the pinned SHA; the earlier CONFIRMED P2 “missing domain tests” claim is **DISPROVED** (wrong path `tests/domain/...`). No replacement CONFIRMED debt is asserted without a separately measured gap.
 
 ---
 ## Issue drafts
 
-**Title:** [TDX-AUDIT-009] Add domain contract registry and ledger invariant tests
-**Body:**
-### Provenance
-- **Audit ID:** pack-v2.1/P07
-- **Audited SHA:** a5243cb4bbed67b267daecdc097b8c48501e140a
-- **Root Cause ID:** rc-contract-registry-test-coverage
-- **Source Finding IDs:** P07-CONTRACT-REGISTRY-001
-- **Severity:** P2
-- **Confidence:** high
-- **Status:** CONFIRMED
-
-### Problem
-Contract registry and ledger invariants are governance-critical but lack sufficient test coverage in the domain layer.
-
-### Evidence
-- File: `src/bioetl/domain/control_plane/contract_registry*.py`
-- Test failure: `pytest tests/unit/domain/control_plane/test_contract_registry.py` reports "No such file or directory".
-
-### Expected vs Actual
-**Expected:** Comprehensive unit tests for `contract_registry*.py` ensuring domain invariants.
-**Actual:** Missing test files in the domain test suite.
-
-### Impact
-Risk of silent breaks in governance-critical contract registry logic, affecting downstream pipeline validation.
-
-### Scope / Non-goals
-Add unit tests. Do not refactor the registry implementation itself.
-
-### Architecture Constraints
-Must follow existing testing patterns, isolated from I/O (pure domain tests).
-
-### Implementation outline
-1. Create `tests/unit/domain/control_plane/test_contract_registry.py` and `test_contract_registry_helpers.py`.
-2. Write tests covering initialization, validation, and policy checks using standard `pytest` assertions.
-
-### Acceptance Criteria
-- Domain tests added for contract registry components.
-- Tests pass locally and in CI.
-- Coverage for `src/bioetl/domain/control_plane/contract_registry*.py` increases.
-
-### Verification Commands
-`uv run pytest tests/unit/domain/control_plane/`
-`uv run pytest --cov=src/bioetl/domain/control_plane tests/unit/domain/control_plane/`
-
-### Dependencies
-None.
-
-### Rollback/Risk
-Low risk, test-only addition.
+**None.** The previous draft `[TDX-AUDIT-009] Add domain contract registry and ledger invariant tests` is **withdrawn**: the target files already exist at the pinned revision under `tests/unit/domain/control_plane/`. Do not recreate them from this audit.
 
 ## P07 Local Output
 
@@ -137,8 +101,8 @@ Low risk, test-only addition.
 **Reason:** Physical schema checks on actual persisted Bronze/Silver tables require environment access to Delta tables, which is not available in static repo-only mode.
 
 ### Registry Completeness
-**Status:** Partial (Configured, but domain verified untested).
-**Details:** `configs/base/contract_registry.yaml` contains 27 valid entries, primarily covering `chembl` and some generic datasets. Ownership matrices indicate it covers pipeline paths. Domain-level tests for `contract_registry*.py` are missing (see P07-CONTRACT-REGISTRY-001).
+**Status:** Configured and domain-tested (static).
+**Details:** `configs/base/contract_registry.yaml` contains 27 valid entries, primarily covering `chembl` and some generic datasets. Ownership matrices indicate it covers pipeline paths. Domain-level unit tests for `contract_registry*.py` are present at `tests/unit/domain/control_plane/` (see DISPROVED P07-CONTRACT-REGISTRY-001).
 
 ### Version-Transition Matrix
 **Status:** NOT_VERIFIABLE
