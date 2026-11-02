@@ -1002,29 +1002,30 @@ def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
 
 
 def test_affected_targets_map_shared_helper_to_importing_tests(
-    tmp_path: Path,
+    repo_root: Path,
 ) -> None:
-    """Changed test helpers select importing tests, never the helper itself."""
-    helper = tmp_path / "tests" / "helpers" / "cli_process.py"
+    """Changed test helpers resolve imports from the checkout root."""
+    repo_root = tmp_path / "tests" / "project"
+    helper = repo_root / "tests" / "helpers" / "cli_process.py"
     helper.parent.mkdir(parents=True)
     helper.write_text("def run() -> None: ...\n", encoding="utf-8")
     (helper.parent / "__init__.py").write_text(
         "from .cli_process import run\n",
         encoding="utf-8",
     )
-    owner = tmp_path / "tests" / "unit" / "sample" / "test_owner.py"
+    owner = repo_root / "tests" / "unit" / "sample" / "test_owner.py"
     owner.parent.mkdir(parents=True)
     owner.write_text(
         "from tests.helpers.cli_process import run\n\ndef test_owner(): pass\n",
         encoding="utf-8",
     )
-    via_package = tmp_path / "tests" / "unit" / "sample" / "test_via_package.py"
+    via_package = repo_root / "tests" / "unit" / "sample" / "test_via_package.py"
     via_package.write_text(
         "from tests.helpers import run\n\ndef test_via_package(): pass\n",
         encoding="utf-8",
     )
 
-    conftest = tmp_path / "tests" / "unit" / "conftest" / "conftest.py"
+    conftest = repo_root / "tests" / "unit" / "conftest" / "conftest.py"
     conftest.parent.mkdir(parents=True)
     conftest.write_text(
         "from tests.helpers import run\n",
@@ -1032,7 +1033,7 @@ def test_affected_targets_map_shared_helper_to_importing_tests(
     )
 
     assert affected_pytest_targets(
-        [helper.relative_to(tmp_path).as_posix()], repo_root=tmp_path
+        [helper.relative_to(repo_root).as_posix()], repo_root=repo_root
     ) == [
         "tests/unit/conftest",
         "tests/unit/sample/test_owner.py",
