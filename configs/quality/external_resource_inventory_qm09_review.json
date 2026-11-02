@@ -1,11 +1,9 @@
 {
   "schema_version": 1,
-  "catalog_ref": "a643963403eceae9b2d381e5af67dc2f57b85b35",
-  "source_ref": "4ad28e9a24604f2c780cf459588807ac451793cb",
+  "catalog_ref": "409ba9b881735eac9fabe04092b3208cdade7bf9",
+  "source_ref": "bafb923c5d3a8045cf1a78dfa9f60cf792393eae",
   "source_reviews": {
-    "src/bioetl/interfaces/http/_health_server_routing_support.py": "Reviewed Codex P2 follow-up on published COMP-004 catalog a643963403: defer НЕТ ЗАПУСКОВ until after report supplements; keep pipeline/workflow/run_type \"-\" as concrete restriction (not All). No new external acquisition or lifecycle behavior.",
-    "src/bioetl/interfaces/http/_selected_run_a2_resolve.py": "Reviewed Codex P2 follow-up on published COMP-004 catalog a643963403: defer НЕТ ЗАПУСКОВ until after report supplements; keep pipeline/workflow/run_type \"-\" as concrete restriction (not All). No new external acquisition or lifecycle behavior.",
-    "src/bioetl/interfaces/http/control_plane_selector_context.py": "Reviewed Codex P2 follow-up on published COMP-004 catalog a643963403: defer НЕТ ЗАПУСКОВ until after report supplements; keep pipeline/workflow/run_type \"-\" as concrete restriction (not All). No new external acquisition or lifecycle behavior."
+    "src/bioetl/interfaces/http/control_plane_selector_context.py": "Reviewed Sonar S1481 cleanup on published COMP-004 catalog 409ba9b881: inline _value(item) in finalize_run_id_empty_catalog_label. No new external acquisition or lifecycle behavior."
   },
   "expression_updates": {},
   "segment_updates": {},
