@@ -35,6 +35,9 @@ from bioetl.infrastructure.control_plane._evidence_location_publish import (
     publish_bytes_if_absent,
     read_existing_bytes,
 )
+from bioetl.infrastructure.control_plane.evidence_location_path_safety import (
+    assert_path_within_trusted_base,
+)
 
 __all__ = ["FileEvidenceLocationStore"]
 
@@ -68,8 +71,17 @@ class FileEvidenceLocationStore(
 
     report_root: Path
 
+    def _trusted_root(self) -> Path:
+        """Return the configured report root as the catalog trust anchor."""
+        try:
+            return Path(self.report_root).resolve(strict=False)
+        except OSError as exc:
+            raise EvidenceLocationInvalidError(
+                "evidence location report root is not resolvable"
+            ) from exc
+
     def _locations_root(self) -> Path:
-        return Path(self.report_root) / EVIDENCE_LOCATIONS_DIRNAME
+        return self._trusted_root() / EVIDENCE_LOCATIONS_DIRNAME
 
     def _record_path(
         self,
@@ -83,7 +95,12 @@ class FileEvidenceLocationStore(
             owner=owner,
             run_id=run_id,
         )
-        return self._locations_root() / kind_seg / owner_seg / filename
+        path = self._locations_root() / kind_seg / owner_seg / filename
+        return assert_path_within_trusted_base(
+            path,
+            trusted_base=self._trusted_root(),
+            field_name="evidence location catalog path",
+        )
 
     def _load_at(
         self,
@@ -93,7 +110,12 @@ class FileEvidenceLocationStore(
         owner: str,
         run_id: str,
     ) -> RunEvidenceLocation | None:
-        raw = read_existing_bytes(path)
+        safe_path = assert_path_within_trusted_base(
+            path,
+            trusted_base=self._trusted_root(),
+            field_name="evidence location catalog path",
+        )
+        raw = read_existing_bytes(safe_path, trusted_base=self._trusted_root())
         if raw is None:
             return None
         location = _parse_location_bytes(raw)
@@ -171,7 +193,12 @@ class FileEvidenceLocationStore(
         candidate: RunEvidenceLocation,
         path: Path,
     ) -> EvidenceLocationRegisterResult:
-        raw = read_existing_bytes(path)
+        safe_path = assert_path_within_trusted_base(
+            path,
+            trusted_base=self._trusted_root(),
+            field_name="evidence location catalog path",
+        )
+        raw = read_existing_bytes(safe_path, trusted_base=self._trusted_root())
         if raw is None:
             return EvidenceLocationRegisterResult(
                 outcome=EvidenceLocationRegisterOutcome.CONFLICT,
@@ -196,7 +223,16 @@ class FileEvidenceLocationStore(
             kind=location.kind, owner=location.owner, run_id=location.run_id
         )
         payload = _serialize_location(location)
-        created = publish_bytes_if_absent(path, payload)
+        safe_path = assert_path_within_trusted_base(
+            path,
+            trusted_base=self._trusted_root(),
+            field_name="evidence location catalog path",
+        )
+        created = publish_bytes_if_absent(
+            safe_path,
+            payload,
+            trusted_base=self._trusted_root(),
+        )
         if created:
             return EvidenceLocationRegisterResult(
                 outcome=EvidenceLocationRegisterOutcome.REGISTERED,
