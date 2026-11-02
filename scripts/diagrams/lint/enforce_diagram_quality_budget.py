@@ -192,6 +192,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--quality-report", type=Path)
     parser.add_argument("--lint-report", type=Path)
     parser.add_argument("--nightly-report", type=Path)
+    parser.add_argument("--broad-report", type=Path)
     parser.add_argument("--max-hard-failures", type=int, default=0)
     parser.add_argument("--max-warning-failures", type=int, default=-1)
     parser.add_argument("--max-diag-t022", type=int, default=0)
@@ -200,6 +201,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-lint-warnings", type=int, default=-1)
     parser.add_argument("--max-nightly-errors", type=int, default=0)
     parser.add_argument("--max-nightly-warnings", type=int, default=-1)
+    parser.add_argument("--max-broad-failures", type=int, default=0)
     parser.add_argument("--json-out", type=Path)
     parser.add_argument("--markdown-out", type=Path)
     parser.add_argument("--json", action="store_true")
@@ -300,6 +302,25 @@ def _nightly_checks(args: argparse.Namespace) -> list[BudgetCheck]:
     return checks
 
 
+
+def _broad_checks(args: argparse.Namespace) -> list[BudgetCheck]:
+    if args.mode != "nightly":
+        return []
+    if args.broad_report is None:
+        return []
+    broad_payload = load_json(args.broad_report)
+    checks = [
+        build_check(
+            metric="broad.changed",
+            value=to_int(broad_payload, "changed_count", 0),
+            limit=args.max_broad_failures,
+            source="check_diagram_visual_smoke",
+            message="broad tier failures exceed budget",
+        )
+    ]
+    return checks
+
+
 def _report_payload(report: BudgetReport) -> dict[str, object]:
     return {
         "mode": report.mode,
@@ -335,7 +356,7 @@ def main() -> int:
     args = parse_args()
 
     try:
-        checks = _quality_checks(args) + _lint_checks(args) + _nightly_checks(args)
+        checks = _quality_checks(args) + _lint_checks(args) + _nightly_checks(args) + _broad_checks(args)
     except (FileNotFoundError, ValueError) as exc:
         _err(f"[ERROR] {exc}")
         return 2

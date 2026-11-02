@@ -522,8 +522,8 @@ the smoke baseline set.
 
 Visual-smoke coverage is tiered: `visual-smoke.txt` is the PR-sized T0 set,
 `visual-smoke-extended.txt` is nightly blocking coverage, and
-`visual-smoke-broad.txt` is a nightly warn-only expansion tier until its broader
-baseline is stable.
+`visual-smoke-broad.txt` is an enforced nightly tier
+
 
 MkDocs is validation-only in the current repository workflow: `mkdocs.yml` is
 checked by docs verification, but there is no GitHub Pages deployment job.

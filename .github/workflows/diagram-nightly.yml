@@ -136,12 +136,14 @@ jobs:
             --quality-report reports/diagrams/diagram-quality-report-nightly.json \
             --lint-report reports/diagrams/diagram-lint-report-nightly.json \
             --nightly-report reports/diagrams/diagram-nightly-phase2.json \
+            --broad-report reports/diagrams/diagram-visual-smoke-broad-nightly.json \
             --max-hard-failures 0 \
             --max-diag-t022 0 \
             --max-diag-t023 0 \
             --max-lint-errors 0 \
             --max-nightly-errors 0 \
             --max-nightly-warnings 0 \
+            --max-broad-failures 0 \
             --json-out reports/diagrams/diagram-quality-budget-nightly.json \
             --markdown-out reports/diagrams/diagram-quality-budget-nightly.md
 
