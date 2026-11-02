@@ -93,3 +93,44 @@ def test_literal_dashboard_path_only_allows_known_files() -> None:
     assert phase4._literal_dashboard_path(phase4.FILE_DQ).name == phase4.FILE_DQ
     with pytest.raises(ValueError, match="unexpected dashboard file"):
         phase4._literal_dashboard_path("not-a-dashboard.json")
+
+
+def test_prune_dead_rename_by_name() -> None:
+    payload = {
+        "templating": {"list": [{"name": "workflow"}]},
+        "panels": [
+            {
+                "id": 1,
+                "transformations": [
+                    {
+                        "id": "organize",
+                        "options": {
+                            "indexByName": {"a": 0},
+                            "renameByName": {"a": "A", "ghost": "Gone"},
+                        },
+                    }
+                ],
+            }
+        ],
+    }
+    _, cleared = phase4.apply_dashboard_data(payload, path_name=phase4.FILE_OVERVIEW)
+    rename = payload["panels"][0]["transformations"][0]["options"]["renameByName"]
+    assert rename == {"a": "A"}
+    assert any(item.startswith("renameByName:pruned=") for item in cleared)
+
+
+def test_drops_unused_selected_vars_on_incident() -> None:
+    payload = {
+        "templating": {
+            "list": [
+                {"name": "selected_run_id", "type": "query"},
+                {"name": "selected_pipeline", "type": "query"},
+                {"name": "workflow", "type": "query"},
+            ]
+        },
+        "panels": [],
+    }
+    removed, _ = phase4.apply_dashboard_data(payload, path_name=phase4.FILE_INCIDENT)
+    names = [var["name"] for var in payload["templating"]["list"]]
+    assert names == ["workflow"]
+    assert set(removed) == {"selected_run_id", "selected_pipeline"}

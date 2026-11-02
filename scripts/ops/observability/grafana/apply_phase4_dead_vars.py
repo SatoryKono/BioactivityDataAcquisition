@@ -30,9 +30,13 @@ FILES = (
 )
 
 DEAD_EVERYWHERE = frozenset({"provider_for_pipeline"})
+# selected_* are A2 helpers used on Overview/DQ targets; unused on the other three.
+_DEAD_SELECTED = frozenset({"selected_run_id", "selected_pipeline"})
 DEAD_BY_FILE = {
     FILE_DQ: frozenset({"stage"}),
-    FILE_CONTROL_PLANE: frozenset({"read_latency_quantile"}),
+    FILE_CONTROL_PLANE: frozenset({"read_latency_quantile"}) | _DEAD_SELECTED,
+    FILE_INCIDENT: frozenset(_DEAD_SELECTED),
+    FILE_RUN_EXPLORER: frozenset(_DEAD_SELECTED),
 }
 DROP_PIPELINE_UNKNOWN_ON = frozenset({FILE_DQ, FILE_INCIDENT, FILE_CONTROL_PLANE})
 _PIPELINE = "pipeline"
@@ -121,6 +125,25 @@ def _clear_dangling_repeats(data: dict[str, Any]) -> list[str]:
     return cleared
 
 
+def _prune_dead_renames(data: dict[str, Any]) -> int:
+    """Drop ``renameByName`` keys absent from the same organize ``indexByName``."""
+    pruned = 0
+    for panel in _iter_panels(data.get("panels")):
+        for transform in panel.get("transformations") or []:
+            if not isinstance(transform, dict) or transform.get("id") != "organize":
+                continue
+            options = transform.setdefault("options", {})
+            index = options.get("indexByName")
+            rename = options.get("renameByName")
+            if not isinstance(index, dict) or not isinstance(rename, dict) or not index:
+                continue
+            keep = {key: value for key, value in rename.items() if key in index}
+            if len(keep) != len(rename):
+                options["renameByName"] = keep
+                pruned += len(rename) - len(keep)
+    return pruned
+
+
 def apply_dashboard_data(
     data: dict[str, Any], *, path_name: str
 ) -> tuple[list[str], list[str]]:
@@ -129,6 +152,9 @@ def apply_dashboard_data(
         raise ValueError(f"refusing unexpected dashboard file: {path_name}")
     removed = _drop_dead_vars(data, path_name=path_name)
     cleared = _clear_dangling_repeats(data)
+    pruned = _prune_dead_renames(data)
+    if pruned:
+        cleared.append(f"renameByName:pruned={pruned}")
     return removed, cleared
 
 
