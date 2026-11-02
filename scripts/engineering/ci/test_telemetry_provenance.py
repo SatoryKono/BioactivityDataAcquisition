@@ -52,6 +52,9 @@ COVERAGE_PRODUCER_JOBS = (
     "tests / serial-coverage",
 )
 RECEIPT = Path("reports/test-telemetry/squash-provenance.json")
+PUBLICATION_RECEIPT = Path(
+    "reports/quality/quality-move-qm08/publication-provenance.json"
+)
 
 
 class ShallowMergeHistoryError(ValueError):
@@ -168,7 +171,11 @@ def _ancestor(root: Path, commit: str, head: str) -> bool:
 
 
 def require_published_ancestor(root: Path, commit: str) -> None:
-    """Require ancestry, or a reviewed GitHub squash bridge, for source refs."""
+    """Require Git ancestry or an independently reviewed publication bridge.
+
+    This proves publication lineage only. Each caller must still verify all its
+    pinned source/review/artifact inputs; this never qualifies changed inputs.
+    """
     if re.fullmatch(r"[0-9a-f]{40}", commit) is None:
         raise ValueError("Full immutable source commit required")
     commit = bytes.fromhex(commit).hex()
@@ -176,7 +183,7 @@ def require_published_ancestor(root: Path, commit: str) -> None:
     if _ancestor(root, commit, head):
         return
 
-    receipt = json.loads((root / RECEIPT).read_text(encoding="utf-8"))
+    receipt = json.loads((root / PUBLICATION_RECEIPT).read_text(encoding="utf-8"))
     bridges = receipt.get("publication_bridges")
     if not isinstance(bridges, list):
         bridges = [receipt]
