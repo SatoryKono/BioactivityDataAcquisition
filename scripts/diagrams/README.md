@@ -143,3 +143,4 @@ python -m scripts.diagrams <command> [args...]
 - `visual-smoke.txt` remains the canonical PR-sized SVG smoke manifest; `visual-smoke-extended.txt` is the nightly blocking tier, and `visual-smoke-broad.txt` is checked by the fail-closed nightly budget when that command receives a valid report. The Phase 2 GitHub Actions job remains disabled under the Actions policy in #11196. `png-compatibility.txt` is a smaller curated manifest for PNG compatibility checks.
 - `check_diagram_visual_smoke.py --json-out <path>` writes `diagram-visual-smoke-report-v1` machine-readable status for CI and local diagnostics.
 - When bundle drift is corrected, prefer regenerating the narrow affected collection via `generate_all_bundles.py --collection <name>` instead of broad refresh of every derived artifact.
+

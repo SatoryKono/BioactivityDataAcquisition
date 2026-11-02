@@ -619,3 +619,4 @@ case "$PROFILE" in
 esac
 
 log "Diagram checks completed (profile=$PROFILE)"
+
