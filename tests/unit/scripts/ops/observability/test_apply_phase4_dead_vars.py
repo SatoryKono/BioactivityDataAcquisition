@@ -112,8 +112,14 @@ def test_prune_dead_rename_by_name() -> None:
                     {
                         "id": "organize",
                         "options": {
+                            # indexByName is order-only; "unordered" stays valid.
                             "indexByName": {"a": 0},
-                            "renameByName": {"a": "A", "ghost": "Gone"},
+                            "excludeByName": {"ghost": True},
+                            "renameByName": {
+                                "a": "A",
+                                "unordered": "Still Valid",
+                                "ghost": "Gone",
+                            },
                         },
                     }
                 ],
@@ -122,7 +128,7 @@ def test_prune_dead_rename_by_name() -> None:
     }
     _, cleared = phase4.apply_dashboard_data(payload, path_name=phase4.FILE_OVERVIEW)
     rename = payload["panels"][0]["transformations"][0]["options"]["renameByName"]
-    assert rename == {"a": "A"}
+    assert rename == {"a": "A", "unordered": "Still Valid"}
     assert any(item.startswith("renameByName:pruned=") for item in cleared)
 
 

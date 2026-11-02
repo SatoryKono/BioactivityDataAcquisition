@@ -462,21 +462,28 @@ def _lint_unused_variables(path: Path, payload: dict[str, Any]) -> list[str]:
 
 
 def _dead_rename_keys(transform: dict[str, Any]) -> list[str]:
-    """Return renameByName keys missing from the same organize indexByName."""
+    """Return renameByName keys for fields excluded by excludeByName.
+
+    ``indexByName`` is display order only, not a field-membership filter, so a
+    rename key missing from it is still valid. A rename is dead only when the
+    same organize transform also excludes that field.
+    """
     if transform.get("id") != "organize":
         return []
     options = transform.get("options") or {}
-    index = options.get("indexByName")
     rename = options.get("renameByName")
-    if not isinstance(index, dict) or not index:
+    exclude = options.get("excludeByName")
+    if not isinstance(rename, dict) or not rename:
         return []
-    if not isinstance(rename, dict):
+    if not isinstance(exclude, dict) or not exclude:
         return []
-    return sorted(key for key in rename if key not in index)
+    return sorted(
+        key for key in rename if isinstance(key, str) and exclude.get(key) is True
+    )
 
 
 def _lint_dead_renames(path: Path, panels: list[dict[str, Any]]) -> list[str]:
-    """Phase-4: renameByName keys must appear in the same organize indexByName."""
+    """Phase-4: renameByName must not target fields excluded in the same organize."""
     findings: list[str] = []
     for panel in panels:
         for transform in panel.get("transformations") or []:

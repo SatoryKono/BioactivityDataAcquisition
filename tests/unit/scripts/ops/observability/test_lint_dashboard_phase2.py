@@ -30,6 +30,36 @@ def test_phase4_linter_passes_on_provisioned_dashboards() -> None:
     assert lint.main(["--profile", "phase4"]) == 0
 
 
+def test_dead_rename_keys_use_exclude_not_index_membership() -> None:
+    """indexByName is order-only; excluded fields are the dead-rename signal."""
+    assert lint._dead_rename_keys(
+        {
+            "id": "organize",
+            "options": {
+                "indexByName": {"kept": 0},
+                "excludeByName": {"hidden": True},
+                "renameByName": {
+                    "kept": "Kept",
+                    "unordered": "Still Valid",
+                    "hidden": "Gone",
+                },
+            },
+        }
+    ) == ["hidden"]
+    assert (
+        lint._dead_rename_keys(
+            {
+                "id": "organize",
+                "options": {
+                    "indexByName": {"a": 0},
+                    "renameByName": {"a": "A", "b": "B"},
+                },
+            }
+        )
+        == []
+    )
+
+
 def test_phase2_linter_flags_missing_nav_and_index_collision(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

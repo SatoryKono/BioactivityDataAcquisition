@@ -2405,17 +2405,12 @@
                   "Time": 11
                 },
                 "renameByName": {
-                  "pipeline": "Pipeline",
-                  "run_type": "Run type",
-                  "stage": "Stage",
                   "signal": "Signal",
                   "Value": "Value",
                   "unit": "Unit",
                   "threshold": "Threshold",
                   "window": "Window",
                   "freshness": "Freshness",
-                  "observation_time": "Observed",
-                  "publication_time": "Published",
                   "Time": "Evaluated",
                   "scope": "Scope"
                 }
@@ -11861,7 +11856,7 @@
             "x": 0,
             "y": 59,
             "w": 24,
-            "h": 12
+            "h": 8
           },
           "datasource": {
             "type": "datasource",

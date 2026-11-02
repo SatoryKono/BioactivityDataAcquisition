@@ -178,8 +178,8 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         return
     _apply_run_explorer_templating(payload)
     panels = {panel["id"]: panel for panel in payload["panels"]}
-    # Keep helper strip to one row so it does not overlap table 3010 (y=3).
-    panels[1]["gridPos"].update(y=2, h=1)
+    # DASH-LAYOUT-004: text panels need h>=2; keep 3010 immediately below.
+    panels[1]["gridPos"].update(y=2, h=2)
     content = panels[1]["options"]["content"].replace(
         "Select a Run ID to view details.", "Select a status to view details."
     )
@@ -193,7 +193,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     )
     panels[1]["options"]["content"] = content
     panel = panels[3010]
-    panel["gridPos"].update(y=3, h=13)
+    panel["gridPos"].update(y=4, h=13)
     panel["description"] = (
         "GLOBAL · BROWSE the launch catalog filtered by Workflow/Pipeline/Run Type. "
         "Last 10 launches, newest Started first, independent of the time range. "

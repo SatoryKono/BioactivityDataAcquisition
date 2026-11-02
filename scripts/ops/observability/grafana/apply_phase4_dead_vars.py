@@ -139,15 +139,24 @@ def _clear_dangling_repeats(data: dict[str, Any]) -> list[str]:
 
 
 def _prune_organize_rename(transform: dict[str, Any]) -> int:
-    """Prune one organize transform; return number of dropped rename keys."""
+    """Drop renameByName keys for fields excluded in the same organize transform.
+
+    ``indexByName`` is order-only; absence there does not make a rename dead.
+    """
     if transform.get("id") != "organize":
         return 0
     options = transform.setdefault("options", {})
-    index = options.get("indexByName")
     rename = options.get("renameByName")
-    if not isinstance(index, dict) or not isinstance(rename, dict) or not index:
+    exclude = options.get("excludeByName")
+    if not isinstance(rename, dict) or not rename:
         return 0
-    keep = {key: value for key, value in rename.items() if key in index}
+    if not isinstance(exclude, dict) or not exclude:
+        return 0
+    keep = {
+        key: value
+        for key, value in rename.items()
+        if exclude.get(key) is not True
+    }
     dropped = len(rename) - len(keep)
     if dropped:
         options["renameByName"] = keep
@@ -155,7 +164,7 @@ def _prune_organize_rename(transform: dict[str, Any]) -> int:
 
 
 def _prune_dead_renames(data: dict[str, Any]) -> int:
-    """Drop ``renameByName`` keys absent from the same organize ``indexByName``."""
+    """Drop ``renameByName`` keys that target excluded fields in the same organize."""
     pruned = 0
     for panel in _iter_panels(data.get("panels")):
         for transform in panel.get("transformations") or []:
