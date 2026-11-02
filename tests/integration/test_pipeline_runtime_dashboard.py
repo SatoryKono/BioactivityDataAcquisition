@@ -89,6 +89,7 @@ def test_pipeline_runtime_has_required_variables() -> None:
         for variable in _dashboard().get("templating", {}).get("list", [])
         if variable.get("name")
     }
+    # Phase 4.5: unused selected_* dropped from Incident (kept on Overview/DQ).
     assert variables == {
         "workflow",
         "pipeline",
@@ -96,8 +97,6 @@ def test_pipeline_runtime_has_required_variables() -> None:
         "run_id",
         "provider",
         "read_latency_quantile",
-        "selected_pipeline",
-        "selected_run_id",
     }
 
 
