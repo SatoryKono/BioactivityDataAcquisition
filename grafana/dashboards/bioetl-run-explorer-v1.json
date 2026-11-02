@@ -402,34 +402,6 @@
         "hide": 0,
         "skipUrlSync": false,
         "description": "Exact UUID within the current Workflow/Pipeline/Run Type, including launches older than the latest ten. Does not replace Selected Run until a matching row is found. Clear to browse recent launches."
-      },
-      {
-        "name": "provider_for_pipeline",
-        "label": "Provider for pipeline",
-        "type": "query",
-        "hide": 2,
-        "includeAll": false,
-        "multi": false,
-        "refresh": 1,
-        "sort": 1,
-        "regex": "",
-        "skipUrlSync": true,
-        "options": [],
-        "current": {
-          "selected": false,
-          "text": "",
-          "value": ""
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
-        "query": {
-          "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
-          "refId": "StandardVariableQuery"
-        },
-        "description": "Hidden selector: provider for a concrete Pipeline. Unused when Pipeline is All ($__all / .*). Table Provider handoff uses the row field."
       }
     ]
   },
@@ -692,7 +664,7 @@
             "properties": [
               {
                 "id": "custom.minWidth",
-                "value": 50
+                "value": 110
               },
               {
                 "id": "custom.inspect",
@@ -700,7 +672,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 60
+                "value": 110
               },
               {
                 "id": "links",
