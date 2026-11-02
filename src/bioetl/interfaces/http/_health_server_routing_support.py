@@ -354,6 +354,23 @@ def _selector_context_payload_with_a2(
     )
 
 
+async def _selector_context_bounded_payload(
+    host: _HealthRoutingHost,
+    query: dict[str, str],
+) -> dict[str, object]:
+    """Build selector-context under the caller's forensic deadline."""
+    assert host._run_manifest_port is not None
+    manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
+    workflow_manifests = await _list_workflow_manifests(host)
+    return await asyncio.to_thread(
+        _selector_context_payload_with_a2,
+        host,
+        manifests=manifests,
+        workflow_manifests=workflow_manifests,
+        query=query,
+    )
+
+
 async def handle_control_plane_selector_context(
     host: _HealthRoutingHost,
     writer: asyncio.StreamWriter,
@@ -365,16 +382,24 @@ async def handle_control_plane_selector_context(
     as selected-run-status, including saved report-only runs, so Grafana panels
     that read ``selected.run_id`` stay in sync with the status panel.
     """
-    assert host._run_manifest_port is not None
-    manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
-    workflow_manifests = await _list_workflow_manifests(host)
-    payload = await asyncio.to_thread(
-        _selector_context_payload_with_a2,
-        host,
-        manifests=manifests,
-        workflow_manifests=workflow_manifests,
-        query=query,
-    )
+    try:
+        payload = await run_bounded_forensic_operation(
+            limiter=host._selector_endpoint_limiter,
+            operation_factory=lambda: _selector_context_bounded_payload(host, query),
+            timeout_seconds=_FILTER_OPTIONS_TIMEOUT_SECONDS,
+            queue_timeout_seconds=SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
+            endpoint="/ops/control-plane/selector-context",
+        )
+    except ForensicEndpointUnavailable as exc:
+        await host._send_payload_response(
+            writer,
+            exc.status_code,
+            forensic_unavailable_payload(
+                endpoint="/ops/control-plane/selector-context",
+                reason=exc.reason,
+            ),
+        )
+        return
     await host._send_payload_response(writer, 200, payload)
 
 
