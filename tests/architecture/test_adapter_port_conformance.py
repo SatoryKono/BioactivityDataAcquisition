@@ -55,6 +55,10 @@ from bioetl.domain.ports.control_plane.artifact_byte_comparison import (
     ArtifactByteComparisonPort,
 )
 from bioetl.domain.ports.control_plane.lineage import LineageStorePort
+from bioetl.domain.ports.control_plane.run_evidence_location import (
+    RunEvidenceLocationReadPort,
+    RunEvidenceLocationRegisterPort,
+)
 from bioetl.domain.ports.control_plane.run_ledger import RunLedgerPort
 from bioetl.domain.ports.control_plane.run_manifest import RunManifestPort
 from bioetl.domain.ports.control_plane.workflow_execution_state import (
@@ -143,6 +147,9 @@ from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAda
 from bioetl.infrastructure.control_plane.file_effective_config_artifact_store import (
     FileEffectiveConfigArtifactStore,
 )
+from bioetl.infrastructure.control_plane.file_evidence_location_store import (
+    FileEvidenceLocationStore,
+)
 from bioetl.infrastructure.export.debug_export_adapter import DebugExportAdapter
 from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
 from bioetl.infrastructure.observability.health_metrics_exposition import (
@@ -201,6 +208,8 @@ PORT_ADAPTER_CASES = (
     PortAdapterCase(ProteinClassificationPort, ChEMBLProteinClassificationGraph),
     PortAdapterCase(PublicationVocabularyPort, PublicationControlledVocabularyLoader),
     PortAdapterCase(RowReconciliationPort, StorageRowReconciliationAdapter),
+    PortAdapterCase(RunEvidenceLocationReadPort, FileEvidenceLocationStore),
+    PortAdapterCase(RunEvidenceLocationRegisterPort, FileEvidenceLocationStore),
     PortAdapterCase(RunLedgerPort, FileRunLedgerStore),
     PortAdapterCase(RunManifestPort, FileRunManifestStore),
     PortAdapterCase(SilverStoragePort, SilverWriter),

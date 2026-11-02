@@ -21,6 +21,13 @@ if TYPE_CHECKING:
         EffectiveConfigArtifactConflictError,
         FileEffectiveConfigArtifactStore,
     )
+    from bioetl.infrastructure.control_plane.file_evidence_location_store import (
+        FileEvidenceLocationStore,
+    )
+    from bioetl.infrastructure.control_plane.file_evidence_read_context import (
+        FileEvidenceReadContext,
+        FileEvidenceReadContextFactory,
+    )
     from bioetl.infrastructure.control_plane.file_historical_replay_closure_store import (
         FileHistoricalReplayClosureStore,
     )
@@ -65,6 +72,15 @@ _EXPORT_MODULES = {
         "bioetl.infrastructure.control_plane.file_artifact_lifecycle_store"
     ),
     "FileEffectiveConfigArtifactStore": (_EFFECTIVE_CONFIG_ARTIFACT_STORE_MODULE),
+    "FileEvidenceLocationStore": (
+        "bioetl.infrastructure.control_plane.file_evidence_location_store"
+    ),
+    "FileEvidenceReadContext": (
+        "bioetl.infrastructure.control_plane.file_evidence_read_context"
+    ),
+    "FileEvidenceReadContextFactory": (
+        "bioetl.infrastructure.control_plane.file_evidence_read_context"
+    ),
     "FileHistoricalReplayClosureStore": (
         "bioetl.infrastructure.control_plane.file_historical_replay_closure_store"
     ),
@@ -101,6 +117,9 @@ __all__ = [
     "FileContractRegistryStore",
     "FileControlPlaneArtifactLifecycleStore",
     "FileEffectiveConfigArtifactStore",
+    "FileEvidenceLocationStore",
+    "FileEvidenceReadContext",
+    "FileEvidenceReadContextFactory",
     "FileHistoricalReplayClosureStore",
     "FileHistoricalReplayUniverseStore",
     "FileLineageStore",

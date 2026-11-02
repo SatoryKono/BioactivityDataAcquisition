@@ -34,6 +34,15 @@ process env for this map. `runtime_source_id` is bind/runtime identity, not a
 Git commit. Missing location, missing manifest, and identity conflict stay
 distinct codes and must not silently fall back to another run.
 
+Safe resolver (RF-003 / #12681): `FileEvidenceLocationStore` publishes
+create-if-absent records under the catalog path; `EvidenceLocationResolver`
+opens a read-only control-plane context for the exact alias +
+`relative_data_root` (`.` = standard alias base). Legacy absence may open
+only that standard base via explicit RF-003 policy — never a foreign
+isolated workflow root via filesystem scan. Symlink/junction escape and
+path traversal fail closed. Ops GET paths must not register or rewrite
+evidence; automatic registration is RF-004.
+
 Optional additive blocks on pipeline reports (omit when unknown; never invent zeros):
 
 - `failure`, `io`, `quarantine`, `dq_summary`, `contract_summary`
