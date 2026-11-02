@@ -126,7 +126,6 @@ _INTERNAL_MODULE = "bioetl.domain.exceptions.internal"
 _NETWORK_MODULE = "bioetl.domain.exceptions.network"
 _PIPELINE_SHUTDOWN_MODULE = "bioetl.domain.exceptions.pipeline_shutdown"
 _VALIDATION_MODULE = "bioetl.domain.exceptions.validation"
-_REDACTION_MODULE = "bioetl.application.core.exceptions_context"
 
 _EXPORT_MODULES = {
     "ApiError": _NETWORK_MODULE,
@@ -158,7 +157,6 @@ _EXPORT_MODULES = {
     "PolicyViolationError": _INTERNAL_MODULE,
     "RateLimitError": _NETWORK_MODULE,
     "RateLimitExceededError": _NETWORK_MODULE,
-    "redact_string": _REDACTION_MODULE,
     "RecoverableError": _BASE_MODULE,
     "RetryExhaustedError": _NETWORK_MODULE,
     "RunnerAlreadyExecutedError": _INTERNAL_MODULE,

@@ -65,11 +65,13 @@ def _uri_host_and_path(value: str) -> tuple[str, str] | None:
     scheme, separator, remainder = candidate.partition("://")
     if not separator or scheme.casefold() not in {"http", "https"}:
         return None
+    # Strip query/fragment before authority/path split so `/` inside query
+    # cannot be treated as a path (e.g. `?ref=/vocab/unit/...`).
+    remainder = remainder.split("?", maxsplit=1)[0].split("#", maxsplit=1)[0]
     authority, slash, suffix = remainder.partition("/")
     authority = authority.rsplit("@", maxsplit=1)[-1].casefold()
     host = authority.split(":", maxsplit=1)[0].rstrip(".")
     path = f"/{suffix}" if slash else ""
-    path = path.split("?", maxsplit=1)[0].split("#", maxsplit=1)[0]
     return host, path
 
 

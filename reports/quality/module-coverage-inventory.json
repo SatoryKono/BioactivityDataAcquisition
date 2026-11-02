@@ -1510,7 +1510,7 @@
     },
     {
       "coverage_percent": null,
-      "coverage_status": "coverage_xml_missing",
+      "coverage_status": "unmeasured",
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
@@ -2650,7 +2650,7 @@
     },
     {
       "coverage_percent": null,
-      "coverage_status": "coverage_xml_missing",
+      "coverage_status": "unmeasured",
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
@@ -3600,7 +3600,7 @@
     },
     {
       "coverage_percent": null,
-      "coverage_status": "coverage_xml_missing",
+      "coverage_status": "unmeasured",
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
@@ -3610,7 +3610,7 @@
     },
     {
       "coverage_percent": null,
-      "coverage_status": "coverage_xml_missing",
+      "coverage_status": "unmeasured",
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
@@ -5100,7 +5100,7 @@
     },
     {
       "coverage_percent": null,
-      "coverage_status": "coverage_xml_missing",
+      "coverage_status": "unmeasured",
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
@@ -23980,7 +23980,7 @@
     },
     {
       "coverage_percent": null,
-      "coverage_status": "coverage_xml_missing",
+      "coverage_status": "unmeasured",
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
@@ -27322,7 +27322,7 @@
     },
     {
       "coverage_percent": null,
-      "coverage_status": "coverage_xml_missing",
+      "coverage_status": "unmeasured",
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
@@ -28462,7 +28462,7 @@
     },
     {
       "coverage_percent": null,
-      "coverage_status": "coverage_xml_missing",
+      "coverage_status": "unmeasured",
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
@@ -29412,7 +29412,7 @@
     },
     {
       "coverage_percent": null,
-      "coverage_status": "coverage_xml_missing",
+      "coverage_status": "unmeasured",
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
@@ -29422,7 +29422,7 @@
     },
     {
       "coverage_percent": null,
-      "coverage_status": "coverage_xml_missing",
+      "coverage_status": "unmeasured",
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
@@ -30912,7 +30912,7 @@
     },
     {
       "coverage_percent": null,
-      "coverage_status": "coverage_xml_missing",
+      "coverage_status": "unmeasured",
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
@@ -49792,7 +49792,7 @@
     },
     {
       "coverage_percent": null,
-      "coverage_status": "coverage_xml_missing",
+      "coverage_status": "unmeasured",
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
@@ -51648,14 +51648,14 @@
         "measured_percent": 99.52,
         "module_count": 208,
         "status_counts": {
-          "coverage_xml_missing": 1,
+          "coverage_xml_missing": 0,
           "fully_covered": 202,
           "no_executable_lines": 0,
           "partially_covered": 5,
           "uncovered": 0,
-          "unmeasured": 0
+          "unmeasured": 1
         },
-        "threshold_status": "pass",
+        "threshold_status": "fail",
         "thresholds": {
           "allowlisted_unmeasured_paths": [],
           "max_unmeasured_module_count": 0,
@@ -51663,9 +51663,11 @@
           "min_covered_module_count": 180,
           "min_measured_module_count": 180
         },
-        "unexpected_unmeasured_module_count": 0,
-        "unexpected_unmeasured_modules": [],
-        "unmeasured_module_count": 0
+        "unexpected_unmeasured_module_count": 1,
+        "unexpected_unmeasured_modules": [
+          "src/bioetl/application/core/exceptions_context.py"
+        ],
+        "unmeasured_module_count": 1
       },
       "application_services_control_plane": {
         "allowlisted_unmeasured_module_count": 0,
@@ -51790,16 +51792,47 @@
     },
     "source_module_count": 2581,
     "status_counts": {
-      "coverage_xml_missing": 6,
+      "coverage_xml_missing": 0,
       "fully_covered": 2515,
       "no_executable_lines": 1,
       "partially_covered": 59,
       "uncovered": 0,
-      "unmeasured": 0
+      "unmeasured": 6
     },
     "uncovered_module_count": 0,
     "uncovered_modules": [],
-    "unmeasured_module_count": 0,
-    "unmeasured_modules": []
+    "unmeasured_module_count": 6,
+    "unmeasured_modules": [
+      {
+        "module": "bioetl.application.control_plane.config_source_hashing",
+        "path": "src/bioetl/application/control_plane/config_source_hashing.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.application.core.exceptions_context",
+        "path": "src/bioetl/application/core/exceptions_context.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.application.lineage.serialization",
+        "path": "src/bioetl/application/lineage/serialization.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.application.normalization._chembl_units",
+        "path": "src/bioetl/application/normalization/_chembl_units.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.application.serialization.snapshot_serialization",
+        "path": "src/bioetl/application/serialization/snapshot_serialization.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.infrastructure.system.subprocess_boundary",
+        "path": "src/bioetl/infrastructure/system/subprocess_boundary.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      }
+    ]
   }
 }

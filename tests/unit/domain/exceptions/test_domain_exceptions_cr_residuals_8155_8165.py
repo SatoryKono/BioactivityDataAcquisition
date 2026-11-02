@@ -17,7 +17,10 @@ from bioetl.domain.exceptions import (
     ValidationError,
     get_domain_exception_context,
 )
-from bioetl.domain.exceptions._redaction import _redact_sequence
+from bioetl.application.core.exceptions_context import (
+    _redact_sequence,
+    get_structured_context,
+)
 from bioetl.domain.exceptions.base_exceptions import BioETLDomainError
 from bioetl.domain.exceptions.network_rate_limit_helpers import (
     resolve_rate_limit_params,
@@ -58,7 +61,7 @@ def test_redact_sequence_uses_plain_list_and_tuple() -> None:
 
 def test_bioetl_error_structured_context_redacts_secrets() -> None:
     err = BioETLError("boom", reason_code="R1", api_key="super-secret-key")
-    payload = err.to_structured_context(extra_token="also-secret")
+    payload = get_structured_context(err, extra_token="also-secret")
     assert payload["error_type"] == "BioETLError"
     assert payload["reason_code"] == "R1"
     assert "super-secret" not in str(payload.values())

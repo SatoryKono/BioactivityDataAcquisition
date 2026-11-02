@@ -60,6 +60,11 @@ from bioetl.domain.exceptions import (
     UploadError,
     ValidationError,
 )
+
+from bioetl.application.core.exceptions_context import (
+    get_exception_context,
+    get_structured_context,
+)
 from bioetl.domain.exceptions.network.timeout import TimeoutError as DomainTimeoutError
 from bioetl.domain.types import ErrorType
 
@@ -378,24 +383,24 @@ class TestErrorClassifier:
 
 
 class TestErrorContext:
-    """Tests for unified error context API (BioETLError.context)."""
+    """Tests for unified error context API via application get_exception_context."""
 
     def test_context_collects_public_attributes(self) -> None:
-        """The context property should collect all public instance attributes."""
+        """get_exception_context should collect all public instance attributes."""
         err = RateLimitError(provider="chembl", retry_after=60.0)
-        ctx = err.context
+        ctx = get_exception_context(err)
 
         assert ctx["provider"] == "chembl"
         assert ctx["retry_after"] == pytest.approx(60.0)
         assert len(ctx) == 2
 
     def test_context_excludes_private_attributes(self) -> None:
-        """The context property should exclude private attributes."""
+        """get_exception_context should exclude private attributes."""
         err = ApiError("test", status_code=500)
         # Manually add a private attribute
         err._internal = "should not appear"  # type: ignore[attr-defined]
 
-        ctx = err.context
+        ctx = get_exception_context(err)
         assert "_internal" not in ctx
         assert "message" in ctx
         assert "status_code" in ctx
@@ -403,7 +408,7 @@ class TestErrorContext:
     def test_context_with_none_values(self) -> None:
         """The context should include None values if they are set."""
         err = LockAcquisitionError("my_key", current_owner=None)
-        ctx = err.context
+        ctx = get_exception_context(err)
 
         assert ctx["key"] == "my_key"
         assert ctx["current_owner"] is None
@@ -416,14 +421,14 @@ class TestErrorContext:
             pass
 
         err = SimpleError("test message")
-        assert err.context == {}
+        assert get_exception_context(err) == {}
 
     def test_with_context_adds_attributes(self) -> None:
         """with_context should add extra attributes to the exception."""
         err = ApiError("Connection failed", status_code=500)
         err = err.with_context(endpoint="/api/v1/data", attempt=3)
 
-        ctx = err.context
+        ctx = get_exception_context(err)
         assert ctx["endpoint"] == "/api/v1/data"
         assert ctx["attempt"] == 3
         assert ctx["status_code"] == 500
@@ -443,7 +448,7 @@ class TestErrorContext:
             .with_context(retry_count=3)
         )
 
-        ctx = err.context
+        ctx = get_exception_context(err)
         assert ctx["host"] == "localhost"
         assert ctx["port"] == 8080
         assert ctx["retry_count"] == 3
@@ -459,7 +464,7 @@ class TestErrorContext:
             err.with_context(context={"nested": 1})
         with pytest.raises(ValueError, match="reserved or read-only"):
             err.with_context(reason_code="R1")
-        assert err.context == {"record_id": "r1"}
+        assert get_exception_context(err) == {"record_id": "r1"}
 
     def test_context_inheritance(self) -> None:
         """Subclass context should include parent class attributes."""
@@ -468,7 +473,7 @@ class TestErrorContext:
             "Service unavailable", service_name="chembl", status_code=503
         )
 
-        ctx = err.context
+        ctx = get_exception_context(err)
 
         # ExternalServiceError sets service_name and status_code
         assert ctx["service_name"] == "chembl"
@@ -493,7 +498,7 @@ class TestErrorContext:
     ) -> None:
         """Verify context extraction for various error types."""
         err = error_cls(*args)
-        ctx = err.context
+        ctx = get_exception_context(err)
 
         assert set(ctx.keys()) == expected_keys
 
@@ -505,7 +510,8 @@ class TestErrorContext:
     def test_to_structured_context_includes_error_metadata(self) -> None:
         """Structured payload should include type/category and extra context."""
         err = NetworkError("Connection refused").with_context(provider="chembl")
-        payload = err.to_structured_context(
+        payload = get_structured_context(
+            err,
             reason_code="CLI_TEST_ERROR",
             pipeline="chembl_activity",
         )

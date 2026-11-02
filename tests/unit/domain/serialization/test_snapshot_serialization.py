@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 from decimal import Decimal
 from uuid import UUID
-from bioetl.domain.serialization.snapshot_serialization import (
+from bioetl.application.serialization.snapshot_serialization import (
     normalize_snapshot,
     to_serializable_mapping,
 )

@@ -21,10 +21,8 @@ from typing import Any
 
 import yaml
 
-from bioetl.domain.control_plane.contract_registry_helpers import (
-    parse_semver,
-    resolve_path,
-)
+from bioetl.domain.control_plane.contract_registry_helpers import parse_semver
+from bioetl.infrastructure.control_plane.file_contract_registry_store import resolve_path
 from bioetl.domain.behavior.schema_classifier import create_schema_classifier
 from bioetl.domain.types.schema_policy import ChangeClassification
 

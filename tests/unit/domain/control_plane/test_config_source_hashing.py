@@ -34,7 +34,7 @@ import hashlib
 
 import pytest
 
-from bioetl.domain.control_plane.config_source_hashing import (
+from bioetl.application.control_plane.config_source_hashing import (
     CANONICAL_YAML_HASH_VERSION,
     RAW_BYTES_HASH_VERSION,
     compute_canonical_yaml_sha256,
