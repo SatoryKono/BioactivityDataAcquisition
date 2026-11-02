@@ -10,6 +10,10 @@ from functools import partial
 from bioetl.application.services.control_plane.workflow.ledger_service import (
     WorkflowLedgerService,
 )
+from bioetl.application.services.run_reports.observations import (
+    bind_run_observations,
+    reset_run_observations,
+)
 from bioetl.application.services.workflow.control_plane.execution_incremental_metadata import (
     extract_incremental_metadata,
 )
@@ -101,44 +105,50 @@ class WorkflowExecutionService:
             workflow_name=config.name,
             owner_id=lock_owner_id,
         )
+        # RF-004: one observation scope through prepare (create_manifest register)
+        # → runner finalize/report so registration soft-failures are not dropped.
+        observation_token = bind_run_observations()
         try:
-            prepared = prepare_workflow_execution(
-                config=config,
-                launch_context=resolved_launch_context,
-                resume_last=resume_last,
-                resume_manifest_id=resume_manifest_id,
-                resume_run_id=resume_run_id,
-                force_steps=force_steps,
-                repair_steps=repair_steps,
-                manifest_service=self.manifest_service,
-                workflow_state_port=self.workflow_state_port,
-                now_factory=self.now_factory,
-                run_id_factory=lambda: lock_owner_id,
-                incremental=incremental,
-            )
-            ledger = self.workflow_ledger_factory(
-                self.workflow_ledger_port,
-                prepared.manifest,
-            )
-            return await _run_locked_workflow(
-                runner=self.workflow_runner,
-                recorder=WorkflowExecutionRecorder(
-                    ledger=ledger,
-                    state_port=self.workflow_state_port,
-                    state=prepared.state,
-                ),
-                prepared_manifest=prepared.manifest,
-                completed_step_ids=prepared.completed_step_ids,
-                completed_transform_fingerprints=(
-                    prepared.completed_transform_fingerprints
-                ),
-                config=prepared.config,
-                resumed=prepared.resumed,
-                repair_steps=repair_steps,
-                force_steps=force_steps,
-                now_factory=self.now_factory,
-                incremental=incremental,
-            )
+            try:
+                prepared = prepare_workflow_execution(
+                    config=config,
+                    launch_context=resolved_launch_context,
+                    resume_last=resume_last,
+                    resume_manifest_id=resume_manifest_id,
+                    resume_run_id=resume_run_id,
+                    force_steps=force_steps,
+                    repair_steps=repair_steps,
+                    manifest_service=self.manifest_service,
+                    workflow_state_port=self.workflow_state_port,
+                    now_factory=self.now_factory,
+                    run_id_factory=lambda: lock_owner_id,
+                    incremental=incremental,
+                )
+                ledger = self.workflow_ledger_factory(
+                    self.workflow_ledger_port,
+                    prepared.manifest,
+                )
+                return await _run_locked_workflow(
+                    runner=self.workflow_runner,
+                    recorder=WorkflowExecutionRecorder(
+                        ledger=ledger,
+                        state_port=self.workflow_state_port,
+                        state=prepared.state,
+                    ),
+                    prepared_manifest=prepared.manifest,
+                    completed_step_ids=prepared.completed_step_ids,
+                    completed_transform_fingerprints=(
+                        prepared.completed_transform_fingerprints
+                    ),
+                    config=prepared.config,
+                    resumed=prepared.resumed,
+                    repair_steps=repair_steps,
+                    force_steps=force_steps,
+                    now_factory=self.now_factory,
+                    incremental=incremental,
+                )
+            finally:
+                reset_run_observations(observation_token)
         finally:
             await self.workflow_lock_port.release(
                 lock_key,

@@ -10,6 +10,9 @@ from __future__ import annotations
 
 import asyncio
 
+from bioetl.application.services.control_plane.evidence_location import (
+    record_registration_soft_failure_observation,
+)
 from bioetl.application.services.run_reports.control_plane_snapshot import (
     archive_run_completion,
     capture_run_completion,
@@ -379,9 +382,17 @@ class PipelineRunnerService:
         if self.evidence_location_verify is not None:
             try:
                 self.evidence_location_verify(result, options)
-            except Exception:
+            except Exception as exc:
                 # Consistency diagnostics must not mask processing success.
-                pass
+                record_registration_soft_failure_observation(
+                    code="verify_exception",
+                    detail=f"{type(exc).__name__}: {exc}",
+                    facts={
+                        "kind": "pipeline",
+                        "owner": str(result.pipeline_name),
+                        "run_id": str(result.run_id),
+                    },
+                )
         finalized = finalize_pipeline_run_report(
             result=result,
             options=options,

@@ -16,9 +16,12 @@ from bioetl.application.services.execution.workflow_runner_step_execution import
     execute_pipeline_step,
     execute_transform_step,
 )
+from bioetl.application.services.control_plane.evidence_location import (
+    record_registration_soft_failure_observation,
+)
 from bioetl.application.services.run_reports.observations import (
-    bind_run_observations,
-    reset_run_observations,
+    bind_run_observations_if_unbound,
+    reset_run_observations_if_bound,
 )
 from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowRunExecutionResult,
@@ -235,15 +238,23 @@ class WorkflowRunnerService:
                 duration_seconds=perf_counter() - started_monotonic,
             )
         )
-        # RF-004: keep soft verification in a report-bound observation scope.
-        observation_token = bind_run_observations()
+        # RF-004: reuse outer prepare→report scope when present; else bind locally.
+        observation_token = bind_run_observations_if_unbound()
         try:
             if self.evidence_location_verify is not None:
                 try:
                     self.evidence_location_verify(identified_result)
-                except Exception:
+                except Exception as exc:
                     # Consistency diagnostics must not mask processing success.
-                    pass
+                    record_registration_soft_failure_observation(
+                        code="verify_exception",
+                        detail=f"{type(exc).__name__}: {exc}",
+                        facts={
+                            "kind": "workflow",
+                            "owner": str(identified_result.workflow_name),
+                            "run_id": str(identified_result.workflow_run_id or ""),
+                        },
+                    )
             reported = attach_workflow_run_report(
                 config=config,
                 result=identified_result,
@@ -258,7 +269,7 @@ class WorkflowRunnerService:
             )
             return reported
         finally:
-            reset_run_observations(observation_token)
+            reset_run_observations_if_bound(observation_token)
 
     def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
         """Record planned pipeline scopes before workflow step execution."""
