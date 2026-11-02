@@ -92,8 +92,7 @@ def _git_env() -> dict[str, str]:
 def _git_stdout(repo: Path, args: list[str]) -> str:
     command = ensure_safe_cli_argv(["git", *args])
     try:
-        completed = (
-            subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
+        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
                 command,
                 cwd=repo,
                 capture_output=True,
@@ -101,7 +100,6 @@ def _git_stdout(repo: Path, args: list[str]) -> str:
                 check=False,
                 env=_git_env(),
                 timeout=_GIT_TIMEOUT_SECONDS,
-            )
         )
     except subprocess.TimeoutExpired as exc:
         raise RuntimeError("git command timed out") from exc
@@ -753,4 +751,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
