@@ -97,6 +97,7 @@ flowchart LR
 | `application.services`         | `domain.normalization`                     |      22 |
 | `composition.bootstrap`        | `application.composite`                    |      22 |
 | `composition.factories`        | `domain.schemas`                           |      22 |
+| `composition.runtime_builders` | `infrastructure.config`                    |      22 |
 | `composition.factories`        | `application.services`                     |      21 |
 | `composition.factories`        | `domain.types`                             |      21 |
 | `interfaces.cli`               | `composition.control_plane_service_access` |      21 |
