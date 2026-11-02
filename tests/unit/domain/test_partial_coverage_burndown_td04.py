@@ -102,7 +102,9 @@ from bioetl.domain.filtering.silver_filter_identity import (
     normalize_silver_filter_compatibility_mode,
 )
 from bioetl.domain.mapping.organism_classification import OrganismClassificationResult
-from bioetl.application.normalization._chembl_units import _legacy_qudt_identifier_from_uri
+from bioetl.application.normalization._chembl_units import (
+    _legacy_qudt_identifier_from_uri,
+)
 from bioetl.domain.normalization.fingerprints import (
     compute_manifest_execution_fingerprint,
 )
