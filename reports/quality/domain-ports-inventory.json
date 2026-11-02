@@ -87,6 +87,18 @@
       "runtime_checkable": true
     },
     {
+      "line": 26,
+      "name": "RunEvidenceLocationReadPort",
+      "path": "src/bioetl/domain/ports/control_plane/run_evidence_location.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 66,
+      "name": "RunEvidenceLocationRegisterPort",
+      "path": "src/bioetl/domain/ports/control_plane/run_evidence_location.py",
+      "runtime_checkable": true
+    },
+    {
       "line": 14,
       "name": "RunLedgerPort",
       "path": "src/bioetl/domain/ports/control_plane/run_ledger.py",
@@ -546,11 +558,11 @@
   "ports_root": "src/bioetl/domain/ports",
   "schema_version": 1,
   "summary": {
-    "port_module_files": 71,
-    "port_protocol_classes": 89,
+    "port_module_files": 72,
+    "port_protocol_classes": 91,
     "runtime_checkable_coverage_pct": 100.0,
-    "runtime_checkable_decorator_count": 101,
-    "runtime_checkable_port_count": 89,
-    "scanned_python_files": 80
+    "runtime_checkable_decorator_count": 103,
+    "runtime_checkable_port_count": 91,
+    "scanned_python_files": 81
   }
 }
