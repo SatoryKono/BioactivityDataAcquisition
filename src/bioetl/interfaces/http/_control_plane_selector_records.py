@@ -283,6 +283,9 @@ def _workflow_candidates(
     workflow_aliases: WorkflowAliasMap | None = None,
 ) -> tuple[str, ...]:
     candidates: list[str] = []
+    # Top-level RunManifest.workflow_name is authoritative declared membership
+    # (same surface A2 reads); nested ctx/aliases remain fallbacks.
+    _append_optional_candidate(candidates, manifest.workflow_name)
     for payload in (
         manifest.launch_context,
         manifest.runtime_config,

@@ -292,6 +292,32 @@ def test_corrupt_reports_are_errors(tmp_path: Path, damage: str) -> None:
         _options(tmp_path)
 
 
+def test_verified_identity_for_run_ignores_unrelated_corrupt_report(
+    tmp_path: Path,
+) -> None:
+    """Exact run_id scope must not trip on a sibling corrupt report."""
+    from bioetl.interfaces.http._report_selector_options import (
+        verified_report_identity_for_run,
+    )
+
+    _report(tmp_path, run_id="selected")
+    _report(tmp_path, run_id="unrelated", pipeline_name="chembl_activity")
+    identity = verified_report_identity_for_run(
+        "selected",
+        {
+            "workflow": (),
+            "pipeline": ("chembl_assay",),
+            "run_type": (),
+            "run_status": (),
+            "run_id": (),
+        },
+        root=tmp_path,
+    )
+    assert identity is not None
+    assert identity["run_id"] == "selected"
+    assert identity["pipeline_name"] == "chembl_assay"
+
+
 def test_report_run_id_label_and_catalog_value_deduplicate(tmp_path: Path) -> None:
     _report(tmp_path)
     payload = supplement_report_options(

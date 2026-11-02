@@ -184,9 +184,15 @@ def verified_report_identity_for_run(
     store: RunReportStorePort | None = None,
     entries: list[ReportIndexEntry] | None = None,
 ) -> dict[str, object] | None:
-    """Return the verified report identity for one run_id in scope, if present."""
+    """Return the verified report identity for one run_id in scope, if present.
+
+    The requested ``run_id`` is injected into scopes **before** identity checks so
+    unrelated corrupt reports in the same pipeline catalog cannot raise
+    ``ValueError`` and block a good explicit UUID.
+    """
+    narrowed = {**scopes, "run_id": (run_id,)}
     for candidate_id, _started, identity in _iter_verified_report_identities(
-        scopes, root=root, store=store, entries=entries
+        narrowed, root=root, store=store, entries=entries
     ):
         if candidate_id == run_id:
             return identity

@@ -573,3 +573,36 @@ def test_a2_pipeline_all_selected_has_concrete_pipeline() -> None:
     assert isinstance(selected, dict)
     assert selected["run_id"] == str(newer.run_id)
     assert selected["pipeline"] == "chembl_assay"
+
+
+def test_a2_keeps_top_level_workflow_name_pick_without_workflow_manifests() -> None:
+    """A2 UUID must survive selector-context when membership is only workflow_name."""
+    from bioetl.interfaces.http.control_plane_selector_context import (
+        build_selector_context_payload,
+    )
+    from bioetl.interfaces.http._control_plane_selector_payloads import RESOLVED_VIA_A2
+
+    matching = _manifest(3, top_level_workflow="chembl_core")
+    assert matching.launch_context == {}
+    latest = resolve_a2_latest_run_id(
+        manifests=(matching,),
+        ledger_port=None,
+        workflow_manifests=(),
+        pipeline="chembl_assay",
+        query={"pipeline": "chembl_assay", "workflow": "chembl_core"},
+    )
+    assert latest == str(matching.run_id)
+    payload = build_selector_context_payload(
+        manifests=(matching,),
+        ledger_port=None,
+        workflow_manifests=(),
+        selected_workflows=("chembl_core",),
+        selected_pipelines=("chembl_assay",),
+        auto_selected_run_id=latest,
+        a2_consulted=True,
+    )
+    selected = payload["selected"]
+    assert payload["resolved_via"] == RESOLVED_VIA_A2
+    assert isinstance(selected, dict)
+    assert selected["run_id"] == str(matching.run_id)
+    assert selected["pipeline"] == "chembl_assay"
