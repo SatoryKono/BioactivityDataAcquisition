@@ -1577,6 +1577,15 @@ def test_scope_mismatch_and_selected_status_defensive_paths(
         {"run_type": "backfill", "workflow_id": "wf-a"},
         {"run_type": "incremental", "workflow": "wf-a"},
     )
+    # Strip must match selected_run_status_key so spaced encodings share scope.
+    assert scope_matches(
+        {"run_type": "incremental", "workflow_id": "wf-a"},
+        {"run_type": "  incremental  ", "workflow": " wf-a "},
+    )
+    assert scope_matches(
+        {"run_type": "incremental", "workflow_id": "wf-a"},
+        {"run_type": "backfill, incremental", "workflow": "wf-a"},
+    )
     monkeypatch.setattr(run_report_ops, "_safe_segment", lambda _value: "other")
     with pytest.raises(ValueError, match="invalid_run_id"):
         _selected_pipeline(".*", "../bad", tmp_path)

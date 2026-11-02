@@ -11,6 +11,7 @@ server stop.
 from __future__ import annotations
 
 import asyncio
+import logging
 from collections import OrderedDict
 from collections.abc import Awaitable, Callable, Mapping
 from copy import deepcopy
@@ -22,6 +23,8 @@ from bioetl.interfaces.http._forensic_request_budget import ForensicEndpointUnav
 FRESH_SECONDS = 30.0
 MAX_AGE_SECONDS = 90.0
 MAX_ENTRIES = 64
+_CLOSE_TIMEOUT_SECONDS = 2.0
+_LOG = logging.getLogger(__name__)
 type StatusKey = tuple[str, str, str, str, str, str]
 type StatusLoader = Callable[[], Awaitable[dict[str, object]]]
 
@@ -64,6 +67,7 @@ def _is_query_error_payload(payload: Mapping[str, object]) -> bool:
         "deadline_exceeded",
         "request_failed",
         "shutting_down",
+        "selector_context_mismatch",
     }
 
 
@@ -126,12 +130,33 @@ class SelectedRunStatusCache:
         if task is None:
             task = asyncio.create_task(self._load(key, entry, loader))
             self._tasks[key] = task
+            self._observe_background_task(task)
 
         if state == "stale" and entry.payload is not None:
             # Do not await; refresh continues in background.
             return deepcopy(entry.payload)
 
         return deepcopy(await asyncio.shield(task))
+
+    @staticmethod
+    def _observe_background_task(task: asyncio.Task[dict[str, object]]) -> None:
+        """Retrieve background exceptions so the event loop does not warn.
+
+        Cold waiters still observe the same failure when they await ``task``.
+        """
+
+        def _done(done: asyncio.Task[dict[str, object]]) -> None:
+            if done.cancelled():
+                return
+            exc = done.exception()
+            if exc is not None:
+                _LOG.warning(
+                    "selected_run_status background refresh failed: %s",
+                    type(exc).__name__,
+                    exc_info=exc,
+                )
+
+        task.add_done_callback(_done)
 
     async def _load(
         self,
@@ -162,8 +187,16 @@ class SelectedRunStatusCache:
 
     async def close(self) -> None:
         self._closed = True
-        if self._tasks:
-            await asyncio.wait(tuple(self._tasks.values()), timeout=2.0)
+        if not self._tasks:
+            return
+        pending = tuple(self._tasks.values())
+        _done, still = await asyncio.wait(pending, timeout=_CLOSE_TIMEOUT_SECONDS)
+        for task in still:
+            task.cancel()
+        if still:
+            # Drain cancellations inside the same shutdown budget; do not start
+            # another full timeout window.
+            await asyncio.gather(*still, return_exceptions=True)
 
 
 __all__ = [
