@@ -7,12 +7,14 @@ evidence, or invent READY / objects verdicts from the locator alone.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from dataclasses import dataclass
-from enum import StrEnum
-from pathlib import Path
-from typing import Protocol, runtime_checkable
 
+from bioetl.application.services.control_plane.evidence_location.models import (
+    EvidenceLocationLegacyRootPolicy,
+    EvidenceLocationResolveResult,
+    EvidenceReadContext,
+    EvidenceReadContextFactoryProtocol,
+)
 from bioetl.application.services.run_reports.evidence_location_paths import (
     EvidenceRootAliasRegistry,
 )
@@ -22,10 +24,7 @@ from bioetl.domain.control_plane.run_evidence_location import (
     EvidenceLocationKind,
     EvidenceLocationLookupCode,
     EvidenceLocationLookupResult,
-    RunEvidenceLocation,
 )
-from bioetl.domain.control_plane.run_manifest import RunManifest
-from bioetl.domain.control_plane.workflow_manifest import WorkflowManifest
 from bioetl.domain.ports import RunEvidenceLocationReadPort
 from bioetl.domain.types import RunID
 
@@ -34,81 +33,8 @@ __all__ = [
     "EvidenceLocationResolveResult",
     "EvidenceLocationResolver",
     "EvidenceReadContext",
-    "EvidenceReadContextOpener",
+    "EvidenceReadContextFactoryProtocol",
 ]
-
-
-class EvidenceLocationLegacyRootPolicy(StrEnum):
-    """RF-003 policy for ``location_missing`` without inventing isolated roots.
-
-    ``REQUIRE_EXPLICIT_RECORD`` — missing locator fails closed (no data root).
-    ``ALLOW_STANDARD_ALIAS_BASE`` — open the trusted alias base (equivalent to
-    explicit ``relative_data_root="."``). Never scans for foreign isolated
-    workflow directories.
-    """
-
-    REQUIRE_EXPLICIT_RECORD = "require_explicit_record"
-    ALLOW_STANDARD_ALIAS_BASE = "allow_standard_alias_base"
-
-
-@runtime_checkable
-class EvidenceReadContext(Protocol):
-    """Read-only control-plane view bound to one data root."""
-
-    @property
-    def data_root(self) -> Path:
-        """Absolute data root selected for this resolve."""
-        ...
-
-    def get_manifest_by_run_id(self, run_id: RunID) -> RunManifest | None:
-        """Load a manifest by run id from the bound root, or ``None``."""
-        ...
-
-    def get_workflow_manifest_by_run_id(self, run_id: RunID) -> WorkflowManifest | None:
-        """Load a workflow manifest by run id from the bound root, or ``None``."""
-        ...
-
-    def verify_replay_objects(self, manifest: RunManifest) -> Mapping[str, bool]:
-        """Re-validate saved config / lock / Bronze bytes for ``manifest``."""
-        ...
-
-
-@runtime_checkable
-class EvidenceReadContextOpener(Protocol):
-    """Composition-injected factory that opens stores under a trusted base."""
-
-    def open(
-        self,
-        data_root: Path,
-        *,
-        trusted_alias_base: Path,
-    ) -> EvidenceReadContext:
-        """Open read-only ports for ``data_root`` after containment checks."""
-        ...
-
-
-@dataclass(frozen=True, slots=True)
-class EvidenceLocationResolveResult:
-    """Resolver outcome; lookup codes stay distinct from replay verdicts."""
-
-    lookup: EvidenceLocationLookupResult
-    requested_kind: EvidenceLocationKind | str | None = None
-    data_root: Path | None = None
-    context: EvidenceReadContext | None = None
-    used_legacy_standard_root: bool = False
-    detail: str | None = None
-
-    @property
-    def code(self) -> EvidenceLocationLookupCode:
-        return self.lookup.code
-
-    @property
-    def location(self) -> RunEvidenceLocation | None:
-        return self.lookup.location
-
-    @property
-    def is_open(self) -> bool:
-        return self.context is not None and self.data_root is not None
 
 
 @dataclass(frozen=True, slots=True)
@@ -117,7 +43,7 @@ class EvidenceLocationResolver:
 
     locations: RunEvidenceLocationReadPort
     aliases: EvidenceRootAliasRegistry
-    opener: EvidenceReadContextOpener
+    opener: EvidenceReadContextFactoryProtocol
     legacy_root_policy: EvidenceLocationLegacyRootPolicy = (
         EvidenceLocationLegacyRootPolicy.ALLOW_STANDARD_ALIAS_BASE
     )
@@ -147,7 +73,6 @@ class EvidenceLocationResolver:
             return self._open_from_location(lookup, requested_kind=kind)
         if lookup.code is EvidenceLocationLookupCode.LOCATION_MISSING:
             return self._open_legacy_or_missing(lookup, requested_kind=kind)
-        # identity_conflict / location_invalid — fail closed
         return EvidenceLocationResolveResult(
             lookup=lookup,
             requested_kind=kind,
@@ -219,25 +144,9 @@ class EvidenceLocationResolver:
                 trusted_alias_base=trusted_base,
             )
         except EvidenceLocationInvalidError as exc:
-            return EvidenceLocationResolveResult(
-                lookup=EvidenceLocationLookupResult(
-                    code=EvidenceLocationLookupCode.LOCATION_INVALID,
-                    location=location,
-                    detail=str(exc),
-                ),
-                requested_kind=requested_kind,
-                detail=str(exc),
-            )
+            return self._invalid_open(lookup, requested_kind, str(exc))
         except (OSError, ValueError) as exc:
-            return EvidenceLocationResolveResult(
-                lookup=EvidenceLocationLookupResult(
-                    code=EvidenceLocationLookupCode.LOCATION_INVALID,
-                    location=location,
-                    detail=str(exc),
-                ),
-                requested_kind=requested_kind,
-                detail=str(exc),
-            )
+            return self._invalid_open(lookup, requested_kind, str(exc))
         return EvidenceLocationResolveResult(
             lookup=lookup,
             requested_kind=requested_kind,
@@ -289,4 +198,21 @@ class EvidenceLocationResolver:
             context=context,
             used_legacy_standard_root=True,
             detail="legacy_standard_alias_base",
+        )
+
+    @staticmethod
+    def _invalid_open(
+        lookup: EvidenceLocationLookupResult,
+        requested_kind: EvidenceLocationKind | str,
+        detail: str,
+    ) -> EvidenceLocationResolveResult:
+        location = lookup.location
+        return EvidenceLocationResolveResult(
+            lookup=EvidenceLocationLookupResult(
+                code=EvidenceLocationLookupCode.LOCATION_INVALID,
+                location=location,
+                detail=detail,
+            ),
+            requested_kind=requested_kind,
+            detail=detail,
         )

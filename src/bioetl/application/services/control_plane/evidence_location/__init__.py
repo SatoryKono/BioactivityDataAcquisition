@@ -8,10 +8,10 @@ from __future__ import annotations
 
 from bioetl.application.services.control_plane.evidence_location.resolver import (
     EvidenceLocationLegacyRootPolicy,
-    EvidenceLocationResolver,
     EvidenceLocationResolveResult,
+    EvidenceLocationResolver,
     EvidenceReadContext,
-    EvidenceReadContextOpener,
+    EvidenceReadContextFactoryProtocol,
 )
 
 __all__ = [
@@ -19,5 +19,5 @@ __all__ = [
     "EvidenceLocationResolveResult",
     "EvidenceLocationResolver",
     "EvidenceReadContext",
-    "EvidenceReadContextOpener",
+    "EvidenceReadContextFactoryProtocol",
 ]
