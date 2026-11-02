@@ -25,7 +25,7 @@ from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
-from bioetl.domain import ports
+import bioetl.domain.ports as ports
 from bioetl.domain.value_objects.dq_anomaly import DQAnomaly
 
 
@@ -85,7 +85,8 @@ def _is_ellipsis_expr(node: ast.expr) -> bool:
     if isinstance(node, ast.Constant) and node.value is ...:
         return True
     return bool(
-        hasattr(ast, "Ellipsis") and isinstance(node, ast.Ellipsis)  # type: ignore[attr-defined]
+        hasattr(ast, "Ellipsis")
+        and isinstance(node, getattr(ast, "Ellipsis", type(None)))
     )
 
 
@@ -1129,3 +1130,6 @@ class TestMemoryMonitorImplementationContract:
             "NoOpMemoryMonitor MUST implement MemoryMonitorPort protocol. "
             "Check that all required methods are present."
         )
+
+
+# ============================================================================
