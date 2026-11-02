@@ -6,6 +6,7 @@ base. Used when opening a resolved data root — never as a READY verdict source
 
 from __future__ import annotations
 
+import os
 import stat
 from pathlib import Path
 
@@ -14,9 +15,25 @@ from bioetl.domain.control_plane.run_evidence_location import (
 )
 
 __all__ = [
+    "EVIDENCE_LOCATION_CATALOG_PATH_FIELD",
     "assert_path_within_trusted_base",
     "reject_symlink_or_junction",
 ]
+
+# Shared field_name for catalog containment checks (store + publish adapter).
+EVIDENCE_LOCATION_CATALOG_PATH_FIELD = "evidence location catalog path"
+
+
+def _normalize_resolved_path(path: Path) -> Path:
+    """Normalize Win32 extended-length paths before containment comparison."""
+    if os.name != "nt":
+        return path
+    text = str(path)
+    if text.startswith("\\\\?\\UNC\\"):
+        return Path("\\\\" + text[8:])
+    if text.startswith("\\\\?\\"):
+        return Path(text[4:])
+    return path
 
 
 def reject_symlink_or_junction(path: Path, *, field_name: str = "path") -> None:
@@ -54,7 +71,7 @@ def _require_absolute_pair(
 
 def _resolve_trusted_base(base: Path) -> Path:
     try:
-        return base.resolve(strict=False)
+        return _normalize_resolved_path(base.resolve(strict=False))
     except OSError as exc:
         raise EvidenceLocationInvalidError(
             "trusted evidence base is not resolvable"
@@ -73,7 +90,7 @@ def _relative_under_base(
     except ValueError:
         pass
     try:
-        target_resolved = target.resolve(strict=False)
+        target_resolved = _normalize_resolved_path(target.resolve(strict=False))
     except OSError as exc:
         raise EvidenceLocationInvalidError(
             f"{field_name} is not resolvable within the trusted base"
@@ -115,7 +132,7 @@ def _finalize_within_base(
     field_name: str,
 ) -> Path:
     try:
-        final = target.resolve(strict=False)
+        final = _normalize_resolved_path(target.resolve(strict=False))
     except OSError as exc:
         raise EvidenceLocationInvalidError(
             f"{field_name} is not resolvable within the trusted base"

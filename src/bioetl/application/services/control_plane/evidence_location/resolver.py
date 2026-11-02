@@ -63,6 +63,10 @@ class EvidenceReadContext(Protocol):
         """Load a manifest by run id from the bound root, or ``None``."""
         ...
 
+    def get_workflow_manifest_by_run_id(self, run_id: object) -> object | None:
+        """Load a workflow manifest by run id from the bound root, or ``None``."""
+        ...
+
     def verify_replay_objects(self, manifest: object) -> Mapping[str, bool]:
         """Re-validate saved config / lock / Bronze bytes for ``manifest``."""
         ...
@@ -87,6 +91,7 @@ class EvidenceLocationResolveResult:
     """Resolver outcome; lookup codes stay distinct from replay verdicts."""
 
     lookup: EvidenceLocationLookupResult
+    requested_kind: EvidenceLocationKind | str | None = None
     data_root: Path | None = None
     context: EvidenceReadContext | None = None
     used_legacy_standard_root: bool = False
@@ -138,11 +143,15 @@ class EvidenceLocationResolver:
         )
         if lookup.code is EvidenceLocationLookupCode.FOUND:
             assert lookup.location is not None
-            return self._open_from_location(lookup)
+            return self._open_from_location(lookup, requested_kind=kind)
         if lookup.code is EvidenceLocationLookupCode.LOCATION_MISSING:
-            return self._open_legacy_or_missing(lookup)
+            return self._open_legacy_or_missing(lookup, requested_kind=kind)
         # identity_conflict / location_invalid — fail closed
-        return EvidenceLocationResolveResult(lookup=lookup, detail=lookup.detail)
+        return EvidenceLocationResolveResult(
+            lookup=lookup,
+            requested_kind=kind,
+            detail=lookup.detail,
+        )
 
     def load_manifest(
         self,
@@ -161,7 +170,23 @@ class EvidenceLocationResolver:
                 location=result.location,
                 detail=result.detail or "context_not_open",
             )
-        manifest = result.context.get_manifest_by_run_id(run_id)
+        try:
+            if result.requested_kind == EvidenceLocationKind.WORKFLOW:
+                manifest = result.context.get_workflow_manifest_by_run_id(run_id)
+            else:
+                manifest = result.context.get_manifest_by_run_id(run_id)
+        except EvidenceLocationInvalidError as exc:
+            return EvidenceLocationLookupResult(
+                code=EvidenceLocationLookupCode.LOCATION_INVALID,
+                location=result.location,
+                detail=str(exc),
+            )
+        except (OSError, ValueError) as exc:
+            return EvidenceLocationLookupResult(
+                code=EvidenceLocationLookupCode.LOCATION_INVALID,
+                location=result.location,
+                detail=str(exc),
+            )
         if manifest is None:
             return EvidenceLocationLookupResult(
                 code=EvidenceLocationLookupCode.MANIFEST_MISSING,
@@ -177,6 +202,8 @@ class EvidenceLocationResolver:
     def _open_from_location(
         self,
         lookup: EvidenceLocationLookupResult,
+        *,
+        requested_kind: EvidenceLocationKind | str,
     ) -> EvidenceLocationResolveResult:
         location = lookup.location
         assert location is not None
@@ -197,6 +224,7 @@ class EvidenceLocationResolver:
                     location=location,
                     detail=str(exc),
                 ),
+                requested_kind=requested_kind,
                 detail=str(exc),
             )
         except (OSError, ValueError) as exc:
@@ -206,10 +234,12 @@ class EvidenceLocationResolver:
                     location=location,
                     detail=str(exc),
                 ),
+                requested_kind=requested_kind,
                 detail=str(exc),
             )
         return EvidenceLocationResolveResult(
             lookup=lookup,
+            requested_kind=requested_kind,
             data_root=context.data_root,
             context=context,
             used_legacy_standard_root=location.relative_data_root == ".",
@@ -218,12 +248,17 @@ class EvidenceLocationResolver:
     def _open_legacy_or_missing(
         self,
         lookup: EvidenceLocationLookupResult,
+        *,
+        requested_kind: EvidenceLocationKind | str,
     ) -> EvidenceLocationResolveResult:
         if (
             self.legacy_root_policy
             is not EvidenceLocationLegacyRootPolicy.ALLOW_STANDARD_ALIAS_BASE
         ):
-            return EvidenceLocationResolveResult(lookup=lookup)
+            return EvidenceLocationResolveResult(
+                lookup=lookup,
+                requested_kind=requested_kind,
+            )
         try:
             trusted_base = self.aliases.absolute_base(DEFAULT_EVIDENCE_ROOT_ALIAS)
             data_root = self.aliases.resolve_data_root(
@@ -237,15 +272,18 @@ class EvidenceLocationResolver:
         except EvidenceLocationInvalidError as exc:
             return EvidenceLocationResolveResult(
                 lookup=lookup,
+                requested_kind=requested_kind,
                 detail=str(exc),
             )
         except (OSError, ValueError) as exc:
             return EvidenceLocationResolveResult(
                 lookup=lookup,
+                requested_kind=requested_kind,
                 detail=str(exc),
             )
         return EvidenceLocationResolveResult(
             lookup=lookup,
+            requested_kind=requested_kind,
             data_root=context.data_root,
             context=context,
             used_legacy_standard_root=True,

@@ -19,6 +19,7 @@ from bioetl.application.services.run_reports.evidence_location_paths import (
 )
 from bioetl.domain.control_plane.run_evidence_location import (
     DEFAULT_EVIDENCE_ROOT_ALIAS,
+    EvidenceLocationInvalidError,
     EvidenceLocationKind,
     EvidenceLocationLookupCode,
     build_run_evidence_location,
@@ -32,6 +33,12 @@ from bioetl.infrastructure.control_plane.file_evidence_location_store import (
 )
 from bioetl.infrastructure.control_plane.file_evidence_read_context import (
     FileEvidenceReadContextFactory,
+)
+from bioetl.infrastructure.control_plane.file_run_manifest_store import (
+    FileRunManifestStore,
+)
+from bioetl.infrastructure.control_plane.file_workflow_manifest_store import (
+    FileWorkflowManifestStore,
 )
 from bioetl.infrastructure.control_plane.replay_object_verifier import (
     ReplayObjectVerifier,
@@ -267,3 +274,61 @@ def test_explicit_dot_relative_uses_standard_root(tmp_path: Path) -> None:
     assert resolved.code is EvidenceLocationLookupCode.FOUND
     assert resolved.data_root == data_root
     assert resolved.used_legacy_standard_root is True
+
+
+def test_context_rechecks_child_paths_before_manifest_read(tmp_path: Path) -> None:
+    data_root = (tmp_path / "data").resolve()
+    data_root.mkdir()
+    context = FileEvidenceReadContextFactory().open(
+        data_root,
+        trusted_alias_base=data_root,
+    )
+    outside = tmp_path / "outside-output"
+    outside.mkdir()
+    try:
+        (data_root / "output").symlink_to(outside, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"symlink unavailable: {exc}")
+
+    with pytest.raises(EvidenceLocationInvalidError, match="escapes|symlink"):
+        context.get_manifest_by_run_id(UUID(_RUN_A))
+
+
+def test_workflow_location_reads_workflow_manifest_store(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    resolver, store, _data_root = _resolver(tmp_path)
+    workflow_location = _location(
+        kind=EvidenceLocationKind.WORKFLOW,
+        owner="workflow-a",
+        run_id=_WF,
+        workflow_run_id=None,
+    )
+    store.register(workflow_location)
+    workflow_manifest = SimpleNamespace(workflow_run_id=UUID(_WF))
+    calls: list[UUID] = []
+
+    def fail_pipeline_lookup(_self: object, _run_id: object) -> None:
+        pytest.fail("workflow lookup must not use the pipeline manifest store")
+
+    def get_workflow_manifest(_self: object, run_id: UUID) -> SimpleNamespace:
+        calls.append(run_id)
+        return workflow_manifest
+
+    monkeypatch.setattr(FileRunManifestStore, "get_by_run_id", fail_pipeline_lookup)
+    monkeypatch.setattr(
+        FileWorkflowManifestStore,
+        "get_by_run_id",
+        get_workflow_manifest,
+    )
+
+    resolved = resolver.resolve(
+        kind=EvidenceLocationKind.WORKFLOW,
+        owner="workflow-a",
+        run_id=_WF,
+    )
+    manifest_lookup = resolver.load_manifest(resolved, run_id=UUID(_WF))
+
+    assert manifest_lookup.code is EvidenceLocationLookupCode.FOUND
+    assert calls == [UUID(_WF)]

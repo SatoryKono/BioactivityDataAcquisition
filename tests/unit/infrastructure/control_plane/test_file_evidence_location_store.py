@@ -12,6 +12,7 @@ import pytest
 from bioetl.domain.control_plane.run_evidence_location import (
     DEFAULT_EVIDENCE_ROOT_ALIAS,
     EvidenceLocationConflictError,
+    EvidenceLocationInvalidError,
     EvidenceLocationKind,
     EvidenceLocationLookupCode,
     EvidenceLocationRegisterOutcome,
@@ -148,3 +149,27 @@ def test_lookup_is_bounded_exact_path_not_rglob(tmp_path: Path) -> None:
     missing = store.lookup(kind="pipeline", owner="chembl_assay", run_id="no-such-run")
     assert missing.code is EvidenceLocationLookupCode.LOCATION_MISSING
     assert missing.location is None
+
+
+def test_catalog_symlink_escape_is_rejected_for_lookup_and_register(
+    tmp_path: Path,
+) -> None:
+    report_root = tmp_path / "run-reports"
+    report_root.mkdir()
+    outside = tmp_path / "outside-catalog"
+    outside.mkdir()
+    catalog = report_root / "_evidence-locations"
+    try:
+        catalog.symlink_to(outside, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"symlink unavailable: {exc}")
+
+    store = FileEvidenceLocationStore(report_root=report_root)
+    # lookup classifies path-safety failures; register raises fail-closed.
+    looked_up = store.lookup(kind="pipeline", owner="chembl_assay", run_id=_RUN_A)
+    assert looked_up.code is EvidenceLocationLookupCode.LOCATION_INVALID
+    assert looked_up.detail is not None
+    assert "symlink" in looked_up.detail or "escapes" in looked_up.detail
+    with pytest.raises(EvidenceLocationInvalidError, match="symlink|escapes"):
+        store.register(_location())
+    assert list(outside.iterdir()) == []

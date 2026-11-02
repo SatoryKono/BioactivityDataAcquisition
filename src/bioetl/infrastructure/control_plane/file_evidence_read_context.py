@@ -7,7 +7,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.control_plane import RunManifest, WorkflowManifest
+from bioetl.domain.control_plane.run_evidence_location import (
+    EvidenceLocationInvalidError,
+)
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane.evidence_location_path_safety import (
     assert_path_within_trusted_base,
@@ -53,11 +56,31 @@ class FileEvidenceReadContext:
 
     def get_manifest_by_run_id(self, run_id: RunID) -> RunManifest | None:
         """Delegate to the bound ``RunManifestPort.get_by_run_id``."""
+        self._validate_bound_paths()
         return self.manifest_port.get_by_run_id(run_id)
+
+    def get_workflow_manifest_by_run_id(self, run_id: RunID) -> WorkflowManifest | None:
+        """Delegate to the workflow manifest store bound to this data root."""
+        self._validate_bound_paths()
+        return self.workflow_manifest_port.get_by_run_id(run_id)
 
     def verify_replay_objects(self, manifest: RunManifest) -> Mapping[str, bool]:
         """Re-check config / lock / Bronze bytes; never cache READY forever."""
+        self._validate_bound_paths()
         return self.replay_object_verifier.verify(manifest)
+
+    def _validate_bound_paths(self) -> None:
+        """Recheck the alias and child store trees at each read boundary."""
+        current_root = assert_path_within_trusted_base(
+            self.data_root,
+            trusted_base=self.trusted_alias_base,
+            field_name="data_root",
+        )
+        if current_root != self.data_root:
+            raise EvidenceLocationInvalidError(
+                "data_root changed after the read context was opened"
+            )
+        _validate_control_tree(current_root)
 
 
 @dataclass(frozen=True, slots=True)
@@ -78,6 +101,7 @@ class FileEvidenceReadContextFactory:
             trusted_base=Path(trusted_alias_base),
             field_name="data_root",
         )
+        _validate_control_tree(safe_root)
         output_root = safe_root / "output" / "control"
         verifier = ReplayObjectVerifier(
             config_root=output_root / "effective_config",
@@ -105,4 +129,25 @@ class FileEvidenceReadContextFactory:
                 metrics=self.metrics,
             ),
             replay_object_verifier=verifier,
+        )
+
+
+def _validate_control_tree(data_root: Path) -> None:
+    """Reject linked standard control/data roots before binding file stores."""
+    roots = (
+        data_root / "output",
+        data_root / "output" / "control",
+        data_root / "output" / "control" / "run_manifest",
+        data_root / "output" / "control" / "run_ledger",
+        data_root / "output" / "control" / "workflow_manifest",
+        data_root / "output" / "control" / "lineage",
+        data_root / "output" / "control" / "effective_config",
+        data_root / "output" / "control" / "dependency_locks",
+        data_root / "output" / "bronze",
+    )
+    for root in roots:
+        assert_path_within_trusted_base(
+            root,
+            trusted_base=data_root,
+            field_name="control-plane evidence path",
         )

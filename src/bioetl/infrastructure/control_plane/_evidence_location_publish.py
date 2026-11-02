@@ -11,6 +11,10 @@ from pathlib import Path
 from bioetl.infrastructure.control_plane._durability import (
     flush_control_plane_file_descriptor,
 )
+from bioetl.infrastructure.control_plane.evidence_location_path_safety import (
+    EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
+    assert_path_within_trusted_base,
+)
 
 __all__ = [
     "publish_bytes_if_absent",
@@ -18,10 +22,15 @@ __all__ = [
 ]
 
 
-def read_existing_bytes(path: Path) -> bytes | None:
+def read_existing_bytes(path: Path, *, trusted_base: Path) -> bytes | None:
     """Return file bytes or ``None`` when the path is absent."""
+    safe_path = assert_path_within_trusted_base(
+        path,
+        trusted_base=trusted_base,
+        field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
+    )
     try:
-        return path.read_bytes()
+        return safe_path.read_bytes()
     except FileNotFoundError:
         return None
     except IsADirectoryError as exc:
@@ -40,7 +49,12 @@ def _publish_new_file_exclusive(source: Path, target: Path) -> None:
         source.unlink()
 
 
-def publish_bytes_if_absent(target: Path, data: bytes) -> bool:
+def publish_bytes_if_absent(
+    target: Path,
+    data: bytes,
+    *,
+    trusted_base: Path,
+) -> bool:
     """Atomically create ``target`` when missing.
 
     Returns:
@@ -49,7 +63,17 @@ def publish_bytes_if_absent(target: Path, data: bytes) -> bool:
 
     Never overwrites an existing file, including under competing writers.
     """
+    target = assert_path_within_trusted_base(
+        target,
+        trusted_base=trusted_base,
+        field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
+    )
     target.parent.mkdir(parents=True, exist_ok=True)
+    target = assert_path_within_trusted_base(
+        target,
+        trusted_base=trusted_base,
+        field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
+    )
     fd, temp_path_str = tempfile.mkstemp(
         suffix=".tmp",
         prefix="." + target.stem + "_",
@@ -62,6 +86,11 @@ def publish_bytes_if_absent(target: Path, data: bytes) -> bool:
             handle.flush()
             flush_control_plane_file_descriptor(handle.fileno())
         try:
+            target = assert_path_within_trusted_base(
+                target,
+                trusted_base=trusted_base,
+                field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
+            )
             _publish_new_file_exclusive(temp_path, target)
         except FileExistsError:
             return False
