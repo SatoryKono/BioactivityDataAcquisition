@@ -16,6 +16,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.selected_run
 from bioetl.composition.composite_catalog import (
     project_assay_replay,
 )
+from bioetl.composition.selected_run_contract_exclusions import (
+    attach_contract_fields,
+)
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.selected_status import (
     DOMAINS,
@@ -44,9 +47,6 @@ from bioetl.interfaces.http._selected_run_a2_resolve import (
     resolve_a2_latest_run_id,
 )
 from bioetl.interfaces.http._selected_run_artifact_probes import _artifact_probes
-from bioetl.composition.selected_run_contract_exclusions import (
-    attach_contract_fields,
-)
 from bioetl.interfaces.http._selected_run_live import (
     active_run_diagnostics,
     scope_matches,
