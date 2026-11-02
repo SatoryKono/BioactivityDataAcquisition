@@ -17,6 +17,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import ast
 import os
 import re
 import shlex
@@ -57,11 +58,6 @@ _OPTION_RE = re.compile(
 _GROUP_CMD_RE = re.compile(
     r"""@typed_group_command\(\s*(\w+)\s*,\s*['"]([^'"]+)['"]\s*\)""",
 )
-# Allow intermediate decorators (e.g. @typed_pass_context) between the group
-# decorator and the function definition — report.py uses that pattern.
-_CLICK_GROUP_RE = re.compile(
-    r"""@typed_click_group\(\)(?:\s*\n@[^\n]+)*\s*\ndef\s+(\w+)\s*\(""",
-)
 _ROUTE_LITERAL_RE = re.compile(r"""['"](/(?:health|healthz|metrics|ops)[^'"]*)['"]""")
 _REQUIRED_REPORT_COMMANDS: frozenset[str] = frozenset(
     {
@@ -71,6 +67,46 @@ _REQUIRED_REPORT_COMMANDS: frozenset[str] = frozenset(
         "`bioetl report prune`",
     }
 )
+
+
+def _decorator_name(node: ast.expr) -> str | None:
+    """Return the dotted/simple name of a decorator call or name node."""
+    target: ast.expr = node
+    if isinstance(target, ast.Call):
+        target = target.func
+    if isinstance(target, ast.Name):
+        return target.id
+    if isinstance(target, ast.Attribute):
+        parts: list[str] = []
+        cur: ast.expr = target
+        while isinstance(cur, ast.Attribute):
+            parts.append(cur.attr)
+            cur = cur.value
+        if isinstance(cur, ast.Name):
+            parts.append(cur.id)
+            return ".".join(reversed(parts))
+        return parts[0] if parts else None
+    return None
+
+
+def _find_typed_click_group_name(source: str) -> str | None:
+    """Locate the Click group function decorated with ``typed_click_group``.
+
+    Uses AST so intermediate decorators (e.g. ``@typed_pass_context`` on
+    ``report.py``) are allowed without a backtracking regex (Sonar S8786/S5852).
+    """
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return None
+    for node in tree.body:
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        for decorator in node.decorator_list:
+            name = _decorator_name(decorator)
+            if name in {"typed_click_group", "click.group"}:
+                return node.name
+    return None
 
 
 @dataclass(frozen=True, slots=True)
@@ -236,11 +272,8 @@ def _matrix_row_for_subcommand(group: str, sub: str, body: str) -> MatrixRow:
 
 def _extract_group_rows(path: Path) -> list[MatrixRow]:
     text = path.read_text(encoding="utf-8")
-    group_match = _CLICK_GROUP_RE.search(text)
-    if group_match is None:
-        return []
-    group = group_match.group(1)
-    if group not in _EXPAND_GROUPS:
+    group = _find_typed_click_group_name(text)
+    if group is None or group not in _EXPAND_GROUPS:
         return []
 
     rows: list[MatrixRow] = []
