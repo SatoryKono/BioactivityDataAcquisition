@@ -1138,6 +1138,7 @@ def _imports_module(test_path: Path, module_name: str) -> bool:
             module_name=module_name,
             parent_module=parent_module,
             leaf_name=leaf_name,
+            test_path=test_path,
         )
         for node in ast.walk(tree)
     )
@@ -1149,6 +1150,7 @@ def _matches_module_import(
     module_name: str,
     parent_module: str,
     leaf_name: str,
+    test_path: Path,
 ) -> bool:
     """Return whether one AST node imports the selected module."""
     if isinstance(node, ast.Import):
@@ -1156,12 +1158,21 @@ def _matches_module_import(
             alias.name == module_name or alias.name.startswith(f"{module_name}.")
             for alias in node.names
         )
-    return isinstance(node, ast.ImportFrom) and (
-        node.module == module_name
-        or (
-            node.module == parent_module
-            and any(alias.name == leaf_name for alias in node.names)
-        )
+    if not isinstance(node, ast.ImportFrom):
+        return False
+    imported_module = node.module or ""
+    if node.level:
+        package_parts = test_path.with_suffix("").parts
+        if test_path.name != "__init__.py":
+            package_parts = package_parts[:-1]
+        ascend = node.level - 1
+        if ascend > len(package_parts):
+            return False
+        package_parts = package_parts[: len(package_parts) - ascend]
+        imported_module = ".".join((*package_parts, *imported_module.split(".")))
+    return imported_module == module_name or (
+        imported_module == parent_module
+        and any(alias.name == leaf_name for alias in node.names)
     )
 
 
