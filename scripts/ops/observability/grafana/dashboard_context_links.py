@@ -406,7 +406,7 @@ def _fix_ranked_links(panel: dict) -> None:
                 "value": [
                     {
                         "title": "Open domain diagnostics",
-                        "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.route_pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
+                        "url": "/d/${__data.fields.action_dashboard_uid}/?${workflow:queryparam}&var-pipeline=${__data.fields.route_pipeline:percentencode}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
                         "targetBlank": False,
                         "includeVars": False,
                     }

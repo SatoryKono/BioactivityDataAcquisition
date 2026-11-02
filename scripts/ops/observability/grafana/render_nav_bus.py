@@ -81,8 +81,8 @@ FILE_BY_UID = {
     "bioetl-run-explorer-v1": "bioetl-run-explorer-v1.json",
 }
 
-# Data Quality remains a supported detail destination through contextual links.
-_NAV_HIDDEN_UIDS = frozenset({"bioetl-dq-v2"})
+# Phase 2 (rev7 §2.1): Data Quality is a first-class bus chip on all five boards.
+_NAV_HIDDEN_UIDS: frozenset[str] = frozenset()
 
 
 def write_dashboard_source(path: Path, serialized: str, *, root: Path) -> None:
@@ -239,7 +239,7 @@ _RECOVERY_ACTION_HTML = (
 )
 _RUN_EXPLORER_UID = "bioetl-run-explorer-v1"
 CHIP_BASE = (
-    "box-sizing:border-box;width:16.5%;min-width:0;text-align:center;padding:0 2px;"
+    "box-sizing:border-box;width:19.5%;min-width:0;text-align:center;padding:0 2px;"
     "border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere"
 )
 # Theme-safe chips: slate link surface works on dark and light Grafana themes.
@@ -247,14 +247,11 @@ LINK_STYLE = (
     f"{CHIP_BASE};color:#f8fafc;background:#334155;"
     "border:2px solid #94a3b8;text-decoration:none"
 )
-# Run Explorer keeps the slate chip face, but the chip must not navigate.
-INACTIVE_HANDOFF_STYLE = f"{LINK_STYLE};cursor:default;pointer-events:none"
 # Current chip: blue fill + cyan border + underline (not color-only).
-# Rendered as <a aria-disabled> so Grafana HTML sanitizer keeps styles
-# (bare <span aria-current> may lose attributes/styles in text panels).
+# Phase 2 (rev7 §2.1): non-link <span class="bioetl-nav-current"> — not <a>.
 CURRENT_STYLE = (
     f"{CHIP_BASE};color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;"
-    "cursor:default;text-decoration:underline;pointer-events:none"
+    "cursor:default;text-decoration:underline;pointer-events:none;display:inline-block"
 )
 CONTAINER_STYLE = (
     "display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;"
@@ -266,12 +263,13 @@ _PRESERVE_SCOPE_TOOLTIP = "Preserves selected scope and time range."
 
 NAV_DESCRIPTION = (
     "Sanitizer-compatible navigation bus with native keyboard focus. "
-    "Shared link-only bus: Run Explorer / Replay Readiness / Run Overview / "
-    "Incident Workspace. Data Quality is a contextual detail destination. "
-    "Current workspace is a non-interactive chip (aria-disabled + data-current=page, "
-    "underlined) so active state is not color-only. Handoffs open same-tab, "
-    "preserve current time range, and document scope reset or context mapping "
-    "on cross-scope transitions. Chip colors are theme-safe for dark and light."
+    "Shared five-chip bus (19.5% each): Run Explorer / Replay Readiness / "
+    "Run Overview / Data Quality / Incident Workspace. "
+    "Current workspace is a non-interactive <span class=\"bioetl-nav-current\"> "
+    "(aria-current=page, underlined) so active state is not color-only and is "
+    "not a link. Handoffs open same-tab, preserve current time range, and "
+    "document scope reset or context mapping on cross-scope transitions. "
+    "Chip colors are theme-safe for dark and light."
 )
 
 
@@ -331,19 +329,10 @@ def _chip_html(item: dict[str, str], *, current_uid: str, source_uid: str) -> st
     short = item["title"].split(". ", 1)[-1]
     if item["uid"] == current_uid:
         title_attr = html.escape(f"{item['title']} ({short})", quote=True)
-        # Anchor keeps inline styles under Grafana sanitizer; not in tab order.
         return (
-            f'<a class="bioetl-nav-current" href="#{item["uid"]}" '
-            f'aria-disabled="true" aria-current="page" data-current="page" '
-            f'tabindex="-1" title="{title_attr}" style="{CURRENT_STYLE}">'
-            f"{item['title']}</a>"
-        )
-    if current_uid == _RUN_EXPLORER_UID:
-        title_attr = html.escape(f"{item['title']} ({short})", quote=True)
-        return (
-            f'<a class="bioetl-nav-link" href="#{item["uid"]}" '
-            f'aria-disabled="true" tabindex="-1" title="{title_attr}" '
-            f'style="{INACTIVE_HANDOFF_STYLE}">{item["title"]}</a>'
+            f'<span class="bioetl-nav-current" aria-current="page" '
+            f'data-current="page" title="{title_attr}" style="{CURRENT_STYLE}">'
+            f"{item['title']}</span>"
         )
     tooltip = nav_link_tooltip(source_uid=source_uid, target=item)
     title_attr = html.escape(tooltip, quote=True)
@@ -370,8 +359,6 @@ def render_html(*, current_uid: str) -> str:
 
 
 def render_links(*, current_uid: str) -> list[dict[str, Any]]:
-    if current_uid == _RUN_EXPLORER_UID:
-        return []
     links: list[dict[str, Any]] = []
     for item in BUS:
         if item["uid"] == current_uid or item["uid"] in _NAV_HIDDEN_UIDS:
@@ -1951,12 +1938,6 @@ def _attach_nav_bus(nav: dict[str, Any], *, current_uid: str) -> None:
         and not any(f"/d/{uid}/" in str(link.get("url", "")) for uid in bus_uids)
     ]
     nav["links"] = render_links(current_uid=current_uid) + extra_links
-    if current_uid == _RUN_EXPLORER_UID:
-        nav["description"] = (
-            "Chips on Run Explorer do not open other dashboards. "
-            "Open Trust, Overview, Pipeline Diagnostics, Provider Health, "
-            "and Data Quality from Inspect Recent Runs."
-        )
     nav.pop("transparent", None)
 
 
@@ -2508,31 +2489,37 @@ def apply_to_dashboard(
         payload, provider_declared=current_uid in _PROVIDER_VARIABLE_UIDS
     )
     panels = payload.get("panels") or []
-    if current_uid == _RUN_EXPLORER_UID:
-        payload["panels"] = [
-            panel
-            for panel in panels
-            if not (isinstance(panel, dict) and panel.get("id") == 1000)
-        ]
-        _restore_minimum_first_window_heights(
-            payload["panels"], current_uid=current_uid
-        )
-    else:
-        nav = next((p for p in panels if p.get("id") == 1000), None)
-        if nav is None:
-            raise SystemExit(f"{safe_path.name}: missing panel id=1000")
-        compact_replay = current_uid == "bioetl-control-plane-v1" and any(
-            p.get("id") == 9430 for p in panels
-        )
-        if not compact_replay:
-            _stamp_nav_panel(nav, panels)
-            _restore_minimum_first_window_heights(panels, current_uid=current_uid)
-            _layout_uid_first_window(panels, current_uid=current_uid)
-            _reclaim_first_window_overflow(nav, panels, current_uid=current_uid)
-            _layout_uid_first_window(panels, current_uid=current_uid)
-            _normalize_collapsed_row_children(panels)
-            _layout_uid_detail_panels(panels, current_uid=current_uid)
-        _attach_nav_bus(nav, current_uid=current_uid)
+    nav = next((p for p in panels if isinstance(p, dict) and p.get("id") == 1000), None)
+    if nav is None:
+        # Phase 2 §2.1: Run Explorer also carries panel 1000.
+        nav = {
+            "id": 1000,
+            "type": "text",
+            "title": "",
+            "gridPos": {"x": 0, "y": 0, "w": 24, "h": NAV_HEIGHT},
+            "options": {"mode": "html", "content": ""},
+            "links": [],
+        }
+        panels.insert(0, nav)
+        payload["panels"] = panels
+        for panel in panels:
+            if not isinstance(panel, dict) or panel is nav:
+                continue
+            grid = panel.get("gridPos")
+            if isinstance(grid, dict) and isinstance(grid.get("y"), int):
+                grid["y"] = int(grid["y"]) + NAV_HEIGHT
+    compact_replay = current_uid == "bioetl-control-plane-v1" and any(
+        isinstance(p, dict) and p.get("id") == 9430 for p in panels
+    )
+    if not compact_replay:
+        _stamp_nav_panel(nav, panels)
+        _restore_minimum_first_window_heights(panels, current_uid=current_uid)
+        _layout_uid_first_window(panels, current_uid=current_uid)
+        _reclaim_first_window_overflow(nav, panels, current_uid=current_uid)
+        _layout_uid_first_window(panels, current_uid=current_uid)
+        _normalize_collapsed_row_children(panels)
+        _layout_uid_detail_panels(panels, current_uid=current_uid)
+    _attach_nav_bus(nav, current_uid=current_uid)
     stamp_selector_columns(payload)
     # Remove our generated row before other appenders calculate their tail y.
     payload["panels"] = [p for p in payload["panels"] if p.get("id") != 9700]

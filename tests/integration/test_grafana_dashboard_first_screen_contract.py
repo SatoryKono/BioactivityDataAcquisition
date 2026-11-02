@@ -528,8 +528,8 @@ def test_current_status_headlines_use_instant_queries() -> None:
 def test_run_explorer_shows_ten_rows_and_only_the_browse_surface() -> None:
     dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
-    assert len(panels) == 2
-    assert 1000 not in panels
+    # Phase 2 §2.1: five-chip nav bus joins the selection leaf.
+    assert set(panels) == {1000, 1, 3010}
     assert 9450 not in panels
     assert not ({3098, 3099, 3011, 3012, 3013, 3014, 3020, 3022, 3023} & panels.keys())
     browse = panels[3010]
@@ -539,6 +539,10 @@ def test_run_explorer_shows_ten_rows_and_only_the_browse_surface() -> None:
     assert browse["options"]["footer"]["enablePagination"] is False
     assert browse["options"]["cellHeight"] == "sm"
     assert "last 10" in browse["title"]
+    nav = panels[1000]
+    content = str((nav.get("options") or {}).get("content") or "")
+    assert content.count("width:19.5%") == 5
+    assert "Data Quality" in content
 
 
 def test_run_explorer_first_screen_empty_copy_has_no_selector_dollars() -> None:

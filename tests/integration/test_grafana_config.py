@@ -1380,7 +1380,7 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
     assert panels[9300]["gridPos"]["y"] + panels[9300]["gridPos"]["h"] <= 18
     assert 215 not in panels
     explorer = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
-    assert {p["id"] for p in get_dashboard_panels(explorer)} == {1, 3010}
+    assert {p["id"] for p in get_dashboard_panels(explorer)} == {1000, 1, 3010}
 
 
 def test_control_plane_dashboard_links_are_scoped() -> None:
@@ -1389,6 +1389,7 @@ def test_control_plane_dashboard_links_are_scoped() -> None:
     assert {link["title"] for link in links} == {
         "Run Explorer",
         "Run Overview",
+        "Data Quality",
         "6. Incident Workspace",
     }
     for link in links:

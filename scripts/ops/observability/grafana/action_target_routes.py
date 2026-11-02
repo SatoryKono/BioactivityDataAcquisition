@@ -106,15 +106,16 @@ def row_aware_dashboard_url() -> str:
     they do not declare, while Runtime/DQ receive stage=All and Provider Health
     receives an explicit provider reset plus row pipeline context.
     """
+    # Phase 2 §2.3 F-27: Grafana accepts /d/{uid}/ without a second UID slug.
     uid = "${__data.fields.action_dashboard_uid}"
     row = "${__data.fields"
     return (
-        f"/d/{uid}/{uid}?var-workflow={row}.workflow}}"
-        f"&var-pipeline={row}.pipeline}}"
-        f"&var-run_type={row}.run_type}}"
+        f"/d/{uid}/?var-workflow={row}.workflow:percentencode}}"
+        f"&var-pipeline={row}.pipeline:percentencode}}"
+        f"&var-run_type={row}.run_type:percentencode}}"
         f"&var-run_id={row}.run_id}}"
         "&var-stage=$__all&var-provider=unknown"
-        f"&var-pipeline_context={row}.pipeline}}&{TIME_TOKEN}"
+        f"&var-pipeline_context={row}.pipeline:percentencode}}&{TIME_TOKEN}"
     )
 
 
