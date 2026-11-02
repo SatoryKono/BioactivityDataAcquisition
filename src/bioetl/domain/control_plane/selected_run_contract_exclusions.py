@@ -31,16 +31,8 @@ def classify_contract_exclusions(
             "contract_exclusions_hard_limit": None,
         }
     rate = _exclusion_rate(funnel)
-    if rate is None:
-        status: str = _UNKNOWN
-    elif rate >= hard:
-        status = _CRIT
-    elif rate >= soft:
-        status = _WARN
-    else:
-        status = _OK
     return {
-        "contract_exclusions_status": status,
+        "contract_exclusions_status": _status_for_rate(rate, soft=soft, hard=hard),
         "contract_exclusions_rate": rate,
         "contract_exclusions_soft_limit": soft,
         "contract_exclusions_hard_limit": hard,
@@ -51,13 +43,8 @@ def extract_records_in(funnel: object) -> int | None:
     """Return bronze (else extract) ``records_in``, or null when unavailable."""
     stages = _stage_map(funnel)
     for stage_id in ("bronze", "extract"):
-        stage = stages.get(stage_id)
-        if stage is None:
-            continue
-        value = stage.get("records_in")
-        if isinstance(value, bool) or not isinstance(value, int):
-            continue
-        if value >= 0:
+        value = _stage_records_in(stages.get(stage_id))
+        if value is not None:
             return value
     return None
 
@@ -68,10 +55,14 @@ def _exclusion_rate(funnel: object) -> float | None:
     ordered = _required_stages(stages)
     if ordered is None:
         return None
-    base = _non_negative_int(ordered[0].get("records_out"))
+    return _rate_for_stages(ordered)
+
+
+def _rate_for_stages(stages: Sequence[Mapping[str, object]]) -> float | None:
+    base = _non_negative_int(stages[0].get("records_out"))
     if base is None:
         return None
-    excluded_total = _excluded_total(ordered)
+    excluded_total = _excluded_total(stages)
     if excluded_total is None or excluded_total > base:
         return None
     if base == 0:
@@ -83,12 +74,28 @@ def _required_stages(
     stages: dict[str, Mapping[str, object]],
 ) -> list[Mapping[str, object]] | None:
     """Return bronze/silver/gold only; ignore extract and other extras."""
-    if any(stage_id not in stages for stage_id in _STAGE_IDS):
+    ordered = _required_stage_entries(stages)
+    if ordered is None:
         return None
-    ordered = [stages[stage_id] for stage_id in _STAGE_IDS]
-    if not all(_stage_fully_tracked(stage) for stage in ordered):
+    if not _all_stages_fully_tracked(ordered):
         return None
     return ordered
+
+
+def _required_stage_entries(
+    stages: dict[str, Mapping[str, object]],
+) -> list[Mapping[str, object]] | None:
+    ordered: list[Mapping[str, object]] = []
+    for stage_id in _STAGE_IDS:
+        stage = stages.get(stage_id)
+        if stage is None:
+            return None
+        ordered.append(stage)
+    return ordered
+
+
+def _all_stages_fully_tracked(stages: Sequence[Mapping[str, object]]) -> bool:
+    return all(_stage_fully_tracked(stage) for stage in stages)
 
 
 def _excluded_total(stages: Sequence[Mapping[str, object]]) -> int | None:
@@ -102,20 +109,46 @@ def _excluded_total(stages: Sequence[Mapping[str, object]]) -> int | None:
 
 
 def _stage_excluded_count(stage: Mapping[str, object]) -> int | None:
-    removals = stage.get("removals")
-    if not isinstance(removals, Sequence) or isinstance(removals, (str, bytes)):
+    removals = _removal_sequence(stage.get("removals"))
+    if removals is None:
         return None
     total = 0
     for removal in removals:
-        if not isinstance(removal, Mapping):
-            return None
-        if removal.get("outcome") != _EXCLUDED:
-            continue
-        count = _non_negative_int(removal.get("count"))
+        count = _excluded_removal_count(removal)
         if count is None:
             return None
         total += count
     return total
+
+
+def _removal_sequence(value: object) -> Sequence[object] | None:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
+        return None
+    return value
+
+
+def _excluded_removal_count(removal: object) -> int | None:
+    if not isinstance(removal, Mapping):
+        return None
+    if removal.get("outcome") != _EXCLUDED:
+        return 0
+    return _non_negative_int(removal.get("count"))
+
+
+def _stage_records_in(stage: Mapping[str, object] | None) -> int | None:
+    if stage is None:
+        return None
+    return _non_negative_int(stage.get("records_in"))
+
+
+def _status_for_rate(rate: float | None, *, soft: float, hard: float) -> str:
+    if rate is None:
+        return _UNKNOWN
+    if rate >= hard:
+        return _CRIT
+    if rate >= soft:
+        return _WARN
+    return _OK
 
 
 def _non_negative_int(value: object) -> int | None:

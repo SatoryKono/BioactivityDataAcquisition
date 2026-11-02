@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-from functools import partial
 
 from bioetl.domain.control_plane import RunManifest, WorkflowManifest
 from bioetl.interfaces.http._forensic_request_budget import (
@@ -20,6 +19,9 @@ from bioetl.interfaces.http._health_server_control_plane_evidence_routing import
 from bioetl.interfaces.http._health_server_control_plane_scope import (
     read_selected_run_id,
 )
+from bioetl.interfaces.http._health_server_filter_options_payload import (
+    build_filter_options_payload,
+)
 from bioetl.interfaces.http._health_server_identity_routing_support import (
     handle_control_plane_identity_evidence,
     handle_control_plane_identity_table,
@@ -34,8 +36,6 @@ from bioetl.interfaces.http._health_server_quarantine_routing import (
     dispatch_quarantine_request,
 )
 from bioetl.interfaces.http._report_selector_options import (
-    load_report_selector_entries,
-    supplement_report_options,
     verified_report_identity_for_run,
 )
 from bioetl.interfaces.http._selected_run_a2_resolve import resolve_a2_latest_run_id
@@ -44,10 +44,8 @@ from bioetl.interfaces.http._selector_catalog import (
 )
 from bioetl.interfaces.http.control_plane_selector_context import (
     RUN_ID_NO_SELECTION,
-    RunIdOptionPolicy,
     build_selector_context_payload,
     build_selector_filter_options_payload,
-    finalize_run_id_empty_catalog_label,
 )
 
 _NOT_FOUND_MESSAGE = "Not Found"
@@ -178,82 +176,13 @@ async def _filter_options_payload(
     host: _HealthRoutingHost,
     query: dict[str, str],
 ) -> dict[str, object]:
-    """Build options without writing after the caller's deadline expires."""
-    manifest_port = host._run_manifest_port
-    assert manifest_port is not None
-    dimension = host._read_optional_param(query, "dimension") or "run_id"
-    requested_pipeline = (
-        host._read_required_param(query, "pipeline")
-        if dimension == "run_id"
-        else host._read_optional_param(query, "pipeline")
+    """Build filter options using the injected selector-catalog builders."""
+    return await build_filter_options_payload(
+        host,
+        query,
+        options_builder=build_selector_filter_options_payload,
+        add_run_id_items=_add_run_id_items,
     )
-    selected_pipelines = host._read_scope_csv_param(query, "pipeline")
-    selected_workflows = host._read_scope_csv_param(query, "workflow")
-    selected_run_types = host._read_scope_csv_param(query, "run_type")
-    selected_run_statuses = host._read_scope_csv_param(query, "run_status")
-    selected_run_id = read_selected_run_id(host, query)
-    response_shape = host._read_optional_param(query, "response_shape") or "object"
-    exact_run_only = _read_truthy_query_param(query, "exact_run_only")
-    fallback_value = host._read_optional_param(query, "fallback_value")
-
-    scopes = {
-        "workflow": selected_workflows,
-        "pipeline": selected_pipelines,
-        "run_type": selected_run_types,
-        "run_status": selected_run_statuses,
-        "run_id": (selected_run_id,) if selected_run_id else (),
-    }
-    include_reports = not exact_run_only or selected_run_id is not None
-
-    async def manifest_options() -> dict[str, object]:
-        manifests, workflow_manifests = await host._selector_catalog.read(
-            manifest_port,
-            host._workflow_manifest_port,
-        )
-        return await asyncio.to_thread(
-            build_selector_filter_options_payload,
-            manifests=manifests,
-            ledger_port=host._run_ledger_port,
-            workflow_manifests=workflow_manifests,
-            dimension=dimension,
-            response_shape=response_shape,
-            requested_pipeline=requested_pipeline,
-            selected_workflows=selected_workflows,
-            selected_pipelines=selected_pipelines,
-            selected_run_types=selected_run_types,
-            selected_run_statuses=selected_run_statuses,
-            selected_run_id=selected_run_id,
-            run_id_policy=RunIdOptionPolicy(
-                exact_run_only=exact_run_only,
-                fallback_value=fallback_value,
-            ),
-            timezone=query.get("timezone") or "UTC",
-        )
-
-    manifest_task = asyncio.create_task(manifest_options())
-    report_task = asyncio.create_task(
-        host._selector_catalog.read_reports(
-            scopes, partial(load_report_selector_entries, store=host._run_report_store)
-        )
-        if include_reports
-        else asyncio.sleep(0, result=[]),
-    )
-    await asyncio.gather(manifest_task, report_task, return_exceptions=True)
-    payload, report_entries = manifest_task.result(), report_task.result()
-    if include_reports:
-        payload = await asyncio.to_thread(
-            supplement_report_options,
-            payload,
-            timezone=query.get("timezone") or "UTC",
-            dimension=dimension,
-            response_shape=response_shape,
-            scopes=scopes,
-            entries=report_entries,
-        )
-    if dimension == "run_id" and response_shape == "options":
-        payload = finalize_run_id_empty_catalog_label(payload)
-    _add_run_id_items(payload, response_shape=response_shape, dimension=dimension)
-    return payload
 
 
 def _add_run_id_items(

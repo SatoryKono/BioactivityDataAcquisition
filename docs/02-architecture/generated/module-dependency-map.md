@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2583`
-- Internal import edges (raw): `8380`
+- Scanned modules: `2585`
+- Internal import edges (raw): `8390`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `330`
@@ -32,8 +32,8 @@ flowchart LR
     infrastructure -->|1294 OK| infrastructure
     interfaces -->|77 OK| application
     interfaces -->|64 OK| composition
-    interfaces -->|90 OK| domain
-    interfaces -->|466 OK| interfaces
+    interfaces -->|91 OK| domain
+    interfaces -->|475 OK| interfaces
 ```
 
 ## Layer Edge Table
@@ -51,8 +51,8 @@ flowchart LR
 | `infrastructure` | `infrastructure` |    1294 | allowed |
 | `interfaces`     | `application`    |      77 | allowed |
 | `interfaces`     | `composition`    |      64 | allowed |
-| `interfaces`     | `domain`         |      90 | allowed |
-| `interfaces`     | `interfaces`     |     466 | allowed |
+| `interfaces`     | `domain`         |      91 | allowed |
+| `interfaces`     | `interfaces`     |     475 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
@@ -85,9 +85,9 @@ flowchart LR
 | `composition.factories`        | `infrastructure.config`                    |      26 |
 | `infrastructure.adapters`      | `domain.ports`                             |      26 |
 | `infrastructure.config`        | `domain.types`                             |      26 |
+| `interfaces.http`              | `domain.control_plane`                     |      26 |
 | `application.services`         | `domain.value_objects`                     |      25 |
 | `composition.bootstrap`        | `infrastructure.control_plane`             |      25 |
-| `interfaces.http`              | `domain.control_plane`                     |      25 |
 | `infrastructure.adapters`      | `domain.exceptions`                        |      24 |
 | `application.services`         | `domain.exceptions`                        |      23 |
 | `application.core`             | `domain.normalization`                     |      22 |

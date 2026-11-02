@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2583,
-    "total_internal_imports": 8380,
+    "scanned_modules": 2585,
+    "total_internal_imports": 8390,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "76f69137c77f90a12c7ced939cb9804a50e32aa5fe5bd3c9e2440b936a5769f6"
+    "source_fingerprint": "306cfd200766ec342d2e6cb9c4d59631a40f1e733214bf011a851119c9e79c75"
   },
   "layer_edges": [
     {
@@ -78,13 +78,13 @@
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 90,
+      "imports": 91,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 466,
+      "imports": 475,
       "allowed": true
     }
   ],
@@ -225,6 +225,11 @@
       "imports": 26
     },
     {
+      "source": "interfaces.http",
+      "target": "domain.control_plane",
+      "imports": 26
+    },
+    {
       "source": "application.services",
       "target": "domain.value_objects",
       "imports": 25
@@ -232,11 +237,6 @@
     {
       "source": "composition.bootstrap",
       "target": "infrastructure.control_plane",
-      "imports": 25
-    },
-    {
-      "source": "interfaces.http",
-      "target": "domain.control_plane",
       "imports": 25
     },
     {
