@@ -6,20 +6,21 @@ CI execution receipt. Git objects independently bind its commit/tree claims.
 
 from __future__ import annotations
 
-import base64
 import argparse
+import base64
 import binascii
 import hashlib
 import io
 import json
 import os
+import re
 import subprocess
 import tempfile
 import urllib.parse
 import urllib.request
 import zipfile
-from pathlib import Path
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"

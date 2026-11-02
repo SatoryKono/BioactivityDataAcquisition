@@ -217,6 +217,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/quality/issue-12475-physical-parity-evidence.md": (
         *ISSUE_12475_PHYSICAL_PARITY_TESTS,
     ),
+    **dict.fromkeys(
+        (
+            "reports/quality/12478-evidence/test_pipeline_graceful_shutdown_e2e_exit_code.txt",
+            "reports/quality/12478-evidence/test_pipeline_graceful_shutdown_e2e_stderr.log",
+            "reports/quality/12478-evidence/test_pipeline_graceful_shutdown_e2e_stdout.log",
+        ),
+        ("tests/e2e/test_pipeline_graceful_shutdown_e2e.py",),
+    ),
     "docs/05-operations/runbooks/incident-response.md": (
         "tests/integration/test_prometheus_rules_config.py",
         INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
@@ -350,6 +358,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
             "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
         ),
+    ),
+    "configs/quality/external_resource_inventory_pr12651_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
     ),
     **dict.fromkeys(
         (
