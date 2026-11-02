@@ -10,14 +10,14 @@ from time import perf_counter
 from typing import TYPE_CHECKING
 
 from bioetl.application.runtime_clock import current_utc_time
+from bioetl.application.services.control_plane.evidence_location import (
+    record_verify_exception_observation,
+)
 from bioetl.application.services.execution.workflow_runner_step_execution import (
     TransformStepRuntimeOptions,
     apply_workflow_step_transition,
     execute_pipeline_step,
     execute_transform_step,
-)
-from bioetl.application.services.control_plane.evidence_location import (
-    record_verify_exception_observation,
 )
 from bioetl.application.services.run_reports.observations import (
     bind_run_observations_if_unbound,
