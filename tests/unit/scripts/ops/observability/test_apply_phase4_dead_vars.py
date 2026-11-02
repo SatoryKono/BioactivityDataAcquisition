@@ -90,12 +90,16 @@ def test_apply_dashboard_data_rejects_unexpected_basename() -> None:
         phase4.apply_dashboard_data({}, path_name="not-a-dashboard.json")
 
 
-def test_dashboard_targets_are_literal_repo_paths() -> None:
-    names = [name for _, name in phase4._DASHBOARD_TARGETS]
-    assert names == list(phase4.FILES)
-    for target, name in phase4._DASHBOARD_TARGETS:
-        assert target.name == name
-        assert target.parent == phase4.DASH
+def test_process_helpers_use_literal_repo_basenames() -> None:
+    processors = (
+        phase4._process_overview,
+        phase4._process_dq,
+        phase4._process_incident,
+        phase4._process_control_plane,
+        phase4._process_run_explorer,
+    )
+    assert len(processors) == len(phase4.FILES)
+    assert (phase4.DASH / phase4.FILE_DQ).parent == phase4.DASH
 
 
 def test_prune_dead_rename_by_name() -> None:

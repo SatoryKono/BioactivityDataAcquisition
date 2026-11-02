@@ -461,19 +461,28 @@ def _lint_unused_variables(path: Path, payload: dict[str, Any]) -> list[str]:
     return findings
 
 
+def _dead_rename_keys(transform: dict[str, Any]) -> list[str]:
+    """Return renameByName keys missing from the same organize indexByName."""
+    if transform.get("id") != "organize":
+        return []
+    options = transform.get("options") or {}
+    index = options.get("indexByName")
+    rename = options.get("renameByName")
+    if not isinstance(index, dict) or not index:
+        return []
+    if not isinstance(rename, dict):
+        return []
+    return sorted(key for key in rename if key not in index)
+
+
 def _lint_dead_renames(path: Path, panels: list[dict[str, Any]]) -> list[str]:
     """Phase-4: renameByName keys must appear in the same organize indexByName."""
     findings: list[str] = []
     for panel in panels:
         for transform in panel.get("transformations") or []:
-            if not isinstance(transform, dict) or transform.get("id") != "organize":
+            if not isinstance(transform, dict):
                 continue
-            options = transform.get("options") or {}
-            index = options.get("indexByName")
-            rename = options.get("renameByName")
-            if not isinstance(index, dict) or not isinstance(rename, dict) or not index:
-                continue
-            dead = sorted(key for key in rename if key not in index)
+            dead = _dead_rename_keys(transform)
             if dead:
                 findings.append(
                     f"{path.name}: panel {panel.get('id')} dead renameByName {dead}"

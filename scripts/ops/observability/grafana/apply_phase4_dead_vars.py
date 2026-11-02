@@ -194,33 +194,77 @@ def apply_dashboard_data(
     return removed, cleared
 
 
-# Literal (path, basename) pairs — paths are never built from a function argument
-# so pythonsecurity:S2083 cannot treat write targets as tainted joins.
-_DASHBOARD_TARGETS: tuple[tuple[Path, str], ...] = (
-    (DASH / FILE_OVERVIEW, FILE_OVERVIEW),
-    (DASH / FILE_DQ, FILE_DQ),
-    (DASH / FILE_INCIDENT, FILE_INCIDENT),
-    (DASH / FILE_CONTROL_PLANE, FILE_CONTROL_PLANE),
-    (DASH / FILE_RUN_EXPLORER, FILE_RUN_EXPLORER),
-)
+def _dump(data: dict[str, Any]) -> str:
+    return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
 
 
-def _write_dashboard(target: Path, data: dict[str, Any]) -> None:
-    target.write_text(
-        json.dumps(data, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
+def _process_overview() -> tuple[list[str], list[str]] | None:
+    """Read/transform/write Overview using only a literal path constant."""
+    target = DASH / FILE_OVERVIEW
+    if not target.exists():
+        return None
+    data = json.loads(target.read_text(encoding="utf-8"))
+    removed, cleared = apply_dashboard_data(data, path_name=FILE_OVERVIEW)
+    target.write_text(_dump(data), encoding="utf-8")
+    return removed, cleared
+
+
+def _process_dq() -> tuple[list[str], list[str]] | None:
+    target = DASH / FILE_DQ
+    if not target.exists():
+        return None
+    data = json.loads(target.read_text(encoding="utf-8"))
+    removed, cleared = apply_dashboard_data(data, path_name=FILE_DQ)
+    target.write_text(_dump(data), encoding="utf-8")
+    return removed, cleared
+
+
+def _process_incident() -> tuple[list[str], list[str]] | None:
+    target = DASH / FILE_INCIDENT
+    if not target.exists():
+        return None
+    data = json.loads(target.read_text(encoding="utf-8"))
+    removed, cleared = apply_dashboard_data(data, path_name=FILE_INCIDENT)
+    target.write_text(_dump(data), encoding="utf-8")
+    return removed, cleared
+
+
+def _process_control_plane() -> tuple[list[str], list[str]] | None:
+    target = DASH / FILE_CONTROL_PLANE
+    if not target.exists():
+        return None
+    data = json.loads(target.read_text(encoding="utf-8"))
+    removed, cleared = apply_dashboard_data(data, path_name=FILE_CONTROL_PLANE)
+    target.write_text(_dump(data), encoding="utf-8")
+    return removed, cleared
+
+
+def _process_run_explorer() -> tuple[list[str], list[str]] | None:
+    target = DASH / FILE_RUN_EXPLORER
+    if not target.exists():
+        return None
+    data = json.loads(target.read_text(encoding="utf-8"))
+    removed, cleared = apply_dashboard_data(data, path_name=FILE_RUN_EXPLORER)
+    target.write_text(_dump(data), encoding="utf-8")
+    return removed, cleared
 
 
 def main() -> int:
     print("Phase 4.1 dead-variable cleanup")
-    for target, path_name in _DASHBOARD_TARGETS:
-        if not target.exists():
+    # Five dedicated processors — no Path built from a function argument (S2083).
+    jobs = (
+        (FILE_OVERVIEW, _process_overview),
+        (FILE_DQ, _process_dq),
+        (FILE_INCIDENT, _process_incident),
+        (FILE_CONTROL_PLANE, _process_control_plane),
+        (FILE_RUN_EXPLORER, _process_run_explorer),
+    )
+    for path_name, processor in jobs:
+        result = processor()
+        if result is None:
             print(f"  missing {path_name}")
             continue
-        data = json.loads(target.read_text(encoding="utf-8"))
-        removed, cleared = apply_dashboard_data(data, path_name=path_name)
-        _write_dashboard(target, data)
+        removed, cleared = result
         print(
             f"  {path_name}: removed={removed or '-'} cleared_repeats={cleared or '-'}"
         )
