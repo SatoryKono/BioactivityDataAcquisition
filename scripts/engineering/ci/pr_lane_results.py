@@ -1009,7 +1009,12 @@ def _path_targets(path: str, root: Path) -> list[str]:
     """Return the test path or unit directory implied by one changed path."""
     if path.startswith("tests/helpers/") and path.endswith(".py"):
         module = ".".join(Path(path).with_suffix("").parts)
-        importing_tests = _importing_script_tests((root / "tests",), module)
+        test_roots = (root / "tests",)
+        importing_tests = _importing_script_tests(test_roots, module)
+        helpers_init = root / "tests" / "helpers" / "__init__.py"
+        # Package re-exports (from tests.helpers import …) must count as consumers.
+        if helpers_init.is_file() and _imports_module(helpers_init, module):
+            importing_tests |= _importing_script_tests(test_roots, "tests.helpers")
         if importing_tests:
             return sorted(test.relative_to(root).as_posix() for test in importing_tests)
         return _helper_suite(path, root)

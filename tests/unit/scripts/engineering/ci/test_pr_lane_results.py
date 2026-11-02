@@ -1007,17 +1007,29 @@ def test_affected_targets_map_shared_helper_to_importing_tests(
     """Changed test helpers select importing tests, never the helper itself."""
     helper = tmp_path / "tests" / "helpers" / "cli_process.py"
     helper.parent.mkdir(parents=True)
-    helper.write_text("def run() -> None: ...\\n", encoding="utf-8")
+    helper.write_text("def run() -> None: ...\n", encoding="utf-8")
+    (helper.parent / "__init__.py").write_text(
+        "from tests.helpers.cli_process import run\n",
+        encoding="utf-8",
+    )
     owner = tmp_path / "tests" / "unit" / "sample" / "test_owner.py"
     owner.parent.mkdir(parents=True)
     owner.write_text(
-        "from tests.helpers.cli_process import run\\n\\ndef test_owner(): pass\\n",
+        "from tests.helpers.cli_process import run\n\ndef test_owner(): pass\n",
+        encoding="utf-8",
+    )
+    via_package = tmp_path / "tests" / "unit" / "sample" / "test_via_package.py"
+    via_package.write_text(
+        "from tests.helpers import run\n\ndef test_via_package(): pass\n",
         encoding="utf-8",
     )
 
     assert affected_pytest_targets(
         [helper.relative_to(tmp_path).as_posix()], repo_root=tmp_path
-    ) == ["tests/unit/sample/test_owner.py"]
+    ) == [
+        "tests/unit/sample/test_owner.py",
+        "tests/unit/sample/test_via_package.py",
+    ]
 
 
 def test_affected_targets_map_integration_vcr_policy() -> None:
