@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from uuid import UUID
@@ -148,7 +148,7 @@ def test_register_workflow_manifest_parent(
         workflow_run_id=RunID(UUID(_WF)),
         execution_fingerprint="f" * 64,
         schema_version="1.0",
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
         workflow_name="chembl_assay_pack",
         workflow_version="1",
         launch_context={},
