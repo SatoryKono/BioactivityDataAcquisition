@@ -60,6 +60,7 @@ def resolve_path(reference: str, base_path: Path | None) -> Path:
         return candidate
     return base_path / candidate
 
+
 @dataclass(slots=True)
 class FileContractRegistryStore:
     """Persist contract registries as YAML files and validate file references."""
