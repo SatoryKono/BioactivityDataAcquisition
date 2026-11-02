@@ -65,7 +65,10 @@ def _is_query_error_payload(payload: Mapping[str, object]) -> bool:
     return isinstance(reason, str) and reason in {
         "capacity_exhausted",
         "deadline_exceeded",
+        "evidence_corrupt",
+        "identity_mismatch",
         "request_failed",
+        "revision_missing",
         "shutting_down",
         "selector_context_mismatch",
     }

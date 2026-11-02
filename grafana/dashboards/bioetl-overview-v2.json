@@ -1224,7 +1224,6 @@
             "include": {
               "names": [
                 "run_execution",
-                "run_verdict",
                 "saved_trust",
                 "run_reason"
               ]
@@ -1236,9 +1235,8 @@
           "options": {
             "indexByName": {
               "run_execution": 0,
-              "run_verdict": 1,
-              "saved_trust": 2,
-              "run_reason": 3
+              "saved_trust": 1,
+              "run_reason": 2
             },
             "renameByName": {
               "run_verdict": "Overall verdict",
@@ -2304,7 +2302,7 @@
               },
               "constraint": {
                 "horizontal": "leftright",
-                "vertical": "top"
+                "vertical": "center"
               },
               "placement": {
                 "left": 8,
@@ -2337,7 +2335,7 @@
               },
               "constraint": {
                 "horizontal": "leftright",
-                "vertical": "top"
+                "vertical": "center"
               },
               "placement": {
                 "left": 8,

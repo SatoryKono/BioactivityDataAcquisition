@@ -1443,6 +1443,17 @@
                 },
                 "properties": [
                   {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
+                  },
+                  {
                     "id": "mappings",
                     "value": [
                       {
@@ -1462,31 +1473,31 @@
                           },
                           "retention_plan_read_error": {
                             "text": "UNAVAILABLE — retention plan read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "lineage_source_read_error": {
                             "text": "UNAVAILABLE — lineage source read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "trust_evidence_read_error": {
                             "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "manifest_parse_error": {
                             "text": "UNAVAILABLE — manifest parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "run_ledger_parse_error": {
                             "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_parse_error": {
                             "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_scope_manifest_parse_error": {
                             "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "red"
+                            "color": "text"
                           }
                         }
                       }
@@ -1494,18 +1505,7 @@
                   },
                   {
                     "id": "custom.hidden",
-                    "value": false
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Reason"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "wrapText": false
-                    }
+                    "value": true
                   }
                 ]
               },
@@ -1535,31 +1535,31 @@
                           },
                           "retention_plan_read_error": {
                             "text": "UNAVAILABLE — retention plan read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "lineage_source_read_error": {
                             "text": "UNAVAILABLE — lineage source read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "trust_evidence_read_error": {
                             "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "manifest_parse_error": {
                             "text": "UNAVAILABLE — manifest parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "run_ledger_parse_error": {
                             "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_parse_error": {
                             "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_scope_manifest_parse_error": {
                             "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "red"
+                            "color": "text"
                           }
                         }
                       }
@@ -1628,12 +1628,12 @@
                 },
                 "properties": [
                   {
-                    "id": "displayName",
-                    "value": "Detail"
-                  },
-                  {
                     "id": "custom.hidden",
                     "value": false
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
                   }
                 ]
               }
@@ -1779,6 +1779,10 @@
                     }
                   },
                   {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
                     "id": "mappings",
                     "value": [
                       {
@@ -1798,31 +1802,31 @@
                           },
                           "retention_plan_read_error": {
                             "text": "UNAVAILABLE — retention plan read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "lineage_source_read_error": {
                             "text": "UNAVAILABLE — lineage source read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "trust_evidence_read_error": {
                             "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "manifest_parse_error": {
                             "text": "UNAVAILABLE — manifest parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "run_ledger_parse_error": {
                             "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_parse_error": {
                             "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_scope_manifest_parse_error": {
                             "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "red"
+                            "color": "text"
                           }
                         }
                       }
@@ -1830,11 +1834,7 @@
                   },
                   {
                     "id": "custom.hidden",
-                    "value": false
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Reason"
+                    "value": true
                   }
                 ]
               },
@@ -1852,12 +1852,12 @@
                     }
                   },
                   {
-                    "id": "displayName",
-                    "value": "Detail"
-                  },
-                  {
                     "id": "custom.hidden",
                     "value": false
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
                   }
                 ]
               },
@@ -1887,31 +1887,31 @@
                           },
                           "retention_plan_read_error": {
                             "text": "UNAVAILABLE — retention plan read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "lineage_source_read_error": {
                             "text": "UNAVAILABLE — lineage source read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "trust_evidence_read_error": {
                             "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "manifest_parse_error": {
                             "text": "UNAVAILABLE — manifest parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "run_ledger_parse_error": {
                             "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_parse_error": {
                             "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_scope_manifest_parse_error": {
                             "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "red"
+                            "color": "text"
                           }
                         }
                       }
@@ -2153,7 +2153,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text",
+                      "type": "auto",
                       "wrapText": false
                     }
                   },
@@ -2231,31 +2231,31 @@
                           },
                           "retention_plan_read_error": {
                             "text": "UNAVAILABLE — retention plan read error",
-                            "color": "#555555"
+                            "color": "text"
                           },
                           "lineage_source_read_error": {
                             "text": "UNAVAILABLE — lineage source read error",
-                            "color": "#555555"
+                            "color": "text"
                           },
                           "trust_evidence_read_error": {
                             "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "#555555"
+                            "color": "text"
                           },
                           "manifest_parse_error": {
                             "text": "UNAVAILABLE — manifest parse error",
-                            "color": "#555555"
+                            "color": "text"
                           },
                           "run_ledger_parse_error": {
                             "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "#555555"
+                            "color": "text"
                           },
                           "checkpoint_parse_error": {
                             "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "#555555"
+                            "color": "text"
                           },
                           "checkpoint_scope_manifest_parse_error": {
                             "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "#555555"
+                            "color": "text"
                           }
                         }
                       }
@@ -2416,7 +2416,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text",
+                      "type": "auto",
                       "wrapText": false
                     }
                   },
@@ -2494,31 +2494,31 @@
                           },
                           "retention_plan_read_error": {
                             "text": "UNAVAILABLE — retention plan read error",
-                            "color": "#555555"
+                            "color": "text"
                           },
                           "lineage_source_read_error": {
                             "text": "UNAVAILABLE — lineage source read error",
-                            "color": "#555555"
+                            "color": "text"
                           },
                           "trust_evidence_read_error": {
                             "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "#555555"
+                            "color": "text"
                           },
                           "manifest_parse_error": {
                             "text": "UNAVAILABLE — manifest parse error",
-                            "color": "#555555"
+                            "color": "text"
                           },
                           "run_ledger_parse_error": {
                             "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "#555555"
+                            "color": "text"
                           },
                           "checkpoint_parse_error": {
                             "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "#555555"
+                            "color": "text"
                           },
                           "checkpoint_scope_manifest_parse_error": {
                             "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "#555555"
+                            "color": "text"
                           }
                         }
                       }
@@ -2782,6 +2782,17 @@
                 },
                 "properties": [
                   {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
+                  },
+                  {
                     "id": "mappings",
                     "value": [
                       {
@@ -2801,31 +2812,31 @@
                           },
                           "retention_plan_read_error": {
                             "text": "UNAVAILABLE — retention plan read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "lineage_source_read_error": {
                             "text": "UNAVAILABLE — lineage source read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "trust_evidence_read_error": {
                             "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "manifest_parse_error": {
                             "text": "UNAVAILABLE — manifest parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "run_ledger_parse_error": {
                             "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_parse_error": {
                             "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_scope_manifest_parse_error": {
                             "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "red"
+                            "color": "text"
                           }
                         }
                       }
@@ -2833,18 +2844,7 @@
                   },
                   {
                     "id": "custom.hidden",
-                    "value": false
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Reason"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "wrapText": false
-                    }
+                    "value": true
                   }
                 ]
               },
@@ -2874,31 +2874,31 @@
                           },
                           "retention_plan_read_error": {
                             "text": "UNAVAILABLE — retention plan read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "lineage_source_read_error": {
                             "text": "UNAVAILABLE — lineage source read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "trust_evidence_read_error": {
                             "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "manifest_parse_error": {
                             "text": "UNAVAILABLE — manifest parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "run_ledger_parse_error": {
                             "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_parse_error": {
                             "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_scope_manifest_parse_error": {
                             "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "red"
+                            "color": "text"
                           }
                         }
                       }
@@ -2967,12 +2967,12 @@
                 },
                 "properties": [
                   {
-                    "id": "displayName",
-                    "value": "Detail"
-                  },
-                  {
                     "id": "custom.hidden",
                     "value": false
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
                   }
                 ]
               }
@@ -3489,31 +3489,31 @@
                           },
                           "retention_plan_read_error": {
                             "text": "UNAVAILABLE — retention plan read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "lineage_source_read_error": {
                             "text": "UNAVAILABLE — lineage source read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "trust_evidence_read_error": {
                             "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "manifest_parse_error": {
                             "text": "UNAVAILABLE — manifest parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "run_ledger_parse_error": {
                             "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_parse_error": {
                             "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_scope_manifest_parse_error": {
                             "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "red"
+                            "color": "text"
                           }
                         }
                       }
@@ -3547,31 +3547,31 @@
                           },
                           "retention_plan_read_error": {
                             "text": "UNAVAILABLE — retention plan read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "lineage_source_read_error": {
                             "text": "UNAVAILABLE — lineage source read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "trust_evidence_read_error": {
                             "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "manifest_parse_error": {
                             "text": "UNAVAILABLE — manifest parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "run_ledger_parse_error": {
                             "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_parse_error": {
                             "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "red"
+                            "color": "text"
                           },
                           "checkpoint_scope_manifest_parse_error": {
                             "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "red"
+                            "color": "text"
                           }
                         }
                       }

@@ -751,18 +751,16 @@
         {
           "id": "organize",
           "options": {
-            "excludeByName": {},
+            "renameByName": {
+              "verdict": "Overall verdict",
+              "reason_display": "Reason",
+              "saved_trust": "Trust"
+            },
             "indexByName": {
               "execution_state": 0,
               "verdict": 1,
               "saved_trust": 2,
               "reason_display": 3
-            },
-            "renameByName": {
-              "execution_state": "Processing",
-              "verdict": "Overall verdict",
-              "saved_trust": "Trust",
-              "reason_display": "Reason"
             }
           }
         }

@@ -117,6 +117,34 @@ _QUERY_ERROR_MAPPINGS = [
                 "text": "QUERY ERROR — catalog unavailable",
                 "color": "red",
             },
+            "retention_plan_read_error": {
+                "text": "UNAVAILABLE — retention plan read error",
+                "color": "text",
+            },
+            "lineage_source_read_error": {
+                "text": "UNAVAILABLE — lineage source read error",
+                "color": "text",
+            },
+            "trust_evidence_read_error": {
+                "text": "UNAVAILABLE — trust evidence read error",
+                "color": "text",
+            },
+            "manifest_parse_error": {
+                "text": "UNAVAILABLE — manifest parse error",
+                "color": "text",
+            },
+            "run_ledger_parse_error": {
+                "text": "UNAVAILABLE — run ledger parse error",
+                "color": "text",
+            },
+            "checkpoint_parse_error": {
+                "text": "UNAVAILABLE — checkpoint parse error",
+                "color": "text",
+            },
+            "checkpoint_scope_manifest_parse_error": {
+                "text": "UNAVAILABLE — checkpoint scope parse error",
+                "color": "text",
+            },
         },
     }
 ]

@@ -172,6 +172,25 @@ async def test_query_error_payload_does_not_poison_fresh_cache(
     )
 
 
+@pytest.mark.parametrize(
+    "reason", ["evidence_corrupt", "identity_mismatch", "revision_missing"]
+)
+async def test_forensic_source_error_reason_does_not_poison_cache(
+    monkeypatch: pytest.MonkeyPatch, reason: str
+) -> None:
+    now = [0.0]
+    monkeypatch.setattr(module, "monotonic", lambda: now[0])
+    cache = module.SelectedRunStatusCache()
+    await _read(cache, AsyncMock(return_value=dict(PAYLOAD)))
+    now[0] = module.MAX_AGE_SECONDS + 1
+    error_payload = {"pipeline": "chembl_assay", "run_id": "run-1", "reason": reason}
+
+    assert await _read(cache, AsyncMock(return_value=error_payload)) == error_payload
+    assert cache.status(QUERY)["last_refresh_error"] == "QUERY_ERROR"
+    stored = cache._entries[module.selected_run_status_key(QUERY)].payload
+    assert stored == PAYLOAD
+
+
 async def test_loader_exception_keeps_last_good_snapshot(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
