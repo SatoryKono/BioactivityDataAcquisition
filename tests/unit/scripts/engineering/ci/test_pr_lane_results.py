@@ -273,6 +273,21 @@ def test_shadow_compare_routes_12375_a_evidence() -> None:
     assert report["covers_full_suite"] is False
 
 
+def test_shadow_compare_routes_12380_acceptance_report() -> None:
+    """Issue 12380 acceptance markdown is a docs/report artifact, not code."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        ["reports/engineering/12380_acceptance_report.md"],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/architecture/test_documentation_cleanup_inventory.py"
+    ]
+    assert report["covers_full_suite"] is False
+
+
 @pytest.mark.parametrize("path", [".gitleaksignore", ".gitleaks.toml"])
 def test_shadow_compare_routes_secret_scanner_policy(path: str) -> None:
     repo_root = Path(__file__).resolve().parents[5]
