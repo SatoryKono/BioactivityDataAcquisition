@@ -575,6 +575,45 @@ def test_a2_pipeline_all_selected_has_concrete_pipeline() -> None:
     assert selected["pipeline"] == "chembl_assay"
 
 
+@pytest.mark.parametrize("token", ("All", "$__all", "__all", "*"))
+def test_selector_context_treats_grafana_all_run_id_as_a2_unresolved(
+    token: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """run_id All-scope tokens must consult A2, not look up a literal UUID."""
+    from bioetl.interfaces.http import _health_server_routing_support as routing
+
+    matching = _manifest(4)
+    host = MagicMock()
+    host._read_scope_csv_param.side_effect = lambda q, key: (
+        (q.get(key),) if q.get(key) not in {None, "", "All", "$__all"} else ()
+    )
+    host._read_optional_param.side_effect = lambda q, key: q.get(key)
+    host._run_ledger_port = None
+    host._run_report_store = None
+
+    def fake_build(**kwargs: object) -> dict[str, object]:
+        return {"kwargs": kwargs}
+
+    monkeypatch.setattr(routing, "build_selector_context_payload", fake_build)
+    monkeypatch.setattr(
+        routing,
+        "resolve_a2_latest_run_id",
+        lambda **_k: str(matching.run_id),
+    )
+    payload = routing._selector_context_payload_with_a2(
+        host,
+        manifests=(matching,),
+        workflow_manifests=(),
+        query={"pipeline": "chembl_assay", "run_id": token},
+    )
+    kwargs = payload["kwargs"]
+    assert isinstance(kwargs, dict)
+    assert kwargs["selected_run_id"] is None
+    assert kwargs["auto_selected_run_id"] == str(matching.run_id)
+    assert kwargs["a2_consulted"] is True
+    assert is_unresolved_run_id(token)
+
+
 def test_a2_keeps_top_level_workflow_name_pick_without_workflow_manifests() -> None:
     """A2 UUID must survive selector-context when membership is only workflow_name."""
     from bioetl.interfaces.http.control_plane_selector_context import (

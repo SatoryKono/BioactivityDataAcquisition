@@ -8,10 +8,8 @@ from uuid import UUID
 
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.types import RunID
-from bioetl.interfaces.http.control_plane_selector_context import (
-    RUN_ID_NO_SELECTION,
-    UNKNOWN_SCOPE,
-)
+from bioetl.interfaces.http._selected_run_a2_resolve import is_unresolved_run_id
+from bioetl.interfaces.http.control_plane_selector_context import UNKNOWN_SCOPE
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,8 +47,16 @@ def read_selected_run_id(
     host: _ControlPlaneScopeHost,
     query: dict[str, str],
 ) -> str | None:
+    """Return a concrete run_id, or ``None`` for A2-unresolved sentinels.
+
+    Aligns with ``is_unresolved_run_id`` / selected-run-status so Grafana
+    tokens ``All``, ``$__all``, ``__all``, ``*``, ``-``, and blank are not
+    treated as explicit UUIDs by selector-context.
+    """
     selected_run_id = host._read_optional_param(query, "run_id")
-    return None if selected_run_id in {None, RUN_ID_NO_SELECTION} else selected_run_id
+    if is_unresolved_run_id(selected_run_id):
+        return None
+    return selected_run_id
 
 
 def _identity_scope(
