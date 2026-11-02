@@ -174,12 +174,18 @@ class DQConfigFile(BaseModel):
         default=False,
         description=(
             "Normalized quality-config property corresponding to the canonical "
-            "contract-YAML key strict_dq_validation under configs/contracts/*"
+            "contract-YAML key strict_dq_validation under configs/contracts/*. "
+            "Defaults to False (permissive mode), which may mask misconfigurations "
+            "if not explicitly enabled for Gold schemas."
         ),
     )
     invalid_record_policy: Literal["quarantine", "skip", "fail"] = Field(
         default="quarantine",
-        description="Policy for handling invalid records",
+        description=(
+            "Policy for handling invalid records. Defaults to 'quarantine', "
+            "which safely isolates non-compliant records without failing the pipeline. "
+            "Explicit declaration is recommended for Gold schemas to avoid implicit fallback masking."
+        ),
     )
     report: DQReportYamlConfig = Field(
         default_factory=DQReportYamlConfig,
