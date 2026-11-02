@@ -1,12 +1,8 @@
 {
   "schema_version": 1,
-  "catalog_ref": "57146e50dfa2a48cb93cd0bbbf6c4aeb503aec59",
-  "source_ref": "57146e50dfa2a48cb93cd0bbbf6c4aeb503aec59",
-  "source_reviews": {
-    "src/bioetl/infrastructure/observability/observability_backend_process.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed.",
-    "src/bioetl/infrastructure/provenance/code_revision.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed.",
-    "src/bioetl/infrastructure/storage/silver/support.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed."
-  },
+  "catalog_ref": "ed6d190f1a4af2620ed7e352d9770dcb556784bd",
+  "source_ref": "52c463a5cd53a1ae8a00df37a8cc18a83097f2e2",
+  "source_reviews": {},
   "expression_updates": {},
   "resource_updates": {},
   "additional_bindings": {},
