@@ -48,6 +48,7 @@ dashboards:
     data_sources:
       - Prometheus
       - Grafana
+      - Mixed
       - BioETL Ops HTTP
     panel_count: 11
     key_panels:
@@ -91,8 +92,8 @@ dashboards:
         description: Saved HTTP evidence for the selected Run ID
       - id: 9402
         title: Inspect Run Identity
-        type: table
-        description: HTTP identity for the selected Run ID
+        type: text
+        description: Handoff to Overview Review Run Identity (panel 9300)
       - id: 9403
         title: Inspect Processed Records
         type: table
@@ -159,7 +160,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 2
+    panel_count: 3
     key_panels:
       - id: 3010
         title: Inspect Recent Runs (last 10)

@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit, urlunsplit
@@ -43,6 +42,28 @@ def _walk(panels: list[Any]) -> list[dict[str, Any]]:
     return out
 
 
+def _shift_panels_down_for_nav(panels: list[Any]) -> None:
+    for panel in panels:
+        if not isinstance(panel, dict):
+            continue
+        grid = panel.get("gridPos")
+        if isinstance(grid, dict) and isinstance(grid.get("y"), int):
+            grid["y"] = int(grid["y"]) + NAV_HEIGHT
+
+
+def _compact_run_explorer_first_window(panels: list[Any]) -> None:
+    for panel in panels:
+        if not isinstance(panel, dict):
+            continue
+        grid = panel.get("gridPos")
+        if not isinstance(grid, dict):
+            continue
+        if panel.get("id") == 1:
+            grid.update({"x": 0, "y": 2, "w": 24, "h": 2})
+        elif panel.get("id") == 3010:
+            grid.update({"x": 0, "y": 4, "w": 24, "h": 12})
+
+
 def _ensure_nav(payload: dict[str, Any], *, uid: str) -> None:
     panels = payload.setdefault("panels", [])
     if not isinstance(panels, list):
@@ -58,27 +79,12 @@ def _ensure_nav(payload: dict[str, Any], *, uid: str) -> None:
             "links": [],
             "description": "",
         }
-        for panel in panels:
-            if not isinstance(panel, dict):
-                continue
-            grid = panel.get("gridPos")
-            if isinstance(grid, dict) and isinstance(grid.get("y"), int):
-                grid["y"] = int(grid["y"]) + NAV_HEIGHT
+        _shift_panels_down_for_nav(panels)
         panels.insert(0, nav)
     _stamp_nav_panel(nav, panels)
     _attach_nav_bus(nav, current_uid=uid)
-    # Compact Run Explorer first window after inserting the bus.
     if uid == "bioetl-run-explorer-v1":
-        for panel in panels:
-            if not isinstance(panel, dict):
-                continue
-            grid = panel.get("gridPos")
-            if not isinstance(grid, dict):
-                continue
-            if panel.get("id") == 1:
-                grid.update({"x": 0, "y": 2, "w": 24, "h": 2})
-            elif panel.get("id") == 3010:
-                grid.update({"x": 0, "y": 4, "w": 24, "h": 12})
+        _compact_run_explorer_first_window(panels)
 
 
 def _move_data_links_to_panel_links(panel: dict[str, Any]) -> None:
@@ -102,10 +108,28 @@ def _move_data_links_to_panel_links(panel: dict[str, Any]) -> None:
     panel["links"] = links
 
 
+def _strip_github_grafana_query(url: str) -> str:
+    parts = urlsplit(url.replace("&amp;", "&"))
+    if not (parts.query or "${" in url):
+        return url
+    path_only = urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
+    return path_only.split("?", 1)[0]
+
+
+def _percentencode_data_fields(url: str) -> str:
+    for field in ("workflow", "pipeline", "run_type"):
+        bare = f"${{__data.fields.{field}}}"
+        encoded = f"${{__data.fields.{field}:percentencode}}"
+        # Avoid double-encoding already-qualified templates.
+        url = url.replace(encoded, "\0")
+        url = url.replace(bare, encoded)
+        url = url.replace("\0", encoded)
+    return url
+
+
 def _rewrite_url(url: str) -> str:
     if not isinstance(url, str) or not url:
         return url
-    original = url
 
     # F-27 static slug: /d/{uid}/{uid} → /d/{uid}/{canonical-path}
     for uid, path in PATH_BY_UID.items():
@@ -121,10 +145,9 @@ def _rewrite_url(url: str) -> str:
     )
 
     # F-14 action_path glue: /${action_path}&… → /${action_path} (path already has ?)
-    url = re.sub(
-        r"/\$\{__data\.fields\.action_path\}&",
+    url = url.replace(
+        "/${__data.fields.action_path}&",
         "/${__data.fields.action_path}",
-        url,
     )
     # Drop Grafana vars glued onto Ops artifact action_path URLs.
     if "${__data.fields.action_path}" in url and "var-pipeline=" in url:
@@ -132,13 +155,7 @@ def _rewrite_url(url: str) -> str:
 
     # F-26: strip Grafana query params from GitHub runbook links.
     if "github.com/" in url and ("blob/main/docs/" in url or "/runbooks/" in url):
-        parts = urlsplit(url.replace("&amp;", "&"))
-        if parts.query or "${" in url:
-            # Keep scheme/netloc/path only; drop query + Grafana templates after ?
-            path_only = urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
-            # Also handle templates that put ${} after ? without urlsplit query
-            path_only = re.split(r"\?", path_only, maxsplit=1)[0]
-            url = path_only
+        url = _strip_github_grafana_query(url)
 
     # CP broken viewPanel=130 → Review Exact Replay Checks (9423)
     url = url.replace("viewPanel=130", "viewPanel=9423")
@@ -153,16 +170,7 @@ def _rewrite_url(url: str) -> str:
     ):
         url = url.replace("${run_id:queryparam}", "var-run_id=-")
 
-    # Missing :percentencode on mapped __data.fields scalars (when bare).
-    for field in ("workflow", "pipeline", "run_type"):
-        url = re.sub(
-            rf"\$\{{__data\.fields\.{field}\}}(?!:)",
-            f"${{__data.fields.{field}:percentencode}}",
-            url,
-        )
-
-    del original  # rewrite is idempotent; always return current url
-    return url
+    return _percentencode_data_fields(url)
 
 
 def _rewrite_links_in_obj(value: Any) -> None:

@@ -653,7 +653,6 @@ def test_dq_renderer_copy_matches_shipped() -> None:
     """Renderer constants and shipped bioetl-dq-v2.json must agree."""
     from scripts.ops.observability.grafana._evidence_readability import (
         _DQ_DOMAINS_DESCRIPTION,
-        _DQ_IDENTITY_DESCRIPTION,
         _DQ_REASON_MAPPINGS,
     )
     from scripts.ops.observability.grafana._gr_db_corrections import (

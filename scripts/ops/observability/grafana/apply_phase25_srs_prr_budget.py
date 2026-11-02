@@ -25,12 +25,15 @@ DASH = ROOT / "grafana" / "dashboards"
 
 OPS = {"type": "yesoreyeram-infinity-datasource", "uid": "bioetl-ops-http"}
 DASH_DS = {"type": "datasource", "uid": "-- Dashboard --"}
+MIXED_DS = {"type": "datasource", "uid": "-- Mixed --"}
 SRS_URL = (
     "/ops/observability/selected-run-status"
     "?pipeline=${pipeline}&run_id=${run_id}"
     "&run_type=${run_type:csv}&workflow=${workflow:csv}"
 )
 FRAME = "_bioetl_frame"
+VIEW_PANEL_TRUST_SELF = "viewPanel=9418"
+VIEW_PANEL_TRUST_SIBLING = "viewPanel=9414"
 
 OV_IDENTITY = (
     "/d/bioetl-overview-v2/2-overview"
@@ -143,7 +146,8 @@ _OV_DOMAINS = (
     "'Result not recorded' : $d.reason_display) }), '; ') : "
     "(($s.verdict = 'OK' or $s.verdict = 'SELECT RUN' or "
     "$s.verdict = 'НЕТ ЗАПУСКОВ') ? ($r ? $r : $s.reason) : $s.reason)"
-    f", '{FRAME}': 'domains'}}]) }})"
+    # f-string doubles braces; trailing `)` closes the outer `(` block.
+    f", '{FRAME}': 'domains'}}]) }}))"
 )
 
 _OV_IDENTITY = (
@@ -198,7 +202,8 @@ _OV_PROVIDER = (
     "'observed_display': $age != null and $age >= 0 ? "
     "($age<60 ? 'Just now' : $elapsed & ' ago') : 'Not recorded', "
     "'report_label': $saved or $cached ? 'Open report' : '—'"
-    f", '{FRAME}': 'provider'}}]) }})"
+    # f-string doubles braces; trailing `)` closes the outer `(` block.
+    f", '{FRAME}': 'provider'}}]) }}))"
 )
 
 _OV_STAGES = _tag_rows("stage_diagnostics", "stages")
@@ -272,7 +277,7 @@ _DQ_STAGES = (
     "'deduplicated': $exists($s) ? $r($s,'deduplicated') : null, "
     "'filtered_out': $exists($s) ? $r($s,'filtered_out') : null, "
     + f"'{FRAME}': 'stages'"
-    + "}]))})})"
+    + "}]))}))"
 )
 
 _DQ_STAGEINPUT = (
@@ -308,7 +313,8 @@ _INC_STATUS = (
     "presentation_summary[0].verdict = 'НЕТ ЗАПУСКОВ') ? "
     "(presentation_trust[0].reasons_display ? "
     "presentation_trust[0].reasons_display : presentation_summary[0].reason) : "
-    f"presentation_summary[0].reason), '{FRAME}': 'status'}}])]"
+    # Close merge object/array, status array, and the outer `($issues := …)` block.
+    f"presentation_summary[0].reason), '{FRAME}': 'status'}}])])"
 )
 
 _INC_DOMAINS = _tag_rows("presentation_domains", "domains")
@@ -337,6 +343,128 @@ _CP_REPLAY_CHECKS = (
     f"$merge([$row, {{'{FRAME}': 'replay_checks'}}])}})"
 )
 _CP_DONOR = _append_many(_CP_TRUST, _CP_REPLAY_READY, _CP_REPLAY_CHECKS)
+
+
+def _jsonata_brackets_balanced(expression: str) -> bool:
+    """Return True when ``()[]{}`` are balanced outside single-quoted literals."""
+    stack: list[str] = []
+    pairs = {")": "(", "]": "[", "}": "{"}
+    opens = set(pairs.values())
+    in_string = False
+    escape = False
+    for char in expression:
+        if in_string:
+            if escape:
+                escape = False
+                continue
+            if char == "\\":
+                escape = True
+                continue
+            if char == "'":
+                in_string = False
+            continue
+        if char == "'":
+            in_string = True
+            continue
+        if char in opens:
+            stack.append(char)
+        elif char in pairs:
+            if not stack or stack[-1] != pairs[char]:
+                return False
+            stack.pop()
+    return not stack
+
+
+def _assert_donor_jsonata_balanced() -> None:
+    donors = {
+        "_OV_DONOR": _OV_DONOR,
+        "_DQ_DONOR": _DQ_DONOR,
+        "_INC_DONOR": _INC_DONOR,
+        "_CP_DONOR": _CP_DONOR,
+        "_MERGED_PRR": _MERGED_PRR,
+        "_OV_DOMAINS": _OV_DOMAINS,
+        "_OV_PROVIDER": _OV_PROVIDER,
+        "_DQ_STAGES": _DQ_STAGES,
+        "_INC_STATUS": _INC_STATUS,
+    }
+    broken = [name for name, expr in donors.items() if not _jsonata_brackets_balanced(expr)]
+    if broken:
+        raise SystemExit(f"unbalanced JSONata donor expression(s): {', '.join(broken)}")
+
+
+def _ensure_exclusions_crit_color(panel: dict[str, Any]) -> None:
+    """Canvas 9482 must color hard-limit ``CRIT`` (legacy ``ERROR`` kept)."""
+    defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
+    mappings = list(defaults.get("mappings") or [])
+    has_crit = any(
+        isinstance(item, dict)
+        and item.get("type") == "regex"
+        and str((item.get("options") or {}).get("pattern") or "") == "^CRIT.*"
+        for item in mappings
+    )
+    if not has_crit:
+        insert_at = next(
+            (
+                index
+                for index, item in enumerate(mappings)
+                if isinstance(item, dict)
+                and item.get("type") == "regex"
+                and str((item.get("options") or {}).get("pattern") or "").startswith(
+                    "^ERROR"
+                )
+            ),
+            len(mappings),
+        )
+        mappings.insert(
+            insert_at,
+            {
+                "type": "regex",
+                "options": {"pattern": "^CRIT.*", "result": {"color": "red"}},
+            },
+        )
+        defaults["mappings"] = mappings
+    description = str(panel.get("description") or "")
+    if "hard limit ERROR" in description:
+        panel["description"] = description.replace("hard limit ERROR", "hard limit CRIT")
+
+
+def _status_donor_transforms() -> list[dict[str, Any]]:
+    """Shared Review Selected Run Status organize chain (DQ + Incident donors)."""
+    return [
+        _filter_frame("status"),
+        {"id": "limit", "options": {"limitField": 1}},
+        {
+            "id": "filterFieldsByName",
+            "options": {
+                "include": {
+                    "names": [
+                        "execution_state",
+                        "verdict",
+                        "saved_trust",
+                        "reason_display",
+                    ]
+                }
+            },
+        },
+        {
+            "id": "organize",
+            "options": {
+                "excludeByName": {},
+                "indexByName": {
+                    "execution_state": 0,
+                    "verdict": 1,
+                    "saved_trust": 2,
+                    "reason_display": 3,
+                },
+                "renameByName": {
+                    "execution_state": "Processing",
+                    "verdict": "Overall verdict",
+                    "saved_trust": "Trust",
+                    "reason_display": "Reason",
+                },
+            },
+        },
+    ]
 
 
 def _replace_with_handoff(
@@ -411,10 +539,12 @@ def apply_overview(data: dict[str, Any]) -> None:
         panel["targets"] = [_dash_target(9002)]
         _prepend_frame_filter(panel, frame)
 
+    _ensure_exclusions_crit_color(_by_id(data, 9482))
+
     stages = _by_id(data, 9460)
     # Mixed targets: Dashboard DS (stages rows from 9002) + one merged PRR.
     # Do not filter on ``_bioetl_frame`` alone — that would drop PRR rows.
-    stages["datasource"] = dict(DASH_DS)
+    stages["datasource"] = dict(MIXED_DS)
     prr_url = (
         "/ops/observability/pipeline-run-report-artifact"
         "?pipeline=${selected_pipeline:percentencode}"
@@ -523,41 +653,7 @@ def apply_dq(data: dict[str, Any]) -> None:
     donor = _by_id(data, 9406)
     donor["datasource"] = dict(OPS)
     donor["targets"] = [_infinity_uql(_DQ_DONOR)]
-    donor["transformations"] = [
-        _filter_frame("status"),
-        {"id": "limit", "options": {"limitField": 1}},
-        {
-            "id": "filterFieldsByName",
-            "options": {
-                "include": {
-                    "names": [
-                        "execution_state",
-                        "verdict",
-                        "saved_trust",
-                        "reason_display",
-                    ]
-                }
-            },
-        },
-        {
-            "id": "organize",
-            "options": {
-                "excludeByName": {},
-                "indexByName": {
-                    "execution_state": 0,
-                    "verdict": 1,
-                    "saved_trust": 2,
-                    "reason_display": 3,
-                },
-                "renameByName": {
-                    "execution_state": "Processing",
-                    "verdict": "Overall verdict",
-                    "saved_trust": "Trust",
-                    "reason_display": "Reason",
-                },
-            },
-        },
-    ]
+    donor["transformations"] = _status_donor_transforms()
 
     stages = _by_id(data, 9460)
     stages["datasource"] = dict(DASH_DS)
@@ -696,41 +792,7 @@ def apply_incident(data: dict[str, Any]) -> None:
     donor = _by_id(data, 2101)
     donor["datasource"] = dict(OPS)
     donor["targets"] = [_infinity_uql(_INC_DONOR)]
-    donor["transformations"] = [
-        _filter_frame("status"),
-        {"id": "limit", "options": {"limitField": 1}},
-        {
-            "id": "filterFieldsByName",
-            "options": {
-                "include": {
-                    "names": [
-                        "execution_state",
-                        "verdict",
-                        "saved_trust",
-                        "reason_display",
-                    ]
-                }
-            },
-        },
-        {
-            "id": "organize",
-            "options": {
-                "excludeByName": {},
-                "indexByName": {
-                    "execution_state": 0,
-                    "verdict": 1,
-                    "saved_trust": 2,
-                    "reason_display": 3,
-                },
-                "renameByName": {
-                    "execution_state": "Processing",
-                    "verdict": "Overall verdict",
-                    "saved_trust": "Trust",
-                    "reason_display": "Reason",
-                },
-            },
-        },
-    ]
+    donor["transformations"] = _status_donor_transforms()
 
     for pid, frame in ((9463, "duration"), (9451, "domains")):
         panel = _by_id(data, pid)
@@ -762,13 +824,8 @@ def apply_incident(data: dict[str, Any]) -> None:
     )
 
 
-def apply_control_plane(data: dict[str, Any]) -> None:
-    donor = _by_id(data, 9418)
-    donor["datasource"] = dict(OPS)
-    donor["targets"] = [_infinity_uql(_CP_DONOR)]
-    transforms = list(donor.get("transformations") or [])
-    # Rebuild transform chain with frame filter + unique indexes.
-    donor["transformations"] = [
+def _cp_trust_donor_transforms() -> list[dict[str, Any]]:
+    return [
         _filter_frame("trust"),
         {
             "id": "convertFieldType",
@@ -824,9 +881,9 @@ def apply_control_plane(data: dict[str, Any]) -> None:
         {"id": "limit", "options": {"limitField": 1}},
     ]
 
-    # Fix hideFrom vs hidden on reasons_count: keep visible (hidden=false),
-    # drop conflicting hideFrom that hid viz/legend/tooltip.
-    overrides = donor.setdefault("fieldConfig", {}).setdefault("overrides", [])
+
+def _fix_reasons_count_visibility(overrides: list[Any]) -> None:
+    """Keep Reason count visible; drop conflicting hideFrom."""
     for override in overrides:
         name = (override.get("matcher") or {}).get("options")
         if name != "reasons_count":
@@ -836,7 +893,6 @@ def apply_control_plane(data: dict[str, Any]) -> None:
             for p in override.get("properties") or []
             if p.get("id") != "custom.hideFrom"
         ]
-        # Ensure hidden stays false (column visible as Reason count).
         has_hidden = False
         for prop in props:
             if prop.get("id") == "custom.hidden":
@@ -846,17 +902,31 @@ def apply_control_plane(data: dict[str, Any]) -> None:
             props.append({"id": "custom.hidden", "value": False})
         override["properties"] = props
 
-    # Self-link viewPanel=9418 → 9414 on trust_reasons_action.
-    blob = json.dumps(donor)
-    if "viewPanel=9418" in blob:
-        for override in overrides:
-            for prop in override.get("properties") or []:
-                if prop.get("id") != "links":
-                    continue
-                for link in prop.get("value") or []:
-                    url = link.get("url") or ""
-                    if "viewPanel=9418" in url:
-                        link["url"] = url.replace("viewPanel=9418", "viewPanel=9414")
+
+def _rewrite_trust_self_links(overrides: list[Any]) -> None:
+    """Self-link viewPanel=9418 → 9414 on trust_reasons_action."""
+    for override in overrides:
+        for prop in override.get("properties") or []:
+            if prop.get("id") != "links":
+                continue
+            for link in prop.get("value") or []:
+                url = link.get("url") or ""
+                if VIEW_PANEL_TRUST_SELF in url:
+                    link["url"] = url.replace(
+                        VIEW_PANEL_TRUST_SELF, VIEW_PANEL_TRUST_SIBLING
+                    )
+
+
+def apply_control_plane(data: dict[str, Any]) -> None:
+    donor = _by_id(data, 9418)
+    donor["datasource"] = dict(OPS)
+    donor["targets"] = [_infinity_uql(_CP_DONOR)]
+    donor["transformations"] = _cp_trust_donor_transforms()
+
+    overrides = donor.setdefault("fieldConfig", {}).setdefault("overrides", [])
+    _fix_reasons_count_visibility(overrides)
+    if VIEW_PANEL_TRUST_SELF in json.dumps(donor):
+        _rewrite_trust_self_links(overrides)
 
     for pid, frame in ((9422, "replay_readiness"), (9423, "replay_checks")):
         panel = _by_id(data, pid)
@@ -878,6 +948,7 @@ def inventory(data: dict[str, Any]) -> tuple[int, int]:
 
 
 def main() -> None:
+    _assert_donor_jsonata_balanced()
     files = {
         "bioetl-overview-v2.json": apply_overview,
         "bioetl-dq-v2.json": apply_dq,

@@ -347,7 +347,7 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
         gridPos={"x": 15, "y": y, "w": 9, "h": 6},
         description=(
             "SELECTED RUN · Excluded-by-contract records summed across Bronze, Silver and Gold. "
-            "Exclusion rate uses Bronze records out: below soft limit OK, at soft limit WARN, at hard limit ERROR. "
+            "Exclusion rate uses Bronze records out: below soft limit OK, at soft limit WARN, at hard limit CRIT. "
             "Limits come from pipeline configuration at dashboard generation, not historical run overrides. "
             "UNKNOWN means incomplete tracking or invalid counters; SELECT RUN requires a Run ID. "
             "Failed requests remain QUERY ERROR. Quarantined, filtered and deduplicated records "
@@ -380,6 +380,10 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
                 {
                     "type": "regex",
                     "options": {"pattern": "^WARN.*", "result": {"color": "orange"}},
+                },
+                {
+                    "type": "regex",
+                    "options": {"pattern": "^CRIT.*", "result": {"color": "red"}},
                 },
                 {
                     "type": "regex",

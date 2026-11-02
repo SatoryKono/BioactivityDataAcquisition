@@ -2,11 +2,19 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
 
 from scripts.ops.observability.grafana import lint_dashboard_phase2 as lint
+from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
+    _assert_donor_jsonata_balanced,
+    _jsonata_brackets_balanced,
+    _OV_DONOR,
+    _DQ_DONOR,
+    _INC_DONOR,
+)
 
 
 pytestmark = pytest.mark.unit
@@ -35,9 +43,90 @@ def test_phase2_linter_flags_missing_nav_and_index_collision(
         ],
     }
     path = tmp_path / "bioetl-overview-v2.json"
-    path.write_text(__import__("json").dumps(dash), encoding="utf-8")
+    path.write_text(json.dumps(dash), encoding="utf-8")
     monkeypatch.setattr(lint, "DASH_DIR", tmp_path)
     monkeypatch.setattr(lint, "FILES", ("bioetl-overview-v2.json",))
     findings = lint.lint_dashboard(path)
     assert any("missing navigation panel id=1000" in item for item in findings)
     assert any("indexByName collision" in item for item in findings)
+
+
+def test_parse_dashboard_view_panel_when_not_first_query_param() -> None:
+    uid, panel = lint.parse_dashboard_view_panel(
+        "/d/bioetl-dq-v2/5-data-quality"
+        "?${workflow:queryparam}&${pipeline:queryparam}"
+        "&viewPanel=9460&${__url_time_range}"
+    )
+    assert uid == "bioetl-dq-v2"
+    assert panel == 9460
+
+
+def test_parse_dashboard_view_panel_first_param_and_amp_entities() -> None:
+    uid, panel = lint.parse_dashboard_view_panel(
+        "/d/bioetl-overview-v2/2-overview?viewPanel=9300&amp;var-run_id=abc"
+    )
+    assert uid == "bioetl-overview-v2"
+    assert panel == 9300
+
+
+def test_lint_flags_broken_view_panel_mid_query(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    dash = {
+        "uid": "bioetl-overview-v2",
+        "panels": [
+            {
+                "id": 1000,
+                "type": "text",
+                "options": {
+                    "content": (
+                        '<div class="bioetl-nav">'
+                        '<span class="bioetl-nav-current">x</span>'
+                        "19.5% 19.5% 19.5% 19.5% 19.5%"
+                        "Run Explorer Replay Readiness Run Overview "
+                        "Data Quality 6. Incident Workspace"
+                        "</div>"
+                    )
+                },
+                "links": [
+                    {
+                        "title": "broken mid-query",
+                        "url": (
+                            "/d/bioetl-dq-v2/5-data-quality"
+                            "?var-pipeline=chembl&viewPanel=99999"
+                        ),
+                    }
+                ],
+            }
+        ],
+    }
+    path = tmp_path / "bioetl-overview-v2.json"
+    path.write_text(json.dumps(dash), encoding="utf-8")
+    dq = {
+        "uid": "bioetl-dq-v2",
+        "panels": [{"id": 9460, "type": "table"}],
+    }
+    (tmp_path / "bioetl-dq-v2.json").write_text(json.dumps(dq), encoding="utf-8")
+    monkeypatch.setattr(lint, "DASH_DIR", tmp_path)
+    monkeypatch.setattr(
+        lint,
+        "FILES",
+        ("bioetl-overview-v2.json", "bioetl-dq-v2.json"),
+    )
+    monkeypatch.setattr(
+        lint,
+        "UID_BY_FILE",
+        {
+            "bioetl-overview-v2.json": "bioetl-overview-v2",
+            "bioetl-dq-v2.json": "bioetl-dq-v2",
+        },
+    )
+    findings = lint.lint_dashboard(path)
+    assert any("broken viewPanel=99999 on bioetl-dq-v2" in item for item in findings)
+
+
+def test_phase25_donor_jsonata_brackets_are_balanced() -> None:
+    _assert_donor_jsonata_balanced()
+    assert _jsonata_brackets_balanced(_OV_DONOR)
+    assert _jsonata_brackets_balanced(_DQ_DONOR)
+    assert _jsonata_brackets_balanced(_INC_DONOR)

@@ -2747,6 +2747,9 @@ def apply_to_dashboard(
             if http_states not in description:
                 panel["description"] = f"{description} {http_states}".strip()
     _document_required_http_evidence(payload)
+    # Phase 2.5 donor–consumer budget must run after identity/layout rebuilds so
+    # re-running this generator does not wipe SRS/PRR donors or markdown handoffs.
+    _apply_phase25_srs_prr_budget(payload, current_uid=current_uid)
     _migrate_grafana_schema42(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
@@ -2764,6 +2767,28 @@ def apply_to_dashboard(
     return True
 
 
+def _apply_phase25_srs_prr_budget(
+    payload: dict[str, Any], *, current_uid: str
+) -> None:
+    """Re-apply Phase 2.5 donors after nav/layout builders (idempotent)."""
+    from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
+        apply_control_plane,
+        apply_dq,
+        apply_incident,
+        apply_overview,
+    )
+
+    applicators = {
+        "bioetl-overview-v2": apply_overview,
+        "bioetl-dq-v2": apply_dq,
+        "bioetl-incident-v1": apply_incident,
+        "bioetl-control-plane-v1": apply_control_plane,
+    }
+    apply = applicators.get(current_uid)
+    if apply is not None:
+        apply(payload)
+
+
 def _migrate_grafana_schema42(payload: dict[str, Any]) -> None:
     """Author the pinned Grafana 12.2.5 v1 schema instead of runtime migration.
 
@@ -2778,6 +2803,7 @@ def _migrate_grafana_schema42(payload: dict[str, Any]) -> None:
         },
         "-- Grafana --": {"uid": "-- Grafana --"},
         "-- Dashboard --": {"type": "datasource", "uid": "-- Dashboard --"},
+        "-- Mixed --": {"type": "datasource", "uid": "-- Mixed --"},
     }
     pending: list[object] = [payload]
     while pending:
