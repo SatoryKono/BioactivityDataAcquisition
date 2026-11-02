@@ -1024,11 +1024,19 @@ def test_affected_targets_map_shared_helper_to_importing_tests(
         encoding="utf-8",
     )
 
+    conftest = tmp_path / "tests" / "unit" / "conftest" / "conftest.py"
+    conftest.parent.mkdir(parents=True)
+    conftest.write_text(
+        "from tests.helpers import run\\n",
+        encoding="utf-8",
+    )
+
     assert affected_pytest_targets(
         [helper.relative_to(tmp_path).as_posix()], repo_root=tmp_path
     ) == [
         "tests/unit/sample/test_owner.py",
         "tests/unit/sample/test_via_package.py",
+        "tests/unit/conftest",
     ]
 
 
