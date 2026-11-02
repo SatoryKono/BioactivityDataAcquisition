@@ -93,18 +93,33 @@ def test_overview_uses_frozen_v3_selector_set() -> None:
         "pipeline",
         "run_type",
         "run_id",
+        "selected_run_id",
+        "selected_pipeline",
         "provider_for_pipeline",
     ]
 
-    for name in ("workflow", "run_type"):
-        variable = variables[name]
-        assert variable.get("datasource") == {
-            "type": "prometheus",
-            "uid": "prometheus",
-        }
-        assert variable.get("includeAll") is True
-        assert variable.get("current", {}).get("text") == "All"
-        assert variable.get("current", {}).get("value") == "$__all"
+    workflow = variables["workflow"]
+    assert workflow.get("datasource") == {
+        "type": "prometheus",
+        "uid": "prometheus",
+    }
+    assert workflow.get("includeAll") is True
+    assert workflow.get("current", {}).get("text") == "All"
+    assert workflow.get("current", {}).get("value") == "$__all"
+
+    # Phase 1.5: run_type options come from Ops HTTP filter-options (same as pipeline).
+    run_type = variables["run_type"]
+    assert run_type.get("datasource") == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }
+    assert run_type.get("includeAll") is True
+    assert run_type.get("current", {}).get("text") == "All"
+    assert run_type.get("current", {}).get("value") == "$__all"
+    run_type_query = run_type.get("query", {})
+    assert isinstance(run_type_query, dict)
+    run_type_inf = run_type_query.get("infinityQuery", {})
+    assert "dimension=run_type" in str(run_type_inf.get("url", ""))
 
     pipeline = variables["pipeline"]
     assert pipeline.get("datasource") == {
@@ -122,7 +137,7 @@ def test_overview_uses_frozen_v3_selector_set() -> None:
 
     assert variables["workflow"].get("multi") is False
     assert variables["pipeline"].get("multi") is False
-    assert variables["run_type"].get("multi") is True
+    assert variables["run_type"].get("multi") is False
 
     run_id = variables["run_id"]
     assert run_id.get("datasource") == {
@@ -216,19 +231,28 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
 
 def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> None:
     identity = _panels_by_title()["Review Run Identity"]
+    domains = _panels_by_title()["Review Run Domains"]
 
+    # Phase 2.5: identity consumes Overview donor 9002 via Dashboard DS.
     assert identity.get("datasource") == {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "bioetl-ops-http",
+        "type": "datasource",
+        "uid": "-- Dashboard --",
     }
-    assert identity.get("targets", [{}])[0].get("parser") == "uql"
     target = identity["targets"][0]
-    assert target["url"].startswith("/ops/observability/selected-run-status?")
-    assert "run_id=${run_id}" in target["url"]
-    assert "parse-json | jsonata" in target["uql"]
+    assert target.get("panelId") == 9002
+    assert target.get("withTransforms") is False
+    donor = domains["targets"][0]
+    assert "selected-run-status?pipeline=${pipeline}&run_id=${run_id}" in donor["url"]
+    assert "parse-json | jsonata" in donor["uql"]
     for label in ("Run ID", "Pipeline", "Run Type", "Started at", "Total Run Duration"):
-        assert label in target["root_selector"]
-    assert "Not recorded in saved run evidence" in target["root_selector"]
+        assert label in donor["root_selector"]
+    assert "Not recorded in saved run evidence" in donor["root_selector"]
+    assert any(
+        t.get("id") == "filterByValue"
+        and "_bioetl_frame" in json.dumps(t)
+        and "identity" in json.dumps(t)
+        for t in identity.get("transformations") or []
+    )
 
     prometheus_expressions = "\n".join(get_panel_expressions(_dashboard()))
     assert "$run_id" not in prometheus_expressions
@@ -306,11 +330,12 @@ def test_overview_queries_are_backed_by_expected_records_and_metrics() -> None:
         if isinstance(target, dict)
     )
 
-    for required_token in (
-        "selected-run-status?pipeline=${pipeline}&run_id=${run_id}",
-        "pipeline-run-report-artifact?pipeline=${pipeline:percentencode}",
-    ):
-        assert required_token in all_expressions
+    assert "selected-run-status?pipeline=${pipeline}&run_id=${run_id}" in all_expressions
+    # Phase 2.5: stages PRR uses selected_* funnel vars (merged B/C target).
+    assert (
+        "pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}"
+        in all_expressions
+    )
 
 
 def test_overview_timelines_use_all_labels_and_hide_clipped_in_band_text() -> None:

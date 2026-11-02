@@ -267,6 +267,27 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
                 for target in panel.get("targets", [])
                 if isinstance(target, dict)
             ]
+            # Phase 2.5: some first-screen panels consume SRS via Dashboard DS
+            # from an in-dashboard donor (panelId), not a direct Infinity URL.
+            donor_ids = [
+                target.get("panelId")
+                for target in panel.get("targets", [])
+                if isinstance(target, dict) and target.get("panelId") is not None
+            ]
+            if donor_ids:
+                panels_by_id = {
+                    p.get("id"): p for p in get_dashboard_panels(dashboard)
+                }
+                for donor_id in donor_ids:
+                    donor = panels_by_id.get(donor_id)
+                    assert donor is not None, (
+                        f"{dashboard_name}:{panel_title} donor {donor_id} missing"
+                    )
+                    expressions.extend(
+                        str(t.get("expr") or t.get("url") or "")
+                        for t in donor.get("targets", [])
+                        if isinstance(t, dict)
+                    )
             assert any(expected_metric in expr for expr in expressions), (
                 f"{dashboard_name}:{panel_title} must consume {expected_metric}"
             )

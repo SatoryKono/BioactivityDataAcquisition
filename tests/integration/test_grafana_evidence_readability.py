@@ -195,7 +195,10 @@ def test_provider_first_window_preserves_full_fleet_with_pagination():
     assert provider["gridPos"]["y"] >= 18
     assert provider["options"]["footer"]["enablePagination"] is True
     assert not any(t.get("id") == "limit" for t in provider["transformations"])
-    assert all("run_id=${run_id}" in t["url"] for t in provider["targets"])
+    # Phase 2.5: provider evidence reuses donor 9002 via Dashboard DS.
+    assert provider["targets"][0].get("panelId") == 9002
+    donor = panels[9002]["targets"][0]
+    assert "run_id=${run_id}" in donor["url"]
     assert all("expr" not in t for t in provider["targets"])
     assert "not live fleet health" in panels[9481]["description"]
 

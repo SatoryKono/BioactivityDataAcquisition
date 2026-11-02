@@ -552,7 +552,10 @@ def test_provider_health_selector_follows_selected_run() -> None:
     variables = {item["name"]: item for item in dashboard["templating"]["list"]}
     assert "provider" not in variables
     panel = _panel_by_id("bioetl-overview-v2.json", 9480)
-    query = panel["targets"][0]["url"]
+    # Phase 2.5: provider evidence reuses donor 9002 via Dashboard DS.
+    assert panel["targets"][0].get("panelId") == 9002
+    donor = _panel_by_id("bioetl-overview-v2.json", 9002)
+    query = donor["targets"][0]["url"]
     assert query.startswith("/ops/observability/selected-run-status?")
     assert "pipeline=${pipeline}" in query
     assert "run_id=${run_id}" in query

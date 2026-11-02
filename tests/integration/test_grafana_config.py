@@ -559,19 +559,23 @@ def _assert_overview_identity_panel(dashboard: dict) -> None:
         None,
     )
     assert identity_panel is not None
+    # Phase 2.5: identity reuses donor 9002 via Dashboard DS.
     assert identity_panel.get("datasource") == {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "bioetl-ops-http",
+        "type": "datasource",
+        "uid": "-- Dashboard --",
     }
     identity_targets = identity_panel.get("targets", [])
     assert isinstance(identity_targets, list) and len(identity_targets) == 1
     identity_target = identity_targets[0]
-    assert identity_target["parser"] == "uql"
-    assert identity_target["url"].startswith("/ops/observability/selected-run-status?")
-    assert "run_id=${run_id}" in identity_target["url"]
-    assert "parse-json | jsonata" in identity_target["uql"]
-    assert "Run ID" in identity_target["root_selector"]
-    assert "Not recorded in saved run evidence" in identity_target["root_selector"]
+    assert identity_target.get("panelId") == 9002
+    assert identity_target.get("withTransforms") is False
+    donor = next(p for p in get_dashboard_panels(dashboard) if p.get("id") == 9002)
+    donor_target = donor["targets"][0]
+    assert donor_target["url"].startswith("/ops/observability/selected-run-status?")
+    assert "run_id=${run_id}" in donor_target["url"]
+    assert "parse-json | jsonata" in donor_target["uql"]
+    assert "Run ID" in donor_target["root_selector"]
+    assert "Not recorded in saved run evidence" in donor_target["root_selector"]
 
 
 def _assert_overview_variable_sources(
@@ -1325,11 +1329,18 @@ def test_control_plane_identity_evidence_panels_exist() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     # Identity presence and checkpoint comparison remain separate from readiness.
-    for pid in (9408, 9406, 9423):
+    # Phase 2.5: 9423 consumes donor 9418 via Dashboard DS.
+    for pid in (9408, 9406):
         panel = panels[pid]
         assert panel["type"] == "table"
         assert all("run_id=${run_id}" in t["url"] for t in panel["targets"])
         assert all("expr" not in t for t in panel["targets"])
+    assert panels[9423]["type"] == "table"
+    assert panels[9423]["targets"][0].get("panelId") == 9418
+    assert (panels[9423]["targets"][0].get("datasource") or {}).get("uid") == (
+        "-- Dashboard --"
+    )
+    assert all("expr" not in t for t in panels[9423]["targets"])
     assert "Presence is not verification" in panels[9408]["description"]
     assert "MISMATCH is critical" in panels[9406]["description"]
     assert "Unknown is not a pass" in panels[9423]["description"]
@@ -1410,11 +1421,15 @@ def test_silver_validation_panels_use_explicit_pipeline_label() -> None:
 def test_provider_dashboard_uses_pipeline_filters():
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9480)
+    # Phase 2.5: provider evidence consumes donor 9002 (SRS URL stays on donor).
+    assert panel["targets"][0].get("panelId") == 9002
+    donor = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9002)
     assert all(
         "pipeline=${pipeline}" in t["url"] and "run_id=${run_id}" in t["url"]
-        for t in panel["targets"]
+        for t in donor["targets"]
     )
     assert all("expr" not in t for t in panel["targets"])
+    assert all("expr" not in t for t in donor["targets"])
 
 
 def test_provider_dashboard_surfaces_current_health_status_panel() -> None:
@@ -1440,7 +1455,12 @@ def test_provider_health_status_mappings_match_description_enum() -> None:
     panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9481)
     mappings = panel["fieldConfig"]["defaults"]["mappings"]
     assert "UNKNOWN" in json.dumps(mappings)
-    assert panel["targets"][0]["root_selector"] == "provider_checks"
+    # Phase 2.5: provider check consumes donor 9002 provider frame.
+    assert panel["targets"][0].get("panelId") == 9002
+    assert any(
+        t.get("id") == "filterByValue" and "provider" in json.dumps(t)
+        for t in panel.get("transformations") or []
+    )
     assert "saved check verdict" in panel["description"]
 
 
