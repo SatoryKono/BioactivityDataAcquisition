@@ -399,7 +399,9 @@ def test_auto_selected_report_only_fills_selected_and_a2_via(tmp_path: Path) -> 
     )
     from bioetl.interfaces.http._control_plane_selector_payloads import RESOLVED_VIA_A2
 
-    _write_pipeline_report(tmp_path, run_id="report-uuid", started_at="2026-09-15T12:00:00+00:00")
+    _write_pipeline_report(
+        tmp_path, run_id="report-uuid", started_at="2026-09-15T12:00:00+00:00"
+    )
     identity = {
         "pipeline_name": "chembl_assay",
         "run_id": "report-uuid",
@@ -464,7 +466,9 @@ def test_a2_empty_scope_does_not_repick_via_pipeline_aliases() -> None:
     from bioetl.interfaces.http.control_plane_selector_context import (
         build_selector_context_payload,
     )
-    from bioetl.interfaces.http._control_plane_selector_payloads import RUN_ID_NO_SELECTION
+    from bioetl.interfaces.http._control_plane_selector_payloads import (
+        RUN_ID_NO_SELECTION,
+    )
 
     foreign = _manifest(2, workflow="chembl_core")
     workflows = (

@@ -35,7 +35,10 @@ def resolved_via(
         return RESOLVED_VIA_A2
     if selected_run_id:
         return "selected_run_id"
-    if selected is not None and selected.completed_at_source == "run_ledger_terminal_event":
+    if (
+        selected is not None
+        and selected.completed_at_source == "run_ledger_terminal_event"
+    ):
         return "latest_terminal_run_for_scope"
     return "latest_manifest_created_at_for_scope"
 
@@ -99,9 +102,7 @@ def selected_payload_from_report_identity(
         "started_at": _coerce_identity_str(identity.get("started_at"), default=""),
         "started_at_source": "pipeline_run_report",
         "completed_at": completed_at,
-        "completed_at_source": (
-            "pipeline_run_report" if completed_at else "none"
-        ),
+        "completed_at_source": ("pipeline_run_report" if completed_at else "none"),
         "terminal_event_type": "",
     }
 

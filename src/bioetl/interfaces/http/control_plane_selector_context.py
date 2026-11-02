@@ -142,9 +142,7 @@ def build_selector_context_payload(
             via = resolved_via(selected, None, auto_selected=True)
         elif report_selected is not None:
             selected_out = selected_payload_from_report_identity(dict(report_selected))
-            via = resolved_via(
-                None, None, auto_selected=True, selected_present=True
-            )
+            via = resolved_via(None, None, auto_selected=True, selected_present=True)
         else:
             selected_out = selected_payload(None)
             via = resolved_via(None, None, auto_selected=False)
