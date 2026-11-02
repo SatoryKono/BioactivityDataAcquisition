@@ -8,7 +8,6 @@ from pathlib import Path
 import yaml
 
 from bioetl.domain.control_plane.contract_registry import ContractRegistry
-from bioetl.domain.control_plane.contract_registry_helpers import resolve_path
 from bioetl.domain.control_plane.contract_registry_types import (
     RegistryValidationIssue,
     RegistryValidationResult,
@@ -54,6 +53,12 @@ def _missing_artifact_issue(
         field="published_artifacts",
     )
 
+
+def resolve_path(reference: str, base_path: Path | None) -> Path:
+    candidate = Path(reference)
+    if candidate.is_absolute() or base_path is None:
+        return candidate
+    return base_path / candidate
 
 @dataclass(slots=True)
 class FileContractRegistryStore:

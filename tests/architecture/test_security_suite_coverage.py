@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SECURITY_BOUNDARIES = {
     "test_api_request_metadata_sanitization.py": "src/bioetl/infrastructure/adapters/common/api_request_collector.py",
     "test_dq_report_xss_prevention.py": "src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py",
-    "test_exception_redaction.py": "src/bioetl/domain/exceptions/_redaction.py",
+    "test_exception_redaction.py": "src/bioetl/application/core/exceptions_context.py",
     "test_export_redaction_enforcement.py": "src/bioetl/application/services/export_lineage/export_execution.py",
     "test_pii_hashing_enforcement.py": "src/bioetl/infrastructure/security/pii_hasher.py",
     "test_pubmed_xxe_mitigation.py": "src/bioetl/infrastructure/adapters/pubmed",

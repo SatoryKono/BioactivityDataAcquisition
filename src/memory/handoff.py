@@ -54,12 +54,14 @@ class HandoffRecord:
             raise ValueError("evidence_digests must be unique")
         for digest in self.evidence_digests:
             _validate_evidence_digest(digest)
-        unexpected = sorted(set(self.context) - ALLOWED_CONTEXT_FIELDS)
+        from bioetl.application.core.exceptions_context import get_exception_context
+        context_dict = get_exception_context(self)
+        unexpected = sorted(set(context_dict) - ALLOWED_CONTEXT_FIELDS)
         if unexpected:
             raise ValueError(
                 f"handoff context contains forbidden fields: {', '.join(unexpected)}"
             )
-        for field, values in self.context.items():
+        for field, values in context_dict.items():
             _validate_string_sequence(values, field=field)
 
     def to_dict(self) -> dict[str, Any]:
@@ -70,7 +72,7 @@ class HandoffRecord:
             "objective": self.objective,
             "constraints": list(self.constraints),
             "evidence_digests": list(self.evidence_digests),
-            "context": {key: list(self.context[key]) for key in sorted(self.context)},
+            "context": {key: list(context_dict[key]) for key in sorted(context_dict)},
         }
 
     def to_bounded_json(self, *, max_bytes: int = DEFAULT_MAX_HANDOFF_BYTES) -> str:

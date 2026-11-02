@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from urllib.parse import urlparse
 
 from bioetl.domain.normalization.text import normalize_string
 
@@ -63,6 +62,7 @@ def normalize_qudt_unit(value: str | None) -> str | None:
 
 def resolve_qudt_unit_identifier(value: str) -> str | None:
     """Resolve a canonical QUDT unit identifier from token or URI."""
+    from bioetl.application.normalization._chembl_units import _qudt_identifier_from_uri
     identifier = _qudt_identifier_from_uri(value)
     if identifier is not None:
         return identifier
@@ -73,22 +73,9 @@ def resolve_qudt_unit_identifier(value: str) -> str | None:
         if mapped_identifier is not None:
             return mapped_identifier
 
+    from bioetl.application.normalization._chembl_units import _legacy_qudt_identifier_from_uri
     return _legacy_qudt_identifier_from_uri(value)
 
 
-def _qudt_identifier_from_uri(value: str) -> str | None:
-    parsed = urlparse(value.strip())
-    hostname = parsed.hostname.casefold() if parsed.hostname is not None else None
-    if hostname == "qudt.org" and parsed.path.startswith("/vocab/unit/"):
-        return parsed.path.rsplit("/", maxsplit=1)[-1]
-    return None
 
 
-def _legacy_qudt_identifier_from_uri(value: str) -> str | None:
-    parsed = urlparse(value.strip())
-    hostname = parsed.hostname.casefold() if parsed.hostname is not None else None
-    if hostname != "www.openphacts.org":
-        return None
-    if parsed.path.casefold() == "/units/nanomolar":
-        return "NanoMOL-PER-L"
-    return None

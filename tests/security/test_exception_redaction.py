@@ -7,7 +7,7 @@ import json
 import pytest
 
 from bioetl.domain.exceptions import NetworkError
-from bioetl.domain.exceptions._redaction import _redact_string
+from bioetl.application.core.exceptions_context import _redact_string
 
 pytestmark = [pytest.mark.security, pytest.mark.unit]
 
@@ -32,7 +32,8 @@ def test_structured_exception_context_redacts_hostile_nested_secrets() -> None:
         }
     )
 
-    payload = error.to_structured_context()
+    from bioetl.application.core.exceptions_context import get_structured_context
+    payload = get_structured_context(error)
     serialized = json.dumps(payload)
 
     assert "[REDACTED]" in serialized
@@ -48,7 +49,8 @@ def test_structured_exception_context_preserves_safe_url_shape() -> None:
         endpoint="prefix https://user:pw@example.org:8443/path?cursor=secret suffix"
     )
 
-    endpoint = error.to_structured_context()["endpoint"]
+    from bioetl.application.core.exceptions_context import get_structured_context
+    endpoint = get_structured_context(error)["endpoint"]
 
     assert endpoint == ("prefix https://example.org:8443/path?[REDACTED] suffix")
 
@@ -100,7 +102,8 @@ def test_malformed_quoted_secret_is_fail_closed_through_exception_context() -> N
     secret = "unterminated value,with;&delimiters"
     error = NetworkError(f'password="{secret}')
 
-    serialized = json.dumps(error.to_structured_context())
+    from bioetl.application.core.exceptions_context import get_structured_context
+    serialized = json.dumps(get_structured_context(error))
 
     assert secret not in serialized
     assert "password=[REDACTED]" in serialized

@@ -6,9 +6,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Literal
 
-from bioetl.domain.control_plane.config_source_hashing import (
-    ConfigSourceHashStrategy,
-)
+ConfigSourceHashStrategy = Literal['canonical_yaml', 'raw_bytes']
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 

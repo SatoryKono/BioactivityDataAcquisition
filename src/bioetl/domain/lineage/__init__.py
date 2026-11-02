@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from bioetl.domain.composite.lineage import CompositeLineageMetadata
-from bioetl.domain.lineage._shared import mapping_to_plain
 from bioetl.domain.lineage.metadata_bundle import (
     MetadataLineageBundleResult,
     MetadataT,
@@ -31,5 +30,4 @@ __all__ = [
     "MetadataT",
     "SchemaRef",
     "TransformRef",
-    "mapping_to_plain",
 ]

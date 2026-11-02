@@ -10,7 +10,7 @@ from bioetl.domain.lineage import (
     LineageEdge,
     LineageNodeRef,
     LineageNodeType,
-    mapping_to_plain,
+
 )
 
 
@@ -53,7 +53,7 @@ def build_semantic_fragment_id(
                 edge.source.node_id,
                 edge.target.node_id,
                 json.dumps(
-                    mapping_to_plain(edge.attributes),
+                    dict(edge.attributes),
                     sort_keys=True,
                     separators=(",", ":"),
                 ),

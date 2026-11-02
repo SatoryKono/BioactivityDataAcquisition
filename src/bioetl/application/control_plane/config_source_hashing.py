@@ -14,7 +14,8 @@ from typing import Literal, cast
 
 import yaml
 
-ConfigSourceHashStrategy = Literal["canonical_yaml", "raw_bytes"]
+from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceHashStrategy
+__all__ = ['ConfigSourceHashStrategy', 'ConfigSourceHashes', 'compute_config_source_hashes', 'compute_raw_sha256', 'compute_canonical_yaml_sha256']
 
 CANONICAL_YAML_HASH_VERSION = "canonical-yaml-sha256-v1"
 RAW_BYTES_HASH_VERSION = "raw-bytes-sha256-v1"

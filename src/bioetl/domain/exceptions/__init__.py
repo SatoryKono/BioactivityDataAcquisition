@@ -12,7 +12,6 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.domain.exceptions._redaction import redact_string
     from bioetl.domain.exceptions.base import (
         BioETLError,
         CriticalError,
@@ -117,7 +116,6 @@ __all__ = [
     "UploadError",
     "ValidationError",
     "get_domain_exception_context",
-    "redact_string",
 ]
 
 _BASE_MODULE = "bioetl.domain.exceptions.base"
@@ -128,7 +126,7 @@ _INTERNAL_MODULE = "bioetl.domain.exceptions.internal"
 _NETWORK_MODULE = "bioetl.domain.exceptions.network"
 _PIPELINE_SHUTDOWN_MODULE = "bioetl.domain.exceptions.pipeline_shutdown"
 _VALIDATION_MODULE = "bioetl.domain.exceptions.validation"
-_REDACTION_MODULE = "bioetl.domain.exceptions._redaction"
+_REDACTION_MODULE = "bioetl.application.core.exceptions_context"
 
 _EXPORT_MODULES = {
     "ApiError": _NETWORK_MODULE,
