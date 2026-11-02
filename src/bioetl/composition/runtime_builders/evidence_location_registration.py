@@ -194,9 +194,7 @@ def build_evidence_location_registration_service(
     return EvidenceLocationRegistrationService(locations=store), binding
 
 
-def _soft_skip(
-    *, code: str, detail: str
-) -> EvidenceLocationRegistrationOutcome:
+def _soft_skip(*, code: str, detail: str) -> EvidenceLocationRegistrationOutcome:
     return EvidenceLocationRegistrationOutcome(code=code, detail=detail)
 
 
