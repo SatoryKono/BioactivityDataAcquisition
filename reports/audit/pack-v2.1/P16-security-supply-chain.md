@@ -65,19 +65,27 @@
 1. **P3 (optional)**: Prefer `yaml.safe_load` alias or document SafeLoader subclass invariant for custom loaders.
 
 ## H. Verification Matrix
-- **Secrets in code**: `detect-secrets` and `gitleaks` in CI (Verified).
-- **.env governance**: `.env` is properly excluded via `.gitignore` and handled safely in scripts (Verified).
-- **GitHub Actions**: Least privilege observed (e.g. `permissions: contents: read`), hashes used for actions (Verified).
-- **Dependencies**: `pip-audit` and `osv-scanner` in CI, strict `uv.lock` pinning (Verified).
-- **Unsafe parsing**: Bare/`UnsafeLoader` `yaml.load` **not** found; XML uses `defusedxml` (Verified).
-- **Subprocess injection**: Handled via `subprocess_boundary.py` enforcing `shell=False` (Verified).
+Statuses below distinguish **workflow/config presence** from **executed CI outcomes**. CI job history was **not** re-fetched in this pass.
+
+- **Secrets in code**: `detect-secrets` and `gitleaks` jobs **Configured** in `.github/workflows/security.yml` (**E2 STATIC**). CI run results / baseline hit rates: **NOT_VERIFIABLE** (history not inspected).
+- **.env governance**: `.env` / `.env.*` entries present in `.gitignore` (**E2 STATIC**). Live secret-manager posture: **NOT_VERIFIABLE**.
+- **GitHub Actions**: Least-privilege/`permissions` and action SHA pins observed in workflow YAML (**E2 STATIC** / **Configured**). Successful green history of those jobs: **NOT_VERIFIABLE**.
+- **Dependencies**: `uv.lock` pinning + `pip-audit` / `osv-scanner` jobs **Configured** in `security.yml` (**E2 STATIC**). Note: `osv-scanner` step uses `continue-on-error: true` (outcome gated elsewhere in workflow — config only here). Scanner exit codes from CI: **NOT_VERIFIABLE**.
+- **Unsafe parsing (YAML)**: **Verified (local E2)** — command `rg -n 'yaml\.load\(' src tests scripts`; revision `1e96c67f69e88f7192fe0e926311ec23432358d3`; date `2026-11-02T21:34:04Z`; exit `0`; artifact: local stdout (5 hits, all SafeLoader/BaseLoader; zero under `src/`). Bare/`UnsafeLoader` not found.
+- **Unsafe parsing (XML)**: PubMed paths import `defusedxml` (**E2 STATIC**); no full XML attack-suite re-run (**NOT_VERIFIABLE** as dynamic proof).
+- **Subprocess injection**: `subprocess_boundary.py` enforces `shell=False` in source (**E2 STATIC**). Runtime fuzz/red-team of the boundary: **NOT_VERIFIABLE**.
+
+### Checks run vs skipped (this honesty pass)
+- **Run (local)**: `rg -n 'yaml\.load\(' src tests scripts` (exit 0); static reads of `.github/workflows/security.yml`, `.gitignore`, `subprocess_boundary.py`, PubMed `defusedxml` imports, VCR SafeLoader class bases.
+- **Skipped / not run**: `detect-secrets`, `gitleaks`, `bandit`, `pip-audit`, `osv-scanner` (no local re-execution); GitHub Actions run history / artifacts for `security.yml` (not fetched); live cloud IAM / secret stores.
+- **Runtime mirror-sync**: **N/A** — no edits under `.codex/**` / `.junie/**` / `.devin/**` in this PR.
 
 ## I. NOT_VERIFIABLE and missing evidence
 - External cloud provider configurations (e.g. AWS IAM, Neo4j production access rules) are out of the repository's scope and cannot be verified via static code analysis.
-- Live CI execution history / historical secret-scan hit rates were not re-run as E3 in this pass (`NOT_VERIFIABLE` for runtime cloud).
+- Live CI execution history / historical secret-scan hit rates were not re-run as E3 in this pass (`NOT_VERIFIABLE` for runtime CI outcomes). Presence of scanners in YAML must not be read as a green run.
 
 ## J. Self-check
-- All claims are supported by E2 STATIC evidence.
+- Claims use **Configured** / **E2 STATIC** / **Verified (local)** / **NOT_VERIFIABLE** without conflating workflow presence and CI results.
 - Statuses distinguish DISPROVED security claims from optional style hygiene.
 - No silent softening of real gaps; the P1 RCE claim was retracted after loader-base verification.
 
@@ -87,21 +95,21 @@ The repository exhibits a mature security and supply chain posture: subprocess b
 ## Required Matrices
 
 ### Threat-Surface Map
-- **Local `.env`**: Machine-local configs potentially containing credentials. Handled via `.gitignore`.
-- **CI Secrets**: GitHub Actions secrets. Guarded by `detect-secrets` and `gitleaks`.
-- **HTTP Communications**: Downstream scientific APIs. Scrubbed in VCR via `check_vcr_secrets.py`.
-- **Subprocesses**: Local OS execution. Governed by `subprocess_boundary.py` (SEC-001).
-- **Deserialization**: XML (`defusedxml`), YAML (SafeLoader/BaseLoader at all `yaml.load` sites; none in `src/`), JSON (`json.loads`).
+- **Local `.env`**: Machine-local configs potentially containing credentials. Ignore rules in `.gitignore` (**E2 STATIC**).
+- **CI Secrets**: GitHub Actions secrets. Scanner jobs **Configured** (`detect-secrets`, `gitleaks`); run outcomes **NOT_VERIFIABLE** here.
+- **HTTP Communications**: Downstream scientific APIs. VCR scrub **Configured** via `check_vcr_secrets.py` (**E2 STATIC**).
+- **Subprocesses**: Local OS execution. Policy in `subprocess_boundary.py` (`shell=False`, **E2 STATIC**).
+- **Deserialization**: XML (`defusedxml` imports, **E2 STATIC**), YAML (SafeLoader/BaseLoader at all `yaml.load` sites; none in `src/`, local rg **Verified**), JSON (`json.loads`).
 
 ### Dependency/Action Provenance Matrix
-- Python Dependencies: Locked via `uv.lock`, scanned by `osv-scanner` and `pip-audit`.
-- GitHub Actions: Pinned to specific SHAs in workflow files (e.g. `actions/checkout@3d3c...`).
-- Docker Images: Produced with Sigstore/Cosign provenance and SBOM attestations (`publish_docker_image.sh`).
+- Python Dependencies: Locked via `uv.lock`; `osv-scanner` / `pip-audit` jobs **Configured** in CI YAML (run results **NOT_VERIFIABLE**).
+- GitHub Actions: SHA pins present in workflow files (**E2 STATIC** / **Configured**).
+- Docker Images: Cosign/Sigstore + SBOM steps present in `publish_docker_image.sh` (**E2 STATIC** / **Configured**); live publish evidence **NOT_VERIFIABLE**.
 
 ### Secret/Log Exposure Matrix
-- VCR Cassettes: Strict scrub policy enforced by `check_vcr_secrets.py`.
-- Application Logs: No PII/Credentials identified directly in logs via static analysis, standard `bioetl` logging suppresses secrets.
-- CI Outputs: `gitleaks` and `detect-secrets` scan for hardcoded credentials. Redaction rules verified in test journal implementations.
+- VCR Cassettes: Scrub policy **Configured** / enforced in code by `check_vcr_secrets.py` (**E2 STATIC**).
+- Application Logs: No hardcoded credentials spotted in a narrow static skim (**E2 STATIC**); exhaustive log-path proof **NOT_VERIFIABLE**.
+- CI Outputs: `gitleaks` / `detect-secrets` jobs **Configured** in `security.yml`; redaction/test-journal coverage is code-level (**E2 STATIC**), not a cited green CI artifact.
 
 ## Issue drafts
 ```markdown
