@@ -21,7 +21,9 @@ from bioetl.infrastructure.config.dq_contract_config_loader import (
     DQContractConfigLoader,
 )
 from bioetl.infrastructure.control_plane import FileContractRegistryStore
-from bioetl.infrastructure.control_plane.file_contract_registry_store import resolve_path
+from bioetl.infrastructure.control_plane.file_contract_registry_store import (
+    resolve_path,
+)
 from scripts.engineering.qa.generate_semantic_pipeline_audit import (
     resolve_latest_gold_contract_path,
 )
