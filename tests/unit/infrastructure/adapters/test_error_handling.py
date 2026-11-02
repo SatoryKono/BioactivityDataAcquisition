@@ -38,6 +38,7 @@ from unittest.mock import MagicMock
 import httpx
 import pytest
 
+from bioetl.application.core.exceptions_context import get_exception_context
 from bioetl.domain.exceptions import (
     CriticalError,
     RateLimitExceededError,
@@ -460,10 +461,10 @@ class TestAdapterErrorHandler:
 
         assert isinstance(wrapped, ServiceUnavailableError)
         assert wrapped.get_reason_code() == "ADAPTER_TIMEOUT_ERROR"
-        assert wrapped.context.get("provider") == "openalex"
-        assert wrapped.context.get("pipeline") == "openalex_publication"
-        assert wrapped.context.get("entity") == "publication"
-        assert wrapped.context.get("operation") == "fetch"
+        assert get_exception_context(wrapped).get("provider") == "openalex"
+        assert get_exception_context(wrapped).get("pipeline") == "openalex_publication"
+        assert get_exception_context(wrapped).get("entity") == "publication"
+        assert get_exception_context(wrapped).get("operation") == "fetch"
         assert wrapped.__cause__ is error
 
     def test_handle_error_raises_critical_for_auth(

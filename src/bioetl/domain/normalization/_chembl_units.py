@@ -70,7 +70,7 @@ def _uri_host_and_path(value: str) -> tuple[str, str] | None:
     remainder = remainder.split("?", maxsplit=1)[0].split("#", maxsplit=1)[0]
     authority, slash, suffix = remainder.partition("/")
     authority = authority.rsplit("@", maxsplit=1)[-1].casefold()
-    host = authority.split(":", maxsplit=1)[0].rstrip(".")
+    host = authority.split(":", maxsplit=1)[0]
     path = f"/{suffix}" if slash else ""
     path_prefix, path_separator, last_segment = path.rpartition("/")
     path = (

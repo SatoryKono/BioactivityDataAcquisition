@@ -106,6 +106,27 @@ def test_resolve_activity_ontology_companion_fields_strips_last_segment_paramete
     assert companions.qudt_unit_mapping_status == "mapped"
 
 
+@pytest.mark.parametrize(
+    "uri",
+    [
+        "http://www.openphacts.org./units/Nanomolar",
+        "https://qudt.org./vocab/unit/NanoMOL-PER-L",
+    ],
+)
+def test_resolve_activity_ontology_companion_fields_rejects_trailing_dot_hosts(
+    uri: str,
+) -> None:
+    companions = resolve_activity_ontology_companion_fields(
+        bao_endpoint=None,
+        bao_format=None,
+        uo_units=None,
+        qudt_units=uri,
+    )
+
+    assert companions.qudt_unit_iri is None
+    assert companions.qudt_unit_mapping_status == "unmapped"
+
+
 def test_resolve_activity_ontology_companion_fields_preserves_unmapped_status() -> None:
     companions = resolve_activity_ontology_companion_fields(
         bao_endpoint="not-bao",
