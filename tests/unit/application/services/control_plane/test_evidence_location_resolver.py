@@ -475,7 +475,7 @@ def test_workflow_location_reads_workflow_manifest_store(
     )
 
     resolved = resolver.resolve(
-        kind=EvidenceLocationKind.WORKFLOW,
+        kind="workflow",
         owner="workflow-a",
         run_id=_WF,
     )
