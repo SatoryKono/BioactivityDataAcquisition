@@ -116,8 +116,6 @@ def test_nightly_budget_uses_validated_broad_change_count(tmp_path: Path) -> Non
     assert check.passed is False
 
 
-
-
 def test_nightly_budget_applies_limit_to_failed_smoke_report(tmp_path: Path) -> None:
     module = _load_module()
     report = tmp_path / "broad.json"
