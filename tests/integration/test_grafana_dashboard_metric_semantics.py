@@ -141,7 +141,7 @@ def _assert_processed_records_target_contract(processed: dict[str, object]) -> N
     assert targets[1]["parser"] == "uql"
     assert (
         targets[1]["url"]
-        == "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}"
+        == "/ops/observability/pipeline-run-report?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
     )
     assert "records_in" in targets[1]["uql"]
     assert targets[0] == {

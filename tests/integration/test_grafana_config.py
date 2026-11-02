@@ -142,6 +142,10 @@ for _name in (
     "bioetl-run-explorer-v1.json",
 ):
     EXPECTED_VARS_BY_DASHBOARD[_name].add("provider_for_pipeline")
+    # Phase-1 A2 detail resolve: selected_* from selector-context, not fleet filters.
+    EXPECTED_VARS_BY_DASHBOARD[_name].update(
+        {"selected_pipeline", "selected_run_id"}
+    )
 EXPECTED_VARS_BY_DASHBOARD["bioetl-incident-v1.json"].add("read_latency_quantile")
 
 _OPTIONAL_LOCAL_PANEL_TYPES = {"bioetl-selectorshell-panel"}

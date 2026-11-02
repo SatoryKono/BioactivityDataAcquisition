@@ -93,6 +93,9 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
         "run_id",
         # Hidden helper for selected-run provider evidence.
         "provider_for_pipeline",
+        # Phase-1 A2 detail resolve from selector-context.
+        "selected_pipeline",
+        "selected_run_id",
     }
     assert overview["workflow"].get("includeAll") is True
     assert overview["workflow"].get("multi") is False
