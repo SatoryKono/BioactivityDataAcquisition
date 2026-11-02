@@ -1,7 +1,7 @@
 """Cold imports from a source checkout and an unrelated working directory.
 
 Both src and the checkout root are explicit: QM-07 wheel isolation is BLOCKED
-by core imports from scripts, recorded in test_qm07_cold_imports.py.
+by core imports from scripts, recorded in test_qm07_script_consumers.py.
 """
 
 import json

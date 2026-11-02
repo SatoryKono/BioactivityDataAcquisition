@@ -161,7 +161,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/qm_07/test_qm07_cold_imports_isolated.py",
         "tests/architecture/qm_07/test_gate_evaluators.py",
         "tests/architecture/qm_07/test_distribution_isolation.py",
-        "tests/architecture/qm_07/test_qm07_cold_imports.py",
+        "tests/architecture/qm_07/test_qm07_script_consumers.py",
+        "tests/architecture/qm_07/test_qm07_seams.py",
+        "tests/architecture/qm_07/test_qm07_wheel_runtime_smoke.py",
     ),
     "reports/engineering/app-002-port-map/report.md": (
         "tests/architecture/test_port_contracts.py",
