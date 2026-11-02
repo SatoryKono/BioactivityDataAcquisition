@@ -204,6 +204,8 @@ def test_composite_config_codec_roundtrips_all_business_sections() -> None:
         dq=CompositeDQConfig(
             soft_fail_threshold=0.2,
             hard_fail_threshold=0.6,
+            strict_validation=True,
+            invalid_record_policy="skip",
             required_fields=("doi", "title"),
             enricher_overrides={
                 "openalex_publication": DQOverrideConfig(
@@ -263,6 +265,10 @@ def test_composite_config_codec_roundtrips_all_business_sections() -> None:
         ],
     }
     assert payload["merge"]["column_groups"][0]["name"] == "identity"
+    assert payload["dq"]["strict_validation"] is True
+    assert payload["dq"]["invalid_record_policy"] == "skip"
+    assert restored.dq.strict_validation is True
+    assert restored.dq.invalid_record_policy == "skip"
     assert payload["dq"]["enricher_overrides"]["openalex_publication"] == {
         "soft_fail_threshold": 0.25,
         "hard_fail_threshold": 0.65,
@@ -349,6 +355,8 @@ def test_composite_section_decoders_fail_closed_on_invalid_nested_shapes() -> No
     dq = build_dq_config(
         {
             "required_fields": ["doi"],
+            "strict_validation": True,
+            "invalid_record_policy": "skip",
             "enricher_overrides": {
                 "openalex": {
                     "soft_fail_threshold": 0.2,
@@ -357,6 +365,8 @@ def test_composite_section_decoders_fail_closed_on_invalid_nested_shapes() -> No
             },
         }
     )
+    assert dq.strict_validation is True
+    assert dq.invalid_record_policy == "skip"
     execution = build_execution_config({})
     lineage = build_lineage_config(
         {

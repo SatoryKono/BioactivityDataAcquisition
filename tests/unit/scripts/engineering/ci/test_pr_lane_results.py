@@ -801,6 +801,10 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
         "configs/quality/quality_move_qm09_reference_decisions.json": {
             "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
         },
+        "reports/quality/quality-move-qm08/publication-provenance.json": {
+            "tests/unit/scripts/ci/test_test_telemetry_provenance.py",
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+        },
         "docker-compose.monitoring.yml": {
             "tests/architecture/test_docker_runtime_contracts.py",
             "tests/integration/test_grafana_datasource_provisioning.py",

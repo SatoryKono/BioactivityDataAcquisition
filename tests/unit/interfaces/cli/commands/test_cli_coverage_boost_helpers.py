@@ -183,24 +183,18 @@ def test_observability_contract_checks_cover_metric_and_alert_paths(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    import bioetl.composition.observability_runtime as composition
+    import bioetl.composition.observability_runtime as runtime
 
-    metric_module = SimpleNamespace(
-        collect_metric_inventory=lambda repo_root: {
-            "registered_without_runtime": ["metric.a"],
-            "runtime_without_registry": [],
-        },
-        validate_metric_inventory=lambda report, allowlist: {"registry": ["metric.a"]},
-    )
     monkeypatch.setattr(
-        composition,
-        "collect_metric_inventory",
-        metric_module.collect_metric_inventory,
-    )
-    monkeypatch.setattr(
-        composition,
-        "validate_metric_inventory",
-        metric_module.validate_metric_inventory,
+        runtime,
+        "check_metric_inventory",
+        lambda _repo_root, _allowlist: (
+            {
+                "registered_without_runtime": ["metric.a"],
+                "runtime_without_registry": [],
+            },
+            {"registry": ["metric.a"]},
+        ),
     )
     allowlist_path = tmp_path / "configs" / "quality"
     allowlist_path.mkdir(parents=True)

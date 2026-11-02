@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from .config_validators import (
     validate_optional_threshold,
@@ -56,6 +56,8 @@ class CompositeDQConfig:
         cross_field_validations: Cross-field validation bundle for composite Gold.
     """
 
+    strict_validation: bool = False
+    invalid_record_policy: Literal["quarantine", "skip", "fail"] = "quarantine"
     soft_fail_threshold: float = 0.10
     hard_fail_threshold: float = 0.50
     enricher_overrides: dict[str, DQOverrideConfig] = field(default_factory=dict)
@@ -65,6 +67,10 @@ class CompositeDQConfig:
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
+        if self.invalid_record_policy not in {"quarantine", "skip", "fail"}:
+            raise ValueError(
+                "invalid_record_policy must be one of quarantine, skip, fail"
+            )
         from bioetl.domain.immutability import freeze_fields
 
         raw_required_fields: object = self.required_fields

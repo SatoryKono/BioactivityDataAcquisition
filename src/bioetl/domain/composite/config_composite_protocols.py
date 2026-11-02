@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Protocol
+from typing import Literal, Protocol
 
 from bioetl.domain.composite.aggregation import (
     AggregationFunction,
@@ -147,6 +147,10 @@ class _DQConfigProtocol(Protocol):
     def soft_fail_threshold(self) -> float: ...
     @property
     def hard_fail_threshold(self) -> float: ...
+    @property
+    def strict_validation(self) -> bool: ...
+    @property
+    def invalid_record_policy(self) -> Literal["quarantine", "skip", "fail"]: ...
     @property
     def required_fields(self) -> tuple[str, ...]: ...
     @property

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import Literal, cast
 
 from bioetl.domain.composite.cross_validation import (
     ComparisonMethod,
@@ -18,6 +19,7 @@ from .config_parsing import (
     optional_str_tuple,
     require_float,
     require_int,
+    require_str,
     str_key_mapping,
 )
 from .config_runtime import ExecutionConfig, LineageConfig
@@ -64,7 +66,21 @@ def build_dq_config(dq_data: dict[str, object]) -> CompositeDQConfig:
     required_fields = optional_str_tuple(
         dq_data.get("required_fields"), "dq.required_fields"
     )
+    invalid_record_policy = require_str(
+        dq_data.get("invalid_record_policy", "quarantine"),
+        "dq.invalid_record_policy",
+    )
+    if invalid_record_policy not in {"quarantine", "skip", "fail"}:
+        raise ValueError(
+            "dq.invalid_record_policy must be one of quarantine, skip, fail"
+        )
     return CompositeDQConfig(
+        strict_validation=optional_bool(
+            dq_data.get("strict_validation"), False, "dq.strict_validation"
+        ),
+        invalid_record_policy=cast(
+            "Literal['quarantine', 'skip', 'fail']", invalid_record_policy
+        ),
         soft_fail_threshold=require_float(
             dq_data.get("soft_fail_threshold"), "dq.soft_fail_threshold", 0.10
         ),

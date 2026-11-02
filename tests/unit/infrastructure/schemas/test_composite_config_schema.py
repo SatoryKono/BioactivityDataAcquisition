@@ -224,12 +224,17 @@ def test_dq_and_execution_schema_to_domain_paths() -> None:
     assert override.to_domain().hard_fail_threshold == pytest.approx(0.2)
 
     composite_dq = CompositeDQSchema(
+        strict_validation=True,
+        invalid_record_policy="fail",
         soft_fail_threshold=0.1,
         hard_fail_threshold=0.3,
         enricher_overrides={"crossref": {"soft_fail_threshold": 0.2}},
         required_fields=["title"],
     )
-    assert composite_dq.to_domain().required_fields == ("title",)
+    domain_dq = composite_dq.to_domain()
+    assert domain_dq.required_fields == ("title",)
+    assert domain_dq.strict_validation is True
+    assert domain_dq.invalid_record_policy == "fail"
 
     execution = ExecutionSchema()
     assert execution.to_domain().max_concurrency == 4
