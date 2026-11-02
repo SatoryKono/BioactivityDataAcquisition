@@ -129,41 +129,41 @@ def _percentencode_data_fields(url: str) -> str:
     return url
 
 
+VIEW_PANEL_TRUST_SELF = "viewPanel=9418"
+VIEW_PANEL_TRUST_SIBLING = "viewPanel=9414"
+VIEW_PANEL_BROKEN_REPLAY = "viewPanel=130"
+VIEW_PANEL_REPLAY_CHECKS = "viewPanel=9423"
+
+
+def _rewrite_static_slugs(url: str) -> str:
+    for uid, path in PATH_BY_UID.items():
+        bad = f"/d/{uid}/{uid}"
+        if bad in url:
+            url = url.replace(bad, f"/d/{uid}/{path}")
+    return url
+
+
 def _rewrite_url(url: str) -> str:
     if not isinstance(url, str) or not url:
         return url
 
-    # F-27 static slug: /d/{uid}/{uid} → /d/{uid}/{canonical-path}
-    for uid, path in PATH_BY_UID.items():
-        bad = f"/d/{uid}/{uid}"
-        good = f"/d/{uid}/{path}"
-        if bad in url:
-            url = url.replace(bad, good)
-
+    url = _rewrite_static_slugs(url)
     # F-27 dynamic: /d/${action_dashboard_uid}/${action_dashboard_uid}
     url = url.replace(
         "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}",
         "/d/${__data.fields.action_dashboard_uid}/",
     )
-
     # F-14 action_path glue: /${action_path}&… → /${action_path} (path already has ?)
     url = url.replace(
         "/${__data.fields.action_path}&",
         "/${__data.fields.action_path}",
     )
-    # Drop Grafana vars glued onto Ops artifact action_path URLs.
     if "${__data.fields.action_path}" in url and "var-pipeline=" in url:
         url = "/${__data.fields.action_path}"
-
-    # F-26: strip Grafana query params from GitHub runbook links.
     if "github.com/" in url and ("blob/main/docs/" in url or "/runbooks/" in url):
         url = _strip_github_grafana_query(url)
-
-    # CP broken viewPanel=130 → Review Exact Replay Checks (9423)
-    url = url.replace("viewPanel=130", "viewPanel=9423")
-    # CP self-link / residual Selected-Run Trust deep-link → lineage/trust sibling 9414
-    url = url.replace("viewPanel=9418", "viewPanel=9414")
-
+    url = url.replace(VIEW_PANEL_BROKEN_REPLAY, VIEW_PANEL_REPLAY_CHECKS)
+    url = url.replace(VIEW_PANEL_TRUST_SELF, VIEW_PANEL_TRUST_SIBLING)
     # F-12 Incident 9101 → DQ: do not carry page run_id into a different pipeline.
     if (
         "/d/bioetl-dq-v2/" in url
@@ -171,7 +171,6 @@ def _rewrite_url(url: str) -> str:
         and "${run_id:queryparam}" in url
     ):
         url = url.replace("${run_id:queryparam}", "var-run_id=-")
-
     return _percentencode_data_fields(url)
 
 

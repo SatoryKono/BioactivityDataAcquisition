@@ -357,23 +357,34 @@ def _advance_jsonata_string(expression: str, index: int) -> int:
     return len(expression)
 
 
+_JSONATA_PAIRS = {")": "(", "]": "[", "}": "{"}
+_JSONATA_OPENS = frozenset(_JSONATA_PAIRS.values())
+
+
+def _consume_jsonata_bracket(stack: list[str], char: str) -> bool:
+    """Update ``stack`` for one bracket char; False when unbalanced."""
+    if char in _JSONATA_OPENS:
+        stack.append(char)
+        return True
+    if char not in _JSONATA_PAIRS:
+        return True
+    if not stack or stack[-1] != _JSONATA_PAIRS[char]:
+        return False
+    stack.pop()
+    return True
+
+
 def _jsonata_brackets_balanced(expression: str) -> bool:
     """Return True when ``()[]{}`` are balanced outside single-quoted literals."""
     stack: list[str] = []
-    pairs = {")": "(", "]": "[", "}": "{"}
-    opens = set(pairs.values())
     index = 0
     while index < len(expression):
         char = expression[index]
         if char == "'":
             index = _advance_jsonata_string(expression, index)
             continue
-        if char in opens:
-            stack.append(char)
-        elif char in pairs:
-            if not stack or stack[-1] != pairs[char]:
-                return False
-            stack.pop()
+        if not _consume_jsonata_bracket(stack, char):
+            return False
         index += 1
     return not stack
 
@@ -397,26 +408,22 @@ def _assert_donor_jsonata_balanced() -> None:
         raise SystemExit(f"unbalanced JSONata donor expression(s): {', '.join(broken)}")
 
 
+def _regex_pattern(item: Any) -> str | None:
+    if not isinstance(item, dict) or item.get("type") != "regex":
+        return None
+    return str((item.get("options") or {}).get("pattern") or "")
+
+
 def _ensure_exclusions_crit_color(panel: dict[str, Any]) -> None:
     """Canvas 9482 must color hard-limit ``CRIT`` (legacy ``ERROR`` kept)."""
     defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
     mappings = list(defaults.get("mappings") or [])
-    has_crit = any(
-        isinstance(item, dict)
-        and item.get("type") == "regex"
-        and str((item.get("options") or {}).get("pattern") or "") == "^CRIT.*"
-        for item in mappings
-    )
-    if not has_crit:
+    if not any(_regex_pattern(item) == "^CRIT.*" for item in mappings):
         insert_at = next(
             (
                 index
                 for index, item in enumerate(mappings)
-                if isinstance(item, dict)
-                and item.get("type") == "regex"
-                and str((item.get("options") or {}).get("pattern") or "").startswith(
-                    "^ERROR"
-                )
+                if (_regex_pattern(item) or "").startswith("^ERROR")
             ),
             len(mappings),
         )
@@ -884,25 +891,25 @@ def _cp_trust_donor_transforms() -> list[dict[str, Any]]:
     ]
 
 
+def _unhide_reasons_count(override: dict[str, Any]) -> None:
+    props = [
+        p for p in override.get("properties") or [] if p.get("id") != "custom.hideFrom"
+    ]
+    for prop in props:
+        if prop.get("id") == "custom.hidden":
+            prop["value"] = False
+            break
+    else:
+        props.append({"id": "custom.hidden", "value": False})
+    override["properties"] = props
+
+
 def _fix_reasons_count_visibility(overrides: list[Any]) -> None:
     """Keep Reason count visible; drop conflicting hideFrom."""
     for override in overrides:
         name = (override.get("matcher") or {}).get("options")
-        if name != "reasons_count":
-            continue
-        props = [
-            p
-            for p in override.get("properties") or []
-            if p.get("id") != "custom.hideFrom"
-        ]
-        has_hidden = False
-        for prop in props:
-            if prop.get("id") == "custom.hidden":
-                prop["value"] = False
-                has_hidden = True
-        if not has_hidden:
-            props.append({"id": "custom.hidden", "value": False})
-        override["properties"] = props
+        if name == "reasons_count":
+            _unhide_reasons_count(override)
 
 
 def _rewrite_link_urls(links: list[Any]) -> None:

@@ -79,22 +79,32 @@ def _ids(panels: list[dict[str, Any]]) -> set[int]:
     }
 
 
+def _urls_from_html(value: str) -> list[tuple[str, str]]:
+    if "href=" not in value and "/d/" not in value:
+        return []
+    return [
+        ("", match.group(1).replace("&amp;", "&"))
+        for match in re.finditer(r'href="([^"]+)"', value)
+    ]
+
+
 def _iter_urls(value: Any) -> list[tuple[str, str]]:
-    found: list[tuple[str, str]] = []
     if isinstance(value, dict):
-        title = str(value.get("title") or "")
+        found: list[tuple[str, str]] = []
         url = value.get("url")
         if isinstance(url, str) and url:
-            found.append((title, url))
+            found.append((str(value.get("title") or ""), url))
         for item in value.values():
             found.extend(_iter_urls(item))
-    elif isinstance(value, list):
+        return found
+    if isinstance(value, list):
+        found = []
         for item in value:
             found.extend(_iter_urls(item))
-    elif isinstance(value, str) and ("href=" in value or "/d/" in value):
-        for match in re.finditer(r'href="([^"]+)"', value):
-            found.append(("", match.group(1).replace("&amp;", "&")))
-    return found
+        return found
+    if isinstance(value, str):
+        return _urls_from_html(value)
+    return []
 
 
 def parse_dashboard_view_panel(url: str) -> tuple[str | None, int | None]:
@@ -153,20 +163,21 @@ def _lint_nav(path: Path, panels: list[dict[str, Any]]) -> list[str]:
     return _nav_content_findings(path.name, content)
 
 
+def _index_collisions(index: dict[Any, Any]) -> list[tuple[Any, list[str]]]:
+    seen: dict[Any, list[str]] = {}
+    for name, position in index.items():
+        seen.setdefault(position, []).append(str(name))
+    return [(position, names) for position, names in seen.items() if len(names) > 1]
+
+
 def _organize_collisions(panel: dict[str, Any]) -> list[tuple[Any, list[str]]]:
     collisions: list[tuple[Any, list[str]]] = []
     for transform in panel.get("transformations") or []:
         if not isinstance(transform, dict) or transform.get("id") != "organize":
             continue
         index = (transform.get("options") or {}).get("indexByName") or {}
-        if not isinstance(index, dict):
-            continue
-        seen: dict[Any, list[str]] = {}
-        for name, position in index.items():
-            seen.setdefault(position, []).append(str(name))
-        collisions.extend(
-            (position, names) for position, names in seen.items() if len(names) > 1
-        )
+        if isinstance(index, dict):
+            collisions.extend(_index_collisions(index))
     return collisions
 
 
@@ -181,19 +192,21 @@ def _lint_organize(path: Path, panels: list[dict[str, Any]]) -> list[str]:
     ]
 
 
+def _text_has_status_token(text: str) -> bool:
+    return any(token in text for token in _STATUS_TOKENS)
+
+
 def _mapping_has_status_token(item: dict[str, Any]) -> bool:
     kind = item.get("type")
     options = item.get("options") or {}
     if kind == "regex":
-        pattern = str(options.get("pattern") or "")
-        return any(token in pattern for token in _STATUS_TOKENS)
+        return _text_has_status_token(str(options.get("pattern") or ""))
     if kind != "value" or not isinstance(options, dict):
         return False
-    for key in options:
-        text = str(key)
-        if any(token in text for token in _STATUS_TOKENS) or not text.isdigit():
-            return True
-    return False
+    return any(
+        _text_has_status_token(text) or not text.isdigit()
+        for text in (str(key) for key in options)
+    )
 
 
 def _mappings_look_like_text_status(mappings: list[Any]) -> bool:
@@ -203,13 +216,7 @@ def _mappings_look_like_text_status(mappings: list[Any]) -> bool:
     )
 
 
-def _stat_green_base(panel: dict[str, Any]) -> str | None:
-    if panel.get("type") != "stat":
-        return None
-    defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
-    mappings = defaults.get("mappings") or []
-    if not mappings or not _mappings_look_like_text_status(mappings):
-        return None
+def _base_threshold_color(defaults: dict[str, Any]) -> str | None:
     steps = (defaults.get("thresholds") or {}).get("steps") or []
     if not steps or not isinstance(steps[0], dict):
         return None
@@ -219,29 +226,36 @@ def _stat_green_base(panel: dict[str, Any]) -> str | None:
     return None
 
 
+def _stat_green_base(panel: dict[str, Any]) -> str | None:
+    if panel.get("type") != "stat":
+        return None
+    defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
+    mappings = defaults.get("mappings") or []
+    if not mappings or not _mappings_look_like_text_status(mappings):
+        return None
+    return _base_threshold_color(defaults)
+
+
 def _lint_thresholds(path: Path, panels: list[dict[str, Any]]) -> list[str]:
-    findings: list[str] = []
-    for panel in panels:
-        color = _stat_green_base(panel)
-        if color is None:
-            continue
-        findings.append(
+    return [
+        (
             f"{path.name}: panel {panel.get('id')} text-stat base threshold "
             f"is green ({color})"
         )
-    return findings
+        for panel in panels
+        if (color := _stat_green_base(panel)) is not None
+    ]
 
 
 def _url_transport_findings(path_name: str, title: str, url: str) -> list[str]:
     findings: list[str] = []
-    if (
-        "/${__data.fields.action_path}&" in url
-        or "/${__data.fields.action_path}&amp;" in url
-    ):
+    glued = "/${__data.fields.action_path}&"
+    if glued in url or glued.replace("&", "&amp;") in url:
         findings.append(f"{path_name}: action_path glued with & ({title or url[:60]})")
-    if "github.com/" in url and (
+    grafana_on_github = "github.com/" in url and (
         "var-" in url or "${__url_time_range}" in url or "${pipeline" in url
-    ):
+    )
+    if grafana_on_github:
         findings.append(f"{path_name}: GitHub URL carries Grafana params ({url[:80]})")
     if title and "Provider Health" in title and "bioetl-overview-v2" in url:
         findings.append(
@@ -265,12 +279,14 @@ def _view_panel_findings(
         return []
     findings: list[str] = []
     dest_ids = id_by_uid.get(dest_uid)
-    if dest_ids is not None and view_panel not in dest_ids:
+    missing_remote = dest_ids is not None and view_panel not in dest_ids
+    missing_local = dest_uid == uid and view_panel not in id_set
+    if missing_remote:
         findings.append(
             f"{path_name}: broken viewPanel={view_panel} on {dest_uid} "
             f"(title={title!r})"
         )
-    if dest_uid == uid and view_panel not in id_set:
+    if missing_local:
         findings.append(
             f"{path_name}: local viewPanel={view_panel} missing (title={title!r})"
         )
