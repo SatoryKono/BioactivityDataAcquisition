@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-02T10:30:07.157877+00:00",
+  "generated_at": "2026-11-02T10:53:41.629053+00:00",
   "summary": {
     "total_scripts": 707,
     "status_counts": {
@@ -9753,7 +9753,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 33,
+      "reference_count": 34,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -10442,7 +10442,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 855,
+          "line": 866,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -20811,7 +20811,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 675,
+          "line": 686,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
