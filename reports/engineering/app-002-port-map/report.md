@@ -9,9 +9,7 @@
 - `AuditInspectionService` -> `AuditPort` -> `NOT_VERIFIABLE`
 - `BaseServicesFactoryProtocol` -> `DataSourcePort` -> `NOT_VERIFIABLE`
 - `BatchProcessingService` -> `BatchIdGeneratorPort` -> `NOT_VERIFIABLE`
-- `BronzeCleanupService` -> `ClockPort` -> `NOT_VERIFIABLE`
 - `CompositeCheckpointServiceContext` -> `CompositeCheckpointPort` -> `NOT_VERIFIABLE`
-- `CompositeRunReportService` -> `ClockPort` -> `NOT_VERIFIABLE`
 - `CompositeRunReportService` -> `RunReportStorePort` -> `NOT_VERIFIABLE`
 - `ConfigService` -> `DomainConfigMapperPort` -> `NOT_VERIFIABLE`
 - `ConfigService` -> `PipelineConfigLoaderPort` -> `NOT_VERIFIABLE`
@@ -48,8 +46,6 @@
 - `PubMedPublicationTermEnrichmentService` -> `FilterableDataSourcePort` -> `NOT_VERIFIABLE`
 - `PublicationTermExtractionHost` -> `DataSourcePort` -> `NOT_VERIFIABLE`
 - `PublicationTermFilteringHost` -> `FilterableDataSourcePort` -> `NOT_VERIFIABLE`
-- `QuarantineService` -> `ClockPort` -> `NOT_VERIFIABLE`
-- `QuarantineServiceSyncMixin` -> `ClockPort` -> `NOT_VERIFIABLE`
 - `StorageFactoryProtocol` -> `AuditPort` -> `NOT_VERIFIABLE`
 - `VacuumService` -> `TableCollectorPort` -> `NOT_VERIFIABLE`
 - `WorkflowRunnerService` -> `RunReportStorePort` -> `NOT_VERIFIABLE`
@@ -112,7 +108,7 @@ The following bindings were resolved via verified production bindings (compositi
 - `EnrichmentCoordinatorService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
 - `ErrorHandlerService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
 - `ErrorHandlerService` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings, not matching base matrix explicitly.
-- `ExportService` -> `DeltaReaderPort`: Resolved to `RequestReader` via production bindings, not matching base matrix explicitly.
+- `ExportService` -> `DeltaReaderPort`: Resolved to `DeltaReader` via production bindings, not matching base matrix explicitly.
 - `ExportService` -> `ExportCatalogPort`: Resolved to `ExportCatalogAdapter` via production bindings, not matching base matrix explicitly.
 - `ExportService` -> `ExportWriterPort`: Resolved to `ExportWriterAdapter` via production bindings, not matching base matrix explicitly.
 - `ExportService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
@@ -125,7 +121,7 @@ The following bindings were resolved via verified production bindings (compositi
 - `HistoricalReplayCorpusService` -> `RunManifestPort`: Resolved to `FileRunManifestStore` via production bindings, not matching base matrix explicitly.
 - `JoinExecutorService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
 - `JoinPlannerService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `KeyExtractorService` -> `DeltaReaderPort`: Resolved to `RequestReader` via production bindings, not matching base matrix explicitly.
+- `KeyExtractorService` -> `DeltaReaderPort`: Resolved to `DeltaReader` via production bindings, not matching base matrix explicitly.
 - `KeyExtractorService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
 - `LifecycleTerminalEmitHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
 - `LineageInspectionService` -> `LineageStorePort`: Resolved to `FileLineageStore` via production bindings, not matching base matrix explicitly.
@@ -197,8 +193,7 @@ The following bindings were resolved via verified production bindings (compositi
 - `_DependencyCoordinatorExecutionHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
 - `_FilteredQuarantineHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
 - `_FilteredQuarantineHost` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings, not matching base matrix explicitly.
-- `_LockRuntimeHostProtocol` -> `LockPort`: Resolved to `MemoryLock` via production bindings, not matching base matrix explicitly.
-- `_LockRuntimeHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
+- `_LockRuntimeHostProtocol` -> `LockPort`: Resolved to `MemoryLock` via production bindings, not matching base matrix explicitly.- `_LockRuntimeHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
 - `_MedallionLifecycleHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
 - `_MergeIOHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
 - `_MergeOutputHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
@@ -239,6 +234,13 @@ The following bindings were resolved via verified production bindings (compositi
 |---|---|---|
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
 
+### `BatchMetricsRecorderService`
+**Location:** `src/bioetl/application/core/batch_metrics.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `MetricsPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+
 ### `BatchProcessingService`
 **Location:** `src/bioetl/application/core/batch_processing_service.py`
 
@@ -266,7 +268,7 @@ The following bindings were resolved via verified production bindings (compositi
 | Port | Implementation | Status |
 |---|---|---|
 | `BronzeStoragePort` | `StorageBundle` | RESOLVED |
-| `ClockPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `ClockPort` | `SystemClock` | RESOLVED |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
 
 ### `CheckpointCompatibilityService`
@@ -347,7 +349,7 @@ The following bindings were resolved via verified production bindings (compositi
 
 | Port | Implementation | Status |
 |---|---|---|
-| `ClockPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `ClockPort` | `SystemClock` | RESOLVED |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
 | `RunReportStorePort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
 
@@ -398,13 +400,17 @@ The following bindings were resolved via verified production bindings (compositi
 | `MetricsPort` | `PrometheusMetrics` | RESOLVED |
 | `RunLedgerPort` | `FileRunLedgerStore` | RESOLVED |
 | `RunManifestPort` | `FileRunManifestStore` | RESOLVED |
-
 ### `DQReportService`
 **Location:** `src/bioetl/application/services/quality/dq_report_service.py`
 
 | Port | Implementation | Status |
 |---|---|---|
+| `BronzeDQAnalyzerPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `GoldDQAnalyzerPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
+| `MetricsPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `DQReportWriterPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `SilverDQAnalyzerPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
 
 ### `DQReportServiceFactoryProtocol`
 **Location:** `src/bioetl/application/ports/dq.py`
@@ -418,14 +424,18 @@ The following bindings were resolved via verified production bindings (compositi
 
 | Port | Implementation | Status |
 |---|---|---|
+| `DQMonitorPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
+| `MetricsPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
 
 ### `DataQualityService`
 **Location:** `src/bioetl/application/services/quality/data_quality_service.py`
 
 | Port | Implementation | Status |
 |---|---|---|
+| `DQMonitorPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
+| `MetricsPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
 
 ### `DataSourceCreatorProtocol`
 **Location:** `src/bioetl/application/ports/providers.py`
@@ -439,6 +449,8 @@ The following bindings were resolved via verified production bindings (compositi
 
 | Port | Implementation | Status |
 |---|---|---|
+| `ClockPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `DeltaReaderPort` | `DeltaReader` | RESOLVED |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
 
 ### `DependencyJoinerService`
@@ -498,7 +510,7 @@ The following bindings were resolved via verified production bindings (compositi
 
 | Port | Implementation | Status |
 |---|---|---|
-| `DeltaReaderPort` | `RequestReader` | RESOLVED |
+| `DeltaReaderPort` | `DeltaReader` | RESOLVED |
 | `ExportCatalogPort` | `ExportCatalogAdapter` | RESOLVED |
 | `ExportWriterPort` | `ExportWriterAdapter` | RESOLVED |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
@@ -562,7 +574,7 @@ The following bindings were resolved via verified production bindings (compositi
 
 | Port | Implementation | Status |
 |---|---|---|
-| `DeltaReaderPort` | `RequestReader` | RESOLVED |
+| `DeltaReaderPort` | `DeltaReader` | RESOLVED |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
 
 ### `LifecycleTerminalEmitHost`
@@ -597,7 +609,6 @@ The following bindings were resolved via verified production bindings (compositi
 
 ### `LockService`
 **Location:** `src/bioetl/application/services/ops/lock_service.py`
-
 | Port | Implementation | Status |
 |---|---|---|
 | `LockPort` | `MemoryLock` | RESOLVED |
@@ -615,8 +626,10 @@ The following bindings were resolved via verified production bindings (compositi
 
 | Port | Implementation | Status |
 |---|---|---|
+| `DeltaReaderPort` | `DeltaReader`; `CompositeReplayInputReader` (replay) | RESOLVED |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
 | `MergedStoragePort` | `StorageBundle` | RESOLVED |
+| `SilverStoragePort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
 
 ### `MetricsService`
 **Location:** `src/bioetl/application/services/ops/metrics_service.py`
@@ -745,6 +758,7 @@ The following bindings were resolved via verified production bindings (compositi
 | Port | Implementation | Status |
 |---|---|---|
 | `ExecutorMetricsPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `TracingPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
 
 ### `PostrunServiceSupportMixin`
 **Location:** `src/bioetl/application/core/postrun/_service_support.py`
@@ -823,7 +837,7 @@ The following bindings were resolved via verified production bindings (compositi
 
 | Port | Implementation | Status |
 |---|---|---|
-| `ClockPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `ClockPort` | `SystemClock` | RESOLVED |
 | `LoggerPort` | `UnifiedLogger` | RESOLVED |
 | `QuarantinePort` | `UnifiedQuarantineAdapter` | RESOLVED |
 
@@ -832,7 +846,7 @@ The following bindings were resolved via verified production bindings (compositi
 
 | Port | Implementation | Status |
 |---|---|---|
-| `ClockPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `ClockPort` | `SystemClock` | RESOLVED |
 
 ### `ResolveProteinClassificationUseCase`
 **Location:** `src/bioetl/application/services/protein/classification_resolution.py`
@@ -847,313 +861,3 @@ The following bindings were resolved via verified production bindings (compositi
 | Port | Implementation | Status |
 |---|---|---|
 | `RunLedgerPort` | `FileRunLedgerStore` | RESOLVED |
-
-### `RunManifestInspectionService`
-**Location:** `src/bioetl/application/services/control_plane/manifest/inspection_service.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `RunManifestPort` | `FileRunManifestStore` | RESOLVED |
-
-### `RunManifestService`
-**Location:** `src/bioetl/application/services/control_plane/manifest/service.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `RunManifestPort` | `FileRunManifestStore` | RESOLVED |
-
-### `ShutdownService`
-**Location:** `src/bioetl/application/services/ops/shutdown_service.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `StorageFactoryProtocol`
-**Location:** `src/bioetl/application/ports/storage.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `AuditPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-| `MetricsPort` | `PrometheusMetrics` | RESOLVED |
-
-### `SupportAwareDataSourceCreatorProtocol`
-**Location:** `src/bioetl/application/ports/providers.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `VacuumService`
-**Location:** `src/bioetl/application/services/ops/vacuum_service.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-| `TableCollectorPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-
-### `WorkflowExecutionService`
-**Location:** `src/bioetl/application/services/workflow/control_plane/execution_service.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LockPort` | `MemoryLock` | RESOLVED |
-| `WorkflowExecutionStatePort` | `FileWorkflowExecutionStateStore` | RESOLVED |
-| `WorkflowLedgerPort` | `FileWorkflowLedgerStore` | RESOLVED |
-
-### `WorkflowInspectionService`
-**Location:** `src/bioetl/application/services/control_plane/workflow/inspection_service.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `WorkflowExecutionStatePort` | `FileWorkflowExecutionStateStore` | RESOLVED |
-| `WorkflowLedgerPort` | `FileWorkflowLedgerStore` | RESOLVED |
-| `WorkflowManifestPort` | `FileWorkflowManifestStore` | RESOLVED |
-
-### `WorkflowLedgerService`
-**Location:** `src/bioetl/application/services/control_plane/workflow/ledger_service.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `WorkflowLedgerPort` | `FileWorkflowLedgerStore` | RESOLVED |
-
-### `WorkflowManifestService`
-**Location:** `src/bioetl/application/services/control_plane/workflow/manifest_service.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `WorkflowManifestPort` | `FileWorkflowManifestStore` | RESOLVED |
-
-### `WorkflowRunnerService`
-**Location:** `src/bioetl/application/services/workflow/workflow_runner_service.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `MetricsPort` | `PrometheusMetrics` | RESOLVED |
-| `RunReportStorePort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-
-### `WorkflowTransformService`
-**Location:** `src/bioetl/application/services/workflow/workflow_transform_service.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `MetricsPort` | `PrometheusMetrics` | RESOLVED |
-
-### `_CompositeLifecycleTracingHost`
-**Location:** `src/bioetl/application/composite/_lifecycle_observer_tracing_types.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_CompositePhaseStartHostProtocol`
-**Location:** `src/bioetl/application/composite/runner_pkg/runner_stage_start_flow.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_CompositeRunnerMergeStageHostProtocol`
-**Location:** `src/bioetl/application/composite/runner_pkg/runner_merge_stage_types.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_CompositeRunnerStageEnrichmentHostProtocol`
-**Location:** `src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_types.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_CompositeRunnerStageHostProtocol`
-**Location:** `src/bioetl/application/composite/runner_pkg/runner_stage_types.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_CompositeRunnerStageSupportHostProtocol`
-**Location:** `src/bioetl/application/composite/runner_pkg/runner_stage_support_types.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_CompositeRunnerSupportHostProtocol`
-**Location:** `src/bioetl/application/composite/runner_pkg/runner_support_types.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_CoordinatorExecutionHost`
-**Location:** `src/bioetl/application/composite/helpers/coordinator_execution.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `ClockPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-| `ExecutionMetricsRunnerPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_CoordinatorPlanningHost`
-**Location:** `src/bioetl/application/composite/coordinator_planning.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_DQReportGenerationHostProtocol`
-**Location:** `src/bioetl/application/services/quality/dq_report_models.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `BronzeDQConfigPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-| `GoldDQConfigPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-| `SilverDQConfigPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-
-### `_DependencyBatchHost`
-**Location:** `src/bioetl/application/composite/helpers/dependency_coordinator_execution.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_DependencyCoordinatorExecutionHost`
-**Location:** `src/bioetl/application/composite/helpers/dependency_coordinator_execution.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `ClockPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_FilteredQuarantineHost`
-**Location:** `src/bioetl/application/services/quality/_quarantine_service_filtered_mixin.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-| `QuarantinePort` | `UnifiedQuarantineAdapter` | RESOLVED |
-
-### `_GoldWriterHost`
-**Location:** `src/bioetl/application/core/_batch_writer_gold_support.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `GoldValidatorPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-
-### `_LockRuntimeHostProtocol`
-**Location:** `src/bioetl/application/core/lifecycle/lock_lifecycle.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LockPort` | `MemoryLock` | RESOLVED |
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_MedallionLifecycleHostProtocol`
-**Location:** `src/bioetl/application/services/medallion/medallion_lifecycle.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_MergeIOHost`
-**Location:** `src/bioetl/application/composite/merger_collaborators.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_MergeOutputHostProtocol`
-**Location:** `src/bioetl/application/composite/merger_output_mixin.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-| `MergedStoragePort` | `StorageBundle` | RESOLVED |
-
-### `_MetricsGatewayHost`
-**Location:** `src/bioetl/application/services/ops/_metrics_service_gateway_support.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_MetricsStartHost`
-**Location:** `src/bioetl/application/services/ops/metrics_service.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `ClockPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-| `MetricsServerPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-
-### `_MetricsStatusHost`
-**Location:** `src/bioetl/application/services/ops/metrics_service.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `MetricsServerPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-
-### `_ObserverContextManagerMixin`
-**Location:** `src/bioetl/application/observability/observer_context_mixin.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `ClockPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-| `MetricsPort` | `PrometheusMetrics` | RESOLVED |
-
-### `_PipelineRunnerCleanupHostProtocol`
-**Location:** `src/bioetl/application/core/_runner_support.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-| `TracingPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-
-### `_PipelineRunnerFlowHostProtocol`
-**Location:** `src/bioetl/application/core/runner_flow.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-
-### `_PostrunHostAttrSurface`
-**Location:** `src/bioetl/application/core/postrun/_service_support.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-| `MetricsPort` | `PrometheusMetrics` | RESOLVED |
-
-### `_PostrunSupportHost`
-**Location:** `src/bioetl/application/core/postrun/_service_support.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `ExecutorMetricsPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
-
-### `_QuarantineAsyncHost`
-**Location:** `src/bioetl/application/services/quality/_quarantine_service_async_mixin.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-| `QuarantinePort` | `UnifiedQuarantineAdapter` | RESOLVED |
-
-### `_QuarantineSyncHost`
-**Location:** `src/bioetl/application/services/quality/_quarantine_service_sync_support.py`
-
-| Port | Implementation | Status |
-|---|---|---|
-| `LoggerPort` | `UnifiedLogger` | RESOLVED |
-| `QuarantinePort` | `UnifiedQuarantineAdapter` | RESOLVED |
-
-
-## 4. Dependency Violations
-
-No infrastructure/scripts imports detected in domain/application layers during static analysis.
-All UseCases strictly depend on `*Port` interfaces. (MEASURED)
