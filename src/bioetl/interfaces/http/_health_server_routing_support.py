@@ -278,7 +278,7 @@ def _selector_context_payload_with_a2(
                 report_scopes,
                 store=report_store,
             )
-    else:
+    elif explicit_run_id is not None:
         report_selected = verified_report_identity_for_run(
             explicit_run_id,
             report_scopes,

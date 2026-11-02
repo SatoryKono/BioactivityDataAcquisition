@@ -19,6 +19,7 @@ from bioetl.domain.ports import RunReportStorePort
 from bioetl.interfaces.http._control_plane_selector_filters import filter_records
 from bioetl.interfaces.http._control_plane_selector_payloads import RUN_ID_NO_SELECTION
 from bioetl.interfaces.http._control_plane_selector_records import (
+    RunLedgerLookup,
     SelectorRecord,
     build_selector_records,
     build_workflow_aliases,
@@ -62,7 +63,7 @@ def is_unresolved_run_id(run_id: str | None) -> bool:
 def resolve_a2_latest_run_id(
     *,
     manifests: tuple[RunManifest, ...],
-    ledger_port: object | None,
+    ledger_port: RunLedgerLookup | None,
     workflow_manifests: tuple[WorkflowManifest, ...] = (),
     pipeline: str,
     query: Mapping[str, str],

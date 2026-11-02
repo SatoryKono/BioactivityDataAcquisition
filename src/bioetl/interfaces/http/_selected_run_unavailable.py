@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from bioetl.application.observability.reason_aliases import display_reason
 from bioetl.application.services.control_plane.manifest.diagnostics.selected_run_replay_readiness import (
     INSUFFICIENT,
@@ -123,8 +125,8 @@ def unavailable_status(
 
 def _gap_presentation(
     state: str,
-    summary: dict[str, object],
-    trust: dict[str, object],
+    summary: Mapping[str, object],
+    trust: Mapping[str, object],
     pipeline: str,
 ) -> tuple[dict[str, object], dict[str, object]]:
     if state == _SELECT_RUN:
@@ -158,4 +160,4 @@ def _gap_presentation(
                 "reasons_display": "Нет запусков в выбранном скоупе",
             },
         )
-    return summary, trust
+    return dict(summary), dict(trust)
