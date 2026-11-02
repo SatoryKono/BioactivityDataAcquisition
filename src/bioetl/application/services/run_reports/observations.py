@@ -25,9 +25,30 @@ def bind_run_observations() -> Token[dict[str, dict[str, object]] | None]:
     return _observations.set({})
 
 
+def bind_run_observations_if_unbound() -> (
+    Token[dict[str, dict[str, object]] | None] | None
+):
+    """Bind a fresh scope only when none is active.
+
+    Preserves an outer prepare→report scope (workflow registration soft-failures
+    recorded during create_manifest) instead of nesting an empty wipe.
+    """
+    if _observations.get() is not None:
+        return None
+    return bind_run_observations()
+
+
 def reset_run_observations(token: Token[dict[str, dict[str, object]] | None]) -> None:
     """Restore the caller scope even after cancellation or construction failure."""
     _observations.reset(token)
+
+
+def reset_run_observations_if_bound(
+    token: Token[dict[str, dict[str, object]] | None] | None,
+) -> None:
+    """Reset only when ``bind_run_observations_if_unbound`` actually bound."""
+    if token is not None:
+        reset_run_observations(token)
 
 
 def record_run_observation(

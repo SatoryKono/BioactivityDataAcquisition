@@ -6,16 +6,17 @@ never by reading process environment maps inside this module.
 
 from __future__ import annotations
 
-import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
 from bioetl.domain.control_plane.run_evidence_location import (
     DEFAULT_EVIDENCE_ROOT_ALIAS,
+    EVIDENCE_LOCATIONS_DIRNAME,
     EvidenceLocationInvalidError,
     EvidenceLocationKind,
     canonicalize_relative_data_root,
+    evidence_location_record_segments,
 )
 
 __all__ = [
@@ -25,21 +26,6 @@ __all__ = [
     "resolve_evidence_location_path",
     "resolve_evidence_locations_root",
 ]
-
-# Additive catalog of data-root locators (RF-002). Lives beside pipeline/workflow
-# report trees; does not rewrite immutable report snapshots.
-EVIDENCE_LOCATIONS_DIRNAME = "_evidence-locations"
-_SAFE_LOCATION_SEGMENT = re.compile(r"^[A-Za-z0-9._-]+$")
-
-
-def _safe_location_segment(value: str, *, field_name: str, max_length: int) -> str:
-    if (
-        value in {".", ".."}
-        or not _SAFE_LOCATION_SEGMENT.fullmatch(value)
-        or len(value) > max_length
-    ):
-        raise EvidenceLocationInvalidError(f"{field_name} is not a safe path segment")
-    return value
 
 
 @dataclass(frozen=True, slots=True)
@@ -101,19 +87,14 @@ def resolve_evidence_location_path(
     report_root: Path | None = None,
 ) -> Path:
     """Path of one location record under the evidence-locations catalog."""
-    kind_value = (
-        kind.value if isinstance(kind, EvidenceLocationKind) else str(kind).strip()
+    kind_seg, owner_seg, filename = evidence_location_record_segments(
+        kind=kind,
+        owner=owner,
+        run_id=run_id,
     )
-    if kind_value not in {
-        EvidenceLocationKind.PIPELINE.value,
-        EvidenceLocationKind.WORKFLOW.value,
-    }:
-        raise EvidenceLocationInvalidError(
-            f"unsupported evidence location kind: {kind_value}"
-        )
     return (
         resolve_evidence_locations_root(report_root=report_root)
-        / kind_value
-        / _safe_location_segment(owner, field_name="owner", max_length=120)
-        / f"{_safe_location_segment(run_id, field_name='run_id', max_length=128)}.json"
+        / kind_seg
+        / owner_seg
+        / filename
     )

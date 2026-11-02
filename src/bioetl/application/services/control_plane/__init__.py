@@ -1,7 +1,8 @@
 """Canonical control-plane service seams.
 
 Responsibility-focused subpackage facades are available under:
-`manifest`, `ledger`, `replay`, `effective_config`, `forensic`, and `workflow`.
+`manifest`, `ledger`, `replay`, `effective_config`, `evidence_location`,
+`forensic`, and `workflow`.
 The package root remains the compatibility-preserving lazy export surface.
 """
 
@@ -18,6 +19,10 @@ RESPONSIBILITY_SEAMS = MappingProxyType(
         "effective_config": (
             "Configuration materialization and effective-config serialization."
         ),
+        "evidence_location": (
+            "Evidence-location catalog resolve, registration, and legacy "
+            "standard-root policy."
+        ),
         "forensic": "Operator-facing replay and manifest diff interpretation.",
         "ledger": "Run-ledger persistence and event ownership.",
         "manifest": "Run-manifest creation, inspection, and diagnostics ownership.",
@@ -27,6 +32,9 @@ RESPONSIBILITY_SEAMS = MappingProxyType(
 )
 
 _EFFECTIVE_CONFIG_MODULE = "bioetl.application.services.control_plane.effective_config"
+_EVIDENCE_LOCATION_MODULE = (
+    "bioetl.application.services.control_plane.evidence_location"
+)
 _FORENSIC_MODULE = "bioetl.application.services.control_plane.forensic"
 _LEDGER_MODULE = "bioetl.application.services.control_plane.ledger"
 _MANIFEST_MODULE = "bioetl.application.services.control_plane.manifest"
@@ -40,6 +48,34 @@ _LAZY_ATTR_EXPORTS = {
     "EffectiveConfigService": (
         _EFFECTIVE_CONFIG_MODULE,
         "EffectiveConfigService",
+    ),
+    "EvidenceLocationLegacyRootPolicy": (
+        _EVIDENCE_LOCATION_MODULE,
+        "EvidenceLocationLegacyRootPolicy",
+    ),
+    "EvidenceLocationRegisterRequest": (
+        _EVIDENCE_LOCATION_MODULE,
+        "EvidenceLocationRegisterRequest",
+    ),
+    "EvidenceLocationRegistrationOutcome": (
+        _EVIDENCE_LOCATION_MODULE,
+        "EvidenceLocationRegistrationOutcome",
+    ),
+    "EvidenceLocationRegistrationService": (
+        _EVIDENCE_LOCATION_MODULE,
+        "EvidenceLocationRegistrationService",
+    ),
+    "EvidenceLocationResolveResult": (
+        _EVIDENCE_LOCATION_MODULE,
+        "EvidenceLocationResolveResult",
+    ),
+    "EvidenceLocationResolver": (
+        _EVIDENCE_LOCATION_MODULE,
+        "EvidenceLocationResolver",
+    ),
+    "EvidenceLocationVerifyOutcome": (
+        _EVIDENCE_LOCATION_MODULE,
+        "EvidenceLocationVerifyOutcome",
     ),
     "ForensicRunDiffResult": (
         _FORENSIC_MODULE,

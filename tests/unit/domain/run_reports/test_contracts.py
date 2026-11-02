@@ -83,6 +83,30 @@ def test_workflow_run_report_golden_matches_v1_schema() -> None:
     assert payload["identity"]["status"] == "success"
 
 
+def test_workflow_run_report_accepts_optional_observations() -> None:
+    from bioetl.domain.run_reports.workflow_report_assembly import (
+        build_workflow_run_report,
+    )
+
+    payload = build_workflow_run_report(
+        identity={"workflow_name": "baseline", "status": "success"},
+        plan_steps=[],
+        execution_steps=[],
+        observations={
+            "Evidence Location": {
+                "verdict": "INCOMPLETE",
+                "reason": "location_missing",
+                "facts": {"kind": "workflow"},
+            }
+        },
+    ).to_dict()
+    schema = json.loads((CONTRACT_ROOT / "workflow_run_report.v1.json").read_text())
+    validator_for(schema)(schema).validate(payload)
+    assert payload["observations"]["Evidence Location"]["reason"] == (
+        "location_missing"
+    )
+
+
 def test_run_evidence_location_golden_matches_v1_schema() -> None:
     from bioetl.domain.control_plane.run_evidence_location import (
         parse_run_evidence_location,

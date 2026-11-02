@@ -49,6 +49,11 @@ class WorkflowManifestService:
     _manifest_id_factory: Callable[[], str] = field(
         default_factory=lambda: _missing_manifest_id_factory
     )
+    # RF-004: optional post-save locator publisher (Composition-injected).
+    # May return an outcome object with ``code``/``detail`` for soft diagnostics.
+    evidence_location_register: Callable[[WorkflowManifest], object | None] | None = (
+        None
+    )
 
     def _resolve_created_at(self) -> datetime:
         """Resolve workflow manifest creation time through the configured seam."""
@@ -80,6 +85,33 @@ class WorkflowManifestService:
             resumed_from_manifest_id=request.resumed_from_manifest_id,
         )
         self.manifest_port.save(manifest)
+        if self.evidence_location_register is not None:
+            from bioetl.application.services.control_plane.evidence_location.registration import (
+                record_registration_exception_observation,
+                record_registration_outcome_observation,
+            )
+
+            owner = str(manifest.workflow_name)
+            run_id = str(manifest.workflow_run_id)
+            try:
+                outcome = self.evidence_location_register(manifest)
+            except Exception as exc:
+                # Locator publication must not mask workflow processing success.
+                record_registration_exception_observation(
+                    kind="workflow",
+                    owner=owner,
+                    run_id=run_id,
+                    exc=exc,
+                )
+            else:
+                # Callbacks may return an outcome or None; surface non-success.
+                if outcome is not None:
+                    record_registration_outcome_observation(
+                        outcome,
+                        kind="workflow",
+                        owner=owner,
+                        run_id=run_id,
+                    )
         return manifest
 
     def compute_execution_fingerprint(self, request: WorkflowManifestCreateSpec) -> str:

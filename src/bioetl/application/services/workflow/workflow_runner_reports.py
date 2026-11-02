@@ -13,6 +13,7 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     RunOptions,
     RunResult,
 )
+from bioetl.application.services.run_reports.observations import run_observations
 from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
@@ -203,6 +204,7 @@ def attach_workflow_run_report(
             },
             plan_steps=plan_steps,
             execution_steps=execution_rows,
+            observations=run_observations(),
         )
         written = write_workflow_run_report(report, root=report_root, store=store)
         return _require_workflow_result(

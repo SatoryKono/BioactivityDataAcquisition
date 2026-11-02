@@ -487,6 +487,51 @@ async def test_workflow_execution_service_persists_manifest_ledger_and_state() -
 
 
 @pytest.mark.asyncio
+async def test_workflow_prepare_registration_observation_visible_during_run() -> None:
+    """RF-004: create_manifest soft-failures stay in the prepare→report scope."""
+    from bioetl.application.services.control_plane.evidence_location import (
+        EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
+    )
+    from bioetl.application.services.run_reports.observations import run_observations
+
+    captured: dict[str, object] = {}
+
+    class _CapturingRunner(_FakeWorkflowRunner):
+        async def run_workflow(self, config, **kwargs):  # type: ignore[no-untyped-def]
+            captured["observations"] = run_observations()
+            return await super().run_workflow(config, **kwargs)
+
+    def _boom(_manifest: object) -> None:
+        raise RuntimeError("locator boom")
+
+    service = WorkflowExecutionService(
+        workflow_runner=_CapturingRunner(),  # type: ignore[arg-type]
+        manifest_service=WorkflowManifestService(
+            manifest_port=_InMemoryWorkflowManifestPort(),
+            created_at_factory=lambda: FIXED_TEST_TIME,
+            _manifest_id_factory=lambda: "workflow-manifest-obs",
+            evidence_location_register=_boom,
+        ),
+        workflow_ledger_port=_InMemoryWorkflowLedgerPort(),
+        workflow_ledger_factory=_create_workflow_ledger_service,
+        workflow_state_port=_InMemoryWorkflowStatePort(),
+        workflow_lock_port=_FakeLockPort(),
+        now_factory=lambda: FIXED_TEST_TIME,
+        run_id_factory=lambda: RunID(UUID("00000000-0000-0000-0000-000000000111")),
+    )
+
+    result = await service.run_workflow(_build_config())
+    assert result.status == "success"
+    observations = captured["observations"]
+    assert isinstance(observations, dict)
+    assert (
+        observations[EVIDENCE_LOCATION_OBSERVATION_DOMAIN]["reason"]
+        == "registration_exception"
+    )
+    assert observations[EVIDENCE_LOCATION_OBSERVATION_DOMAIN]["verdict"] == "ERROR"
+
+
+@pytest.mark.asyncio
 async def test_workflow_execution_service_resume_last_skips_completed_steps() -> None:
     manifest_port = _InMemoryWorkflowManifestPort()
     ledger_port = _InMemoryWorkflowLedgerPort()

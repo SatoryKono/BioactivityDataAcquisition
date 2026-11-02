@@ -1455,7 +1455,10 @@ class TestAttachWorkflowRunReport:
         monkeypatch.setattr(
             _builder,
             "build_workflow_run_report",
-            lambda *, identity, plan_steps, execution_steps: {"identity": identity},
+            lambda *, identity, plan_steps, execution_steps, observations: {
+                "identity": identity,
+                "observations": observations,
+            },
         )
         monkeypatch.setattr(
             _writer,
@@ -1472,6 +1475,45 @@ class TestAttachWorkflowRunReport:
         )
         assert result.run_report_json_path == "report.json"
         assert result.run_report_markdown_path == "report.md"
+
+    def test_attaches_workflow_observations_to_report(self, monkeypatch):
+        import bioetl.application.services.run_reports.writer as _writer
+        from bioetl.application.services.run_reports.observations import (
+            bind_run_observations,
+            record_run_observation,
+            reset_run_observations,
+        )
+
+        captured = {}
+        monkeypatch.setattr(
+            _writer,
+            "write_workflow_run_report",
+            lambda report, root=None, store=None: (
+                captured.update(report.to_dict())
+                or SimpleNamespace(
+                    json_path=Path("report.json"), markdown_path=Path("report.md")
+                )
+            ),
+        )
+        token = bind_run_observations()
+        try:
+            record_run_observation(
+                "Evidence Location",
+                verdict="INCOMPLETE",
+                reason="location_missing",
+                facts={"kind": "workflow", "run_id": "wf-run"},
+            )
+            attach_workflow_run_report(
+                config=_plan_config(),
+                result=self._result(),
+                store=MagicMock(),
+            )
+        finally:
+            reset_run_observations(token)
+
+        assert captured["observations"]["Evidence Location"]["reason"] == (
+            "location_missing"
+        )
 
     def test_failure_logs_warning_and_records_error(self):
         logger = MagicMock()

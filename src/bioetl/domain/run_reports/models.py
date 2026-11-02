@@ -290,6 +290,7 @@ class WorkflowRunReport:
         default_factory=dict
     )  # Any: report/json payload shape is dynamic
     reasons_rollup: tuple[dict[str, Any], ...] = ()  # Any: aggregated child reasons
+    observations: dict[str, object] | None = None
     schema_version: str = "workflow_run_report_v1"
 
     def to_dict(self) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
@@ -302,4 +303,6 @@ class WorkflowRunReport:
             "index": dict(self.index),
         }
         _copy_reason_items(payload, "reasons_rollup", self.reasons_rollup)
+        if self.observations is not None:
+            payload["observations"] = dict(self.observations)
         return payload

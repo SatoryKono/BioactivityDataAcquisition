@@ -24,7 +24,9 @@ from bioetl.domain.control_plane.run_evidence_location_models import (
     RunEvidenceLocation,
 )
 from bioetl.domain.control_plane.run_evidence_location_path import (
+    EVIDENCE_LOCATIONS_DIRNAME,
     canonicalize_relative_data_root,
+    evidence_location_record_segments,
     optional_workflow_run_id,
     require_segment,
     validate_runtime_source_id,
@@ -32,6 +34,7 @@ from bioetl.domain.control_plane.run_evidence_location_path import (
 
 __all__ = [
     "DEFAULT_EVIDENCE_ROOT_ALIAS",
+    "EVIDENCE_LOCATIONS_DIRNAME",
     "EVIDENCE_LOCATION_SCHEMA_VERSION",
     "EvidenceLocationConflictError",
     "EvidenceLocationIdentityConflictError",
@@ -47,6 +50,7 @@ __all__ = [
     "canonicalize_relative_data_root",
     "compare_location_bindings",
     "decide_register_outcome",
+    "evidence_location_record_segments",
     "ownership_key",
     "parse_run_evidence_location",
     "validate_runtime_source_id",

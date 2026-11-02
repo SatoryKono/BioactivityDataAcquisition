@@ -149,6 +149,20 @@
         "type": "object",
         "additionalProperties": true
       }
+    },
+    "observations": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["verdict", "reason", "facts"],
+        "properties": {
+          "verdict": {
+            "enum": ["OK", "WARN", "ERROR", "INCOMPLETE", "UNKNOWN", "N/A"]
+          },
+          "reason": {"type": "string"},
+          "facts": {"type": "object"}
+        }
+      }
     }
   }
 }

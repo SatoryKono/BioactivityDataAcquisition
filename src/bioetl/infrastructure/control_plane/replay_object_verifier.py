@@ -40,54 +40,103 @@ class ReplayObjectVerifier:
     config_root: Path
     lock_root: Path
     bronze_root: Path
+    # Optional evidence-location trust anchor; when set, absolute/file URI
+    # snapshot paths must resolve under this base (RF-003/RF-004).
+    trusted_base: Path | None = None
 
     def verify(self, manifest: RunManifest) -> dict[str, bool]:
         """Return current object checks; never trust historical boolean flags."""
         provenance = manifest.code_provenance
-        lock_digest = _digest(provenance.dependency_lock_hash)
         values = {
             "effective_config_hash": self._config(manifest),
-            "dependency_lock_hash": (
-                verify_file(self.lock_root / lock_digest, lock_digest)
-                if lock_digest
-                else None
+            "dependency_lock_hash": self._dependency_lock(
+                provenance.dependency_lock_hash
             ),
             "input_snapshot_fingerprint": self._snapshots(manifest),
         }
         return {key: value for key, value in values.items() if value is not None}
+
+    def _dependency_lock(self, expected: str | None) -> bool | None:
+        lock_digest = _digest(expected)
+        if lock_digest is None:
+            return None
+        path = self._contained(self.lock_root / lock_digest)
+        return verify_file(path, lock_digest) if path is not None else None
+
+    def _contained(self, path: Path) -> Path | None:
+        """Return resolved ``path`` when it stays under ``trusted_base`` (if set)."""
+        try:
+            resolved = path.resolve(strict=False)
+        except OSError:
+            return None
+        if self.trusted_base is None:
+            return resolved
+        try:
+            base = self.trusted_base.resolve(strict=False)
+        except OSError:
+            return None
+        return resolved if resolved.is_relative_to(base) else None
+
+    def _load_contained_effective_config(
+        self, run_id: object
+    ) -> dict[str, object] | None:
+        """Load effective-config JSON only when index + record stay trusted."""
+        run_index = self.config_root / "_by_run_id" / f"{run_id}.txt"
+        if self._contained(run_index) is None or not run_index.exists():
+            return None
+        artifact_id = run_index.read_text(encoding="utf-8").strip()
+        if not artifact_id:
+            return None
+        artifact_path = self.config_root / f"{artifact_id}.json"
+        if self._contained(artifact_path) is None:
+            return None
+        return FileEffectiveConfigArtifactStore(self.config_root).get(artifact_id)
+
+    @staticmethod
+    def _effective_config_hash_matches(
+        payload: dict[str, object],
+        *,
+        expected_artifact_id: object,
+        expected_digest: str,
+    ) -> bool | None:
+        """Compare persisted effective-config bytes to the manifest digest."""
+        if payload.get("artifact_id") != expected_artifact_id:
+            return False
+        semantic = payload.get("semantic_artifact", payload)
+        if not isinstance(semantic, dict):
+            return None
+        section = semantic.get("effective_execution_config")
+        if not isinstance(section, dict) or "config_data" not in section:
+            return None
+        version = section.get("identity_version")
+        if version != "effective-config-v1":
+            return None
+        return (
+            stable_json_hash(
+                {
+                    "identity_version": version,
+                    "config_data": section["config_data"],
+                }
+            )
+            == expected_digest
+        )
 
     def _config(self, manifest: RunManifest) -> bool | None:
         expected = _digest(manifest.code_provenance.effective_config_hash)
         if expected is None:
             return None
         try:
-            payload = FileEffectiveConfigArtifactStore(self.config_root).get_by_run_id(
-                manifest.run_id
-            )
+            # Contain index + selected JSON before reading so an outward
+            # symlink under config_root cannot forge effective_config_hash.
+            payload = self._load_contained_effective_config(manifest.run_id)
             if payload is None:
                 return None
-            if (
-                payload.get("artifact_id")
-                != manifest.code_provenance.effective_config_artifact_id
-            ):
-                return False
-            semantic = payload.get("semantic_artifact", payload)
-            if not isinstance(semantic, dict):
-                return None
-            section = semantic.get("effective_execution_config")
-            if not isinstance(section, dict) or "config_data" not in section:
-                return None
-            version = section.get("identity_version")
-            if version != "effective-config-v1":
-                return None
-            return (
-                stable_json_hash(
-                    {
-                        "identity_version": version,
-                        "config_data": section["config_data"],
-                    }
-                )
-                == expected
+            return self._effective_config_hash_matches(
+                payload,
+                expected_artifact_id=(
+                    manifest.code_provenance.effective_config_artifact_id
+                ),
+                expected_digest=expected,
             )
         except (OSError, ValueError, TypeError):
             return None
@@ -108,10 +157,14 @@ class ReplayObjectVerifier:
                 else root
             )
             candidate = (anchor / relative).resolve()
-            return candidate if candidate.is_relative_to(root) else None
+            if not candidate.is_relative_to(root):
+                return None
+            return self._contained(candidate)
         if uri.startswith("file://"):
-            return Path(uri.removeprefix("file://"))
-        return None if "://" in uri or not uri else Path(uri)
+            return self._contained(Path(uri.removeprefix("file://")))
+        if "://" in uri or not uri:
+            return None
+        return self._contained(Path(uri))
 
     def _snapshots(self, manifest: RunManifest) -> bool | None:
         results: list[bool | None] = []

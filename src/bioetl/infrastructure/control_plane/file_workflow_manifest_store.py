@@ -110,6 +110,13 @@ class FileWorkflowManifestStore(WorkflowManifestPort):
                     "Workflow manifest index corruption: run-id index points to "
                     f"missing manifest file '{manifest_id}'"
                 )
+            if manifest.workflow_run_id != workflow_run_id:
+                raise ValueError(
+                    "Workflow manifest index corruption: indexed manifest "
+                    f"'{manifest_id}' belongs to workflow_run_id "
+                    f"'{manifest.workflow_run_id}', not requested "
+                    f"workflow_run_id '{workflow_run_id}'"
+                )
             return manifest
         except (OSError, TypeError, ValueError):
             status = "failed"
