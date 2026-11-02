@@ -54,6 +54,12 @@ from bioetl.domain.ports.control_plane import (
     RawRunManifestInspectionPort as RawRunManifestInspectionPort,
 )
 from bioetl.domain.ports.control_plane import (
+    RunEvidenceLocationReadPort as RunEvidenceLocationReadPort,
+)
+from bioetl.domain.ports.control_plane import (
+    RunEvidenceLocationRegisterPort as RunEvidenceLocationRegisterPort,
+)
+from bioetl.domain.ports.control_plane import (
     RunLedgerPort as RunLedgerPort,
 )
 from bioetl.domain.ports.control_plane import (

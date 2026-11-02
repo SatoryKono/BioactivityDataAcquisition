@@ -1,0 +1,11 @@
+{
+  "kind": "pipeline",
+  "owner": "chembl_assay",
+  "relative_data_root": "workflow-limit100-20261102T144403Z/chembl_assay",
+  "revision": "071bef8620a0a42e64366e8455c365d624a197e58d9bdc29a5f4eda3382ce562",
+  "root_alias": "dashboard_data",
+  "run_id": "ac0b4e22-6a6e-5b7e-818e-106aeaf41390",
+  "runtime_source_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "schema_version": "run_evidence_location_v1",
+  "workflow_run_id": "3dc8ffe4-305b-5d4b-a945-fe8e78f03828"
+}
