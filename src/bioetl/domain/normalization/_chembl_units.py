@@ -73,10 +73,11 @@ def _uri_host_and_path(value: str) -> tuple[str, str] | None:
     host = authority.split(":", maxsplit=1)[0].rstrip(".")
     path = f"/{suffix}" if slash else ""
     path_prefix, path_separator, last_segment = path.rpartition("/")
-    if path_separator:
-        path = f"{path_prefix}/{last_segment.partition(';')[0]}"
-    else:
-        path = path.partition(";")[0]
+    path = (
+        f"{path_prefix}/{last_segment.partition(';')[0]}"
+        if path_separator
+        else path.partition(";")[0]
+    )
     return host, path
 
 
@@ -97,3 +98,4 @@ def resolve_qudt_unit_identifier(value: str) -> str | None:
             return mapped_identifier
 
     return None
+
