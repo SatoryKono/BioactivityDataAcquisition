@@ -11,6 +11,7 @@ import pytest
 from scripts.engineering.qa.external_resource_inventory import (
     SCENARIOS,
     SourceBlob,
+    render,
     validate_inventory,
 )
 
@@ -110,6 +111,17 @@ def test_reviewed_resource_free_rebind_preserves_facts_and_history(
     payload, sources, blobs = copy.deepcopy(inventory_case)
     path = "src/bioetl/pure.py"
     payload["source_files"][path] = "c" * 40
+    payload["source_requalification"] = {
+        "catalog_ref": "1" * 40,
+        "source_ref": payload["source_commit"],
+        "baseline_source_ref": "2" * 40,
+        "review_sha256": "a" * 64,
+        # Matches len(sources) after the pure.py blob is added below.
+        "production_file_count": 2,
+        "definition_count": 1,
+        "creation_site_count": 1,
+        "runtime_result": "NOT_RUN_12553",
+    }
     sources[path] = b"def pure():\n    return 2\n"
     digest = hashlib.sha256(sources[path]).hexdigest()
     blobs[path] = SourceBlob("d" * 40, digest)
@@ -129,6 +141,7 @@ def test_reviewed_resource_free_rebind_preserves_facts_and_history(
         **old["source_files"],
         path: "d" * 40,
     }
+    assert updated["source_requalification"]["source_ref"] == "e" * 40
     assert validate_inventory(updated, sources, blobs) == []
     assert updated["source_rebindings"][0]["from_commit"] == old["source_commit"]
     assert (
@@ -210,6 +223,36 @@ def test_correct_component_is_accepted_and_rendered(
     payload["resources"][0]["resource_components"] = [resource_component]
     assert validate_inventory(payload, sources, blobs) == []
     assert "fixture.component" in "\n".join(_render_components(payload))
+
+
+def test_render_preserves_baseline_method_under_source_requalification() -> None:
+    """Provenance method must keep the baseline narrative for requalified catalogs."""
+    baseline = "a" * 40
+    source_ref = "b" * 40
+    payload = {
+        "completeness_method": "Verified denominators and baseline explanation.",
+        "source_requalification": {
+            "source_ref": source_ref,
+            "baseline_source_ref": baseline,
+            "production_file_count": 1,
+            "definition_count": 1,
+            "creation_site_count": 1,
+        },
+        "source_commit": source_ref,
+        "source_tree": "c" * 40,
+        "scope_statement": "Owned production definitions only.",
+        "resources": [],
+        "prior_candidate_dispositions": [],
+        "history_statement": "History retained.",
+        "reuse_statement": "Reuse retained.",
+    }
+    text = render(payload)
+    assert f"Current reviewed source: {source_ref}" in text
+    assert f"Original baseline qualification narrative ({baseline})" in text
+    assert "Verified denominators and baseline explanation." in text
+    assert text.index("Current reviewed source") < text.index(
+        "Verified denominators and baseline explanation."
+    )
 
 
 @pytest.mark.parametrize(

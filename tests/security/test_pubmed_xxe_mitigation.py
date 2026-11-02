@@ -1,10 +1,14 @@
 """Security tests for XXE mitigation in PubMed pipeline."""
 
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from threading import Thread
+from unittest.mock import MagicMock
+
 import pytest
+
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
 from bioetl.domain.context import PipelineContext
-from unittest.mock import MagicMock
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 
@@ -46,6 +50,41 @@ def test_xml_processor_xxe_mitigation():
     # and returns None.
     result = PubMedXmlProcessor.parse_response(xxe_payload)
     assert result is None
+
+
+def test_xml_processor_accepts_pubmed_doctype_without_loading_external_dtd():
+    """Accept the normal PubMed declaration without fetching its external DTD."""
+    requests: list[str] = []
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self) -> None:
+            requests.append(self.path)
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"<!ELEMENT PubmedArticleSet ANY>")
+
+        def log_message(self, format: str, *args: object) -> None:
+            pass
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        payload = (
+            '<!DOCTYPE PubmedArticleSet PUBLIC "-//NLM//DTD PubMedArticle//EN" '
+            f'"http://127.0.0.1:{server.server_port}/pubmed.dtd">'
+            "<PubmedArticleSet/>"
+        )
+
+        result = PubMedXmlProcessor.parse_response(payload)
+
+        assert result is not None
+        assert result.tag == "PubmedArticleSet"
+        assert requests == []
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join()
 
 
 def test_transformer_billion_laughs_mitigation():

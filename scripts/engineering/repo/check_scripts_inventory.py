@@ -366,7 +366,7 @@ def _iter_search_files(root: Path) -> list[Path]:
                 files.append(path)
             continue
         files.extend(_iter_dir_search_files(root, path))
-    return sorted(set(files))
+    return sorted(files)
 
 
 def _source_group(rel_path: str) -> str:

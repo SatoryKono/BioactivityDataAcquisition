@@ -652,12 +652,22 @@ def test_legacy_pytest_asyncio_table_migration_uses_full_suite_route(
     assert dependencies.pytest_configuration_changed(tmp_path, "base", "head")
 
 
-@pytest.mark.parametrize("key", ["build-backend", "backend-path"])
-def test_build_backend_configuration_uses_full_suite_route(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, key: str
+def test_build_backend_changes_use_full_suite_route(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    before = {"build-system": {key: "old"}}
-    after = {"build-system": {key: "new"}}
+    before = {
+        "build-system": {
+            "requires": ["setuptools"],
+            "build-backend": "setuptools.build_meta",
+            "backend-path": ["build_support"],
+        }
+    }
+    after = {
+        "build-system": {
+            "requires": ["setuptools"],
+            "build-backend": "hatchling.build",
+        }
+    }
     monkeypatch.setattr(
         dependencies,
         "_read_revision",

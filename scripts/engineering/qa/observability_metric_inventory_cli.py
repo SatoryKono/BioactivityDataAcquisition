@@ -1,16 +1,10 @@
 """Rendering, persistence, and CLI for observability metric inventory."""
 
 from __future__ import annotations
-from bioetl.infrastructure.observability.metric_inventory_policy import (
-    _parse_allowlist_metric_name as _parse_allowlist_metric_name,
-)
-from bioetl.infrastructure.observability.metric_inventory_policy import (
-    _validate_allowlist_review_date as _validate_allowlist_review_date,
-)
-from bioetl.infrastructure.observability.metric_inventory_policy import (
-    validate_metric_inventory as validate_metric_inventory,
-)
 
+from bioetl.infrastructure.observability import (
+    metric_inventory_policy as _metric_inventory_policy,
+)
 
 import argparse
 import json
@@ -193,6 +187,29 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+_parse_allowlist_metric_name = _metric_inventory_policy._parse_allowlist_metric_name
+
+
+def _validate_allowlist_review_date(
+    *,
+    key: str,
+    metric_name: str,
+    raw_review_date: str,
+) -> None:
+    try:
+        review_date = date.fromisoformat(raw_review_date)
+    except ValueError as exc:
+        raise ValueError(
+            f"{key} metric {metric_name!r} has invalid review_date "
+            f"{raw_review_date!r}; expected ISO YYYY-MM-DD"
+        ) from exc
+    if review_date < date.today():
+        raise ValueError(
+            f"{key} metric {metric_name!r} has expired review_date "
+            f"{raw_review_date}; refresh or remove this lifecycle exception"
+        )
+
+
 def _load_drift_allowlist(path: Path) -> dict[str, set[str]]:
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
@@ -226,6 +243,9 @@ def _load_drift_allowlist(path: Path) -> dict[str, set[str]]:
             if metric_name
         }
     return allowlist
+
+
+validate_metric_inventory = _metric_inventory_policy.validate_metric_inventory
 
 
 def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:

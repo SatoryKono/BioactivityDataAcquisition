@@ -226,6 +226,40 @@ def test_squash_without_bridge_fails_closed(bridge) -> None:
     assert not provenance.source_commit_is_reachable(payload, root, head)
 
 
+def test_delivery_ancestry_uses_independent_publication_receipt(
+    bridge, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, _, payload, receipt, _ = bridge
+    bridge_record = {
+        **receipt,
+        "schema_version": 1,
+        "verification_mode": "live_github",
+        "reviewed_source_commits": [payload["source_commit"]],
+    }
+    destination = root / provenance.PUBLICATION_RECEIPT
+    destination.parent.mkdir(parents=True)
+    destination.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "verification_mode": "live_github",
+                "publication_bridges": [bridge_record],
+            }
+        ),
+        encoding="utf-8",
+    )
+    reads: list[str] = []
+
+    def read_github_json(path: str) -> dict[str, object]:
+        reads.append(path)
+        return receipt["github_pull_request"]
+
+    monkeypatch.setattr(provenance, "_read_github_json", read_github_json)
+
+    provenance.require_published_ancestor(root, payload["source_commit"])
+    assert reads == ["pulls/42"]
+
+
 def test_shallow_endpoints_without_intermediate_require_verified_proof(bridge) -> None:
     root, head, payload, receipt, git = bridge
     source = payload["source_commit"]
