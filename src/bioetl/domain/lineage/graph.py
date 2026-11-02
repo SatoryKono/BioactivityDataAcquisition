@@ -12,6 +12,7 @@ from bioetl.domain.lineage._shared import (
     load_mapping,
     load_optional_datetime,
     load_optional_str,
+    mapping_to_plain,
     normalize_mapping,
 )
 from bioetl.domain.lineage.refs import LineageNodeRef
@@ -70,7 +71,7 @@ class LineageEdge:
             "created_at": (
                 self.created_at.isoformat() if self.created_at is not None else None
             ),
-            "attributes": {k: v for k, v in self.attributes.items()},
+            "attributes": mapping_to_plain(self.attributes),
         }
 
     @classmethod
