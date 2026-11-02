@@ -151,7 +151,7 @@ def test_register_workflow_manifest_parent(
         workflow_run_id=RunID(UUID(_WF)),
         execution_fingerprint="f" * 64,
         schema_version="1.0",
-        created_at=datetime.now(UTC),
+        created_at=datetime(2024, 1, 1, tzinfo=UTC),
         workflow_name="chembl_assay_pack",
         workflow_version="1",
         launch_context={},

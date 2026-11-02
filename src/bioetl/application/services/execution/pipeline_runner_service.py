@@ -371,33 +371,31 @@ class PipelineRunnerService:
             write_report=False,
             store=self.report_store,
         )
-        return self._finalize_report(result, options)
+        return _finalize_pipeline_report(self, result, options)
 
-    def _finalize_report(
-        self, result: RunResult, options: RunOptions | None
-    ) -> RunResult:
-        """Capture control-plane evidence, persist the run report, then archive."""
-        capture_run_completion(self.capture_control_plane, result, options)
-        soft_invoke_evidence_location_verify(
-            (
-                None
-                if self.evidence_location_verify is None
-                else (lambda: self.evidence_location_verify(result, options))
-            ),
-            kind="pipeline",
-            owner=str(result.pipeline_name),
-            run_id=str(result.run_id),
-        )
-        finalized = finalize_pipeline_run_report(
-            result=result,
-            options=options,
-            report_root=self.report_root,
-            store=self.report_store,
-        )
-        self._archive_control_plane(finalized, options)
-        return finalized
 
-    def _archive_control_plane(
-        self, result: RunResult, options: RunOptions | None
-    ) -> None:
-        archive_run_completion(self.archive_control_plane, result, options)
+def _finalize_pipeline_report(
+    runner: PipelineRunnerService,
+    result: RunResult,
+    options: RunOptions | None,
+) -> RunResult:
+    """Capture control-plane evidence, persist the run report, then archive."""
+    capture_run_completion(runner.capture_control_plane, result, options)
+    soft_invoke_evidence_location_verify(
+        (
+            None
+            if runner.evidence_location_verify is None
+            else (lambda: runner.evidence_location_verify(result, options))
+        ),
+        kind="pipeline",
+        owner=str(result.pipeline_name),
+        run_id=str(result.run_id),
+    )
+    finalized = finalize_pipeline_run_report(
+        result=result,
+        options=options,
+        report_root=runner.report_root,
+        store=runner.report_store,
+    )
+    archive_run_completion(runner.archive_control_plane, finalized, options)
+    return finalized

@@ -113,17 +113,13 @@ class WorkflowRunnerService:
     metrics: MetricsPort
     report_store: RunReportStorePort
     monotonic: Callable[[], float] = perf_counter
-    workflow_transform_artifact_sink: WorkflowTransformArtifactSinkProtocol | None = (
-        None
-    )
+    workflow_transform_artifact_sink: WorkflowTransformArtifactSinkProtocol | None = None
     report_root: Path | None = None
     cohort_resolver: (
-        Callable[
-            [WorkflowStepConfig, Mapping[str, object]], Awaitable[WorkflowStepConfig]
-        ]
+        Callable[[WorkflowStepConfig, Mapping[str, object]], Awaitable[WorkflowStepConfig]]
         | None
     ) = None
-    # RF-004: Composition-injected finalize consistency check (soft diagnostics).
+    # RF-004: finalize consistency check (soft diagnostics).
     evidence_location_verify: Callable[[WorkflowRunExecutionResult], None] | None = None
 
     async def run_workflow(
