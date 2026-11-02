@@ -14,6 +14,12 @@ The report is intentionally static and repo-local. It reconciles:
 
 from __future__ import annotations
 
+from bioetl.infrastructure.observability import (
+    metric_inventory_assembly as _metric_inventory_assembly,
+    metric_inventory_ast as _metric_inventory_ast,
+    metric_inventory_scan as _metric_inventory_scan,
+)
+
 import sys
 
 # `python -m scripts.engineering.qa.report_observability_metric_inventory` loads
@@ -193,6 +199,12 @@ def _sync_metric_scan_compatibility_seams() -> None:
         if "REGISTERED_PROMETHEUS_METRIC_LABELS" in globals()
         else {}
     )
+    _metric_inventory_scan.REGISTERED_PROMETHEUS_METRIC_LABELS = (
+        _metric_scan.REGISTERED_PROMETHEUS_METRIC_LABELS
+    )
+    _metric_inventory_ast.REGISTERED_PROMETHEUS_METRIC_LABELS = (
+        _metric_scan.REGISTERED_PROMETHEUS_METRIC_LABELS
+    )
 
 
 def _iter_text_files(root: Path) -> list[Path]:
@@ -371,156 +383,24 @@ def _build_runtime_cardinality_review_summary(
     )
 
 
-def _scan_docs_and_rules_mentions(
-    repo_root: Path, *, declared_set: set[str]
-) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
-    doc_paths: list[Path] = []
-    for root in _DOC_SCAN_ROOTS:
-        doc_paths.extend(_iter_text_files(repo_root / root))
-    docs_mentions = _filter_documented_metric_mentions(
-        _scan_canonical_metric_mentions(doc_paths, repo_root),
-        registered_metrics=declared_set,
-    )
-    rules_mentions = _filter_documented_metric_mentions(
-        _scan_rule_metric_mentions(repo_root),
-        registered_metrics=declared_set,
-    )
-    return docs_mentions, rules_mentions
+_scan_docs_and_rules_mentions = _metric_inventory_assembly._scan_docs_and_rules_mentions
 
 
-def _collect_observability_event_inventory(
-    repo_root: Path,
-) -> _ObservabilityEventInventory:
-    declared_pipeline_events = _declared_pipeline_event_names()
-    mapped_observability_events, mapped_event_emitters = (
-        _scan_domain_mapping_observability_events(repo_root)
-    )
-    direct_observability_event_emitters, domain_event_emitters = (
-        _scan_runtime_observability_event_calls(repo_root)
-    )
-    raw_declared_observability_events = (
-        declared_pipeline_events | mapped_observability_events
-    )
-    retired_declared_observability_events = sorted(
-        raw_declared_observability_events
-        & _load_retired_observability_event_names(repo_root)
-    )
-    declared_observability_events = sorted(
-        raw_declared_observability_events - set(retired_declared_observability_events)
-    )
-    emitted_observability_events = sorted(
-        set(direct_observability_event_emitters) | mapped_observability_events
-    )
-    return {
-        "declared_observability_events": declared_observability_events,
-        "emitted_observability_events": emitted_observability_events,
-        "retired_declared_observability_events": retired_declared_observability_events,
-        "retired_declared_observability_events_emitted": sorted(
-            set(retired_declared_observability_events)
-            & set(emitted_observability_events)
-        ),
-        "raw_unused_declared_observability_events": sorted(
-            set(declared_observability_events) - set(emitted_observability_events)
-        ),
-        "emitted_observability_events_without_contract": sorted(
-            set(emitted_observability_events) - set(declared_observability_events)
-        ),
-        "observability_event_emitters": _combine_metric_emitters(
-            direct_observability_event_emitters,
-            mapped_event_emitters,
-        ),
-        "domain_event_emitters": domain_event_emitters,
-    }
+_collect_observability_event_inventory = (
+    _metric_inventory_assembly._collect_observability_event_inventory
+)
 
 
-def _counter_total_aliases(
-    metric_names: set[str], runtime_registered_set: set[str]
-) -> set[str]:
-    return {
-        f"{metric_name}_total"
-        for metric_name in metric_names
-        if f"{metric_name}_total" in runtime_registered_set
-    }
+_counter_total_aliases = _metric_inventory_assembly._counter_total_aliases
 
 
-def _canonical_runtime_sets(
-    *,
-    direct_runtime_set: set[str],
-    helper_runtime_set: set[str],
-    runtime_registered_set: set[str],
-) -> tuple[set[str], set[str], set[str], set[str], set[str]]:
-    # Prometheus client counters expose a base metric name at runtime while
-    # the registry stores the canonical ``_total`` sample name.  Treat only
-    # registered, exact suffix pairs as equivalent; do not generalize this to
-    # arbitrary names because that would hide genuine registry drift.
-    runtime_set = direct_runtime_set | helper_runtime_set
-    runtime_counter_bases = {
-        metric_name
-        for metric_name in runtime_set
-        if f"{metric_name}_total" in runtime_registered_set
-    }
-    canonical_runtime_set = runtime_set | {
-        f"{metric_name}_total" for metric_name in runtime_counter_bases
-    }
-    canonical_direct_runtime_set = direct_runtime_set | _counter_total_aliases(
-        direct_runtime_set, runtime_registered_set
-    )
-    canonical_helper_runtime_set = helper_runtime_set | _counter_total_aliases(
-        helper_runtime_set, runtime_registered_set
-    )
-    return (
-        runtime_set,
-        runtime_counter_bases,
-        canonical_runtime_set,
-        canonical_direct_runtime_set,
-        canonical_helper_runtime_set,
-    )
+_canonical_runtime_sets = _metric_inventory_assembly._canonical_runtime_sets
 
 
-def _allowlisted_metric_diff(raw_set: set[str], allowlist: set[str]) -> list[str]:
-    return sorted(raw_set - allowlist)
+_allowlisted_metric_diff = _metric_inventory_assembly._allowlisted_metric_diff
 
 
-def _cardinality_review_fields(
-    *,
-    combined_emitters: dict[str, list[str]],
-    drift_allowlist: dict[str, set[str]],
-    cardinality_thresholds: dict[str, int],
-    observed_series_counts: dict[str, int],
-) -> _CardinalityReviewFields:
-    reviewed_runtime_cardinality = drift_allowlist.get(
-        "runtime_cardinality_review_required", set()
-    ) | set(cardinality_thresholds)
-    runtime_cardinality_candidates = sorted(
-        metric_name
-        for metric_name, emitter_paths in combined_emitters.items()
-        if len(set(emitter_paths)) >= 3
-    )
-    runtime_cardinality_reviewed = sorted(
-        set(runtime_cardinality_candidates) & reviewed_runtime_cardinality
-    )
-    runtime_cardinality_review_required = [
-        metric_name
-        for metric_name in runtime_cardinality_candidates
-        if metric_name not in reviewed_runtime_cardinality
-    ]
-    return {
-        "runtime_cardinality_candidates": runtime_cardinality_candidates,
-        "runtime_cardinality_reviewed": runtime_cardinality_reviewed,
-        "runtime_cardinality_review_required": runtime_cardinality_review_required,
-        "runtime_cardinality_evidence": _runtime_cardinality_evidence_rows(
-            metric_names=runtime_cardinality_candidates,
-            combined_emitters=combined_emitters,
-            observed_series_counts=observed_series_counts,
-            thresholds=cardinality_thresholds,
-        ),
-        "runtime_cardinality_threshold_violations": (
-            _runtime_cardinality_threshold_violations(
-                observed_series_counts=observed_series_counts,
-                thresholds=cardinality_thresholds,
-            )
-        ),
-    }
+_cardinality_review_fields = _metric_inventory_assembly._cardinality_review_fields
 
 
 def _risky_label_review_fields(
@@ -744,15 +624,7 @@ def _collect_metric_inventory_impl(
     return report
 
 
-def _combine_metric_emitters(
-    runtime_emitters: dict[str, list[str]],
-    helper_backed_emitters: dict[str, list[str]],
-) -> dict[str, list[str]]:
-    combined: dict[str, list[str]] = defaultdict(list)
-    for source in (runtime_emitters, helper_backed_emitters):
-        for metric_name, emitter_paths in source.items():
-            combined[metric_name].extend(emitter_paths)
-    return dict(combined)
+_combine_metric_emitters = _metric_inventory_assembly._combine_metric_emitters
 
 
 def collect_metric_inventory(repo_root: Path) -> MetricInventoryReport:
