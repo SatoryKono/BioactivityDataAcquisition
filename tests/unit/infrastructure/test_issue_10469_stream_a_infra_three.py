@@ -435,7 +435,14 @@ def test_observability_backend_process_parse_drop_and_popen_kwargs(
     # Probe/taskkill go through run_protected_command, not subprocess.run.
     # Patching subprocess.run still executes host netstat and can surface
     # banner noise ("Active Internet connections") on Linux CI runners.
-    monkeypatch.setattr(backend, "run_protected_command", _timeout)
+    def _protected_runner(command: list[str], **_kwargs: object) -> object:
+        if command == ["netstat"]:
+            raise subprocess.TimeoutExpired(cmd=command, timeout=1)
+        return subprocess.CompletedProcess(
+            args=command, returncode=1, stdout="", stderr=""
+        )
+
+    monkeypatch.setattr(backend, "run_protected_command", _protected_runner)
     monkeypatch.setattr(backend, "_resolve_system_executable", lambda _cmd: "netstat")
     assert backend._run_listener_probe(["netstat"]) == ""
     assert backend._run_taskkill(9).returncode == 1
