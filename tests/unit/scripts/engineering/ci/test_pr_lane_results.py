@@ -288,6 +288,25 @@ def test_shadow_compare_routes_12380_acceptance_report() -> None:
     assert report["covers_full_suite"] is False
 
 
+@pytest.mark.parametrize(
+    "path",
+    (
+        "reports/audit/pack-v2.1/P02-ddd-domain.md",
+        "reports/audit/pack-v2.1/P05-interfaces-contracts.md",
+    ),
+)
+def test_shadow_compare_routes_pack_v21_stage_audit_reports(path: str) -> None:
+    """pack-v2.1 stage handoffs stay on the cleanup-inventory contract."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare([path], repo_root=repo_root)
+
+    assert report["selected"] == [
+        "tests/architecture/test_documentation_cleanup_inventory.py"
+    ]
+    assert report["covers_full_suite"] is False
+
+
 @pytest.mark.parametrize("path", [".gitleaksignore", ".gitleaks.toml"])
 def test_shadow_compare_routes_secret_scanner_policy(path: str) -> None:
     repo_root = Path(__file__).resolve().parents[5]
