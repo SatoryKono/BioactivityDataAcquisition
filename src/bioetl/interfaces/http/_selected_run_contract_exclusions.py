@@ -1,6 +1,8 @@
 """HTTP-facing compatibility exports for selected-run contract exclusions."""
 
-from bioetl.composition.selected_run_contract_exclusions import (
+from __future__ import annotations
+
+from bioetl.composition.composite_catalog import (
     attach_contract_fields,
     evaluate_contract_exclusions,
     extract_records_in,

@@ -5,11 +5,11 @@
 
 ## Summary
 
-- Scanned modules: `2580`
-- Internal import edges (raw): `8369`
+- Scanned modules: `2581`
+- Internal import edges (raw): `8378`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `332`
+- Cross-layer module-group edges (total): `330`
 - Cross-layer module-group edges (top 55): `55`
 
 ## Layer Dependency Graph
@@ -24,16 +24,16 @@ flowchart LR
     application -->|1651 OK| application
     application -->|1132 OK| domain
     composition -->|230 OK| application
-    composition -->|649 OK| composition
+    composition -->|650 OK| composition
     composition -->|316 OK| domain
     composition -->|302 OK| infrastructure
     domain -->|1313 OK| domain
     infrastructure -->|799 OK| domain
     infrastructure -->|1294 OK| infrastructure
-    interfaces -->|72 OK| application
+    interfaces -->|74 OK| application
     interfaces -->|64 OK| composition
-    interfaces -->|88 OK| domain
-    interfaces -->|459 OK| interfaces
+    interfaces -->|90 OK| domain
+    interfaces -->|463 OK| interfaces
 ```
 
 ## Layer Edge Table
@@ -43,16 +43,16 @@ flowchart LR
 | `application`    | `application`    |    1651 | allowed |
 | `application`    | `domain`         |    1132 | allowed |
 | `composition`    | `application`    |     230 | allowed |
-| `composition`    | `composition`    |     649 | allowed |
+| `composition`    | `composition`    |     650 | allowed |
 | `composition`    | `domain`         |     316 | allowed |
 | `composition`    | `infrastructure` |     302 | allowed |
 | `domain`         | `domain`         |    1313 | allowed |
 | `infrastructure` | `domain`         |     799 | allowed |
 | `infrastructure` | `infrastructure` |    1294 | allowed |
-| `interfaces`     | `application`    |      72 | allowed |
+| `interfaces`     | `application`    |      74 | allowed |
 | `interfaces`     | `composition`    |      64 | allowed |
-| `interfaces`     | `domain`         |      88 | allowed |
-| `interfaces`     | `interfaces`     |     459 | allowed |
+| `interfaces`     | `domain`         |      90 | allowed |
+| `interfaces`     | `interfaces`     |     463 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 

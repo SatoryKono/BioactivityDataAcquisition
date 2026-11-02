@@ -14,15 +14,11 @@ from bioetl.application.services.control_plane.manifest.diagnostics.selected_run
     project_selected_run_replay_readiness,
 )
 from bioetl.composition.composite_catalog import (
-    project_assay_replay,
-)
-from bioetl.composition.selected_run_contract_exclusions import (
     attach_contract_fields,
+    project_assay_replay,
 )
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.selected_status import (
-    DOMAINS,
-    RULES_VERSION,
     provider_check_rows,
     provider_selector_options,
 )
@@ -34,10 +30,7 @@ from bioetl.interfaces.http._forensic_request_budget import (
 from bioetl.interfaces.http._health_server_observability_protocols import (
     _HealthObservabilityRoutingHost,
 )
-from bioetl.interfaces.http._reconciliation_display import (
-    linked_reconciliation_display,
-    unavailable_reconciliation,
-)
+from bioetl.interfaces.http._reconciliation_display import linked_reconciliation_display
 from bioetl.interfaces.http._selected_run_a2_resolve import (
     CATALOG_UNAVAILABLE_REASON,
     NO_RUNS_REASON,
@@ -64,137 +57,14 @@ from bioetl.interfaces.http._selected_run_report_assessment import (
     _saved_trust,
     _selected_pipeline,
 )
+from bioetl.interfaces.http._selected_run_unavailable import unavailable_status
 from bioetl.interfaces.http.run_report_ops import _validated_artifact_paths
 
 _NOT_EVALUATED = "NOT EVALUATED"
 _QUERY_ERROR = "QUERY ERROR"
 _CONTROL_PLANE = "Control Plane"
 
-_SELECT_RUN = "SELECT RUN"
 _NO_RUNS = NO_RUNS_STATUS
-_GAP_STATES = frozenset({_SELECT_RUN, _NO_RUNS})
-
-
-def unavailable_status(
-    pipeline: str, run_id: str, state: str, reason: str
-) -> dict[str, object]:
-    """Emit explicit state rows so unavailable evidence never becomes a green zero."""
-    rows: list[dict[str, object]] = [
-        {
-            "domain": domain,
-            "verdict": state,
-            "display_verdict": state,
-            "reason": reason,
-            "reason_display": display_reason(reason),
-            "run_id": run_id,
-            "pipeline": pipeline,
-            "action": (
-                "No runs in current scope"
-                if state == _NO_RUNS
-                else "Select run or inspect evidence"
-            ),
-        }
-        for domain in DOMAINS
-    ]
-    summary = {
-        "pipeline": pipeline,
-        "run_id": run_id,
-        "verdict": state,
-        "reason": reason,
-        "evidence_availability": reason,
-        "rules_version": RULES_VERSION,
-        "execution_state": "UNKNOWN",
-        "checks_verdict": "UNKNOWN",
-        "evidence_completeness": "INCOMPLETE",
-        "replay_readiness_now": _readiness_state(state),
-        "heartbeat_now": _NOT_EVALUATED,
-    }
-    for row in rows:
-        row.update({**summary, **row, "run_verdict": state})
-    trust = {
-        "processing_status": "UNKNOWN",
-        "trust_status": state,
-        "reasons_text": reason,
-        "reasons_display": display_reason(reason),
-        "reasons_count": None,
-        "trust_reasons_action": "Not assessed",
-        "evidence_observed_at": None,
-    }
-    presentation_summary = summary
-    presentation_trust = trust
-    if state == _SELECT_RUN:
-        presentation_summary = {
-            **summary,
-            "pipeline": "No run selected",
-            "run_id": "—",
-            "execution_state": _SELECT_RUN,
-            "evidence_completeness": _SELECT_RUN,
-        }
-        presentation_trust = {
-            **trust,
-            "processing_status": _SELECT_RUN,
-            "reasons_display": "Choose a run",
-        }
-    elif state == _NO_RUNS:
-        presentation_summary = {
-            **summary,
-            "pipeline": pipeline if pipeline not in {"", ".*"} else "—",
-            "run_id": "—",
-            "execution_state": _NO_RUNS,
-            "evidence_completeness": _NO_RUNS,
-            "verdict": _NO_RUNS,
-        }
-        presentation_trust = {
-            **trust,
-            "processing_status": _NO_RUNS,
-            "reasons_display": "Нет запусков в выбранном скоупе",
-        }
-    return attach_contract_fields(
-        {
-            **summary,
-            "summary": [summary],
-            "presentation_summary": [presentation_summary],
-            "presentation_trust": [presentation_trust],
-            "domains": rows,
-            "reconciliation_display": unavailable_reconciliation(reason),
-            "presentation_domains": presentation_rows(
-                rows,
-                selection=state == _SELECT_RUN,
-                empty_catalog=state == _NO_RUNS,
-            ),
-            "provider_checks": [
-                {
-                    "provider": "—",
-                    "check_result": state,
-                    "evidence": reason,
-                    "observed_at": None,
-                }
-            ],
-            "provider_options": [],
-            "quality_evidence": {"pipeline": pipeline, "funnel": None},
-            "rows": rows,
-            "trust": [trust],
-            **_readiness_fields(
-                empty_replay_readiness(
-                    pipeline=pipeline,
-                    run_id=run_id,
-                    verdict=_readiness_state(state),
-                    reason=reason,
-                )
-            ),
-            **project_stage_diagnostics(
-                None, request_state=state, request_reason=reason
-            ),
-        }
-    )
-
-
-def _readiness_state(state: str) -> str:
-    if state in _GAP_STATES:
-        return state
-    if state == _QUERY_ERROR:
-        return _QUERY_ERROR
-    return INSUFFICIENT
 
 
 def _present_status(

@@ -56,6 +56,11 @@ MODULE_GROUP_OVERRIDES = {
     # The detached backend is part of the canonical observability runtime
     # composition family even though it keeps a focused import surface for CLI.
     "bioetl.composition.observability_backend": "composition.observability_runtime",
+    # Selected-run contract fields share the composite catalog public seam so
+    # ops-http callers stay on one composition.module-group → infrastructure edge.
+    "bioetl.composition.selected_run_contract_exclusions": (
+        "composition.composite_catalog"
+    ),
 }
 TYPE_CHECKING_NAME = "TYPE_CHECKING"
 _FRONTMATTER_DELIMITER = "---"
