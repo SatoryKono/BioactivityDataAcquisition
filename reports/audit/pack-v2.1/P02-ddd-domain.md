@@ -45,7 +45,7 @@
 
 ## J. Self-check
 - Unsupported claims: Removed; executable evidence limited to E3 registry checker.
-- Stale evidence: None for the registry check on the audit pinned revision; claims no longer assert “all domain tests pass”.
+- Stale evidence: None for the registry check on the revision pinned by this audit (`a5243cb4bbed67b267daecdc097b8c48501e140a`); claims no longer assert “all domain tests pass”.
 - Exception handling: Complies with policy.
 - Score/severity consistency: Overall Score 4/5 matches limited executable evidence.
 
