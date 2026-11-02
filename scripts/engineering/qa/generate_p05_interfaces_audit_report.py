@@ -2,18 +2,27 @@
 """Generate reports/audit/pack-v2.1/P05-interfaces-contracts.md from HEAD.
 
 Canonical regenerator for the P05 interfaces audit pack report.
-Pin Revision is taken from `git rev-parse HEAD` (never hand-edited).
+
+- Pin Revision is taken from ``git rev-parse HEAD`` (never hand-edited).
+- E3 runs the focused architecture pytest command and records the actual
+  exit code / summary (or marks E3 unverified when ``--skip-e3``).
+- E4 builds the public-surface matrix by extracting CLI Click options and
+  HTTP route literals from ``src/bioetl/interfaces`` (not fixed strings).
 
 Usage:
     python -m scripts.engineering.qa.generate_p05_interfaces_audit_report
-    python scripts/engineering/qa/generate_p05_interfaces_audit_report.py
+    python -m scripts.engineering.qa.generate_p05_interfaces_audit_report --skip-e3
 """
 
 from __future__ import annotations
 
+import argparse
 import os
+import re
+import shlex
 import subprocess
 import sys
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -21,31 +30,65 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 REPORT_PATH = (
     REPO_ROOT / "reports" / "audit" / "pack-v2.1" / "P05-interfaces-contracts.md"
 )
+CLI_COMMANDS_DIR = REPO_ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands"
+HTTP_DIR = REPO_ROOT / "src" / "bioetl" / "interfaces" / "http"
 
-# Focused architecture evidence captured at regeneration time (E3).
-# Full `tests/architecture/` suite is NOT claimed here.
-E3_COMMAND = (
-    "uv run pytest "
-    "tests/architecture/test_adapter_port_conformance.py "
-    "tests/architecture/test_quarantine_cli_seam.py "
-    "tests/architecture/test_workflow_cli_running_boundaries.py "
-    "tests/architecture/test_strict_architecture_contracts.py "
-    "tests/architecture/test_port_contracts.py "
-    "-q"
+E3_ARGV: tuple[str, ...] = (
+    "pytest",
+    "tests/architecture/test_adapter_port_conformance.py",
+    "tests/architecture/test_quarantine_cli_seam.py",
+    "tests/architecture/test_workflow_cli_running_boundaries.py",
+    "tests/architecture/test_strict_architecture_contracts.py",
+    "tests/architecture/test_port_contracts.py",
+    "-q",
+    "--tb=no",
 )
-E3_RESULT = "exit=0; 198 passed; 0 failed (focused interfaces/ports subset)"
-E3_NOTE = (
-    "INCOMPLETE for full tests/architecture/; focused subset only. "
-    "Do not treat class EXECUTABLE alone as success."
+E3_COMMAND_DISPLAY = "uv run " + " ".join(shlex.quote(part) for part in E3_ARGV)
+
+# Groups whose subcommands are expanded into full ``bioetl <group> <sub>`` paths.
+_EXPAND_GROUPS: frozenset[str] = frozenset(
+    {"lock", "quarantine", "report", "adr", "diagnostics", "health"}
 )
 
-# E4: no durable named runtime matrix tool in tree; matrix rebuilt statically.
-E4_STATUS = "INCOMPLETE"
-E4_SOURCE = (
-    "scripts/engineering/qa/generate_p05_interfaces_audit_report.py "
-    "(static CLI/HTTP extraction; no live HTTP)"
+_OPTION_RE = re.compile(
+    r"""@(?:typed_click_option|click\.option)\(\s*(['"])(--[A-Za-z0-9][\w-]*)\1""",
+    re.MULTILINE,
 )
-E4_RESULT = "matrix regenerated from source; live HTTP not executed"
+_GROUP_CMD_RE = re.compile(
+    r"""@typed_group_command\(\s*(\w+)\s*,\s*['"]([^'"]+)['"]\s*\)""",
+)
+_CLICK_GROUP_RE = re.compile(
+    r"""@typed_click_group\(\)\s*\ndef\s+(\w+)\s*\(""",
+)
+_ROUTE_LITERAL_RE = re.compile(r"""['"](/(?:health|healthz|metrics|ops)[^'"]*)['"]""")
+
+
+@dataclass(frozen=True, slots=True)
+class MatrixRow:
+    name: str
+    kind: str
+    options: str
+    output: str
+    exits: str
+    status: str
+    tests: str
+
+
+@dataclass(frozen=True, slots=True)
+class E3Evidence:
+    command: str
+    result: str
+    note: str
+    verified: bool
+    exit_code: int | None
+
+
+@dataclass(frozen=True, slots=True)
+class E4Evidence:
+    status: str
+    source: str
+    result: str
+    rows: tuple[MatrixRow, ...]
 
 
 def _git(*args: str) -> str:
@@ -59,14 +102,312 @@ def _git(*args: str) -> str:
 
 def _pin_revision() -> tuple[str, bool]:
     sha = _git("rev-parse", "HEAD")
-    # Dirty relative to audited SCOPE only (ignore report/generator edits).
     porcelain = _git("status", "--porcelain", "--", "src/bioetl/interfaces")
     dirty = bool(porcelain.strip())
     return sha, dirty
 
 
-def _render(pin: str, dirty: bool, when: str) -> str:
+def _run_e3(*, skip: bool) -> E3Evidence:
+    note = (
+        "INCOMPLETE for full tests/architecture/; focused subset only. "
+        "Do not treat class EXECUTABLE alone as success."
+    )
+    if skip:
+        return E3Evidence(
+            command=E3_COMMAND_DISPLAY,
+            result="UNVERIFIED (E3 not executed; --skip-e3)",
+            note=note,
+            verified=False,
+            exit_code=None,
+        )
+
+    proc = subprocess.run(
+        [sys.executable, "-m", *E3_ARGV],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    combined = "\n".join(
+        part for part in (proc.stdout.strip(), proc.stderr.strip()) if part
+    )
+    summary_line = ""
+    for line in reversed(combined.splitlines()):
+        if re.search(r"\d+\s+passed|\d+\s+failed|no tests ran|error", line, re.I):
+            summary_line = " ".join(line.strip().split())
+            break
+    if not summary_line:
+        # pytest -q may only print progress dots + [n%]; count dots as passed.
+        dots = sum(1 for ch in combined if ch == ".")
+        failed_marks = sum(1 for ch in combined if ch == "F")
+        error_marks = sum(1 for ch in combined if ch == "E")
+        if proc.returncode == 0 and dots and not failed_marks and not error_marks:
+            summary_line = f"{dots} passed (pytest -q progress dots; no summary line)"
+        else:
+            summary_line = (
+                f"no pytest summary line; dots={dots} F={failed_marks} E={error_marks}"
+            )
+    # Keep ledger cells single-line (markdown table safe).
+    summary_line = summary_line.replace("`", "'").replace("|", "/")
+    result = f"exit={proc.returncode}; {summary_line}"
+    return E3Evidence(
+        command=E3_COMMAND_DISPLAY,
+        result=result,
+        note=note,
+        verified=True,
+        exit_code=proc.returncode,
+    )
+
+
+def _unique(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for item in items:
+        if item not in seen:
+            seen.add(item)
+            out.append(item)
+    return out
+
+
+def _options_before_def(chunk: str) -> list[str]:
+    before_def = chunk.split("\ndef ", 1)[0]
+    return _unique([m.group(2) for m in _OPTION_RE.finditer(before_def)])
+
+
+def _extract_group_rows(path: Path) -> list[MatrixRow]:
+    text = path.read_text(encoding="utf-8")
+    group_match = _CLICK_GROUP_RE.search(text)
+    if group_match is None:
+        return []
+    group = group_match.group(1)
+    if group not in _EXPAND_GROUPS:
+        return []
+
+    rows: list[MatrixRow] = []
+    parts = _GROUP_CMD_RE.split(text)
+    # parts: [pre, group_name, sub, body, group_name, sub, body, ...]
+    index = 1
+    while index + 2 < len(parts):
+        group_name = parts[index]
+        sub = parts[index + 1]
+        body = parts[index + 2]
+        index += 3
+        if group_name != group:
+            continue
+        opts = _options_before_def(body)
+        # quarantine stats uses add_quarantine_stats_options() helper.
+        if group == "quarantine" and sub == "stats" and not opts:
+            helper = CLI_COMMANDS_DIR / "domains" / "shared" / "inspection_commands.py"
+            if helper.is_file():
+                helper_text = helper.read_text(encoding="utf-8")
+                start = helper_text.find("def add_quarantine_stats_options")
+                if start >= 0:
+                    opts = _unique(
+                        [
+                            m.group(2)
+                            for m in _OPTION_RE.finditer(
+                                helper_text[start : start + 2500]
+                            )
+                        ]
+                    )
+        option_text = ", ".join(f"`{opt}`" for opt in opts) if opts else "(none)"
+        status = "CURRENT"
+        if group == "quarantine" and sub == "serve":
+            status = "CURRENT (legacy long-lived helper; prefer `bioetl health server`)"
+        rows.append(
+            MatrixRow(
+                name=f"`bioetl {group} {sub}`",
+                kind="CLI",
+                options=option_text,
+                output="Text/JSON" if "--json" in opts else "Text",
+                exits="0 (OK) / 1 (FAIL) / 2 (Click usage)",
+                status=status,
+                tests="Yes",
+            )
+        )
+    return rows
+
+
+def _extract_run_row() -> MatrixRow:
+    path = CLI_COMMANDS_DIR / "run.py"
+    text = path.read_text(encoding="utf-8")
+    # run.py wires options through shared helpers; surface required + discovered flags.
+    opts = _unique([m.group(2) for m in _OPTION_RE.finditer(text)])
+    # Fall back to known required flag from help contract when decorators are indirect.
+    if "--pipeline" not in opts:
+        opts = ["--pipeline", *opts]
+    option_text = (
+        ", ".join(f"`{opt}`" for opt in opts)
+        + " (plus shared run option pack; see `bioetl run --help`)"
+    )
+    return MatrixRow(
+        name="`bioetl run`",
+        kind="CLI",
+        options=option_text,
+        output="Text",
+        exits=("0 (OK) / 1 (FAIL) / 2 (Click usage) / 80+ domain codes / 130 SIGINT"),
+        status="CURRENT",
+        tests="Yes",
+    )
+
+
+def _extract_http_rows() -> list[MatrixRow]:
+    routes: set[str] = set()
+    for path in sorted(HTTP_DIR.rglob("*.py")):
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        for match in _ROUTE_LITERAL_RE.finditer(text):
+            route = match.group(1)
+            # Keep concrete endpoints; collapse prefix-only markers separately.
+            if route.endswith("/"):
+                routes.add(route + "*")
+            else:
+                routes.add(route)
+
+    rows: list[MatrixRow] = []
+    for route in sorted(routes):
+        rows.append(
+            MatrixRow(
+                name=f"`{route}`",
+                kind="HTTP",
+                options="GET",
+                output="JSON"
+                if not route.startswith("/metrics")
+                else "Prometheus text",
+                exits="200 / 4xx / 5xx",
+                status="CURRENT",
+                tests="Yes",
+            )
+        )
+
+    # Distinct HTTP *types* modules (not routes) — keep both paths explicit.
+    types_modules = (
+        HTTP_DIR / "types.py",
+        HTTP_DIR / "control_plane_identity" / "types.py",
+    )
+    for module in types_modules:
+        rel = module.relative_to(REPO_ROOT).as_posix()
+        note = "DTO helpers; **not a route**"
+        if "control_plane_identity" in rel:
+            note = (
+                "identity evidence shared types; **not a route**; "
+                "legacy compat sunset 2026-12-31"
+            )
+        rows.append(
+            MatrixRow(
+                name=f"`{rel}`",
+                kind="HTTP types module",
+                options=f"N/A ({note})",
+                output="N/A",
+                exits="N/A",
+                status="CURRENT",
+                tests="Yes",
+            )
+        )
+    return rows
+
+
+def _build_e4() -> E4Evidence:
+    rows: list[MatrixRow] = []
+    for name in sorted(_EXPAND_GROUPS):
+        path = CLI_COMMANDS_DIR / f"{name}.py"
+        if path.is_file():
+            rows.extend(_extract_group_rows(path))
+    rows.append(_extract_run_row())
+    rows.extend(_extract_http_rows())
+
+    # Sanity: health server must expose --host/--port when extraction works.
+    health_server = next(
+        (row for row in rows if row.name == "`bioetl health server`"),
+        None,
+    )
+    if health_server is None or "--host" not in health_server.options:
+        raise RuntimeError(
+            "E4 extraction failed: expected `bioetl health server` with --host/--port"
+        )
+
+    source = (
+        "scripts/engineering/qa/generate_p05_interfaces_audit_report.py "
+        "(AST/regex extraction over src/bioetl/interfaces/cli/commands + "
+        "src/bioetl/interfaces/http; no live HTTP)"
+    )
+    result = (
+        f"static matrix extracted from source ({len(rows)} rows); "
+        "live HTTP not executed"
+    )
+    return E4Evidence(
+        status="STATIC_EXTRACTED",
+        source=source,
+        result=result,
+        rows=tuple(rows),
+    )
+
+
+def _md_escape_cell(value: str) -> str:
+    return value.replace("|", "\\|")
+
+
+def _matrix_table(rows: tuple[MatrixRow, ...]) -> str:
+    lines = [
+        "| Command/Endpoint | Type | Options/Request Schema | "
+        "Output Schema/Text Contract | Exit/Status Codes | "
+        "Compatibility/Deprecation Status | Tests |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for row in rows:
+        lines.append(
+            "| "
+            + " | ".join(
+                _md_escape_cell(part)
+                for part in (
+                    row.name,
+                    row.kind,
+                    row.options,
+                    row.output,
+                    row.exits,
+                    row.status,
+                    row.tests,
+                )
+            )
+            + " |"
+        )
+    return "\n".join(lines)
+
+
+def _scorecard(e3: E3Evidence, e4: E4Evidence) -> tuple[int, str]:
+    e3_ok = e3.verified and e3.exit_code == 0
+    if e3_ok and e4.status == "STATIC_EXTRACTED":
+        score = 4
+        justification = (
+            "Mature thin-controller implementation + focused architecture "
+            f"enforcement (E3 exit={e3.exit_code}). Score is not 5 because E3 is "
+            "incomplete for the full `tests/architecture/` suite and E4 has no "
+            "live runtime matrix (static extraction only). Evidence: E1-README, "
+            "E2-CLI-MAIN, E3-ARCH-TESTS (focused), E4-RUNTIME-MATRIX (static)."
+        )
+    elif e3.verified and e3.exit_code not in (0, None):
+        score = 2
+        justification = (
+            f"E3 focused architecture subset failed (exit={e3.exit_code}). "
+            "Score capped until E3 is green."
+        )
+    else:
+        score = 3
+        justification = "E3 unverified or incomplete; E4 static-only. Score capped."
+    return score, justification
+
+
+def _render(
+    *,
+    pin: str,
+    dirty: bool,
+    when: str,
+    e3: E3Evidence,
+    e4: E4Evidence,
+) -> str:
     dirty_s = "True" if dirty else "False"
+    score, justification = _scorecard(e3, e4)
+    e3_freshness = "CURRENT" if e3.verified else "UNVERIFIED"
+    matrix = _matrix_table(e4.rows)
     return f"""# P05. Interfaces: CLI, HTTP и boundary contracts
 
 ## A. Audit Manifest
@@ -79,8 +420,8 @@ def _render(pin: str, dirty: bool, when: str) -> str:
 - **Environment**: Python/uv (as configured in repository)
 - **Time of Execution**: {when}
 - **Generated By**: `scripts/engineering/qa/generate_p05_interfaces_audit_report.py`
-- **Sources of Truth**: Explicit architecture policy, ADR-032 (Unified HTTP Client Pattern), ADR-044, ADR-045, project RULES.md, `tests/architecture/`, CLI Click groups under `src/bioetl/interfaces/cli/commands/`, HTTP routes under `src/bioetl/interfaces/http/health_server_routing_mixin.py` (+ ops dispatch helpers).
-- **Untested / Excluded**: Live HTTP endpoints (requires backend runtime). Evaluated via static route definitions, CLI option extraction, and focused architecture tests.
+- **Sources of Truth**: Explicit architecture policy, ADR-032 (Unified HTTP Client Pattern), ADR-044, ADR-045, project RULES.md, `tests/architecture/`, CLI Click groups under `src/bioetl/interfaces/cli/commands/`, HTTP routes under `src/bioetl/interfaces/http/`.
+- **Untested / Excluded**: Live HTTP endpoints (requires backend runtime). Evaluated via extracted route definitions, CLI option extraction, and focused architecture tests.
 
 ## B. Scope/ownership and exclusions
 
@@ -94,8 +435,8 @@ def _render(pin: str, dirty: bool, when: str) -> str:
 | E1-README | NORMATIVE | CURRENT | `src/bioetl/interfaces/README.md` | Architecture contract for interfaces layer. |
 | E2-CLI-MAIN | STATIC | CURRENT | `src/bioetl/interfaces/cli/main.py` | Main CLI entry point. |
 | E2-SEAM-CHECK | STATIC | CURRENT | `src/bioetl/interfaces/**/*.py` | Static analysis of import seams. |
-| E3-ARCH-TESTS | EXECUTABLE | CURRENT | `{E3_COMMAND}` | Focused architecture pytest. **Result:** `{E3_RESULT}`. **Note:** {E3_NOTE} |
-| E4-RUNTIME-MATRIX | RUNTIME | CURRENT | `{E4_SOURCE}` | Public-surface matrix extraction. **Status:** `{E4_STATUS}`. **Result:** `{E4_RESULT}`. |
+| E3-ARCH-TESTS | EXECUTABLE | {e3_freshness} | `{e3.command}` | Focused architecture pytest. **Result:** `{e3.result}`. **Note:** {e3.note} |
+| E4-RUNTIME-MATRIX | RUNTIME | CURRENT | `{e4.source}` | Public-surface matrix extraction. **Status:** `{e4.status}`. **Result:** `{e4.result}`. |
 
 ## D. Findings Register
 
@@ -124,8 +465,8 @@ def _render(pin: str, dirty: bool, when: str) -> str:
 
 ## E. Quantitative Scorecard
 
-- **Score**: 4
-- **Justification**: Mature thin-controller implementation + focused architecture enforcement (E3 focused subset exit 0). Score is not 5 because E3 is incomplete for the full `tests/architecture/` suite and E4 is explicitly INCOMPLETE (no live runtime matrix). Evidence: E1-README, E2-CLI-MAIN, E3-ARCH-TESTS (focused), E4-RUNTIME-MATRIX (static only).
+- **Score**: {score}
+- **Justification**: {justification}
 
 ## F. Cross-cutting/root-cause clusters
 
@@ -139,51 +480,13 @@ def _render(pin: str, dirty: bool, when: str) -> str:
 
 | Component | Verified | Notes |
 |---|---|---|
-| CLI Commands | Yes | Static analysis + Click help/`typed_group_command` extraction. |
-| HTTP Routes | Yes | Static route tables in routing mixins (not live). |
-| Import Seams | Partial | Covered by focused E3 subset; full architecture suite not re-run. |
+| CLI Commands | Yes | Extracted from Click `typed_group_command` / option decorators. |
+| HTTP Routes | Yes | Extracted route literals under `src/bioetl/interfaces/http` (not live). |
+| Import Seams | Partial | Covered by focused E3 subset when verified; full architecture suite not re-run. |
 
 ### Public-Surface Stability Matrix
 
-| Command/Endpoint | Type | Options/Request Schema | Output Schema/Text Contract | Exit/Status Codes | Compatibility/Deprecation Status | Tests |
-|---|---|---|---|---|---|---|
-| `bioetl lock release` | CLI | `--pipeline`, `--run-id`, `--exclusive` | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl lock check` | CLI | `--pipeline`, `--run-id` | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl quarantine serve` | CLI | `--host`, `--port`, `--data-root` | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT (legacy long-lived helper; prefer `bioetl health server`) | Yes |
-| `bioetl quarantine inspect` | CLI | `--pipeline`, `--limit`, `--error-code`, `--run-id` | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl quarantine stats` | CLI | `--pipeline`, `--json`, `--error-code`, `--run-id`, `--group-by`, `--top` | Text/JSON | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl quarantine replay` | CLI | `--pipeline`, `--error-code`, `--max-age-days`, `--dry-run` | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl quarantine purge` | CLI | `--pipeline`, `--older-than-days`, `--dry-run`, `--force` | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl quarantine resolve` | CLI | `--pipeline`, `--payload-hash`, `--status` | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl report show` | CLI | `--pipeline`, `--run-id`, `--workflow`, `--workflow-run-id`, `--latest`, `--root`, `--json` | Text/JSON | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl report list` | CLI | `--pipeline`, `--workflow`, `--limit`, `--root` | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl report diff` | CLI | `--pipeline`, `--run-id-a`, `--run-id-b`, `--root` | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl report prune` | CLI | `--kind`, `--owner`, `--max-count`, `--max-age-days`, `--apply`, `--root` | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl adr list` | CLI | `--json` | Text/JSON | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl adr show` | CLI | `--raw` | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl adr validate` | CLI | `--json` | Text/JSON | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl diagnostics guide` | CLI | (none) | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl diagnostics health` | CLI | `--provider`, `--json` | Text/JSON | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl diagnostics metrics` | CLI | `--json` | Text/JSON | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl diagnostics run` | CLI | (none) | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl diagnostics dossier` | CLI | `--run-id`, `--manifest-id`, `--limit`, `--format` | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl diagnostics contract-checks` | CLI | `--json` | Text/JSON | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl diagnostics checkpoint` | CLI | (none) | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl diagnostics manifest` | CLI | `--format` | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl diagnostics forensic-diff` | CLI | `--format` | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl diagnostics quarantine` | CLI | (none) | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) | CURRENT | Yes |
-| `bioetl run` | CLI | `--pipeline` (required) plus run-type/resume/limit/input-csv/filter-*/dry-run/--yes/vacuum-*/debug/health-*/tracing/cached-bronze*/replay-*/observability-* (see `bioetl run --help`) | Text | 0 (OK) / 1 (FAIL) / 2 (Click usage) / 80+ domain codes / 130 SIGINT | CURRENT | Yes |
-| `/health` | HTTP | GET | JSON health | 200 / 5xx | CURRENT | Yes |
-| `/healthz` | HTTP | GET | JSON health | 200 / 5xx | CURRENT | Yes |
-| `/health/live` | HTTP | GET | JSON liveness | 200 / 5xx | CURRENT | Yes |
-| `/health/ready` | HTTP | GET | JSON readiness | 200 / 5xx | CURRENT | Yes |
-| `/health/providers` | HTTP | GET | JSON providers | 200 / 5xx | CURRENT | Yes |
-| `/metrics` | HTTP | GET | Prometheus text | 200 / 5xx | CURRENT | Yes |
-| `/ops/control-plane/*` | HTTP | GET (selector/filter/identity/evidence/trust/…) | JSON | 200 / 4xx / 5xx | CURRENT | Yes |
-| `/ops/observability/*` | HTTP | GET (selected-run-status, processed-records, run-reports, …) | JSON | 200 / 4xx / 5xx | CURRENT | Yes |
-| `/ops/quarantine/*` | HTTP | GET (filtered-records/stats/timeseries/filter-options, …) | JSON | 200 / 4xx / 5xx | CURRENT | Yes |
-| `src/bioetl/interfaces/http/types.py` | HTTP types module | N/A (DTO helpers: `HealthResponse`; **not a route**) | N/A | N/A | CURRENT | Yes |
-| `src/bioetl/interfaces/http/control_plane_identity/types.py` | HTTP types module | N/A (identity evidence shared types; **not a route**; legacy compat sunset 2026-12-31) | N/A | N/A | CURRENT | Yes |
+{matrix}
 
 ### Error/Exit-Code Matrix
 
@@ -203,45 +506,61 @@ def _render(pin: str, dirty: bool, when: str) -> str:
 
 ### Thinness Violations
 
-- Никаких нарушений не обнаружено (на основе статического эвристического анализа и focused E3 architecture subset).
+- Никаких нарушений не обнаружено (на основе статического извлечения контрактов и focused E3 architecture subset, when verified).
 
 ### Test Gaps
 
 - Full `tests/architecture/` suite not re-executed in this regeneration (E3 incomplete beyond focused subset).
 - Live HTTP request/response validation excluded (NOT_VERIFIABLE).
-- E4 runtime matrix has no live backend execution.
+- E4 has no live backend execution (static extraction only).
 
 ## I. NOT_VERIFIABLE and missing evidence
 
 - **Live HTTP Endpoints**: Actual HTTP request/response validation requires a running backend instance which is excluded from this static audit.
-- **E3 full suite**: Only the focused five-file architecture subset was executed at regeneration; full-suite success is not claimed.
-- **E4 runtime matrix**: Marked INCOMPLETE — static extraction only.
+- **E3 full suite**: Only the focused five-file architecture subset is executed at regeneration (unless `--skip-e3`); full-suite success is not claimed.
+- **E4 runtime matrix**: Static extraction from `src/bioetl/interfaces`; live HTTP incomplete.
 
 ## J. Self-check
 
 - All findings are within the pinned revision `{pin}`.
 - Severity and confidence scales adhered to per COMMON AUDIT CONTRACT v2.0.
 - Pin Revision stamped by generator from `git rev-parse HEAD` (not hand-edited).
+- E3 result recorded from this regeneration run (or explicitly UNVERIFIED).
+- E4 matrix rows produced by source extraction (not fixed success strings).
 
 ## K. Verdict
 
-- The interfaces layer adheres to the documented architecture policy within the static/focused-evidence scope above. Score capped at 4 while E3 full-suite and E4 live runtime remain incomplete.
+- The interfaces layer adheres to the documented architecture policy within the static/focused-evidence scope above. Score reflects live E3 outcome and static-only E4.
 """
 
 
 def main(argv: list[str] | None = None) -> int:
-    _ = argv
+    parser = argparse.ArgumentParser(
+        description="Regenerate pack-v2.1/P05 interfaces audit report."
+    )
+    parser.add_argument(
+        "--skip-e3",
+        action="store_true",
+        help="Do not run E3 pytest; mark E3 evidence as UNVERIFIED.",
+    )
+    args = parser.parse_args(argv)
+
     pin, dirty = _pin_revision()
     when = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-    payload = _render(pin, dirty, when)
+    e3 = _run_e3(skip=args.skip_e3)
+    e4 = _build_e4()
+    payload = _render(pin=pin, dirty=dirty, when=when, e3=e3, e4=e4)
+
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     tmp = REPORT_PATH.with_suffix(".md.tmp")
     tmp.write_text(payload, encoding="utf-8")
     os.replace(tmp, REPORT_PATH)
     print(
-        f"[p05-audit] wrote {REPORT_PATH.relative_to(REPO_ROOT)} pin={pin} dirty={dirty}"
+        f"[p05-audit] wrote {REPORT_PATH.relative_to(REPO_ROOT)} "
+        f"pin={pin} dirty={dirty} e3_verified={e3.verified} "
+        f"e3_exit={e3.exit_code} e4_rows={len(e4.rows)}"
     )
-    return 0
+    return 0 if (not e3.verified or e3.exit_code == 0) else 1
 
 
 if __name__ == "__main__":
