@@ -302,7 +302,6 @@ def _nightly_checks(args: argparse.Namespace) -> list[BudgetCheck]:
     return checks
 
 
-
 def _broad_checks(args: argparse.Namespace) -> list[BudgetCheck]:
     if args.mode != "nightly":
         return []
@@ -356,7 +355,12 @@ def main() -> int:
     args = parse_args()
 
     try:
-        checks = _quality_checks(args) + _lint_checks(args) + _nightly_checks(args) + _broad_checks(args)
+        checks = (
+            _quality_checks(args)
+            + _lint_checks(args)
+            + _nightly_checks(args)
+            + _broad_checks(args)
+        )
     except (FileNotFoundError, ValueError) as exc:
         _err(f"[ERROR] {exc}")
         return 2
