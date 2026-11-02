@@ -39,7 +39,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import AsyncIterator
-from typing import NoReturn
+from typing import Any, NoReturn
 
 from pathlib import Path
 
@@ -87,6 +87,27 @@ def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
     ]:
         return "test_all_chembl_pipelines_chain"
     return str(request.node.name)
+
+
+async def _run_molecule_then_target_and_assert_records(
+    e2e_data_dir: Path,
+) -> Any:
+    """Run B then A in one process and verify both persisted outputs."""
+    molecule_runner = bootstrap_pipeline_runner(
+        create_test_context("chembl_molecule", limit=2)
+    )
+    await molecule_runner.run()
+
+    target_runner = bootstrap_pipeline_runner(
+        create_test_context("chembl_target", limit=2)
+    )
+    await target_runner.run()
+
+    await assert_silver_table_has_records(e2e_data_dir, "chembl_target", expected_min=1)
+    await assert_silver_table_has_records(
+        e2e_data_dir, "chembl_molecule", expected_min=1
+    )
+    return target_runner
 
 
 @pytest.mark.e2e
@@ -312,22 +333,9 @@ async def test_run_normal_a_b_a(e2e_data_dir: Path) -> None:
     runner1 = bootstrap_pipeline_runner(ctx1)
     await runner1.run()
 
-    # Run B (Molecule)
-    ctx_b = create_test_context("chembl_molecule", limit=2)
-    runner_b = bootstrap_pipeline_runner(ctx_b)
-    await runner_b.run()
-
-    # Run A2 (Target)
-    ctx2 = create_test_context("chembl_target", limit=2)
-    runner2 = bootstrap_pipeline_runner(ctx2)
-    await runner2.run()
+    runner2 = await _run_molecule_then_target_and_assert_records(e2e_data_dir)
     assert runner2.execution_metrics["records_fetched"] > 0, (
         "A2 fetched no Target records"
-    )
-
-    await assert_silver_table_has_records(e2e_data_dir, "chembl_target", expected_min=1)
-    await assert_silver_table_has_records(
-        e2e_data_dir, "chembl_molecule", expected_min=1
     )
 
 
@@ -398,20 +406,7 @@ async def test_run_cancellation_and_restart(
         await asyncio.gather(task, return_exceptions=True)
     monkeypatch.setattr(source, "extract_records", original_extract)
 
-    # Run B (Molecule)
-    ctx_b = create_test_context("chembl_molecule", limit=2)
-    runner_b = bootstrap_pipeline_runner(ctx_b)
-    await runner_b.run()
-
-    # Run A2 (Target)
-    ctx2 = create_test_context("chembl_target", limit=2)
-    runner2 = bootstrap_pipeline_runner(ctx2)
-    await runner2.run()
-
-    await assert_silver_table_has_records(e2e_data_dir, "chembl_target", expected_min=1)
-    await assert_silver_table_has_records(
-        e2e_data_dir, "chembl_molecule", expected_min=1
-    )
+    await _run_molecule_then_target_and_assert_records(e2e_data_dir)
 
 
 @pytest.mark.e2e
@@ -449,20 +444,7 @@ async def test_run_error_and_restart(
         await runner1.run()
     monkeypatch.setattr(source, "extract_records", original_extract)
 
-    # Run B (Molecule) - normal
-    ctx_b = create_test_context("chembl_molecule", limit=2)
-    runner_b = bootstrap_pipeline_runner(ctx_b)
-    await runner_b.run()
-
-    # Run A2 (Target) - normal
-    ctx2 = create_test_context("chembl_target", limit=2)
-    runner2 = bootstrap_pipeline_runner(ctx2)
-    await runner2.run()
-
-    await assert_silver_table_has_records(e2e_data_dir, "chembl_target", expected_min=1)
-    await assert_silver_table_has_records(
-        e2e_data_dir, "chembl_molecule", expected_min=1
-    )
+    await _run_molecule_then_target_and_assert_records(e2e_data_dir)
 
 
 @pytest.mark.e2e
@@ -479,19 +461,7 @@ async def test_run_config_error_and_restart(e2e_data_dir: Path) -> None:
     with pytest.raises(RuntimeError, match="injected pipeline config load failure"):
         bootstrap_pipeline_runner(ctx1, load_pipeline_config_fn=fail_config_load)
 
-    # Run B (Molecule), then A (Target) after bootstrap failed post-registry setup.
-    ctx_b = create_test_context("chembl_molecule", limit=2)
-    runner_b = bootstrap_pipeline_runner(ctx_b)
-    await runner_b.run()
-
-    ctx2 = create_test_context("chembl_target", limit=2)
-    runner2 = bootstrap_pipeline_runner(ctx2)
-    await runner2.run()
+    runner2 = await _run_molecule_then_target_and_assert_records(e2e_data_dir)
     assert runner2.execution_metrics["records_fetched"] > 0, (
         "A2 fetched no Target records after the bootstrap config error"
-    )
-
-    await assert_silver_table_has_records(e2e_data_dir, "chembl_target", expected_min=1)
-    await assert_silver_table_has_records(
-        e2e_data_dir, "chembl_molecule", expected_min=1
     )
