@@ -169,32 +169,16 @@ def _relocate(
     old_tree, new_tree = ast.parse(old.sources[path]), ast.parse(new.sources[path])
     scope = _scope(old_tree, line)
     if "expression" in ref:
-        expression = replacements.get(ref["expression"], ref["expression"])
-        kinds = {
-            "call": (ast.Call,),
-            "callback-reference": (ast.Name, ast.Attribute),
-            "callback": (ast.FunctionDef, ast.AsyncFunctionDef),
-        }
-        candidates = []
-        for node in ast.walk(new_tree):
-            if not isinstance(node, kinds[ref.get("creation_mode", "call")]):
-                continue
-            if ast.unparse(node) != expression:
-                continue
-            node_line = getattr(node, "lineno", None)
-            if isinstance(node_line, int) and _scope(new_tree, node_line) == scope:
-                candidates.append(node_line)
-        ref["expression"] = expression
+        candidates = _expression_candidates(ref, new_tree, scope, replacements)
     else:
-        segment = ref.get(
-            "source_segment", old.sources[path].decode().splitlines()[line - 1].strip()
+        candidates = _segment_candidates(
+            ref,
+            old.sources[path],
+            new.sources[path],
+            new_tree,
+            scope,
+            segment_replacements,
         )
-        segment = segment_replacements.get(segment, segment)
-        candidates = [
-            i
-            for i, text in enumerate(new.sources[path].decode().splitlines(), 1)
-            if text.strip() == segment and _scope(new_tree, i) == scope
-        ]
     if len(candidates) != 1:
         raise ValueError(
             f"Reference relocation needs an explicit unambiguous review: {path}:{line}"
@@ -204,6 +188,55 @@ def _relocate(
         ref["source_segment"] = (
             new.sources[path].decode().splitlines()[ref["line"] - 1].strip()
         )
+
+
+def _expression_candidates(
+    ref: dict[str, Any],
+    tree: ast.AST,
+    scope: str,
+    replacements: dict[str, str],
+) -> list[int]:
+    expression = replacements.get(ref["expression"], ref["expression"])
+    kinds = {
+        "call": (ast.Call,),
+        "callback-reference": (ast.Name, ast.Attribute),
+        "callback": (ast.FunctionDef, ast.AsyncFunctionDef),
+    }
+    creation_mode = ref.get("creation_mode", "call")
+    if creation_mode not in kinds:
+        raise ValueError(f"Unsupported reference creation mode: {creation_mode}")
+    candidates = []
+    for node in ast.walk(tree):
+        if (
+            not isinstance(node, kinds[creation_mode])
+            or ast.unparse(node) != expression
+        ):
+            continue
+        node_line = getattr(node, "lineno", None)
+        if isinstance(node_line, int) and _scope(tree, node_line) == scope:
+            candidates.append(node_line)
+    ref["expression"] = expression
+    return candidates
+
+
+def _segment_candidates(
+    ref: dict[str, Any],
+    old_source: bytes,
+    new_source: bytes,
+    new_tree: ast.AST,
+    scope: str,
+    replacements: dict[str, str],
+) -> list[int]:
+    line = ref["line"]
+    segment = ref.get(
+        "source_segment", old_source.decode().splitlines()[line - 1].strip()
+    )
+    segment = replacements.get(segment, segment)
+    return [
+        index
+        for index, text in enumerate(new_source.decode().splitlines(), 1)
+        if text.strip() == segment and _scope(new_tree, index) == scope
+    ]
 
 
 def _validate_review_schema(review: dict[str, Any]) -> None:
