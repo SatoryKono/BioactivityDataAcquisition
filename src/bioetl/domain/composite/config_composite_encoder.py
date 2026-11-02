@@ -125,6 +125,8 @@ def _dq_to_dict(dq: _DQConfigProtocol) -> dict[str, object]:
     return {
         "soft_fail_threshold": dq.soft_fail_threshold,
         "hard_fail_threshold": dq.hard_fail_threshold,
+        "strict_validation": dq.strict_validation,
+        "invalid_record_policy": dq.invalid_record_policy,
         "required_fields": list(dq.required_fields),
         "enricher_overrides": {
             name: _dq_override_entry(override)

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-import shutil
 from collections import defaultdict
 from pathlib import Path
 
@@ -21,9 +20,6 @@ def _optional_git_files(root: Path) -> list[Path] | None:
     """Use bounded Git discovery only when the caller supplied a checkout root."""
     checkout = next((p for p in (root, *root.parents) if (p / ".git").exists()), None)
     if checkout is not None:
-        executable = shutil.which("git")
-        if executable is None:
-            return None
         names = list_git_worktree_files(checkout, root.relative_to(checkout).as_posix())
         if names is not None:
             return sorted(

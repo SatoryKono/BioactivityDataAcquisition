@@ -554,10 +554,20 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "reports/quality/quality-move-qm08/publication-provenance.json": (
         "tests/unit/scripts/ci/test_test_telemetry_provenance.py",
         "tests/architecture/test_external_resource_inventory_catalog.py",
-        "tests/unit/scripts/ops/test_refresh_router_delivery.py",
+    ),
+    "reports/12592_report.md": (
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        CHECK_DOC_LINKS_GUARDRAILS_TEST,
+    ),
+    "reports/12592_scoped_patch.diff": (
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        CHECK_DOC_LINKS_GUARDRAILS_TEST,
     ),
     "configs/quality/scripts_inventory_manifest.json": (
         SCRIPTS_INVENTORY_MANIFEST_TEST,
+    ),
+    "configs/quality/domain_aggregate_classification.yaml": (
+        "tests/architecture/test_domain_aggregate_classification.py",
     ),
     "configs/quality/scripts_lifecycle_registry.json": (
         "tests/architecture/test_scripts_lifecycle_registry.py",
@@ -620,14 +630,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         ("tests/architecture/test_silver_filter_boundary_inventory.py",),
     ),
-    "reports/12592_report.md": (
-        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
-        CHECK_DOC_LINKS_GUARDRAILS_TEST,
-    ),
-    "reports/12592_scoped_patch.diff": (
-        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
-        CHECK_DOC_LINKS_GUARDRAILS_TEST,
-    ),
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
@@ -645,6 +647,10 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "configs/entities/": (
         "tests/architecture/test_config_strict_keys.py",
         "tests/unit/infrastructure/schemas/test_filter_config.py",
+    ),
+    "configs/quality/entities/composite/": (
+        "tests/unit/composition/bootstrap/runtime/test_composite_config_loader.py",
+        "tests/unit/infrastructure/schemas/test_composite_gold_dq.py",
     ),
     "reports/evidence/12461/": (
         "tests/architecture/test_provider_contract_interoperability_governance.py",
