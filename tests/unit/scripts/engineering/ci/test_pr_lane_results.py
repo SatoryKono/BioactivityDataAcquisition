@@ -1009,7 +1009,7 @@ def test_affected_targets_map_shared_helper_to_importing_tests(
     helper.parent.mkdir(parents=True)
     helper.write_text("def run() -> None: ...\n", encoding="utf-8")
     (helper.parent / "__init__.py").write_text(
-        "from tests.helpers.cli_process import run\n",
+        "from .cli_process import run\n",
         encoding="utf-8",
     )
     owner = tmp_path / "tests" / "unit" / "sample" / "test_owner.py"
