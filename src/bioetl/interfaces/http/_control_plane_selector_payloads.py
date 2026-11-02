@@ -11,6 +11,7 @@ from bioetl.interfaces.http._control_plane_selector_records import (
 )
 
 RUN_ID_NO_SELECTION = "-"
+RUN_ID_NO_RUNS_LABEL = "НЕТ ЗАПУСКОВ"
 UNKNOWN_SCOPE = "unknown"
 RUN_TYPE_FALLBACK = "backfill"
 SELECTOR_CONTEXT_CONTRACT = "control_plane_selector_context_v1"

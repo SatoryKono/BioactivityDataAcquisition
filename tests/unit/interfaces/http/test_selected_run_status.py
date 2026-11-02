@@ -155,7 +155,10 @@ def read(tmp_path, run_id="run-a") -> dict[str, Any]:
 def test_quality_evidence_unavailable_never_invents_counters(tmp_path, run_id):
     result = read(tmp_path, run_id=run_id)
     assert result["quality_evidence"] == {"pipeline": "chembl_activity", "funnel": None}
-    assert result["verdict"] == ("SELECT RUN" if run_id == "-" else "UNKNOWN")
+    assert result["verdict"] == ("НЕТ ЗАПУСКОВ" if run_id == "-" else "UNKNOWN")
+    assert result["contract_exclusions_status"] == "UNKNOWN"
+    assert result["contract_exclusions_rate"] is None
+    assert result["records_in"] is None
 
 
 def test_quality_evidence_preserves_exact_saved_funnel(tmp_path):
@@ -594,7 +597,8 @@ def test_neighbour_and_empty_selection(tmp_path):
     persist(tmp_path, report(run_id="run-b", status="failed"))
     assert read(tmp_path)["verdict"] == "OK"
     assert read(tmp_path, "run-b")["verdict"] == "ERROR"
-    assert read(tmp_path, "-")["verdict"] == "SELECT RUN"
+    # Direct loader without catalog: unresolved sentinel is A2 empty-catalog gap.
+    assert read(tmp_path, "-")["verdict"] == "НЕТ ЗАПУСКОВ"
     assert read(tmp_path, "absent")["reason"] == "run_not_found"
 
 

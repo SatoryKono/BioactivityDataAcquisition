@@ -509,7 +509,7 @@ def test_empty_run_option_labels_do_not_invent_a_run() -> None:
         response_shape="options",
         requested_pipeline="unknown",
     )
-    assert payload == {"items": [{"text": "SELECT RUN", "value": "-"}]}
+    assert payload == {"items": [{"text": "НЕТ ЗАПУСКОВ", "value": "-"}]}
 
 
 def test_filter_options_apply_exact_run_fallback_and_validate_dimension() -> None:

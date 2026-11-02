@@ -35,7 +35,17 @@ from bioetl.interfaces.http._reconciliation_display import (
     linked_reconciliation_display,
     unavailable_reconciliation,
 )
+from bioetl.interfaces.http._selected_run_a2_resolve import (
+    NO_RUNS_REASON,
+    NO_RUNS_STATUS,
+    is_unresolved_run_id,
+    list_a2_catalog,
+    resolve_a2_latest_run_id,
+)
 from bioetl.interfaces.http._selected_run_artifact_probes import _artifact_probes
+from bioetl.interfaces.http._selected_run_contract_exclusions import (
+    attach_contract_fields,
+)
 from bioetl.interfaces.http._selected_run_live import (
     active_run_diagnostics,
     scope_matches,
@@ -60,6 +70,8 @@ _QUERY_ERROR = "QUERY ERROR"
 _CONTROL_PLANE = "Control Plane"
 
 _SELECT_RUN = "SELECT RUN"
+_NO_RUNS = NO_RUNS_STATUS
+_GAP_STATES = frozenset({_SELECT_RUN, _NO_RUNS})
 
 
 def unavailable_status(
@@ -75,7 +87,11 @@ def unavailable_status(
             "reason_display": display_reason(reason),
             "run_id": run_id,
             "pipeline": pipeline,
-            "action": "Select run or inspect evidence",
+            "action": (
+                "No runs in current scope"
+                if state == _NO_RUNS
+                else "Select run or inspect evidence"
+            ),
         }
         for domain in DOMAINS
     ]
@@ -103,59 +119,78 @@ def unavailable_status(
         "trust_reasons_action": "Not assessed",
         "evidence_observed_at": None,
     }
-    return {
-        **summary,
-        "summary": [summary],
-        "presentation_summary": [
-            {
-                **summary,
-                "pipeline": "No run selected",
-                "run_id": "—",
-                "execution_state": _SELECT_RUN,
-                "evidence_completeness": _SELECT_RUN,
-            }
-            if summary["verdict"] == _SELECT_RUN
-            else summary
-        ],
-        "presentation_trust": [
-            {
-                **trust,
-                "processing_status": _SELECT_RUN,
-                "reasons_display": "Choose a run",
-            }
-            if summary["verdict"] == _SELECT_RUN
-            else trust
-        ],
-        "domains": rows,
-        "reconciliation_display": unavailable_reconciliation(reason),
-        "presentation_domains": presentation_rows(rows, selection=state == _SELECT_RUN),
-        "provider_checks": [
-            {
-                "provider": "—",
-                "check_result": state,
-                "evidence": reason,
-                "observed_at": None,
-            }
-        ],
-        "provider_options": [],
-        "quality_evidence": {"pipeline": pipeline, "funnel": None},
-        "rows": rows,
-        "trust": [trust],
-        **_readiness_fields(
-            empty_replay_readiness(
-                pipeline=pipeline,
-                run_id=run_id,
-                verdict=_readiness_state(state),
-                reason=reason,
-            )
-        ),
-        **project_stage_diagnostics(None, request_state=state, request_reason=reason),
-    }
+    presentation_summary = summary
+    presentation_trust = trust
+    if state == _SELECT_RUN:
+        presentation_summary = {
+            **summary,
+            "pipeline": "No run selected",
+            "run_id": "—",
+            "execution_state": _SELECT_RUN,
+            "evidence_completeness": _SELECT_RUN,
+        }
+        presentation_trust = {
+            **trust,
+            "processing_status": _SELECT_RUN,
+            "reasons_display": "Choose a run",
+        }
+    elif state == _NO_RUNS:
+        presentation_summary = {
+            **summary,
+            "pipeline": pipeline if pipeline not in {"", ".*"} else "—",
+            "run_id": "—",
+            "execution_state": _NO_RUNS,
+            "evidence_completeness": _NO_RUNS,
+            "verdict": _NO_RUNS,
+        }
+        presentation_trust = {
+            **trust,
+            "processing_status": _NO_RUNS,
+            "reasons_display": "Нет запусков в выбранном скоупе",
+        }
+    return attach_contract_fields(
+        {
+            **summary,
+            "summary": [summary],
+            "presentation_summary": [presentation_summary],
+            "presentation_trust": [presentation_trust],
+            "domains": rows,
+            "reconciliation_display": unavailable_reconciliation(reason),
+            "presentation_domains": presentation_rows(
+                rows,
+                selection=state == _SELECT_RUN,
+                empty_catalog=state == _NO_RUNS,
+            ),
+            "provider_checks": [
+                {
+                    "provider": "—",
+                    "check_result": state,
+                    "evidence": reason,
+                    "observed_at": None,
+                }
+            ],
+            "provider_options": [],
+            "quality_evidence": {"pipeline": pipeline, "funnel": None},
+            "rows": rows,
+            "trust": [trust],
+            **_readiness_fields(
+                empty_replay_readiness(
+                    pipeline=pipeline,
+                    run_id=run_id,
+                    verdict=_readiness_state(state),
+                    reason=reason,
+                )
+            ),
+            **project_stage_diagnostics(
+                None, request_state=state, request_reason=reason
+            ),
+        }
+    )
 
 
 def _readiness_state(state: str) -> str:
-    if state == _SELECT_RUN:
-        return _SELECT_RUN
+    if state in _GAP_STATES:
+        return state
     if state == _QUERY_ERROR:
         return _QUERY_ERROR
     return INSUFFICIENT
@@ -190,42 +225,26 @@ def _present_status(
         if row["domain"] == _CONTROL_PLANE:
             row["reason_display"] = trust["reasons_display"] or "No saved Trust reasons"
             row["display_verdict"] = trust["trust_status"]
-    return {
-        **summary,
-        "summary": [summary],
-        "presentation_summary": [
-            {
-                **summary,
-                "pipeline": "No run selected",
-                "run_id": "—",
-                "execution_state": _SELECT_RUN,
-                "evidence_completeness": _SELECT_RUN,
-            }
-            if summary["verdict"] == _SELECT_RUN
-            else summary
-        ],
-        "presentation_trust": [
-            {
-                **trust,
-                "processing_status": _SELECT_RUN,
-                "reasons_display": "Choose a run",
-            }
-            if summary["verdict"] == _SELECT_RUN
-            else trust
-        ],
-        "domains": rows,
-        "presentation_domains": presentation_rows(rows),
-        "provider_checks": provider_check_rows(report),
-        "provider_options": provider_selector_options(report),
-        "quality_evidence": {
-            "pipeline": summary["pipeline"],
-            "funnel": report.get("funnel"),
-        },
-        "rows": rows,
-        "trust": [trust],
-        **readiness_fields,
-        **project_stage_diagnostics(report),
-    }
+    return attach_contract_fields(
+        {
+            **summary,
+            "summary": [summary],
+            "presentation_summary": [summary],
+            "presentation_trust": [trust],
+            "domains": rows,
+            "presentation_domains": presentation_rows(rows),
+            "provider_checks": provider_check_rows(report),
+            "provider_options": provider_selector_options(report),
+            "quality_evidence": {
+                "pipeline": summary["pipeline"],
+                "funnel": report.get("funnel"),
+            },
+            "rows": rows,
+            "trust": [trust],
+            **readiness_fields,
+            **project_stage_diagnostics(report),
+        }
+    )
 
 
 def _load_saved_assessment(
@@ -256,9 +275,13 @@ def load_selected_run_status(
     manifest_port: object | None = None,
     store: RunReportStorePort | None = None,
 ) -> dict[str, object]:
-    """Load and revalidate the exact report, revision and bound identity each time."""
-    if run_id in {"", "-", "All", "$__all"}:
-        return unavailable_status(pipeline, run_id, _SELECT_RUN, "selection_required")
+    """Load and revalidate the exact report, revision and bound identity each time.
+
+    Unresolved ``run_id`` sentinels are A2 empty-catalog gaps («НЕТ ЗАПУСКОВ»)
+    when called without a prior auto-select. HTTP handling resolves latest first.
+    """
+    if is_unresolved_run_id(run_id):
+        return unavailable_status(pipeline, "-", _NO_RUNS, NO_RUNS_REASON)
     try:
         selected_pipeline = _selected_pipeline(pipeline, run_id, root, store)
     except ValueError as exc:
@@ -364,11 +387,31 @@ async def handle_selected_run_status(
     writer: asyncio.StreamWriter,
     query: dict[str, str],
 ) -> None:
-    """Bound blocking reads and preserve explicit query errors for Grafana."""
+    """Bound blocking reads and preserve explicit query errors for Grafana.
+
+    Mode A2: unresolved ``run_id`` auto-selects latest in scope; empty catalog
+    returns «НЕТ ЗАПУСКОВ». An explicit URL ``run_id`` wins over auto-select.
+    """
     pipeline = host._read_required_param(query, "pipeline")
-    run_id = host._read_optional_param(query, "run_id") or "-"
+    requested_run_id = host._read_optional_param(query, "run_id") or "-"
 
     def load() -> dict[str, object]:
+        run_id = requested_run_id
+        if is_unresolved_run_id(run_id):
+            manifests, workflow_manifests = list_a2_catalog(
+                host._run_manifest_port,
+                getattr(host, "_workflow_manifest_port", None),
+            )
+            latest = resolve_a2_latest_run_id(
+                manifests=manifests,
+                ledger_port=host._run_ledger_port,
+                workflow_manifests=workflow_manifests,
+                pipeline=pipeline,
+                query=query,
+            )
+            if latest is None:
+                return unavailable_status(pipeline, "-", _NO_RUNS, NO_RUNS_REASON)
+            run_id = latest
         result = load_selected_run_status(
             pipeline=pipeline,
             run_id=run_id,
@@ -376,6 +419,7 @@ async def handle_selected_run_status(
             store=host._run_report_store,
         )
         if result.get("reason") == "run_not_found":
+            # URL/explicit run_id stays bound; never substitute a different latest.
             active = active_run_diagnostics(host, pipeline, run_id)
             if active is not None:
                 result = _merge_active_diagnostics(
@@ -395,9 +439,13 @@ async def handle_selected_run_status(
             endpoint="selected-run-status",
         )
     except ForensicEndpointUnavailable as exc:
-        payload = unavailable_status(pipeline, run_id, _QUERY_ERROR, exc.reason)
+        payload = unavailable_status(
+            pipeline, requested_run_id, _QUERY_ERROR, exc.reason
+        )
         if exc.request_id is not None:
             payload["request_id"] = exc.request_id
     except (OSError, RuntimeError, ValueError):
-        payload = unavailable_status(pipeline, run_id, _QUERY_ERROR, "request_failed")
+        payload = unavailable_status(
+            pipeline, requested_run_id, _QUERY_ERROR, "request_failed"
+        )
     await host._send_payload_response(writer, 200, payload)

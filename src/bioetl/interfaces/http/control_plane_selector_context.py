@@ -11,6 +11,7 @@ from bioetl.interfaces.http._control_plane_selector_filters import (
     latest_record,
 )
 from bioetl.interfaces.http._control_plane_selector_payloads import (
+    RUN_ID_NO_RUNS_LABEL,
     RUN_ID_NO_SELECTION,
     SELECTOR_CONTEXT_CONTRACT,
     UNKNOWN_SCOPE,
@@ -174,11 +175,17 @@ def _filter_options_response(
 
 
 def _run_option_label(
-    value: str, record: SelectorRecord | None, *, timezone: str = "UTC"
+    value: str,
+    record: SelectorRecord | None,
+    *,
+    timezone: str = "UTC",
+    empty_catalog: bool = False,
 ) -> str:
     """Readable catalog label; Grafana value stays the stable UUID."""
     if value == RUN_ID_NO_SELECTION:
-        return "SELECT RUN"
+        # A2 empty catalog uses «НЕТ ЗАПУСКОВ»; SELECT RUN remains only as the
+        # legacy A1 sentinel label when concrete runs exist (JSON may still send -).
+        return RUN_ID_NO_RUNS_LABEL if empty_catalog else "SELECT RUN"
     if record is None:
         return f"UNKNOWN · {value}"
     timestamp = record.started_at
@@ -195,9 +202,22 @@ def _run_option_labels(
     timezone: str = "UTC",
 ) -> dict[str, object]:
     by_id = {record.run_id: record for record in records}
+    concrete = [value for value in values if value and value != RUN_ID_NO_SELECTION]
+    empty_catalog = not concrete
+    if empty_catalog:
+        return {
+            "items": [
+                {"text": RUN_ID_NO_RUNS_LABEL, "value": RUN_ID_NO_SELECTION},
+            ]
+        }
     items = [
         {
-            "text": _run_option_label(value, by_id.get(value), timezone=timezone),
+            "text": _run_option_label(
+                value,
+                by_id.get(value),
+                timezone=timezone,
+                empty_catalog=False,
+            ),
             "value": value,
         }
         for value in values
