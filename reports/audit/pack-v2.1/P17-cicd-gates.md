@@ -17,7 +17,7 @@
 - `E1 NORMATIVE`: `docs/00-project/RULES.md`, ADR stack; `docs/04-reference/github-actions-workflows.md` (inventory + keep-disabled policy for `release.yml`); header comments in `.github/workflows/release.yml` (`KEEP-DISABLED (#11182)`).
 - `E2 STATIC`: `.github/workflows/release.yml`, `.github/workflows/tests.yml`, `pyproject.toml`, tracked `.github/workflows/*.yml` inventory.
 - `E3 EXECUTABLE`: Read-only verification commands below (no workflow mutations).
-- `E4 RUNTIME`: Отсутствует — история запусков CI / live hosting API не запрашивались в этом прогоне.
+- `E4 RUNTIME`: Не выполнялось — история запусков CI не читалась; live hosting API (rulesets/environments) не вызывался.
 
 ## D. Findings Register
 
@@ -67,7 +67,7 @@
 - **Score:** 4
 - **Workflow file count:** 55 tracked `.github/workflows/*.yml` на audited SHA.
 - **Count command/result:** `git ls-tree -r --name-only ddbb7a0ee687365258bc407110e38601c4c3b765 .github/workflows | rg '\.yml$' | wc -l` → `55` (совпадает с `docs/04-reference/github-actions-workflows.md`).
-- **Justification:** Статический обзор workflows / lock-файлов / матриц без открытых P0/P1; штраф за неверифицированный live hosting. Residual unreachable jobs в keep-disabled `release.yml` учтены как P3 hygiene, не как сломанный publish. Доказательства: `E1`–`E3`.
+- **Justification:** Зафиксированы workflow count (55) и keep-disabled residual в `release.yml` (`E1`–`E3`); открытых P0/P1 нет. Штраф за live hosting `NOT_VERIFIABLE`. Полный обзор transitive graph / cache / secrets / lock-файлов / test matrices в этом прогоне **не** выполнялся с записанными командами (см. §H).
 
 ## F. Cross-cutting/root-cause clusters
 - `release-publish-keep-disabled-residual`
@@ -78,11 +78,13 @@
 2. [P3] Live GET branch protection / rulesets / environments и обновление inventory `Last verified`.
 
 ## H. Verification Matrix
-- Transitive graph: Выполнено (статически)
-- Triggers/Permissions: Выполнено (статически)
-- Cache keys: Выполнено (статически)
-- Secrets/OIDC: Выполнено (статически; runtime publish не запускался)
-- Hosting settings: NOT_VERIFIABLE (live); historical snapshot 2026-10-16 noted
+- Transitive graph: `NOT_VERIFIABLE` — отдельная команда/результат обхода `workflow_call` графа в этом прогоне не записывались.
+- Triggers/Permissions (кроме `release.yml`): `NOT_VERIFIABLE` — полный scan `on:`/`permissions:` по всем 55 workflow не выполнялся с записанным результатом. Для `release.yml` только: `git show ddbb7a0ee687365258bc407110e38601c4c3b765:.github/workflows/release.yml | nl -ba | sed -n '1,20p;200,260p'` → `on: workflow_dispatch`; jobs `publish-pypi`/`create-github-release-assets` с `if: github.event_name == 'release'`; header KEEP-DISABLED L2–L3.
+- Cache keys: `NOT_VERIFIABLE` — поиск/проверка cache key patterns не выполнялись.
+- Secrets/OIDC: `NOT_VERIFIABLE` — static/OIDC inventory по workflows не прогонялся; runtime publish не запускался.
+- Lock files / test matrices: `NOT_VERIFIABLE` — `uv.lock` / matrix blocks не проверялись отдельными командами в этом прогоне.
+- Workflow inventory count: выполнено — `git ls-tree -r --name-only ddbb7a0ee687365258bc407110e38601c4c3b765 .github/workflows | rg '\.yml$' | wc -l` → `55`.
+- Hosting settings: `NOT_VERIFIABLE` (live GET не выполнялся); historical snapshot 2026-10-16 noted in docs inventory.
 
 ## I. `NOT_VERIFIABLE` и missing evidence
 - Live конфигурация GitHub Environments и Secrets.
@@ -96,7 +98,7 @@
 - Score/severity consistency: нет открытых P0/P1; Score 4 из-за hosting `NOT_VERIFIABLE`.
 
 ## K. Verdict
-В scope статически проверены tracked GitHub Actions workflows (55 YAML), явные pin'ы actions, uv lock-файлы и матрицы тестов. Runtime-поведение CI и live hosting settings **не** проверялись. Главное замечание: residual недостижимые publish-job'ы в keep-disabled `release.yml` при политике «Publish stays outside GitHub Actions» (#11182) — optional P3 hygiene, не подтверждённая поломка рабочего канала публикации и не повод включать publish через `workflow_dispatch`.
+В scope с записанными командами подтверждены: 55 tracked workflow YAML и keep-disabled residual в `release.yml` (#11182). Transitive graph, cache keys, secrets/OIDC, lock-файлы и test matrices — `NOT_VERIFIABLE` (команды не выполнялись). Runtime история CI и live hosting API **не** запускались. Главное замечание: residual недостижимые publish-job'ы в keep-disabled `release.yml` — optional P3 hygiene, не поломка рабочего канала публикации и не повод включать publish через `workflow_dispatch`.
 
 ## Issue drafts
 
