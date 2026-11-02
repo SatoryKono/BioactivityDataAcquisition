@@ -165,6 +165,14 @@ def _run_option_labels(
     merged catalog is complete.
     """
     by_id = {record.run_id: record for record in records}
+    concrete = [value for value in values if value and value != RUN_ID_NO_SELECTION]
+    empty_catalog = not concrete
+    if empty_catalog:
+        return {
+            "items": [
+                {"text": RUN_ID_NO_RUNS_LABEL, "value": RUN_ID_NO_SELECTION},
+            ]
+        }
     items = [
         {
             "text": _run_option_label(
