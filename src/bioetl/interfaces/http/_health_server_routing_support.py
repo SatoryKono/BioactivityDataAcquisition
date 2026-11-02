@@ -296,7 +296,6 @@ def _selector_context_payload_with_a2(
         )
     return build_selector_context_payload(
         manifests=manifests,
-        ledger_port=host._run_ledger_port,
         workflow_manifests=workflow_manifests,
         selected_workflows=selected_workflows,
         selected_pipelines=selected_pipelines,
