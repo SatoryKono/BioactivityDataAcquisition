@@ -52,15 +52,12 @@ def _gold_write_metric_labels(
     *,
     status: str | None = None,
 ) -> dict[str, str]:
-    pipeline, table = _split_gold_table_label(
-        cast(Any, request).table_name  # Any: gold write request duck-type  # tracked(#12721): unused attr-defined ignore removed
-    )
+    # tracked(#12721): unused attr-defined ignore removed; Any duck-types request
+    pipeline, table = _split_gold_table_label(cast(Any, request).table_name)
     labels = {
         "pipeline": pipeline,
         "table": table,
-        "mode": _normalize_gold_metric_mode(
-            cast(Any, request).mode  # Any: gold write request duck-type  # tracked(#12721): unused attr-defined ignore removed
-        ),
+        "mode": _normalize_gold_metric_mode(cast(Any, request).mode),
     }
     if status is not None:
         labels["status"] = _normalize_gold_metric_status(status)
