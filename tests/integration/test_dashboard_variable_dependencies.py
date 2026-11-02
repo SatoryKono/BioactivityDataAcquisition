@@ -83,7 +83,6 @@ def test_runtime_variable_dependencies():
         "run_type",
         "run_id",
         "provider",
-        "provider_for_pipeline",
         "read_latency_quantile",
         "selected_pipeline",
         "selected_run_id",
@@ -92,7 +91,7 @@ def test_runtime_variable_dependencies():
     assert "filter-options?dimension=run_type" in query
     assert "${pipeline}" in query
     assert variables["run_type"]["current"]["value"] == "$__all"
-    assert variables["provider_for_pipeline"]["hide"] == 2
+    assert "provider_for_pipeline" not in variables
     assert variables["run_id"]["datasource"] == {
         "type": "yesoreyeram-infinity-datasource",
         "uid": "bioetl-ops-http",
@@ -113,25 +112,24 @@ def test_overview_variable_dependencies():
 
 
 def test_dq_variable_dependencies():
-    """bioetl-dq-v2: $stage depends on pipeline/run_type and defaults to All."""
+    """bioetl-dq-v2: Phase 4.1 drops unused $stage; pipeline/run_type remain."""
     variables = _templating_map("grafana/dashboards/bioetl-dq-v2.json")
 
     assert "pipeline" in variables, "bioetl-dq-v2 must have $pipeline variable"
     assert "run_type" in variables, "bioetl-dq-v2 must have $run_type variable"
-    assert "stage" in variables, "bioetl-dq-v2 must have $stage variable"
-    stage_var = variables["stage"]
-    assert stage_var.get("includeAll") is True
-    assert stage_var.get("current", {}).get("value") == "$__all"
-    assert stage_var.get("current", {}).get("text") == "All"
+    assert "stage" not in variables
+    assert "provider_for_pipeline" not in variables
 
 
 def test_provider_health_variable_dependencies():
     """Saved Provider Evidence uses exact run identity, not legacy fleet selectors."""
     variables = _templating_map("grafana/dashboards/bioetl-overview-v2.json")
-    assert {"provider", "adapter", "pipeline_context"}.isdisjoint(variables)
-    provider = variables["provider_for_pipeline"]
-    assert provider["hide"] == 2
-    assert 'pipeline=~"$pipeline"' in str(provider.get("definition") or "")
+    assert {
+        "provider",
+        "adapter",
+        "pipeline_context",
+        "provider_for_pipeline",
+    }.isdisjoint(variables)
     assert variables["run_id"]["datasource"] == {
         "type": "yesoreyeram-infinity-datasource",
         "uid": "bioetl-ops-http",
@@ -141,21 +139,19 @@ def test_provider_health_variable_dependencies():
 
 
 def test_overview_provider_context_is_derived_from_pipeline():
-    """Provider evidence is bound to the selected run, not a fleet selector."""
+    """Provider evidence reuses Overview donor 9002 (no fleet provider helper var)."""
     variables = _templating_map("grafana/dashboards/bioetl-overview-v2.json")
-    provider = variables["provider_for_pipeline"]
-    assert provider["definition"] == (
-        'label_values(bioetl_workflow_pipeline_expected{pipeline=~"$pipeline"}, provider)'
-    )
-    assert provider["hide"] == 2
+    assert "provider_for_pipeline" not in variables
     assert not {"provider", "pipeline_context", "adapter"} & variables.keys()
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panels = {panel["id"]: panel for panel in dashboard["panels"]}
+    donor = panels[9002]["targets"][0]
+    assert donor["url"].startswith("/ops/observability/selected-run-status?")
+    assert "pipeline=${pipeline}" in donor["url"]
+    assert "run_id=${run_id}" in donor["url"]
     for panel_id in (9480, 9481):
         target = panels[panel_id]["targets"][0]
-        assert target["url"].startswith("/ops/observability/selected-run-status?")
-        assert "pipeline=${pipeline}" in target["url"]
-        assert "run_id=${run_id}" in target["url"]
+        assert target.get("panelId") == 9002
 
 
 def test_incident_provider_derives_from_pipeline_or_workflow():

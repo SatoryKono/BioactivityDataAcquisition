@@ -32,8 +32,9 @@ def test_run_explorer_processing_status_fits_zoom_with_inspectable_run_id() -> N
         }
         for override in panel["fieldConfig"]["overrides"]
     }
-    assert fields["Overview"]["custom.width"] == 180
-    assert fields["Overview"]["custom.minWidth"] == 180
+    assert fields["Overview"]["custom.width"] == 150
+    assert fields["Overview"]["custom.minWidth"] == 150
+    assert fields["Run ID"]["custom.width"] == 110
     assert fields["Run ID"]["custom.inspect"] is True
     assert any(
         "${__data.fields.run_id}" in link["title"] for link in fields["Run ID"]["links"]
@@ -107,7 +108,7 @@ def test_row_aware_action_url_preserves_row_and_destination_context() -> None:
     for field in ("workflow", "pipeline", "run_type"):
         assert f"var-{field}=${{__data.fields.{field}:percentencode}}" in url
     assert "var-run_id=${__data.fields.run_id}" in url
-    assert "var-stage=$__all" in url
+    assert "var-stage=" not in url
     assert "var-provider=unknown" in url
     assert "var-pipeline_context=${__data.fields.pipeline:percentencode}" in url
     assert nav_bus.build_handoff_url.__module__.endswith("dashboard_context_links")
@@ -158,10 +159,12 @@ def test_nav_tooltips_describe_resets_and_escape_html_attributes() -> None:
     assert "&quot;Health&quot;" in rendered
     assert "&lt;scope&gt;" in rendered
     runtime = next(item for item in nav_bus.BUS if item["uid"] == "bioetl-dq-v2")
-    assert "stage=All" in nav_bus.nav_link_tooltip(
+    tooltip = nav_bus.nav_link_tooltip(
         source_uid="bioetl-overview-v2",
         target=runtime,
     )
+    assert "stage=All" not in tooltip
+    assert "Preserves selected scope and time range." in tooltip
 
 
 def test_overflow_reclamation_uses_root_panels_and_keeps_minimum_height() -> None:

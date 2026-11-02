@@ -95,7 +95,6 @@ def test_overview_uses_frozen_v3_selector_set() -> None:
         "run_id",
         "selected_run_id",
         "selected_pipeline",
-        "provider_for_pipeline",
     ]
 
     workflow = variables["workflow"]
