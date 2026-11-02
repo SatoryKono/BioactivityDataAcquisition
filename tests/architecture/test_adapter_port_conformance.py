@@ -463,4 +463,3 @@ def test_missing_production_binding_detected() -> None:
     assert not missing, (
         f"Production bindings missing from conformance matrix: {missing}"
     )
-
