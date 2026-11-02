@@ -6,12 +6,30 @@ from collections.abc import Mapping
 from urllib.parse import urlencode
 
 _SELECT_RUN = "SELECT RUN"
+_NO_RUNS = "НЕТ ЗАПУСКОВ"
 
 
 def presentation_rows(
-    rows: list[dict[str, object]], *, selection: bool = False
+    rows: list[dict[str, object]],
+    *,
+    selection: bool = False,
+    empty_catalog: bool = False,
 ) -> list[dict[str, object]]:
     """Keep canonical domain verdicts intact; present one neutral selection action."""
+    if empty_catalog:
+        return [
+            {
+                **(rows[0] if rows else {}),
+                "domain": "Selected run",
+                "execution_state": _NO_RUNS,
+                "evidence_completeness": _NO_RUNS,
+                "run_verdict": _NO_RUNS,
+                "verdict": _NO_RUNS,
+                "reason": "no_runs_in_scope",
+                "action": "No runs in current scope",
+                "action_path": "d/bioetl-run-explorer-v1/run-explorer?var-run_id=-",
+            }
+        ]
     if selection:
         return [
             {

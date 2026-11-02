@@ -12,6 +12,11 @@ from bioetl.composition.bootstrap.runtime.composite import (
 from bioetl.composition.bootstrap.runtime.assay_replay import (
     replay_assay as replay_assay,
 )
+from bioetl.composition.selected_run_contract_exclusions import (
+    attach_contract_fields as attach_contract_fields,
+    evaluate_contract_exclusions as evaluate_contract_exclusions,
+    extract_records_in as extract_records_in,
+)
 from bioetl.infrastructure.storage.composite_replay_evidence import (
     project_assay_replay as project_assay_replay,
 )
@@ -22,7 +27,10 @@ from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_confi
 _NON_FACTORY_ENTITY_PROVIDERS = frozenset({"composite"})
 
 __all__ = [
+    "attach_contract_fields",
     "bootstrap_composite_runner",
+    "evaluate_contract_exclusions",
+    "extract_records_in",
     "list_configured_pipeline_names",
     "load_composite_config",
     "load_pipeline_config",

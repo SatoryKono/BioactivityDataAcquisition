@@ -612,6 +612,43 @@ async def test_filter_options_deadline_does_not_send_late_success(monkeypatch) -
 
 
 @pytest.mark.asyncio
+async def test_selector_context_deadline_returns_typed_unavailable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Selector-context shares the filter-options forensic unavailable path."""
+    host = _RoutingHost()
+    writer = _Writer()
+
+    async def deadline(**_kwargs: object) -> object:
+        raise ForensicEndpointUnavailable(
+            reason="capacity_exhausted",
+            status_code=503,
+        )
+
+    monkeypatch.setattr(
+        routing_support,
+        "run_bounded_forensic_operation",
+        deadline,
+    )
+    await routing_support.handle_control_plane_selector_context(
+        host,
+        writer,
+        {"pipeline": "chembl_activity", "run_id": "-"},
+    )
+    assert host.sent[-1] == (
+        "payload",
+        503,
+        {
+            "contract": "forensic_endpoint_error_v1",
+            "status": "unavailable",
+            "endpoint": "/ops/control-plane/selector-context",
+            "reason": "capacity_exhausted",
+            "retryable": True,
+        },
+    )
+
+
+@pytest.mark.asyncio
 async def test_routing_support_filter_options_and_selector_context(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -635,6 +672,11 @@ async def test_routing_support_filter_options_and_selector_context(
         routing_support,
         "build_selector_context_payload",
         fake_context_payload,
+    )
+    monkeypatch.setattr(
+        routing_support,
+        "resolve_a2_latest_run_id",
+        lambda **_kwargs: None,
     )
 
     await routing_support.handle_control_plane_filter_options(

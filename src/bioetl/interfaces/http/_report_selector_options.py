@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 from bioetl.application.services.run_reports.query import (
@@ -153,6 +153,100 @@ def supplement_report_options(
         if option is not None:
             items.append(option)
     return {**payload, "items": items}
+
+
+def filtered_report_run_candidates(
+    scopes: dict[str, tuple[str, ...]],
+    *,
+    root: Path | None = None,
+    store: RunReportStorePort | None = None,
+    entries: list[ReportIndexEntry] | None = None,
+) -> tuple[tuple[str, datetime], ...]:
+    """Return identity-checked ``(run_id, started_at)`` rows for A2 / selector sync.
+
+    Uses the same scope + identity gates as ``supplement_report_options`` so
+    report-only runs that appear in filter-options also participate in latest
+    selection and empty-scope checks. Rows without a parseable ``started_at``
+    are excluded here only — A2 ordering needs a timestamp — while explicit
+    UUID lookup via ``verified_report_identity_for_run`` still resolves them.
+    """
+    return tuple(
+        (run_id, started)
+        for run_id, started, _identity in _iter_verified_report_identities(
+            scopes, root=root, store=store, entries=entries
+        )
+        if started is not None
+    )
+
+
+def verified_report_identity_for_run(
+    run_id: str,
+    scopes: dict[str, tuple[str, ...]],
+    *,
+    root: Path | None = None,
+    store: RunReportStorePort | None = None,
+    entries: list[ReportIndexEntry] | None = None,
+) -> dict[str, object] | None:
+    """Return the verified report identity for one run_id in scope, if present.
+
+    The requested ``run_id`` is injected into scopes **before** identity checks so
+    unrelated corrupt reports in the same pipeline catalog cannot raise
+    ``ValueError`` and block a good explicit UUID. Missing ``started_at`` does
+    not drop the identity — filter-options labels already render ``UNKNOWN``.
+    """
+    narrowed = {**scopes, "run_id": (run_id,)}
+    for candidate_id, _started, identity in _iter_verified_report_identities(
+        narrowed, root=root, store=store, entries=entries
+    ):
+        if candidate_id == run_id:
+            return identity
+    return None
+
+
+def _iter_verified_report_identities(
+    scopes: dict[str, tuple[str, ...]],
+    *,
+    root: Path | None = None,
+    store: RunReportStorePort | None = None,
+    entries: list[ReportIndexEntry] | None = None,
+) -> tuple[tuple[str, datetime | None, dict[str, object]], ...]:
+    root = configured_report_root(root=root)
+    if entries is None:
+        entries = load_report_selector_entries(scopes, root=root, store=store)
+    rows: list[tuple[str, datetime | None, dict[str, object]]] = []
+    seen: set[str] = set()
+    for entry in sorted(entries, key=lambda item: item.started_at or "", reverse=True):
+        if not _entry_matches_catalog(entry, scopes):
+            continue
+        # Propagate identity/path mismatches: callers (A2 / selected-run-status)
+        # map ValueError to QUERY ERROR instead of treating a corrupt catalog as empty.
+        identity = _checked_identity(entry, root)
+        if not _identity_matches_scopes(identity, scopes):
+            continue
+        run_id = identity.get("run_id")
+        if not isinstance(run_id, str) or not run_id or run_id in seen:
+            continue
+        # Keep verified rows even when started_at is absent; A2 candidate
+        # catalog applies the timestamp gate separately.
+        started = _identity_started_at(identity, entry)
+        seen.add(run_id)
+        rows.append((run_id, started, identity))
+    return tuple(rows)
+
+
+def _identity_started_at(
+    identity: dict[str, object], entry: ReportIndexEntry
+) -> datetime | None:
+    raw = identity.get("started_at") or entry.started_at
+    if raw is None:
+        return None
+    try:
+        moment = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+    if moment.tzinfo is None:
+        return moment.replace(tzinfo=UTC)
+    return moment
 
 
 def load_report_selector_entries(

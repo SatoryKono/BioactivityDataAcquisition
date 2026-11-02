@@ -164,6 +164,13 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/qm_07/test_distribution_isolation.py",
         "tests/architecture/qm_07/test_qm07_cold_imports.py",
     ),
+    **dict.fromkeys(
+        (
+            "reports/qm07/acceptance.md",
+            "reports/qm07/passport.md",
+        ),
+        ("tests/architecture/test_qm07_cold_imports.py",),
+    ),
     "reports/engineering/app-002-port-map/report.md": (
         "tests/architecture/test_port_contracts.py",
         "tests/architecture/test_application_services_cross_subdomain_imports.py",

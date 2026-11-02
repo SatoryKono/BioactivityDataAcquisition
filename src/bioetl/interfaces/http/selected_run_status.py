@@ -14,12 +14,11 @@ from bioetl.application.services.control_plane.manifest.diagnostics.selected_run
     project_selected_run_replay_readiness,
 )
 from bioetl.composition.composite_catalog import (
+    attach_contract_fields,
     project_assay_replay,
 )
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.selected_status import (
-    DOMAINS,
-    RULES_VERSION,
     provider_check_rows,
     provider_selector_options,
 )
@@ -31,9 +30,14 @@ from bioetl.interfaces.http._forensic_request_budget import (
 from bioetl.interfaces.http._health_server_observability_protocols import (
     _HealthObservabilityRoutingHost,
 )
-from bioetl.interfaces.http._reconciliation_display import (
-    linked_reconciliation_display,
-    unavailable_reconciliation,
+from bioetl.interfaces.http._reconciliation_display import linked_reconciliation_display
+from bioetl.interfaces.http._selected_run_a2_resolve import (
+    CATALOG_UNAVAILABLE_REASON,
+    NO_RUNS_REASON,
+    NO_RUNS_STATUS,
+    is_unresolved_run_id,
+    list_a2_catalog,
+    resolve_a2_latest_run_id,
 )
 from bioetl.interfaces.http._selected_run_artifact_probes import _artifact_probes
 from bioetl.interfaces.http._selected_run_live import (
@@ -53,112 +57,14 @@ from bioetl.interfaces.http._selected_run_report_assessment import (
     _saved_trust,
     _selected_pipeline,
 )
+from bioetl.interfaces.http._selected_run_unavailable import unavailable_status
 from bioetl.interfaces.http.run_report_ops import _validated_artifact_paths
 
 _NOT_EVALUATED = "NOT EVALUATED"
 _QUERY_ERROR = "QUERY ERROR"
 _CONTROL_PLANE = "Control Plane"
 
-_SELECT_RUN = "SELECT RUN"
-
-
-def unavailable_status(
-    pipeline: str, run_id: str, state: str, reason: str
-) -> dict[str, object]:
-    """Emit explicit state rows so unavailable evidence never becomes a green zero."""
-    rows: list[dict[str, object]] = [
-        {
-            "domain": domain,
-            "verdict": state,
-            "display_verdict": state,
-            "reason": reason,
-            "reason_display": display_reason(reason),
-            "run_id": run_id,
-            "pipeline": pipeline,
-            "action": "Select run or inspect evidence",
-        }
-        for domain in DOMAINS
-    ]
-    summary = {
-        "pipeline": pipeline,
-        "run_id": run_id,
-        "verdict": state,
-        "reason": reason,
-        "evidence_availability": reason,
-        "rules_version": RULES_VERSION,
-        "execution_state": "UNKNOWN",
-        "checks_verdict": "UNKNOWN",
-        "evidence_completeness": "INCOMPLETE",
-        "replay_readiness_now": _readiness_state(state),
-        "heartbeat_now": _NOT_EVALUATED,
-    }
-    for row in rows:
-        row.update({**summary, **row, "run_verdict": state})
-    trust = {
-        "processing_status": "UNKNOWN",
-        "trust_status": state,
-        "reasons_text": reason,
-        "reasons_display": display_reason(reason),
-        "reasons_count": None,
-        "trust_reasons_action": "Not assessed",
-        "evidence_observed_at": None,
-    }
-    return {
-        **summary,
-        "summary": [summary],
-        "presentation_summary": [
-            {
-                **summary,
-                "pipeline": "No run selected",
-                "run_id": "—",
-                "execution_state": _SELECT_RUN,
-                "evidence_completeness": _SELECT_RUN,
-            }
-            if summary["verdict"] == _SELECT_RUN
-            else summary
-        ],
-        "presentation_trust": [
-            {
-                **trust,
-                "processing_status": _SELECT_RUN,
-                "reasons_display": "Choose a run",
-            }
-            if summary["verdict"] == _SELECT_RUN
-            else trust
-        ],
-        "domains": rows,
-        "reconciliation_display": unavailable_reconciliation(reason),
-        "presentation_domains": presentation_rows(rows, selection=state == _SELECT_RUN),
-        "provider_checks": [
-            {
-                "provider": "—",
-                "check_result": state,
-                "evidence": reason,
-                "observed_at": None,
-            }
-        ],
-        "provider_options": [],
-        "quality_evidence": {"pipeline": pipeline, "funnel": None},
-        "rows": rows,
-        "trust": [trust],
-        **_readiness_fields(
-            empty_replay_readiness(
-                pipeline=pipeline,
-                run_id=run_id,
-                verdict=_readiness_state(state),
-                reason=reason,
-            )
-        ),
-        **project_stage_diagnostics(None, request_state=state, request_reason=reason),
-    }
-
-
-def _readiness_state(state: str) -> str:
-    if state == _SELECT_RUN:
-        return _SELECT_RUN
-    if state == _QUERY_ERROR:
-        return _QUERY_ERROR
-    return INSUFFICIENT
+_NO_RUNS = NO_RUNS_STATUS
 
 
 def _present_status(
@@ -190,42 +96,26 @@ def _present_status(
         if row["domain"] == _CONTROL_PLANE:
             row["reason_display"] = trust["reasons_display"] or "No saved Trust reasons"
             row["display_verdict"] = trust["trust_status"]
-    return {
-        **summary,
-        "summary": [summary],
-        "presentation_summary": [
-            {
-                **summary,
-                "pipeline": "No run selected",
-                "run_id": "—",
-                "execution_state": _SELECT_RUN,
-                "evidence_completeness": _SELECT_RUN,
-            }
-            if summary["verdict"] == _SELECT_RUN
-            else summary
-        ],
-        "presentation_trust": [
-            {
-                **trust,
-                "processing_status": _SELECT_RUN,
-                "reasons_display": "Choose a run",
-            }
-            if summary["verdict"] == _SELECT_RUN
-            else trust
-        ],
-        "domains": rows,
-        "presentation_domains": presentation_rows(rows),
-        "provider_checks": provider_check_rows(report),
-        "provider_options": provider_selector_options(report),
-        "quality_evidence": {
-            "pipeline": summary["pipeline"],
-            "funnel": report.get("funnel"),
-        },
-        "rows": rows,
-        "trust": [trust],
-        **readiness_fields,
-        **project_stage_diagnostics(report),
-    }
+    return attach_contract_fields(
+        {
+            **summary,
+            "summary": [summary],
+            "presentation_summary": [summary],
+            "presentation_trust": [trust],
+            "domains": rows,
+            "presentation_domains": presentation_rows(rows),
+            "provider_checks": provider_check_rows(report),
+            "provider_options": provider_selector_options(report),
+            "quality_evidence": {
+                "pipeline": summary["pipeline"],
+                "funnel": report.get("funnel"),
+            },
+            "rows": rows,
+            "trust": [trust],
+            **readiness_fields,
+            **project_stage_diagnostics(report),
+        }
+    )
 
 
 def _load_saved_assessment(
@@ -256,9 +146,13 @@ def load_selected_run_status(
     manifest_port: object | None = None,
     store: RunReportStorePort | None = None,
 ) -> dict[str, object]:
-    """Load and revalidate the exact report, revision and bound identity each time."""
-    if run_id in {"", "-", "All", "$__all"}:
-        return unavailable_status(pipeline, run_id, _SELECT_RUN, "selection_required")
+    """Load and revalidate the exact report, revision and bound identity each time.
+
+    Unresolved ``run_id`` sentinels are A2 empty-catalog gaps («НЕТ ЗАПУСКОВ»)
+    when called without a prior auto-select. HTTP handling resolves latest first.
+    """
+    if is_unresolved_run_id(run_id):
+        return unavailable_status(pipeline, "-", _NO_RUNS, NO_RUNS_REASON)
     try:
         selected_pipeline = _selected_pipeline(pipeline, run_id, root, store)
     except ValueError as exc:
@@ -359,34 +253,95 @@ def _merge_active_diagnostics(
     return merged
 
 
+def _resolve_a2_run_id(
+    host: _HealthObservabilityRoutingHost,
+    *,
+    pipeline: str,
+    query: dict[str, str],
+) -> str | dict[str, object]:
+    """Return concrete run_id or an unavailable payload for A2 auto-select."""
+    if host._run_manifest_port is None:
+        return unavailable_status(
+            pipeline, "-", _QUERY_ERROR, CATALOG_UNAVAILABLE_REASON
+        )
+    manifests, workflow_manifests = list_a2_catalog(
+        host._run_manifest_port,
+        getattr(host, "_workflow_manifest_port", None),
+    )
+    latest = resolve_a2_latest_run_id(
+        manifests=manifests,
+        ledger_port=host._run_ledger_port,
+        workflow_manifests=workflow_manifests,
+        pipeline=pipeline,
+        query=query,
+        report_store=getattr(host, "_run_report_store", None),
+    )
+    if latest is None:
+        return unavailable_status(pipeline, "-", _NO_RUNS, NO_RUNS_REASON)
+    return latest
+
+
+def _load_selected_with_live_fallback(
+    host: _HealthObservabilityRoutingHost,
+    *,
+    pipeline: str,
+    run_id: str,
+    query: dict[str, str],
+    skip_scope_check: bool,
+) -> dict[str, object]:
+    result = load_selected_run_status(
+        pipeline=pipeline,
+        run_id=run_id,
+        manifest_port=host._run_manifest_port,
+        store=host._run_report_store,
+    )
+    if result.get("reason") == "run_not_found":
+        # URL/explicit run_id stays bound; never substitute a different latest.
+        active = active_run_diagnostics(host, pipeline, run_id)
+        if active is not None:
+            result = _merge_active_diagnostics(active, pipeline=pipeline, run_id=run_id)
+    if skip_scope_check:
+        return result
+    state = result.get("execution_state")
+    if state not in {None, "UNKNOWN"} and not scope_matches(result, query):
+        return unavailable_status(
+            pipeline, run_id, "ERROR", "selector_context_mismatch"
+        )
+    return result
+
+
 async def handle_selected_run_status(
     host: _HealthObservabilityRoutingHost,
     writer: asyncio.StreamWriter,
     query: dict[str, str],
 ) -> None:
-    """Bound blocking reads and preserve explicit query errors for Grafana."""
+    """Bound blocking reads and preserve explicit query errors for Grafana.
+
+    Mode A2: unresolved ``run_id`` auto-selects latest in scope; empty catalog
+    returns «НЕТ ЗАПУСКОВ». An explicit URL ``run_id`` wins over auto-select.
+    Missing manifest catalog is QUERY ERROR, not an empty catalog.
+    """
     pipeline = host._read_required_param(query, "pipeline")
-    run_id = host._read_optional_param(query, "run_id") or "-"
+    requested_run_id = host._read_optional_param(query, "run_id") or "-"
 
     def load() -> dict[str, object]:
-        result = load_selected_run_status(
+        run_id = requested_run_id
+        a2_resolved = False
+        if is_unresolved_run_id(run_id):
+            resolved = _resolve_a2_run_id(host, pipeline=pipeline, query=query)
+            if isinstance(resolved, dict):
+                return resolved
+            run_id = resolved
+            a2_resolved = True
+        # A2 catalog membership already enforced filters (incl. workflow aliases);
+        # do not re-reject via report.workflow_id vs Grafana workflow alias.
+        return _load_selected_with_live_fallback(
+            host,
             pipeline=pipeline,
             run_id=run_id,
-            manifest_port=host._run_manifest_port,
-            store=host._run_report_store,
+            query=query,
+            skip_scope_check=a2_resolved,
         )
-        if result.get("reason") == "run_not_found":
-            active = active_run_diagnostics(host, pipeline, run_id)
-            if active is not None:
-                result = _merge_active_diagnostics(
-                    active, pipeline=pipeline, run_id=run_id
-                )
-        state = result.get("execution_state")
-        if state not in {None, "UNKNOWN"} and not scope_matches(result, query):
-            return unavailable_status(
-                pipeline, run_id, "ERROR", "selector_context_mismatch"
-            )
-        return result
 
     try:
         payload = await run_bounded_forensic_operation(
@@ -395,9 +350,13 @@ async def handle_selected_run_status(
             endpoint="selected-run-status",
         )
     except ForensicEndpointUnavailable as exc:
-        payload = unavailable_status(pipeline, run_id, _QUERY_ERROR, exc.reason)
+        payload = unavailable_status(
+            pipeline, requested_run_id, _QUERY_ERROR, exc.reason
+        )
         if exc.request_id is not None:
             payload["request_id"] = exc.request_id
-    except (OSError, RuntimeError, ValueError):
-        payload = unavailable_status(pipeline, run_id, _QUERY_ERROR, "request_failed")
+    except (KeyError, OSError, RuntimeError, ValueError):
+        payload = unavailable_status(
+            pipeline, requested_run_id, _QUERY_ERROR, "request_failed"
+        )
     await host._send_payload_response(writer, 200, payload)

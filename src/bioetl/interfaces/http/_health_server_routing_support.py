@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import asyncio
-from functools import partial
 
-from bioetl.domain.control_plane import WorkflowManifest
+from bioetl.domain.control_plane import RunManifest, WorkflowManifest
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
     forensic_unavailable_payload,
@@ -19,6 +18,9 @@ from bioetl.interfaces.http._health_server_control_plane_evidence_routing import
 )
 from bioetl.interfaces.http._health_server_control_plane_scope import (
     read_selected_run_id,
+)
+from bioetl.interfaces.http._health_server_filter_options_payload import (
+    build_filter_options_payload as _build_filter_options_payload,
 )
 from bioetl.interfaces.http._health_server_identity_routing_support import (
     handle_control_plane_identity_evidence,
@@ -34,21 +36,21 @@ from bioetl.interfaces.http._health_server_quarantine_routing import (
     dispatch_quarantine_request,
 )
 from bioetl.interfaces.http._report_selector_options import (
-    load_report_selector_entries,
-    supplement_report_options,
+    verified_report_identity_for_run,
 )
+from bioetl.interfaces.http._selected_run_a2_resolve import resolve_a2_latest_run_id
 from bioetl.interfaces.http._selector_catalog import (
     SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
 )
 from bioetl.interfaces.http.control_plane_selector_context import (
     RUN_ID_NO_SELECTION,
-    RunIdOptionPolicy,
     build_selector_context_payload,
     build_selector_filter_options_payload,
 )
 
 _NOT_FOUND_MESSAGE = "Not Found"
 _FILTER_OPTIONS_TIMEOUT_SECONDS = 20.0
+_SELECTOR_CONTEXT_ENDPOINT = "/ops/control-plane/selector-context"
 _CONTROL_PLANE_CLIENT_ERRORS = (ValueError, RuntimeError, OSError, ConnectionError)
 
 
@@ -174,80 +176,25 @@ async def _filter_options_payload(
     host: _HealthRoutingHost,
     query: dict[str, str],
 ) -> dict[str, object]:
-    """Build options without writing after the caller's deadline expires."""
-    manifest_port = host._run_manifest_port
-    assert manifest_port is not None
-    dimension = host._read_optional_param(query, "dimension") or "run_id"
-    requested_pipeline = (
-        host._read_required_param(query, "pipeline")
-        if dimension == "run_id"
-        else host._read_optional_param(query, "pipeline")
-    )
-    selected_pipelines = host._read_scope_csv_param(query, "pipeline")
-    selected_workflows = host._read_scope_csv_param(query, "workflow")
-    selected_run_types = host._read_scope_csv_param(query, "run_type")
-    selected_run_statuses = host._read_scope_csv_param(query, "run_status")
-    selected_run_id = read_selected_run_id(host, query)
-    response_shape = host._read_optional_param(query, "response_shape") or "object"
+    """Build filter options using the injected selector-catalog builders."""
     exact_run_only = _read_truthy_query_param(query, "exact_run_only")
-    fallback_value = host._read_optional_param(query, "fallback_value")
-
-    scopes = {
-        "workflow": selected_workflows,
-        "pipeline": selected_pipelines,
-        "run_type": selected_run_types,
-        "run_status": selected_run_statuses,
-        "run_id": (selected_run_id,) if selected_run_id else (),
-    }
+    selected_run_id = read_selected_run_id(host, query)
     include_reports = not exact_run_only or selected_run_id is not None
-
-    async def manifest_options() -> dict[str, object]:
-        manifests, workflow_manifests = await host._selector_catalog.read(
-            manifest_port,
-            host._workflow_manifest_port,
-        )
-        return await asyncio.to_thread(
-            build_selector_filter_options_payload,
-            manifests=manifests,
-            ledger_port=host._run_ledger_port,
-            workflow_manifests=workflow_manifests,
-            dimension=dimension,
-            response_shape=response_shape,
-            requested_pipeline=requested_pipeline,
-            selected_workflows=selected_workflows,
-            selected_pipelines=selected_pipelines,
-            selected_run_types=selected_run_types,
-            selected_run_statuses=selected_run_statuses,
-            selected_run_id=selected_run_id,
-            run_id_policy=RunIdOptionPolicy(
-                exact_run_only=exact_run_only,
-                fallback_value=fallback_value,
-            ),
-            timezone=query.get("timezone") or "UTC",
-        )
-
-    manifest_task = asyncio.create_task(manifest_options())
-    report_task = asyncio.create_task(
-        host._selector_catalog.read_reports(
-            scopes, partial(load_report_selector_entries, store=host._run_report_store)
-        )
-        if include_reports
-        else asyncio.sleep(0, result=[]),
-    )
-    await asyncio.gather(manifest_task, report_task, return_exceptions=True)
-    payload, report_entries = manifest_task.result(), report_task.result()
     if include_reports:
-        payload = await asyncio.to_thread(
-            supplement_report_options,
-            payload,
-            timezone=query.get("timezone") or "UTC",
-            dimension=dimension,
-            response_shape=response_shape,
-            scopes=scopes,
-            entries=report_entries,
+        return await _build_filter_options_payload(
+            host,
+            query,
+            options_builder=build_selector_filter_options_payload,
+            add_run_id_items=_add_run_id_items,
+            include_reports=True,
         )
-    _add_run_id_items(payload, response_shape=response_shape, dimension=dimension)
-    return payload
+    return await _build_filter_options_payload(
+        host,
+        query,
+        options_builder=build_selector_filter_options_payload,
+        add_run_id_items=_add_run_id_items,
+        include_reports=False,
+    )
 
 
 def _add_run_id_items(
@@ -275,26 +222,129 @@ def _read_truthy_query_param(query: dict[str, str], name: str) -> bool:
     return value.strip().lower() in {"1", "true", "yes"}
 
 
+def _selector_context_payload_with_a2(
+    host: _HealthRoutingHost,
+    *,
+    manifests: tuple[RunManifest, ...],
+    workflow_manifests: tuple[WorkflowManifest, ...],
+    query: dict[str, str],
+) -> dict[str, object]:
+    """Build selector-context, resolving unresolved run_id via shared A2 catalog.
+
+    Report identity is loaded for both auto and explicit run_id so report-only
+    UUIDs keep a concrete ``selected.run_id`` / ``selected.pipeline``. When A2
+    returns ``None`` for a strict workflow scope, empty selected is preserved
+    (no pipeline-alias re-pick).
+    """
+    selected_workflows = host._read_scope_csv_param(query, "workflow")
+    selected_pipelines = host._read_scope_csv_param(query, "pipeline")
+    selected_run_types = host._read_scope_csv_param(query, "run_type")
+    selected_run_statuses = host._read_scope_csv_param(query, "run_status")
+    explicit_run_id = read_selected_run_id(host, query)
+    auto_selected_run_id: str | None = None
+    report_selected: dict[str, object] | None = None
+    report_store = getattr(host, "_run_report_store", None)
+    report_scopes = {
+        "workflow": selected_workflows,
+        "pipeline": selected_pipelines,
+        "run_type": selected_run_types,
+        "run_status": selected_run_statuses,
+        "run_id": (),
+    }
+    a2_consulted = explicit_run_id is None
+    if a2_consulted:
+        pipeline = (
+            selected_pipelines[0]
+            if len(selected_pipelines) == 1
+            else (host._read_optional_param(query, "pipeline") or "All")
+        )
+        a2_query = {
+            "workflow": query.get("workflow", ""),
+            "pipeline": query.get("pipeline", ""),
+            "run_type": query.get("run_type", ""),
+            "run_status": query.get("run_status", ""),
+        }
+        auto_selected_run_id = resolve_a2_latest_run_id(
+            manifests=manifests,
+            ledger_port=host._run_ledger_port,
+            workflow_manifests=workflow_manifests,
+            pipeline=pipeline,
+            query=a2_query,
+            report_store=report_store,
+        )
+        if auto_selected_run_id is not None:
+            report_selected = verified_report_identity_for_run(
+                auto_selected_run_id,
+                report_scopes,
+                store=report_store,
+            )
+    elif explicit_run_id is not None:
+        report_selected = verified_report_identity_for_run(
+            explicit_run_id,
+            report_scopes,
+            store=report_store,
+        )
+    return build_selector_context_payload(
+        manifests=manifests,
+        ledger_port=host._run_ledger_port,
+        workflow_manifests=workflow_manifests,
+        selected_workflows=selected_workflows,
+        selected_pipelines=selected_pipelines,
+        selected_run_types=selected_run_types,
+        selected_run_statuses=selected_run_statuses,
+        selected_run_id=explicit_run_id,
+        auto_selected_run_id=auto_selected_run_id,
+        report_selected=report_selected,
+        a2_consulted=a2_consulted,
+    )
+
+
+async def _selector_context_bounded_payload(
+    host: _HealthRoutingHost,
+    query: dict[str, str],
+) -> dict[str, object]:
+    """Build selector-context under the caller's forensic deadline."""
+    assert host._run_manifest_port is not None
+    manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
+    workflow_manifests = await _list_workflow_manifests(host)
+    return await asyncio.to_thread(
+        _selector_context_payload_with_a2,
+        host,
+        manifests=manifests,
+        workflow_manifests=workflow_manifests,
+        query=query,
+    )
+
+
 async def handle_control_plane_selector_context(
     host: _HealthRoutingHost,
     writer: asyncio.StreamWriter,
     query: dict[str, str],
 ) -> None:
-    """Resolve a coherent selector tuple for dashboard selector shells."""
-    assert host._run_manifest_port is not None
-    manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
-    workflow_manifests = await _list_workflow_manifests(host)
-    payload = await asyncio.to_thread(
-        build_selector_context_payload,
-        manifests=manifests,
-        ledger_port=host._run_ledger_port,
-        workflow_manifests=workflow_manifests,
-        selected_workflows=host._read_scope_csv_param(query, "workflow"),
-        selected_pipelines=host._read_scope_csv_param(query, "pipeline"),
-        selected_run_types=host._read_scope_csv_param(query, "run_type"),
-        selected_run_statuses=host._read_scope_csv_param(query, "run_status"),
-        selected_run_id=read_selected_run_id(host, query),
-    )
+    """Resolve a coherent selector tuple for dashboard selector shells.
+
+    Unresolved ``run_id`` (``-`` / omitted) is resolved to the same A2 latest
+    as selected-run-status, including saved report-only runs, so Grafana panels
+    that read ``selected.run_id`` stay in sync with the status panel.
+    """
+    try:
+        payload = await run_bounded_forensic_operation(
+            limiter=host._selector_endpoint_limiter,
+            operation_factory=lambda: _selector_context_bounded_payload(host, query),
+            timeout_seconds=_FILTER_OPTIONS_TIMEOUT_SECONDS,
+            queue_timeout_seconds=SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
+            endpoint=_SELECTOR_CONTEXT_ENDPOINT,
+        )
+    except ForensicEndpointUnavailable as exc:
+        await host._send_payload_response(
+            writer,
+            exc.status_code,
+            forensic_unavailable_payload(
+                endpoint=_SELECTOR_CONTEXT_ENDPOINT,
+                reason=exc.reason,
+            ),
+        )
+        return
     await host._send_payload_response(writer, 200, payload)
 
 
@@ -336,7 +386,7 @@ async def _dispatch_ops_endpoints(
         return True
     handlers = {
         "/ops/control-plane/filter-options": handle_control_plane_filter_options,
-        "/ops/control-plane/selector-context": handle_control_plane_selector_context,
+        _SELECTOR_CONTEXT_ENDPOINT: handle_control_plane_selector_context,
         "/ops/control-plane/identity-table": handle_control_plane_identity_table,
         "/ops/control-plane/identity-evidence": handle_control_plane_identity_evidence,
         "/ops/control-plane/checkpoint-freshness": handle_control_plane_checkpoint_freshness,

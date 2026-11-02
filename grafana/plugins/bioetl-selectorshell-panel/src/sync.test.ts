@@ -93,6 +93,21 @@ describe('selector shell sync helpers', () => {
     });
   });
 
+  it('applies A2 last-run defaults including var-run_id', () => {
+    const current: VisibleSelectorState = {
+      workflow: 'All',
+      pipeline: 'unknown',
+      runType: 'backfill',
+      runId: '-',
+    };
+    const payload = buildPayload({}, 'latest_a2_for_scope');
+    expect(buildNextShellUpdate(current, payload, { allowLastRunDefaults: true })).toEqual({
+      'var-workflow': 'chembl_target',
+      'var-pipeline': 'chembl_target',
+      'var-run_id': 'run-123',
+    });
+  });
+
   it('does not apply last-run defaults when allow flag is off', () => {
     const current: VisibleSelectorState = {
       workflow: 'All',

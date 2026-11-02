@@ -1293,7 +1293,7 @@ class TestHealthServerControlPlaneSelector:
         assert status_code == 200
         data = json.loads(body)
         assert data["contract"] == "control_plane_selector_context_v1"
-        assert data["resolved_via"] == "latest_terminal_run_for_scope"
+        assert data["resolved_via"] == "latest_a2_for_scope"
         assert data["selected"]["pipeline"] == "chembl_activity"
         assert data["selected"]["run_type"] == "backfill"
         assert data["selected"]["run_id"] == str(latest_manifest.run_id)
