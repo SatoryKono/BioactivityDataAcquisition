@@ -25684,6 +25684,16 @@
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
+      "module": "bioetl.interfaces.http._selected_run_status_cache",
+      "path": "src/bioetl/interfaces/http/_selected_run_status_cache.py",
+      "source_lines": 176
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.interfaces.http._selected_run_unavailable",
       "path": "src/bioetl/interfaces/http/_selected_run_unavailable.py",
       "source_lines": 161
@@ -51696,6 +51706,16 @@
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
+      "module": "bioetl.interfaces.http._selected_run_status_cache",
+      "path": "src/bioetl/interfaces/http/_selected_run_status_cache.py",
+      "source_lines": 176
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.interfaces.http._selected_run_unavailable",
       "path": "src/bioetl/interfaces/http/_selected_run_unavailable.py",
       "source_lines": 161
@@ -52190,18 +52210,18 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2601,
+    "source_module_count": 2602,
     "status_counts": {
       "coverage_xml_missing": 9,
       "fully_covered": 2517,
       "no_executable_lines": 2,
       "partially_covered": 67,
       "uncovered": 0,
-      "unmeasured": 6
+      "unmeasured": 7
     },
     "uncovered_module_count": 0,
     "uncovered_modules": [],
-    "unmeasured_module_count": 6,
+    "unmeasured_module_count": 7,
     "unmeasured_modules": [
       {
         "module": "bioetl.application.services.control_plane.effective_config.config_source_hashing",
@@ -52226,6 +52246,11 @@
       {
         "module": "bioetl.interfaces.http._selected_run_a2_resolve",
         "path": "src/bioetl/interfaces/http/_selected_run_a2_resolve.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.interfaces.http._selected_run_status_cache",
+        "path": "src/bioetl/interfaces/http/_selected_run_status_cache.py",
         "reason": "coverage_xml_has_no_class_entry"
       },
       {
