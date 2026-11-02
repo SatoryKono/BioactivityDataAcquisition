@@ -29,7 +29,7 @@ def test_collect_metric_inventory_rebuilds_after_public_call(
     reports = iter([{"observed": 1}, {"observed": 2}])
     calls = 0
 
-    def collect(_repo_root: Path) -> dict[str, int]:
+    def collect(_repo_root: Path, **_kwargs: object) -> dict[str, int]:
         nonlocal calls
         calls += 1
         return next(reports)

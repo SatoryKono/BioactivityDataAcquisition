@@ -2,9 +2,22 @@
 
 from __future__ import annotations
 
-from bioetl.infrastructure.observability import (
-    metric_inventory_events as _metric_inventory_events,
+from bioetl.infrastructure.observability.metric_inventory_events import (
+    _declared_pipeline_event_names as _declared_pipeline_event_names,
+    _load_retired_observability_event_names as _load_retired_observability_event_names,
+    _resolve_observability_event_expr as _resolve_observability_event_expr,
+    _scan_domain_mapping_observability_events as _scan_domain_mapping_observability_events,
+    _collect_emit_event_names as _collect_emit_event_names,
+    _scan_path_for_runtime_event_calls as _scan_path_for_runtime_event_calls,
+    _scan_runtime_observability_event_calls as _scan_runtime_observability_event_calls,
+    _load_runtime_cardinality_thresholds as _load_runtime_cardinality_thresholds,
+    _sample_matches_metric as _sample_matches_metric,
+    _observed_labelsets_for_metric as _observed_labelsets_for_metric,
+    _observed_runtime_series_counts as _observed_runtime_series_counts,
+    _runtime_cardinality_evidence_rows as _runtime_cardinality_evidence_rows,
+    _runtime_cardinality_threshold_violations as _runtime_cardinality_threshold_violations,
 )
+
 
 import ast
 import json
@@ -52,104 +65,10 @@ from scripts.engineering.qa.observability_metric_inventory_shared import (
 REGISTERED_PROMETHEUS_METRIC_LABELS: dict[str, frozenset[str]] = {}
 
 
-_declared_pipeline_event_names = _metric_inventory_events._declared_pipeline_event_names
-
-
-_load_retired_observability_event_names = (
-    _metric_inventory_events._load_retired_observability_event_names
-)
-
-
-def _resolve_observability_event_expr(node: ast.expr) -> set[str]:
-    if isinstance(node, ast.Constant) and isinstance(node.value, str):
-        return {node.value}
-    if (
-        isinstance(node, ast.Attribute)
-        and isinstance(node.value, ast.Name)
-        and node.value.id == "PipelineEvent"
-    ):
-        resolved = getattr(PipelineEvent, node.attr, None)
-        return {resolved} if isinstance(resolved, str) else set()
-    if (
-        isinstance(node, ast.Call)
-        and isinstance(node.func, ast.Attribute)
-        and isinstance(node.func.value, ast.Name)
-        and node.func.value.id == "PipelineEvent"
-        and node.func.attr in {"phase_started", "phase_completed"}
-    ):
-        resolver = (
-            PipelineEvent.phase_started
-            if node.func.attr == "phase_started"
-            else PipelineEvent.phase_completed
-        )
-        if (
-            node.args
-            and isinstance(node.args[0], ast.Constant)
-            and isinstance(node.args[0].value, str)
-        ):
-            return {resolver(node.args[0].value)}
-        return {resolver(stage_name) for stage_name in ORDINARY_PIPELINE_STAGE_NAMES}
-    return set()
-
-
-_scan_domain_mapping_observability_events = (
-    _metric_inventory_events._scan_domain_mapping_observability_events
-)
-
-
-_collect_emit_event_names = _metric_inventory_events._collect_emit_event_names
-
-
-_scan_path_for_runtime_event_calls = (
-    _metric_inventory_events._scan_path_for_runtime_event_calls
-)
-
-
-_scan_runtime_observability_event_calls = (
-    _metric_inventory_events._scan_runtime_observability_event_calls
-)
-
-
-_load_runtime_cardinality_thresholds = (
-    _metric_inventory_events._load_runtime_cardinality_thresholds
-)
-
-
-_sample_matches_metric = _metric_inventory_events._sample_matches_metric
-
-
-def _observed_labelsets_for_metric(
-    metric: Any, metric_name: str
-) -> set[tuple[tuple[str, str], ...]]:
-    observed_labelsets: set[tuple[tuple[str, str], ...]] = set()
-    for family in metric.collect():
-        for sample in family.samples:
-            if not _sample_matches_metric(str(sample.name), metric_name):
-                continue
-            observed_labelsets.add(
-                tuple(sorted((str(k), str(v)) for k, v in sample.labels.items()))
-            )
-    return observed_labelsets
-
-
-_observed_runtime_series_counts = (
-    _metric_inventory_events._observed_runtime_series_counts
-)
-
-
-_runtime_cardinality_evidence_rows = (
-    _metric_inventory_events._runtime_cardinality_evidence_rows
-)
-
-
-_runtime_cardinality_threshold_violations = (
-    _metric_inventory_events._runtime_cardinality_threshold_violations
-)
-
-
 def _resolve_prometheus_base_url(
     explicit_base_url: str | None,
 ) -> tuple[str | None, str]:
+    """Resolve CLI/environment settings at the engineering boundary only."""
     if explicit_base_url and explicit_base_url.strip():
         return explicit_base_url.strip().rstrip("/"), "cli"
     env_base_url = os.getenv(_PROMETHEUS_BASE_URL_ENV_VAR, "").strip()

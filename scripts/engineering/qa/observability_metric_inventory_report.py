@@ -1,13 +1,20 @@
 """Typed target analysis and report helpers for observability inventory."""
 
 from __future__ import annotations
+from bioetl.infrastructure.observability.metric_inventory_assembly import (
+    _filter_declared_label_contract_metrics as _filter_declared_label_contract_metrics,
+)
 
-from bioetl.infrastructure.observability import (
-    metric_inventory_assembly as _metric_inventory_assembly,
+
+from bioetl.infrastructure.observability.metric_inventory_report import (
+    _looks_like_metric_family_name as _looks_like_metric_family_name,
+    _is_generated_prometheus_series as _is_generated_prometheus_series,
+    _filter_documented_metric_mentions as _filter_documented_metric_mentions,
+    _scan_rule_metric_mentions as _scan_rule_metric_mentions,
+    _extract_rule_metric_names as _extract_rule_metric_names,
+    _drift_allowlist_token as _drift_allowlist_token,
 )
-from bioetl.infrastructure.observability import (
-    metric_inventory_report as _metric_inventory_report,
-)
+
 
 import ast
 import json
@@ -684,30 +691,3 @@ def collect_typed_observability_inventory(repo_root: Path) -> dict[str, object]:
         catalog_aliases=_catalog_policy_aliases(repo_root),
         registered_runtime_metrics=set(_scan_registered_metric_names(repo_root)),
     )
-
-
-_filter_declared_label_contract_metrics = (
-    _metric_inventory_assembly._filter_declared_label_contract_metrics
-)
-
-
-_looks_like_metric_family_name = _metric_inventory_report._looks_like_metric_family_name
-
-
-_is_generated_prometheus_series = (
-    _metric_inventory_report._is_generated_prometheus_series
-)
-
-
-_filter_documented_metric_mentions = (
-    _metric_inventory_report._filter_documented_metric_mentions
-)
-
-
-_scan_rule_metric_mentions = _metric_inventory_report._scan_rule_metric_mentions
-
-
-_extract_rule_metric_names = _metric_inventory_report._extract_rule_metric_names
-
-
-_drift_allowlist_token = _metric_inventory_report._drift_allowlist_token
