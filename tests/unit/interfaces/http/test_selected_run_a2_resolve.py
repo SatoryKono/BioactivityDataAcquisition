@@ -307,7 +307,7 @@ def test_declared_workflow_beats_pipeline_wide_aliases() -> None:
 
 
 def test_alias_fallback_when_run_has_no_declared_workflow() -> None:
-    undeclared = _manifest(3)  # no launch_context workflow
+    undeclared = _manifest(3)  # no launch_context / top-level workflow
     workflows = (_workflow("chembl_assay", index=52),)
     latest = resolve_a2_latest_run_id(
         manifests=(undeclared,),
