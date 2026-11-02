@@ -38,7 +38,6 @@ Cassettes location: tests/fixtures/vcr/chembl/
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncIterator
 from typing import NoReturn
 
 from pathlib import Path
@@ -53,6 +52,16 @@ from .conftest import (
     assert_silver_table_has_records,
     create_test_context,
     get_silver_records,
+)
+from ._pipeline_restart_helpers import (
+    aba_restart_marks,
+    batch_processing_service,
+    bootstrap_target_runner,
+    cancel_after_first_record,
+    failing_extract_records,
+    gated_extract_factory,
+    patched_extract_records,
+    run_molecule_then_target_and_assert,
 )
 
 # Large multi-entity VCR chains (10–29 MiB) stay out of default -m "not slow".
@@ -298,175 +307,61 @@ async def test_rerun_same_pipeline_twice(e2e_data_dir: Path) -> None:
     assert second_identity == first_identity, "Merge rerun changed identity set"
 
 
-def _aba_restart_marks(test_fn: object) -> object:
-    """Shared marks for single-process Target→Molecule→Target restart scenarios."""
-    for mark in (
-        pytest.mark.e2e,
-        pytest.mark.vcr(allow_playback_repeats=True),
-        pytest.mark.asyncio,
-        pytest.mark.timeout(E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT),
-    ):
-        test_fn = mark(test_fn)
-    return test_fn
-
-
-def _batch_processing_service(runner: object) -> object:
-    """Return the runner's batch extraction service (test seam for inject/cancel)."""
-    return runner._executor._extraction_loop_service._batch_processing_service  # type: ignore[attr-defined]  # pylint: disable=protected-access
-
-
-async def _run_molecule_then_target_and_assert(
-    e2e_data_dir: Path,
-    *,
-    require_a2_records_fetched: bool = False,
-    a2_fetch_message: str = "A2 fetched no Target records",
-) -> None:
-    """Shared B→A2 restart path plus silver presence checks for Target and Molecule."""
-    ctx_b = create_test_context("chembl_molecule", limit=2)
-    runner_b = bootstrap_pipeline_runner(ctx_b)
-    await runner_b.run()
-
-    ctx2 = create_test_context("chembl_target", limit=2)
-    runner2 = bootstrap_pipeline_runner(ctx2)
-    await runner2.run()
-    if require_a2_records_fetched:
-        assert runner2.execution_metrics["records_fetched"] > 0, a2_fetch_message
-
-    await assert_silver_table_has_records(e2e_data_dir, "chembl_target", expected_min=1)
-    await assert_silver_table_has_records(
-        e2e_data_dir, "chembl_molecule", expected_min=1
-    )
-
-
-@_aba_restart_marks
+@aba_restart_marks
 async def test_run_normal_a_b_a(e2e_data_dir: Path) -> None:
-    """E2E: Normal pipeline runs in A -> B -> A pattern in a single process.
-
-    Verifies state isolation between runs in the same process.
-    """
-    ctx1 = create_test_context("chembl_target", limit=2)
-    runner1 = bootstrap_pipeline_runner(ctx1)
-    await runner1.run()
-
-    await _run_molecule_then_target_and_assert(
+    """E2E: Normal pipeline runs in A -> B -> A pattern in a single process."""
+    runner1 = bootstrap_target_runner(limit=2)
+    await runner1.run()  # type: ignore[attr-defined]
+    await run_molecule_then_target_and_assert(
         e2e_data_dir,
         require_a2_records_fetched=True,
-        a2_fetch_message="A2 fetched no Target records",
     )
 
 
-@_aba_restart_marks
+@aba_restart_marks
 async def test_run_cancellation_and_restart(
     e2e_data_dir: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """E2E: Pipeline cancellation followed by restart in a single process.
-
-    Verifies A -> B -> A pattern and cancellation safety.
-    """
-    # Pause after the source yields its first record so cancellation lands inside
-    # the active extraction path.
-    ctx1 = create_test_context("chembl_target", limit=2)
-    runner1 = bootstrap_pipeline_runner(ctx1)
-    source = _batch_processing_service(runner1)
-    original_extract = source.extract_records  # type: ignore[attr-defined]
+    """E2E: cancel Target mid-extract, then Molecule → Target restart."""
+    runner1 = bootstrap_target_runner(limit=2)
+    source = batch_processing_service(runner1)
     first_record_ready = asyncio.Event()
     continue_extraction = asyncio.Event()
-
-    def gated_extract_records(*args: object, **kwargs: object) -> AsyncIterator[object]:
-        records = original_extract(*args, **kwargs)
-
-        async def gate_first_record() -> AsyncIterator[object]:
-            iterator = aiter(records)
-            try:
-                first_record = await anext(iterator)
-                first_record_ready.set()
-                await continue_extraction.wait()
-                yield first_record
-                async for record in iterator:
-                    yield record
-            finally:
-                aclose = getattr(iterator, "aclose", None)
-                if callable(aclose):
-                    await aclose()
-
-        return gate_first_record()
-
-    monkeypatch.setattr(source, "extract_records", gated_extract_records)
-
-    task = asyncio.create_task(runner1.run())
-    first_record_waiter = asyncio.create_task(first_record_ready.wait())
-    try:
-        done, _ = await asyncio.wait(
-            {task, first_record_waiter},
-            timeout=30,
-            return_when=asyncio.FIRST_COMPLETED,
-        )
-        if first_record_waiter not in done:
-            if task in done:
-                task.result()
-            pytest.fail("Pipeline did not reach the first-record cancellation point")
-        if task in done:
-            task.result()
-            pytest.fail("Pipeline finished before reaching the cancellation point")
-        task.cancel()
-        with pytest.raises(asyncio.CancelledError):
-            await task
-    finally:
-        first_record_waiter.cancel()
-        await asyncio.gather(first_record_waiter, return_exceptions=True)
-        if not task.done():
-            task.cancel()
-        await asyncio.gather(task, return_exceptions=True)
-    monkeypatch.setattr(source, "extract_records", original_extract)
-
-    await _run_molecule_then_target_and_assert(e2e_data_dir)
+    gated = gated_extract_factory(
+        source.extract_records,  # type: ignore[attr-defined]
+        first_record_ready,
+        continue_extraction,
+    )
+    with patched_extract_records(runner1, monkeypatch, gated):
+        await cancel_after_first_record(runner1, first_record_ready)
+    await run_molecule_then_target_and_assert(e2e_data_dir)
 
 
-@_aba_restart_marks
+@aba_restart_marks
 async def test_run_error_and_restart(
     e2e_data_dir: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """E2E: Pipeline error followed by restart in a single process.
-
-    Verifies A -> B -> A pattern and error safety using a simulated network error
-    that propagates up the real execution path.
-    """
-    ctx1 = create_test_context("chembl_target", limit=3)
-    runner1 = bootstrap_pipeline_runner(ctx1)
-    source = _batch_processing_service(runner1)
-    original_extract = source.extract_records  # type: ignore[attr-defined]
-
-    def failing_extract_records(
-        *_args: object, **_kwargs: object
-    ) -> AsyncIterator[object]:
-        async def fail_during_iteration() -> AsyncIterator[object]:
-            if False:  # pragma: no cover - keeps this an async generator
-                yield None
-            raise RuntimeError("injected ChEMBL source failure")
-
-        return fail_during_iteration()
-
-    monkeypatch.setattr(source, "extract_records", failing_extract_records)
-
-    with pytest.raises(RuntimeError, match="injected ChEMBL source failure"):
-        await runner1.run()
-    monkeypatch.setattr(source, "extract_records", original_extract)
-
-    await _run_molecule_then_target_and_assert(e2e_data_dir)
+    """E2E: Target extract failure, then Molecule → Target restart."""
+    runner1 = bootstrap_target_runner(limit=3)
+    with patched_extract_records(runner1, monkeypatch, failing_extract_records):
+        with pytest.raises(RuntimeError, match="injected ChEMBL source failure"):
+            await runner1.run()  # type: ignore[attr-defined]
+    await run_molecule_then_target_and_assert(e2e_data_dir)
 
 
-@_aba_restart_marks
+@aba_restart_marks
 async def test_run_config_error_and_restart(e2e_data_dir: Path) -> None:
     """A config-load failure during bootstrap must not poison later runs."""
 
     def fail_config_load(_pipeline_name: str) -> NoReturn:
         raise RuntimeError("injected pipeline config load failure")
 
-    ctx1 = create_test_context("chembl_target", limit=2)
     with pytest.raises(RuntimeError, match="injected pipeline config load failure"):
-        bootstrap_pipeline_runner(ctx1, load_pipeline_config_fn=fail_config_load)
-
-    await _run_molecule_then_target_and_assert(
+        bootstrap_pipeline_runner(
+            create_test_context("chembl_target", limit=2),
+            load_pipeline_config_fn=fail_config_load,
+        )
+    await run_molecule_then_target_and_assert(
         e2e_data_dir,
         require_a2_records_fetched=True,
         a2_fetch_message=(
