@@ -13,6 +13,12 @@ from scripts.ops.observability.grafana import apply_phase4_dead_vars as phase4
 pytestmark = pytest.mark.unit
 
 
+def _write(tmp_path: Path, name: str, payload: dict) -> Path:
+    path = tmp_path / name
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    return path
+
+
 def test_drop_provider_and_pipeline_unknown(tmp_path: Path) -> None:
     payload = {
         "templating": {
@@ -29,9 +35,8 @@ def test_drop_provider_and_pipeline_unknown(tmp_path: Path) -> None:
         },
         "panels": [],
     }
-    path = tmp_path / "bioetl-dq-v2.json"
-    path.write_text(json.dumps(payload), encoding="utf-8")
-    removed, cleared = phase4.apply_file(path)
+    path = _write(tmp_path, phase4.FILE_DQ, payload)
+    removed, cleared = phase4.apply_file(path, dashboard_root=tmp_path)
     data = json.loads(path.read_text(encoding="utf-8"))
     names = [var["name"] for var in data["templating"]["list"]]
     assert "provider_for_pipeline" not in names
@@ -56,9 +61,8 @@ def test_clear_dangling_overview_fleet_repeat(tmp_path: Path) -> None:
             }
         ],
     }
-    path = tmp_path / "bioetl-overview-v2.json"
-    path.write_text(json.dumps(payload), encoding="utf-8")
-    removed, cleared = phase4.apply_file(path)
+    path = _write(tmp_path, phase4.FILE_OVERVIEW, payload)
+    removed, cleared = phase4.apply_file(path, dashboard_root=tmp_path)
     data = json.loads(path.read_text(encoding="utf-8"))
     panel = data["panels"][0]
     assert "repeat" not in panel
@@ -83,11 +87,16 @@ def test_keeps_incident_read_latency_quantile(tmp_path: Path) -> None:
             }
         ],
     }
-    path = tmp_path / "bioetl-incident-v1.json"
-    path.write_text(json.dumps(payload), encoding="utf-8")
-    removed, _ = phase4.apply_file(path)
+    path = _write(tmp_path, phase4.FILE_INCIDENT, payload)
+    removed, _ = phase4.apply_file(path, dashboard_root=tmp_path)
     data = json.loads(path.read_text(encoding="utf-8"))
     names = [var["name"] for var in data["templating"]["list"]]
     assert "read_latency_quantile" in names
     assert "provider_for_pipeline" not in names
     assert removed == ["provider_for_pipeline"]
+
+
+def test_apply_file_rejects_unexpected_basename(tmp_path: Path) -> None:
+    path = _write(tmp_path, "not-a-dashboard.json", {"templating": {"list": []}})
+    with pytest.raises(ValueError, match="unexpected dashboard file"):
+        phase4.apply_file(path, dashboard_root=tmp_path)

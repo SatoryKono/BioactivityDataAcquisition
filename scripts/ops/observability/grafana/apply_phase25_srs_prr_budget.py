@@ -45,7 +45,7 @@ DQ_STAGES = (
     "/d/bioetl-dq-v2/5-data-quality"
     "?${workflow:queryparam}&${pipeline:queryparam}"
     "&${run_type:queryparam}&${run_id:queryparam}"
-    "&var-stage=$__all&viewPanel=9460&${__url_time_range}"
+    "&viewPanel=9460&${__url_time_range}"
 )
 
 

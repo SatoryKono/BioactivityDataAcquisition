@@ -792,7 +792,7 @@ def _assert_cross_dashboard_link_policy(
         assert "${__data.fields.action_scope:raw}" in url
         for resolved_uid in routes[current_uid]:
             scope = "var-pipeline=chembl_assay"
-            if resolved_uid in {"bioetl-runtime", "bioetl-dq-v2"}:
+            if resolved_uid == "bioetl-runtime":
                 scope += "&var-stage=$__all"
             if resolved_uid == "bioetl-provider-health-v2":
                 scope += "&var-provider=$__all&var-pipeline_context=chembl_assay"

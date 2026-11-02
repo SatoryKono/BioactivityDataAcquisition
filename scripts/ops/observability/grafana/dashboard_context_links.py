@@ -145,7 +145,8 @@ def build_handoff_url(
         "run_id": run_id,
     }
     extra_values: dict[str, str] = dict(extras or {})
-    if target_uid in {"bioetl-runtime", "bioetl-dq-v2"}:
+    # Phase 4.1 removed DQ $stage; only retired runtime boards still accept it.
+    if target_uid == "bioetl-runtime":
         extra_values.setdefault("stage", stage)
     if target_uid == "bioetl-provider-health-v2":
         # Auto-select the pipeline's configured provider. Explicit All stays

@@ -33,7 +33,7 @@ def test_row_aware_dashboard_url_uses_the_row_uid_and_scope_variables() -> None:
     assert "var-pipeline=${__data.fields.pipeline:percentencode}" in url
     assert "var-run_type=${__data.fields.run_type:percentencode}" in url
     assert "var-run_id=${__data.fields.run_id}" in url
-    assert "var-stage=$__all" in url
+    assert "var-stage=" not in url
     assert "var-provider=unknown" in url
     assert "var-pipeline_context=${__data.fields.pipeline:percentencode}" in url
 

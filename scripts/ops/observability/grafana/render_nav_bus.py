@@ -222,7 +222,8 @@ _OVERVIEW_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     99: (0, 2, 17, 3),
     9604: (17, 2, 7, 3),
     9603: (0, 5, 12, 7),
-    9002: (12, 5, 12, 7),
+    # Phase 4.3 / rev7 §4.3: h in 7–8 with limitField=6 (JSON authoring source).
+    9002: (12, 5, 12, 8),
     9300: (0, 12, 24, 7),
 }
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
@@ -258,7 +259,8 @@ CONTAINER_STYLE = (
     "padding:0 2px;overflow:visible;white-space:normal;font-size:16px"
 )
 _PROVIDER_VARIABLE_UIDS = {"bioetl-provider-health-v2", "bioetl-incident-v1"}
-_STAGE_TARGET_UIDS = {"bioetl-runtime", "bioetl-dq-v2"}
+# Phase 4.1 removed DQ $stage; keep only retired/runtime boards that still use it.
+_STAGE_TARGET_UIDS = {"bioetl-runtime"}
 _PRESERVE_SCOPE_TOOLTIP = "Preserves selected scope and time range."
 
 NAV_DESCRIPTION = (
@@ -2711,13 +2713,14 @@ def apply_to_dashboard(
                     value["tooltip"] = (
                         "Saved Provider Evidence for the selected Run ID. CURRENT provider alert conditions remain in Incident Workspace and do not prove this saved verdict."
                     )
-            if (
-                isinstance(value.get("url"), str)
-                and current_uid == "bioetl-incident-v1"
-                and value["url"].startswith("/d/bioetl-dq-v2/")
-            ):
-                value["url"] = value["url"].replace(
-                    "${stage:queryparam}", "var-stage=$__all"
+            if isinstance(value.get("url"), str) and "/d/bioetl-dq-v2/" in value["url"]:
+                # Phase 4.1: DQ no longer exposes $stage — drop stale query params.
+                value["url"] = (
+                    value["url"]
+                    .replace("&var-stage=$__all", "")
+                    .replace("${stage:queryparam}&", "")
+                    .replace("&${stage:queryparam}", "")
+                    .replace("${stage:queryparam}", "")
                 )
             pending_links.extend(value.values())
         elif isinstance(value, list):
