@@ -285,6 +285,37 @@ def test_load_manifest_rejects_run_id_different_from_resolved_identity(
     assert calls == []
 
 
+def test_load_manifest_string_run_id_finds_saved_pipeline_manifest(
+    tmp_path: Path,
+) -> None:
+    """String ownership keys must coerce to RunID before the file store."""
+    from bioetl.domain.types import RunID
+    from tests.unit.application.services.run_manifest_test_support import (
+        RunManifestOverrides,
+        make_run_manifest,
+    )
+
+    resolver, store, data_root = _resolver(tmp_path)
+    isolated = data_root / "workflow-a" / "chembl_assay"
+    isolated.mkdir(parents=True)
+    store.register(_location())
+    manifest_store = FileRunManifestStore(
+        base_path=isolated / "output" / "control" / "run_manifest"
+    )
+    saved = make_run_manifest(
+        manifest_id="manifest-string-run",
+        run_id=RunID(UUID(_RUN_A)),
+        overrides=RunManifestOverrides(pipeline_name="chembl_assay", entity="assay"),
+    )
+    manifest_store.save(saved)
+
+    resolved = resolver.resolve(kind="pipeline", owner="chembl_assay", run_id=_RUN_A)
+    # Same string form accepted by resolve() must not yield location_invalid.
+    lookup = resolver.load_manifest(resolved, run_id=_RUN_A)
+    assert lookup.code is EvidenceLocationLookupCode.FOUND
+    assert lookup.detail == "manifest_present"
+
+
 def test_resolved_context_uses_standard_verifier_on_real_bytes(
     tmp_path: Path,
 ) -> None:

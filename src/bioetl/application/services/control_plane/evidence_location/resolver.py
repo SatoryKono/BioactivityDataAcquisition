@@ -8,7 +8,7 @@ evidence, or invent READY / objects verdicts from the locator alone.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 from typing import Protocol, runtime_checkable
@@ -163,7 +163,17 @@ class EvidenceLocationResolver:
                 requested_kind=kind,
                 detail=lookup.detail,
             )
-        return replace(result, requested_run_id=str(run_id))
+        # Rebuild instead of ``dataclasses.replace`` so the return type stays
+        # ``EvidenceLocationResolveResult`` (Sonar rejects DataclassInstance).
+        return EvidenceLocationResolveResult(
+            lookup=result.lookup,
+            requested_run_id=str(run_id),
+            requested_kind=result.requested_kind,
+            data_root=result.data_root,
+            context=result.context,
+            used_legacy_standard_root=result.used_legacy_standard_root,
+            detail=result.detail,
+        )
 
     def load_manifest(
         self,
