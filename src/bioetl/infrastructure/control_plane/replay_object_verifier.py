@@ -49,7 +49,9 @@ class ReplayObjectVerifier:
         provenance = manifest.code_provenance
         values = {
             "effective_config_hash": self._config(manifest),
-            "dependency_lock_hash": self._dependency_lock(provenance.dependency_lock_hash),
+            "dependency_lock_hash": self._dependency_lock(
+                provenance.dependency_lock_hash
+            ),
             "input_snapshot_fingerprint": self._snapshots(manifest),
         }
         return {key: value for key, value in values.items() if value is not None}

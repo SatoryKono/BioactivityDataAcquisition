@@ -149,6 +149,7 @@ def get_workflow_runner_service(
         if pipeline_runner_service_factory is None
         else pipeline_runner_service_factory
     )
+
     def _verify_workflow_evidence_location(result: object) -> None:
         from bioetl.composition.runtime_builders.evidence_location_registration import (
             verify_workflow_run_location,

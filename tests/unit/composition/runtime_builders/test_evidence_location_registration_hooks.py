@@ -38,9 +38,9 @@ def test_relative_data_root_standard_and_isolated(tmp_path: Path) -> None:
     isolated.mkdir(parents=True)
     foreign = (tmp_path / "other-data").resolve()
     foreign.mkdir()
-    assert relative_data_root_under_alias(
-        write_data_root=alias, alias_base=alias
-    ) == "."
+    assert (
+        relative_data_root_under_alias(write_data_root=alias, alias_base=alias) == "."
+    )
     assert (
         relative_data_root_under_alias(write_data_root=isolated, alias_base=alias)
         == "workflow-a/chembl_assay"
@@ -78,7 +78,8 @@ def test_register_skips_when_write_root_outside_dashboard_alias(
         entity="assay",
     )
     outcome = register_pipeline_manifest_location(
-        manifest=manifest, settings=settings  # type: ignore[arg-type]
+        manifest=manifest,
+        settings=settings,  # type: ignore[arg-type]
     )
     assert outcome.code == "skipped_write_root_outside_alias"
     store = FileEvidenceLocationStore(report_root=report_root)
@@ -116,7 +117,8 @@ def test_register_pipeline_manifest_writes_catalog(
         workflow_run_id=_WF,
     )
     outcome = register_pipeline_manifest_location(
-        manifest=manifest, settings=settings  # type: ignore[arg-type]
+        manifest=manifest,
+        settings=settings,  # type: ignore[arg-type]
     )
     assert outcome.code == "registered"
     store = FileEvidenceLocationStore(report_root=report_root)
@@ -157,7 +159,8 @@ def test_register_workflow_manifest_parent(
         steps=(),
     )
     outcome = register_workflow_manifest_location(
-        manifest=manifest, settings=settings  # type: ignore[arg-type]
+        manifest=manifest,
+        settings=settings,  # type: ignore[arg-type]
     )
     assert outcome.code == "registered"
     store = FileEvidenceLocationStore(report_root=report_root)

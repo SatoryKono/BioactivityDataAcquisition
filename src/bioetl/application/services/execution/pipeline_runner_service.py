@@ -105,9 +105,9 @@ class PipelineRunnerService:
     capture_control_plane: Callable[[str, str, datetime], None] | None = None
     archive_control_plane: Callable[[RunResult, RunOptions | None], None] | None = None
     # RF-004: Composition-injected finalize consistency check (soft diagnostics).
-    evidence_location_verify: (
-        Callable[[RunResult, RunOptions | None], None] | None
-    ) = None
+    evidence_location_verify: Callable[[RunResult, RunOptions | None], None] | None = (
+        None
+    )
 
     async def run(
         self,

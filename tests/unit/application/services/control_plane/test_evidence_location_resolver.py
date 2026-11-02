@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import errno
 from hashlib import sha256
 from pathlib import Path
 from types import SimpleNamespace
@@ -43,6 +44,25 @@ from bioetl.infrastructure.control_plane.file_workflow_manifest_store import (
 from bioetl.infrastructure.control_plane.replay_object_verifier import (
     ReplayObjectVerifier,
 )
+
+
+def _create_symlink_or_skip(
+    link: Path, target: Path, *, target_is_directory: bool = False
+) -> None:
+    try:
+        link.symlink_to(target, target_is_directory=target_is_directory)
+    except NotImplementedError as exc:
+        pytest.skip(f"symlinks are unavailable: {exc}")
+    except OSError as exc:
+        unsupported = {
+            errno.EPERM,
+            errno.ENOSYS,
+            getattr(errno, "EOPNOTSUPP", errno.EPERM),
+        }
+        if exc.errno in unsupported or getattr(exc, "winerror", None) == 1314:
+            pytest.skip(f"symlink creation is not permitted: {exc}")
+        raise
+
 
 pytestmark = pytest.mark.unit
 
@@ -285,12 +305,37 @@ def test_context_rechecks_child_paths_before_manifest_read(tmp_path: Path) -> No
     )
     outside = tmp_path / "outside-output"
     outside.mkdir()
-    try:
-        (data_root / "output").symlink_to(outside, target_is_directory=True)
-    except OSError as exc:
-        pytest.skip(f"symlink unavailable: {exc}")
+    _create_symlink_or_skip(data_root / "output", outside, target_is_directory=True)
 
     with pytest.raises(EvidenceLocationInvalidError, match="escapes|symlink"):
+        context.get_manifest_by_run_id(UUID(_RUN_A))
+
+
+@pytest.mark.parametrize("linked_path", ["index", "record"])
+def test_context_rejects_symlinked_manifest_index_and_record(
+    tmp_path: Path,
+    linked_path: str,
+) -> None:
+    data_root = (tmp_path / "data").resolve()
+    data_root.mkdir()
+    context = FileEvidenceReadContextFactory().open(
+        data_root,
+        trusted_alias_base=data_root,
+    )
+    store_base = data_root / "output" / "control" / "run_manifest"
+    index = store_base / "_by_run_id" / f"{_RUN_A}.txt"
+    index.parent.mkdir(parents=True)
+    outside = tmp_path / "outside.txt"
+    outside.write_text("manifest-a", encoding="utf-8")
+
+    if linked_path == "index":
+        _create_symlink_or_skip(index, outside)
+    else:
+        index.write_text("manifest-a", encoding="utf-8")
+        record = store_base / "manifest-a.json"
+        _create_symlink_or_skip(record, outside)
+
+    with pytest.raises(EvidenceLocationInvalidError, match="symlink|escapes"):
         context.get_manifest_by_run_id(UUID(_RUN_A))
 
 

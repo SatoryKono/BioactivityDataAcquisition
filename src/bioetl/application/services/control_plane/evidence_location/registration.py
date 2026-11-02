@@ -67,7 +67,9 @@ class EvidenceLocationVerifyOutcome:
     verdict: str = "UNKNOWN"
 
 
-class _RegisterAndReadPort(RunEvidenceLocationRegisterPort, RunEvidenceLocationReadPort, Protocol):
+class _RegisterAndReadPort(
+    RunEvidenceLocationRegisterPort, RunEvidenceLocationReadPort, Protocol
+):
     """Store surface that supports both register and lookup."""
 
 

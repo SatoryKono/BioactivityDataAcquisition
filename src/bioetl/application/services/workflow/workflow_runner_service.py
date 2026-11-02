@@ -16,6 +16,10 @@ from bioetl.application.services.execution.workflow_runner_step_execution import
     execute_pipeline_step,
     execute_transform_step,
 )
+from bioetl.application.services.run_reports.observations import (
+    bind_run_observations,
+    reset_run_observations,
+)
 from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
@@ -122,9 +126,7 @@ class WorkflowRunnerService:
         | None
     ) = None
     # RF-004: Composition-injected finalize consistency check (soft diagnostics).
-    evidence_location_verify: (
-        Callable[[WorkflowRunExecutionResult], None] | None
-    ) = None
+    evidence_location_verify: Callable[[WorkflowRunExecutionResult], None] | None = None
 
     async def run_workflow(
         self,
@@ -233,27 +235,30 @@ class WorkflowRunnerService:
                 duration_seconds=perf_counter() - started_monotonic,
             )
         )
-        # RF-004: soft verify before workflow report write (keeps diagnostics
-        # available to any observation-aware finalize path).
-        if self.evidence_location_verify is not None:
-            try:
-                self.evidence_location_verify(identified_result)
-            except Exception:
-                # Consistency diagnostics must not mask workflow processing success.
-                pass
-        reported = attach_workflow_run_report(
-            config=config,
-            result=identified_result,
-            logger=getattr(self.pipeline_runner, "logger", None),
-            store=self.report_store,
-            report_root=self.report_root,
-        )
-        archive_workflow_children(
-            config,
-            reported,
-            getattr(self.pipeline_runner, "archive_control_plane", None),
-        )
-        return reported
+        # RF-004: keep soft verification in a report-bound observation scope.
+        observation_token = bind_run_observations()
+        try:
+            if self.evidence_location_verify is not None:
+                try:
+                    self.evidence_location_verify(identified_result)
+                except Exception:
+                    # Consistency diagnostics must not mask processing success.
+                    pass
+            reported = attach_workflow_run_report(
+                config=config,
+                result=identified_result,
+                logger=getattr(self.pipeline_runner, "logger", None),
+                store=self.report_store,
+                report_root=self.report_root,
+            )
+            archive_workflow_children(
+                config,
+                reported,
+                getattr(self.pipeline_runner, "archive_control_plane", None),
+            )
+            return reported
+        finally:
+            reset_run_observations(observation_token)
 
     def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
         """Record planned pipeline scopes before workflow step execution."""

@@ -67,6 +67,7 @@ Optional on workflow reports:
 
 - execution `top_reasons`, `skip_reason`, `pipeline_report_ref`
 - top-level `reasons_rollup`
+- top-level `observations` for checks recorded during workflow finalization
 
 ## Operator questions
 
