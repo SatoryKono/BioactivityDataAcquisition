@@ -42,9 +42,6 @@ _CRASH_OBSERVATION = re.compile(
     re.IGNORECASE,
 )
 _MAXFAIL_OBSERVATION = re.compile(r"stopping after \d+ failures", re.IGNORECASE)
-_TIMEOUT_OBSERVATION = re.compile(
-    r"^\[run_pytest_resilient\] pass '[^'\r\n]+' timed out after [0-9]+s\.$"
-)
 _OUTPUT_PREFIXES = (
     "reports/",
     ".pytest_cache/",
@@ -457,9 +454,7 @@ class ReceiptPlugin:
         self.selected_nodeids: list[str] = []
         self.deselected_nodeids: list[str] = []
         self.collection_errors: list[str] = []
-        self.results: dict[
-            str, dict[str, str | None] | list[dict[str, str | None]]
-        ] = {}
+        self.results: dict[str, dict[str, str | None]] = {}
         self.source = source_snapshot(self.repo_root, self.receipt_dir)
         self.source_diverged = False
         head = str(self.source["head"])
@@ -674,8 +669,7 @@ def _clip_observed_error(text: str, limit: int = 4000) -> str:
     matched = [
         line
         for line in redacted.splitlines()
-        if (_CRASH_OBSERVATION.search(line) and not _MAXFAIL_OBSERVATION.search(line))
-        or _TIMEOUT_OBSERVATION.fullmatch(line)
+        if _CRASH_OBSERVATION.search(line) and not _MAXFAIL_OBSERVATION.search(line)
     ]
     tail = redacted[-limit:]
     if not matched or "\n".join(matched) in tail:
@@ -703,15 +697,12 @@ def write_runner_terminal_receipt(
     Collection and node outcomes stay unknown. The observed error is redacted.
     """
     directory = _resolve_dir(str(receipt_dir))
-    run_id = _safe_id(run_id, "run_id")
-    attempt = _safe_id(attempt, "attempt")
-    pass_name = _safe_id(pass_name, "pass")
     payload = {
         "schema_version": _SCHEMA_VERSION,
         "role": "runner",
-        "run_id": run_id,
-        "attempt": attempt,
-        "pass": pass_name,
+        "run_id": _safe_id(run_id, "run_id"),
+        "attempt": _safe_id(attempt, "attempt"),
+        "pass": _safe_id(pass_name, "pass"),
         "worker": "runner",
         "exit_code": exit_code,
         "early_stop": True,
@@ -723,7 +714,7 @@ def write_runner_terminal_receipt(
         "source": source_snapshot(repo_root, directory),
         "environment": allowed_environment(),
     }
-    target = directory / run_id / attempt / pass_name / "runner"
+    target = directory / payload["run_id"] / payload["attempt"] / pass_name / "runner"
     return write_receipt_file(target, payload)
 
 

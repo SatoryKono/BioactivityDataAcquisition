@@ -429,9 +429,6 @@ def test_observability_backend_process_parse_drop_and_popen_kwargs(
     assert backend._find_posix_listener_pids_by_port(1) == ()
     assert backend._run_taskkill(1).returncode == 1
 
-    def _timeout(_command: list[str], **_kwargs: object) -> object:
-        raise subprocess.TimeoutExpired(cmd="netstat", timeout=1)
-
     # Probe/taskkill go through run_protected_command, not subprocess.run.
     # Patching subprocess.run still executes host netstat and can surface
     # banner noise ("Active Internet connections") on Linux CI runners.
