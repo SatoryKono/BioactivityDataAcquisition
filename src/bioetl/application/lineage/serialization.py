@@ -1,3 +1,5 @@
+"""Application-layer JSON-safe serialization helpers for lineage attributes."""
+
 from __future__ import annotations
 
 import math

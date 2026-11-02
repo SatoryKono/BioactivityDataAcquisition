@@ -1,3 +1,5 @@
+"""URI parsing helpers for QUDT / legacy OpenPhacts unit identifiers."""
+
 from urllib.parse import urlparse
 
 

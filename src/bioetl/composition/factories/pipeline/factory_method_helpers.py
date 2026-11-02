@@ -1,3 +1,5 @@
+"""Shared helpers for pipeline factory-method composition."""
+
 from __future__ import annotations
 
 from collections.abc import Callable

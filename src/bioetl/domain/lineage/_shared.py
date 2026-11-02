@@ -10,11 +10,10 @@ from pathlib import PurePath
 from types import MappingProxyType
 from uuid import UUID
 
-from bioetl.domain.normalization.json import serialize_json_canonical
-
 from bioetl.domain.normalization._control_plane_primitives import (
     normalize_control_plane_datetime,
 )
+from bioetl.domain.normalization.json import serialize_json_canonical
 
 __all__ = [
     "load_attributes",
