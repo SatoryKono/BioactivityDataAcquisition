@@ -69,11 +69,8 @@ def _is_query_error_payload(payload: Mapping[str, object]) -> bool:
         "identity_mismatch",
         "request_failed",
         "revision_missing",
-        "shutting_down",
         "selector_context_mismatch",
-        "evidence_corrupt",
-        "identity_mismatch",
-        "revision_missing",
+        "shutting_down",
     }
 
 
