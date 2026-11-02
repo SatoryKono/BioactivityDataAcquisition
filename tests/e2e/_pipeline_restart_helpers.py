@@ -58,9 +58,7 @@ def patched_extract_records(
         monkeypatch.setattr(source, "extract_records", original)
 
 
-def failing_extract_records(
-    *_args: object, **_kwargs: object
-) -> AsyncIterator[object]:
+def failing_extract_records(*_args: object, **_kwargs: object) -> AsyncIterator[object]:
     """Async iterator that fails before yielding any records."""
 
     async def fail_during_iteration() -> AsyncIterator[object]:
@@ -100,7 +98,9 @@ def gated_extract_factory(
     return gated_extract_records
 
 
-async def cancel_after_first_record(runner: object, first_record_ready: asyncio.Event) -> None:
+async def cancel_after_first_record(
+    runner: object, first_record_ready: asyncio.Event
+) -> None:
     """Run ``runner`` until the first record is ready, then cancel the task."""
     task = asyncio.create_task(runner.run())  # type: ignore[attr-defined]
     first_record_waiter = asyncio.create_task(first_record_ready.wait())
