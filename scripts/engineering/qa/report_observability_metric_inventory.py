@@ -633,7 +633,8 @@ def collect_metric_inventory(repo_root: Path) -> MetricInventoryReport:
         _RUNTIME_CANDIDATE_PATH_CACHE,
         _RUNTIME_EVENT_CANDIDATE_PATH_CACHE,
     ):
-        cache.clear()    _sync_metric_scan_compatibility_seams()
+        cache.clear()
+    _sync_metric_scan_compatibility_seams()
     return _collect_metric_inventory_impl(repo_root)
 
 

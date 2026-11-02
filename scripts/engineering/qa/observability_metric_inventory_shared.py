@@ -158,7 +158,8 @@ _PROMETHEUS_ALIAS_SUFFIXES: Final[frozenset[str]] = frozenset(
         "_seconds",
         "_total",
     }
-)_RUNTIME_EVENT_SCAN_MARKERS: Final[tuple[str, ...]] = (
+)
+_RUNTIME_EVENT_SCAN_MARKERS: Final[tuple[str, ...]] = (
     "emit_event(",
     "emit_domain_event(",
     "PipelineEvent.",

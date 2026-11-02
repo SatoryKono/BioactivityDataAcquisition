@@ -665,6 +665,11 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh": (
         NPM_RUNTIME_TEST,
     ),
+    "scripts/diagrams/": (
+        "tests/architecture/test_diagram_quality_budget_security.py",
+        "tests/architecture/test_run_diagram_checks_script.py",
+        "tests/architecture/test_diagram_issues_6205_6211_closeout.py",
+    ),
     "docs/02-architecture/diagrams/": (
         "tests/architecture/test_diagram_corpus_regression_guards.py",
         "tests/architecture/test_diagram_drift_and_embed_guards.py",

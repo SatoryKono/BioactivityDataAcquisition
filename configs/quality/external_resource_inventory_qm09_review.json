@@ -1,13 +1,133 @@
 {
   "schema_version": 1,
-  "catalog_ref": "2f8ce16e39e3e8e9da9914d523a1d7c09ecdd92a",
-  "source_ref": "25aa79165f89851e274b6b60486d573f8ced5b50",
+  "catalog_ref": "c3d7e98a90c8d2c49ffef0d16bfc2af2958ab59d",
+  "source_ref": "eab7409268002909b50631e2e837086de0a9cb67",
   "source_reviews": {
-    "src/bioetl/domain/_observability_contract_core.py": "Reviewed the main-side pipeline-label sanitizer change. It only normalizes an in-memory string with an ASCII regular expression and introduces no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock, or lifecycle behavior."
+    "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py": "Reviewed pandas 3.1 compatibility change: normalize extension string dtype names to the existing in-memory str contract. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/application/core/_base_transformer_execution_support.py": "Reviewed structural contract support change: classify existing in-memory outcomes and resolve optional-field metadata from the already loaded policy. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/application/core/_base_transformer_structural_support.py": "Reviewed structural support change: defer internal imports and attach already available policy metadata to in-memory filter errors. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/behavior/_dq_rule_evaluators.py": "Reviewed pandas 3.1 compatibility change: reuse the in-memory presence predicate for required and non-null validation. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/behavior/_dq_value_coercion.py": "Reviewed pandas 3.1 compatibility change: classify floating NaN as absent during in-memory DQ coercion. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/schemas/chembl/publication.py": "Reviewed pandas 3.1 compatibility change: cast the mapped calendar predicate to boolean before the existing nullable Series check. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/normalization/json.py": "Reviewed optimization of JSON normalization for built-in scalars, dicts and lists, with existing recursive mapping/sequence handling retained for other types. The JsonDict import also moves to its defining leaf module without changing the type. This changes in-memory value conversion only; it introduces no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/domain/normalization/text.py": "Reviewed in-memory text normalization optimization: a helper keeps ASCII translate and Unicode regex paths while removing the same control-character ranges. The change preserves the reviewed Unicode speedup and keeps the caller's cyclomatic complexity within the domain limit; no external resource behavior changes.",
+    "src/bioetl/domain/aggregates/events.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/error_classifier.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/base.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/data_quality.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/gold_write.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/internal_auth.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/internal_data.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/internal_lock.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/internal_state.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/internal_system.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/network/connection.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/network/service.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/network/timeout.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/pipeline_shutdown.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/storage/_base.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/storage/_delta.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/storage/_storage.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/exceptions/validation.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/domain/medallion.py": "Reviewed import-only relocation from the domain.types compatibility facade to its defining leaf module. The same in-memory types are used; no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/application/core/base_transformer/_structural_policy_contracts.py": "Reviewed pandas 3.1 compatibility change: recognize the string[pyarrow] dtype as the existing logical string type. This is in-memory schema classification only and introduces no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/infrastructure/validation/contract_validator.py": "Reviewed pandas 3.1 compatibility change: normalize nullable DataFrame values to Python None before building in-memory contract-validation records. This changes in-memory conversion only and introduces no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/domain/_observability_contract_core.py": "Reviewed the pipeline-label sanitization optimization: one ASCII character-class regex replaces runs of non-alphanumeric characters with an underscore before the existing trim/lowercase steps. This preserves in-memory label normalization and introduces no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/composition/observability_backend.py": "Reviewed subprocess boundary migration: the composition adapter now injects protected wrappers; fixed argv, bounded timeout and caller-owned process lifecycle are preserved.",
+    "src/bioetl/infrastructure/observability/observability_backend_process.py": "Reviewed subprocess boundary migration: listener probes, taskkill fallback and detached startup use protected wrappers; caller lifetime and cleanup semantics are preserved.",
+    "src/bioetl/infrastructure/provenance/code_revision.py": "Reviewed Git metadata migration to run_protected_command; resolved executable, fixed argv, explicit environment and five-second timeout remain enforced.",
+    "src/bioetl/infrastructure/storage/metadata/builder_base.py": "Reviewed Git metadata migration to run_protected_command; resolved executable, fixed argv and five-second timeout remain enforced.",
+    "src/bioetl/infrastructure/storage/gold/writer_metrics.py": "Reviewed formatter-only layout changes in gold writer metric labels; no acquisition, cleanup or runtime behavior changed.",
+    "src/bioetl/infrastructure/storage/silver/support.py": "Reviewed Delta subprocess migration to run_protected_subprocess_popen; fixed argv, pipe ownership and bounded reader cleanup remain with the existing resource owner.",
+    "src/bioetl/infrastructure/system/subprocess_boundary.py": "Reviewed the central SEC-001 subprocess transport, typed Popen result alias, and environment-copy helper rename. Caller-provided environment values are copied without filtering or changing process acquisition; Popen sites remain caller-owned transport and excluded duplicate low-level census sites.",
+    "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py": "Reviewed health backend composition move; Docker engine probe remains fixed argv, timeout bounded and shell-free in the composition owner."
   },
-  "expression_updates": {},
+  "expression_updates": {
+    "src/bioetl/infrastructure/observability/observability_backend_process.py": {
+      "subprocess.run(command, check=False, capture_output=True, text=True, timeout=_PROCESS_PROBE_TIMEOUT_SECONDS)": "run_protected_command(command, check=False, capture_output=True, text=True, timeout=_PROCESS_PROBE_TIMEOUT_SECONDS)"
+    },
+    "src/bioetl/infrastructure/provenance/code_revision.py": {
+      "subprocess.run([git_executable, *arguments], cwd=_REPO_ROOT, capture_output=True, text=True, encoding='utf-8', errors='surrogateescape', timeout=5, check=False, env=environment)": "run_protected_command([git_executable, *arguments], cwd=_REPO_ROOT, capture_output=True, text=True, encoding='utf-8', errors='surrogateescape', timeout=5, check=False, env=environment)",
+      "subprocess.run([executable, *arguments], cwd=_REPO_ROOT, capture_output=True, text=True, encoding='utf-8', errors='surrogateescape', timeout=5, check=False, env=environment)": "run_protected_command([executable, *arguments], cwd=_REPO_ROOT, capture_output=True, text=True, encoding='utf-8', errors='surrogateescape', timeout=5, check=False, env=environment)"
+    },
+    "src/bioetl/infrastructure/storage/metadata/builder_base.py": {
+      "subprocess.run([git_executable, 'rev-parse', '--short', 'HEAD'], capture_output=True, text=True, timeout=5, check=False)": "run_protected_command([git_executable, 'rev-parse', '--short', 'HEAD'], capture_output=True, text=True, timeout=5, check=False)"
+    },
+    "src/bioetl/infrastructure/storage/silver/support.py": {
+      "subprocess.Popen(list(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=0)": "run_protected_subprocess_popen(list(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=0)"
+    }
+  },
   "resource_updates": {},
   "additional_bindings": {},
   "new_resources": [],
-  "new_exclusions": []
+  "new_exclusions": [
+    {
+      "file": "src/bioetl/infrastructure/system/subprocess_boundary.py",
+      "scope": "_terminate_process_tree",
+      "call": "subprocess.Popen",
+      "reason": "Low-level taskkill helper is owned by caller resource cleanup; caller-level process records remain authoritative."
+    },
+    {
+      "file": "src/bioetl/infrastructure/system/subprocess_boundary.py",
+      "scope": "run_protected_command",
+      "call": "subprocess.Popen",
+      "reason": "Low-level transport for caller-owned protected command acquisitions; caller-level process records remain authoritative."
+    },
+    {
+      "file": "src/bioetl/infrastructure/system/subprocess_boundary.py",
+      "scope": "run_protected_subprocess_popen",
+      "call": "subprocess.Popen",
+      "reason": "Low-level transport for caller-owned protected Popen acquisitions; caller-level process records remain authoritative."
+    }
+  ],
+  "segment_updates": {
+    "src/bioetl/infrastructure/observability/observability_backend_process.py": {
+      "result = subprocess.run(  # nosec B603 - see suppression registry": "result = run_protected_command(",
+      "return subprocess.run(  # nosec B603 - see suppression registry": "return run_protected_command("
+    },
+    "src/bioetl/infrastructure/provenance/code_revision.py": {
+      "last_result = subprocess.run(  # nosec B603 - Git path resolved via which(); see suppression registry": "last_result = run_protected_command(  # nosec B603 - Git path resolved via which(); see suppression registry",
+      "candidate_result = subprocess.run(  # nosec B603 - see suppression registry": "candidate_result = run_protected_command(  # nosec B603 - see suppression registry"
+    },
+    "src/bioetl/infrastructure/storage/metadata/builder_base.py": {
+      "result = subprocess.run(  # nosec B603 - Git path resolved via which(); see suppression registry": "result = run_protected_command(  # nosec B603 - Git path resolved via which(); see suppression registry"
+    },
+    "src/bioetl/infrastructure/storage/silver/support.py": {
+      "proc = subprocess.Popen(  # nosec B603 - see suppression registry": "proc = run_protected_subprocess_popen(  # nosec B603 - see suppression registry"
+    }
+  },
+  "reference_moves": [
+    {
+      "identity": "interfaces.cli.commands.domains.health.observability_backend_runtime.docker_engine_not_ready_message.process",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py",
+        "line": 241
+      },
+      "to": {
+        "file": "src/bioetl/composition/observability_backend.py",
+        "scope": "docker_engine_not_ready_message",
+        "segment": "def docker_engine_not_ready_message() -> str | None:"
+      }
+    },
+    {
+      "identity": "interfaces.cli.commands.domains.health.observability_backend_runtime.docker_engine_not_ready_message.process",
+      "fields": [
+        "creation_sites",
+        "production_binding",
+        "cleanup_sources"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py",
+        "line": 247
+      },
+      "to": {
+        "file": "src/bioetl/composition/observability_backend.py",
+        "scope": "docker_engine_not_ready_message",
+        "call": "run_protected_command"
+      }
+    }
+  ]
 }

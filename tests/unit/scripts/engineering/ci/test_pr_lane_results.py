@@ -1112,6 +1112,22 @@ def test_shadow_compare_routes_assertless_ratchet_config() -> None:
     ]
 
 
+def test_shadow_compare_routes_diagram_runner_paths() -> None:
+    """Diagram tooling changes select their runner and budget contracts."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        ["scripts/diagrams/README.md", "scripts/diagrams/run_diagram_checks.sh"],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/architecture/test_diagram_quality_budget_security.py",
+        "tests/architecture/test_run_diagram_checks_script.py",
+        "tests/architecture/test_diagram_issues_6205_6211_closeout.py",
+    ]
+
+
 def test_affected_targets_map_memory_source_without_test_diff() -> None:
     """A chunking-only PR must select its real RAG regression suite."""
     repo_root = Path(__file__).resolve().parents[5]

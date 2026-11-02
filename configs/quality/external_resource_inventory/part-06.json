@@ -54,7 +54,7 @@
       "lifetime": "process-scoped singleton; each acquisition lasts for one collector with block",
       "creation_sites": [
         {
-          "source_commit": "25aa79165f89851e274b6b60486d573f8ced5b50",
+          "source_commit": "eab7409268002909b50631e2e837086de0a9cb67",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -68,19 +68,19 @@
       ],
       "production_binding": [
         {
-          "source_commit": "25aa79165f89851e274b6b60486d573f8ced5b50",
-          "source_blob": "694ac98027bf0899e9d008b4b2211ddf4979543a",
-          "content_sha256": "b35f9817307d7ec6ac5bf17cbeee3ba3044714eae3be57a2671acfe2bc93f237",
+          "source_commit": "eab7409268002909b50631e2e837086de0a9cb67",
+          "source_blob": "9ca7f12907205933824494583cf79695570cef57",
+          "content_sha256": "1fa61e0ae6278265d2179d762a1679594a15119ff196a5b260b7f55530223e1f",
           "file": "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
-          "line": 113,
-          "expression": "check_metric_inventory(repo_root, _load_metric_allowlist(allowlist_path))",
+          "line": 110,
+          "expression": "report_observability_metric_inventory.collect_metric_inventory(repo_root)",
           "call": "report_observability_metric_inventory.collect_metric_inventory",
           "creator": "_check_metric_inventory",
           "creation_mode": "call",
           "context_manager": false
         },
         {
-          "source_commit": "25aa79165f89851e274b6b60486d573f8ced5b50",
+          "source_commit": "eab7409268002909b50631e2e837086de0a9cb67",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -92,7 +92,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "25aa79165f89851e274b6b60486d573f8ced5b50",
+          "source_commit": "eab7409268002909b50631e2e837086de0a9cb67",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -102,7 +102,7 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "25aa79165f89851e274b6b60486d573f8ced5b50",
+          "source_commit": "eab7409268002909b50631e2e837086de0a9cb67",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
