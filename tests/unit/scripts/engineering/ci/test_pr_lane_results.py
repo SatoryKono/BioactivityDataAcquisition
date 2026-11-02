@@ -1002,9 +1002,11 @@ def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
 
 
 def test_affected_targets_map_shared_helper_to_importing_tests(
-    repo_root: Path,
+    tmp_path: Path,
 ) -> None:
     """Changed test helpers resolve imports from the checkout root."""
+    # Nested under …/tests/… so absolute path.parts would mis-anchor without
+    # repo_root-relative package resolution (CodeRabbit nested-checkout case).
     repo_root = tmp_path / "tests" / "project"
     helper = repo_root / "tests" / "helpers" / "cli_process.py"
     helper.parent.mkdir(parents=True)

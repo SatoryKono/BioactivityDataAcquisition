@@ -1029,7 +1029,7 @@ def _helper_path_targets(path: str, root: Path) -> list[str]:
     helpers_init = root / "tests" / "helpers" / "__init__.py"
     # Package re-exports (from tests.helpers import …) must count as consumers.
     if helpers_init.is_file() and _imports_module(helpers_init, module, root):
-        importing_tests |= _importing_script_tests(test_roots, "tests.helpers")
+        importing_tests |= _importing_script_tests(test_roots, "tests.helpers", root)
     if importing_tests:
         targets = {
             test.parent if test.name == CONFTEST_FILENAME else test
@@ -1148,9 +1148,7 @@ def _imports_module(test_path: Path, module_name: str, repo_root: Path) -> bool:
     )
 
 
-def _containing_package_parts(
-    path: Path, repo_root: Path
-) -> tuple[str, ...] | None:
+def _containing_package_parts(path: Path, repo_root: Path) -> tuple[str, ...] | None:
     """Return package parts under tests/scripts/src relative to the checkout."""
     try:
         parts = path.relative_to(repo_root).with_suffix("").parts
