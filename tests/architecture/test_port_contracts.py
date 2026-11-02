@@ -1458,4 +1458,3 @@ class TestWorkflowManifestPortContract:
         assert is_runtime_checkable, (
             "WorkflowManifestPort MUST be decorated with @runtime_checkable"
         )
-
