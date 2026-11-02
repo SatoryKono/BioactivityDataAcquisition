@@ -10,6 +10,7 @@ from bioetl.domain.lineage._shared import (
     load_optional_int,
     load_optional_str,
     load_optional_version,
+    mapping_to_plain,
     normalize_mapping,
 )
 from bioetl.domain.medallion import Layer
@@ -61,7 +62,7 @@ class LineageNodeRef:
             "node_type": self.node_type.value,
             "node_id": self.node_id,
             "label": self.label,
-            "attributes": {k: v for k, v in self.attributes.items()},
+            "attributes": mapping_to_plain(self.attributes),
         }
 
     @classmethod
