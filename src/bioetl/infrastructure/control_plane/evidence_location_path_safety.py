@@ -35,6 +35,98 @@ def reject_symlink_or_junction(path: Path, *, field_name: str = "path") -> None:
         )
 
 
+def _require_absolute_pair(
+    candidate: Path,
+    trusted_base: Path,
+    *,
+    field_name: str,
+) -> tuple[Path, Path]:
+    base = Path(trusted_base)
+    target = Path(candidate)
+    if not base.is_absolute():
+        raise EvidenceLocationInvalidError("trusted evidence base must be absolute")
+    if not target.is_absolute():
+        raise EvidenceLocationInvalidError(
+            f"{field_name} must be absolute after alias resolution"
+        )
+    return base, target
+
+
+def _resolve_trusted_base(base: Path) -> Path:
+    try:
+        return base.resolve(strict=False)
+    except OSError as exc:
+        raise EvidenceLocationInvalidError(
+            "trusted evidence base is not resolvable"
+        ) from exc
+
+
+def _relative_under_base(
+    target: Path,
+    base_resolved: Path,
+    *,
+    field_name: str,
+) -> tuple[Path, Path]:
+    """Return ``(relative, normalized_target)`` under ``base_resolved``."""
+    try:
+        return target.relative_to(base_resolved), target
+    except ValueError:
+        pass
+    try:
+        target_resolved = target.resolve(strict=False)
+    except OSError as exc:
+        raise EvidenceLocationInvalidError(
+            f"{field_name} is not resolvable within the trusted base"
+        ) from exc
+    if not target_resolved.is_relative_to(base_resolved):
+        raise EvidenceLocationInvalidError(
+            f"{field_name} escapes the trusted evidence alias base"
+        )
+    return target_resolved.relative_to(base_resolved), target_resolved
+
+
+def _reject_link_chain(
+    base_resolved: Path,
+    relative: Path,
+    *,
+    field_name: str,
+) -> None:
+    cursor = base_resolved
+    for part in relative.parts:
+        cursor = cursor / part
+        try:
+            metadata = cursor.lstat()
+        except FileNotFoundError:
+            return
+        except OSError as exc:
+            raise EvidenceLocationInvalidError(
+                f"{field_name} containment check failed"
+            ) from exc
+        if stat.S_ISLNK(metadata.st_mode) or cursor.is_junction():
+            raise EvidenceLocationInvalidError(
+                f"{field_name} rejects symlink or junction escape"
+            )
+
+
+def _finalize_within_base(
+    target: Path,
+    base_resolved: Path,
+    *,
+    field_name: str,
+) -> Path:
+    try:
+        final = target.resolve(strict=False)
+    except OSError as exc:
+        raise EvidenceLocationInvalidError(
+            f"{field_name} is not resolvable within the trusted base"
+        ) from exc
+    if not final.is_relative_to(base_resolved):
+        raise EvidenceLocationInvalidError(
+            f"{field_name} escapes the trusted evidence alias base"
+        )
+    return final
+
+
 def assert_path_within_trusted_base(
     candidate: Path,
     *,
@@ -48,65 +140,12 @@ def assert_path_within_trusted_base(
     alias base. Missing leaf directories are allowed (empty roots may still be
     opened for read-only lookup).
     """
-    base = Path(trusted_base)
-    target = Path(candidate)
-    if not base.is_absolute():
-        raise EvidenceLocationInvalidError("trusted evidence base must be absolute")
-    if not target.is_absolute():
-        raise EvidenceLocationInvalidError(
-            f"{field_name} must be absolute after alias resolution"
-        )
-
-    try:
-        base_resolved = base.resolve(strict=False)
-    except OSError as exc:
-        raise EvidenceLocationInvalidError(
-            "trusted evidence base is not resolvable"
-        ) from exc
-
-    try:
-        relative = target.relative_to(base_resolved)
-    except ValueError:
-        relative = None
-
-    if relative is None:
-        try:
-            target_resolved = target.resolve(strict=False)
-        except OSError as exc:
-            raise EvidenceLocationInvalidError(
-                f"{field_name} is not resolvable within the trusted base"
-            ) from exc
-        if not target_resolved.is_relative_to(base_resolved):
-            raise EvidenceLocationInvalidError(
-                f"{field_name} escapes the trusted evidence alias base"
-            )
-        relative = target_resolved.relative_to(base_resolved)
-        target = target_resolved
-
-    cursor = base_resolved
-    for part in relative.parts:
-        cursor = cursor / part
-        try:
-            metadata = cursor.lstat()
-        except FileNotFoundError:
-            break
-        except OSError as exc:
-            raise EvidenceLocationInvalidError(
-                f"{field_name} containment check failed"
-            ) from exc
-        if stat.S_ISLNK(metadata.st_mode) or cursor.is_junction():
-            raise EvidenceLocationInvalidError(
-                f"{field_name} rejects symlink or junction escape"
-            )
-
-    try:
-        final = target.resolve(strict=False)
-    except OSError as exc:
-        raise EvidenceLocationInvalidError(
-            f"{field_name} is not resolvable within the trusted base"
-        ) from exc
-    if not final.is_relative_to(base_resolved):
-        raise EvidenceLocationInvalidError(
-            f"{field_name} escapes the trusted evidence alias base"
-        )
-    return final
+    base, target = _require_absolute_pair(
+        candidate, trusted_base, field_name=field_name
+    )
+    base_resolved = _resolve_trusted_base(base)
+    relative, target = _relative_under_base(
+        target, base_resolved, field_name=field_name
+    )
+    _reject_link_chain(base_resolved, relative, field_name=field_name)
+    return _finalize_within_base(target, base_resolved, field_name=field_name)

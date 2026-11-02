@@ -16,8 +16,8 @@ from bioetl.application.services.control_plane.evidence_location.resolver import
 
 __all__ = [
     "EvidenceLocationLegacyRootPolicy",
-    "EvidenceLocationResolver",
     "EvidenceLocationResolveResult",
+    "EvidenceLocationResolver",
     "EvidenceReadContext",
     "EvidenceReadContextOpener",
 ]
