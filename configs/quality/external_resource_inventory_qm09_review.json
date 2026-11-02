@@ -1,15 +1,28 @@
 {
   "schema_version": 1,
-  "catalog_ref": "9b928d6a07dd818f4833ca70777c42a2c2aa2451",
-  "source_ref": "9b928d6a07dd818f4833ca70777c42a2c2aa2451",
+  "catalog_ref": "2e5f70acf3df9b4b0e713098be5aeee2533618f8",
+  "source_ref": "72026e632cdc730ce7eb1d1993bf86fc4fcf8a45",
   "source_reviews": {
-    "src/bioetl/infrastructure/storage/gold/writer_metrics.py": "Reviewed formatter-only layout changes in gold writer metric labels; no acquisition, cleanup or runtime behavior changed."
+    "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py": "Reviewed: In-memory extension string dtype normalization. No new external acquisition or cleanup behavior.",
+    "src/bioetl/application/core/_base_transformer_execution_support.py": "Reviewed: Relocation of structural classification helpers without resource lifecycle changes. No new external acquisition or cleanup behavior.",
+    "src/bioetl/application/core/_base_transformer_structural_support.py": "Reviewed: In-memory structural classification and filtering metadata relocation. No new external acquisition or cleanup behavior.",
+    "src/bioetl/composition/observability_runtime.py": "Reviewed: New check_metric_inventory wrapper delegates existing collect/validate calls; push/delete gateway bindings retain behavior with shifted source lines. No new external acquisition or cleanup behavior.",
+    "src/bioetl/domain/composite/config_composite_encoder.py": "Reviewed: Serialization of explicit DQ policy scalars. No new external acquisition or cleanup behavior.",
+    "src/bioetl/domain/composite/config_composite_protocols.py": "Reviewed: Read-only typed DQ policy scalar properties. No new external acquisition or cleanup behavior.",
+    "src/bioetl/domain/composite/config_composite_section_decoders.py": "Reviewed: In-memory parsing and validation of explicit DQ policy scalars. No new external acquisition or cleanup behavior.",
+    "src/bioetl/domain/composite/config_dq.py": "Reviewed: Explicit DQ configuration fields and literal validation. No new external acquisition or cleanup behavior.",
+    "src/bioetl/domain/normalization/identifiers.py": "Reviewed: In-memory pandas NAType missing-value recognition. No new external acquisition or cleanup behavior.",
+    "src/bioetl/domain/normalization/json.py": "Reviewed: Existing recursive in-memory conversions replace built-in fast paths. No new external acquisition or cleanup behavior.",
+    "src/bioetl/infrastructure/adapters/common/_api_request_sanitize.py": "Reviewed: Docstring-only change; sanitization implementation unchanged. No new external acquisition or cleanup behavior.",
+    "src/bioetl/infrastructure/observability/metric_inventory_discovery.py": "Reviewed: Removal of redundant git executable availability check; existing bounded git discovery and fallback os.walk/read_text retain resource semantics and relocate by AST. No new external acquisition or cleanup behavior.",
+    "src/bioetl/infrastructure/schemas/composite_validation.py": "Reviewed: Explicit DQ scalar fields forwarded into domain configuration. No new external acquisition or cleanup behavior.",
+    "src/bioetl/infrastructure/schemas/dq_config.py": "Reviewed: Descriptions of existing DQ defaults only. No new external acquisition or cleanup behavior.",
+    "src/bioetl/infrastructure/storage/gold/writer_metrics.py": "Reviewed: Formatting only around existing in-memory type casts; no change to metrics or storage operations. No new external acquisition or cleanup behavior.",
+    "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py": "Reviewed: Metric collection delegates to check_metric_inventory; existing tracing/YAML file reads and cleanup behavior retained with relocated source positions. No new external acquisition or cleanup behavior."
   },
-  "expression_updates": {},
-  "resource_updates": {},
-  "additional_bindings": {},
-  "new_resources": [],
-  "new_exclusions": [],
-  "segment_updates": {},
-  "reference_moves": []
+  "expression_updates": {
+    "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py": {
+      "report_observability_metric_inventory.collect_metric_inventory(repo_root)": "check_metric_inventory(repo_root, _load_metric_allowlist(allowlist_path))"
+    }
+  }
 }
