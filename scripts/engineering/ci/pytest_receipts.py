@@ -42,10 +42,6 @@ _CRASH_OBSERVATION = re.compile(
     re.IGNORECASE,
 )
 _MAXFAIL_OBSERVATION = re.compile(r"stopping after \d+ failures", re.IGNORECASE)
-_TIMEOUT_OBSERVATION = re.compile(
-    r"^\[run_pytest_resilient\] pass '[^'\r\n]+' timed out after [0-9]+s\.$",
-    re.IGNORECASE,
-)
 _OUTPUT_PREFIXES = (
     "reports/",
     ".pytest_cache/",
@@ -673,8 +669,7 @@ def _clip_observed_error(text: str, limit: int = 4000) -> str:
     matched = [
         line
         for line in redacted.splitlines()
-        if (_CRASH_OBSERVATION.search(line) and not _MAXFAIL_OBSERVATION.search(line))
-        or _TIMEOUT_OBSERVATION.fullmatch(line)
+        if _CRASH_OBSERVATION.search(line) and not _MAXFAIL_OBSERVATION.search(line)
     ]
     tail = redacted[-limit:]
     if not matched or "\n".join(matched) in tail:

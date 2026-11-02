@@ -1,10 +1,8 @@
 {
   "schema_version": 1,
   "catalog_ref": "70c538263eadb13e4f1538f0b7e5d30237a2a660",
-  "source_ref": "62bfc18209f3458070e84d877a0054df69b0daa7",
-  "source_reviews": {
-    "src/bioetl/domain/_observability_contract_core.py": "Reviewed merged source delta: changes only ASCII normalization of observability pipeline labels; it adds no external resource acquisition, lifecycle, or cleanup behavior, so existing inventory definitions remain applicable."
-  },
+  "source_ref": "70c538263eadb13e4f1538f0b7e5d30237a2a660",
+  "source_reviews": {},
   "expression_updates": {},
   "resource_updates": {},
   "additional_bindings": {},
