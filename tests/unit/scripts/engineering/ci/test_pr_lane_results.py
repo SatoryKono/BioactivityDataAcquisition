@@ -1001,6 +1001,25 @@ def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
     assert targets == ["tests/unit/domain"]
 
 
+def test_affected_targets_map_shared_helper_to_importing_tests(
+    tmp_path: Path,
+) -> None:
+    """Changed test helpers select importing tests, never the helper itself."""
+    helper = tmp_path / "tests" / "helpers" / "cli_process.py"
+    helper.parent.mkdir(parents=True)
+    helper.write_text("def run() -> None: ...\\n", encoding="utf-8")
+    owner = tmp_path / "tests" / "unit" / "sample" / "test_owner.py"
+    owner.parent.mkdir(parents=True)
+    owner.write_text(
+        "from tests.helpers.cli_process import run\\n\\ndef test_owner(): pass\\n",
+        encoding="utf-8",
+    )
+
+    assert affected_pytest_targets(
+        [helper.relative_to(tmp_path).as_posix()], repo_root=tmp_path
+    ) == ["tests/unit/sample/test_owner.py"]
+
+
 def test_affected_targets_map_integration_vcr_policy() -> None:
     """VCR policy edits select the inventory architecture test."""
     repo_root = Path(__file__).resolve().parents[5]
