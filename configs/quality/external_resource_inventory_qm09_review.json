@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "catalog_ref": "57146e50dfa2a48cb93cd0bbbf6c4aeb503aec59",
-  "source_ref": "57146e50dfa2a48cb93cd0bbbf6c4aeb503aec59",
+  "catalog_ref": "84ef6e402c1b4eed08e8f2e8c8fc78e2075bef83",
+  "source_ref": "f7b958414b7533000c29a2113e14b81ef5d38e8a",
   "source_reviews": {
-    "src/bioetl/infrastructure/observability/observability_backend_process.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed.",
-    "src/bioetl/infrastructure/provenance/code_revision.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed.",
-    "src/bioetl/infrastructure/storage/silver/support.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed."
+    "src/bioetl/infrastructure/observability/observability_backend_process.py": "Reviewed Bandit B404 nosec placement onto the subprocess import line; no external resource acquisition, cleanup, or runtime subprocess argv behavior changed.",
+    "src/bioetl/infrastructure/provenance/code_revision.py": "Reviewed Bandit B404 nosec placement onto the subprocess import line; no external resource acquisition, cleanup, or runtime git subprocess behavior changed.",
+    "src/bioetl/infrastructure/storage/silver/support.py": "Reviewed Bandit B404 nosec placement onto the subprocess import line; no external resource acquisition, cleanup, or runtime subprocess behavior changed."
   },
   "expression_updates": {},
   "resource_updates": {},
