@@ -14,9 +14,7 @@ from __future__ import annotations
 import hashlib
 import os
 import re
-import subprocess
-
-# nosec B404 - see suppression registry
+import subprocess  # nosec B404 - see suppression registry
 from dataclasses import dataclass
 from functools import lru_cache
 from importlib.metadata import PackageNotFoundError
