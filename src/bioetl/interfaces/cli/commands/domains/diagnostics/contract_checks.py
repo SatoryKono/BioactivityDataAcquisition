@@ -75,7 +75,7 @@ def _safe_contract_check(
 ) -> ContractCheck:
     try:
         return checker(repo_root)
-    except (OSError, ValueError, yaml.YAMLError) as exc:
+    except (ImportError, OSError, ValueError, yaml.YAMLError) as exc:
         return ContractCheck(
             name=name,
             passed=False,
