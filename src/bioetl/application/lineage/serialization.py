@@ -1,14 +1,20 @@
 from __future__ import annotations
+
 import math
 from collections.abc import Mapping
 from datetime import date, datetime
 from enum import Enum
-from uuid import UUID
 from pathlib import PurePath
-from bioetl.domain.normalization._control_plane_primitives import normalize_control_plane_datetime
+from uuid import UUID
+
+from bioetl.domain.normalization._control_plane_primitives import (
+    normalize_control_plane_datetime,
+)
 from bioetl.domain.normalization.json import serialize_json_canonical
+
 _UNHANDLED = object()
-__all__ = ['mapping_to_plain']
+__all__ = ["mapping_to_plain"]
+
 
 def mapping_to_plain(values: Mapping[str, object]) -> dict[str, object]:
     """Return a JSON-safe deep plain-dict copy of a (possibly frozen) mapping."""
@@ -90,3 +96,4 @@ def _plain_identifier(value: object) -> object:
     if isinstance(value, Enum):
         return _plain_value(value.value)
     return _UNHANDLED
+
