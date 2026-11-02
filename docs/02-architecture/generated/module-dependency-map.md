@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2582`
-- Internal import edges (raw): `8378`
+- Internal import edges (raw): `8382`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `330`
@@ -30,10 +30,10 @@ flowchart LR
     domain -->|1313 OK| domain
     infrastructure -->|799 OK| domain
     infrastructure -->|1294 OK| infrastructure
-    interfaces -->|74 OK| application
+    interfaces -->|75 OK| application
     interfaces -->|64 OK| composition
-    interfaces -->|90 OK| domain
-    interfaces -->|463 OK| interfaces
+    interfaces -->|91 OK| domain
+    interfaces -->|465 OK| interfaces
 ```
 
 ## Layer Edge Table
@@ -49,10 +49,10 @@ flowchart LR
 | `domain`         | `domain`         |    1313 | allowed |
 | `infrastructure` | `domain`         |     799 | allowed |
 | `infrastructure` | `infrastructure` |    1294 | allowed |
-| `interfaces`     | `application`    |      74 | allowed |
+| `interfaces`     | `application`    |      75 | allowed |
 | `interfaces`     | `composition`    |      64 | allowed |
-| `interfaces`     | `domain`         |      90 | allowed |
-| `interfaces`     | `interfaces`     |     463 | allowed |
+| `interfaces`     | `domain`         |      91 | allowed |
+| `interfaces`     | `interfaces`     |     465 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
@@ -108,11 +108,11 @@ flowchart LR
 | `application.services`         | `domain.run_reports`                       |      17 |
 | `infrastructure.schemas`       | `domain.config`                            |      17 |
 | `infrastructure.storage`       | `domain.exceptions`                        |      17 |
-| `interfaces.http`              | `domain.ports`                             |      16 |
+| `interfaces.http`              | `domain.ports`                             |      17 |
+| `interfaces.http`              | `application.services`                     |      16 |
 | `composition.bootstrap`        | `infrastructure.observability`             |      15 |
 | `composition.bootstrap`        | `infrastructure.time`                      |      15 |
 | `composition.factories`        | `application.ports`                        |      15 |
-| `composition.providers`        | `infrastructure.adapters`                  |      15 |
 
 ## Policy Violations
 

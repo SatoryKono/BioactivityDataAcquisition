@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "catalog_ref": "2e5f70acf3df9b4b0e713098be5aeee2533618f8",
-  "source_ref": "5a1e164562dedbdf8569223c4a844e16f78a17b0",
+  "source_ref": "d4ecc543a9a140c7cd47915f6ab9052aac61f586",
   "source_reviews": {
     "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py": "Reviewed pandas 3.1 compatibility change: normalize extension string dtype names to the existing in-memory str contract. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
     "src/bioetl/application/core/_base_transformer_execution_support.py": "Reviewed structural contract support change: classify existing in-memory outcomes and resolve optional-field metadata from the already loaded policy. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
@@ -33,17 +33,22 @@
     "src/bioetl/infrastructure/storage/silver/support.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed.",
     "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py": "Reviewed diagnostics alias and ImportError handling; existing file reads and metric checks remain at the same scopes; no new external acquisition.",
     "src/bioetl/interfaces/http/_control_plane_selector_payloads.py": "Reviewed control-plane selector payload shaping for ops-http. In-memory payload assembly only; no external acquisition, cleanup, endpoint, subprocess, network, lock or lifecycle behavior is introduced.",
-    "src/bioetl/interfaces/http/_selected_run_a2_resolve.py": "Reviewed A2 latest-run resolution with per-run workflow preference: declared RunManifest.workflow_name hits union alias-fallback candidates when undeclared. Catalog reads stay on already-qualified control-plane ports; no new external acquisition, cleanup, subprocess, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/interfaces/http/_health_server_routing_support.py": "Reviewed selector-context unresolved run_id resolution through the shared A2 latest helper (manifests + saved reports) inside the existing asyncio.to_thread selector-context build. Uses existing manifest/report ports already inventoried for control-plane selectors; no new subprocess, network, lock or lifecycle acquisition is introduced.",
+    "src/bioetl/interfaces/http/_report_selector_options.py": "Reviewed filter-options report supplementation and filtered_report_run_candidates used by A2/selector-context. Reads stay on the existing run-report store/port and identity-checked pipeline-run-report payloads; no new subprocess, network, lock or lifecycle acquisition is introduced.",
+    "src/bioetl/interfaces/http/_selected_run_a2_resolve.py": "Reviewed A2 latest-run resolution with declared/alias workflow union and merged identity-checked saved-report candidates matching filter-options supplement_report_options. Catalog reads stay on already-qualified control-plane and report ports; no new external acquisition, cleanup, subprocess, network, lock or lifecycle behavior is introduced.",
     "src/bioetl/interfaces/http/_selected_run_contract_exclusions.py": "Reviewed thin HTTP compatibility re-export of composition contract-field helpers through the sanctioned composite_catalog seam. No external acquisition behavior is introduced.",
     "src/bioetl/interfaces/http/_selected_run_presentation.py": "Reviewed Grafana presentation helpers for selected-run status. In-memory presentation mapping only; no external acquisition, cleanup, subprocess, network, lock or lifecycle behavior is introduced.",
     "src/bioetl/interfaces/http/_selected_run_unavailable.py": "Reviewed extraction of unavailable/gap selected-run payloads from selected_run_status. In-memory payload assembly only; no external acquisition, cleanup, subprocess, network, lock or lifecycle behavior is introduced.",
     "src/bioetl/interfaces/http/control_plane_selector_context.py": "Reviewed selector context wiring for ops-http. Uses existing ports and in-memory shaping; no new external acquisition, cleanup, subprocess, network, lock or lifecycle behavior is introduced.",
-    "src/bioetl/interfaces/http/selected_run_status.py": "Reviewed selected-run-status HTTP projection for phase 3a A2 and contract fields. KeyError from A2 catalog reads maps to QUERY ERROR request_failed alongside OSError/RuntimeError/ValueError. Retains the existing asyncio.to_thread forensic boundary already inventoried for this endpoint; no new subprocess, network, lock or lifecycle acquisition is introduced."
+    "src/bioetl/interfaces/http/selected_run_status.py": "Reviewed selected-run-status HTTP projection for phase 3a A2 and contract fields. A2 latest passes the host run-report store into the shared resolver; KeyError maps to QUERY ERROR request_failed. Retains the existing asyncio.to_thread forensic boundary already inventoried for this endpoint; no new subprocess, network, lock or lifecycle acquisition is introduced."
   },
   "expression_updates": {
     "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py": {
       "report_observability_metric_inventory.collect_metric_inventory(repo_root)": "metric_inventory.collect_metric_inventory(repo_root)",
       "report_observability_metric_inventory.validate_metric_inventory(report, allowlist)": "metric_inventory.validate_metric_inventory(report, allowlist)"
+    },
+    "src/bioetl/interfaces/http/_health_server_routing_support.py": {
+      "asyncio.to_thread(build_selector_context_payload, manifests=manifests, ledger_port=host._run_ledger_port, workflow_manifests=workflow_manifests, selected_workflows=host._read_scope_csv_param(query, 'workflow'), selected_pipelines=host._read_scope_csv_param(query, 'pipeline'), selected_run_types=host._read_scope_csv_param(query, 'run_type'), selected_run_statuses=host._read_scope_csv_param(query, 'run_status'), selected_run_id=read_selected_run_id(host, query))": "asyncio.to_thread(_selector_context_payload_with_a2, host, manifests=manifests, workflow_manifests=workflow_manifests, query=query)"
     }
   },
   "resource_updates": {},
