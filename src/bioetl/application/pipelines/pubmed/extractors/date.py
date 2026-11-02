@@ -19,8 +19,10 @@ __all__ = ["DateExtractor", "MedlineDateParser", "NormalizedDate", "RawDate"]
 
 import calendar
 import re
-from typing import ClassVar, TypedDict, cast
-from xml.etree.ElementTree import Element  # nosec B405 - see suppression registry
+from typing import TYPE_CHECKING, ClassVar, TypedDict, cast
+
+if TYPE_CHECKING:
+    from xml.etree.ElementTree import Element  # nosec B405 - see suppression registry
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
 from bioetl.application.pipelines.pubmed.xml_parser import get_text

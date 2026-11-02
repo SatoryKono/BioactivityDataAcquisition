@@ -256,4 +256,3 @@ jobs:
             echo "- Workflow status: ${{ job.status }}"
             echo "- `mmdc --version`: $(mmdc --version || echo 'unavailable')"
           } >> "$GITHUB_STEP_SUMMARY"
-

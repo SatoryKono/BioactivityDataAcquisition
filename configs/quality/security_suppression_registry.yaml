@@ -152,14 +152,14 @@ entries:
       no ET parsing call sites in this module.
   - id: SUP-ET-014
     path: src/bioetl/infrastructure/adapters/pubmed/xml_processor.py
-    line: 16
+    line: 11
     rule: B405
     symbol: xml.etree.ElementTree
-    owner: stream-a
+    owner: stream-b
     review_date: "2027-03-18"
     rationale: >-
-      parse_response uses defused_ET.fromstring; stdlib ET is used for Element
-      types and ParseError handling only.
+      External XML is parsed with defusedxml.ElementTree.fromstring; stdlib ET
+      provides Element types and annotation-only use, with no ET parsing sites.
   # --- subprocess imports (B404) ---
   - id: SUP-SP-004
     path: src/bioetl/infrastructure/provenance/code_revision.py

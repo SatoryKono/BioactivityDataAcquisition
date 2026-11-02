@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "6dc2c052ff97acb54abbfa1a848225b2ddac4645",
+  "source_ref": "b876988266717d4b7a0c4482d459a0e16e85b7a4",
+  "source_reviews": {
+    "src/bioetl/infrastructure/observability/observability_backend_process.py": "Reviewed same-line Bandit B404 nosec placement on the subprocess import only; protected subprocess boundary and process lifecycle sites are unchanged.",
+    "src/bioetl/infrastructure/provenance/code_revision.py": "Reviewed same-line Bandit B404 nosec placement on the subprocess import only; git/provenance subprocess calls through the protected boundary are unchanged.",
+    "src/bioetl/infrastructure/storage/silver/support.py": "Reviewed same-line Bandit B404 nosec placement on the subprocess import only; Delta/table subprocess and async acquisition sites are unchanged."
+  },
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}

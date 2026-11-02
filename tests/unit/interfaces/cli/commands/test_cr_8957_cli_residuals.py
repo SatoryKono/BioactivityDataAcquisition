@@ -198,6 +198,19 @@ class TestContractChecksDoNotPropagateYamlErrors:
         assert inventory.passed is False
         assert "error" in inventory.details
 
+    def test_missing_engineering_scripts_returns_failed_check(self, tmp_path: Path):
+        from bioetl.interfaces.cli.commands.domains.diagnostics.contract_checks import (
+            _safe_contract_check,
+        )
+
+        def checker(_root: Path):
+            raise ImportError("No module named 'scripts'")
+
+        check = _safe_contract_check("metric_inventory_drift", checker, tmp_path)
+
+        assert check.passed is False
+        assert check.details == {"error": "No module named 'scripts'"}
+
 
 class TestLineageBlankIdentifiers:
     def test_blank_run_id_does_not_win_over_manifest(self) -> None:

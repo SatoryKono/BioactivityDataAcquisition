@@ -8,16 +8,14 @@ Extracted from the PubMed adapter module for better separation of concerns.
 
 from __future__ import annotations
 
-from typing import cast
+import xml.etree.ElementTree as ET  # nosec B405 - type annotations only, see suppression registry
 
-__all__ = ["PubMedXmlProcessor"]
-
-
-import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry
-
-import defusedxml.ElementTree as defused_ET
+from defusedxml import ElementTree as SafeET
+from defusedxml.common import DefusedXmlException
 
 from bioetl.domain.types import JsonDict
+
+__all__ = ["PubMedXmlProcessor"]
 
 
 class PubMedXmlProcessor:
@@ -34,14 +32,14 @@ class PubMedXmlProcessor:
             Parsed XML root element, or None if parsing fails
         """
         try:
-            parsed_root: ET.Element = defused_ET.fromstring(xml_text)
+            parsed_root: ET.Element = SafeET.fromstring(
+                xml_text,
+                forbid_dtd=False,
+                forbid_entities=True,
+                forbid_external=True,
+            )
             return parsed_root
-        except (
-            ET.ParseError,
-            cast(
-                type[BaseException], getattr(defused_ET, "EntitiesForbidden", Exception)
-            ),
-        ):
+        except (SafeET.ParseError, DefusedXmlException):
             return None
 
     @staticmethod
@@ -63,7 +61,7 @@ class PubMedXmlProcessor:
             "article_title": (
                 title_node.text if title_node is not None else "No title found"
             ),
-            "_raw_xml": ET.tostring(article_node, encoding="unicode"),
+            "_raw_xml": SafeET.tostring(article_node, encoding="unicode"),
         }
 
     @staticmethod
@@ -90,7 +88,7 @@ class PubMedXmlProcessor:
         Returns:
             List of article record dictionaries
         """
-        records = []
+        records: list[JsonDict] = []
         for article_node in PubMedXmlProcessor.find_articles(root):
             records.append(PubMedXmlProcessor.extract_record(article_node))
         return records

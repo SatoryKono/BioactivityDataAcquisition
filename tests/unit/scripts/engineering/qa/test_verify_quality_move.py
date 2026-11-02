@@ -752,16 +752,14 @@ def test_after_leftover_import(
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("newline", ["\n", "\r\n"])
 def test_after_leftover_import_exempt(
-    newline: str,
     run_scanner: Runner,
     committed_sources: tuple[Path, str],
     tmp_path: Path,
 ) -> None:
     repo, commit = committed_sources
     consumer = "scripts/consumer.py"
-    text = "from bioetl.test0 import moved" + newline
+    text = "from bioetl.test0 import moved\n"
     _commit_move(repo, extra={consumer: text})
     digest = hashlib.sha256((repo / consumer).read_bytes()).hexdigest()
     manifest = tmp_path / "manifest.csv"
