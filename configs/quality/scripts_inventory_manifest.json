@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-02T07:53:08.416950+00:00",
+  "generated_at": "2026-11-02T09:36:04.026123+00:00",
   "summary": {
     "total_scripts": 705,
     "status_counts": {
@@ -13,7 +13,7 @@
       "ci": 75,
       "docs": 290,
       "other": 21,
-      "scripts": 592,
+      "scripts": 591,
       "skills": 13,
       "tests": 521
     }
@@ -13786,7 +13786,7 @@
         },
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_report.py",
-          "line": 26,
+          "line": 33,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa._tracked_glob import tracked_files"
         },
@@ -16053,13 +16053,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/run_observability_closure_campaign.py",
-          "line": 1812,
+          "line": 1816,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import observability_closure_campaign_cli as _campaign_cli"
         },
         {
           "path": "scripts/engineering/qa/run_observability_closure_campaign.py",
-          "line": 1813,
+          "line": 1817,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_closure_campaign_cli import ("
         }
@@ -16078,7 +16078,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/run_observability_closure_campaign.py",
-          "line": 1656,
+          "line": 1660,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_closure_campaign_validation import ("
         }
@@ -16093,20 +16093,8 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 4,
       "references": [
-        {
-          "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 773,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.qa import observability_metric_inventory_cli as _metric_cli"
-        },
-        {
-          "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 774,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.qa.observability_metric_inventory_cli import ("
-        },
         {
           "path": "tests/unit/repo_backed/scripts/test_report_observability_metric_inventory_cli.py",
           "line": 592,
@@ -16142,17 +16130,11 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_cli.py",
-          "line": 14,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.qa.observability_metric_inventory_report import ("
-        },
-        {
-          "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 227,
+          "line": 18,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_report import ("
         },
@@ -16179,29 +16161,11 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_cli.py",
-          "line": 19,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.qa.observability_metric_inventory_runtime import ("
-        },
-        {
-          "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 270,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.qa import ("
-        },
-        {
-          "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 273,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.qa.observability_metric_inventory_runtime import ("
-        },
-        {
-          "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 276,
+          "line": 23,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_runtime import ("
         }
@@ -16216,29 +16180,17 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_report.py",
-          "line": 17,
+          "line": 24,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_scan import ("
         },
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_runtime.py",
-          "line": 29,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.qa.observability_metric_inventory_scan import ("
-        },
-        {
-          "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 111,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.qa import observability_metric_inventory_scan as _metric_scan"
-        },
-        {
-          "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 112,
+          "line": 33,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_scan import ("
         },
@@ -16259,35 +16211,29 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_cli.py",
-          "line": 22,
+          "line": 26,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_shared import ("
         },
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_report.py",
-          "line": 27,
+          "line": 34,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_shared import ("
         },
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_runtime.py",
-          "line": 37,
+          "line": 41,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_shared import ("
         },
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_scan.py",
-          "line": 15,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.qa.observability_metric_inventory_shared import ("
-        },
-        {
-          "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 45,
+          "line": 31,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_shared import ("
         }
@@ -17790,7 +17736,7 @@
         },
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_runtime.py",
-          "line": 588,
+          "line": 444,
           "source_group": "scripts",
           "text": "\"python -m scripts.engineering.qa.report_observability_metric_inventory \""
         },
