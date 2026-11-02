@@ -1,13 +1,37 @@
 {
   "schema_version": 1,
-  "catalog_ref": "24e7c8c183f41d02b3ba6c5a32d3910374f2807b",
-  "source_ref": "0e81c01f765208c8ad27350583c60060012f51c7",
+  "catalog_ref": "dd267d3769ba1dbbee15188ddbe354108b278f88",
+  "source_ref": "ab03577090a0294ae1b0f18d2125ea82ffe0ecd0",
   "source_reviews": {
-    "src/bioetl/domain/_observability_contract_core.py": "Reviewed pipeline label sanitization regex hardening (ASCII word-boundary); no external resource acquisition or cleanup behavior changed.",
-    "src/bioetl/domain/schemas/chembl/publication.py": "Reviewed creation_date calendar Series.map boolean typing cleanup; no external resource acquisition or cleanup behavior changed.",
-    "src/bioetl/infrastructure/validation/contract_validator.py": "Reviewed gold validator record materialization simplification; no external resource acquisition or cleanup behavior changed."
+    "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py": "Reviewed pandas 3.1 compatibility change: normalize extension string dtype names to the existing in-memory str contract. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/application/core/_base_transformer_execution_support.py": "Reviewed structural contract support change: classify existing in-memory outcomes and resolve optional-field metadata from the already loaded policy. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/application/core/_base_transformer_structural_support.py": "Reviewed structural support change: defer internal imports and attach already available policy metadata to in-memory filter errors. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/application/pipelines/pubmed/_block_definitions_analytics.py": "Reviewed source delta for the PR merge; acquisition census confirms no new external resource site, and no resource creation/cleanup lifecycle behavior changed.",
+    "src/bioetl/application/pipelines/pubmed/_block_definitions_base.py": "Reviewed source delta for the PR merge; acquisition census confirms no new external resource site, and no resource creation/cleanup lifecycle behavior changed.",
+    "src/bioetl/application/pipelines/pubmed/_block_definitions_edition.py": "Reviewed source delta for the PR merge; acquisition census confirms no new external resource site, and no resource creation/cleanup lifecycle behavior changed.",
+    "src/bioetl/application/pipelines/pubmed/_block_definitions_identifiers.py": "Reviewed source delta for the PR merge; acquisition census confirms no new external resource site, and no resource creation/cleanup lifecycle behavior changed.",
+    "src/bioetl/application/pipelines/pubmed/_block_helpers.py": "Reviewed source delta for the PR merge; acquisition census confirms no new external resource site, and no resource creation/cleanup lifecycle behavior changed.",
+    "src/bioetl/application/pipelines/pubmed/extractors/abstract.py": "Reviewed source delta for the PR merge; acquisition census confirms no new external resource site, and no resource creation/cleanup lifecycle behavior changed.",
+    "src/bioetl/application/pipelines/pubmed/extractors/author.py": "Reviewed source delta for the PR merge; acquisition census confirms no new external resource site, and no resource creation/cleanup lifecycle behavior changed.",
+    "src/bioetl/application/pipelines/pubmed/extractors/base.py": "Reviewed source delta for the PR merge; acquisition census confirms no new external resource site, and no resource creation/cleanup lifecycle behavior changed.",
+    "src/bioetl/application/pipelines/pubmed/extractors/classification.py": "Reviewed source delta for the PR merge; acquisition census confirms no new external resource site, and no resource creation/cleanup lifecycle behavior changed.",
+    "src/bioetl/application/pipelines/pubmed/extractors/date.py": "Reviewed source delta for the PR merge; acquisition census confirms no new external resource site, and no resource creation/cleanup lifecycle behavior changed.",
+    "src/bioetl/application/pipelines/pubmed/extractors/identifier.py": "Reviewed source delta for the PR merge; acquisition census confirms no new external resource site, and no resource creation/cleanup lifecycle behavior changed.",
+    "src/bioetl/application/pipelines/pubmed/transformer.py": "Reviewed PubMed parser/transformer integration; operates on the fetched payload and parsed records, no new external resource acquisition or lifecycle change.",
+    "src/bioetl/application/pipelines/pubmed/xml_parser.py": "Reviewed parser type annotation suppression placement; runtime parsing remains in the hardened XML adapter, no acquisition or lifecycle change.",
+    "src/bioetl/domain/normalization/identifiers.py": "Reviewed source delta for the PR merge; acquisition census confirms no new external resource site, and no resource creation/cleanup lifecycle behavior changed.",
+    "src/bioetl/domain/normalization/json.py": "Reviewed optimization of JSON normalization for built-in scalars, dicts and lists, with existing recursive mapping/sequence handling retained for other types. The JsonDict import also moves to its defining leaf module without changing the type. This changes in-memory value conversion only; it introduces no external resource acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior.",
+    "src/bioetl/domain/schemas/chembl/publication.py": "Reviewed pandas 3.1 compatibility change: cast the mapped calendar predicate to boolean before the existing nullable Series check. No external acquisition, cleanup, endpoint, subprocess, file, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/infrastructure/adapters/common/_api_request_sanitize.py": "Reviewed request sanitization and existing call boundary; transport resource creation and cleanup are unchanged.",
+    "src/bioetl/infrastructure/adapters/pubmed/xml_processor.py": "Reviewed hardened XML parsing over fetched response text; DTD/entity handling and parser serialization only, no external resource acquisition.",
+    "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py": "Reviewed diagnostics alias and ImportError handling; existing file reads and metric checks remain at the same scopes; no new external acquisition."
   },
-  "expression_updates": {},
+  "expression_updates": {
+    "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py": {
+      "report_observability_metric_inventory.collect_metric_inventory(repo_root)": "metric_inventory.collect_metric_inventory(repo_root)",
+      "report_observability_metric_inventory.validate_metric_inventory(report, allowlist)": "metric_inventory.validate_metric_inventory(report, allowlist)"
+    }
+  },
   "resource_updates": {},
   "additional_bindings": {},
   "new_resources": [],

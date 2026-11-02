@@ -2,11 +2,6 @@
 
 from __future__ import annotations
 
-# SANCTIONED: pathlib.Path used as value object for path computation only.
-# No I/O operations (open, read, write) are performed here.
-# See domain/README.md#sanctioned-exceptions
-from pathlib import Path
-
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.contract_identity import (
     CompatibilityLevel,
@@ -164,14 +159,6 @@ def build_existing_version_issue(
         severity=RegistryValidationSeverity.WARNING,
         contract_ref=candidate.identity.contract_ref,
     )
-
-
-def resolve_path(reference: str, base_path: Path | None) -> Path:
-    """Resolve possibly relative path against optional base directory."""
-    candidate = Path(reference)
-    if candidate.is_absolute() or base_path is None:
-        return candidate
-    return base_path / candidate
 
 
 def build_version_regression_message(

@@ -6,7 +6,6 @@ Centralized JSON serialization for deterministic content hashing.
 The canonical JSON codec merged into this package from the former
 ``domain/serialization.py`` module (#11788), so the package loads through the
 normal import graph instead of a filesystem-based module load.
-Snapshot helpers from ``snapshot_serialization`` are re-exported alongside the
 codec API (#11241).
 
 Provides canonical JSON serialization using orjson for optimal performance.
@@ -50,10 +49,6 @@ from bioetl.domain.normalization.json import (
 )
 from bioetl.domain.normalization.json import (
     serialize_json_canonical as _serialize_json_canonical,
-)
-from bioetl.domain.serialization.snapshot_serialization import (
-    normalize_snapshot,
-    to_serializable_mapping,
 )
 from bioetl.domain.types import JsonDict
 
@@ -316,9 +311,7 @@ __all__ = [
     "deserialize_from_json",
     "flatten_arrow_table_for_export",
     "is_orjson_available",
-    "normalize_snapshot",
     "serialize_to_canonical_json",
     "serialize_to_json",
     "serialize_to_json_canonical",
-    "to_serializable_mapping",
 ]
