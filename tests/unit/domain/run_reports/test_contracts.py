@@ -83,6 +83,17 @@ def test_workflow_run_report_golden_matches_v1_schema() -> None:
     assert payload["identity"]["status"] == "success"
 
 
+def test_run_evidence_location_golden_matches_v1_schema() -> None:
+    payload = validate_fixture(
+        schema_name="run_evidence_location.v1.json",
+        fixture_name="run_evidence_location_golden.json",
+    )
+    assert payload["schema_version"] == "run_evidence_location_v1"
+    assert payload["kind"] == "pipeline"
+    assert payload["root_alias"] == "dashboard_data"
+    assert payload["relative_data_root"].startswith("workflow-limit100-")
+
+
 def test_golden_json_is_canonically_ordered() -> None:
     for path in sorted(FIXTURE_ROOT.glob("*_run_report_golden.json")):
         payload = json.loads(path.read_text(encoding="utf-8"))
