@@ -1030,7 +1030,11 @@ def _helper_path_targets(path: str, root: Path) -> list[str]:
     if helpers_init.is_file() and _imports_module(helpers_init, module):
         importing_tests |= _importing_script_tests(test_roots, "tests.helpers")
     if importing_tests:
-        return sorted(test.relative_to(root).as_posix() for test in importing_tests)
+        targets = {
+            test.parent if test.name == "conftest.py" else test
+            for test in importing_tests
+        }
+        return sorted(test.relative_to(root).as_posix() for test in targets)
     return _helper_suite(path, root)
 
 
@@ -1048,7 +1052,11 @@ def _script_targets(path: str, root: Path) -> list[str]:
         if (candidate := directory / direct_name).is_file()
     }
     module = ".".join(("scripts", *relative.with_suffix("").parts))
-    selected = sorted(direct | _importing_script_tests(test_roots, module))
+    importing_tests = _importing_script_tests(test_roots, module)
+    selected = direct | {
+        test.parent if test.name == "conftest.py" else test
+        for test in importing_tests
+    }
     if selected:
         return [test.relative_to(root).as_posix() for test in selected]
     return [
@@ -1058,13 +1066,14 @@ def _script_targets(path: str, root: Path) -> list[str]:
     ]
 
 
-def _importing_script_tests(roots: tuple[Path, Path], module: str) -> set[Path]:
-    """Return test files that statically import the script module."""
+def _importing_script_tests(roots: tuple[Path, ...], module: str) -> set[Path]:
+    """Return tests and conftest files that statically import a module."""
     return {
         test
         for root in roots
         if root.is_dir()
-        for test in root.rglob(TEST_FILE_GLOB)
+        for pattern in (TEST_FILE_GLOB, "conftest.py")
+        for test in root.rglob(pattern)
         if _imports_module(test, module)
     }
 
