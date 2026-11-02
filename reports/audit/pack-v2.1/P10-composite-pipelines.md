@@ -47,7 +47,7 @@ Workflow lifecycle is owned by `WorkflowExecutionState` (`created`, `running`, `
 ### Join/Cardinality Matrix
 - `EnricherConfig` rejects `MANY_TO_ONE` when aggregation is absent (`src/bioetl/domain/composite/config_models.py::_validate`).
 - Unit tests cover both rejection without aggregation and acceptance with aggregation (`tests/unit/domain/composite/test_composite_config.py::test_enricher_config_many_to_one_requires_aggregation`, `::test_enricher_config_many_to_one_with_aggregation`).
-- Inner mappings verified for key presense (keys ⊆ seed outputs).
+- Inner mappings verified for key presence (keys ⊆ seed outputs).
 
 ### Recovery/Equivalence Matrix
 - Resume points defined by `is_resumable` (SEED_COMPLETED, DEPENDENCIES_RUNNING, DEPENDENCIES_COMPLETED, ENRICHING, ENRICHMENT_COMPLETED, FAILED).
@@ -81,6 +81,11 @@ Workflow lifecycle is owned by `WorkflowExecutionState` (`created`, `running`, `
 
 ## J. Self-check
 - Verified candidate claims against the domain guard and focused unit tests. Workflow-level state is documented separately from composite pipeline state. Evidence ledger strictly follows `Evidence ID | class | freshness | source` schema. Output contains required P10 section.
+- **Checks executed** on tip `840a127f5e` (UTC `2026-11-02T21:22:11Z`), commands recorded as run (`.venv/bin/…`); not a full-repo gate:
+  - `.venv/bin/ruff check src/bioetl/domain/composite` → exit `0` (`All checks passed!`)
+  - `.venv/bin/mypy src/bioetl/domain/composite` → exit `0` (`Success: no issues found in 30 source files`)
+  - `.venv/bin/pytest tests/unit/domain/composite/ --tb=no` → exit `0` (`482 passed in 1.90s`)
+- Scope note: mypy/ruff limited to `src/bioetl/domain/composite`; pytest limited to `tests/unit/domain/composite/`. Broader application/control-plane suites were **not** re-run here → treat those as **INCOMPLETE**, not PASS.
 
 ## K. Verdict
 - The reviewed configuration guard and preflight validation reject the cited invalid cases. Workflow execution and composite pipeline state have separate owners. No issue drafts are warranted for the withdrawn candidates.
