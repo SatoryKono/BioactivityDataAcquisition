@@ -77,6 +77,7 @@ def _derive_provider(pipeline: str, workflow: str) -> str:
 def test_runtime_variable_dependencies():
     """Fleet runtime evidence retains pipeline/run_type dependencies on Incident."""
     variables = _templating_map("grafana/dashboards/bioetl-incident-v1.json")
+    # Phase 4.5: selected_* removed from Incident (unused outside Overview/DQ).
     assert {
         "workflow",
         "pipeline",
@@ -84,8 +85,6 @@ def test_runtime_variable_dependencies():
         "run_id",
         "provider",
         "read_latency_quantile",
-        "selected_pipeline",
-        "selected_run_id",
     } == set(variables)
     query = str(variables["run_type"].get("definition") or "")
     assert "filter-options?dimension=run_type" in query

@@ -132,14 +132,10 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "step_kind",
     },
 }
-for _name in (
-    "bioetl-control-plane-v1.json",
-    "bioetl-overview-v2.json",
-    "bioetl-dq-v2.json",
-    "bioetl-incident-v1.json",
-    "bioetl-run-explorer-v1.json",
-):
-    # Phase-1 A2 detail resolve: selected_* from selector-context, not fleet filters.
+# Phase-1 A2 detail resolve: selected_* from selector-context on boards that
+# still query with ${selected_pipeline}/${selected_run_id} (Overview + DQ).
+# Phase 4.5: dropped unused selected_* from Incident / Control Plane / Run Explorer.
+for _name in ("bioetl-overview-v2.json", "bioetl-dq-v2.json"):
     EXPECTED_VARS_BY_DASHBOARD[_name].update({"selected_pipeline", "selected_run_id"})
 # Phase 4.1: provider_for_pipeline removed as unused; Incident keeps read_latency_quantile.
 EXPECTED_VARS_BY_DASHBOARD["bioetl-incident-v1.json"].add("read_latency_quantile")
