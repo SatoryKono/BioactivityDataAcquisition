@@ -254,7 +254,7 @@ def test_delivery_ancestry_uses_independent_publication_receipt(
         lambda path: receipt["github_pull_request"],
     )
 
-    provenance.require_published_ancestor(root, payload["source_commit"])
+    assert provenance.require_published_ancestor(root, payload["source_commit"]) is None
 
 
 def test_shallow_endpoints_without_intermediate_require_verified_proof(bridge) -> None:
