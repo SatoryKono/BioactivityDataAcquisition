@@ -7,6 +7,10 @@ these names so tests and patch seams keep working.
 
 from __future__ import annotations
 
+from bioetl.infrastructure.observability import (
+    metric_inventory_shared as _metric_inventory_shared,
+)
+
 import sys
 import re
 from pathlib import Path
@@ -30,9 +34,7 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (
 )
 
 
-class _StartupInfoLike(Protocol):
-    dwFlags: int
-    wShowWindow: int
+_StartupInfoLike = _metric_inventory_shared._StartupInfoLike
 
 
 _CANONICAL_METRIC_RE = re.compile(r"\bbioetl_[a-z0-9_]+\b")
@@ -71,30 +73,13 @@ _TEXT_SUFFIXES = {".py", ".md", ".json", ".yml", ".yaml"}
 MetricInventoryReport = dict[str, list[str] | dict[str, list[str]]]
 
 
-class _ObservabilityEventInventory(TypedDict):
-    declared_observability_events: list[str]
-    emitted_observability_events: list[str]
-    retired_declared_observability_events: list[str]
-    retired_declared_observability_events_emitted: list[str]
-    raw_unused_declared_observability_events: list[str]
-    emitted_observability_events_without_contract: list[str]
-    observability_event_emitters: dict[str, list[str]]
-    domain_event_emitters: list[str]
+_ObservabilityEventInventory = _metric_inventory_shared._ObservabilityEventInventory
 
 
-class _CardinalityReviewFields(TypedDict):
-    runtime_cardinality_candidates: list[str]
-    runtime_cardinality_reviewed: list[str]
-    runtime_cardinality_review_required: list[str]
-    runtime_cardinality_evidence: dict[str, list[str]]
-    runtime_cardinality_threshold_violations: list[str]
+_CardinalityReviewFields = _metric_inventory_shared._CardinalityReviewFields
 
 
-class _RiskyLabelReviewFields(TypedDict):
-    declared_risky_label_candidates: list[str]
-    contract_bounded_risky_labels: set[str]
-    declared_risky_label_reviewed: list[str]
-    declared_risky_label_review_required: list[str]
+_RiskyLabelReviewFields = _metric_inventory_shared._RiskyLabelReviewFields
 
 
 _TEXT_FILE_DISCOVERY_CACHE: dict[str, tuple[Path, ...]] = {}

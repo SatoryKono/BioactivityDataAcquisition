@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.observability import (
+    metric_inventory_policy as _metric_inventory_policy,
+)
+
 import argparse
 import json
 import shlex
@@ -183,35 +187,7 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _parse_allowlist_metric_name(
-    key: str, item: object
-) -> str | None:  # pragma: no cover - exercised through _load_drift_allowlist
-    if isinstance(item, str):
-        if key in _ALLOWLIST_METADATA_REQUIRED_KEYS:
-            raise ValueError(
-                f"{key} entries must be mappings with metric/owner/reason/review_date"
-            )
-        return item
-    if not isinstance(item, dict):
-        raise ValueError(f"{key} entries must be strings or mappings")
-
-    metric_name = item.get("metric")
-    if not isinstance(metric_name, str) or not metric_name:
-        raise ValueError(f"{key} mapping entries must declare a non-empty metric")
-
-    if key in _ALLOWLIST_METADATA_REQUIRED_KEYS:
-        for field_name in ("owner", "reason", "review_date"):
-            field_value = item.get(field_name)
-            if not isinstance(field_value, str) or not field_value.strip():
-                raise ValueError(
-                    f"{key} metric {metric_name!r} is missing required {field_name}"
-                )
-        _validate_allowlist_review_date(
-            key=key,
-            metric_name=metric_name,
-            raw_review_date=str(item["review_date"]),
-        )
-    return metric_name
+_parse_allowlist_metric_name = _metric_inventory_policy._parse_allowlist_metric_name
 
 
 def _validate_allowlist_review_date(
@@ -269,29 +245,7 @@ def _load_drift_allowlist(path: Path) -> dict[str, set[str]]:
     return allowlist
 
 
-def validate_metric_inventory(
-    report: dict[str, list[str] | dict[str, list[str]]],
-    *,
-    allowlist: dict[str, set[str]] | None = None,
-) -> dict[str, list[str]]:
-    """Return unallowed metric drift grouped by deterministic check category."""
-    allowed = allowlist or {}
-    violations: dict[str, list[str]] = {}
-    for key in _CHECK_DRIFT_KEYS:
-        values = report.get(key, [])
-        if not isinstance(values, list):
-            continue
-        allowed_values = allowed.get(key, set())
-        unallowed = sorted(
-            {
-                value
-                for value in values
-                if _drift_allowlist_token(key, value) not in allowed_values
-            }
-        )
-        if unallowed:
-            violations[key] = unallowed
-    return violations
+validate_metric_inventory = _metric_inventory_policy.validate_metric_inventory
 
 
 def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
