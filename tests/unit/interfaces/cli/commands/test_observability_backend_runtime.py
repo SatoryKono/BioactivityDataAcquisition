@@ -219,6 +219,14 @@ def test_protected_command_timeout_kills_pipe_holding_descendant(
     grandchild_pid = int(pid_file.read_text())
     deadline = time.monotonic() + 2.0
     while time.monotonic() < deadline:
+        stat_path = Path(f"/proc/{grandchild_pid}/stat")
+        if stat_path.exists():
+            # A zombie has exited and cannot keep the pipe open, even when PID 1
+            # has not yet reaped it.
+            stat = stat_path.read_text(encoding="utf-8")
+            state = stat[stat.rfind(")") + 2 : stat.rfind(")") + 3]
+            if state == "Z":
+                break
         try:
             os.kill(grandchild_pid, 0)
         except ProcessLookupError:
