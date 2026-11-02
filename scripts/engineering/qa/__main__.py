@@ -42,6 +42,7 @@ Commands:
     report-port-adapter-factory-coverage Generate/check core port-adapter-factory coverage matrix
     report-module-coverage Generate/check module-level coverage inventory
     check-branch-coverage Enforce branch coverage from reports/coverage/coverage.xml
+    requalify-external-resource-inventory Review/materialize a pinned source delta
     report-dead-code-inventory Generate repo-local static dead-code review inventory
     report-weak-assert-inventory Generate advisory weak-assert triage inventory
     report-vcr-corpus-budget Generate VCR corpus size budget report
@@ -180,6 +181,9 @@ COMMAND_MODULES: dict[str, str] = {
     ),
     "check-external-resource-inventory": (
         "scripts.engineering.qa.external_resource_inventory"
+    ),
+    "requalify-external-resource-inventory": (
+        "scripts.engineering.qa.requalify_external_resource_inventory"
     ),
     "report-composition-protocol-inventory": (
         "scripts.engineering.qa.report_composition_protocol_inventory"
