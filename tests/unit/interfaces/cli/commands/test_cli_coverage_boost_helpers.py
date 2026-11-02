@@ -843,6 +843,7 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
+    original_find_pids = backend_process._find_listening_backend_pids_by_port
     fake_output = "\n".join(
         [
             'LISTEN 0 128 127.0.0.1:9090 0.0.0.0:* users:(("python",pid=123,fd=4))',
@@ -954,13 +955,10 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
             ]
         )
     )
-    import os as os_module
-    import subprocess as subprocess_module
-
     monkeypatch.setattr(
-        subprocess_module, "run", lambda *args, **kwargs: windows_result
+        backend_process, "_run_listener_probe", lambda _command: windows_result.stdout
     )
-    monkeypatch.setattr(os_module, "name", "nt")
+    monkeypatch.setattr(backend_process.os, "name", "nt")
     monkeypatch.setattr(
         backend_process, "_resolve_system_executable", lambda x: "netstat"
     )
