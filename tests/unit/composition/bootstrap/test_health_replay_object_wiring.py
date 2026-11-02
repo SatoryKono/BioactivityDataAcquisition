@@ -106,3 +106,83 @@ def test_bootstrap_verifies_original_objects(
     assert {
         name: path.read_bytes() for name, path in paths.items() if path.exists()
     } == before
+
+
+def test_isolated_root_verifier_ready_while_default_root_misses(tmp_path, monkeypatch):
+    """RF-001 control: ReplayObjectVerifier passes only on the owning data root."""
+    default_data = tmp_path / "data"
+    isolated = default_data / "workflow-limit100-20261102T144403Z" / "chembl_assay"
+    monkeypatch.setattr(
+        health_server,
+        "get_settings",
+        lambda: SimpleNamespace(
+            data_dir=str(default_data),
+            archive_root=None,
+            report_root=tmp_path / "reports",
+        ),
+    )
+    isolated_deps = health_server.create_health_server_dependencies(
+        metrics=MagicMock(),
+        checkpoint_port_factory=lambda _: MagicMock(),
+        data_root=isolated,
+    )
+    default_deps = health_server.create_health_server_dependencies(
+        metrics=MagicMock(),
+        checkpoint_port_factory=lambda _: MagicMock(),
+        data_root=default_data,
+    )
+    run_id = UUID("ac0b4e22-6a6e-5b7e-818e-106aeaf41390")
+    control = isolated / "output" / "control"
+    config = {"identity_version": "effective-config-v1", "config_data": {"limit": 100}}
+    FileEffectiveConfigArtifactStore(control / "effective_config").save(
+        artifact_id="saved-config",
+        run_id=run_id,
+        payload={
+            "artifact_id": "saved-config",
+            "semantic_artifact": {"effective_execution_config": config},
+        },
+    )
+    lock_bytes = b"isolated lock bytes\n"
+    lock_hash = sha256(lock_bytes).hexdigest()
+    bronze_bytes = b'{"assay_id":"CHEMBL1"}\n'
+    (control / "dependency_locks" / lock_hash).parent.mkdir(parents=True, exist_ok=True)
+    (control / "dependency_locks" / lock_hash).write_bytes(lock_bytes)
+    bronze = isolated / "output" / "bronze" / "chembl" / "assay" / "batch.jsonl"
+    bronze.parent.mkdir(parents=True, exist_ok=True)
+    bronze.write_bytes(bronze_bytes)
+    manifest = SimpleNamespace(
+        run_id=run_id,
+        code_provenance=SimpleNamespace(
+            effective_config_hash=stable_json_hash(config),
+            effective_config_artifact_id="saved-config",
+            dependency_lock_hash="sha256:" + lock_hash,
+        ),
+        source_refs=(
+            SimpleNamespace(
+                provider="chembl",
+                entity="assay",
+                input_snapshots=(
+                    SimpleNamespace(
+                        immutable_uri="bronze://chembl/assay/batch.jsonl",
+                        content_hash=sha256(bronze_bytes).hexdigest(),
+                    ),
+                ),
+            ),
+        ),
+    )
+    before = {
+        "config": (control / "effective_config" / "saved-config.json").read_bytes(),
+        "lock": (control / "dependency_locks" / lock_hash).read_bytes(),
+        "bronze": bronze.read_bytes(),
+    }
+    assert isolated_deps.run_manifest_port.verify_replay_objects(manifest) == {
+        "effective_config_hash": True,
+        "dependency_lock_hash": True,
+        "input_snapshot_fingerprint": True,
+    }
+    assert default_deps.run_manifest_port.verify_replay_objects(manifest) == {}
+    assert (control / "effective_config" / "saved-config.json").read_bytes() == before[
+        "config"
+    ]
+    assert (control / "dependency_locks" / lock_hash).read_bytes() == before["lock"]
+    assert bronze.read_bytes() == before["bronze"]
