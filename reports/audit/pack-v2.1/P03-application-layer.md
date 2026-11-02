@@ -16,7 +16,7 @@
 ## C. Evidence Ledger
 - `E1 NORMATIVE`: `docs/00-project/RULES.md`
 - `E2 STATIC`: `src/bioetl/application/core/runner.py`, `src/bioetl/application/core/batch_execution/run_service.py`, `src/bioetl/application/core/lifecycle/batch_fsm.py`
-- `E3 EXECUTABLE`: Results from the architecture-boundary and cancellation tests listed in the Verification Matrix.
+- `E3 EXECUTABLE`: Named pytest invocations in the Verification Matrix (H). Checkout for those runs: `2013e9015dfee5ce7767aa8434ed31eed60e3e66` (**≠** pinned `56484ffd123b719a91811a53da6e284522d02a0d`; tip adds this audit report + inventory only — `git diff --stat 56484ffd12..2013e9015d -- src/bioetl/application/ tests/architecture/test_layer_dependencies.py tests/architecture/test_no_structlog_in_application_interfaces.py tests/unit/application/core/test_batch_execution_lifecycle.py` empty). Env: `uv` + Python `3.13.16`, Linux-x86_64.
 - `E4 CROSS-PACK`: P02 domain/port inventory and P06 DI/wiring report (present; not treated as missing).
 
 ## D. Findings Register
@@ -36,10 +36,10 @@ No confirmed application-layer defect was established by this bounded review. Th
 - No code remediation is proposed from the bounded evidence. Extend the audit only if evidence for failure/retry policy, side-effect sequencing, or a full application-side DI mapping walk from P06 is required.
 
 ## H. Verification Matrix
-- `tests/architecture/test_layer_dependencies.py::test_application_layer_no_infrastructure_imports`: PASS (1 passed).
-- `tests/architecture/test_no_structlog_in_application_interfaces.py::TestNoStructlogInApplicationLayer::test_no_structlog_in_application_layer`: PASS (1 passed).
-- Cancellation finalization: `tests/unit/application/core/test_batch_execution_lifecycle.py::test_run_service_finalizes_on_cancelled_error` and `::test_run_service_finalizes_when_cancel_interrupts_shield` — PASS (2 passed).
-- Failure/retry semantics and side-effect sequencing: NOT_RUN; no result is claimed.
+- Import boundary: `uv run --frozen --no-build pytest tests/architecture/test_layer_dependencies.py::test_application_layer_no_infrastructure_imports` — checkout=`2013e9015d`, UTC start=`2026-11-02T22:48:02Z`, UTC end=`2026-11-02T22:48:03Z`, exit_code=`0`, output=`1 passed in 0.65s` → **PASS**.
+- No direct `structlog` in application interfaces: `uv run --frozen --no-build pytest tests/architecture/test_no_structlog_in_application_interfaces.py::TestNoStructlogInApplicationLayer::test_no_structlog_in_application_layer` — checkout=`2013e9015d`, UTC start=`2026-11-02T22:48:03Z`, UTC end=`2026-11-02T22:48:05Z`, exit_code=`0`, output=`1 passed in 0.85s` → **PASS**.
+- Cancellation finalization: `uv run --frozen --no-build pytest tests/unit/application/core/test_batch_execution_lifecycle.py::test_run_service_finalizes_on_cancelled_error tests/unit/application/core/test_batch_execution_lifecycle.py::test_run_service_finalizes_when_cancel_interrupts_shield` — checkout=`2013e9015d`, UTC start=`2026-11-02T22:48:05Z`, UTC end=`2026-11-02T22:48:06Z`, exit_code=`0`, output=`2 passed in 1.06s` → **PASS** (those two scenarios only).
+- Failure/retry semantics and side-effect sequencing: **NOT_RUN** / `NOT_VERIFIABLE`; no command was executed and no result is claimed.
 
 ## I. NOT_VERIFIABLE and missing evidence
 - Failure/retry semantics and general side-effect sequencing were not exercised.
