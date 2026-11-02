@@ -288,25 +288,6 @@ def test_shadow_compare_routes_12380_acceptance_report() -> None:
     assert report["covers_full_suite"] is False
 
 
-@pytest.mark.parametrize(
-    "path",
-    (
-        "reports/audit/pack-v2.1/P02-ddd-domain.md",
-        "reports/audit/pack-v2.1/P05-interfaces-contracts.md",
-    ),
-)
-def test_shadow_compare_routes_pack_v21_stage_audit_reports(path: str) -> None:
-    """pack-v2.1 stage handoffs stay on the cleanup-inventory contract."""
-    repo_root = Path(__file__).resolve().parents[5]
-
-    report = build_shadow_compare([path], repo_root=repo_root)
-
-    assert report["selected"] == [
-        "tests/architecture/test_documentation_cleanup_inventory.py"
-    ]
-    assert report["covers_full_suite"] is False
-
-
 @pytest.mark.parametrize("path", [".gitleaksignore", ".gitleaks.toml"])
 def test_shadow_compare_routes_secret_scanner_policy(path: str) -> None:
     repo_root = Path(__file__).resolve().parents[5]
@@ -557,6 +538,21 @@ def test_shadow_compare_routes_qm07_report_to_isolation_contracts() -> None:
         "tests/architecture/qm_07/test_distribution_isolation.py",
         "tests/architecture/qm_07/test_qm07_cold_imports.py",
     }
+
+
+@pytest.mark.parametrize(
+    "path",
+    (
+        "reports/qm07/acceptance.md",
+        "reports/qm07/passport.md",
+    ),
+)
+def test_shadow_compare_routes_qm07_closeout_evidence(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert report["selected"] == [
+        "tests/architecture/test_qm07_cold_imports.py",
+    ]
 
 
 @pytest.mark.parametrize(
@@ -814,10 +810,6 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
             "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
         },
         "configs/quality/external_resource_inventory_qm09_review.json": {
-            "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-        },
-        "configs/quality/external_resource_inventory_pr12688_rf002_review.json": {
             "tests/architecture/test_external_resource_inventory_catalog.py",
             "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
         },
@@ -1210,6 +1202,38 @@ def test_affected_targets_map_test_governance_audit_config() -> None:
     ) == [
         "tests/architecture/test_test_governance_audit.py",
         "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
+    ]
+
+
+def test_shadow_compare_routes_assertless_ratchet_config() -> None:
+    """The shrink-only assertless ratchet has explicit owning tests."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        ["configs/quality/assertless_ratchet.yaml"],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/architecture/test_arch_s4_s9_gates.py",
+        "tests/architecture/test_test_governance_audit.py",
+        "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
+    ]
+
+
+def test_shadow_compare_routes_diagram_runner_paths() -> None:
+    """Diagram tooling changes select their runner and budget contracts."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        ["scripts/diagrams/README.md", "scripts/diagrams/run_diagram_checks.sh"],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/architecture/test_diagram_quality_budget_security.py",
+        "tests/architecture/test_run_diagram_checks_script.py",
+        "tests/architecture/test_diagram_issues_6205_6211_closeout.py",
     ]
 
 

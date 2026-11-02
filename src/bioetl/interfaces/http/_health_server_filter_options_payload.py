@@ -16,9 +16,6 @@ from bioetl.interfaces.http._report_selector_options import (
     load_report_selector_entries,
     supplement_report_options,
 )
-from bioetl.interfaces.http._run_type_universe_options import (
-    supplement_prometheus_run_type_options,
-)
 from bioetl.interfaces.http.control_plane_selector_context import (
     RunIdOptionPolicy,
     finalize_run_id_empty_catalog_label,
@@ -32,7 +29,6 @@ async def build_filter_options_payload(
     options_builder: Callable[..., dict[str, object]],
     add_run_id_items: Callable[..., None],
     include_reports: bool,
-    deadline: float,
 ) -> dict[str, object]:
     """Combine manifest and report catalogs into a filter-options payload."""
     manifest_port = host._run_manifest_port
@@ -106,53 +102,13 @@ async def build_filter_options_payload(
             scopes=scopes,
             entries=report_entries,
         )
-    payload = _finalize_run_id_options_label(
-        payload, dimension=dimension, response_shape=response_shape
-    )
-    # Additive PromQL universe merge for run_type (fail-open, budget-capped).
-    # Gate kept in a helper so Sonar CC stays within leak budget while the
-    # asyncio.to_thread census site remains under build_filter_options_payload.
-    prometheus_base_url = _prometheus_base_url_for_run_type_options(
-        host, dimension=dimension, selected_workflows=selected_workflows
-    )
-    if prometheus_base_url:
-        # fmt: off
-        # One-line call keeps COMP-004 segment for report-options to_thread unique.
-        payload = await asyncio.to_thread(supplement_prometheus_run_type_options, payload, prometheus_base_url=prometheus_base_url, deadline=deadline, response_shape=response_shape, pipelines=selected_pipelines)  # noqa: E501
-        # fmt: on
+    if dimension == "run_id" and response_shape == "options":
+        payload = finalize_run_id_empty_catalog_label(payload)
     add_run_id_items(payload, response_shape=response_shape, dimension=dimension)
     return payload
 
 
-def _finalize_run_id_options_label(
-    payload: dict[str, object],
-    *,
-    dimension: str,
-    response_shape: str,
-) -> dict[str, object]:
-    """Apply empty-catalog run_id label only for options-shaped run_id responses."""
-    if dimension == "run_id" and response_shape == "options":
-        return finalize_run_id_empty_catalog_label(payload)
-    return payload
-
-
-def _prometheus_base_url_for_run_type_options(
-    host: _HealthRoutingHost,
-    *,
-    dimension: str,
-    selected_workflows: tuple[str, ...],
-) -> str:
-    """Return Prom base URL only for unscoped run_type option supplements."""
-    if dimension != "run_type":
-        return ""
-    # Universe metrics lack workflow membership — do not widen a scoped catalog.
-    if selected_workflows:
-        return ""
-    return getattr(host, "_prometheus_base_url", "") or ""
-
-
 def _read_truthy_query_param(query: dict[str, str], name: str) -> bool:
-
     value = query.get(name)
     return value is not None and value.strip().lower() in {"1", "true", "yes"}
 

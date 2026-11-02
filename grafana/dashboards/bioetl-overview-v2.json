@@ -133,43 +133,19 @@
           "value": "$__all"
         },
         "datasource": {
-          "type": "yesoreyeram-infinity-datasource",
-          "uid": "bioetl-ops-http"
+          "type": "prometheus",
+          "uid": "prometheus"
         },
-        "definition": "/ops/control-plane/filter-options?dimension=run_type&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&allow_stale=1",
+        "definition": "label_values(bioetl_overview_pipeline_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
         "hide": 0,
         "includeAll": true,
         "label": "Run Type",
-        "multi": false,
+        "multi": true,
         "name": "run_type",
         "options": [],
         "query": {
-          "queryType": "infinity",
-          "refId": "variable",
-          "infinityQuery": {
-            "format": "table",
-            "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
-            "type": "json",
-            "source": "url",
-            "url_options": {
-              "method": "GET",
-              "data": ""
-            },
-            "url": "/ops/control-plane/filter-options?dimension=run_type&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&allow_stale=1",
-            "columns": [
-              {
-                "selector": "text",
-                "text": "__text",
-                "type": "string"
-              },
-              {
-                "selector": "value",
-                "text": "__value",
-                "type": "string"
-              }
-            ]
-          }
+          "query": "label_values(bioetl_overview_pipeline_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
+          "refId": "StandardVariableQuery"
         },
         "refresh": 1,
         "regex": "",
@@ -180,7 +156,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Browse scope from the local control-plane catalog. Default All includes every run type. Explicit URL selections take precedence."
+        "description": "Core scope: run_type selector bounded by pipeline; fallback: All run types for selected pipeline."
       },
       {
         "allValue": null,
@@ -238,132 +214,6 @@
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "-",
-          "value": "-"
-        },
-        "datasource": {
-          "type": "yesoreyeram-infinity-datasource",
-          "uid": "bioetl-ops-http"
-        },
-        "definition": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
-        "description": "Concrete SELECTED RUN identity from /ops/control-plane/selector-context (selected.run_id). When Grafana $run_id is still '-', A2 latest fills this value so pipeline-run-report / artifact queries do not stay unresolved_scope.",
-        "hide": 2,
-        "includeAll": false,
-        "label": "Selected Run ID",
-        "multi": false,
-        "name": "selected_run_id",
-        "options": [
-          {
-            "selected": true,
-            "text": "-",
-            "value": "-"
-          }
-        ],
-        "query": {
-          "queryType": "infinity",
-          "refId": "variable",
-          "infinityQuery": {
-            "format": "table",
-            "parser": "backend",
-            "root_selector": "($id := selected.run_id; $exists($id) and $string($id) != \"\" ? [{\"text\":$string($id),\"value\":$string($id)}] : [{\"text\":\"-\",\"value\":\"-\"}])",
-            "type": "json",
-            "source": "url",
-            "url_options": {
-              "method": "GET",
-              "data": ""
-            },
-            "url": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
-            "columns": [
-              {
-                "selector": "text",
-                "text": "__text",
-                "type": "string"
-              },
-              {
-                "selector": "value",
-                "text": "__value",
-                "type": "string"
-              }
-            ]
-          }
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": true,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "All"
-        },
-        "datasource": {
-          "type": "yesoreyeram-infinity-datasource",
-          "uid": "bioetl-ops-http"
-        },
-        "definition": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
-        "description": "Concrete SELECTED RUN pipeline from /ops/control-plane/selector-context (selected.pipeline). When Grafana $pipeline is still All/aggregate and A2 fills selected_run_id, this carries the concrete pipeline so pipeline-run-report / artifact queries do not stay unresolved_scope.",
-        "hide": 2,
-        "includeAll": false,
-        "label": "Selected Pipeline",
-        "multi": false,
-        "name": "selected_pipeline",
-        "options": [
-          {
-            "selected": true,
-            "text": "All",
-            "value": "All"
-          }
-        ],
-        "query": {
-          "queryType": "infinity",
-          "refId": "variable",
-          "infinityQuery": {
-            "format": "table",
-            "parser": "backend",
-            "root_selector": "($p := selected.pipeline; $exists($p) and $string($p) != \"\" and $string($p) != \"unknown\" ? [{\"text\":$string($p),\"value\":$string($p)}] : [{\"text\":\"All\",\"value\":\"All\"}])",
-            "type": "json",
-            "source": "url",
-            "url_options": {
-              "method": "GET",
-              "data": ""
-            },
-            "url": "/ops/control-plane/selector-context?workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}&allow_stale=1",
-            "columns": [
-              {
-                "selector": "text",
-                "text": "__text",
-                "type": "string"
-              },
-              {
-                "selector": "value",
-                "text": "__value",
-                "type": "string"
-              }
-            ]
-          }
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": true,
         "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
@@ -604,7 +454,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#555555",
+                "color": "green",
                 "value": null
               }
             ]
@@ -789,7 +639,7 @@
                 "value": [
                   {
                     "title": "Open saved run report",
-                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
                     "targetBlank": true
                   }
                 ]
@@ -805,13 +655,13 @@
           "source": "url",
           "parser": "uql",
           "format": "table",
-          "root_selector": "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'НЕТ ЗАПУСКОВ']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : (($s.verdict = 'OK' or $s.verdict = 'SELECT RUN' or $s.verdict = 'НЕТ ЗАПУСКОВ') ? ($r ? $r : $s.reason) : $s.reason)}]) }))",
+          "root_selector": "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'НЕТ ЗАПУСКОВ']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : (($s.verdict = 'OK' or $s.verdict = 'SELECT RUN' or $s.verdict = 'НЕТ ЗАПУСКОВ') ? ($r ? $r : $s.reason) : $s.reason)}]) }))\"",
+          "uql": "parse-json | jsonata \"($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))\"",
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
@@ -931,7 +781,63 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Processing"
+              "options": "action_dashboard_uid"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "SELECT RUN": {
+                        "text": "—",
+                        "color": "text"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "displayName",
+                "value": "Overall verdict"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pipeline"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Result"
             },
             "properties": [
               {
@@ -988,12 +894,31 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Overall verdict"
+              "options": "Rules"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Evidence"
             },
             "properties": [
               {
                 "id": "links",
-                "value": []
+                "value": [
+                  {
+                    "title": "Open Run Explorer",
+                    "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
+                  }
+                ]
               },
               {
                 "id": "mappings",
@@ -1002,32 +927,12 @@
                     "type": "value",
                     "options": {
                       "SELECT RUN": {
-                        "text": "—",
+                        "text": "Choose a run",
                         "color": "text"
                       }
                     }
                   }
                 ]
-              },
-              {
-                "id": "displayName",
-                "value": "Overall verdict"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Trust"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Trust"
-              },
-              {
-                "id": "custom.width",
-                "value": 80
               }
             ]
           },
@@ -1107,6 +1012,22 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trust"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Trust"
+              },
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
           }
         ]
       },
@@ -1142,7 +1063,6 @@
             "include": {
               "names": [
                 "run_execution",
-                "run_verdict",
                 "saved_trust",
                 "run_reason"
               ]
@@ -1152,18 +1072,27 @@
         {
           "id": "organize",
           "options": {
-            "excludeByName": {},
             "indexByName": {
               "run_execution": 0,
-              "run_verdict": 1,
-              "saved_trust": 2,
-              "run_reason": 3
+              "saved_trust": 1,
+              "run_reason": 2
             },
             "renameByName": {
-              "run_execution": "Processing",
-              "run_verdict": "Overall verdict",
+              "domain": "Domain",
+              "verdict": "Status",
+              "execution_state": "Result",
+              "evidence_completeness": "Evidence",
+              "rules_version": "Rules",
+              "run_verdict": "Status",
+              "run_execution": "Result",
+              "run_reason": "Reason",
               "saved_trust": "Trust",
-              "run_reason": "Reason"
+              "reason_display": "Reason"
+            },
+            "excludeByName": {
+              "__name__": true,
+              "job": true,
+              "action_dashboard_uid": false
             }
           }
         }
@@ -1391,7 +1320,7 @@
                 "value": [
                   {
                     "title": "Open report",
-                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
                     "targetBlank": true
                   }
                 ]
@@ -1547,14 +1476,6 @@
                 "INCOMPLETE": {
                   "text": "INCOMPLETE",
                   "color": "orange"
-                },
-                "—": {
-                  "text": "—",
-                  "color": "gray"
-                },
-                "QUERY ERROR": {
-                  "text": "QUERY ERROR",
-                  "color": "red"
                 }
               }
             },
@@ -1576,7 +1497,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#555555",
+                "color": "green",
                 "value": null
               }
             ]
@@ -1830,7 +1751,7 @@
                 "value": [
                   {
                     "title": "Open saved run report (JSON)",
-                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
                     "targetBlank": true
                   }
                 ]
@@ -1848,7 +1769,7 @@
                 "value": [
                   {
                     "title": "Open saved run report (JSON)",
-                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
                     "targetBlank": true
                   }
                 ]
@@ -2030,7 +1951,7 @@
           "parser": "uql",
           "format": "table",
           "root_selector": "($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $map(funnel, function($s){ {'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), 'excluded':$r($s,'excluded_by_contract'), 'deduplicated':$r($s,'deduplicated'), 'filtered_out':$r($s,'filtered_out')} }))",
-          "url": "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+          "url": "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
           "url_options": {
             "method": "GET",
             "data": ""
@@ -2048,7 +1969,7 @@
           "parser": "uql",
           "format": "table",
           "root_selector": "($ratio := function($s,$n){$s.tracking='full' and $type($s.records_in)='number' and $type($n)='number' ? ($s.records_in>0 and $n>=0 and $n<=$s.records_in ? 100*$n/$s.records_in : null) : null}; $map(funnel,function($s){($excluded := $s.tracking='full' and $type($s.removals)='array' ? $sum($append([0],$s.removals[outcome='excluded_by_contract'].count)) : null; {'stage_id':$s.stage_id,'excluded_pct':$ratio($s,$excluded),'saved_pct':$ratio($s,$s.records_out)})}))",
-          "url": "/ops/observability/pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json",
+          "url": "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
           "url_options": {
             "method": "GET",
             "data": ""
@@ -2188,13 +2109,13 @@
               },
               "constraint": {
                 "horizontal": "leftright",
-                "vertical": "top"
+                "vertical": "center"
               },
               "placement": {
                 "left": 8,
                 "right": 8,
-                "top": 4,
-                "height": 48
+                "top": 30,
+                "height": 60
               },
               "background": {
                 "color": {
@@ -2221,13 +2142,13 @@
               },
               "constraint": {
                 "horizontal": "leftright",
-                "vertical": "top"
+                "vertical": "center"
               },
               "placement": {
                 "left": 8,
                 "right": 8,
-                "top": 56,
-                "height": 42
+                "top": -30,
+                "height": 60
               },
               "background": {
                 "color": {
@@ -2274,10 +2195,6 @@
               "options": {
                 "UNKNOWN": {
                   "text": "UNKNOWN",
-                  "color": "gray"
-                },
-                "SELECT RUN": {
-                  "text": "SELECT RUN",
                   "color": "gray"
                 }
               }

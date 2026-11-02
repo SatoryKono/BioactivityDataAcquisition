@@ -17,8 +17,6 @@ effective-config artifacts).
 | Lineage graph store | `LineageStorePort` |
 | Effective config artifact store | `EffectiveConfigArtifactStorePort` |
 | Artifact byte comparison | `ArtifactByteComparisonPort` |
-| Run evidence location read | `RunEvidenceLocationReadPort` |
-| Run evidence location register | `RunEvidenceLocationRegisterPort` |
 
 ## Release / governance
 
@@ -51,10 +49,6 @@ from bioetl.domain.ports.control_plane.effective_config_artifact import (
     EffectiveConfigArtifactStorePort,
 )
 from bioetl.domain.ports.control_plane.lineage import LineageStorePort
-from bioetl.domain.ports.control_plane.run_evidence_location import (
-    RunEvidenceLocationReadPort,
-    RunEvidenceLocationRegisterPort,
-)
 from bioetl.domain.ports.control_plane.run_ledger import RunLedgerPort
 from bioetl.domain.ports.control_plane.run_manifest import (
     RawManifestInspection,
@@ -74,8 +68,6 @@ __all__ = [
     "LineageStorePort",
     "RawManifestInspection",
     "RawRunManifestInspectionPort",
-    "RunEvidenceLocationReadPort",
-    "RunEvidenceLocationRegisterPort",
     "RunLedgerPort",
     "RunManifestPort",
     "WorkflowExecutionStatePort",

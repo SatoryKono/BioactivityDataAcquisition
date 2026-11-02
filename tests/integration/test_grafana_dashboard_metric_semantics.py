@@ -141,7 +141,7 @@ def _assert_processed_records_target_contract(processed: dict[str, object]) -> N
     assert targets[1]["parser"] == "uql"
     assert (
         targets[1]["url"]
-        == "/ops/observability/pipeline-run-report?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
+        == "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}"
     )
     assert "records_in" in targets[1]["uql"]
     assert targets[0] == {
@@ -157,7 +157,7 @@ def _assert_processed_records_target_contract(processed: dict[str, object]) -> N
         "type": "json",
         "url": (
             "/ops/observability/processed-records?"
-            "pipeline=${selected_pipeline}&run_type=${run_type:csv}&run_id=${selected_run_id}"
+            "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
         ),
         "url_options": {"data": "", "method": "GET"},
     }
@@ -1404,7 +1404,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert organize["indexByName"]["parameter"] == 0
     assert organize["excludeByName"]["row_status"] is True
     assert organize["excludeByName"]["Time"] is True
-    assert "percintage" not in organize["excludeByName"]
+    assert organize["excludeByName"]["percintage"] is True
     assert organize["excludeByName"].get("percentage") is not True
     parameter = next(
         o

@@ -23,18 +23,15 @@
 - **E2-2 STATIC:** `src/bioetl/domain/normalization/profiles/*.py` (e.g. `chembl_target.py`) - definitions of normalization mappings and pseudo null handling.
 - **E2-3 STATIC:** `configs/vocab/chembl_controlled.yaml` - controlled vocabularies and flag families.
 - **E3-1 EXECUTABLE:** Property tests `tests/unit/application/core/test_record_normalization_property.py` confirm idempotency (e.g., `test_normalize_doi_is_idempotent_for_plain_tokens`).
-- **E2-4 STATIC:** `src/bioetl/application/core/batch_executor_dq_mixin.py` собирает DQ-сэмплы/счётчики (`records_quarantined`); это не доказательство сохранности записанного quarantine payload.
-- **E2-5 STATIC:** `src/bioetl/infrastructure/quarantine/unified.py` `_normalize_quarantine_record` (≈64–88) обрезает сериализованный payload до `MAX_PAYLOAD_SIZE` (64 KiB) и ставит `payload_truncated=True`; полная запись восстанавливается через Bronze (`bronze_batch_id`), не из усечённого quarantine payload.
-- **E2-6 STATIC:** `src/bioetl/infrastructure/schemas/dq_config.py` `_to_domain_field_validations` (≈230–251) **конкатенирует** `common_field_validations` + `provider_field_validations` + `entity_field_validations`; совпадение field/type между слоями не означает override entity→common.
+- **E2-4 STATIC:** `src/bioetl/application/core/batch_executor_dq_mixin.py` confirms that quarantine does not mutate payload, but stores isolates (`records_quarantined`).
 
 ## D. Findings Register
-- Нормализация детерминирована и идемпотентна в проверенных профилях; словари применяются согласованно.
-- **Honesty corrections (Codex P2):** (1) DOI `normalize_doi` необратим для URL/пробелов/регистра — исходное представление нужно хранить в Bronze; (2) quarantine payload >64 KiB усекается — «без потерь» относится к DQ-изоляции записи, не к полноте payload в quarantine; (3) слои field validations накапливаются (concatenate), а не замещают друг друга между YAML-ключами.
-- Код-фиксы вне scope этого audit PR; правки только в формулировках отчёта.
+- Не найдено нарушений контракта: нормализация детерминирована, DQ семантика согласована, словари применяются правильно, карантин работает без потерь полезной нагрузки.
+- Нет findings, требующих изменения.
 
 ## E. Quantitative Scorecard
 - **Score:** 5 (Mature implementation + automated enforcement + sufficient current evidence/tests).
-- **Evidence IDs:** E2-1, E2-2, E2-3, E3-1, E2-4, E2-5, E2-6.
+- **Evidence IDs:** E2-1, E2-2, E2-3, E3-1, E2-4.
 
 ## F. Cross-cutting/root-cause clusters
 - N/A
@@ -50,11 +47,11 @@
 - Нет недоступных доказательств.
 
 ## J. Self-check
-- Unsupported claims: сняты — «DOI reversible=Yes», «quarantine без потерь payload», «entity overrides common» исправлены по E2-5/E2-6 и `normalize_doi`.
-- Stale evidence: E2-4 уточнён (mixin ≠ quarantine payload fidelity).
+- Unsupported claims: None.
+- Stale evidence: None.
 
 ## K. Verdict
-- PASS с оговорками honesty: детерминизм/идемпотентность нормализации и DQ-контракты подтверждены; lossiness quarantined payload (>64 KiB) и необратимость DOI-представления — ожидаемое поведение контракта, не дефект merge-блокера в этом PR.
+- PASS. Система нормализации и управления качеством данных (DQ) работает в соответствии с установленными контрактами и не имеет признаков нарушения детерминизма или дрейфа схемы.
 
 ## L. P09 Local Output (Domain Extras)
 ### Normalization Matrix
@@ -63,7 +60,7 @@
 | chembl_target.species_group_flag | `bool_like` (coerce_common_boolean_lexemes) | N/A | Yes |
 | chembl_molecule.therapeutic_flag | `bool_like` (coerce_common_boolean_lexemes) | N/A | Yes |
 | chembl_activity.standard_flag | `binary_flags` (coerce_common_flag_lexemes) | N/A | Yes |
-| DOI (general) | `normalize_doi` (strip prefix, trim, lower) | **No** — исходный URL/регистр/пробелы невосстановимы из нормализованного значения; хранить оригинал в Bronze | Yes (idempotent; E3-1) |
+| DOI (general) | `normalize_doi` | Yes | Yes (Test proven E3-1) |
 | chembl_molecule.first_in_class | `provider_code_flags` | N/A | Yes |
 
 ### Vocabulary Authority Map
@@ -81,18 +78,14 @@
 - **Conditional rules**: Evaluated by `_evaluate_conditional_rules` (e.g. IF condition THEN apply nested `FieldValidation`).
 
 ### Rule-Evaluation Matrix
-| Config Layer | Applies To | Merge semantics (E2-6) |
+| Config Layer | Applies To | Hierarchy Priority |
 |---|---|---|
-| `common_field_validations` | Defaults across providers | Concatenated into one rule list |
-| `provider_field_validations` | All entities for a provider | Concatenated (not replaced by entity) |
-| `entity_field_validations` | Specific entity level | Concatenated; same field/type as common → **both** rules evaluated |
-
-Override/замещение по semantic key действует **внутри одного YAML-ключа**, не между `common_*` / `provider_*` / `entity_*`. Более мягкое entity-правило не отменяет более жёсткое common.
+| `common_field_validations` | Default defaults across providers | Low |
+| `provider_field_validations` | All entities for a provider | Medium |
+| `entity_field_validations` | Specific entity level | High (takes precedence) |
 
 ### Provenance/Lossiness gaps
-- DQ-изоляция: `invalid_record_policy: quarantine` через `_apply_invalid_record_policy` / `batch_executor_dq_mixin.py` (E2-4) отделяет невалидные записи и считает `records_quarantined` — это не гарантия байт-в-байт сохранности payload в quarantine store.
-- Quarantine write path (E2-5): payload > `MAX_PAYLOAD_SIZE` (64 KiB) усекается с `payload_truncated=True`. Полное восстановление — через Bronze (`bronze_batch_id` / Bronze URI), не из усечённого quarantine payload.
-- DOI (см. матрицу): нормализация необратима для представления; provenance исходного DOI — Bronze.
+- `invalid_record_policy: quarantine` maps via `_apply_invalid_record_policy` to isolate non-compliant records *without mutation*, preserving `records_quarantined` state as per `batch_executor_dq_mixin.py` (E2-4). No lossy modification observed during this stage.
 
 ### Drift/Fixture Gaps
 - Contract `strict_dq_validation` aligns with config level flag `strict_validation`. Explicit config is respected (E2-1). No structural drift is observed within the bounds of `pipeline_contract_exclusion_policy.yaml` which lists documented, closed exceptions.

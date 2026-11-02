@@ -142,8 +142,6 @@ for _name in (
     "bioetl-run-explorer-v1.json",
 ):
     EXPECTED_VARS_BY_DASHBOARD[_name].add("provider_for_pipeline")
-    # Phase-1 A2 detail resolve: selected_* from selector-context, not fleet filters.
-    EXPECTED_VARS_BY_DASHBOARD[_name].update({"selected_pipeline", "selected_run_id"})
 EXPECTED_VARS_BY_DASHBOARD["bioetl-incident-v1.json"].add("read_latency_quantile")
 
 _OPTIONAL_LOCAL_PANEL_TYPES = {"bioetl-selectorshell-panel"}
@@ -600,17 +598,11 @@ def _assert_overview_variable_sources(
 
     run_type_var = variable_map["run_type"]
     run_type_query = run_type_var.get("query", {})
-    assert isinstance(run_type_query, dict)
-    run_type_infinity = run_type_query.get("infinityQuery", {})
-    assert isinstance(run_type_infinity, dict)
-    run_type_url = str(run_type_infinity.get("url", ""))
-    assert "/ops/control-plane/filter-options" in run_type_url
-    assert "dimension=run_type" in run_type_url
-    assert run_type_var.get("datasource") == {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "bioetl-ops-http",
-    }
-    assert run_type_var.get("current", {}).get("value") == "$__all"
+    run_type_query_text = (
+        run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
+    )
+    assert "bioetl_overview_pipeline_run_type_universe" in run_type_query_text
+    assert "run_type" in run_type_query_text
 
     _assert_overview_run_id_variable(variable_map["run_id"])
     _assert_overview_identity_panel(dashboard)

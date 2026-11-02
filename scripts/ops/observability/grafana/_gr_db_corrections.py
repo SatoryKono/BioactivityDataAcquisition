@@ -1004,7 +1004,7 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
         {
             "id": "organize",
             "options": {
-                "excludeByName": {"row_status": True, "Time": True},
+                "excludeByName": {"row_status": True, "Time": True, "percintage": True},
                 "indexByName": {
                     "parameter": 0,
                     "count in": 1,

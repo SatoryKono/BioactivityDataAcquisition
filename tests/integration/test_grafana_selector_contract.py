@@ -504,29 +504,9 @@ def test_default_selection_policy_is_normative() -> None:
     decisions = policy.get("decisions")
     assert isinstance(decisions, dict)
     assert decisions.get("overview_landing") == "fleet_all"
-    assert decisions.get("run_type_native_default_all_primary_boards") == "All"
-    assert decisions.get("run_type_option_list_source") == (
-        "control_plane_filter_options_api"
-    )
-    assert decisions.get("run_type_option_list_prometheus_supplement") == [
-        "bioetl_overview_pipeline_run_type_universe",
-        "bioetl_control_plane_run_type_universe",
-    ]
+    assert decisions.get("run_type_native_default_non_overview") == "backfill"
     assert decisions.get("run_id_list_order") == "started_at_desc"
     assert decisions.get("url_var_precedence") == "url_wins_over_auto_default"
-
-
-def test_shipped_run_type_source_is_filter_options_on_all_primary_boards() -> None:
-    registry = _SELECTOR_CONTRACT.get("shipped_selector_registry")
-    assert isinstance(registry, dict)
-    for uid, payload in registry.items():
-        assert isinstance(payload, dict)
-        families = payload.get("query_source_families")
-        assert isinstance(families, dict)
-        assert families.get("run_type") == "control_plane_filter_options_api", uid
-        query = _variable_query_text(f"{uid}.json", "run_type")
-        assert "/ops/control-plane/filter-options" in query, uid
-        assert "dimension=run_type" in query, uid
 
 
 def test_current_dashboards_do_not_ship_future_execution_selectors() -> None:

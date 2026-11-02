@@ -265,7 +265,6 @@ async def test_filter_catalog_reads_overlap_without_losing_options(monkeypatch) 
     # load_report_selector_entries is bound in filter-options payload after extract.
     monkeypatch.setattr(filter_payload, "load_report_selector_entries", reports)
     monkeypatch.setattr(module, "build_selector_filter_options_payload", build_options)
-
     budget = AsyncMock(wraps=module.run_bounded_forensic_operation)
     monkeypatch.setattr(module, "run_bounded_forensic_operation", budget)
     await module.handle_control_plane_filter_options(
