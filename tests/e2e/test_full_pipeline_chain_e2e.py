@@ -471,6 +471,7 @@ async def test_run_error_and_restart(
 @pytest.mark.timeout(E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT)
 async def test_run_config_error_and_restart(e2e_data_dir: Path) -> None:
     """A config-load failure during bootstrap must not poison later runs."""
+
     def fail_config_load(_pipeline_name: str) -> NoReturn:
         raise RuntimeError("injected pipeline config load failure")
 
