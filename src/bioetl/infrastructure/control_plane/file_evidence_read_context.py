@@ -77,6 +77,13 @@ class FileEvidenceReadContext:
     def verify_replay_objects(self, manifest: RunManifest) -> Mapping[str, bool]:
         """Re-check config / lock / Bronze bytes; never cache READY forever."""
         self._validate_bound_paths()
+        # Effective-config index/JSON can be outward symlinks even when the
+        # parent directory stayed under the trusted alias base.
+        self._assert_concrete_run_index(
+            self.data_root / "output" / "control" / "effective_config",
+            manifest.run_id,
+            suffix=".json",
+        )
         return self.replay_object_verifier.verify(manifest)
 
     def _validate_bound_paths(self) -> None:
@@ -116,18 +123,18 @@ class FileEvidenceReadContext:
         try:
             if not index_path.exists():
                 return
-            manifest_id = index_path.read_text(encoding="utf-8").strip()
+            record_id = index_path.read_text(encoding="utf-8").strip()
         except OSError as exc:
             raise EvidenceLocationInvalidError(
                 "control-plane run index is not readable within the trusted base"
             ) from exc
-        if not manifest_id:
+        if not record_id:
             return
-        record_path = store_base / f"{manifest_id}{suffix}"
+        record_path = store_base / f"{record_id}{suffix}"
         assert_path_within_trusted_base(
             record_path,
             trusted_base=self.trusted_alias_base,
-            field_name="control-plane manifest record path",
+            field_name="control-plane record path",
         )
 
 
@@ -198,6 +205,7 @@ def _validate_control_tree(
         data_root / "output" / "control" / "workflow_manifest" / "_by_run_id",
         data_root / "output" / "control" / "lineage",
         data_root / "output" / "control" / "effective_config",
+        data_root / "output" / "control" / "effective_config" / "_by_run_id",
         data_root / "output" / "control" / "dependency_locks",
         data_root / "output" / "bronze",
     )

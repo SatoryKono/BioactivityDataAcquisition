@@ -1,5 +1,6 @@
 """Replay evidence must be checked from original bytes on every read."""
 
+import json
 from hashlib import sha256
 from types import SimpleNamespace
 from uuid import UUID
@@ -212,3 +213,57 @@ def test_trusted_base_rejects_absolute_file_uri_escape(tmp_path):
     )
     # Escaped absolute URI must not count as a verified snapshot.
     assert verifier.verify(manifest) == {}
+
+
+@pytest.mark.parametrize("linked_path", ["index", "record"])
+def test_trusted_base_rejects_symlinked_effective_config_escape(tmp_path, linked_path):
+    """Outward effective-config symlinks must not yield effective_config_hash=True."""
+    alias = (tmp_path / "data").resolve()
+    alias.mkdir()
+    config_root = alias / "config"
+    config = {
+        "identity_version": "effective-config-v1",
+        "config_data": {"limit": 100},
+    }
+    config_hash = stable_json_hash(config)
+    run_id = UUID("11111111-1111-4111-8111-111111111111")
+    outside = tmp_path / "outside-config.json"
+    outside.write_text(
+        json.dumps(
+            {
+                "artifact_id": "saved-config",
+                "semantic_artifact": {"effective_execution_config": config},
+            },
+            indent=2,
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+    index = config_root / "_by_run_id" / f"{run_id}.txt"
+    index.parent.mkdir(parents=True)
+    try:
+        if linked_path == "index":
+            index.symlink_to(outside)
+        else:
+            index.write_text("saved-config", encoding="utf-8")
+            (config_root / "saved-config.json").symlink_to(outside)
+    except OSError as exc:
+        pytest.skip(f"symlink unavailable: {exc}")
+
+    verifier = ReplayObjectVerifier(
+        config_root,
+        alias / "locks",
+        alias / "bronze",
+        trusted_base=alias,
+    )
+    manifest = SimpleNamespace(
+        run_id=run_id,
+        code_provenance=SimpleNamespace(
+            effective_config_hash=config_hash,
+            effective_config_artifact_id="saved-config",
+            dependency_lock_hash=None,
+        ),
+        source_refs=(),
+        objects={},
+    )
+    assert "effective_config_hash" not in verifier.verify(manifest)

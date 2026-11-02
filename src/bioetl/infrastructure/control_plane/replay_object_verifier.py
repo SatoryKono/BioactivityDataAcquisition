@@ -82,8 +82,21 @@ class ReplayObjectVerifier:
         if expected is None:
             return None
         try:
-            payload = FileEffectiveConfigArtifactStore(self.config_root).get_by_run_id(
-                manifest.run_id
+            # Contain index + selected JSON before reading so an outward
+            # symlink under config_root cannot forge effective_config_hash.
+            run_index = self.config_root / "_by_run_id" / f"{manifest.run_id}.txt"
+            if self._contained(run_index) is None:
+                return None
+            if not run_index.exists():
+                return None
+            artifact_id = run_index.read_text(encoding="utf-8").strip()
+            if not artifact_id:
+                return None
+            artifact_path = self.config_root / f"{artifact_id}.json"
+            if self._contained(artifact_path) is None:
+                return None
+            payload = FileEffectiveConfigArtifactStore(self.config_root).get(
+                artifact_id
             )
             if payload is None:
                 return None

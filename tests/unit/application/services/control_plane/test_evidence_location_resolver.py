@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import errno
+import json
 from hashlib import sha256
 from pathlib import Path
 from types import SimpleNamespace
@@ -337,6 +338,58 @@ def test_context_rejects_symlinked_manifest_index_and_record(
 
     with pytest.raises(EvidenceLocationInvalidError, match="symlink|escapes"):
         context.get_manifest_by_run_id(UUID(_RUN_A))
+
+
+@pytest.mark.parametrize("linked_path", ["index", "record"])
+def test_context_rejects_symlinked_effective_config_index_and_record(
+    tmp_path: Path,
+    linked_path: str,
+) -> None:
+    """Outward effective-config symlinks must not verify as trusted evidence."""
+    data_root = (tmp_path / "data").resolve()
+    data_root.mkdir()
+    context = FileEvidenceReadContextFactory().open(
+        data_root,
+        trusted_alias_base=data_root,
+    )
+    store_base = data_root / "output" / "control" / "effective_config"
+    index = store_base / "_by_run_id" / f"{_RUN_A}.txt"
+    index.parent.mkdir(parents=True)
+
+    config = {
+        "identity_version": "effective-config-v1",
+        "config_data": {"limit": 100},
+    }
+    config_hash = stable_json_hash(config)
+    outside_payload = {
+        "artifact_id": "saved-config",
+        "semantic_artifact": {"effective_execution_config": config},
+    }
+    outside = tmp_path / "outside-config.json"
+    outside.write_text(
+        json.dumps(outside_payload, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+
+    if linked_path == "index":
+        _create_symlink_or_skip(index, outside)
+    else:
+        index.write_text("saved-config", encoding="utf-8")
+        record = store_base / "saved-config.json"
+        _create_symlink_or_skip(record, outside)
+
+    evidence = SimpleNamespace(
+        run_id=UUID(_RUN_A),
+        code_provenance=SimpleNamespace(
+            effective_config_hash=config_hash,
+            effective_config_artifact_id="saved-config",
+            dependency_lock_hash=None,
+        ),
+        source_refs=(),
+        objects={},
+    )
+    with pytest.raises(EvidenceLocationInvalidError, match="symlink|escapes"):
+        context.verify_replay_objects(evidence)  # type: ignore[arg-type]
 
 
 def test_workflow_location_reads_workflow_manifest_store(
