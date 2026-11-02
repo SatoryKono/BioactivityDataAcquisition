@@ -481,6 +481,30 @@ def _lint_dead_renames(path: Path, panels: list[dict[str, Any]]) -> list[str]:
     return findings
 
 
+_EXPECTED_REFRESH_INTERVALS = [
+    "5s",
+    "10s",
+    "30s",
+    "1m",
+    "5m",
+    "15m",
+    "30m",
+    "1h",
+    "2h",
+    "1d",
+]
+
+
+def _lint_timepicker(path: Path, payload: dict[str, Any]) -> list[str]:
+    """Phase-4: shared timepicker.refresh_intervals across provisioned boards."""
+    intervals = (payload.get("timepicker") or {}).get("refresh_intervals")
+    if intervals == _EXPECTED_REFRESH_INTERVALS:
+        return []
+    return [
+        f"{path.name}: timepicker.refresh_intervals must match shared Phase 4.4 list"
+    ]
+
+
 def lint_dashboard(path: Path, *, profile: str = "phase2") -> list[str]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     uid = str(payload.get("uid") or UID_BY_FILE.get(path.name) or "")
@@ -507,6 +531,7 @@ def lint_dashboard(path: Path, *, profile: str = "phase2") -> list[str]:
     if profile == "phase4":
         findings.extend(_lint_unused_variables(path, payload))
         findings.extend(_lint_dead_renames(path, panels))
+        findings.extend(_lint_timepicker(path, payload))
     return findings
 
 
@@ -528,8 +553,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--profile",
         choices=("phase2", "phase4"),
-        default="phase2",
-        help="phase2 = nav/links/index/thresholds; phase4 adds unused vars + dead renames",
+        default="phase4",
+        help=(
+            "phase2 = nav/links/index/thresholds; "
+            "phase4 (default) adds unused vars, dead renames, shared timepicker"
+        ),
     )
     args = parser.parse_args(argv)
     all_findings: list[str] = []
