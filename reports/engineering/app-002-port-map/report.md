@@ -63,152 +63,185 @@
 - `_PipelineRunnerCleanupHostProtocol` -> `TracingPort` -> `NOT_VERIFIABLE`
 - `_PostrunSupportHost` -> `ExecutorMetricsPort` -> `NOT_VERIFIABLE`
 
-## 2. Discrepancies with Bindings Matrix (#12467)
+## 2. Production Bindings Cross-Reference to Pair Matrix (#12467)
 
-The following bindings were resolved via verified production bindings (composition root) but may diverge from the strictly mapped matrix tests:
+The base contract matrix records adapter-to-port pairs in `tests/architecture/test_adapter_port_conformance.py::PORT_ADAPTER_CASES`. It does not record use-case-to-port-to-production-binding triples. These are separate views; `NOT_VERIFIABLE` means no pair-specific source value was confirmed for the production edge.
 
-- `BaseServicesFactoryProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `BatchCheckpointRecoveryService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `BatchProcessingSupportService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `BatchProgressService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `BronzeCleanupService` -> `BronzeStoragePort`: Resolved to `StorageBundle` via production bindings, not matching base matrix explicitly.
-- `BronzeCleanupService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `CheckpointCompatibilityService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `CheckpointRuntimeService` -> `CheckpointPort`: Resolved to `LocalCheckpointAdapter` via production bindings, not matching base matrix explicitly.
-- `CheckpointRuntimeService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `CheckpointService` -> `CheckpointPort`: Resolved to `LocalCheckpointAdapter` via production bindings, not matching base matrix explicitly.
-- `CheckpointService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `CheckpointValidationProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `CleanupService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `CoalescePolicyService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `ColumnOrderService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `CompositeCheckpointServiceContext` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `CompositeLifecycleObserverService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `CompositePreflightValidationService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `CompositeRunReportService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `CompositeRunnerObservabilityHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `ConfigDQService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `ConfigService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `ConflictResolverService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `ContractMigrationService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `ControlPlaneIntegrityMetricsService` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings, not matching base matrix explicitly.
-- `ControlPlaneIntegrityMetricsService` -> `RunLedgerPort`: Resolved to `FileRunLedgerStore` via production bindings, not matching base matrix explicitly.
-- `ControlPlaneIntegrityMetricsService` -> `RunManifestPort`: Resolved to `FileRunManifestStore` via production bindings, not matching base matrix explicitly.
-- `DQReportService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `DQReportServiceFactoryProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `DataQualityMetricsHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `DataQualityService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `DataSourceCreatorProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `DependencyCoordinatorService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `DependencyJoinerService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `DependencyProgressService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `DependencyResultService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `EnricherDeduplicatorService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `EnrichmentCoordinatorResultMixin` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `EnrichmentCoordinatorService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `ErrorHandlerService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `ErrorHandlerService` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings, not matching base matrix explicitly.
-- `ExportService` -> `DeltaReaderPort`: Resolved to `DeltaReader` via production bindings, not matching base matrix explicitly.
-- `ExportService` -> `ExportCatalogPort`: Resolved to `ExportCatalogAdapter` via production bindings, not matching base matrix explicitly.
-- `ExportService` -> `ExportWriterPort`: Resolved to `ExportWriterAdapter` via production bindings, not matching base matrix explicitly.
-- `ExportService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `FSMStateHelperService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `ForensicRunDiffService` -> `RunManifestPort`: Resolved to `FileRunManifestStore` via production bindings, not matching base matrix explicitly.
-- `HealthService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `HistoricalReplayCertificationService` -> `RunLedgerPort`: Resolved to `FileRunLedgerStore` via production bindings, not matching base matrix explicitly.
-- `HistoricalReplayCertificationService` -> `RunManifestPort`: Resolved to `FileRunManifestStore` via production bindings, not matching base matrix explicitly.
-- `HistoricalReplayCorpusService` -> `RunLedgerPort`: Resolved to `FileRunLedgerStore` via production bindings, not matching base matrix explicitly.
-- `HistoricalReplayCorpusService` -> `RunManifestPort`: Resolved to `FileRunManifestStore` via production bindings, not matching base matrix explicitly.
-- `JoinExecutorService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `JoinPlannerService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `KeyExtractorService` -> `DeltaReaderPort`: Resolved to `DeltaReader` via production bindings, not matching base matrix explicitly.
-- `KeyExtractorService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `LifecycleTerminalEmitHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `LineageInspectionService` -> `LineageStorePort`: Resolved to `FileLineageStore` via production bindings, not matching base matrix explicitly.
-- `LockRuntimeService` -> `LockPort`: Resolved to `MemoryLock` via production bindings, not matching base matrix explicitly.
-- `LockRuntimeService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `LockRuntimeServiceCreateContext` -> `LockPort`: Resolved to `MemoryLock` via production bindings, not matching base matrix explicitly.
-- `LockRuntimeServiceCreateContext` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `LockService` -> `LockPort`: Resolved to `MemoryLock` via production bindings, not matching base matrix explicitly.
-- `LockService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `MedallionLifecycleService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `MergeService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `MergeService` -> `MergedStoragePort`: Resolved to `StorageBundle` via production bindings, not matching base matrix explicitly.
-- `MetricsService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `PipelineDebugService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `PipelineRunExecutionService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `PipelineRunnerService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `PipelineRunnerService` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings, not matching base matrix explicitly.
-- `PipelineRuntimeControlServicesProtocol` -> `CheckpointPort`: Resolved to `LocalCheckpointAdapter` via production bindings, not matching base matrix explicitly.
-- `PipelineRuntimeControlServicesProtocol` -> `LockPort`: Resolved to `MemoryLock` via production bindings, not matching base matrix explicitly.
-- `PipelineRuntimeControlServicesProtocol` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings, not matching base matrix explicitly.
-- `PipelineService` -> `CheckpointPort`: Resolved to `LocalCheckpointAdapter` via production bindings, not matching base matrix explicitly.
-- `PipelineService` -> `LockPort`: Resolved to `MemoryLock` via production bindings, not matching base matrix explicitly.
-- `PipelineService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `PipelineService` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings, not matching base matrix explicitly.
-- `PipelineService` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings, not matching base matrix explicitly.
-- `PostrunCleanupService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `PostrunCompactService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `PostrunDQReportService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `PreflightSchemaFieldExtractionHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `PreflightService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `PreflightService` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings, not matching base matrix explicitly.
-- `ProteinClassificationResolutionService` -> `ProteinClassificationPort`: Resolved to `ChEMBLProteinClassificationGraph` via production bindings, not matching base matrix explicitly.
-- `ProviderDataSourceAccessProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `PubMedPublicationTermEnrichmentService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `QuarantineManagerSupportMixin` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings, not matching base matrix explicitly.
-- `QuarantineRuntimeService` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings, not matching base matrix explicitly.
-- `QuarantineService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `QuarantineService` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings, not matching base matrix explicitly.
-- `ResolveProteinClassificationUseCase` -> `ProteinClassificationPort`: Resolved to `ChEMBLProteinClassificationGraph` via production bindings, not matching base matrix explicitly.
-- `RunLedgerService` -> `RunLedgerPort`: Resolved to `FileRunLedgerStore` via production bindings, not matching base matrix explicitly.
-- `RunManifestInspectionService` -> `RunManifestPort`: Resolved to `FileRunManifestStore` via production bindings, not matching base matrix explicitly.
-- `RunManifestService` -> `RunManifestPort`: Resolved to `FileRunManifestStore` via production bindings, not matching base matrix explicitly.
-- `ShutdownService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `StorageFactoryProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `StorageFactoryProtocol` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings, not matching base matrix explicitly.
-- `SupportAwareDataSourceCreatorProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `VacuumService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `WorkflowExecutionService` -> `LockPort`: Resolved to `MemoryLock` via production bindings, not matching base matrix explicitly.
-- `WorkflowExecutionService` -> `WorkflowExecutionStatePort`: Resolved to `FileWorkflowExecutionStateStore` via production bindings, not matching base matrix explicitly.
-- `WorkflowExecutionService` -> `WorkflowLedgerPort`: Resolved to `FileWorkflowLedgerStore` via production bindings, not matching base matrix explicitly.
-- `WorkflowInspectionService` -> `WorkflowExecutionStatePort`: Resolved to `FileWorkflowExecutionStateStore` via production bindings, not matching base matrix explicitly.
-- `WorkflowInspectionService` -> `WorkflowLedgerPort`: Resolved to `FileWorkflowLedgerStore` via production bindings, not matching base matrix explicitly.
-- `WorkflowInspectionService` -> `WorkflowManifestPort`: Resolved to `FileWorkflowManifestStore` via production bindings, not matching base matrix explicitly.
-- `WorkflowLedgerService` -> `WorkflowLedgerPort`: Resolved to `FileWorkflowLedgerStore` via production bindings, not matching base matrix explicitly.
-- `WorkflowManifestService` -> `WorkflowManifestPort`: Resolved to `FileWorkflowManifestStore` via production bindings, not matching base matrix explicitly.
-- `WorkflowRunnerService` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings, not matching base matrix explicitly.
-- `WorkflowTransformService` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings, not matching base matrix explicitly.
-- `_CompositeLifecycleTracingHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_CompositePhaseStartHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_CompositeRunnerMergeStageHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_CompositeRunnerStageEnrichmentHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_CompositeRunnerStageHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_CompositeRunnerStageSupportHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_CompositeRunnerSupportHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_CoordinatorExecutionHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_CoordinatorPlanningHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_DQReportGenerationHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_DependencyBatchHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_DependencyCoordinatorExecutionHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_FilteredQuarantineHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_FilteredQuarantineHost` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings, not matching base matrix explicitly.
-- `_LockRuntimeHostProtocol` -> `LockPort`: Resolved to `MemoryLock` via production bindings, not matching base matrix explicitly.- `_LockRuntimeHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_MedallionLifecycleHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_MergeIOHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_MergeOutputHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_MergeOutputHostProtocol` -> `MergedStoragePort`: Resolved to `StorageBundle` via production bindings, not matching base matrix explicitly.
-- `_MetricsGatewayHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_MetricsStartHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_ObserverContextManagerMixin` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings, not matching base matrix explicitly.
-- `_PipelineRunnerCleanupHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_PipelineRunnerFlowHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_PostrunHostAttrSurface` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_PostrunHostAttrSurface` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings, not matching base matrix explicitly.
-- `_QuarantineAsyncHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_QuarantineAsyncHost` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings, not matching base matrix explicitly.
-- `_QuarantineSyncHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings, not matching base matrix explicitly.
-- `_QuarantineSyncHost` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings, not matching base matrix explicitly.
+| Adapter | Port |
+|---|---|
+| `FilesystemAdrCatalog` | `AdrServicePort` |
+| `FileArtifactByteComparisonAdapter` | `ArtifactByteComparisonPort` |
+| `BronzeWriter` | `BronzeStoragePort` |
+| `CircuitBreakerGuard` | `CircuitBreakerPort` |
+| `CompositeReplayInputReader` | `DeltaReaderPort` |
+| `RequestReader` | `DeltaReaderPort` |
+| `ExportCatalogAdapter` | `ExportCatalogPort` |
+| `ExportWriterAdapter` | `ExportWriterPort` |
+| `SilverForeignKeyReconciliationAdapter` | `ForeignKeyReconciliationPort` |
+| `GoldWriter` | `GoldStoragePort` |
+| `FileLineageStore` | `LineageStorePort` |
+| `MemoryLock` | `LockPort` |
+| `NoOpLogger` | `LoggerPort` |
+| `StructlogLogger` | `LoggerPort` |
+| `UnifiedLogger` | `LoggerPort` |
+| `MetadataCoordinator` | `MetadataCoordinatorPort` |
+| `PrometheusMetrics` | `MetricsPort` |
+| `ChEMBLProteinClassificationGraph` | `ProteinClassificationPort` |
+| `PublicationControlledVocabularyLoader` | `PublicationVocabularyPort` |
+| `StorageRowReconciliationAdapter` | `RowReconciliationPort` |
+| `FileRunLedgerStore` | `RunLedgerPort` |
+| `FileRunManifestStore` | `RunManifestPort` |
+| `SilverWriter` | `SilverStoragePort` |
+| `StageAccountingAccumulator` | `StageAccountingPort` |
+| `FileWorkflowExecutionStateStore` | `WorkflowExecutionStatePort` |
+| `FileWorkflowLedgerStore` | `WorkflowLedgerPort` |
+| `FileWorkflowManifestStore` | `WorkflowManifestPort` |
+
+The following rows record verified use-case → port → production binding edges. They are not direct adapter → port matrix rows; the exact pair-level source values are listed above, and missing triples are not treated as discrepancies by themselves:
+
+- `BaseServicesFactoryProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `BatchCheckpointRecoveryService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `BatchProcessingSupportService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `BatchProgressService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `BronzeCleanupService` -> `BronzeStoragePort`: Resolved to `StorageBundle` via production bindings.
+- `BronzeCleanupService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `CheckpointCompatibilityService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `CheckpointRuntimeService` -> `CheckpointPort`: Resolved to `LocalCheckpointAdapter` via production bindings.
+- `CheckpointRuntimeService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `CheckpointService` -> `CheckpointPort`: Resolved to `LocalCheckpointAdapter` via production bindings.
+- `CheckpointService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `CheckpointValidationProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `CleanupService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `CoalescePolicyService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `ColumnOrderService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `CompositeCheckpointServiceContext` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `CompositeLifecycleObserverService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `CompositePreflightValidationService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `CompositeRunReportService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `CompositeRunnerObservabilityHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `ConfigDQService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `ConfigService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `ConflictResolverService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `ContractMigrationService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `ControlPlaneIntegrityMetricsService` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings.
+- `ControlPlaneIntegrityMetricsService` -> `RunLedgerPort`: Resolved to `FileRunLedgerStore` via production bindings.
+- `ControlPlaneIntegrityMetricsService` -> `RunManifestPort`: Resolved to `FileRunManifestStore` via production bindings.
+- `DQReportService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `DQReportServiceFactoryProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `DataQualityMetricsHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `DataQualityService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `DataSourceCreatorProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `DependencyCoordinatorService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `DependencyJoinerService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `DependencyProgressService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `DependencyResultService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `EnricherDeduplicatorService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `EnrichmentCoordinatorResultMixin` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `EnrichmentCoordinatorService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `ErrorHandlerService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `ErrorHandlerService` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings.
+- `ExportService` -> `DeltaReaderPort`: Resolved to `DeltaReader` via production bindings.
+- `ExportService` -> `ExportCatalogPort`: Resolved to `ExportCatalogAdapter` via production bindings.
+- `ExportService` -> `ExportWriterPort`: Resolved to `ExportWriterAdapter` via production bindings.
+- `ExportService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `FSMStateHelperService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `ForensicRunDiffService` -> `RunManifestPort`: Resolved to `FileRunManifestStore` via production bindings.
+- `HealthService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `HistoricalReplayCertificationService` -> `RunLedgerPort`: Resolved to `FileRunLedgerStore` via production bindings.
+- `HistoricalReplayCertificationService` -> `RunManifestPort`: Resolved to `FileRunManifestStore` via production bindings.
+- `HistoricalReplayCorpusService` -> `RunLedgerPort`: Resolved to `FileRunLedgerStore` via production bindings.
+- `HistoricalReplayCorpusService` -> `RunManifestPort`: Resolved to `FileRunManifestStore` via production bindings.
+- `JoinExecutorService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `JoinPlannerService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `KeyExtractorService` -> `DeltaReaderPort`: Resolved to `DeltaReader` via production bindings.
+- `KeyExtractorService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `LifecycleTerminalEmitHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `LineageInspectionService` -> `LineageStorePort`: Resolved to `FileLineageStore` via production bindings.
+- `LockRuntimeService` -> `LockPort`: Resolved to `MemoryLock` via production bindings.
+- `LockRuntimeService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `LockRuntimeServiceCreateContext` -> `LockPort`: Resolved to `MemoryLock` via production bindings.
+- `LockRuntimeServiceCreateContext` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `LockService` -> `LockPort`: Resolved to `MemoryLock` via production bindings.
+- `LockService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `MedallionLifecycleService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `MergeService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `MergeService` -> `MergedStoragePort`: Resolved to `StorageBundle` via production bindings.
+- `MetricsService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `PipelineDebugService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `PipelineRunExecutionService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `PipelineRunnerService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `PipelineRunnerService` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings.
+- `PipelineRuntimeControlServicesProtocol` -> `CheckpointPort`: Resolved to `LocalCheckpointAdapter` via production bindings.
+- `PipelineRuntimeControlServicesProtocol` -> `LockPort`: Resolved to `MemoryLock` via production bindings.
+- `PipelineRuntimeControlServicesProtocol` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings.
+- `PipelineService` -> `CheckpointPort`: Resolved to `LocalCheckpointAdapter` via production bindings.
+- `PipelineService` -> `LockPort`: Resolved to `MemoryLock` via production bindings.
+- `PipelineService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `PipelineService` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings.
+- `PipelineService` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings.
+- `PostrunCleanupService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `PostrunCompactService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `PostrunDQReportService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `PreflightSchemaFieldExtractionHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `PreflightService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `PreflightService` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings.
+- `ProteinClassificationResolutionService` -> `ProteinClassificationPort`: Resolved to `ChEMBLProteinClassificationGraph` via production bindings.
+- `ProviderDataSourceAccessProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `PubMedPublicationTermEnrichmentService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `QuarantineManagerSupportMixin` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings.
+- `QuarantineRuntimeService` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings.
+- `QuarantineService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `QuarantineService` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings.
+- `ResolveProteinClassificationUseCase` -> `ProteinClassificationPort`: Resolved to `ChEMBLProteinClassificationGraph` via production bindings.
+- `RunLedgerService` -> `RunLedgerPort`: Resolved to `FileRunLedgerStore` via production bindings.
+- `RunManifestInspectionService` -> `RunManifestPort`: Resolved to `FileRunManifestStore` via production bindings.
+- `RunManifestService` -> `RunManifestPort`: Resolved to `FileRunManifestStore` via production bindings.
+- `ShutdownService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `StorageFactoryProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `StorageFactoryProtocol` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings.
+- `SupportAwareDataSourceCreatorProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `VacuumService` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `WorkflowExecutionService` -> `LockPort`: Resolved to `MemoryLock` via production bindings.
+- `WorkflowExecutionService` -> `WorkflowExecutionStatePort`: Resolved to `FileWorkflowExecutionStateStore` via production bindings.
+- `WorkflowExecutionService` -> `WorkflowLedgerPort`: Resolved to `FileWorkflowLedgerStore` via production bindings.
+- `WorkflowInspectionService` -> `WorkflowExecutionStatePort`: Resolved to `FileWorkflowExecutionStateStore` via production bindings.
+- `WorkflowInspectionService` -> `WorkflowLedgerPort`: Resolved to `FileWorkflowLedgerStore` via production bindings.
+- `WorkflowInspectionService` -> `WorkflowManifestPort`: Resolved to `FileWorkflowManifestStore` via production bindings.
+- `WorkflowLedgerService` -> `WorkflowLedgerPort`: Resolved to `FileWorkflowLedgerStore` via production bindings.
+- `WorkflowManifestService` -> `WorkflowManifestPort`: Resolved to `FileWorkflowManifestStore` via production bindings.
+- `WorkflowRunnerService` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings.
+- `WorkflowTransformService` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings.
+- `_CompositeLifecycleTracingHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_CompositePhaseStartHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_CompositeRunnerMergeStageHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_CompositeRunnerStageEnrichmentHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_CompositeRunnerStageHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_CompositeRunnerStageSupportHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_CompositeRunnerSupportHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_CoordinatorExecutionHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_CoordinatorPlanningHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_DQReportGenerationHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_DependencyBatchHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_DependencyCoordinatorExecutionHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_FilteredQuarantineHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_FilteredQuarantineHost` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings.
+- `_LockRuntimeHostProtocol` -> `LockPort`: Resolved to `MemoryLock` via production bindings.
+- `_LockRuntimeHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_MedallionLifecycleHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_MergeIOHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_MergeOutputHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_MergeOutputHostProtocol` -> `MergedStoragePort`: Resolved to `StorageBundle` via production bindings.
+- `_MetricsGatewayHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_MetricsStartHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_ObserverContextManagerMixin` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings.
+- `_PipelineRunnerCleanupHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_PipelineRunnerFlowHostProtocol` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_PostrunHostAttrSurface` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_PostrunHostAttrSurface` -> `MetricsPort`: Resolved to `PrometheusMetrics` via production bindings.
+- `_QuarantineAsyncHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_QuarantineAsyncHost` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings.
+- `_QuarantineSyncHost` -> `LoggerPort`: Resolved to `UnifiedLogger` via production bindings.
+- `_QuarantineSyncHost` -> `QuarantinePort`: Resolved to `UnifiedQuarantineAdapter` via production bindings.
 
 ## 3. Use Cases and their Ports
 
@@ -400,6 +433,7 @@ The following bindings were resolved via verified production bindings (compositi
 | `MetricsPort` | `PrometheusMetrics` | RESOLVED |
 | `RunLedgerPort` | `FileRunLedgerStore` | RESOLVED |
 | `RunManifestPort` | `FileRunManifestStore` | RESOLVED |
+
 ### `DQReportService`
 **Location:** `src/bioetl/application/services/quality/dq_report_service.py`
 
@@ -609,6 +643,7 @@ The following bindings were resolved via verified production bindings (compositi
 
 ### `LockService`
 **Location:** `src/bioetl/application/services/ops/lock_service.py`
+
 | Port | Implementation | Status |
 |---|---|---|
 | `LockPort` | `MemoryLock` | RESOLVED |
@@ -861,3 +896,313 @@ The following bindings were resolved via verified production bindings (compositi
 | Port | Implementation | Status |
 |---|---|---|
 | `RunLedgerPort` | `FileRunLedgerStore` | RESOLVED |
+
+### `RunManifestInspectionService`
+**Location:** `src/bioetl/application/services/control_plane/manifest/inspection_service.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `RunManifestPort` | `FileRunManifestStore` | RESOLVED |
+
+### `RunManifestService`
+**Location:** `src/bioetl/application/services/control_plane/manifest/service.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `RunManifestPort` | `FileRunManifestStore` | RESOLVED |
+
+### `ShutdownService`
+**Location:** `src/bioetl/application/services/ops/shutdown_service.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `StorageFactoryProtocol`
+**Location:** `src/bioetl/application/ports/storage.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `AuditPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+| `MetricsPort` | `PrometheusMetrics` | RESOLVED |
+
+### `SupportAwareDataSourceCreatorProtocol`
+**Location:** `src/bioetl/application/ports/providers.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `VacuumService`
+**Location:** `src/bioetl/application/services/ops/vacuum_service.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+| `TableCollectorPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+
+### `WorkflowExecutionService`
+**Location:** `src/bioetl/application/services/workflow/control_plane/execution_service.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LockPort` | `MemoryLock` | RESOLVED |
+| `WorkflowExecutionStatePort` | `FileWorkflowExecutionStateStore` | RESOLVED |
+| `WorkflowLedgerPort` | `FileWorkflowLedgerStore` | RESOLVED |
+
+### `WorkflowInspectionService`
+**Location:** `src/bioetl/application/services/control_plane/workflow/inspection_service.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `WorkflowExecutionStatePort` | `FileWorkflowExecutionStateStore` | RESOLVED |
+| `WorkflowLedgerPort` | `FileWorkflowLedgerStore` | RESOLVED |
+| `WorkflowManifestPort` | `FileWorkflowManifestStore` | RESOLVED |
+
+### `WorkflowLedgerService`
+**Location:** `src/bioetl/application/services/control_plane/workflow/ledger_service.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `WorkflowLedgerPort` | `FileWorkflowLedgerStore` | RESOLVED |
+
+### `WorkflowManifestService`
+**Location:** `src/bioetl/application/services/control_plane/workflow/manifest_service.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `WorkflowManifestPort` | `FileWorkflowManifestStore` | RESOLVED |
+
+### `WorkflowRunnerService`
+**Location:** `src/bioetl/application/services/workflow/workflow_runner_service.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `MetricsPort` | `PrometheusMetrics` | RESOLVED |
+| `RunReportStorePort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+
+### `WorkflowTransformService`
+**Location:** `src/bioetl/application/services/workflow/workflow_transform_service.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `MetricsPort` | `PrometheusMetrics` | RESOLVED |
+
+### `_CompositeLifecycleTracingHost`
+**Location:** `src/bioetl/application/composite/_lifecycle_observer_tracing_types.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_CompositePhaseStartHostProtocol`
+**Location:** `src/bioetl/application/composite/runner_pkg/runner_stage_start_flow.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_CompositeRunnerMergeStageHostProtocol`
+**Location:** `src/bioetl/application/composite/runner_pkg/runner_merge_stage_types.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_CompositeRunnerStageEnrichmentHostProtocol`
+**Location:** `src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_types.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_CompositeRunnerStageHostProtocol`
+**Location:** `src/bioetl/application/composite/runner_pkg/runner_stage_types.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_CompositeRunnerStageSupportHostProtocol`
+**Location:** `src/bioetl/application/composite/runner_pkg/runner_stage_support_types.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_CompositeRunnerSupportHostProtocol`
+**Location:** `src/bioetl/application/composite/runner_pkg/runner_support_types.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_CoordinatorExecutionHost`
+**Location:** `src/bioetl/application/composite/helpers/coordinator_execution.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `ClockPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `ExecutionMetricsRunnerPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_CoordinatorPlanningHost`
+**Location:** `src/bioetl/application/composite/coordinator_planning.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_DQReportGenerationHostProtocol`
+**Location:** `src/bioetl/application/services/quality/dq_report_models.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `BronzeDQConfigPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `GoldDQConfigPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+| `SilverDQConfigPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+
+### `_DependencyBatchHost`
+**Location:** `src/bioetl/application/composite/helpers/dependency_coordinator_execution.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_DependencyCoordinatorExecutionHost`
+**Location:** `src/bioetl/application/composite/helpers/dependency_coordinator_execution.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `ClockPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_FilteredQuarantineHost`
+**Location:** `src/bioetl/application/services/quality/_quarantine_service_filtered_mixin.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+| `QuarantinePort` | `UnifiedQuarantineAdapter` | RESOLVED |
+
+### `_GoldWriterHost`
+**Location:** `src/bioetl/application/core/_batch_writer_gold_support.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `GoldValidatorPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+
+### `_LockRuntimeHostProtocol`
+**Location:** `src/bioetl/application/core/lifecycle/lock_lifecycle.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LockPort` | `MemoryLock` | RESOLVED |
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_MedallionLifecycleHostProtocol`
+**Location:** `src/bioetl/application/services/medallion/medallion_lifecycle.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_MergeIOHost`
+**Location:** `src/bioetl/application/composite/merger_collaborators.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_MergeOutputHostProtocol`
+**Location:** `src/bioetl/application/composite/merger_output_mixin.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+| `MergedStoragePort` | `StorageBundle` | RESOLVED |
+
+### `_MetricsGatewayHost`
+**Location:** `src/bioetl/application/services/ops/_metrics_service_gateway_support.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_MetricsStartHost`
+**Location:** `src/bioetl/application/services/ops/metrics_service.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `ClockPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+| `MetricsServerPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+
+### `_MetricsStatusHost`
+**Location:** `src/bioetl/application/services/ops/metrics_service.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `MetricsServerPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+
+### `_ObserverContextManagerMixin`
+**Location:** `src/bioetl/application/observability/observer_context_mixin.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `ClockPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+| `MetricsPort` | `PrometheusMetrics` | RESOLVED |
+
+### `_PipelineRunnerCleanupHostProtocol`
+**Location:** `src/bioetl/application/core/_runner_support.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+| `TracingPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+
+### `_PipelineRunnerFlowHostProtocol`
+**Location:** `src/bioetl/application/core/runner_flow.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+
+### `_PostrunHostAttrSurface`
+**Location:** `src/bioetl/application/core/postrun/_service_support.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+| `MetricsPort` | `PrometheusMetrics` | RESOLVED |
+
+### `_PostrunSupportHost`
+**Location:** `src/bioetl/application/core/postrun/_service_support.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `ExecutorMetricsPort` | `NOT_VERIFIABLE` | NOT_VERIFIABLE |
+
+### `_QuarantineAsyncHost`
+**Location:** `src/bioetl/application/services/quality/_quarantine_service_async_mixin.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+| `QuarantinePort` | `UnifiedQuarantineAdapter` | RESOLVED |
+
+### `_QuarantineSyncHost`
+**Location:** `src/bioetl/application/services/quality/_quarantine_service_sync_support.py`
+
+| Port | Implementation | Status |
+|---|---|---|
+| `LoggerPort` | `UnifiedLogger` | RESOLVED |
+| `QuarantinePort` | `UnifiedQuarantineAdapter` | RESOLVED |
+
+
+## 4. Dependency Violations
+
+No infrastructure/scripts imports detected in domain/application layers during static analysis.
+All UseCases strictly depend on `*Port` interfaces. (MEASURED)
