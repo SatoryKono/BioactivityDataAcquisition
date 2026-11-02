@@ -20,11 +20,11 @@
   - **Adapter clients:** `chembl/client.py`, `pubchem/client.py`, `crossref/client.py` (incl. `fetch_filtered_with_fallback` / `CrossRefFetchFlow`).
   - **Rate limit implementation:** `TokenBucketRateLimiter` in `src/bioetl/infrastructure/adapters/http/rate_limiter.py`.
   - **Optional decorator wrappers (available, not default HTTP factory path):** `RetryingDataSourceDecorator`, `CircuitBreakerDataSourceDecorator`, `wrap_with_resilience` under `src/bioetl/infrastructure/adapters/decorators/` — no production call sites outside that package on tip.
-  - **Checks executed (exit 0):**
-    - `rg -n -F --glob '*.py' -e 'class TokenBucketRateLimiter' -e 'class CircuitBreakerGuard' -e 'class RetryingDataSourceDecorator' -e 'class CircuitBreakerDataSourceDecorator' -e 'class HttpClientFactory' -e 'class UnifiedHTTPClient' src/bioetl`
-    - `rg -n -F --glob '*.py' -e 'circuit_breaker=CircuitBreakerGuard' -e 'retry_config=' src/bioetl/composition/factories/datasource`
-    - `rg -n -F --glob '*.py' -e 'RetryingDataSourceDecorator(' -e 'CircuitBreakerDataSourceDecorator(' -e 'wrap_with_resilience(' src/bioetl` excluding `**/decorators/**` → **no matches** (decorators not wired as default composition)
-    - `rg -n -F --glob '*.py' -e 'fetch_filtered_with_fallback' -e 'CrossRefFetchFlow' src/bioetl/infrastructure/adapters/crossref src/bioetl/composition`
+  - **Checks executed** (per-command exit codes below; `rg` exit 1 = no matches):
+    - `rg -n -F --glob '*.py' -e 'class TokenBucketRateLimiter' -e 'class CircuitBreakerGuard' -e 'class RetryingDataSourceDecorator' -e 'class CircuitBreakerDataSourceDecorator' -e 'class HttpClientFactory' -e 'class UnifiedHTTPClient' src/bioetl` → exit 0 (matches found)
+    - `rg -n -F --glob '*.py' -e 'circuit_breaker=CircuitBreakerGuard' -e 'retry_config=' src/bioetl/composition/factories/datasource` → exit 0 (matches found)
+    - `rg -n -F --glob '*.py' --glob '!**/decorators/**' -e 'RetryingDataSourceDecorator(' -e 'CircuitBreakerDataSourceDecorator(' -e 'wrap_with_resilience(' src/bioetl` → exit 1, **no matches** (decorators not wired as default composition outside `decorators/`)
+    - `rg -n -F --glob '*.py' -e 'fetch_filtered_with_fallback' -e 'CrossRefFetchFlow' src/bioetl/infrastructure/adapters/crossref src/bioetl/composition` → exit 0 (matches found)
   - **Skipped:** live HTTP against ChEMBL/PubChem/CrossRef; full pytest provider suites; automated mkdocs/docs scan for this pack (handled by PR Docs lane separately).
 
 ## D. Findings Register
