@@ -1,9 +1,12 @@
 {
   "schema_version": 1,
-  "catalog_ref": "9b928d6a07dd818f4833ca70777c42a2c2aa2451",
-  "source_ref": "9b928d6a07dd818f4833ca70777c42a2c2aa2451",
+  "catalog_ref": "e5cfda36c8320c8bd4fc31bfd2c8cfea8ff6a44d",
+  "source_ref": "e5cfda36c8320c8bd4fc31bfd2c8cfea8ff6a44d",
   "source_reviews": {
-    "src/bioetl/infrastructure/storage/gold/writer_metrics.py": "Reviewed formatter-only layout changes in gold writer metric labels; no acquisition, cleanup or runtime behavior changed."
+    "src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py": "Reviewed removal of string[pyarrow] dtype alias mapping; no external resource acquisition, cleanup, or runtime network behavior changed.",
+    "src/bioetl/domain/_observability_contract_core.py": "Reviewed pipeline label sanitization regex hardening (ASCII word-boundary); no external resource acquisition or cleanup behavior changed.",
+    "src/bioetl/domain/schemas/chembl/publication.py": "Reviewed creation_date calendar check boolean typing cleanup; no external resource acquisition or cleanup behavior changed.",
+    "src/bioetl/infrastructure/validation/contract_validator.py": "Reviewed gold validator record materialization simplification; no external resource acquisition or cleanup behavior changed."
   },
   "expression_updates": {},
   "resource_updates": {},
