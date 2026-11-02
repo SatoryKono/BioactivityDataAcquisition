@@ -181,7 +181,7 @@ def test_container_preflight_on_synthetic_installed_runtime(
         assert "Chromium version mismatch" in result.stderr
 
 
-def test_powershell_filesystem_executes_locked_pin() -> None:
+def test_powershell_filesystem_executes_locked_pin(tmp_path: Path) -> None:
     powershell = (
         shutil.which("pwsh")
         or shutil.which("pwsh.exe")
@@ -203,6 +203,7 @@ def test_powershell_filesystem_executes_locked_pin() -> None:
         text=True,
         capture_output=True,
         check=False,
+        env={**os.environ, "NPM_CONFIG_CACHE": str(tmp_path / "npm_cache")},
     )
     assert result.returncode == 0, result.stderr
     assert "@modelcontextprotocol/server-filesystem@2026.8.31" in result.stdout
@@ -230,6 +231,7 @@ def test_shell_filesystem_executes_locked_pin(tmp_path: Path) -> None:
         text=True,
         capture_output=True,
         check=False,
+        env={**os.environ, "NPM_CONFIG_CACHE": str(tmp_path / "npm_cache")},
     )
     assert result.returncode == 0, result.stderr
     assert "@modelcontextprotocol/server-filesystem@2026.8.31" in result.stdout
