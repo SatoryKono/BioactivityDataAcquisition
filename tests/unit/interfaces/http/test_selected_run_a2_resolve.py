@@ -124,6 +124,27 @@ def test_resolve_empty_scope_returns_none() -> None:
     assert latest is None
 
 
+def test_pipeline_no_matches_dash_is_not_all_scope() -> None:
+    """Grafana pipeline=- (NO MATCHES) must not expand into unrestricted All."""
+    latest = resolve_a2_latest_run_id(
+        manifests=(_manifest(1, pipeline="chembl_assay"),),
+        ledger_port=None,
+        pipeline="-",
+        query={"pipeline": "-"},
+    )
+    assert latest is None
+
+
+def test_workflow_dash_is_concrete_restriction() -> None:
+    latest = resolve_a2_latest_run_id(
+        manifests=(_manifest(1, pipeline="chembl_assay"),),
+        ledger_port=None,
+        pipeline="chembl_assay",
+        query={"pipeline": "chembl_assay", "workflow": "-"},
+    )
+    assert latest is None
+
+
 def _write_pipeline_report(
     root: Path,
     *,

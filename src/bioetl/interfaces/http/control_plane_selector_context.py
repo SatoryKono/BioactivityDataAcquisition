@@ -40,6 +40,7 @@ __all__ = (
     "RunIdOptionPolicy",
     "build_selector_context_payload",
     "build_selector_filter_options_payload",
+    "finalize_run_id_empty_catalog_label",
 )
 
 
@@ -389,15 +390,14 @@ def _run_option_labels(
     *,
     timezone: str = "UTC",
 ) -> dict[str, object]:
+    """Label run_id options from the manifest catalog only.
+
+    Empty catalogs keep ``-`` as ``SELECT RUN`` here so report supplements can
+    still append report-only UUIDs without dual-labeling ``-`` as
+    «НЕТ ЗАПУСКОВ». Call ``finalize_run_id_empty_catalog_label`` after the
+    merged catalog is complete.
+    """
     by_id = {record.run_id: record for record in records}
-    concrete = [value for value in values if value and value != RUN_ID_NO_SELECTION]
-    empty_catalog = not concrete
-    if empty_catalog:
-        return {
-            "items": [
-                {"text": RUN_ID_NO_RUNS_LABEL, "value": RUN_ID_NO_SELECTION},
-            ]
-        }
     items = [
         {
             "text": _run_option_label(
@@ -411,6 +411,36 @@ def _run_option_labels(
         for value in values
     ]
     return {"items": items}
+
+
+def finalize_run_id_empty_catalog_label(
+    payload: dict[str, object],
+) -> dict[str, object]:
+    """Apply «НЕТ ЗАПУСКОВ» only after manifest + report options are merged."""
+    raw_items = payload.get("items")
+    if not isinstance(raw_items, list):
+        return payload
+
+    def _value(item: object) -> object:
+        return item.get("value") if isinstance(item, dict) else item
+
+    concrete = [
+        item
+        for item in raw_items
+        if (value := _value(item)) not in {None, "", RUN_ID_NO_SELECTION}
+    ]
+    if concrete:
+        items: list[object] = []
+        for item in raw_items:
+            if isinstance(item, dict) and item.get("value") == RUN_ID_NO_SELECTION:
+                items.append({**item, "text": "SELECT RUN"})
+            else:
+                items.append(item)
+        return {**payload, "items": items}
+    return {
+        **payload,
+        "items": [{"text": RUN_ID_NO_RUNS_LABEL, "value": RUN_ID_NO_SELECTION}],
+    }
 
 
 def build_selector_filter_options_payload(

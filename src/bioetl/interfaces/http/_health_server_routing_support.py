@@ -47,6 +47,7 @@ from bioetl.interfaces.http.control_plane_selector_context import (
     RunIdOptionPolicy,
     build_selector_context_payload,
     build_selector_filter_options_payload,
+    finalize_run_id_empty_catalog_label,
 )
 
 _NOT_FOUND_MESSAGE = "Not Found"
@@ -249,6 +250,8 @@ async def _filter_options_payload(
             scopes=scopes,
             entries=report_entries,
         )
+    if dimension == "run_id" and response_shape == "options":
+        payload = finalize_run_id_empty_catalog_label(payload)
     _add_run_id_items(payload, response_shape=response_shape, dimension=dimension)
     return payload
 

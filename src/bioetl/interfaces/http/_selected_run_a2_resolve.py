@@ -33,8 +33,12 @@ from bioetl.interfaces.http.run_report_index import _normalize_list_owner
 _UNRESOLVED_RUN_IDS = frozenset(
     {"", RUN_ID_NO_SELECTION, "All", "$__all", "__all", "*"}
 )
+# Grafana All / multi-value wildcards only. Keep ``-`` out: it is the run_id
+# unresolved sentinel (NO_SELECTION), not an All-scope token for workflow /
+# pipeline / run_type. Treating pipeline=- as All would expand an empty
+# NO MATCHES scope into unrestricted latest selection.
 _ALL_SCOPE_TOKENS = frozenset(
-    {"", "All", "all", ".*", "$__all", "__all", "*", "—", "-"}
+    {"", "All", "all", ".*", "$__all", "__all", "*", "—"}
 )
 
 NO_RUNS_STATUS = "НЕТ ЗАПУСКОВ"
