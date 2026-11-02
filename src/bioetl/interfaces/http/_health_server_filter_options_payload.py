@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import time
 from collections.abc import Callable
 from functools import partial
 
@@ -25,8 +24,6 @@ from bioetl.interfaces.http.control_plane_selector_context import (
     finalize_run_id_empty_catalog_label,
 )
 
-_DEFAULT_FILTER_OPTIONS_BUDGET_SECONDS = 20.0
-
 
 async def build_filter_options_payload(
     host: _HealthRoutingHost,
@@ -35,11 +32,9 @@ async def build_filter_options_payload(
     options_builder: Callable[..., dict[str, object]],
     add_run_id_items: Callable[..., None],
     include_reports: bool,
-    deadline: float | None = None,
+    deadline: float,
 ) -> dict[str, object]:
     """Combine manifest and report catalogs into a filter-options payload."""
-    if deadline is None:
-        deadline = time.monotonic() + _DEFAULT_FILTER_OPTIONS_BUDGET_SECONDS
     manifest_port = host._run_manifest_port
     assert manifest_port is not None
     dimension = host._read_optional_param(query, "dimension") or "run_id"
@@ -111,8 +106,9 @@ async def build_filter_options_payload(
             scopes=scopes,
             entries=report_entries,
         )
-    if dimension == "run_id" and response_shape == "options":
-        payload = finalize_run_id_empty_catalog_label(payload)
+    payload = _finalize_run_id_options_label(
+        payload, dimension=dimension, response_shape=response_shape
+    )
     # Additive PromQL universe merge for run_type (fail-open, budget-capped).
     # Gate kept in a helper so Sonar CC stays within leak budget while the
     # asyncio.to_thread census site remains under build_filter_options_payload.
@@ -125,6 +121,18 @@ async def build_filter_options_payload(
         payload = await asyncio.to_thread(supplement_prometheus_run_type_options, payload, prometheus_base_url=prometheus_base_url, deadline=deadline, response_shape=response_shape, pipelines=selected_pipelines)  # noqa: E501
         # fmt: on
     add_run_id_items(payload, response_shape=response_shape, dimension=dimension)
+    return payload
+
+
+def _finalize_run_id_options_label(
+    payload: dict[str, object],
+    *,
+    dimension: str,
+    response_shape: str,
+) -> dict[str, object]:
+    """Apply empty-catalog run_id label only for options-shaped run_id responses."""
+    if dimension == "run_id" and response_shape == "options":
+        return finalize_run_id_empty_catalog_label(payload)
     return payload
 
 

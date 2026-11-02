@@ -183,6 +183,8 @@ async def _filter_options_payload(
     deadline: float | None = None,
 ) -> dict[str, object]:
     """Build filter options using the injected selector-catalog builders."""
+    if deadline is None:
+        deadline = time.monotonic() + _FILTER_OPTIONS_TIMEOUT_SECONDS
     exact_run_only = _read_truthy_query_param(query, "exact_run_only")
     selected_run_id = read_selected_run_id(host, query)
     include_reports = not exact_run_only or selected_run_id is not None

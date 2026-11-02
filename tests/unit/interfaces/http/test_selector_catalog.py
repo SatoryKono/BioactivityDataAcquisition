@@ -221,11 +221,12 @@ async def test_selector_timeout_retains_slot_until_operation_finishes(monkeypatc
     host._send_payload_response = AsyncMock()
     release = asyncio.Event()
 
-    async def blocked(*args):
+    async def blocked(*args, **_kwargs):
         await release.wait()
         return {"items": []}
 
     monkeypatch.setattr(routing, "_filter_options_payload", blocked)
+
     monkeypatch.setattr(routing, "_FILTER_OPTIONS_TIMEOUT_SECONDS", 0.01)
     try:
         await routing.handle_control_plane_filter_options(host, None, {})
