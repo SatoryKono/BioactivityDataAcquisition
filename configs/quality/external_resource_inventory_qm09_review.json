@@ -1,11 +1,21 @@
 {
   "schema_version": 1,
-  "catalog_ref": "57146e50dfa2a48cb93cd0bbbf6c4aeb503aec59",
-  "source_ref": "57146e50dfa2a48cb93cd0bbbf6c4aeb503aec59",
+  "catalog_ref": "2e5f70acf3df9b4b0e713098be5aeee2533618f8",
+  "source_ref": "387b629377f11150a853c7c322686ceaa7aa8cb1",
   "source_reviews": {
+    "src/bioetl/application/services/control_plane/manifest/diagnostics/selected_run_replay_readiness.py": "Reviewed selected-run replay readiness projection helpers for ops-http A2. In-memory readiness verdicts only; no external acquisition, cleanup, endpoint, subprocess, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/composition/composite_catalog.py": "Reviewed public composition seam re-exports of selected-run contract fields through the existing composite catalog API. No new filesystem, network, subprocess or lifecycle acquisition is introduced beyond the existing entities glob for pipeline names.",
+    "src/bioetl/composition/selected_run_contract_exclusions.py": "Reviewed additive selected-run contract exclusion status and records_in projection. Limits resolve through existing DQConfigLoader.load after an entity YAML existence check; funnel math is in-memory only. No new subprocess, network, lock or lifecycle behavior is introduced.",
     "src/bioetl/infrastructure/observability/observability_backend_process.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed.",
     "src/bioetl/infrastructure/provenance/code_revision.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed.",
-    "src/bioetl/infrastructure/storage/silver/support.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed."
+    "src/bioetl/infrastructure/storage/silver/support.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed.",
+    "src/bioetl/interfaces/http/_control_plane_selector_payloads.py": "Reviewed control-plane selector payload shaping for ops-http. In-memory payload assembly only; no external acquisition, cleanup, endpoint, subprocess, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/interfaces/http/_selected_run_a2_resolve.py": "Reviewed A2 latest-run resolution against existing run-manifest ports. Catalog reads stay on already-qualified control-plane ports; no new external acquisition, cleanup, subprocess, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/interfaces/http/_selected_run_contract_exclusions.py": "Reviewed thin HTTP compatibility re-export of composition contract-field helpers through the sanctioned composite_catalog seam. No external acquisition behavior is introduced.",
+    "src/bioetl/interfaces/http/_selected_run_presentation.py": "Reviewed Grafana presentation helpers for selected-run status. In-memory presentation mapping only; no external acquisition, cleanup, subprocess, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/interfaces/http/_selected_run_unavailable.py": "Reviewed extraction of unavailable/gap selected-run payloads from selected_run_status. In-memory payload assembly only; no external acquisition, cleanup, subprocess, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/interfaces/http/control_plane_selector_context.py": "Reviewed selector context wiring for ops-http. Uses existing ports and in-memory shaping; no new external acquisition, cleanup, subprocess, network, lock or lifecycle behavior is introduced.",
+    "src/bioetl/interfaces/http/selected_run_status.py": "Reviewed selected-run-status HTTP projection for phase 3a A2 and contract fields. Retains the existing asyncio.to_thread forensic boundary already inventoried for this endpoint; no new subprocess, network, lock or lifecycle acquisition is introduced."
   },
   "expression_updates": {},
   "resource_updates": {},
@@ -13,5 +23,38 @@
   "new_resources": [],
   "new_exclusions": [],
   "segment_updates": {},
-  "reference_moves": []
+  "reference_moves": [
+    {
+      "identity": "health._selected_run_artifact_probes.file",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "line": 372,
+        "source_segment": "result = load_selected_run_status("
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "scope": "_load_selected_with_live_fallback",
+        "segment": "result = load_selected_run_status("
+      }
+    },
+    {
+      "identity": "health._selected_run_report_assessment.file",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "line": 372,
+        "source_segment": "result = load_selected_run_status("
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "scope": "_load_selected_with_live_fallback",
+        "segment": "result = load_selected_run_status("
+      }
+    }
+  ]
 }
