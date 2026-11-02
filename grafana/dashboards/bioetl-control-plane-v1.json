@@ -1622,7 +1622,18 @@
                   },
                   {
                     "id": "custom.hidden",
-                    "value": true
+                    "value": false
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
                   }
                 ]
               },
@@ -1746,7 +1757,11 @@
                 "properties": [
                   {
                     "id": "displayName",
-                    "value": "Reason"
+                    "value": "Detail"
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": false
                   }
                 ]
               }
@@ -1887,7 +1902,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
+                      "type": "color-text",
                       "wrapText": true
                     }
                   },
@@ -1943,7 +1958,11 @@
                   },
                   {
                     "id": "custom.hidden",
-                    "value": true
+                    "value": false
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
                   }
                 ]
               },
@@ -1962,7 +1981,11 @@
                   },
                   {
                     "id": "displayName",
-                    "value": "Reason"
+                    "value": "Detail"
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": false
                   }
                 ]
               },
@@ -2258,7 +2281,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
+                      "type": "color-text",
                       "wrapText": false
                     }
                   },
@@ -2521,7 +2544,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
+                      "type": "color-text",
                       "wrapText": false
                     }
                   },
@@ -2938,7 +2961,18 @@
                   },
                   {
                     "id": "custom.hidden",
-                    "value": true
+                    "value": false
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
                   }
                 ]
               },
@@ -3062,7 +3096,11 @@
                 "properties": [
                   {
                     "id": "displayName",
-                    "value": "Reason"
+                    "value": "Detail"
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": false
                   }
                 ]
               }

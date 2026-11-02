@@ -205,3 +205,43 @@ async def test_close_rejects_new_reads() -> None:
     with pytest.raises(ForensicEndpointUnavailable) as exc_info:
         await _read(cache, AsyncMock(return_value=dict(PAYLOAD)))
     assert exc_info.value.reason == "shutting_down"
+
+
+async def test_stale_refresh_exception_is_observed_without_poisoning(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    now = [0.0]
+    monkeypatch.setattr(module, "monotonic", lambda: now[0])
+    cache = module.SelectedRunStatusCache()
+    await _read(cache, AsyncMock(return_value=dict(PAYLOAD)))
+    now[0] = module.FRESH_SECONDS + 1
+    fail = ForensicEndpointUnavailable(reason="deadline_exceeded", status_code=504)
+    stale = await _read(cache, AsyncMock(side_effect=fail))
+    assert stale["verdict"] == "OK"
+    await asyncio.gather(*tuple(cache._tasks.values()), return_exceptions=True)
+    assert cache.status(QUERY)["last_refresh_error"] == "deadline_exceeded"
+    # Last good snapshot remains; cold waiters can still observe a raised error
+    # on a fully expired key in a separate scenario.
+    assert cache._entries[module.selected_run_status_key(QUERY)].payload == PAYLOAD
+
+
+async def test_close_cancels_pending_tasks_after_wait_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    cache = module.SelectedRunStatusCache()
+    release = asyncio.Event()
+
+    async def hang() -> dict[str, object]:
+        await release.wait()
+        return dict(PAYLOAD)
+
+    task = asyncio.create_task(_read(cache, AsyncMock(side_effect=hang)))
+    await asyncio.sleep(0)
+    assert cache._tasks
+    monkeypatch.setattr(module, "_CLOSE_TIMEOUT_SECONDS", 0.01)
+    await cache.close()
+    assert all(item.cancelled() or item.done() for item in cache._tasks.values()) or (
+        not cache._tasks
+    )
+    release.set()
+    await asyncio.gather(task, return_exceptions=True)
