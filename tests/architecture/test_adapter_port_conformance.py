@@ -33,7 +33,7 @@ from bioetl.domain.ports import (
     LoggerPort,
     SilverStoragePort,
 )
-from bioetl.domain.ports.noop import NoOpMetrics
+from bioetl.domain.ports.noop import NoOpMetadataWriter, NoOpMetrics
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.observability.logging import StructlogLogger
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
@@ -113,6 +113,50 @@ from bioetl.infrastructure.storage.workflow_row_reconciliation import (
     StorageRowReconciliationAdapter,
 )
 
+from bioetl.domain.ports.audit import AuditPort
+from bioetl.domain.ports.control_plane.effective_config_artifact import (
+    EffectiveConfigArtifactStorePort,
+)
+from bioetl.domain.ports.export import DebugExportPort
+from bioetl.domain.ports.idmapping import IDMappingSourceReaderPort
+from bioetl.domain.ports.metadata.writer import MetadataWriterPort
+from bioetl.domain.ports.observability.metrics import (
+    HealthMetricsExpositionPort,
+    MetricsPublisherPort,
+    MetricsServerPort,
+)
+from bioetl.domain.ports.quality.dq_report import DQReportWriterPort
+from bioetl.domain.ports.runtime.checkpoint import CheckpointPort
+from bioetl.domain.ports.runtime.composite_checkpoint import CompositeCheckpointPort
+from bioetl.domain.ports.storage.run_report_store import RunReportStorePort
+from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
+from bioetl.infrastructure.adapters.input.idmapping_csv_reader_adapter import (
+    IDMappingCsvReaderAdapter,
+)
+from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
+from bioetl.infrastructure.audit.file_audit import FileAuditAdapter
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
+from bioetl.infrastructure.control_plane.file_effective_config_artifact_store import (
+    FileEffectiveConfigArtifactStore,
+)
+from bioetl.infrastructure.export.debug_export_adapter import DebugExportAdapter
+from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
+from bioetl.infrastructure.observability.health_metrics_exposition import (
+    HealthMetricsExpositionAdapter,
+)
+from bioetl.infrastructure.observability.metrics_publisher_adapter import (
+    MetricsPublisherAdapter,
+)
+from bioetl.infrastructure.observability.metrics_server_adapter import (
+    MetricsServerAdapter,
+)
+from bioetl.infrastructure.storage.run_report_store_adapter import (
+    FileRunReportStoreAdapter,
+)
+from bioetl.infrastructure.storage.support.checkpoint_writer import (
+    FileCompositeCheckpointWriter,
+)
+
 pytestmark = pytest.mark.architecture
 
 
@@ -158,7 +202,22 @@ PORT_ADAPTER_CASES = (
     PortAdapterCase(StageAccountingPort, StageAccountingAccumulator),
     PortAdapterCase(WorkflowExecutionStatePort, FileWorkflowExecutionStateStore),
     PortAdapterCase(WorkflowLedgerPort, FileWorkflowLedgerStore),
-    PortAdapterCase(WorkflowManifestPort, FileWorkflowManifestStore),
+    PortAdapterCase(WorkflowManifestPort, FileWorkflowManifestStore    PortAdapterCase(AuditPort, FileAuditAdapter),
+    PortAdapterCase(CheckpointPort, LocalCheckpointAdapter),
+    PortAdapterCase(CompositeCheckpointPort, FileCompositeCheckpointWriter),
+    PortAdapterCase(DataSourcePort, CrossRefAdapter),
+    PortAdapterCase(DataSourcePort, PubChemAdapter),
+    PortAdapterCase(DebugExportPort, DebugExportAdapter),
+    PortAdapterCase(DQReportWriterPort, DQReportWriter),
+    PortAdapterCase(EffectiveConfigArtifactStorePort, FileEffectiveConfigArtifactStore),
+    PortAdapterCase(HealthMetricsExpositionPort, HealthMetricsExpositionAdapter),
+    PortAdapterCase(IDMappingSourceReaderPort, IDMappingCsvReaderAdapter),
+    PortAdapterCase(MetadataWriterPort, NoOpMetadataWriter),
+    PortAdapterCase(MetricsPort, NoOpMetrics),
+    PortAdapterCase(MetricsPublisherPort, MetricsPublisherAdapter),
+    PortAdapterCase(MetricsServerPort, MetricsServerAdapter),
+    PortAdapterCase(RunReportStorePort, FileRunReportStoreAdapter),
+),
 )
 
 
@@ -427,34 +486,19 @@ _DISCOVERED_BINDING_EXCLUSIONS = frozenset(
     {
         "BatchWriter",
         "ChemblPolicyRegistryLoader",
-        "CrossRefAdapter",
-        "DQReportWriter",
-        "DebugExportAdapter",
         "DictReader",
         "FileArchiveStore",
-        "FileAuditAdapter",
-        "FileCompositeCheckpointWriter",
         "FileControlPlaneArtifactLifecycleStore",
-        "FileEffectiveConfigArtifactStore",
         "FileHistoricalReplayClosureStore",
         "FileHistoricalReplayUniverseStore",
         "FileProviderHealthEvidenceStore",
-        "FileRunReportStoreAdapter",
         "FileSystemEnumLoader",
         "FileWorkflowTransformArtifactStore",
-        "HealthMetricsExpositionAdapter",
-        "IDMappingCsvReaderAdapter",
         "LazyFactoryCatalog",
-        "LocalCheckpointAdapter",
         "Lock",
         "MetadataWriter",
-        "MetricsPublisherAdapter",
-        "MetricsServerAdapter",
-        "NoOpMetadataWriter",
-        "NoOpMetrics",
         "ProteinClassTargetTypeMappingLoader",
         "ProviderStore",
-        "PubChemAdapter",
         "PublicationTypeClassificationLoader",
         "RLock",
         "UnifiedQuarantineAdapter",
