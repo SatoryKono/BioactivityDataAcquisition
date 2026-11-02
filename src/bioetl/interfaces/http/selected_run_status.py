@@ -322,12 +322,9 @@ async def handle_selected_run_status(
     Missing manifest catalog is QUERY ERROR, not an empty catalog.
 
     §3.4: concurrent identical scopes share one physical load via the
-    process-local selected-run-status cache (TTL 30s).
+    HealthServer-local selected-run-status cache (TTL 30s). Transport and
+    capacity failures raise so the cache keeps the last good snapshot.
     """
-    from bioetl.interfaces.http._selected_run_status_cache import (
-        shared_selected_run_status_cache,
-    )
-
     pipeline = host._read_required_param(query, "pipeline")
     requested_run_id = host._read_optional_param(query, "run_id") or "-"
 
@@ -351,23 +348,24 @@ async def handle_selected_run_status(
         )
 
     async def cached_load() -> dict[str, object]:
-        try:
-            return await run_bounded_forensic_operation(
-                limiter=host._forensic_endpoint_limiter,
-                operation_factory=lambda: asyncio.to_thread(load),
-                endpoint="selected-run-status",
-            )
-        except ForensicEndpointUnavailable as exc:
-            payload = unavailable_status(
-                pipeline, requested_run_id, _QUERY_ERROR, exc.reason
-            )
-            if exc.request_id is not None:
-                payload["request_id"] = exc.request_id
-            return payload
-        except (KeyError, OSError, RuntimeError, ValueError):
-            return unavailable_status(
-                pipeline, requested_run_id, _QUERY_ERROR, "request_failed"
-            )
+        # Propagate ForensicEndpointUnavailable / IO failures so the cache does
+        # not store QUERY ERROR frames as a fresh success payload.
+        return await run_bounded_forensic_operation(
+            limiter=host._forensic_endpoint_limiter,
+            operation_factory=lambda: asyncio.to_thread(load),
+            endpoint="selected-run-status",
+        )
 
-    payload = await shared_selected_run_status_cache().read(query, cached_load)
+    try:
+        payload = await host._selected_run_status_cache.read(query, cached_load)
+    except ForensicEndpointUnavailable as exc:
+        payload = unavailable_status(
+            pipeline, requested_run_id, _QUERY_ERROR, exc.reason
+        )
+        if exc.request_id is not None:
+            payload["request_id"] = exc.request_id
+    except (KeyError, OSError, RuntimeError, ValueError):
+        payload = unavailable_status(
+            pipeline, requested_run_id, _QUERY_ERROR, "request_failed"
+        )
     await host._send_payload_response(writer, 200, payload)
