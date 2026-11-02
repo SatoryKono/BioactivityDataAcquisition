@@ -1,13 +1,90 @@
 {
   "schema_version": 1,
-  "catalog_ref": "409ba9b881735eac9fabe04092b3208cdade7bf9",
-  "source_ref": "bafb923c5d3a8045cf1a78dfa9f60cf792393eae",
+  "catalog_ref": "a99ab2c6a4f86b401217f17a37474b0c9743daf0",
+  "source_ref": "4bdd6d7c64a45caa8a01b53222c45e3495fb8c58",
   "source_reviews": {
-    "src/bioetl/interfaces/http/control_plane_selector_context.py": "Reviewed Sonar S1481 cleanup on published COMP-004 catalog 409ba9b881: inline _value(item) in finalize_run_id_empty_catalog_label. No new external acquisition or lifecycle behavior."
+    "src/bioetl/composition/observability_runtime.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
+    "src/bioetl/domain/composite/config_composite_encoder.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
+    "src/bioetl/domain/composite/config_composite_protocols.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
+    "src/bioetl/domain/composite/config_composite_section_decoders.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
+    "src/bioetl/domain/composite/config_dq.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
+    "src/bioetl/infrastructure/observability/metric_inventory_discovery.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
+    "src/bioetl/infrastructure/schemas/composite_validation.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
+    "src/bioetl/infrastructure/schemas/dq_config.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
+    "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites."
   },
   "expression_updates": {},
   "segment_updates": {},
-  "reference_moves": [],
+  "reference_moves": [
+    {
+      "identity": "diagnostics.metric_inventory.file",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
+        "line": 110,
+        "expression": "metric_inventory.collect_metric_inventory(repo_root)"
+      },
+      "to": {
+        "file": "src/bioetl/composition/observability_runtime.py",
+        "scope": "check_metric_inventory",
+        "call": "collect_metric_inventory",
+        "expression": "collect_metric_inventory(repo_root)"
+      }
+    },
+    {
+      "identity": "diagnostics.metric_inventory.directory-walk",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
+        "line": 110,
+        "expression": "metric_inventory.collect_metric_inventory(repo_root)"
+      },
+      "to": {
+        "file": "src/bioetl/composition/observability_runtime.py",
+        "scope": "check_metric_inventory",
+        "call": "collect_metric_inventory",
+        "expression": "collect_metric_inventory(repo_root)"
+      }
+    },
+    {
+      "identity": "diagnostics.metric_inventory.directory-glob",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
+        "line": 110,
+        "expression": "metric_inventory.collect_metric_inventory(repo_root)"
+      },
+      "to": {
+        "file": "src/bioetl/composition/observability_runtime.py",
+        "scope": "check_metric_inventory",
+        "call": "collect_metric_inventory",
+        "expression": "collect_metric_inventory(repo_root)"
+      }
+    },
+    {
+      "identity": "diagnostics.metric_inventory.reentrant-lock",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
+        "line": 110,
+        "expression": "metric_inventory.collect_metric_inventory(repo_root)"
+      },
+      "to": {
+        "file": "src/bioetl/composition/observability_runtime.py",
+        "scope": "check_metric_inventory",
+        "call": "collect_metric_inventory",
+        "expression": "collect_metric_inventory(repo_root)"
+      }
+    }
+  ],
   "resource_updates": {},
   "additional_bindings": {},
   "new_resources": [],
