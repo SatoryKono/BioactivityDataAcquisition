@@ -116,6 +116,7 @@ def wheel_venv_python(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path
         env=build_env,
         capture_output=True,
         text=True,
+        timeout=600,
         check=False,
     )
     assert build.returncode == 0, f"uv build failed: {build.stderr}"
@@ -128,6 +129,7 @@ def wheel_venv_python(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path
         env=build_env,
         capture_output=True,
         text=True,
+        timeout=600,
         check=False,
     )
     assert create.returncode == 0, f"uv venv failed: {create.stderr}"
@@ -140,6 +142,7 @@ def wheel_venv_python(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path
         env=build_env,
         capture_output=True,
         text=True,
+        timeout=600,
         check=False,
     )
     assert install.returncode == 0, f"wheel install failed: {install.stderr}"
