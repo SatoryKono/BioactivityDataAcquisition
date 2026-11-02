@@ -1210,6 +1210,7 @@
       "decision_date": "2026-01-28",
       "decision_path": "docs/02-architecture/decisions/ADR-032-unified-http-client.md",
       "enforcement_owner_paths": [
+        "scripts/engineering/qa/generate_p05_interfaces_audit_report.py",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
       "gap_reasons": [],
@@ -1228,6 +1229,7 @@
         "docs/04-reference/pipelines/chembl/05-activity-spec.md",
         "docs/04-reference/publications/publication-processing-workflows.md",
         "docs/05-operations/performance-tuning.md",
+        "scripts/engineering/qa/generate_p05_interfaces_audit_report.py",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
       "manual_exception": null,
@@ -1608,6 +1610,7 @@
       "decision_date": "2026-03-24",
       "decision_path": "docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md",
       "enforcement_owner_paths": [
+        "scripts/engineering/qa/generate_p05_interfaces_audit_report.py",
         "tests/architecture/test_control_plane_runtime_docs_alignment.py",
         "tests/architecture/test_documentation_audit_remediation.py",
         "tests/unit/domain/ports/test_control_plane_port_exports.py",
@@ -1636,6 +1639,7 @@
         "docs/04-reference/templates/index.md",
         "docs/05-operations/runbooks/index.md",
         "docs/05-operations/runbooks/run-manifest-inspection.md",
+        "scripts/engineering/qa/generate_p05_interfaces_audit_report.py",
         "src/bioetl/domain/ports/control_plane/__init__.py",
         "src/bioetl/interfaces/http/_processed_records_table_support.py",
         "tests/architecture/test_control_plane_runtime_docs_alignment.py",
@@ -1655,6 +1659,7 @@
       "decision_path": "docs/02-architecture/decisions/ADR-045-dq-contract-system.md",
       "enforcement_owner_paths": [
         "scripts/documentation_governance_check.py",
+        "scripts/engineering/qa/generate_p05_interfaces_audit_report.py",
         "tests/architecture/test_gold_strict_validation_policy.py"
       ],
       "gap_reasons": [],
@@ -1686,6 +1691,7 @@
         "docs/05-operations/runbooks/index.md",
         "docs/05-operations/runbooks/run-manifest-inspection.md",
         "scripts/documentation_governance_check.py",
+        "scripts/engineering/qa/generate_p05_interfaces_audit_report.py",
         "tests/architecture/test_gold_strict_validation_policy.py"
       ],
       "manual_exception": null,
