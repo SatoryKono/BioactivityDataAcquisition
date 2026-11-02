@@ -14,13 +14,29 @@ The report is intentionally static and repo-local. It reconciles:
 
 from __future__ import annotations
 
-from bioetl.infrastructure.observability import (
-    metric_inventory_assembly as _metric_inventory_assembly,
-    metric_inventory_ast as _metric_inventory_ast,
-    metric_inventory_scan as _metric_inventory_scan,
-)
-
+import argparse
+import ast
+import json
+import os
+import re
+import subprocess
 import sys
+import types
+from collections import defaultdict
+from collections.abc import Callable, Sequence
+from datetime import UTC, date, datetime
+from pathlib import Path
+from typing import Any, Final, Protocol, TypedDict, cast
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
+
+# Support running this report directly from a source checkout without requiring
+# the project package to be installed or ``src`` to be present in PYTHONPATH.
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+_SRC_ROOT = _REPO_ROOT / "src"
+if str(_SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(_SRC_ROOT))
 
 # `python -m scripts.engineering.qa.report_observability_metric_inventory` loads
 # this file as ``__main__``. The scan helper imports the same module by package
@@ -32,21 +48,11 @@ if __name__ == "__main__":
         sys.modules[__name__],
     )
 
-import argparse
-import ast
-import json
-import os
-import re
-import subprocess
-import types
-from collections import defaultdict
-from collections.abc import Callable, Sequence
-from datetime import UTC, date, datetime
-from pathlib import Path
-from typing import Any, Final, Protocol, TypedDict, cast
-from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+from bioetl.infrastructure.observability import (
+    metric_inventory_assembly as _metric_inventory_assembly,
+    metric_inventory_ast as _metric_inventory_ast,
+    metric_inventory_scan as _metric_inventory_scan,
+)
 
 from scripts.engineering.qa.observability_metric_inventory_shared import (
     _REPO_ROOT,

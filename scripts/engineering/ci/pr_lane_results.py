@@ -363,6 +363,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         EXTERNAL_RESOURCE_INVENTORY_TEST,
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
     ),
+    "configs/quality/external_resource_inventory_pr12651_main_merge_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+    ),
     **dict.fromkeys(
         (
             "reports/epoch2208/b/12371_b_handoff.md",

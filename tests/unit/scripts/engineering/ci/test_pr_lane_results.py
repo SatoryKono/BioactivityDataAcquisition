@@ -1713,6 +1713,7 @@ def test_collect_nodeids_parses_pytest_collection(tmp_path: Path) -> None:
         ],
         "reports/quality/external-resource-inventory.md",
         "configs/quality/external_resource_inventory_pr12651_review.json",
+        "configs/quality/external_resource_inventory_pr12651_main_merge_review.json",
         "scripts/engineering/qa/README.md",
     ],
 )
