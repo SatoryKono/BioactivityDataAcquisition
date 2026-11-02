@@ -30,7 +30,7 @@ from bioetl.infrastructure.control_plane.file_effective_config_artifact_store im
     FileEffectiveConfigArtifactStore,
 )
 from bioetl.interfaces.cli.commands.domains.health import server_integration_deps as cli
-from bioetl.interfaces.http import run_report_ops
+from bioetl.interfaces.http import report_root_config, run_report_ops
 from tests.unit.application.services.run_manifest_test_support import (
     RunManifestOverrides,
     make_run_manifest,
@@ -378,8 +378,7 @@ def _write_assay_report(*, reports, run_id: str, workflow_id: str, store):
     return write_pipeline_run_report(report, root=reports, store=store)
 
 
-async def _query_selected_run(*, deps, reports, monkeypatch, run_id: str):
-    monkeypatch.setattr(run_report_ops, "_effective_root", lambda root: reports)
+async def _query_selected_run(*, deps, run_id: str):
     server = cli.build_health_server(
         host="127.0.0.1", port=0, deps=deps, quarantine_service=None
     )
@@ -438,11 +437,14 @@ async def test_isolated_manifest_lost_under_default_data_root(tmp_path, monkeypa
         data_dir=str(default_data),
         report_root=reports,
         archive_root=None,
+        enforce_report_root_marker=False,
         prometheus_url=None,
         runtime_source_id=None,
     )
     monkeypatch.setattr(assembly, "get_settings", lambda: settings)
     monkeypatch.setattr(cli, "load_settings", lambda: settings)
+    monkeypatch.setattr(report_root_config, "load_settings", lambda: settings)
+    assert run_report_ops._effective_root(None) == reports
 
     # Persist manifests only into their isolated stores (not the default root).
     target_deps = assembly.create_health_server_dependencies(
@@ -492,9 +494,7 @@ async def test_isolated_manifest_lost_under_default_data_root(tmp_path, monkeypa
         is not None
     )
 
-    buggy = await _query_selected_run(
-        deps=default_deps, reports=reports, monkeypatch=monkeypatch, run_id=_TARGET_RUN
-    )
+    buggy = await _query_selected_run(deps=default_deps, run_id=_TARGET_RUN)
     checks = {item["code"]: item for item in buggy["replay_checks"]}
     assert buggy["verdict"] == "OK", buggy
     assert buggy["execution_state"] == "SUCCESS", buggy
@@ -509,9 +509,7 @@ async def test_isolated_manifest_lost_under_default_data_root(tmp_path, monkeypa
     initial_digest = sha256(report_before).hexdigest()
 
     # Control: same HTTP path with the correct isolated data root → READY.
-    ready = await _query_selected_run(
-        deps=target_deps, reports=reports, monkeypatch=monkeypatch, run_id=_TARGET_RUN
-    )
+    ready = await _query_selected_run(deps=target_deps, run_id=_TARGET_RUN)
     ready_checks = {item["code"]: item for item in ready["replay_checks"]}
     assert ready["replay_readiness_now"] == "READY", ready
     assert ready["verdict"] == "OK", ready
@@ -525,17 +523,13 @@ async def test_isolated_manifest_lost_under_default_data_root(tmp_path, monkeypa
     assert _replay_status(ready) == "OK"
 
     # Foreign isolated evidence must not satisfy the target run.
-    borrowed = await _query_selected_run(
-        deps=foreign_deps, reports=reports, monkeypatch=monkeypatch, run_id=_TARGET_RUN
-    )
+    borrowed = await _query_selected_run(deps=foreign_deps, run_id=_TARGET_RUN)
     assert borrowed["replay_readiness_now"] == "INSUFFICIENT", borrowed
     borrowed_checks = {item["code"]: item for item in borrowed["replay_checks"]}
     assert borrowed_checks["manifest_not_recorded"]["result"] == "unknown"
 
     # Re-reads must not mutate report or isolated objects.
-    reread = await _query_selected_run(
-        deps=default_deps, reports=reports, monkeypatch=monkeypatch, run_id=_TARGET_RUN
-    )
+    reread = await _query_selected_run(deps=default_deps, run_id=_TARGET_RUN)
     assert reread["revision"] == initial_revision
     assert reread["replay_readiness_now"] == "INSUFFICIENT"
     assert written.json_path.read_bytes() == report_before
