@@ -80,7 +80,7 @@ class FileEvidenceReadContext:
             raise EvidenceLocationInvalidError(
                 "data_root changed after the read context was opened"
             )
-        _validate_control_tree(current_root)
+        _validate_control_tree(current_root, trusted_base=self.trusted_alias_base)
 
 
 @dataclass(frozen=True, slots=True)
@@ -101,38 +101,79 @@ class FileEvidenceReadContextFactory:
             trusted_base=Path(trusted_alias_base),
             field_name="data_root",
         )
-        _validate_control_tree(safe_root)
-        output_root = safe_root / "output" / "control"
+        trusted_base = Path(trusted_alias_base).resolve(strict=False)
+        output_root = _safe_store_root(
+            safe_root, trusted_base, "output/control", "output_root"
+        )
+        config_root = _safe_store_root(
+            output_root, trusted_base, "effective_config", "config_root"
+        )
+        lock_root = _safe_store_root(
+            output_root, trusted_base, "dependency_locks", "lock_root"
+        )
+        bronze_root = _safe_store_root(
+            safe_root, trusted_base, "output/bronze", "bronze_root"
+        )
+        run_manifest_root = _safe_store_root(
+            output_root, trusted_base, "run_manifest", "run_manifest_root"
+        )
+        run_ledger_root = _safe_store_root(
+            output_root, trusted_base, "run_ledger", "run_ledger_root"
+        )
+        workflow_manifest_root = _safe_store_root(
+            output_root,
+            trusted_base,
+            "workflow_manifest",
+            "workflow_manifest_root",
+        )
+        lineage_root = _safe_store_root(
+            output_root, trusted_base, "lineage", "lineage_root"
+        )
+        _validate_control_tree(safe_root, trusted_base=trusted_base)
         verifier = ReplayObjectVerifier(
-            config_root=output_root / "effective_config",
-            lock_root=output_root / "dependency_locks",
-            bronze_root=safe_root / "output" / "bronze",
+            config_root=config_root,
+            lock_root=lock_root,
+            bronze_root=bronze_root,
         )
         return FileEvidenceReadContext(
             data_root=safe_root,
-            trusted_alias_base=Path(trusted_alias_base).resolve(strict=False),
+            trusted_alias_base=trusted_base,
             manifest_port=FileRunManifestStore(
-                base_path=output_root / "run_manifest",
+                base_path=run_manifest_root,
                 metrics=self.metrics,
                 replay_object_verifier=verifier,
             ),
             ledger_port=FileRunLedgerStore(
-                base_path=output_root / "run_ledger",
+                base_path=run_ledger_root,
                 metrics=self.metrics,
             ),
             workflow_manifest_port=FileWorkflowManifestStore(
-                base_path=output_root / "workflow_manifest",
+                base_path=workflow_manifest_root,
                 metrics=self.metrics,
             ),
             lineage_port=FileLineageStore(
-                base_path=output_root / "lineage",
+                base_path=lineage_root,
                 metrics=self.metrics,
             ),
             replay_object_verifier=verifier,
         )
 
 
-def _validate_control_tree(data_root: Path) -> None:
+def _safe_store_root(
+    data_root: Path,
+    trusted_base: Path,
+    relative_path: str,
+    field_name: str,
+) -> Path:
+    """Validate a concrete store root against the original alias trust anchor."""
+    return assert_path_within_trusted_base(
+        data_root.joinpath(*relative_path.split("/")),
+        trusted_base=trusted_base,
+        field_name=field_name,
+    )
+
+
+def _validate_control_tree(data_root: Path, *, trusted_base: Path) -> None:
     """Reject linked standard control/data roots before binding file stores."""
     roots = (
         data_root / "output",
@@ -148,6 +189,6 @@ def _validate_control_tree(data_root: Path) -> None:
     for root in roots:
         assert_path_within_trusted_base(
             root,
-            trusted_base=data_root,
+            trusted_base=trusted_base,
             field_name="control-plane evidence path",
         )

@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2596`
-- Internal import edges (raw): `8416`
+- Internal import edges (raw): `8419`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `330`
@@ -22,7 +22,7 @@ flowchart LR
     composition[composition]
     interfaces[interfaces]
     application -->|1652 OK| application
-    application -->|1135 OK| domain
+    application -->|1138 OK| domain
     composition -->|232 OK| application
     composition -->|650 OK| composition
     composition -->|315 OK| domain
@@ -41,7 +41,7 @@ flowchart LR
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1652 | allowed |
-| `application`    | `domain`         |    1135 | allowed |
+| `application`    | `domain`         |    1138 | allowed |
 | `composition`    | `application`    |     232 | allowed |
 | `composition`    | `composition`    |     650 | allowed |
 | `composition`    | `domain`         |     315 | allowed |
@@ -58,11 +58,11 @@ flowchart LR
 
 | From Group                     | To Group                                   | Imports |
 | ------------------------------ | ------------------------------------------ | ------: |
-| `application.services`         | `domain.control_plane`                     |     154 |
+| `application.services`         | `domain.control_plane`                     |     156 |
 | `infrastructure.adapters`      | `domain.types`                             |     125 |
 | `application.composite`        | `domain.composite`                         |     116 |
 | `application.core`             | `domain.types`                             |     107 |
-| `application.services`         | `domain.types`                             |      86 |
+| `application.services`         | `domain.types`                             |      87 |
 | `infrastructure.storage`       | `domain.types`                             |      83 |
 | `infrastructure.storage`       | `domain.ports`                             |      67 |
 | `application.pipelines`        | `domain.types`                             |      57 |
