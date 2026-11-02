@@ -57,14 +57,23 @@ def _expected_module_path(module_name: str) -> Path:
 
 
 def _run_isolated(code: str, *, cwd: Path) -> subprocess.CompletedProcess[str]:
-    """Run ``code`` with ``-I`` and explicit src/checkout on ``sys.path``."""
+    """Run ``code`` with ``-I`` and explicit src/checkout on ``sys.path``.
+
+    Paths are passed via env (not interpolated into the ``-c`` string) so
+    Windows ``\\U...`` and apostrophes in checkout paths cannot break the child.
+    """
+    env = os.environ.copy()
+    env["BIOETL_QM07_SRC"] = str(REPO_ROOT / "src")
+    env["BIOETL_QM07_ROOT"] = str(REPO_ROOT)
+    # -I ignores PYTHONPATH; child reads BIOETL_QM07_* instead.
     prelude = (
-        "import sys; "
-        f"sys.path[:0] = {list(map(str, (REPO_ROOT / 'src', REPO_ROOT)))!r}; "
+        "import os, sys; "
+        "sys.path[:0] = [os.environ['BIOETL_QM07_SRC'], os.environ['BIOETL_QM07_ROOT']]; "
     )
     return subprocess.run(
         [sys.executable, "-I", "-c", prelude + code],
         cwd=cwd,
+        env=env,
         capture_output=True,
         text=True,
         timeout=60,
