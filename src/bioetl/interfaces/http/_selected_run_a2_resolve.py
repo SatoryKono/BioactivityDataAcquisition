@@ -25,7 +25,9 @@ from bioetl.interfaces.http._control_plane_selector_records import (
     narrow_manifest_catalog,
     selected_pipeline_scope,
 )
-from bioetl.interfaces.http._report_selector_options import filtered_report_run_candidates
+from bioetl.interfaces.http._report_selector_options import (
+    filtered_report_run_candidates,
+)
 from bioetl.interfaces.http.run_report_index import _normalize_list_owner
 
 _UNRESOLVED_RUN_IDS = frozenset(
@@ -121,7 +123,11 @@ def resolve_a2_latest_run_id(
         "run_id": (),
     }
     report_rows: tuple[tuple[str, datetime], ...] = ()
-    if report_store is not None or report_root is not None or report_entries is not None:
+    if (
+        report_store is not None
+        or report_root is not None
+        or report_entries is not None
+    ):
         report_rows = filtered_report_run_candidates(
             scopes,
             root=report_root,
