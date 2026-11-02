@@ -9,7 +9,11 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.domain.control_plane import RunManifest, WorkflowManifest, WorkflowManifestStep
+from bioetl.domain.control_plane import (
+    RunManifest,
+    WorkflowManifest,
+    WorkflowManifestStep,
+)
 from bioetl.domain.types import RunID, RunType
 from bioetl.interfaces.http._selected_run_a2_resolve import (
     CATALOG_UNAVAILABLE_REASON,
@@ -54,7 +58,9 @@ def _manifest(
     )
 
 
-def _workflow(name: str, pipeline: str = "chembl_assay", index: int = 50) -> WorkflowManifest:
+def _workflow(
+    name: str, pipeline: str = "chembl_assay", index: int = 50
+) -> WorkflowManifest:
     return WorkflowManifest(
         manifest_id=f"workflow-manifest-{index}",
         workflow_run_id=_run_id(index),
@@ -118,24 +124,18 @@ def test_resolve_empty_scope_returns_none() -> None:
 def test_filter_change_reselects_latest_in_new_scope() -> None:
     assay = _manifest(1, pipeline="chembl_assay")
     activity = _manifest(2, pipeline="chembl_activity")
-    assert (
-        resolve_a2_latest_run_id(
-            manifests=(assay, activity),
-            ledger_port=None,
-            pipeline="chembl_assay",
-            query={"pipeline": "chembl_assay"},
-        )
-        == str(assay.run_id)
-    )
-    assert (
-        resolve_a2_latest_run_id(
-            manifests=(assay, activity),
-            ledger_port=None,
-            pipeline="chembl_activity",
-            query={"pipeline": "chembl_activity"},
-        )
-        == str(activity.run_id)
-    )
+    assert resolve_a2_latest_run_id(
+        manifests=(assay, activity),
+        ledger_port=None,
+        pipeline="chembl_assay",
+        query={"pipeline": "chembl_assay"},
+    ) == str(assay.run_id)
+    assert resolve_a2_latest_run_id(
+        manifests=(assay, activity),
+        ledger_port=None,
+        pipeline="chembl_activity",
+        query={"pipeline": "chembl_activity"},
+    ) == str(activity.run_id)
 
 
 def test_declared_workflow_beats_pipeline_wide_aliases() -> None:
