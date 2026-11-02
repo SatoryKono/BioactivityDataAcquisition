@@ -28,3 +28,17 @@ def test_shadow_compare_routes_rf003_store_and_resolver() -> None:
     assert "tests/unit/application" in selected
     assert "tests/architecture/test_documentation_sync.py" in selected
     assert "tests/unit/domain/run_reports/test_contracts.py" in selected
+
+
+def test_shadow_compare_routes_rf003_inventory_review() -> None:
+    """COMP-004 RF-003 review JSON keeps catalog + requalify governing tests."""
+    repo_root = Path(__file__).resolve().parents[5]
+    path = "configs/quality/external_resource_inventory_pr12702_rf003_review.json"
+    report = build_shadow_compare([path], repo_root=repo_root)
+    assert report["covers_full_suite"] is False
+    selected = set(report["selected"])
+    assert "tests/architecture/test_external_resource_inventory_catalog.py" in selected
+    assert (
+        "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py"
+        in selected
+    )
