@@ -554,7 +554,8 @@ uv run python -m scripts.diagrams check-quality-gates \
 uv run python scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json \
   > reports/diagrams/diagram-lint-report.json
 uv run python -m scripts.diagrams lint-budget \
-  --mode pr \  --quality-report reports/diagrams/diagram-quality-report.json \
+  --mode pr \
+  --quality-report reports/diagrams/diagram-quality-report.json \
   --lint-report reports/diagrams/diagram-lint-report.json \
   --max-hard-failures 0 \
   --max-diag-t022 0 \
