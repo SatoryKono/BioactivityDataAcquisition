@@ -209,21 +209,18 @@ def test_invalid_existing_does_not_fallback_to_other_run() -> None:
     with pytest.raises(EvidenceLocationConflictError):
         store.register(target)
     # Foreign run remains untouched; no silent redirect.
-    assert store.get(
-        kind=foreign.kind, owner=foreign.owner, run_id=foreign.run_id
-    ) == foreign
-    lookup = store.lookup(
-        kind=target.kind, owner=target.owner, run_id=target.run_id
+    assert (
+        store.get(kind=foreign.kind, owner=foreign.owner, run_id=foreign.run_id)
+        == foreign
     )
+    lookup = store.lookup(kind=target.kind, owner=target.owner, run_id=target.run_id)
     assert lookup.code is EvidenceLocationLookupCode.LOCATION_INVALID
     assert lookup.location is None
 
 
 def test_lookup_codes_stay_distinct_from_replay_verdict() -> None:
     store: RunEvidenceLocationReadPort = _InMemoryEvidenceLocationStore()
-    missing = store.lookup(
-        kind="pipeline", owner="chembl_assay", run_id="missing-run"
-    )
+    missing = store.lookup(kind="pipeline", owner="chembl_assay", run_id="missing-run")
     assert missing.code is EvidenceLocationLookupCode.LOCATION_MISSING
     assert missing.location is None
     # Manifest gap is a separate post-resolve code; never auto-substituted here.

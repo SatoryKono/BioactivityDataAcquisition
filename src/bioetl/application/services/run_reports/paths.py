@@ -101,7 +101,9 @@ class EvidenceRootAliasMap:
         return base.joinpath(*relative.split("/"))
 
 
-def default_evidence_root_alias_map(*, dashboard_data_root: Path) -> EvidenceRootAliasMap:
+def default_evidence_root_alias_map(
+    *, dashboard_data_root: Path
+) -> EvidenceRootAliasMap:
     """Build the v1 alias map with the standard ``dashboard_data`` binding."""
     root = Path(dashboard_data_root)
     if not root.is_absolute():
@@ -131,7 +133,9 @@ def resolve_evidence_location_path(
         EvidenceLocationKind.PIPELINE.value,
         EvidenceLocationKind.WORKFLOW.value,
     }:
-        raise EvidenceLocationInvalidError(f"unsupported evidence location kind: {kind_value}")
+        raise EvidenceLocationInvalidError(
+            f"unsupported evidence location kind: {kind_value}"
+        )
     return (
         resolve_evidence_locations_root(report_root=report_root)
         / kind_value

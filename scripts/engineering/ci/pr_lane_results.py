@@ -61,6 +61,7 @@ RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
+RUN_REPORT_CONTRACTS_TEST = "tests/unit/domain/run_reports/test_contracts.py"
 SCRIPTS_INVENTORY_MANIFEST_TEST = (
     "tests/architecture/test_scripts_inventory_manifest.py"
 )
@@ -487,7 +488,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/04-reference/reports/run-reports.md": (
         DOCUMENTATION_SYNC_TEST,
-        "tests/unit/domain/run_reports/test_contracts.py",
+        RUN_REPORT_CONTRACTS_TEST,
     ),
     ".github/workflows/docker.yml": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "reports/quality/architecture-debt-remote-main-baseline.md": (
@@ -645,12 +646,8 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_adr_registry_governance_sync.py",
     ),
     # Run-report JSON contracts + golden fixtures → schema/golden contract suite.
-    "configs/contracts/reports/": (
-        "tests/unit/domain/run_reports/test_contracts.py",
-    ),
-    "tests/fixtures/reports/": (
-        "tests/unit/domain/run_reports/test_contracts.py",
-    ),
+    "configs/contracts/reports/": (RUN_REPORT_CONTRACTS_TEST,),
+    "tests/fixtures/reports/": (RUN_REPORT_CONTRACTS_TEST,),
     "configs/composites/": (
         "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
     ),

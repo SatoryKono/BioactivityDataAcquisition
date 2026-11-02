@@ -143,7 +143,9 @@ class EvidenceLocationLookupResult:
 
     @property
     def is_found(self) -> bool:
-        return self.code is EvidenceLocationLookupCode.FOUND and self.location is not None
+        return (
+            self.code is EvidenceLocationLookupCode.FOUND and self.location is not None
+        )
 
 
 @dataclass(frozen=True, slots=True)

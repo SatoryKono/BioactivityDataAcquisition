@@ -54,9 +54,7 @@ def test_alias_map_resolves_standard_and_isolated_roots(tmp_path: Path) -> None:
         relative_data_root="workflow-limit100-20261102T144403Z/chembl_assay",
     )
     assert isolated == (
-        data_root.resolve()
-        / "workflow-limit100-20261102T144403Z"
-        / "chembl_assay"
+        data_root.resolve() / "workflow-limit100-20261102T144403Z" / "chembl_assay"
     )
 
 
