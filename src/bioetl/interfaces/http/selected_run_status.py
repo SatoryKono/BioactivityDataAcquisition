@@ -354,7 +354,7 @@ async def handle_selected_run_status(
         )
         if exc.request_id is not None:
             payload["request_id"] = exc.request_id
-    except (OSError, RuntimeError, ValueError):
+    except (KeyError, OSError, RuntimeError, ValueError):
         payload = unavailable_status(
             pipeline, requested_run_id, _QUERY_ERROR, "request_failed"
         )

@@ -1633,6 +1633,20 @@ async def test_selected_status_handler_covers_selector_and_request_failures(
     )
     assert host._send_payload_response.call_args.args[2]["reason"] == "request_failed"
 
+    async def fail_key(**_kwargs):
+        raise KeyError("workflow_name")
+
+    monkeypatch.setattr(selected, "run_bounded_forensic_operation", fail_key)
+    await handle_selected_run_status(
+        host,
+        MagicMock(),
+        {"pipeline": "chembl_activity", "run_id": "-"},
+    )
+    assert host._send_payload_response.call_args.args[2]["reason"] == "request_failed"
+    assert host._send_payload_response.call_args.args[2]["trust_status"] == (
+        "QUERY ERROR"
+    )
+
 
 def test_selection_presentation_keeps_canonical_domains_and_one_action():
     from bioetl.interfaces.http.selected_run_status import unavailable_status

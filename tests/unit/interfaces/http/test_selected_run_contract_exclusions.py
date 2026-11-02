@@ -54,6 +54,16 @@ def test_unknown_without_pipeline_config() -> None:
     }
 
 
+def test_path_traversal_pipeline_segments_stay_unknown() -> None:
+    fields = evaluate_contract_exclusions("../x_../../y", _full_funnel(excluded=50))
+    assert fields == {
+        "contract_exclusions_status": "UNKNOWN",
+        "contract_exclusions_rate": None,
+        "contract_exclusions_soft_limit": None,
+        "contract_exclusions_hard_limit": None,
+    }
+
+
 def test_ok_warn_crit_boundaries_for_chembl_activity() -> None:
     # chembl_activity soft=0.05 hard=0.5
     ok = evaluate_contract_exclusions("chembl_activity", _full_funnel(excluded=4))
