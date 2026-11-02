@@ -400,3 +400,41 @@ def test_runtime_checkable_observability_ports_accept_real_adapters() -> None:
     assert isinstance(UnifiedLogger("chembl_activity", "run-123"), LoggerPort)
     assert isinstance(StructlogLogger(structlog.get_logger("bioetl.test")), LoggerPort)
     assert isinstance(CircuitBreakerGuard(provider="chembl"), CircuitBreakerPort)
+
+def test_missing_production_binding_detected() -> None:
+    """Production bindings must be tracked in PORT_ADAPTER_CASES."""
+    import ast
+    from pathlib import Path
+
+    known_adapters = {
+        "FilesystemAdrCatalog", "FileArtifactByteComparisonAdapter", "BronzeWriter",
+        "CircuitBreakerGuard", "CompositeReplayInputReader", "RequestReader",
+        "ExportCatalogAdapter", "ExportWriterAdapter", "SilverForeignKeyReconciliationAdapter",
+        "GoldWriter", "FileLineageStore", "MemoryLock", "NoOpLogger", "StructlogLogger",
+        "UnifiedLogger", "MetadataCoordinator", "PrometheusMetrics",
+        "ChEMBLProteinClassificationGraph", "PublicationControlledVocabularyLoader",
+        "StorageRowReconciliationAdapter", "FileRunLedgerStore", "FileRunManifestStore",
+        "SilverWriter", "StageAccountingAccumulator", "FileWorkflowExecutionStateStore",
+        "FileWorkflowLedgerStore", "FileWorkflowManifestStore",
+    }
+
+    composition_dir = Path(__file__).resolve().parents[2] / "src" / "bioetl" / "composition"
+    instantiated_adapters = set()
+
+    for py_file in composition_dir.rglob("*.py"):
+        try:
+            content = py_file.read_text(encoding="utf-8")
+            tree = ast.parse(content)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+                    if node.func.id in known_adapters:
+                        instantiated_adapters.add(node.func.id)
+                elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+                    if node.func.attr in known_adapters:
+                        instantiated_adapters.add(node.func.attr)
+        except Exception:
+            continue
+
+    tracked_adapters = {case.adapter_cls.__name__ for case in PORT_ADAPTER_CASES}
+    missing = instantiated_adapters - tracked_adapters
+    assert not missing, f"Production bindings missing from conformance matrix: {missing}"
