@@ -444,7 +444,9 @@ def test_missing_production_binding_detected() -> None:
     )
     instantiated_adapters = set()
 
-    assert composition_dir.is_dir(), f"Composition directory is missing: {composition_dir}"
+    assert composition_dir.is_dir(), (
+        f"Composition directory is missing: {composition_dir}"
+    )
     py_files = sorted(composition_dir.rglob("*.py"))
     assert py_files, f"No production composition modules found under {composition_dir}"
 
