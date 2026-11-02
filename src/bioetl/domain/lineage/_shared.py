@@ -26,8 +26,6 @@ __all__ = [
     "normalize_mapping",
 ]
 
-_UNHANDLED = object()
-
 
 def _detach_mapping(value: Mapping[object, object]) -> MappingProxyType[str, object]:
     return MappingProxyType(
@@ -54,13 +52,15 @@ def _detach_value(value: object) -> object:
     return value
 
 
-def mapping_to_plain(values: Mapping[str, object]) -> dict[str, object]:
-    """Return a JSON-safe deep plain-dict copy of a (possibly frozen) mapping."""
-    return {str(key): _plain_value(value) for key, value in values.items()}
+_UNHANDLED = object()
+
+
+def mapping_to_plain(value: object) -> object:
+    """Return a JSON-safe deep plain copy of immutable lineage attribute values."""
+    return _plain_value(value)
 
 
 def _plain_set(value: set[object] | frozenset[object]) -> list[object]:
-    # Deterministic order for set-valued attributes (JSON/export stability).
     plain_items = [_plain_value(item) for item in value]
     return sorted(plain_items, key=lambda item: serialize_json_canonical([item]))
 

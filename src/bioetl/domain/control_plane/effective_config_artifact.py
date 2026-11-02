@@ -6,11 +6,10 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Literal
 
-from bioetl.domain.control_plane.config_source_hashing import (
-    ConfigSourceHashStrategy,
-)
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
+
+ConfigSourceHashStrategy = Literal["canonical_yaml", "raw_bytes"]
 
 RESOLVED_CONFIG_IDENTITY_VERSION = "resolved-config-v1"
 EFFECTIVE_CONFIG_IDENTITY_VERSION = "effective-config-v1"
