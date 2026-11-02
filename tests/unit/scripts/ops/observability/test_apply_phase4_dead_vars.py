@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
 
 import pytest
 
@@ -13,11 +11,7 @@ from scripts.ops.observability.grafana import apply_phase4_dead_vars as phase4
 pytestmark = pytest.mark.unit
 
 
-def _write(tmp_path: Path, name: str, payload: dict) -> None:
-    (tmp_path / name).write_text(json.dumps(payload), encoding="utf-8")
-
-
-def test_drop_provider_and_pipeline_unknown(tmp_path: Path) -> None:
+def test_drop_provider_and_pipeline_unknown() -> None:
     payload = {
         "templating": {
             "list": [
@@ -33,19 +27,17 @@ def test_drop_provider_and_pipeline_unknown(tmp_path: Path) -> None:
         },
         "panels": [],
     }
-    _write(tmp_path, phase4.FILE_DQ, payload)
-    removed, cleared = phase4.apply_file(phase4.FILE_DQ, dashboard_root=tmp_path)
-    data = json.loads((tmp_path / phase4.FILE_DQ).read_text(encoding="utf-8"))
-    names = [var["name"] for var in data["templating"]["list"]]
+    removed, cleared = phase4.apply_dashboard_data(payload, path_name=phase4.FILE_DQ)
+    names = [var["name"] for var in payload["templating"]["list"]]
     assert "provider_for_pipeline" not in names
     assert "workflow" in names
-    assert data["templating"]["list"][0]["options"] == []
+    assert payload["templating"]["list"][0]["options"] == []
     assert "provider_for_pipeline" in removed
     assert "pipeline.options[unknown]" in removed
     assert cleared == []
 
 
-def test_clear_dangling_overview_fleet_repeat(tmp_path: Path) -> None:
+def test_clear_dangling_overview_fleet_repeat() -> None:
     payload = {
         "templating": {"list": [{"name": "pipeline", "options": []}]},
         "panels": [
@@ -59,10 +51,10 @@ def test_clear_dangling_overview_fleet_repeat(tmp_path: Path) -> None:
             }
         ],
     }
-    _write(tmp_path, phase4.FILE_OVERVIEW, payload)
-    removed, cleared = phase4.apply_file(phase4.FILE_OVERVIEW, dashboard_root=tmp_path)
-    data = json.loads((tmp_path / phase4.FILE_OVERVIEW).read_text(encoding="utf-8"))
-    panel = data["panels"][0]
+    removed, cleared = phase4.apply_dashboard_data(
+        payload, path_name=phase4.FILE_OVERVIEW
+    )
+    panel = payload["panels"][0]
     assert "repeat" not in panel
     assert "repeatDirection" not in panel
     assert "maxPerRow" not in panel
@@ -70,7 +62,7 @@ def test_clear_dangling_overview_fleet_repeat(tmp_path: Path) -> None:
     assert removed == []
 
 
-def test_keeps_incident_read_latency_quantile(tmp_path: Path) -> None:
+def test_keeps_incident_read_latency_quantile() -> None:
     payload = {
         "templating": {
             "list": [
@@ -85,16 +77,19 @@ def test_keeps_incident_read_latency_quantile(tmp_path: Path) -> None:
             }
         ],
     }
-    _write(tmp_path, phase4.FILE_INCIDENT, payload)
-    removed, _ = phase4.apply_file(phase4.FILE_INCIDENT, dashboard_root=tmp_path)
-    data = json.loads((tmp_path / phase4.FILE_INCIDENT).read_text(encoding="utf-8"))
-    names = [var["name"] for var in data["templating"]["list"]]
+    removed, _ = phase4.apply_dashboard_data(payload, path_name=phase4.FILE_INCIDENT)
+    names = [var["name"] for var in payload["templating"]["list"]]
     assert "read_latency_quantile" in names
     assert "provider_for_pipeline" not in names
     assert removed == ["provider_for_pipeline"]
 
 
-def test_apply_file_rejects_unexpected_basename(tmp_path: Path) -> None:
-    _write(tmp_path, "not-a-dashboard.json", {"templating": {"list": []}})
+def test_apply_dashboard_data_rejects_unexpected_basename() -> None:
     with pytest.raises(ValueError, match="unexpected dashboard file"):
-        phase4.apply_file("not-a-dashboard.json", dashboard_root=tmp_path)
+        phase4.apply_dashboard_data({}, path_name="not-a-dashboard.json")
+
+
+def test_literal_dashboard_path_only_allows_known_files() -> None:
+    assert phase4._literal_dashboard_path(phase4.FILE_DQ).name == phase4.FILE_DQ
+    with pytest.raises(ValueError, match="unexpected dashboard file"):
+        phase4._literal_dashboard_path("not-a-dashboard.json")
