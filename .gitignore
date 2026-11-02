@@ -172,9 +172,6 @@ log_test.txt
 !/reports/quality/quality-move-qm01/
 !/reports/quality/quality-move-qm01/**
 !/reports/quality/ci-family-refresh-evidence-20261012.json
-# QM-07 closeout evidence (cold imports / wheel isolation passport).
-!/reports/qm07/
-!/reports/qm07/**
 
 # Sonar residual ledgers (SNR-R / SNR-R2)
 

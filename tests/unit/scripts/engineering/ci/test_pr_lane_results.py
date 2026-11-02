@@ -543,21 +543,6 @@ def test_shadow_compare_routes_qm07_report_to_isolation_contracts() -> None:
 @pytest.mark.parametrize(
     "path",
     (
-        "reports/qm07/acceptance.md",
-        "reports/qm07/passport.md",
-    ),
-)
-def test_shadow_compare_routes_qm07_closeout_evidence(path: str) -> None:
-    root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare([path], repo_root=root)
-    assert report["selected"] == [
-        "tests/architecture/test_qm07_cold_imports.py",
-    ]
-
-
-@pytest.mark.parametrize(
-    "path",
-    (
         "docs/00-project/RULES.md",
         "docs/05-operations/runbooks/stale-lock.md",
     ),
