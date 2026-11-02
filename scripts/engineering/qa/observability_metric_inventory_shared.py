@@ -7,19 +7,21 @@ these names so tests and patch seams keep working.
 
 from __future__ import annotations
 
-from bioetl.infrastructure.observability import (
-    metric_inventory_shared as _metric_inventory_shared,
-)
-
-import sys
 import re
+import sys
 from pathlib import Path
 from typing import Final, Protocol, TypedDict
 
+# Resolve the repository source root before importing bioetl so this module
+# works from a checkout without an installed package.
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _SRC_ROOT = _REPO_ROOT / "src"
 if str(_SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(_SRC_ROOT))
+
+from bioetl.infrastructure.observability import (
+    metric_inventory_shared as _metric_inventory_shared,
+)
 
 from bioetl.infrastructure.observability import (
     metrics_definitions as _metric_defs,
@@ -77,7 +79,6 @@ _ObservabilityEventInventory = _metric_inventory_shared._ObservabilityEventInven
 
 
 _CardinalityReviewFields = _metric_inventory_shared._CardinalityReviewFields
-
 
 _RiskyLabelReviewFields = _metric_inventory_shared._RiskyLabelReviewFields
 
@@ -157,8 +158,7 @@ _PROMETHEUS_ALIAS_SUFFIXES: Final[frozenset[str]] = frozenset(
         "_seconds",
         "_total",
     }
-)
-_RUNTIME_EVENT_SCAN_MARKERS: Final[tuple[str, ...]] = (
+)_RUNTIME_EVENT_SCAN_MARKERS: Final[tuple[str, ...]] = (
     "emit_event(",
     "emit_domain_event(",
     "PipelineEvent.",
