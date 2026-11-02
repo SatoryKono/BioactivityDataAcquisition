@@ -33,6 +33,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from bioetl.application.services.quality.exceptions_context import get_exception_context
 from bioetl.domain.exceptions import (
     CriticalError,
     DomainExceptionContext,
@@ -73,10 +74,10 @@ def test_map_to_domain_error_rate_limit(mapper: DomainInfraExceptionMapper) -> N
     assert mapped.retry_after == pytest.approx(60.0)
     assert mapped.get_reason_code() == "ADAPTER_HTTP_RATE_LIMIT"
     assert mapped.__cause__ is source
-    assert mapped.context.get("provider") == "chembl"
-    assert mapped.context.get("entity") == "publication"
-    assert mapped.context.get("pipeline") == "chembl_publication"
-    assert mapped.context.get("operation") == "fetch_batch"
+    assert get_exception_context(mapped).get("provider") == "chembl"
+    assert get_exception_context(mapped).get("entity") == "publication"
+    assert get_exception_context(mapped).get("pipeline") == "chembl_publication"
+    assert get_exception_context(mapped).get("operation") == "fetch_batch"
 
 
 def test_map_to_domain_error_server_error(mapper: DomainInfraExceptionMapper) -> None:
@@ -113,9 +114,9 @@ def test_map_to_domain_error_auth_raises_critical(
     error = exc_info.value
     assert error.get_reason_code() == "ADAPTER_AUTH_FAILED"
     assert error.__cause__ is source
-    assert error.context.get("provider") == "uniprot"
-    assert error.context.get("entity") == "protein"
-    assert error.context.get("pipeline") == "uniprot_protein"
+    assert get_exception_context(error).get("provider") == "uniprot"
+    assert get_exception_context(error).get("entity") == "protein"
+    assert get_exception_context(error).get("pipeline") == "uniprot_protein"
 
 
 def test_map_to_domain_error_timeout_without_status(

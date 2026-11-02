@@ -52,9 +52,11 @@ from bioetl.domain.control_plane.contract_registry_helpers import (
     entry_payload,
     parse_entry_payload,
     parse_semver,
-    resolve_path,
 )
 from bioetl.domain.control_plane.contract_registry_service import ContractRegistry
+from bioetl.infrastructure.control_plane.file_contract_registry_store import (
+    resolve_path,
+)
 from bioetl.domain.control_plane.contract_registry_types import (
     ContractRegistryEntry,
     RegistryValidationIssue,
