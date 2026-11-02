@@ -86,11 +86,12 @@ def test_gitleaks_accepts_reviewed_source_identity_and_response_metadata() -> No
     auth_line = json.dumps(auth_source) + ": " + json.dumps(auth_oid) + ","
     assert _precision_metadata_allowed(inventory_path, auth_line)
     ignore = _read(".gitleaksignore")
-    assert (
+    expected_fingerprint = (
         "9e75ee1b4def9bb72adfd5ea91aa567affb0bc52:"
         "configs/quality/external_resource_inventory.json:"
         "generic-api-key:2831"
-    ) in ignore
+    )
+    assert expected_fingerprint in ignore.splitlines()
     assert _precision_metadata_allowed(inventory_path, "\n" + line)
     assert not _precision_metadata_allowed(inventory_path, "prefix" + line)
     assert not _precision_metadata_allowed(inventory_path, line + "suffix")
