@@ -4,7 +4,7 @@
     "total_internal_imports": 8378,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 331,
+    "cross_layer_group_edges_total": 330,
     "violations": 0,
     "source_fingerprint": "5a9bf8a43d4948bb677d4a7a7342d5cc7df16ca1f80640510b2dcb51bbdc1a1e"
   },
@@ -182,7 +182,7 @@
     {
       "source": "composition.runtime_builders",
       "target": "domain.control_plane",
-      "imports": 31
+      "imports": 32
     },
     {
       "source": "infrastructure.control_plane",
@@ -275,6 +275,11 @@
       "imports": 22
     },
     {
+      "source": "composition.runtime_builders",
+      "target": "infrastructure.config",
+      "imports": 22
+    },
+    {
       "source": "composition.factories",
       "target": "application.services",
       "imports": 21
@@ -297,11 +302,6 @@
     {
       "source": "composition.factories",
       "target": "infrastructure.storage",
-      "imports": 20
-    },
-    {
-      "source": "composition.runtime_builders",
-      "target": "infrastructure.config",
       "imports": 20
     },
     {

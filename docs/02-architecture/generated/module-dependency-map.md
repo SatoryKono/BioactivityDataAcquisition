@@ -9,7 +9,7 @@
 - Internal import edges (raw): `8378`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `331`
+- Cross-layer module-group edges (total): `330`
 - Cross-layer module-group edges (top 55): `55`
 
 ## Layer Dependency Graph
@@ -76,7 +76,7 @@ flowchart LR
 | `infrastructure.storage`       | `domain.models`                            |      36 |
 | `composition.bootstrap`        | `domain.ports`                             |      34 |
 | `application.core`             | `domain.ports`                             |      32 |
-| `composition.runtime_builders` | `domain.control_plane`                     |      31 |
+| `composition.runtime_builders` | `domain.control_plane`                     |      32 |
 | `infrastructure.control_plane` | `domain.control_plane`                     |      31 |
 | `infrastructure.storage`       | `domain.medallion`                         |      31 |
 | `interfaces.cli`               | `application.services`                     |      31 |
@@ -95,12 +95,12 @@ flowchart LR
 | `application.services`         | `domain.normalization`                     |      22 |
 | `composition.bootstrap`        | `application.composite`                    |      22 |
 | `composition.factories`        | `domain.schemas`                           |      22 |
+| `composition.runtime_builders` | `infrastructure.config`                    |      22 |
 | `composition.factories`        | `application.services`                     |      21 |
 | `composition.factories`        | `domain.types`                             |      21 |
 | `interfaces.cli`               | `composition.control_plane_service_access` |      21 |
 | `composition.bootstrap`        | `infrastructure.config`                    |      20 |
 | `composition.factories`        | `infrastructure.storage`                   |      20 |
-| `composition.runtime_builders` | `infrastructure.config`                    |      20 |
 | `application.core`             | `domain.exceptions`                        |      19 |
 | `application.observability`    | `domain.control_plane`                     |      17 |
 | `application.pipelines`        | `domain.value_objects`                     |      17 |
