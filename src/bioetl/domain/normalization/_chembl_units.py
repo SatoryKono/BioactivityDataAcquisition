@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-
 from bioetl.domain.normalization.text import normalize_string
 
 QUDT_ONTOLOGY_VERSION = "3.2.1"
@@ -60,12 +59,32 @@ def normalize_qudt_unit(value: str | None) -> str | None:
     return normalize_string(value)
 
 
+def _uri_host_and_path(value: str) -> tuple[str, str] | None:
+    """Extract a simple HTTP(S) host and path without an application-layer import."""
+    candidate = value.strip()
+    scheme, separator, remainder = candidate.partition("://")
+    if not separator or scheme.casefold() not in {"http", "https"}:
+        return None
+    authority, slash, suffix = remainder.partition("/")
+    authority = authority.rsplit("@", maxsplit=1)[-1].casefold()
+    host = authority.split(":", maxsplit=1)[0].rstrip(".")
+    path = f"/{suffix}" if slash else ""
+    path = path.split("?", maxsplit=1)[0].split("#", maxsplit=1)[0]
+    return host, path
+
+
 def resolve_qudt_unit_identifier(value: str) -> str | None:
     """Resolve a canonical QUDT unit identifier from token or URI."""
-    from bioetl.application.normalization._chembl_units import _qudt_identifier_from_uri
-    identifier = _qudt_identifier_from_uri(value)
-    if identifier is not None:
-        return identifier
+    parsed = _uri_host_and_path(value)
+    if parsed is not None:
+        hostname, path = parsed
+        if hostname == "qudt.org" and path.startswith("/vocab/unit/"):
+            return path.rsplit("/", maxsplit=1)[-1]
+        if (
+            hostname == "www.openphacts.org"
+            and path.casefold() == "/units/nanomolar"
+        ):
+            return "NanoMOL-PER-L"
 
     normalized_unit = normalize_standard_unit(value)
     if normalized_unit is not None:
@@ -73,8 +92,7 @@ def resolve_qudt_unit_identifier(value: str) -> str | None:
         if mapped_identifier is not None:
             return mapped_identifier
 
-    from bioetl.application.normalization._chembl_units import _legacy_qudt_identifier_from_uri
-    return _legacy_qudt_identifier_from_uri(value)
+    return None
 
 
 
