@@ -31,14 +31,17 @@
 *(No actionable implementation defects confirmed from static REPO_ONLY evidence. See E for score; I for missing live evidence.)*
 
 ## E. Quantitative Scorecard
-- **External API Parity, Resilience, and Provider Contracts**: 4
-  - Strong static implementation of shared HTTP resilience and provider fallbacks; score limited by **доказательная база** (no live endpoint parity evidence in `REPO_ONLY`), not by a confirmed static defect.
+  - **External API Parity, Resilience, and Provider Contracts**: 3
+  - The repository contains concrete static evidence for HTTP wiring and fallback paths, but this audit did not inspect provider configuration/model parity in depth or run provider tests. The score reflects that limited evidence; it is not a claim of broad external API robustness.
   - Confirmed static paths: `TokenBucketRateLimiter`; factory-wired `CircuitBreakerGuard` + `retry_config` via `HttpClientFactory` / PubChem factory; CrossRef title/filter fallback via `CrossRefFetchFlow.fetch_filtered_with_fallback`.
   - Distinguish: `CircuitBreakerGuard` is the production circuit-breaker type on `UnifiedHTTPClient`; `CircuitBreakerDataSourceDecorator` / `RetryingDataSourceDecorator` are optional wrappers, not the default factory wiring.
-  - Evidence: `E2 STATIC` (commands/results in section C).
+  - Evidence: `E2 STATIC` (commands/results in section C). No automated adapter/config/model test evidence was collected for this audit.
 
 ## F. Cross-cutting/Root-cause Clusters
-- N/A
+  - **Shared HTTP assembly:** Static source inspection only (`HttpClientFactory` / `UnifiedHTTPClient`, `CircuitBreakerGuard`, `retry_config`); no provider test suite was run.
+  - **PubChem factory:** Static source inspection only; no provider test suite was run.
+  - **CrossRef fallback:** Static source inspection only; no provider test suite was run.
+  - **Configuration/model parity and live endpoints:** `NOT_VERIFIABLE` in this `REPO_ONLY` audit.
 
 ## G. Prioritized Roadmap
 - N/A
@@ -50,7 +53,8 @@
 - **Missing Evidence** (`NOT_VERIFIABLE` in `REPO_ONLY`): Live endpoint verification against provider APIs (e.g., ChEMBL, PubChem, CrossRef). Drift checks for API models against current live provider responses cannot be verified statically. This is an evidence-base limitation, not a confirmed implementation defect.
 
 ## J. Self-check
-- Assertions are restricted to repository evidence and the listed static commands.
+  - Assertions are restricted to repository evidence and the listed static commands.
+  - Score 3 is limited to static wiring evidence; configuration/model parity and behavior tests were not assessed.
 - No stale artifacts have been utilized.
 - Decorator types are not cited as proof of default HTTP adapter assembly.
 
