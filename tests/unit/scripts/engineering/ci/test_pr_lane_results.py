@@ -1043,6 +1043,46 @@ def test_affected_targets_map_shared_helper_to_importing_tests(
     ]
 
 
+def test_affected_targets_map_transitive_helper_consumers(
+    tmp_path: Path,
+) -> None:
+    """Helper→helper imports select tests of the intermediate helper."""
+    ids = tmp_path / "tests" / "helpers" / "deterministic_ids.py"
+    ids.parent.mkdir(parents=True)
+    ids.write_text(
+        "def deterministic_run_id(n: str) -> str: return n\n", encoding="utf-8"
+    )
+    (ids.parent / "__init__.py").write_text("", encoding="utf-8")
+    fixtures = tmp_path / "tests" / "helpers" / "metadata_fixtures.py"
+    fixtures.write_text(
+        "from tests.helpers.deterministic_ids import deterministic_run_id\n"
+        "def build_meta():\n"
+        "    return deterministic_run_id('x')\n",
+        encoding="utf-8",
+    )
+    direct = tmp_path / "tests" / "unit" / "ids" / "test_direct.py"
+    direct.parent.mkdir(parents=True)
+    direct.write_text(
+        "from tests.helpers.deterministic_ids import deterministic_run_id\n"
+        "def test_direct(): pass\n",
+        encoding="utf-8",
+    )
+    via_helper = tmp_path / "tests" / "unit" / "meta" / "test_via_helper.py"
+    via_helper.parent.mkdir(parents=True)
+    via_helper.write_text(
+        "from tests.helpers.metadata_fixtures import build_meta\n"
+        "def test_via_helper(): pass\n",
+        encoding="utf-8",
+    )
+
+    assert affected_pytest_targets(
+        [ids.relative_to(tmp_path).as_posix()], repo_root=tmp_path
+    ) == [
+        "tests/unit/ids/test_direct.py",
+        "tests/unit/meta/test_via_helper.py",
+    ]
+
+
 def test_affected_targets_map_integration_vcr_policy() -> None:
     """VCR policy edits select the inventory architecture test."""
     repo_root = Path(__file__).resolve().parents[5]

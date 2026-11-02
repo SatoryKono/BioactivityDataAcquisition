@@ -1030,6 +1030,8 @@ def _helper_path_targets(path: str, root: Path) -> list[str]:
     # Package re-exports (from tests.helpers import …) must count as consumers.
     if helpers_init.is_file() and _imports_module(helpers_init, module, root):
         importing_tests |= _importing_script_tests(test_roots, "tests.helpers", root)
+    # One-hop: helpers that import this module expose it to their consumers.
+    importing_tests |= _helper_consumer_tests(path, module, root, test_roots)
     if importing_tests:
         targets = {
             test.parent if test.name == CONFTEST_FILENAME else test
@@ -1037,6 +1039,28 @@ def _helper_path_targets(path: str, root: Path) -> list[str]:
         }
         return sorted(test.relative_to(root).as_posix() for test in targets)
     return _helper_suite(path, root)
+
+
+def _helper_consumer_tests(
+    path: str,
+    module: str,
+    root: Path,
+    test_roots: tuple[Path, ...],
+) -> set[Path]:
+    """Return tests that import helpers which themselves import ``module``."""
+    helpers_dir = root / "tests" / "helpers"
+    if not helpers_dir.is_dir():
+        return set()
+    changed = (root / path).resolve()
+    consumers: set[Path] = set()
+    for helper in sorted(helpers_dir.glob("*.py")):
+        if helper.name.startswith("_") or helper.resolve() == changed:
+            continue
+        if not _imports_module(helper, module, root):
+            continue
+        helper_module = ".".join(helper.relative_to(root).with_suffix("").parts)
+        consumers |= _importing_script_tests(test_roots, helper_module, root)
+    return consumers
 
 
 def _script_targets(path: str, root: Path) -> list[str]:
