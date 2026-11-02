@@ -114094,10 +114094,10 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 26,
       "reports_workspace_entrypoint": 1,
-      "working_report": 280
+      "working_report": 281
     },
     "by_recommended_action": {
-      "archive-after-migration": 309,
+      "archive-after-migration": 310,
       "generate-automatically": 1066,
       "keep": 2668
     },
@@ -114123,7 +114123,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 633,
+      "reports": 634,
       "security": 2
     },
     "by_status": {
@@ -114131,17 +114131,17 @@
       "Archived": 1554,
       "Canonical": 76,
       "Generated": 1066,
-      "Working": 596
+      "Working": 597
     },
     "by_surface_family": {
       "active": 751,
       "archive": 1554,
       "canonical": 76,
       "generated": 1066,
-      "working": 596
+      "working": 597
     },
     "by_tracking_state": {
-      "tracked": 4043
+      "tracked": 4044
     },
     "docs_reports_local_count": 59,
     "duplicate_group_count": 80,
@@ -114154,8 +114154,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4043,
+    "total_doc_like": 4044,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4043
+    "total_doc_like_tracked": 4044
   }
 }
