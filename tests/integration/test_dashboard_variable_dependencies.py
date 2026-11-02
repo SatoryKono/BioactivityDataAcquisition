@@ -85,6 +85,8 @@ def test_runtime_variable_dependencies():
         "run_id",
         "provider",
         "read_latency_quantile",
+        "selected_pipeline",
+        "selected_run_id",
     } == set(variables)
     query = str(variables["run_type"].get("definition") or "")
     assert "filter-options?dimension=run_type" in query

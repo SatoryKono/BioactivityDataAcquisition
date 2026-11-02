@@ -97,6 +97,8 @@ def test_pipeline_runtime_has_required_variables() -> None:
         "run_id",
         "provider",
         "read_latency_quantile",
+        "selected_pipeline",
+        "selected_run_id",
     }
 
 
