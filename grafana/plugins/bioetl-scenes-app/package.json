@@ -57,7 +57,8 @@
     "webpack-livereload-plugin": "^3.0.2",
     "webpack-subresource-integrity": "^5.1.0",
     "webpack-virtual-modules": "^0.6.2",
-    "braces": "file:../../../.github/tooling/braces-backport/braces-3.0.4-bioetl.1.tgz"
+    "braces": "file:../../../.github/tooling/braces-backport/braces-3.0.4-bioetl.1.tgz",
+    "minimatch": "file:../../tooling/router-v7-bridge/minimatch-legacy-compat/minimatch-11.0.3-bioetl.1.tgz"
   },
   "dependencies": {
     "@emotion/css": "11.13.5",
@@ -81,6 +82,7 @@
     "braces": "$braces",
     "@istanbuljs/load-nyc-config": {
       "js-yaml": "4.3.2"
-    }
+    },
+    "minimatch": "$minimatch"
   }
 }

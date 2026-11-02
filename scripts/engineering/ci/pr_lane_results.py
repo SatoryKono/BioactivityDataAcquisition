@@ -115,6 +115,9 @@ CHECK_DOC_LINKS_GUARDRAILS_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".gitleaks.toml": (
+        "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
+    ),
     ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "mkdocs.yml": ("tests/architecture/test_documentation_sync.py",),
     "docs/reports/evidence/project-test-health/SUMMARY.md": (
