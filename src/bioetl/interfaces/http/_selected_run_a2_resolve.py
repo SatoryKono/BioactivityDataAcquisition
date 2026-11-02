@@ -37,9 +37,7 @@ _UNRESOLVED_RUN_IDS = frozenset(
 # unresolved sentinel (NO_SELECTION), not an All-scope token for workflow /
 # pipeline / run_type. Treating pipeline=- as All would expand an empty
 # NO MATCHES scope into unrestricted latest selection.
-_ALL_SCOPE_TOKENS = frozenset(
-    {"", "All", "all", ".*", "$__all", "__all", "*", "—"}
-)
+_ALL_SCOPE_TOKENS = frozenset({"", "All", "all", ".*", "$__all", "__all", "*", "—"})
 
 NO_RUNS_STATUS = "НЕТ ЗАПУСКОВ"
 NO_RUNS_REASON = "no_runs_in_scope"
