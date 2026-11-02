@@ -21,7 +21,9 @@ pytestmark = pytest.mark.unit
 
 
 def _full_funnel(*, excluded: int = 0, bronze_out: int = 100) -> list[dict[str, Any]]:
-    def stage(stage_id: str, records_in: int, records_out: int, rem: int = 0) -> dict[str, Any]:
+    def stage(
+        stage_id: str, records_in: int, records_out: int, rem: int = 0
+    ) -> dict[str, Any]:
         removals = (
             [{"outcome": "excluded_by_contract", "reason_code": "x", "count": rem}]
             if rem
@@ -89,7 +91,15 @@ def test_four_stage_funnel_with_extract_computes_rate() -> None:
 def test_incomplete_funnel_keeps_limits_but_unknown_rate() -> None:
     fields = evaluate_contract_exclusions(
         "chembl_activity",
-        [{"stage_id": "bronze", "records_in": 10, "records_out": 10, "tracking": "full", "removals": []}],
+        [
+            {
+                "stage_id": "bronze",
+                "records_in": 10,
+                "records_out": 10,
+                "tracking": "full",
+                "removals": [],
+            }
+        ],
     )
     assert fields["contract_exclusions_status"] == "UNKNOWN"
     assert fields["contract_exclusions_rate"] is None
@@ -102,7 +112,15 @@ def test_extract_records_in_prefers_bronze() -> None:
     assert extract_records_in(None) is None
     assert (
         extract_records_in(
-            [{"stage_id": "extract", "records_in": 7, "records_out": 7, "tracking": "full", "removals": []}]
+            [
+                {
+                    "stage_id": "extract",
+                    "records_in": 7,
+                    "records_out": 7,
+                    "tracking": "full",
+                    "removals": [],
+                }
+            ]
         )
         == 7
     )
