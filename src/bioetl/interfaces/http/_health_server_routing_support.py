@@ -284,7 +284,13 @@ def _selector_context_payload_with_a2(
     workflow_manifests: tuple[WorkflowManifest, ...],
     query: dict[str, str],
 ) -> dict[str, object]:
-    """Build selector-context, resolving unresolved run_id via shared A2 catalog."""
+    """Build selector-context, resolving unresolved run_id via shared A2 catalog.
+
+    Report identity is loaded for both auto and explicit run_id so report-only
+    UUIDs keep a concrete ``selected.run_id`` / ``selected.pipeline``. When A2
+    returns ``None`` for a strict workflow scope, empty selected is preserved
+    (no pipeline-alias re-pick).
+    """
     selected_workflows = host._read_scope_csv_param(query, "workflow")
     selected_pipelines = host._read_scope_csv_param(query, "pipeline")
     selected_run_types = host._read_scope_csv_param(query, "run_type")
@@ -292,7 +298,16 @@ def _selector_context_payload_with_a2(
     explicit_run_id = read_selected_run_id(host, query)
     auto_selected_run_id: str | None = None
     report_selected: dict[str, object] | None = None
-    if explicit_run_id is None:
+    report_store = getattr(host, "_run_report_store", None)
+    report_scopes = {
+        "workflow": selected_workflows,
+        "pipeline": selected_pipelines,
+        "run_type": selected_run_types,
+        "run_status": selected_run_statuses,
+        "run_id": (),
+    }
+    a2_consulted = explicit_run_id is None
+    if a2_consulted:
         pipeline = (
             selected_pipelines[0]
             if len(selected_pipelines) == 1
@@ -304,7 +319,6 @@ def _selector_context_payload_with_a2(
             "run_type": query.get("run_type", ""),
             "run_status": query.get("run_status", ""),
         }
-        report_store = getattr(host, "_run_report_store", None)
         auto_selected_run_id = resolve_a2_latest_run_id(
             manifests=manifests,
             ledger_port=host._run_ledger_port,
@@ -316,15 +330,15 @@ def _selector_context_payload_with_a2(
         if auto_selected_run_id is not None:
             report_selected = verified_report_identity_for_run(
                 auto_selected_run_id,
-                {
-                    "workflow": selected_workflows,
-                    "pipeline": selected_pipelines,
-                    "run_type": selected_run_types,
-                    "run_status": selected_run_statuses,
-                    "run_id": (),
-                },
+                report_scopes,
                 store=report_store,
             )
+    else:
+        report_selected = verified_report_identity_for_run(
+            explicit_run_id,
+            report_scopes,
+            store=report_store,
+        )
     return build_selector_context_payload(
         manifests=manifests,
         ledger_port=host._run_ledger_port,
@@ -336,6 +350,7 @@ def _selector_context_payload_with_a2(
         selected_run_id=explicit_run_id,
         auto_selected_run_id=auto_selected_run_id,
         report_selected=report_selected,
+        a2_consulted=a2_consulted,
     )
 
 

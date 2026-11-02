@@ -208,10 +208,9 @@ def _iter_verified_report_identities(
     for entry in sorted(entries, key=lambda item: item.started_at or "", reverse=True):
         if not _entry_matches_catalog(entry, scopes):
             continue
-        try:
-            identity = _checked_identity(entry, root)
-        except ValueError:
-            continue
+        # Propagate identity/path mismatches: callers (A2 / selected-run-status)
+        # map ValueError to QUERY ERROR instead of treating a corrupt catalog as empty.
+        identity = _checked_identity(entry, root)
         if not _identity_matches_scopes(identity, scopes):
             continue
         run_id = identity.get("run_id")

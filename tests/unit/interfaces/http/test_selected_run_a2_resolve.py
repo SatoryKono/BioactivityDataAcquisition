@@ -458,3 +458,114 @@ def test_explicit_selected_run_id_still_marks_selected_run_id() -> None:
     assert isinstance(selected, dict)
     assert selected["run_id"] == str(newer.run_id)
 
+
+def test_a2_empty_scope_does_not_repick_via_pipeline_aliases() -> None:
+    """When A2 returns None, keep empty selected — no legacy alias re-pick."""
+    from bioetl.interfaces.http.control_plane_selector_context import (
+        build_selector_context_payload,
+    )
+    from bioetl.interfaces.http._control_plane_selector_payloads import RUN_ID_NO_SELECTION
+
+    foreign = _manifest(2, workflow="chembl_core")
+    workflows = (
+        _workflow("chembl_assay", index=50),
+        _workflow("chembl_core", index=51),
+    )
+    assert (
+        resolve_a2_latest_run_id(
+            manifests=(foreign,),
+            ledger_port=None,
+            workflow_manifests=workflows,
+            pipeline="chembl_assay",
+            query={"pipeline": "chembl_assay", "workflow": "chembl_assay"},
+        )
+        is None
+    )
+    payload = build_selector_context_payload(
+        manifests=(foreign,),
+        ledger_port=None,
+        workflow_manifests=workflows,
+        selected_workflows=("chembl_assay",),
+        selected_pipelines=("chembl_assay",),
+        auto_selected_run_id=None,
+        a2_consulted=True,
+    )
+    selected = payload["selected"]
+    assert payload["resolved_via"] == "no_manifest_for_scope"
+    assert isinstance(selected, dict)
+    assert selected["run_id"] == RUN_ID_NO_SELECTION
+
+
+def test_explicit_report_only_run_id_fills_selected_from_identity() -> None:
+    from bioetl.interfaces.http.control_plane_selector_context import (
+        build_selector_context_payload,
+    )
+
+    identity = {
+        "pipeline_name": "chembl_assay",
+        "run_id": "report-only-explicit",
+        "workflow_id": "chembl_assay",
+        "run_type": "incremental",
+        "started_at": "2026-09-15T12:00:00+00:00",
+        "status": "success",
+    }
+    payload = build_selector_context_payload(
+        manifests=(),
+        ledger_port=None,
+        selected_pipelines=("chembl_assay",),
+        selected_run_id="report-only-explicit",
+        report_selected=identity,
+    )
+    selected = payload["selected"]
+    assert payload["resolved_via"] == "selected_run_id"
+    assert isinstance(selected, dict)
+    assert selected["run_id"] == "report-only-explicit"
+    assert selected["pipeline"] == "chembl_assay"
+
+
+def test_a2_corrupt_report_identity_raises_for_query_error(tmp_path: Path) -> None:
+    """Mismatched report identity must not look like an empty A2 catalog."""
+    _write_pipeline_report(tmp_path)
+    bad = (
+        tmp_path
+        / "pipeline"
+        / "chembl_assay"
+        / "report-only-run"
+        / "pipeline-run-report.json"
+    )
+    bad.write_text(
+        bad.read_text(encoding="utf-8").replace(
+            '"pipeline_name": "chembl_assay"',
+            '"pipeline_name": "chembl_activity"',
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="selector report"):
+        resolve_a2_latest_run_id(
+            manifests=(),
+            ledger_port=None,
+            pipeline="chembl_assay",
+            query={"pipeline": "chembl_assay"},
+            report_root=tmp_path,
+        )
+
+
+def test_a2_pipeline_all_selected_has_concrete_pipeline() -> None:
+    from bioetl.interfaces.http.control_plane_selector_context import (
+        build_selector_context_payload,
+    )
+    from bioetl.interfaces.http._control_plane_selector_payloads import RESOLVED_VIA_A2
+
+    newer = _manifest(2, pipeline="chembl_assay")
+    payload = build_selector_context_payload(
+        manifests=(newer,),
+        ledger_port=None,
+        selected_pipelines=(),
+        auto_selected_run_id=str(newer.run_id),
+        a2_consulted=True,
+    )
+    selected = payload["selected"]
+    assert payload["resolved_via"] == RESOLVED_VIA_A2
+    assert isinstance(selected, dict)
+    assert selected["run_id"] == str(newer.run_id)
+    assert selected["pipeline"] == "chembl_assay"

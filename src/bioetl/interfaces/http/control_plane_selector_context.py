@@ -66,14 +66,21 @@ def build_selector_context_payload(
     auto_selected_run_id: str | None = None,
     report_selected: Mapping[str, object] | None = None,
     workflow_manifests: tuple[WorkflowManifest, ...] = (),
+    a2_consulted: bool = False,
 ) -> dict[str, object]:
     """Resolve a coherent dashboard selector tuple from local control-plane data.
 
     ``selected_run_id`` is an explicit client/URL choice (``resolved_via=
     selected_run_id``). ``auto_selected_run_id`` is A2 fill from an unresolved
     selector and keeps the last-run defaults signal (``latest_a2_for_scope``).
-    ``report_selected`` supplies a verified report identity when the auto-picked
-    UUID exists only in saved pipeline-run reports.
+    ``report_selected`` supplies a verified report identity when the picked
+    UUID exists only in saved pipeline-run reports (auto or explicit).
+    ``a2_consulted`` means A2 already decided the unresolved scope: when it
+    returned ``None``, keep empty selected and do **not** re-pick via
+    pipeline-wide workflow aliases (foreign-workflow data must not leak into
+    ``${selected_run_id}`` panels). When a run is selected, ``selected.pipeline``
+    is always the concrete pipeline name so report/artifact clients can follow
+    it even if the Grafana ``pipeline`` var is still aggregate (All / ``.*``).
     """
     workflow_aliases = build_workflow_aliases(workflow_manifests)
     explicit_run_id = selected_run_id
@@ -110,8 +117,20 @@ def build_selector_context_payload(
         )
         selected = latest_record(candidates)
         option_records = candidates if candidates else records
-        selected_out = selected_payload(selected)
-        via = resolved_via(selected, explicit_run_id, auto_selected=False)
+        if selected is not None:
+            selected_out = selected_payload(selected)
+            via = resolved_via(selected, explicit_run_id, auto_selected=False)
+        elif report_selected is not None:
+            selected_out = selected_payload_from_report_identity(dict(report_selected))
+            via = resolved_via(
+                None,
+                explicit_run_id,
+                auto_selected=False,
+                selected_present=True,
+            )
+        else:
+            selected_out = selected_payload(None)
+            via = resolved_via(None, explicit_run_id, auto_selected=False)
     elif auto_run_id:
         selected = next(
             (record for record in scope_candidates if record.run_id == auto_run_id),
@@ -129,6 +148,11 @@ def build_selector_context_payload(
         else:
             selected_out = selected_payload(None)
             via = resolved_via(None, None, auto_selected=False)
+    elif a2_consulted:
+        # Strict A2 empty scope: do not fall back to alias-broad latest_record.
+        option_records = scope_candidates if scope_candidates else records
+        selected_out = selected_payload(None)
+        via = resolved_via(None, None, auto_selected=False)
     else:
         candidates = scope_candidates
         selected = latest_record(candidates)

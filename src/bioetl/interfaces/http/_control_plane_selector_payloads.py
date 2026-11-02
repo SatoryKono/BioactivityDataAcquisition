@@ -77,36 +77,44 @@ def selected_payload_from_report_identity(
 ) -> dict[str, object]:
     """Build ``selected`` from a verified pipeline-run-report identity."""
     pipeline = str(identity.get("pipeline_name") or UNKNOWN_SCOPE)
-    provider, separator, entity = pipeline.partition("_")
-    if not separator:
-        provider, entity = UNKNOWN_SCOPE, UNKNOWN_SCOPE
-    workflow = identity.get("workflow_id")
-    run_type = identity.get("run_type")
-    run_id = identity.get("run_id")
-    status = identity.get("status")
-    started = identity.get("started_at")
-    completed = identity.get("completed_at")
+    provider, entity = _provider_entity_from_pipeline(pipeline)
+    completed_at = _coerce_identity_str(identity.get("completed_at"), default="")
     return {
-        "workflow": str(workflow) if isinstance(workflow, str) and workflow else ALL_SCOPE,
+        "workflow": _coerce_identity_str(
+            identity.get("workflow_id"), default=ALL_SCOPE
+        ),
         "pipeline": pipeline,
-        "run_type": (
-            str(run_type) if isinstance(run_type, str) and run_type else RUN_TYPE_FALLBACK
+        "run_type": _coerce_identity_str(
+            identity.get("run_type"), default=RUN_TYPE_FALLBACK
         ),
-        "run_id": str(run_id) if isinstance(run_id, str) and run_id else RUN_ID_NO_SELECTION,
-        "run_status": (
-            str(status) if isinstance(status, str) and status else UNKNOWN_SCOPE
+        "run_id": _coerce_identity_str(
+            identity.get("run_id"), default=RUN_ID_NO_SELECTION
         ),
-        "provider": provider or UNKNOWN_SCOPE,
-        "entity": entity or UNKNOWN_SCOPE,
+        "run_status": _coerce_identity_str(
+            identity.get("status"), default=UNKNOWN_SCOPE
+        ),
+        "provider": provider,
+        "entity": entity,
         "manifest_id": "",
-        "started_at": str(started) if isinstance(started, str) else "",
+        "started_at": _coerce_identity_str(identity.get("started_at"), default=""),
         "started_at_source": "pipeline_run_report",
-        "completed_at": str(completed) if isinstance(completed, str) else "",
+        "completed_at": completed_at,
         "completed_at_source": (
-            "pipeline_run_report" if isinstance(completed, str) and completed else "none"
+            "pipeline_run_report" if completed_at else "none"
         ),
         "terminal_event_type": "",
     }
+
+
+def _coerce_identity_str(value: object, *, default: str) -> str:
+    return str(value) if isinstance(value, str) and value else default
+
+
+def _provider_entity_from_pipeline(pipeline: str) -> tuple[str, str]:
+    provider, separator, entity = pipeline.partition("_")
+    if not separator:
+        return UNKNOWN_SCOPE, UNKNOWN_SCOPE
+    return provider or UNKNOWN_SCOPE, entity or UNKNOWN_SCOPE
 
 
 def _empty_selected_payload() -> dict[str, object]:
