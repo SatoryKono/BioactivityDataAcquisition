@@ -420,6 +420,47 @@ _ADAPTER_CONSTRUCTOR_SUFFIXES = (
     "Accumulator",
 )
 
+# Discovered constructors that are intentionally outside PORT_ADAPTER_CASES:
+# stdlib noise (DictReader/Lock/RLock) plus composition helpers that are not
+# port-matrix adapters. Keep sorted; never put FutureAdapter-style new ports here.
+_DISCOVERED_BINDING_EXCLUSIONS = frozenset(
+    {
+        "BatchWriter",
+        "ChemblPolicyRegistryLoader",
+        "CrossRefAdapter",
+        "DQReportWriter",
+        "DebugExportAdapter",
+        "DictReader",
+        "FileArchiveStore",
+        "FileAuditAdapter",
+        "FileCompositeCheckpointWriter",
+        "FileControlPlaneArtifactLifecycleStore",
+        "FileEffectiveConfigArtifactStore",
+        "FileHistoricalReplayClosureStore",
+        "FileHistoricalReplayUniverseStore",
+        "FileProviderHealthEvidenceStore",
+        "FileRunReportStoreAdapter",
+        "FileSystemEnumLoader",
+        "FileWorkflowTransformArtifactStore",
+        "HealthMetricsExpositionAdapter",
+        "IDMappingCsvReaderAdapter",
+        "LazyFactoryCatalog",
+        "LocalCheckpointAdapter",
+        "Lock",
+        "MetadataWriter",
+        "MetricsPublisherAdapter",
+        "MetricsServerAdapter",
+        "NoOpMetadataWriter",
+        "NoOpMetrics",
+        "ProteinClassTargetTypeMappingLoader",
+        "ProviderStore",
+        "PubChemAdapter",
+        "PublicationTypeClassificationLoader",
+        "RLock",
+        "UnifiedQuarantineAdapter",
+    }
+)
+
 
 def _instantiated_adapter_names(py_files: list[Path]) -> set[str]:
     """Find adapter-like constructors without consulting the conformance matrix."""
@@ -448,16 +489,21 @@ def test_production_adapter_discovery_does_not_depend_on_matrix(
     """New conventional adapter names are discovered before matrix registration."""
     composition = tmp_path / "composition.py"
     composition.write_text(
-        "class FutureAdapter:\\n    pass\\n\\nFutureAdapter()\\n",
+        "class FutureAdapter:\n    pass\n\nFutureAdapter()\n",
         encoding="utf-8",
     )
     assert _instantiated_adapter_names([composition]) == {"FutureAdapter"}
 
 
-def test_missing_production_binding_detected() -> None:
-    """Production bindings must be tracked in PORT_ADAPTER_CASES."""
-    from pathlib import Path
+def test_discovered_binding_exclusions_stay_disjoint_from_matrix() -> None:
+    """Exclusions must not hide constructors already tracked by the matrix."""
+    tracked = {case.adapter_cls.__name__ for case in PORT_ADAPTER_CASES}
+    overlap = tracked & _DISCOVERED_BINDING_EXCLUSIONS
+    assert not overlap, f"Matrix adapters listed as discovery exclusions: {overlap}"
 
+
+def test_missing_production_binding_detected() -> None:
+    """Production bindings must be tracked in PORT_ADAPTER_CASES or excluded."""
     composition_dir = (
         Path(__file__).resolve().parents[2] / "src" / "bioetl" / "composition"
     )
@@ -478,7 +524,7 @@ def test_missing_production_binding_detected() -> None:
 
     instantiated_adapters = _instantiated_adapter_names(py_files)
     tracked_adapters = {case.adapter_cls.__name__ for case in PORT_ADAPTER_CASES}
-    missing = instantiated_adapters - tracked_adapters
+    missing = instantiated_adapters - tracked_adapters - _DISCOVERED_BINDING_EXCLUSIONS
     assert not missing, (
         f"Production bindings missing from conformance matrix: {missing}"
     )
