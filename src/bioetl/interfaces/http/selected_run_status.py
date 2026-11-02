@@ -19,6 +19,7 @@ from bioetl.composition.composite_catalog import (
 )
 from bioetl.composition.selected_run_contract_exclusions import (
     attach_contract_fields,
+    project_assay_replay,
 )
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.selected_status import (
