@@ -72,6 +72,11 @@ def _uri_host_and_path(value: str) -> tuple[str, str] | None:
     authority = authority.rsplit("@", maxsplit=1)[-1].casefold()
     host = authority.split(":", maxsplit=1)[0].rstrip(".")
     path = f"/{suffix}" if slash else ""
+    path_prefix, path_separator, last_segment = path.rpartition("/")
+    if path_separator:
+        path = f"{path_prefix}/{last_segment.partition(';')[0]}"
+    else:
+        path = path.partition(";")[0]
     return host, path
 
 
