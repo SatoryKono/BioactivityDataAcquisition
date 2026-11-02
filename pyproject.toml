@@ -1,6 +1,7 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["setuptools==84.1.0"]
+build-backend = "scripts.engineering.common.build_backend"
+backend-path = ["."]
 
 [project]
 name = "bioetl"
@@ -29,9 +30,9 @@ dependencies = [
     # Re-add only as part of a deltalake>=1.0 migration with Windows-CI proof.
     "pyarrow>=15.0,<26.0",
     "zstandard>=0.22",
-    # <2.3 holds back pandas 3.x behavioral breaks (CoW/strings); 2.3.x is
-    # unvalidated in this repo. Reviewed 2026-09-19; re-review by 2027-03-19. (AUD-006)
-    "pandas>=2.0,<2.3",
+    # pandas 3.1 compatibility is being qualified in PR #12635; keep the
+    # reviewed ceiling below 3.2 until the exact-head CI completes. (AUD-006)
+    "pandas>=2.0,<3.2",
     # Validation
     "pandera>=0.20",
     # Providers (RULES.md Appendix A)
@@ -80,7 +81,7 @@ export = [
 tests = [
     "filelock>=4.2.1",
     # Testing frameworks
-    "pytest>=9.0.3,<9.2",
+    "pytest>=9.0.3,<9.3",
     "pytest-cov>=4.0",
     "pytest-asyncio>=1.4",
     "pytest-xdist>=3.5",
@@ -117,7 +118,7 @@ tests_full = [
 ]
 dev = [
     "filelock>=4.2.1",
-    "pytest>=9.0.3,<9.2",
+    "pytest>=9.0.3,<9.3",
     "pytest-cov>=4.0",
     "pytest-asyncio>=1.4",
     "pytest-xdist>=3.5",
@@ -181,6 +182,8 @@ dev = [
     "pre-commit>=4.5.1",
     "types-pyyaml>=6.0.12.20260906",
     "types-defusedxml>=0.7.0.20260504",
+    "setuptools==84.1.0",
+    "types-setuptools==84.0.0.20261006",
 ]
 docs = [
     "mkdocs>=1.6,<2.0",
@@ -194,6 +197,7 @@ docs = [
 [tool.uv]
 # pre-commit pulls virtualenv. Floor stays at the pip-audit/OSV fix release.
 # msgpack / litellm floors: CVE-2026-114613 / CVE-2026-114612 (CI-MAP-7 / #12582).
+# langgraph-sdk floor: CVE-2026-118667 (pip-audit exact-head CI / #12610).
 # Prefer litellm 1.102.2 (listed pip-audit fix). Avoid 1.103.0 (still vulnerable) and
 # 1.103.1+ (httpx[http2] → orphaned h2/hpack/hyperframe on the consumer-route gate).
 # Pin new AWS transitive entries to 7+ day aged releases (boto3/botocore 1.43.116).
@@ -201,6 +205,7 @@ constraint-dependencies = [
     "virtualenv>=21.14.7",
     "msgpack>=1.2.3",
     "litellm>=1.102.2,<1.103.0",
+    "langgraph-sdk>=0.4.6",
     "boto3>=1.43.1,<=1.43.116",
     "botocore>=1.43.1,<=1.43.116",
 ]
@@ -212,6 +217,8 @@ exclude = ["scripts", "scripts.*", "bioetl.infrastructure.quality", "bioetl.infr
 # ============ PYTEST ============
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 norecursedirs = [
     ".venv",
     ".venv-win",
@@ -289,6 +296,9 @@ filterwarnings = [
     "error",
     # Deprecation warnings must fail by default; dedicated compatibility tests
     # should opt in locally if a retained public seam still emits them.
+    # AnyIO still imports pytest's deprecated CallSpec2 alias; pytest 9.2 keeps
+    # the alias and removes it only in pytest 10 or 11.
+    "ignore:.*CallSpec2 has been renamed to CallSpec.*:pytest.PytestRemovedIn10Warning",
     # NoOpMetrics warns when metrics are disabled (expected in tests)
     "ignore:NoOpMetrics is being used:UserWarning",
     # Explicit norecursedirs is intentional to avoid mixed Windows/WSL venv traversal.
@@ -298,10 +308,6 @@ filterwarnings = [
     # pytest-benchmark warning when xdist is active (expected in parallel mode)
     "ignore:Benchmarks are automatically disabled",
 ]
-
-# ============ PYTEST-ASYNCIO ============
-[tool.pytest-asyncio]
-asyncio_mode = "auto"
 
 # ============ COVERAGE ============
 [tool.coverage.run]

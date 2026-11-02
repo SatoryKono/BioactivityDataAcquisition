@@ -11,7 +11,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 
 from bioetl.domain.exceptions.base import RecoverableError
-from bioetl.domain.types import ErrorType
+from bioetl.domain.types.enums import ErrorType
 
 __all__ = [
     "NetworkError",

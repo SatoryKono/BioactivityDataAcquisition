@@ -16,6 +16,7 @@ import importlib.util
 import json
 import re
 import sys
+import tomllib
 from collections import namedtuple
 from pathlib import Path
 from types import ModuleType
@@ -1078,6 +1079,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert dockerfile.count("glibc-2.44-locale-posix=2.44-r8") == 2
     assert dockerfile.count("ld-linux-2.44=2.44-r8") == 2
     assert dockerfile.count("libcrypt1-2.44=2.44-r8") == 2
+    assert dockerfile.count("py3-pip-wheel=26.2.2-r2") == 2
     assert (
         dockerfile.count(
             "chainguard/wolfi-base@sha256:"
@@ -1085,7 +1087,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         )
         == 2
     )
-    assert dockerfile.count("python-3.13=3.13.16_git20261002-r2") == 2
+    assert dockerfile.count("python-3.13=3.13.18_git20261030-r0") == 2
     assert dockerfile.count("zlib=1.3.2.1_rc20260917-r0") == 2
     assert "python-3.14" not in dockerfile
     assert "FROM scratch" in dockerfile
@@ -1100,7 +1102,11 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert "bioetl:x:999:" in dockerfile
     assert "COPY --from=runtime-root /runtime-fs/ /" in dockerfile
     assert "COPY --from=runtime-root / /" not in dockerfile
-    assert "setuptools==83.0.0" in dockerfile
+    build_requirements = tomllib.loads((ROOT / "pyproject.toml").read_text())[
+        "build-system"
+    ]["requires"]
+    assert "setuptools==84.1.0" in build_requirements
+    assert "setuptools==84.1.0" in dockerfile
     assert "--build-constraint /tmp/build-constraints.txt" in dockerfile
     assert (
         "4fad23465a06cc5149a541fbec6f87e234a64dc0550f6bfdd2d290d8f03240df"
@@ -1589,7 +1595,7 @@ def test_docker_workflow_probes_shellless_runtime_and_default_health() -> None:
     )
     probe = str(provenance["run"])
     for required in (
-        "sys.version_info[:3] == (3, 13, 16)",
+        "sys.version_info[:3] == (3, 13, 18)",
         "(os.getuid(), os.getgid()) == (999, 999)",
         'pwd.getpwuid(999).pw_name == "bioetl"',
         'pwd.getpwuid(999).pw_shell == "/sbin/nologin"',

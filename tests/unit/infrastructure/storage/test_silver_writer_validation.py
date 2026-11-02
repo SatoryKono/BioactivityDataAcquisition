@@ -73,7 +73,7 @@ def _build_pandera_validator(
     *, min_value: float | None = None
 ) -> PanderaSilverValidator:
     """Create a simple validator for ``entity_id``/``value`` test records."""
-    import pandera as pa
+    import pandera.pandas as pa
 
     value_kwargs = {"checks": pa.Check.ge(min_value)} if min_value is not None else {}
     return PanderaSilverValidator(

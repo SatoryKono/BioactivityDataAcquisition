@@ -8,10 +8,15 @@ import re
 import subprocess
 import sys
 import tarfile
+from typing import IO
+
+from scripts.ops.observability.refresh_router_host_provenance import JsonObject
+
+from scripts.ops.observability.grafana.trusted_docker import docker_path
 
 
-def filesystem_records(stream):
-    records = {}
+def filesystem_records(stream: IO[bytes]) -> JsonObject:
+    records: JsonObject = {}
     with tarfile.open(fileobj=stream, mode="r|") as archive:
         for entry in archive:
             name = entry.name.removeprefix("./").rstrip("/")
@@ -21,6 +26,8 @@ def filesystem_records(stream):
             if entry.isfile():
                 digest = hashlib.sha256()
                 source = archive.extractfile(entry)
+                if source is None:
+                    raise ValueError("Missing regular-file content: " + name)
                 while chunk := source.read(1024 * 1024):
                     digest.update(chunk)
                 content = digest.hexdigest()
@@ -44,7 +51,7 @@ def filesystem_records(stream):
     return records
 
 
-def fingerprint(stream):
+def fingerprint(stream: IO[bytes]) -> str:
     records = filesystem_records(stream)
     encoded = json.dumps(records, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(encoded).hexdigest()
@@ -66,16 +73,12 @@ def canonical_image_reference(value: str) -> str:
     return "satorykono/bioetl-grafana-router7-canvas@sha256:" + digest
 
 
-def main(argv: list[str] | None = None):
+def main(argv: list[str] | None = None) -> None:
     args = sys.argv[1:] if argv is None else argv
     if len(args) != 1:
         raise ValueError("Unsupported image reference")
     image = canonical_image_reference(args[0])
-    docker = (
-        "C:/Program Files/Docker/Docker/resources/bin/docker.exe"
-        if sys.platform == "win32"
-        else "/usr/bin/docker"
-    )
+    docker = docker_path()
     container = subprocess.check_output(
         [docker, "create", "--entrypoint", "/bin/true", "--", image], text=True
     ).strip()
@@ -86,6 +89,8 @@ def main(argv: list[str] | None = None):
             [docker, "export", container], stdout=subprocess.PIPE
         ) as process:
             try:
+                if process.stdout is None:
+                    raise ValueError("Missing Docker export stdout")
                 result = fingerprint(process.stdout)
             except BaseException:
                 process.kill()

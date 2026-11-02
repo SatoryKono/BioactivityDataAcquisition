@@ -589,6 +589,7 @@ class TestPostrunServiceSpan:
         """Verify run() works with an explicit NoOpTracing instance."""
         service = self._build_postrun_service(tracer=NoOpTracing())
         await service.run(executor=self._make_executor())
+        assert service._dq_service.evaluate.call_count == 1
 
     def test_postrun_none_tracer_is_rejected(self) -> None:
         """Construction fails fast when tracer defaults are unresolved."""

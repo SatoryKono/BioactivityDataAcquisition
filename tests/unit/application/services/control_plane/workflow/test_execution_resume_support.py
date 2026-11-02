@@ -177,13 +177,19 @@ def test_validate_resume_state_accepts_skipped_steps() -> None:
         ),
     )
 
-    support.validate_resume_state(
-        latest_state=state,
-        workflow_name="chembl_publication",
-        current_fingerprint="fingerprint-1",
-        force_steps=(),
-        repair_steps=(),
+    assert (
+        support.validate_resume_state(
+            latest_state=state,
+            workflow_name="chembl_publication",
+            current_fingerprint="fingerprint-1",
+            force_steps=(),
+            repair_steps=(),
+        )
+        is None
     )
+    assert support.resolve_skipped_step_ids(
+        state=state, force_steps=(), repair_steps=()
+    ) == frozenset({"seed"})
 
 
 def test_load_resume_manifest_errors_when_persisted_manifest_missing() -> None:

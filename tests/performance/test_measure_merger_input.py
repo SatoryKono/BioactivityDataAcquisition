@@ -219,6 +219,8 @@ def test_value_validation_accepts_finite_roundoff(rows):
 
     expected = 0.75 * rows * (rows - 1)
     harness.validate_values(rows, math.nextafter(expected, math.inf), rows)
+    with pytest.raises(ValueError, match="row count/value validation"):
+        harness.validate_values(rows, expected + 1.5, rows)
 
 
 @pytest.mark.parametrize(

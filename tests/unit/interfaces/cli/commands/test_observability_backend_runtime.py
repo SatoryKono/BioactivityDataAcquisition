@@ -67,6 +67,48 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("scheme", ["http", "https"])
+def test_probe_redirect_preserves_allowed_http_targets_without_network(scheme):
+    target = f"{scheme}://fixture.invalid/ready"
+    request = probe_subject._HttpHttpsRedirectHandler().redirect_request(
+        Request("https://fixture.invalid/old"),
+        BytesIO(),
+        302,
+        "Found",
+        Message(),
+        target,
+    )
+    assert request is not None
+    assert request.full_url == target
+
+
+def test_probe_opener_installs_redirect_guard_and_forwards_timeout(monkeypatch):
+    response = MagicMock()
+    opener = MagicMock()
+    opener.open.return_value = response
+    factory = MagicMock(return_value=opener)
+    monkeypatch.setattr(probe_subject, "build_opener", factory)
+    assert (
+        probe_subject._open_observability_probe(
+            "https://fixture.invalid/ready", timeout=2.5
+        )
+        is response
+    )
+    factory.assert_called_once_with(probe_subject._HttpHttpsRedirectHandler)
+    opener.open.assert_called_once_with("https://fixture.invalid/ready", timeout=2.5)
+
+
+def test_required_probe_rejects_non_http_before_opening():
+    opener = MagicMock(side_effect=AssertionError("must not open a non-HTTP URL"))
+    assert (
+        probe_subject.probe_observability_backend_required_paths(
+            "file:///synthetic", required_probe_paths=("/ready",), urlopen_fn=opener
+        )
+        is False
+    )
+    opener.assert_not_called()
+
+
 @pytest.fixture(autouse=True)
 def _stub_docker_readiness(monkeypatch: pytest.MonkeyPatch) -> None:
     """Keep backend unit tests independent of the host Docker daemon."""

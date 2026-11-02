@@ -47,6 +47,27 @@ from bioetl.domain.normalization.identifiers import (
 
 pytestmark = pytest.mark.unit
 
+
+@pytest.mark.parametrize(
+    "value,expected", [("TS-TS-0001", "TS-0001"), ("UNKNOWN_001", "UNKNOWN_001")]
+)
+def test_ontology_prefix_edge_contracts(value: str, expected: str) -> None:
+    from bioetl.domain.normalization.identifiers import normalize_ontology_id
+
+    assert normalize_ontology_id(value) == expected
+
+
+def test_canonical_fast_path_defensive_inconsistent_string_protocol() -> None:
+    """Fault fixture only: builtin str cannot disagree about tuple/member prefixes."""
+    from bioetl.domain.normalization.identifiers import _fast_path_canonical
+
+    class InconsistentPrefix(str):
+        def startswith(self, prefix, *args):
+            return isinstance(prefix, tuple)
+
+    assert _fast_path_canonical("BAO_001", InconsistentPrefix("BAO_001")) is None
+
+
 LEGACY_HTTP_DOI = "http" + "://doi.org/10.1234/test"
 
 
@@ -258,6 +279,23 @@ class TestNormalizeOntologyID:
         assert (
             normalize_ontology_id("UBERON 7") == "UBERON_0000007"
         )  # Space format gets padding
+
+    @pytest.mark.parametrize("separator", ("\t", "\n", "\u00a0"))
+    def test_normalize_ontology_id_all_whitespace_separators(
+        self, separator: str
+    ) -> None:
+        """Preserve normalization for every whitespace separator accepted by split."""
+        assert normalize_ontology_id(f"UBERON{separator}7") == "UBERON_0000007"
+        assert normalize_ontology_id_strict(f"UBERON{separator}7") == "UBERON_0000007"
+
+    def test_normalize_ontology_id_accepts_string_subclasses(self) -> None:
+        """String subclasses remain valid normalization inputs."""
+
+        class OntologyIdentifier(str):
+            pass
+
+        value = OntologyIdentifier("GO:0008150")
+        assert normalize_ontology_id(value) == "GO_0008150"
 
     def test_normalize_ontology_id_none_and_empty(self) -> None:
         """Test None and empty string handling."""

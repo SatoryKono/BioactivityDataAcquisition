@@ -127,11 +127,12 @@ class TestCleanupTracerSuccess:
 
     @pytest.mark.asyncio
     async def test_cleanup_tracer_none_skips_close(
-        self, cleanup_service: PostrunCleanupService
+        self, cleanup_service: PostrunCleanupService, mock_logger: MagicMock
     ) -> None:
         """Test that cleanup_tracer with None tracer is a no-op."""
         # Must not raise, must not call anything
         await cleanup_service.cleanup_tracer(None)
+        assert mock_logger.mock_calls == []
 
     @pytest.mark.asyncio
     async def test_cleanup_tracer_none_does_not_log_debug(

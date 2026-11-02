@@ -6,6 +6,8 @@ import ast
 import errno
 import json
 from pathlib import Path
+import re
+import shlex
 import subprocess
 import sys
 
@@ -285,7 +287,32 @@ def test_real_daily_caller_and_command_partition_are_complete() -> None:
     assert '--parallel-marker "not serial"' in pr
     assert '--serial-marker "serial"' in pr
     assert "--prove-artifact-deferral" in pr
-    assert '--fallback-addopts "-p no:xdist -q --tb=line"' in pr
+    pr_workflow = yaml.safe_load(pr)
+    architecture = next(
+        step["run"]
+        for step in pr_workflow["jobs"]["class-lane"]["steps"]
+        if step.get("id") == "arch-pytest"
+    )
+    tokens = shlex.split(architecture)
+    fallback = shlex.split(tokens[tokens.index("--fallback-addopts") + 1])
+    assert fallback[:4] == ["-p", "no:xdist", "-q", "--tb=line"]
+    parallel = shlex.split(tokens[tokens.index("--parallel-addopts") + 1])
+    assert {arg for arg in fallback if arg.startswith("--ignore")} == {
+        arg for arg in parallel if arg.startswith("--ignore")
+    }
+    affected = next(
+        step
+        for step in pr_workflow["jobs"]["class-lane"]["steps"]
+        if step.get("id") == "affected-pytest"
+    )
+    affected_command = affected["run"]
+    assert "scripts.engineering.ci.run_pytest_resilient" in affected_command
+    assert '--target "${targets[@]}"' in affected_command
+    assert '--parallel-marker "not serial"' in affected_command
+    assert '--serial-marker "serial"' in affected_command
+    assert "--no-fallback" in affected_command.split()
+    assert "--prove-artifact-deferral" in affected_command.split()
+    assert "--fallback-addopts" not in affected_command.split()
     assert "cov-fail-under" not in pr
     assert "exit 5" not in pr
 
@@ -296,6 +323,110 @@ def test_stale_manifest_selector_fails_before_subset_selection(tmp_path: Path) -
     path.write_text("def test_source(): pass\n", encoding="utf-8")
     manifest = {"tests": [{"node": "tests/test_removed.py::test_old"}]}
     with pytest.raises(ValueError, match="Stale artifact manifest selector"):
+        validate_selectors(manifest, tmp_path)
+
+
+def test_selector_cache_reuses_only_exact_source_bytes(tmp_path, monkeypatch) -> None:
+    from scripts.engineering.dev import pytest_artifact_selection as selection
+
+    selection._source_selectors.cache_clear()
+    path = tmp_path / "tests/test_cached.py"
+    path.parent.mkdir()
+    path.write_bytes(b"def test_one(): pass\n")
+    manifest = {"tests": [{"node": "tests/test_cached.py::test_one"}]}
+    original_parse = selection.ast.parse
+    parsed = []
+
+    def counted_parse(source, *args, **kwargs):
+        if not args and not kwargs:
+            parsed.append(source)
+        return original_parse(source, *args, **kwargs)
+
+    monkeypatch.setattr(selection.ast, "parse", counted_parse)
+    validate_selectors(manifest, tmp_path)
+    validate_selectors(manifest, tmp_path)
+    assert parsed == [path.read_bytes().decode("utf-8")]
+    stat = path.stat()
+    original = path.read_bytes().decode("utf-8")
+    path.write_bytes(original.replace("test_one", "test_two").encode("utf-8"))
+    import os
+
+    os.utime(path, ns=(stat.st_atime_ns, stat.st_mtime_ns))
+    assert path.stat().st_size == stat.st_size
+    with pytest.raises(ValueError, match="Stale artifact manifest selector"):
+        validate_selectors(manifest, tmp_path)
+    assert parsed == [original, original.replace("test_one", "test_two")]
+    manifest["tests"][0]["node"] = "tests/test_cached.py::test_two"
+    validate_selectors(manifest, tmp_path)
+    assert len(parsed) == 2
+    path.unlink()
+    with pytest.raises(FileNotFoundError):
+        validate_selectors(manifest, tmp_path)
+
+
+@pytest.mark.parametrize(
+    ("source", "selector", "message"),
+    [
+        ("def test_one(): pass\ndef test_one(): pass\n", "test_one", "Stale"),
+        (
+            "class TestSuite:\n def test_one(self): pass\nclass TestSuite: pass\n",
+            "TestSuite::test_one",
+            "Stale",
+        ),
+        ("class TestSuite: pass\n", "TestSuite", "not a function"),
+        ("def test_one(: pass\n", "test_one", "syntax"),
+    ],
+)
+def test_warmed_selector_cache_rejects_invalid_current_source(
+    tmp_path, source, selector, message
+) -> None:
+    path = tmp_path / "tests/test_current.py"
+    path.parent.mkdir()
+    path.write_text("def test_one(): pass\n", encoding="utf-8")
+    manifest = {"tests": [{"node": "tests/test_current.py::test_one"}]}
+    validate_selectors(manifest, tmp_path)
+    path.write_text(source, encoding="utf-8")
+    manifest["tests"][0]["node"] = f"tests/test_current.py::{selector}"
+    if message == "syntax":
+        with pytest.raises(SyntaxError):
+            validate_selectors(manifest, tmp_path)
+    else:
+        with pytest.raises(ValueError, match=message):
+            validate_selectors(manifest, tmp_path)
+
+
+def test_selector_cache_keeps_roots_and_manifest_decisions_fresh(tmp_path) -> None:
+    for name, source in (
+        ("first", "def test_one(): pass\n"),
+        ("second", "def test_two(): pass\n"),
+    ):
+        path = tmp_path / name / "tests/test_current.py"
+        path.parent.mkdir(parents=True)
+        path.write_text(source, encoding="utf-8")
+    manifest = {"tests": [{"node": "tests/test_current.py::test_one"}]}
+    validate_selectors(manifest, tmp_path / "first")
+    with pytest.raises(ValueError, match="Stale"):
+        validate_selectors(manifest, tmp_path / "second")
+    manifest["tests"][0]["node"] = "tests/test_current.py::test_two"
+    validate_selectors(manifest, tmp_path / "second")
+    with pytest.raises(ValueError, match="Stale"):
+        validate_selectors(manifest, tmp_path / "first")
+
+
+def test_selector_cache_preserves_nested_async_and_utf8_contract(tmp_path) -> None:
+    path = tmp_path / "tests/test_nested.py"
+    path.parent.mkdir()
+    path.write_text(
+        "class TestOuter:\n class TestInner:\n  async def test_one(self): pass\n",
+        encoding="utf-8",
+    )
+    manifest = {
+        "tests": [{"node": "tests/test_nested.py::TestOuter::TestInner::test_one"}]
+    }
+    validate_selectors(manifest, tmp_path)
+    validate_selectors(manifest, tmp_path)
+    path.write_bytes(b"# coding: latin1\n# \xe9\ndef test_one(): pass\n")
+    with pytest.raises(UnicodeDecodeError):
         validate_selectors(manifest, tmp_path)
 
 
@@ -783,15 +914,38 @@ def test_source_checks_and_coverage_selection_survive_daily_partition():
     pr = yaml.safe_load(
         (ROOT / ".github/workflows/pr-required.yml").read_text(encoding="utf-8")
     )
-    commands = [
-        step.get("run", "")
-        for job in pr["jobs"].values()
-        for step in job.get("steps", [])
-    ]
-    assert any(
-        "python -m scripts.docs passports check-source" in command
-        for command in commands
+    docs_lane = pr["jobs"]["docs-lane"]
+    needs = docs_lane["needs"]
+    assert ([needs] if isinstance(needs, str) else needs) == ["classify-changes"]
+    # Always execute the owner lane so missing classifier output fails closed;
+    # the aggregate job decides whether docs governance applies.
+    assert "if" not in docs_lane and True not in docs_lane
+    assert re.fullmatch(
+        r"SatoryKono/BioactivityDataAcquisition/\.github/workflows/docs\.yml@[0-9a-f]{40}",
+        docs_lane["uses"],
     )
+    assert not docs_lane.get("continue-on-error", False)
+    docs_owner = yaml.safe_load(
+        (ROOT / ".github/workflows/docs.yml").read_text(encoding="utf-8")
+    )["jobs"]["docs-governance"]
+    passport_step = next(
+        step
+        for step in docs_owner["steps"]
+        if step.get("name") == "Check pipeline and workflow passport drift"
+    )
+    assert shlex.split(passport_step["run"]) == [
+        "uv",
+        "run",
+        "--frozen",
+        "--no-build",
+        "python",
+        "-m",
+        "scripts.docs",
+        "passports",
+        "check",
+    ]
+    assert "if" not in passport_step
+    assert not passport_step.get("continue-on-error", False)
 
 
 @pytest.mark.parametrize("new_importer", [False, True])

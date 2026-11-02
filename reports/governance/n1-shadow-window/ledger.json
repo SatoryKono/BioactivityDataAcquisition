@@ -1,7 +1,7 @@
 {
   "actions_execution_observed": true,
   "actions_permissions_http": "403",
-  "baseline_sha": "ce050a180ffea36a2ff1400e3d66c4ebcc3bcaaf",
+  "baseline_sha": "acc8d0f344a048f8d659671f59da2de279a20616",
   "decision_owner": "CI",
   "durable_archive": {
     "acceptance": "not_pass",
@@ -41,7 +41,7 @@
     "configuration_id": "daily-deterministic-plus-existing-weekly-security",
     "continuation": "Start the 48-hour (two full day) window only after this daily configuration is on main and the first valid comparable observation exists. Record that observation SHA and UTC then. Do not backdate it and do not mix it with the unacceptable history below. Durable archive acceptance still requires the 90-day age gate before N1 can close. Do not continue N2 before that.",
     "minimum_hours": 48,
-    "status": "not_started"
+    "status": "started"
   },
   "personal_assignees": [],
   "recorded_at": "2026-10-23T16:17:52Z",
@@ -84,6 +84,6 @@
     "minimum_span": "48 wall-clock hours after the start observation (two full days), not two calendar-date hops and not two runs",
     "start_rule": "Set window_start_sha and window_start_utc only after this daily configuration is merged and the first valid comparable baseline/candidate observation exists. Record both SHAs, both UTCs, and the configuration id. Do not backdate."
   },
-  "window_start_sha": null,
-  "window_start_utc": null
+  "window_start_sha": "acc8d0f344a048f8d659671f59da2de279a20616",
+  "window_start_utc": "2026-11-02T07:10:42Z"
 }

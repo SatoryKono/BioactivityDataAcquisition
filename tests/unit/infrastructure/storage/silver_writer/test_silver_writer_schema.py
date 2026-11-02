@@ -47,6 +47,26 @@ TEST_ROOT = synthetic_test_root("bioetl-silver-writer-schema")
 SILVER_BASE_PATH = TEST_ROOT / "silver"
 
 
+@pytest.mark.parametrize("missing_input", ["existing_schema", "records"])
+def test_type_diff_without_baseline_or_batch_reports_no_changes(
+    missing_input: str,
+) -> None:
+    """No type evolution is inferred without an existing schema or new rows."""
+    import pyarrow as pa
+
+    from bioetl.infrastructure.storage.silver.schema_drift_operations import (
+        _diff_schema_types,
+    )
+
+    existing = (
+        None
+        if missing_input == "existing_schema"
+        else pa.schema([("value", pa.int64())])
+    )
+    records = [] if missing_input == "records" else [{"value": 1}]
+    assert _diff_schema_types(existing, records) == ()
+
+
 class TestSilverWriterSchemaDrift:
     """Tests for schema drift detection and handling."""
 

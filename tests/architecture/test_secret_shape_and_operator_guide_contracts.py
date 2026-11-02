@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import re
+import json
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -49,6 +51,78 @@ def test_gitleaks_does_not_allowlist_live_sk_or_hex_tokens() -> None:
     assert "'''[a-f0-9]{40}'''" not in text
     assert "tests/fixtures/" in text
     assert "msk-[a-zA-Z0-9]+" in text
+
+
+def _precision_metadata_allowed(path: str, line: str) -> bool:
+    rules = tomllib.loads(_read(".gitleaks.toml"))["rules"]
+    generic = next(rule for rule in rules if rule["id"] == "generic-api-key")
+    entries = [
+        entry
+        for entry in generic["allowlists"]
+        if entry["description"].startswith("Reviewed #12474")
+    ]
+    assert len(entries) == 3
+    for entry in entries:
+        assert entry["condition"] == "AND"
+        assert entry["regexTarget"] == "line"
+    return any(
+        any(re.search(pattern, path) for pattern in entry["paths"])
+        and any(re.search(pattern, line) for pattern in entry["regexes"])
+        for entry in entries
+    )
+
+
+def test_gitleaks_accepts_reviewed_source_identity_and_response_metadata() -> None:
+    inventory_path = "configs/quality/external_resource_inventory.json"
+    inventory = json.loads(_read(inventory_path))
+    source = "src/bioetl/application/composite/dependency_key_resolvers.py"
+    line = (
+        json.dumps(source) + ": " + json.dumps(inventory["source_files"][source]) + ","
+    )
+    assert _precision_metadata_allowed(inventory_path, line)
+    assert _precision_metadata_allowed(inventory_path, "\n" + line)
+    assert not _precision_metadata_allowed(inventory_path, "prefix" + line)
+    assert not _precision_metadata_allowed(inventory_path, line + "suffix")
+    assert not _precision_metadata_allowed(
+        inventory_path, line + '\n"api_key": "unexpected"'
+    )
+    assert not _precision_metadata_allowed("other/" + inventory_path, line)
+    for filename, header in (
+        ("uniprot_headers.txt", "x-api-deployment-date"),
+        ("semanticscholar_headers.txt", "x-amz-apigw-id"),
+    ):
+        path = "reports/evidence/12461/" + filename
+        actual = next(
+            line
+            for line in _read(path).splitlines()
+            if line.lower().startswith(header + ":")
+        )
+        assert _precision_metadata_allowed(path, actual)
+        assert _precision_metadata_allowed(path, "\n" + actual)
+        assert not _precision_metadata_allowed("other/" + path, actual)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "configs/quality/external_resource_inventory.json",
+        "reports/evidence/12461/uniprot_headers.txt",
+        "reports/evidence/12461/semanticscholar_headers.txt",
+    ],
+)
+def test_gitleaks_precision_never_excludes_credential_assignments(path: str) -> None:
+    value = "".join(
+        ("7e91", "c4a6", "b308", "f2d5", "a947", "d10c", "e6b8", "039f", "2c75", "a461")
+    )
+    for name in ("api_key", "access_token", "authorization"):
+        assert not _precision_metadata_allowed(
+            path, json.dumps(name) + ': "' + value + '"'
+        )
+    # Even the allowed source-path key cannot hide an arbitrary 40-hex credential.
+    source = "src/bioetl/application/composite/dependency_key_resolvers.py"
+    assert not _precision_metadata_allowed(
+        path, json.dumps(source) + ': "' + value + '"'
+    )
 
 
 def test_commitlint_does_not_ignore_nonconventional_headers() -> None:

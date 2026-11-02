@@ -52,6 +52,18 @@ class BenchmarkMeasurementContractError(Exception):
         self.code = code
 
 
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    """Bridge pytest's public nodeid to pytest-benchmark 5.3's removed alias.
+
+    pytest 9.2 removed ``Function._nodeid`` while pytest-benchmark 5.3.0
+    still reads it. The benchmark guard is loaded before that plugin, so add
+    the compatibility alias during collection when the plugin needs it.
+    """
+    for item in items:
+        if not hasattr(item, "_nodeid"):
+            item._nodeid = item.nodeid
+
+
 class _BlockedBenchmarkVcsProbe(OSError):
     """Raised instead of executing a pytest-benchmark git/hg command."""
 

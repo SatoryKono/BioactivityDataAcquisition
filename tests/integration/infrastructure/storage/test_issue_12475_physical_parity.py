@@ -132,7 +132,14 @@ async def test_every_resolved_pipeline_config_writes_and_reads_all_layers(
         silver_table_path = (
             tmp_path / "silver" / "issue12475_matrix" / f"pipeline_{observed:02d}"
         )
-        silver_rows = DeltaTable(str(silver_table_path)).to_pyarrow_table().to_pylist()
+        silver_table = DeltaTable(str(silver_table_path))
+        expected_silver = pa.schema(
+            field
+            for field in _silver_schema(value_type=pa.int64())
+            if field.name not in NONDETERMINISTIC_PERSISTED_FIELDS
+        )
+        assert silver_table.schema().to_pyarrow().equals(expected_silver)
+        silver_rows = silver_table.to_pyarrow_table().to_pylist()
         assert len(silver_rows) == 1
         assert silver_rows[0]["entity_id"] == record_id
         assert silver_rows[0]["value"] == 1
@@ -163,7 +170,25 @@ async def test_every_resolved_pipeline_config_writes_and_reads_all_layers(
         gold_table_path = (
             tmp_path / "gold" / "issue12475_matrix" / f"pipeline_{observed:02d}"
         )
-        gold_rows = DeltaTable(str(gold_table_path)).to_pyarrow_table().to_pylist()
+        gold_table = DeltaTable(str(gold_table_path))
+        expected_gold_types = {"entity_id": pa.string(), "value": pa.float64()}
+        if gold_mode == "scd2":
+            expected_gold_types.update(
+                {
+                    "_valid_from": pa.string(),
+                    "_valid_to": pa.string(),
+                    "_is_current": pa.bool_(),
+                    "_version": pa.int64(),
+                }
+            )
+        physical_gold = gold_table.schema().to_pyarrow()
+        assert {
+            field.name: field.type for field in physical_gold
+        } == expected_gold_types
+        # Preserve #12475 finding explicitly; owner disposition is required for
+        # #12474 acceptance. Logical required-field validation remains separate.
+        assert all(field.nullable for field in physical_gold)
+        gold_rows = gold_table.to_pyarrow_table().to_pylist()
         assert len(gold_rows) == 1
         assert gold_rows[0]["entity_id"] == record_id
         assert gold_rows[0]["value"] == 1.5

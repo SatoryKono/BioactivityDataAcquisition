@@ -258,8 +258,8 @@ class TestValidTransitions:
         self, current: CompositePipelineState, target: CompositePipelineState
     ):
         """Module-level validate_transition should not raise for valid transitions."""
-        # Should not raise
-        validate_transition(current, target)
+        assert validate_transition(current, target) is None
+        assert current.can_transition_to(target)
 
 
 class TestInvalidTransitions:
