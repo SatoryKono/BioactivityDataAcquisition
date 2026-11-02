@@ -107,6 +107,9 @@ QUALITY_GOVERNANCE_TESTS: tuple[str, ...] = (
 EXTERNAL_RESOURCE_INVENTORY_TEST = (
     "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py"
 )
+EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST = (
+    "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py"
+)
 EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST = (
     "tests/architecture/test_external_resource_inventory_catalog.py"
 )
@@ -356,8 +359,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_qm09_review.json",
         ),
         (
-            EXTERNAL_RESOURCE_INVENTORY_TEST,
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+            EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         ),
     ),
     "configs/quality/external_resource_inventory_pr12651_review.json": (
