@@ -7,18 +7,18 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4031 |
-| Tracked doc-like files | 4031 |
+| Doc-like files | 4035 |
+| Tracked doc-like files | 4035 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
-| Generated routes | 76 |
+| Generated routes | 77 |
 
 ## Tracking State
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4031 |
+| tracked | 4035 |
 
 ## Lifecycle Counts
 
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 268 |
+| working_report | 271 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -51,29 +51,29 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 751 |
+| Active | 752 |
 | Archived | 1554 |
 | Canonical | 76 |
-| Generated | 1066 |
-| Working | 584 |
+| Generated | 1067 |
+| Working | 586 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 751 |
+| active | 752 |
 | archive | 1554 |
 | canonical | 76 |
-| generated | 1066 |
-| working | 584 |
+| generated | 1067 |
+| working | 586 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 297 |
-| generate-automatically | 1066 |
-| keep | 2668 |
+| archive-after-migration | 299 |
+| generate-automatically | 1067 |
+| keep | 2669 |
 
 ## Cleanup Candidates
 
@@ -124,6 +124,7 @@
 | `reports/12371-restart-c/handoff_report.md` | Working | 0 | archive-after-migration |
 | `reports/12375_b_repeat_blocker.md` | Working | 0 | archive-after-migration |
 | `reports/12375_restart_c_no_change_report.md` | Working | 0 | archive-after-migration |
+| `reports/12592_report.md` | Working | 0 | archive-after-migration |
 | `reports/NAMED_BLOCKER_12464.md` | Working | 1 | archive-after-migration |
 | `reports/acceptance/P04-REM-R10-acceptance-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/acceptance/P04-REM-R10-acceptance-matrix.md` | Working | 0 | archive-after-migration |
@@ -158,7 +159,6 @@
 | `reports/audit-runs/12107-r07/map-acceptance-verdict.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/owner-decision-package.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/port-relationship-index.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/12107-r07/scan-manifest.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -370,6 +370,7 @@
 | provider-contract-drift-quality-report | `scripts/engineering/qa/report_provider_contract_drift.py` | working_output |
 | pytest-dev-html-coverage-report | `scripts/engineering/dev/run_tests.py` | ignored_local_output |
 | pytest-resilient-telemetry-report | `scripts/engineering/ci/run_pytest_resilient.py` | working_output |
+| quality-move-source-publication-provenance | `scripts/engineering/ci/test_telemetry_provenance.py` | tracked_quality_evidence |
 | reproducibility-support-matrix-generated-doc | `scripts/engineering/qa/generate_reproducibility_support_matrix.py` | tracked_curated_generated_doc |
 | root-local-clutter-cleanup-governance-doc | `manual-governance-doc` | tracked_curated_generated_doc |
 | runtime-structured-log-file | `src/bioetl/infrastructure/observability/logging_config.py` | ignored_runtime_output |

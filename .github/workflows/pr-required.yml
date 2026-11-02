@@ -469,7 +469,6 @@ jobs:
           mkdir -p reports/quality
           # Observational only. affected-pytest remains the executed set.
           # A path with no route fails closed. Nightly test-matrix is unchanged.
-          # Rollback: delete this step and the upload below.
           uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results shadow-compare \
             --repo-root . \
             --base-sha "$BASE_SHA" \
@@ -481,16 +480,6 @@ jobs:
             cat reports/quality/impact-shadow-compare.json
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload impact shadow compare
-        if: always() && !cancelled() && needs['classify-changes'].outputs['tests'] == 'required' && hashFiles('reports/quality/impact-shadow-compare.json') != ''
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: impact-shadow-compare-${{ github.sha }}
-          path: reports/quality/impact-shadow-compare.json
-          if-no-files-found: error
-          retention-days: 3
-
       - name: Restore mypy cache
         if: needs['classify-changes'].outputs['type-checking'] == 'required'
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0

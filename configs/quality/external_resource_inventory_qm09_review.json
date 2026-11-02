@@ -1,11 +1,17 @@
 {
   "schema_version": 1,
-  "catalog_ref": "2b468fcfe7010deca8d00f30f66eae58441d85cc",
-  "source_ref": "f45827000cdc122bddc100097fc73a400f2bf3a8",
+  "catalog_ref": "57146e50dfa2a48cb93cd0bbbf6c4aeb503aec59",
+  "source_ref": "57146e50dfa2a48cb93cd0bbbf6c4aeb503aec59",
   "source_reviews": {
-    "src/bioetl/infrastructure/observability/observability_backend_process.py": "Reviewed: Same-line Bandit # nosec B404 on existing subprocess import; no change to process lifecycle or external acquisition. No new external acquisition or cleanup behavior.",
-    "src/bioetl/infrastructure/provenance/code_revision.py": "Reviewed: Same-line Bandit # nosec B404 on existing subprocess import; Git revision helpers unchanged. No new external acquisition or cleanup behavior.",
-    "src/bioetl/infrastructure/storage/silver/support.py": "Reviewed: Same-line Bandit # nosec B404 on existing subprocess import; Silver Delta subprocess helpers unchanged. No new external acquisition or cleanup behavior."
+    "src/bioetl/infrastructure/observability/observability_backend_process.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed.",
+    "src/bioetl/infrastructure/provenance/code_revision.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed.",
+    "src/bioetl/infrastructure/storage/silver/support.py": "Reviewed Bandit B404 nosec placement only: moved the justified `# nosec B404 - see suppression registry` marker onto the `import subprocess` line so Bandit honors it. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed."
   },
-  "expression_updates": {}
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "segment_updates": {},
+  "reference_moves": []
 }
