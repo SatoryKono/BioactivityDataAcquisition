@@ -784,7 +784,7 @@ def test_dashboard_links_do_not_default_run_type_to_unknown() -> None:
 
 
 def test_run_type_variables_default_to_all_not_unknown() -> None:
-    """Run Type defaults: Overview keeps All; other boards default to backfill (SEL-P0).
+    """Run Type defaults to All on all primary boards (phase-1 F-10 / rev7 §1.5).
 
     Missing context must never use run_type=unknown.
     """
@@ -802,23 +802,12 @@ def test_run_type_variables_default_to_all_not_unknown() -> None:
             assert text != "unknown" and value != "unknown", (
                 f"{dashboard_path.name} run_type must not default to unknown"
             )
-            if dashboard_path.name in {
-                "bioetl-overview-v2.json",
-                "bioetl-run-explorer-v1.json",
-            }:
-                assert text == "All", (
-                    f"{dashboard_path.name} run_type current text must be All"
-                )
-                assert value == "$__all", (
-                    f"{dashboard_path.name} run_type current value must be $__all"
-                )
-            else:
-                assert text == "backfill", (
-                    f"{dashboard_path.name} run_type current text must be backfill"
-                )
-                assert value == "backfill", (
-                    f"{dashboard_path.name} run_type current value must be backfill"
-                )
+            assert text == "All", (
+                f"{dashboard_path.name} run_type current text must be All"
+            )
+            assert value == "$__all", (
+                f"{dashboard_path.name} run_type current value must be $__all"
+            )
 
 
 def test_pipeline_and_provider_variables_follow_explicit_scope_defaults() -> None:

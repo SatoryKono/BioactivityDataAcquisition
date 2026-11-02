@@ -61,6 +61,7 @@ RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
+DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
 RUN_REPORT_CONTRACTS_TEST = "tests/unit/domain/run_reports/test_contracts.py"
 SCRIPTS_INVENTORY_MANIFEST_TEST = (
     "tests/architecture/test_scripts_inventory_manifest.py"
@@ -124,7 +125,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
     ),
     ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
-    "mkdocs.yml": ("tests/architecture/test_documentation_sync.py",),
+    "mkdocs.yml": (DOCUMENTATION_SYNC_TEST,),
     "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md": (
         "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
     ),
@@ -478,7 +479,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "Dockerfile.bioetl": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "grafana/plugins/eslint-shared-config.mjs": (
         BRACES_BACKPORT_TEST,
-        "tests/architecture/test_dashboard_scenes_contract.py",
+        DASHBOARD_SCENES_CONTRACT_TEST,
         RESIDUAL_OSV_TEST,
     ),
     "docker-compose.monitoring.yml": (
@@ -653,6 +654,21 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "docs/03-guides/dashboards/": (
+        DOCUMENTATION_SYNC_TEST,
+        "tests/integration/test_grafana_selector_contract.py",
+        "tests/integration/test_grafana_variable_reference.py",
+    ),
+    "grafana/dashboards/": (
+        DASHBOARD_SCENES_CONTRACT_TEST,
+        "tests/integration/test_dashboard_variable_dependencies.py",
+        "tests/integration/test_grafana_config.py",
+        "tests/integration/test_grafana_dashboard_cta_links.py",
+        "tests/integration/test_grafana_dashboard_metric_semantics.py",
+        "tests/integration/test_grafana_evidence_readability.py",
+        "tests/integration/test_grafana_selector_contract.py",
+        "tests/integration/test_grafana_variable_reference.py",
+    ),
     "docs/02-architecture/decisions/": (
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
@@ -687,7 +703,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ),
     "grafana/plugins/bioetl-scenes-app/": (
         BRACES_BACKPORT_TEST,
-        "tests/architecture/test_dashboard_scenes_contract.py",
+        DASHBOARD_SCENES_CONTRACT_TEST,
         RESIDUAL_OSV_TEST,
     ),
     "grafana/plugins/bioetl-selectorshell-panel/": (
