@@ -23,7 +23,9 @@ from bioetl.interfaces.http._control_plane_selector_records import (
 )
 from bioetl.interfaces.http.run_report_index import _normalize_list_owner
 
-_UNRESOLVED_RUN_IDS = frozenset({"", RUN_ID_NO_SELECTION, "All", "$__all", "__all", "*"})
+_UNRESOLVED_RUN_IDS = frozenset(
+    {"", RUN_ID_NO_SELECTION, "All", "$__all", "__all", "*"}
+)
 _ALL_SCOPE_TOKENS = frozenset(
     {"", "All", "all", ".*", "$__all", "__all", "*", "—", "-"}
 )
@@ -186,4 +188,6 @@ def _scope_values(raw: str | None) -> tuple[str, ...]:
 
 
 def _is_all_pipeline(pipeline: str) -> bool:
-    return pipeline.strip() in _ALL_SCOPE_TOKENS or _normalize_list_owner(pipeline) is None
+    return (
+        pipeline.strip() in _ALL_SCOPE_TOKENS or _normalize_list_owner(pipeline) is None
+    )
