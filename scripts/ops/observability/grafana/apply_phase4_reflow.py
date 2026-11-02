@@ -48,43 +48,19 @@ def _by_id(data: dict[str, Any], panel_id: int) -> dict[str, Any]:
     raise KeyError(panel_id)
 
 
-def _redistribute_widths(items: list[dict[str, Any]]) -> bool:
-    """Scale/fill ``gridPos.w`` so the band sums to 24. Returns True if changed."""
-    if not items:
-        return False
+def _ordered_band(
+    items: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[int]]:
     ordered = sorted(items, key=lambda p: int((p.get("gridPos") or {}).get("x") or 0))
     widths = [max(1, int((p.get("gridPos") or {}).get("w") or 1)) for p in ordered]
-    total = sum(widths)
-    if total == TARGET_WIDTH:
-        # Still normalize x packing.
-        changed = False
-        cursor = 0
-        for panel, width in zip(ordered, widths, strict=True):
-            gp = panel.setdefault("gridPos", {})
-            if gp.get("x") != cursor or gp.get("w") != width:
-                gp["x"] = cursor
-                gp["w"] = width
-                changed = True
-            cursor += width
-        return changed
+    return ordered, widths
 
-    if len(ordered) == 1:
-        new_widths = [TARGET_WIDTH]
-    else:
-        scaled = [max(1, round(width * TARGET_WIDTH / total)) for width in widths]
-        drift = TARGET_WIDTH - sum(scaled)
-        # Push rounding drift onto the rightmost panel.
-        scaled[-1] = max(1, scaled[-1] + drift)
-        # Guard against a left panel eating the row after aggressive round-up.
-        while sum(scaled) > TARGET_WIDTH and scaled[-1] > 1:
-            scaled[-1] -= 1
-        while sum(scaled) < TARGET_WIDTH:
-            scaled[-1] += 1
-        new_widths = scaled
 
+def _apply_widths(ordered: list[dict[str, Any]], widths: list[int]) -> bool:
+    """Write packed ``x``/``w`` values; return whether any panel changed."""
     changed = False
     cursor = 0
-    for panel, width in zip(ordered, new_widths, strict=True):
+    for panel, width in zip(ordered, widths, strict=True):
         gp = panel.setdefault("gridPos", {})
         if gp.get("x") != cursor or gp.get("w") != width:
             gp["x"] = cursor
@@ -92,6 +68,31 @@ def _redistribute_widths(items: list[dict[str, Any]]) -> bool:
             changed = True
         cursor += width
     return changed
+
+
+def _scaled_widths(widths: list[int]) -> list[int]:
+    """Proportionally expand ``widths`` so they sum to ``TARGET_WIDTH``."""
+    if len(widths) == 1:
+        return [TARGET_WIDTH]
+    total = sum(widths)
+    scaled = [max(1, round(width * TARGET_WIDTH / total)) for width in widths]
+    drift = TARGET_WIDTH - sum(scaled)
+    scaled[-1] = max(1, scaled[-1] + drift)
+    while sum(scaled) > TARGET_WIDTH and scaled[-1] > 1:
+        scaled[-1] -= 1
+    while sum(scaled) < TARGET_WIDTH:
+        scaled[-1] += 1
+    return scaled
+
+
+def _redistribute_widths(items: list[dict[str, Any]]) -> bool:
+    """Scale/fill ``gridPos.w`` so the band sums to 24. Returns True if changed."""
+    if not items:
+        return False
+    ordered, widths = _ordered_band(items)
+    if sum(widths) == TARGET_WIDTH:
+        return _apply_widths(ordered, widths)
+    return _apply_widths(ordered, _scaled_widths(widths))
 
 
 def reflow_fleet_row(row: dict[str, Any]) -> int:

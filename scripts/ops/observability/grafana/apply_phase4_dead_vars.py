@@ -42,6 +42,19 @@ DROP_PIPELINE_UNKNOWN_ON = frozenset({FILE_DQ, FILE_INCIDENT, FILE_CONTROL_PLANE
 _PIPELINE = "pipeline"
 _UNKNOWN = "unknown"
 _REPEAT_KEYS = ("repeat", "repeatDirection", "maxPerRow")
+# Phase 4.4: shared timepicker surface across the five provisioned boards.
+_REFRESH_INTERVALS = (
+    "5s",
+    "10s",
+    "30s",
+    "1m",
+    "5m",
+    "15m",
+    "30m",
+    "1h",
+    "2h",
+    "1d",
+)
 
 
 def _iter_panels(panels: list[Any] | None) -> Iterator[dict[str, Any]]:
@@ -125,23 +138,44 @@ def _clear_dangling_repeats(data: dict[str, Any]) -> list[str]:
     return cleared
 
 
+def _prune_organize_rename(transform: dict[str, Any]) -> int:
+    """Prune one organize transform; return number of dropped rename keys."""
+    if transform.get("id") != "organize":
+        return 0
+    options = transform.setdefault("options", {})
+    index = options.get("indexByName")
+    rename = options.get("renameByName")
+    if not isinstance(index, dict) or not isinstance(rename, dict) or not index:
+        return 0
+    keep = {key: value for key, value in rename.items() if key in index}
+    dropped = len(rename) - len(keep)
+    if dropped:
+        options["renameByName"] = keep
+    return dropped
+
+
 def _prune_dead_renames(data: dict[str, Any]) -> int:
     """Drop ``renameByName`` keys absent from the same organize ``indexByName``."""
     pruned = 0
     for panel in _iter_panels(data.get("panels")):
         for transform in panel.get("transformations") or []:
-            if not isinstance(transform, dict) or transform.get("id") != "organize":
-                continue
-            options = transform.setdefault("options", {})
-            index = options.get("indexByName")
-            rename = options.get("renameByName")
-            if not isinstance(index, dict) or not isinstance(rename, dict) or not index:
-                continue
-            keep = {key: value for key, value in rename.items() if key in index}
-            if len(keep) != len(rename):
-                options["renameByName"] = keep
-                pruned += len(rename) - len(keep)
+            if isinstance(transform, dict):
+                pruned += _prune_organize_rename(transform)
     return pruned
+
+
+def _ensure_timepicker(data: dict[str, Any]) -> bool:
+    """Align ``timepicker.refresh_intervals`` to the shared Phase 4.4 list."""
+    timepicker = data.setdefault("timepicker", {})
+    if not isinstance(timepicker, dict):
+        data["timepicker"] = {"refresh_intervals": list(_REFRESH_INTERVALS)}
+        return True
+    current = timepicker.get("refresh_intervals")
+    desired = list(_REFRESH_INTERVALS)
+    if current == desired:
+        return False
+    timepicker["refresh_intervals"] = desired
+    return True
 
 
 def apply_dashboard_data(
@@ -155,49 +189,41 @@ def apply_dashboard_data(
     pruned = _prune_dead_renames(data)
     if pruned:
         cleared.append(f"renameByName:pruned={pruned}")
+    if _ensure_timepicker(data):
+        cleared.append("timepicker.refresh_intervals")
     return removed, cleared
 
 
-def _literal_dashboard_path(name: str) -> Path:
-    """Map an allowlisted basename to a Path built only from string constants.
-
-    Exhaustive literal branches keep the write target free of tainted joins
-    (pythonsecurity:S2083 / GHAS path-traversal).
-    """
-    if name == FILE_OVERVIEW:
-        return DASH / FILE_OVERVIEW
-    if name == FILE_DQ:
-        return DASH / FILE_DQ
-    if name == FILE_INCIDENT:
-        return DASH / FILE_INCIDENT
-    if name == FILE_CONTROL_PLANE:
-        return DASH / FILE_CONTROL_PLANE
-    if name == FILE_RUN_EXPLORER:
-        return DASH / FILE_RUN_EXPLORER
-    raise ValueError(f"refusing unexpected dashboard file: {name}")
+# Literal (path, basename) pairs — paths are never built from a function argument
+# so pythonsecurity:S2083 cannot treat write targets as tainted joins.
+_DASHBOARD_TARGETS: tuple[tuple[Path, str], ...] = (
+    (DASH / FILE_OVERVIEW, FILE_OVERVIEW),
+    (DASH / FILE_DQ, FILE_DQ),
+    (DASH / FILE_INCIDENT, FILE_INCIDENT),
+    (DASH / FILE_CONTROL_PLANE, FILE_CONTROL_PLANE),
+    (DASH / FILE_RUN_EXPLORER, FILE_RUN_EXPLORER),
+)
 
 
-def apply_file(name: str) -> tuple[list[str], list[str]]:
-    """Apply dead-var cleanup under the repo ``grafana/dashboards`` root only."""
-    target = _literal_dashboard_path(name)
-    data = json.loads(target.read_text(encoding="utf-8"))
-    removed, cleared = apply_dashboard_data(data, path_name=name)
+def _write_dashboard(target: Path, data: dict[str, Any]) -> None:
     target.write_text(
         json.dumps(data, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
-    return removed, cleared
 
 
 def main() -> int:
     print("Phase 4.1 dead-variable cleanup")
-    for name in FILES:
-        target = _literal_dashboard_path(name)
+    for target, path_name in _DASHBOARD_TARGETS:
         if not target.exists():
-            print(f"  missing {name}")
+            print(f"  missing {path_name}")
             continue
-        removed, cleared = apply_file(name)
-        print(f"  {name}: removed={removed or '-'} cleared_repeats={cleared or '-'}")
+        data = json.loads(target.read_text(encoding="utf-8"))
+        removed, cleared = apply_dashboard_data(data, path_name=path_name)
+        _write_dashboard(target, data)
+        print(
+            f"  {path_name}: removed={removed or '-'} cleared_repeats={cleared or '-'}"
+        )
     return 0
 
 
