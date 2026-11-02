@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2577,
-    "total_internal_imports": 8359,
+    "scanned_modules": 2580,
+    "total_internal_imports": 8369,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 330,
+    "cross_layer_group_edges_total": 332,
     "violations": 0,
-    "source_fingerprint": "d039db1856a2143c594167cf76e3db14636c1ab8adcfb7641958a40398639b0e"
+    "source_fingerprint": "bb48cc5d55d2a49b5ddf1c4a5fd695c7b4019a413baa9e308839199bfbc6ab88"
   },
   "layer_edges": [
     {
@@ -42,7 +42,7 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 300,
+      "imports": 302,
       "allowed": true
     },
     {
@@ -72,19 +72,19 @@
     {
       "source": "interfaces",
       "target": "composition",
-      "imports": 62,
+      "imports": 64,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 87,
+      "imports": 88,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 454,
+      "imports": 459,
       "allowed": true
     }
   ],
@@ -235,13 +235,13 @@
       "imports": 25
     },
     {
-      "source": "infrastructure.adapters",
-      "target": "domain.exceptions",
-      "imports": 24
-    },
-    {
       "source": "interfaces.http",
       "target": "domain.control_plane",
+      "imports": 25
+    },
+    {
+      "source": "infrastructure.adapters",
+      "target": "domain.exceptions",
       "imports": 24
     },
     {
