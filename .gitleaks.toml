@@ -16,6 +16,11 @@ useDefault = true
 description = "BioETL-specific allowlist"
 
 paths = [
+    '''^tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts\.py$''',
+    '''^tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders\.py$''',
+    '''^tests/architecture/ci/test_event_journal\.py$''',
+    '''^README\.md$''',
+    '''^\.venv/.*''',
     # Example environment file with placeholder values
     '''^\.env\.example$''',
 
