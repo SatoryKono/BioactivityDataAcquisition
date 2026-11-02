@@ -1,9 +1,11 @@
 {
   "schema_version": 1,
-  "catalog_ref": "9b928d6a07dd818f4833ca70777c42a2c2aa2451",
-  "source_ref": "9b928d6a07dd818f4833ca70777c42a2c2aa2451",
+  "catalog_ref": "bc2de01c8419152752896ed38024a98ab164e99d",
+  "source_ref": "bc2de01c8419152752896ed38024a98ab164e99d",
   "source_reviews": {
-    "src/bioetl/infrastructure/storage/gold/writer_metrics.py": "Reviewed formatter-only layout changes in gold writer metric labels; no acquisition, cleanup or runtime behavior changed."
+    "src/bioetl/infrastructure/observability/observability_backend_process.py": "Reviewed Bandit B404 suppression placement only: moved inline # nosec B404 onto the existing subprocess import. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed.",
+    "src/bioetl/infrastructure/provenance/code_revision.py": "Reviewed Bandit B404 suppression placement only: moved inline # nosec B404 onto the existing subprocess import. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed.",
+    "src/bioetl/infrastructure/storage/silver/support.py": "Reviewed Bandit B404 suppression placement only: moved inline # nosec B404 onto the existing subprocess import. No acquisition, cleanup, endpoint, subprocess argv, file, network, lock or lifecycle behavior changed."
   },
   "expression_updates": {},
   "resource_updates": {},
