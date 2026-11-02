@@ -195,8 +195,8 @@
       "imports": 32
     },
     {
-      "source": "infrastructure.storage",
-      "target": "domain.medallion",
+      "source": "composition.runtime_builders",
+      "target": "domain.control_plane",
       "imports": 31
     },
     {
