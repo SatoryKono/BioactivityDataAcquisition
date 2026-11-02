@@ -447,7 +447,15 @@ def test_missing_production_binding_detected() -> None:
     assert composition_dir.is_dir(), (
         f"Composition directory is missing: {composition_dir}"
     )
-    py_files = sorted(composition_dir.rglob("*.py"))
+    def raise_walk_error(error: OSError) -> None:
+        raise error
+
+    py_files = sorted(
+        directory / filename
+        for directory, _, filenames in composition_dir.walk(on_error=raise_walk_error)
+        for filename in filenames
+        if filename.endswith(".py")
+    )
     assert py_files, f"No production composition modules found under {composition_dir}"
 
     for py_file in py_files:
