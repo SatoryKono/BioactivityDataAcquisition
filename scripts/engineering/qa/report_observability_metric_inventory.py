@@ -317,7 +317,8 @@ from scripts.engineering.qa.observability_metric_inventory_runtime import (
     _finalize_live_cardinality_review,
 )
 
-_query_prometheus_scalar_impl = _metric_runtime._query_prometheus_scalar_query_prometheus_label_values_impl = _metric_runtime._query_prometheus_label_values
+_query_prometheus_scalar_impl = _metric_runtime._query_prometheus_scalar
+_query_prometheus_label_values_impl = _metric_runtime._query_prometheus_label_values
 _build_runtime_cardinality_review_summary_impl = (
     _metric_runtime._build_runtime_cardinality_review_summary
 )
