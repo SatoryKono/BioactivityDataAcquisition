@@ -9,6 +9,7 @@ five provisioned BioETL dashboards. Keeps ``read_latency_quantile`` on Incident
 from __future__ import annotations
 
 import json
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -39,18 +40,15 @@ _UNKNOWN = "unknown"
 _REPEAT_KEYS = ("repeat", "repeatDirection", "maxPerRow")
 
 
-def _walk(panels: list[Any]) -> list[dict[str, Any]]:
-    out: list[dict[str, Any]] = []
-    stack = list(panels or [])
-    while stack:
-        panel = stack.pop(0)
+def _iter_panels(panels: list[Any] | None) -> Iterator[dict[str, Any]]:
+    """Depth-first yield of dict panels (including nested row children)."""
+    for panel in panels or []:
         if not isinstance(panel, dict):
             continue
-        out.append(panel)
+        yield panel
         nested = panel.get("panels")
         if isinstance(nested, list):
-            stack[0:0] = [item for item in nested if isinstance(item, dict)]
-    return out
+            yield from _iter_panels(nested)
 
 
 def _clean_pipeline_unknown_options(var: dict[str, Any]) -> bool:
@@ -116,31 +114,35 @@ def _clear_dangling_repeats(data: dict[str, Any]) -> list[str]:
     """Clear ``repeat`` when the target variable is no longer defined."""
     defined = _defined_variable_names(data)
     cleared: list[str] = []
-    for panel in _walk(data.get("panels", [])):
+    for panel in _iter_panels(data.get("panels")):
         note = _clear_panel_repeat(panel, defined=defined)
         if note is not None:
             cleared.append(note)
     return cleared
 
 
-def _resolve_dashboard_path(path: Path, *, dashboard_root: Path) -> Path:
-    """Allow only known dashboard basenames under ``dashboard_root``."""
-    root = dashboard_root.resolve()
-    name = path.name
+def _dashboard_path(name: str, *, dashboard_root: Path) -> Path:
+    """Resolve an allowlisted dashboard basename under ``dashboard_root``.
+
+    Callers pass only a basename from ``FILES`` — never a free-form path — so
+    write targets cannot escape the dashboard directory (pythonsecurity:S2083).
+    """
     if name not in FILES:
         raise ValueError(f"refusing unexpected dashboard file: {name}")
+    root = dashboard_root.resolve()
     target = (root / name).resolve()
-    if target.parent != root:
-        raise ValueError(f"refusing path outside {root}: {path}")
+    if target.parent != root or target.name != name:
+        raise ValueError(f"refusing path outside {root}: {name}")
     return target
 
 
 def apply_file(
-    path: Path, *, dashboard_root: Path | None = None
+    name: str, *, dashboard_root: Path | None = None
 ) -> tuple[list[str], list[str]]:
-    target = _resolve_dashboard_path(path, dashboard_root=dashboard_root or DASH)
+    """Apply dead-var cleanup to one allowlisted dashboard basename."""
+    target = _dashboard_path(name, dashboard_root=dashboard_root or DASH)
     data = json.loads(target.read_text(encoding="utf-8"))
-    removed = _drop_dead_vars(data, path_name=target.name)
+    removed = _drop_dead_vars(data, path_name=name)
     cleared = _clear_dangling_repeats(data)
     target.write_text(
         json.dumps(data, indent=2, ensure_ascii=False) + "\n",
@@ -156,7 +158,7 @@ def main() -> int:
         if not path.exists():
             print(f"  missing {name}")
             continue
-        removed, cleared = apply_file(path)
+        removed, cleared = apply_file(name)
         print(f"  {name}: removed={removed or '-'} cleared_repeats={cleared or '-'}")
     return 0
 
