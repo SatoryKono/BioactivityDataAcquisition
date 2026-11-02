@@ -121,29 +121,41 @@ def _clear_dangling_repeats(data: dict[str, Any]) -> list[str]:
     return cleared
 
 
-def _dashboard_path(name: str, *, dashboard_root: Path) -> Path:
-    """Resolve an allowlisted dashboard basename under ``dashboard_root``.
-
-    Callers pass only a basename from ``FILES`` — never a free-form path — so
-    write targets cannot escape the dashboard directory (pythonsecurity:S2083).
-    """
-    if name not in FILES:
-        raise ValueError(f"refusing unexpected dashboard file: {name}")
-    root = dashboard_root.resolve()
-    target = (root / name).resolve()
-    if target.parent != root or target.name != name:
-        raise ValueError(f"refusing path outside {root}: {name}")
-    return target
-
-
-def apply_file(
-    name: str, *, dashboard_root: Path | None = None
+def apply_dashboard_data(
+    data: dict[str, Any], *, path_name: str
 ) -> tuple[list[str], list[str]]:
-    """Apply dead-var cleanup to one allowlisted dashboard basename."""
-    target = _dashboard_path(name, dashboard_root=dashboard_root or DASH)
-    data = json.loads(target.read_text(encoding="utf-8"))
-    removed = _drop_dead_vars(data, path_name=name)
+    """Mutate dashboard JSON in memory. No filesystem I/O (S2083-safe)."""
+    if path_name not in FILES:
+        raise ValueError(f"refusing unexpected dashboard file: {path_name}")
+    removed = _drop_dead_vars(data, path_name=path_name)
     cleared = _clear_dangling_repeats(data)
+    return removed, cleared
+
+
+def _literal_dashboard_path(name: str) -> Path:
+    """Map an allowlisted basename to a Path built only from string constants.
+
+    Exhaustive literal branches keep the write target free of tainted joins
+    (pythonsecurity:S2083 / GHAS path-traversal).
+    """
+    if name == FILE_OVERVIEW:
+        return DASH / FILE_OVERVIEW
+    if name == FILE_DQ:
+        return DASH / FILE_DQ
+    if name == FILE_INCIDENT:
+        return DASH / FILE_INCIDENT
+    if name == FILE_CONTROL_PLANE:
+        return DASH / FILE_CONTROL_PLANE
+    if name == FILE_RUN_EXPLORER:
+        return DASH / FILE_RUN_EXPLORER
+    raise ValueError(f"refusing unexpected dashboard file: {name}")
+
+
+def apply_file(name: str) -> tuple[list[str], list[str]]:
+    """Apply dead-var cleanup under the repo ``grafana/dashboards`` root only."""
+    target = _literal_dashboard_path(name)
+    data = json.loads(target.read_text(encoding="utf-8"))
+    removed, cleared = apply_dashboard_data(data, path_name=name)
     target.write_text(
         json.dumps(data, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
@@ -154,8 +166,8 @@ def apply_file(
 def main() -> int:
     print("Phase 4.1 dead-variable cleanup")
     for name in FILES:
-        path = DASH / name
-        if not path.exists():
+        target = _literal_dashboard_path(name)
+        if not target.exists():
             print(f"  missing {name}")
             continue
         removed, cleared = apply_file(name)
