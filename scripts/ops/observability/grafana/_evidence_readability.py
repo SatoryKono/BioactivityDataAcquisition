@@ -79,12 +79,21 @@ def _selected_run_selectors(p: dict[int, dict]) -> None:
                     target["root_selector"] = "presentation_" + selector
 
 
+def _is_dashboard_ds_target(target: dict) -> bool:
+    ds = target.get("datasource") or {}
+    return ds.get("uid") == "-- Dashboard --" or "panelId" in target
+
+
 def _saved_run(p: dict[int, dict]) -> None:
     _selected_run_selectors(p)
     if 9451 not in p or 9450 not in p:
         return
     panel = p[9451]
-    panel["targets"][0]["root_selector"] = "presentation_domains"
+    target0 = panel["targets"][0]
+    # Phase 2.5: domains consumers reuse the SRS donor via Dashboard DS; do not
+    # rewrite Infinity root_selector on those targets.
+    if not _is_dashboard_ds_target(target0):
+        target0["root_selector"] = "presentation_domains"
     for transform in panel["transformations"]:
         if transform["id"] == "filterFieldsByName":
             names = transform["options"]["include"]["names"]
@@ -150,7 +159,8 @@ def _saved_run(p: dict[int, dict]) -> None:
         ],
     )
     panel["links"] = []
-    if 9452 in p:
+    # §2.4: identity copies 9452 are markdown handoffs to Overview 9300.
+    if 9452 in p and p[9452].get("type") != "text":
         for field in ("Pipeline", "Run ID"):
             _override(
                 p[9452],
@@ -174,9 +184,9 @@ def _saved_run(p: dict[int, dict]) -> None:
         identity_custom["cellOptions"]["wrapText"] = True
         p[9452]["options"]["footer"]["enablePagination"] = True
         p[9452]["description"] = _DQ_IDENTITY_DESCRIPTION
-    p[9451]["options"]["footer"]["enablePagination"] = False
+    p[9451]["options"].setdefault("footer", {})["enablePagination"] = False
     heights: dict[int, int] = {}
-    if 9460 in p:
+    if 9460 in p and p[9460].get("type") != "text":
         heights[9460] = 8
     heights[9451] = 12
     if 9452 in p:

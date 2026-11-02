@@ -574,8 +574,8 @@
         "h": 3
       },
       "datasource": {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "bioetl-ops-http"
+        "type": "datasource",
+        "uid": "-- Dashboard --"
       },
       "description": "SELECTED RUN · Saved exact-replay assessment, not CURRENT health. OK/WARN/CRIT palette: READY=OK, INSUFFICIENT=WARN, BLOCKED=CRIT. UNSUPPORTED/UNKNOWN/INCOMPLETE are gray. SELECT RUN means no Run ID is selected; QUERY ERROR means backend unavailable or request failure. UNKNOWN means no assessed value, never READY. Open replay checks for basis. Occurrence-only versus semantic drift still requires exact-run evidence; current write-risk telemetry is not proof for this run. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "options": {
@@ -666,24 +666,34 @@
       },
       "targets": [
         {
+          "panelId": 9418,
           "refId": "A",
-          "type": "json",
-          "source": "url",
-          "parser": "backend",
-          "format": "table",
-          "root_selector": "replay_readiness",
-          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-          "url_options": {
-            "method": "GET",
-            "data": ""
-          },
+          "withTransforms": false,
           "datasource": {
-            "type": "yesoreyeram-infinity-datasource",
-            "uid": "bioetl-ops-http"
+            "type": "datasource",
+            "uid": "-- Dashboard --"
           }
         }
       ],
       "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "_bioetl_frame",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "replay_readiness"
+                  }
+                }
+              }
+            ]
+          }
+        },
         {
           "id": "filterFieldsByName",
           "options": {
@@ -710,26 +720,17 @@
       "title": "Review Exact Replay Checks",
       "description": "SELECTED RUN · One row per readiness check for this Run ID. Fail blocks replay. Unknown is not a pass. Valid-empty check output stays VALID EMPTY. Request failure is QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "datasource": {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "bioetl-ops-http"
+        "type": "datasource",
+        "uid": "-- Dashboard --"
       },
       "targets": [
         {
+          "panelId": 9418,
           "refId": "A",
-          "type": "json",
-          "source": "url",
-          "parser": "uql",
-          "format": "table",
-          "root_selector": "",
-          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-          "url_options": {
-            "method": "GET",
-            "data": ""
-          },
-          "uql": "parse-json | jsonata \"replay_checks^(result='fail' ? 0 : result='unknown' ? 1 : result='pass' ? 2 : 3)\"",
+          "withTransforms": false,
           "datasource": {
-            "type": "yesoreyeram-infinity-datasource",
-            "uid": "bioetl-ops-http"
+            "type": "datasource",
+            "uid": "-- Dashboard --"
           }
         }
       ],
@@ -748,6 +749,24 @@
         }
       },
       "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "_bioetl_frame",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "replay_checks"
+                  }
+                }
+              }
+            ]
+          }
+        },
         {
           "id": "organize",
           "options": {
@@ -1168,14 +1187,6 @@
               {
                 "id": "custom.hidden",
                 "value": false
-              },
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "viz": true,
-                  "legend": true,
-                  "tooltip": true
-                }
               }
             ]
           },
@@ -1372,7 +1383,7 @@
                 "value": [
                   {
                     "title": "View trust reasons",
-                    "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9418&${__url_time_range}",
+                    "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
                     "includeVars": false,
                     "targetBlank": false
                   }
@@ -1412,18 +1423,18 @@
       },
       "targets": [
         {
-          "format": "table",
-          "parser": "uql",
           "refId": "A",
-          "root_selector": "",
-          "source": "url",
           "type": "json",
+          "source": "url",
+          "parser": "uql",
+          "format": "table",
+          "root_selector": "$append($append([presentation_trust.($base := $sift($, function($v,$k){$k != 'trust_reasons_action'}); $merge([$base, reasons_count > 0 ? {'trust_reasons_action':'View trust reasons'} : {'trust_action_note': reasons_count = 0 ? 'No trust issues' : 'Not assessed'}, {'_bioetl_frame': 'trust'}]))], $map(replay_readiness, function($row){$merge([$row, {'_bioetl_frame': 'replay_readiness'}])})), $map(replay_checks^(result='fail' ? 0 : result='unknown' ? 1 : result='pass' ? 2 : 3), function($row){$merge([$row, {'_bioetl_frame': 'replay_checks'}])}))",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
-            "data": "",
-            "method": "GET"
+            "method": "GET",
+            "data": ""
           },
-          "uql": "parse-json | jsonata \"[presentation_trust.($base := $sift($, function($v,$k){$k != \\\"trust_reasons_action\\\"}); $merge([$base, reasons_count > 0 ? {\\\"trust_reasons_action\\\":\\\"View trust reasons\\\"} : {\\\"trust_action_note\\\": reasons_count = 0 ? \\\"No trust issues\\\" : \\\"Not assessed\\\"}]))]\"",
+          "uql": "parse-json | jsonata \"$append($append([presentation_trust.($base := $sift($, function($v,$k){$k != 'trust_reasons_action'}); $merge([$base, reasons_count > 0 ? {'trust_reasons_action':'View trust reasons'} : {'trust_action_note': reasons_count = 0 ? 'No trust issues' : 'Not assessed'}, {'_bioetl_frame': 'trust'}]))], $map(replay_readiness, function($row){$merge([$row, {'_bioetl_frame': 'replay_readiness'}])})), $map(replay_checks^(result='fail' ? 0 : result='unknown' ? 1 : result='pass' ? 2 : 3), function($row){$merge([$row, {'_bioetl_frame': 'replay_checks'}])}))\"",
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
@@ -1431,6 +1442,24 @@
         }
       ],
       "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "_bioetl_frame",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "trust"
+                  }
+                }
+              }
+            ]
+          }
+        },
         {
           "id": "convertFieldType",
           "options": {
@@ -1467,11 +1496,11 @@
               "processing_status": 0,
               "trust_status": 1,
               "reasons_display": 2,
-              "evidence_observed_at": 3,
-              "reasons_count": 2,
-              "evidence_freshness": 5,
+              "reasons_count": 3,
               "trust_reasons_action": 4,
-              "trust_action_note": 4
+              "trust_action_note": 5,
+              "evidence_observed_at": 6,
+              "evidence_freshness": 7
             },
             "renameByName": {
               "processing_status": "Processing result",
