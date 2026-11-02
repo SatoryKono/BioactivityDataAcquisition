@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "catalog_ref": "a99ab2c6a4f86b401217f17a37474b0c9743daf0",
-  "source_ref": "4bdd6d7c64a45caa8a01b53222c45e3495fb8c58",
+  "source_ref": "fc64c23abe164836e544984a4ed93e8dd987e586",
   "source_reviews": {
     "src/bioetl/composition/observability_runtime.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
     "src/bioetl/domain/composite/config_composite_encoder.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
@@ -11,7 +11,8 @@
     "src/bioetl/infrastructure/observability/metric_inventory_discovery.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
     "src/bioetl/infrastructure/schemas/composite_validation.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
     "src/bioetl/infrastructure/schemas/dq_config.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
-    "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites."
+    "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
+    "src/bioetl/interfaces/http/_selected_run_a2_resolve.py": "Reviewed the source delta after Ruff formatting cleanup. The change only wraps the existing scope-token set to canonical line length; it adds no external acquisition, resource lifecycle, or execution behavior."
   },
   "expression_updates": {},
   "segment_updates": {},
