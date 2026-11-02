@@ -37,6 +37,10 @@ Cassettes location: tests/fixtures/vcr/chembl/
 
 from __future__ import annotations
 
+import asyncio
+from collections.abc import AsyncIterator
+from typing import NoReturn
+
 from pathlib import Path
 
 import pytest
@@ -82,13 +86,13 @@ def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
         "test_run_config_error_and_restart",
     ]:
         return "test_all_chembl_pipelines_chain"
-    return request.node.name
+    return str(request.node.name)
 
 
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_chembl_target_then_activity_chain(e2e_data_dir: Path):
+async def test_chembl_target_then_activity_chain(e2e_data_dir: Path) -> None:
     """E2E: Run Target pipeline, then Activity pipeline.
 
     Activities reference targets, so this tests a realistic data flow.
@@ -119,7 +123,7 @@ async def test_chembl_target_then_activity_chain(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_chembl_molecule_then_activity_chain(e2e_data_dir: Path):
+async def test_chembl_molecule_then_activity_chain(e2e_data_dir: Path) -> None:
     """E2E: Run Molecule pipeline, then Activity pipeline.
 
     Activities reference molecules, so this tests compound data flow.
@@ -151,7 +155,7 @@ async def test_chembl_molecule_then_activity_chain(e2e_data_dir: Path):
 @pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(600)  # Extended timeout: 5 pipelines × ~60s each + Gold validation
-async def test_all_chembl_pipelines_chain(e2e_data_dir: Path):
+async def test_all_chembl_pipelines_chain(e2e_data_dir: Path) -> None:
     """E2E: Run all ChEMBL pipelines in sequence.
 
     Order: Target → Molecule → Document → Activity → Assay
@@ -189,7 +193,7 @@ async def test_all_chembl_pipelines_chain(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_parallel_independent_pipelines(e2e_data_dir: Path):
+async def test_parallel_independent_pipelines(e2e_data_dir: Path) -> None:
     """E2E: Run independent pipelines that can run in parallel.
 
     PubMed and UniProt pipelines are independent and should not interfere.
@@ -210,7 +214,7 @@ async def test_parallel_independent_pipelines(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_pipeline_isolation(e2e_data_dir: Path):
+async def test_pipeline_isolation(e2e_data_dir: Path) -> None:
     """E2E: Verify pipelines are isolated and don't corrupt each other's data.
 
     Running multiple pipelines should not cause data mixing.
@@ -254,7 +258,7 @@ async def test_pipeline_isolation(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_rerun_same_pipeline_twice(e2e_data_dir: Path):
+async def test_rerun_same_pipeline_twice(e2e_data_dir: Path) -> None:
     """E2E: Merge-mode pipeline rerun preserves business identity set.
 
     ``chembl_target`` uses Silver merge semantics, so rerunning the same input
@@ -298,7 +302,7 @@ async def test_rerun_same_pipeline_twice(e2e_data_dir: Path):
 @pytest.mark.vcr(allow_playback_repeats=True)
 @pytest.mark.asyncio
 @pytest.mark.timeout(E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT)
-async def test_run_normal_a_b_a(e2e_data_dir: Path):
+async def test_run_normal_a_b_a(e2e_data_dir: Path) -> None:
     """E2E: Normal pipeline runs in A -> B -> A pattern in a single process.
 
     Verifies state isolation between runs in the same process.
@@ -333,29 +337,25 @@ async def test_run_normal_a_b_a(e2e_data_dir: Path):
 @pytest.mark.timeout(E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT)
 async def test_run_cancellation_and_restart(
     e2e_data_dir: Path, monkeypatch: pytest.MonkeyPatch
-):
+) -> None:
     """E2E: Pipeline cancellation followed by restart in a single process.
 
     Verifies A -> B -> A pattern and cancellation safety.
     """
-    import asyncio
-
     # Run A1 (Target), pause after the source yields its first record so the
     # cancellation always lands inside the active extraction path.
-    from collections.abc import AsyncIterator
-
     ctx1 = create_test_context("chembl_target", limit=2)
     runner1 = bootstrap_pipeline_runner(ctx1)
-    source = runner1._executor._extraction_loop_service._batch_processing_service
+    source = runner1._executor._extraction_loop_service._batch_processing_service  # pylint: disable=protected-access
     original_extract = source.extract_records
     first_record_ready = asyncio.Event()
     continue_extraction = asyncio.Event()
 
     def gated_extract_records(*args: object, **kwargs: object) -> AsyncIterator[object]:
-        records = original_extract(*args, **kwargs)
+        records = original_extract(*args, **kwargs)  # type: ignore[arg-type]
 
         async def gate_first_record() -> AsyncIterator[object]:
-            iterator = records.__aiter__()
+            iterator = aiter(records)
             try:
                 first_record = await anext(iterator)
                 first_record_ready.set()
@@ -420,7 +420,7 @@ async def test_run_cancellation_and_restart(
 @pytest.mark.timeout(E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT)
 async def test_run_error_and_restart(
     e2e_data_dir: Path, monkeypatch: pytest.MonkeyPatch
-):
+) -> None:
     """E2E: Pipeline error followed by restart in a single process.
 
     Verifies A -> B -> A pattern and error safety using a simulated network error
@@ -428,19 +428,17 @@ async def test_run_error_and_restart(
     """
 
     # Inject a known failure from the source iterator used by the real runner.
-    from collections.abc import AsyncIterator
-
     ctx1 = create_test_context("chembl_target", limit=3)
     runner1 = bootstrap_pipeline_runner(ctx1)
-    source = runner1._executor._extraction_loop_service._batch_processing_service
+    source = runner1._executor._extraction_loop_service._batch_processing_service  # pylint: disable=protected-access
     original_extract = source.extract_records
 
     def failing_extract_records(
-        *args: object, **kwargs: object
+        *_args: object, **_kwargs: object
     ) -> AsyncIterator[object]:
         async def fail_during_iteration() -> AsyncIterator[object]:
-            if False:
-                yield None
+            for _ in []:
+                yield None  # pragma: no cover
             raise RuntimeError("injected ChEMBL source failure")
 
         return fail_during_iteration()
@@ -471,10 +469,8 @@ async def test_run_error_and_restart(
 @pytest.mark.vcr(allow_playback_repeats=True)
 @pytest.mark.asyncio
 @pytest.mark.timeout(E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT)
-async def test_run_config_error_and_restart(e2e_data_dir: Path):
+async def test_run_config_error_and_restart(e2e_data_dir: Path) -> None:
     """A config-load failure during bootstrap must not poison later runs."""
-    from typing import NoReturn
-
     def fail_config_load(_pipeline_name: str) -> NoReturn:
         raise RuntimeError("injected pipeline config load failure")
 
