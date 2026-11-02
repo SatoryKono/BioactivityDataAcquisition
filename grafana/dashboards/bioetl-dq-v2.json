@@ -85,13 +85,7 @@
         "label": "Pipeline",
         "multi": false,
         "name": "pipeline",
-        "options": [
-          {
-            "selected": false,
-            "text": "unknown",
-            "value": "unknown"
-          }
-        ],
+        "options": [],
         "query": {
           "queryType": "infinity",
           "refId": "variable",
@@ -376,67 +370,6 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
-      },
-      {
-        "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}, stage)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Stage",
-        "multi": true,
-        "name": "stage",
-        "options": [],
-        "query": {
-          "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}, stage)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false,
-        "description": "Core scope: stage selector (only where stage-level analysis exists); fallback: All stages for selected pipeline/run_type. Default selection is All stages. "
-      },
-      {
-        "name": "provider_for_pipeline",
-        "label": "Provider for pipeline",
-        "type": "query",
-        "hide": 2,
-        "includeAll": false,
-        "multi": false,
-        "refresh": 1,
-        "sort": 1,
-        "regex": "",
-        "skipUrlSync": true,
-        "options": [],
-        "current": {
-          "selected": false,
-          "text": "",
-          "value": ""
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
-        "query": {
-          "query": "label_values(bioetl_workflow_pipeline_expected{pipeline=~\"$pipeline\"}, provider)",
-          "refId": "StandardVariableQuery"
-        },
-        "description": "Hidden selector: resolves the provider owning the selected pipeline so cross-dashboard handoffs can prefill $provider without operator input."
       }
     ]
   },
@@ -1824,7 +1757,7 @@
             "x": 0,
             "y": 41,
             "w": 24,
-            "h": 12
+            "h": 8
           },
           "datasource": {
             "type": "datasource",
