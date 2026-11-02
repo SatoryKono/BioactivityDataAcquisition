@@ -3,7 +3,7 @@
 ## A. Audit Manifest
 - **Audit ID**: pack-v2.1/P04
 - **Date**: 02.11.2026
-- **Pinned Revision (HEAD SHA)**: `a5243cb4bbed67b267daecdc097b8c48501e140a`
+- **Pinned Source Revision**: `a5243cb4bbed67b267daecdc097b8c48501e140a`
 - **Branch**: `main`
 - **Worktree State**: Clean
 - **Scope**: `src/bioetl/infrastructure/**`
@@ -20,9 +20,12 @@
 - `E2-CONFORMANCE`: `STATIC`, `CURRENT` - Source `tests/architecture/test_adapter_port_conformance.py`
 - `E3-CONFORMANCE-TEST`: `EXECUTABLE`, `NOT_CAPTURED` - Command planned (`uv run pytest tests/architecture/test_adapter_port_conformance.py`); this report does **not** include timestamp, exit code, or captured output, so the run is not attested here.
 - `E2-ATOMICITY`: `STATIC`, `CURRENT` - Storage helper module `src/bioetl/infrastructure/storage/support/atomic_ops.py` and `atomic.py`
-- `E2-LIFECYCLE`: `STATIC`, `CURRENT` - HTTP/sync adapter lifecycle in `src/bioetl/infrastructure/adapters/base.py` and `sync_base.py` (not storage writers)
+- `E2-LIFECYCLE`: `STATIC`, `CURRENT` - HTTP/sync adapter lifecycle in `src/bioetl/infrastructure/adapters/base.py` and `sync_base.py` (HTTP clients only; not storage writers)
+- `E2-WRITER-LIFECYCLE`: `STATIC`, `CURRENT` - Absence of `__enter__`/`__exit__`/`close()` on `SilverWriter` / `BronzeWriter` under `src/bioetl/infrastructure/storage/`
 - `E2-LEDGER-STRICT`: `STATIC`, `CURRENT` - `iter_jsonl_payloads_strict` in `src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py`
 - `E2-BRONZE-CLEANUP`: `STATIC`, `CURRENT` - Owned-artifact selection in `src/bioetl/infrastructure/storage/bronze/cleanup_support.py` / `cleanup_posix.py`
+- `E2-SILVER-RETENTION`: `STATIC`, `CURRENT` - Silver vacuum / time-travel helpers in `src/bioetl/infrastructure/storage/silver/retention_delta.py` (and related archive helpers)
+- `E2-POLICY-SEPARATION`: `STATIC`, `PARTIAL` - Port interfaces under `src/bioetl/domain/ports/` plus adapter placement under `src/bioetl/infrastructure/`; does **not** by itself prove all business logic lives outside infrastructure
 
 ## D. Findings Register
 
@@ -33,17 +36,17 @@
 - **Concern**: Ensure that all domain ports have concrete adapter implementations matching the conformance tests.
 - **Severity**: P3
 - **Confidence**: high
-- **Status**: CONFIRMED
-- **Expected**: Every domain port should be represented by a tested infrastructure adapter in `tests/architecture/test_adapter_port_conformance.py`.
-- **Actual**: `PORT_ADAPTER_CASES` explicitly defines the conformance matrix. `tests/architecture/test_adapter_port_conformance.py` verifies this logic, but some adapters are actively excluded via `_DISCOVERED_BINDING_EXCLUSIONS`.
-- **Evidence IDs**: E2-CONFORMANCE, E3-CONFORMANCE-TEST
-- **Attempted Disproof**: The exclusion list in the test file is explicitly annotated as "Discovered constructors that are intentionally outside PORT_ADAPTER_CASES: stdlib noise... plus composition helpers that are not port-matrix adapters."
-- **Exceptions Checked**: `_DISCOVERED_BINDING_EXCLUSIONS` in `tests/architecture/test_adapter_port_conformance.py`
-- **Impact**: Without explicit adapter port conformance testing, we might drift from interface contracts. The current exclusion list is valid based on architecture rules.
-- **Root Cause**: Architecture explicitly defines some infrastructure objects that are not domain port implementations.
-- **Recommendation**: Maintain current testing strategy. Consider moving purely structural configuration loaders out of the exclusion list if they implement a specific port.
-- **Scope / Non-Goals**: N/A
-- **Acceptance Criteria**: Conformance test passes.
+- **Status**: PARTIAL / OBSERVED (static matrix only; executable run `NOT_CAPTURED`)
+- **Expected**: The curated `PORT_ADAPTER_CASES` matrix in `tests/architecture/test_adapter_port_conformance.py` remains the explicit, tested adapter↔port contract for listed cases — **not** a claim that every domain port or discovered constructor is covered.
+- **Actual**: `PORT_ADAPTER_CASES` defines the curated conformance matrix. `_DISCOVERED_BINDING_EXCLUSIONS` only documents discovered constructors intentionally **outside** that matrix (stdlib noise / composition helpers); it does **not** prove full domain-port coverage. `E3-CONFORMANCE-TEST` is planned but **not** attested in this report (`NOT_CAPTURED`), so no successful run is claimed here.
+- **Evidence IDs**: E2-CONFORMANCE; E3-CONFORMANCE-TEST (`NOT_CAPTURED`)
+- **Attempted Disproof**: The exclusion list is annotated as constructors intentionally outside `PORT_ADAPTER_CASES`; treating exclusions as coverage evidence would overclaim.
+- **Exceptions Checked**: `_DISCOVERED_BINDING_EXCLUSIONS` in `tests/architecture/test_adapter_port_conformance.py` (scope limiters, not completeness proof)
+- **Impact**: Drift risk remains for ports/adapters outside `PORT_ADAPTER_CASES`; this finding only confirms the curated matrix exists statically.
+- **Root Cause**: Conformance testing is intentionally curated; discovered exclusions are noise/helpers, not a full inventory of domain ports.
+- **Recommendation**: Keep the curated matrix; do not equate exclusions with full coverage. Capture an executable `E3` attestation before raising the conformance score.
+- **Scope / Non-Goals**: Does not assert every domain port has a matrix row or a green CI run in this report.
+- **Acceptance Criteria**: Curated `PORT_ADAPTER_CASES` remains coherent with listed adapters; executable pass recorded separately when available.
 - **Verification Command**: `uv run pytest tests/architecture/test_adapter_port_conformance.py`
 - **Dependencies**: None
 - **Related Findings**: None
@@ -100,7 +103,6 @@
 | `MetricsPublisherAdapter` | `MetricsPublisherPort` |
 | `MetricsServerAdapter` | `MetricsServerPort` |
 | `FileRunReportStoreAdapter` | `RunReportStorePort` |
-| `adapter_cls` | `DataSourcePort` |
 
 ### Lifecycle Owner Matrix
 
@@ -109,7 +111,7 @@
 | `DataSourcePort` (PubChem, CrossRef) | Composition Root | Pipeline / async context | Provider-specific `close()` / `aclose()` or delegated HTTP client shutdown |
 | `MetricsPort` | Composition Root | Observability Shutdown | `close()` (e.g. `PrometheusMetrics`) |
 | `LoggerPort` | Composition Root | Graceful Shutdown | Adapter-specific shutdown (varies by logger backend) |
-| `SilverWriter` / `BronzeWriter` | Composition Root | Pipeline call sites | **No** `__enter__`/`__exit__` and **no** `close()` on these classes; writers are plain port implementations without a context-manager API |
+| `SilverWriter` / `BronzeWriter` | Composition Root | **N/A** (no close operation on these classes) | **No** `__enter__`/`__exit__` and **no** `close()`; plain port implementations without a context-manager or close API |
 | `BaseHttpAdapter` | Composition Root | Pipeline / `__aexit__` | Async context via `__aenter__`/`__aexit__` closes the wrapped HTTP client; base `aclose()` is an explicit **no-op** |
 
 ### Storage Atomicity & Crash Recovery Matrix
@@ -139,13 +141,13 @@
 
 
 ## E. Quantitative Scorecard
-1. **Adapter / Port Conformance**: 4 (Static matrix + conformance test source exist; executable run not captured in this report). (Evidence: E2-CONFORMANCE; E3-CONFORMANCE-TEST `NOT_CAPTURED`)
-2. **Infrastructure Policy Separation**: 5 (Infrastructure implements ports, business logic is explicitly delegated to composition or domain layers). (Evidence: E2-PORTS)
+1. **Adapter / Port Conformance**: 4 (Curated `PORT_ADAPTER_CASES` matrix + test source exist; not full domain-port coverage; executable run not captured). (Evidence: E2-CONFORMANCE; E3-CONFORMANCE-TEST `NOT_CAPTURED`)
+2. **Infrastructure Policy Separation**: 3 (Port interfaces and infrastructure adapter placement observed; business-logic delegation beyond port boundaries is only partially evidenced). (Evidence: E2-PORTS, E2-POLICY-SEPARATION `PARTIAL`)
 3. **HTTP/API Resilience & Closure**: 4 (Circuit breaker / retry decorators exist; `BaseHttpAdapter` closes via `__aexit__`, base `aclose()` is no-op). (Evidence: E2-LIFECYCLE)
 4. **Storage Atomicity & Crash Consistency**: 4 (`atomic.py` / `atomic_ops.py` provide atomic publication; run-ledger interruption is fail-closed, not prefix-replay recovery). (Evidence: E2-ATOMICITY, E2-LEDGER-STRICT)
 5. **Control-plane Consistency**: 4 (Append-only ledger JSONL + separate atomic manifest JSON; strict parse rejects truncated tails). (Evidence: E2-LEDGER-STRICT, E2-ATOMICITY)
-6. **Lifecycle Management**: 3 (HTTP/sync adapters use async/sync context managers; `SilverWriter`/`BronzeWriter` expose neither CM nor `close()`). (Evidence: E2-LIFECYCLE)
-7. **Retention / Maintenance**: 3 (Silver vacuum/archive helpers exist; Bronze cleanup targets owned artifacts, not write-temp vacuum — end-to-end cleanup/recovery runs not evidenced here). (Evidence: E2-BRONZE-CLEANUP)
+6. **Lifecycle Management**: 3 (HTTP/sync adapters use async/sync context managers; `SilverWriter`/`BronzeWriter` expose neither CM nor `close()`). (Evidence: E2-LIFECYCLE, E2-WRITER-LIFECYCLE)
+7. **Retention / Maintenance**: 3 (Bronze owned-artifact cleanup and Silver vacuum/archive helpers exist statically; end-to-end cleanup/recovery runs not evidenced here). (Evidence: E2-BRONZE-CLEANUP, E2-SILVER-RETENTION)
 
 ## F. Cross-cutting/root-cause clusters
 - Storage Atomicity is highly centralized (`atomic_ops.py`).
@@ -157,12 +159,13 @@
 - **P3**: Document writer ownership at composition/pipeline call sites explicitly (since writers lack CM/`close()`).
 
 ## H. Verification Matrix
-- Adapter/port matrix: static source review — verified.
+- Adapter/port matrix: curated `PORT_ADAPTER_CASES` static review — verified for listed cases only (not full domain-port census).
 - `E3-CONFORMANCE-TEST` executable run: **not captured** in this report.
 - Run-ledger truncated-tail behavior: static review of `iter_jsonl_payloads_strict` — verified fail-closed.
-- Writer lifecycle CM/`close()` claims: static review — **disproved**; writers have neither API.
-- `BaseHttpAdapter` close path: static review — `__aexit__` / no-op `aclose()`.
-- Bronze cleanup semantics: static review — owned-artifact cleanup, not write-temp vacuum.
+- Writer lifecycle CM/`close()` claims: static review (`E2-WRITER-LIFECYCLE`) — **disproved**; Close Owner = N/A.
+- `BaseHttpAdapter` close path: static review (`E2-LIFECYCLE`) — `__aexit__` / no-op `aclose()`.
+- Bronze cleanup semantics: static review (`E2-BRONZE-CLEANUP`) — owned-artifact cleanup, not write-temp vacuum.
+- Silver retention helpers: static path presence (`E2-SILVER-RETENTION`) — not executable proof.
 - Runtime recovery / cleanup / resource-close drills: **NOT_VERIFIABLE** here.
 
 ## I. `NOT_VERIFIABLE` and missing evidence
