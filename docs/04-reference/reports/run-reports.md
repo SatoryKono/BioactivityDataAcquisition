@@ -9,9 +9,30 @@ Program: `run-reports-v1` (issues #6519–#6526) with extension program
 |--------|------|
 | `pipeline_run_report_v1` | `configs/contracts/reports/pipeline_run_report.v1.json` |
 | `workflow_run_report_v1` | `configs/contracts/reports/workflow_run_report.v1.json` |
+| `run_evidence_location_v1` | `configs/contracts/reports/run_evidence_location.v1.json` |
 | Reason catalog | `configs/contracts/reports/reason_catalog.v1.yaml` |
 
 Golden examples: `tests/fixtures/reports/*_golden.json`.
+
+### Evidence locations (`run_evidence_location_v1`)
+
+Additive catalog of data-root **locators** for Ops / Run Explorer lookup
+(program RF-002 / #12680). Layout:
+
+```text
+reports/run-reports/_evidence-locations/
+  {pipeline|workflow}/<owner>/<run_id>.json
+```
+
+Fields: `schema_version`, `kind`, `owner`, `run_id`, `workflow_run_id`,
+`runtime_source_id`, `root_alias` (v1: `dashboard_data`), `relative_data_root`
+(`.` = alias base / legacy standard data root), `revision` (binding digest).
+
+Locator is **not** a READY / `objects=true` source of truth. Absolute alias
+bases come from trusted DI configuration; application code does not read
+process env for this map. `runtime_source_id` is bind/runtime identity, not a
+Git commit. Missing location, missing manifest, and identity conflict stay
+distinct codes and must not silently fall back to another run.
 
 Optional additive blocks on pipeline reports (omit when unknown; never invent zeros):
 

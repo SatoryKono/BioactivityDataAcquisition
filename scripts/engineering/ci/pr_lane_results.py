@@ -62,6 +62,7 @@ BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
 DASHBOARD_SCENES_CONTRACT_TEST = "tests/architecture/test_dashboard_scenes_contract.py"
+RUN_REPORT_CONTRACTS_TEST = "tests/unit/domain/run_reports/test_contracts.py"
 SCRIPTS_INVENTORY_MANIFEST_TEST = (
     "tests/architecture/test_scripts_inventory_manifest.py"
 )
@@ -365,6 +366,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         (
             "configs/quality/external_resource_inventory_qm08_review.json",
             "configs/quality/external_resource_inventory_qm09_review.json",
+            "configs/quality/external_resource_inventory_pr12688_rf002_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -493,6 +495,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_cli_doc_parity.py",
         DOCUMENTATION_SYNC_TEST,
     ),
+    "docs/04-reference/reports/run-reports.md": (
+        DOCUMENTATION_SYNC_TEST,
+        RUN_REPORT_CONTRACTS_TEST,
+    ),
     ".github/workflows/docker.yml": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "reports/quality/architecture-debt-remote-main-baseline.md": (
         "tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py",
@@ -502,6 +508,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "configs/quality/generated_artifact_tests.json": (
         "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+    ),
+    "tests/fixtures/reports/run_evidence_location_golden.json": (
+        "tests/unit/domain/control_plane/test_run_evidence_location.py",
+        RUN_REPORT_CONTRACTS_TEST,
     ),
     "tests/fixtures/contracts/coderabbit-schema.v2.json": (
         "tests/architecture/test_coderabbit_config.py",
@@ -663,6 +673,9 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
     ),
+    # Run-report JSON contracts + golden fixtures → schema/golden contract suite.
+    "configs/contracts/reports/": (RUN_REPORT_CONTRACTS_TEST,),
+    "tests/fixtures/reports/": (RUN_REPORT_CONTRACTS_TEST,),
     "configs/composites/": (
         "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
     ),
@@ -1068,7 +1081,9 @@ def _path_targets(path: str, root: Path) -> list[str]:
         return _helper_path_targets(path, root)
     if path.startswith(TESTS_PREFIX) and path.endswith(".py"):
         return [path] if (root / path).is_file() else []
-    if path.startswith(SRC_BIOETL_PREFIX) and path.endswith(".py"):
+    if path.startswith(SRC_BIOETL_PREFIX) and (
+        path.endswith(".py") or path.endswith(".pyi")
+    ):
         first = path.removeprefix(SRC_BIOETL_PREFIX).split("/", 1)[0]
         candidate = root / "tests" / "unit" / first
         return [candidate.relative_to(root).as_posix()] if candidate.is_dir() else []
