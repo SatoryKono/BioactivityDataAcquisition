@@ -57,10 +57,20 @@ _OPTION_RE = re.compile(
 _GROUP_CMD_RE = re.compile(
     r"""@typed_group_command\(\s*(\w+)\s*,\s*['"]([^'"]+)['"]\s*\)""",
 )
+# Allow intermediate decorators (e.g. @typed_pass_context) between the group
+# decorator and the function definition — report.py uses that pattern.
 _CLICK_GROUP_RE = re.compile(
-    r"""@typed_click_group\(\)\s*\ndef\s+(\w+)\s*\(""",
+    r"""@typed_click_group\(\)(?:\s*\n@[^\n]+)*\s*\ndef\s+(\w+)\s*\(""",
 )
 _ROUTE_LITERAL_RE = re.compile(r"""['"](/(?:health|healthz|metrics|ops)[^'"]*)['"]""")
+_REQUIRED_REPORT_COMMANDS: frozenset[str] = frozenset(
+    {
+        "`bioetl report show`",
+        "`bioetl report list`",
+        "`bioetl report diff`",
+        "`bioetl report prune`",
+    }
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -343,6 +353,16 @@ def _build_e4() -> E4Evidence:
     if health_server is None or "--host" not in health_server.options:
         raise RuntimeError(
             "E4 extraction failed: expected `bioetl health server` with --host/--port"
+        )
+
+    # Sanity: report.py uses @typed_pass_context between @typed_click_group and def;
+    # intermediate decorators must not drop show/list/diff/prune from the matrix.
+    present = {row.name for row in rows}
+    missing_report = sorted(_REQUIRED_REPORT_COMMANDS - present)
+    if missing_report:
+        raise RuntimeError(
+            "E4 extraction failed: missing report CLI rows "
+            f"(intermediate-decorator gap?): {missing_report}"
         )
 
     source = (
