@@ -3,10 +3,6 @@
 
 from __future__ import annotations
 
-import shutil
-import subprocess
-
-# nosec B404 - see suppression registry
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from os import environ as os_environ
@@ -29,6 +25,7 @@ from bioetl.composition.observability_backend import (
     _build_detached_backend_popen_kwargs,
     _build_observability_backend_probe_urls,
     build_detached_backend_log_path,
+    docker_engine_not_ready_message,
     drop_listening_backend_on_port,
     find_listening_backend_pid_by_port,
     probe_observability_backend,
@@ -43,7 +40,6 @@ from bioetl.composition.observability_backend import (
 from bioetl.composition.observability_backend import (
     start_detached_quarantine_backend as _composition_start_detached_quarantine_backend,
 )
-from bioetl.infrastructure.system.subprocess_boundary import run_protected_command
 from bioetl.interfaces.cli.commands.domains.health._observability_backend_ensure_parts import (
     _observability_backend_runtime_hooks,
     _require_integral_backend_port,
@@ -239,31 +235,6 @@ def attach_observability_backend_to_cli_input[
     ):
         return replace(cli_input, health_server=False)
     return cli_input
-
-
-def docker_engine_not_ready_message() -> str | None:
-    """Return an operator message when Docker CLI exists but the engine is down."""
-    docker = shutil.which("docker")
-    if docker is None:
-        return None
-    try:
-        completed = run_protected_command(  # nosec B603 - see suppression registry
-            [docker, "info"],
-            capture_output=True,
-            timeout=8,
-            check=False,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        return (
-            "Docker engine is not reachable. Wait until `docker info` succeeds "
-            "before starting bioetl run / workflow run with observability backend."
-        )
-    if completed.returncode != 0:
-        return (
-            "Docker engine is not ready. Wait until `docker info` succeeds "
-            "before starting bioetl run / workflow run with observability backend."
-        )
-    return None
 
 
 def should_disable_transient_health_server(
