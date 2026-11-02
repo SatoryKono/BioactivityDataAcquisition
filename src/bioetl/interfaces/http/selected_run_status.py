@@ -40,6 +40,7 @@ from bioetl.interfaces.http._selected_run_a2_resolve import (
     resolve_a2_latest_run_id,
 )
 from bioetl.interfaces.http._selected_run_a2_resolve import (
+    CATALOG_UNAVAILABLE_REASON,
     NO_RUNS_REASON,
     NO_RUNS_STATUS,
     is_unresolved_run_id,

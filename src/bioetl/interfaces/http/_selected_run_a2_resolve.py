@@ -212,6 +212,57 @@ def _newest_merged_run_id(
     return best_id
 
 
+def _apply_workflow_preference(
+    records: tuple[SelectorRecord, ...],
+    selected_workflows: tuple[str, ...],
+) -> tuple[SelectorRecord, ...]:
+    if not selected_workflows:
+        return records
+    declared_hits: list[SelectorRecord] = []
+    alias_fallback: list[SelectorRecord] = []
+    selected = set(selected_workflows)
+    for record in records:
+        declared = _declared_workflows(record.manifest)
+        if declared:
+            if selected & set(declared):
+                declared_hits.append(record)
+            continue
+        if selected & set(record.workflow_candidates):
+            alias_fallback.append(record)
+    if declared_hits:
+        return tuple(declared_hits)
+    return tuple(alias_fallback)
+
+
+def _declared_workflows(manifest: RunManifest) -> tuple[str, ...]:
+    """Workflow names recorded on the run itself (not pipeline-wide aliases)."""
+    values: list[str] = []
+    for payload in (
+        manifest.launch_context,
+        manifest.runtime_config,
+        manifest.resolved_config,
+    ):
+        for key in ("workflow_name", "workflow"):
+            raw = payload.get(key)
+            if isinstance(raw, str):
+                text = raw.strip()
+                if text and text not in values:
+                    values.append(text)
+    return tuple(values)
+
+
+def _newest_started_record(
+    records: tuple[SelectorRecord, ...],
+) -> SelectorRecord | None:
+    """Pick the same head run as filter-options run_id list (started_at desc)."""
+    if not records:
+        return None
+    return max(
+        records,
+        key=lambda record: (record.started_at, record.manifest_id, record.run_id),
+    )
+
+
 def list_a2_catalog(
     manifest_port: _A2ManifestPort,
     workflow_manifest_port: _A2WorkflowManifestPort | None,
