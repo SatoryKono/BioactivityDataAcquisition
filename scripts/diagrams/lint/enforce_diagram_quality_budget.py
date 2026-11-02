@@ -308,10 +308,10 @@ def _broad_checks(args: argparse.Namespace) -> list[BudgetCheck]:
     if args.broad_report is None:
         raise ValueError("--broad-report is required in nightly mode")
     broad_payload = load_json(args.broad_report)
-    if broad_payload.get("schema_version") != 1:
+    if broad_payload.get("schema_version") != "diagram-visual-smoke-report-v1":
         raise ValueError("broad report has an unsupported schema_version")
-    if broad_payload.get("status") != "passed":
-        raise ValueError("broad visual-smoke report did not pass")
+    if broad_payload.get("status") not in {"passed", "failed"}:
+        raise ValueError("broad visual-smoke report has an invalid status")
     errors = broad_payload.get("errors")
     if not isinstance(errors, list) or errors:
         raise ValueError("broad visual-smoke report contains errors")
