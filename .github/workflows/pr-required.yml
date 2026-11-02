@@ -470,6 +470,17 @@ jobs:
           mkdir -p reports/quality
           # Observational only. affected-pytest remains the executed set.
           # A path with no route fails closed. Nightly test-matrix is unchanged.
+          uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results shadow-compare \
+            --repo-root . \
+            --base-sha "$BASE_SHA" \
+            --head-sha "$HEAD_SHA" \
+            --output reports/quality/impact-shadow-compare.json
+          {
+            echo "## Impact shadow compare"
+            echo '```json'
+            cat reports/quality/impact-shadow-compare.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Restore mypy cache
         if: needs['classify-changes'].outputs['type-checking'] == 'required'
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
