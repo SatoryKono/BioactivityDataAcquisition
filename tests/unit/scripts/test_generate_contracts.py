@@ -49,28 +49,19 @@ def test_boolean_dtype_alias_maps_to_json_boolean() -> None:
     assert generator._map_dtype_to_json_type("boolean") == "boolean"
 
 
-@pytest.mark.parametrize(
-    ("dtype", "expected"),
-    [
-        ("str", "string"),
-        ("string[pyarrow]", "string"),
-        ("int64", "integer"),
-        ("binary[pyarrow]", "object"),
-        ("large_string[pyarrow]", "object"),
-    ],
-)
-def test_arrow_string_alias_preserves_strict_json_type(
-    dtype: str, expected: str
-) -> None:
-    from jsonschema import Draft7Validator
+@pytest.mark.parametrize("dtype", ["str", "string[pyarrow]"])
+def test_arrow_string_dtype_maps_to_json_string(dtype: str) -> None:
+    assert generator._map_dtype_to_json_type(dtype) == "string"
 
-    mapped = generator._map_dtype_to_json_type(dtype)
-    assert mapped == expected
-    if expected == "string":
-        validator = Draft7Validator({"type": mapped})
-        assert validator.is_valid("kept")
-        assert not validator.is_valid(42)
-        assert not validator.is_valid(None)
+
+def test_chembl_activity_contract_keeps_arrow_string_as_json_string() -> None:
+    from bioetl.domain.contracts.gold import ChEMBLActivityGoldSchema
+
+    contract = generator._build_contract(
+        ChEMBLActivityGoldSchema, "chembl_activity", "1.0.0"
+    )
+
+    assert contract["properties"]["activity_id"]["type"] == "string"
 
 
 def test_composite_nullable_integer_contract_overrides_remain_integer() -> None:

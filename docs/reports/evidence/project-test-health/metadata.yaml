@@ -5,10 +5,10 @@ owner: "@bioetl-quality"
 last_verified: "2026-11-02"
 freshness_window_days: 30
 verification_scope: tracked_test_module_inventory
-source_ref: c280a9a9d2ee486180ef9cdb0ec4a0d3f41c9a5d
+source_ref: e5cfda36c8320c8bd4fc31bfd2c8cfea8ff6a44d
 test_module_inventory:
   command: "git ls-files 'tests/**/test_*.py' | wc -l"
-  count: 3210
+  count: 3209
   counted_on: "2026-11-02"
   full_evidence_snapshot_date: "2026-03-23"
 allowed_interpretation: backlog_signal_only
