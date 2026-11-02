@@ -93,7 +93,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 52,
+      "line": 66,
       "name": "RunEvidenceLocationRegisterPort",
       "path": "src/bioetl/domain/ports/control_plane/run_evidence_location.py",
       "runtime_checkable": true

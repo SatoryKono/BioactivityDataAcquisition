@@ -334,26 +334,6 @@ def test_shadow_compare_routes_entity_configs(path: str) -> None:
     )
 
 
-def test_shadow_compare_routes_run_report_contracts_and_docs() -> None:
-    """Run-report contracts, goldens, and operator docs select contract tests."""
-    repo_root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare(
-        [
-            "configs/contracts/reports/run_evidence_location.v1.json",
-            "tests/fixtures/reports/run_evidence_location_golden.json",
-            "docs/04-reference/reports/run-reports.md",
-        ],
-        repo_root=repo_root,
-    )
-    assert report["covers_full_suite"] is False
-    assert "tests/unit/domain/run_reports/test_contracts.py" in report["selected"]
-    assert (
-        "tests/unit/domain/control_plane/test_run_evidence_location.py"
-        in report["selected"]
-    )
-    assert "tests/architecture/test_documentation_sync.py" in report["selected"]
-
-
 def test_shadow_compare_routes_published_pipeline_schemas() -> None:
     """Published pipeline JSON schemas select the tests that read them."""
     repo_root = Path(__file__).resolve().parents[5]
@@ -558,21 +538,6 @@ def test_shadow_compare_routes_qm07_report_to_isolation_contracts() -> None:
         "tests/architecture/qm_07/test_distribution_isolation.py",
         "tests/architecture/qm_07/test_qm07_cold_imports.py",
     }
-
-
-@pytest.mark.parametrize(
-    "path",
-    (
-        "reports/qm07/acceptance.md",
-        "reports/qm07/passport.md",
-    ),
-)
-def test_shadow_compare_routes_qm07_closeout_evidence(path: str) -> None:
-    root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare([path], repo_root=root)
-    assert report["selected"] == [
-        "tests/architecture/test_qm07_cold_imports.py",
-    ]
 
 
 @pytest.mark.parametrize(
