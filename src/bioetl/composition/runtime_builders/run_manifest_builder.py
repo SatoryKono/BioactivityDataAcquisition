@@ -130,6 +130,7 @@ def _publish_manifest_and_refs(
         manifest_create_request=manifest_create_request,
         ledger_service=ledger_service,
     )
+    _register_evidence_location_soft(manifest=manifest, settings=inputs.settings)
     if not require_before_persist:
         _require_cached_bronze_snapshots(
             inputs=inputs, manifest_context=manifest_context
@@ -143,6 +144,29 @@ def _publish_manifest_and_refs(
         ),
     )
     return control_plane_refs, ledger_service
+
+
+def _register_evidence_location_soft(
+    *,
+    manifest: object,
+    settings: object,
+) -> None:
+    """RF-004: publish locator after durable manifest save (never fail ETL)."""
+    try:
+        from bioetl.composition.runtime_builders.evidence_location_registration import (
+            register_pipeline_manifest_location,
+        )
+        from bioetl.domain.control_plane.run_manifest import RunManifest
+        from bioetl.infrastructure.config.settings_api import Settings
+
+        if not isinstance(manifest, RunManifest):
+            return
+        if not isinstance(settings, Settings):
+            return
+        register_pipeline_manifest_location(manifest=manifest, settings=settings)
+    except Exception:
+        # Registration is additive diagnostics; processing success is independent.
+        return
 
 
 def _strict_cached_bronze_require(

@@ -121,6 +121,10 @@ class WorkflowRunnerService:
         ]
         | None
     ) = None
+    # RF-004: Composition-injected finalize consistency check (soft diagnostics).
+    evidence_location_verify: (
+        Callable[[WorkflowRunExecutionResult], None] | None
+    ) = None
 
     async def run_workflow(
         self,
@@ -236,6 +240,12 @@ class WorkflowRunnerService:
             store=self.report_store,
             report_root=self.report_root,
         )
+        if self.evidence_location_verify is not None:
+            try:
+                self.evidence_location_verify(reported)
+            except Exception:
+                # Consistency diagnostics must not mask workflow processing success.
+                pass
         archive_workflow_children(
             config,
             reported,

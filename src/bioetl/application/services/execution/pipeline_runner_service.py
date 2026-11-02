@@ -104,6 +104,10 @@ class PipelineRunnerService:
     report_root: Path | None = None
     capture_control_plane: Callable[[str, str, datetime], None] | None = None
     archive_control_plane: Callable[[RunResult, RunOptions | None], None] | None = None
+    # RF-004: Composition-injected finalize consistency check (soft diagnostics).
+    evidence_location_verify: (
+        Callable[[RunResult, RunOptions | None], None] | None
+    ) = None
 
     async def run(
         self,
@@ -377,6 +381,12 @@ class PipelineRunnerService:
             report_root=self.report_root,
             store=self.report_store,
         )
+        if self.evidence_location_verify is not None:
+            try:
+                self.evidence_location_verify(finalized, options)
+            except Exception:
+                # Consistency diagnostics must not mask processing success.
+                pass
         self._archive_control_plane(finalized, options)
         return finalized
 

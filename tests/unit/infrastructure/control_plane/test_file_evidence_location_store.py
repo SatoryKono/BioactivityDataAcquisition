@@ -165,8 +165,11 @@ def test_catalog_symlink_escape_is_rejected_for_lookup_and_register(
         pytest.skip(f"symlink unavailable: {exc}")
 
     store = FileEvidenceLocationStore(report_root=report_root)
-    with pytest.raises(EvidenceLocationInvalidError, match="symlink|escapes"):
-        store.lookup(kind="pipeline", owner="chembl_assay", run_id=_RUN_A)
+    # Lookup stays code-discriminated (never raises for path safety failures).
+    looked = store.lookup(kind="pipeline", owner="chembl_assay", run_id=_RUN_A)
+    assert looked.code is EvidenceLocationLookupCode.LOCATION_INVALID
+    assert looked.detail is not None
+    assert "symlink" in looked.detail or "escapes" in looked.detail
     with pytest.raises(EvidenceLocationInvalidError, match="symlink|escapes"):
         store.register(_location())
     assert list(outside.iterdir()) == []

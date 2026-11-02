@@ -49,6 +49,8 @@ class WorkflowManifestService:
     _manifest_id_factory: Callable[[], str] = field(
         default_factory=lambda: _missing_manifest_id_factory
     )
+    # RF-004: optional post-save locator publisher (Composition-injected).
+    evidence_location_register: Callable[[WorkflowManifest], None] | None = None
 
     def _resolve_created_at(self) -> datetime:
         """Resolve workflow manifest creation time through the configured seam."""
@@ -80,6 +82,12 @@ class WorkflowManifestService:
             resumed_from_manifest_id=request.resumed_from_manifest_id,
         )
         self.manifest_port.save(manifest)
+        if self.evidence_location_register is not None:
+            try:
+                self.evidence_location_register(manifest)
+            except Exception:
+                # Locator publication must not mask workflow processing success.
+                pass
         return manifest
 
     def compute_execution_fingerprint(self, request: WorkflowManifestCreateSpec) -> str:

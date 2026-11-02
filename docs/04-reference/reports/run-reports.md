@@ -41,7 +41,17 @@ opens a read-only control-plane context for the exact alias +
 only that standard base via explicit RF-003 policy — never a foreign
 isolated workflow root via filesystem scan. Symlink/junction escape and
 path traversal fail closed. Ops GET paths must not register or rewrite
-evidence; automatic registration is RF-004.
+evidence.
+
+Automatic registration (RF-004 / #12682): after a durable pipeline or
+workflow manifest save, Composition publishes a locator via
+`EvidenceLocationRegistrationService` using the write `data_root`, the
+trusted `dashboard_data` alias base (`BIOETL_DASHBOARD_DATA_ROOT` at the
+composition edge, else the write root), and `runtime_source_id`. Report
+finalization verifies the locator and records an `Evidence Location`
+observation without mutating `processing_status`. Composite report writes
+and late workflow child revisions do not register. Bronze successors keep
+the same `(kind, owner, run_id)` binding (idempotent identical).
 
 Optional additive blocks on pipeline reports (omit when unknown; never invent zeros):
 

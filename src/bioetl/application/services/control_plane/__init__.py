@@ -20,7 +20,8 @@ RESPONSIBILITY_SEAMS = MappingProxyType(
             "Configuration materialization and effective-config serialization."
         ),
         "evidence_location": (
-            "Evidence-location catalog resolve and legacy standard-root policy."
+            "Evidence-location catalog resolve, registration, and legacy "
+            "standard-root policy."
         ),
         "forensic": "Operator-facing replay and manifest diff interpretation.",
         "ledger": "Run-ledger persistence and event ownership.",
@@ -52,6 +53,18 @@ _LAZY_ATTR_EXPORTS = {
         _EVIDENCE_LOCATION_MODULE,
         "EvidenceLocationLegacyRootPolicy",
     ),
+    "EvidenceLocationRegisterRequest": (
+        _EVIDENCE_LOCATION_MODULE,
+        "EvidenceLocationRegisterRequest",
+    ),
+    "EvidenceLocationRegistrationOutcome": (
+        _EVIDENCE_LOCATION_MODULE,
+        "EvidenceLocationRegistrationOutcome",
+    ),
+    "EvidenceLocationRegistrationService": (
+        _EVIDENCE_LOCATION_MODULE,
+        "EvidenceLocationRegistrationService",
+    ),
     "EvidenceLocationResolveResult": (
         _EVIDENCE_LOCATION_MODULE,
         "EvidenceLocationResolveResult",
@@ -59,6 +72,10 @@ _LAZY_ATTR_EXPORTS = {
     "EvidenceLocationResolver": (
         _EVIDENCE_LOCATION_MODULE,
         "EvidenceLocationResolver",
+    ),
+    "EvidenceLocationVerifyOutcome": (
+        _EVIDENCE_LOCATION_MODULE,
+        "EvidenceLocationVerifyOutcome",
     ),
     "ForensicRunDiffResult": (
         _FORENSIC_MODULE,
