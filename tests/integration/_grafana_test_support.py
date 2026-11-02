@@ -521,21 +521,40 @@ def _assert_standard_variable_contract(
     )
     _assert_pipeline_filter_options_shell(dashboard_path, pipeline_var)
 
+    expected_pipeline_metric_by_dashboard = {
+        "bioetl-control-plane-v1.json": "bioetl_control_plane_run_type_universe",
+        "bioetl-runtime.json": "bioetl_runtime_pipeline_run_type_universe",
+    }
+    expected_pipeline_metric = expected_pipeline_metric_by_dashboard.get(
+        dashboard_path.name,
+        "bioetl_overview_pipeline_run_type_universe",
+    )
+
     run_type_var = variable_map.get("run_type")
     assert run_type_var is not None, (
         f"Dashboard {dashboard_path.name} must define 'run_type' variable"
     )
-    # Phase-1 F-10 / rev7 §1.5: uniform HTTP filter-options source on all boards.
-    assert run_type_var.get("datasource") == {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "bioetl-ops-http",
-    }, f"{dashboard_path.name} 'run_type' must use the control-plane catalog"
-    infinity = (run_type_var.get("query") or {}).get("infinityQuery") or {}
-    run_type_url = str(infinity.get("url", ""))
-    assert "/ops/control-plane/filter-options" in run_type_url
-    assert "dimension=run_type" in run_type_url
-    assert run_type_var.get("current", {}).get("value") == "$__all"
-    assert run_type_var.get("current", {}).get("text") == "All"
+    if dashboard_path.name == "bioetl-run-explorer-v1.json":
+        assert run_type_var.get("datasource") == {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http",
+        }, f"{dashboard_path.name} 'run_type' must use the control-plane catalog"
+        infinity = (run_type_var.get("query") or {}).get("infinityQuery") or {}
+        run_type_url = str(infinity.get("url", ""))
+        assert "/ops/control-plane/filter-options" in run_type_url
+        assert "dimension=run_type" in run_type_url
+        return
+    run_type_query = run_type_var.get("query", {})
+    run_type_query_text = (
+        run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
+    )
+    assert expected_pipeline_metric in run_type_query_text, (
+        f"Dashboard {dashboard_path.name} 'run_type' query must use "
+        f"{expected_pipeline_metric}"
+    )
+    assert "run_type" in run_type_query_text, (
+        f"Dashboard {dashboard_path.name} 'run_type' query must select run_type label"
+    )
 
 
 def _query_text(variable: dict[str, object] | None) -> str:
@@ -671,10 +690,7 @@ def _assert_provider_health_pipeline_run_type(
     assert run_type_var is not None, (
         f"Dashboard {dashboard_path.name} must define shared 'run_type' context"
     )
-    infinity = (run_type_var.get("query") or {}).get("infinityQuery") or {}
-    run_type_url = str(infinity.get("url", ""))
-    assert "/ops/control-plane/filter-options" in run_type_url
-    assert "dimension=run_type" in run_type_url
+    assert "bioetl_overview_pipeline_run_type_universe" in _query_text(run_type_var)
 
 
 def _assert_provider_health_provider_var(dashboard_path, variable_map):

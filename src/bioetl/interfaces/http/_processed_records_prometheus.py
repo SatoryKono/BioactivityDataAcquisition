@@ -25,13 +25,12 @@ def _fetch_prometheus_query_payload(
     *,
     prometheus_base_url: str,
     query: str,
-    timeout_seconds: float = PROMETHEUS_QUERY_TIMEOUT_SECONDS,
 ) -> dict[str, object]:
     url = (
         prometheus_base_url.rstrip("/") + "/api/v1/query?" + urlencode({"query": query})
     )
     try:
-        with _open_url(url, timeout=timeout_seconds) as response:
+        with _open_url(url, timeout=PROMETHEUS_QUERY_TIMEOUT_SECONDS) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except (HTTPError, URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
         raise RuntimeError(f"Prometheus query failed: {exc}") from exc

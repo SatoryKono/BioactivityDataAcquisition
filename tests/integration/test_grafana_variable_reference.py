@@ -93,9 +93,6 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
         "run_id",
         # Hidden helper for selected-run provider evidence.
         "provider_for_pipeline",
-        # Phase-1 A2 detail resolve from selector-context.
-        "selected_pipeline",
-        "selected_run_id",
     }
     assert overview["workflow"].get("includeAll") is True
     assert overview["workflow"].get("multi") is False
@@ -123,9 +120,8 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
         assert pipeline.get("includeAll") is True
         assert pipeline.get("current", {}).get("value") == "$__all"
         assert run_type.get("includeAll") is True
-        # Phase-1 F-10 / rev7 §1.5: All ($__all) on every primary board.
-        assert run_type.get("current", {}).get("value") == "$__all"
-        assert run_type.get("current", {}).get("text") == "All"
+        # SEL-P0/P2: non-Overview native default is backfill (fallback policy).
+        assert run_type.get("current", {}).get("value") == "backfill"
         assert run_id.get("sort") == 0
         assert run_id.get("current", {}).get("value") == "-"
 

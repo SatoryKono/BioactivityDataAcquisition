@@ -247,11 +247,10 @@ The repo ships that plugin at `grafana/plugins/bioetl-selectorshell-panel`
 (`autoApplyLastRunDefaults` + exact-run sync). Primary dashboard JSON does not
 embed the unsigned panel by default; local Grafana must allow the plugin id.
 
-**Default selection policy (SEL-P0 / #7550, updated phase-1 F-10 / rev7 §1.5):**
+**Default selection policy (SEL-P0 / #7550):**
 
-- Primary boards fleet landing: `All/All/All/-` (workflow/pipeline/run_type/run_id)
-- `$run_type` default is All (`$__all`) on all five primary boards; options from HTTP `/ops/control-plane/filter-options?dimension=run_type` (manifest + report catalog), supplemented with Prometheus universe labels (`bioetl_overview_pipeline_run_type_universe` / `bioetl_control_plane_run_type_universe`) so telemetry-only types remain selectable
-- Normative source: `docs/03-guides/dashboards/contracts/selector-contracts.yaml` (`default_selection_policy`, `shipped_selector_registry`)
+- Overview fleet landing: `All/All/All/-`
+- Non-Overview native `run_type` default: `backfill`
 - `run_id` list order: `started_at` desc with `-` first; Grafana `sort=0`
 - URL `var-*` handoffs win over auto-default
 - Prom Status stays pipeline/run_type scoped; exact `run_id` is HTTP identity only

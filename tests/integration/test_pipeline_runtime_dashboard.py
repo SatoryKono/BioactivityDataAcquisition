@@ -97,8 +97,6 @@ def test_pipeline_runtime_has_required_variables() -> None:
         "provider",
         "provider_for_pipeline",
         "read_latency_quantile",
-        "selected_pipeline",
-        "selected_run_id",
     }
 
 
@@ -110,20 +108,13 @@ def test_pipeline_runtime_variables_use_runtime_universe() -> None:
     }
 
     pipeline_query = str(variables["pipeline"].get("definition") or "")
-    run_type_def = str(variables["run_type"].get("definition") or "")
-    run_type_url = str(
-        ((variables["run_type"].get("query") or {}).get("infinityQuery") or {}).get(
-            "url", ""
-        )
-    )
+    run_type_query = variables["run_type"].get("query", {}).get("query", "")
     provider_query = str(variables["provider_for_pipeline"].get("definition") or "")
 
     assert "filter-options?dimension=pipeline" in pipeline_query
-    assert "filter-options?dimension=run_type" in run_type_def
-    assert "filter-options?dimension=run_type" in run_type_url
-    assert variables["run_type"]["current"]["value"] == "$__all"
+    assert "bioetl_overview_pipeline_run_type_universe" in run_type_query
     assert "bioetl_records_processed_total" not in pipeline_query
-    assert "bioetl_records_processed_total" not in run_type_def
+    assert "bioetl_records_processed_total" not in run_type_query
     assert "bioetl_workflow_pipeline_expected" in provider_query
 
 
