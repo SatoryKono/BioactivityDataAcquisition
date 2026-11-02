@@ -166,6 +166,44 @@ def _ancestor(root: Path, commit: str, head: str) -> bool:
     return _git(root, "merge-base", "--is-ancestor", commit, head).returncode == 0
 
 
+def require_published_ancestor(root: Path, commit: str) -> None:
+    """Require ancestry, or a reviewed GitHub squash bridge, for source refs."""
+    if re.fullmatch(r"[0-9a-f]{40}", commit) is None:
+        raise ValueError("Full immutable source commit required")
+    commit = bytes.fromhex(commit).hex()
+    head = _git(root, "rev-parse", "HEAD").stdout.strip()
+    if _ancestor(root, commit, head):
+        return
+
+    receipt = json.loads((root / RECEIPT).read_text(encoding="utf-8"))
+    bridges = receipt.get("publication_bridges")
+    if not isinstance(bridges, list):
+        bridges = [receipt]
+    if (
+        receipt.get("schema_version") != 1
+        or receipt.get("verification_mode") != "live_github"
+    ):
+        raise ValueError("Source lacks a reviewed publication bridge")
+    for bridge in bridges:
+        reviewed = bridge.get("reviewed_source_commits")
+        if not isinstance(reviewed, list) or commit not in reviewed:
+            continue
+        refreshed = _refresh_live_mapping(bridge)
+        mapping = _github_mapping(refreshed)
+        if mapping is None:
+            continue
+        pr_head, merge = mapping
+        merged_tree, published_tree = _tree(root, merge), _tree(root, pr_head)
+        if (
+            merged_tree
+            and merged_tree == published_tree
+            and _ancestor(root, merge, head)
+            and _ancestor(root, commit, pr_head)
+        ):
+            return
+    raise ValueError("Source lacks a reviewed publication bridge to the current tree")
+
+
 def _is_shallow(root: Path) -> bool:
     result = _git(root, "rev-parse", "--is-shallow-repository")
     return result.returncode == 0 and result.stdout.strip() == "true"

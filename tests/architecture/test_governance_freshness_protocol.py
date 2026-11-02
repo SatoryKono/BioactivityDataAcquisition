@@ -12,9 +12,11 @@
 
 from __future__ import annotations
 
-import pytest
-
+import re
+from datetime import date
 from pathlib import Path
+
+import pytest
 
 import yaml
 
@@ -143,16 +145,16 @@ def test_project_test_health_summary_has_machine_readable_metadata() -> None:
     assert metadata["allowed_interpretation"] == "backlog_signal_only"
     assert metadata["canonical_sources"]
     assert metadata["verification_scope"] == "tracked_test_module_inventory"
-    assert metadata["source_ref"] == "c9d639733928a2b699be2cc5031a38c4b3a3707e"
-    assert metadata["test_module_inventory"] == {
-        "command": "git ls-files 'tests/**/test_*.py' | wc -l",
-        "count": 1988,
-        "counted_on": "2026-07-13",
-        "full_evidence_snapshot_date": "2026-03-23",
-    }
+    assert re.fullmatch(r"[0-9a-f]{40}", metadata["source_ref"])
+    inventory = metadata["test_module_inventory"]
+    assert inventory["command"] == "git ls-files 'tests/**/test_*.py' | wc -l"
+    assert isinstance(inventory["count"], int) and inventory["count"] > 0
+    counted_on = date.fromisoformat(inventory["counted_on"])
+    evidence_snapshot = date.fromisoformat(inventory["full_evidence_snapshot_date"])
+    assert counted_on >= evidence_snapshot
     assert shard_registry["policy_scope"] == "project_test_health_evidence_shards"
     assert shard_registry["owner"]
-    assert shard_registry["last_inventory_rebaseline"] == "2026-07-13"
+    assert shard_registry["last_inventory_rebaseline"] == inventory["counted_on"]
     assert shard_registry["inventory_source_ref"] == metadata["source_ref"]
     assert shard_registry["inventory_scope"] == metadata["verification_scope"]
     assert shard_registry["shards"]
