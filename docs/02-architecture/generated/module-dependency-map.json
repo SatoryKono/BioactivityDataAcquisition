@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2577,
-    "total_internal_imports": 8358,
+    "scanned_modules": 2578,
+    "total_internal_imports": 8355,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "3ef0614df254fcc9a86d48041859d3776dd4f0ce3be94e18b5d6a771ca8ef972"
+    "source_fingerprint": "b6905b6ff95644a3d9d4cb2c7d8745f46a744d7880163ba7e1b3646c5fa11810"
   },
   "layer_edges": [
     {
@@ -24,7 +24,7 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 230,
+      "imports": 232,
       "allowed": true
     },
     {
@@ -36,7 +36,7 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 316,
+      "imports": 314,
       "allowed": true
     },
     {
@@ -48,13 +48,13 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1313,
+      "imports": 1310,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 799,
+      "imports": 798,
       "allowed": true
     },
     {
@@ -66,7 +66,7 @@
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 72,
+      "imports": 74,
       "allowed": true
     },
     {
@@ -78,7 +78,7 @@
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 87,
+      "imports": 86,
       "allowed": true
     },
     {
@@ -175,19 +175,14 @@
       "imports": 34
     },
     {
+      "source": "interfaces.cli",
+      "target": "application.services",
+      "imports": 33
+    },
+    {
       "source": "application.core",
       "target": "domain.ports",
       "imports": 32
-    },
-    {
-      "source": "composition.runtime_builders",
-      "target": "domain.control_plane",
-      "imports": 31
-    },
-    {
-      "source": "infrastructure.control_plane",
-      "target": "domain.control_plane",
-      "imports": 31
     },
     {
       "source": "infrastructure.storage",
@@ -195,9 +190,14 @@
       "imports": 31
     },
     {
-      "source": "interfaces.cli",
-      "target": "application.services",
-      "imports": 31
+      "source": "composition.runtime_builders",
+      "target": "domain.control_plane",
+      "imports": 30
+    },
+    {
+      "source": "infrastructure.control_plane",
+      "target": "domain.control_plane",
+      "imports": 30
     },
     {
       "source": "composition.bootstrap",

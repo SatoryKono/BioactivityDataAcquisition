@@ -6,7 +6,11 @@ Extracted from base.py to reduce file size and improve separation of concerns.
 from __future__ import annotations
 
 import re
+from typing import TYPE_CHECKING
 from urllib.parse import SplitResult, urlsplit, urlunsplit
+
+if TYPE_CHECKING:
+    from bioetl.domain.exceptions.base import BioETLError
 
 _SECRET_MARKERS = (
     "password",
@@ -239,3 +243,33 @@ def _redact_structured(
         return value
     finally:
         seen.discard(object_id)
+
+
+def get_exception_context(exc: BioETLError) -> dict[str, object]:
+    result: dict[str, object] = {}
+    for key, value in vars(exc).items():
+        if key.startswith("_"):
+            continue
+        if key in exc._CONTEXT_EXCLUDE:
+            continue
+        result[key] = _redact(value, key)
+    return result
+
+
+def get_structured_context(
+    exc: BioETLError,
+    *,
+    reason_code: str | None = None,
+    **extra: object,
+) -> dict[str, object]:
+    resolved_reason_code = reason_code or exc.get_reason_code()
+    structured: dict[str, object] = {
+        "message": str(exc),
+        "error_type": type(exc).__name__,
+        "error_category": exc.get_error_type().value,
+    }
+    if resolved_reason_code is not None:
+        structured["reason_code"] = resolved_reason_code
+    structured.update(get_exception_context(exc))
+    structured.update({key: _redact(value, key) for key, value in extra.items()})
+    return {key: _redact(value, key) for key, value in structured.items()}

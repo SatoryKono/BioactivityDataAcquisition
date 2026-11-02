@@ -42,6 +42,8 @@ from unittest.mock import patch
 
 import pytest
 
+from bioetl.application.services.quality.exceptions_context import get_exception_context
+
 from bioetl.domain.behavior._dq_condition_matchers import _ne_condition_matches
 from bioetl.domain.behavior.activity_aggregator._aggregator_extensions import (
     _ActivityAggregatorExtensions,
@@ -100,7 +102,9 @@ from bioetl.domain.filtering.silver_filter_identity import (
     normalize_silver_filter_compatibility_mode,
 )
 from bioetl.domain.mapping.organism_classification import OrganismClassificationResult
-from bioetl.domain.normalization._chembl_units import _legacy_qudt_identifier_from_uri
+from bioetl.application.normalization._chembl_units import (
+    _legacy_qudt_identifier_from_uri,
+)
 from bioetl.domain.normalization.fingerprints import (
     compute_manifest_execution_fingerprint,
 )
@@ -504,8 +508,9 @@ def test_normalize_silver_filter_compatibility_mode__accepts_canonical() -> None
 
 def test_bioetl_error__context_kwargs_attached() -> None:
     err = BioETLError("boom", pipeline="chembl_activity", stage="extract")
-    assert err.context["pipeline"] == "chembl_activity"
-    assert err.context["stage"] == "extract"
+    ctx = get_exception_context(err)
+    assert ctx["pipeline"] == "chembl_activity"
+    assert ctx["stage"] == "extract"
 
 
 def test_validation_error__sets_record_id() -> None:

@@ -701,6 +701,11 @@ jobs:
       - name: Run jscpd for duplication detection
         id: jscpd
         if: needs['classify-changes'].outputs['duplication'] == 'required'
+        env:
+          # Full-tree clone reporting OOMs the default ~2GiB Node heap on Class
+          # runners (exit 134). Match CircleCI-style heap headroom; keep html/json
+          # artifacts and skip console to avoid multi-thousand clone log blowups.
+          NODE_OPTIONS: --max-old-space-size=8192
         run: |
           set -euo pipefail
           mkdir -p reports/jscpd
@@ -710,7 +715,7 @@ jobs:
             "${GITHUB_WORKSPACE}/src" "${GITHUB_WORKSPACE}/tests" \
             --config "${GITHUB_WORKSPACE}/.jscpd.json" \
             --threshold 10 --format python \
-            --reporters "console,html,json" \
+            --reporters "html,json" \
             --output "${GITHUB_WORKSPACE}/reports/jscpd"
 
       - name: Enforce BioETL hotspot duplication zero ratchet

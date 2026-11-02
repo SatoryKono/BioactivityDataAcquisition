@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING, ClassVar
 if TYPE_CHECKING:
     from bioetl.domain.types.enums import ErrorType
 
-from bioetl.domain.exceptions._redaction import _redact
 
 __all__ = [
     "BioETLError",
@@ -88,41 +87,6 @@ class BioETLError(Exception):
         """Get the optional semantic reason code for this error."""
         reason_code = getattr(self, "reason_code", None)
         return None if reason_code is None else str(reason_code)
-
-    @property
-    def context(self) -> dict[str, object]:
-        """Collect all public instance attributes for diagnostics.
-
-        Returns:
-            Dictionary of all public instance attributes excluding internal fields.
-        """
-        result: dict[str, object] = {}
-        for key, value in vars(self).items():
-            if key.startswith("_"):
-                continue
-            if key in self._CONTEXT_EXCLUDE:
-                continue
-            result[key] = _redact(value, key)
-        return result
-
-    def to_structured_context(
-        self,
-        *,
-        reason_code: str | None = None,
-        **extra: object,
-    ) -> dict[str, object]:
-        """Build a structured and redacted error payload for diagnostics."""
-        resolved_reason_code = reason_code or self.get_reason_code()
-        structured: dict[str, object] = {
-            "message": str(self),
-            "error_type": type(self).__name__,
-            "error_category": self.get_error_type().value,
-        }
-        if resolved_reason_code is not None:
-            structured["reason_code"] = resolved_reason_code
-        structured.update(self.context)
-        structured.update({key: _redact(value, key) for key, value in extra.items()})
-        return {key: _redact(value, key) for key, value in structured.items()}
 
     def with_context(self, **extra: object) -> BioETLError:
         """Attach additional context and return this exception instance.

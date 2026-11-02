@@ -26,7 +26,10 @@ from bioetl.domain.aggregates.events import (
     QuarantineEntryResolved,
     RecordQuarantined,
 )
-from bioetl.domain.exceptions._redaction import _redact, redact_string
+from bioetl.application.services.quality.exceptions_context import (
+    _redact,
+    redact_string,
+)
 from bioetl.domain.medallion import Layer
 from bioetl.domain.observability_event_mapping import (
     map_domain_event_to_observability_event,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from bioetl.domain.control_plane.config_source_hashing import (
+from bioetl.application.services.control_plane.effective_config.config_source_hashing import (
     ConfigSourceHashStrategy,
     compute_config_source_hashes,
 )
