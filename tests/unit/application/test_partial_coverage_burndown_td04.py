@@ -42,7 +42,7 @@ from unittest.mock import patch
 
 import pytest
 
-from bioetl.application.services.exceptions_context import get_exception_context
+from bioetl.application.services.quality.exceptions_context import get_exception_context
 
 from bioetl.domain.behavior._dq_condition_matchers import _ne_condition_matches
 from bioetl.domain.behavior.activity_aggregator._aggregator_extensions import (

@@ -45,7 +45,7 @@ from bioetl.domain.control_plane.contract_registry_service import ContractRegist
 from bioetl.domain.entities.chembl_structures_foundation import (
     TargetProteinClassification,
 )
-from bioetl.application.services.exceptions_context import (
+from bioetl.application.services.quality.exceptions_context import (
     _redact_structured,
     _redact_url,
 )

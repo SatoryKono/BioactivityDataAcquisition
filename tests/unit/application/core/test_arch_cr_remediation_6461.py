@@ -32,7 +32,10 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services.exceptions_context import _redact, _redact_string
+from bioetl.application.services.quality.exceptions_context import (
+    _redact,
+    _redact_string,
+)
 from bioetl.domain.filtering._filter_primitives import check_exclude_if_present
 from bioetl.domain.immutability import (
     FrozenDict,
