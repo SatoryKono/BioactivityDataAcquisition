@@ -399,7 +399,6 @@ def _check_source_review(
     return []
 
 
-
 def validate_inventory(
     payload: dict[str, Any],  # Any: JSON inventory boundary, checked below.
     sources: Mapping[str, bytes],
