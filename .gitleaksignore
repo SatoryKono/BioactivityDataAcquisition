@@ -94,3 +94,6 @@ c08883508249e87d297f3b306e7a4d032e36de02:reports/evidence/12461/uniprot_headers.
 3d64273a395bb1dea3404c236d13e5d67383f20a:configs/quality/external_resource_inventory.json:generic-api-key:2831
 # Nightly 41381437142 (CI-MAP-7 / #12582): same inventory key, new commit after #12652.
 9e75ee1b4def9bb72adfd5ea91aa567affb0bc52:configs/quality/external_resource_inventory.json:generic-api-key:2831
+# PR #12677 / Class lane 41461881864: contract test asserted the same reviewed OID
+# as a contiguous literal (generic-api-key). Chunked in a follow-up commit; keep FP.
+e77300b92366a8aaac2a68a2408a87d5557542bf:tests/architecture/test_secret_shape_and_operator_guide_contracts.py:generic-api-key:85
