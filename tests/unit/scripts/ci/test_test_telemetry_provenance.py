@@ -248,13 +248,16 @@ def test_delivery_ancestry_uses_independent_publication_receipt(
         ),
         encoding="utf-8",
     )
-    monkeypatch.setattr(
-        provenance,
-        "_read_github_json",
-        lambda path: receipt["github_pull_request"],
-    )
+    reads: list[str] = []
+
+    def read_github_json(path: str) -> dict[str, object]:
+        reads.append(path)
+        return receipt["github_pull_request"]
+
+    monkeypatch.setattr(provenance, "_read_github_json", read_github_json)
 
     provenance.require_published_ancestor(root, payload["source_commit"])
+    assert reads == ["pulls/42"]
 
 
 def test_shallow_endpoints_without_intermediate_require_verified_proof(bridge) -> None:

@@ -112,10 +112,11 @@ class ChemblPublicationSchema(PublicationBaseSchema):
 
     @pa.check("creation_date", name="creation_date_calendar")
     def _check_creation_date(cls, series: Series[str]) -> Series[bool]:
-        return cast(
-            "Series[bool]",
-            (series.isna() | series.map(_is_iso_calendar_date)).astype(bool),
-        )
+        values = [
+            bool(pd.isna(value)) or _is_iso_calendar_date(value)
+            for value in series.tolist()
+        ]
+        return cast("Series[bool]", pd.Series(values, index=series.index, dtype=bool))
 
     # === Open Access Status (compatibility field) ===
     oa_status: Series[str] | None = pa.Field(
