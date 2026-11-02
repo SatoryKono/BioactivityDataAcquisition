@@ -150,6 +150,7 @@ from bioetl.infrastructure.observability.metrics_publisher_adapter import (
 from bioetl.infrastructure.observability.metrics_server_adapter import (
     MetricsServerAdapter,
 )
+from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.storage.run_report_store_adapter import (
     FileRunReportStoreAdapter,
 )
@@ -213,6 +214,7 @@ PORT_ADAPTER_CASES = (
     PortAdapterCase(HealthMetricsExpositionPort, HealthMetricsExpositionAdapter),
     PortAdapterCase(IDMappingSourceReaderPort, IDMappingCsvReaderAdapter),
     PortAdapterCase(MetadataWriterPort, NoOpMetadataWriter),
+    PortAdapterCase(MetadataWriterPort, MetadataWriter),
     PortAdapterCase(MetricsPort, NoOpMetrics),
     PortAdapterCase(MetricsPublisherPort, MetricsPublisherAdapter),
     PortAdapterCase(MetricsServerPort, MetricsServerAdapter),
@@ -496,7 +498,6 @@ _DISCOVERED_BINDING_EXCLUSIONS = frozenset(
         "FileWorkflowTransformArtifactStore",
         "LazyFactoryCatalog",
         "Lock",
-        "MetadataWriter",
         "ProteinClassTargetTypeMappingLoader",
         "ProviderStore",
         "PublicationTypeClassificationLoader",
