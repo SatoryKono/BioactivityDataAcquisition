@@ -10,8 +10,8 @@ from bioetl.domain.lineage import (
     LineageEdge,
     LineageNodeRef,
     LineageNodeType,
-
 )
+from bioetl.domain.lineage._shared import mapping_to_plain
 
 
 def fragment_timestamp(*values: datetime | None) -> datetime:
@@ -53,7 +53,7 @@ def build_semantic_fragment_id(
                 edge.source.node_id,
                 edge.target.node_id,
                 json.dumps(
-                    dict(edge.attributes),
+                    mapping_to_plain(edge.attributes),
                     sort_keys=True,
                     separators=(",", ":"),
                 ),
