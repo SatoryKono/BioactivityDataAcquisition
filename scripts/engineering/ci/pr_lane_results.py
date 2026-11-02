@@ -1162,7 +1162,7 @@ def _matches_module_import(
         return False
     imported_module = node.module or ""
     if node.level:
-        package_parts = test_path.with_suffix("").parts
+        package_parts = test_path.parent.parts
         if test_path.name != "__init__.py":
             package_parts = package_parts[:-1]
         ascend = node.level - 1
