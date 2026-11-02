@@ -64,37 +64,45 @@ class EvidenceLocationBindingContext:
     relative_data_root: str
     runtime_source_id: str | None
     report_root: Path | None
+    # Set when write root is outside an explicitly configured dashboard alias.
+    skip_reason: str | None = None
+
+    @property
+    def registration_allowed(self) -> bool:
+        """False when the binding must not publish a ``dashboard_data`` locator."""
+        return self.skip_reason is None and self.runtime_source_id is not None
 
 
-def resolve_dashboard_data_alias_base(*, write_data_root: Path) -> Path:
+def resolve_dashboard_data_alias_base(*, write_data_root: Path) -> Path | None:
     """Resolve the trusted ``dashboard_data`` alias base at composition edge.
 
-    Prefer ``BIOETL_DASHBOARD_DATA_ROOT`` when set; otherwise use the write
-    data root itself (standard / non-isolated runs → relative ``.``).
+    Returns the configured ``BIOETL_DASHBOARD_DATA_ROOT`` when set, otherwise
+    ``None`` so callers may treat the write root as the alias base.
     """
     raw = os.environ.get(_DASHBOARD_DATA_ROOT_ENV, "").strip()
     if raw:
         return Path(raw).expanduser().resolve(strict=False)
-    return Path(write_data_root).resolve(strict=False)
+    _ = write_data_root
+    return None
 
 
 def relative_data_root_under_alias(
     *,
     write_data_root: Path,
     alias_base: Path,
-) -> str:
+) -> str | None:
     """Return posix relative path of write root under alias, or ``.``.
 
     Uses ``Path.relative_to`` against the DI/composition alias base — not
-    parent-folder name heuristics. When write root is outside the alias base,
-    fall back to treating write root as its own alias (``.``).
+    parent-folder name heuristics. Returns ``None`` when write root is outside
+    the alias base (caller must skip registration, never remap ``dashboard_data``).
     """
     write = Path(write_data_root).resolve(strict=False)
     base = Path(alias_base).resolve(strict=False)
     try:
         relative = write.relative_to(base)
     except ValueError:
-        return "."
+        return None
     text = relative.as_posix()
     if text in {"", "."}:
         return "."
@@ -122,25 +130,51 @@ def resolve_registration_runtime_source_id(settings: Settings) -> str | None:
 def build_evidence_location_binding_context(
     settings: Settings,
 ) -> EvidenceLocationBindingContext:
-    """Build alias/write binding from settings + composition-edge env."""
+    """Build alias/write binding from settings + composition-edge env.
+
+    Never remaps ``dashboard_data`` onto a foreign write root. When
+    ``BIOETL_DASHBOARD_DATA_ROOT`` is set and the write root lies outside it,
+    registration is skipped with diagnostics.
+    """
     write_root = resolve_data_root(settings).resolve(strict=False)
-    alias_base = resolve_dashboard_data_alias_base(write_data_root=write_root)
-    # When env alias base does not contain write root, rebind alias to write.
-    try:
-        write_root.relative_to(alias_base)
-    except ValueError:
-        alias_base = write_root
+    configured_alias = resolve_dashboard_data_alias_base(write_data_root=write_root)
+    report_root = getattr(settings, "report_root", None)
+    runtime_source_id = resolve_registration_runtime_source_id(settings)
+
+    if configured_alias is None:
+        # No explicit dashboard alias: write root IS the trusted base.
+        return EvidenceLocationBindingContext(
+            write_data_root=write_root,
+            alias_base=write_root,
+            root_alias=DEFAULT_EVIDENCE_ROOT_ALIAS,
+            relative_data_root=".",
+            runtime_source_id=runtime_source_id,
+            report_root=Path(report_root) if report_root is not None else None,
+        )
+
     relative = relative_data_root_under_alias(
         write_data_root=write_root,
-        alias_base=alias_base,
+        alias_base=configured_alias,
     )
-    report_root = getattr(settings, "report_root", None)
+    if relative is None:
+        return EvidenceLocationBindingContext(
+            write_data_root=write_root,
+            alias_base=configured_alias,
+            root_alias=DEFAULT_EVIDENCE_ROOT_ALIAS,
+            relative_data_root=".",
+            runtime_source_id=runtime_source_id,
+            report_root=Path(report_root) if report_root is not None else None,
+            skip_reason=(
+                "write_data_root_outside_dashboard_data_alias; "
+                "refusing to publish dashboard_data locator for foreign root"
+            ),
+        )
     return EvidenceLocationBindingContext(
         write_data_root=write_root,
-        alias_base=alias_base,
+        alias_base=configured_alias,
         root_alias=DEFAULT_EVIDENCE_ROOT_ALIAS,
         relative_data_root=relative,
-        runtime_source_id=resolve_registration_runtime_source_id(settings),
+        runtime_source_id=runtime_source_id,
         report_root=Path(report_root) if report_root is not None else None,
     )
 
@@ -150,7 +184,7 @@ def build_evidence_location_registration_service(
 ) -> tuple[EvidenceLocationRegistrationService, EvidenceLocationBindingContext]:
     """Construct file-backed registration service + binding context."""
     binding = build_evidence_location_binding_context(settings)
-    # Ensure alias registry is constructible (validates absolute base).
+    # Alias registry always uses the trusted dashboard base (never remapped).
     default_evidence_root_alias_registry(dashboard_data_root=binding.alias_base)
     store = FileEvidenceLocationStore(
         report_root=binding.report_root
@@ -160,13 +194,26 @@ def build_evidence_location_registration_service(
     return EvidenceLocationRegistrationService(locations=store), binding
 
 
-def _soft_skip_missing_source(
-    *, detail: str
+def _soft_skip(
+    *, code: str, detail: str
 ) -> EvidenceLocationRegistrationOutcome:
-    return EvidenceLocationRegistrationOutcome(
-        code="skipped_missing_runtime_source_id",
-        detail=detail,
-    )
+    return EvidenceLocationRegistrationOutcome(code=code, detail=detail)
+
+
+def _guard_registration_binding(
+    binding: EvidenceLocationBindingContext,
+) -> EvidenceLocationRegistrationOutcome | None:
+    if binding.skip_reason is not None:
+        return _soft_skip(
+            code="skipped_write_root_outside_alias",
+            detail=binding.skip_reason,
+        )
+    if binding.runtime_source_id is None:
+        return _soft_skip(
+            code="skipped_missing_runtime_source_id",
+            detail="runtime_source_id unresolved; locator not published",
+        )
+    return None
 
 
 def register_pipeline_manifest_location(
@@ -176,10 +223,10 @@ def register_pipeline_manifest_location(
 ) -> EvidenceLocationRegistrationOutcome:
     """Best-effort register after a pipeline manifest was persisted."""
     service, binding = build_evidence_location_registration_service(settings)
-    if binding.runtime_source_id is None:
-        return _soft_skip_missing_source(
-            detail="runtime_source_id unresolved; locator not published"
-        )
+    skipped = _guard_registration_binding(binding)
+    if skipped is not None:
+        return skipped
+    assert binding.runtime_source_id is not None
     workflow_run_id = getattr(manifest, "workflow_run_id", None)
     return service.register_pipeline_run(
         pipeline_name=str(manifest.pipeline_name),
@@ -198,10 +245,10 @@ def register_workflow_manifest_location(
 ) -> EvidenceLocationRegistrationOutcome:
     """Best-effort register after a workflow parent manifest was persisted."""
     service, binding = build_evidence_location_registration_service(settings)
-    if binding.runtime_source_id is None:
-        return _soft_skip_missing_source(
-            detail="runtime_source_id unresolved; locator not published"
-        )
+    skipped = _guard_registration_binding(binding)
+    if skipped is not None:
+        return skipped
+    assert binding.runtime_source_id is not None
     return service.register_workflow_run(
         workflow_name=str(manifest.workflow_name),
         workflow_run_id=str(manifest.workflow_run_id),
@@ -218,9 +265,9 @@ def verify_pipeline_run_location(
     workflow_run_id: str | None,
     settings: Settings,
 ) -> EvidenceLocationVerifyOutcome | None:
-    """Finalize-time verify; returns None when source identity is unavailable."""
+    """Finalize-time verify; returns None when binding cannot be published."""
     service, binding = build_evidence_location_binding_service(settings)
-    if binding.runtime_source_id is None:
+    if binding.skip_reason is not None or binding.runtime_source_id is None:
         return None
     return service.record_verify_observation(
         EvidenceLocationRegisterRequest(
@@ -250,7 +297,7 @@ def verify_workflow_run_location(
 ) -> EvidenceLocationVerifyOutcome | None:
     """Finalize-time verify for a workflow parent locator."""
     service, binding = build_evidence_location_registration_service(settings)
-    if binding.runtime_source_id is None:
+    if binding.skip_reason is not None or binding.runtime_source_id is None:
         return None
     return service.record_verify_observation(
         EvidenceLocationRegisterRequest(

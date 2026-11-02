@@ -233,6 +233,14 @@ class WorkflowRunnerService:
                 duration_seconds=perf_counter() - started_monotonic,
             )
         )
+        # RF-004: soft verify before workflow report write (keeps diagnostics
+        # available to any observation-aware finalize path).
+        if self.evidence_location_verify is not None:
+            try:
+                self.evidence_location_verify(identified_result)
+            except Exception:
+                # Consistency diagnostics must not mask workflow processing success.
+                pass
         reported = attach_workflow_run_report(
             config=config,
             result=identified_result,
@@ -240,12 +248,6 @@ class WorkflowRunnerService:
             store=self.report_store,
             report_root=self.report_root,
         )
-        if self.evidence_location_verify is not None:
-            try:
-                self.evidence_location_verify(reported)
-            except Exception:
-                # Consistency diagnostics must not mask workflow processing success.
-                pass
         archive_workflow_children(
             config,
             reported,

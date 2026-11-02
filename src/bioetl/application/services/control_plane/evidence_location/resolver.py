@@ -37,6 +37,15 @@ __all__ = [
 ]
 
 
+def _is_workflow_kind(kind: EvidenceLocationKind | str | None) -> bool:
+    """True for enum or string workflow kind (callers may pass either form)."""
+    if kind is None:
+        return False
+    if isinstance(kind, EvidenceLocationKind):
+        return kind is EvidenceLocationKind.WORKFLOW
+    return str(kind).strip().lower() == EvidenceLocationKind.WORKFLOW.value
+
+
 class EvidenceLocationLegacyRootPolicy(StrEnum):
     """RF-003 policy for ``location_missing`` without inventing isolated roots.
 
@@ -171,7 +180,7 @@ class EvidenceLocationResolver:
                 detail=result.detail or "context_not_open",
             )
         try:
-            if result.requested_kind == EvidenceLocationKind.WORKFLOW:
+            if _is_workflow_kind(result.requested_kind):
                 manifest = result.context.get_workflow_manifest_by_run_id(run_id)
             else:
                 manifest = result.context.get_manifest_by_run_id(run_id)

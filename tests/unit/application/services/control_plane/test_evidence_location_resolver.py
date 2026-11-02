@@ -332,3 +332,40 @@ def test_workflow_location_reads_workflow_manifest_store(
 
     assert manifest_lookup.code is EvidenceLocationLookupCode.FOUND
     assert calls == [UUID(_WF)]
+
+
+def test_load_manifest_accepts_string_workflow_kind(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """String kind ``\"workflow\"`` must use the workflow store (not enum-only)."""
+    resolver, store, _data_root = _resolver(tmp_path)
+    store.register(
+        _location(
+            kind=EvidenceLocationKind.WORKFLOW,
+            owner="workflow-a",
+            run_id=_WF,
+            workflow_run_id=None,
+        )
+    )
+    calls: list[UUID] = []
+
+    def fail_pipeline_lookup(_self: object, _run_id: object) -> None:
+        pytest.fail("string workflow kind must not use pipeline store")
+
+    def get_workflow_manifest(_self: object, run_id: UUID) -> SimpleNamespace:
+        calls.append(run_id)
+        return SimpleNamespace(workflow_run_id=run_id)
+
+    monkeypatch.setattr(FileRunManifestStore, "get_by_run_id", fail_pipeline_lookup)
+    monkeypatch.setattr(
+        FileWorkflowManifestStore,
+        "get_by_run_id",
+        get_workflow_manifest,
+    )
+
+    resolved = resolver.resolve(kind="workflow", owner="workflow-a", run_id=_WF)
+    assert resolved.requested_kind == "workflow"
+    lookup = resolver.load_manifest(resolved, run_id=UUID(_WF))
+    assert lookup.code is EvidenceLocationLookupCode.FOUND
+    assert calls == [UUID(_WF)]

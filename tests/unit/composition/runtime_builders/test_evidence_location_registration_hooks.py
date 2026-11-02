@@ -36,12 +36,55 @@ def test_relative_data_root_standard_and_isolated(tmp_path: Path) -> None:
     alias.mkdir()
     isolated = alias / "workflow-a" / "chembl_assay"
     isolated.mkdir(parents=True)
+    foreign = (tmp_path / "other-data").resolve()
+    foreign.mkdir()
     assert relative_data_root_under_alias(
         write_data_root=alias, alias_base=alias
     ) == "."
     assert (
         relative_data_root_under_alias(write_data_root=isolated, alias_base=alias)
         == "workflow-a/chembl_assay"
+    )
+    assert (
+        relative_data_root_under_alias(write_data_root=foreign, alias_base=alias)
+        is None
+    )
+
+
+def test_register_skips_when_write_root_outside_dashboard_alias(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    alias = (tmp_path / "dashboard-data").resolve()
+    alias.mkdir()
+    write_root = (tmp_path / "foreign-data").resolve()
+    write_root.mkdir()
+    report_root = tmp_path / "run-reports"
+    report_root.mkdir()
+    monkeypatch.setenv("BIOETL_DASHBOARD_DATA_ROOT", str(alias))
+    monkeypatch.setenv("BIOETL_RUNTIME_SOURCE_ID", _SOURCE)
+    settings = SimpleNamespace(
+        data_dir=write_root,
+        report_root=report_root,
+        runtime_source_id=_SOURCE,
+    )
+    binding = build_evidence_location_binding_context(settings)  # type: ignore[arg-type]
+    assert binding.skip_reason is not None
+    assert binding.alias_base == alias
+    manifest = RunManifest(
+        manifest_id="0f77f009-8565-539a-8c79-5e75a5039546",
+        run_id=RunID(UUID(_RUN)),
+        pipeline_name="chembl_assay",
+        provider="chembl",
+        entity="assay",
+    )
+    outcome = register_pipeline_manifest_location(
+        manifest=manifest, settings=settings  # type: ignore[arg-type]
+    )
+    assert outcome.code == "skipped_write_root_outside_alias"
+    store = FileEvidenceLocationStore(report_root=report_root)
+    assert (
+        store.get(kind=EvidenceLocationKind.PIPELINE, owner="chembl_assay", run_id=_RUN)
+        is None
     )
 
 

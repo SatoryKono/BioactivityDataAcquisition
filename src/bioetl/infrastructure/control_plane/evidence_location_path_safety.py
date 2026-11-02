@@ -15,9 +15,13 @@ from bioetl.domain.control_plane.run_evidence_location import (
 )
 
 __all__ = [
+    "EVIDENCE_LOCATION_CATALOG_PATH_FIELD",
     "assert_path_within_trusted_base",
     "reject_symlink_or_junction",
 ]
+
+# Shared Sonar-safe field label for catalog containment checks.
+EVIDENCE_LOCATION_CATALOG_PATH_FIELD = "evidence location catalog path"
 
 
 def _normalize_resolved_path(path: Path) -> Path:

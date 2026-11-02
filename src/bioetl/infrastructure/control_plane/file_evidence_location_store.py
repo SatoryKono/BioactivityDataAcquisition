@@ -36,6 +36,7 @@ from bioetl.infrastructure.control_plane._evidence_location_publish import (
     read_existing_bytes,
 )
 from bioetl.infrastructure.control_plane.evidence_location_path_safety import (
+    EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
     assert_path_within_trusted_base,
 )
 
@@ -99,7 +100,7 @@ class FileEvidenceLocationStore(
         return assert_path_within_trusted_base(
             path,
             trusted_base=self._trusted_root(),
-            field_name="evidence location catalog path",
+            field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
         )
 
     def _load_at(
@@ -113,7 +114,7 @@ class FileEvidenceLocationStore(
         safe_path = assert_path_within_trusted_base(
             path,
             trusted_base=self._trusted_root(),
-            field_name="evidence location catalog path",
+            field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
         )
         raw = read_existing_bytes(safe_path, trusted_base=self._trusted_root())
         if raw is None:
@@ -196,7 +197,7 @@ class FileEvidenceLocationStore(
         safe_path = assert_path_within_trusted_base(
             path,
             trusted_base=self._trusted_root(),
-            field_name="evidence location catalog path",
+            field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
         )
         raw = read_existing_bytes(safe_path, trusted_base=self._trusted_root())
         if raw is None:
@@ -226,7 +227,7 @@ class FileEvidenceLocationStore(
         safe_path = assert_path_within_trusted_base(
             path,
             trusted_base=self._trusted_root(),
-            field_name="evidence location catalog path",
+            field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
         )
         created = publish_bytes_if_absent(
             safe_path,

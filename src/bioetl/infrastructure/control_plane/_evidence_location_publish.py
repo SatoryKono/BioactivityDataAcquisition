@@ -12,6 +12,7 @@ from bioetl.infrastructure.control_plane._durability import (
     flush_control_plane_file_descriptor,
 )
 from bioetl.infrastructure.control_plane.evidence_location_path_safety import (
+    EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
     assert_path_within_trusted_base,
 )
 
@@ -26,7 +27,7 @@ def read_existing_bytes(path: Path, *, trusted_base: Path) -> bytes | None:
     safe_path = assert_path_within_trusted_base(
         path,
         trusted_base=trusted_base,
-        field_name="evidence location catalog path",
+        field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
     )
     try:
         return safe_path.read_bytes()
@@ -65,13 +66,13 @@ def publish_bytes_if_absent(
     target = assert_path_within_trusted_base(
         target,
         trusted_base=trusted_base,
-        field_name="evidence location catalog path",
+        field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
     )
     target.parent.mkdir(parents=True, exist_ok=True)
     target = assert_path_within_trusted_base(
         target,
         trusted_base=trusted_base,
-        field_name="evidence location catalog path",
+        field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
     )
     fd, temp_path_str = tempfile.mkstemp(
         suffix=".tmp",
@@ -88,7 +89,7 @@ def publish_bytes_if_absent(
             target = assert_path_within_trusted_base(
                 target,
                 trusted_base=trusted_base,
-                field_name="evidence location catalog path",
+                field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
             )
             _publish_new_file_exclusive(temp_path, target)
         except FileExistsError:

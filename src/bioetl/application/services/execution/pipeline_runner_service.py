@@ -375,18 +375,19 @@ class PipelineRunnerService:
     ) -> RunResult:
         """Capture control-plane evidence, persist the run report, then archive."""
         capture_run_completion(self.capture_control_plane, result, options)
+        # RF-004: record Evidence Location observation BEFORE report snapshot.
+        if self.evidence_location_verify is not None:
+            try:
+                self.evidence_location_verify(result, options)
+            except Exception:
+                # Consistency diagnostics must not mask processing success.
+                pass
         finalized = finalize_pipeline_run_report(
             result=result,
             options=options,
             report_root=self.report_root,
             store=self.report_store,
         )
-        if self.evidence_location_verify is not None:
-            try:
-                self.evidence_location_verify(finalized, options)
-            except Exception:
-                # Consistency diagnostics must not mask processing success.
-                pass
         self._archive_control_plane(finalized, options)
         return finalized
 

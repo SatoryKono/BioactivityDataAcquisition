@@ -47,11 +47,15 @@ Automatic registration (RF-004 / #12682): after a durable pipeline or
 workflow manifest save, Composition publishes a locator via
 `EvidenceLocationRegistrationService` using the write `data_root`, the
 trusted `dashboard_data` alias base (`BIOETL_DASHBOARD_DATA_ROOT` at the
-composition edge, else the write root), and `runtime_source_id`. Report
-finalization verifies the locator and records an `Evidence Location`
-observation without mutating `processing_status`. Composite report writes
-and late workflow child revisions do not register. Bronze successors keep
-the same `(kind, owner, run_id)` binding (idempotent identical).
+composition edge, else the write root), and `runtime_source_id`. When an
+explicit dashboard alias is set and the write root lies outside it,
+registration is skipped with diagnostics — the publisher never remaps
+`dashboard_data` onto a foreign write root. Report finalization verifies
+the locator **before** the report observation snapshot and records an
+`Evidence Location` observation without mutating `processing_status`.
+Composite report writes and late workflow child revisions do not register.
+Bronze successors keep the same `(kind, owner, run_id)` binding
+(idempotent identical).
 
 Optional additive blocks on pipeline reports (omit when unknown; never invent zeros):
 
