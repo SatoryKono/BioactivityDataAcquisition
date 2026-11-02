@@ -28,6 +28,7 @@ async def build_filter_options_payload(
     *,
     options_builder: Callable[..., dict[str, object]],
     add_run_id_items: Callable[..., None],
+    include_reports: bool,
 ) -> dict[str, object]:
     """Combine manifest and report catalogs into a filter-options payload."""
     manifest_port = host._run_manifest_port
@@ -54,7 +55,6 @@ async def build_filter_options_payload(
         "run_status": selected_run_statuses,
         "run_id": (selected_run_id,) if selected_run_id else (),
     }
-    include_reports = not exact_run_only or selected_run_id is not None
 
     async def manifest_options() -> dict[str, object]:
         manifests, workflow_manifests = await host._selector_catalog.read(

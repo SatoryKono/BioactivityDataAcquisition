@@ -20,7 +20,7 @@ from bioetl.interfaces.http._health_server_control_plane_scope import (
     read_selected_run_id,
 )
 from bioetl.interfaces.http._health_server_filter_options_payload import (
-    build_filter_options_payload,
+    build_filter_options_payload as _build_filter_options_payload,
 )
 from bioetl.interfaces.http._health_server_identity_routing_support import (
     handle_control_plane_identity_evidence,
@@ -177,11 +177,23 @@ async def _filter_options_payload(
     query: dict[str, str],
 ) -> dict[str, object]:
     """Build filter options using the injected selector-catalog builders."""
-    return await build_filter_options_payload(
+    exact_run_only = _read_truthy_query_param(query, "exact_run_only")
+    selected_run_id = read_selected_run_id(host, query)
+    include_reports = not exact_run_only or selected_run_id is not None
+    if include_reports:
+        return await _build_filter_options_payload(
+            host,
+            query,
+            options_builder=build_selector_filter_options_payload,
+            add_run_id_items=_add_run_id_items,
+            include_reports=True,
+        )
+    return await _build_filter_options_payload(
         host,
         query,
         options_builder=build_selector_filter_options_payload,
         add_run_id_items=_add_run_id_items,
+        include_reports=False,
     )
 
 
