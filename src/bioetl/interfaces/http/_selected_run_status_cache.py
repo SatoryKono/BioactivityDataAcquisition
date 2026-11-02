@@ -71,6 +71,9 @@ def _is_query_error_payload(payload: Mapping[str, object]) -> bool:
         "revision_missing",
         "shutting_down",
         "selector_context_mismatch",
+        "evidence_corrupt",
+        "identity_mismatch",
+        "revision_missing",
     }
 
 
@@ -178,7 +181,7 @@ class SelectedRunStatusCache:
             entry.completed_at = monotonic()
             entry.error = None
             return deepcopy(payload)
-        except Exception as exc:
+        except (ForensicEndpointUnavailable, ValueError, OSError, RuntimeError) as exc:
             entry.error = (
                 exc.reason
                 if isinstance(exc, ForensicEndpointUnavailable)

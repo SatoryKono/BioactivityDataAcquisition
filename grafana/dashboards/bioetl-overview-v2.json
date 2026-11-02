@@ -1054,6 +1054,26 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "displayName",
+                "value": "Overall verdict"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trust"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Trust"
+              },
+              {
+                "id": "custom.width",
+                "value": 80
               }
             ]
           },
@@ -1224,6 +1244,7 @@
             "include": {
               "names": [
                 "run_execution",
+                "run_verdict",
                 "saved_trust",
                 "run_reason"
               ]
@@ -1233,10 +1254,12 @@
         {
           "id": "organize",
           "options": {
+            "excludeByName": {},
             "indexByName": {
               "run_execution": 0,
-              "saved_trust": 1,
-              "run_reason": 2
+              "run_verdict": 1,
+              "saved_trust": 2,
+              "run_reason": 3
             },
             "renameByName": {
               "run_verdict": "Overall verdict",

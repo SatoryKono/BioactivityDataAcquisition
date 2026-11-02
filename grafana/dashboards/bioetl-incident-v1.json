@@ -2661,6 +2661,10 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Overall verdict"
                   }
                 ]
               },
@@ -2670,6 +2674,26 @@
                   "options": "Overall verdict"
                 },
                 "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Trust"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 80
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
                   {
                     "id": "links",
                     "value": []
@@ -2806,7 +2830,8 @@
               "datasource": {
                 "type": "yesoreyeram-infinity-datasource",
                 "uid": "bioetl-ops-http"
-              }
+              },
+              "uql": "parse-json | jsonata \"($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'НЕТ ЗАПУСКОВ']; [$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : ((presentation_summary[0].verdict = 'OK' or presentation_summary[0].verdict = 'SELECT RUN' or presentation_summary[0].verdict = 'НЕТ ЗАПУСКОВ') ? (presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason) : presentation_summary[0].reason)}])])\""
             }
           ],
           "transformations": [
@@ -2841,8 +2866,8 @@
                   "names": [
                     "execution_state",
                     "verdict",
-                    "evidence_completeness",
-                    "rules_version"
+                    "saved_trust",
+                    "reason_display"
                   ]
                 }
               }
@@ -2850,18 +2875,18 @@
             {
               "id": "organize",
               "options": {
+                "excludeByName": {},
                 "indexByName": {
                   "execution_state": 0,
                   "verdict": 1,
-                  "evidence_completeness": 2,
-                  "rules_version": 3
+                  "saved_trust": 2,
+                  "reason_display": 3
                 },
                 "renameByName": {
-                  "domain": "Domain",
-                  "verdict": "Status",
-                  "execution_state": "Result",
-                  "evidence_completeness": "Evidence",
-                  "rules_version": "Rules"
+                  "execution_state": "Processing",
+                  "verdict": "Overall verdict",
+                  "saved_trust": "Trust",
+                  "reason_display": "Reason"
                 }
               }
             }

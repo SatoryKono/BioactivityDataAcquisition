@@ -4,7 +4,7 @@
     "total_internal_imports": 8443,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 330,
+    "cross_layer_group_edges_total": 333,
     "violations": 0,
     "source_fingerprint": "68756fa0f72775c89d933cba3024cb81cc47782f4ffde9110a8d18cb143648fa"
   },
@@ -12,13 +12,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 1660,
+      "imports": 1663,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1138,
+      "imports": 1141,
       "allowed": true
     },
     {
@@ -30,19 +30,19 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 656,
+      "imports": 654,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 317,
+      "imports": 319,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 304,
+      "imports": 311,
       "allowed": true
     },
     {
@@ -60,7 +60,7 @@
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1304,
+      "imports": 1300,
       "allowed": true
     },
     {
@@ -92,7 +92,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 155
+      "imports": 158
     },
     {
       "source": "infrastructure.adapters",
@@ -175,14 +175,14 @@
       "imports": 34
     },
     {
-      "source": "infrastructure.control_plane",
+      "source": "composition.runtime_builders",
       "target": "domain.control_plane",
       "imports": 34
     },
     {
-      "source": "composition.runtime_builders",
+      "source": "infrastructure.control_plane",
       "target": "domain.control_plane",
-      "imports": 33
+      "imports": 34
     },
     {
       "source": "interfaces.cli",
@@ -330,11 +330,6 @@
       "imports": 17
     },
     {
-      "source": "composition.runtime_builders",
-      "target": "application.services",
-      "imports": 17
-    },
-    {
       "source": "infrastructure.schemas",
       "target": "domain.config",
       "imports": 17
@@ -348,6 +343,11 @@
       "source": "interfaces.http",
       "target": "domain.ports",
       "imports": 17
+    },
+    {
+      "source": "composition.runtime_builders",
+      "target": "application.services",
+      "imports": 16
     },
     {
       "source": "infrastructure.control_plane",

@@ -22,7 +22,7 @@ from bioetl.composition.runtime_builders._run_manifest_replay_support import (
 from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     build_launch_context_snapshot,
 )
-from bioetl.composition.runtime_builders._run_manifest_sink_policy import (
+from bioetl.domain.control_plane.run_manifest_sink_policy import (
     validate_reproducible_sink_modes,
 )
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (

@@ -35,6 +35,9 @@ from bioetl.composition.factories.pipeline.runner import (
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_run_id
 from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import get_settings
+from bioetl.composition.runtime_builders.evidence_location_registration import (
+    verify_pipeline_run_location,
+)
 from bioetl.infrastructure.storage.run_report_store_adapter import (
     FileRunReportStoreAdapter,
 )
@@ -98,10 +101,6 @@ def bootstrap_pipeline_runner_service(
     def _verify_evidence_location(
         result: RunResult, options: RunOptions | None
     ) -> None:
-        from bioetl.composition.runtime_builders.evidence_location_registration import (
-            verify_pipeline_run_location,
-        )
-
         workflow_run_id = None
         if options is not None:
             workflow_run_id = getattr(options, "workflow_run_id", None)

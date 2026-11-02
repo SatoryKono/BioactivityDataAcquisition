@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import is_dataclass, replace
+from dataclasses import dataclass, is_dataclass, replace
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.composition.runtime_builders._manifest_publication_context_support import (

@@ -33,9 +33,7 @@ from bioetl.infrastructure.control_plane.file_effective_config_artifact_store im
 from bioetl.infrastructure.control_plane.file_evidence_location_store import (
     FileEvidenceLocationStore,
 )
-from bioetl.infrastructure.control_plane.file_evidence_read_context import (
-    FileEvidenceReadContextFactory,
-)
+from bioetl.composition.control_plane_paths import FileEvidenceReadContextFactory
 from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
 )
@@ -65,7 +63,7 @@ def _create_symlink_or_skip(
         raise
 
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 _SOURCE_A = "a" * 64
 _SOURCE_B = "b" * 64

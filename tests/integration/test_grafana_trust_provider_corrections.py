@@ -58,6 +58,12 @@ def test_provider_status_uses_filtered_vectors_in_severity_order():
     )
     assert all("expr" not in target for target in panel["targets"])
     assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    defaults = panel["fieldConfig"]["defaults"]
+    threshold_colors = [step.get("color") for step in defaults["thresholds"]["steps"]]
+    assert "green" not in threshold_colors
+    assert threshold_colors[0] in {"text", "gray", "#555555"}
+    value_maps = next(m["options"] for m in defaults["mappings"] if m.get("type") == "value")
+    assert value_maps["QUERY ERROR"]["color"] == "red"
     description = panel["description"]
     assert "not live fleet health" in description
     assert "QUERY ERROR" in description

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.services.control_plane.evidence_location import (
-    record_verify_exception_observation,
+    soft_invoke_evidence_location_verify,
 )
 from bioetl.application.services.execution.workflow_runner_step_execution import (
     TransformStepRuntimeOptions,
@@ -42,8 +42,6 @@ from bioetl.application.services.workflow.workflow_runner_support import (
 )
 from bioetl.application.services.workflow.workflow_transform_service import (
     WorkflowTransformDestructiveCommit as WorkflowTransformDestructiveCommit,
-)
-from bioetl.application.services.workflow.workflow_transform_service import (
     WorkflowTransformService,
 )
 from bioetl.application.services.workflow.workflow_transition_policy import (
@@ -51,10 +49,7 @@ from bioetl.application.services.workflow.workflow_transition_policy import (
     resolve_step_transition_policy,
 )
 from bioetl.domain.ports import RunReportStorePort
-from bioetl.domain.workflow import (
-    WorkflowConfig,
-    WorkflowStepConfig,
-)
+from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
 
 if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_service import (
@@ -118,17 +113,13 @@ class WorkflowRunnerService:
     metrics: MetricsPort
     report_store: RunReportStorePort
     monotonic: Callable[[], float] = perf_counter
-    workflow_transform_artifact_sink: WorkflowTransformArtifactSinkProtocol | None = (
-        None
-    )
+    workflow_transform_artifact_sink: WorkflowTransformArtifactSinkProtocol | None = None
     report_root: Path | None = None
     cohort_resolver: (
-        Callable[
-            [WorkflowStepConfig, Mapping[str, object]], Awaitable[WorkflowStepConfig]
-        ]
+        Callable[[WorkflowStepConfig, Mapping[str, object]], Awaitable[WorkflowStepConfig]]
         | None
     ) = None
-    # RF-004: Composition-injected finalize consistency check (soft diagnostics).
+    # RF-004: finalize consistency check (soft diagnostics).
     evidence_location_verify: Callable[[WorkflowRunExecutionResult], None] | None = None
 
     async def run_workflow(
@@ -238,20 +229,15 @@ class WorkflowRunnerService:
                 duration_seconds=perf_counter() - started_monotonic,
             )
         )
-        # RF-004: reuse outer prepare→report scope when present; else bind locally.
         observation_token = bind_run_observations_if_unbound()
         try:
-            if self.evidence_location_verify is not None:
-                try:
-                    self.evidence_location_verify(identified_result)
-                except Exception as exc:
-                    # Consistency diagnostics must not mask processing success.
-                    record_verify_exception_observation(
-                        kind="workflow",
-                        owner=str(identified_result.workflow_name),
-                        run_id=str(identified_result.workflow_run_id or ""),
-                        exc=exc,
-                    )
+            verify = self.evidence_location_verify
+            soft_invoke_evidence_location_verify(
+                None if verify is None else (lambda: verify(identified_result)),
+                kind="workflow",
+                owner=str(identified_result.workflow_name),
+                run_id=str(identified_result.workflow_run_id or ""),
+            )
             reported = attach_workflow_run_report(
                 config=config,
                 result=identified_result,
