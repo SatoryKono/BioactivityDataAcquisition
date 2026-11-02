@@ -33,7 +33,7 @@ from bioetl.domain.ports import (
     LoggerPort,
     SilverStoragePort,
 )
-from bioetl.domain.ports.noop import NoOpMetrics
+from bioetl.domain.ports.noop import NoOpMetadataWriter, NoOpMetrics
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.observability.logging import StructlogLogger
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
@@ -41,6 +41,7 @@ from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
+from bioetl.infrastructure.storage.delta_reader import DeltaReader
 from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.bootstrap.runtime.assay_replay_capture import RequestReader
 from bioetl.domain.ports.adr import AdrServicePort
@@ -112,6 +113,51 @@ from bioetl.infrastructure.storage.workflow_row_reconciliation import (
     StorageRowReconciliationAdapter,
 )
 
+from bioetl.domain.ports.audit import AuditPort
+from bioetl.domain.ports.control_plane.effective_config_artifact import (
+    EffectiveConfigArtifactStorePort,
+)
+from bioetl.domain.ports.export import DebugExportPort
+from bioetl.domain.ports.idmapping import IDMappingSourceReaderPort
+from bioetl.domain.ports.metadata.writer import MetadataWriterPort
+from bioetl.domain.ports.observability.metrics import (
+    HealthMetricsExpositionPort,
+    MetricsPublisherPort,
+    MetricsServerPort,
+)
+from bioetl.domain.ports.quality.dq_report import DQReportWriterPort
+from bioetl.domain.ports.runtime.checkpoint import CheckpointPort
+from bioetl.domain.ports.runtime.composite_checkpoint import CompositeCheckpointPort
+from bioetl.domain.ports.storage.run_report_store import RunReportStorePort
+from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
+from bioetl.infrastructure.adapters.input.idmapping_csv_reader_adapter import (
+    IDMappingCsvReaderAdapter,
+)
+from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
+from bioetl.infrastructure.audit.file_audit import FileAuditAdapter
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
+from bioetl.infrastructure.control_plane.file_effective_config_artifact_store import (
+    FileEffectiveConfigArtifactStore,
+)
+from bioetl.infrastructure.export.debug_export_adapter import DebugExportAdapter
+from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
+from bioetl.infrastructure.observability.health_metrics_exposition import (
+    HealthMetricsExpositionAdapter,
+)
+from bioetl.infrastructure.observability.metrics_publisher_adapter import (
+    MetricsPublisherAdapter,
+)
+from bioetl.infrastructure.observability.metrics_server_adapter import (
+    MetricsServerAdapter,
+)
+from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
+from bioetl.infrastructure.storage.run_report_store_adapter import (
+    FileRunReportStoreAdapter,
+)
+from bioetl.infrastructure.storage.support.checkpoint_writer import (
+    FileCompositeCheckpointWriter,
+)
+
 pytestmark = pytest.mark.architecture
 
 
@@ -132,6 +178,7 @@ PORT_ADAPTER_CASES = (
     PortAdapterCase(ArtifactByteComparisonPort, FileArtifactByteComparisonAdapter),
     PortAdapterCase(BronzeStoragePort, BronzeWriter),
     PortAdapterCase(CircuitBreakerPort, CircuitBreakerGuard),
+    PortAdapterCase(DeltaReaderPort, DeltaReader),
     PortAdapterCase(DeltaReaderPort, CompositeReplayInputReader),
     PortAdapterCase(DeltaReaderPort, RequestReader),
     PortAdapterCase(ExportCatalogPort, ExportCatalogAdapter),
@@ -157,6 +204,22 @@ PORT_ADAPTER_CASES = (
     PortAdapterCase(WorkflowExecutionStatePort, FileWorkflowExecutionStateStore),
     PortAdapterCase(WorkflowLedgerPort, FileWorkflowLedgerStore),
     PortAdapterCase(WorkflowManifestPort, FileWorkflowManifestStore),
+    PortAdapterCase(AuditPort, FileAuditAdapter),
+    PortAdapterCase(CheckpointPort, LocalCheckpointAdapter),
+    PortAdapterCase(CompositeCheckpointPort, FileCompositeCheckpointWriter),
+    PortAdapterCase(DataSourcePort, CrossRefAdapter),
+    PortAdapterCase(DataSourcePort, PubChemAdapter),
+    PortAdapterCase(DebugExportPort, DebugExportAdapter),
+    PortAdapterCase(DQReportWriterPort, DQReportWriter),
+    PortAdapterCase(EffectiveConfigArtifactStorePort, FileEffectiveConfigArtifactStore),
+    PortAdapterCase(HealthMetricsExpositionPort, HealthMetricsExpositionAdapter),
+    PortAdapterCase(IDMappingSourceReaderPort, IDMappingCsvReaderAdapter),
+    PortAdapterCase(MetadataWriterPort, NoOpMetadataWriter),
+    PortAdapterCase(MetadataWriterPort, MetadataWriter),
+    PortAdapterCase(MetricsPort, NoOpMetrics),
+    PortAdapterCase(MetricsPublisherPort, MetricsPublisherAdapter),
+    PortAdapterCase(MetricsServerPort, MetricsServerAdapter),
+    PortAdapterCase(RunReportStorePort, FileRunReportStoreAdapter),
 )
 
 
@@ -400,3 +463,113 @@ def test_runtime_checkable_observability_ports_accept_real_adapters() -> None:
     assert isinstance(UnifiedLogger("chembl_activity", "run-123"), LoggerPort)
     assert isinstance(StructlogLogger(structlog.get_logger("bioetl.test")), LoggerPort)
     assert isinstance(CircuitBreakerGuard(provider="chembl"), CircuitBreakerPort)
+
+
+_ADAPTER_CONSTRUCTOR_SUFFIXES = (
+    "Adapter",
+    "Writer",
+    "Reader",
+    "Store",
+    "Catalog",
+    "Guard",
+    "Logger",
+    "Metrics",
+    "Graph",
+    "Loader",
+    "Lock",
+    "Coordinator",
+    "Accumulator",
+)
+
+# Discovered constructors that are intentionally outside PORT_ADAPTER_CASES:
+# stdlib noise (DictReader/Lock/RLock) plus composition helpers that are not
+# port-matrix adapters. Keep sorted; never put FutureAdapter-style new ports here.
+_DISCOVERED_BINDING_EXCLUSIONS = frozenset(
+    {
+        "BatchWriter",
+        "ChemblPolicyRegistryLoader",
+        "DictReader",
+        "FileArchiveStore",
+        "FileControlPlaneArtifactLifecycleStore",
+        "FileHistoricalReplayClosureStore",
+        "FileHistoricalReplayUniverseStore",
+        "FileProviderHealthEvidenceStore",
+        "FileSystemEnumLoader",
+        "FileWorkflowTransformArtifactStore",
+        "LazyFactoryCatalog",
+        "Lock",
+        "ProteinClassTargetTypeMappingLoader",
+        "ProviderStore",
+        "PublicationTypeClassificationLoader",
+        "RLock",
+        "UnifiedQuarantineAdapter",
+    }
+)
+
+
+def _instantiated_adapter_names(py_files: list[Path]) -> set[str]:
+    """Find adapter-like constructors without consulting the conformance matrix."""
+    import ast
+
+    names: set[str] = set()
+    for py_file in py_files:
+        tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            if isinstance(node.func, ast.Name):
+                name = node.func.id
+            elif isinstance(node.func, ast.Attribute):
+                name = node.func.attr
+            else:
+                continue
+            if name.endswith(_ADAPTER_CONSTRUCTOR_SUFFIXES):
+                names.add(name)
+    return names
+
+
+def test_production_adapter_discovery_does_not_depend_on_matrix(
+    tmp_path: Path,
+) -> None:
+    """New conventional adapter names are discovered before matrix registration."""
+    composition = tmp_path / "composition.py"
+    composition.write_text(
+        "class FutureAdapter:\n    pass\n\nFutureAdapter()\n",
+        encoding="utf-8",
+    )
+    assert _instantiated_adapter_names([composition]) == {"FutureAdapter"}
+
+
+def test_discovered_binding_exclusions_stay_disjoint_from_matrix() -> None:
+    """Exclusions must not hide constructors already tracked by the matrix."""
+    tracked = {case.adapter_cls.__name__ for case in PORT_ADAPTER_CASES}
+    overlap = tracked & _DISCOVERED_BINDING_EXCLUSIONS
+    assert not overlap, f"Matrix adapters listed as discovery exclusions: {overlap}"
+
+
+def test_missing_production_binding_detected() -> None:
+    """Production bindings must be tracked in PORT_ADAPTER_CASES or excluded."""
+    composition_dir = (
+        Path(__file__).resolve().parents[2] / "src" / "bioetl" / "composition"
+    )
+    assert composition_dir.is_dir(), (
+        f"Composition directory is missing: {composition_dir}"
+    )
+
+    def raise_walk_error(error: OSError) -> None:
+        raise error
+
+    py_files = sorted(
+        directory / filename
+        for directory, _, filenames in composition_dir.walk(on_error=raise_walk_error)
+        for filename in filenames
+        if filename.endswith(".py")
+    )
+    assert py_files, f"No production composition modules found under {composition_dir}"
+
+    instantiated_adapters = _instantiated_adapter_names(py_files)
+    tracked_adapters = {case.adapter_cls.__name__ for case in PORT_ADAPTER_CASES}
+    missing = instantiated_adapters - tracked_adapters - _DISCOVERED_BINDING_EXCLUSIONS
+    assert not missing, (
+        f"Production bindings missing from conformance matrix: {missing}"
+    )
