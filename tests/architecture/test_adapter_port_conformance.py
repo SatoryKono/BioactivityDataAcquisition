@@ -404,46 +404,63 @@ def test_runtime_checkable_observability_ports_accept_real_adapters() -> None:
     assert isinstance(CircuitBreakerGuard(provider="chembl"), CircuitBreakerPort)
 
 
+_ADAPTER_CONSTRUCTOR_SUFFIXES = (
+    "Adapter",
+    "Writer",
+    "Reader",
+    "Store",
+    "Catalog",
+    "Guard",
+    "Logger",
+    "Metrics",
+    "Graph",
+    "Loader",
+    "Lock",
+    "Coordinator",
+    "Accumulator",
+)
+
+
+def _instantiated_adapter_names(py_files: list[Path]) -> set[str]:
+    """Find adapter-like constructors without consulting the conformance matrix."""
+    import ast
+
+    names: set[str] = set()
+    for py_file in py_files:
+        tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            if isinstance(node.func, ast.Name):
+                name = node.func.id
+            elif isinstance(node.func, ast.Attribute):
+                name = node.func.attr
+            else:
+                continue
+            if name.endswith(_ADAPTER_CONSTRUCTOR_SUFFIXES):
+                names.add(name)
+    return names
+
+
+def test_production_adapter_discovery_does_not_depend_on_matrix(
+    tmp_path: Path,
+) -> None:
+    """New conventional adapter names are discovered before matrix registration."""
+    composition = tmp_path / "composition.py"
+    composition.write_text(
+        "class FutureAdapter:\\n    pass\\n\\nFutureAdapter()\\n",
+        encoding="utf-8",
+    )
+    assert _instantiated_adapter_names([composition]) == {"FutureAdapter"}
+
+
 def test_missing_production_binding_detected() -> None:
     """Production bindings must be tracked in PORT_ADAPTER_CASES."""
-    import ast
     from pathlib import Path
-
-    known_adapters = {
-        "FilesystemAdrCatalog",
-        "FileArtifactByteComparisonAdapter",
-        "BronzeWriter",
-        "CircuitBreakerGuard",
-        "CompositeReplayInputReader",
-        "RequestReader",
-        "ExportCatalogAdapter",
-        "ExportWriterAdapter",
-        "SilverForeignKeyReconciliationAdapter",
-        "GoldWriter",
-        "FileLineageStore",
-        "MemoryLock",
-        "NoOpLogger",
-        "StructlogLogger",
-        "UnifiedLogger",
-        "MetadataCoordinator",
-        "PrometheusMetrics",
-        "ChEMBLProteinClassificationGraph",
-        "PublicationControlledVocabularyLoader",
-        "StorageRowReconciliationAdapter",
-        "FileRunLedgerStore",
-        "FileRunManifestStore",
-        "SilverWriter",
-        "StageAccountingAccumulator",
-        "FileWorkflowExecutionStateStore",
-        "FileWorkflowLedgerStore",
-        "FileWorkflowManifestStore",
-    }
 
     composition_dir = (
         Path(__file__).resolve().parents[2] / "src" / "bioetl" / "composition"
     )
-    instantiated_adapters = set()
-
     assert composition_dir.is_dir(), (
         f"Composition directory is missing: {composition_dir}"
     )
@@ -459,17 +476,7 @@ def test_missing_production_binding_detected() -> None:
     )
     assert py_files, f"No production composition modules found under {composition_dir}"
 
-    for py_file in py_files:
-        content = py_file.read_text(encoding="utf-8")
-        tree = ast.parse(content, filename=str(py_file))
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
-                if node.func.id in known_adapters:
-                    instantiated_adapters.add(node.func.id)
-            elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
-                if node.func.attr in known_adapters:
-                    instantiated_adapters.add(node.func.attr)
-
+    instantiated_adapters = _instantiated_adapter_names(py_files)
     tracked_adapters = {case.adapter_cls.__name__ for case in PORT_ADAPTER_CASES}
     missing = instantiated_adapters - tracked_adapters
     assert not missing, (
