@@ -768,8 +768,7 @@ def _run_phase_command(
     try:
         from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
-        completed = (
-            subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
+        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
                 ensure_safe_cli_argv([str(token) for token in command]),
                 cwd=phase_root if isolated_workdir else repo_root,
                 env=env,
@@ -777,7 +776,6 @@ def _run_phase_command(
                 text=True,
                 timeout=timeout_seconds,
                 check=False,
-            )
         )
         exit_code = completed.returncode
         stdout = completed.stdout
@@ -1845,4 +1843,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
