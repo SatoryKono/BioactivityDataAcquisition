@@ -29,11 +29,11 @@ from bioetl.infrastructure.control_plane.replay_object_verifier import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import MetricsPort
-    from bioetl.domain.ports.control_plane.lineage import LineageStorePort
-    from bioetl.domain.ports.control_plane.run_ledger import RunLedgerPort
-    from bioetl.domain.ports.control_plane.run_manifest import RunManifestPort
-    from bioetl.domain.ports.control_plane.workflow_manifest import (
+    from bioetl.domain.ports import (
+        LineageStorePort,
+        MetricsPort,
+        RunLedgerPort,
+        RunManifestPort,
         WorkflowManifestPort,
     )
 

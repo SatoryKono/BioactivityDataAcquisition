@@ -25,9 +25,7 @@ from bioetl.domain.control_plane.run_evidence_location import (
     EvidenceLocationLookupResult,
     RunEvidenceLocation,
 )
-from bioetl.domain.ports.control_plane.run_evidence_location import (
-    RunEvidenceLocationReadPort,
-)
+from bioetl.domain.ports import RunEvidenceLocationReadPort
 from bioetl.domain.types import RunID
 
 __all__ = [
