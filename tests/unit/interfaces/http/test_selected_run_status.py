@@ -1642,10 +1642,9 @@ async def test_selected_status_handler_covers_selector_and_request_failures(
         MagicMock(),
         {"pipeline": "chembl_activity", "run_id": "-"},
     )
-    assert host._send_payload_response.call_args.args[2]["reason"] == "request_failed"
-    assert host._send_payload_response.call_args.args[2]["trust_status"] == (
-        "QUERY ERROR"
-    )
+    payload = host._send_payload_response.call_args.args[2]
+    assert payload["reason"] == "request_failed"
+    assert payload["verdict"] == "QUERY ERROR"
 
 
 def test_selection_presentation_keeps_canonical_domains_and_one_action():
