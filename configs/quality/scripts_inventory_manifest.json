@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-01T22:41:39.436200+00:00",
+  "generated_at": "2026-11-02T07:53:08.416950+00:00",
   "summary": {
     "total_scripts": 705,
     "status_counts": {
@@ -3745,7 +3745,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 220,
+          "line": 221,
           "source_group": "tests",
           "text": "script = ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         },
@@ -23701,7 +23701,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 295,
+          "line": 297,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\""
         }
@@ -24423,7 +24423,7 @@
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
           "line": 182,
           "source_group": "other",
-          "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"8e3b299d9ae91fbfe53d6c13c62e1b04decfdc95ef9dc694527812412801beed\","
+          "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"28c1914c4104413695381c6d44c73d6c81a6a8d7d6136e497e61cfcde2561dfc\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
@@ -24608,7 +24608,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 339,
+          "line": 341,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1\""
         },
