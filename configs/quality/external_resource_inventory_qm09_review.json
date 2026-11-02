@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "catalog_ref": "a5243cb4bbed67b267daecdc097b8c48501e140a",
-  "source_ref": "68912a44d5ddc38813a0d36741528ab83a175032",
+  "catalog_ref": "ddbb7a0ee687365258bc407110e38601c4c3b765",
+  "source_ref": "54290f9f0a3810addef18eed058a104af0364c38",
   "source_reviews": {
-    "src/bioetl/interfaces/http/_health_server_filter_options_payload.py": "Reviewed Phase-1 restack on main after #12674: required deadline, _finalize_run_id_options_label, _prometheus_base_url_for_run_type_options gate, and asyncio.to_thread(supplement_prometheus_run_type_options, ..., deadline=...) kept under build_filter_options_payload for COMP-004 exclusion continuity. No new acquisition owner.",
+    "src/bioetl/interfaces/http/_health_server_filter_options_payload.py": "Reviewed Phase-1 after RF-002 main sync: required deadline, _finalize_run_id_options_label, _prometheus_base_url_for_run_type_options gate, and asyncio.to_thread(supplement_prometheus_run_type_options, ..., deadline=...) kept under build_filter_options_payload for COMP-004 exclusion continuity. No new acquisition owner.",
     "src/bioetl/interfaces/http/_health_server_routing_support.py": "Reviewed filter-options wrapper defaulting deadline via time.monotonic()+_FILTER_OPTIONS_TIMEOUT_SECONDS when omitted, forwarding required deadline= into _build_filter_options_payload. Lambda segments gain deadline= only; no new acquisition sites.",
     "src/bioetl/interfaces/http/_processed_records_prometheus.py": "Reviewed optional timeout_seconds on _fetch_prometheus_query_payload so Prom callers can cap below outer filter-options budget. Same _open_url acquisition site; default remains PROMETHEUS_QUERY_TIMEOUT_SECONDS.",
     "src/bioetl/interfaces/http/_run_type_universe_options.py": "Reviewed new Prometheus run_type universe supplement helper with fail-open semantics and budget cap min(remaining-reserve, PROMETHEUS_QUERY_TIMEOUT). Reuses already-qualified _fetch_prometheus_query_payload / _open_url owner; no direct sockets/files/subprocess/locks; no cleanup ownership."
