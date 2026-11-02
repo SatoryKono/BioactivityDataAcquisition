@@ -51,6 +51,7 @@ from bioetl.interfaces.http.control_plane_selector_context import (
 
 _NOT_FOUND_MESSAGE = "Not Found"
 _FILTER_OPTIONS_TIMEOUT_SECONDS = 20.0
+_SELECTOR_CONTEXT_ENDPOINT = "/ops/control-plane/selector-context"
 _CONTROL_PLANE_CLIENT_ERRORS = (ValueError, RuntimeError, OSError, ConnectionError)
 
 
@@ -388,14 +389,14 @@ async def handle_control_plane_selector_context(
             operation_factory=lambda: _selector_context_bounded_payload(host, query),
             timeout_seconds=_FILTER_OPTIONS_TIMEOUT_SECONDS,
             queue_timeout_seconds=SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
-            endpoint="/ops/control-plane/selector-context",
+            endpoint=_SELECTOR_CONTEXT_ENDPOINT,
         )
     except ForensicEndpointUnavailable as exc:
         await host._send_payload_response(
             writer,
             exc.status_code,
             forensic_unavailable_payload(
-                endpoint="/ops/control-plane/selector-context",
+                endpoint=_SELECTOR_CONTEXT_ENDPOINT,
                 reason=exc.reason,
             ),
         )
@@ -441,7 +442,7 @@ async def _dispatch_ops_endpoints(
         return True
     handlers = {
         "/ops/control-plane/filter-options": handle_control_plane_filter_options,
-        "/ops/control-plane/selector-context": handle_control_plane_selector_context,
+        _SELECTOR_CONTEXT_ENDPOINT: handle_control_plane_selector_context,
         "/ops/control-plane/identity-table": handle_control_plane_identity_table,
         "/ops/control-plane/identity-evidence": handle_control_plane_identity_evidence,
         "/ops/control-plane/checkpoint-freshness": handle_control_plane_checkpoint_freshness,
