@@ -162,42 +162,6 @@ def test_check_update_check_is_readonly_idempotent_and_preserves_history(
     assert current["source_requalification"]["runtime_result"] == "NOT_RUN_12553"
 
 
-def test_reviewed_reference_move_can_cross_source_files(candidate: tuple) -> None:
-    root, review, _ = candidate
-    moved = "src/bioetl/moved_fixture.py"
-    (root / SOURCE).write_text(
-        "def read_file():\n    return None\n", encoding="utf-8", newline="\n"
-    )
-    (root / moved).write_text(TEXT, encoding="utf-8", newline="\n")
-    git(root, "add", "--", SOURCE, moved)
-    git(root, "commit", "-qm", "move fixture acquisition")
-    review["source_ref"] = git(root, "rev-parse", "HEAD")
-    review["source_reviews"][SOURCE] = (
-        "The reviewed file read moved to its owning module."
-    )
-    review["source_reviews"][moved] = (
-        "The existing file read retains the same lifetime."
-    )
-    review["reference_moves"] = [
-        {
-            "identity": "fixture.file",
-            "fields": ["creation_sites", "production_binding"],
-            "from": {
-                "file": SOURCE,
-                "line": 2,
-                "expression": "open('fixture')",
-            },
-            "to": {"file": moved, "scope": "read_file", "call": "open"},
-        }
-    ]
-
-    assert invoke(root, review, "--update") == 0
-    current = inventory.load_catalog(root)
-    resource = current["resources"][0]
-    assert resource["creation_sites"][0]["file"] == moved
-    assert resource["production_binding"][0]["file"] == moved
-
-
 def test_real_squash_preserves_source_review_without_qualifying_dirty_inputs(
     candidate: tuple, monkeypatch: pytest.MonkeyPatch
 ) -> None:

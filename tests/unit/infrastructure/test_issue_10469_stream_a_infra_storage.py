@@ -51,7 +51,6 @@ from bioetl.infrastructure.storage.lineage_persistence import (
     persist_lineage_fragment_if_present,
     resolve_metadata_and_lineage_fragment,
 )
-from bioetl.infrastructure.storage.metadata import builder_base
 from bioetl.infrastructure.storage.metadata.builder_base import (
     _MetadataBuilderBase,
     _build_gold_artifact_id,
@@ -133,8 +132,7 @@ class TestBuilderBase:
         assert _get_git_commit_cached() is None
         monkeypatch.setattr("shutil.which", lambda _name: "git")
         monkeypatch.setattr(
-            builder_base,
-            "run_protected_command",
+            "subprocess.run",
             lambda *_a, **_k: (_ for _ in ()).throw(FileNotFoundError("git")),
         )
         assert _get_git_commit_cached() is None

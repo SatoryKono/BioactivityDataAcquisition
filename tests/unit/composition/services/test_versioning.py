@@ -46,7 +46,7 @@ def _clear_git_commit_cache() -> None:
 
 
 @pytest.mark.unit
-@patch("bioetl.infrastructure.provenance.code_revision.run_protected_command")
+@patch("bioetl.infrastructure.provenance.code_revision.subprocess.run")
 def test_get_git_commit_returns_full_hash_on_success(mock_run: MagicMock) -> None:
     full_hash = "a" * 40
     mock_run.return_value = SimpleNamespace(returncode=0, stdout=f"{full_hash}\n")
@@ -66,7 +66,7 @@ def test_get_git_commit_returns_full_hash_on_success(mock_run: MagicMock) -> Non
 
 
 @pytest.mark.unit
-@patch("bioetl.infrastructure.provenance.code_revision.run_protected_command")
+@patch("bioetl.infrastructure.provenance.code_revision.subprocess.run")
 def test_get_git_commit_returns_none_on_nonzero_exit(mock_run: MagicMock) -> None:
     mock_run.return_value = SimpleNamespace(returncode=1, stdout="")
 
@@ -74,7 +74,7 @@ def test_get_git_commit_returns_none_on_nonzero_exit(mock_run: MagicMock) -> Non
 
 
 @pytest.mark.unit
-@patch("bioetl.infrastructure.provenance.code_revision.run_protected_command")
+@patch("bioetl.infrastructure.provenance.code_revision.subprocess.run")
 def test_get_git_commit_rejects_non_full_sha(mock_run: MagicMock) -> None:
     mock_run.return_value = SimpleNamespace(returncode=0, stdout="abc1234\n")
 
@@ -82,7 +82,7 @@ def test_get_git_commit_rejects_non_full_sha(mock_run: MagicMock) -> None:
 
 
 @pytest.mark.unit
-@patch("bioetl.infrastructure.provenance.code_revision.run_protected_command")
+@patch("bioetl.infrastructure.provenance.code_revision.subprocess.run")
 def test_get_git_commit_returns_none_on_exception(mock_run: MagicMock) -> None:
     mock_run.side_effect = FileNotFoundError("git missing")
 
@@ -94,7 +94,7 @@ def test_get_git_commit_returns_none_on_exception(mock_run: MagicMock) -> None:
     "bioetl.infrastructure.provenance.code_revision._iter_windows_git_fallback_executables"
 )
 @patch("bioetl.infrastructure.provenance.code_revision.os.name", "nt")
-@patch("bioetl.infrastructure.provenance.code_revision.run_protected_command")
+@patch("bioetl.infrastructure.provenance.code_revision.subprocess.run")
 def test_get_git_commit_falls_back_to_explicit_windows_git_executable(
     mock_run: MagicMock,
     mock_candidates: MagicMock,
@@ -111,7 +111,7 @@ def test_get_git_commit_falls_back_to_explicit_windows_git_executable(
 
 
 @pytest.mark.unit
-@patch("bioetl.infrastructure.provenance.code_revision.run_protected_command")
+@patch("bioetl.infrastructure.provenance.code_revision.subprocess.run")
 def test_get_code_revision_provenance_reports_clean_state(
     mock_run: MagicMock,
     tmp_path,
@@ -139,7 +139,7 @@ def test_get_code_revision_provenance_reports_clean_state(
 
 
 @pytest.mark.unit
-@patch("bioetl.infrastructure.provenance.code_revision.run_protected_command")
+@patch("bioetl.infrastructure.provenance.code_revision.subprocess.run")
 def test_get_code_revision_provenance_reports_dirty_state(
     mock_run: MagicMock,
     tmp_path,
@@ -167,7 +167,7 @@ def test_get_code_revision_provenance_reports_dirty_state(
 
 
 @pytest.mark.unit
-@patch("bioetl.infrastructure.provenance.code_revision.run_protected_command")
+@patch("bioetl.infrastructure.provenance.code_revision.subprocess.run")
 def test_get_code_revision_provenance_reports_documented_git_unavailable_state(
     mock_run: MagicMock,
 ) -> None:
@@ -185,7 +185,7 @@ def test_get_code_revision_provenance_reports_documented_git_unavailable_state(
     "bioetl.infrastructure.provenance.code_revision._iter_windows_git_fallback_executables"
 )
 @patch("bioetl.infrastructure.provenance.code_revision.os.name", "nt")
-@patch("bioetl.infrastructure.provenance.code_revision.run_protected_command")
+@patch("bioetl.infrastructure.provenance.code_revision.subprocess.run")
 def test_get_code_revision_provenance_uses_same_windows_git_fallback_for_dirty_check(
     mock_run: MagicMock,
     mock_candidates: MagicMock,
@@ -330,7 +330,7 @@ def test_iter_windows_git_fallback_executables_discovers_unique_git_exe(
 @patch(
     "bioetl.infrastructure.provenance.code_revision._iter_windows_git_fallback_executables"
 )
-@patch("bioetl.infrastructure.provenance.code_revision.run_protected_command")
+@patch("bioetl.infrastructure.provenance.code_revision.subprocess.run")
 def test_run_git_command_preserves_repo_failures_without_windows_retry(
     mock_run: MagicMock,
     mock_candidates: MagicMock,
@@ -350,7 +350,7 @@ def test_run_git_command_preserves_repo_failures_without_windows_retry(
 @patch(
     "bioetl.infrastructure.provenance.code_revision._iter_windows_git_fallback_executables"
 )
-@patch("bioetl.infrastructure.provenance.code_revision.run_protected_command")
+@patch("bioetl.infrastructure.provenance.code_revision.subprocess.run")
 def test_run_git_command_returns_last_windows_fallback_result_after_failures(
     mock_run: MagicMock,
     mock_candidates: MagicMock,
@@ -446,7 +446,7 @@ def test_get_code_revision_provenance_reports_unknown_on_unexpected_returncode(
 
 
 @pytest.mark.unit
-@patch("bioetl.infrastructure.provenance.code_revision.run_protected_command")
+@patch("bioetl.infrastructure.provenance.code_revision.subprocess.run")
 def test_get_code_revision_provenance_falls_back_to_repo_lockfile_outside_runtime_tree(
     mock_run: MagicMock,
     tmp_path,

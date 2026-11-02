@@ -30,7 +30,6 @@ BUDGET_TMP_DIR=""
 BUDGET_QUALITY_JSON=""
 BUDGET_LINT_JSON=""
 BUDGET_NIGHTLY_JSON=""
-BUDGET_BROAD_JSON=""
 THEME_CONFIG="$DIAGRAM_THEME_DIR/mermaid-config.json"
 
 usage() {
@@ -389,7 +388,6 @@ run_budget_enforcement() {
   if [[ "$mode" == "nightly" ]]; then
     cmd+=(
       --nightly-report "$BUDGET_NIGHTLY_JSON"
-      --broad-report "$BUDGET_BROAD_JSON"
       --max-nightly-errors 0
       --max-nightly-warnings 0
     )
@@ -477,7 +475,6 @@ run_nightly_profile() {
       BUDGET_TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/diagram-budget.XXXXXX")"
     fi
     BUDGET_NIGHTLY_JSON="$BUDGET_TMP_DIR/nightly.json"
-    BUDGET_BROAD_JSON="$BUDGET_TMP_DIR/broad.json"
     nightly_cmd+=(--json-out "$BUDGET_NIGHTLY_JSON")
   fi
 
@@ -488,9 +485,6 @@ run_nightly_profile() {
   "${nightly_cmd[@]}"
 
   if [[ "$ENFORCE_BUDGET" -eq 1 ]]; then
-    python3 "$REPO_ROOT/scripts/diagrams/check/check_diagram_visual_smoke.py" \
-      --manifest "$REPO_ROOT/docs/02-architecture/diagrams/manifests/visual-smoke-broad.txt" \
-      --json-out "$BUDGET_BROAD_JSON" || true
     log "DIAG-BUDGET: Enforce nightly budget"
     run_budget_enforcement nightly
   fi
@@ -619,4 +613,3 @@ case "$PROFILE" in
 esac
 
 log "Diagram checks completed (profile=$PROFILE)"
-

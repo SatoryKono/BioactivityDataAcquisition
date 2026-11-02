@@ -768,11 +768,10 @@ def test_committed_gap_ledger_is_not_the_shadow_window() -> None:
     assert historical["status"] == "unacceptable"
     assert "mixed_tested_sha" in historical["reason_codes"]
     assert "no_parallel_candidate_arm" in historical["reason_codes"]
-    assert ledger["window_start_sha"] == ledger["baseline_sha"]
-    assert isinstance(ledger["window_start_utc"], str)
-    assert ledger["window_start_utc"]
+    assert ledger["window_start_sha"] is None
+    assert ledger["window_start_utc"] is None
     assert ledger["independent_review_record"] is None
-    assert ledger["next_window"]["status"] == "started"
+    assert ledger["next_window"]["status"] == "not_started"
     assert ledger["durable_archive"]["minimum_days"] == 90
     assert ledger["durable_archive"]["elapsed_age_is_90_days"] is False
     assert ledger["durable_archive"]["independent_restore"] is False

@@ -78,6 +78,7 @@ Index: [sequence/README.md](sequence/README.md)
 ## Provider Data Flow Diagrams — issue #6545
 
 Index: [providers/README.md](./providers/README.md)
+
 Per provider (4 flows: API, transform, medallion, errors): `chembl`, `pubchem`,
 `uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar` under `providers/`.
 
@@ -156,7 +157,8 @@ ______________________________________________________________________
 | 35  | Batch Aggregate Seal Write Commit Failure Lifecycle             | `architecture/35-batch-aggregate-seal-write-commit-failure-lifecycle.mmd`                        | Batch aggregate lifecycle |
 | 36  | Quarantine Entry Review Resolution And Discard Flow             | `architecture/36-quarantine-entry-review-resolution-and-discard-flow.mmd`                        | Quarantine entry state transitions |
 | 37  | Observability Bootstrap Bundle From Settings To Ports           | `architecture/37-observability-bootstrap-bundle-from-settings-to-ports.mmd`                      | Logger/metrics/tracer bootstrap bundle |
-| 38  | ChEMBL Activity Extraction To Bronze Artifact Publication       | `architecture/38-chembl-bronze-activity-extraction-to-artifact-publication.mmd`                  | ChEMBL activity bronze publication path || 39  | CrossRef Publication Search Fallback And Batch DOI Fetch        | `architecture/39-crossref-search-fallback-and-batch-doi-fetch-publications.mmd`                  | CrossRef publication fallback path |
+| 38  | ChEMBL Activity Extraction To Bronze Artifact Publication       | `architecture/38-chembl-bronze-activity-extraction-to-artifact-publication.mmd`                  | ChEMBL activity bronze publication path |
+| 39  | CrossRef Publication Search Fallback And Batch DOI Fetch        | `architecture/39-crossref-search-fallback-and-batch-doi-fetch-publications.mmd`                  | CrossRef publication fallback path |
 | 40  | PubMed Search Fetch XML Parse And Publication Mapping           | `architecture/40-pubmed-search-fetch-xml-parse-and-publication-mapping.mmd`                      | PubMed XML publication mapping path |
 | 41  | OpenAlex Cursor Pagination And Response Mapping Path            | `architecture/41-openalex-cursor-pagination-and-response-mapping-path.mmd`                       | OpenAlex cursor pagination path |
 | 42  | SemanticScholar Search Fallback And Batch Request Flow          | `architecture/42-semanticscholar-search-fallback-and-batch-request-flow.mmd`                     | Semantic Scholar search and batch flow |
@@ -235,7 +237,8 @@ Historical/foundational diagrams consolidated from `docs/02-architecture/diagram
 ### Foundation 01–25
 
 | #   | File                                                   | Description                                 |
-| --- | ------------------------------------------------------ | ------------------------------------------- || 01a | `foundation/01-full-system-component.mmd`              | Full system component diagram (C4-style)    |
+| --- | ------------------------------------------------------ | ------------------------------------------- |
+| 01a | `foundation/01-full-system-component.mmd`              | Full system component diagram (C4-style)    |
 | 01b | `foundation/01-high-level.mmd`                         | High-level system overview                  |
 | 02a | `foundation/02-full-medallion-data-flow.mmd`           | Medallion architecture data flow (detailed) |
 | 03a | `foundation/03-pipeline-execution-happy-path.mmd`      | Pipeline execution sequence (happy path)    |
@@ -314,7 +317,8 @@ ______________________________________________________________________
 | Layer      | Fill      | Border    |
 | ---------- | --------- | --------- |
 | Bronze     | `#fff7ed` | `#f59e0b` |
-| Silver     | `#f8fafc` | `#475569` || Gold       | `#fefce8` | `#ca8a04` |
+| Silver     | `#f8fafc` | `#475569` |
+| Gold       | `#fefce8` | `#ca8a04` |
 | Quarantine | `#ffe4e6` | `#e11d48` |
 
 ______________________________________________________________________
@@ -393,6 +397,7 @@ Description coverage policy:
 - `architecture/`, `foundation/`, and `views/` require one narrative card in `descriptions/<collection>/<stem>.md` for every active source file.
 - `class-diagrams/` requires narrative cards for the 16 primary curated family diagrams (`01-*` through `16-*`).
 - Focused class method catalogs (`01a`, `08a`, `14a`), the frontmatter sandbox copy, and generated `90-pkg-*` supplemental package slices are inventory/render surfaces; they are covered by their parent family cards or package-level generated context and are not required to have individual narrative cards.
+
 ### Render options
 
 ```bash
@@ -472,7 +477,8 @@ docs/02-architecture/diagrams/
     *.mmd           # source diagrams (89)
     svg/*.svg       # rendered vector (scalable)
     png/*.png       # rendered raster (300 DPI)
-  class-diagrams/    *.mmd           # source diagrams (94 total:
+  class-diagrams/
+    *.mmd           # source diagrams (94 total:
                     #   19 curated families
                     #   1 frontmatter sandbox copy
                     #   generated 90-pkg-* supplemental package slices)
@@ -516,11 +522,8 @@ the smoke baseline set.
 
 Visual-smoke coverage is tiered: `visual-smoke.txt` is the PR-sized T0 set,
 `visual-smoke-extended.txt` is nightly blocking coverage, and
-`visual-smoke-broad.txt` is an enforced nightly tier
-when the nightly budget command receives a valid broad report. The repository's
-Phase 2 GitHub Actions job remains disabled under the Actions policy in #11196,
-so this configured budget is not currently run by scheduled CI.
-
+`visual-smoke-broad.txt` is a nightly warn-only expansion tier until its broader
+baseline is stable.
 
 MkDocs is validation-only in the current repository workflow: `mkdocs.yml` is
 checked by docs verification, but there is no GitHub Pages deployment job.
@@ -634,7 +637,8 @@ participating in any edge or message.
 **Skipped:** `classDiagram`, `stateDiagram`, `erDiagram`, `mindmap`, legend files.
 
 ```bash
-# Report orphans (CI mode)python scripts/diagrams/fix/prune_orphan_nodes.py --check
+# Report orphans (CI mode)
+python scripts/diagrams/fix/prune_orphan_nodes.py --check
 
 # Machine-readable output
 python scripts/diagrams/fix/prune_orphan_nodes.py --check --json

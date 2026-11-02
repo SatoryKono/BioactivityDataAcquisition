@@ -432,14 +432,7 @@ def test_observability_backend_process_parse_drop_and_popen_kwargs(
     def _timeout(_command: list[str], **_kwargs: object) -> object:
         raise subprocess.TimeoutExpired(cmd="netstat", timeout=1)
 
-    def _protected_runner(command: list[str], **_kwargs: object) -> object:
-        if command == ["netstat"]:
-            raise subprocess.TimeoutExpired(cmd=command, timeout=1)
-        return subprocess.CompletedProcess(
-            args=command, returncode=1, stdout="", stderr=""
-        )
-
-    monkeypatch.setattr(backend, "run_protected_command", _protected_runner)
+    monkeypatch.setattr(backend.subprocess, "run", _timeout)
     monkeypatch.setattr(backend, "_resolve_system_executable", lambda _cmd: "netstat")
     assert backend._run_listener_probe(["netstat"]) == ""
     assert backend._run_taskkill(9).returncode == 1

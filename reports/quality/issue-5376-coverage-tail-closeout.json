@@ -29,7 +29,7 @@
     "tests/architecture/test_module_coverage_inventory.py"
   ],
   "current_live_metrics": {
-    "below_85_module_count": 1,
+    "below_85_module_count": 0,
     "uncovered_module_count": 0,
     "unmeasured_module_count": 0,
     "tracked_module_coverage_percent": 100.0,
@@ -38,9 +38,9 @@
   "closeout": {
     "status": "regressed_after_closeout",
     "historical_status": "bounded_shard_complete",
-    "residual_tail_remains": true,
-    "residual_below_85_module_count": 1,
-    "rationale": "Retained live inventory has 1 measured modules below the default floor; uncovered=0, unmeasured=0. Historical floors are retained; these values do not assert fresh raw coverage. Historical shard delta and regressed_after_closeout status remain unchanged."
+    "residual_tail_remains": false,
+    "residual_below_85_module_count": 0,
+    "rationale": "Retained live inventory has 0 measured modules below the default floor; uncovered=0, unmeasured=0. Historical floors are retained; these values do not assert fresh raw coverage. Historical shard delta and regressed_after_closeout status remain unchanged."
   },
   "previous_current_bindings": [
     {
@@ -62,8 +62,8 @@
     }
   ],
   "current_live_metrics_provenance": {
-    "source_inventory_sha256": "8619d435a2b0796c05ad80f711df9e55e34276fe63ce7ee267eaf67b71f22e48",
-    "source_tree_sha256": "14edcab13289055a17a22b1542f03cbaa2cf6634aa315db1ab737afb38f01fe7",
+    "source_inventory_sha256": "2d502b10948659f2190304f424e9f266211eadf09177108773fb4c4d27801f5d",
+    "source_tree_sha256": "7b2eef170a4bae2b7f641a614f552b749b830b219d74b8661287bc1c4e927c51",
     "derived_by": "scripts/engineering/qa/_refresh_issue5376_live_metrics.py",
     "semantics": "Live retained-inventory binding; raw W44 regression ledger is separate."
   }
