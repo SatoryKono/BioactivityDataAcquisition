@@ -17,8 +17,9 @@ from bioetl.interfaces.http._forensic_request_budget import (
     run_bounded_forensic_operation,
 )
 
-FRESH_SECONDS = 30.0
-MAX_AGE_SECONDS = 120.0
+# Owner decision (rev7 §3.4 / question №3): filter-options TTL = 5 minutes.
+FRESH_SECONDS = 300.0
+MAX_AGE_SECONDS = 600.0
 RETRY_SECONDS = 5.0
 MAX_ENTRIES = 32
 MAX_REFRESHES = 4

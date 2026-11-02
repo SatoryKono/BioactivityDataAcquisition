@@ -1587,6 +1587,34 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "red"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "red"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "red"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "red"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "red"
                           }
                         }
                       }
@@ -1620,6 +1648,34 @@
                           },
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "red"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "red"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "red"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "red"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
                             "color": "red"
                           }
                         }
@@ -1852,6 +1908,34 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "red"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "red"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "red"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "red"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "red"
                           }
                         }
                       }
@@ -1904,6 +1988,34 @@
                           },
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "red"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "red"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "red"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "red"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
                             "color": "red"
                           }
                         }
@@ -2221,6 +2333,34 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "#555555"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "#555555"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "#555555"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "#555555"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "#555555"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "#555555"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "#555555"
                           }
                         }
                       }
@@ -2456,6 +2596,34 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "#555555"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "#555555"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "#555555"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "#555555"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "#555555"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "#555555"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "#555555"
                           }
                         }
                       }
@@ -2735,6 +2903,34 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "red"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "red"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "red"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "red"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "red"
                           }
                         }
                       }
@@ -2768,6 +2964,34 @@
                           },
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "red"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "red"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "red"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "red"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
                             "color": "red"
                           }
                         }
@@ -3352,6 +3576,34 @@
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
                             "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "red"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "red"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "red"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "red"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
+                            "color": "red"
                           }
                         }
                       }
@@ -3381,6 +3633,34 @@
                           },
                           "catalog_unavailable": {
                             "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          },
+                          "retention_plan_read_error": {
+                            "text": "UNAVAILABLE — retention plan read error",
+                            "color": "red"
+                          },
+                          "lineage_source_read_error": {
+                            "text": "UNAVAILABLE — lineage source read error",
+                            "color": "red"
+                          },
+                          "trust_evidence_read_error": {
+                            "text": "UNAVAILABLE — trust evidence read error",
+                            "color": "red"
+                          },
+                          "manifest_parse_error": {
+                            "text": "UNAVAILABLE — manifest parse error",
+                            "color": "red"
+                          },
+                          "run_ledger_parse_error": {
+                            "text": "UNAVAILABLE — run ledger parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint parse error",
+                            "color": "red"
+                          },
+                          "checkpoint_scope_manifest_parse_error": {
+                            "text": "UNAVAILABLE — checkpoint scope parse error",
                             "color": "red"
                           }
                         }
