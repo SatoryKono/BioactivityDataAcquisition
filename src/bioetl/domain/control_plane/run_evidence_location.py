@@ -52,9 +52,10 @@ __all__ = [
 
 _OWNER_SEGMENT = re.compile(r"^[A-Za-z0-9._-]+$")
 _SOURCE_ID = re.compile(r"^[0-9a-f]{64}$")
-# Single-segment "." is allowed via the character class (not a separate
-# alternative — that would be redundant with [A-Za-z0-9._-]+).
-_RELATIVE_ROOT = re.compile(r"^[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$")
+_RELATIVE_ROOT = re.compile(
+    r"^(?!\.{1,2}(?:/|$))[A-Za-z0-9._-]+"
+    r"(?:/(?!\.{1,2}(?:/|$))[A-Za-z0-9._-]+)*$"
+)
 _DRIVE_ABSOLUTE = re.compile(r"^[A-Za-z]:(?:/|$)")
 
 
@@ -107,11 +108,13 @@ def canonicalize_relative_data_root(value: object) -> str:
         raise EvidenceLocationInvalidError(
             "relative_data_root has unsupported characters or shape"
         )
+    if len(text) > 512:
+        raise EvidenceLocationInvalidError("relative_data_root exceeds max length 512")
     return text
 
 
 def _require_nonempty_segment(text: str, *, field_name: str) -> str:
-    if not text or not _OWNER_SEGMENT.fullmatch(text):
+    if text in {".", ".."} or not text or not _OWNER_SEGMENT.fullmatch(text):
         raise EvidenceLocationInvalidError(
             f"{field_name} must be a non-empty safe path segment"
         )
@@ -171,7 +174,12 @@ def ownership_key(
 def _coerce_kind(kind: EvidenceLocationKind | str) -> EvidenceLocationKind:
     if isinstance(kind, EvidenceLocationKind):
         return kind
-    return EvidenceLocationKind(str(kind).strip())
+    try:
+        return EvidenceLocationKind(str(kind).strip())
+    except ValueError as exc:
+        raise EvidenceLocationInvalidError(
+            f"unsupported evidence location kind: {kind}"
+        ) from exc
 
 
 def build_run_evidence_location(
@@ -230,6 +238,29 @@ def parse_run_evidence_location(payload: Mapping[str, object]) -> RunEvidenceLoc
     """Parse and validate one location payload; recompute revision integrity."""
     if not isinstance(payload, Mapping):
         raise EvidenceLocationInvalidError("location payload must be a mapping")
+    required = {
+        "schema_version",
+        "kind",
+        "owner",
+        "run_id",
+        "workflow_run_id",
+        "runtime_source_id",
+        "root_alias",
+        "relative_data_root",
+        "revision",
+    }
+    missing = sorted(required - payload.keys())
+    if missing:
+        raise EvidenceLocationInvalidError(
+            "location payload missing required fields: " + ", ".join(missing)
+        )
+    if (
+        not isinstance(payload["relative_data_root"], str)
+        or not str(payload["relative_data_root"]).strip()
+    ):
+        raise EvidenceLocationInvalidError(
+            "relative_data_root must be a non-empty string"
+        )
     schema = _payload_text(payload, "schema_version")
     if schema != EVIDENCE_LOCATION_SCHEMA_VERSION:
         raise EvidenceLocationInvalidError(

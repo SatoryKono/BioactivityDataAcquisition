@@ -501,6 +501,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/generated_artifact_tests.json": (
         "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
     ),
+    "tests/fixtures/reports/run_evidence_location_golden.json": (
+        "tests/unit/domain/control_plane/test_run_evidence_location.py",
+        RUN_REPORT_CONTRACTS_TEST,
+    ),
     "tests/fixtures/contracts/coderabbit-schema.v2.json": (
         "tests/architecture/test_coderabbit_config.py",
     ),

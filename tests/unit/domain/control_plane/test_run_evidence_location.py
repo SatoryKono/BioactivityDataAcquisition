@@ -3,6 +3,9 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pytest
 
 from bioetl.domain.control_plane.run_evidence_location import (
@@ -30,6 +33,7 @@ pytestmark = pytest.mark.unit
 
 _SOURCE_A = "a" * 64
 _SOURCE_B = "b" * 64
+ROOT = Path(__file__).resolve().parents[4]
 
 
 def _location(**overrides: object) -> RunEvidenceLocation:
@@ -128,6 +132,41 @@ def test_standard_root_alias_uses_dot_relative() -> None:
     assert location.relative_data_root == "."
     assert location.root_alias == DEFAULT_EVIDENCE_ROOT_ALIAS
     assert canonicalize_relative_data_root("./") == "."
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("owner", ".."), ("owner", "."), ("run_id", ".."), ("root_alias", ".")],
+)
+def test_path_identity_segments_reject_dot_segments(field: str, value: str) -> None:
+    with pytest.raises(EvidenceLocationInvalidError, match="safe path segment"):
+        _location(**{field: value})
+
+
+def test_relative_data_root_rejects_values_longer_than_schema_limit() -> None:
+    with pytest.raises(EvidenceLocationInvalidError, match="512"):
+        _location(relative_data_root="a" * 513)
+
+
+def test_golden_fixture_parses_and_checks_domain_revision() -> None:
+    fixture = (
+        ROOT / "tests" / "fixtures" / "reports" / "run_evidence_location_golden.json"
+    )
+    payload = json.loads(fixture.read_text(encoding="utf-8"))
+    assert parse_run_evidence_location(payload).to_dict() == payload
+
+
+@pytest.mark.parametrize("kind", ["", "unknown"])
+def test_unknown_kind_uses_domain_invalid_error(kind: str) -> None:
+    with pytest.raises(EvidenceLocationInvalidError, match="unsupported.*kind"):
+        _location(kind=kind)
+
+
+def test_parse_rejects_missing_required_relative_root() -> None:
+    payload = _location().to_dict()
+    del payload["relative_data_root"]
+    with pytest.raises(EvidenceLocationInvalidError, match="missing required fields"):
+        parse_run_evidence_location(payload)
 
 
 @pytest.mark.parametrize(

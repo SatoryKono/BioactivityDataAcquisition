@@ -40,6 +40,35 @@ def test_evidence_locations_catalog_layout(tmp_path: Path) -> None:
     )
 
 
+def test_location_paths_preserve_full_run_id_without_collisions(tmp_path: Path) -> None:
+    common = "x" * 120
+    first = resolve_evidence_location_path(
+        kind=EvidenceLocationKind.PIPELINE,
+        owner="chembl_assay",
+        run_id=common + "a",
+        report_root=tmp_path,
+    )
+    second = resolve_evidence_location_path(
+        kind=EvidenceLocationKind.PIPELINE,
+        owner="chembl_assay",
+        run_id=common + "b",
+        report_root=tmp_path,
+    )
+    assert first != second
+    assert first.name == f"{common}a.json"
+
+
+@pytest.mark.parametrize("owner", [".", ".."])
+def test_location_paths_reject_dot_owners(tmp_path: Path, owner: str) -> None:
+    with pytest.raises(EvidenceLocationInvalidError, match="safe path segment"):
+        resolve_evidence_location_path(
+            kind=EvidenceLocationKind.PIPELINE,
+            owner=owner,
+            run_id="run-1",
+            report_root=tmp_path,
+        )
+
+
 def test_alias_registry_resolves_standard_and_isolated_roots(tmp_path: Path) -> None:
     data_root = tmp_path / "data"
     data_root.mkdir()

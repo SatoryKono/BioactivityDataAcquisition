@@ -28,20 +28,20 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 120,
-      "pattern": "^[A-Za-z0-9._-]+$"
+      "pattern": "^(?!\\.{1,2}$)[A-Za-z0-9._-]+$"
     },
     "run_id": {
       "type": "string",
       "minLength": 1,
       "maxLength": 128,
-      "pattern": "^[A-Za-z0-9._-]+$"
+      "pattern": "^(?!\\.{1,2}$)[A-Za-z0-9._-]+$"
     },
     "workflow_run_id": {
       "description": "Parent workflow run id for a child pipeline; null for workflow records and standalone pipelines.",
       "type": ["string", "null"],
       "minLength": 1,
       "maxLength": 128,
-      "pattern": "^[A-Za-z0-9._-]+$"
+      "pattern": "^(?!\\.{1,2}$)[A-Za-z0-9._-]+$"
     },
     "runtime_source_id": {
       "description": "64-char lowercase hex runtime/bind source identity digest. Not a Git commit SHA; historical evidence must not be rejected solely for an older commit.",
@@ -53,19 +53,29 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 64,
-      "pattern": "^[A-Za-z0-9._-]+$"
+      "pattern": "^(?!\\.{1,2}$)[A-Za-z0-9._-]+$"
     },
     "relative_data_root": {
       "description": "POSIX-relative path under the alias base. '.' means the alias base itself (legacy standard data root). Must not be absolute or contain '..'.",
       "type": "string",
       "minLength": 1,
       "maxLength": 512,
-      "pattern": "^[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$"
+      "pattern": "^(?:\\.|(?!\\.{1,2}(?:/|$))[A-Za-z0-9._-]+(?:/(?!\\.{1,2}(?:/|$))[A-Za-z0-9._-]+)*)$"
     },
     "revision": {
       "description": "SHA-256 hex digest of the canonical location body excluding this field. Integrity of the locator bytes only — not replay readiness.",
       "type": "string",
       "pattern": "^[0-9a-f]{64}$"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"kind": {"const": "workflow"}}
+      },
+      "then": {
+        "properties": {"workflow_run_id": {"const": null}}
+      }
+    }
+  ]
 }

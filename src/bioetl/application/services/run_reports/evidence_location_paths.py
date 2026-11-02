@@ -6,6 +6,7 @@ never by reading process environment maps inside this module.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -28,11 +29,17 @@ __all__ = [
 # Additive catalog of data-root locators (RF-002). Lives beside pipeline/workflow
 # report trees; does not rewrite immutable report snapshots.
 EVIDENCE_LOCATIONS_DIRNAME = "_evidence-locations"
+_SAFE_LOCATION_SEGMENT = re.compile(r"^[A-Za-z0-9._-]+$")
 
 
-def _safe_location_segment(value: str) -> str:
-    cleaned = "".join(ch if ch.isalnum() or ch in "._-" else "_" for ch in value)
-    return cleaned[:120] or "unknown"
+def _safe_location_segment(value: str, *, field_name: str, max_length: int) -> str:
+    if (
+        value in {".", ".."}
+        or not _SAFE_LOCATION_SEGMENT.fullmatch(value)
+        or len(value) > max_length
+    ):
+        raise EvidenceLocationInvalidError(f"{field_name} is not a safe path segment")
+    return value
 
 
 @dataclass(frozen=True, slots=True)
@@ -107,6 +114,6 @@ def resolve_evidence_location_path(
     return (
         resolve_evidence_locations_root(report_root=report_root)
         / kind_value
-        / _safe_location_segment(owner)
-        / f"{_safe_location_segment(run_id)}.json"
+        / _safe_location_segment(owner, field_name="owner", max_length=120)
+        / f"{_safe_location_segment(run_id, field_name='run_id', max_length=128)}.json"
     )
