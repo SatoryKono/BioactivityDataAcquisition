@@ -84,7 +84,7 @@
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 477,
+      "imports": 480,
       "allowed": true
     }
   ],

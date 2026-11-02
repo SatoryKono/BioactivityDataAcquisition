@@ -2,6 +2,10 @@
 
 Owner TTL: 30 seconds fresh. Concurrent callers with the same cache key share
 one physical load. Stale entries may be served briefly while a refresh runs.
+
+Bound to a ``HealthServer`` instance (not a process-wide singleton) so distinct
+servers with different stores cannot share payloads. Close via ``close()`` on
+server stop.
 """
 
 from __future__ import annotations
@@ -12,17 +16,18 @@ from collections.abc import Awaitable, Callable, Mapping
 from copy import deepcopy
 from dataclasses import dataclass
 from time import monotonic
-from typing import Any
+
+from bioetl.interfaces.http._forensic_request_budget import ForensicEndpointUnavailable
 
 FRESH_SECONDS = 30.0
 MAX_AGE_SECONDS = 90.0
 MAX_ENTRIES = 64
-type StatusKey = tuple[str, str, str, str, str]
+type StatusKey = tuple[str, str, str, str, str, str]
 type StatusLoader = Callable[[], Awaitable[dict[str, object]]]
 
 
 def selected_run_status_key(query: Mapping[str, str]) -> StatusKey:
-    """Normalize the §3.4 key: endpoint + pipeline + run_id + run_type + workflow."""
+    """Normalize the §3.4 key including A2 ``run_status`` filter scope."""
 
     def _one(name: str) -> str:
         raw = query.get(name)
@@ -36,6 +41,7 @@ def selected_run_status_key(query: Mapping[str, str]) -> StatusKey:
         _one("run_id") or "-",
         _one("run_type"),
         _one("workflow"),
+        _one("run_status"),
     )
 
 
@@ -44,6 +50,21 @@ class _Entry:
     payload: dict[str, object] | None = None
     completed_at: float = 0.0
     error: str | None = None
+
+
+def _is_query_error_payload(payload: Mapping[str, object]) -> bool:
+    """True when the loader returned a synthetic QUERY ERROR frame."""
+    for key in ("execution_state", "verdict", "status", "overall_verdict"):
+        value = payload.get(key)
+        if isinstance(value, str) and value.strip().upper() == "QUERY ERROR":
+            return True
+    reason = payload.get("reason")
+    return isinstance(reason, str) and reason in {
+        "capacity_exhausted",
+        "deadline_exceeded",
+        "request_failed",
+        "shutting_down",
+    }
 
 
 class SelectedRunStatusCache:
@@ -79,8 +100,11 @@ class SelectedRunStatusCache:
                     (item for item in self._entries if item not in self._tasks),
                     None,
                 )
-                if victim is not None:
-                    del self._entries[victim]
+                if victim is None:
+                    raise ForensicEndpointUnavailable(
+                        reason="capacity_exhausted", status_code=503
+                    )
+                del self._entries[victim]
             self._entries[key] = _Entry()
         self._entries.move_to_end(key)
         return self._entries[key]
@@ -91,7 +115,7 @@ class SelectedRunStatusCache:
         loader: StatusLoader,
     ) -> dict[str, object]:
         if self._closed:
-            raise RuntimeError("selected-run-status cache is closed")
+            raise ForensicEndpointUnavailable(reason="shutting_down", status_code=503)
         key = selected_run_status_key(query)
         entry = self._entry(key)
         state = self.status(query)["state"]
@@ -107,11 +131,7 @@ class SelectedRunStatusCache:
             # Do not await; refresh continues in background.
             return deepcopy(entry.payload)
 
-        try:
-            return deepcopy(await asyncio.shield(task))
-        finally:
-            # Task removal happens in _load; no-op if already cleaned.
-            pass
+        return deepcopy(await asyncio.shield(task))
 
     async def _load(
         self,
@@ -121,12 +141,21 @@ class SelectedRunStatusCache:
     ) -> dict[str, object]:
         try:
             payload = await loader()
+            if _is_query_error_payload(payload):
+                # Keep last good snapshot; do not promote QUERY ERROR to fresh.
+                # Still return the error frame to this caller so Grafana sees it.
+                entry.error = "QUERY_ERROR"
+                return deepcopy(payload)
             entry.payload = deepcopy(payload)
             entry.completed_at = monotonic()
             entry.error = None
             return deepcopy(payload)
-        except Exception as exc:  # noqa: BLE001 — surface to callers as-is
-            entry.error = type(exc).__name__
+        except Exception as exc:
+            entry.error = (
+                exc.reason
+                if isinstance(exc, ForensicEndpointUnavailable)
+                else type(exc).__name__
+            )
             raise
         finally:
             self._tasks.pop(key, None)
@@ -137,29 +166,10 @@ class SelectedRunStatusCache:
             await asyncio.wait(tuple(self._tasks.values()), timeout=2.0)
 
 
-# Process-local shared cache for the health server.
-_SHARED: SelectedRunStatusCache | None = None
-
-
-def shared_selected_run_status_cache() -> SelectedRunStatusCache:
-    global _SHARED
-    if _SHARED is None:
-        _SHARED = SelectedRunStatusCache()
-    return _SHARED
-
-
-def reset_shared_selected_run_status_cache_for_tests() -> None:
-    """Test helper: drop the process-local singleton."""
-    global _SHARED
-    _SHARED = None
-
-
 __all__ = [
     "FRESH_SECONDS",
     "MAX_AGE_SECONDS",
     "MAX_ENTRIES",
     "SelectedRunStatusCache",
-    "reset_shared_selected_run_status_cache_for_tests",
     "selected_run_status_key",
-    "shared_selected_run_status_cache",
 ]

@@ -28,6 +28,7 @@ from bioetl.domain.run_reports.selected_status import (
 from bioetl.infrastructure.storage.run_report_store_adapter import (
     FileRunReportStoreAdapter,
 )
+from bioetl.interfaces.http._selected_run_status_cache import SelectedRunStatusCache
 from bioetl.interfaces.http.selected_run_status import (
     _saved_trust,
     handle_selected_run_status,
@@ -36,6 +37,12 @@ from bioetl.interfaces.http.selected_run_status import (
 from tests.helpers.deterministic_ids import deterministic_run_id
 
 pytestmark = pytest.mark.unit
+
+
+def _bind_status_cache(host: MagicMock) -> MagicMock:
+    """Attach a fresh per-host selected-run-status cache (not process-wide)."""
+    host._selected_run_status_cache = SelectedRunStatusCache()
+    return host
 
 
 @pytest.mark.parametrize(
@@ -242,7 +249,7 @@ async def test_http_ignores_time_and_range(tmp_path, monkeypatch, age, chart_ran
     # The wall-clock is controlled independently of the immutable observation time.
     current = datetime(2026, 1, 1, 0, 1, tzinfo=UTC) + timedelta(seconds=age)
     monkeypatch.setattr("time.time", lambda: current.timestamp())
-    host = MagicMock()
+    host = _bind_status_cache(MagicMock())
     host._read_required_param.side_effect = lambda query, key: query[key]
     host._read_optional_param.side_effect = lambda query, key: query.get(key)
     host._forensic_endpoint_limiter = asyncio.Semaphore(2)
@@ -653,9 +660,10 @@ async def test_endpoint_timeout_is_query_error(monkeypatch, reason):
         "bioetl.interfaces.http.selected_run_status.run_bounded_forensic_operation",
         fail,
     )
-    host = MagicMock()
+    host = _bind_status_cache(MagicMock())
     host._read_required_param.return_value = "chembl_activity"
     host._read_optional_param.return_value = "run-a"
+    host._forensic_endpoint_limiter = asyncio.Semaphore(2)
     host._send_payload_response = AsyncMock()
     await handle_selected_run_status(host, MagicMock(), {})
     payload = host._send_payload_response.call_args.args[2]
@@ -744,7 +752,7 @@ async def test_current_telemetry_is_not_consulted(tmp_path, monkeypatch, current
     monkeypatch.setattr(
         "bioetl.interfaces.http.run_report_ops._effective_root", lambda root: tmp_path
     )
-    host = MagicMock()
+    host = _bind_status_cache(MagicMock())
     host._read_required_param.side_effect = lambda q, key: q[key]
     host._read_optional_param.side_effect = lambda q, key: q.get(key)
     host._forensic_endpoint_limiter = asyncio.Semaphore(2)
@@ -771,7 +779,7 @@ async def test_unfinalized_run_presentation_matches_ledger(
     monkeypatch.setattr(
         "bioetl.interfaces.http.run_report_ops._effective_root", lambda root: tmp_path
     )
-    host = MagicMock()
+    host = _bind_status_cache(MagicMock())
     host._read_required_param.side_effect = lambda q, key: q[key]
     host._read_optional_param.side_effect = lambda q, key: q.get(key)
     host._forensic_endpoint_limiter = asyncio.Semaphore(2)
@@ -844,7 +852,7 @@ async def test_late_previous_request_keeps_its_own_identity(tmp_path, monkeypatc
         "bioetl.interfaces.http.selected_run_status.load_selected_run_status",
         delayed_load,
     )
-    host = MagicMock()
+    host = _bind_status_cache(MagicMock())
     host._read_required_param.side_effect = lambda q, key: q[key]
     host._read_optional_param.side_effect = lambda q, key: q.get(key)
     host._forensic_endpoint_limiter = asyncio.Semaphore(2)
@@ -1169,7 +1177,7 @@ async def test_active_workflow_in_all_scope_retains_exact_context(
     from types import SimpleNamespace
 
     run_id = "00000000-0000-0000-0000-000000000001"
-    host = MagicMock()
+    host = _bind_status_cache(MagicMock())
     host._read_required_param.side_effect = lambda q, key: q[key]
     host._read_optional_param.side_effect = lambda q, key: q.get(key)
     host._forensic_endpoint_limiter = asyncio.Semaphore(2)
@@ -1607,7 +1615,7 @@ async def test_selected_status_handler_covers_selector_and_request_failures(
     monkeypatch.setattr(
         "bioetl.interfaces.http.run_report_ops._effective_root", lambda root: tmp_path
     )
-    host = MagicMock()
+    host = _bind_status_cache(MagicMock())
     host._read_required_param.side_effect = lambda query, key: query[key]
     host._read_optional_param.side_effect = lambda query, key: query.get(key)
     host._forensic_endpoint_limiter = asyncio.Semaphore(1)
@@ -1625,6 +1633,8 @@ async def test_selected_status_handler_covers_selector_and_request_failures(
     async def fail(**_kwargs):
         raise ValueError("broken")
 
+    # Fresh cache would hide loader failures; force a cold path per scenario.
+    host._selected_run_status_cache = SelectedRunStatusCache()
     monkeypatch.setattr(selected, "run_bounded_forensic_operation", fail)
     await handle_selected_run_status(
         host,
@@ -1636,6 +1646,7 @@ async def test_selected_status_handler_covers_selector_and_request_failures(
     async def fail_key(**_kwargs):
         raise KeyError("workflow_name")
 
+    host._selected_run_status_cache = SelectedRunStatusCache()
     monkeypatch.setattr(selected, "run_bounded_forensic_operation", fail_key)
     await handle_selected_run_status(
         host,

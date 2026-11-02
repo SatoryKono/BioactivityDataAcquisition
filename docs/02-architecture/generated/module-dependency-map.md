@@ -33,7 +33,7 @@ flowchart LR
     interfaces -->|77 OK| application
     interfaces -->|64 OK| composition
     interfaces -->|91 OK| domain
-    interfaces -->|477 OK| interfaces
+    interfaces -->|480 OK| interfaces
 ```
 
 ## Layer Edge Table
@@ -52,7 +52,7 @@ flowchart LR
 | `interfaces`     | `application`    |      77 | allowed |
 | `interfaces`     | `composition`    |      64 | allowed |
 | `interfaces`     | `domain`         |      91 | allowed |
-| `interfaces`     | `interfaces`     |     477 | allowed |
+| `interfaces`     | `interfaces`     |     480 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
