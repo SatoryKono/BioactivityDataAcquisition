@@ -1,17 +1,13 @@
 """Pure rules for run evidence location locators (RF-002).
 
-A location record points at the data root used by one pipeline or workflow
-run. It is intentionally **not** proof of READY, objects=true, or any replay
-verdict. Manifest predecessor/successor chains and late workflow revisions
-remain owned by RunManifestPort / report assessment — this locator must not
-pin a permanent first-manifest id.
+A location record points at one run's data root. It is not READY / objects /
+replay proof; manifest chains stay on RunManifestPort / report assessment.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
-import re
 from collections.abc import Mapping
 
 from bioetl.domain.control_plane.run_evidence_location_models import (
@@ -26,6 +22,12 @@ from bioetl.domain.control_plane.run_evidence_location_models import (
     EvidenceLocationRegisterOutcome,
     EvidenceLocationRegisterResult,
     RunEvidenceLocation,
+)
+from bioetl.domain.control_plane.run_evidence_location_path import (
+    canonicalize_relative_data_root,
+    optional_workflow_run_id,
+    require_segment,
+    validate_runtime_source_id,
 )
 
 __all__ = [
@@ -50,103 +52,19 @@ __all__ = [
     "validate_runtime_source_id",
 ]
 
-_OWNER_SEGMENT = re.compile(r"^[A-Za-z0-9._-]+$")
-_SOURCE_ID = re.compile(r"^[0-9a-f]{64}$")
-_RELATIVE_ROOT = re.compile(
-    r"^(?!\.{1,2}(?:/|$))[A-Za-z0-9._-]+"
-    r"(?:/(?!\.{1,2}(?:/|$))[A-Za-z0-9._-]+)*$"
+_REQUIRED_LOCATION_FIELDS = frozenset(
+    {
+        "schema_version",
+        "kind",
+        "owner",
+        "run_id",
+        "workflow_run_id",
+        "runtime_source_id",
+        "root_alias",
+        "relative_data_root",
+        "revision",
+    }
 )
-_DRIVE_ABSOLUTE = re.compile(r"^[A-Za-z]:(?:/|$)")
-
-
-def validate_runtime_source_id(value: object) -> str:
-    """Return a canonical lowercase 64-hex source id or raise."""
-    text = str(value or "").strip().lower()
-    if not _SOURCE_ID.fullmatch(text):
-        raise EvidenceLocationInvalidError(
-            "runtime_source_id must be a 64-character lowercase hex digest"
-        )
-    return text
-
-
-def _collapse_slashes(text: str) -> str:
-    while "//" in text:
-        text = text.replace("//", "/")
-    return text
-
-
-def _reject_absolute_relative_root(text: str) -> None:
-    if text.startswith("/") or _DRIVE_ABSOLUTE.match(text):
-        raise EvidenceLocationInvalidError(
-            "relative_data_root must be relative to the alias base"
-        )
-
-
-def _reject_dot_segments(parts: list[str]) -> None:
-    if any(part in {"", ".", ".."} for part in parts):
-        raise EvidenceLocationInvalidError(
-            "relative_data_root must not contain '.' or '..' segments"
-        )
-
-
-def _is_alias_base_relative(text: str) -> bool:
-    return text in {"", ".", "./"}
-
-
-def canonicalize_relative_data_root(value: object) -> str:
-    """Normalize a relative data-root path; reject absolute / parent segments."""
-    text = str(value or "").strip().replace("\\", "/")
-    if _is_alias_base_relative(text):
-        return "."
-    text = _collapse_slashes(text)
-    _reject_absolute_relative_root(text)
-    text = text.strip("/")
-    if _is_alias_base_relative(text):
-        return "."
-    _reject_dot_segments(text.split("/"))
-    if not _RELATIVE_ROOT.fullmatch(text):
-        raise EvidenceLocationInvalidError(
-            "relative_data_root has unsupported characters or shape"
-        )
-    if len(text) > 512:
-        raise EvidenceLocationInvalidError("relative_data_root exceeds max length 512")
-    return text
-
-
-def _require_nonempty_segment(text: str, *, field_name: str) -> str:
-    if text in {".", ".."} or not text or not _OWNER_SEGMENT.fullmatch(text):
-        raise EvidenceLocationInvalidError(
-            f"{field_name} must be a non-empty safe path segment"
-        )
-    return text
-
-
-def _require_segment(value: object, *, field_name: str) -> str:
-    text = _require_nonempty_segment(str(value or "").strip(), field_name=field_name)
-    if len(text) > 128:
-        raise EvidenceLocationInvalidError(
-            f"{field_name} must be a non-empty safe path segment"
-        )
-    if field_name == "owner" and len(text) > 120:
-        raise EvidenceLocationInvalidError("owner exceeds max length 120")
-    return text
-
-
-def _optional_workflow_run_id(
-    value: object,
-    *,
-    kind: EvidenceLocationKind,
-) -> str | None:
-    if value is None:
-        return None
-    text = str(value).strip()
-    if not text:
-        return None
-    if kind is EvidenceLocationKind.WORKFLOW:
-        raise EvidenceLocationInvalidError(
-            "workflow_run_id must be null for kind=workflow"
-        )
-    return _require_segment(text, field_name="workflow_run_id")
 
 
 def _canonical_json(payload: Mapping[str, object]) -> str:
@@ -194,16 +112,12 @@ def build_run_evidence_location(
 ) -> RunEvidenceLocation:
     """Build a validated location record with a content revision digest."""
     kind_value = _coerce_kind(kind)
-    owner_text = _require_segment(owner, field_name="owner")
-    if len(owner_text) > 120:
-        raise EvidenceLocationInvalidError("owner exceeds max length 120")
-    run_id_text = _require_segment(run_id, field_name="run_id")
-    alias = _require_segment(root_alias, field_name="root_alias")
-    if len(alias) > 64:
-        raise EvidenceLocationInvalidError("root_alias exceeds max length 64")
+    owner_text = require_segment(owner, field_name="owner")
+    run_id_text = require_segment(run_id, field_name="run_id")
+    alias = require_segment(root_alias, field_name="root_alias")
     source_id = validate_runtime_source_id(runtime_source_id)
     relative = canonicalize_relative_data_root(relative_data_root)
-    workflow = _optional_workflow_run_id(workflow_run_id, kind=kind_value)
+    workflow = optional_workflow_run_id(workflow_run_id, kind=kind_value)
     body = {
         "schema_version": EVIDENCE_LOCATION_SCHEMA_VERSION,
         "kind": kind_value.value,
@@ -234,39 +148,37 @@ def _payload_text(payload: Mapping[str, object], key: str) -> str:
     return str(value).strip()
 
 
-def parse_run_evidence_location(payload: Mapping[str, object]) -> RunEvidenceLocation:
-    """Parse and validate one location payload; recompute revision integrity."""
+def _require_location_mapping(payload: object) -> Mapping[str, object]:
     if not isinstance(payload, Mapping):
         raise EvidenceLocationInvalidError("location payload must be a mapping")
-    required = {
-        "schema_version",
-        "kind",
-        "owner",
-        "run_id",
-        "workflow_run_id",
-        "runtime_source_id",
-        "root_alias",
-        "relative_data_root",
-        "revision",
-    }
-    missing = sorted(required - payload.keys())
+    return payload
+
+
+def _require_location_fields(payload: Mapping[str, object]) -> None:
+    missing = sorted(_REQUIRED_LOCATION_FIELDS - payload.keys())
     if missing:
         raise EvidenceLocationInvalidError(
             "location payload missing required fields: " + ", ".join(missing)
         )
-    if (
-        not isinstance(payload["relative_data_root"], str)
-        or not str(payload["relative_data_root"]).strip()
-    ):
-        raise EvidenceLocationInvalidError(
-            "relative_data_root must be a non-empty string"
-        )
+
+
+def _require_relative_root_string(payload: Mapping[str, object]) -> None:
+    value = payload["relative_data_root"]
+    if isinstance(value, str) and value.strip():
+        return
+    raise EvidenceLocationInvalidError("relative_data_root must be a non-empty string")
+
+
+def _require_supported_schema(payload: Mapping[str, object]) -> None:
     schema = _payload_text(payload, "schema_version")
-    if schema != EVIDENCE_LOCATION_SCHEMA_VERSION:
-        raise EvidenceLocationInvalidError(
-            f"unsupported schema_version: {schema or '<missing>'}"
-        )
-    location = build_run_evidence_location(
+    if schema == EVIDENCE_LOCATION_SCHEMA_VERSION:
+        return
+    label = schema if schema else "<missing>"
+    raise EvidenceLocationInvalidError(f"unsupported schema_version: {label}")
+
+
+def _build_from_payload(payload: Mapping[str, object]) -> RunEvidenceLocation:
+    return build_run_evidence_location(
         kind=_payload_text(payload, "kind"),
         owner=_payload_text(payload, "owner"),
         run_id=_payload_text(payload, "run_id"),
@@ -275,11 +187,27 @@ def parse_run_evidence_location(payload: Mapping[str, object]) -> RunEvidenceLoc
         relative_data_root=_payload_text(payload, "relative_data_root"),
         workflow_run_id=payload.get("workflow_run_id"),  # type: ignore[arg-type]
     )
+
+
+def _require_matching_revision(
+    payload: Mapping[str, object],
+    location: RunEvidenceLocation,
+) -> None:
     recorded = _payload_text(payload, "revision").lower()
     if recorded != location.revision:
         raise EvidenceLocationInvalidError(
             "location revision digest does not match canonical binding body"
         )
+
+
+def parse_run_evidence_location(payload: Mapping[str, object]) -> RunEvidenceLocation:
+    """Parse and validate one location payload; recompute revision integrity."""
+    mapping = _require_location_mapping(payload)
+    _require_location_fields(mapping)
+    _require_relative_root_string(mapping)
+    _require_supported_schema(mapping)
+    location = _build_from_payload(mapping)
+    _require_matching_revision(mapping, location)
     return location
 
 

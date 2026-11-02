@@ -1058,7 +1058,9 @@ def _path_targets(path: str, root: Path) -> list[str]:
         return _helper_path_targets(path, root)
     if path.startswith(TESTS_PREFIX) and path.endswith(".py"):
         return [path] if (root / path).is_file() else []
-    if path.startswith(SRC_BIOETL_PREFIX) and path.endswith(".py"):
+    if path.startswith(SRC_BIOETL_PREFIX) and (
+        path.endswith(".py") or path.endswith(".pyi")
+    ):
         first = path.removeprefix(SRC_BIOETL_PREFIX).split("/", 1)[0]
         candidate = root / "tests" / "unit" / first
         return [candidate.relative_to(root).as_posix()] if candidate.is_dir() else []

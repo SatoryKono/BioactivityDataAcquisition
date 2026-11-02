@@ -3,9 +3,6 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
 import pytest
 
 from bioetl.domain.control_plane.run_evidence_location import (
@@ -33,7 +30,6 @@ pytestmark = pytest.mark.unit
 
 _SOURCE_A = "a" * 64
 _SOURCE_B = "b" * 64
-ROOT = Path(__file__).resolve().parents[4]
 
 
 def _location(**overrides: object) -> RunEvidenceLocation:
@@ -148,11 +144,8 @@ def test_relative_data_root_rejects_values_longer_than_schema_limit() -> None:
         _location(relative_data_root="a" * 513)
 
 
-def test_golden_fixture_parses_and_checks_domain_revision() -> None:
-    fixture = (
-        ROOT / "tests" / "fixtures" / "reports" / "run_evidence_location_golden.json"
-    )
-    payload = json.loads(fixture.read_text(encoding="utf-8"))
+def test_parse_roundtrip_preserves_domain_revision() -> None:
+    payload = _location().to_dict()
     assert parse_run_evidence_location(payload).to_dict() == payload
 
 

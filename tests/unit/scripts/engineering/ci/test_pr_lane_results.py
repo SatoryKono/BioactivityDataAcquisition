@@ -1044,6 +1044,17 @@ def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
     assert targets == ["tests/unit/domain"]
 
 
+def test_shadow_compare_routes_domain_ports_stub() -> None:
+    """Typed ports package stubs map like their .py siblings under tests/unit."""
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["src/bioetl/domain/ports/__init__.pyi"],
+        repo_root=repo_root,
+    )
+    assert report["covers_full_suite"] is False
+    assert "tests/unit/domain" in report["selected"]
+
+
 def test_affected_targets_map_shared_helper_to_importing_tests(
     tmp_path: Path,
 ) -> None:

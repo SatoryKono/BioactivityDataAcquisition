@@ -84,6 +84,10 @@ def test_workflow_run_report_golden_matches_v1_schema() -> None:
 
 
 def test_run_evidence_location_golden_matches_v1_schema() -> None:
+    from bioetl.domain.control_plane.run_evidence_location import (
+        parse_run_evidence_location,
+    )
+
     payload = validate_fixture(
         schema_name="run_evidence_location.v1.json",
         fixture_name="run_evidence_location_golden.json",
@@ -92,6 +96,7 @@ def test_run_evidence_location_golden_matches_v1_schema() -> None:
     assert payload["kind"] == "pipeline"
     assert payload["root_alias"] == "dashboard_data"
     assert payload["relative_data_root"].startswith("workflow-limit100-")
+    assert parse_run_evidence_location(payload).to_dict() == payload
 
 
 def test_every_report_schema_is_valid_json_schema() -> None:
