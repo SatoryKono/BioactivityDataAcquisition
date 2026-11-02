@@ -2,11 +2,21 @@
 
 from __future__ import annotations
 
-from bioetl.infrastructure.observability import metric_inventory_ast as _metric_inventory_ast
-from bioetl.infrastructure.observability import metric_inventory_bindings as _metric_inventory_bindings
-from bioetl.infrastructure.observability import metric_inventory_discovery as _metric_inventory_discovery
-from bioetl.infrastructure.observability import metric_inventory_scan as _metric_inventory_scan
-from bioetl.infrastructure.observability import metric_inventory_text as _metric_inventory_text
+from bioetl.infrastructure.observability import (
+    metric_inventory_ast as _metric_inventory_ast,
+)
+from bioetl.infrastructure.observability import (
+    metric_inventory_bindings as _metric_inventory_bindings,
+)
+from bioetl.infrastructure.observability import (
+    metric_inventory_discovery as _metric_inventory_discovery,
+)
+from bioetl.infrastructure.observability import (
+    metric_inventory_scan as _metric_inventory_scan,
+)
+from bioetl.infrastructure.observability import (
+    metric_inventory_text as _metric_inventory_text,
+)
 
 import ast
 import os
@@ -398,7 +408,9 @@ _read_cached_text = _metric_inventory_text._read_cached_text
 _read_runtime_candidate_text = _metric_inventory_text._read_runtime_candidate_text
 
 
-_read_runtime_event_candidate_text = _metric_inventory_text._read_runtime_event_candidate_text
+_read_runtime_event_candidate_text = (
+    _metric_inventory_text._read_runtime_event_candidate_text
+)
 
 
 def _iter_runtime_candidate_paths(repo_root: Path) -> list[Path]:
@@ -597,19 +609,27 @@ def _collect_runtime_candidate_texts(repo_root: Path) -> list[tuple[Path, str]]:
 _iter_string_assignments = _metric_inventory_bindings._iter_string_assignments
 
 
-_resolve_imported_string_bindings = _metric_inventory_bindings._resolve_imported_string_bindings
+_resolve_imported_string_bindings = (
+    _metric_inventory_bindings._resolve_imported_string_bindings
+)
 
 
-_collect_class_attribute_bindings = _metric_inventory_bindings._collect_class_attribute_bindings
+_collect_class_attribute_bindings = (
+    _metric_inventory_bindings._collect_class_attribute_bindings
+)
 
 
-_collect_repo_class_attribute_bindings = _metric_inventory_bindings._collect_repo_class_attribute_bindings
+_collect_repo_class_attribute_bindings = (
+    _metric_inventory_bindings._collect_repo_class_attribute_bindings
+)
 
 
 _resolve_metric_name_expr = _metric_inventory_bindings._resolve_metric_name_expr
 
 
-_collect_local_string_bindings = _metric_inventory_bindings._collect_local_string_bindings
+_collect_local_string_bindings = (
+    _metric_inventory_bindings._collect_local_string_bindings
+)
 
 
 _call_method_name = _metric_inventory_bindings._call_method_name
@@ -618,22 +638,30 @@ _call_method_name = _metric_inventory_bindings._call_method_name
 _scan_metric_names_in_tree = _metric_inventory_ast._scan_metric_names_in_tree
 
 
-_looks_like_imported_string_constant_name = _metric_inventory_bindings._looks_like_imported_string_constant_name
+_looks_like_imported_string_constant_name = (
+    _metric_inventory_bindings._looks_like_imported_string_constant_name
+)
 
 
-_imported_string_constant_aliases = _metric_inventory_bindings._imported_string_constant_aliases
+_imported_string_constant_aliases = (
+    _metric_inventory_bindings._imported_string_constant_aliases
+)
 
 
 _module_string_bindings = _metric_inventory_bindings._module_string_bindings
 
 
-_merge_imported_string_aliases = _metric_inventory_bindings._merge_imported_string_aliases
+_merge_imported_string_aliases = (
+    _metric_inventory_bindings._merge_imported_string_aliases
+)
 
 
 _class_nodes = _metric_inventory_bindings._class_nodes
 
 
-_class_attribute_string_bindings = _metric_inventory_bindings._class_attribute_string_bindings
+_class_attribute_string_bindings = (
+    _metric_inventory_bindings._class_attribute_string_bindings
+)
 
 
 _call_nodes = _metric_inventory_bindings._call_nodes
@@ -654,13 +682,19 @@ _dict_literal_string_keys = _metric_inventory_ast._dict_literal_string_keys
 _direct_metric_label_keys = _metric_inventory_ast._direct_metric_label_keys
 
 
-_scan_direct_metric_label_shapes = _metric_inventory_ast._scan_direct_metric_label_shapes
+_scan_direct_metric_label_shapes = (
+    _metric_inventory_ast._scan_direct_metric_label_shapes
+)
 
 
-_record_label_contract_violations = _metric_inventory_ast._record_label_contract_violations
+_record_label_contract_violations = (
+    _metric_inventory_ast._record_label_contract_violations
+)
 
 
-_partition_helper_metric_candidates = _metric_inventory_ast._partition_helper_metric_candidates
+_partition_helper_metric_candidates = (
+    _metric_inventory_ast._partition_helper_metric_candidates
+)
 
 
 _is_metric_like_alias_name = _metric_inventory_ast._is_metric_like_alias_name
@@ -673,3 +707,4 @@ _scan_runtime_metric_calls = _metric_inventory_scan._scan_runtime_metric_calls
 
 
 _record_static_runtime_emitters = _metric_inventory_scan._record_static_runtime_emitters
+
