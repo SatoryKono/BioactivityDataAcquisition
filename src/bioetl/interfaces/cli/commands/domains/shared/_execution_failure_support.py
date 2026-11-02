@@ -28,7 +28,12 @@ def build_failure_context(
 ) -> dict[str, object]:
     """Build structured context for CLI failure diagnostics."""
     if isinstance(exc, BioETLError):
-        structured_context: dict[str, object] = exc.to_structured_context(
+        from bioetl.application.services.quality.exceptions_context import (
+            get_structured_context,
+        )
+
+        structured_context: dict[str, object] = get_structured_context(
+            exc,
             reason_code=reason_code,
             **{subject_key: subject_value},
         )

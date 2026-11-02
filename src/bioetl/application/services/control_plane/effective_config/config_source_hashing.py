@@ -10,11 +10,21 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from enum import Enum
 from pathlib import PurePath
-from typing import Literal, cast
+from typing import cast
 
 import yaml
 
-ConfigSourceHashStrategy = Literal["canonical_yaml", "raw_bytes"]
+from bioetl.domain.control_plane.effective_config_artifact import (
+    ConfigSourceHashStrategy,
+)
+
+__all__ = [
+    "ConfigSourceHashSnapshot",
+    "ConfigSourceHashStrategy",
+    "compute_canonical_yaml_sha256",
+    "compute_config_source_hashes",
+    "compute_raw_sha256",
+]
 
 CANONICAL_YAML_HASH_VERSION = "canonical-yaml-sha256-v1"
 RAW_BYTES_HASH_VERSION = "raw-bytes-sha256-v1"
@@ -57,7 +67,7 @@ _UniqueKeySafeLoader.add_constructor(
 
 
 @dataclass(frozen=True)
-class ConfigSourceHashes:
+class ConfigSourceHashSnapshot:
     """Semantic and raw hashes for one file-backed config source."""
 
     semantic_hash: str
@@ -95,17 +105,17 @@ def compute_config_source_hashes(
     *,
     source_path: str,
     raw_bytes: bytes,
-) -> ConfigSourceHashes:
+) -> ConfigSourceHashSnapshot:
     """Compute semantic identity and raw integrity hashes for a config source."""
     raw_hash = compute_raw_sha256(raw_bytes)
     if PurePath(source_path).suffix.lower() in _YAML_SUFFIXES:
-        return ConfigSourceHashes(
+        return ConfigSourceHashSnapshot(
             semantic_hash=compute_canonical_yaml_sha256(raw_bytes),
             raw_hash=raw_hash,
             hash_strategy="canonical_yaml",
             semantic_hash_version=CANONICAL_YAML_HASH_VERSION,
         )
-    return ConfigSourceHashes(
+    return ConfigSourceHashSnapshot(
         semantic_hash=raw_hash,
         raw_hash=raw_hash,
         hash_strategy="raw_bytes",
