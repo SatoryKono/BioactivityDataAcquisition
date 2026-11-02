@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "catalog_ref": "a99ab2c6a4f86b401217f17a37474b0c9743daf0",
-  "source_ref": "e4ab56cf69c60eccfa78693fd74288f60786a88c",
+  "source_ref": "ea5c7f0120cbb78b16b275e4ff868bc4469d7fd0",
   "source_reviews": {
     "src/bioetl/composition/observability_runtime.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
     "src/bioetl/domain/composite/config_composite_encoder.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
@@ -12,12 +12,13 @@
     "src/bioetl/infrastructure/schemas/composite_validation.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
     "src/bioetl/infrastructure/schemas/dq_config.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
     "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py": "Reviewed source delta from main #12653 composite Gold DQ merge on published COMP-004 catalog a99ab2c6a4. Metric inventory collect binding moved into observability_runtime.check_metric_inventory; discovery line shifts only. No new external acquisition lifecycle beyond already inventoried sites.",
-    "src/bioetl/interfaces/http/_selected_run_a2_resolve.py": "Reviewed the source delta after Ruff formatting cleanup. The change only wraps the existing scope-token set to canonical line length; it adds no external acquisition, resource lifecycle, or execution behavior.",
+    "src/bioetl/interfaces/http/_selected_run_a2_resolve.py": "Reviewed A2 resolver after mypy tip. Typed ledger_port as RunLedgerLookup; selection semantics and catalog merge behavior unchanged. No new external acquisition or lifecycle behavior.",
     "src/bioetl/domain/control_plane/selected_run_contract_exclusions.py": "Reviewed a complexity refactor of contract-exclusion calculations. It preserves the same inputs, status vocabulary, and fail-closed handling; no external acquisition or lifecycle behavior was added.",
     "src/bioetl/interfaces/http/_control_plane_selector_context_build.py": "Reviewed the extracted selector-context payload builder. It preserves A2, explicit-run, and report-only selection behavior; existing executor bindings are moved explicitly in this review.",
     "src/bioetl/interfaces/http/_health_server_filter_options_payload.py": "Reviewed the extracted filter-options payload builder. Existing manifest/report reads and executor task lifetimes are preserved; existing bindings are moved explicitly in this review.",
-    "src/bioetl/interfaces/http/_health_server_routing_support.py": "Reviewed the routing module split. The HTTP endpoint contracts and bounded request handling are unchanged; existing filter-options builder bindings are moved to their extracted helper.",
-    "src/bioetl/interfaces/http/control_plane_selector_context.py": "Reviewed the extraction of selected-run context construction. Public function signature and selector behavior are preserved; the existing record-builder binding moves to the extracted module."
+    "src/bioetl/interfaces/http/_health_server_routing_support.py": "Reviewed routing helper after mypy tip. Narrowed explicit run_id before verified_report_identity_for_run; endpoint contracts and bounded forensic handling unchanged. No new external acquisition or lifecycle behavior.",
+    "src/bioetl/interfaces/http/control_plane_selector_context.py": "Reviewed the extraction of selected-run context construction. Public function signature and selector behavior are preserved; the existing record-builder binding moves to the extracted module.",
+    "src/bioetl/interfaces/http/_selected_run_unavailable.py": "Reviewed unavailable/gap payload helper after mypy tip. Accepted Mapping for gap presentation to satisfy dict invariance; payload vocabulary and fail-closed status emission unchanged. No new external acquisition or lifecycle behavior."
   },
   "expression_updates": {},
   "segment_updates": {},
