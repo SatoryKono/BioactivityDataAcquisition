@@ -152,6 +152,8 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
         "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
         "braces": "$braces",
         "@istanbuljs/load-nyc-config": {"js-yaml": "4.3.2"},
+        "glob": "14.0.3",
+        "minimatch": "$minimatch",
     }
     scenes_pkg = _json(SCENES_PKG)
     bridge_ref = (
@@ -164,6 +166,8 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
         "braces": "$braces",
         "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
         "@istanbuljs/load-nyc-config": {"js-yaml": "4.3.2"},
+        "glob": "14.0.3",
+        "minimatch": "$minimatch",
     }
     # This candidate has a real adapter for Grafana's legacy history contract;
     # a lockfile major alone is never host/runtime qualification evidence.
@@ -191,6 +195,19 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
     # run in each installed plugin graph; the removed formatter must stay absent.
     for package, locked in ((scenes_pkg, scenes), (selector_pkg, selector)):
         assert "nyc-yaml-compat.test.cjs" in package["scripts"]["test:ci"]
+        assert (
+            "minimatch-legacy-compat/contracts.test.cjs"
+            in package["scripts"]["test:ci"]
+        )
+        assert package["devDependencies"]["glob"] == "14.0.3"
+        assert package["devDependencies"]["minimatch"] == (
+            "file:../../tooling/router-v7-bridge/minimatch-legacy-compat/"
+            "minimatch-11.0.3-bioetl.1.tgz"
+        )
+        assert locked["node_modules/glob"]["version"] == "14.0.3"
+        assert locked["node_modules/minimatch"]["version"] == "11.0.3-bioetl.1"
+        assert locked["node_modules/minimatch-fixed"]["name"] == "minimatch"
+        assert locked["node_modules/minimatch-fixed"]["version"] == "11.0.3"
         assert locked["node_modules/js-yaml"]["version"] == "4.3.2"
         assert not any(key.endswith("/sprintf-js") for key in locked)
         assert not any(

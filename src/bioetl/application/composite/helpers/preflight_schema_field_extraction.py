@@ -37,6 +37,7 @@ def simplify_dtype(dtype_str: str) -> str:
         "float64": "float",
         "object": "str",
         "string": "str",
+        "string[pyarrow]": "str",
         "String": "str",
         "boolean": "bool",
         "datetime64[ns]": "datetime",
