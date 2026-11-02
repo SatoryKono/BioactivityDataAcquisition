@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import ErrorType
+    from bioetl.domain.types.enums import ErrorType
 
 
 __all__ = [
@@ -79,7 +79,7 @@ class BioETLError(Exception):
         Returns:
             ErrorType for this exception.
         """
-        from bioetl.domain.types import ErrorType
+        from bioetl.domain.types.enums import ErrorType
 
         return getattr(cls, "error_type", ErrorType.INVALID_DATA)
 
@@ -125,7 +125,7 @@ class CriticalError(BioETLError):
     @classmethod
     def get_error_type(cls) -> ErrorType:
         """Return the explicit type or the critical fallback."""
-        from bioetl.domain.types import ErrorType
+        from bioetl.domain.types.enums import ErrorType
 
         return getattr(cls, "error_type", ErrorType.DB_UNAVAILABLE)
 
@@ -140,7 +140,7 @@ class DataQualityError(BioETLError):
     @classmethod
     def get_error_type(cls) -> ErrorType:
         """Return the explicit type or the data-quality fallback."""
-        from bioetl.domain.types import ErrorType
+        from bioetl.domain.types.enums import ErrorType
 
         return getattr(cls, "error_type", ErrorType.INVALID_DATA)
 
@@ -154,6 +154,6 @@ class RecoverableError(BioETLError):
     @classmethod
     def get_error_type(cls) -> ErrorType:
         """Return the explicit type or the recoverable fallback."""
-        from bioetl.domain.types import ErrorType
+        from bioetl.domain.types.enums import ErrorType
 
         return getattr(cls, "error_type", ErrorType.NETWORK_ERROR)

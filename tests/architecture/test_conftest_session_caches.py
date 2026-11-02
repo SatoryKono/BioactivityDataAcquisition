@@ -18,6 +18,45 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
+@pytest.mark.parametrize("is_wsl", [True, False])
+@pytest.mark.parametrize(
+    "timeout",
+    [
+        "60",
+        "180",
+        "240",
+        "0",
+        0,
+        "",
+        "invalid",
+    ],
+)
+def test_wsl_timeout_preserves_policy_without_deprecated_config_access(
+    monkeypatch: pytest.MonkeyPatch, is_wsl: bool, timeout: object
+) -> None:
+    from tests import conftest as runtime_conftest
+
+    class ConfigFixture:
+        def __init__(self):
+            self._inicache = {"timeout": timeout}
+
+        def getini(self, name):
+            return self._inicache[name]
+
+        @property
+        def inicfg(self):
+            raise AssertionError("Deprecated pytest configuration access")
+
+    config = ConfigFixture()
+    monkeypatch.setattr(runtime_conftest, "_is_wsl", lambda: is_wsl)
+    monkeypatch.setattr(
+        runtime_conftest.asyncio, "to_thread", runtime_conftest.asyncio.to_thread
+    )
+    runtime_conftest._configure_wsl_timeout(config)
+    assert config.getini("timeout") == timeout
+
+
 _CONFTEST_PATH = Path(__file__).with_name("conftest.py")
 _CONFTEST_SPEC = importlib.util.spec_from_file_location(
     "architecture_conftest",

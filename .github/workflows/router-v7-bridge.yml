@@ -5,6 +5,12 @@ permissions:
 
 on:
   workflow_dispatch:
+    inputs:
+      candidate-delivery-image:
+        description: "Optional owned immutable image for full candidate qualification; empty verifies declared delivery"
+        required: false
+        default: ""
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -83,8 +89,8 @@ jobs:
         run: |
           # Runtime sourcemaps contain hashes derived from the compiler root.
           docker run --rm \
-            --mount "type=bind,source=$GITHUB_WORKSPACE,target=/work" \
-            --workdir "/work/grafana/plugins/$BIOETL_PLUGIN" \
+            --mount "type=bind,source=$GITHUB_WORKSPACE,target=$GITHUB_WORKSPACE" \
+            --workdir "$GITHUB_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN" \
             node@sha256:e7add2a490bb17d97b485b8641bd88455fff7839ade0f5eba493c3508124d413 \
             npm run build
       - name: Verify built bundle against shipped host manifest
@@ -218,15 +224,25 @@ jobs:
             --metadata-file reports/qa/router-v7-image-build.json \
             -f grafana/tooling/router-v7-bridge/Dockerfile.host \
             -t bioetl-router-host:acceptance reports/qa/router-v7-image-context
-      - name: Verify built image against declared delivery image
+      - name: Verify complete built image against selected immutable delivery
         id: host_parity
+        env:
+          CANDIDATE_DELIVERY_IMAGE: ${{ inputs.candidate-delivery-image }}
         run: |
-          image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
+          image=$(node --input-type=module -e '
+            import { readFileSync } from "node:fs";
+            import { validateDeliveryImage } from "./grafana/tooling/router-v7-bridge/verify-host-image.mjs";
+            const declared = JSON.parse(readFileSync("grafana/tooling/router-v7-bridge/host-image.json", "utf8")).image;
+            process.stdout.write(validateDeliveryImage(process.env.CANDIDATE_DELIVERY_IMAGE || declared));
+          ')
           docker pull "$image"
           base_image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').base_image")
           docker pull "$base_image"
-          node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
-            bioetl-router-host:acceptance
+          args=(bioetl-router-host:acceptance)
+          if [[ -n "$CANDIDATE_DELIVERY_IMAGE" ]]; then
+            args+=(--candidate-image "$image")
+          fi
+          node grafana/tooling/router-v7-bridge/verify-host-image.mjs "${args[@]}"
       - name: Preserve complete rootfs differences when parity fails
         if: ${{ !cancelled() && failure() && steps.host_parity.outcome == 'failure' }}
         run: |

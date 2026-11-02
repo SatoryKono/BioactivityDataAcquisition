@@ -273,9 +273,10 @@ def test_shadow_compare_routes_12375_a_evidence() -> None:
     assert report["covers_full_suite"] is False
 
 
-def test_shadow_compare_routes_historical_secret_fingerprints() -> None:
+@pytest.mark.parametrize("path", [".gitleaksignore", ".gitleaks.toml"])
+def test_shadow_compare_routes_secret_scanner_policy(path: str) -> None:
     repo_root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare([".gitleaksignore"], repo_root=repo_root)
+    report = build_shadow_compare([path], repo_root=repo_root)
     assert report["selected"] == [
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py"
     ]
@@ -590,6 +591,23 @@ def test_shadow_compare_routes_low_coverage_revalidation_junit() -> None:
     assert report["selected"] == [
         "tests/unit/scripts/qa/test_refresh_governance_artifacts.py"
     ]
+
+
+def test_shadow_compare_routes_test_health_summary_to_freshness_owners() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["docs/reports/evidence/project-test-health/SUMMARY.md"], repo_root=root
+    )
+    assert report["covers_full_suite"] is False
+    assert set(report["selected"]) == {
+        "tests/architecture/test_governance_freshness_protocol.py",
+        "tests/architecture/test_runtime_agent_docs_drift.py",
+        "tests/unit/scripts/docs/test_check_drift_evidence_age.py",
+    }
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            ["docs/reports/evidence/project-test-health/unowned.md"], repo_root=root
+        )
 
 
 def test_shadow_compare_routes_security_suppression_registry() -> None:
@@ -1046,6 +1064,22 @@ def test_shadow_compare_routes_assertless_ratchet_config() -> None:
         "tests/architecture/test_arch_s4_s9_gates.py",
         "tests/architecture/test_test_governance_audit.py",
         "tests/architecture/test_tech_debt_issues_5514_5515_governance.py",
+    ]
+
+
+def test_shadow_compare_routes_diagram_runner_paths() -> None:
+    """Diagram tooling changes select their runner and budget contracts."""
+    repo_root = Path(__file__).resolve().parents[5]
+
+    report = build_shadow_compare(
+        ["scripts/diagrams/README.md", "scripts/diagrams/run_diagram_checks.sh"],
+        repo_root=repo_root,
+    )
+
+    assert report["selected"] == [
+        "tests/architecture/test_diagram_quality_budget_security.py",
+        "tests/architecture/test_run_diagram_checks_script.py",
+        "tests/architecture/test_diagram_issues_6205_6211_closeout.py",
     ]
 
 
