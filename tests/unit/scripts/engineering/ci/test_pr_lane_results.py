@@ -1077,9 +1077,9 @@ def test_shadow_compare_routes_diagram_runner_paths() -> None:
     )
 
     assert report["selected"] == [
-        "tests/architecture/test_diagram_issues_6205_6211_closeout.py",
         "tests/architecture/test_diagram_quality_budget_security.py",
         "tests/architecture/test_run_diagram_checks_script.py",
+        "tests/architecture/test_diagram_issues_6205_6211_closeout.py",
     ]
 
 
