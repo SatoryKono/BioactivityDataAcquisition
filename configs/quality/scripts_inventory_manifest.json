@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-02T09:56:32.505845+00:00",
+  "generated_at": "2026-11-02T10:14:04.180598+00:00",
   "summary": {
-    "total_scripts": 707,
+    "total_scripts": 704,
     "status_counts": {
       "active": 334,
-      "supporting": 373
+      "supporting": 370
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -11349,18 +11349,6 @@
       ]
     },
     {
-      "path": "scripts/engineering/common/build_backend.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-11-30",
-      "next_step": "Retain as the PEP 517 build-system backend configured by pyproject.toml. It delegates wheel creation to setuptools and declares the source-only quality tooling closure for sdists; it has no standalone CLI."
-    },
-    {
       "path": "scripts/engineering/common/cli_dispatch.py",
       "type": "py",
       "status": "supporting",
@@ -14518,18 +14506,6 @@
           "text": "SOURCE = ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"check_quality_exemptions.py\""
         }
       ]
-    },
-    {
-      "path": "scripts/engineering/qa/check_quality_move_distributions.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-11-30",
-      "next_step": "Retain as the test-imported, read-only QM-09 distribution-content validator. Keep it supporting so the active script budget does not grow; promote only after a router slot is freed."
     },
     {
       "path": "scripts/engineering/qa/check_semantic_anchor_parity.py",
@@ -18001,18 +17977,6 @@
           "text": "from scripts.engineering.qa.report_source_tree_manifest import build_manifest"
         }
       ]
-    },
-    {
-      "path": "scripts/engineering/qa/report_test_basename_collisions.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-11-30",
-      "next_step": "Retain as the deterministic basename-collision inventory implementation behind python -m scripts.engineering.qa report-test-basename-collisions; owning tests import its collector. Keep routed through the existing QA dispatcher, with no new active-script surface."
     },
     {
       "path": "scripts/engineering/qa/report_test_governance_audit.py",
