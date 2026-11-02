@@ -476,14 +476,20 @@ def rebind_resource_free_sources(
         if reviewed[path] != actual or blobs[path].sha256 != actual:
             raise ValueError(f"Reviewed source digest differs: {path}")
     updated = copy.deepcopy(payload)
+    previous_commit = payload["source_commit"]
     updated["source_commit"] = commit
     updated["source_tree"] = tree
     updated["source_files"] = {path: blob.oid for path, blob in blobs.items()}
     for ref in _references(updated):
         ref["source_commit"] = commit
+    review = updated.get("source_requalification")
+    if isinstance(review, dict):
+        # Keep the reviewed provenance block; only the pinned source_ref moves
+        # with this resource-free rebind. Counts and runtime remain authoritative.
+        review["source_ref"] = commit
     updated.setdefault("source_rebindings", []).append(
         {
-            "from_commit": payload["source_commit"],
+            "from_commit": previous_commit,
             "to_commit": commit,
             "reviewed_resource_free_sources": dict(reviewed),
         }
@@ -496,7 +502,6 @@ def rebind_resource_free_sources(
 
 def render(payload: dict[str, Any]) -> str:  # Any: validated JSON catalog.
     """Render every resource and source link without inventing runtime results."""
-    commit = payload["source_commit"]
     method = payload["completeness_method"]
     review = payload.get("source_requalification")
     if review is not None:
@@ -508,6 +513,7 @@ def render(payload: dict[str, Any]) -> str:  # Any: validated JSON catalog.
             f"Original baseline qualification narrative ({review['baseline_source_ref']}), "
             f"preserved verbatim; its correction totals describe that baseline:\n\n{method}"
         )
+    commit = payload["source_commit"]
     out = [
         "# External Resource Inventory",
         "",

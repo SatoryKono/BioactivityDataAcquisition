@@ -75,7 +75,7 @@ def _safe_contract_check(
 ) -> ContractCheck:
     try:
         return checker(repo_root)
-    except (OSError, ValueError, yaml.YAMLError) as exc:
+    except (ImportError, OSError, ValueError, yaml.YAMLError) as exc:
         return ContractCheck(
             name=name,
             passed=False,
@@ -105,11 +105,11 @@ def render_contract_check_report(report: ObservabilityContractCheckReport) -> st
 
 
 def _check_metric_inventory(repo_root: Path) -> ContractCheck:
-    import bioetl.composition.observability_runtime as report_observability_metric_inventory
+    import bioetl.composition.observability_runtime as metric_inventory
 
-    report = report_observability_metric_inventory.collect_metric_inventory(repo_root)
+    report = metric_inventory.collect_metric_inventory(repo_root)
     allowlist_path = repo_root / _METRIC_ALLOWLIST
-    violations = report_observability_metric_inventory.validate_metric_inventory(
+    violations = metric_inventory.validate_metric_inventory(
         report,
         allowlist=_load_metric_allowlist(allowlist_path),
     )

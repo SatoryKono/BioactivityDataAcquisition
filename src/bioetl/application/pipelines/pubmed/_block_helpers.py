@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 import re
-import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry - see suppression registry
+else:
+    from defusedxml import ElementTree as ET
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING
 

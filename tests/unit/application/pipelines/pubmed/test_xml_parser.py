@@ -37,14 +37,23 @@ Tests for get_text() and get_int() helper functions:
 
 from __future__ import annotations
 
+from typing import get_type_hints
+
 import pytest
 
 import xml.etree.ElementTree as ET
 
 from bioetl.application.pipelines.pubmed.xml_parser import get_int, get_text
+from bioetl.application.pipelines.pubmed.extractors.author import AuthorExtractor
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_pubmed_element_annotations_resolve_at_runtime() -> None:
+    """Public XML helper and extractor annotations remain introspectable."""
+    assert get_type_hints(get_text)["node"]
+    assert get_type_hints(AuthorExtractor.extract)["element"]
 
 
 class TestGetText:

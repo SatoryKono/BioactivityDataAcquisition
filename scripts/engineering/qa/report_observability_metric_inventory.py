@@ -14,44 +14,29 @@ The report is intentionally static and repo-local. It reconciles:
 
 from __future__ import annotations
 
-# Tooling must also bootstrap from a source root without an installed package.
-from scripts.engineering.qa.observability_metric_inventory_shared import (
-    _SRC_ROOT as _SRC_ROOT,
-)
-
-
-from bioetl.infrastructure.observability.metric_inventory_assembly import (
-    _scan_docs_and_rules_mentions as _scan_docs_and_rules_mentions,
-)
-from bioetl.infrastructure.observability.metric_inventory_assembly import (
-    _collect_observability_event_inventory as _collect_observability_event_inventory,
-)
-from bioetl.infrastructure.observability.metric_inventory_assembly import (
-    _counter_total_aliases as _counter_total_aliases,
-)
-from bioetl.infrastructure.observability.metric_inventory_assembly import (
-    _canonical_runtime_sets as _canonical_runtime_sets,
-)
-from bioetl.infrastructure.observability.metric_inventory_assembly import (
-    _allowlisted_metric_diff as _allowlisted_metric_diff,
-)
-from bioetl.infrastructure.observability.metric_inventory_assembly import (
-    _cardinality_review_fields as _cardinality_review_fields,
-)
-from bioetl.infrastructure.observability.metric_inventory_assembly import (
-    _risky_label_review_fields as _risky_label_review_fields,
-)
-from bioetl.infrastructure.observability.metric_inventory import (
-    _collect_metric_inventory_impl as _collect_metric_inventory_impl,
-)
-from bioetl.infrastructure.observability.metric_inventory_assembly import (
-    _combine_metric_emitters as _combine_metric_emitters,
-)
-
-
+import argparse
+import ast
+import json
+import os
+import re
+import subprocess
 import sys
-from contextlib import contextmanager
-from collections.abc import Iterator
+import types
+from collections import defaultdict
+from collections.abc import Callable, Sequence
+from datetime import UTC, date, datetime
+from pathlib import Path
+from typing import Any, Final, Protocol, TypedDict, cast
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
+
+# Support running this report directly from a source checkout without requiring
+# the project package to be installed or ``src`` to be present in PYTHONPATH.
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+_SRC_ROOT = _REPO_ROOT / "src"
+if str(_SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(_SRC_ROOT))
 
 # `python -m scripts.engineering.qa.report_observability_metric_inventory` loads
 # this file as ``__main__``. The scan helper imports the same module by package
@@ -63,24 +48,15 @@ if __name__ == "__main__":
         sys.modules[__name__],
     )
 
-import argparse
-import ast
-import json
-import os
-import re
-import subprocess
-import types
-from collections import defaultdict
-from collections.abc import Callable, Sequence
-from datetime import UTC, date, datetime
-from pathlib import Path
-from typing import Any, Final, Protocol, TypedDict, cast
-from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+from bioetl.infrastructure.observability import (
+    metric_inventory_assembly as _metric_inventory_assembly,
+    metric_inventory_ast as _metric_inventory_ast,
+    metric_inventory_scan as _metric_inventory_scan,
+)
 
 from scripts.engineering.qa.observability_metric_inventory_shared import (
     _REPO_ROOT,
+    _SRC_ROOT,
     _StartupInfoLike,
     _CANONICAL_METRIC_RE,
     _PROMETHEUS_METRIC_NAME_RE,
@@ -144,271 +120,126 @@ if __name__ == "__main__":
         sys.modules[__name__],
     )
 
-from bioetl.infrastructure.observability import metric_inventory_scan as _metric_scan
-from scripts.engineering.qa import (
-    observability_metric_inventory_scan as _metric_discovery,
-)
-from bioetl.infrastructure.observability import metric_inventory_ast as _metric_ast
-from bioetl.infrastructure.observability import (
-    metric_inventory_bindings as _metric_bindings,
-)
+from scripts.engineering.qa import observability_metric_inventory_scan as _metric_scan
 from scripts.engineering.qa.observability_metric_inventory_scan import (
     _iter_text_files_with_rg,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _run_text_discovery_command,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _WindowsSubprocessKwargs,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _hidden_windows_subprocess_kwargs,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _repo_relative_pathspec,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import _as_repo_relative
-from scripts.engineering.qa.observability_metric_inventory_scan import (
+    _as_repo_relative,
     _scan_canonical_metric_mentions,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _scan_canonical_metric_mentions_via_direct_reads,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _repo_relative_paths_for_scan,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _append_metric_mentions_from_grep_line,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _run_metric_mention_grep,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _scan_metric_mentions_via_command_chunks,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _scan_canonical_metric_mentions_with_git_grep,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _scan_canonical_metric_mentions_with_rg,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _normalize_mapping_lists,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import _read_cached_text
-from scripts.engineering.qa.observability_metric_inventory_scan import (
+    _read_cached_text,
     _read_runtime_candidate_text,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _read_runtime_event_candidate_text,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _iter_runtime_candidate_paths,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _candidate_paths_from_stdout,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _iter_candidate_paths_with_git_grep,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _iter_candidate_paths_with_rg,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _iter_runtime_candidate_paths_with_rg,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _iter_runtime_event_candidate_paths,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _iter_runtime_event_candidate_paths_with_rg,
-)
-from scripts.engineering.qa.observability_metric_inventory_scan import (
     _collect_runtime_candidate_texts,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _module_path_from_import,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _collect_module_string_bindings,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _iter_string_assignments,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _resolve_imported_string_bindings,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _collect_class_attribute_bindings,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _collect_repo_class_attribute_bindings,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _resolve_metric_name_expr,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _collect_local_string_bindings,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _call_method_name,
-)
-from bioetl.infrastructure.observability.metric_inventory_ast import (
     _helper_metric_candidates,
-)
-from bioetl.infrastructure.observability.metric_inventory_ast import (
     _scan_metric_names_in_tree,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _import_from_nodes,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _looks_like_imported_string_constant_name,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _imported_string_constant_aliases,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _module_string_bindings,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _merge_imported_string_aliases,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import _class_nodes
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
+    _class_nodes,
     _class_attribute_string_bindings,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import _call_nodes
-from bioetl.infrastructure.observability.metric_inventory_ast import (
+    _call_nodes,
     _metric_names_for_call,
-)
-from bioetl.infrastructure.observability.metric_inventory_ast import _direct_metric_name
-from bioetl.infrastructure.observability.metric_inventory_ast import (
+    _direct_metric_name,
     _collector_base_metric_expr,
-)
-from bioetl.infrastructure.observability.metric_inventory_ast import (
     _direct_collector_metric_name,
-)
-from bioetl.infrastructure.observability.metric_inventory_ast import (
     _dict_literal_string_keys,
-)
-from bioetl.infrastructure.observability.metric_inventory_ast import (
     _direct_metric_label_keys,
-)
-from bioetl.infrastructure.observability.metric_inventory_ast import (
     _scan_direct_metric_label_shapes,
-)
-from bioetl.infrastructure.observability.metric_inventory_ast import (
     _record_label_contract_violations,
-)
-from bioetl.infrastructure.observability.metric_inventory_ast import (
     _partition_helper_metric_candidates,
-)
-from bioetl.infrastructure.observability.metric_inventory_ast import (
     _is_metric_like_alias_name,
-)
-from bioetl.infrastructure.observability.metric_inventory_ast import (
     _record_runtime_mentions,
-)
-from bioetl.infrastructure.observability.metric_inventory_scan import (
     _scan_runtime_metric_file,
-)
-from bioetl.infrastructure.observability.metric_inventory_scan import (
     _scan_runtime_metric_calls,
-)
-from bioetl.infrastructure.observability.metric_inventory_scan import (
     _record_static_runtime_emitters,
-)
-from bioetl.infrastructure.observability.metric_inventory_scan import (
     _scan_registered_metric_names,
-)
-from bioetl.infrastructure.observability.metric_inventory_scan import (
     _load_declared_metric_definitions,
-)
-from bioetl.infrastructure.observability.metric_inventory_bindings import (
     _resolve_imported_metric_bindings,
 )
 
-_iter_text_files_impl = _metric_discovery._iter_text_files
+_iter_text_files_impl = _metric_scan._iter_text_files
 _iter_text_files_with_git_ls_files_impl = (
-    _metric_discovery._iter_text_files_with_git_ls_files
+    _metric_scan._iter_text_files_with_git_ls_files
 )
 
 
 def _sync_metric_scan_compatibility_seams() -> None:
     """Propagate historical module overrides into the scanner seam."""
-    _metric_discovery._iter_text_files_with_git_ls_files = (
-        _iter_text_files_with_git_ls_files
-    )
-    _metric_discovery._run_text_discovery_command = _run_text_discovery_command
-    _metric_bindings._module_string_bindings = _module_string_bindings
+    _metric_scan._iter_text_files_with_git_ls_files = _iter_text_files_with_git_ls_files
+    _metric_scan._run_text_discovery_command = _run_text_discovery_command
+    _metric_scan._module_string_bindings = _module_string_bindings
     _metric_scan._DEFAULT_DECLARED_METRIC_DEFINITIONS = (
         _DEFAULT_DECLARED_METRIC_DEFINITIONS
     )
-    _metric_ast.REGISTERED_PROMETHEUS_METRIC_LABELS = (
+    _metric_scan.REGISTERED_PROMETHEUS_METRIC_LABELS = (
         REGISTERED_PROMETHEUS_METRIC_LABELS
         if "REGISTERED_PROMETHEUS_METRIC_LABELS" in globals()
         else {}
     )
-
-
-@contextmanager
-def _inventory_compatibility_seams(repo_root: Path | None = None) -> Iterator[None]:
-    from bioetl.infrastructure.observability import metric_inventory_events as events
-    from bioetl.infrastructure.observability import (
-        metric_inventory_assembly as assembly,
+    _metric_inventory_scan.REGISTERED_PROMETHEUS_METRIC_LABELS = (
+        _metric_scan.REGISTERED_PROMETHEUS_METRIC_LABELS
     )
-    from bioetl.infrastructure.observability import (
-        metric_inventory_candidates as candidates,
+    _metric_inventory_ast.REGISTERED_PROMETHEUS_METRIC_LABELS = (
+        _metric_scan.REGISTERED_PROMETHEUS_METRIC_LABELS
     )
-    from bioetl.infrastructure.observability import metric_inventory_report as report
-
-    targets = (
-        (_metric_discovery, "_REPO_ROOT"),
-        (_metric_discovery, "_iter_text_files_with_git_ls_files"),
-        (_metric_discovery, "_run_text_discovery_command"),
-        (_metric_bindings, "_module_string_bindings"),
-        (_metric_ast, "REGISTERED_PROMETHEUS_METRIC_LABELS"),
-        (_metric_scan, "_DEFAULT_DECLARED_METRIC_DEFINITIONS"),
-        (events, "REGISTERED_PROMETHEUS_METRIC_LABELS"),
-        (assembly, "_iter_text_files"),
-        (candidates, "_iter_text_files"),
-        (report, "_iter_text_files"),
-        (assembly, "_scan_canonical_metric_mentions"),
-        (report, "_scan_canonical_metric_mentions"),
-    )
-    previous = [(module, name, getattr(module, name)) for module, name in targets]
-    try:
-        _sync_metric_scan_compatibility_seams()
-        if repo_root is not None:
-            _metric_discovery._REPO_ROOT = repo_root.resolve()
-        for module in (assembly, candidates, report):
-            module._iter_text_files = _iter_text_files_impl
-        for module in (assembly, report):
-            module._scan_canonical_metric_mentions = (
-                _metric_discovery._scan_canonical_metric_mentions
-            )
-        events.REGISTERED_PROMETHEUS_METRIC_LABELS = REGISTERED_PROMETHEUS_METRIC_LABELS
-        yield
-    finally:
-        for module, name, value in previous:
-            setattr(module, name, value)
 
 
 def _iter_text_files(root: Path) -> list[Path]:
-    """Use engineering overrides without leaking them into installed-runtime logic."""
-    with _inventory_compatibility_seams():
+    """Compatibility wrapper for the historical scanner patch surface."""
+    previous_seams = {
+        "_iter_text_files_with_git_ls_files": (
+            _metric_scan._iter_text_files_with_git_ls_files
+        ),
+        "_run_text_discovery_command": _metric_scan._run_text_discovery_command,
+        "_module_string_bindings": _metric_scan._module_string_bindings,
+        "_DEFAULT_DECLARED_METRIC_DEFINITIONS": (
+            _metric_scan._DEFAULT_DECLARED_METRIC_DEFINITIONS
+        ),
+        "REGISTERED_PROMETHEUS_METRIC_LABELS": (
+            _metric_scan.REGISTERED_PROMETHEUS_METRIC_LABELS
+        ),
+    }
+    try:
+        _sync_metric_scan_compatibility_seams()
         return _iter_text_files_impl(root)
+    finally:
+        for name, value in previous_seams.items():
+            setattr(_metric_scan, name, value)
 
 
 def _iter_text_files_with_git_ls_files(root: Path) -> list[Path] | None:
-    """Use bounded discovery with the historical engineering command seam."""
-    previous = _metric_discovery._run_text_discovery_command
-    try:
-        _metric_discovery._run_text_discovery_command = _run_text_discovery_command
-        return _iter_text_files_with_git_ls_files_impl(root)
-    finally:
-        _metric_discovery._run_text_discovery_command = previous
+    """Compatibility wrapper for bounded git-backed discovery."""
+    _metric_scan._run_text_discovery_command = _run_text_discovery_command
+    return _iter_text_files_with_git_ls_files_impl(root)
 
 
 from scripts.engineering.qa.observability_metric_inventory_report import (
@@ -558,29 +389,263 @@ def _build_runtime_cardinality_review_summary(
     )
 
 
-def collect_metric_inventory(repo_root: Path) -> MetricInventoryReport:
-    """Collect using the shared implementation and historical engineering overrides."""
-    from bioetl.infrastructure.observability.metric_inventory import _COLLECTION_LOCK
-    from bioetl.infrastructure.observability.metric_inventory_shared import (
-        _reset_inventory_caches,
+_scan_docs_and_rules_mentions = _metric_inventory_assembly._scan_docs_and_rules_mentions
+
+
+_collect_observability_event_inventory = (
+    _metric_inventory_assembly._collect_observability_event_inventory
+)
+
+
+_counter_total_aliases = _metric_inventory_assembly._counter_total_aliases
+
+
+_canonical_runtime_sets = _metric_inventory_assembly._canonical_runtime_sets
+
+
+_allowlisted_metric_diff = _metric_inventory_assembly._allowlisted_metric_diff
+
+
+_cardinality_review_fields = _metric_inventory_assembly._cardinality_review_fields
+
+
+def _risky_label_review_fields(
+    *,
+    declared_set: set[str],
+    declared_label_contract_metrics: set[str],
+    drift_allowlist: dict[str, set[str]],
+) -> _RiskyLabelReviewFields:
+    declared_risky_label_candidates = sorted(
+        metric_name
+        for metric_name, label_names in REGISTERED_PROMETHEUS_METRIC_LABELS.items()
+        if metric_name in declared_set
+        and bool(set(label_names) & _CARDINALITY_RISK_LABEL_NAMES)
+    )
+    contract_bounded_risky_labels = (
+        set(declared_risky_label_candidates) & declared_label_contract_metrics
+    )
+    reviewed_risky_labels = drift_allowlist.get(
+        "declared_risky_label_review_required",
+        set(),
+    )
+    declared_risky_label_reviewed = sorted(
+        (set(declared_risky_label_candidates) & reviewed_risky_labels)
+        | contract_bounded_risky_labels
+    )
+    declared_risky_label_review_required = [
+        metric_name
+        for metric_name in declared_risky_label_candidates
+        if metric_name not in reviewed_risky_labels
+        and metric_name not in contract_bounded_risky_labels
+    ]
+    return {
+        "declared_risky_label_candidates": declared_risky_label_candidates,
+        "contract_bounded_risky_labels": contract_bounded_risky_labels,
+        "declared_risky_label_reviewed": declared_risky_label_reviewed,
+        "declared_risky_label_review_required": declared_risky_label_review_required,
+    }
+
+
+def _collect_metric_inventory_impl(
+    repo_root: Path,
+) -> MetricInventoryReport:
+    repo_root = repo_root.resolve()
+    cache_key = repo_root.as_posix()
+    cached = _METRIC_INVENTORY_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+    declared_metric_definitions = _load_declared_metric_definitions(repo_root)
+    declared_rule_metrics = declared_metric_definitions["recording_rule_metrics"]
+    declared_policy_aliases = declared_metric_definitions["policy_alias_metrics"]
+    declared_label_contract_metrics = declared_metric_definitions[
+        "declared_label_contract_metrics"
+    ]
+    runtime_registered_set = set(REGISTERED_PROMETHEUS_METRIC_NAMES)
+    declared_set = (
+        runtime_registered_set | declared_rule_metrics | declared_policy_aliases
+    )
+    registered = sorted(declared_set)
+    (
+        runtime_mentions,
+        helper_backed_mentions,
+        alias_mentions,
+        label_contract_violations,
+        label_contract_unresolved,
+    ) = _scan_runtime_metric_calls(repo_root)
+    label_contract_unresolved = _filter_declared_label_contract_metrics(
+        label_contract_unresolved,
+        declared_label_contract_metrics,
+    )
+    docs_mentions, rules_mentions = _scan_docs_and_rules_mentions(
+        repo_root, declared_set=declared_set
+    )
+    event_inventory = _collect_observability_event_inventory(repo_root)
+    runtime_observability_contract = get_runtime_observability_publication_contract()
+
+    registered_set = set(registered)
+    (
+        runtime_set,
+        runtime_counter_bases,
+        canonical_runtime_set,
+        canonical_direct_runtime_set,
+        canonical_helper_runtime_set,
+    ) = _canonical_runtime_sets(
+        direct_runtime_set=set(runtime_mentions),
+        helper_runtime_set=set(helper_backed_mentions),
+        runtime_registered_set=runtime_registered_set,
+    )
+    docs_set = set(docs_mentions)
+    rules_set = set(rules_mentions)
+    registry_only_metric_set = runtime_registered_set - canonical_runtime_set
+    runtime_without_registry_set = runtime_set - registered_set - runtime_counter_bases
+    dead_metrics = registry_only_metric_set - docs_set - rules_set
+    ruled_without_runtime_set = (
+        rules_set & runtime_registered_set
+    ) - canonical_runtime_set
+    combined_emitters = _combine_metric_emitters(
+        runtime_mentions, helper_backed_mentions
+    )
+    observed_series_counts = _observed_runtime_series_counts()
+    cardinality_thresholds = _load_runtime_cardinality_thresholds(repo_root)
+    drift_allowlist = _load_drift_allowlist(repo_root / _DEFAULT_DRIFT_ALLOWLIST)
+    documented_without_runtime = _allowlisted_metric_diff(
+        (docs_set & runtime_registered_set) - canonical_runtime_set,
+        drift_allowlist.get("dashboarded_without_emission", set()),
+    )
+    registry_only_metrics = _allowlisted_metric_diff(
+        registry_only_metric_set,
+        drift_allowlist.get("unused_declared_metrics", set()),
+    )
+    runtime_without_registry = _allowlisted_metric_diff(
+        runtime_without_registry_set,
+        drift_allowlist.get("runtime_without_registry", set()),
+    )
+    unused_declared_observability_events = _allowlisted_metric_diff(
+        set(event_inventory["raw_unused_declared_observability_events"]),
+        drift_allowlist.get("unused_declared_observability_events", set()),
+    )
+    ruled_without_runtime = _allowlisted_metric_diff(
+        ruled_without_runtime_set,
+        drift_allowlist.get("alerted_without_emission", set()),
+    )
+    cardinality_fields = _cardinality_review_fields(
+        combined_emitters=combined_emitters,
+        drift_allowlist=drift_allowlist,
+        cardinality_thresholds=cardinality_thresholds,
+        observed_series_counts=observed_series_counts,
+    )
+    risky_label_fields = _risky_label_review_fields(
+        declared_set=declared_set,
+        declared_label_contract_metrics=declared_label_contract_metrics,
+        drift_allowlist=drift_allowlist,
     )
 
-    with _COLLECTION_LOCK, _inventory_compatibility_seams(repo_root):
-        _reset_inventory_caches()
-        return _collect_metric_inventory_impl(
-            repo_root,
-            sources={
-                "_load_declared_metric_definitions": _load_declared_metric_definitions,
-                "_scan_runtime_metric_calls": _scan_runtime_metric_calls,
-                "_scan_docs_and_rules_mentions": _scan_docs_and_rules_mentions,
-                "_collect_observability_event_inventory": _collect_observability_event_inventory,
-                "_observed_runtime_series_counts": _observed_runtime_series_counts,
-                "_load_runtime_cardinality_thresholds": _load_runtime_cardinality_thresholds,
-                "_load_drift_allowlist": _load_drift_allowlist,
-                "REGISTERED_PROMETHEUS_METRIC_NAMES": REGISTERED_PROMETHEUS_METRIC_NAMES,
-                "REGISTERED_PROMETHEUS_METRIC_LABELS": REGISTERED_PROMETHEUS_METRIC_LABELS,
-            },
-        )
+    report: MetricInventoryReport = {
+        "declared_metrics": registered,
+        "emitted_metrics": sorted(registered_set & canonical_runtime_set),
+        "declared_observability_events": event_inventory[
+            "declared_observability_events"
+        ],
+        "emitted_observability_events": event_inventory["emitted_observability_events"],
+        "unused_declared_observability_events": unused_declared_observability_events,
+        "retired_declared_observability_events": event_inventory[
+            "retired_declared_observability_events"
+        ],
+        "retired_declared_observability_events_emitted": event_inventory[
+            "retired_declared_observability_events_emitted"
+        ],
+        "emitted_observability_events_without_contract": event_inventory[
+            "emitted_observability_events_without_contract"
+        ],
+        "dashboarded_metrics": sorted(docs_set & registered_set),
+        "alerted_metrics": sorted(rules_set & registered_set),
+        "unused_declared_metrics": sorted(registry_only_metrics),
+        "emitted_without_declaration": sorted(runtime_without_registry),
+        "dashboarded_without_declaration": sorted(docs_set - registered_set),
+        "alerted_without_declaration": sorted(rules_set - registered_set),
+        "dashboarded_without_emission": sorted(documented_without_runtime),
+        "alerted_without_emission": sorted(ruled_without_runtime),
+        "runtime_cardinality_review_candidates": cardinality_fields[
+            "runtime_cardinality_candidates"
+        ],
+        "runtime_cardinality_reviewed": cardinality_fields[
+            "runtime_cardinality_reviewed"
+        ],
+        "runtime_cardinality_review_required": cardinality_fields[
+            "runtime_cardinality_review_required"
+        ],
+        "runtime_cardinality_evidence": cardinality_fields[
+            "runtime_cardinality_evidence"
+        ],
+        "runtime_cardinality_observed_series": {
+            metric_name: [f"observed_series_count={count}"]
+            for metric_name, count in sorted(observed_series_counts.items())
+        },
+        "runtime_cardinality_threshold_violations": cardinality_fields[
+            "runtime_cardinality_threshold_violations"
+        ],
+        "declared_risky_label_review_candidates": risky_label_fields[
+            "declared_risky_label_candidates"
+        ],
+        "declared_risky_label_contract_reviewed": sorted(
+            risky_label_fields["contract_bounded_risky_labels"]
+        ),
+        "declared_risky_label_reviewed": risky_label_fields[
+            "declared_risky_label_reviewed"
+        ],
+        "declared_risky_label_review_required": risky_label_fields[
+            "declared_risky_label_review_required"
+        ],
+        "declared_label_contract_metrics": sorted(declared_label_contract_metrics),
+        "runtime_label_contract_violations": label_contract_violations,
+        "runtime_label_contract_unresolved": label_contract_unresolved,
+        "registered_metrics": registered,
+        "live_metrics": sorted(registered_set & canonical_runtime_set),
+        "direct_live_metrics": sorted(registered_set & canonical_direct_runtime_set),
+        "helper_backed_live_metrics": sorted(
+            registered_set & canonical_helper_runtime_set
+        ),
+        "registered_without_runtime": sorted(registry_only_metrics),
+        "runtime_without_registry": sorted(runtime_without_registry),
+        "registry_only_metrics": sorted(registry_only_metrics),
+        "dead_metrics": sorted(dead_metrics),
+        "documented_without_registry": sorted(docs_set - registered_set),
+        "rules_without_registry": sorted(rules_set - registered_set),
+        "documented_without_runtime": sorted(documented_without_runtime),
+        "documented_only_metrics": sorted(documented_without_runtime),
+        "ruled_without_runtime": sorted(ruled_without_runtime),
+        "compatibility_alias_candidates": sorted(alias_mentions),
+        "runtime_emitters": runtime_mentions,
+        "helper_backed_emitters": helper_backed_mentions,
+        "observability_event_emitters": event_inventory["observability_event_emitters"],
+        "domain_event_emitters": event_inventory["domain_event_emitters"],
+        "canonical_runtime_observability_emitters": sorted(
+            runtime_observability_contract.canonical_emitters
+        ),
+        "docs_mentions": docs_mentions,
+        "rules_mentions": rules_mentions,
+        "alias_emitters": alias_mentions,
+    }
+    _METRIC_INVENTORY_CACHE[cache_key] = report
+    return report
+
+
+_combine_metric_emitters = _metric_inventory_assembly._combine_metric_emitters
+
+
+def collect_metric_inventory(repo_root: Path) -> MetricInventoryReport:
+    """Collect a fresh inventory after syncing compatibility overrides."""
+    for cache in (
+        _TEXT_FILE_DISCOVERY_CACHE,
+        _METRIC_INVENTORY_CACHE,
+        _SOURCE_TEXT_CACHE,
+        _RUNTIME_CANDIDATE_TEXT_CACHE,
+        _RUNTIME_CANDIDATE_PATH_CACHE,
+        _RUNTIME_EVENT_CANDIDATE_PATH_CACHE,
+    ):
+        cache.clear()
+    _sync_metric_scan_compatibility_seams()
+    return _collect_metric_inventory_impl(repo_root)
 
 
 from scripts.engineering.qa import observability_metric_inventory_cli as _metric_cli
