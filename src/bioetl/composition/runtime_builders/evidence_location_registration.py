@@ -275,21 +275,29 @@ def register_workflow_manifest_location(
     )
 
 
-def verify_pipeline_run_location(
+def build_evidence_location_binding_service(
+    settings: Settings,
+) -> tuple[EvidenceLocationRegistrationService, EvidenceLocationBindingContext]:
+    """Alias for :func:`build_evidence_location_registration_service`."""
+    return build_evidence_location_registration_service(settings)
+
+
+def _verify_bound_location(
     *,
-    pipeline_name: str,
+    settings: Settings,
+    kind: EvidenceLocationKind,
+    owner: str,
     run_id: str,
     workflow_run_id: str | None,
-    settings: Settings,
 ) -> EvidenceLocationVerifyOutcome | None:
-    """Finalize-time verify; returns None when binding cannot be published."""
-    service, binding = build_evidence_location_binding_service(settings)
+    """Finalize-time verify shared by pipeline and workflow callers."""
+    service, binding = build_evidence_location_registration_service(settings)
     if binding.skip_reason is not None or binding.runtime_source_id is None:
         return None
     return service.record_verify_observation(
         EvidenceLocationRegisterRequest(
-            kind=EvidenceLocationKind.PIPELINE,
-            owner=pipeline_name,
+            kind=kind,
+            owner=owner,
             run_id=run_id,
             runtime_source_id=binding.runtime_source_id,
             relative_data_root=binding.relative_data_root,
@@ -299,11 +307,21 @@ def verify_pipeline_run_location(
     )
 
 
-def build_evidence_location_binding_service(
+def verify_pipeline_run_location(
+    *,
+    pipeline_name: str,
+    run_id: str,
+    workflow_run_id: str | None,
     settings: Settings,
-) -> tuple[EvidenceLocationRegistrationService, EvidenceLocationBindingContext]:
-    """Alias for :func:`build_evidence_location_registration_service`."""
-    return build_evidence_location_registration_service(settings)
+) -> EvidenceLocationVerifyOutcome | None:
+    """Finalize-time verify; returns None when binding cannot be published."""
+    return _verify_bound_location(
+        settings=settings,
+        kind=EvidenceLocationKind.PIPELINE,
+        owner=pipeline_name,
+        run_id=run_id,
+        workflow_run_id=workflow_run_id,
+    )
 
 
 def verify_workflow_run_location(
@@ -313,17 +331,10 @@ def verify_workflow_run_location(
     settings: Settings,
 ) -> EvidenceLocationVerifyOutcome | None:
     """Finalize-time verify for a workflow parent locator."""
-    service, binding = build_evidence_location_registration_service(settings)
-    if binding.skip_reason is not None or binding.runtime_source_id is None:
-        return None
-    return service.record_verify_observation(
-        EvidenceLocationRegisterRequest(
-            kind=EvidenceLocationKind.WORKFLOW,
-            owner=workflow_name,
-            run_id=workflow_run_id,
-            runtime_source_id=binding.runtime_source_id,
-            relative_data_root=binding.relative_data_root,
-            root_alias=binding.root_alias,
-            workflow_run_id=None,
-        )
+    return _verify_bound_location(
+        settings=settings,
+        kind=EvidenceLocationKind.WORKFLOW,
+        owner=workflow_name,
+        run_id=workflow_run_id,
+        workflow_run_id=None,
     )

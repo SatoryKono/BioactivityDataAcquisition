@@ -103,6 +103,15 @@ class FileEvidenceLocationStore(
             field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
         )
 
+    def _read_catalog_bytes(self, path: Path) -> bytes | None:
+        """Contain ``path`` under the trusted root and read existing bytes."""
+        safe_path = assert_path_within_trusted_base(
+            path,
+            trusted_base=self._trusted_root(),
+            field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
+        )
+        return read_existing_bytes(safe_path, trusted_base=self._trusted_root())
+
     def _load_at(
         self,
         path: Path,
@@ -111,12 +120,7 @@ class FileEvidenceLocationStore(
         owner: str,
         run_id: str,
     ) -> RunEvidenceLocation | None:
-        safe_path = assert_path_within_trusted_base(
-            path,
-            trusted_base=self._trusted_root(),
-            field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
-        )
-        raw = read_existing_bytes(safe_path, trusted_base=self._trusted_root())
+        raw = self._read_catalog_bytes(path)
         if raw is None:
             return None
         location = _parse_location_bytes(raw)
@@ -154,19 +158,8 @@ class FileEvidenceLocationStore(
         """Classify found / missing / invalid / identity conflict without a verdict."""
         try:
             path = self._record_path(kind=kind, owner=owner, run_id=run_id)
-        except EvidenceLocationInvalidError as exc:
-            return EvidenceLocationLookupResult(
-                code=EvidenceLocationLookupCode.LOCATION_INVALID,
-                detail=str(exc),
-            )
-        try:
             location = self._load_at(path, kind=kind, owner=owner, run_id=run_id)
-        except EvidenceLocationInvalidError as exc:
-            return EvidenceLocationLookupResult(
-                code=EvidenceLocationLookupCode.LOCATION_INVALID,
-                detail=str(exc),
-            )
-        except (OSError, ValueError) as exc:
+        except (EvidenceLocationInvalidError, OSError, ValueError) as exc:
             return EvidenceLocationLookupResult(
                 code=EvidenceLocationLookupCode.LOCATION_INVALID,
                 detail=str(exc),
@@ -194,12 +187,7 @@ class FileEvidenceLocationStore(
         candidate: RunEvidenceLocation,
         path: Path,
     ) -> EvidenceLocationRegisterResult:
-        safe_path = assert_path_within_trusted_base(
-            path,
-            trusted_base=self._trusted_root(),
-            field_name=EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
-        )
-        raw = read_existing_bytes(safe_path, trusted_base=self._trusted_root())
+        raw = self._read_catalog_bytes(path)
         if raw is None:
             return EvidenceLocationRegisterResult(
                 outcome=EvidenceLocationRegisterOutcome.CONFLICT,

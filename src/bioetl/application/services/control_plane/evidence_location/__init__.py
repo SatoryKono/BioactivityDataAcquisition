@@ -13,7 +13,11 @@ from bioetl.application.services.control_plane.evidence_location.registration im
     EvidenceLocationRegistrationOutcome,
     EvidenceLocationRegistrationService,
     EvidenceLocationVerifyOutcome,
+    record_registration_exception_observation,
+    record_registration_outcome_observation,
     record_registration_soft_failure_observation,
+    record_verify_exception_observation,
+    soft_failure_exception_detail,
 )
 from bioetl.application.services.control_plane.evidence_location.resolver import (
     EvidenceLocationLegacyRootPolicy,
@@ -34,5 +38,9 @@ __all__ = [
     "EvidenceLocationVerifyOutcome",
     "EvidenceReadContext",
     "EvidenceReadContextOpener",
+    "record_registration_exception_observation",
+    "record_registration_outcome_observation",
     "record_registration_soft_failure_observation",
+    "record_verify_exception_observation",
+    "soft_failure_exception_detail",
 ]

@@ -206,13 +206,7 @@ class EvidenceLocationResolver:
                 manifest = result.context.get_workflow_manifest_by_run_id(typed_run_id)
             else:
                 manifest = result.context.get_manifest_by_run_id(typed_run_id)
-        except EvidenceLocationInvalidError as exc:
-            return EvidenceLocationLookupResult(
-                code=EvidenceLocationLookupCode.LOCATION_INVALID,
-                location=result.location,
-                detail=str(exc),
-            )
-        except (OSError, TypeError, ValueError) as exc:
+        except (EvidenceLocationInvalidError, OSError, TypeError, ValueError) as exc:
             return EvidenceLocationLookupResult(
                 code=EvidenceLocationLookupCode.LOCATION_INVALID,
                 location=result.location,
@@ -230,6 +224,23 @@ class EvidenceLocationResolver:
             detail="manifest_present",
         )
 
+    def _open_context(
+        self,
+        *,
+        root_alias: str,
+        relative_data_root: str,
+    ) -> EvidenceReadContext:
+        """Resolve alias roots and open a trusted read context."""
+        trusted_base = self.aliases.absolute_base(root_alias)
+        data_root = self.aliases.resolve_data_root(
+            root_alias=root_alias,
+            relative_data_root=relative_data_root,
+        )
+        return self.opener.open(
+            data_root,
+            trusted_alias_base=trusted_base,
+        )
+
     def _open_from_location(
         self,
         lookup: EvidenceLocationLookupResult,
@@ -239,26 +250,11 @@ class EvidenceLocationResolver:
         location = lookup.location
         assert location is not None
         try:
-            trusted_base = self.aliases.absolute_base(location.root_alias)
-            data_root = self.aliases.resolve_data_root(
+            context = self._open_context(
                 root_alias=location.root_alias,
                 relative_data_root=location.relative_data_root,
             )
-            context = self.opener.open(
-                data_root,
-                trusted_alias_base=trusted_base,
-            )
-        except EvidenceLocationInvalidError as exc:
-            return EvidenceLocationResolveResult(
-                lookup=EvidenceLocationLookupResult(
-                    code=EvidenceLocationLookupCode.LOCATION_INVALID,
-                    location=location,
-                    detail=str(exc),
-                ),
-                requested_kind=requested_kind,
-                detail=str(exc),
-            )
-        except (OSError, ValueError) as exc:
+        except (EvidenceLocationInvalidError, OSError, ValueError) as exc:
             return EvidenceLocationResolveResult(
                 lookup=EvidenceLocationLookupResult(
                     code=EvidenceLocationLookupCode.LOCATION_INVALID,
@@ -291,22 +287,11 @@ class EvidenceLocationResolver:
                 requested_kind=requested_kind,
             )
         try:
-            trusted_base = self.aliases.absolute_base(DEFAULT_EVIDENCE_ROOT_ALIAS)
-            data_root = self.aliases.resolve_data_root(
+            context = self._open_context(
                 root_alias=DEFAULT_EVIDENCE_ROOT_ALIAS,
                 relative_data_root=".",
             )
-            context = self.opener.open(
-                data_root,
-                trusted_alias_base=trusted_base,
-            )
-        except EvidenceLocationInvalidError as exc:
-            return EvidenceLocationResolveResult(
-                lookup=lookup,
-                requested_kind=requested_kind,
-                detail=str(exc),
-            )
-        except (OSError, ValueError) as exc:
+        except (EvidenceLocationInvalidError, OSError, ValueError) as exc:
             return EvidenceLocationResolveResult(
                 lookup=lookup,
                 requested_kind=requested_kind,

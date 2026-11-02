@@ -86,42 +86,32 @@ class WorkflowManifestService:
         )
         self.manifest_port.save(manifest)
         if self.evidence_location_register is not None:
+            from bioetl.application.services.control_plane.evidence_location.registration import (
+                record_registration_exception_observation,
+                record_registration_outcome_observation,
+            )
+
+            owner = str(manifest.workflow_name)
+            run_id = str(manifest.workflow_run_id)
             try:
                 outcome = self.evidence_location_register(manifest)
             except Exception as exc:
                 # Locator publication must not mask workflow processing success.
-                from bioetl.application.services.control_plane.evidence_location.registration import (
-                    record_registration_soft_failure_observation,
-                )
-
-                record_registration_soft_failure_observation(
-                    code="registration_exception",
-                    detail=f"{type(exc).__name__}: {exc}",
-                    facts={
-                        "kind": "workflow",
-                        "owner": str(manifest.workflow_name),
-                        "run_id": str(manifest.workflow_run_id),
-                    },
+                record_registration_exception_observation(
+                    kind="workflow",
+                    owner=owner,
+                    run_id=run_id,
+                    exc=exc,
                 )
             else:
                 # Callbacks may return an outcome or None; surface non-success.
                 if outcome is not None:
-                    from bioetl.application.services.control_plane.evidence_location.registration import (
-                        record_registration_soft_failure_observation,
+                    record_registration_outcome_observation(
+                        outcome,
+                        kind="workflow",
+                        owner=owner,
+                        run_id=run_id,
                     )
-
-                    code = getattr(outcome, "code", None)
-                    if isinstance(code, str):
-                        record_registration_soft_failure_observation(
-                            code=code,
-                            detail=getattr(outcome, "detail", None),
-                            facts={
-                                "kind": "workflow",
-                                "owner": str(manifest.workflow_name),
-                                "run_id": str(manifest.workflow_run_id),
-                                "revision": getattr(outcome, "revision", None),
-                            },
-                        )
         return manifest
 
     def compute_execution_fingerprint(self, request: WorkflowManifestCreateSpec) -> str:

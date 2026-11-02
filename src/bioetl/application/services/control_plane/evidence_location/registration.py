@@ -18,6 +18,7 @@ from bioetl.domain.control_plane.run_evidence_location import (
     EvidenceLocationKind,
     EvidenceLocationLookupCode,
     EvidenceLocationRegisterOutcome,
+    RunEvidenceLocation,
     build_run_evidence_location,
 )
 from bioetl.domain.ports.control_plane.run_evidence_location import (
@@ -31,12 +32,21 @@ __all__ = [
     "EvidenceLocationRegistrationOutcome",
     "EvidenceLocationRegistrationService",
     "EvidenceLocationVerifyOutcome",
+    "record_registration_exception_observation",
+    "record_registration_outcome_observation",
     "record_registration_soft_failure_observation",
+    "record_verify_exception_observation",
+    "soft_failure_exception_detail",
 ]
 
 EVIDENCE_LOCATION_OBSERVATION_DOMAIN = "Evidence Location"
 
 _REGISTRATION_SUCCESS_CODES = frozenset({"registered", "already_identical"})
+
+
+def soft_failure_exception_detail(exc: BaseException) -> str:
+    """Stable ``Type: message`` detail for soft-failure observations."""
+    return f"{type(exc).__name__}: {exc}"
 
 
 def record_registration_soft_failure_observation(
@@ -61,6 +71,64 @@ def record_registration_soft_failure_observation(
         verdict="ERROR",
         reason=code,
         facts=payload,
+    )
+
+
+def record_verify_exception_observation(
+    *,
+    kind: str,
+    owner: str,
+    run_id: str,
+    exc: BaseException,
+) -> None:
+    """Record finalize-time verify exceptions without mutating processing status."""
+    record_registration_soft_failure_observation(
+        code="verify_exception",
+        detail=soft_failure_exception_detail(exc),
+        facts={"kind": kind, "owner": owner, "run_id": run_id},
+    )
+
+
+def record_registration_exception_observation(
+    *,
+    kind: str,
+    exc: BaseException,
+    owner: str | None = None,
+    run_id: str | None = None,
+) -> None:
+    """Record soft-register exceptions without mutating processing status."""
+    facts: dict[str, object] = {"kind": kind}
+    if owner is not None:
+        facts["owner"] = owner
+    if run_id is not None:
+        facts["run_id"] = run_id
+    record_registration_soft_failure_observation(
+        code="registration_exception",
+        detail=soft_failure_exception_detail(exc),
+        facts=facts,
+    )
+
+
+def record_registration_outcome_observation(
+    outcome: object,
+    *,
+    kind: str,
+    owner: str,
+    run_id: str,
+) -> None:
+    """Surface a soft-register outcome code when the callback returns one."""
+    code = getattr(outcome, "code", None)
+    if not isinstance(code, str):
+        return
+    record_registration_soft_failure_observation(
+        code=code,
+        detail=getattr(outcome, "detail", None),
+        facts={
+            "kind": kind,
+            "owner": owner,
+            "run_id": run_id,
+            "revision": getattr(outcome, "revision", None),
+        },
     )
 
 
@@ -95,6 +163,21 @@ class EvidenceLocationVerifyOutcome:
     verdict: str = "UNKNOWN"
 
 
+def _location_from_request(
+    request: EvidenceLocationRegisterRequest,
+) -> RunEvidenceLocation:
+    """Build the immutable locator payload shared by register and verify."""
+    return build_run_evidence_location(
+        kind=request.kind,
+        owner=request.owner,
+        run_id=request.run_id,
+        runtime_source_id=request.runtime_source_id,
+        root_alias=request.root_alias,
+        relative_data_root=request.relative_data_root,
+        workflow_run_id=request.workflow_run_id,
+    )
+
+
 class _RegisterAndReadPort(
     RunEvidenceLocationRegisterPort, RunEvidenceLocationReadPort, Protocol
 ):
@@ -112,15 +195,7 @@ class EvidenceLocationRegistrationService:
     ) -> EvidenceLocationRegistrationOutcome:
         """Create-if-absent / idempotent-identical register; soft conflict."""
         try:
-            location = build_run_evidence_location(
-                kind=request.kind,
-                owner=request.owner,
-                run_id=request.run_id,
-                runtime_source_id=request.runtime_source_id,
-                root_alias=request.root_alias,
-                relative_data_root=request.relative_data_root,
-                workflow_run_id=request.workflow_run_id,
-            )
+            location = _location_from_request(request)
         except EvidenceLocationInvalidError as exc:
             return EvidenceLocationRegistrationOutcome(
                 code="invalid",
@@ -136,7 +211,7 @@ class EvidenceLocationRegistrationService:
         except (OSError, ValueError) as exc:
             return EvidenceLocationRegistrationOutcome(
                 code="error",
-                detail=f"{type(exc).__name__}: {exc}",
+                detail=soft_failure_exception_detail(exc),
             )
         if result.outcome is EvidenceLocationRegisterOutcome.REGISTERED:
             return EvidenceLocationRegistrationOutcome(
@@ -204,15 +279,7 @@ class EvidenceLocationRegistrationService:
     ) -> EvidenceLocationVerifyOutcome:
         """Lookup + binding compare for report finalization diagnostics."""
         try:
-            expected = build_run_evidence_location(
-                kind=request.kind,
-                owner=request.owner,
-                run_id=request.run_id,
-                runtime_source_id=request.runtime_source_id,
-                root_alias=request.root_alias,
-                relative_data_root=request.relative_data_root,
-                workflow_run_id=request.workflow_run_id,
-            )
+            expected = _location_from_request(request)
         except EvidenceLocationInvalidError as exc:
             return EvidenceLocationVerifyOutcome(
                 code="invalid",

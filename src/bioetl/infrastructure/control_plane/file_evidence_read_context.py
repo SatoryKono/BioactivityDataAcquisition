@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 from uuid import UUID
 
 from bioetl.domain.control_plane import RunManifest, WorkflowManifest
@@ -45,6 +45,8 @@ __all__ = [
 # Shared Sonar-safe suffix for control-plane JSON records (manifest / config).
 _CONTROL_PLANE_JSON_RECORD_SUFFIX = ".json"
 
+_TBoundRecord = TypeVar("_TBoundRecord")
+
 
 def _coerce_run_id(run_id: object) -> RunID:
     """Normalize string/UUID run ids to ``RunID`` at the file-adapter boundary.
@@ -72,27 +74,38 @@ class FileEvidenceReadContext:
 
     def get_manifest_by_run_id(self, run_id: object) -> RunManifest | None:
         """Delegate to the bound ``RunManifestPort.get_by_run_id``."""
-        normalized = _coerce_run_id(run_id)
-        self._validate_bound_paths()
-        self._assert_concrete_run_index(
-            self.data_root / "output" / "control" / "run_manifest",
-            normalized,
-            suffix=_CONTROL_PLANE_JSON_RECORD_SUFFIX,
+        return self._get_bound_record_by_run_id(
+            run_id,
+            store_dir="run_manifest",
+            loader=self.manifest_port.get_by_run_id,
         )
-        return self.manifest_port.get_by_run_id(normalized)
 
     def get_workflow_manifest_by_run_id(
         self, run_id: object
     ) -> WorkflowManifest | None:
         """Delegate to the workflow manifest store bound to this data root."""
+        return self._get_bound_record_by_run_id(
+            run_id,
+            store_dir="workflow_manifest",
+            loader=self.workflow_manifest_port.get_by_run_id,
+        )
+
+    def _get_bound_record_by_run_id(
+        self,
+        run_id: object,
+        *,
+        store_dir: str,
+        loader: Callable[[RunID], _TBoundRecord | None],
+    ) -> _TBoundRecord | None:
+        """Coerce id, contain the concrete index, then load via the bound port."""
         normalized = _coerce_run_id(run_id)
         self._validate_bound_paths()
         self._assert_concrete_run_index(
-            self.data_root / "output" / "control" / "workflow_manifest",
+            self.data_root / "output" / "control" / store_dir,
             normalized,
             suffix=_CONTROL_PLANE_JSON_RECORD_SUFFIX,
         )
-        return self.workflow_manifest_port.get_by_run_id(normalized)
+        return loader(normalized)
 
     def verify_replay_objects(self, manifest: RunManifest) -> Mapping[str, bool]:
         """Re-check config / lock / Bronze bytes; never cache READY forever."""

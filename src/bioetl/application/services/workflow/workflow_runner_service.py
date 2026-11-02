@@ -17,7 +17,7 @@ from bioetl.application.services.execution.workflow_runner_step_execution import
     execute_transform_step,
 )
 from bioetl.application.services.control_plane.evidence_location import (
-    record_registration_soft_failure_observation,
+    record_verify_exception_observation,
 )
 from bioetl.application.services.run_reports.observations import (
     bind_run_observations_if_unbound,
@@ -246,14 +246,11 @@ class WorkflowRunnerService:
                     self.evidence_location_verify(identified_result)
                 except Exception as exc:
                     # Consistency diagnostics must not mask processing success.
-                    record_registration_soft_failure_observation(
-                        code="verify_exception",
-                        detail=f"{type(exc).__name__}: {exc}",
-                        facts={
-                            "kind": "workflow",
-                            "owner": str(identified_result.workflow_name),
-                            "run_id": str(identified_result.workflow_run_id or ""),
-                        },
+                    record_verify_exception_observation(
+                        kind="workflow",
+                        owner=str(identified_result.workflow_name),
+                        run_id=str(identified_result.workflow_run_id or ""),
+                        exc=exc,
                     )
             reported = attach_workflow_run_report(
                 config=config,
