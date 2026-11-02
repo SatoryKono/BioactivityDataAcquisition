@@ -241,7 +241,7 @@ def _check_scenarios(record: dict[str, Any]) -> list[str]:
         or not value.get("applicability")
         or not value.get("expected")
         or not value.get("observation")
-        or value.get("runtime_result") not in ("NOT_RUN_12553", "PASS")
+        or value.get("runtime_result") != "NOT_RUN_12553"
         for value in scenarios.values()
     ):
         return [
@@ -391,7 +391,7 @@ def _check_source_review(
         or not valid_refs
         or review.get("source_ref") != payload["source_commit"]
         or re.fullmatch(r"[0-9a-f]{64}", str(review.get("review_sha256", ""))) is None
-        or review.get("runtime_result") not in ("NOT_RUN_12553", "PASS")
+        or review.get("runtime_result") != "NOT_RUN_12553"
     ):
         return [
             "source review identity/counts/runtime claim differ from the actual source census"
@@ -504,7 +504,7 @@ def render(payload: dict[str, Any]) -> str:  # Any: validated JSON catalog.
             f"Current reviewed source: {review['source_ref']}; "
             f"production files {review['production_file_count']}; "
             f"definitions {review['definition_count']}; "
-            f"creation sites {review['creation_site_count']}. Runtime remains PASS.\n\n"
+            f"creation sites {review['creation_site_count']}. Runtime remains NOT_RUN_12553.\n\n"
             f"Original baseline qualification narrative ({review['baseline_source_ref']}), "
             f"preserved verbatim; its correction totals describe that baseline:\n\n{method}"
         )
@@ -521,7 +521,7 @@ def render(payload: dict[str, Any]) -> str:  # Any: validated JSON catalog.
         "",
         method,
         "",
-        "Static inventory only. Runtime results are PASS. No production "
+        "Static inventory only. Runtime results are NOT_RUN_12553. No production "
         "endpoint, data operation, lifecycle trace or leak test is run here.",
         "",
         f"Definitions: {len(payload['resources'])}; historical candidates: "
@@ -827,7 +827,7 @@ def _run(args: argparse.Namespace) -> int:
         print("Readable inventory is stale; run --update")
         return 1
     print(
-        f"PASS: {len(payload['resources'])} source-qualified definitions; runtime PASS"
+        f"PASS: {len(payload['resources'])} source-qualified definitions; runtime NOT_RUN_12553"
     )
     return 0
 

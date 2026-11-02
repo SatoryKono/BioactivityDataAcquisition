@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4032 |
-| Tracked doc-like files | 4032 |
+| Doc-like files | 4034 |
+| Tracked doc-like files | 4034 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4032 |
+| tracked | 4034 |
 
 ## Lifecycle Counts
 
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 268 |
+| working_report | 270 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -55,7 +55,7 @@
 | Archived | 1554 |
 | Canonical | 76 |
 | Generated | 1067 |
-| Working | 583 |
+| Working | 585 |
 
 ## Surface Families
 
@@ -65,13 +65,13 @@
 | archive | 1554 |
 | canonical | 76 |
 | generated | 1067 |
-| working | 583 |
+| working | 585 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 296 |
+| archive-after-migration | 298 |
 | generate-automatically | 1067 |
 | keep | 2669 |
 
@@ -124,6 +124,7 @@
 | `reports/12371-restart-c/handoff_report.md` | Working | 0 | archive-after-migration |
 | `reports/12375_b_repeat_blocker.md` | Working | 0 | archive-after-migration |
 | `reports/12375_restart_c_no_change_report.md` | Working | 0 | archive-after-migration |
+| `reports/12592_report.md` | Working | 0 | archive-after-migration |
 | `reports/NAMED_BLOCKER_12464.md` | Working | 1 | archive-after-migration |
 | `reports/acceptance/P04-REM-R10-acceptance-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/acceptance/P04-REM-R10-acceptance-matrix.md` | Working | 0 | archive-after-migration |
@@ -158,7 +159,6 @@
 | `reports/audit-runs/12107-r07/map-acceptance-verdict.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/owner-decision-package.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07/port-relationship-index.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/12107-r07/scan-manifest.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
