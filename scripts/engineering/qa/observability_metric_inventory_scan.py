@@ -42,6 +42,28 @@ from scripts.engineering.qa.observability_metric_inventory_shared import (
     _TEXT_SUFFIXES,
 )
 
+from bioetl.infrastructure.observability.metric_inventory_ast import (
+    _helper_metric_candidates,
+    _metric_names_for_call,
+)
+from bioetl.infrastructure.observability.metric_inventory_bindings import (
+    _collect_module_string_bindings,
+    _import_from_nodes,
+    _module_path_from_import,
+    _resolve_imported_metric_bindings,
+)
+from bioetl.infrastructure.observability.metric_inventory_discovery import (
+    _scan_canonical_metric_mentions_via_direct_reads,
+)
+from bioetl.infrastructure.observability.metric_inventory_scan import (
+    _load_declared_metric_definitions,
+    _scan_registered_metric_names,
+    _scan_runtime_metric_file,
+)
+from bioetl.infrastructure.observability.metric_inventory_text import (
+    _normalize_mapping_lists,
+)
+
 REGISTERED_PROMETHEUS_METRIC_LABELS: dict[str, frozenset[str]] = {}
 
 
@@ -228,21 +250,6 @@ def _scan_canonical_metric_mentions(
     return _scan_canonical_metric_mentions_via_direct_reads(paths, repo_root)
 
 
-def _scan_canonical_metric_mentions_via_direct_reads(
-    paths: list[Path],
-    repo_root: Path,
-) -> dict[str, list[str]]:
-    mentions: dict[str, list[str]] = defaultdict(list)
-    for path in paths:
-        try:
-            text = path.read_text(encoding="utf-8")  # NOSONAR - path confined
-        except (OSError, UnicodeDecodeError):
-            continue
-        for metric_name in sorted(set(_CANONICAL_METRIC_RE.findall(text))):
-            mentions[metric_name].append(_as_repo_relative(path, repo_root))
-    return _normalize_mapping_lists(mentions)
-
-
 def _repo_relative_paths_for_scan(
     paths: list[Path],
     repo_root: Path,
@@ -381,13 +388,6 @@ def _scan_canonical_metric_mentions_with_rg(
     return _scan_metric_mentions_via_command_chunks(
         relative_paths, command_builder=build_command, cwd=repo_root
     )
-
-
-def _normalize_mapping_lists(
-    mapping: dict[str, list[str]] | defaultdict[str, list[str]],
-) -> dict[str, list[str]]:
-    """Return a mapping with deterministically sorted unique list values."""
-    return {key: sorted(set(values)) for key, values in sorted(mapping.items())}
 
 
 def _read_cached_text(path: Path) -> str | None:
@@ -625,50 +625,6 @@ def _collect_runtime_candidate_texts(repo_root: Path) -> list[tuple[Path, str]]:
     return candidates
 
 
-def _module_path_from_import(module_name: str, repo_root: Path) -> Path | None:
-    if not module_name.startswith("bioetl."):
-        return None
-    module_rel = module_name.replace(".", "/")
-    module_path = repo_root / "src" / f"{module_rel}.py"
-    if module_path.exists():
-        return module_path
-    package_init = repo_root / "src" / module_rel / "__init__.py"
-    if package_init.exists():
-        return package_init
-    return None
-
-
-def _collect_module_string_bindings(path: Path) -> dict[str, str]:
-    try:
-        text = path.read_text(encoding="utf-8")  # NOSONAR - path confined
-    except (UnicodeDecodeError, OSError, TimeoutError):
-        return {}
-    try:
-        tree = ast.parse(text)
-    except SyntaxError:
-        return {}
-    bindings: dict[str, str] = {}
-    for node in tree.body:
-        value_node: ast.expr | None = None
-        targets: list[ast.expr] = []
-        if isinstance(node, ast.Assign):
-            value_node = node.value
-            targets = list(node.targets)
-        elif isinstance(node, ast.AnnAssign):
-            value_node = node.value
-            targets = [node.target]
-        if (
-            value_node is None
-            or not isinstance(value_node, ast.Constant)
-            or not isinstance(value_node.value, str)
-        ):
-            continue
-        for target in targets:
-            if isinstance(target, ast.Name):
-                bindings[target.id] = value_node.value
-    return bindings
-
-
 def _iter_string_assignments(tree: ast.AST) -> list[tuple[list[ast.expr], str]]:
     assignments: list[tuple[list[ast.expr], str]] = []
     for node in ast.walk(tree):
@@ -772,41 +728,6 @@ def _call_method_name(node: ast.Call) -> str | None:
     return None
 
 
-def _helper_metric_candidates(
-    node: ast.Call,
-    *,
-    string_bindings: dict[str, str],
-    attribute_bindings: dict[str, str],
-    metric_bindings: dict[str, str],
-    call_method_name: str | None,
-) -> set[str]:
-    candidates: set[str] = set()
-    if call_method_name == "emit_metric":
-        for arg in node.args:
-            metric_name = _resolve_metric_name_expr(
-                arg,
-                string_bindings=string_bindings,
-                attribute_bindings=attribute_bindings,
-                metric_bindings=metric_bindings,
-            )
-            if metric_name is not None:
-                candidates.add(metric_name)
-    for keyword in node.keywords:
-        metric_name = _resolve_metric_name_expr(
-            keyword.value,
-            string_bindings=string_bindings,
-            attribute_bindings=attribute_bindings,
-            metric_bindings=metric_bindings,
-        )
-        if metric_name is None:
-            continue
-        if keyword.arg in _RUNTIME_METRIC_NAME_KEYWORDS or metric_name.startswith(
-            "bioetl_"
-        ):
-            candidates.add(metric_name)
-    return candidates
-
-
 def _scan_metric_names_in_tree(
     tree: ast.AST,
     *,
@@ -835,15 +756,6 @@ def _scan_metric_names_in_tree(
         )
 
     return direct_metric_names, helper_metric_names, alias_metric_names
-
-
-def _import_from_nodes(tree: ast.AST) -> list[ast.ImportFrom]:
-    """Return import-from nodes with concrete module names."""
-    return [
-        node
-        for node in ast.walk(tree)
-        if isinstance(node, ast.ImportFrom) and node.module is not None
-    ]
 
 
 def _looks_like_imported_string_constant_name(name: str) -> bool:
@@ -913,45 +825,6 @@ def _class_attribute_string_bindings(class_node: ast.ClassDef) -> dict[str, str]
 def _call_nodes(tree: ast.AST) -> list[ast.Call]:
     """Return all call nodes from the AST."""
     return [node for node in ast.walk(tree) if isinstance(node, ast.Call)]
-
-
-def _metric_names_for_call(
-    node: ast.Call,
-    *,
-    string_bindings: dict[str, str],
-    attribute_bindings: dict[str, str],
-    metric_bindings: dict[str, str],
-) -> tuple[str | None, set[str]]:
-    """Return direct runtime metric name or helper candidates for one call."""
-    method_name = _call_method_name(node)
-    if method_name in _RUNTIME_METRIC_METHODS:
-        return (
-            _direct_metric_name(
-                node,
-                string_bindings=string_bindings,
-                attribute_bindings=attribute_bindings,
-                metric_bindings=metric_bindings,
-            ),
-            set(),
-        )
-    collector_metric_name = _direct_collector_metric_name(
-        node,
-        string_bindings=string_bindings,
-        attribute_bindings=attribute_bindings,
-        metric_bindings=metric_bindings,
-    )
-    if collector_metric_name is not None:
-        return (collector_metric_name, set())
-    return (
-        None,
-        _helper_metric_candidates(
-            node,
-            string_bindings=string_bindings,
-            attribute_bindings=attribute_bindings,
-            metric_bindings=metric_bindings,
-            call_method_name=method_name,
-        ),
-    )
 
 
 def _direct_metric_name(
@@ -1146,66 +1019,6 @@ def _record_runtime_mentions(
         alias_mentions[metric_name].append(relative_path)
 
 
-def _scan_runtime_metric_file(
-    path: Path,
-    *,
-    repo_root: Path,
-    import_binding_cache: dict[Path, dict[str, str]],
-    repo_attribute_bindings: dict[str, str] | None = None,
-    preloaded_text: str | None = None,
-) -> (
-    tuple[
-        str,
-        set[str],
-        set[str],
-        set[str],
-        list[tuple[str, frozenset[str] | None, int]],
-    ]
-    | None
-):
-    text = (
-        preloaded_text
-        if preloaded_text is not None
-        else _read_runtime_candidate_text(path)
-    )
-    if text is None:
-        return None
-    try:
-        tree = ast.parse(text)
-    except SyntaxError:
-        return None
-    string_bindings = _resolve_imported_string_bindings(
-        tree,
-        repo_root=repo_root,
-        cache=import_binding_cache,
-    )
-    string_bindings.update(_collect_local_string_bindings(tree))
-    metric_bindings = _resolve_imported_metric_bindings(tree)
-    attribute_bindings = dict(repo_attribute_bindings or {})
-    attribute_bindings.update(_collect_class_attribute_bindings(tree))
-    direct_metric_names, helper_metric_names, alias_metric_names = (
-        _scan_metric_names_in_tree(
-            tree,
-            string_bindings=string_bindings,
-            attribute_bindings=attribute_bindings,
-            metric_bindings=metric_bindings,
-        )
-    )
-    label_shapes = _scan_direct_metric_label_shapes(
-        tree,
-        string_bindings=string_bindings,
-        attribute_bindings=attribute_bindings,
-        metric_bindings=metric_bindings,
-    )
-    return (
-        _as_repo_relative(path, repo_root),
-        direct_metric_names,
-        helper_metric_names,
-        alias_metric_names,
-        label_shapes,
-    )
-
-
 def _scan_runtime_metric_calls(
     repo_root: Path,
 ) -> tuple[
@@ -1274,70 +1087,3 @@ def _record_static_runtime_emitters(
         for relative_path in relative_paths:
             if (repo_root / relative_path).exists():
                 canonical_mentions[metric_name].append(relative_path)
-
-
-def _scan_registered_metric_names(repo_root: Path) -> frozenset[str]:
-    metric_names: set[str] = set()
-    for path in sorted((repo_root / _REGISTERED_SCAN_ROOT).glob("_metrics_defs_*.py")):
-        try:
-            text = path.read_text(encoding="utf-8")  # NOSONAR - path confined
-        except UnicodeDecodeError:
-            continue
-        metric_names.update(_CANONICAL_METRIC_RE.findall(text))
-    return frozenset(metric_names)
-
-
-def _load_declared_metric_definitions(repo_root: Path) -> dict[str, set[str]]:
-    path = repo_root / _DEFAULT_DECLARED_METRIC_DEFINITIONS
-    if not path.exists():
-        return {
-            "recording_rule_metrics": set(),
-            "policy_alias_metrics": set(),
-            "declared_label_contract_metrics": set(),
-        }
-    try:
-        import yaml
-    except ImportError:
-        return {
-            "recording_rule_metrics": set(),
-            "policy_alias_metrics": set(),
-            "declared_label_contract_metrics": set(),
-        }
-    payload = yaml.safe_load(
-        path.read_text(encoding="utf-8")
-    )  # NOSONAR - path confined
-    if not isinstance(payload, dict):
-        return {
-            "recording_rule_metrics": set(),
-            "policy_alias_metrics": set(),
-            "declared_label_contract_metrics": set(),
-        }
-
-    definitions: dict[str, set[str]] = {}
-    for field in (
-        "recording_rule_metrics",
-        "policy_alias_metrics",
-        "declared_label_contract_metrics",
-    ):
-        raw_metrics = payload.get(field, [])
-        if not isinstance(raw_metrics, list):
-            definitions[field] = set()
-            continue
-        definitions[field] = {
-            value
-            for value in raw_metrics
-            if isinstance(value, str) and value.startswith("bioetl_")
-        }
-    return definitions
-
-
-def _resolve_imported_metric_bindings(tree: ast.AST) -> dict[str, str]:
-    bindings = dict(_EXPORTED_PROMETHEUS_METRIC_NAME_BINDINGS)
-    for node in _import_from_nodes(tree):
-        for alias in node.names:
-            if alias.name == "*":
-                continue
-            metric_name = _EXPORTED_PROMETHEUS_METRIC_NAME_BINDINGS.get(alias.name)
-            if metric_name is not None:
-                bindings[alias.asname or alias.name] = metric_name
-    return bindings
