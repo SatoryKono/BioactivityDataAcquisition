@@ -11,6 +11,7 @@ import pytest
 from scripts.engineering.qa.external_resource_inventory import (
     SCENARIOS,
     SourceBlob,
+    render,
     validate_inventory,
 )
 
@@ -210,6 +211,36 @@ def test_correct_component_is_accepted_and_rendered(
     payload["resources"][0]["resource_components"] = [resource_component]
     assert validate_inventory(payload, sources, blobs) == []
     assert "fixture.component" in "\n".join(_render_components(payload))
+
+
+def test_render_preserves_baseline_method_under_source_requalification() -> None:
+    """Provenance method must keep the baseline narrative for requalified catalogs."""
+    baseline = "a" * 40
+    source_ref = "b" * 40
+    payload = {
+        "completeness_method": "Verified denominators and baseline explanation.",
+        "source_requalification": {
+            "source_ref": source_ref,
+            "baseline_source_ref": baseline,
+            "production_file_count": 1,
+            "definition_count": 1,
+            "creation_site_count": 1,
+        },
+        "source_commit": source_ref,
+        "source_tree": "c" * 40,
+        "scope_statement": "Owned production definitions only.",
+        "resources": [],
+        "prior_candidate_dispositions": [],
+        "history_statement": "History retained.",
+        "reuse_statement": "Reuse retained.",
+    }
+    text = render(payload)
+    assert f"Current reviewed source: {source_ref}" in text
+    assert f"Original baseline qualification narrative ({baseline})" in text
+    assert "Verified denominators and baseline explanation." in text
+    assert text.index("Current reviewed source") < text.index(
+        "Verified denominators and baseline explanation."
+    )
 
 
 @pytest.mark.parametrize(

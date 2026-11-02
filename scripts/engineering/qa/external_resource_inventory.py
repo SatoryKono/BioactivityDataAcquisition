@@ -519,7 +519,7 @@ def render(payload: dict[str, Any]) -> str:  # Any: validated JSON catalog.
         "",
         payload["scope_statement"],
         "",
-        payload["completeness_method"],
+        method,
         "",
         "Static inventory only. Runtime results are NOT_RUN_12553. No production "
         "endpoint, data operation, lifecycle trace or leak test is run here.",
