@@ -1,7 +1,7 @@
 {
   "additive_coverage_xml_path": "reports/coverage/coverage.xml",
-  "additive_coverage_xml_sha256": "e8dccdf92cade7c8ea78bd2b5ce0c87735473680309510cb464a7d31f00d9919",
-  "additive_measured_module_count": 2,
+  "additive_coverage_xml_sha256": "457a0bafd9a830d61be8f8d87f0d749babcd02521423c1b839fa3e3f42809273",
+  "additive_measured_module_count": 1,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "4dc66455506c3529b7ed2450c9131d9d64f9a513b9ca7757b340beac1e3495ce",
@@ -25477,6 +25477,16 @@
       "module": "bioetl.interfaces.http._run_summary_accounting",
       "path": "src/bioetl/interfaces/http/_run_summary_accounting.py",
       "source_lines": 29
+    },
+    {
+      "coverage_percent": 95.89,
+      "coverage_status": "partially_covered",
+      "covered_lines": 70,
+      "executable_lines": 73,
+      "missing_lines": 3,
+      "module": "bioetl.interfaces.http._run_type_universe_options",
+      "path": "src/bioetl/interfaces/http/_run_type_universe_options.py",
+      "source_lines": 145
     },
     {
       "coverage_percent": null,
@@ -51351,6 +51361,16 @@
       "source_lines": 29
     },
     {
+      "coverage_percent": 95.89,
+      "coverage_status": "partially_covered",
+      "covered_lines": 70,
+      "executable_lines": 73,
+      "missing_lines": 3,
+      "module": "bioetl.interfaces.http._run_type_universe_options",
+      "path": "src/bioetl/interfaces/http/_run_type_universe_options.py",
+      "source_lines": 145
+    },
+    {
       "coverage_percent": null,
       "coverage_status": "unmeasured",
       "covered_lines": null,
@@ -51910,12 +51930,12 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2587,
+    "source_module_count": 2588,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 2515,
       "no_executable_lines": 2,
-      "partially_covered": 64,
+      "partially_covered": 65,
       "uncovered": 0,
       "unmeasured": 6
     },
