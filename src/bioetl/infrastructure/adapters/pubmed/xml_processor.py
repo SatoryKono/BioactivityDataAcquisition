@@ -8,14 +8,11 @@ Extracted from the PubMed adapter module for better separation of concerns.
 
 from __future__ import annotations
 
-from typing import cast
+from defusedxml import ElementTree as SafeET
+from defusedxml.common import DefusedXmlException
 
 __all__ = ["PubMedXmlProcessor"]
 
-
-import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry
-
-import defusedxml.ElementTree as defused_ET
 
 from bioetl.domain.types import JsonDict
 
@@ -24,7 +21,7 @@ class PubMedXmlProcessor:
     """Processes PubMed XML responses and extracts article records."""
 
     @staticmethod
-    def parse_response(xml_text: str) -> ET.Element | None:
+    def parse_response(xml_text: str) -> SafeET.Element | None:
         """Parse XML response text into ElementTree.
 
         Args:
@@ -34,19 +31,19 @@ class PubMedXmlProcessor:
             Parsed XML root element, or None if parsing fails
         """
         try:
-            parsed_root: ET.Element = defused_ET.fromstring(xml_text)
+            parsed_root: SafeET.Element = SafeET.fromstring(
+                xml_text,
+                forbid_dtd=False,
+                forbid_entities=True,
+                forbid_external=True,
+            )  # type: ignore[call-arg]
             return parsed_root
-        except (
-            ET.ParseError,
-            cast(
-                type[BaseException], getattr(defused_ET, "EntitiesForbidden", Exception)
-            ),
-        ):
+        except (SafeET.ParseError, DefusedXmlException):
             return None
 
     @staticmethod
     def extract_record(
-        article_node: ET.Element,
+        article_node: SafeET.Element,
     ) -> JsonDict:  # Any: untyped API JSON record
         """Extract record dict from a PubmedArticle XML node.
 
@@ -63,11 +60,11 @@ class PubMedXmlProcessor:
             "article_title": (
                 title_node.text if title_node is not None else "No title found"
             ),
-            "_raw_xml": ET.tostring(article_node, encoding="unicode"),
+            "_raw_xml": SafeET.tostring(article_node, encoding="unicode"),
         }
 
     @staticmethod
-    def find_articles(root: ET.Element) -> list[ET.Element]:
+    def find_articles(root: SafeET.Element) -> list[SafeET.Element]:
         """Find all PubmedArticle elements in the XML tree.
 
         Args:
@@ -80,7 +77,7 @@ class PubMedXmlProcessor:
 
     @staticmethod
     def extract_all_records(
-        root: ET.Element,
+        root: SafeET.Element,
     ) -> list[JsonDict]:  # Any: untyped API JSON record
         """Extract all article records from XML root.
 

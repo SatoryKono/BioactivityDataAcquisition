@@ -13,7 +13,6 @@ import hashlib
 import io
 import json
 import os
-import re
 import subprocess
 import tempfile
 import urllib.parse
@@ -52,9 +51,6 @@ COVERAGE_PRODUCER_JOBS = (
     "tests / serial-coverage",
 )
 RECEIPT = Path("reports/test-telemetry/squash-provenance.json")
-PUBLICATION_RECEIPT = Path(
-    "reports/quality/quality-move-qm08/publication-provenance.json"
-)
 
 
 class ShallowMergeHistoryError(ValueError):
@@ -505,47 +501,6 @@ def source_commit_is_reachable(payload: dict[str, Any], root: Path, head: str) -
         return _reject(f"{type(exc).__name__}: {exc}")
 
 
-def require_published_ancestor(root: Path, commit: str) -> None:
-    """Require Git ancestry, or the same ancestry across a verified GitHub squash.
-
-    This proves publication lineage only. Each caller must still verify all its
-    pinned source/review/artifact inputs; this never qualifies changed inputs.
-    """
-    if re.fullmatch(r"[0-9a-f]{40}", commit) is None:
-        raise ValueError("Full immutable source commit required")
-    commit = bytes.fromhex(commit).hex()
-    head = _git(root, "rev-parse", "HEAD").stdout.strip()
-    if _ancestor(root, commit, head):
-        return
-    receipt = json.loads((root / PUBLICATION_RECEIPT).read_text(encoding="utf-8"))
-    bridges = receipt.get("publication_bridges")
-    if not isinstance(bridges, list):
-        bridges = [receipt]
-    if (
-        receipt.get("schema_version") != 1
-        or receipt.get("verification_mode") != "live_github"
-    ):
-        raise ValueError("Source lacks a reviewed publication bridge")
-    for bridge in bridges:
-        reviewed = bridge.get("reviewed_source_commits")
-        if not isinstance(reviewed, list) or commit not in reviewed:
-            continue
-        refreshed = _refresh_live_mapping(bridge)
-        mapping = _github_mapping(refreshed)
-        if mapping is None:
-            continue
-        pr_head, merge = mapping
-        merged_tree, published_tree = _tree(root, merge), _tree(root, pr_head)
-        if (
-            merged_tree
-            and merged_tree == published_tree
-            and _ancestor(root, merge, head)
-            and _ancestor(root, commit, pr_head)
-        ):
-            return
-    raise ValueError("Source lacks a reviewed publication bridge to the current tree")
-
-
 def _ci_capture_run(payload: dict[str, Any], run_id: int) -> dict[str, Any]:
     """Read actual producer identity; overall workflow success is a separate gate."""
     if isinstance(run_id, bool) or run_id <= 0:
@@ -624,45 +579,6 @@ def _qualified_capture_jobs(
             }
         )
     return selected
-
-
-def _publication_sources(root: Path, source: str) -> list[str]:
-    head = _git(root, "rev-parse", "HEAD").stdout.strip()
-    candidates = {source}
-    for review_name in (
-        "external_resource_inventory_qm08_review.json",
-        "external_resource_inventory_qm09_review.json",
-    ):
-        review_path = root / "configs/quality" / review_name
-        if review_path.is_file():
-            review = json.loads(review_path.read_text(encoding="utf-8"))
-            candidates.update({review["catalog_ref"], review["source_ref"]})
-            if review_name == "external_resource_inventory_qm09_review.json":
-                # The pinned catalog's original production source is also needed
-                # to reconstruct the reviewed delta after its publishing PR is
-                # squash-merged. Read it from that immutable catalog revision.
-                catalog = _git(
-                    root,
-                    "show",
-                    f"{review['catalog_ref']}:configs/quality/external_resource_inventory.json",
-                )
-                if catalog.returncode == 0:
-                    candidates.add(json.loads(catalog.stdout)["source_commit"])
-    host_path = root / "grafana/tooling/router-v7-bridge/host-image.json"
-    if host_path.is_file():
-        host = json.loads(host_path.read_text(encoding="utf-8"))
-        candidates.add(host["delivery_source"]["source_ref"])
-    if re.fullmatch(r"[0-9a-f]{40}", source) is None or not _ancestor(
-        root, source, head
-    ):
-        raise ValueError("Publication source is not an immutable PR ancestor")
-    # A reviewed input from another already merged PR belongs in that PR's own
-    # bridge. Only commits in this PR's ancestry can be vouched for here.
-    return sorted(
-        commit
-        for commit in candidates
-        if re.fullmatch(r"[0-9a-f]{40}", commit) and _ancestor(root, commit, head)
-    )
 
 
 def _require_clean_producer_inputs(root: Path) -> None:
@@ -820,7 +736,6 @@ def build_ci_squash_receipt(
         "metrics_sha256": telemetry_metrics_sha256(payload),
         "ci_artifact_inputs": artifacts,
         "ci_capture_producers": run["verified_capture_jobs"],
-        "reviewed_source_commits": _publication_sources(root, source),
         "retrieved_from": f"https://api.github.com/repos/{REPOSITORY}/pulls/{pull_request}",
         "retrieved_at_utc": datetime.now(UTC).isoformat(),
         "github_pull_request": {
@@ -871,84 +786,6 @@ def _write_receipt_atomically(destination: Path, receipt: dict[str, Any]) -> Non
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
-
-
-def write_ci_publication_receipts(root: Path, receipt: dict[str, Any]) -> None:
-    """Keep source publication lineage independent of future telemetry captures."""
-    bridge = {
-        key: receipt[key]
-        for key in (
-            "schema_version",
-            "verification_mode",
-            "reviewed_source_commits",
-            "retrieved_from",
-            "retrieved_at_utc",
-            "github_pull_request",
-            "trust_statement",
-        )
-    }
-    path = root / PUBLICATION_RECEIPT
-    existing = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
-    bridges = existing.get("publication_bridges")
-    if not isinstance(bridges, list):
-        bridges = [existing] if existing.get("github_pull_request") else []
-    pull_request = bridge["github_pull_request"]["number"]
-    publication = {
-        "schema_version": 1,
-        "verification_mode": "live_github",
-        "publication_bridges": [
-            item
-            for item in bridges
-            if item.get("github_pull_request", {}).get("number") != pull_request
-        ]
-        + [bridge],
-        "trust_statement": (
-            "Reviewed live GitHub publication mappings; not a signature or CI "
-            "execution receipt."
-        ),
-    }
-    _write_receipt_atomically(root / RECEIPT, receipt)
-    _write_receipt_atomically(path, publication)
-
-
-def build_publication_receipt(*, root: Path, pull_request: int) -> dict[str, Any]:
-    """Refresh source lineage only after GitHub confirms the exact PR merge."""
-    head = _git(root, "rev-parse", "HEAD").stdout.strip()
-    pr = _read_github_json(f"pulls/{pull_request}")
-    if (
-        pr.get("number") != pull_request
-        or pr.get("head", {}).get("sha") != head
-        or pr.get("base", {}).get("repo", {}).get("full_name") != REPOSITORY
-        or pr.get("merged") is not True
-    ):
-        raise ValueError("GitHub has not confirmed this exact PR head as merged")
-    merge = pr.get("merge_commit_sha")
-    main = _git(root, "rev-parse", "origin/main").stdout.strip()
-    if (
-        not isinstance(merge, str)
-        or re.fullmatch(r"[0-9a-f]{40}", merge) is None
-        or not _ancestor(root, merge, main)
-        or _tree(root, merge) != _tree(root, head)
-    ):
-        raise ValueError("Published PR merge/tree is not present on origin/main")
-    return {
-        "schema_version": 1,
-        "verification_mode": "live_github",
-        "reviewed_source_commits": _publication_sources(root, head),
-        "retrieved_from": f"https://api.github.com/repos/{REPOSITORY}/pulls/{pull_request}",
-        "retrieved_at_utc": datetime.now(UTC).isoformat(),
-        "github_pull_request": {
-            "number": pull_request,
-            "merged": True,
-            "base": {"repo": {"full_name": REPOSITORY}},
-            "head": {"sha": head},
-            "merge_commit_sha": merge,
-        },
-        "trust_statement": (
-            "Reviewed live GitHub publication mapping; not a signature or CI "
-            "execution receipt."
-        ),
-    }
 
 
 def require_capture_metrics(payload: dict[str, Any], expected: dict[str, Any]) -> None:
@@ -1041,37 +878,9 @@ def main() -> int:
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--local-manifest", type=Path)
     mode.add_argument("--ci-run-id", type=int)
-    mode.add_argument("--refresh-publication-receipt", action="store_true")
     parser.add_argument("--pull-request", type=int, required=True)
     args = parser.parse_args()
     root = args.repo_root.resolve()
-    if args.refresh_publication_receipt:
-        bridge = build_publication_receipt(root=root, pull_request=args.pull_request)
-        receipt_path = root / PUBLICATION_RECEIPT
-        if receipt_path.is_file():
-            existing = json.loads(receipt_path.read_text(encoding="utf-8"))
-        else:
-            existing = {}
-        old_bridges = existing.get("publication_bridges")
-        if not isinstance(old_bridges, list):
-            old_bridges = [existing] if existing.get("github_pull_request") else []
-        bridges = [
-            item
-            for item in old_bridges
-            if item.get("github_pull_request", {}).get("number") != args.pull_request
-        ]
-        bridges.append(bridge)
-        receipt = {
-            "schema_version": 1,
-            "verification_mode": "live_github",
-            "publication_bridges": bridges,
-            "trust_statement": (
-                "Reviewed live GitHub publication mappings; not a signature or "
-                "CI execution receipt."
-            ),
-        }
-        _write_receipt_atomically(receipt_path, receipt)
-        return 0
     payload = yaml.safe_load(
         (root / "configs/quality/test_telemetry_baseline.yaml").read_text(
             encoding="utf-8"
@@ -1081,7 +890,7 @@ def main() -> int:
         receipt = build_ci_squash_receipt(
             payload, root=root, pull_request=args.pull_request, run_id=args.ci_run_id
         )
-        write_ci_publication_receipts(root, receipt)
+        _write_receipt_atomically(root / RECEIPT, receipt)
     else:
         if args.measurement_repo_root is None:
             parser.error("--local-manifest requires --measurement-repo-root")
