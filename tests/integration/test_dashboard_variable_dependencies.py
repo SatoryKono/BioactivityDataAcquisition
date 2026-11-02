@@ -87,8 +87,9 @@ def test_runtime_variable_dependencies():
         "read_latency_quantile",
     } == set(variables)
     query = str(variables["run_type"].get("definition") or "")
-    assert "bioetl_overview_pipeline_run_type_universe" in query
-    assert 'pipeline=~"$pipeline"' in query
+    assert "filter-options?dimension=run_type" in query
+    assert "${pipeline}" in query
+    assert variables["run_type"]["current"]["value"] == "$__all"
     assert variables["provider_for_pipeline"]["hide"] == 2
     assert variables["run_id"]["datasource"] == {
         "type": "yesoreyeram-infinity-datasource",
@@ -101,7 +102,8 @@ def test_overview_variable_dependencies():
     """Run Overview owns runtime context after Pipeline Diagnostics retirement."""
     variables = _templating_map("grafana/dashboards/bioetl-overview-v2.json")
     assert {"workflow", "pipeline", "run_type", "run_id"} <= variables.keys()
-    assert 'pipeline=~"$pipeline"' in variables["run_type"]["definition"]
+    assert "filter-options?dimension=run_type" in variables["run_type"]["definition"]
+    assert variables["run_type"]["current"]["value"] == "$__all"
     run_query = variables["run_id"]["definition"]
     for selector in ("${workflow}", "${pipeline}", "${run_type:csv}"):
         assert selector in run_query

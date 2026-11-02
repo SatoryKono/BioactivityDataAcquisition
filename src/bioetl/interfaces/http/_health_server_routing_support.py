@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import time
 
 from bioetl.domain.control_plane import RunManifest, WorkflowManifest
 from bioetl.interfaces.http._forensic_request_budget import (
@@ -126,11 +127,12 @@ async def handle_control_plane_filter_options(
             },
         )
         return
+    deadline = time.monotonic() + _FILTER_OPTIONS_TIMEOUT_SECONDS
     try:
         if _read_truthy_query_param(query, "allow_stale"):
             payload = await host._selector_catalog.options.read(
                 query,
-                lambda: _filter_options_payload(host, query),
+                lambda: _filter_options_payload(host, query, deadline=deadline),
                 limiter=host._selector_endpoint_limiter,
                 timeout_seconds=_FILTER_OPTIONS_TIMEOUT_SECONDS,
                 queue_timeout_seconds=SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
@@ -138,7 +140,9 @@ async def handle_control_plane_filter_options(
         else:
             payload = await run_bounded_forensic_operation(
                 limiter=host._selector_endpoint_limiter,
-                operation_factory=lambda: _filter_options_payload(host, query),
+                operation_factory=lambda: _filter_options_payload(
+                    host, query, deadline=deadline
+                ),
                 timeout_seconds=_FILTER_OPTIONS_TIMEOUT_SECONDS,
                 queue_timeout_seconds=SELECTOR_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
                 endpoint="/ops/control-plane/filter-options",
@@ -175,6 +179,8 @@ async def prewarm_selector_options(host: _HealthRoutingHost) -> None:
 async def _filter_options_payload(
     host: _HealthRoutingHost,
     query: dict[str, str],
+    *,
+    deadline: float | None = None,
 ) -> dict[str, object]:
     """Build filter options using the injected selector-catalog builders."""
     exact_run_only = _read_truthy_query_param(query, "exact_run_only")
@@ -187,6 +193,7 @@ async def _filter_options_payload(
             options_builder=build_selector_filter_options_payload,
             add_run_id_items=_add_run_id_items,
             include_reports=True,
+            deadline=deadline,
         )
     return await _build_filter_options_payload(
         host,
@@ -194,6 +201,7 @@ async def _filter_options_payload(
         options_builder=build_selector_filter_options_payload,
         add_run_id_items=_add_run_id_items,
         include_reports=False,
+        deadline=deadline,
     )
 
 

@@ -41,7 +41,11 @@ def test_overview_v2_semantics_contract():
     assert by_id[9480]["title"] == "Review Provider Evidence"
     for panel_id in (9002, 9300, 9480, 9460):
         urls = [target.get("url", "") for target in by_id[panel_id].get("targets", [])]
-        assert urls and all("run_id=${run_id" in url for url in urls)
+        # Phase-1: detail panels bind selected_* funnel vars; browse retains ${run_id}.
+        assert urls and all(
+            ("run_id=${selected_run_id" in url) or ("run_id=${run_id" in url)
+            for url in urls
+        )
         assert all("/ops/observability/" in url for url in urls)
 
     nav_links = list(d.get("links", []))

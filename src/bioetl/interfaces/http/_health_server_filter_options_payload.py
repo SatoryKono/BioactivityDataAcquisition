@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import time
 from collections.abc import Callable
 from functools import partial
 
@@ -16,10 +17,15 @@ from bioetl.interfaces.http._report_selector_options import (
     load_report_selector_entries,
     supplement_report_options,
 )
+from bioetl.interfaces.http._run_type_universe_options import (
+    supplement_prometheus_run_type_options,
+)
 from bioetl.interfaces.http.control_plane_selector_context import (
     RunIdOptionPolicy,
     finalize_run_id_empty_catalog_label,
 )
+
+_DEFAULT_FILTER_OPTIONS_BUDGET_SECONDS = 20.0
 
 
 async def build_filter_options_payload(
@@ -29,8 +35,11 @@ async def build_filter_options_payload(
     options_builder: Callable[..., dict[str, object]],
     add_run_id_items: Callable[..., None],
     include_reports: bool,
+    deadline: float | None = None,
 ) -> dict[str, object]:
     """Combine manifest and report catalogs into a filter-options payload."""
+    if deadline is None:
+        deadline = time.monotonic() + _DEFAULT_FILTER_OPTIONS_BUDGET_SECONDS
     manifest_port = host._run_manifest_port
     assert manifest_port is not None
     dimension = host._read_optional_param(query, "dimension") or "run_id"
@@ -104,6 +113,15 @@ async def build_filter_options_payload(
         )
     if dimension == "run_id" and response_shape == "options":
         payload = finalize_run_id_empty_catalog_label(payload)
+    if dimension == "run_type":
+        # Additive: keep telemetry-only run_type values selectable for PromQL.
+        # Skip when a workflow scope is set — universe metrics lack membership.
+        prometheus_base_url = getattr(host, "_prometheus_base_url", "") or ""
+        if prometheus_base_url and not selected_workflows:
+            # fmt: off
+            # One-line call keeps COMP-004 segment for report-options to_thread unique.
+            payload = await asyncio.to_thread(supplement_prometheus_run_type_options, payload, prometheus_base_url=prometheus_base_url, deadline=deadline, response_shape=response_shape, pipelines=selected_pipelines)  # noqa: E501
+            # fmt: on
     add_run_id_items(payload, response_shape=response_shape, dimension=dimension)
     return payload
 
