@@ -707,4 +707,3 @@ _scan_runtime_metric_calls = _metric_inventory_scan._scan_runtime_metric_calls
 
 
 _record_static_runtime_emitters = _metric_inventory_scan._record_static_runtime_emitters
-

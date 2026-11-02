@@ -80,7 +80,8 @@ from scripts.engineering.qa.observability_metric_inventory_shared import (
     _RUNTIME_CANDIDATE_PATH_CACHE,
     _RUNTIME_EVENT_CANDIDATE_PATH_CACHE,
     _TEXT_DISCOVERY_TIMEOUT_SECONDS,
-    _METRIC_MENTION_GREP_TIMEOUT_SECONDS,    _METRIC_MENTION_GREP_CHUNK_SIZE,
+    _METRIC_MENTION_GREP_TIMEOUT_SECONDS,
+    _METRIC_MENTION_GREP_CHUNK_SIZE,
     _PROMETHEUS_QUERY_TIMEOUT_SECONDS,
     _PROMETHEUS_BASE_URL_ENV_VAR,
     _PROMETHEUS_BEARER_TOKEN_ENV_VAR,
@@ -159,7 +160,8 @@ from scripts.engineering.qa.observability_metric_inventory_scan import (
     _looks_like_imported_string_constant_name,
     _imported_string_constant_aliases,
     _module_string_bindings,
-    _merge_imported_string_aliases,    _class_nodes,
+    _merge_imported_string_aliases,
+    _class_nodes,
     _class_attribute_string_bindings,
     _call_nodes,
     _metric_names_for_call,
@@ -238,7 +240,8 @@ def _iter_text_files_with_git_ls_files(root: Path) -> list[Path] | None:
 
 
 from scripts.engineering.qa.observability_metric_inventory_report import (
-    _coerce_int,    _iter_dashboard_panels,
+    _coerce_int,
+    _iter_dashboard_panels,
     _field_config_link_candidates,
     _runbook_urls_from_link_candidates,
     _panel_runbook_urls,
@@ -476,7 +479,8 @@ def _collect_metric_inventory_impl(
     runtime_observability_contract = get_runtime_observability_publication_contract()
 
     registered_set = set(registered)
-    (        runtime_set,
+    (
+        runtime_set,
         runtime_counter_bases,
         canonical_runtime_set,
         canonical_direct_runtime_set,
@@ -555,7 +559,8 @@ def _collect_metric_inventory_impl(
         "emitted_without_declaration": sorted(runtime_without_registry),
         "dashboarded_without_declaration": sorted(docs_set - registered_set),
         "alerted_without_declaration": sorted(rules_set - registered_set),
-        "dashboarded_without_emission": sorted(documented_without_runtime),        "alerted_without_emission": sorted(ruled_without_runtime),
+        "dashboarded_without_emission": sorted(documented_without_runtime),
+        "alerted_without_emission": sorted(ruled_without_runtime),
         "runtime_cardinality_review_candidates": cardinality_fields[
             "runtime_cardinality_candidates"
         ],
