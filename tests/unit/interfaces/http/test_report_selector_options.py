@@ -318,6 +318,53 @@ def test_verified_identity_for_run_ignores_unrelated_corrupt_report(
     assert identity["pipeline_name"] == "chembl_assay"
 
 
+def test_explicit_uuid_keeps_identity_without_started_at(tmp_path: Path) -> None:
+    """Missing started_at gates A2 catalog only; explicit UUID still resolves."""
+    from bioetl.interfaces.http._report_selector_options import (
+        filtered_report_run_candidates,
+        verified_report_identity_for_run,
+    )
+
+    path = tmp_path / "pipeline" / "chembl_assay" / "run-x" / "pipeline-run-report.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": "pipeline_run_report_v1",
+                "identity": {
+                    "pipeline_name": "chembl_assay",
+                    "run_id": "run-x",
+                    "workflow_id": "chembl_baseline",
+                    "run_type": "backfill",
+                    "status": "success",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    scopes = {
+        "workflow": (),
+        "pipeline": ("chembl_assay",),
+        "run_type": (),
+        "run_status": (),
+        "run_id": (),
+    }
+    identity = verified_report_identity_for_run("run-x", scopes, root=tmp_path)
+    assert identity is not None
+    assert identity["run_id"] == "run-x"
+    assert "started_at" not in identity
+    assert filtered_report_run_candidates(scopes, root=tmp_path) == ()
+    options = supplement_report_options(
+        {"items": []},
+        dimension="run_id",
+        response_shape="options",
+        scopes=scopes,
+        root=tmp_path,
+    )
+    assert options["items"][0]["value"] == "run-x"
+    assert str(options["items"][0]["text"]).startswith("UNKNOWN ·")
+
+
 def test_report_run_id_label_and_catalog_value_deduplicate(tmp_path: Path) -> None:
     _report(tmp_path)
     payload = supplement_report_options(
