@@ -153,9 +153,8 @@ def test_overview_provider_context_is_derived_from_pipeline():
     panels = {panel["id"]: panel for panel in dashboard["panels"]}
     for panel_id in (9480, 9481):
         target = panels[panel_id]["targets"][0]
-        assert target["url"].startswith("/ops/observability/selected-run-status?")
-        assert "pipeline=${pipeline}" in target["url"]
-        assert "run_id=${run_id}" in target["url"]
+        assert target["panelId"] == 9002
+        assert target["withTransforms"] is False
 
 
 def test_incident_provider_derives_from_pipeline_or_workflow():

@@ -341,6 +341,10 @@ def panel_declared_row_cap(panel: dict[str, Any]) -> int | None:
                 for item in filters:
                     if not isinstance(item, dict):
                         continue
+                    if item.get("fieldName") == "_bioetl_frame":
+                        # A donor frame label selects a section, not a single
+                        # row; shared-donor tables can contain many rows per frame.
+                        continue
                     config = item.get("config")
                     if not isinstance(config, dict):
                         continue
