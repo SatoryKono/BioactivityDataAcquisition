@@ -70,9 +70,9 @@ Canonical commands for this cycle:
 
 ```bash
 uv run python -m pytest tests/architecture/test_architecture_dependency_docs_drift.py -q
-uv run python -m scripts.engineering.qa report-dep-map --check
-uv run python -m scripts.engineering.qa report-dep-map --update
-uv run python -m scripts.engineering.qa report-compatibility-importer-census
+uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check
+uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --update
+uv run python scripts/engineering/qa/report_compatibility_importer_census.py
 ./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --check
 ./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --update
 uv run python scripts/engineering/qa/generate_compatibility_facade_snapshot.py --check
@@ -99,7 +99,7 @@ Artifact-to-command policy:
 
 Fast local repair path:
 
-1. If `test_architecture_dependency_docs_drift.py` fails, run `uv run python -m scripts.engineering.qa report-dep-map --update`.
+1. If `test_architecture_dependency_docs_drift.py` fails, run `uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --update`.
 1. If compatibility snapshot drift fails, update `configs/quality/compatibility_facade_inventory.yaml` first when policy changed, then run `uv run python scripts/engineering/qa/generate_compatibility_facade_snapshot.py --update`.
 1. Re-run `test_architecture_dependency_docs_drift.py`, `test_public_facade_inventory.py`, and `test_documentation_sync.py`.
 1. Use `scripts/engineering/README.md` for the canonical scripts index; treat `docs/reports/**` as historical evidence only, not as repair guidance.
