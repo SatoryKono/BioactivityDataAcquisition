@@ -21,7 +21,7 @@
   },
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "cc6b82dcdef08e9d9d1597887455dccdac4410f7e6a373f5f9e0ba3b6246a58b",
-    "bioetl-dq-v2": "6207a7c2f1d832aebd35a91b5dbadc60a6808d01bd669e051e2dbdf053675594",
+    "bioetl-dq-v2": "aeb753d4b9d8ac817208be2423bbfa13473cc2bdb9a5487e30ccae14459c0034",
     "bioetl-incident-v1": "4c4f4d15a246f65af6ef0a457d574761643a93c20d27501c233b8712afda4630",
     "bioetl-overview-v2": "13755dfed635df99e05ca0617c8cbe8e008c7f418c52c0693d01c599def0ac56",
     "bioetl-run-explorer-v1": "0e9347b07716728ca4139ce1f73192840f20f3031dd281185e5437c3a1b446b8"
@@ -318,7 +318,7 @@
         "datasource_type": "yesoreyeram-infinity-datasource",
         "datasource_uid": "bioetl-ops-http",
         "expressions": [
-          "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+          "/ops/observability/processed-records?pipeline=${selected_pipeline}&run_type=${run_type:csv}&run_id=${selected_run_id}",
           "/ops/observability/pipeline-run-report?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
         ],
         "target_count": 2

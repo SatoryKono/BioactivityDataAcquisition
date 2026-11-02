@@ -157,7 +157,7 @@ def _assert_processed_records_target_contract(processed: dict[str, object]) -> N
         "type": "json",
         "url": (
             "/ops/observability/processed-records?"
-            "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+            "pipeline=${selected_pipeline}&run_type=${run_type:csv}&run_id=${selected_run_id}"
         ),
         "url_options": {"data": "", "method": "GET"},
     }
