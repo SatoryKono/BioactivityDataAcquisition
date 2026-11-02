@@ -138,7 +138,7 @@ def _saved_run(p: dict[int, dict]) -> None:
         [
             {
                 "title": "Inspect saved run report",
-                "url": "/${__data.fields.action_path}&var-pipeline=${pipeline:percentencode}&var-run_type=${run_type:percentencode}&var-workflow=${workflow:percentencode}&${__url_time_range}",
+                "url": "/${__data.fields.action_path}",
                 "targetBlank": True,
             }
         ],

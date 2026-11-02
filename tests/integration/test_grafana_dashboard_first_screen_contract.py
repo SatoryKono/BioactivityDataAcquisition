@@ -275,9 +275,7 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
                 if isinstance(target, dict) and target.get("panelId") is not None
             ]
             if donor_ids:
-                panels_by_id = {
-                    p.get("id"): p for p in get_dashboard_panels(dashboard)
-                }
+                panels_by_id = {p.get("id"): p for p in get_dashboard_panels(dashboard)}
                 for donor_id in donor_ids:
                     donor = panels_by_id.get(donor_id)
                     assert donor is not None, (

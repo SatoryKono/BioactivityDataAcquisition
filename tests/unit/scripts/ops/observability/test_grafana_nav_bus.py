@@ -100,15 +100,16 @@ def test_row_aware_action_url_preserves_row_and_destination_context() -> None:
     url = routes.row_aware_dashboard_url()
 
     assert "/d/${__data.fields.action_dashboard_uid}/" in url
-    assert "${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}" not in url
+    assert (
+        "${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}"
+        not in url
+    )
     for field in ("workflow", "pipeline", "run_type"):
         assert f"var-{field}=${{__data.fields.{field}:percentencode}}" in url
     assert "var-run_id=${__data.fields.run_id}" in url
     assert "var-stage=$__all" in url
     assert "var-provider=unknown" in url
-    assert (
-        "var-pipeline_context=${__data.fields.pipeline:percentencode}" in url
-    )
+    assert "var-pipeline_context=${__data.fields.pipeline:percentencode}" in url
     assert nav_bus.build_handoff_url.__module__.endswith("dashboard_context_links")
     assert routes.TIME_TOKEN in url
 
@@ -257,7 +258,7 @@ def test_phase2_nav_bus_five_chips_include_data_quality() -> None:
     html = nav_bus.render_html(current_uid="bioetl-run-explorer-v1")
     assert html.count("width:19.5%") == 5
     assert 'class="bioetl-nav-current"' in html
-    assert "<span class=\"bioetl-nav-current\"" in html or (
+    assert '<span class="bioetl-nav-current"' in html or (
         '<span class="bioetl-nav-current"' in html
     )
     assert html.count('class="bioetl-nav-link"') == 4

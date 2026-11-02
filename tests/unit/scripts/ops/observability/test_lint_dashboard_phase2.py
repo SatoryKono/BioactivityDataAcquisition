@@ -130,3 +130,30 @@ def test_phase25_donor_jsonata_brackets_are_balanced() -> None:
     assert _jsonata_brackets_balanced(_OV_DONOR)
     assert _jsonata_brackets_balanced(_DQ_DONOR)
     assert _jsonata_brackets_balanced(_INC_DONOR)
+
+
+def test_nav_lint_requires_real_chip_elements() -> None:
+    findings = lint._nav_content_findings(
+        "bioetl-overview-v2.json",
+        (
+            '<div class="bioetl-nav">'
+            '<span class="bioetl-nav-current">x</span>'
+            "19.5% 19.5% 19.5% 19.5% 19.5%"
+            "Run Explorer Replay Readiness Run Overview "
+            "Data Quality 6. Incident Workspace"
+            "</div>"
+        ),
+    )
+    assert any("expected five nav chips" in item for item in findings)
+
+
+def test_mapping_value_text_tokens_count_as_status() -> None:
+    assert lint._mapping_has_status_token(
+        {
+            "type": "value",
+            "options": {
+                "0": {"text": "UNKNOWN"},
+                "1": {"text": "OK"},
+            },
+        }
+    )

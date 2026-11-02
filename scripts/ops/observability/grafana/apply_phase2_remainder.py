@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit, urlunsplit
@@ -110,6 +111,24 @@ def _move_data_links_to_panel_links(panel: dict[str, Any]) -> None:
     panel["links"] = links
 
 
+def _ensure_run_id_on_cp_scope_links(panel: dict[str, Any]) -> None:
+    """CP panel 9400 deep-links need run_id when includeVars is false."""
+    links = panel.get("links")
+    if not isinstance(links, list):
+        return
+    for link in links:
+        if not isinstance(link, dict):
+            continue
+        url = link.get("url")
+        if not isinstance(url, str) or _RUN_ID_QUERYPARAM in url:
+            continue
+        match = re.search(r"(?:^|[?&])viewPanel=(\d+)", url.replace("&amp;", "&"))
+        if match is None or match.group(1) not in _CP_SCOPE_VIEW_PANELS:
+            continue
+        needle = f"viewPanel={match.group(1)}"
+        link["url"] = url.replace(needle, f"{_RUN_ID_QUERYPARAM}&{needle}")
+
+
 def _strip_github_grafana_query(url: str) -> str:
     parts = urlsplit(url.replace("&amp;", "&"))
     if not (parts.query or "${" in url):
@@ -129,10 +148,10 @@ def _percentencode_data_fields(url: str) -> str:
     return url
 
 
-VIEW_PANEL_TRUST_SELF = "viewPanel=9418"
-VIEW_PANEL_TRUST_SIBLING = "viewPanel=9414"
 VIEW_PANEL_BROKEN_REPLAY = "viewPanel=130"
 VIEW_PANEL_REPLAY_CHECKS = "viewPanel=9423"
+_CP_SCOPE_VIEW_PANELS = frozenset({"9423", "9414", "9415", "9416"})
+_RUN_ID_QUERYPARAM = "${run_id:queryparam}"
 
 
 def _rewrite_static_slugs(url: str) -> str:
@@ -163,7 +182,8 @@ def _rewrite_url(url: str) -> str:
     if "github.com/" in url and ("blob/main/docs/" in url or "/runbooks/" in url):
         url = _strip_github_grafana_query(url)
     url = url.replace(VIEW_PANEL_BROKEN_REPLAY, VIEW_PANEL_REPLAY_CHECKS)
-    url = url.replace(VIEW_PANEL_TRUST_SELF, VIEW_PANEL_TRUST_SIBLING)
+    # Keep viewPanel=9418 as Selected-Run Trust destination; phase2.5 rewrites
+    # only the 9418 panel's own trust_reasons_action self-link to 9414.
     # F-12 Incident 9101 → DQ: do not carry page run_id into a different pipeline.
     if (
         "/d/bioetl-dq-v2/" in url
@@ -225,6 +245,8 @@ def apply_dashboard(path: Path, *, uid: str) -> dict[str, Any]:
     for panel in _walk(payload.get("panels", [])):
         if panel.get("id") == 9400:
             _move_data_links_to_panel_links(panel)
+            if uid == "bioetl-control-plane-v1":
+                _ensure_run_id_on_cp_scope_links(panel)
         if uid == "bioetl-incident-v1" and panel.get("id") == 2542:
             _fix_incident_2542(panel)
     _rewrite_links_in_obj(payload)

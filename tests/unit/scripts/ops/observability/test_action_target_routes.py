@@ -25,7 +25,10 @@ def test_row_aware_dashboard_url_uses_the_row_uid_and_scope_variables() -> None:
     url = row_aware_dashboard_url()
 
     assert "/d/${__data.fields.action_dashboard_uid}/" in url
-    assert "${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}" not in url
+    assert (
+        "${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}"
+        not in url
+    )
     assert "var-workflow=${__data.fields.workflow:percentencode}" in url
     assert "var-pipeline=${__data.fields.pipeline:percentencode}" in url
     assert "var-run_type=${__data.fields.run_type:percentencode}" in url

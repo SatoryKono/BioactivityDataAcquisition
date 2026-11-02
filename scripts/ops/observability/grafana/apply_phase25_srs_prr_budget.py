@@ -594,7 +594,7 @@ def apply_overview(data: dict[str, Any]) -> None:
                         },
                     },
                     {
-                        "fieldName": "excluded_pct",
+                        "fieldName": "stage_id",
                         "config": {"id": "isNotNull", "options": {}},
                     },
                 ],

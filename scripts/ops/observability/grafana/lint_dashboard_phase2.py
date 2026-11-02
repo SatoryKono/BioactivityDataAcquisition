@@ -41,6 +41,7 @@ UID_BY_FILE = {
     "bioetl-run-explorer-v1.json": "bioetl-run-explorer-v1",
 }
 GREEN = frozenset({"green", "#73BF69", "#73bf69", "#56A64B", "#56a64b"})
+_AMP_ENTITY = "&amp;"
 _NAV_CHIP_TITLES = (
     "Run Explorer",
     "Replay Readiness",
@@ -56,6 +57,14 @@ _STATUS_TOKENS = (
     "UNKNOWN",
     "SELECT RUN",
     "INCOMPLETE",
+)
+_NAV_LINK_RE = re.compile(
+    r'<a\b[^>]*\bclass="[^"]*\bbioetl-nav-link\b[^"]*"[^>]*>',
+    re.IGNORECASE,
+)
+_NAV_CURRENT_RE = re.compile(
+    r'<span\b[^>]*\bclass="[^"]*\bbioetl-nav-current\b[^"]*"[^>]*>',
+    re.IGNORECASE,
 )
 
 
@@ -83,7 +92,7 @@ def _urls_from_html(value: str) -> list[tuple[str, str]]:
     if "href=" not in value and "/d/" not in value:
         return []
     return [
-        ("", match.group(1).replace("&amp;", "&"))
+        ("", match.group(1).replace(_AMP_ENTITY, "&"))
         for match in re.finditer(r'href="([^"]+)"', value)
     ]
 
@@ -109,7 +118,7 @@ def _iter_urls(value: Any) -> list[tuple[str, str]]:
 
 def parse_dashboard_view_panel(url: str) -> tuple[str | None, int | None]:
     """Extract ``/d/{uid}/…`` destination uid and ``viewPanel`` from any query position."""
-    cleaned = url.replace("&amp;", "&")
+    cleaned = url.replace(_AMP_ENTITY, "&")
     parts = urlsplit(cleaned)
     path_match = re.match(r"/d/([^/?#]+)/", parts.path)
     if path_match is None:
@@ -133,18 +142,21 @@ def _nav_content_findings(path_name: str, content: str) -> list[str]:
     findings: list[str] = []
     if "bioetl-nav" not in content:
         findings.append(f"{path_name}: panel 1000 missing bioetl-nav markup")
-    chip_count = content.count("19.5%")
+    link_count = len(_NAV_LINK_RE.findall(content))
+    current_count = len(_NAV_CURRENT_RE.findall(content))
+    chip_count = link_count + current_count
     if chip_count < 5:
         findings.append(
-            f"{path_name}: panel 1000 expected five 19.5% chips, found {chip_count}"
+            f"{path_name}: panel 1000 expected five nav chips "
+            f"(links+current), found {chip_count}"
+        )
+    if current_count != 1:
+        findings.append(
+            f"{path_name}: panel 1000 current chip must be exactly one "
+            '<span class="bioetl-nav-current">'
         )
     if "16.5%" in content:
         findings.append(f"{path_name}: panel 1000 still uses legacy 16.5% chip width")
-    if "<span" not in content or "bioetl-nav-current" not in content:
-        findings.append(
-            f"{path_name}: panel 1000 current chip must be "
-            '<span class="bioetl-nav-current">'
-        )
     if re.search(r'<a[^>]*class="[^"]*bioetl-nav-current', content):
         findings.append(f"{path_name}: panel 1000 current chip must not be an <a>")
     findings.extend(
@@ -203,10 +215,23 @@ def _mapping_has_status_token(item: dict[str, Any]) -> bool:
         return _text_has_status_token(str(options.get("pattern") or ""))
     if kind != "value" or not isinstance(options, dict):
         return False
-    return any(
-        _text_has_status_token(text) or not text.isdigit()
-        for text in (str(key) for key in options)
-    )
+    status_hits = 0
+    count_style_hits = 0
+    for key, meta in options.items():
+        key_text = str(key)
+        value_text = str(meta.get("text") or "") if isinstance(meta, dict) else ""
+        if not key_text.isdigit():
+            return (
+                _text_has_status_token(key_text)
+                or _text_has_status_token(value_text)
+                or bool(key_text)
+            )
+        if _text_has_status_token(key_text) or _text_has_status_token(value_text):
+            status_hits += 1
+        elif value_text and not value_text.isdigit():
+            # e.g. "0 blockers" — numeric count panel, not an OK/CRIT palette.
+            count_style_hits += 1
+    return status_hits > 0 and count_style_hits == 0
 
 
 def _mappings_look_like_text_status(mappings: list[Any]) -> bool:
@@ -250,7 +275,7 @@ def _lint_thresholds(path: Path, panels: list[dict[str, Any]]) -> list[str]:
 def _url_transport_findings(path_name: str, title: str, url: str) -> list[str]:
     findings: list[str] = []
     glued = "/${__data.fields.action_path}&"
-    if glued in url or glued.replace("&", "&amp;") in url:
+    if glued in url or glued.replace("&", _AMP_ENTITY) in url:
         findings.append(f"{path_name}: action_path glued with & ({title or url[:60]})")
     grafana_on_github = "github.com/" in url and (
         "var-" in url or "${__url_time_range}" in url or "${pipeline" in url

@@ -40,9 +40,7 @@ def test_overview_v2_semantics_contract():
     assert by_id[9460]["title"] == "Inspect Selected Run Stages"
     assert by_id[9480]["title"] == "Review Provider Evidence"
     # Phase 2.5: 9002 is the SRS donor; consumers reuse it via Dashboard DS.
-    donor_urls = [
-        target.get("url", "") for target in by_id[9002].get("targets", [])
-    ]
+    donor_urls = [target.get("url", "") for target in by_id[9002].get("targets", [])]
     assert donor_urls and all(
         ("run_id=${selected_run_id" in url) or ("run_id=${run_id" in url)
         for url in donor_urls
@@ -54,9 +52,7 @@ def test_overview_v2_semantics_contract():
         assert (targets[0].get("datasource") or {}).get("uid") == "-- Dashboard --"
     stages = by_id[9460].get("targets", [])
     assert stages and stages[0].get("panelId") == 9002
-    assert any(
-        "pipeline-run-report-artifact" in (t.get("url") or "") for t in stages
-    )
+    assert any("pipeline-run-report-artifact" in (t.get("url") or "") for t in stages)
 
     nav_links = list(d.get("links", []))
     links_blob = ""

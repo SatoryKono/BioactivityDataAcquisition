@@ -550,19 +550,19 @@
       "links": [
         {
           "title": "Open Replay Safety Diagnostics",
-          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&viewPanel=9423&${__url_time_range}",
+          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9423&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },
         {
           "title": "Open Selected-Run Trust",
-          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&viewPanel=9414&${__url_time_range}",
+          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },
         {
           "title": "Open Lineage Validation",
-          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&viewPanel=9415&${__url_time_range}",
+          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9415&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },

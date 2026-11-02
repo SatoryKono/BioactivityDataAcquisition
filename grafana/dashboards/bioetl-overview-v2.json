@@ -2141,7 +2141,7 @@
                 }
               },
               {
-                "fieldName": "excluded_pct",
+                "fieldName": "stage_id",
                 "config": {
                   "id": "isNotNull",
                   "options": {}
