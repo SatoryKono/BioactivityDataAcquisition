@@ -43,6 +43,7 @@ PYPROJECT_TOML = "pyproject.toml"
 UV_LOCK = "uv.lock"
 PYTHON_DEPENDENCY_FILES = frozenset({PYPROJECT_TOML, UV_LOCK})
 TEST_FILE_GLOB = "test_*.py"
+CONFTEST_FILENAME = "conftest.py"
 GENERATED_ARTIFACT_TESTS = Path("configs/quality/generated_artifact_tests.json")
 GENERATED_ARTIFACT_ROUTING = Path("configs/quality/generated_artifact_routing.yaml")
 
@@ -1031,7 +1032,7 @@ def _helper_path_targets(path: str, root: Path) -> list[str]:
         importing_tests |= _importing_script_tests(test_roots, "tests.helpers")
     if importing_tests:
         targets = {
-            test.parent if test.name == "conftest.py" else test
+            test.parent if test.name == CONFTEST_FILENAME else test
             for test in importing_tests
         }
         return sorted(test.relative_to(root).as_posix() for test in targets)
@@ -1054,7 +1055,7 @@ def _script_targets(path: str, root: Path) -> list[str]:
     module = ".".join(("scripts", *relative.with_suffix("").parts))
     importing_tests = _importing_script_tests(test_roots, module)
     selected = direct | {
-        test.parent if test.name == "conftest.py" else test
+        test.parent if test.name == CONFTEST_FILENAME else test
         for test in importing_tests
     }
     if selected:
@@ -1072,7 +1073,7 @@ def _importing_script_tests(roots: tuple[Path, ...], module: str) -> set[Path]:
         test
         for root in roots
         if root.is_dir()
-        for pattern in (TEST_FILE_GLOB, "conftest.py")
+        for pattern in (TEST_FILE_GLOB, CONFTEST_FILENAME)
         for test in root.rglob(pattern)
         if _imports_module(test, module)
     }
@@ -1105,7 +1106,7 @@ def _consumer_targets(
         _require_targets(selected, root)
         return selected
     if consumer.startswith(TESTS_PREFIX):
-        if Path(consumer).name == "conftest.py":
+        if Path(consumer).name == CONFTEST_FILENAME:
             return [Path(consumer).parent.as_posix()]
         if not Path(consumer).name.startswith("test_"):
             return _helper_suite(consumer, root)
@@ -1144,6 +1145,18 @@ def _imports_module(test_path: Path, module_name: str) -> bool:
     )
 
 
+def _containing_package_parts(path: Path) -> tuple[str, ...] | None:
+    """Return package parts under tests/scripts/src for relative ImportFrom."""
+    parts = [part for part in path.with_suffix("").parts if part not in {"/", "\\"}]
+    for anchor in ("tests", "scripts", "src"):
+        if anchor not in parts:
+            continue
+        idx = parts.index(anchor)
+        # Drop the module/__init__ leaf — remaining is the containing package.
+        return tuple(parts[idx:-1])
+    return None
+
+
 def _matches_module_import(
     node: ast.AST,
     *,
@@ -1162,14 +1175,16 @@ def _matches_module_import(
         return False
     imported_module = node.module or ""
     if node.level:
-        package_parts = test_path.parent.parts
-        if test_path.name != "__init__.py":
-            package_parts = package_parts[:-1]
+        package_parts = _containing_package_parts(test_path)
+        if package_parts is None:
+            return False
         ascend = node.level - 1
         if ascend > len(package_parts):
             return False
-        package_parts = package_parts[: len(package_parts) - ascend]
-        imported_module = ".".join((*package_parts, *imported_module.split(".")))
+        if ascend:
+            package_parts = package_parts[:-ascend]
+        suffix = imported_module.split(".") if imported_module else []
+        imported_module = ".".join((*package_parts, *suffix))
     return imported_module == module_name or (
         imported_module == parent_module
         and any(alias.name == leaf_name for alias in node.names)
