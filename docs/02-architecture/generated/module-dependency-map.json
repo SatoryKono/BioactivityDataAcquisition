@@ -1,12 +1,12 @@
 {
   "summary": {
     "scanned_modules": 2606,
-    "total_internal_imports": 8480,
+    "total_internal_imports": 8483,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 329,
     "violations": 0,
-    "source_fingerprint": "bc4c8fef7ba06816af8816752f1f8807e673410f54930f4ec939b4483d520ea9"
+    "source_fingerprint": "8eb9179b2f522626b1f84390a88075c199c9b4075058a2f649fe2292a38eb595"
   },
   "layer_edges": [
     {
@@ -24,7 +24,7 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 237,
+      "imports": 238,
       "allowed": true
     },
     {
@@ -36,7 +36,7 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 320,
+      "imports": 321,
       "allowed": true
     },
     {
@@ -48,7 +48,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1315,
+      "imports": 1316,
       "allowed": true
     },
     {
@@ -160,13 +160,13 @@
       "imports": 37
     },
     {
-      "source": "application.composite",
-      "target": "domain.exceptions",
-      "imports": 36
-    },
-    {
       "source": "composition.runtime_builders",
       "target": "domain.control_plane",
+      "imports": 37
+    },
+    {
+      "source": "application.composite",
+      "target": "domain.exceptions",
       "imports": 36
     },
     {
@@ -312,7 +312,7 @@
     {
       "source": "composition.runtime_builders",
       "target": "application.services",
-      "imports": 18
+      "imports": 19
     },
     {
       "source": "application.observability",
