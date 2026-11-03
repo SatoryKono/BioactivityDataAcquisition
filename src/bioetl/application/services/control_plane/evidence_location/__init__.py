@@ -13,8 +13,6 @@ from bioetl.application.services.control_plane.evidence_location.registration im
     EvidenceLocationRegistrationOutcome,
     EvidenceLocationRegistrationService,
     EvidenceLocationVerifyOutcome,
-)
-from bioetl.application.services.control_plane.evidence_location.registration_observations import (
     record_registration_exception_observation,
     record_registration_outcome_observation,
     record_registration_soft_failure_observation,

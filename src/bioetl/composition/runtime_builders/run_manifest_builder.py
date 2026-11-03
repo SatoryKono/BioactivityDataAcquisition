@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.evidence_location.registration_observations import (
+from bioetl.application.services.control_plane.evidence_location.registration import (
     record_registration_exception_observation,
     record_registration_outcome_observation,
 )

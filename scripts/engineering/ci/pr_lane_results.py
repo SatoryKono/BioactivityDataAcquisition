@@ -121,6 +121,17 @@ CHECK_DOC_LINKS_GUARDRAILS_TEST = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    **dict.fromkeys(
+        (
+            ".vscode/extensions.json",
+            ".vscode/launch.json",
+            ".vscode/settings.json",
+        ),
+        (
+            "tests/architecture/test_root_hygiene_review_registry.py",
+            "tests/architecture/test_root_hygiene_workflow.py",
+        ),
+    ),
     ".gitleaks.toml": (
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
     ),
@@ -131,6 +142,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "configs/quality/layered_suffix_policy.yaml": (
         "tests/architecture/test_layer_aware_suffix_policy.py",
+    ),
+    "configs/quality/external_resource_inventory_pr12751_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+    ),
+    "docs/00-project/governance/05-github-policy.md": (
+        "tests/architecture/test_github_actions_runtime_policy.py",
+        "tests/architecture/test_root_hygiene_workflow.py",
     ),
     **dict.fromkeys(
         (

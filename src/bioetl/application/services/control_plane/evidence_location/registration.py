@@ -13,6 +13,10 @@ from typing import Protocol
 from bioetl.application.services.control_plane.evidence_location.registration_observations import (
     EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
     record_location_verify_observation,
+    record_registration_exception_observation,
+    record_registration_outcome_observation,
+    record_registration_soft_failure_observation,
+    record_verify_exception_observation,
     soft_failure_exception_detail,
 )
 from bioetl.application.services.control_plane.evidence_location.registration_types import (
@@ -41,6 +45,11 @@ __all__ = [
     "EvidenceLocationRegistrationOutcome",
     "EvidenceLocationRegistrationService",
     "EvidenceLocationVerifyOutcome",
+    "record_registration_exception_observation",
+    "record_registration_outcome_observation",
+    "record_registration_soft_failure_observation",
+    "record_verify_exception_observation",
+    "soft_failure_exception_detail",
 ]
 
 

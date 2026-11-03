@@ -143,11 +143,8 @@ class PipelineRunnerService:
             options=effective_options,
             started_at=started_at,
         )
-        run_logger = _create_pipeline_run_logger(
-            logger=self.logger,
-            context=context,
-            options=effective_options,
-        )
+        run_logger = self.logger.bind(**context.log_correlation_fields())
+        _log_pipeline_run_start(run_logger=run_logger, options=effective_options)
         await _record_pipeline_audit_event(
             self.audit,
             event_name="PipelineRunStarted",
@@ -391,18 +388,11 @@ class PipelineRunnerService:
         archive_run_completion(self.archive_control_plane, result, options)
 
 
-def _create_pipeline_run_logger(
-    *,
-    logger: LoggerPort,
-    context: PipelineRunContext,
-    options: RunOptions,
-) -> LoggerPort:
-    """Bind pipeline run context and emit the stable start event."""
-    run_logger = logger.bind(**context.log_correlation_fields())
+def _log_pipeline_run_start(*, run_logger: LoggerPort, options: RunOptions) -> None:
+    """Emit the stable start event through the run-bound logger."""
     run_logger.info(
         "Starting pipeline run",
         run_type=options.run_type,
         dry_run=options.dry_run,
         limit=options.limit,
     )
-    return run_logger

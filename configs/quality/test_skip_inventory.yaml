@@ -99,6 +99,19 @@ allowed_categories:
   - snapshot_refresh_write_mode
   - temporary_known_failure
 entries:
+  - path: tests/integration/application/services/control_plane/test_evidence_location_resolver.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-control-plane"
+    linked_issue: "#10418"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-11-03"
+    rationale: >
+      Windows may deny symlink creation for the temporary evidence root
+      (WinError 1314). Linux CI remains the merge-truth environment and runs
+      this integration path without the platform guard.
   - path: tests/contract/_gold_schema_snapshot_registry.py
     suite: contract
     category: snapshot_refresh_write_mode

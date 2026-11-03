@@ -56,15 +56,27 @@ class EvidenceReadContext(Protocol):
         ...
 
     def get_manifest_by_run_id(self, run_id: object) -> object | None:
-        """Load a manifest by run id from the bound root, or ``None``."""
+        """Load a manifest by run id from the bound root, or ``None``.
+
+        Args:
+            run_id: Identifier of the run whose manifest is requested.
+        """
         ...
 
     def get_workflow_manifest_by_run_id(self, run_id: object) -> object | None:
-        """Load a workflow manifest by run id from the bound root, or ``None``."""
+        """Load a workflow manifest by run id from the bound root, or ``None``.
+
+        Args:
+            run_id: Identifier of the run whose workflow manifest is requested.
+        """
         ...
 
     def verify_replay_objects(self, manifest: object) -> Mapping[str, bool]:
-        """Re-validate saved config, lock and Bronze bytes for ``manifest``."""
+        """Re-validate saved config, lock and Bronze bytes for ``manifest``.
+
+        Args:
+            manifest: Saved manifest containing the replay object references.
+        """
         ...
 
 
@@ -78,7 +90,12 @@ class EvidenceReadContextOpenerProtocol(Protocol):
         *,
         trusted_alias_base: Path,
     ) -> EvidenceReadContext:
-        """Open read-only ports after validating path containment."""
+        """Open read-only ports after validating path containment.
+
+        Args:
+            data_root: Data root selected for the read-only operation.
+            trusted_alias_base: Trusted base used to validate alias containment.
+        """
         ...
 
 
