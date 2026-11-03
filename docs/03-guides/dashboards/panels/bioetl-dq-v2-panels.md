@@ -32,10 +32,10 @@ current telemetry.
 - **Empty:** `QUERY ERROR` when the request fails. `SELECT RUN` is not a successful empty run.
 
 ### Inspect Run Identity
-- **Type:** Table
-- **Purpose:** Manifest identity for the selected Run ID.
-- **Data sources:** `/ops/control-plane/identity-table` with `run_id`.
-- **Contract:** BioETL Ops HTTP control-plane identity endpoint; this is not a Prometheus panel.
+- **Type:** Text
+- **Purpose:** Handoff to the canonical selected-run identity on Overview.
+- **Data sources:** none (markdown link only).
+- **Contract:** Opens Overview panel `Review Run Identity` (9300) with the current workflow/pipeline/run_type/run_id context. Not a Prometheus panel.
 
 ### Inspect Processed Records
 - **Type:** Table
@@ -46,8 +46,8 @@ current telemetry.
 ### Inspect Saved Run Evidence
 - **Type:** Row
 - **Purpose:** Saved domain and identity detail for the same Run ID.
-- **Panels:** `Inspect Selected Run Stages` (saved stage rows for the exact Run ID), `Inspect Selected Run Domains` (domain verdicts of this Run ID; not the page status), `Inspect Selected Run Identity` (full identifiers; the short table is `Inspect Run Identity` on the first screen).
-- **Data sources:** `/ops/observability/selected-run-status` with `run_id`.
+- **Panels:** `Inspect Selected Run Stages` (saved stage rows for the exact Run ID), `Inspect Selected Run Domains` (domain verdicts of this Run ID; not the page status), `Inspect Selected Run Identity` (text handoff to Overview `Review Run Identity` / 9300; the first-screen `Inspect Run Identity` is the same handoff).
+- **Data sources:** `/ops/observability/selected-run-status` with `run_id` for stages/domains; identity panels are markdown handoffs without local targets.
 
 <!-- BEGIN SHIPPED PANEL INVENTORY -->
 ## Current shipped panel inventory
@@ -58,10 +58,10 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | --- | --- | --- |
 | 9400 | Understand Evidence Scope | text |
 | 9406 | Review Selected Run Status | table |
-| 9402 | Inspect Run Identity | table |
+| 9402 | Inspect Run Identity | text |
 | 9403 | Inspect Processed Records | table |
 | 9450 | Inspect Saved Run Evidence | row |
 | 9460 | Inspect Selected Run Stages | table |
 | 9451 | Inspect Selected Run Domains | table |
-| 9452 | Inspect Selected Run Identity | table |
+| 9452 | Inspect Selected Run Identity | text |
 <!-- END SHIPPED PANEL INVENTORY -->
