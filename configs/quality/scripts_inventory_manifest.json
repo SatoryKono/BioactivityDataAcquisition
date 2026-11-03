@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-03T19:25:13.301389+00:00",
+  "generated_at": "2026-11-03T20:35:07.665871+00:00",
   "summary": {
     "total_scripts": 711,
     "status_counts": {
@@ -6247,13 +6247,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 261,
+          "line": 262,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 381,
+          "line": 383,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
@@ -6298,7 +6298,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 403,
+          "line": 405,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
@@ -6375,7 +6375,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 392,
+          "line": 394,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
@@ -6459,13 +6459,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 264,
+          "line": 265,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 386,
+          "line": 388,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
@@ -6917,7 +6917,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 398,
+          "line": 400,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/fix/harmonize_link_styles.py --dry-run --fail-on-errors"
         },
@@ -7180,7 +7180,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 336,
+          "line": 338,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py \"${lint_targets[@]}\" --json > /tmp/diagram-lint.json"
         },
@@ -7225,7 +7225,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 339,
+          "line": 341,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -7991,7 +7991,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 295,
+          "line": 296,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -14730,7 +14730,7 @@
         },
         {
           "path": "tests/architecture/test_docs_governance_workflow.py",
-          "line": 113,
+          "line": 129,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/check_xwalk_missing_backlog.py\","
         },
