@@ -25,7 +25,7 @@
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
-| active_quality_baseline | 119 |
+| active_quality_baseline | 120 |
 | closeout_evidence | 168 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 29 |
@@ -73,7 +73,7 @@
 | --- | --- |
 | archive-after-migration | 318 |
 | generate-automatically | 1066 |
-| keep | 2668 |
+| keep | 2669 |
 
 ## Cleanup Candidates
 

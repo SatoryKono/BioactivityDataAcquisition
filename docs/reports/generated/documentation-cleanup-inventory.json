@@ -99159,6 +99159,34 @@
       "duplicate_group": null,
       "duplicate_resolution": null,
       "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "active_quality_baseline",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/audit/github_settings_inventory.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
       "freshness": "review-required",
       "generated_route": null,
       "generated_route_exception": null,
@@ -114305,7 +114333,7 @@
   "summary": {
     "by_lifecycle": {
       "active_backlog": 1,
-      "active_quality_baseline": 119,
+      "active_quality_baseline": 120,
       "closeout_evidence": 168,
       "docs_reports_curated_entrypoint": 2,
       "docs_reports_curated_or_historical_report": 29,
@@ -114323,7 +114351,7 @@
     "by_recommended_action": {
       "archive-after-migration": 318,
       "generate-automatically": 1066,
-      "keep": 2668
+      "keep": 2669
     },
     "by_section": {
       ".github": 6,
