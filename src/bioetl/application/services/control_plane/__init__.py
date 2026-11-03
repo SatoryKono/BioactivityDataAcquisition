@@ -1,8 +1,7 @@
 """Canonical control-plane service seams.
 
 Responsibility-focused subpackage facades are available under:
-`manifest`, `ledger`, `replay`, `effective_config`, `evidence_location`,
-`forensic`, and `workflow`.
+`manifest`, `ledger`, `replay`, `effective_config`, `forensic`, and `workflow`.
 The package root remains the compatibility-preserving lazy export surface.
 """
 
@@ -18,9 +17,6 @@ RESPONSIBILITY_SEAMS = MappingProxyType(
     {
         "effective_config": (
             "Configuration materialization and effective-config serialization."
-        ),
-        "evidence_location": (
-            "Run evidence-location resolution and registration ownership."
         ),
         "forensic": "Operator-facing replay and manifest diff interpretation.",
         "ledger": "Run-ledger persistence and event ownership.",
