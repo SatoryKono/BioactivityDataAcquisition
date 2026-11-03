@@ -135,6 +135,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/layered_suffix_policy.yaml": (
         "tests/architecture/test_layer_aware_suffix_policy.py",
     ),
+    "configs/quality/architecture_acceptance_baseline.yaml": (
+        "tests/architecture/test_architecture_acceptance_baseline.py",
+    ),
     **dict.fromkeys(
         (
             "docs/reports/evidence/project-test-health/SUMMARY.md",
