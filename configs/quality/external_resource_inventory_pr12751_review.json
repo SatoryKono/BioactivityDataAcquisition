@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "8656c38f17209e2da6d630786800478acb9087fb",
+  "source_ref": "0cf75aa35b45d57e91c219e8dc4fe3f63e144e0a",
+  "source_reviews": {
+    "src/bioetl/application/ports/__init__.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/application/ports/control_plane.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/application/services/control_plane/__init__.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/application/services/control_plane/evidence_location/__init__.py": "Reviewed evidence-location/control-plane decomposition and path safety changes: persistence remains local file-backed under the trusted base, with no new external service, process, or long-lived owner.",
+    "src/bioetl/application/services/control_plane/evidence_location/registration.py": "Reviewed evidence-location/control-plane decomposition and path safety changes: persistence remains local file-backed under the trusted base, with no new external service, process, or long-lived owner.",
+    "src/bioetl/application/services/control_plane/evidence_location/registration_observations.py": "Reviewed evidence-location/control-plane decomposition and path safety changes: persistence remains local file-backed under the trusted base, with no new external service, process, or long-lived owner.",
+    "src/bioetl/application/services/control_plane/evidence_location/registration_types.py": "Reviewed evidence-location/control-plane decomposition and path safety changes: persistence remains local file-backed under the trusted base, with no new external service, process, or long-lived owner.",
+    "src/bioetl/application/services/control_plane/evidence_location/resolver.py": "Reviewed evidence-location/control-plane decomposition and path safety changes: persistence remains local file-backed under the trusted base, with no new external service, process, or long-lived owner.",
+    "src/bioetl/application/services/control_plane/evidence_location/resolver_types.py": "Reviewed evidence-location/control-plane decomposition and path safety changes: persistence remains local file-backed under the trusted base, with no new external service, process, or long-lived owner.",
+    "src/bioetl/application/services/control_plane/workflow/manifest_service.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/application/services/execution/pipeline_runner_service.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/application/services/execution/workflow_runner_step_execution.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/application/services/run_reports/evidence_location_paths.py": "Reviewed evidence-location/control-plane decomposition and path safety changes: persistence remains local file-backed under the trusted base, with no new external service, process, or long-lived owner.",
+    "src/bioetl/application/services/run_reports/observations.py": "Reviewed run-report model/service decomposition: report access remains delegated to existing file-store ports; no new resource owner or runtime qualification claim.",
+    "src/bioetl/application/services/workflow/control_plane/execution_service.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/application/services/workflow/workflow_runner_reports.py": "Reviewed run-report model/service decomposition: report access remains delegated to existing file-store ports; no new resource owner or runtime qualification claim.",
+    "src/bioetl/application/services/workflow/workflow_runner_service.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/composition/bootstrap/runtime/runner.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/composition/factories/services/workflow_services.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/composition/runtime_builders/_run_manifest_attr_support.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/composition/runtime_builders/_run_manifest_creation_support_helpers.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/composition/runtime_builders/evidence_location_registration.py": "Reviewed evidence-location/control-plane decomposition and path safety changes: persistence remains local file-backed under the trusted base, with no new external service, process, or long-lived owner.",
+    "src/bioetl/composition/runtime_builders/run_manifest_builder.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/composition/runtime_builders/run_manifest_data_roots.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/domain/control_plane/run_evidence_location.py": "Reviewed evidence-location/control-plane decomposition and path safety changes: persistence remains local file-backed under the trusted base, with no new external service, process, or long-lived owner.",
+    "src/bioetl/domain/control_plane/run_evidence_location_path.py": "Reviewed evidence-location/control-plane decomposition and path safety changes: persistence remains local file-backed under the trusted base, with no new external service, process, or long-lived owner.",
+    "src/bioetl/domain/run_reports/model_serialization.py": "Reviewed run-report model/service decomposition: report access remains delegated to existing file-store ports; no new resource owner or runtime qualification claim.",
+    "src/bioetl/domain/run_reports/models.py": "Reviewed run-report model/service decomposition: report access remains delegated to existing file-store ports; no new resource owner or runtime qualification claim.",
+    "src/bioetl/domain/run_reports/workflow_report_assembly.py": "Reviewed run-report model/service decomposition: report access remains delegated to existing file-store ports; no new resource owner or runtime qualification claim.",
+    "src/bioetl/domain/run_reports/workflow_totals.py": "Reviewed run-report model/service decomposition: report access remains delegated to existing file-store ports; no new resource owner or runtime qualification claim.",
+    "src/bioetl/infrastructure/config/_base.py": "Reviewed configuration path/resolver changes: reads remain local configuration-file operations and existing settings-backed behavior; no new external resource owner.",
+    "src/bioetl/infrastructure/config/pipeline_config_api.py": "Reviewed configuration path/resolver changes: reads remain local configuration-file operations and existing settings-backed behavior; no new external resource owner.",
+    "src/bioetl/infrastructure/control_plane/__init__.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py": "Reviewed evidence-location/control-plane decomposition and path safety changes: persistence remains local file-backed under the trusted base, with no new external service, process, or long-lived owner.",
+    "src/bioetl/infrastructure/control_plane/evidence_location_path_safety.py": "Reviewed evidence-location/control-plane decomposition and path safety changes: persistence remains local file-backed under the trusted base, with no new external service, process, or long-lived owner.",
+    "src/bioetl/infrastructure/control_plane/file_evidence_location_store.py": "Reviewed evidence-location/control-plane decomposition and path safety changes: persistence remains local file-backed under the trusted base, with no new external service, process, or long-lived owner.",
+    "src/bioetl/infrastructure/control_plane/file_evidence_read_context.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
+    "src/bioetl/infrastructure/control_plane/replay_object_verifier.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "reference_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [
+    {
+      "file": "src/bioetl/application/services/control_plane/evidence_location/resolver.py",
+      "scope": "EvidenceLocationResolver._open_context",
+      "call": "self.opener.open",
+      "expression": "self.opener.open(data_root, trusted_alias_base=trusted_base)",
+      "reason": "Delegated evidence-location opener port; concrete file opener owns local file access, no additional external resource."
+    },
+    {
+      "file": "src/bioetl/application/services/control_plane/workflow/manifest_service.py",
+      "scope": "WorkflowManifestService.create_manifest",
+      "call": "self.manifest_port.save",
+      "expression": "self.manifest_port.save(manifest)",
+      "reason": "Delegated workflow-manifest persistence port; concrete control-plane store owns local file access, no additional external resource."
+    },
+    {
+      "file": "src/bioetl/application/services/workflow/workflow_runner_reports.py",
+      "scope": "_load_child_report_slice",
+      "call": "store.read_text",
+      "expression": "store.read_text(str(path))",
+      "reason": "Delegated report file-store read; the concrete report store owns the local file operation, no additional external resource."
+    },
+    {
+      "file": "src/bioetl/infrastructure/config/pipeline_config_api.py",
+      "scope": "_load_yaml_mapping",
+      "call": "path.read_bytes",
+      "expression": "path.read_bytes()",
+      "reason": "Local configuration-file content read for deterministic configuration fingerprinting; no external resource lifecycle."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+      "scope": "publish_bytes_if_absent",
+      "call": "tempfile.mkstemp",
+      "expression": "tempfile.mkstemp(suffix='.tmp', prefix='.' + target.stem + '_', dir=target.parent)",
+      "reason": "Short-lived temporary file in the trusted local evidence-location directory; descriptor/path cleanup is in the same publication operation."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+      "scope": "read_existing_bytes",
+      "call": "safe_path.read_bytes",
+      "expression": "safe_path.read_bytes()",
+      "reason": "Local trusted-base evidence-location catalog read; file is not an external service resource."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+      "scope": "publish_bytes_if_absent",
+      "call": "os.fdopen",
+      "expression": "os.fdopen(fd, 'wb')",
+      "reason": "Context-managed wrapper for the descriptor created by the colocated mkstemp call; closed before publication completes."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/file_evidence_read_context.py",
+      "scope": "FileEvidenceReadContext._assert_concrete_run_index",
+      "call": "index_path.read_text",
+      "expression": "index_path.read_text(encoding='utf-8')",
+      "reason": "Local run-index file read under the trusted control-plane base; no external resource lifecycle."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py",
+      "scope": "FileWorkflowManifestStore.list_all",
+      "call": "self.base_path.glob",
+      "expression": "self.base_path.glob('*.json')",
+      "reason": "Local filesystem enumeration of workflow-manifest files; no separately owned external resource."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/replay_object_verifier.py",
+      "scope": "ReplayObjectVerifier._load_contained_effective_config",
+      "call": "run_index.read_text",
+      "expression": "run_index.read_text(encoding='utf-8')",
+      "reason": "Local run-index file read after containment validation; no external resource lifecycle."
+    },
+    {
+      "file": "src/bioetl/infrastructure/control_plane/replay_object_verifier.py",
+      "scope": "ReplayObjectVerifier.archive_lock",
+      "call": "candidate.read_bytes",
+      "expression": "candidate.read_bytes()",
+      "reason": "Local dependency-lock file read used for digest verification; lock archive remains file-backed and runtime status is unchanged."
+    }
+  ]
+}
