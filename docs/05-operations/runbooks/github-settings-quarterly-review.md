@@ -55,9 +55,9 @@ state.
 1. Confirm the report records the discovered repository/default branch and
    automation_mutated_github: false.
 1. <!-- policy-anchor:deployment-provider --> Compare the read-only GET with catalog `deployment.provider=github_actions`. Do not treat `.circleci/config.yml` as current merge protection.
-   <!-- policy-anchor:ruleset-enforcement-mode --> Record `enforcement` for every ruleset returned by the paginated list. On 2026-10-16, `13643213` and `15730586` were `enforcement: disabled`.
-   <!-- policy-anchor:stored-ruleset-contexts --> Record stored contexts even when enforcement is disabled. Those rulesets store `ci/circleci: pr-gate-complete`; that stored context is not active CircleCI protection.
-   <!-- policy-anchor:target-gha-context --> Catalog target `pr-gate-complete` is not the context stored on the rulesets.
+   <!-- policy-anchor:ruleset-enforcement-mode --> Record `enforcement` for every ruleset returned by the paginated list. On 2026-10-16, `13643213` and `15730586` were `enforcement: disabled`; on 2026-11-02 (settings-audit phase 0) `15730586` and `24517966` were deleted and `13643213` stays `enforcement: disabled`.
+   <!-- policy-anchor:stored-ruleset-contexts --> Record stored contexts even when enforcement is disabled. Since 2026-11-02 ruleset `13643213` stores the GitHub Actions context `pr-gate-complete`; that stored context is not active merge protection while the ruleset stays disabled.
+   <!-- policy-anchor:target-gha-context --> Catalog target `pr-gate-complete` is the context stored on ruleset `13643213` since 2026-11-02.
    <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` `2026-10-09` is not proof of active merge protection.
    <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge when classic branch protection is absent and the applicable rulesets are disabled. An offline catalog match does not confirm live server rulesets.
    Do not change settings from this runbook. The 2026-10-05 receipt remains historical evidence only.
