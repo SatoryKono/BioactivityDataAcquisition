@@ -459,6 +459,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/duplication_complexity_exemptions.yaml": (
         "tests/architecture/test_duplication_complexity_expiry_governance.py",
     ),
+    "configs/quality/source_test_mapping_exceptions.yaml": (
+        "tests/architecture/test_source_test_mapping_policy.py",
+        "tests/architecture/test_source_test_facade_ownership.py",
+    ),
     "configs/quality/package_cohesion_budget.yaml": (
         "tests/architecture/test_architecture_quality_scorecard.py",
     ),
