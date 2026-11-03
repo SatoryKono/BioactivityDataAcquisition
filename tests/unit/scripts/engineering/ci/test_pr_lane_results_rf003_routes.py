@@ -17,7 +17,7 @@ def test_shadow_compare_routes_rf003_store_and_resolver() -> None:
         [
             "src/bioetl/infrastructure/control_plane/file_evidence_location_store.py",
             "src/bioetl/infrastructure/control_plane/evidence_location_path_safety.py",
-            "src/bioetl/application/services/control_plane/evidence_location/resolver.py",
+            "src/bioetl/application/services/evidence_location/resolver.py",
             "docs/04-reference/reports/run-reports.md",
         ],
         repo_root=repo_root,
