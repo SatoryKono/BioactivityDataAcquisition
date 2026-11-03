@@ -3,22 +3,22 @@
   "issue": "#5272",
   "parent_epic": "#5244",
   "title": "Burn down application_core coverage and zero-uncovered module debt",
-  "status": "current_inventory_regressed",
-  "debt_outcome": "current_inventory_regressed",
+  "status": "validated_local_closeable",
+  "debt_outcome": "improved",
   "baseline_metrics": {
     "repo_uncovered_module_count": 68,
     "application_core_covered_line_percent": 49.09
   },
   "current_metrics": {
     "repo_uncovered_module_count": 0,
-    "repo_unmeasured_module_count": 5,
+    "repo_unmeasured_module_count": 0,
     "application_core_covered_line_percent": 99.86,
     "application_core_uncovered_module_count": 0,
     "application_core_unmeasured_module_count": 0
   },
   "parent_epic_status": {
     "status": "not_closeable_under_current_definition_of_done",
-    "remaining_below_85_module_count": 3,
+    "remaining_below_85_module_count": 7,
     "reason": "Live accepted-inventory floor count; this binding does not close the parent epic."
   },
   "evidence": [
@@ -2855,6 +2855,27 @@
       "parent_epic_status": {
         "status": "not_closeable_under_current_definition_of_done",
         "remaining_below_85_module_count": 7,
+        "reason": "Live accepted-inventory floor count; this binding does not close the parent epic."
+      },
+      "current_binding_refresh": {
+        "source_tree_sha256": "7ada3ddb9d59ea2e2a67df506eee04f85c754bd917f74ad8346dc46f068827d6",
+        "evidence": "reports/quality/module-coverage-inventory.json",
+        "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
+      },
+      "notes": "Current metrics are rebound to the accepted module inventory. Historical measurements, baseline, and earlier closeout notes are preserved in previous_current_bindings. This does not claim fresh global measured nonregression."
+    },
+    {
+      "snapshot_date": "2026-08-17",
+      "current_metrics": {
+        "repo_uncovered_module_count": 0,
+        "repo_unmeasured_module_count": 5,
+        "application_core_covered_line_percent": 99.86,
+        "application_core_uncovered_module_count": 0,
+        "application_core_unmeasured_module_count": 0
+      },
+      "parent_epic_status": {
+        "status": "not_closeable_under_current_definition_of_done",
+        "remaining_below_85_module_count": 3,
         "reason": "Live accepted-inventory floor count; this binding does not close the parent epic."
       },
       "current_binding_refresh": {
