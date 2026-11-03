@@ -14,6 +14,7 @@ _INSPECT = "custom.inspect"
 _WIDTH = "custom.width"
 _CELL = "custom.cellOptions"
 _COUNT_IN = "count in"
+_OVERALL_VERDICT_FIELD = "Overall verdict"
 
 
 def _panels(items: list[dict[str, Any]]):
