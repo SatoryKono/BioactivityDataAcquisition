@@ -49,7 +49,7 @@ def test_coderabbit_configuration_matches_official_schema() -> None:
     schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
     config = yaml.load(
         (ROOT / ".coderabbit.yaml").read_text(encoding="utf-8"),
-        Loader=_UniqueKeyLoader,
+        Loader=_UniqueKeyLoader,  # noqa: S506, bandit:nosec
     )
     jsonschema.validate(config, schema)
     assert config["language"] == "ru-RU"
@@ -76,7 +76,7 @@ def test_coderabbit_configuration_matches_official_schema() -> None:
 def test_config_loader_rejects_duplicate_keys(document: str) -> None:
     """Reject duplicates at the root, in nested mappings, and inside sequences."""
     with pytest.raises(yaml.constructor.ConstructorError, match="duplicate key"):
-        yaml.load(document, Loader=_UniqueKeyLoader)
+        yaml.load(document, Loader=_UniqueKeyLoader)  # noqa: S506, bandit:nosec
 
 
 def test_schema_rejects_invalid_review_controls() -> None:
