@@ -24,14 +24,9 @@ from bioetl.infrastructure.schemas.composite_config import (
 pytestmark = pytest.mark.integration
 
 
-def _base_composite_yaml(
-    with_version: bool, with_aggregation: bool = False
-) -> str:
+def _base_composite_yaml(with_version: bool, with_aggregation: bool = False) -> str:
     version_line = '  version: "1.0.0"\n' if with_version else ""
-    enricher_block = (
-        "    - pipeline: crossref_publication\n"
-        "      join_keys: [doi]\n"
-    )
+    enricher_block = "    - pipeline: crossref_publication\n      join_keys: [doi]\n"
     if with_aggregation:
         enricher_block = (
             "    - pipeline: crossref_publication\n"
@@ -55,7 +50,7 @@ def _base_composite_yaml(
         "    output_keys: [publication_id, doi]\n"
         "    silver_table: silver/chembl/publication\n"
         "  enrichers:\n"
-f"{enricher_block}"
+        f"{enricher_block}"
         "  merge:\n"
         "    output:\n"
         "      silver: silver/composite/publication\n"
@@ -113,7 +108,7 @@ def test_composite_many_to_one_enricher_validates_aggregation() -> None:
     # Second, test that missing aggregation with many_to_one fails
     invalid_yaml = _base_composite_yaml(with_version=True).replace(
         "      join_keys: [doi]\n",
-        "      join_keys: [doi]\n      cardinality: many_to_one\n"
+        "      join_keys: [doi]\n      cardinality: many_to_one\n",
     )
     invalid_payload = yaml.safe_load(invalid_yaml)
 
