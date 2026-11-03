@@ -228,7 +228,7 @@ _OV_PROVIDER = (
     "($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' "
     "? 'Provider check' : 'UNKNOWN')), "
     "'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), "
-    "'check_result': $cached ? '—' : ($p.evidence = 'PRESENT' and $p.check_result "
+    "'check_result_display': $cached ? '—' : ($p.evidence = 'PRESENT' and $p.check_result "
     "? $p.check_result : 'UNKNOWN'), "
     "'reason': $cached ? 'Cached Bronze used; provider API was not called.' : "
     "($d.reason = 'run_preflight_provider_observation' ? "
@@ -263,7 +263,80 @@ def _append_many(*parts: str) -> str:
     return expr
 
 
-_OV_DONOR = _append_many(
+_DONOR_SCHEMA = (
+    "{"
+    + ", ".join(
+        f"'{field}': null"
+        for field in (
+            "_bioetl_frame",
+            "domain",
+            "verdict",
+            "status",
+            "detail",
+            "reason",
+            "reason_display",
+            "status_display",
+            "run_execution",
+            "run_verdict",
+            "saved_trust",
+            "run_reason",
+            "parameter",
+            "value",
+            "provider",
+            "data_source",
+            "check_performed",
+            "check_result",
+            "check_result_display",
+            "evidence",
+            "observed_at",
+            "observed_display",
+            "report_label",
+            "stage_id",
+            "stage_name",
+            "tracking",
+            "records_in",
+            "records_out",
+            "removals",
+            "quarantined",
+            "excluded",
+            "deduplicated",
+            "filtered_out",
+            "excluded_pct",
+            "saved_pct",
+            "execution_state",
+            "workflow",
+            "pipeline",
+            "run_type",
+            "run_id",
+            "started_at",
+            "completed_at",
+            "reasons_count",
+            "reasons_display",
+            "trust_status",
+            "trust_reasons_action",
+            "trust_action_note",
+            "result",
+            "check_id",
+            "replay_ready",
+            "readiness",
+            "Run duration",
+            "trust",
+        )
+    )
+    + "}"
+)
+
+
+def _normalized_donor(*parts: str) -> str:
+    """Give every donor row the same columns before Grafana builds a frame."""
+    appended = _append_many(*parts)
+    return (
+        f"($schema := {_DONOR_SCHEMA}; "
+        f"$map({appended}, function($row){{$merge([$schema, $row])}}))"
+    )
+
+
+_OV_DONOR = _normalized_donor(
     _OV_DOMAINS, _OV_IDENTITY, _OV_PROVIDER, _OV_STAGES, _OV_RECON, _OV_EXCL
 )
 
@@ -331,7 +404,7 @@ _DQ_STAGEINPUT = (
     + "}) }))"
 )
 
-_DQ_DONOR = _append_many(_DQ_STATUS, _DQ_DOMAINS, _DQ_STAGES, _DQ_STAGEINPUT)
+_DQ_DONOR = _normalized_donor(_DQ_STATUS, _DQ_DOMAINS, _DQ_STAGES, _DQ_STAGEINPUT)
 
 # --- Incident donor -------------------------------------------------------
 
@@ -360,7 +433,7 @@ _INC_DURATION = (
     f"[{{'Run duration': $start != null and $end != null and $end >= $start ? "
     f"($end - $start) / 1000 : null, '{FRAME}': 'duration'}}])"
 )
-_INC_DONOR = _append_many(_INC_STATUS, _INC_DOMAINS, _INC_DURATION)
+_INC_DONOR = _normalized_donor(_INC_STATUS, _INC_DOMAINS, _INC_DURATION)
 
 # --- Control Plane donor --------------------------------------------------
 
@@ -377,7 +450,7 @@ _CP_REPLAY_CHECKS = (
     "result='pass' ? 2 : 3), function($row){"
     f"$merge([$row, {{'{FRAME}': 'replay_checks'}}])}})"
 )
-_CP_DONOR = _append_many(_CP_TRUST, _CP_REPLAY_READY, _CP_REPLAY_CHECKS)
+_CP_DONOR = _normalized_donor(_CP_TRUST, _CP_REPLAY_READY, _CP_REPLAY_CHECKS)
 
 
 def _advance_jsonata_string(expression: str, index: int) -> int:
@@ -812,7 +885,7 @@ def apply_dq(data: dict[str, Any]) -> None:
                     "url_options": {"method": "GET", "data": ""},
                     "uql": (
                         'parse-json | jsonata "'
-                        "($f := quality_evidence.funnel; "
+                        "($f := funnel; "
                         "$map(['01 bronze_records','02 silver_valid_records',"
                         "'03 silver_filtered_out_records',"
                         "'04 silver_quarantined_records',"
