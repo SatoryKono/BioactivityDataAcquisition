@@ -383,6 +383,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12688_rf002_review.json",
             "configs/quality/external_resource_inventory_pr12728_review.json",
             "configs/quality/external_resource_inventory_pr12728_sonar_review.json",
+            "configs/quality/external_resource_inventory_pr12728_main_merge_12737_review.json",
             "configs/quality/external_resource_inventory_pr12730_rf001_004_review.json",
         ),
         (
