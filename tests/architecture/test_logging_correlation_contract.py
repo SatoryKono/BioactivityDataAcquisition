@@ -30,6 +30,15 @@ PIPELINE_RUNNER_SERVICE_PATH = (
     / "execution"
     / "pipeline_runner_service.py"
 )
+PIPELINE_RUNNER_FINALIZE_PATH = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "services"
+    / "execution"
+    / "pipeline_runner_finalize.py"
+)
 LOGGER_BOOTSTRAP_PATH = (
     ROOT
     / "src"
@@ -72,7 +81,12 @@ def test_pipeline_run_context_exposes_required_log_correlation_fields() -> None:
 @pytest.mark.architecture
 def test_pipeline_runner_service_binds_logger_through_context_contract() -> None:
     """Runner service must source correlation fields from PipelineRunContext."""
-    source = PIPELINE_RUNNER_SERVICE_PATH.read_text(encoding="utf-8")
+    source = "\n".join(
+        [
+            PIPELINE_RUNNER_SERVICE_PATH.read_text(encoding="utf-8"),
+            PIPELINE_RUNNER_FINALIZE_PATH.read_text(encoding="utf-8"),
+        ]
+    )
 
     assert "context.log_correlation_fields()" in source, (
         "PipelineRunnerService must bind its run logger through "

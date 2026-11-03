@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "1560a3d36e164f69043f8d5b8388af9091b46f57",
+  "source_ref": "203c16f3bf5bf13fe04c7436aa912164b78ebf6e",
+  "source_reviews": {
+    "src/bioetl/application/services/execution/pipeline_runner_service.py": "PR #12756 moves pipeline report finalization behind finalize_pipeline_service_report; the service retains ownership and no resource acquisition changes.",
+    "src/bioetl/application/services/workflow/workflow_runner_service.py": "PR #12756 extracts workflow transitions and finalization into focused helpers; no resource acquisition changes.",
+    "src/bioetl/application/services/execution/pipeline_runner_finalize.py": "PR #12756 adds a finalization helper that delegates to existing run-report owners; no new external resource acquisition.",
+    "src/bioetl/application/services/workflow/workflow_runner_finalize.py": "PR #12756 adds workflow result finalization using existing ports; no external resource acquisition.",
+    "src/bioetl/application/services/workflow/workflow_runner_transitions.py": "PR #12756 adds workflow transition delegation using existing services; no external resource acquisition.",
+    "src/bioetl/domain/run_reports/workflow_report_assembly.py": "PR #12756 extracts pure workflow report assembly helpers; no external resource acquisition.",
+    "src/bioetl/domain/run_reports/workflow_totals.py": "PR #12756 extracts pure workflow totals helpers; no external resource acquisition."
+  },
+  "expression_updates": {},
+  "segment_updates": {
+    "src/bioetl/application/services/execution/pipeline_runner_service.py": {
+      "finalized = finalize_pipeline_run_report(": "return finalize_pipeline_service_report("
+    }
+  },
+  "reference_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
