@@ -1183,12 +1183,6 @@
       "owner": "@bioetl-observability",
       "review_by": "2026-09-30"
     },
-    "scripts/engineering/qa/generate_p05_interfaces_audit_report.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the canonical P05 interfaces/contracts audit report generator while pack-v2.1 P05 regeneration depends on this script; promote to an active QA router command only after scripts.engineering.qa __main__ owns a matching active slot.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2027-02-03"
-    },
     "scripts/engineering/qa/generate_reproducibility_support_matrix.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the canonical reproducibility support-matrix generator while architecture/docs drift tests and operator policy docs depend on this generated surface; only fold it into broader docs tooling if the reproducibility policy generator layer is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",

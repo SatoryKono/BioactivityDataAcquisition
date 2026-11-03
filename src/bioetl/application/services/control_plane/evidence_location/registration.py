@@ -21,7 +21,7 @@ from bioetl.domain.control_plane.run_evidence_location import (
     RunEvidenceLocation,
     build_run_evidence_location,
 )
-from bioetl.domain.ports.control_plane.run_evidence_location import (
+from bioetl.domain.ports import (
     RunEvidenceLocationReadPort,
     RunEvidenceLocationRegisterPort,
 )

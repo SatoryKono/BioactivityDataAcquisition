@@ -1,11 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-03T07:16:29.425664+00:00",
+  "generated_at": "2026-11-03T09:32:55.904991+00:00",
   "summary": {
     "total_scripts": 705,
     "status_counts": {
       "active": 334,
-      "supporting": 371
+      "orphan": 1,
+      "supporting": 370
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -13,7 +14,7 @@
       "ci": 75,
       "docs": 291,
       "other": 16,
-      "scripts": 592,
+      "scripts": 591,
       "skills": 13,
       "tests": 520
     }
@@ -13948,7 +13949,7 @@
         },
         {
           "path": ".github/workflows/type-checking.yml",
-          "line": 87,
+          "line": 86,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa.check_architecture domain-type-policy"
         },
@@ -15719,7 +15720,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 322,
+          "line": 321,
           "source_group": "scripts",
           "text": "`generate_hotspot_degradation_report.py` performance-evidence owner. It has a"
         },
@@ -15740,21 +15741,10 @@
     {
       "path": "scripts/engineering/qa/generate_p05_interfaces_audit_report.py",
       "type": "py",
-      "status": "supporting",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/engineering/qa/README.md",
-          "line": 182,
-          "source_group": "scripts",
-          "text": "- `scripts/engineering/qa/generate_p05_interfaces_audit_report.py` (`python -m scripts.engineering.qa.generate_p05_interfaces_audit_report`) regenerates `reports/audit/pack-v2.1/P05-interfaces-contrac"
-        }
-      ],
-      "owner": "@bioetl-architecture",
-      "lifecycle_decision": "shared_helper_module",
-      "review_by": "2027-02-03",
-      "next_step": "Retain as the canonical P05 interfaces/contracts audit report generator while pack-v2.1 P05 regeneration depends on this script; promote to an active QA router command only after scripts.engineering.qa __main__ owns a matching active slot."
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/engineering/qa/generate_reproducibility_support_matrix.py",
@@ -16350,7 +16340,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 183,
+          "line": 182,
           "source_group": "scripts",
           "text": "- `scripts/engineering/qa/reduce_architecture_debt.py` (`python -m scripts.engineering.qa reduce-architecture-debt`) builds the orchestration plan consumed by the architecture-debt agent."
         },
@@ -16617,13 +16607,13 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 210,
+          "line": 209,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_architecture_quality_scorecard.py"
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 245,
+          "line": 244,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_architecture_quality_scorecard.py"
         },
@@ -17379,7 +17369,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 248,
+          "line": 247,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_duplication_baseline.py"
         },
@@ -17946,7 +17936,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 193,
+          "line": 192,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_provider_contract_drift.py --output reports/quality/provider-contract-drift-report.json --fail-on breaking"
         },
@@ -18154,13 +18144,13 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 190,
+          "line": 189,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_vcr_metadata_catalog.py --check"
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 191,
+          "line": 190,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_vcr_metadata_catalog.py --update"
         },
@@ -18443,7 +18433,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 264,
+          "line": 263,
           "source_group": "scripts",
           "text": "coverage acceptance is based on `python -m scripts.engineering.qa.run_local_coverage_verify`"
         }
@@ -20671,7 +20661,7 @@
         },
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 591,
+          "line": 596,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -22671,7 +22661,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 511,
+          "line": 516,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
