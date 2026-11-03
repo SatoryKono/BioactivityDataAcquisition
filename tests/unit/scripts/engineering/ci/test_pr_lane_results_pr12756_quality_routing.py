@@ -18,6 +18,10 @@ def test_shadow_compare_routes_pr12756_quality_inputs() -> None:
             "tests/architecture/test_external_resource_inventory_catalog.py",
             "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
         },
+        "configs/quality/external_resource_inventory_pr12756_main_12748_review.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        },
         "configs/quality/architecture_acceptance_baseline.yaml": {
             "tests/architecture/test_architecture_acceptance_baseline.py",
         },
