@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "FileEvidenceReadContext",
-    "validate_control_tree_paths",
+    "validate_control_tree",
 ]
 
 # Shared Sonar-safe suffix for control-plane JSON records (manifest / config).
@@ -121,7 +121,7 @@ class FileEvidenceReadContext:
             raise EvidenceLocationInvalidError(
                 "data_root changed after the read context was opened"
             )
-        validate_control_tree_paths(
+        validate_control_tree(
             current_root,
             trusted_alias_base=self.trusted_alias_base,
         )
@@ -162,7 +162,7 @@ class FileEvidenceReadContext:
         )
 
 
-def validate_control_tree_paths(
+def validate_control_tree(
     data_root: Path,
     *,
     trusted_alias_base: Path,

@@ -11,7 +11,6 @@ from bioetl.composition.control_plane_archive import archive_successful_run
 from bioetl.composition.bootstrap.runtime.run_status_capture import (
     create_run_status_capture,
 )
-
 from bioetl.application.services.execution.pipeline_run_context_service import (
     PipelineRunContextService,
 )
@@ -28,6 +27,9 @@ from bioetl.application.services.execution.pipeline_runner_service import (
 from bioetl.composition.bootstrap.runtime.observability import (
     bootstrap_observability_bundle,
 )
+from bioetl.composition.evidence_location_registration import (
+    bind_pipeline_run_location_verifier,
+)
 from bioetl.composition.factories.pipeline.runner import (
     create_metrics_extractor,
     create_runner_factory,
@@ -35,9 +37,6 @@ from bioetl.composition.factories.pipeline.runner import (
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_run_id
 from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import get_settings
-from bioetl.composition.runtime_builders.evidence_location_registration import (
-    verify_pipeline_run_location,
-)
 from bioetl.infrastructure.storage.run_report_store_adapter import (
     FileRunReportStoreAdapter,
 )
@@ -98,19 +97,6 @@ def bootstrap_pipeline_runner_service(
             report_root=settings.report_root,
         )
 
-    def _verify_evidence_location(
-        result: RunResult, options: RunOptions | None
-    ) -> None:
-        workflow_run_id = None
-        if options is not None:
-            workflow_run_id = getattr(options, "workflow_run_id", None)
-        verify_pipeline_run_location(
-            pipeline_name=result.pipeline_name,
-            run_id=result.run_id,
-            workflow_run_id=str(workflow_run_id) if workflow_run_id else None,
-            settings=settings,
-        )
-
     return PipelineRunnerService(
         report_store=FileRunReportStoreAdapter(),
         report_root=settings.report_root,
@@ -120,7 +106,7 @@ def bootstrap_pipeline_runner_service(
             report_root=settings.report_root,
         ),
         archive_control_plane=_archive_control_plane,
-        evidence_location_verify=_verify_evidence_location,
+        evidence_location_verify=bind_pipeline_run_location_verifier(settings),
         runner_factory=runner_factory,
         metrics_extractor=metrics_extractor,
         logger=observability.logger,

@@ -10,8 +10,8 @@ from time import perf_counter
 from typing import TYPE_CHECKING
 
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.application.services.control_plane.evidence_location import (
-    record_verify_exception_observation,
+from bioetl.application.services.evidence_location import (
+    soft_invoke_evidence_location_verify,
 )
 from bioetl.application.services.execution.workflow_runner_step_execution import (
     TransformStepRuntimeOptions,
@@ -51,10 +51,7 @@ from bioetl.application.services.workflow.workflow_transition_policy import (
     resolve_step_transition_policy,
 )
 from bioetl.domain.ports import RunReportStorePort
-from bioetl.domain.workflow import (
-    WorkflowConfig,
-    WorkflowStepConfig,
-)
+from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
 
 if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_service import (
@@ -109,6 +106,64 @@ def _cohort_producer_ids(config: WorkflowConfig) -> set[str]:
     return producers
 
 
+def _finalize_workflow_run_result(
+    *,
+    service: WorkflowRunnerService,
+    config: WorkflowConfig,
+    state: WorkflowExecutionState,
+    workflow_context_labels: Mapping[str, str],
+    workflow_run_id: str | None,
+    manifest_id: str | None,
+    execution_fingerprint: str | None,
+    resumed: bool,
+    started_at: datetime,
+    started_monotonic: float,
+) -> WorkflowRunExecutionResult:
+    """Attach metrics, evidence verify, and reports after step execution."""
+    record_workflow_run_metrics(
+        metrics=service.metrics,
+        workflow_name=config.name,
+        status=state.status,
+        context_labels=workflow_context_labels,
+    )
+    identified_result = _require_workflow_result(
+        replace(
+            workflow_result_from_state(config.name, state),
+            workflow_run_id=workflow_run_id,
+            manifest_id=manifest_id,
+            execution_fingerprint=execution_fingerprint,
+            resumed=resumed,
+            started_at=started_at.isoformat(),
+            completed_at=current_utc_time().isoformat(),
+            duration_seconds=perf_counter() - started_monotonic,
+        )
+    )
+    observation_token = bind_run_observations_if_unbound()
+    try:
+        verify = service.evidence_location_verify
+        soft_invoke_evidence_location_verify(
+            None if verify is None else (lambda: verify(identified_result)),
+            kind="workflow",
+            owner=str(identified_result.workflow_name),
+            run_id=str(identified_result.workflow_run_id or ""),
+        )
+        reported = attach_workflow_run_report(
+            config=config,
+            result=identified_result,
+            logger=getattr(service.pipeline_runner, "logger", None),
+            store=service.report_store,
+            report_root=service.report_root,
+        )
+        archive_workflow_children(
+            config,
+            reported,
+            getattr(service.pipeline_runner, "archive_control_plane", None),
+        )
+        return reported
+    finally:
+        reset_run_observations_if_bound(observation_token)
+
+
 @dataclass(slots=True)
 class WorkflowRunnerService:
     """Execute workflow pipeline and transform steps in topological order."""
@@ -128,7 +183,7 @@ class WorkflowRunnerService:
         ]
         | None
     ) = None
-    # RF-004: Composition-injected finalize consistency check (soft diagnostics).
+    # RF-004: finalize consistency check (soft diagnostics).
     evidence_location_verify: Callable[[WorkflowRunExecutionResult], None] | None = None
 
     async def run_workflow(
@@ -157,7 +212,7 @@ class WorkflowRunnerService:
         """
         started_at = current_utc_time()
         started_monotonic = perf_counter()
-        record_workflow_pipeline_expected_metrics(metrics=self.metrics, config=config)
+        self.record_expected_pipeline_metrics(config)
         state = WorkflowExecutionState(
             step_results=[], step_outputs=dict(restored_step_outputs or {})
         )
@@ -194,7 +249,8 @@ class WorkflowRunnerService:
                 step_completed_callback=step_completed_callback,
             )
 
-        return self._finalize_run_result(
+        return _finalize_workflow_run_result(
+            service=self,
             config=config,
             state=state,
             workflow_context_labels=workflow_context_labels,
@@ -207,70 +263,11 @@ class WorkflowRunnerService:
         )
 
     def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
-        """Record expected pipeline metrics through the extracted policy helper."""
-        record_workflow_pipeline_expected_metrics(metrics=self.metrics, config=config)
-
-    def _finalize_run_result(
-        self,
-        *,
-        config: WorkflowConfig,
-        state: WorkflowExecutionState,
-        workflow_context_labels: Mapping[str, str],
-        workflow_run_id: str | None,
-        manifest_id: str | None,
-        execution_fingerprint: str | None,
-        resumed: bool,
-        started_at: datetime,
-        started_monotonic: float,
-    ) -> WorkflowRunExecutionResult:
-        record_workflow_run_metrics(
+        """Record planned pipeline scopes before workflow step execution."""
+        record_workflow_pipeline_expected_metrics(
             metrics=self.metrics,
-            workflow_name=config.name,
-            status=state.status,
-            context_labels=workflow_context_labels,
+            config=config,
         )
-        result = workflow_result_from_state(config.name, state)
-        identified_result = _require_workflow_result(
-            replace(
-                result,
-                workflow_run_id=workflow_run_id,
-                manifest_id=manifest_id,
-                execution_fingerprint=execution_fingerprint,
-                resumed=resumed,
-                started_at=started_at.isoformat(),
-                completed_at=current_utc_time().isoformat(),
-                duration_seconds=perf_counter() - started_monotonic,
-            )
-        )
-        # RF-004: reuse outer prepare→report scope when present; else bind locally.
-        observation_token = bind_run_observations_if_unbound()
-        try:
-            if self.evidence_location_verify is not None:
-                try:
-                    self.evidence_location_verify(identified_result)
-                except (OSError, RuntimeError, TypeError, ValueError) as exc:
-                    # Consistency diagnostics must not mask processing success.
-                    record_verify_exception_observation(
-                        kind="workflow",
-                        owner=str(identified_result.workflow_name),
-                        run_id=str(identified_result.workflow_run_id or ""),
-                        exc=exc,
-                    )
-            reported = attach_workflow_run_report(
-                config=config,
-                result=identified_result,
-                logger=getattr(self.pipeline_runner, "logger", None),
-                store=self.report_store,
-                report_root=self.report_root,
-            )
-            archive_workflow_children(
-                config,
-                reported,
-                getattr(self.pipeline_runner, "archive_control_plane", None),
-            )
-            return reported
-        finally:
-            reset_run_observations_if_bound(observation_token)
 
     async def _resolve_step_transition(
         self,

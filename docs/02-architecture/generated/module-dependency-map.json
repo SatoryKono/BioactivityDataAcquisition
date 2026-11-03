@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2601,
-    "total_internal_imports": 8453,
+    "scanned_modules": 2603,
+    "total_internal_imports": 8459,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 330,
+    "cross_layer_group_edges_total": 329,
     "violations": 0,
-    "source_fingerprint": "4ab417b9bcef270902528d63019299338e5bbf8202c081a4bd92fa9fb1f2b38a"
+    "source_fingerprint": "c899f5f471bba3707f816a0647b652f9c642550a85be4aec44787fae870032cc"
   },
   "layer_edges": [
     {
@@ -24,19 +24,19 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 236,
+      "imports": 237,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 652,
+      "imports": 654,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 321,
+      "imports": 320,
       "allowed": true
     },
     {
@@ -84,7 +84,7 @@
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 477,
+      "imports": 481,
       "allowed": true
     }
   ],
@@ -255,6 +255,11 @@
       "imports": 23
     },
     {
+      "source": "interfaces.cli",
+      "target": "composition.runtime_builders",
+      "imports": 23
+    },
+    {
       "source": "application.core",
       "target": "domain.normalization",
       "imports": 22
@@ -290,11 +295,6 @@
       "imports": 21
     },
     {
-      "source": "interfaces.cli",
-      "target": "composition.control_plane_service_access",
-      "imports": 21
-    },
-    {
       "source": "composition.bootstrap",
       "target": "infrastructure.config",
       "imports": 20
@@ -308,6 +308,11 @@
       "source": "application.core",
       "target": "domain.exceptions",
       "imports": 19
+    },
+    {
+      "source": "composition.runtime_builders",
+      "target": "application.services",
+      "imports": 18
     },
     {
       "source": "application.observability",
@@ -327,11 +332,6 @@
     {
       "source": "application.services",
       "target": "domain.run_reports",
-      "imports": 17
-    },
-    {
-      "source": "composition.runtime_builders",
-      "target": "application.services",
       "imports": 17
     },
     {

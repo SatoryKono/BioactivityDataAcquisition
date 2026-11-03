@@ -282,13 +282,13 @@ class WorkflowRunReport:
     plan_steps: tuple[dict[str, Any], ...]  # Any: report/json payload shape is dynamic
     execution: tuple[WorkflowExecutionRow, ...]
     totals: dict[str, Any]  # Any: report/json payload shape is dynamic
-    index: dict[str, Any] = field(default_factory=dict)  # Any: dynamic index payload
+    index: dict[str, Any] = field(default_factory=dict)  # Any: dynamic index
     reasons_rollup: tuple[dict[str, Any], ...] = ()  # Any: aggregated child reasons
     observations: dict[str, object] | None = None
     schema_version: str = "workflow_run_report_v1"
 
     def to_dict(self) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
-        payload: dict[str, Any] = {  # Any: report/json payload shape is dynamic
+        payload: dict[str, Any] = {  # Any: dynamic report payload
             "schema_version": self.schema_version,
             "identity": dict(self.identity),
             "plan": {"steps": [dict(step) for step in self.plan_steps]},

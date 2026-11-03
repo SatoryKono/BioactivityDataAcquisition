@@ -10,19 +10,21 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from bioetl.application.services.control_plane.evidence_location.registration_models import (
+from bioetl.application.services.evidence_location.registration_models import (
     EvidenceLocationRegisterRequest,
     EvidenceLocationRegistrationOutcome,
     EvidenceLocationVerifyOutcome,
-    _location_from_request,
 )
-from bioetl.application.services.control_plane.evidence_location.registration_observations import (
+from bioetl.application.services.evidence_location.registration_observations import (
     EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
+    EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS,
     record_registration_exception_observation,
     record_registration_outcome_observation,
     record_registration_soft_failure_observation,
     record_verify_exception_observation,
     soft_failure_exception_detail,
+    soft_invoke_evidence_location_register,
+    soft_invoke_evidence_location_verify,
 )
 from bioetl.application.services.run_reports.observations import record_run_observation
 from bioetl.domain.control_plane.run_evidence_location import (
@@ -32,6 +34,8 @@ from bioetl.domain.control_plane.run_evidence_location import (
     EvidenceLocationKind,
     EvidenceLocationLookupCode,
     EvidenceLocationRegisterOutcome,
+    RunEvidenceLocation,
+    build_run_evidence_location,
 )
 from bioetl.domain.ports import (
     RunEvidenceLocationReadPort,
@@ -40,6 +44,7 @@ from bioetl.domain.ports import (
 
 __all__ = [
     "EVIDENCE_LOCATION_OBSERVATION_DOMAIN",
+    "EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS",
     "EvidenceLocationRegisterRequest",
     "EvidenceLocationRegistrationOutcome",
     "EvidenceLocationRegistrationService",
@@ -49,7 +54,24 @@ __all__ = [
     "record_registration_soft_failure_observation",
     "record_verify_exception_observation",
     "soft_failure_exception_detail",
+    "soft_invoke_evidence_location_register",
+    "soft_invoke_evidence_location_verify",
 ]
+
+
+def _location_from_request(
+    request: EvidenceLocationRegisterRequest,
+) -> RunEvidenceLocation:
+    """Build the immutable locator payload shared by register and verify."""
+    return build_run_evidence_location(
+        kind=request.kind,
+        owner=request.owner,
+        run_id=request.run_id,
+        runtime_source_id=request.runtime_source_id,
+        root_alias=request.root_alias,
+        relative_data_root=request.relative_data_root,
+        workflow_run_id=request.workflow_run_id,
+    )
 
 
 class _RegisterAndReadPort(

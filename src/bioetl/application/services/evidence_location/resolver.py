@@ -10,12 +10,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from uuid import UUID
 
-from bioetl.application.services.control_plane.evidence_location.resolver_models import (
+from bioetl.application.services.evidence_location.resolver_types import (
     EvidenceLocationLegacyRootPolicy,
     EvidenceLocationResolveResult,
     EvidenceReadContext,
-    EvidenceReadContextOpenerProtocol,
-    _is_workflow_kind,
+    EvidenceReadContextFactoryProtocol,
 )
 from bioetl.application.services.run_reports.evidence_location_paths import (
     EvidenceRootAliasRegistry,
@@ -27,9 +26,7 @@ from bioetl.domain.control_plane.run_evidence_location import (
     EvidenceLocationLookupCode,
     EvidenceLocationLookupResult,
 )
-from bioetl.domain.ports import (
-    RunEvidenceLocationReadPort,
-)
+from bioetl.domain.ports import RunEvidenceLocationReadPort
 from bioetl.domain.types import RunID
 
 __all__ = [
@@ -37,8 +34,17 @@ __all__ = [
     "EvidenceLocationResolveResult",
     "EvidenceLocationResolver",
     "EvidenceReadContext",
-    "EvidenceReadContextOpenerProtocol",
+    "EvidenceReadContextFactoryProtocol",
 ]
+
+
+def _is_workflow_kind(kind: EvidenceLocationKind | str | None) -> bool:
+    """True for enum or string workflow kind (callers may pass either form)."""
+    if kind is None:
+        return False
+    if isinstance(kind, EvidenceLocationKind):
+        return kind is EvidenceLocationKind.WORKFLOW
+    return str(kind).strip().lower() == EvidenceLocationKind.WORKFLOW.value
 
 
 @dataclass(frozen=True, slots=True)
@@ -47,7 +53,7 @@ class EvidenceLocationResolver:
 
     locations: RunEvidenceLocationReadPort
     aliases: EvidenceRootAliasRegistry
-    opener: EvidenceReadContextOpenerProtocol
+    opener: EvidenceReadContextFactoryProtocol
     legacy_root_policy: EvidenceLocationLegacyRootPolicy = (
         EvidenceLocationLegacyRootPolicy.ALLOW_STANDARD_ALIAS_BASE
     )

@@ -63,7 +63,7 @@ from bioetl.application.services.execution.pipeline_runner_models import (
 )
 from bioetl.application.services.execution.pipeline_runner_service import (
     PipelineRunnerService,
-    _finalize_report,
+    _finalize_pipeline_report,
 )
 
 
@@ -1021,7 +1021,7 @@ async def test_cancelled_execution_persists_snapshot_and_releases_observations(
 def test_finalize_report_records_verify_exception_without_status_change(
     service, tmp_path
 ) -> None:
-    from bioetl.application.services.control_plane.evidence_location import (
+    from bioetl.application.services.evidence_location import (
         EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
     )
     from bioetl.application.services.run_reports.observations import (
@@ -1052,7 +1052,7 @@ def test_finalize_report_records_verify_exception_without_status_change(
     )
     token = bind_run_observations()
     try:
-        finalized = _finalize_report(service, result, RunOptions())
+        finalized = _finalize_pipeline_report(service, result, RunOptions())
         assert finalized.status == PipelineRunResult.SUCCESS
         observations = run_observations()
         assert (

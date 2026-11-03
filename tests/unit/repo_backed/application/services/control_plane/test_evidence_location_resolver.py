@@ -12,12 +12,9 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.services.control_plane.evidence_location import (
+from bioetl.application.services.evidence_location import (
     EvidenceLocationLegacyRootPolicy,
     EvidenceLocationResolver,
-)
-from bioetl.composition.runtime_builders.evidence_location_registration import (
-    FileEvidenceReadContextFactory,
 )
 from bioetl.application.services.run_reports.evidence_location_paths import (
     default_evidence_root_alias_registry,
@@ -36,6 +33,7 @@ from bioetl.infrastructure.control_plane.file_effective_config_artifact_store im
 from bioetl.infrastructure.control_plane.file_evidence_location_store import (
     FileEvidenceLocationStore,
 )
+from bioetl.composition.control_plane_paths import FileEvidenceReadContextFactory
 from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
 )

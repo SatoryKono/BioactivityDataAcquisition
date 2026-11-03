@@ -14,6 +14,7 @@ _INSPECT = "custom.inspect"
 _WIDTH = "custom.width"
 _CELL = "custom.cellOptions"
 _COUNT_IN = "count in"
+_OVERALL_VERDICT_FIELD = "Overall verdict"
 
 
 def _panels(items: list[dict[str, Any]]):
@@ -116,6 +117,34 @@ _QUERY_ERROR_MAPPINGS = [
             "catalog_unavailable": {
                 "text": "QUERY ERROR — catalog unavailable",
                 "color": "red",
+            },
+            "retention_plan_read_error": {
+                "text": "UNAVAILABLE — retention plan read error",
+                "color": "text",
+            },
+            "lineage_source_read_error": {
+                "text": "UNAVAILABLE — lineage source read error",
+                "color": "text",
+            },
+            "trust_evidence_read_error": {
+                "text": "UNAVAILABLE — trust evidence read error",
+                "color": "text",
+            },
+            "manifest_parse_error": {
+                "text": "UNAVAILABLE — manifest parse error",
+                "color": "text",
+            },
+            "run_ledger_parse_error": {
+                "text": "UNAVAILABLE — run ledger parse error",
+                "color": "text",
+            },
+            "checkpoint_parse_error": {
+                "text": "UNAVAILABLE — checkpoint parse error",
+                "color": "text",
+            },
+            "checkpoint_scope_manifest_parse_error": {
+                "text": "UNAVAILABLE — checkpoint scope parse error",
+                "color": "text",
             },
         },
     }
@@ -957,8 +986,8 @@ def _correct_runtime_evidence_actions(panels: dict[int, dict[str, Any]]) -> None
                 "title": "Open saved run report",
                 "url": (
                     "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/"
-                    "pipeline-run-report-artifact?pipeline=${pipeline:percentencode}"
-                    "&run_id=${run_id:percentencode}&format=pipeline_run_report_json"
+                    "pipeline-run-report-artifact?pipeline=${selected_pipeline:percentencode}"
+                    "&run_id=${selected_run_id:percentencode}&format=pipeline_run_report_json"
                 ),
                 "targetBlank": True,
             }
@@ -1116,14 +1145,14 @@ def _correct_dq(uid: str, panels: dict[int, dict[str, Any]]) -> None:
             },
             {
                 "id": "organize",
-                "options": {"renameByName": {"verdict": "Overall verdict"}},
+                "options": {"renameByName": {"verdict": _OVERALL_VERDICT_FIELD}},
             },
         ]
         summary["options"]["cellHeight"] = "sm"
         summary["fieldConfig"]["defaults"].setdefault("custom", {}).update(
             wrapText=False, inspect=True
         )
-        for field in ("Result", "Status", "Trust", "Reason"):
+        for field in ("execution_state", _OVERALL_VERDICT_FIELD, "Trust", "Reason"):
             _override(summary, field, "custom.wrapText", False)
             _override(summary, field, _CELL, {"type": "auto", "wrapText": False})
     if uid != "bioetl-dq-v2" or 155 not in panels:
@@ -1147,9 +1176,30 @@ def _correct_dq(uid: str, panels: dict[int, dict[str, Any]]) -> None:
 
 
 def _correct_overview(uid: str, panels: dict[int, dict[str, Any]]) -> None:
-    if uid != "bioetl-overview-v2" or 215 not in panels:
+    if uid != "bioetl-overview-v2":
         return
-    _override(panels[215], "Action", _WIDTH, 150)
+    provider_check = panels.get(9481)
+    if provider_check is not None:
+        defaults = provider_check.setdefault("fieldConfig", {}).setdefault(
+            "defaults", {}
+        )
+        mappings = defaults.setdefault("mappings", [])
+        value_mapping = next(
+            (mapping for mapping in mappings if mapping.get("type") == "value"),
+            None,
+        )
+        if value_mapping is None:
+            value_mapping = {"type": "value", "options": {}}
+            mappings.append(value_mapping)
+        value_mapping.setdefault("options", {})["QUERY ERROR"] = {
+            "text": "QUERY ERROR",
+            "color": "red",
+        }
+        thresholds = defaults.setdefault("thresholds", {}).setdefault("steps", [])
+        if thresholds:
+            thresholds[0]["color"] = "gray"
+    if 215 in panels:
+        _override(panels[215], "Action", _WIDTH, 150)
 
 
 def _correct_run_explorer(uid: str, panels: dict[int, dict[str, Any]]) -> None:

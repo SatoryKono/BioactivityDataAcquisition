@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.application.services.control_plane.evidence_location import (
+from bioetl.application.services.evidence_location import (
     EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
     EvidenceLocationRegisterRequest,
     EvidenceLocationRegistrationService,

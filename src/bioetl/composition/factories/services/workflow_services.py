@@ -23,7 +23,7 @@ from bioetl.composition.occurrence_identity import (
 )
 from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import get_settings
-from bioetl.composition.runtime_builders.evidence_location_registration import (
+from bioetl.composition.evidence_location_registration import (
     register_workflow_manifest_location,
     verify_workflow_run_location,
 )

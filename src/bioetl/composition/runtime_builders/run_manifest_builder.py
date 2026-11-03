@@ -5,6 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.ledger.service import RunLedgerService
+from bioetl.composition.evidence_location_registration import (
+    register_pipeline_manifest_location_soft,
+)
 from bioetl.composition.runtime_builders.run_manifest_support import (
     ManifestControlPlaneRefs as ManifestControlPlaneRefs,
     RunManifestContractIdentity,
@@ -133,7 +136,9 @@ def _publish_manifest_and_refs(
         manifest_create_request=manifest_create_request,
         ledger_service=ledger_service,
     )
-    _register_evidence_location_soft(manifest=manifest, settings=inputs.settings)
+    register_pipeline_manifest_location_soft(
+        manifest=manifest, settings=inputs.settings
+    )
     if not require_before_persist:
         _require_cached_bronze_snapshots(
             inputs=inputs, manifest_context=manifest_context

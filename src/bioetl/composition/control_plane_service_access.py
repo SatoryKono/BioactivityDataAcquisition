@@ -53,8 +53,18 @@ from bioetl.composition.composite_catalog import (
     list_configured_pipeline_names as list_configured_pipeline_names,
 )
 
+from bioetl.composition.control_plane_paths import (
+    EvidenceLocationBindingContext as EvidenceLocationBindingContext,
+    build_evidence_location_binding_context as build_evidence_location_binding_context,
+    relative_data_root_under_alias as relative_data_root_under_alias,
+    resolve_dashboard_data_alias_base as resolve_dashboard_data_alias_base,
+    resolve_registration_runtime_source_id as resolve_registration_runtime_source_id,
+)
+
 __all__ = [
+    "EvidenceLocationBindingContext",
     "bootstrap_control_plane_lifecycle_store",
+    "build_evidence_location_binding_context",
     "get_adr_service",
     "get_bronze_cleanup_service",
     "get_checkpoint_runtime_service",
@@ -74,4 +84,7 @@ __all__ = [
     "load_workflow_config",
     "persist_historical_replay_closure_report",
     "persist_historical_replay_universe_report",
+    "relative_data_root_under_alias",
+    "resolve_dashboard_data_alias_base",
+    "resolve_registration_runtime_source_id",
 ]

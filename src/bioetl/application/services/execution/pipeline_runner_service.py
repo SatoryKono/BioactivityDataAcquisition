@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import asyncio
 
-from bioetl.application.services.control_plane.evidence_location import (
-    record_verify_exception_observation,
+from bioetl.application.services.evidence_location import (
+    soft_invoke_evidence_location_verify,
 )
 from bioetl.application.services.run_reports.control_plane_snapshot import (
     archive_run_completion,
@@ -173,7 +173,7 @@ class PipelineRunnerService:
                 dry_run_result=dry_run_result,
                 record_event=_record_pipeline_audit_event,
             )
-            return _finalize_report(self, completed_dry_run, effective_options)
+            return self._finalize_report(completed_dry_run, effective_options)
 
         record_constructor_failure = constructor_failure_recorder(
             audit=self.audit,
@@ -182,7 +182,7 @@ class PipelineRunnerService:
             run_id=effective_run_id,
             options=effective_options,
             started_at=started_at,
-            finalize=lambda result, options: _finalize_report(self, result, options),
+            finalize=self._finalize_report,
             record_event=_record_pipeline_audit_event,
         )
 
@@ -270,7 +270,7 @@ class PipelineRunnerService:
                 timestamp=completed_at,
                 error_type="CancelledError",
             )
-            _finalize_report(self, result, options)
+            self._finalize_report(result, options)
             raise
         finally:
             reset_stage_accounting(accounting_token)
@@ -371,38 +371,40 @@ class PipelineRunnerService:
             write_report=False,
             store=self.report_store,
         )
-        return _finalize_report(self, result, options)
+        return _finalize_pipeline_report(self, result, options)
 
-    def _archive_control_plane(
-        self, result: RunResult, options: RunOptions | None
-    ) -> None:
-        archive_run_completion(self.archive_control_plane, result, options)
+    def _finalize_report(
+        self,
+        result: RunResult,
+        options: RunOptions | None,
+    ) -> RunResult:
+        """Finalize and persist a run report from all terminal paths."""
+        return _finalize_pipeline_report(self, result, options)
 
 
-def _finalize_report(
-    service: PipelineRunnerService,
+def _finalize_pipeline_report(
+    runner: PipelineRunnerService,
     result: RunResult,
     options: RunOptions | None,
 ) -> RunResult:
     """Capture control-plane evidence, persist the run report, then archive."""
-    capture_run_completion(service.capture_control_plane, result, options)
-    # RF-004: record Evidence Location observation BEFORE report snapshot.
-    if service.evidence_location_verify is not None:
-        try:
-            service.evidence_location_verify(result, options)
-        except (OSError, RuntimeError, TypeError, ValueError) as exc:
-            # Consistency diagnostics must not mask processing success.
-            record_verify_exception_observation(
-                kind="pipeline",
-                owner=str(result.pipeline_name),
-                run_id=str(result.run_id),
-                exc=exc,
-            )
+    capture_run_completion(runner.capture_control_plane, result, options)
+    evidence_location_verify = runner.evidence_location_verify
+    soft_invoke_evidence_location_verify(
+        (
+            None
+            if evidence_location_verify is None
+            else (lambda: evidence_location_verify(result, options))
+        ),
+        kind="pipeline",
+        owner=str(result.pipeline_name),
+        run_id=str(result.run_id),
+    )
     finalized = finalize_pipeline_run_report(
         result=result,
         options=options,
-        report_root=service.report_root,
-        store=service.report_store,
+        report_root=runner.report_root,
+        store=runner.report_store,
     )
-    service._archive_control_plane(finalized, options)
+    archive_run_completion(runner.archive_control_plane, finalized, options)
     return finalized
