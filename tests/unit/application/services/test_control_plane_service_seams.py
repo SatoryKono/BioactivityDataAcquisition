@@ -66,10 +66,11 @@ import bioetl.application.services.control_plane as control_plane_root
 
 pytestmark = pytest.mark.unit
 
-# evidence_location moved out of control_plane hotspot prefixes (9f5fe787e6);
-# seam lives under bioetl.application.services.evidence_location.
+# evidence_location moved out of control_plane implementation prefixes;
+# its explicit ownership seam is registered here for the external package.
 EXPECTED_RESPONSIBILITY_SEAMS = {
     "effective_config",
+    "evidence_location",
     "forensic",
     "ledger",
     "manifest",
