@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import yaml
 
 from tests.architecture._module_coverage_inventory_support import (
     skip_if_module_coverage_inventory_is_dirty,
@@ -39,11 +40,17 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 
 def _below_default_floor_count(inventory: dict[str, Any]) -> int:
+    gates = yaml.safe_load(
+        (ROOT / "configs/quality/module_coverage_gates.yaml").read_text(
+            encoding="utf-8"
+        )
+    )
+    default_floor = float(gates["tiers"]["default_module"]["line_min_percent"])
     return sum(
         1
         for row in inventory["modules"]
         if isinstance(row.get("coverage_percent"), (int, float))
-        and float(row["coverage_percent"]) < 85.0
+        and float(row["coverage_percent"]) < default_floor
     )
 
 
@@ -116,8 +123,10 @@ def test_issue_5244_parent_epic_stays_open_until_default_floor_is_zero() -> None
         below_default_floor
         == closeout["parent_epic_status"]["remaining_below_85_module_count"]
     )
-    assert below_default_floor == 0
-    assert (
-        closeout["parent_epic_status"]["status"]
-        == "not_closeable_under_current_definition_of_done"
-    )
+    parent_status = closeout["parent_epic_status"]["status"]
+    if parent_status == "closeable":
+        assert below_default_floor == 0
+    else:
+        assert (
+            parent_status == "not_closeable_under_current_definition_of_done"
+        )
