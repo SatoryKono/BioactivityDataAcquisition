@@ -86,15 +86,20 @@ async def test_stale_returns_immediately_and_refreshes(
 
 
 async def test_cache_key_includes_run_status_and_normalizes_blank_run_id() -> None:
-    assert module.selected_run_status_key(
-        {
-            "pipeline": "p",
-            "run_id": "",
-            "run_type": "t",
-            "workflow": "w",
-            "run_status": "failed",
-        }
-    ) == ("selected-run-status", "p", "-", "t", "w", "failed")
+    expected = ("selected-run-status", "p", "-", "t", "w", "failed")
+    for run_id in ("", "-", "All", "$__all", "__all", "*"):
+        assert (
+            module.selected_run_status_key(
+                {
+                    "pipeline": "p",
+                    "run_id": run_id,
+                    "run_type": "t",
+                    "workflow": "w",
+                    "run_status": "failed",
+                }
+            )
+            == expected
+        )
     success = module.selected_run_status_key(
         {
             "pipeline": "p",
@@ -114,6 +119,17 @@ async def test_cache_key_includes_run_status_and_normalizes_blank_run_id() -> No
         }
     )
     assert success != failed
+    concrete = module.selected_run_status_key(
+        {
+            "pipeline": "p",
+            "run_id": "run-1",
+            "run_type": "t",
+            "workflow": "w",
+            "run_status": "failed",
+        }
+    )
+    assert concrete == ("selected-run-status", "p", "run-1", "t", "w", "failed")
+    assert concrete != expected
 
 
 async def test_capacity_exhausted_when_all_entries_busy() -> None:
