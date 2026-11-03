@@ -1649,13 +1649,13 @@
         "type": "datasource",
         "uid": "-- Dashboard --"
       },
-      "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health. SELECT RUN means no Run ID is selected. VALID EMPTY means no saved provider check. QUERY ERROR means backend unavailable or request failure. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+      "description": "SELECTED RUN · Saved provider check result via check_result_display. Cached Bronze (provider API not called) shows —. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health. SELECT RUN means no Run ID is selected. VALID EMPTY means no saved provider check. QUERY ERROR means backend unavailable or request failure.",
       "options": {
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/^check_result$/",
+          "fields": "/^check_result_display$/",
           "values": true
         },
         "colorMode": "value",
@@ -1719,6 +1719,10 @@
                 "INCOMPLETE": {
                   "text": "INCOMPLETE",
                   "color": "orange"
+                },
+                "—": {
+                  "text": "—",
+                  "color": "gray"
                 }
               }
             },
@@ -1779,19 +1783,19 @@
           }
         },
         {
-          "id": "limit",
-          "options": {
-            "limitField": 1
-          }
-        },
-        {
           "id": "filterFieldsByName",
           "options": {
             "include": {
               "names": [
-                "check_result"
+                "check_result_display"
               ]
             }
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 1
           }
         }
       ],

@@ -43,6 +43,15 @@ def test_provider_status_uses_filtered_vectors_in_severity_order():
     assert "QUERY ERROR" in description
     assert "VALID EMPTY" in description
     assert "SELECT RUN" in description
+    # Align with Review Provider Evidence: Cached Bronze → —, not raw check_result.
+    assert panel["options"]["reduceOptions"]["fields"] == "/^check_result_display$/"
+    assert any(
+        t.get("id") == "filterFieldsByName"
+        and t.get("options", {}).get("include", {}).get("names")
+        == ["check_result_display"]
+        for t in panel.get("transformations") or []
+    )
+    assert "—" in json.dumps(panel["fieldConfig"]["defaults"]["mappings"], ensure_ascii=False)
     blob = json.dumps(panel)
     assert "vector(0)" not in blob
     assert not (ROOT / "grafana/dashboards/bioetl-provider-health-v2.json").exists()

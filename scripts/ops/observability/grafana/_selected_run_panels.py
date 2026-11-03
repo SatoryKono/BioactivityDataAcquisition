@@ -697,22 +697,24 @@ def _style_provider_check(panels: list[dict]) -> None:
     review["gridPos"].update(x=15, y=2, w=9, h=3)
     review["type"] = "stat"
     review["description"] = (
-        "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. "
-        "OK/WARN/CRIT color the saved check verdict, not live fleet health."
+        "SELECTED RUN · Saved provider check result via check_result_display. "
+        "Cached Bronze (provider API not called) shows —. Missing evidence stays "
+        "UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health."
         " SELECT RUN means no Run ID is selected. VALID EMPTY means no saved "
         "provider check. QUERY ERROR means backend unavailable or request failure."
     )
+    # Align with Review Provider Evidence: display field, not raw check_result.
     review["transformations"] = [
         {"id": "limit", "options": {"limitField": 1}},
         {
             "id": "filterFieldsByName",
-            "options": {"include": {"names": ["check_result"]}},
+            "options": {"include": {"names": ["check_result_display"]}},
         },
     ]
     review["options"] = {
         "reduceOptions": {
             "calcs": ["lastNotNull"],
-            "fields": "/^check_result$/",
+            "fields": "/^check_result_display$/",
             "values": True,
         },
         "colorMode": "background",
@@ -736,6 +738,7 @@ def _style_provider_check(panels: list[dict]) -> None:
                         "CRIT": {"text": "CRIT", "color": "red"},
                         "UNKNOWN": {"text": "UNKNOWN", "color": "gray"},
                         "N/A": {"text": "N/A", "color": "gray"},
+                        "—": {"text": "—", "color": "gray"},
                         "SELECT RUN": {"text": "SELECT RUN", "color": "gray"},
                         "INCOMPLETE": {"text": "INCOMPLETE", "color": "orange"},
                     },

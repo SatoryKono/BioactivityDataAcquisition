@@ -23,7 +23,7 @@
     "bioetl-control-plane-v1": "b7dd4fc74150a98fd8694730e17a3c0ccf9a82d35a3f08b2dcc78b7f933c7c63",
     "bioetl-dq-v2": "aba4531b06eb55a92455c4c4e4da0a11a0c4e7921acd6eae0e65a67969ed18d3",
     "bioetl-incident-v1": "b111c66283fb9d949d9cd90af0606652bebf4168d1ef44ecd10688df4169ebce",
-    "bioetl-overview-v2": "9a57427d0ad6b09c77a3cf1a1a1e26dede47544ff74442f938bf8e14fc392972",
+    "bioetl-overview-v2": "5e6976d2bdde438fbcc34ee41500e13bba684662f6e1f6f6797eb6ba8d5507ec",
     "bioetl-run-explorer-v1": "ae94d4aabf34582b314d2281de853985611f67fc668c92176e3a54330f151185"
   },
   "panels": [

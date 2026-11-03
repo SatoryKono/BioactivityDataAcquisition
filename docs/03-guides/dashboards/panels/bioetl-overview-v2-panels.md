@@ -40,8 +40,10 @@ without a remote probe is No API check; it is not a claim of live provider healt
 
 ## Review Provider Check
 
-Table `9481` preserves saved check result and reason. Missing performed checks are
-UNKNOWN. No API check is distinct from a successful remote probe.
+Stat `9481` reduces `check_result_display` from the shared selected-run donor
+(same field as Review Provider Evidence). Cached Bronze without a remote probe
+shows —. Missing performed checks are UNKNOWN. No API check is distinct from a
+successful remote probe.
 
 ## Inspect Selected Run Stages
 
