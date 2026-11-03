@@ -114,7 +114,6 @@ def test_issue_5496_control_plane_root_routes_through_explicit_seams() -> None:
     # control_plane seams after evidence_location extraction to application.services
     assert set(control_plane_root.RESPONSIBILITY_SEAMS) == {
         "effective_config",
-        "evidence_location",
         "forensic",
         "ledger",
         "manifest",
