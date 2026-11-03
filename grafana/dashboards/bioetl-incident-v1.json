@@ -2661,10 +2661,6 @@
                         }
                       }
                     ]
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Overall verdict"
                   }
                 ]
               },
@@ -2675,12 +2671,26 @@
                 },
                 "properties": [
                   {
-                    "id": "displayName",
-                    "value": "Trust"
+                    "id": "links",
+                    "value": []
                   },
                   {
-                    "id": "custom.width",
-                    "value": 80
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "SELECT RUN": {
+                            "text": "—",
+                            "color": "text"
+                          },
+                          "НЕТ ЗАПУСКОВ": {
+                            "text": "НЕТ ЗАПУСКОВ",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               },
@@ -2911,7 +2921,7 @@
                     },
                     "1": {
                       "text": "UNKNOWN",
-                      "color": "#555555"
+                      "color": "text"
                     },
                     "2": {
                       "text": "WARN",

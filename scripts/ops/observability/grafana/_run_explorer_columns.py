@@ -182,7 +182,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     _apply_run_explorer_templating(payload)
     panels = {panel["id"]: panel for panel in payload["panels"]}
     # Keep helper copy at its two-row minimum and place table 3010 below it.
-    panels[1]["gridPos"]["h"] = 2
+    panels[1]["gridPos"]["h"] = 3
     content = panels[1]["options"]["content"].replace(
         "Select a Run ID to view details.", "Select a status to view details."
     )

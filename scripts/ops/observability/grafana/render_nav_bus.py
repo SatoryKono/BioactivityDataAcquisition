@@ -122,7 +122,7 @@ FIRST_WINDOW_PANEL_BOTTOM = 17
 # First-window copy that was explicitly designed and tested at h=3 must not be
 # sacrificed when the shared navigation grows to its canonical h=4.
 _MINIMUM_FIRST_WINDOW_HEIGHTS: dict[str, dict[int, int]] = {
-    "bioetl-run-explorer-v1": {1: 2, 3010: 12},
+    "bioetl-run-explorer-v1": {1: 3, 3010: 12},
     "bioetl-incident-v1": {2005: 4, 2010: 4},
     "bioetl-dq-v2": {9406: 5},
     "bioetl-control-plane-v1": {},
