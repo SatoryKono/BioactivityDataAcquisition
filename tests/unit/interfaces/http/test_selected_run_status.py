@@ -1647,6 +1647,26 @@ async def test_selected_status_handler_covers_selector_and_request_failures(
     assert payload["verdict"] == "QUERY ERROR"
 
 
+def _assert_l2_action_path(action_path: object) -> str:
+    """Rev7 §2.3 / L2: Grafana links use ``/${action_path}``.
+
+    The API field itself must not start with ``/`` (template supplies the single
+    leading slash). Assembled URL must have exactly one leading ``/``, exactly
+    one ``?``, and ``&`` only after ``?``.
+    """
+    assert isinstance(action_path, str)
+    assert action_path
+    assert not action_path.startswith("/")
+    assert "?" in action_path
+    assembled = f"/{action_path}"
+    assert assembled.startswith("/")
+    assert not assembled.startswith("//")
+    assert assembled.count("?") == 1
+    q = assembled.find("?")
+    assert all(i > q for i, ch in enumerate(assembled) if ch == "&")
+    return assembled
+
+
 def test_selection_presentation_keeps_canonical_domains_and_one_action():
     from bioetl.interfaces.http.selected_run_status import unavailable_status
 
@@ -1659,6 +1679,10 @@ def test_selection_presentation_keeps_canonical_domains_and_one_action():
     assert rows[0]["verdict"] == "SELECT RUN"
     assert (
         rows[0]["action_path"] == "d/bioetl-run-explorer-v1/run-explorer?var-run_id=-"
+    )
+    assert (
+        _assert_l2_action_path(rows[0]["action_path"])
+        == "/d/bioetl-run-explorer-v1/run-explorer?var-run_id=-"
     )
 
 
@@ -1676,6 +1700,12 @@ def test_error_presentation_never_collapses_into_selection_or_healthy_empty():
         "pipeline=chembl_activity" in row["action_path"]
         for row in payload["presentation_domains"]
     )
+    for row in payload["presentation_domains"]:
+        assembled = _assert_l2_action_path(row["action_path"])
+        assert assembled.startswith(
+            "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/"
+            "pipeline-run-report-artifact?"
+        )
 
 
 def test_selection_presentation_does_not_imply_failed_execution():

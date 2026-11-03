@@ -100,7 +100,7 @@ def _provider_evidence_columns(panel: dict) -> None:
         "provider": "Provider",
         "data_source": "Data source",
         "check_performed": "Performed",
-        "check_result": "Result",
+        "check_result_display": "Result",
         "reason": "Reason",
         "observed_display": "Since completed",
         "report_label": "Evidence",
@@ -119,7 +119,7 @@ def _provider_evidence_columns(panel: dict) -> None:
         "'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : "
         "($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' ? 'Provider check' : 'UNKNOWN')), "
         "'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), "
-        "'check_result': $cached ? '—' : "
+        "'check_result_display': $cached ? '—' : "
         "($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN'), "
         "'reason': $cached ? 'Cached Bronze used; provider API was not called.' : "
         "($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : "
