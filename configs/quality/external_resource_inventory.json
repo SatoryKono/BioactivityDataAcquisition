@@ -10582,10 +10582,10 @@
     }
   ],
   "source_requalification": {
-    "catalog_ref": "193df05473f419f90f095be87dbca34e05550fef",
+    "catalog_ref": "159591f407d92f590dfb5e78a3c1fb820e97f35b",
     "source_ref": "795b9ef453b2bc06748db34d6eb4d65b93924134",
-    "baseline_source_ref": "8715e92a3aeeb47a8ae33a3403c24283ff44d469",
-    "review_sha256": "0ee75eb278df853fb186d13e2eb0cf2a255fbbaebecfee132e986c2a8e635872",
+    "baseline_source_ref": "889497b06b1cf212f92b221eb6bfc2b64d4b5550",
+    "review_sha256": "04dd490419e9ec76e8b9af934349b6c10cbb487b6f6c471fd0cc7aa9294ca311",
     "production_file_count": 2605,
     "definition_count": 206,
     "creation_site_count": 545,
