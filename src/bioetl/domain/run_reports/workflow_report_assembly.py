@@ -18,6 +18,8 @@ from bioetl.domain.run_reports.workflow_totals import (
     _first_present,
     _optional_int,
     _optional_text,
+    optional_mapping_copy,
+    planned_execution_count,
 )
 
 _COUNT_FIELDS = (
@@ -294,8 +296,10 @@ def build_workflow_run_report(
         identity=dict(identity),
         plan_steps=plan,
         execution=execution,
-        totals=_build_totals(execution, planned=len(plan) or len(execution)),
+        totals=_build_totals(
+            execution, planned=planned_execution_count(plan, execution)
+        ),
         index=_build_index(normalized),
         reasons_rollup=build_reasons_rollup(execution),
-        observations=None if observations is None else dict(observations),
+        observations=optional_mapping_copy(observations),
     )

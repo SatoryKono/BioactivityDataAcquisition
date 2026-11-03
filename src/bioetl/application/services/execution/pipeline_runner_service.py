@@ -10,13 +10,6 @@ from __future__ import annotations
 
 import asyncio
 
-from bioetl.application.services.control_plane.evidence_location import (
-    record_verify_exception_observation,
-)
-from bioetl.application.services.run_reports.control_plane_snapshot import (
-    archive_run_completion,
-    capture_run_completion,
-)
 from bioetl.application.services.run_reports.observations import (
     bind_run_observations,
     reset_run_observations,
@@ -45,7 +38,6 @@ from bioetl.application.services.execution._pipeline_runner_support import (
     build_pipeline_run_result,
     complete_pipeline_dry_run,
     constructor_failure_recorder,
-    finalize_pipeline_run_report,
     prepare_execution_runner,
 )
 from bioetl.application.services.execution._pipeline_runner_support import (
@@ -63,6 +55,12 @@ from bioetl.application.services.execution.pipeline_run_context_service import (
 from bioetl.application.services.execution.pipeline_run_execution_service import (
     PipelineExecutionResult,
     PipelineRunExecutionService,
+)
+from bioetl.application.services.execution.pipeline_runner_finalize import (
+    build_and_finalize_run_result,
+    create_pipeline_run_logger,
+    ensure_pipeline_registered,
+    finalize_pipeline_service_report,
 )
 from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineNotFoundError,
@@ -131,7 +129,11 @@ class PipelineRunnerService:
                 dry_run=dry_run_value
             ),
         )
-        self._ensure_pipeline_exists(pipeline_name)
+        ensure_pipeline_registered(
+            self.runner_factory,
+            pipeline_name,
+            not_found_error=PipelineNotFoundError,
+        )
         effective_run_id = _resolve_effective_run_id(
             run_id=run_id,
             options=effective_options,
@@ -143,7 +145,8 @@ class PipelineRunnerService:
             options=effective_options,
             started_at=started_at,
         )
-        run_logger = self._create_run_logger(
+        run_logger = create_pipeline_run_logger(
+            logger=self.logger,
             context=context,
             options=effective_options,
         )
@@ -276,27 +279,6 @@ class PipelineRunnerService:
             reset_stage_accounting(accounting_token)
             reset_run_observations(observation_token)
 
-    def _ensure_pipeline_exists(self, pipeline_name: str) -> None:
-        if self.runner_factory.contains(pipeline_name):
-            return
-        available = self.runner_factory.list_pipelines()
-        raise PipelineNotFoundError(pipeline_name, available)
-
-    def _create_run_logger(
-        self,
-        *,
-        context: PipelineRunContext,
-        options: RunOptions,
-    ) -> LoggerPort:
-        run_logger = self.logger.bind(**context.log_correlation_fields())
-        run_logger.info(
-            "Starting pipeline run",
-            run_type=options.run_type,
-            dry_run=options.dry_run,
-            limit=options.limit,
-        )
-        return run_logger
-
     def list_pipelines(self) -> list[str]:
         """Return registered pipeline names in sorted order."""
         return self.runner_factory.list_pipelines()
@@ -324,7 +306,7 @@ class PipelineRunnerService:
             started_at=started_at,
             started_monotonic=started_monotonic,
         )
-        result = self._build_run_result(
+        result = build_and_finalize_run_result(
             outcome=outcome,
             runner=runner,
             pipeline_name=pipeline_name,
@@ -332,6 +314,11 @@ class PipelineRunnerService:
             run_type=run_type,
             started_at=started_at,
             options=options,
+            store=self.report_store,
+            report_root=self.report_root,
+            capture_control_plane=self.capture_control_plane,
+            archive_control_plane=self.archive_control_plane,
+            evidence_location_verify=self.evidence_location_verify,
         )
         # Terminal run counter is owned by PipelineObserver.__exit__.
         # Incrementing here double-counts every CLI/service run (OBS-LIFE-001).
@@ -348,58 +335,16 @@ class PipelineRunnerService:
         )
         return result
 
-    def _build_run_result(
-        self,
-        *,
-        outcome: PipelineExecutionResult,
-        runner: ExecutionMetricsRunnerPort,
-        pipeline_name: str,
-        run_id: RunID,
-        run_type: str,
-        started_at: datetime,
-        options: RunOptions | None = None,
-    ) -> RunResult:
-        """Convert execution outcome to public RunResult contract."""
-        result = build_pipeline_run_result(
-            outcome=outcome,
-            runner=runner,
-            pipeline_name=pipeline_name,
-            run_id=run_id,
-            run_type=run_type,
-            started_at=started_at,
-            options=options,
-            write_report=False,
-            store=self.report_store,
-        )
-        return self._finalize_report(result, options)
-
     def _finalize_report(
         self, result: RunResult, options: RunOptions | None
     ) -> RunResult:
         """Capture control-plane evidence, persist the run report, then archive."""
-        capture_run_completion(self.capture_control_plane, result, options)
-        # RF-004: record Evidence Location observation BEFORE report snapshot.
-        if self.evidence_location_verify is not None:
-            try:
-                self.evidence_location_verify(result, options)
-            except Exception as exc:
-                # Consistency diagnostics must not mask processing success.
-                record_verify_exception_observation(
-                    kind="pipeline",
-                    owner=str(result.pipeline_name),
-                    run_id=str(result.run_id),
-                    exc=exc,
-                )
-        finalized = finalize_pipeline_run_report(
+        return finalize_pipeline_service_report(
             result=result,
             options=options,
             report_root=self.report_root,
             store=self.report_store,
+            capture_control_plane=self.capture_control_plane,
+            archive_control_plane=self.archive_control_plane,
+            evidence_location_verify=self.evidence_location_verify,
         )
-        self._archive_control_plane(finalized, options)
-        return finalized
-
-    def _archive_control_plane(
-        self, result: RunResult, options: RunOptions | None
-    ) -> None:
-        archive_run_completion(self.archive_control_plane, result, options)

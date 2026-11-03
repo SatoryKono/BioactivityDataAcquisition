@@ -3,52 +3,35 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from time import perf_counter
 from typing import TYPE_CHECKING
 
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.application.services.control_plane.evidence_location import (
-    record_verify_exception_observation,
-)
 from bioetl.application.services.execution.workflow_runner_step_execution import (
-    TransformStepRuntimeOptions,
     apply_workflow_step_transition,
-    execute_pipeline_step,
-    execute_transform_step,
 )
-from bioetl.application.services.run_reports.observations import (
-    bind_run_observations_if_unbound,
-    reset_run_observations_if_bound,
+from bioetl.application.services.workflow.workflow_runner_finalize import (
+    finalize_workflow_run_result,
 )
 from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
 )
-from bioetl.application.services.workflow.workflow_runner_reports import (
-    archive_workflow_children,
-    attach_workflow_run_report,
-)
 from bioetl.application.services.workflow.workflow_runner_support import (
-    ResolvedWorkflowStepTransitionRecord,
     WorkflowExecutionState,
-    build_resume_skipped_step_result,
-    build_skipped_step_result,
     record_workflow_pipeline_expected_metrics,
-    record_workflow_run_metrics,
-    workflow_result_from_state,
+)
+from bioetl.application.services.workflow.workflow_runner_transitions import (
+    resolve_workflow_step_transition,
 )
 from bioetl.application.services.workflow.workflow_transform_service import (
     WorkflowTransformDestructiveCommit as WorkflowTransformDestructiveCommit,
 )
 from bioetl.application.services.workflow.workflow_transform_service import (
     WorkflowTransformService,
-)
-from bioetl.application.services.workflow.workflow_transition_policy import (
-    WorkflowStepDefinition,
-    resolve_step_transition_policy,
 )
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.workflow import (
@@ -70,28 +53,6 @@ __all__ = [
     "WorkflowRunnerService",
     "WorkflowStepExecutionResult",
 ]
-
-
-def _blocked_step_ids(state: WorkflowExecutionState) -> frozenset[str]:
-    """Return steps whose failure or failure-skip must block dependents."""
-    blocked = {
-        result.step_id
-        for result in state.step_results
-        if result.status == "failed"
-        or (result.status == "skipped" and result.error_type == "UpstreamStepFailed")
-    }
-    if state.failed_step_id is not None:
-        blocked.add(state.failed_step_id)
-    return frozenset(blocked)
-
-
-def _require_workflow_result(value: object) -> WorkflowRunExecutionResult:
-    """Return a concrete workflow result after validating replacement output."""
-    if not isinstance(value, WorkflowRunExecutionResult):
-        raise TypeError(
-            "dataclass replacement did not preserve WorkflowRunExecutionResult"
-        )
-    return value
 
 
 def _cohort_producer_ids(config: WorkflowConfig) -> set[str]:
@@ -171,7 +132,13 @@ class WorkflowRunnerService:
             step = config.get_step(step_id)
             if step is None:
                 continue
-            transition = await self._resolve_step_transition(
+            transition = await resolve_workflow_step_transition(
+                pipeline_runner=self.pipeline_runner,
+                transform_service=self.transform_service,
+                metrics=self.metrics,
+                monotonic=self.monotonic,
+                cohort_resolver=self.cohort_resolver,
+                artifact_sink=self.workflow_transform_artifact_sink,
                 workflow_name=config.name,
                 step=step,
                 state=state,
@@ -194,7 +161,7 @@ class WorkflowRunnerService:
                 step_completed_callback=step_completed_callback,
             )
 
-        return self._finalize_run_result(
+        return finalize_workflow_run_result(
             config=config,
             state=state,
             workflow_context_labels=workflow_context_labels,
@@ -204,214 +171,19 @@ class WorkflowRunnerService:
             resumed=resumed,
             started_at=started_at,
             started_monotonic=started_monotonic,
-        )
-
-    def _finalize_run_result(
-        self,
-        *,
-        config: WorkflowConfig,
-        state: WorkflowExecutionState,
-        workflow_context_labels: Mapping[str, str],
-        workflow_run_id: str | None,
-        manifest_id: str | None,
-        execution_fingerprint: str | None,
-        resumed: bool,
-        started_at: datetime,
-        started_monotonic: float,
-    ) -> WorkflowRunExecutionResult:
-        record_workflow_run_metrics(
             metrics=self.metrics,
-            workflow_name=config.name,
-            status=state.status,
-            context_labels=workflow_context_labels,
+            report_store=self.report_store,
+            report_root=self.report_root,
+            logger=getattr(self.pipeline_runner, "logger", None),
+            archive_control_plane=getattr(
+                self.pipeline_runner, "archive_control_plane", None
+            ),
+            evidence_location_verify=self.evidence_location_verify,
         )
-        result = workflow_result_from_state(config.name, state)
-        identified_result = _require_workflow_result(
-            replace(
-                result,
-                workflow_run_id=workflow_run_id,
-                manifest_id=manifest_id,
-                execution_fingerprint=execution_fingerprint,
-                resumed=resumed,
-                started_at=started_at.isoformat(),
-                completed_at=current_utc_time().isoformat(),
-                duration_seconds=perf_counter() - started_monotonic,
-            )
-        )
-        # RF-004: reuse outer prepare→report scope when present; else bind locally.
-        observation_token = bind_run_observations_if_unbound()
-        try:
-            if self.evidence_location_verify is not None:
-                try:
-                    self.evidence_location_verify(identified_result)
-                except Exception as exc:
-                    # Consistency diagnostics must not mask processing success.
-                    record_verify_exception_observation(
-                        kind="workflow",
-                        owner=str(identified_result.workflow_name),
-                        run_id=str(identified_result.workflow_run_id or ""),
-                        exc=exc,
-                    )
-            reported = attach_workflow_run_report(
-                config=config,
-                result=identified_result,
-                logger=getattr(self.pipeline_runner, "logger", None),
-                store=self.report_store,
-                report_root=self.report_root,
-            )
-            archive_workflow_children(
-                config,
-                reported,
-                getattr(self.pipeline_runner, "archive_control_plane", None),
-            )
-            return reported
-        finally:
-            reset_run_observations_if_bound(observation_token)
 
     def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
         """Record planned pipeline scopes before workflow step execution."""
         record_workflow_pipeline_expected_metrics(
             metrics=self.metrics,
             config=config,
-        )
-
-    async def _resolve_step_transition(
-        self,
-        *,
-        workflow_name: str,
-        step: WorkflowStepDefinition,
-        state: WorkflowExecutionState,
-        workflow_context_labels: Mapping[str, str],
-        completed_step_ids: frozenset[str] | None,
-        completed_transform_fingerprints: dict[str, str] | None,
-        step_started_callback: Callable[..., None] | None,
-        transform_commit_callback: (
-            Callable[[WorkflowTransformDestructiveCommit], None] | None
-        ),
-        dry_run: bool,
-        workflow_run_id: str | None,
-        manifest_id: str | None,
-        debug_export: tuple[bool, str | None],
-        created_at_factory: Callable[[], datetime] | None,
-        capture_producer_snapshot: bool = False,
-    ) -> ResolvedWorkflowStepTransitionRecord:
-        """Resolve whether a step should run, resume-skip, or failure-skip."""
-        debug_export_enabled, debug_export_dir = debug_export
-        policy = resolve_step_transition_policy(
-            step,
-            failed_step_id=state.failed_step_id,
-            completed_step_ids=completed_step_ids,
-            blocked_step_ids=_blocked_step_ids(state),
-        )
-        if policy.disposition == "skip_failed":
-            return ResolvedWorkflowStepTransitionRecord(
-                policy=policy,
-                result=build_skipped_step_result(
-                    metrics=self.metrics,
-                    workflow_name=workflow_name,
-                    step=step,
-                    failed_step_id=policy.failed_step_id or "",
-                    context_labels=workflow_context_labels,
-                ),
-            )
-        if policy.disposition == "skip_completed":
-            completed = build_resume_skipped_step_result(
-                metrics=self.metrics,
-                workflow_name=workflow_name,
-                step=step,
-                context_labels=workflow_context_labels,
-            )
-            restored = state.step_outputs.get(step.step_id)
-            if isinstance(restored, Mapping):
-                run_id = restored.get("run_id")
-                child_manifest = restored.get("manifest_id")
-                completed = replace(
-                    completed,
-                    payload=restored,
-                    child_run_id=str(run_id) if run_id is not None else None,
-                    child_manifest_id=str(child_manifest)
-                    if child_manifest is not None
-                    else None,
-                )
-            return ResolvedWorkflowStepTransitionRecord(
-                policy=policy,
-                result=completed,
-            )
-        return ResolvedWorkflowStepTransitionRecord(
-            policy=policy,
-            result=await self._run_step(
-                workflow_name=workflow_name,
-                step=step,
-                step_outputs=state.step_outputs,
-                workflow_context_labels=workflow_context_labels,
-                completed_transform_fingerprints=completed_transform_fingerprints,
-                step_started_callback=step_started_callback,
-                transform_commit_callback=transform_commit_callback,
-                dry_run=dry_run,
-                workflow_run_id=workflow_run_id,
-                manifest_id=manifest_id,
-                debug_export_enabled=debug_export_enabled,
-                debug_export_dir=debug_export_dir,
-                created_at_factory=created_at_factory,
-                capture_producer_snapshot=capture_producer_snapshot,
-            ),
-        )
-
-    async def _run_step(
-        self,
-        *,
-        workflow_name: str,
-        step: WorkflowStepDefinition,
-        step_outputs: dict[str, object],
-        workflow_context_labels: Mapping[str, str],
-        completed_transform_fingerprints: dict[str, str] | None,
-        step_started_callback: Callable[..., None] | None,
-        transform_commit_callback: (
-            Callable[[WorkflowTransformDestructiveCommit], None] | None
-        ),
-        dry_run: bool,
-        workflow_run_id: str | None,
-        manifest_id: str | None,
-        debug_export_enabled: bool,
-        debug_export_dir: str | None,
-        created_at_factory: Callable[[], datetime] | None,
-        capture_producer_snapshot: bool = False,
-    ) -> WorkflowStepExecutionResult:
-        if isinstance(step, WorkflowStepConfig):
-            return await execute_pipeline_step(
-                pipeline_runner=self.pipeline_runner,
-                cohort_resolver=self.cohort_resolver,
-                upstream_outputs=step_outputs,
-                capture_producer_snapshot=capture_producer_snapshot,
-                metrics=self.metrics,
-                monotonic=self.monotonic,
-                workflow_name=workflow_name,
-                step=step,
-                workflow_context_labels=workflow_context_labels,
-                step_started_callback=step_started_callback,
-                workflow_run_id=workflow_run_id,
-                snapshot_reader=getattr(
-                    getattr(self.transform_service, "registry", None),
-                    "snapshot_reader",
-                    None,
-                ),
-            )
-        return await execute_transform_step(
-            transform_service=self.transform_service,
-            artifact_sink=self.workflow_transform_artifact_sink,
-            workflow_name=workflow_name,
-            step=step,
-            step_outputs=step_outputs,
-            workflow_context_labels=workflow_context_labels,
-            options=TransformStepRuntimeOptions(
-                completed_transform_fingerprints=completed_transform_fingerprints,
-                step_started_callback=step_started_callback,
-                transform_commit_callback=transform_commit_callback,
-                dry_run=dry_run,
-                workflow_run_id=workflow_run_id,
-                manifest_id=manifest_id,
-                debug_export_enabled=debug_export_enabled,
-                debug_export_dir=debug_export_dir,
-                created_at_factory=created_at_factory,
-            ),
         )
