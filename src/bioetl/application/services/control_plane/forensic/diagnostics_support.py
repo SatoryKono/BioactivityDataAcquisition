@@ -11,6 +11,7 @@ from bioetl.application.services.control_plane.manifest.inspection_service impor
 )
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 
+
 def inspection_service_factory_from_ports(
     manifest_port: RunManifestPort,
     ledger_port: RunLedgerPort | None,
