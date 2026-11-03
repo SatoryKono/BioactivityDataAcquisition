@@ -1,8 +1,9 @@
 {
   "schema_version": 1,
   "catalog_ref": "fe3308006e3265859d849a5e61fbf4a9dd1f7c83",
-  "source_ref": "5621e5a0ebc2cddc096b3c7a2d6d72c5b4e0145d",
+  "source_ref": "5754ce76c3c13d5d5fc6f1ecfba63a804bd851a2",
   "source_reviews": {
+    "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py": "Reviewed mkstemp/fdopen ownership fix in publish_bytes_if_absent: raw fd is closed on fdopen failure; stream owns close after successful transfer; temp-path unlink remains a separate finally obligation. Still a local trusted-base temp publish helper, not a new external service owner; runtime remains NOT_RUN_12553.",
     "src/bioetl/application/ports/__init__.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
     "src/bioetl/application/ports/control_plane.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
     "src/bioetl/application/services/execution/workflow_runner_step_execution.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",

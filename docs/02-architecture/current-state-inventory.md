@@ -335,13 +335,13 @@ by storage technology. Current owner boundaries:
 
 ## Current source inventory binding
 
-- `source_tree_sha256=9862a200e566600c1eaa38fee70d7d9b4b4524e83853968ace6cb77915f75775`
-- `source_module_count=2604`
-- Source modules: `2604`
-- `coverage_inventory_module_count=2600`
-- Accepted coverage inventory: `2600` modules
-- Accepted inventory: `2516` fully covered
-- Accepted inventory: `67` partially covered
+- `source_tree_sha256=2027492501b9e1e823d05c2704b48670abfe027ce135030361565c03e5d6bcc7`
+- `source_module_count=2605`
+- Source modules: `2605`
+- `coverage_inventory_module_count=2605`
+- Accepted coverage inventory: `2605` modules
+- Accepted inventory: `2521` fully covered
+- Accepted inventory: `83` partially covered
 - Test inventory: `assertless_total_candidates=69`
 
 Derived by scripts/engineering/qa/report_topology_source_binding.py from
