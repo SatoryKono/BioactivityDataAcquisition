@@ -646,6 +646,21 @@ def _stamp_no_runs_value_maps(data: dict[str, Any]) -> None:
         _walk_panels_stamp_no_runs(panels)
 
 
+_COL_PROCESSING = "Processing"
+_COL_OVERALL_VERDICT = "Overall verdict"
+_COL_TRUST = "Trust"
+_COL_REASON = "Reason"
+
+_STATUS_DONOR_COLUMNS = frozenset(
+    {_COL_PROCESSING, _COL_OVERALL_VERDICT, _COL_TRUST, _COL_REASON}
+)
+_LEGACY_STATUS_OVERRIDE_REMAP = {
+    "Result": _COL_PROCESSING,
+    "Status": _COL_OVERALL_VERDICT,
+}
+_DEAD_STATUS_OVERRIDE_NAMES = frozenset({"Rules", "Evidence", "Result", "Status"})
+
+
 def _status_donor_transforms() -> list[dict[str, Any]]:
     """Shared Review Selected Run Status organize chain (DQ + Incident donors)."""
     return [
@@ -675,22 +690,57 @@ def _status_donor_transforms() -> list[dict[str, Any]]:
                     "reason_display": 3,
                 },
                 "renameByName": {
-                    "execution_state": "Processing",
-                    "verdict": "Overall verdict",
-                    "saved_trust": "Trust",
-                    "reason_display": "Reason",
+                    "execution_state": _COL_PROCESSING,
+                    "verdict": _COL_OVERALL_VERDICT,
+                    "saved_trust": _COL_TRUST,
+                    "reason_display": _COL_REASON,
                 },
             },
         },
     ]
 
 
-_STATUS_DONOR_COLUMNS = frozenset({"Processing", "Overall verdict", "Trust", "Reason"})
-_LEGACY_STATUS_OVERRIDE_REMAP = {
-    "Result": "Processing",
-    "Status": "Overall verdict",
-}
-_DEAD_STATUS_OVERRIDE_NAMES = frozenset({"Rules", "Evidence", "Result", "Status"})
+def _strip_echo_display_name(override: dict[str, Any], target: str) -> None:
+    """Drop displayName props that only repeat the post-organize column title."""
+    props = override.get("properties")
+    if not isinstance(props, list):
+        return
+    override["properties"] = [
+        prop
+        for prop in props
+        if not (
+            isinstance(prop, dict)
+            and prop.get("id") == "displayName"
+            and prop.get("value") == target
+        )
+    ]
+
+
+def _retarget_status_byname_override(
+    override: dict[str, Any], *, seen_targets: set[str]
+) -> dict[str, Any] | None:
+    """Keep, retarget, or drop one byName override for a status donor panel.
+
+    Returns the override to retain (possibly mutated), or ``None`` to drop it.
+    Non-byName overrides pass through unchanged.
+    """
+    matcher = override.get("matcher")
+    if not isinstance(matcher, dict) or matcher.get("id") != "byName":
+        return override
+    name = matcher.get("options")
+    if not isinstance(name, str):
+        return override
+    target = _LEGACY_STATUS_OVERRIDE_REMAP.get(name, name)
+    if name in _DEAD_STATUS_OVERRIDE_NAMES and target not in _STATUS_DONOR_COLUMNS:
+        return None
+    if target not in _STATUS_DONOR_COLUMNS and name not in _STATUS_DONOR_COLUMNS:
+        return override
+    if target in seen_targets:
+        return None
+    seen_targets.add(target)
+    matcher["options"] = target
+    _strip_echo_display_name(override, target)
+    return override
 
 
 def _align_status_donor_overrides(panel: dict[str, Any]) -> None:
@@ -711,37 +761,9 @@ def _align_status_donor_overrides(panel: dict[str, Any]) -> None:
     for override in overrides:
         if not isinstance(override, dict):
             continue
-        matcher = override.get("matcher")
-        if not isinstance(matcher, dict) or matcher.get("id") != "byName":
-            kept.append(override)
-            continue
-        name = matcher.get("options")
-        if not isinstance(name, str):
-            kept.append(override)
-            continue
-        target = _LEGACY_STATUS_OVERRIDE_REMAP.get(name, name)
-        if name in _DEAD_STATUS_OVERRIDE_NAMES and target not in _STATUS_DONOR_COLUMNS:
-            continue
-        if target not in _STATUS_DONOR_COLUMNS and name not in _STATUS_DONOR_COLUMNS:
-            # Preserve unrelated overrides (if any) without inventing columns.
-            kept.append(override)
-            continue
-        if target in seen_targets:
-            continue
-        seen_targets.add(target)
-        matcher["options"] = target
-        props = override.get("properties")
-        if isinstance(props, list):
-            override["properties"] = [
-                prop
-                for prop in props
-                if not (
-                    isinstance(prop, dict)
-                    and prop.get("id") == "displayName"
-                    and prop.get("value") == target
-                )
-            ]
-        kept.append(override)
+        retained = _retarget_status_byname_override(override, seen_targets=seen_targets)
+        if retained is not None:
+            kept.append(retained)
     field_config["overrides"] = kept
 
 
