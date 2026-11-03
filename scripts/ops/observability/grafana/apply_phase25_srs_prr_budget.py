@@ -812,7 +812,7 @@ def apply_dq(data: dict[str, Any]) -> None:
                     "url_options": {"method": "GET", "data": ""},
                     "uql": (
                         'parse-json | jsonata "'
-                        "($f := quality_evidence.funnel; "
+                        "($f := funnel; "
                         "$map(['01 bronze_records','02 silver_valid_records',"
                         "'03 silver_filtered_out_records',"
                         "'04 silver_quarantined_records',"
