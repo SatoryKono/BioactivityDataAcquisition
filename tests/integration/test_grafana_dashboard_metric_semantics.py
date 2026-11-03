@@ -1410,6 +1410,8 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert organize["indexByName"]["parameter"] == 0
     assert organize["excludeByName"]["row_status"] is True
     assert organize["excludeByName"]["Time"] is True
+    assert "value A" not in organize["excludeByName"]
+    assert "percentage A" not in organize["excludeByName"]
     assert "percintage" not in organize["excludeByName"]
     assert organize["excludeByName"].get("percentage") is not True
     parameter = next(

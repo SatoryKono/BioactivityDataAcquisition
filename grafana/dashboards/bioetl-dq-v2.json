@@ -1485,9 +1485,7 @@
           "options": {
             "excludeByName": {
               "row_status": true,
-              "Time": true,
-              "value A": true,
-              "percentage A": true
+              "Time": true
             },
             "indexByName": {
               "parameter": 0,
