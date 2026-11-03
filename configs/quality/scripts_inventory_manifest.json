@@ -1,21 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-02T15:51:37.948741+00:00",
+  "generated_at": "2026-11-03T21:50:41.947602+00:00",
   "summary": {
-    "total_scripts": 704,
+    "total_scripts": 711,
     "status_counts": {
-      "active": 334,
+      "active": 340,
+      "orphan": 1,
       "supporting": 370
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
       "ci": 75,
-      "docs": 290,
+      "docs": 291,
       "other": 16,
-      "scripts": 591,
+      "scripts": 595,
       "skills": 13,
-      "tests": 520
+      "tests": 524
     }
   },
   "scripts": [
@@ -2896,7 +2897,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 512,
+          "line": 538,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3678,7 +3679,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 511,
+          "line": 537,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3733,7 +3734,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 510,
+          "line": 536,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -9787,13 +9788,13 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 131,
+          "line": 137,
           "source_group": "ci",
           "text": "uv run --no-sync --frozen --no-build python -m scripts.engineering.ci pr-gate classify \"${classify_args[@]}\""
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 292,
+          "line": 298,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results assert-steps \\"
         }
@@ -10130,7 +10131,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 338,
+          "line": 344,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10411,13 +10412,13 @@
         },
         {
           "path": "tests/architecture/test_required_checks_prose_consistency.py",
-          "line": 492,
+          "line": 494,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_gate import classify_changes, load_catalog"
         },
         {
           "path": "tests/architecture/test_required_checks_prose_consistency.py",
-          "line": 504,
+          "line": 506,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_gate import ("
         }
@@ -10432,11 +10433,11 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 27,
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 870,
+          "line": 876,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10460,7 +10461,7 @@
         },
         {
           "path": "tests/architecture/test_required_checks_prose_consistency.py",
-          "line": 509,
+          "line": 511,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_lane_results import DOCS_LANE, OWNER_STEPS"
         },
@@ -10503,7 +10504,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 425,
+          "line": 443,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -10546,7 +10547,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 524,
+          "line": 550,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -10944,13 +10945,13 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 400,
+          "line": 406,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-mar"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 459,
+          "line": 465,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target \"${targets[@]}\" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-timeout"
         },
@@ -12883,7 +12884,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 290,
+          "line": 299,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -12907,13 +12908,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 500,
+          "line": 519,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 513,
+          "line": 532,
           "source_group": "tests",
           "text": "if path == \"scripts/engineering/dev/zed_mypy.py\":"
         }
@@ -13090,7 +13091,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 202,
+          "line": 208,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.diagnostics audit-structure --path ."
         },
@@ -13663,7 +13664,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 407,
+      "reference_count": 403,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -13948,7 +13949,7 @@
         },
         {
           "path": ".github/workflows/type-checking.yml",
-          "line": 87,
+          "line": 86,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa.check_architecture domain-type-policy"
         },
@@ -14026,7 +14027,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 385,
+          "line": 391,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -14173,13 +14174,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
-          "line": 175,
+          "line": 179,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
-          "line": 187,
+          "line": 191,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         }
@@ -15528,7 +15529,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 29,
+      "reference_count": 32,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -15574,9 +15575,9 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 76,
+          "line": 73,
           "source_group": "docs",
-          "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --check"
+          "text": "uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         }
       ]
     },
@@ -15736,6 +15737,14 @@
           "text": "from scripts.engineering.qa.generate_hotspot_degradation_report import ("
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/qa/generate_p05_interfaces_audit_report.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/engineering/qa/generate_reproducibility_support_matrix.py",
@@ -16792,8 +16801,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
+        {
+          "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
+          "line": 75,
+          "source_group": "docs",
+          "text": "uv run python scripts/engineering/qa/report_compatibility_importer_census.py"
+        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 46,
@@ -18457,7 +18472,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 323,
+          "line": 325,
           "source_group": "tests",
           "text": "Path(\"scripts/engineering/qa/run_observability_closure_campaign.py\"),"
         },
@@ -20275,13 +20290,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 756,
+          "line": 775,
           "source_group": "tests",
           "text": "\"src/bioetl/infrastructure/quality/scoring.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 757,
+          "line": 776,
           "source_group": "tests",
           "text": "\"scripts/engineering/quality/scoring.py\","
         },
@@ -20622,13 +20637,13 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 177,
+          "line": 183,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/repo/check_github_actions_runtime_policy.py --pr-required-pins --check"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 685,
+          "line": 691,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
@@ -20646,7 +20661,7 @@
         },
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 591,
+          "line": 596,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -20658,7 +20673,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 607,
+          "line": 633,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -21241,7 +21256,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 23,
       "references": [
         {
           "path": "docs/02-architecture/04-interfaces-layer.md",
@@ -22646,7 +22661,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 511,
+          "line": 516,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
@@ -23042,7 +23057,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2498,
+          "line": 2481,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -23063,17 +23078,23 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2548,
+          "line": 2537,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._evidence_readability import ("
+        },
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2803,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 625,
+          "line": 706,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
@@ -23085,7 +23106,7 @@
         },
         {
           "path": "tests/integration/test_grafana_evidence_readability.py",
-          "line": 206,
+          "line": 242,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import _stage_colors"
         }
@@ -23110,13 +23131,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2545,
+          "line": 2534,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections"
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 630,
+          "line": 710,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import ("
         },
@@ -23143,7 +23164,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_evidence_readability.py",
-          "line": 862,
+          "line": 1036,
           "source_group": "scripts",
           "text": "from ._incident_explanations import explain_incident"
         }
@@ -23168,7 +23189,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_nav_bus.py",
-          "line": 51,
+          "line": 52,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._latest_complete_run_panel import ("
         }
@@ -23193,7 +23214,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2595,
+          "line": 2584,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._overview_identity import ("
         }
@@ -23204,19 +23225,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_overview_identity.py",
-          "line": 357,
+          "line": 370,
           "source_group": "scripts",
           "text": "from ._overview_quality import exclusion_quality_expression"
-        },
-        {
-          "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 62,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana._overview_quality import ("
         }
       ]
     },
@@ -23229,25 +23244,25 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2564,
+          "line": 2553,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2573,
+          "line": 2562,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2590,
+          "line": 2579,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2650,
+          "line": 2639,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._provider_evidence_columns import ("
         }
@@ -23266,13 +23281,13 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2602,
+          "line": 2591,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._replay_layout import apply_replay_layout"
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2647,
+          "line": 2636,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._replay_layout import apply_replay_layout"
         }
@@ -23291,13 +23306,13 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_evidence_readability.py",
-          "line": 871,
+          "line": 1045,
           "source_group": "scripts",
           "text": "from ._replay_readiness_design import apply_replay_readiness_design"
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2603,
+          "line": 2592,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._replay_readiness_design import ("
         }
@@ -23324,7 +23339,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2559,
+          "line": 2548,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._run_explorer_columns import ("
         },
@@ -23345,7 +23360,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_dashboard_state_followup.py",
@@ -23360,6 +23375,12 @@
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
         {
+          "path": "scripts/ops/observability/grafana/apply_phase25_srs_prr_budget.py",
+          "line": 1300,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
+        },
+        {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
           "line": 23,
           "source_group": "scripts",
@@ -23367,13 +23388,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1448,
+          "line": 1437,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import STATUS_URL"
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2581,
+          "line": 2570,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
@@ -23385,15 +23406,9 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 635,
+          "line": 715,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
-        },
-        {
-          "path": "tests/integration/test_grafana_config.py",
-          "line": 19,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana._selected_run_panels import SELECTOR_ROWS"
         }
       ],
       "owner": "@bioetl-platform",
@@ -23416,7 +23431,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2540,
+          "line": 2529,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._visual_usability import ("
         }
@@ -23435,7 +23450,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2553,
+          "line": 2542,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._workflow_scope import apply_workflow_scope"
         },
@@ -23526,6 +23541,102 @@
       "next_step": "Retain only as a one-off DUX2 residual migration helper for auditability; do not promote it to an active operator workflow."
     },
     {
+      "path": "scripts/ops/observability/grafana/apply_phase25_srs_prr_budget.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/apply_phase2_remainder.py",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "``apply_phase25_srs_prr_budget.py`` (already applied) and"
+        },
+        {
+          "path": "scripts/ops/observability/grafana/lint_dashboard_phase2.py",
+          "line": 548,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import ("
+        },
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2777,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_lint_dashboard_phase2.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import ("
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/observability/grafana/apply_phase2_remainder.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2784,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.apply_phase2_remainder import ("
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/observability/grafana/apply_phase4_dead_vars.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "tests/architecture/test_observability_dashboard_tooling.py",
+          "line": 58,
+          "source_group": "tests",
+          "text": "\"apply_phase4_dead_vars.py\","
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_apply_phase4_dead_vars.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana import apply_phase4_dead_vars as phase4"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/observability/grafana/apply_phase4_reflow.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2824,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.apply_phase4_reflow import ("
+        },
+        {
+          "path": "tests/architecture/test_observability_dashboard_tooling.py",
+          "line": 59,
+          "source_group": "tests",
+          "text": "\"apply_phase4_reflow.py\","
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_apply_phase4_reflow.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana.apply_phase4_reflow import ("
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/observability/grafana/audit_live_grafana_panels.py",
       "type": "py",
       "status": "active",
@@ -23576,7 +23687,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 321,
+          "line": 323,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\"),"
         }
@@ -23603,13 +23714,13 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 76,
+          "line": 78,
           "source_group": "tests",
           "text": "script.name == \"capture_acceptance.py\""
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 435,
+          "line": 437,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.capture_acceptance import main"
         },
@@ -23658,7 +23769,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 688,
+          "line": 732,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -23811,7 +23922,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 425,
+          "line": 427,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         }
@@ -23822,7 +23933,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_selected_run_panels.py",
@@ -23837,6 +23948,12 @@
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
         {
+          "path": "scripts/ops/observability/grafana/apply_phase2_remainder.py",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.dashboard_context_links import PATH_BY_UID"
+        },
+        {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
           "line": 30,
           "source_group": "scripts",
@@ -23844,7 +23961,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2491,
+          "line": 2474,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
@@ -23863,12 +23980,6 @@
         {
           "path": "tests/integration/test_pipeline_diagnostics_retirement.py",
           "line": 8,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
-        },
-        {
-          "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
-          "line": 7,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         }
@@ -23931,7 +24042,7 @@
       "references": [
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 58,
+          "line": 60,
           "source_group": "tests",
           "text": "\"generate_dux4_issue_pack.py\","
         }
@@ -23950,7 +24061,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2858,
+          "line": 2982,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.generate_prometheus_only_dashboards import ("
         },
@@ -23981,13 +24092,13 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 97,
+          "line": 99,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/generate_trust_validation_fixtures.py\""
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 113,
+          "line": 115,
           "source_group": "tests",
           "text": "\"generate_trust_validation_fixtures.py must not call write_text \""
         },
@@ -24008,6 +24119,27 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as the bounded #8576/#8578 Trust-panel fixture generator; consolidate it into the canonical dashboard-audit command or remove it when the reviewed close-up campaign is complete."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/lint_dashboard_phase2.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/apply_phase2_remainder.py",
+          "line": 6,
+          "source_group": "scripts",
+          "text": "``lint_dashboard_phase2.py``."
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_lint_dashboard_phase2.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana import lint_dashboard_phase2 as lint"
+        }
+      ]
     },
     {
       "path": "scripts/ops/observability/grafana/qa_context.py",
@@ -24195,7 +24327,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 19,
       "references": [
         {
           "path": "docs/03-guides/dashboards/README.md",
@@ -24272,7 +24404,7 @@
         },
         {
           "path": "docs/03-guides/grafana-dashboard-configuration.md",
-          "line": 60,
+          "line": 70,
           "source_group": "docs",
           "text": "python -m scripts.ops.observability.grafana.rerender_grafana_screenshots \\"
         },
@@ -24451,7 +24583,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 320,
+          "line": 322,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py\"),"
         },
@@ -24632,7 +24764,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 422,
+          "line": 424,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         },
@@ -24855,6 +24987,21 @@
       "next_step": "Retain only as the bounded #8576 JSON-source evidence refresher; remove it after visual-baseline closeout or consolidate it into the canonical dashboard audit command."
     },
     {
+      "path": "scripts/ops/observability/seed_dc6_pipeline_run_report.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/ops/observability/test_lint_dashboard_phase2.py",
+          "line": 388,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.seed_dc6_pipeline_run_report import main"
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/observability/start_read_only_audit_stack.py",
       "type": "py",
       "status": "active",
@@ -24890,7 +25037,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 94,
+          "line": 96,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/trust_validation_fixture_materialization.py\""
         },
@@ -25558,7 +25705,7 @@
         },
         {
           "path": "docs/04-reference/reports/run-reports.md",
-          "line": 183,
+          "line": 228,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/runtime_manager.py start --stack main --timeout 180"
         },
@@ -25621,19 +25768,19 @@
         },
         {
           "path": "docs/04-reference/reports/run-reports.md",
-          "line": 140,
+          "line": 185,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay"
         },
         {
           "path": "docs/04-reference/reports/run-reports.md",
-          "line": 167,
+          "line": 212,
           "source_group": "docs",
           "text": "`verify_report_bind.py`. The verifier compares the normalized bind path,"
         },
         {
           "path": "docs/04-reference/reports/run-reports.md",
-          "line": 171,
+          "line": 216,
           "source_group": "docs",
           "text": "6. Operator re-check: `python scripts/ops/runtime/docker/verify_report_bind.py`."
         },

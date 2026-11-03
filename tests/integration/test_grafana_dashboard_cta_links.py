@@ -516,14 +516,19 @@ def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
             )
 
 
-def test_runtime_contextual_handoffs_do_not_duplicate_top_level_dq_provider_links() -> (
-    None
-):
-    """DQ and provider evidence are contextual actions, absent from the visible bus."""
+def test_runtime_contextual_handoffs_keep_single_top_level_dq_bus_link() -> None:
+    """DQ has one first-class bus link while provider evidence stays contextual."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     nav = get_dashboard_navigation_links(dashboard)
+    assert (
+        sum(
+            _extract_dashboard_uid(candidate["url"]) == "bioetl-dq-v2"
+            for candidate in nav
+        )
+        == 1
+    )
     assert all(
-        _extract_dashboard_uid(candidate["url"]) != "bioetl-dq-v2" for candidate in nav
+        "viewPanel=9480" not in str(candidate.get("url") or "") for candidate in nav
     )
     for pid in (4, 7):
         link = next(
@@ -532,7 +537,7 @@ def test_runtime_contextual_handoffs_do_not_duplicate_top_level_dq_provider_link
             if candidate["title"] == "Open Data Quality"
         )
         assert _extract_dashboard_uid(link["url"]) == "bioetl-dq-v2"
-        assert "var-stage=$__all" in link["url"]
+        assert "var-stage=" not in link["url"]
         assert "${run_id:queryparam}" in link["url"]
         assert "${__url_time_range}" in link["url"]
     for pid in (6, 259):
@@ -917,8 +922,8 @@ def test_nav_bus_never_uses_literal_stage_unknown() -> None:
             )
             target = _extract_dashboard_uid(url)
             if target == "bioetl-dq-v2":
-                assert "var-stage=$__all" in url, (
-                    f"{uid} → {target} must pass var-stage=$__all"
+                assert "var-stage=" not in url, (
+                    f"{uid} → {target} must not pass removed $stage"
                 )
 
     from scripts.ops.observability.grafana.render_nav_bus import _url_for
@@ -928,8 +933,7 @@ def test_nav_bus_never_uses_literal_stage_unknown() -> None:
             {"uid": target_uid, "path": target_uid, "title": "x"},
             source_uid="bioetl-overview-v2",
         )
-        assert "var-stage=unknown" not in url
-        assert "var-stage=$__all" in url
+        assert "var-stage=" not in url
 
 
 def test_provider_health_first_action_cta_contract() -> None:

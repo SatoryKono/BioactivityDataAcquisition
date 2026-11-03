@@ -43,7 +43,7 @@ nonregressing adoption retains prior accepted values where the fresh raw
 measurement is lower. Those 2566-module figures and the summary table below are
 historical measurement evidence for that commit, not the live source-module
 count. The current source inventory binding at the end of this document reports
-the live projection (`source_module_count=2571`). This is local measurement
+the live projection (`source_module_count=2601`). This is local measurement
 evidence, not CircleCI acceptance or lifecycle ADMIT for the final PR head.
 
 | Artifact | Historical measurement (`912f4839`) | Source |
@@ -52,7 +52,7 @@ evidence, not CircleCI acceptance or lifecycle ADMIT for the final PR head.
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
 | Source modules in module coverage inventory | `2566` | `reports/quality/module-coverage-inventory.json` (historical measurement) |
 | Unmatched live modules / uncovered measured modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, complete source-module snapshot |
-| Coverage inventory status counts | `2524` fully covered, `41` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `2517` fully covered, `67` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `0` | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Module-boundaries coupling | `10.0` (`control-plane` fan-in `1/2`, `runtime_builders` fan-in `2/3`) | `reports/quality/architecture-quality-scorecard.json`, `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py` |
@@ -313,8 +313,8 @@ by storage technology. Current owner boundaries:
 | Domain context exposed direct wall-clock creation | `src/bioetl/domain/context.py` no longer defines `current_utc_time`; effective-config domain artifacts use deterministic sentinel defaults. | `src/bioetl/application/runtime_clock.py`, `src/bioetl/infrastructure/time/system_clock.py`, `tests/architecture/test_time_seam_normalization.py`. | Moved runtime clock helpers to application/infrastructure seams and guarded domain defaults against wall-clock regressions. |
 | Runtime Gold Pandera strictness had no production-path non-strict guard | `tests/architecture/test_gold_validator_strict_runtime_paths.py` scans `src/bioetl` for `PanderaGoldValidator(..., strict=False)` and `ContractAwareGoldValidator(..., strict=False)`. | `src/bioetl/infrastructure/storage/silver/merged_operations.py`; `src/bioetl/infrastructure/validation/pandera_validator.py`. | Replaced the Silver merged-write non-strict Gold validator with `PanderaSilverValidator(strict=False)` and added the runtime guard. |
 | Quarantine payload immutability evidence stopped at aggregate/mock level | `tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_preserves_persisted_payload_and_hash` writes a real Delta table, updates status, and checks persisted `payload`, `payload_hash`, and `metadata`. | `src/bioetl/infrastructure/quarantine/unified.py`. | Added persisted immutability coverage and a read fallback for Delta string-view filter failures after status updates. |
-| Test governance refined assertless residuals are now fully eliminated while compatibility coverage stays bounded | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=85`, `refined_assertless_tests=0`, `compatibility_test_files=0`, and zero budget violations. | Contract schema tests under `tests/contract/**` plus governance inventory under `tests/architecture/**`. | Tightened observable assertions and governance classification so the refined assertless residual count is zero without regrowing compatibility-test scope. |
-| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `10.0`, `46` passing gates, and zero failing gates; `reports/quality/module-coverage-inventory.json` reports `2491` source modules with `0` unmeasured, `0` uncovered, and `7` partially covered modules; `module_boundaries_coupling` is `10.0` with `families_at_budget_count=0`. | Current committed `reports/quality/*.json` artifacts and `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py`. | Refreshed the current-state table for #11080 while keeping module inventory distinct from full line/branch coverage and preserving shrink-only budgets. |
+| Test governance refined assertless residuals are now fully eliminated while compatibility coverage stays bounded | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=71`, `refined_assertless_tests=0`, `compatibility_test_files=0`, and zero budget violations. | Contract schema tests under `tests/contract/**` plus governance inventory under `tests/architecture/**`. | Tightened observable assertions and governance classification so the refined assertless residual count is zero without regrowing compatibility-test scope. |
+| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `10.0`, `46` passing gates, and zero failing gates; `reports/quality/module-coverage-inventory.json` reports `2491` source modules with `0` unmeasured, `0` uncovered, and `67` partially covered modules; `module_boundaries_coupling` is `10.0` with `families_at_budget_count=0`. | Current committed `reports/quality/*.json` artifacts and `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py`. | Refreshed the current-state table for #11080 while keeping module inventory distinct from full line/branch coverage and preserving shrink-only budgets. |
 
 ## Open Questions
 
@@ -336,12 +336,12 @@ by storage technology. Current owner boundaries:
 ## Current source inventory binding
 
 - `source_tree_sha256=1cf6267ff6060cb5b965ed6e5a4420edaf61aa7c6915b9e2faeb73585aeb3f4c`
-- `source_module_count=2580`
-- Source modules: `2580`
+- `source_module_count=2601`
+- Source modules: `2601`
 - `coverage_inventory_module_count=2576`
 - Accepted coverage inventory: `2576` modules
-- Accepted inventory: `2515` fully covered
-- Accepted inventory: `60` partially covered
+- Accepted inventory: `2517` fully covered
+- Accepted inventory: `67` partially covered
 - Test inventory: `assertless_total_candidates=71`
 
 Derived by scripts/engineering/qa/report_topology_source_binding.py from

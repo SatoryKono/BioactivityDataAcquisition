@@ -77,7 +77,6 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "pipeline",
         "run_type",
         "run_id",
-        "stage",
     },
     "bioetl-runtime.json": {
         "workflow",
@@ -101,7 +100,6 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "pipeline",
         "run_type",
         "run_id",
-        "read_latency_quantile",
     },
     "bioetl-incident-v1.json": {
         "workflow",
@@ -134,16 +132,12 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "step_kind",
     },
 }
-for _name in (
-    "bioetl-control-plane-v1.json",
-    "bioetl-overview-v2.json",
-    "bioetl-dq-v2.json",
-    "bioetl-incident-v1.json",
-    "bioetl-run-explorer-v1.json",
-):
-    EXPECTED_VARS_BY_DASHBOARD[_name].add("provider_for_pipeline")
-    # Phase-1 A2 detail resolve: selected_* from selector-context, not fleet filters.
+# Phase-1 A2 detail resolve: selected_* from selector-context on boards that
+# still query with ${selected_pipeline}/${selected_run_id} (Overview + DQ).
+# Phase 4.5: dropped unused selected_* from Incident / Control Plane / Run Explorer.
+for _name in ("bioetl-overview-v2.json", "bioetl-dq-v2.json"):
     EXPECTED_VARS_BY_DASHBOARD[_name].update({"selected_pipeline", "selected_run_id"})
+# Phase 4.1: provider_for_pipeline removed as unused; Incident keeps read_latency_quantile.
 EXPECTED_VARS_BY_DASHBOARD["bioetl-incident-v1.json"].add("read_latency_quantile")
 
 _OPTIONAL_LOCAL_PANEL_TYPES = {"bioetl-selectorshell-panel"}
@@ -559,19 +553,23 @@ def _assert_overview_identity_panel(dashboard: dict) -> None:
         None,
     )
     assert identity_panel is not None
+    # Phase 2.5: identity reuses donor 9002 via Dashboard DS.
     assert identity_panel.get("datasource") == {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "bioetl-ops-http",
+        "type": "datasource",
+        "uid": "-- Dashboard --",
     }
     identity_targets = identity_panel.get("targets", [])
     assert isinstance(identity_targets, list) and len(identity_targets) == 1
     identity_target = identity_targets[0]
-    assert identity_target["parser"] == "uql"
-    assert identity_target["url"].startswith("/ops/observability/selected-run-status?")
-    assert "run_id=${run_id}" in identity_target["url"]
-    assert "parse-json | jsonata" in identity_target["uql"]
-    assert "Run ID" in identity_target["root_selector"]
-    assert "Not recorded in saved run evidence" in identity_target["root_selector"]
+    assert identity_target.get("panelId") == 9002
+    assert identity_target.get("withTransforms") is False
+    donor = next(p for p in get_dashboard_panels(dashboard) if p.get("id") == 9002)
+    donor_target = donor["targets"][0]
+    assert donor_target["url"].startswith("/ops/observability/selected-run-status?")
+    assert "run_id=${run_id}" in donor_target["url"]
+    assert "parse-json | jsonata" in donor_target["uql"]
+    assert "Run ID" in donor_target["root_selector"]
+    assert "Not recorded in saved run evidence" in donor_target["root_selector"]
 
 
 def _assert_overview_variable_sources(
@@ -996,16 +994,7 @@ def test_dashboard_has_required_variables(dashboard_path):
     assert expected_vars is not None, (
         f"Unexpected dashboard file: {dashboard_path.name}"
     )
-    expected_vars = expected_vars | {"provider_for_pipeline"}
-    provider_context = next(
-        variable
-        for variable in dashboard["templating"]["list"]
-        if variable["name"] == "provider_for_pipeline"
-    )
-    assert provider_context["hide"] == 2
-    assert provider_context["definition"] == (
-        'label_values(bioetl_workflow_pipeline_expected{pipeline=~"$pipeline"}, provider)'
-    )
+    assert "provider_for_pipeline" not in variables
     assert variables == expected_vars, (
         f"Dashboard {dashboard_path.name} variables mismatch. "
         f"Expected: {sorted(expected_vars)}, got: {sorted(variables)}"
@@ -1325,11 +1314,18 @@ def test_control_plane_identity_evidence_panels_exist() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     # Identity presence and checkpoint comparison remain separate from readiness.
-    for pid in (9408, 9406, 9423):
+    # Phase 2.5: 9423 consumes donor 9418 via Dashboard DS.
+    for pid in (9408, 9406):
         panel = panels[pid]
         assert panel["type"] == "table"
         assert all("run_id=${run_id}" in t["url"] for t in panel["targets"])
         assert all("expr" not in t for t in panel["targets"])
+    assert panels[9423]["type"] == "table"
+    assert panels[9423]["targets"][0].get("panelId") == 9418
+    assert (panels[9423]["targets"][0].get("datasource") or {}).get("uid") == (
+        "-- Dashboard --"
+    )
+    assert all("expr" not in t for t in panels[9423]["targets"])
     assert "Presence is not verification" in panels[9408]["description"]
     assert "MISMATCH is critical" in panels[9406]["description"]
     assert "Unknown is not a pass" in panels[9423]["description"]
@@ -1365,11 +1361,12 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     assert panels[9002]["options"]["cellHeight"] == "sm"
-    assert panels[9002]["gridPos"]["h"] == 13
+    # Phase 4.3 / rev7 §4.3: h in 7–8 with limitField=6.
+    assert panels[9002]["gridPos"]["h"] == 8
     assert panels[9300]["gridPos"]["y"] + panels[9300]["gridPos"]["h"] <= 18
     assert 215 not in panels
     explorer = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
-    assert {p["id"] for p in get_dashboard_panels(explorer)} == {1, 3010}
+    assert {p["id"] for p in get_dashboard_panels(explorer)} == {1000, 1, 3010}
 
 
 def test_control_plane_dashboard_links_are_scoped() -> None:
@@ -1378,7 +1375,8 @@ def test_control_plane_dashboard_links_are_scoped() -> None:
     assert {link["title"] for link in links} == {
         "Run Explorer",
         "Run Overview",
-        "6. Incident Workspace",
+        "Data Quality",
+        "Incident Workspace",
     }
     for link in links:
         assert link["includeVars"] is False
@@ -1410,11 +1408,15 @@ def test_silver_validation_panels_use_explicit_pipeline_label() -> None:
 def test_provider_dashboard_uses_pipeline_filters():
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9480)
+    # Phase 2.5: provider evidence consumes donor 9002 (SRS URL stays on donor).
+    assert panel["targets"][0].get("panelId") == 9002
+    donor = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9002)
     assert all(
         "pipeline=${pipeline}" in t["url"] and "run_id=${run_id}" in t["url"]
-        for t in panel["targets"]
+        for t in donor["targets"]
     )
     assert all("expr" not in t for t in panel["targets"])
+    assert all("expr" not in t for t in donor["targets"])
 
 
 def test_provider_dashboard_surfaces_current_health_status_panel() -> None:
@@ -1440,7 +1442,12 @@ def test_provider_health_status_mappings_match_description_enum() -> None:
     panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9481)
     mappings = panel["fieldConfig"]["defaults"]["mappings"]
     assert "UNKNOWN" in json.dumps(mappings)
-    assert panel["targets"][0]["root_selector"] == "provider_checks"
+    # Phase 2.5: provider check consumes donor 9002 provider frame.
+    assert panel["targets"][0].get("panelId") == 9002
+    assert any(
+        t.get("id") == "filterByValue" and "provider" in json.dumps(t)
+        for t in panel.get("transformations") or []
+    )
     assert "saved check verdict" in panel["description"]
 
 
@@ -1536,28 +1543,20 @@ def test_workflow_dashboard_collapses_step_diagnostics_below_first_screen() -> N
     assert any(9997 in {p["id"] for p in get_dashboard_panels(row)} for row in rows)
 
 
-@pytest.mark.parametrize(
-    ("dashboard_file", "variable_name"),
-    [
-        ("bioetl-dq-v2.json", "stage"),
-    ],
-)
-def test_stage_drilldown_variable_is_available_for_runtime_and_dq_dashboards(
-    dashboard_file: str, variable_name: str
-) -> None:
-    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
-    variable_map = {
-        var.get("name"): var
-        for var in dashboard.get("templating", {}).get("list", [])
-        if var.get("name")
-    }
-    stage_var = variable_map.get(variable_name)
-    assert stage_var is not None, f"{dashboard_file} must expose stage drill-down"
-    query = stage_var.get("query", {})
-    query_text = query.get("query", "") if isinstance(query, dict) else ""
-    expected_source = (
-        "bioetl_pipeline_stage_expected"
-        if dashboard_file == "bioetl-runtime.json"
-        else "bioetl_records_processed_total"
-    )
-    assert f"label_values({expected_source}" in query_text and "stage" in query_text
+def test_phase41_removes_dead_stage_and_provider_helper_vars() -> None:
+    """Phase 4.1 / F-20…F-23: unused stage + provider_for_pipeline stay gone."""
+    for name in (
+        "bioetl-overview-v2.json",
+        "bioetl-dq-v2.json",
+        "bioetl-incident-v1.json",
+        "bioetl-control-plane-v1.json",
+        "bioetl-run-explorer-v1.json",
+    ):
+        dashboard = load_dashboard(Path("grafana/dashboards") / name)
+        names = {
+            var.get("name")
+            for var in dashboard.get("templating", {}).get("list", [])
+            if var.get("name")
+        }
+        assert "provider_for_pipeline" not in names, name
+        assert "stage" not in names, name
