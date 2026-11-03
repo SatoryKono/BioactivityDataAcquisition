@@ -79,6 +79,7 @@
       "metadata_status": "managed_inventory",
       "reachability_status": "direct_reference",
       "reachability_owner_paths": [
+        "tests/e2e/conftest.py",
         "tests/e2e/test_full_pipeline_chain_e2e.py"
       ]
     },

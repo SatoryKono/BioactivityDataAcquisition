@@ -8,6 +8,8 @@ import pytest
 
 from bioetl.interfaces.http import _run_type_universe_options as module
 
+pytestmark = pytest.mark.unit
+
 
 def test_supplement_adds_telemetry_only_run_type(
     monkeypatch: pytest.MonkeyPatch,
