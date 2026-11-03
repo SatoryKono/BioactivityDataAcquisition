@@ -34,6 +34,7 @@ SRS_URL = (
 FRAME = "_bioetl_frame"
 VIEW_PANEL_TRUST_SELF = "viewPanel=9418"
 VIEW_PANEL_TRUST_SIBLING = "viewPanel=9414"
+_SELECT_RUN = "SELECT RUN"
 
 OV_IDENTITY = (
     "/d/bioetl-overview-v2/2-overview"
@@ -550,7 +551,7 @@ def _ensure_exclusions_crit_color(panel: dict[str, Any]) -> None:
         )
         changed = True
     # No-selection must not reuse the UNKNOWN value map (Codex P2 #4449151423).
-    select_run = {"text": "SELECT RUN", "color": "gray"}
+    select_run = {"text": _SELECT_RUN, "color": "gray"}
     value_maps = [
         (index, options)
         for index, item in enumerate(mappings)
@@ -558,13 +559,13 @@ def _ensure_exclusions_crit_color(panel: dict[str, Any]) -> None:
     ]
     if value_maps:
         index, options = value_maps[0]
-        if options.get("SELECT RUN") != select_run:
+        if options.get(_SELECT_RUN) != select_run:
             options = dict(options)
-            options["SELECT RUN"] = select_run
+            options[_SELECT_RUN] = select_run
             mappings[index] = {"type": "value", "options": options}
             changed = True
     else:
-        mappings.append({"type": "value", "options": {"SELECT RUN": select_run}})
+        mappings.append({"type": "value", "options": {_SELECT_RUN: select_run}})
         changed = True
     if changed:
         defaults["mappings"] = mappings
