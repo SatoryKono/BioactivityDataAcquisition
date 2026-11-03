@@ -1044,7 +1044,6 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
                 "excludeByName": {
                     "row_status": True,
                     "Time": True,
-                    _COUNT_IN: True,
                     "value A": True,
                     "percentage A": True,
                 },
