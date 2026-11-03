@@ -28,7 +28,10 @@ FULL_SUITE_CONFIGURATION_PREFIXES = (
     "tool.pytest-asyncio",
     "build-system",
 )
-NARROW_CONFIGURATION_PREFIXES = ("tool.setuptools.packages.find.exclude", "tool.ruff.lint.select",)
+NARROW_CONFIGURATION_PREFIXES = (
+    "tool.setuptools.packages.find.exclude",
+    "tool.ruff.lint.select",
+)
 # Stub-only wheels have no runtime import owner. Keep reviewed ownership explicit.
 STUB_RUNTIME_DISTRIBUTIONS = {"types-openpyxl": ("openpyxl", "openpyxl")}
 
