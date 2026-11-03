@@ -10485,7 +10485,7 @@
   "resource_parts": [
     {
       "file": "configs/quality/external_resource_inventory/part-01.json",
-      "sha256": "ab2ade41803bc6419fa0b07cc391b9d6b8e4f3f9ac109c23b1e0b25977449de2",
+      "sha256": "7a792a75ce0c8bf406316a70a5f5e0edf97dc7cb64b8aa7511e715ebc66dce88",
       "resource_count": 44
     },
     {

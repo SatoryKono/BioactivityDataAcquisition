@@ -17,7 +17,9 @@
   "reference_moves": [
     {
       "identity": "application.services.run_reports.artifact_digest.file",
-      "fields": ["production_binding"],
+      "fields": [
+        "production_binding"
+      ],
       "from": {
         "file": "src/bioetl/application/services/execution/pipeline_runner_service.py",
         "line": 403,
@@ -30,7 +32,22 @@
       }
     }
   ],
-  "resource_updates": {},
+  "resource_updates": {
+    "application.services.run_reports.artifact_digest.file": {
+      "call_path": [
+        "run/composite/workflow finalization and report/health inspection -> FileRunReportStoreAdapter",
+        "bioetl.application.services.run_reports.enrichment._cached_bronze_batch_artifacts -> bioetl.application.services.run_reports.artifact_digest.file_sha256",
+        "bioetl.application.services.run_reports.enrichment.build_artifacts_from_result -> bioetl.application.services.run_reports.enrichment._cached_bronze_batch_artifacts",
+        "bioetl.application.services.execution._pipeline_runner_support.finalize_pipeline_run_report -> bioetl.application.services.run_reports.enrichment.build_artifacts_from_result",
+        "bioetl.application.services.execution.pipeline_runner_finalize.finalize_pipeline_service_report -> bioetl.application.services.execution._pipeline_runner_support.finalize_pipeline_run_report",
+        "bioetl.application.services.execution.pipeline_runner_service.PipelineRunnerService._finalize_report -> bioetl.application.services.execution.pipeline_runner_finalize.finalize_pipeline_service_report",
+        "bioetl.application.services.execution.pipeline_runner_service.PipelineRunnerService -> bioetl.application.services.execution.pipeline_runner_service.PipelineRunnerService._finalize_report",
+        "bioetl.composition.bootstrap.runtime.runner.bootstrap_pipeline_runner_service -> bioetl.application.services.execution.pipeline_runner_service.PipelineRunnerService",
+        " -> concrete allocation inside file_sha256",
+        " -> configured factory"
+      ]
+    }
+  },
   "additional_bindings": {},
   "new_resources": [],
   "new_exclusions": []

@@ -81,20 +81,13 @@ def test_pipeline_run_context_exposes_required_log_correlation_fields() -> None:
 @pytest.mark.architecture
 def test_pipeline_runner_service_binds_logger_through_context_contract() -> None:
     """Runner service must source correlation fields from PipelineRunContext."""
-    source = "\n".join(
-        [
-            PIPELINE_RUNNER_SERVICE_PATH.read_text(encoding="utf-8"),
-            PIPELINE_RUNNER_FINALIZE_PATH.read_text(encoding="utf-8"),
-        ]
-    )
+    service_source = PIPELINE_RUNNER_SERVICE_PATH.read_text(encoding="utf-8")
+    finalize_source = PIPELINE_RUNNER_FINALIZE_PATH.read_text(encoding="utf-8")
 
-    assert "context.log_correlation_fields()" in source, (
-        "PipelineRunnerService must bind its run logger through "
-        "PipelineRunContext.log_correlation_fields() so correlation anchors "
-        "stay explicit and testable."
-    )
-    assert "self.logger.bind(**context.log_correlation_fields())" in source, (
-        "PipelineRunnerService must pass the explicit correlation contract "
+    assert "logger=self.logger" in service_source
+    assert "create_pipeline_run_logger(" in service_source
+    assert "logger.bind(**context.log_correlation_fields())" in finalize_source, (
+        "create_pipeline_run_logger must pass the explicit correlation contract "
         "directly into LoggerPort.bind()."
     )
 
