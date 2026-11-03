@@ -1,0 +1,26 @@
+schema_version: "2.0.0"
+composite:
+  name: composite_many_to_one_contract
+  version: "1.0.0"
+  seed:
+    pipeline: chembl_publication
+    output_keys: [publication_id, doi]
+    silver_table: silver/chembl/publication
+  enrichers:
+    - pipeline: crossref_publication
+      join_keys: [doi]
+      cardinality: many_to_one
+      aggregation:
+        group_by: doi
+        order_by: [publication_id]
+        fields:
+          title_list:
+            source: title
+            agg: collect_list
+  merge:
+    output:
+      silver: silver/composite/publication
+      gold: gold/composite/publication
+    sort_by:
+      silver: [entity_id, publication_id]
+      gold: [entity_id, publication_id]
