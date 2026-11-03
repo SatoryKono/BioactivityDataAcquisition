@@ -14,14 +14,26 @@ def apply_overview_identity(payload: dict) -> None:
         by_id[pid]["options"]["cellHeight"] = "sm"
     # Fixed status widths must fit the existing 200% CSS budget; Reason stays flexible.
     # F-15 titles: Processing / Overall verdict / Trust (aligned with DQ/Incident).
+    # Keep property order when width is already correct so workflow_scope stays
+    # idempotent for saved-run panel 9603 (test_workflow_scope).
     for override in by_id[9603]["fieldConfig"]["overrides"]:
         field = override["matcher"].get("options")
-        if field in {"Overall verdict", "Processing", "Trust", "Status", "Result"}:
+        if field not in {"Overall verdict", "Processing", "Trust", "Status", "Result"}:
+            continue
+        props = override["properties"]
+        width_props = [prop for prop in props if prop.get("id") == "custom.width"]
+        if field in {"Processing", "Trust", "Result"}:
+            if len(width_props) == 1 and width_props[0].get("value") == 80:
+                continue
             override["properties"] = [
-                prop for prop in override["properties"] if prop["id"] != "custom.width"
+                prop for prop in props if prop.get("id") != "custom.width"
             ]
-            if field in {"Processing", "Trust", "Result"}:
-                override["properties"].append({"id": "custom.width", "value": 80})
+            override["properties"].append({"id": "custom.width", "value": 80})
+            continue
+        if width_props:
+            override["properties"] = [
+                prop for prop in props if prop.get("id") != "custom.width"
+            ]
     # Provider evidence is now local. Keep the three domain actions discoverable
     # without forwarding legacy provider selectors that Overview does not own.
     links = by_id[9002]["fieldConfig"]["defaults"].setdefault("links", [])
