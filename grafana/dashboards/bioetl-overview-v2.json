@@ -1727,6 +1727,10 @@
                 "INCOMPLETE": {
                   "text": "INCOMPLETE",
                   "color": "orange"
+                },
+                "QUERY ERROR": {
+                  "text": "QUERY ERROR",
+                  "color": "red"
                 }
               }
             },

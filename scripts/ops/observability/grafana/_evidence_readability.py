@@ -188,7 +188,8 @@ def _saved_run(p: dict[int, dict]) -> None:
     heights: dict[int, int] = {}
     if 9460 in p and p[9460].get("type") != "text":
         heights[9460] = 8
-    heights[9451] = 12
+    # rev7 §4.3 / F-30: domains table h in 7–8 at limitField 6 (was 12).
+    heights[9451] = 8
     if 9452 in p:
         heights[9452] = 8
     _stack(p[9450], heights)

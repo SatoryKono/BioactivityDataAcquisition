@@ -1727,7 +1727,7 @@
             "x": 0,
             "y": 41,
             "w": 24,
-            "h": 12
+            "h": 8
           },
           "datasource": {
             "type": "datasource",
@@ -1982,7 +1982,7 @@
           "description": "SELECTED RUN · Canonical identity is Overview 9300 (rev7 §2.4).",
           "gridPos": {
             "x": 0,
-            "y": 53,
+            "y": 49,
             "w": 24,
             "h": 8
           },
