@@ -61,6 +61,12 @@ MODULE_GROUP_OVERRIDES = {
     "bioetl.composition.selected_run_contract_exclusions": (
         "composition.runtime_builders"
     ),
+    # Leaf control-plane path/access helpers stay under runtime_builders so the
+    # unique composition.control_plane_* group edges do not inflate the total.
+    "bioetl.composition.control_plane_paths": "composition.runtime_builders",
+    "bioetl.composition.control_plane_service_access": (
+        "composition.runtime_builders"
+    ),
 }
 TYPE_CHECKING_NAME = "TYPE_CHECKING"
 _FRONTMATTER_DELIMITER = "---"

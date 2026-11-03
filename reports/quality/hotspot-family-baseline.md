@@ -9,10 +9,10 @@
 | Family | Files | Total LOC | Files >=250 LOC | Helper ratio | Duplication | Max fan-in | Max fan-in module | Budgets | Budget warnings | Budget review notes |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- | --- |
 | `application_core` | 207 | 25908 | 0 | 0.384 | 0 | 5 | `bioetl.application.core.record_processor_config` | `files_ge_250_loc=0, max_internal_fan_in=7` | `-` | `-` |
-| `composition_bootstrap_runtime` | 49 | 6467 | 0 | 0.288 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
-| `composition_factories_pipeline` | 32 | 3855 | 0 | 0.358 | 0 | 2 | `bioetl.composition.factories.pipeline.runner_constructor` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
-| `application_services_control_plane` | 130 | 15443 | 0 | 0.400 | 0 | 1 | `bioetl.application.services.control_plane.workflow.manifest_models` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `-` |
-| `composition_runtime_builders` | 55 | 6587 | 0 | 0.345 | 0 | 2 | `bioetl.composition.runtime_builders.runner_inputs` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
+| `composition_bootstrap_runtime` | 49 | 6484 | 0 | 0.291 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
+| `composition_factories_pipeline` | 32 | 3857 | 0 | 0.358 | 0 | 2 | `bioetl.composition.factories.pipeline.runner_constructor` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
+| `application_services_control_plane` | 137 | 16486 | 0 | 0.393 | 0 | 1 | `bioetl.application.services.control_plane.workflow.manifest_models` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `-` |
+| `composition_runtime_builders` | 55 | 6816 | 0 | 0.349 | 0 | 2 | `bioetl.composition.runtime_builders.runner_inputs` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 
 ## `application_core` internal fan-in
 
@@ -37,14 +37,14 @@ No modules currently sit at the fan-in cap.
 
 ## `application_services_control_plane` internal fan-in
 
-- distribution: `0:23, 1:107`
+- distribution: `0:24, 1:113`
 - at_budget_module_count: `0` (cap `2`)
 
 No modules currently sit at the fan-in cap.
 
 ## `composition_runtime_builders` internal fan-in
 
-- distribution: `0:3, 1:26, 2:26`
+- distribution: `0:3, 1:27, 2:25`
 - at_budget_module_count: `0` (cap `3`)
 
 No modules currently sit at the fan-in cap.

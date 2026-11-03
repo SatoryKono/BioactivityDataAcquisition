@@ -53,7 +53,7 @@ from bioetl.composition.composite_catalog import (
     list_configured_pipeline_names as list_configured_pipeline_names,
 )
 
-from bioetl.composition.runtime_builders.evidence_location_binding import (
+from bioetl.composition.control_plane_paths import (
     EvidenceLocationBindingContext as EvidenceLocationBindingContext,
     build_evidence_location_binding_context as build_evidence_location_binding_context,
     relative_data_root_under_alias as relative_data_root_under_alias,

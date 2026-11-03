@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from bioetl.domain.control_plane.workflow_manifest import WorkflowManifest
     from bioetl.infrastructure.config.settings_api import Settings
 
-from bioetl.composition.runtime_builders.evidence_location_binding import (
+from bioetl.composition.control_plane_paths import (
     EvidenceLocationBindingContext,
     build_evidence_location_binding_context,
     relative_data_root_under_alias,

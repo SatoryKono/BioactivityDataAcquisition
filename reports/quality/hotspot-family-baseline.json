@@ -1628,9 +1628,9 @@
       ],
       "duplication_clusters": 0,
       "files": 49,
-      "total_loc": 6467,
+      "total_loc": 6484,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.288,
+      "helper_function_ratio": 0.291,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.tracing_bootstrap",
       "bounded_growth_budgets": {
@@ -2026,7 +2026,7 @@
       ],
       "duplication_clusters": 0,
       "files": 32,
-      "total_loc": 3855,
+      "total_loc": 3857,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.358,
       "max_internal_fan_in": 2,
@@ -2298,10 +2298,10 @@
         "src/bioetl/application/services/control_plane/"
       ],
       "duplication_clusters": 0,
-      "files": 130,
-      "total_loc": 15443,
+      "files": 137,
+      "total_loc": 16486,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.4,
+      "helper_function_ratio": 0.393,
       "max_internal_fan_in": 1,
       "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
       "bounded_growth_budgets": {
@@ -2310,8 +2310,8 @@
       },
       "internal_fan_in_census": {
         "distribution": {
-          "0": 23,
-          "1": 107
+          "0": 24,
+          "1": 113
         },
         "modules": [
           {
@@ -2328,6 +2328,11 @@
           },
           {
             "module": "bioetl.application.services.control_plane.effective_config",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.effective_config.config_source_hashing",
             "fan_in": 0,
             "runtime_importers": []
           },
@@ -2364,6 +2369,48 @@
             "fan_in": 1,
             "runtime_importers": [
               "bioetl.application.services.control_plane.effective_config"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.evidence_location",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.workflow.manifest_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.evidence_location.registration",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.evidence_location"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.evidence_location.registration_models",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.evidence_location.registration"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.evidence_location.registration_observations",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.evidence_location.registration"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.evidence_location.resolver",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.evidence_location"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.evidence_location.resolver_types",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.evidence_location.resolver"
             ]
           },
           {
@@ -3187,6 +3234,12 @@
           "bioetl.application.services.control_plane.effective_config.runtime_overrides",
           "bioetl.application.services.control_plane.effective_config.serialization",
           "bioetl.application.services.control_plane.effective_config.service",
+          "bioetl.application.services.control_plane.evidence_location",
+          "bioetl.application.services.control_plane.evidence_location.registration",
+          "bioetl.application.services.control_plane.evidence_location.registration_models",
+          "bioetl.application.services.control_plane.evidence_location.registration_observations",
+          "bioetl.application.services.control_plane.evidence_location.resolver",
+          "bioetl.application.services.control_plane.evidence_location.resolver_types",
           "bioetl.application.services.control_plane.forensic.diagnostics_support",
           "bioetl.application.services.control_plane.forensic_diff_service",
           "bioetl.application.services.control_plane.ledger",
@@ -3306,9 +3359,9 @@
       ],
       "duplication_clusters": 0,
       "files": 55,
-      "total_loc": 6587,
+      "total_loc": 6816,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.345,
+      "helper_function_ratio": 0.349,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.runtime_builders.runner_inputs",
       "bounded_growth_budgets": {
@@ -3318,8 +3371,8 @@
       "internal_fan_in_census": {
         "distribution": {
           "0": 3,
-          "1": 26,
-          "2": 26
+          "1": 27,
+          "2": 25
         },
         "modules": [
           {
@@ -3484,14 +3537,6 @@
             ]
           },
           {
-            "module": "bioetl.composition.runtime_builders._run_manifest_sink_policy",
-            "fan_in": 2,
-            "runtime_importers": [
-              "bioetl.composition.runtime_builders._run_manifest_builder_policy",
-              "bioetl.composition.runtime_builders.run_manifest_support"
-            ]
-          },
-          {
             "module": "bioetl.composition.runtime_builders._run_manifest_snapshot_resolution",
             "fan_in": 2,
             "runtime_importers": [
@@ -3587,6 +3632,13 @@
             "fan_in": 1,
             "runtime_importers": [
               "bioetl.composition.runtime_builders.control_plane"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.evidence_location_registration",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.run_manifest_builder"
             ]
           },
           {
@@ -3739,7 +3791,6 @@
           "bioetl.composition.runtime_builders._run_manifest_identity_ref_values",
           "bioetl.composition.runtime_builders._run_manifest_refs",
           "bioetl.composition.runtime_builders._run_manifest_replay_support",
-          "bioetl.composition.runtime_builders._run_manifest_sink_policy",
           "bioetl.composition.runtime_builders._run_manifest_snapshot_resolution",
           "bioetl.composition.runtime_builders._run_manifest_snapshot_support",
           "bioetl.composition.runtime_builders._runner_control_plane_artifact_policy",

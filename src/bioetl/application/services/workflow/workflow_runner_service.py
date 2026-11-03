@@ -106,6 +106,65 @@ def _cohort_producer_ids(config: WorkflowConfig) -> set[str]:
     return producers
 
 
+def _finalize_workflow_run_result(
+    *,
+    service: WorkflowRunnerService,
+    config: WorkflowConfig,
+    state: WorkflowExecutionState,
+    workflow_context_labels: Mapping[str, str],
+    workflow_run_id: str | None,
+    manifest_id: str | None,
+    execution_fingerprint: str | None,
+    resumed: bool,
+    started_at: datetime,
+    started_monotonic: float,
+) -> WorkflowRunExecutionResult:
+    """Attach metrics, evidence verify, and reports after step execution."""
+    record_workflow_run_metrics(
+        metrics=service.metrics,
+        workflow_name=config.name,
+        status=state.status,
+        context_labels=workflow_context_labels,
+    )
+    result = workflow_result_from_state(config.name, state)
+    identified_result = _require_workflow_result(
+        replace(
+            result,
+            workflow_run_id=workflow_run_id,
+            manifest_id=manifest_id,
+            execution_fingerprint=execution_fingerprint,
+            resumed=resumed,
+            started_at=started_at.isoformat(),
+            completed_at=current_utc_time().isoformat(),
+            duration_seconds=perf_counter() - started_monotonic,
+        )
+    )
+    observation_token = bind_run_observations_if_unbound()
+    try:
+        verify = service.evidence_location_verify
+        soft_invoke_evidence_location_verify(
+            None if verify is None else (lambda: verify(identified_result)),
+            kind="workflow",
+            owner=str(identified_result.workflow_name),
+            run_id=str(identified_result.workflow_run_id or ""),
+        )
+        reported = attach_workflow_run_report(
+            config=config,
+            result=identified_result,
+            logger=getattr(service.pipeline_runner, "logger", None),
+            store=service.report_store,
+            report_root=service.report_root,
+        )
+        archive_workflow_children(
+            config,
+            reported,
+            getattr(service.pipeline_runner, "archive_control_plane", None),
+        )
+        return reported
+    finally:
+        reset_run_observations_if_bound(observation_token)
+
+
 @dataclass(slots=True)
 class WorkflowRunnerService:
     """Execute workflow pipeline and transform steps in topological order."""
@@ -191,7 +250,8 @@ class WorkflowRunnerService:
                 step_completed_callback=step_completed_callback,
             )
 
-        return self._finalize_run_result(
+        return _finalize_workflow_run_result(
+            service=self,
             config=config,
             state=state,
             workflow_context_labels=workflow_context_labels,
@@ -202,63 +262,6 @@ class WorkflowRunnerService:
             started_at=started_at,
             started_monotonic=started_monotonic,
         )
-
-    def _finalize_run_result(
-        self,
-        *,
-        config: WorkflowConfig,
-        state: WorkflowExecutionState,
-        workflow_context_labels: Mapping[str, str],
-        workflow_run_id: str | None,
-        manifest_id: str | None,
-        execution_fingerprint: str | None,
-        resumed: bool,
-        started_at: datetime,
-        started_monotonic: float,
-    ) -> WorkflowRunExecutionResult:
-        record_workflow_run_metrics(
-            metrics=self.metrics,
-            workflow_name=config.name,
-            status=state.status,
-            context_labels=workflow_context_labels,
-        )
-        result = workflow_result_from_state(config.name, state)
-        identified_result = _require_workflow_result(
-            replace(
-                result,
-                workflow_run_id=workflow_run_id,
-                manifest_id=manifest_id,
-                execution_fingerprint=execution_fingerprint,
-                resumed=resumed,
-                started_at=started_at.isoformat(),
-                completed_at=current_utc_time().isoformat(),
-                duration_seconds=perf_counter() - started_monotonic,
-            )
-        )
-        observation_token = bind_run_observations_if_unbound()
-        try:
-            verify = self.evidence_location_verify
-            soft_invoke_evidence_location_verify(
-                None if verify is None else (lambda: verify(identified_result)),
-                kind="workflow",
-                owner=str(identified_result.workflow_name),
-                run_id=str(identified_result.workflow_run_id or ""),
-            )
-            reported = attach_workflow_run_report(
-                config=config,
-                result=identified_result,
-                logger=getattr(self.pipeline_runner, "logger", None),
-                store=self.report_store,
-                report_root=self.report_root,
-            )
-            archive_workflow_children(
-                config,
-                reported,
-                getattr(self.pipeline_runner, "archive_control_plane", None),
-            )
-            return reported
-        finally:
-            reset_run_observations_if_bound(observation_token)
 
     def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
         """Record planned pipeline scopes before workflow step execution."""

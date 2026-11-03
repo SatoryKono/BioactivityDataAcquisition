@@ -78,7 +78,6 @@ class StageId(StrEnum):
     GOLD = "gold"
     EXPORT = "export"
 
-
 @dataclass(frozen=True, slots=True)
 class ReasonRemoval:
     """One reason-coded removal aggregate."""
