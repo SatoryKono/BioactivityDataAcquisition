@@ -220,13 +220,11 @@
       "kind": "http",
       "panel_id": 9403,
       "panel_title": "Inspect Processed Records",
-      "query": "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query": "/ops/observability/pipeline-run-report?pipeline=${selected_pipeline}&run_id=${selected_run_id}",
       "query_tokens": [
-        "/ops/observability/selected-run-status",
+        "/ops/observability/pipeline-run-report",
         "pipeline",
-        "run_id",
-        "run_type",
-        "workflow"
+        "run_id"
       ],
       "ref_id": "StageInput",
       "runbook_urls": [],
@@ -520,7 +518,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "gray",
+          "color": "green",
           "value": null
         },
         {
@@ -1411,7 +1409,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -1446,7 +1444,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -1547,7 +1545,7 @@
       ],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -1816,7 +1814,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
@@ -1918,7 +1916,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "#555555",
+          "color": "green",
           "value": null
         },
         {
