@@ -113,9 +113,6 @@ def _findings() -> list[object]:
     vulture = Vulture()
     vulture.scavenge([str(BIOETL_PATH)])
     vulture.scavenge([str(REPO_ROOT / ".vulture_whitelist.py")])
-    vulture.scavenge([str(REPO_ROOT / ".vulture_whitelist.py")])
-    vulture.scavenge([str(REPO_ROOT / ".vulture_whitelist.py")])
-    vulture.scavenge([str(REPO_ROOT / ".vulture_whitelist.py")])
     return [
         item
         for item in vulture.get_unused_code(min_confidence=MIN_CONFIDENCE)
