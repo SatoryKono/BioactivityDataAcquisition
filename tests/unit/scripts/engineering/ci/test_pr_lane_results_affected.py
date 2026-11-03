@@ -21,6 +21,7 @@ pytestmark = pytest.mark.unit
 
 HEAD = "a" * 40
 
+
 def test_required_tests_gate_requires_shadow_step() -> None:
     """A required tests gate fails closed when the shadow step did not succeed."""
     failures = assert_step_outcomes(
