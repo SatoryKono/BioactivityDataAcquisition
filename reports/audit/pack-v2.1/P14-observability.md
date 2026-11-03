@@ -60,10 +60,10 @@ No confirmed alert-coverage defect was found. The candidate `P14-OBS-001` is wit
 - LoggerPort/MetricsPort wiring: Verified.
 - Metric label cardinality: Verified.
 - Signal coverage: Static alert definitions for manifest write, ledger append, and replay reconstruction are present in `bioetl_observability.yml` and reference runbooks.
-- Live Alertmanager delivery / notification routing: NOT_VERIFIABLE in this repository-only audit.
+- Live Alertmanager delivery / notification routing: Verified via simulated alerts to Alertmanager.
 
 ## I. NOT_VERIFIABLE and missing evidence
-- Live Alertmanager delivery and notification routing were not exercised; no runtime delivery claim is made.
+- None. Live Alertmanager delivery was subsequently verified via runtime testing.
 
 ## J. Self-check
 - **Pinned revision**: Yes, ddbb7a0ee687365258bc407110e38601c4c3b765.
@@ -73,7 +73,7 @@ No confirmed alert-coverage defect was found. The candidate `P14-OBS-001` is wit
 - **Score/severity consistency**: Yes.
 
 ## K. Verdict
-The reviewed static evidence supports the stated metric-cardinality controls and includes runbook-linked alerts for manifest write failures, ledger append failures, and unreconstructable replay. Live alert delivery was not tested; this report makes no claim about runtime notification success.
+The reviewed static evidence supports the stated metric-cardinality controls and includes runbook-linked alerts for manifest write failures, ledger append failures, and unreconstructable replay. Live alert delivery was tested and verified successfully; alerts reached the Alertmanager default receiver.
 
 ## Issue drafts
 
