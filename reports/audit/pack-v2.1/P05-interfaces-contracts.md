@@ -165,13 +165,14 @@
 
 ### Test Gaps
 
-- Full `tests/architecture/` suite verified completely.
+- Full `tests/architecture/` suite not re-executed in this regeneration (E3 incomplete beyond focused subset).
 - Live HTTP request/response validation excluded (NOT_VERIFIABLE).
 - E4 has no live backend execution (static extraction only).
 
 ## I. NOT_VERIFIABLE and missing evidence
 
 - **Live HTTP Endpoints**: Actual HTTP request/response validation requires a running backend instance which is excluded from this static audit.
+- **E3 full suite**: Only the focused five-file architecture subset is executed at regeneration (unless `--skip-e3`); full-suite success is not claimed.
 - **E4 runtime matrix**: Static extraction from `src/bioetl/interfaces`; live HTTP incomplete.
 
 ## J. Self-check

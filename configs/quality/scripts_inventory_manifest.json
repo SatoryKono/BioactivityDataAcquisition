@@ -1,12 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-03T06:39:04.026298+00:00",
+  "generated_at": "2026-11-03T07:16:29.425664+00:00",
   "summary": {
     "total_scripts": 705,
     "status_counts": {
       "active": 334,
-      "orphan": 1,
-      "supporting": 370
+      "supporting": 371
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -14,7 +13,7 @@
       "ci": 75,
       "docs": 291,
       "other": 16,
-      "scripts": 591,
+      "scripts": 592,
       "skills": 13,
       "tests": 520
     }
@@ -9788,13 +9787,13 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 131,
+          "line": 137,
           "source_group": "ci",
           "text": "uv run --no-sync --frozen --no-build python -m scripts.engineering.ci pr-gate classify \"${classify_args[@]}\""
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 292,
+          "line": 298,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results assert-steps \\"
         }
@@ -10131,7 +10130,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 338,
+          "line": 344,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -10412,13 +10411,13 @@
         },
         {
           "path": "tests/architecture/test_required_checks_prose_consistency.py",
-          "line": 492,
+          "line": 494,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_gate import classify_changes, load_catalog"
         },
         {
           "path": "tests/architecture/test_required_checks_prose_consistency.py",
-          "line": 504,
+          "line": 506,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_gate import ("
         }
@@ -10437,7 +10436,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 870,
+          "line": 876,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -10461,7 +10460,7 @@
         },
         {
           "path": "tests/architecture/test_required_checks_prose_consistency.py",
-          "line": 509,
+          "line": 511,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_lane_results import DOCS_LANE, OWNER_STEPS"
         },
@@ -10945,13 +10944,13 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 400,
+          "line": 406,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-mar"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 459,
+          "line": 465,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target \"${targets[@]}\" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-timeout"
         },
@@ -13091,7 +13090,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 202,
+          "line": 208,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.diagnostics audit-structure --path ."
         },
@@ -14027,7 +14026,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 385,
+          "line": 391,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -15720,7 +15719,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 321,
+          "line": 322,
           "source_group": "scripts",
           "text": "`generate_hotspot_degradation_report.py` performance-evidence owner. It has a"
         },
@@ -15741,10 +15740,21 @@
     {
       "path": "scripts/engineering/qa/generate_p05_interfaces_audit_report.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/README.md",
+          "line": 182,
+          "source_group": "scripts",
+          "text": "- `scripts/engineering/qa/generate_p05_interfaces_audit_report.py` (`python -m scripts.engineering.qa.generate_p05_interfaces_audit_report`) regenerates `reports/audit/pack-v2.1/P05-interfaces-contrac"
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-03",
+      "next_step": "Retain as the canonical P05 interfaces/contracts audit report generator while pack-v2.1 P05 regeneration depends on this script; promote to an active QA router command only after scripts.engineering.qa __main__ owns a matching active slot."
     },
     {
       "path": "scripts/engineering/qa/generate_reproducibility_support_matrix.py",
@@ -16340,7 +16350,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 182,
+          "line": 183,
           "source_group": "scripts",
           "text": "- `scripts/engineering/qa/reduce_architecture_debt.py` (`python -m scripts.engineering.qa reduce-architecture-debt`) builds the orchestration plan consumed by the architecture-debt agent."
         },
@@ -16607,13 +16617,13 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 209,
+          "line": 210,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_architecture_quality_scorecard.py"
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 244,
+          "line": 245,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_architecture_quality_scorecard.py"
         },
@@ -17369,7 +17379,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 247,
+          "line": 248,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_duplication_baseline.py"
         },
@@ -17936,7 +17946,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 192,
+          "line": 193,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_provider_contract_drift.py --output reports/quality/provider-contract-drift-report.json --fail-on breaking"
         },
@@ -18144,13 +18154,13 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 189,
+          "line": 190,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_vcr_metadata_catalog.py --check"
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 190,
+          "line": 191,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_vcr_metadata_catalog.py --update"
         },
@@ -18433,7 +18443,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 263,
+          "line": 264,
           "source_group": "scripts",
           "text": "coverage acceptance is based on `python -m scripts.engineering.qa.run_local_coverage_verify`"
         }
@@ -20637,13 +20647,13 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 177,
+          "line": 183,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/repo/check_github_actions_runtime_policy.py --pr-required-pins --check"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 685,
+          "line": 691,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
