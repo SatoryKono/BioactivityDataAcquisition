@@ -311,6 +311,9 @@ async def test_run_normal_a_b_a(e2e_data_dir: Path) -> None:
     """E2E: Normal pipeline runs in A -> B -> A pattern in a single process."""
     runner1 = bootstrap_target_runner(limit=2)
     await runner1.run()  # type: ignore[attr-defined]
+    assert runner1.execution_metrics["records_fetched"] > 0  # type: ignore[index]
+    assert runner1.execution_metrics["records_silver"] > 0  # type: ignore[index]
+
     await run_molecule_then_target_and_assert(
         e2e_data_dir,
         require_a2_records_fetched=True,
@@ -333,6 +336,9 @@ async def test_run_cancellation_and_restart(
     )
     with patched_extract_records(runner1, monkeypatch, gated):
         await cancel_after_first_record(runner1, first_record_ready)
+
+    assert runner1.execution_metrics["records_fetched"] == 0  # type: ignore[index]
+
     await run_molecule_then_target_and_assert(e2e_data_dir)
 
 
