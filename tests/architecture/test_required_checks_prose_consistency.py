@@ -212,7 +212,7 @@ def test_catalog_prose_matches_declared_documents() -> None:
     assert policy["enforcement_verified_date"] == "2026-10-09"
     assert policy["enforcement_verified_date_is_live_protection_evidence"] is False
     assert policy["github_ruleset_13643213_enforcement"] == "disabled"
-    assert policy["github_ruleset_15730586_enforcement"] == "disabled"
+    assert policy["github_ruleset_15730586_enforcement"] == "deleted"
     errors = check_required_checks_prose(
         catalog,
         _repo_documents(ROOT, list(policy["prose_claim_doc_paths"])),
@@ -323,8 +323,9 @@ def test_anchor_region_does_not_reuse_wording_elsewhere() -> None:
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
     target = "docs/00-project/governance/05-github-policy.md"
     old = (
-        "<!-- policy-anchor:ruleset-enforcement-mode --> Rulesets `13643213` "
-        "and `15730586` are `enforcement: disabled`."
+        "<!-- policy-anchor:ruleset-enforcement-mode --> Ruleset `13643213` is "
+        "`enforcement: disabled`; rulesets `15730586` and `24517966` were "
+        "deleted on 2026-11-02 (settings-audit phase 0)."
     )
     assert old in documents[target]
     documents[target] = documents[target].replace(
@@ -456,8 +457,9 @@ def test_contributing_ruleset_region_cannot_borrow_disabled_wording() -> None:
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
     target = ".github/CONTRIBUTING.md"
     old = (
-        "<!-- policy-anchor:ruleset-enforcement-mode --> Rulesets `13643213` "
-        "and `15730586` are `enforcement: disabled`."
+        "<!-- policy-anchor:ruleset-enforcement-mode --> Ruleset `13643213` is "
+        "`enforcement: disabled`; rulesets `15730586` and `24517966` were "
+        "deleted on 2026-11-02 (settings-audit phase 0)."
     )
     assert old in documents[target]
     documents[target] = documents[target].replace(

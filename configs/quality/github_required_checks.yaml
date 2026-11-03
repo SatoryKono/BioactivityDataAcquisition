@@ -31,7 +31,9 @@ policy:
   not_applicable_requires_reason: true
   # Ruleset enforcement field only. Does not record stored status contexts.
   github_ruleset_13643213_enforcement: disabled
-  github_ruleset_15730586_enforcement: disabled
+  # Ruleset 15730586 (root-hygiene-required-check) was deleted on 2026-11-02
+  # (settings-audit phase 0); "deleted" replaces the disabled enforcement field.
+  github_ruleset_15730586_enforcement: deleted
   catalog_check_status: enforced
   # Runnable catalog provider, not the context stored on a disabled ruleset.
   enforcement_provider: github_actions
@@ -55,17 +57,17 @@ policy:
       required_substrings: ["policy-anchor:deployment-provider", "github_actions"]
     - id: ruleset-enforcement-mode
       required_substrings:
-        ["policy-anchor:ruleset-enforcement-mode", "13643213", "15730586", "enforcement: disabled"]
+        ["policy-anchor:ruleset-enforcement-mode", "13643213", "15730586", "enforcement: disabled", "deleted"]
     - id: stored-ruleset-contexts
       required_substrings:
         [
           "policy-anchor:stored-ruleset-contexts",
-          "ci/circleci: pr-gate-complete",
-          "not active CircleCI protection",
+          "pr-gate-complete",
+          "not active merge protection",
         ]
     - id: target-gha-context
       required_substrings:
-        ["policy-anchor:target-gha-context", "pr-gate-complete", "not the context stored"]
+        ["policy-anchor:target-gha-context", "pr-gate-complete", "is the context stored"]
     - id: enforcement-verified-date
       required_substrings:
         [
