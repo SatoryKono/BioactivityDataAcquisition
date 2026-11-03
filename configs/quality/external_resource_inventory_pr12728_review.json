@@ -42,7 +42,7 @@
     "src/bioetl/interfaces/http/_health_server_observability_protocols.py": "PR #12728 Phase 3b selected-run cache / health_server trim. Cache TTL/identity/error-reason paths reviewed; new create_task sites in new_exclusions.",
     "src/bioetl/interfaces/http/_selected_run_live.py": "PR #12728 Phase 3b selected-run cache / health_server trim. Cache TTL/identity/error-reason paths reviewed; new create_task sites in new_exclusions.",
     "src/bioetl/interfaces/http/_selected_run_status_cache.py": "PR #12728 Phase 3b selected-run cache / health_server trim. Cache TTL/identity/error-reason paths reviewed; new create_task sites in new_exclusions.",
-    "src/bioetl/interfaces/http/_selector_options_cache.py": "PR #12728 Phase 3b selected-run cache / health_server trim. Cache TTL/identity/error-reason paths reviewed; new create_task sites in new_exclusions.",
+    "src/bioetl/interfaces/http/_selector_options_cache.py": "PR #12728 Phase 3b selected-run cache / health_server trim. Cache TTL/identity/error-reason paths reviewed; create_task and ensure_future sites remain covered by accepted_site_keys; the new selected-run task is listed in new_exclusions.",
     "src/bioetl/interfaces/http/health_server.py": "PR #12728 Phase 3b selected-run cache / health_server trim. Cache TTL/identity/error-reason paths reviewed; new create_task sites in new_exclusions.",
     "src/bioetl/interfaces/http/selected_run_status.py": "PR #12728 Phase 3b selected-run cache / health_server trim. Cache TTL/identity/error-reason paths reviewed; new create_task sites in new_exclusions."
   },

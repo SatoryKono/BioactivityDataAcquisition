@@ -30,12 +30,12 @@ if TYPE_CHECKING:
     from bioetl.domain.control_plane.workflow_manifest import WorkflowManifest
     from bioetl.infrastructure.config.settings_api import Settings
 
-from bioetl.composition.control_plane_service_access import (
+from bioetl.composition.runtime_builders.evidence_location_binding import (
     EvidenceLocationBindingContext,
     build_evidence_location_binding_context,
     relative_data_root_under_alias,
     resolve_dashboard_data_alias_base,
-    resolve_registration_runtime_source_id,
+    resolve_registration_runtime_source_id as _resolve_registration_runtime_source_id,
 )
 
 __all__ = [
@@ -49,6 +49,17 @@ __all__ = [
     "resolve_registration_runtime_source_id",
 ]
 
+
+def _repository_root() -> Path:
+    """Return the repository root; kept as a test seam for env-file lookup."""
+    return Path(__file__).resolve().parents[4]
+
+
+def resolve_registration_runtime_source_id(settings: Settings) -> str | None:
+    """Resolve runtime source identity using this builder's repository root."""
+    return _resolve_registration_runtime_source_id(
+        settings, repository_root=_repository_root()
+    )
 
 
 def build_evidence_location_registration_service(

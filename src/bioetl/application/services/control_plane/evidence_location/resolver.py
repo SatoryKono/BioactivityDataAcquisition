@@ -8,7 +8,6 @@ evidence, or invent READY / objects verdicts from the locator alone.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
 from uuid import UUID
 
 from bioetl.application.services.control_plane.evidence_location.resolver_types import (
@@ -26,7 +25,6 @@ from bioetl.domain.control_plane.run_evidence_location import (
     EvidenceLocationKind,
     EvidenceLocationLookupCode,
     EvidenceLocationLookupResult,
-    RunEvidenceLocation,
 )
 from bioetl.domain.ports import RunEvidenceLocationReadPort
 from bioetl.domain.types import RunID

@@ -22,6 +22,7 @@ __all__ = [
     "EvidenceReadContextFactoryProtocol",
 ]
 
+
 class EvidenceLocationLegacyRootPolicy(StrEnum):
     """RF-003 policy for ``location_missing`` without inventing isolated roots.
 

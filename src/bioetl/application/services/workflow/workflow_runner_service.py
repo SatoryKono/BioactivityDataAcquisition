@@ -42,6 +42,8 @@ from bioetl.application.services.workflow.workflow_runner_support import (
 )
 from bioetl.application.services.workflow.workflow_transform_service import (
     WorkflowTransformDestructiveCommit as WorkflowTransformDestructiveCommit,
+)
+from bioetl.application.services.workflow.workflow_transform_service import (
     WorkflowTransformService,
 )
 from bioetl.application.services.workflow.workflow_transition_policy import (
@@ -113,10 +115,14 @@ class WorkflowRunnerService:
     metrics: MetricsPort
     report_store: RunReportStorePort
     monotonic: Callable[[], float] = perf_counter
-    workflow_transform_artifact_sink: WorkflowTransformArtifactSinkProtocol | None = None
+    workflow_transform_artifact_sink: WorkflowTransformArtifactSinkProtocol | None = (
+        None
+    )
     report_root: Path | None = None
     cohort_resolver: (
-        Callable[[WorkflowStepConfig, Mapping[str, object]], Awaitable[WorkflowStepConfig]]
+        Callable[
+            [WorkflowStepConfig, Mapping[str, object]], Awaitable[WorkflowStepConfig]
+        ]
         | None
     ) = None
     # RF-004: finalize consistency check (soft diagnostics).

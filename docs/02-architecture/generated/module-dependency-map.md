@@ -21,11 +21,11 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1663 OK| application
+    application -->|1671 OK| application
     application -->|1141 OK| domain
-    composition -->|236 OK| application
-    composition -->|654 OK| composition
-    composition -->|319 OK| domain
+    composition -->|237 OK| application
+    composition -->|656 OK| composition
+    composition -->|320 OK| domain
     composition -->|311 OK| infrastructure
     domain -->|1315 OK| domain
     infrastructure -->|804 OK| domain
@@ -40,11 +40,11 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1663 | allowed |
+| `application`    | `application`    |    1671 | allowed |
 | `application`    | `domain`         |    1141 | allowed |
-| `composition`    | `application`    |     236 | allowed |
-| `composition`    | `composition`    |     654 | allowed |
-| `composition`    | `domain`         |     319 | allowed |
+| `composition`    | `application`    |     237 | allowed |
+| `composition`    | `composition`    |     656 | allowed |
+| `composition`    | `domain`         |     320 | allowed |
 | `composition`    | `infrastructure` |     311 | allowed |
 | `domain`         | `domain`         |    1315 | allowed |
 | `infrastructure` | `domain`         |     804 | allowed |
@@ -74,8 +74,8 @@ flowchart LR
 | `composition.factories`        | `domain.ports`                             |      37 |
 | `application.composite`        | `domain.exceptions`                        |      36 |
 | `infrastructure.storage`       | `domain.models`                            |      36 |
+| `composition.runtime_builders` | `domain.control_plane`                     |      35 |
 | `composition.bootstrap`        | `domain.ports`                             |      34 |
-| `composition.runtime_builders` | `domain.control_plane`                     |      34 |
 | `infrastructure.control_plane` | `domain.control_plane`                     |      34 |
 | `interfaces.cli`               | `application.services`                     |      33 |
 | `application.core`             | `domain.ports`                             |      32 |
@@ -107,10 +107,10 @@ flowchart LR
 | `application.pipelines`        | `domain.value_objects`                     |      17 |
 | `application.services`         | `domain.lineage`                           |      17 |
 | `application.services`         | `domain.run_reports`                       |      17 |
+| `composition.runtime_builders` | `application.services`                     |      17 |
 | `infrastructure.schemas`       | `domain.config`                            |      17 |
 | `infrastructure.storage`       | `domain.exceptions`                        |      17 |
 | `interfaces.http`              | `domain.ports`                             |      17 |
-| `composition.runtime_builders` | `application.services`                     |      16 |
 | `infrastructure.control_plane` | `domain.types`                             |      16 |
 | `interfaces.http`              | `application.services`                     |      16 |
 | `composition.bootstrap`        | `infrastructure.observability`             |      15 |

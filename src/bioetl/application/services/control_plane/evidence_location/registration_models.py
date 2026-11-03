@@ -15,6 +15,7 @@ __all__ = [
     "EvidenceLocationVerifyOutcome",
 ]
 
+
 @dataclass(frozen=True, slots=True)
 class EvidenceLocationRegisterRequest:
     """DI-bound inputs for one ownership key registration."""

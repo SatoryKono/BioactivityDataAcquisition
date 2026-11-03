@@ -10,14 +10,33 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
+from bioetl.application.services.control_plane.evidence_location.registration_models import (
+    EvidenceLocationRegisterRequest,
+    EvidenceLocationRegistrationOutcome,
+    EvidenceLocationVerifyOutcome,
+)
 from bioetl.application.services.control_plane.evidence_location.registration_observations import (
     EVIDENCE_LOCATION_OBSERVATION_DOMAIN as EVIDENCE_LOCATION_OBSERVATION_DOMAIN,
+)
+from bioetl.application.services.control_plane.evidence_location.registration_observations import (
     EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS as EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS,
+)
+from bioetl.application.services.control_plane.evidence_location.registration_observations import (
     record_registration_exception_observation as record_registration_exception_observation,
+)
+from bioetl.application.services.control_plane.evidence_location.registration_observations import (
     record_registration_outcome_observation as record_registration_outcome_observation,
+)
+from bioetl.application.services.control_plane.evidence_location.registration_observations import (
     record_registration_soft_failure_observation as record_registration_soft_failure_observation,
+)
+from bioetl.application.services.control_plane.evidence_location.registration_observations import (
     record_verify_exception_observation as record_verify_exception_observation,
+)
+from bioetl.application.services.control_plane.evidence_location.registration_observations import (
     soft_failure_exception_detail as soft_failure_exception_detail,
+)
+from bioetl.application.services.control_plane.evidence_location.registration_observations import (
     soft_invoke_evidence_location_verify as soft_invoke_evidence_location_verify,
 )
 from bioetl.application.services.run_reports.observations import record_run_observation
@@ -34,12 +53,6 @@ from bioetl.domain.control_plane.run_evidence_location import (
 from bioetl.domain.ports import (
     RunEvidenceLocationReadPort,
     RunEvidenceLocationRegisterPort,
-)
-
-from bioetl.application.services.control_plane.evidence_location.registration_models import (
-    EvidenceLocationRegisterRequest,
-    EvidenceLocationRegistrationOutcome,
-    EvidenceLocationVerifyOutcome,
 )
 
 __all__ = [

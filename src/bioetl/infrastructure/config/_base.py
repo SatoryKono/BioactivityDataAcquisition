@@ -138,9 +138,7 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
     )
     dashboard_data_root: Path | None = Field(
         default=None,
-        description=(
-            "Trusted dashboard data alias base (BIOETL_DASHBOARD_DATA_ROOT)"
-        ),
+        description=("Trusted dashboard data alias base (BIOETL_DASHBOARD_DATA_ROOT)"),
     )
     enforce_report_root_marker: bool = Field(
         default=False,

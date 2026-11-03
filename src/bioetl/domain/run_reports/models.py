@@ -6,6 +6,7 @@ from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Any
 
+
 def _copy_present_attributes(
     payload: dict[str, Any],  # Any: dynamic report serialization payload
     source: object,

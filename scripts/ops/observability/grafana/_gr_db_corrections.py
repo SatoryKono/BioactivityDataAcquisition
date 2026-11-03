@@ -1151,7 +1151,7 @@ def _correct_dq(uid: str, panels: dict[int, dict[str, Any]]) -> None:
         summary["fieldConfig"]["defaults"].setdefault("custom", {}).update(
             wrapText=False, inspect=True
         )
-        for field in ("Result", "Status", "Trust", "Reason"):
+        for field in ("execution_state", "Overall verdict", "Trust", "Reason"):
             _override(summary, field, "custom.wrapText", False)
             _override(summary, field, _CELL, {"type": "auto", "wrapText": False})
     if uid != "bioetl-dq-v2" or 155 not in panels:

@@ -57,9 +57,6 @@ __all__ = [
     "EvidenceLocationBindingContext",
     "bootstrap_control_plane_lifecycle_store",
     "build_evidence_location_binding_context",
-    "relative_data_root_under_alias",
-    "resolve_dashboard_data_alias_base",
-    "resolve_registration_runtime_source_id",
     "get_adr_service",
     "get_bronze_cleanup_service",
     "get_checkpoint_runtime_service",
@@ -79,6 +76,9 @@ __all__ = [
     "load_workflow_config",
     "persist_historical_replay_closure_report",
     "persist_historical_replay_universe_report",
+    "relative_data_root_under_alias",
+    "resolve_dashboard_data_alias_base",
+    "resolve_registration_runtime_source_id",
 ]
 
 
@@ -103,6 +103,7 @@ from bioetl.domain.control_plane.run_evidence_location import (
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
+
 
 @dataclass(frozen=True, slots=True)
 class EvidenceLocationBindingContext:
@@ -162,8 +163,8 @@ def relative_data_root_under_alias(
 
 
 def _repository_root() -> Path:
-    # runtime_builders → composition → bioetl → src → repo root
-    return Path(__file__).resolve().parents[4]
+    # composition → bioetl → src → repo root
+    return Path(__file__).resolve().parents[3]
 
 
 def resolve_registration_runtime_source_id(settings: Settings) -> str | None:

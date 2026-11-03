@@ -373,6 +373,14 @@ class PipelineRunnerService:
         )
         return _finalize_pipeline_report(self, result, options)
 
+    def _finalize_report(
+        self,
+        result: RunResult,
+        options: RunOptions | None,
+    ) -> RunResult:
+        """Finalize and persist a run report from all terminal paths."""
+        return _finalize_pipeline_report(self, result, options)
+
 
 def _finalize_pipeline_report(
     runner: PipelineRunnerService,
