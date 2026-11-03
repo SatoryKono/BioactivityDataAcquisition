@@ -1,0 +1,87 @@
+{
+  "benchmarks": [
+    {
+      "benchmark_key": "atomic_write_group_50",
+      "samples": 1,
+      "window_size": 1,
+      "window_latency_ms": 0.989557999673707,
+      "window_p95_latency_ms": 1.1106338000899996,
+      "window_throughput_rps": 50527.60931293245,
+      "baseline_latency_ms": 1.032,
+      "baseline_throughput_rps": 48454.261,
+      "max_regression_pct": 0.3,
+      "latency_regression_pct": -0.04112596930842353,
+      "p95_regression_pct": -0.9777873239982,
+      "throughput_regression_pct": -0.04278980362392592,
+      "within_budget": true
+    },
+    {
+      "benchmark_key": "crossref_batch_fetch_200",
+      "samples": 1,
+      "window_size": 1,
+      "window_latency_ms": 0.2389190003668773,
+      "window_p95_latency_ms": 0.3279387001839495,
+      "window_throughput_rps": 837103.787027761,
+      "baseline_latency_ms": 0.246,
+      "baseline_throughput_rps": 812420.281,
+      "max_regression_pct": 1.5,
+      "latency_regression_pct": -0.02878455135415731,
+      "p95_regression_pct": 0.5252962799253466,
+      "throughput_regression_pct": -0.030382680744230502,
+      "within_budget": true
+    },
+    {
+      "benchmark_key": "silver_prepare_arrow_2000",
+      "samples": 1,
+      "window_size": 1,
+      "window_latency_ms": 2.105695999944146,
+      "window_p95_latency_ms": 2.246570799843539,
+      "window_throughput_rps": 949804.720174731,
+      "baseline_latency_ms": 2.039,
+      "baseline_throughput_rps": 981006.729,
+      "max_regression_pct": 0.25,
+      "latency_regression_pct": 0.032710152007918526,
+      "p95_regression_pct": -0.7839835769381213,
+      "throughput_regression_pct": 0.03180611090922401,
+      "within_budget": true
+    },
+    {
+      "benchmark_key": "silver_write_append_600",
+      "samples": 1,
+      "window_size": 1,
+      "window_latency_ms": 23.72180300017135,
+      "window_p95_latency_ms": 24.668782199933048,
+      "window_throughput_rps": 25293.187031174064,
+      "baseline_latency_ms": 21.871,
+      "baseline_throughput_rps": 27433.094,
+      "max_regression_pct": 0.6,
+      "latency_regression_pct": 0.08462361118244936,
+      "p95_regression_pct": -0.41264804285873696,
+      "throughput_regression_pct": 0.07800457975414428,
+      "within_budget": true
+    },
+    {
+      "benchmark_key": "silver_write_merge_600",
+      "samples": 1,
+      "window_size": 1,
+      "window_latency_ms": 49.21173299999282,
+      "window_p95_latency_ms": 51.03154380003616,
+      "window_throughput_rps": 12192.214405456674,
+      "baseline_latency_ms": 48.424,
+      "baseline_throughput_rps": 12390.455,
+      "max_regression_pct": 0.7,
+      "latency_regression_pct": 0.016267408722799012,
+      "p95_regression_pct": -0.2822567679319808,
+      "throughput_regression_pct": 0.015999460434933634,
+      "within_budget": true
+    }
+  ],
+  "reason": "within_budget",
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0
+  },
+  "verdict": "measured",
+  "window_size": 5
+}
