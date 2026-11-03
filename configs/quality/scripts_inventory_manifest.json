@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-03T19:03:28.335582+00:00",
+  "generated_at": "2026-11-03T19:25:13.301389+00:00",
   "summary": {
     "total_scripts": 711,
     "status_counts": {
-      "active": 340,
-      "supporting": 371
+      "active": 334,
+      "supporting": 377
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -13,7 +13,7 @@
       "ci": 75,
       "docs": 291,
       "other": 16,
-      "scripts": 596,
+      "scripts": 598,
       "skills": 13,
       "tests": 524
     }
@@ -276,7 +276,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 112,
+          "line": 142,
           "source_group": "scripts",
           "text": "\"diagnose-codex-wsl\": \"../ai/codex/diagnose_wsl.sh\","
         },
@@ -1579,7 +1579,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 113,
+          "line": 143,
           "source_group": "scripts",
           "text": "\"setup-agents\": \"../ai/codex/setup_agents.sh\","
         },
@@ -22702,7 +22702,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 60,
+          "line": 72,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"maintenance/security/salt_rotate.py\","
         },
@@ -22913,7 +22913,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 75,
+          "line": 87,
           "source_group": "scripts",
           "text": "\"archive-control-plane\": \"observability/archive_control_plane.py\","
         },
@@ -22938,7 +22938,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 73,
+          "line": 85,
           "source_group": "scripts",
           "text": "\"observability/check_bioetl_prometheus_scrape.py\""
         },
@@ -22996,7 +22996,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 61,
+          "line": 73,
           "source_group": "scripts",
           "text": "\"check-observability-ports\": \"observability/check_published_observability_endpoints.py\","
         },
@@ -23553,10 +23553,16 @@
     {
       "path": "scripts/ops/observability/grafana/apply_phase25_srs_prr_budget.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 118,
+          "source_group": "scripts",
+          "text": "\"scripts.ops.observability.grafana.apply_phase25_srs_prr_budget\""
+        },
         {
           "path": "scripts/ops/observability/grafana/apply_phase2_remainder.py",
           "line": 5,
@@ -23581,30 +23587,50 @@
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the dashboard transform helpers imported by render_nav_bus and lint_dashboard_phase2; route the legacy apply command through python -m scripts.ops apply-grafana-phase25-srs-prr-budget. Direct module invocation remains compatible."
     },
     {
       "path": "scripts/ops/observability/grafana/apply_phase2_remainder.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 121,
+          "source_group": "scripts",
+          "text": "\"scripts.ops.observability.grafana.apply_phase2_remainder\""
+        },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
           "line": 2784,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.apply_phase2_remainder import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the dashboard transform helpers imported by render_nav_bus; route the legacy apply command through python -m scripts.ops apply-grafana-phase2-remainder. Direct module invocation remains compatible."
     },
     {
       "path": "scripts/ops/observability/grafana/apply_phase4_dead_vars.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 124,
+          "source_group": "scripts",
+          "text": "\"scripts.ops.observability.grafana.apply_phase4_dead_vars\""
+        },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
           "line": 58,
@@ -23617,15 +23643,25 @@
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import apply_phase4_dead_vars as phase4"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the tested Phase 4.1 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-dead-vars; keep direct module invocation as a compatibility surface."
     },
     {
       "path": "scripts/ops/observability/grafana/apply_phase4_reflow.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 127,
+          "source_group": "scripts",
+          "text": "\"scripts.ops.observability.grafana.apply_phase4_reflow\""
+        },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
           "line": 2824,
@@ -23644,7 +23680,11 @@
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.apply_phase4_reflow import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the tested Phase 4.2–4.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface."
     },
     {
       "path": "scripts/ops/observability/grafana/audit_live_grafana_panels.py",
@@ -23661,7 +23701,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 65,
+          "line": 77,
           "source_group": "scripts",
           "text": "\"audit-live-grafana\": \"observability/grafana/audit_live_grafana_panels.py\","
         },
@@ -23712,7 +23752,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 64,
+          "line": 76,
           "source_group": "scripts",
           "text": "\"assess-grafana-captures\": \"observability/grafana/capture_acceptance.py\","
         },
@@ -23847,7 +23887,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 67,
+          "line": 79,
           "source_group": "scripts",
           "text": "\"observability/grafana/check_dashboard_panel_fill.py\""
         },
@@ -23902,7 +23942,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 70,
+          "line": 82,
           "source_group": "scripts",
           "text": "\"observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
@@ -24033,7 +24073,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 77,
+          "line": 89,
           "source_group": "scripts",
           "text": "\"observability/grafana/ensure_quarantine_explorer.py\""
         }
@@ -24133,10 +24173,16 @@
     {
       "path": "scripts/ops/observability/grafana/lint_dashboard_phase2.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 130,
+          "source_group": "scripts",
+          "text": "\"scripts.ops.observability.grafana.lint_dashboard_phase2\""
+        },
         {
           "path": "scripts/ops/observability/grafana/apply_phase2_remainder.py",
           "line": 6,
@@ -24149,7 +24195,11 @@
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import lint_dashboard_phase2 as lint"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the Phase 2 linter implementation behind python -m scripts.ops lint-grafana-phase2; its repo-backed tests and canonical dispatcher exercise the supported command."
     },
     {
       "path": "scripts/ops/observability/grafana/qa_context.py",
@@ -24272,7 +24322,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 103,
+          "line": 115,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.refresh_router_delivery\""
         }
@@ -24420,7 +24470,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 62,
+          "line": 74,
           "source_group": "scripts",
           "text": "\"rerender-grafana\": \"observability/grafana/rerender_grafana_screenshots.py\","
         },
@@ -24465,7 +24515,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 100,
+          "line": 112,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.router_managed_image\""
         },
@@ -24526,7 +24576,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 97,
+          "line": 109,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.router_rootfs\""
         },
@@ -24581,7 +24631,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 80,
+          "line": 92,
           "source_group": "scripts",
           "text": "\"observability/grafana/run_grafana_dashboard_audit_cycle.py\""
         },
@@ -24626,7 +24676,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 63,
+          "line": 75,
           "source_group": "scripts",
           "text": "\"render-grafana-matrix\": (\"observability/grafana/run_grafana_render_matrix.py\"),"
         },
@@ -24906,7 +24956,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 91,
+          "line": 103,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.promote_router_host_release\""
         },
@@ -24931,7 +24981,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 94,
+          "line": 106,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.refresh_router_host_provenance\""
         },
@@ -24999,17 +25049,27 @@
     {
       "path": "scripts/ops/observability/seed_dc6_pipeline_run_report.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 133,
+          "source_group": "scripts",
+          "text": "\"scripts.ops.observability.seed_dc6_pipeline_run_report\""
+        },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_lint_dashboard_phase2.py",
           "line": 388,
           "source_group": "tests",
           "text": "from scripts.ops.observability.seed_dc6_pipeline_run_report import main"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-01-31",
+      "next_step": "Retain the local-only DC-6 fixture writer behind python -m scripts.ops seed-dc6-pipeline-run-report; keep acceptance data out of committed run reports."
     },
     {
       "path": "scripts/ops/observability/start_read_only_audit_stack.py",
@@ -25192,7 +25252,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 118,
+          "line": 148,
           "source_group": "scripts",
           "text": "\"deploy\": \"runtime/deploy/deploy-bioetl.sh\","
         }
@@ -26706,7 +26766,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 116,
+          "line": 146,
           "source_group": "scripts",
           "text": "\"check-skills\": \"support/skills/check_ai_skills_layout.sh\","
         },
