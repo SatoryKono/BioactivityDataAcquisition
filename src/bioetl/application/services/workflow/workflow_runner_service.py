@@ -14,6 +14,7 @@ from bioetl.application.services.execution.workflow_runner_step_execution import
     apply_workflow_step_transition,
 )
 from bioetl.application.services.workflow.workflow_runner_finalize import (
+    WorkflowFinalizeContext,
     finalize_workflow_run_result,
 )
 from bioetl.application.services.workflow.workflow_runner_models import (
@@ -25,6 +26,8 @@ from bioetl.application.services.workflow.workflow_runner_support import (
     record_workflow_pipeline_expected_metrics,
 )
 from bioetl.application.services.workflow.workflow_runner_transitions import (
+    WorkflowStepTransitionContext,
+    WorkflowStepTransitionServices,
     resolve_workflow_step_transition,
 )
 from bioetl.application.services.workflow.workflow_transform_service import (
@@ -128,31 +131,36 @@ class WorkflowRunnerService:
         debug_export_dir = config.defaults.debug_export_dir
         cohort_producers = _cohort_producer_ids(config)
 
+        transition_services = WorkflowStepTransitionServices(
+            pipeline_runner=self.pipeline_runner,
+            transform_service=self.transform_service,
+            metrics=self.metrics,
+            monotonic=self.monotonic,
+            cohort_resolver=self.cohort_resolver,
+            artifact_sink=self.workflow_transform_artifact_sink,
+        )
         for step_id in config.topological_step_ids:
             step = config.get_step(step_id)
             if step is None:
                 continue
             transition = await resolve_workflow_step_transition(
-                pipeline_runner=self.pipeline_runner,
-                transform_service=self.transform_service,
-                metrics=self.metrics,
-                monotonic=self.monotonic,
-                cohort_resolver=self.cohort_resolver,
-                artifact_sink=self.workflow_transform_artifact_sink,
-                workflow_name=config.name,
-                step=step,
-                state=state,
-                workflow_context_labels=workflow_context_labels,
-                completed_step_ids=completed_step_ids,
-                completed_transform_fingerprints=completed_transform_fingerprints,
-                step_started_callback=step_started_callback,
-                transform_commit_callback=transform_commit_callback,
-                dry_run=effective_dry_run,
-                workflow_run_id=workflow_run_id,
-                manifest_id=manifest_id,
-                debug_export=(debug_export_enabled, debug_export_dir),
-                created_at_factory=created_at_factory,
-                capture_producer_snapshot=step_id in cohort_producers,
+                WorkflowStepTransitionContext(
+                    services=transition_services,
+                    workflow_name=config.name,
+                    step=step,
+                    state=state,
+                    workflow_context_labels=workflow_context_labels,
+                    completed_step_ids=completed_step_ids,
+                    completed_transform_fingerprints=completed_transform_fingerprints,
+                    step_started_callback=step_started_callback,
+                    transform_commit_callback=transform_commit_callback,
+                    dry_run=effective_dry_run,
+                    workflow_run_id=workflow_run_id,
+                    manifest_id=manifest_id,
+                    debug_export=(debug_export_enabled, debug_export_dir),
+                    created_at_factory=created_at_factory,
+                    capture_producer_snapshot=step_id in cohort_producers,
+                )
             )
             apply_workflow_step_transition(
                 state=state,
@@ -162,23 +170,25 @@ class WorkflowRunnerService:
             )
 
         return finalize_workflow_run_result(
-            config=config,
-            state=state,
-            workflow_context_labels=workflow_context_labels,
-            workflow_run_id=workflow_run_id,
-            manifest_id=manifest_id,
-            execution_fingerprint=execution_fingerprint,
-            resumed=resumed,
-            started_at=started_at,
-            started_monotonic=started_monotonic,
-            metrics=self.metrics,
-            report_store=self.report_store,
-            report_root=self.report_root,
-            logger=getattr(self.pipeline_runner, "logger", None),
-            archive_control_plane=getattr(
-                self.pipeline_runner, "archive_control_plane", None
-            ),
-            evidence_location_verify=self.evidence_location_verify,
+            WorkflowFinalizeContext(
+                config=config,
+                state=state,
+                workflow_context_labels=workflow_context_labels,
+                workflow_run_id=workflow_run_id,
+                manifest_id=manifest_id,
+                execution_fingerprint=execution_fingerprint,
+                resumed=resumed,
+                started_at=started_at,
+                started_monotonic=started_monotonic,
+                metrics=self.metrics,
+                report_store=self.report_store,
+                report_root=self.report_root,
+                logger=getattr(self.pipeline_runner, "logger", None),
+                archive_control_plane=getattr(
+                    self.pipeline_runner, "archive_control_plane", None
+                ),
+                evidence_location_verify=self.evidence_location_verify,
+            )
         )
 
     def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
