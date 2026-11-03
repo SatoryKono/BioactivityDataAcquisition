@@ -1,21 +1,9 @@
 {
   "schema_version": 1,
-  "catalog_ref": "385a209bc0b5e6f873c5fada399a4b8bba224018",
-  "source_ref": "e78bd71bfe8684fb3198dec5a7d628e6947c2240",
+  "catalog_ref": "15094edf8750ae1fcc90520076c66ad978b01191",
+  "source_ref": "6bdfb1886d47d45f99445ff846ee617ed8394c49",
   "source_reviews": {
-    "src/bioetl/application/services/control_plane/evidence_location/registration.py": "PR #12728 Class ratchet shrink: binding folded into control_plane_paths; no new acquisition owner.",
-    "src/bioetl/application/services/control_plane/evidence_location/registration_models.py": "PR #12728 / #12708 evidence-location split + ports facade. Census re-reviewed; acquisition ownership unchanged or listed in new_exclusions.",
-    "src/bioetl/application/services/control_plane/evidence_location/resolver.py": "PR #12728 / #12708 evidence-location split + ports facade. Census re-reviewed; acquisition ownership unchanged or listed in new_exclusions.",
-    "src/bioetl/application/services/control_plane/evidence_location/resolver_types.py": "PR #12728 / #12708 evidence-location split + ports facade. Census re-reviewed; acquisition ownership unchanged or listed in new_exclusions.",
-    "src/bioetl/application/services/control_plane/workflow/manifest_service.py": "PR #12728 Class ratchet shrink: binding folded into control_plane_paths; no new acquisition owner.",
-    "src/bioetl/application/services/execution/pipeline_runner_service.py": "PR #12728 Phase 3b / RF evidence-location sync. Reviewed for COMP-004 census; no new independent acquisition owner beyond new_exclusions.",
-    "src/bioetl/application/services/workflow/workflow_runner_service.py": "PR #12728 Class ratchet shrink: binding folded into control_plane_paths; no new acquisition owner.",
-    "src/bioetl/composition/control_plane_paths.py": "PR #12728 Class ratchet shrink: binding folded into control_plane_paths; no new acquisition owner.",
-    "src/bioetl/composition/control_plane_service_access.py": "PR #12728 Class ratchet shrink: binding folded into control_plane_paths; no new acquisition owner.",
-    "src/bioetl/composition/runtime_builders/control_plane.py": "PR #12728 / #12708 control-plane composition and workflow wiring after evidence-location move. No new independent acquisition owners beyond new_exclusions.",
-    "src/bioetl/composition/runtime_builders/evidence_location_registration.py": "PR #12728 Class ratchet shrink: binding folded into control_plane_paths; no new acquisition owner.",
-    "src/bioetl/domain/run_reports/models.py": "PR #12728 Class ratchet shrink: binding folded into control_plane_paths; no new acquisition owner.",
-    "src/bioetl/infrastructure/config/_base.py": "PR #12728 / #12708 ancillary domain/config touch for evidence-location contracts. No new acquisition owner."
+    "src/bioetl/domain/run_reports/models.py": "PR #12728 ruff-format models.py for Class; no new acquisition owner."
   },
   "expression_updates": {},
   "resource_updates": {},
