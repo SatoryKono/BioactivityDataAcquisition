@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 from copy import deepcopy
-from scripts.ops.observability.grafana._gr_db_corrections import _override, _panels
+from scripts.ops.observability.grafana._gr_db_corrections import (
+    _OVERALL_VERDICT_FIELD,
+    _override,
+    _panels,
+)
 from scripts.ops.observability.grafana._visual_usability import _bands
 
 _WIDTH = "custom.width"

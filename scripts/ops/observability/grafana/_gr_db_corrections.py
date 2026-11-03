@@ -1144,14 +1144,14 @@ def _correct_dq(uid: str, panels: dict[int, dict[str, Any]]) -> None:
             },
             {
                 "id": "organize",
-                "options": {"renameByName": {"verdict": "Overall verdict"}},
+                "options": {"renameByName": {"verdict": _OVERALL_VERDICT_FIELD}},
             },
         ]
         summary["options"]["cellHeight"] = "sm"
         summary["fieldConfig"]["defaults"].setdefault("custom", {}).update(
             wrapText=False, inspect=True
         )
-        for field in ("execution_state", "Overall verdict", "Trust", "Reason"):
+        for field in ("execution_state", _OVERALL_VERDICT_FIELD, "Trust", "Reason"):
             _override(summary, field, "custom.wrapText", False)
             _override(summary, field, _CELL, {"type": "auto", "wrapText": False})
     if uid != "bioetl-dq-v2" or 155 not in panels:
