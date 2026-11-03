@@ -104,8 +104,8 @@ def test_saved_reason_labels_and_accounting_use_current_owners() -> None:
     assert any("selected-run-status?" in target["url"] for target in targets)
     assert not any("pipeline-run-report?" in target["url"] for target in targets)
     for target in targets:
-        assert "pipeline=${pipeline" in target["url"]
-        assert "run_id=${run_id" in target["url"]
+        assert "pipeline=${selected_pipeline" in target["url"]
+        assert "run_id=${selected_run_id" in target["url"]
     assert "SELECTED RUN" in dq[9403]["description"]
     assert "CURRENT" not in dq[9403]["description"]
 
