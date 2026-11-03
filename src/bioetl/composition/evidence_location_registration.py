@@ -7,8 +7,11 @@ receive absolute paths, alias bases, and runtime_source_id as parameters.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
-
+from bioetl.application.services.evidence_location import (
+    EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS,
+    record_registration_exception_observation,
+    record_registration_outcome_observation,
+)
 from bioetl.application.services.evidence_location.registration import (
     EvidenceLocationRegisterRequest,
     EvidenceLocationRegistrationOutcome,
@@ -21,14 +24,12 @@ from bioetl.application.services.run_reports.evidence_location_paths import (
 from bioetl.domain.control_plane.run_evidence_location import (
     EvidenceLocationKind,
 )
+from bioetl.domain.control_plane.run_manifest import RunManifest
+from bioetl.domain.control_plane.workflow_manifest import WorkflowManifest
+from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.control_plane.file_evidence_location_store import (
     FileEvidenceLocationStore,
 )
-
-if TYPE_CHECKING:
-    from bioetl.domain.control_plane.run_manifest import RunManifest
-    from bioetl.domain.control_plane.workflow_manifest import WorkflowManifest
-    from bioetl.infrastructure.config.settings_api import Settings
 
 from bioetl.composition.control_plane_paths import (
     EvidenceLocationBindingContext,
@@ -54,7 +55,7 @@ __all__ = [
 
 def _repository_root() -> Path:
     """Return the repository root; kept as a test seam for env-file lookup."""
-    return Path(__file__).resolve().parents[4]
+    return Path(__file__).resolve().parents[3]
 
 
 def resolve_registration_runtime_source_id(settings: Settings) -> str | None:
@@ -229,14 +230,6 @@ def register_pipeline_manifest_location_soft(
     settings: object,
 ) -> None:
     """Publish pipeline locator after durable save; never fail ETL."""
-    from bioetl.application.services.evidence_location import (
-        EVIDENCE_LOCATION_SOFT_FAILURE_EXCEPTIONS,
-        record_registration_exception_observation,
-        record_registration_outcome_observation,
-    )
-    from bioetl.domain.control_plane.run_manifest import RunManifest
-    from bioetl.infrastructure.config.settings_api import Settings
-
     if not isinstance(manifest, RunManifest) or not isinstance(settings, Settings):
         return
     try:

@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.ledger.service import RunLedgerService
-from bioetl.composition.evidence_location.registration import (
+from bioetl.composition.evidence_location_registration import (
     register_pipeline_manifest_location_soft,
 )
 from bioetl.composition.runtime_builders.run_manifest_support import (

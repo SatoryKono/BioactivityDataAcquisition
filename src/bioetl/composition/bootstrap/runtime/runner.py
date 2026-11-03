@@ -27,7 +27,7 @@ from bioetl.application.services.execution.pipeline_runner_service import (
 from bioetl.composition.bootstrap.runtime.observability import (
     bootstrap_observability_bundle,
 )
-from bioetl.composition.evidence_location.registration import (
+from bioetl.composition.evidence_location_registration import (
     bind_pipeline_run_location_verifier,
 )
 from bioetl.composition.factories.pipeline.runner import (

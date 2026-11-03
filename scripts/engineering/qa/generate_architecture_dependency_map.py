@@ -68,6 +68,12 @@ MODULE_GROUP_OVERRIDES = {
     "bioetl.composition.control_plane_service_access": (
         _COMPOSITION_RUNTIME_BUILDERS_GROUP
     ),
+    # Evidence-location wiring lives outside the runtime_builders path_prefix for
+    # hotspot residual freezes but must fold into the same composition group so
+    # unique cross-layer group edges do not inflate past the shrink-only budget.
+    "bioetl.composition.evidence_location_registration": (
+        _COMPOSITION_RUNTIME_BUILDERS_GROUP
+    ),
 }
 TYPE_CHECKING_NAME = "TYPE_CHECKING"
 _FRONTMATTER_DELIMITER = "---"
