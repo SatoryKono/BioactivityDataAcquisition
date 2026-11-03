@@ -310,8 +310,10 @@ async def test_rerun_same_pipeline_twice(e2e_data_dir: Path) -> None:
 async def test_run_normal_a_b_a(e2e_data_dir: Path) -> None:
     """E2E: Normal pipeline runs in A -> B -> A pattern in a single process."""
     runner1 = bootstrap_target_runner(limit=2)
-    initial_result = await runner1.run()  # type: ignore[attr-defined]
-    assert initial_result.is_success, "Initial Target run failed before restart."
+    await runner1.run()
+    assert runner1.execution_metrics["records_fetched"] > 0, (
+        "Initial Target run fetched no records before restart."
+    )
     await run_molecule_then_target_and_assert(
         e2e_data_dir,
         require_a2_records_fetched=True,
