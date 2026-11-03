@@ -2747,6 +2747,43 @@
                       "type": "auto",
                       "wrapText": true
                     }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "execution_success": {
+                            "text": "Processing completed"
+                          },
+                          "standalone_pipeline": {
+                            "text": "Standalone pipeline"
+                          },
+                          "run_dq_threshold_evaluation": {
+                            "text": "Data quality checks"
+                          },
+                          "run_preflight_provider_observation": {
+                            "text": "Provider preflight check"
+                          },
+                          "run_gold_schema_validation": {
+                            "text": "Gold schema validation"
+                          },
+                          "run_observation_missing": {
+                            "text": "Result not recorded"
+                          },
+                          "no_gold_candidates": {
+                            "text": "No Gold candidates"
+                          },
+                          "Archive missing": {
+                            "text": "No verified archive"
+                          },
+                          "archive_evidence_not_recorded": {
+                            "text": "No verified archive"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               }

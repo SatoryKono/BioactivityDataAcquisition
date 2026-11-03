@@ -519,6 +519,9 @@ def _incident(p: dict[int, dict]) -> None:
     p[9401]["fieldConfig"]["defaults"]["displayName"] = "Monitor Scope Status"
     _override(p[2101], "Reason", _WRAP, True)
     _override(p[2101], "Reason", _CELL, {"type": "auto", "wrapText": True})
+    _override(
+        p[2101], "Reason", "mappings", [{"type": "value", "options": _REASON_MAPPINGS}]
+    )
     p[2001]["gridPos"].update(y=5, h=2)
     p[2010]["gridPos"].update(y=7, h=5)
     p[2005]["gridPos"].update(y=12, h=5)
