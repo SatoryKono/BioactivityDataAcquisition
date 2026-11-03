@@ -32,6 +32,9 @@ from bioetl.composition.runtime_builders.input_snapshot_resolution import (
 from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     validate_manifest_persistence_requirements,
 )
+from bioetl.composition.runtime_builders.evidence_location_registration import (
+    _register_evidence_location_soft,
+)
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
@@ -144,45 +147,6 @@ def _publish_manifest_and_refs(
         ),
     )
     return control_plane_refs, ledger_service
-
-
-def _register_evidence_location_soft(
-    *,
-    manifest: object,
-    settings: object,
-) -> None:
-    """RF-004: publish locator after durable manifest save (never fail ETL)."""
-    from bioetl.application.services.control_plane.evidence_location.registration import (
-        record_registration_exception_observation,
-        record_registration_outcome_observation,
-    )
-
-    try:
-        from bioetl.composition.runtime_builders.evidence_location_registration import (
-            register_pipeline_manifest_location,
-        )
-        from bioetl.domain.control_plane.run_manifest import RunManifest
-        from bioetl.infrastructure.config.settings_api import Settings
-
-        if not isinstance(manifest, RunManifest):
-            return
-        if not isinstance(settings, Settings):
-            return
-        outcome = register_pipeline_manifest_location(
-            manifest=manifest, settings=settings
-        )
-        record_registration_outcome_observation(
-            outcome,
-            kind="pipeline",
-            owner=str(manifest.pipeline_name),
-            run_id=str(manifest.run_id),
-        )
-    except Exception as exc:
-        # Registration is additive diagnostics; processing success is independent.
-        try:
-            record_registration_exception_observation(kind="pipeline", exc=exc)
-        except Exception:
-            return
 
 
 def _strict_cached_bronze_require(

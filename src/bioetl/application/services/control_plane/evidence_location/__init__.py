@@ -24,7 +24,7 @@ from bioetl.application.services.control_plane.evidence_location.resolver import
     EvidenceLocationResolver,
     EvidenceLocationResolveResult,
     EvidenceReadContext,
-    EvidenceReadContextOpener,
+    EvidenceReadContextOpenerProtocol,
 )
 
 __all__ = [
@@ -37,7 +37,7 @@ __all__ = [
     "EvidenceLocationResolver",
     "EvidenceLocationVerifyOutcome",
     "EvidenceReadContext",
-    "EvidenceReadContextOpener",
+    "EvidenceReadContextOpenerProtocol",
     "record_registration_exception_observation",
     "record_registration_outcome_observation",
     "record_registration_soft_failure_observation",

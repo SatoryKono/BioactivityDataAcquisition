@@ -61,11 +61,11 @@ def test_register_skips_when_write_root_outside_dashboard_alias(
     write_root.mkdir()
     report_root = tmp_path / "run-reports"
     report_root.mkdir()
-    monkeypatch.setenv("BIOETL_DASHBOARD_DATA_ROOT", str(alias))
     monkeypatch.setenv("BIOETL_RUNTIME_SOURCE_ID", _SOURCE)
     settings = SimpleNamespace(
         data_dir=write_root,
         report_root=report_root,
+        dashboard_data_root=alias,
         runtime_source_id=_SOURCE,
     )
     binding = build_evidence_location_binding_context(settings)  # type: ignore[arg-type]
@@ -97,12 +97,12 @@ def test_register_pipeline_manifest_writes_catalog(
     data_root.mkdir()
     report_root = tmp_path / "run-reports"
     report_root.mkdir()
-    monkeypatch.setenv("BIOETL_DASHBOARD_DATA_ROOT", str(data_root))
     monkeypatch.setenv("BIOETL_RUNTIME_SOURCE_ID", _SOURCE)
 
     settings = SimpleNamespace(
         data_dir=data_root,
         report_root=report_root,
+        dashboard_data_root=data_root,
         runtime_source_id=_SOURCE,
     )
     binding = build_evidence_location_binding_context(settings)  # type: ignore[arg-type]
@@ -151,7 +151,7 @@ def test_register_workflow_manifest_parent(
         workflow_run_id=RunID(UUID(_WF)),
         execution_fingerprint="f" * 64,
         schema_version="1.0",
-        created_at=datetime.now(UTC),
+        created_at=datetime(2025, 1, 1, tzinfo=UTC),
         workflow_name="chembl_assay_pack",
         workflow_version="1",
         launch_context={},
@@ -188,7 +188,7 @@ def test_resolve_registration_runtime_source_id_reads_env_local(
     from bioetl.application.services.run_reports.source_identity import (
         RUNTIME_SOURCE_ID_ENV,
     )
-    import bioetl.composition.runtime_builders.evidence_location_registration as mod
+    import bioetl.composition.runtime_builders.evidence_location_composition as mod
 
     monkeypatch.delenv(RUNTIME_SOURCE_ID_ENV, raising=False)
     (tmp_path / ".env").write_text(

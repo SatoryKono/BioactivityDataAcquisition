@@ -116,6 +116,7 @@ def test_issue_5496_control_plane_root_routes_through_explicit_seams() -> None:
         "ledger",
         "manifest",
         "replay",
+        "evidence_location",
         "workflow",
     }
     assert (

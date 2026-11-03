@@ -136,6 +136,10 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
         default=None,
         description="Run-report root override (BIOETL_REPORT_ROOT)",
     )
+    dashboard_data_root: Path | None = Field(
+        default=None,
+        description="Trusted dashboard data root (BIOETL_DASHBOARD_DATA_ROOT)",
+    )
     enforce_report_root_marker: bool = Field(
         default=False,
         description=(

@@ -371,35 +371,38 @@ class PipelineRunnerService:
             write_report=False,
             store=self.report_store,
         )
-        return self._finalize_report(result, options)
-
-    def _finalize_report(
-        self, result: RunResult, options: RunOptions | None
-    ) -> RunResult:
-        """Capture control-plane evidence, persist the run report, then archive."""
-        capture_run_completion(self.capture_control_plane, result, options)
-        # RF-004: record Evidence Location observation BEFORE report snapshot.
-        if self.evidence_location_verify is not None:
-            try:
-                self.evidence_location_verify(result, options)
-            except Exception as exc:
-                # Consistency diagnostics must not mask processing success.
-                record_verify_exception_observation(
-                    kind="pipeline",
-                    owner=str(result.pipeline_name),
-                    run_id=str(result.run_id),
-                    exc=exc,
-                )
-        finalized = finalize_pipeline_run_report(
-            result=result,
-            options=options,
-            report_root=self.report_root,
-            store=self.report_store,
-        )
-        self._archive_control_plane(finalized, options)
-        return finalized
+        return _finalize_report(self, result, options)
 
     def _archive_control_plane(
         self, result: RunResult, options: RunOptions | None
     ) -> None:
         archive_run_completion(self.archive_control_plane, result, options)
+
+
+def _finalize_report(
+    service: PipelineRunnerService,
+    result: RunResult,
+    options: RunOptions | None,
+) -> RunResult:
+    """Capture control-plane evidence, persist the run report, then archive."""
+    capture_run_completion(service.capture_control_plane, result, options)
+    # RF-004: record Evidence Location observation BEFORE report snapshot.
+    if service.evidence_location_verify is not None:
+        try:
+            service.evidence_location_verify(result, options)
+        except (OSError, RuntimeError, TypeError, ValueError) as exc:
+            # Consistency diagnostics must not mask processing success.
+            record_verify_exception_observation(
+                kind="pipeline",
+                owner=str(result.pipeline_name),
+                run_id=str(result.run_id),
+                exc=exc,
+            )
+    finalized = finalize_pipeline_run_report(
+        result=result,
+        options=options,
+        report_root=service.report_root,
+        store=service.report_store,
+    )
+    service._archive_control_plane(finalized, options)
+    return finalized

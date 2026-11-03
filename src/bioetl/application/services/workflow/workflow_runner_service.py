@@ -157,7 +157,7 @@ class WorkflowRunnerService:
         """
         started_at = current_utc_time()
         started_monotonic = perf_counter()
-        self.record_expected_pipeline_metrics(config)
+        record_workflow_pipeline_expected_metrics(metrics=self.metrics, config=config)
         state = WorkflowExecutionState(
             step_results=[], step_outputs=dict(restored_step_outputs or {})
         )
@@ -244,7 +244,7 @@ class WorkflowRunnerService:
             if self.evidence_location_verify is not None:
                 try:
                     self.evidence_location_verify(identified_result)
-                except Exception as exc:
+                except (OSError, RuntimeError, TypeError, ValueError) as exc:
                     # Consistency diagnostics must not mask processing success.
                     record_verify_exception_observation(
                         kind="workflow",
@@ -267,13 +267,6 @@ class WorkflowRunnerService:
             return reported
         finally:
             reset_run_observations_if_bound(observation_token)
-
-    def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
-        """Record planned pipeline scopes before workflow step execution."""
-        record_workflow_pipeline_expected_metrics(
-            metrics=self.metrics,
-            config=config,
-        )
 
     async def _resolve_step_transition(
         self,
