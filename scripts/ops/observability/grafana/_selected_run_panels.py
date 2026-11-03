@@ -740,6 +740,10 @@ def _style_provider_check(panels: list[dict]) -> None:
                         "N/A": {"text": "N/A", "color": "gray"},
                         "—": {"text": "—", "color": "gray"},
                         "SELECT RUN": {"text": "SELECT RUN", "color": "gray"},
+                        _NO_RUNS_LABEL: {
+                            "text": _NO_RUNS_LABEL,
+                            "color": "gray",
+                        },
                         "INCOMPLETE": {"text": "INCOMPLETE", "color": "orange"},
                     },
                 },
@@ -932,8 +936,12 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
         )
 
 
+# A2 empty-catalog client fallback (rev7 §3.2): same label as API finalize when
+# filter-options returns items=[]. Keep SELECT RUN only as A1 regression maps.
+_NO_RUNS_LABEL = "НЕТ ЗАПУСКОВ"
 SELECTOR_ROWS = (
-    '$exists(items) and $count(items) = 0 ? [{"text":"NO MATCHES","value":"-"}] : items'
+    "$exists(items) and $count(items) = 0 ? "
+    f'[{{"text":"{_NO_RUNS_LABEL}","value":"-"}}] : items'
 )
 
 

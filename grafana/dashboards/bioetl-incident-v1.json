@@ -87,7 +87,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -144,7 +144,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -208,7 +208,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"НЕТ ЗАПУСКОВ\",\"value\":\"-\"}] : items",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -2653,6 +2653,10 @@
                           "SELECT RUN": {
                             "text": "—",
                             "color": "text"
+                          },
+                          "НЕТ ЗАПУСКОВ": {
+                            "text": "НЕТ ЗАПУСКОВ",
+                            "color": "gray"
                           }
                         }
                       }
@@ -2679,6 +2683,10 @@
                           "SELECT RUN": {
                             "text": "—",
                             "color": "text"
+                          },
+                          "НЕТ ЗАПУСКОВ": {
+                            "text": "НЕТ ЗАПУСКОВ",
+                            "color": "gray"
                           }
                         }
                       }
@@ -2724,6 +2732,10 @@
                           "SELECT RUN": {
                             "text": "Choose a run",
                             "color": "text"
+                          },
+                          "НЕТ ЗАПУСКОВ": {
+                            "text": "НЕТ ЗАПУСКОВ",
+                            "color": "gray"
                           }
                         }
                       }

@@ -576,6 +576,9 @@ def test_http_selector_frames_declare_columns_for_empty_catalogs() -> None:
             assert infinity["url"].count("allow_stale=1") == 1, path.name
             assert infinity["parser"] == "backend", path.name
             assert infinity["root_selector"] == SELECTOR_ROWS, path.name
+            # A2 empty catalog (rev7 §3.2): client fallback matches API label.
+            assert "НЕТ ЗАПУСКОВ" in SELECTOR_ROWS
+            assert "NO MATCHES" not in SELECTOR_ROWS
             assert infinity["columns"] == [
                 {"selector": field, "text": f"__{field}", "type": "string"}
                 for field in ("text", "value")
