@@ -290,6 +290,23 @@ def _correct_incident(uid: str, panels: dict[int, dict[str, Any]]) -> None:
     if uid != "bioetl-incident-v1":
         return
     for panel in panels.values():
+        if panel.get("title") not in {
+            "Monitor Runtime Error Rate",
+            "Monitor Worst Stage Lag",
+            "Monitor Active Blocker Count",
+            "Monitor Manifest (30m)",
+            "Monitor Ledger (30m)",
+        }:
+            continue
+        steps = (
+            panel.get("fieldConfig", {})
+            .get("defaults", {})
+            .get("thresholds", {})
+            .get("steps", [])
+        )
+        if steps and steps[0].get("value") is None:
+            steps[0]["color"] = "green"
+    for panel in panels.values():
         if panel.get("type") != "table":
             continue
         defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
@@ -977,7 +994,7 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
             "source": "url",
             "parser": "uql",
             "format": "table",
-            "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+            "url": "/ops/observability/pipeline-run-report?pipeline=${selected_pipeline}&run_id=${selected_run_id}",
             "url_options": {"method": "GET", "data": ""},
             "uql": 'parse-json | jsonata "' + expression + '"',
         }

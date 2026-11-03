@@ -517,6 +517,8 @@ def _incident(p: dict[int, dict]) -> None:
     p[9400]["gridPos"]["h"] = 3
     p[9401]["gridPos"]["h"] = 3
     p[9401]["fieldConfig"]["defaults"]["displayName"] = "Monitor Scope Status"
+    _override(p[2101], "Reason", _WRAP, True)
+    _override(p[2101], "Reason", _CELL, {"type": "auto", "wrapText": True})
     p[2001]["gridPos"].update(y=5, h=2)
     p[2010]["gridPos"].update(y=7, h=5)
     p[2005]["gridPos"].update(y=12, h=5)
@@ -673,7 +675,7 @@ def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
                 run_reason="Reason",
                 saved_trust="Trust",
             )
-    return ["run_execution", "saved_trust", "run_reason"]
+    return ["run_execution", "run_verdict", "saved_trust", "run_reason"]
 
 
 def _apply_reason_columns(panel: dict, fields: list[str]) -> None:

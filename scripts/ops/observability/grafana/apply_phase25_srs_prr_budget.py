@@ -245,7 +245,7 @@ _OV_PROVIDER = (
 _OV_STAGES = _tag_rows("stage_diagnostics", "stages")
 _OV_RECON = _tag_rows("reconciliation_display", "reconciliation")
 _OV_EXCL = (
-    f"[{{'status': contract_exclusions_status, "
+    f"[{{'status': verdict='SELECT RUN' ? 'SELECT RUN' : contract_exclusions_status, "
     f"'detail': contract_exclusions_rate != null ? "
     f"'excluded ' & $string($round(contract_exclusions_rate*100,2)) & '%' : "
     f"(verdict='SELECT RUN' ? 'Choose a run' : 'excluded UNKNOWN'), "
@@ -806,10 +806,8 @@ def apply_dq(data: dict[str, Any]) -> None:
                     "format": "table",
                     "root_selector": "",
                     "url": (
-                        "/ops/observability/selected-run-status"
-                        "?pipeline=${selected_pipeline}"
-                        "&run_id=${selected_run_id}"
-                        "&run_type=${run_type:csv}&workflow=${workflow:csv}"
+                        "/ops/observability/pipeline-run-report"
+                        "?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
                     ),
                     "url_options": {"method": "GET", "data": ""},
                     "uql": (

@@ -516,7 +516,7 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 24,
         "x": 0,
         "y": 2
@@ -545,7 +545,7 @@
         "h": 13,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",

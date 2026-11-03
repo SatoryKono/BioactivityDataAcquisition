@@ -1714,7 +1714,7 @@
         {
           "includeVars": false,
           "title": "Show all rows and total (summary: up to 2)",
-          "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=22005&${__url_time_range}",
+          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=22005&${__url_time_range}",
           "targetBlank": false
         }
       ]
@@ -2878,6 +2878,25 @@
                         }
                       }
                     ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "custom.wrapText",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               }
@@ -4516,7 +4535,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "green",
                     "value": null
                   },
                   {
@@ -4613,7 +4632,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "gray",
+                    "color": "green",
                     "value": null
                   },
                   {
@@ -6961,7 +6980,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "green",
                     "value": null
                   },
                   {
@@ -8522,7 +8541,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "green",
                     "value": null
                   },
                   {
@@ -8806,7 +8825,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "green",
                     "value": null
                   },
                   {
@@ -10824,7 +10843,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "#555555",
+                    "color": "green",
                     "value": null
                   },
                   {
