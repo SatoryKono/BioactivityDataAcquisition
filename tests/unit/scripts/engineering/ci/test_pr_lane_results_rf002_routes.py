@@ -11,13 +11,14 @@ pytestmark = pytest.mark.unit
 
 
 def test_shadow_compare_routes_run_report_contracts_and_docs__rf002_routes() -> None:
-    """Run-report contracts, goldens, and operator docs select contract tests."""
+    """Run-report and resource-review inputs select their contract tests."""
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
         [
             "configs/contracts/reports/run_evidence_location.v1.json",
             "tests/fixtures/reports/run_evidence_location_golden.json",
             "docs/04-reference/reports/run-reports.md",
+            "configs/quality/external_resource_inventory_pr12755_review.json",
         ],
         repo_root=repo_root,
     )
@@ -28,6 +29,14 @@ def test_shadow_compare_routes_run_report_contracts_and_docs__rf002_routes() -> 
         in report["selected"]
     )
     assert "tests/architecture/test_documentation_sync.py" in report["selected"]
+    assert (
+        "tests/architecture/test_external_resource_inventory_catalog.py"
+        in report["selected"]
+    )
+    assert (
+        "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py"
+        in report["selected"]
+    )
 
 
 @pytest.mark.parametrize(
