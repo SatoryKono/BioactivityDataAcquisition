@@ -10,9 +10,11 @@ import asyncio
 import time
 from typing import cast
 
-from bioetl.application.services.evidence_location.resolver import EvidenceLocationResolver
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
+)
+from bioetl.application.services.evidence_location.resolver import (
+    EvidenceLocationResolver,
 )
 from bioetl.application.services.quality.quarantine_service import QuarantineService
 from bioetl.composition.observability_runtime import create_run_report_store
@@ -151,7 +153,8 @@ class HealthServer(
                     RunReportStorePort | None, recognized.get("run_report_store")
                 ),
                 evidence_location_resolver=cast(
-                    EvidenceLocationResolver | None, recognized.get("evidence_location_resolver")
+                    EvidenceLocationResolver | None,
+                    recognized.get("evidence_location_resolver"),
                 ),
             )
         return control_plane or HealthServerControlPlaneDeps()
@@ -359,7 +362,6 @@ async def run_health_server(
     run_ledger_port: RunLedgerPort | None = None,
     workflow_manifest_port: WorkflowManifestPort | None = None,
     control_plane_evidence_service: ControlPlaneEvidenceService | None = None,
-    evidence_location_resolver: EvidenceLocationResolver | None = None,
     control_plane_integrity_refresher: ControlPlaneMetricsRefresher | None = None,
     prometheus_base_url: str | None = None,
     logger: LoggerPort | None = None,
@@ -398,7 +400,6 @@ async def run_health_server(
             run_ledger_port=run_ledger_port,
             workflow_manifest_port=workflow_manifest_port,
             control_plane_evidence_service=control_plane_evidence_service,
-            evidence_location_resolver=evidence_location_resolver,
             control_plane_integrity_refresher=control_plane_integrity_refresher,
         ),
         prometheus_base_url=prometheus_base_url,

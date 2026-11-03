@@ -1,12 +1,12 @@
 {
   "summary": {
     "scanned_modules": 2603,
-    "total_internal_imports": 8461,
+    "total_internal_imports": 8469,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 329,
     "violations": 0,
-    "source_fingerprint": "5768095bc6e894299e46e92699c26089a04552119e2230c9bf89926bba6ddb92"
+    "source_fingerprint": "7fccc691a41259634a51b19f7d929a9f34272c8282e4394ebcb3931b84b56f4a"
   },
   "layer_edges": [
     {
@@ -24,7 +24,7 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 237,
+      "imports": 238,
       "allowed": true
     },
     {
@@ -66,7 +66,7 @@
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 77,
+      "imports": 84,
       "allowed": true
     },
     {
@@ -147,7 +147,7 @@
     {
       "source": "composition.bootstrap",
       "target": "application.services",
-      "imports": 47
+      "imports": 48
     },
     {
       "source": "infrastructure.storage",
@@ -260,6 +260,11 @@
       "imports": 23
     },
     {
+      "source": "interfaces.http",
+      "target": "application.services",
+      "imports": 23
+    },
+    {
       "source": "application.core",
       "target": "domain.normalization",
       "imports": 22
@@ -352,11 +357,6 @@
     {
       "source": "infrastructure.control_plane",
       "target": "domain.types",
-      "imports": 16
-    },
-    {
-      "source": "interfaces.http",
-      "target": "application.services",
       "imports": 16
     },
     {

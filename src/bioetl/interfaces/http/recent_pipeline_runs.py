@@ -7,6 +7,9 @@ from pathlib import Path
 from urllib.parse import urlencode
 
 from bioetl.application.runtime_clock import current_utc_time
+from bioetl.application.services.evidence_location.resolver import (
+    EvidenceLocationResolver,
+)
 from bioetl.domain.ports import RunManifestPort, RunReportStorePort
 from bioetl.interfaces.http._control_plane_selector_records import (
     RunLedgerLookup,
@@ -14,7 +17,6 @@ from bioetl.interfaces.http._control_plane_selector_records import (
     build_selector_records,
     narrow_manifest_catalog,
 )
-from bioetl.application.services.evidence_location.resolver import EvidenceLocationResolver
 from bioetl.interfaces.http._recent_run_presentation import recent_run_presentation
 from bioetl.interfaces.http.run_report_index import _normalize_list_owner
 from bioetl.interfaces.http.run_report_ops import (
@@ -403,7 +405,9 @@ def _present_page(
     for item in items:
         item.update(_report_link(item, root))
         item.update(
-            recent_run_presentation(item, root=root, manifest_port=manifest_port, resolver=resolver)
+            recent_run_presentation(
+                item, root=root, manifest_port=manifest_port, resolver=resolver
+            )
         )
         item.update(_timing_fields(item, observed_at))
         run_identity = str(item["run_id"])

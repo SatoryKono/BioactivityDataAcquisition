@@ -6,9 +6,11 @@ import asyncio
 from dataclasses import dataclass
 from typing import Protocol
 
-from bioetl.application.services.evidence_location.resolver import EvidenceLocationResolver
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
+)
+from bioetl.application.services.evidence_location.resolver import (
+    EvidenceLocationResolver,
 )
 from bioetl.application.services.quality.quarantine_service import QuarantineService
 from bioetl.domain.control_plane import RunLedgerEntry

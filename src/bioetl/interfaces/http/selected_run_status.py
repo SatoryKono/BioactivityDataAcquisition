@@ -13,6 +13,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.selected_run
     empty_replay_readiness,
     project_selected_run_replay_readiness,
 )
+from bioetl.application.services.evidence_location.resolver import (
+    EvidenceLocationResolver,
+)
 from bioetl.composition.composite_catalog import (
     attach_contract_fields,
     project_assay_replay,
@@ -49,7 +52,6 @@ from bioetl.interfaces.http._selected_run_presentation import (
     _readiness_fields,
     presentation_rows,
 )
-from bioetl.application.services.evidence_location.resolver import EvidenceLocationResolver
 from bioetl.interfaces.http._selected_run_report_assessment import (
     _IdentityMismatchError,
     _load_report_assessment,
@@ -139,6 +141,36 @@ def _load_saved_assessment(
         )
 
 
+def _resolved_report_path(
+    resolver: EvidenceLocationResolver | None,
+    *,
+    pipeline: str,
+    run_id: str,
+) -> Path | None:
+    """Return a saved report under the resolved evidence root, when one exists."""
+    if resolver is None:
+        return None
+    try:
+        resolved = resolver.resolve(kind="pipeline", owner=pipeline, run_id=run_id)
+    except (OSError, TypeError, ValueError):
+        return None
+    context = resolved.context
+    if context is None:
+        return None
+    try:
+        report_path, _ = _validated_artifact_paths(
+            pipeline,
+            run_id,
+            "pipeline_run_report_json",
+            context.data_root,
+        )
+    except ValueError:
+        return None
+    if not report_path.is_file():
+        return None
+    return report_path
+
+
 def load_selected_run_status(
     *,
     pipeline: str,
@@ -162,25 +194,7 @@ def load_selected_run_status(
     if selected_pipeline is None:
         return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
     pipeline = selected_pipeline
-
-    resolved_context = None
-    if resolver is not None:
-        try:
-            resolved = resolver.resolve(kind="pipeline", owner=pipeline, run_id=run_id)
-            resolved_context = resolved.context
-        except BaseException:
-            pass
-
-    path = None
-    if resolved_context is not None:
-        report_path = getattr(resolved_context, "_path", lambda *a: None)(pipeline, run_id, "pipeline_run_report_json")
-        if report_path is None:
-            try:
-                report_path, _ = _validated_artifact_paths(pipeline, run_id, "pipeline_run_report_json", resolved_context.data_root)
-            except ValueError:
-                pass
-        if report_path is not None and report_path.is_file():
-            path = report_path
+    path = _resolved_report_path(resolver, pipeline=pipeline, run_id=run_id)
     if path is None:
         path, _ = _validated_artifact_paths(
             pipeline, run_id, "pipeline_run_report_json", root

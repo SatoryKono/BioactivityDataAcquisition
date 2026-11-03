@@ -836,15 +836,17 @@ async def test_late_previous_request_keeps_its_own_identity(tmp_path, monkeypatc
             reason="requires real asyncio.to_thread worker offload; "
             "the WSL safeguard in tests/conftest.py runs it inline"
         )
+    run_a = "00000000-0000-0000-0000-000000000001"
+    run_b = "00000000-0000-0000-0000-000000000002"
     persist(tmp_path)
-    persist(tmp_path, report(run_id="00000000-0000-0000-0000-000000000001", status="success"))
-    persist(tmp_path, report(run_id="00000000-0000-0000-0000-000000000002", status="failed"))
+    persist(tmp_path, report(run_id=run_a, status="success"))
+    persist(tmp_path, report(run_id=run_b, status="failed"))
     first_entered = threading.Event()
     release_first = threading.Event()
     real_load = load_selected_run_status
 
     def delayed_load(*, pipeline, run_id, **kwargs):
-        if run_id == "run-a":
+        if run_id == run_a:
             first_entered.set()
             assert release_first.wait(5)
         return real_load(pipeline=pipeline, run_id=run_id, root=tmp_path, **kwargs)
@@ -861,12 +863,12 @@ async def test_late_previous_request_keeps_its_own_identity(tmp_path, monkeypatc
     first_writer, second_writer = MagicMock(), MagicMock()
     first = asyncio.create_task(
         handle_selected_run_status(
-            host, first_writer, {"pipeline": "chembl_activity", "run_id": "run-a"}
+            host, first_writer, {"pipeline": "chembl_activity", "run_id": run_a}
         )
     )
     assert await asyncio.to_thread(first_entered.wait, 5)
     await handle_selected_run_status(
-        host, second_writer, {"pipeline": "chembl_activity", "run_id": "run-b"}
+        host, second_writer, {"pipeline": "chembl_activity", "run_id": run_b}
     )
     release_first.set()
     await first
@@ -874,9 +876,9 @@ async def test_late_previous_request_keeps_its_own_identity(tmp_path, monkeypatc
         (call.args[0], call.args[2])
         for call in host._send_payload_response.call_args_list
     ]
-    assert responses[0][0] is second_writer and responses[0][1]["run_id"] == "run-b"
+    assert responses[0][0] is second_writer and responses[0][1]["run_id"] == run_b
     assert responses[0][1]["verdict"] == "ERROR"
-    assert responses[1][0] is first_writer and responses[1][1]["run_id"] == "run-a"
+    assert responses[1][0] is first_writer and responses[1][1]["run_id"] == run_a
     assert responses[1][1]["verdict"] == "OK"
 
 

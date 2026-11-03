@@ -13,8 +13,10 @@ from datetime import datetime
 from typing import Protocol
 
 from bioetl.application.runtime_clock import current_utc_time
+from bioetl.application.services.evidence_location.resolver import (
+    EvidenceLocationResolver,
+)
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort, RunReportStorePort
-from bioetl.application.services.evidence_location.resolver import EvidenceLocationResolver
 from bioetl.interfaces.http.recent_pipeline_runs import (
     RECENT_TIMING_FIELDS,
     _scope,

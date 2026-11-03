@@ -37,7 +37,11 @@ def test_readiness_is_independent_from_processing(monkeypatch, readiness, expect
     assert result["saved_evidence_status"] == "INCOMPLETE"
     assert result["data_quality_status"] == "INCOMPLETE"
     loader.assert_called_once_with(
-        pipeline="chembl_assay", run_id="exact-id", root=None, manifest_port=None
+        pipeline="chembl_assay",
+        run_id="exact-id",
+        root=None,
+        manifest_port=None,
+        resolver=None,
     )
 
 
