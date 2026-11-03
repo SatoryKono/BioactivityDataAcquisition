@@ -291,10 +291,13 @@ def test_newer_alias_fallback_not_hidden_by_older_declared_match() -> None:
 def _host() -> MagicMock:
     import asyncio
 
+    from bioetl.interfaces.http._selected_run_status_cache import SelectedRunStatusCache
+
     host = MagicMock()
     host._read_required_param.side_effect = lambda q, key: q[key]
     host._read_optional_param.side_effect = lambda q, key: q.get(key)
     host._forensic_endpoint_limiter = asyncio.Semaphore(2)
+    host._selected_run_status_cache = SelectedRunStatusCache()
     host._run_manifest_port = MagicMock()
     host._run_ledger_port = None
     host._run_report_store = MagicMock()

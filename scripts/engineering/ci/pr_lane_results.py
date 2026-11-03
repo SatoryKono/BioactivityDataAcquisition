@@ -126,6 +126,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     ".dockerignore": (DOCKER_RUNTIME_CONTRACT_TEST,),
     "mkdocs.yml": (DOCUMENTATION_SYNC_TEST,),
+    "docs/00-project/governance/05-github-policy.md": (
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
     "docs/05-operations/runbooks/quality-tooling-artifact-refresh.md": (
         "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
     ),
@@ -148,6 +151,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "configs/quality/quality_move_qm09_reference_decisions.json": (
         "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
+    ),
+    "configs/quality/external_resource_inventory_pr12728_hotspot_move_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
     "scripts/engineering/README.md": (
         SCRIPTS_INVENTORY_MANIFEST_TEST,
@@ -375,6 +381,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_qm08_review.json",
             "configs/quality/external_resource_inventory_qm09_review.json",
             "configs/quality/external_resource_inventory_pr12688_rf002_review.json",
+            "configs/quality/external_resource_inventory_pr12728_review.json",
+            "configs/quality/external_resource_inventory_pr12728_sonar_review.json",
+            "configs/quality/external_resource_inventory_pr12728_main_merge_12737_review.json",
+            "configs/quality/external_resource_inventory_pr12728_mypy_types_review.json",
+            "configs/quality/external_resource_inventory_pr12730_rf001_004_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -449,6 +460,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "configs/quality/duplication_complexity_exemptions.yaml": (
         "tests/architecture/test_duplication_complexity_expiry_governance.py",
+    ),
+    "configs/quality/source_test_mapping_exceptions.yaml": (
+        "tests/architecture/test_source_test_mapping_policy.py",
+        "tests/architecture/test_source_test_facade_ownership.py",
     ),
     "configs/quality/package_cohesion_budget.yaml": (
         "tests/architecture/test_architecture_quality_scorecard.py",
@@ -686,6 +701,10 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "tests/fixtures/reports/": (RUN_REPORT_CONTRACTS_TEST,),
     "configs/composites/": (
         "tests/unit/infrastructure/schemas/test_composite_config_schema.py",
+    ),
+    # Composite MANY_TO_ONE / enricher fixtures → schema contract suite.
+    "tests/fixtures/composite/": (
+        "tests/integration/composite/test_composite_config_schema_contract.py",
     ),
     # Entity YAML family: fail-closed pipeline load + FilterConfigFile boundary.
     "configs/entities/": (

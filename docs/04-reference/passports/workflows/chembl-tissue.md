@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:chembl_tissue`
 - Schema: `1.0.0`
-- Source revision: `sha256:58e48b1497e0bf581212cd655335e66e3bd086933346627b32a787451cbc5153`
+- Source revision: `sha256:1f2c448602d2d63a69196a4e66336fe111b585fe4bc5e45fd305c92617458ecb`
 
 ## Evidence
 
@@ -75,7 +75,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:a857a41f69deaa9647c4d78c945750a9e057df30880fdb5747517906229319f9",
-    "source_revision": "sha256:58e48b1497e0bf581212cd655335e66e3bd086933346627b32a787451cbc5153"
+    "source_revision": "sha256:1f2c448602d2d63a69196a4e66336fe111b585fe4bc5e45fd305c92617458ecb"
   },
   "source_references": [
     {

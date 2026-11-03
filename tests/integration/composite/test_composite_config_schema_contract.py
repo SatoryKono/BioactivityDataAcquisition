@@ -12,6 +12,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import yaml
 import pytest
 from pydantic import ValidationError
@@ -24,22 +26,8 @@ from bioetl.infrastructure.schemas.composite_config import (
 pytestmark = pytest.mark.integration
 
 
-def _base_composite_yaml(with_version: bool, with_aggregation: bool = False) -> str:
+def _base_composite_yaml(with_version: bool) -> str:
     version_line = '  version: "1.0.0"\n' if with_version else ""
-    enricher_block = "    - pipeline: crossref_publication\n      join_keys: [doi]\n"
-    if with_aggregation:
-        enricher_block = (
-            "    - pipeline: crossref_publication\n"
-            "      join_keys: [doi]\n"
-            "      cardinality: many_to_one\n"
-            "      aggregation:\n"
-            "        group_by: doi\n"
-            "        order_by: [doi]\n"
-            "        fields:\n"
-            "          citation_count:\n"
-            "            source: citation_count\n"
-            "            agg: first\n"
-        )
     return (
         'schema_version: "2.0.0"\n'
         "composite:\n"
@@ -50,7 +38,8 @@ def _base_composite_yaml(with_version: bool, with_aggregation: bool = False) -> 
         "    output_keys: [publication_id, doi]\n"
         "    silver_table: silver/chembl/publication\n"
         "  enrichers:\n"
-        f"{enricher_block}"
+        "    - pipeline: crossref_publication\n"
+        "      join_keys: [doi]\n"
         "  merge:\n"
         "    output:\n"
         "      silver: silver/composite/publication\n"
@@ -93,27 +82,18 @@ def test_composite_local_gold_filters_are_rejected() -> None:
         validate_composite_config_payload(payload)
 
 
-def test_composite_many_to_one_enricher_validates_aggregation() -> None:
-    """A many_to_one enricher must include an aggregation block."""
-    # First, test that with_aggregation=True works
-    valid_payload = yaml.safe_load(
-        _base_composite_yaml(with_version=True, with_aggregation=True)
-    )
-    schema = CompositeConfigFileSchema.model_validate(valid_payload)
+def test_composite_many_to_one_enricher_aggregation_is_validated() -> None:
+    """MANY_TO_ONE enrichers must explicitly define aggregation rules statically."""
+    fixture = Path(__file__).parents[2] / "fixtures/composite/many_to_one_enricher.yaml"
+    base = yaml.safe_load(fixture.read_text(encoding="utf-8"))
 
+    # Verify missing aggregation fails
+    missing_aggregation = yaml.safe_load(fixture.read_text(encoding="utf-8"))
+    del missing_aggregation["composite"]["enrichers"][0]["aggregation"]
+    with pytest.raises(ValidationError, match="requires aggregation config"):
+        validate_composite_config_payload(missing_aggregation)
+
+    # Verify complete MANY_TO_ONE specification passes
+    schema = CompositeConfigFileSchema.model_validate(base)
     assert schema.composite.enrichers[0].cardinality == "many_to_one"
-    assert schema.composite.enrichers[0].aggregation is not None
     assert schema.composite.enrichers[0].aggregation.group_by == "doi"
-
-    # Second, test that missing aggregation with many_to_one fails
-    invalid_yaml = _base_composite_yaml(with_version=True).replace(
-        "      join_keys: [doi]\n",
-        "      join_keys: [doi]\n      cardinality: many_to_one\n",
-    )
-    invalid_payload = yaml.safe_load(invalid_yaml)
-
-    with pytest.raises(
-        ValidationError,
-        match="cardinality=many_to_one requires aggregation config",
-    ):
-        validate_composite_config_payload(invalid_payload)

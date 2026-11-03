@@ -8,7 +8,6 @@
     "src/bioetl/interfaces/http/_processed_records_prometheus.py": "Reviewed optional timeout_seconds on _fetch_prometheus_query_payload so Prom callers can cap below outer filter-options budget. Same _open_url acquisition site; default remains PROMETHEUS_QUERY_TIMEOUT_SECONDS.",
     "src/bioetl/interfaces/http/_run_type_universe_options.py": "Reviewed new Prometheus run_type universe supplement helper with fail-open semantics and budget cap min(remaining-reserve, PROMETHEUS_QUERY_TIMEOUT). Reuses already-qualified _fetch_prometheus_query_payload / _open_url owner; no direct sockets/files/subprocess/locks; no cleanup ownership."
   },
-  "expression_updates": {},
   "resource_updates": {},
   "additional_bindings": {},
   "new_resources": [],
