@@ -1,38 +1,43 @@
-# GitHub Settings Inventory
-
-This report contains a read-only inventory of GitHub settings for the BioactivityDataAcquisition repository.
-It documents actual settings for rulesets, environments, branch protection, and secrets to identify discrepancies with policy.
+# GitHub Settings Audit Report
 
 ## 1. Rulesets
 
-| Ruleset Name | Enforcement Status | Target Branches | Required Contexts |
-| :--- | :--- | :--- | :--- |
-| `main` | Disabled | `main` | `ci/circleci: pr-gate-complete` (Dead) |
-| `release-tags-v-protection` | Disabled | `tag` | N/A |
+Found 1 rulesets.
+
+| Ruleset Name | ID | Enforcement | Status Checks |
+|---|---|---|---|
+| main | 13643213 | disabled | [{"context": "pr-gate-complete"}] |
 
 ## 2. Environments
 
-| Environment Name | Protection Rules | Required Reviewers |
-| :--- | :--- | :--- |
-| `pypi` | None | None |
-| `testpypi` | None | None |
+Found 5 environments.
 
-## 3. Branch Protection
+| Environment Name | Protection Rules |
+|---|---|
+| copilot | required_reviewers, branch_policy |
+| ghcr-publish | required_reviewers, branch_policy |
+| observability-render-host | required_reviewers, branch_policy |
+| pypi | required_reviewers, branch_policy |
+| testpypi | required_reviewers, branch_policy |
 
-| Branch | Status | Required Approving Reviews | Required Status Checks |
-| :--- | :--- | :--- | :--- |
-| `main` | Unverified | 1 | `ci/circleci: pr-gate-complete` (Dead) |
+## 3. Branch Protection (main)
+
+No classic branch protection found for main (likely managed via rulesets).
 
 ## 4. Secrets Inventory
 
-| Environment / Scope | Secret Names |
-| :--- | :--- |
-| Repository | (Not Verified) |
-| `pypi` | (Not Verified) |
-| `testpypi` | (Not Verified) |
+### Environment Secrets
+
+- **pypi**: 0 secrets
+- **testpypi**: 0 secrets
+
+### Repository Secrets
+
+Found 1 repository secrets.
+- `MUSE_API_KEY`
 
 ## 5. Расхождения с политикой (Discrepancies)
 
-1. **Dead Required Context:** The required context for branch protection is `ci/circleci: pr-gate-complete`, which is a dead context. The real context should be `pr-gate-complete`.
-2. **Disabled Ruleset:** The rulesets are currently disabled, leaving the `main` branch and tags without enforced protection.
-3. **Environment Protection:** The `pypi` and `testpypi` environments lack explicit protection rules and required reviewers.
+- Фактический required context в ruleset: `pr-gate-complete`, тогда как политика или другие зависимости могли ожидать `ci/circleci: pr-gate-complete` (согласно контексту из #12581).
+- Ruleset `main` находится в состоянии `disabled`.
+- Секреты окружений `pypi` и `testpypi` отсутствуют (0 секретов), что может мешать публикации.

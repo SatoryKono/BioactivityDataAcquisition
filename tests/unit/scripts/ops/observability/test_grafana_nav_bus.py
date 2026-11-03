@@ -32,8 +32,9 @@ def test_run_explorer_processing_status_fits_zoom_with_inspectable_run_id() -> N
         }
         for override in panel["fieldConfig"]["overrides"]
     }
-    assert fields["Overview"]["custom.width"] == 180
-    assert fields["Overview"]["custom.minWidth"] == 180
+    assert fields["Overview"]["custom.width"] == 150
+    assert fields["Overview"]["custom.minWidth"] == 150
+    assert fields["Run ID"]["custom.width"] == 110
     assert fields["Run ID"]["custom.inspect"] is True
     assert any(
         "${__data.fields.run_id}" in link["title"] for link in fields["Run ID"]["links"]
@@ -100,11 +101,16 @@ def test_row_aware_action_url_preserves_row_and_destination_context() -> None:
     url = routes.row_aware_dashboard_url()
 
     assert "/d/${__data.fields.action_dashboard_uid}/" in url
-    for field in ("workflow", "pipeline", "run_type", "run_id"):
-        assert f"var-{field}=${{__data.fields.{field}}}" in url
-    assert "var-stage=$__all" in url
+    assert (
+        "${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}"
+        not in url
+    )
+    for field in ("workflow", "pipeline", "run_type"):
+        assert f"var-{field}=${{__data.fields.{field}:percentencode}}" in url
+    assert "var-run_id=${__data.fields.run_id}" in url
+    assert "var-stage=" not in url
     assert "var-provider=unknown" in url
-    assert "var-pipeline_context=${__data.fields.pipeline}" in url
+    assert "var-pipeline_context=${__data.fields.pipeline:percentencode}" in url
     assert nav_bus.build_handoff_url.__module__.endswith("dashboard_context_links")
     assert routes.TIME_TOKEN in url
 
@@ -153,10 +159,12 @@ def test_nav_tooltips_describe_resets_and_escape_html_attributes() -> None:
     assert "&quot;Health&quot;" in rendered
     assert "&lt;scope&gt;" in rendered
     runtime = next(item for item in nav_bus.BUS if item["uid"] == "bioetl-dq-v2")
-    assert "stage=All" in nav_bus.nav_link_tooltip(
+    tooltip = nav_bus.nav_link_tooltip(
         source_uid="bioetl-overview-v2",
         target=runtime,
     )
+    assert "stage=All" not in tooltip
+    assert "Preserves selected scope and time range." in tooltip
 
 
 def test_overflow_reclamation_uses_root_panels_and_keeps_minimum_height() -> None:
@@ -249,18 +257,23 @@ def test_trust_layout_preserves_scalar_area_and_detail_rows() -> None:
     assert nav_bus._first_window_overflow(panels) == 0
 
 
-def test_run_explorer_nav_chips_do_not_open_other_dashboards() -> None:
+def test_phase2_nav_bus_five_chips_include_data_quality() -> None:
     html = nav_bus.render_html(current_uid="bioetl-run-explorer-v1")
-    assert "/d/" not in html
-    assert html.count('aria-disabled="true"') == 4
-    assert html.count("pointer-events:none") == 4
-    assert nav_bus.render_links(current_uid="bioetl-run-explorer-v1") == []
+    assert html.count("width:19.5%") == 5
+    assert 'class="bioetl-nav-current"' in html
+    assert '<span class="bioetl-nav-current"' in html or (
+        '<span class="bioetl-nav-current"' in html
+    )
+    assert html.count('class="bioetl-nav-link"') == 4
+    assert "/d/bioetl-overview-v2/" in html
+    assert "/d/bioetl-dq-v2/" in html
+    assert len(nav_bus.render_links(current_uid="bioetl-run-explorer-v1")) == 4
     overview = nav_bus.render_html(current_uid="bioetl-overview-v2")
-    assert overview.count('class="bioetl-nav-link"') == 3
+    assert overview.count('class="bioetl-nav-link"') == 4
     assert "/d/bioetl-run-explorer-v1/" in overview
-    assert len(nav_bus.render_links(current_uid="bioetl-overview-v2")) == 3
-    assert "Data Quality" not in overview
-    assert "/d/bioetl-dq-v2/" not in overview
+    assert "Data Quality" in overview
+    assert "/d/bioetl-dq-v2/" in overview
+    assert len(nav_bus.render_links(current_uid="bioetl-overview-v2")) == 4
 
 
 def test_run_explorer_restores_scope_and_compacts_reviewed_table() -> None:
@@ -310,7 +323,7 @@ def test_apply_to_dashboard_expands_nav_and_reclaims_first_window(
     assert nav["gridPos"] == {"x": 0, "y": 0, "w": 24, "h": 2}
     assert slack["gridPos"]["h"] == 5
     assert first_window["gridPos"]["y"] + first_window["gridPos"]["h"] == 17
-    assert len(nav["links"]) == 4
+    assert len(nav["links"]) == 5
     assert "bioetl-panel-title" not in nav["options"]["content"]
     before_check = dashboard.read_bytes()
     assert nav_bus.apply_to_dashboard(

@@ -39,14 +39,20 @@ def test_overview_v2_semantics_contract():
     assert by_id[9300]["title"] == "Review Run Identity"
     assert by_id[9460]["title"] == "Inspect Selected Run Stages"
     assert by_id[9480]["title"] == "Review Provider Evidence"
-    for panel_id in (9002, 9300, 9480, 9460):
-        urls = [target.get("url", "") for target in by_id[panel_id].get("targets", [])]
-        # Phase-1: detail panels bind selected_* funnel vars; browse retains ${run_id}.
-        assert urls and all(
-            ("run_id=${selected_run_id" in url) or ("run_id=${run_id" in url)
-            for url in urls
-        )
-        assert all("/ops/observability/" in url for url in urls)
+    # Phase 2.5: 9002 is the SRS donor; consumers reuse it via Dashboard DS.
+    donor_urls = [target.get("url", "") for target in by_id[9002].get("targets", [])]
+    assert donor_urls and all(
+        ("run_id=${selected_run_id" in url) or ("run_id=${run_id" in url)
+        for url in donor_urls
+    )
+    assert all("/ops/observability/" in url for url in donor_urls)
+    for panel_id in (9300, 9480):
+        targets = by_id[panel_id].get("targets", [])
+        assert targets and targets[0].get("panelId") == 9002
+        assert (targets[0].get("datasource") or {}).get("uid") == "-- Dashboard --"
+    stages = by_id[9460].get("targets", [])
+    assert stages and stages[0].get("panelId") == 9002
+    assert any("pipeline-run-report-artifact" in (t.get("url") or "") for t in stages)
 
     nav_links = list(d.get("links", []))
     links_blob = ""
@@ -64,16 +70,20 @@ def test_overview_v2_semantics_contract():
     ]:
         assert token in links
 
-    # Data Quality is a contextual detail route rather than a global nav item.
+    # Phase 2 §2.1: Data Quality remains reachable from Overview (nav bus + panel links).
     dq_links = [
         link
         for link in by_id[9002].get("links", [])
         if link.get("url", "").startswith("/d/bioetl-dq-v2/")
     ]
-    assert len(dq_links) == 1
+    assert len(dq_links) >= 1
     assert "${run_id:queryparam}" in dq_links[0]["url"]
     assert "${pipeline:queryparam}" in dq_links[0]["url"]
     assert "${__url_time_range}" in dq_links[0]["url"]
+    nav = by_id[1000]
+    nav_content = str((nav.get("options") or {}).get("content") or "")
+    assert "Data Quality" in nav_content
+    assert "width:19.5%" in nav_content
 
     for current_title in [
         "Monitor Scope Health",
