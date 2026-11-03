@@ -377,6 +377,7 @@ from bioetl.application.services.execution.pipeline_runner_finalize import (
     archive_pipeline_control_plane,
 )
 
+
 class TestArchiveControlPlane:
     def test_missing_hook_is_noop(self) -> None:
         assert archive_pipeline_control_plane(None, MagicMock(), None) is None
