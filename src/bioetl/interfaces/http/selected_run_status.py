@@ -49,6 +49,7 @@ from bioetl.interfaces.http._selected_run_presentation import (
     _readiness_fields,
     presentation_rows,
 )
+from bioetl.application.services.evidence_location.resolver import EvidenceLocationResolver
 from bioetl.interfaces.http._selected_run_report_assessment import (
     _IdentityMismatchError,
     _load_report_assessment,
@@ -145,6 +146,7 @@ def load_selected_run_status(
     root: Path | None = None,
     manifest_port: object | None = None,
     store: RunReportStorePort | None = None,
+    resolver: EvidenceLocationResolver | None = None,
 ) -> dict[str, object]:
     """Load and revalidate the exact report, revision and bound identity each time.
 
@@ -160,9 +162,29 @@ def load_selected_run_status(
     if selected_pipeline is None:
         return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
     pipeline = selected_pipeline
-    path, _ = _validated_artifact_paths(
-        pipeline, run_id, "pipeline_run_report_json", root
-    )
+
+    resolved_context = None
+    if resolver is not None:
+        try:
+            resolved = resolver.resolve(kind="pipeline", owner=pipeline, run_id=run_id)
+            resolved_context = resolved.context
+        except BaseException:
+            pass
+
+    path = None
+    if resolved_context is not None:
+        report_path = getattr(resolved_context, "_path", lambda *a: None)(pipeline, run_id, "pipeline_run_report_json")
+        if report_path is None:
+            try:
+                report_path, _ = _validated_artifact_paths(pipeline, run_id, "pipeline_run_report_json", resolved_context.data_root)
+            except ValueError:
+                pass
+        if report_path is not None and report_path.is_file():
+            path = report_path
+    if path is None:
+        path, _ = _validated_artifact_paths(
+            pipeline, run_id, "pipeline_run_report_json", root
+        )
     if not path.is_file():
         return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
     loaded = _load_saved_assessment(path, pipeline, run_id)
@@ -294,6 +316,7 @@ def _load_selected_with_live_fallback(
         run_id=run_id,
         manifest_port=host._run_manifest_port,
         store=host._run_report_store,
+        resolver=getattr(host, "_evidence_location_resolver", None),
     )
     if result.get("reason") == "run_not_found":
         # URL/explicit run_id stays bound; never substitute a different latest.

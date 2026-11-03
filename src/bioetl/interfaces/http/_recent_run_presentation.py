@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from urllib.parse import quote
 
+from bioetl.application.services.evidence_location.resolver import EvidenceLocationResolver
 from bioetl.interfaces.http.selected_run_status import load_selected_run_status
 
 _PASSPORT_ROOT = (
@@ -73,7 +74,7 @@ def _artifact_checks(checks: object) -> list[dict[str, object]]:
 
 
 def recent_run_presentation(
-    row: dict[str, object], *, root: Path | None, manifest_port: object | None
+    row: dict[str, object], *, root: Path | None, manifest_port: object | None, resolver: EvidenceLocationResolver | None = None
 ) -> dict[str, object]:
     """Reuse verified report/revision/artifact checks only for the bounded page.
 
@@ -95,6 +96,7 @@ def recent_run_presentation(
         run_id=str(row["run_id"]),
         root=root,
         manifest_port=manifest_port,
+        resolver=resolver,
     )
     quality = _quality_verdict(assessment.get("domains"))
     provider = _assessed_provider(

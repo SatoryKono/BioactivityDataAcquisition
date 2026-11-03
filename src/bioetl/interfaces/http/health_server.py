@@ -10,6 +10,7 @@ import asyncio
 import time
 from typing import cast
 
+from bioetl.application.services.evidence_location.resolver import EvidenceLocationResolver
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
@@ -149,6 +150,9 @@ class HealthServer(
                 run_report_store=cast(
                     RunReportStorePort | None, recognized.get("run_report_store")
                 ),
+                evidence_location_resolver=cast(
+                    EvidenceLocationResolver | None, recognized.get("evidence_location_resolver")
+                ),
             )
         return control_plane or HealthServerControlPlaneDeps()
 
@@ -184,6 +188,7 @@ class HealthServer(
         self._run_ledger_port = deps.run_ledger_port
         self._workflow_manifest_port = deps.workflow_manifest_port
         self._control_plane_evidence_service = deps.control_plane_evidence_service
+        self._evidence_location_resolver = deps.evidence_location_resolver
         self._control_plane_integrity_refresher = deps.control_plane_integrity_refresher
         self._control_plane_integrity_refresh_task: asyncio.Task[None] | None = None
         self._control_plane_integrity_refresh_interval_seconds = (
@@ -354,6 +359,7 @@ async def run_health_server(
     run_ledger_port: RunLedgerPort | None = None,
     workflow_manifest_port: WorkflowManifestPort | None = None,
     control_plane_evidence_service: ControlPlaneEvidenceService | None = None,
+    evidence_location_resolver: EvidenceLocationResolver | None = None,
     control_plane_integrity_refresher: ControlPlaneMetricsRefresher | None = None,
     prometheus_base_url: str | None = None,
     logger: LoggerPort | None = None,
@@ -392,6 +398,7 @@ async def run_health_server(
             run_ledger_port=run_ledger_port,
             workflow_manifest_port=workflow_manifest_port,
             control_plane_evidence_service=control_plane_evidence_service,
+            evidence_location_resolver=evidence_location_resolver,
             control_plane_integrity_refresher=control_plane_integrity_refresher,
         ),
         prometheus_base_url=prometheus_base_url,

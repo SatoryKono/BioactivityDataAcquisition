@@ -12,6 +12,7 @@ from bioetl.application.observability.control_plane_integrity_metrics import (
 from bioetl.application.observability.control_plane_archive import (
     resolve_control_plane_archive_root,
 )
+from bioetl.application.services.evidence_location.resolver import EvidenceLocationResolver
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
@@ -74,6 +75,7 @@ class HealthServerDependencies:
     workflow_manifest_port: WorkflowManifestPort
     metrics_exposition: HealthMetricsExpositionPort
     control_plane_evidence_service: ControlPlaneEvidenceService | None = None
+    evidence_location_resolver: EvidenceLocationResolver | None = None
     control_plane_integrity_refresher: ControlPlaneIntegrityMetricsService | None = None
     data_root: Path = Path()
     run_report_store: RunReportStorePort = field(
@@ -172,6 +174,7 @@ def create_health_server_dependencies(
         run_manifest_port=control_plane_ports.manifest_port,
         run_ledger_port=control_plane_ports.ledger_port,
         workflow_manifest_port=control_plane_ports.workflow_manifest_port,
+        evidence_location_resolver=None, # Needs to be passed through deps later if available
         control_plane_evidence_service=ControlPlaneEvidenceService(
             archive_verifier=FileArchiveStore(
                 resolved_data_root,

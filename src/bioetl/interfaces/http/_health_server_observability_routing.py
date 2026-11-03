@@ -314,6 +314,7 @@ async def handle_pipeline_run_reports_list(
             manifest_port=host._run_manifest_port,
             ledger_port=host._run_ledger_port,
             store=host._run_report_store,
+            resolver=getattr(host, "_evidence_location_resolver", None),
         )
         await host._send_payload_response(writer, 200, payload)
         return

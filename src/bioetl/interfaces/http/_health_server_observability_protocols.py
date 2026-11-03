@@ -6,6 +6,7 @@ import asyncio
 from dataclasses import dataclass
 from typing import Protocol
 
+from bioetl.application.services.evidence_location.resolver import EvidenceLocationResolver
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
@@ -92,6 +93,9 @@ class _HealthRoutingHost(_HealthResponseSupport, Protocol):
     ) -> ControlPlaneEvidenceService | None: ...
 
     @property
+    def _evidence_location_resolver(self) -> EvidenceLocationResolver | None: ...
+
+    @property
     def _forensic_endpoint_limiter(self) -> asyncio.Semaphore: ...
 
     @property
@@ -158,3 +162,4 @@ class HealthServerControlPlaneDeps:
     metrics_exposition: HealthMetricsExpositionPort | None = None
     runtime_source_id: str | None = None
     run_report_store: RunReportStorePort | None = None
+    evidence_location_resolver: EvidenceLocationResolver | None = None

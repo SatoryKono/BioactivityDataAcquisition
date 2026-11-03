@@ -837,7 +837,8 @@ async def test_late_previous_request_keeps_its_own_identity(tmp_path, monkeypatc
             "the WSL safeguard in tests/conftest.py runs it inline"
         )
     persist(tmp_path)
-    persist(tmp_path, report(run_id="run-b", status="failed"))
+    persist(tmp_path, report(run_id="00000000-0000-0000-0000-000000000001", status="success"))
+    persist(tmp_path, report(run_id="00000000-0000-0000-0000-000000000002", status="failed"))
     first_entered = threading.Event()
     release_first = threading.Event()
     real_load = load_selected_run_status
