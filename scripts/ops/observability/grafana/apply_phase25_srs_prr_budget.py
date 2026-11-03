@@ -690,6 +690,18 @@ def apply_overview(data: dict[str, Any]) -> None:
     # Row filter alone is not enough: project back to the prior column set.
     _ensure_field_projection(_by_id(data, 9300), _IDENTITY_FIELDS)
     _ensure_field_projection(_by_id(data, 9483), _RECONCILIATION_FIELDS)
+    # Stat 9481 must reduce the display field (Cached Bronze → —), not raw
+    # check_result — same contract as Review Provider Evidence (9480).
+    check = _by_id(data, 9481)
+    _ensure_field_projection(check, ("check_result_display",))
+    reduce = check.setdefault("options", {}).setdefault("reduceOptions", {})
+    reduce["fields"] = "/^check_result_display$/"
+    defaults = check.setdefault("fieldConfig", {}).setdefault("defaults", {})
+    mappings = defaults.setdefault("mappings", [])
+    if mappings and isinstance(mappings[0].get("options"), dict):
+        mappings[0]["options"].setdefault(
+            "—", {"text": "—", "color": "gray"}
+        )
     recon = _by_id(data, 9483)
     if not any(t.get("id") == "organize" for t in recon.get("transformations") or []):
         recon.setdefault("transformations", []).append(
