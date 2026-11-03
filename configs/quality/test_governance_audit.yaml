@@ -1034,6 +1034,12 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/application/services/test_workflow_runner_service.py
       target_lane: repo-backed-unit
       protected_surface: configs/workflows/*.yaml declarative workflow execution contracts
+    - path: tests/unit/repo_backed/application/services/control_plane/test_evidence_location_registration.py
+      target_lane: repo-backed-unit
+      protected_surface: FileEvidenceLocationStore persistence and evidence-location registration contract
+    - path: tests/unit/repo_backed/application/services/control_plane/test_evidence_location_resolver.py
+      target_lane: repo-backed-unit
+      protected_surface: File-backed evidence-location, manifest, and replay-store resolution contract
     - path: tests/unit/repo_backed/application/pipelines/crossref/test_business_data_builder.py
       target_lane: repo-backed-unit
       protected_surface: src/bioetl/application/pipelines/crossref/_business_data_builder.py
