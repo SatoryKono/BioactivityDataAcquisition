@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "476d13b0df6572a8960f07278e24f167c0fbacbd",
+  "source_ref": "e0153370d1b91c9029adcb60737fcb657eaa6c22",
+  "source_reviews": {
+    "src/bioetl/domain/normalization/_chembl_organisms.py": "Merged ChEMBL whitespace-normalization optimization replaces a compiled regular expression with str.split/join. This is a pure string transformation; it adds no external resource acquisition or lifecycle behavior.",
+    "src/bioetl/interfaces/http/_selected_run_status_cache.py": "PR #12748 normalizes unresolved run_id sentinels in selected_run_status_key. The delta changes cache-key normalization and imports only. The existing asyncio.create_task acquisition and SelectedRunStatusCache owner/lifecycle behavior are unchanged; no new direct external resource acquisition is introduced."
+  },
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "segment_updates": {},
+  "reference_moves": []
+}
