@@ -278,12 +278,6 @@ def _append_index_row(
     bucket["step_ids"] = [*bucket["step_ids"], row.step_id]
 
 
-def _optional_observations_copy(
-    observations: Mapping[str, object] | None,
-) -> dict[str, object] | None:
-    return None if observations is None else dict(observations)
-
-
 def build_workflow_run_report(
     *,
     identity: Mapping[str, Any],  # Any: report payload
@@ -302,5 +296,5 @@ def build_workflow_run_report(
         totals=_build_totals(execution, planned=_planned_step_count(plan, execution)),
         index=_build_index(normalized),
         reasons_rollup=build_reasons_rollup(execution),
-        observations=_optional_observations_copy(observations),
+        observations=None if observations is None else dict(observations),
     )

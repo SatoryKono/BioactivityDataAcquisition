@@ -35,9 +35,6 @@ from bioetl.composition.runtime_builders.input_snapshot_resolution import (
 from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     validate_manifest_persistence_requirements,
 )
-from bioetl.composition.runtime_builders.evidence_location_registration import (
-    _register_evidence_location_soft,
-)
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )

@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "a06194db4da54f3f8a54975b852dbd4ba95fcb05f33a97ac716a3117363d8cfb",
-      "limit": "a06194db4da54f3f8a54975b852dbd4ba95fcb05f33a97ac716a3117363d8cfb",
+      "current": "d72d3febe9f78b7119f5658835d64f4f843688261f65ede5822bf416b82a7a9f",
+      "limit": "d72d3febe9f78b7119f5658835d64f4f843688261f65ede5822bf416b82a7a9f",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -56,16 +56,16 @@
     },
     {
       "current": {
-        "source_module_count": 2599,
-        "source_tree_sha256": "a06194db4da54f3f8a54975b852dbd4ba95fcb05f33a97ac716a3117363d8cfb",
+        "source_module_count": 2594,
+        "source_tree_sha256": "d72d3febe9f78b7119f5658835d64f4f843688261f65ede5822bf416b82a7a9f",
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 6
+        "unmeasured_module_count": 5
       },
       "limit": {
-        "source_module_count": 2599,
-        "source_tree_sha256": "a06194db4da54f3f8a54975b852dbd4ba95fcb05f33a97ac716a3117363d8cfb",
+        "source_module_count": 2594,
+        "source_tree_sha256": "d72d3febe9f78b7119f5658835d64f4f843688261f65ede5822bf416b82a7a9f",
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 6
+        "unmeasured_module_count": 5
       },
       "metric": "module_coverage_scorecard_alignment",
       "name": "module_coverage_scorecard_coherence",
@@ -74,7 +74,7 @@
       "status": "pass"
     },
     {
-      "current": 6,
+      "current": 5,
       "limit": 0,
       "metric": "unmeasured_module_count",
       "name": "module_coverage_unmeasured_modules",
@@ -427,7 +427,7 @@
       "status": "pass"
     },
     {
-      "current": "c32de34a0ac1b11c7b8355fb1193ddd06ceb902a3c01920391964eb8f2b75ebd",
+      "current": "5a0cd31da916b6656b421c89bd1bfd4d5af425b57155b17cadad44b79b18a434",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -485,8 +485,8 @@
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 8.29,
-    "architecture_quality_scorecard_interpretation": "satisfactory_system_refactoring_required",
+    "architecture_quality_scorecard_integral_score": 8.65,
+    "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
     "fail_count": 1,
     "failing_gates": [
       "module_coverage_unmeasured_modules"

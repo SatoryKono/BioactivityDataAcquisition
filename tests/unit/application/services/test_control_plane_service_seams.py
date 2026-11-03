@@ -74,6 +74,7 @@ EXPECTED_RESPONSIBILITY_SEAMS = {
     "ledger",
     "manifest",
     "replay",
+    "evidence_location",
     "workflow",
 }
 

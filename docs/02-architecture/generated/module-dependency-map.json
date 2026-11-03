@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2603,
-    "total_internal_imports": 8459,
+    "scanned_modules": 2604,
+    "total_internal_imports": 8473,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 329,
     "violations": 0,
-    "source_fingerprint": "c899f5f471bba3707f816a0647b652f9c642550a85be4aec44787fae870032cc"
+    "source_fingerprint": "69230394ae4891e8f26e65638fcfa8a1bd9dc85eddeab68945e86c59740865bb"
   },
   "layer_edges": [
     {
@@ -18,31 +18,31 @@
     {
       "source": "application",
       "target": "domain",
-      "imports": 1141,
+      "imports": 1143,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 237,
+      "imports": 238,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 654,
+      "imports": 655,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 320,
+      "imports": 323,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 311,
+      "imports": 318,
       "allowed": true
     },
     {
@@ -92,7 +92,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 158
+      "imports": 160
     },
     {
       "source": "infrastructure.adapters",
@@ -155,6 +155,11 @@
       "imports": 43
     },
     {
+      "source": "composition.runtime_builders",
+      "target": "domain.control_plane",
+      "imports": 38
+    },
+    {
       "source": "composition.factories",
       "target": "domain.ports",
       "imports": 37
@@ -162,11 +167,6 @@
     {
       "source": "application.composite",
       "target": "domain.exceptions",
-      "imports": 36
-    },
-    {
-      "source": "composition.runtime_builders",
-      "target": "domain.control_plane",
       "imports": 36
     },
     {
@@ -312,7 +312,12 @@
     {
       "source": "composition.runtime_builders",
       "target": "application.services",
-      "imports": 18
+      "imports": 19
+    },
+    {
+      "source": "composition.runtime_builders",
+      "target": "infrastructure.control_plane",
+      "imports": 19
     },
     {
       "source": "application.observability",
@@ -358,11 +363,6 @@
       "source": "interfaces.http",
       "target": "application.services",
       "imports": 16
-    },
-    {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.observability",
-      "imports": 15
     }
   ],
   "violations": []
