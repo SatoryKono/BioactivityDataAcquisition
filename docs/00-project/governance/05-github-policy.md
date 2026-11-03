@@ -261,11 +261,13 @@ double-run it. Thresholds stay 70/60/60/60.
 | PR Hygiene | `pr-hygiene.yml` | Weekly Mon 06:30 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 | Release | `release.yml` | `workflow_dispatch` only (YAML only; `release` event removed) | optional | `disabled_manually` | `keep-disabled` |
 
-`release.yml` YAML still **Build and test on Python 3.13**. The only remaining
-publish job is manual TestPyPI (`publish-testpypi`) when that optional lane is
-re-enabled and `workflow_dispatch` runs with `dry_run == false`. Unreachable
-`publish-pypi` / `create-github-release-assets` jobs (conditioned on the removed
-`release` event) are deleted from the workflow.
+`release.yml` stays **KEEP-DISABLED** for the removed `release` event and for
+production PyPI / GitHub Release asset jobs. YAML still **Build and test on
+Python 3.13**. The only remaining publish job is manual TestPyPI
+(`publish-testpypi`) when that optional lane is intentionally run with
+`workflow_dispatch` and `dry_run == false` — TestPyPI only, not a substitute
+for PyPI. Unreachable `publish-pypi` / `create-github-release-assets` jobs
+(conditioned on the removed `release` event) are deleted from the workflow.
 
 ______________________________________________________________________
 
