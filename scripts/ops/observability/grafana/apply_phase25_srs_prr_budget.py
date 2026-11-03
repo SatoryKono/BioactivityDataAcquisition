@@ -852,9 +852,7 @@ def apply_overview(data: dict[str, Any]) -> None:
         # (not UNKNOWN) so operators do not treat transport failure as N/A.
         options = mappings[0]["options"]
         options.setdefault("—", {"text": "—", "color": "gray"})
-        options.setdefault(
-            "QUERY ERROR", {"text": "QUERY ERROR", "color": "red"}
-        )
+        options.setdefault("QUERY ERROR", {"text": "QUERY ERROR", "color": "red"})
     recon = _by_id(data, 9483)
     if not any(t.get("id") == "organize" for t in recon.get("transformations") or []):
         recon.setdefault("transformations", []).append(
