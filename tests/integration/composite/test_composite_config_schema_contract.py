@@ -113,4 +113,5 @@ def test_composite_many_to_one_enricher_aggregation_is_validated() -> None:
     # Verify complete MANY_TO_ONE specification passes
     schema = CompositeConfigFileSchema.model_validate(base)
     assert schema.composite.enrichers[0].cardinality == "many_to_one"
+    assert schema.composite.enrichers[0].aggregation is not None
     assert schema.composite.enrichers[0].aggregation.group_by == "doi"

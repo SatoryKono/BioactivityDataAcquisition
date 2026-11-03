@@ -12,7 +12,7 @@ composite:
       cardinality: many_to_one
       aggregation:
         group_by: doi
-        order_by: [publication_id]
+        order_by: [doi]
         fields:
           title_list:
             source: title
