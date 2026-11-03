@@ -286,3 +286,113 @@ def test_exclusions_canvas_keeps_select_run_value_mapping() -> None:
         and (item.get("options") or {}).get("pattern") == "^CRIT.*"
         for item in mappings
     )
+
+
+def _panel_by_id(dashboard: dict, panel_id: int) -> dict:
+    def walk(panels: list) -> dict | None:
+        for panel in panels or []:
+            if not isinstance(panel, dict):
+                continue
+            if panel.get("id") == panel_id:
+                return panel
+            found = walk(panel.get("panels") or [])
+            if found is not None:
+                return found
+        return None
+
+    panel = walk(dashboard.get("panels") or [])
+    assert panel is not None, f"missing panel id={panel_id}"
+    return panel
+
+
+def _organize_rename(panel: dict) -> dict[str, str]:
+    for transform in panel.get("transformations") or []:
+        if transform.get("id") == "organize":
+            rename = (transform.get("options") or {}).get("renameByName") or {}
+            return {str(k): str(v) for k, v in rename.items()}
+    return {}
+
+
+def test_f15_status_columns_unified_on_overview_dq_incident() -> None:
+    """F-15: Review Selected Run Status titles match across OV/DQ/Incident."""
+    expected = {
+        "Processing",
+        "Overall verdict",
+        "Trust",
+        "Reason",
+    }
+    cases = (
+        ("grafana/dashboards/bioetl-overview-v2.json", 9603),
+        ("grafana/dashboards/bioetl-dq-v2.json", 9406),
+        ("grafana/dashboards/bioetl-incident-v1.json", 2101),
+    )
+    for path, panel_id in cases:
+        panel = _panel_by_id(
+            json.loads(Path(path).read_text(encoding="utf-8")), panel_id
+        )
+        titles = set(_organize_rename(panel).values())
+        assert expected <= titles, f"{path}:{panel_id} titles={titles}"
+
+
+def test_f03_overview_provider_check_maps_query_error() -> None:
+    """F-03 / §1.2: Overview 9481 must map QUERY ERROR (and Cached Bronze —)."""
+    panel = _panel_by_id(
+        json.loads(Path("grafana/dashboards/bioetl-overview-v2.json").read_text()),
+        9481,
+    )
+    mappings = panel["fieldConfig"]["defaults"]["mappings"]
+    value_options = next(
+        item["options"] for item in mappings if item.get("type") == "value"
+    )
+    assert "QUERY ERROR" in value_options
+    assert value_options["QUERY ERROR"]["color"] == "red"
+    assert "—" in value_options
+
+
+def test_f05_canvas_halves_do_not_overlap() -> None:
+    """F-05 / §1.3: Canvas 9482 status/detail occupy non-overlapping top halves."""
+    panel = _panel_by_id(
+        json.loads(Path("grafana/dashboards/bioetl-overview-v2.json").read_text()),
+        9482,
+    )
+    assert panel.get("type") == "canvas"
+    elements = panel["options"]["root"]["elements"]
+    by_name = {element["name"]: element for element in elements}
+    status = by_name["status"]["placement"]
+    detail = by_name["detail"]["placement"]
+    assert by_name["status"]["constraint"]["vertical"] == "top"
+    assert by_name["detail"]["constraint"]["vertical"] == "top"
+    assert status["top"] < detail["top"]
+    assert status["top"] + status["height"] <= detail["top"]
+
+
+def test_f30_domains_panel_heights_are_compact() -> None:
+    """F-30 / §4.3: domains tables use h in 7–8 at limitField 6."""
+    cases = (
+        ("grafana/dashboards/bioetl-overview-v2.json", 9002),
+        ("grafana/dashboards/bioetl-dq-v2.json", 9451),
+        ("grafana/dashboards/bioetl-incident-v1.json", 9451),
+    )
+    for path, panel_id in cases:
+        panel = _panel_by_id(
+            json.loads(Path(path).read_text(encoding="utf-8")), panel_id
+        )
+        height = int(panel["gridPos"]["h"])
+        assert 7 <= height <= 8, f"{path}:{panel_id} h={height}"
+
+
+def test_seed_dc6_pipeline_run_report_writes_matching_identity(
+    tmp_path: Path,
+) -> None:
+    """DC-6 helper materializes a v1 report whose identity matches the seed."""
+    from scripts.ops.observability.seed_dc6_pipeline_run_report import main
+
+    assert main(["--root", str(tmp_path)]) == 0
+    run_id = "00000000-0000-4000-8000-000000000942"
+    path = tmp_path / "pipeline" / "chembl_assay" / run_id / "pipeline-run-report.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == "pipeline_run_report_v1"
+    assert payload["identity"]["run_id"] == run_id
+    assert payload["identity"]["pipeline_name"] == "chembl_assay"
+    assert payload["identity"]["workflow_id"] == "chembl_baseline"
+    assert (tmp_path / "pipeline" / "chembl_assay" / "_latest.json").is_file()
