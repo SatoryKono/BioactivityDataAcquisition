@@ -101,7 +101,8 @@ def test_saved_reason_labels_and_accounting_use_current_owners() -> None:
     dq = {p["id"]: p for p in _panels(_dashboard("bioetl-dq-v2")["panels"])}
     targets = dq[9403]["targets"]
     assert any("processed-records?" in target["url"] for target in targets)
-    assert any("pipeline-run-report?" in target["url"] for target in targets)
+    assert any("selected-run-status?" in target["url"] for target in targets)
+    assert not any("pipeline-run-report?" in target["url"] for target in targets)
     for target in targets:
         assert "pipeline=${pipeline" in target["url"]
         assert "run_id=${run_id" in target["url"]

@@ -259,10 +259,15 @@ double-run it. Thresholds stay 70/60/60/60.
 | Quality Debt Weekly | `quality-debt-weekly.yml` | Weekly Mon 04:45 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 | Stale | `stale.yml` | Weekly Mon 06:00 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 | PR Hygiene | `pr-hygiene.yml` | Weekly Mon 06:30 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
-| Release | `release.yml` | `release` + `workflow_dispatch` (YAML only) | optional | `disabled_manually` | `keep-disabled` |
+| Release | `release.yml` | `workflow_dispatch` only (YAML only; `release` event removed) | optional | `disabled_manually` | `keep-disabled` |
 
-`release.yml` YAML still **Build and test on Python 3.13**, then publish to
-TestPyPI+PyPI, when that optional lane is re-enabled for an actual release.
+`release.yml` stays **KEEP-DISABLED** for the removed `release` event and for
+production PyPI / GitHub Release asset jobs. YAML still **Build and test on
+Python 3.13**. The only remaining publish job is manual TestPyPI
+(`publish-testpypi`) when that optional lane is intentionally run with
+`workflow_dispatch` and `dry_run == false` — TestPyPI only, not a substitute
+for PyPI. Unreachable `publish-pypi` / `create-github-release-assets` jobs
+(conditioned on the removed `release` event) are deleted from the workflow.
 
 ______________________________________________________________________
 
@@ -685,20 +690,27 @@ ______________________________________________________________________
 ### Workflow: `release.yml`
 
 The build job attests `dist/*` after SBOM generation, including manual dry-run
-validation. Attestation is independent of package publication; existing PyPI
-environment reviews still govern upload. Signed-Releases acceptance must be
-checked against a subsequently published release, not inferred from YAML alone.
+validation. Attestation is independent of package publication; the `testpypi`
+environment review still governs TestPyPI upload when publish runs.
+Signed-Releases acceptance must be checked against a subsequently published
+artifact path outside this workflow, not inferred from YAML alone.
 
-Triggered by GitHub Release publication or manual dispatch (`workflow_dispatch` with `dry_run` default `true`).
+Triggered by manual dispatch only (`workflow_dispatch` with `dry_run` default
+`true`). The `release` event trigger was removed; jobs that required
+`github.event_name == 'release'` were unreachable and are deleted.
 
-Environments: `testpypi` (`if: release || (workflow_dispatch && dry_run == 'false')`) and `pypi` (`if: release` only, `needs: publish-testpypi` chain). Both use OIDC trusted publishing (`id-token: write`, `pypa/gh-action-pypi-publish`). Configure deployment branch policy (tags/releases only for `pypi`) and a reviewer/wait-timer in GitHub Settings → Environments; repository docs do not replace the live protection rule.
+Environment: `testpypi` only
+(`if: workflow_dispatch && dry_run == 'false'`), OIDC trusted publishing
+(`id-token: write`, `pypa/gh-action-pypi-publish`). Configure deployment branch
+policy and a reviewer/wait-timer in GitHub Settings → Environments; repository
+docs do not replace the live protection rule. The live `pypi` GitHub Environment
+may still exist for inventory/protection history, but **no** `release.yml` job
+binds it after `publish-pypi` removal.
 
 ```
 1. Build         → wheel + sdist + twine verify
 2. Test Install  → Python 3.13
-3. TestPyPI      → Publish to test index
-4. PyPI          → Publish to production index (releases only)
-5. Assets        → Upload to GitHub Release
+3. TestPyPI      → Publish to test index (manual non-dry-run only)
 ```
 
 ### Versioning
@@ -738,7 +750,7 @@ permissions:
 | Permission               | Workflows That Use It                             |
 | ------------------------ | ------------------------------------------------- |
 | `contents: read`         | All workflows (default)                           |
-| `contents: write`        | release.yml (asset upload)                        |
+| `contents: write`        | (none in active `release.yml`; asset-upload job removed) |
 | `packages: write`        | docker.yml `docker-push` (GHCR; Environment `ghcr-publish`) |
 | `security-events: write` | docker.yml (Trivy SARIF upload)                   |
 
@@ -756,7 +768,7 @@ The publish job uses run-scoped concurrency so a stale protected publish request
 cannot block a newer validation run. Before writing GHCR tags, it queries the
 current `main` branch SHA and fails closed if the approved run no longer matches
 `main`, preventing stale `:${{ github.ref_name }}` publication.
-| `id-token: write` | release.yml build provenance and PyPI trusted publishing; docker.yml protected `docker-push` provenance |
+| `id-token: write` | release.yml build provenance and TestPyPI trusted publishing (`publish-testpypi`); docker.yml protected `docker-push` provenance |
 | `attestations: write` | release.yml `build` for `dist/*`; docker.yml `docker-push` for the published manifest digest |
 | `issues: write`          | contract-tests.yml (auto-create issue on failure); memory-freshness.yml `open-review-issue`; diagram-nightly.yml `nightly-phase2`; stale.yml; pr-hygiene.yml |
 | `pull-requests: write`   | stale.yml; pr-hygiene.yml; labeler.yml |
@@ -767,8 +779,8 @@ Live publishing/deployment environment controls (API-verified 2026-08-30):
 | --- | --- | --- | --- |
 | `ghcr-publish` | `@SatoryKono` | branch `main` | `docker.yml` → immutable SHA/ref-name GHCR tags |
 | `observability-render-host` | `@SatoryKono` | branch `main` | reviewed manual execution on the self-hosted render runner |
-| `testpypi` | `@SatoryKono` | branch `main`; tags `v*` | reviewed manual dry-run override or release OIDC publish |
-| `pypi` | `@SatoryKono` | tags `v*` | release-only OIDC publish after `testpypi` |
+| `testpypi` | `@SatoryKono` | branch `main`; tags `v*` | reviewed manual `workflow_dispatch` OIDC publish (`dry_run == false`) |
+| `pypi` | `@SatoryKono` | tags `v*` | retained Environment; **unbound** by `release.yml` after `publish-pypi` removal |
 | `copilot` | `@SatoryKono` | branch glob `copilot/**` | GitHub Copilot coding agent runtime (#10371). Not a publish surface. |
 
 Each listed **publish** environment has a required-reviewer rule and a custom deployment

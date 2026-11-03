@@ -391,26 +391,18 @@ shipped_selector_registry:
     - pipeline
     - run_type
     - run_id
-    - read_latency_quantile
-    hidden_context_selectors:
-    - provider_for_pipeline
-    hidden_detail_selectors: &id006
-    - selected_run_id
-    - selected_pipeline
+    hidden_context_selectors: []
+    hidden_detail_selectors: []
     top_bar_order:
     - workflow
     - pipeline
     - run_type
     - run_id
-    - read_latency_quantile
     query_source_families:
       workflow: prometheus_workflow_runs_total
       pipeline: control_plane_filter_options_api
       run_type: control_plane_filter_options_api
       run_id: control_plane_filter_options_api
-      read_latency_quantile: grafana_custom_enum
-      selected_run_id: control_plane_selector_context_api
-      selected_pipeline: control_plane_selector_context_api
   bioetl-overview-v2:
     family: hybrid_overview
     visible_selectors: &id003
@@ -418,9 +410,10 @@ shipped_selector_registry:
     - pipeline
     - run_type
     - run_id
-    hidden_context_selectors:
-    - provider_for_pipeline
-    hidden_detail_selectors: *id006
+    hidden_context_selectors: []
+    hidden_detail_selectors: &id006
+    - selected_run_id
+    - selected_pipeline
     top_bar_order:
     - workflow
     - pipeline
@@ -440,30 +433,25 @@ shipped_selector_registry:
     - pipeline
     - run_type
     - run_id
-    - stage
-    hidden_context_selectors:
-    - provider_for_pipeline
+    hidden_context_selectors: []
     hidden_detail_selectors: *id006
     top_bar_order:
     - workflow
     - pipeline
     - run_type
     - run_id
-    - stage
     query_source_families:
       workflow: prometheus_workflow_runs_total
       pipeline: control_plane_filter_options_api
       run_type: control_plane_filter_options_api
       run_id: control_plane_filter_options_api
-      stage: prometheus_records_processed_total
       selected_run_id: control_plane_selector_context_api
       selected_pipeline: control_plane_selector_context_api
   bioetl-incident-v1:
     family: incident_workspace
     visible_selectors: *id001
-    hidden_context_selectors:
-    - provider_for_pipeline
-    hidden_detail_selectors: *id006
+    hidden_context_selectors: []
+    hidden_detail_selectors: []
     top_bar_order:
     - workflow
     - pipeline
@@ -478,8 +466,6 @@ shipped_selector_registry:
       run_id: control_plane_filter_options_api
       provider: prometheus_provider_health_union
       read_latency_quantile: custom
-      selected_run_id: control_plane_selector_context_api
-      selected_pipeline: control_plane_selector_context_api
   bioetl-run-explorer-v1:
     family: exact_run_explorer
     visible_selectors: &id005
@@ -488,9 +474,8 @@ shipped_selector_registry:
     - pipeline
     - run_type
     - run_id
-    hidden_context_selectors:
-    - provider_for_pipeline
-    hidden_detail_selectors: *id006
+    hidden_context_selectors: []
+    hidden_detail_selectors: []
     top_bar_order:
     - workflow
     - pipeline
@@ -503,8 +488,6 @@ shipped_selector_registry:
       run_type: control_plane_filter_options_api
       run_id: control_plane_filter_options_api
       lookup_run_id: textbox_exact_run_lookup
-      selected_run_id: control_plane_selector_context_api
-      selected_pipeline: control_plane_selector_context_api
 ship_now_selector_contract_by_uid:
   bioetl-control-plane-v1:
     visible_selectors: *id002
@@ -522,8 +505,7 @@ ship_now_selector_contract_by_uid:
     visible_selectors: *id005
     time_range: grafana_builtin
 hidden_handoff_contract:
-  allowed_shipped_vars:
-  - provider_for_pipeline
+  allowed_shipped_vars: []
   detail_only_shipped_vars:
   - selected_run_id
   - selected_pipeline
