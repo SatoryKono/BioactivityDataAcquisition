@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "catalog_ref": "159591f407d92f590dfb5e78a3c1fb820e97f35b",
-  "source_ref": "795b9ef453b2bc06748db34d6eb4d65b93924134",
+  "catalog_ref": "3f1d7622983e481393eaea0039d948ea2d7bc543",
+  "source_ref": "5835408c6f0cfdfbbfd6ecf3d8a629629fc1f844",
   "source_reviews": {
-    "src/bioetl/application/services/execution/workflow_runner_step_execution.py": "Renamed the dispatch dependency dataclass and its references only; no acquisition call, external-resource owner, or lifecycle behavior changed.",
-    "src/bioetl/application/services/workflow/workflow_runner_service.py": "Updated the import and construction reference for the renamed dispatch dependency dataclass only; no resource acquisition or lifecycle behavior changed."
+    "src/bioetl/application/services/control_plane/__init__.py": "PR #12751 removes the evidence_location responsibility description and registration from the package-root ownership map. This is documentation and ownership metadata only; resource acquisition, ownership, and lifecycle behavior are unchanged.",
+    "src/bioetl/interfaces/http/_selected_run_status_cache.py": "PR #12748 normalizes unresolved run_id sentinels in selected_run_status_key. The delta changes cache-key normalization and imports only. The existing asyncio.create_task acquisition and SelectedRunStatusCache owner/lifecycle behavior are unchanged; no new direct external resource acquisition is introduced."
   },
   "expression_updates": {},
   "segment_updates": {},
