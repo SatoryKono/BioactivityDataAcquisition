@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "catalog_ref": "fe3308006e3265859d849a5e61fbf4a9dd1f7c83",
-  "source_ref": "44b050185b41679590466c017f5d4328461ad7bf",
+  "source_ref": "5621e5a0ebc2cddc096b3c7a2d6d72c5b4e0145d",
   "source_reviews": {
     "src/bioetl/application/ports/__init__.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
     "src/bioetl/application/ports/control_plane.py": "Reviewed service/composition/domain decomposition in the pinned source delta: ownership remains with existing concrete adapters/stores and composition roots; no new external resource owner or runtime qualification claim.",
@@ -14,7 +14,8 @@
     "src/bioetl/domain/run_reports/models.py": "Reviewed run-report model/service decomposition: report access remains delegated to existing file-store ports; no new resource owner or runtime qualification claim.",
     "src/bioetl/domain/run_reports/workflow_totals.py": "Reviewed run-report model/service decomposition: report access remains delegated to existing file-store ports; no new resource owner or runtime qualification claim.",
     "src/bioetl/domain/normalization/_chembl_organisms.py": "Reviewed ChEMBL organism whitespace-normalization change: in-memory string processing only; no new external resource acquisition, owner, or cleanup site.",
-    "src/bioetl/application/services/control_plane/__init__.py": "Reviewed explicit evidence_location responsibility seam declaration in the control-plane facade; documentation/ownership mapping only, with no new resource acquisition or lifecycle behavior."
+    "src/bioetl/application/services/control_plane/__init__.py": "Reviewed explicit evidence_location responsibility seam declaration in the control-plane facade; documentation/ownership mapping only, with no new resource acquisition or lifecycle behavior.",
+    "src/bioetl/application/services/workflow/workflow_runner_service.py": "Reviewed workflow step dispatch refactor and dependency bundle: delegates existing pipeline/transform operations without adding external resource acquisition, ownership, or cleanup behavior."
   },
   "expression_updates": {},
   "segment_updates": {},
