@@ -824,39 +824,36 @@ def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
     """Quality-move configs and documentation retain explicit governing tests."""
     repo_root = Path(__file__).resolve().parents[5]
 
+    catalog_and_requalify_tests = {
+        "tests/architecture/test_external_resource_inventory_catalog.py",
+        "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+    }
     new_inputs = {
         "configs/quality/external_resource_inventory/part-06.json": {
             "tests/architecture/test_external_resource_inventory_catalog.py",
             "tests/unit/scripts/engineering/qa/test_external_resource_inventory.py",
         },
-        "configs/quality/external_resource_inventory_qm08_review.json": {
-            "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-        },
-        "configs/quality/external_resource_inventory_qm09_review.json": {
-            "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-        },
-        "configs/quality/external_resource_inventory_pr12688_rf002_review.json": {
-            "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-        },
-        "configs/quality/external_resource_inventory_pr12728_main_merge_12737_review.json": {
-            "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-        },
-        "configs/quality/external_resource_inventory_pr12728_mypy_types_review.json": {
-            "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-        },
-        "configs/quality/external_resource_inventory_pr12748_status_cache_review.json": {
-            "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-        },
-        "configs/quality/external_resource_inventory_pr12730_rf001_004_review.json": {
-            "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-        },
+        "configs/quality/external_resource_inventory_qm08_review.json": (
+            catalog_and_requalify_tests
+        ),
+        "configs/quality/external_resource_inventory_qm09_review.json": (
+            catalog_and_requalify_tests
+        ),
+        "configs/quality/external_resource_inventory_pr12688_rf002_review.json": (
+            catalog_and_requalify_tests
+        ),
+        "configs/quality/external_resource_inventory_pr12728_main_merge_12737_review.json": (
+            catalog_and_requalify_tests
+        ),
+        "configs/quality/external_resource_inventory_pr12728_mypy_types_review.json": (
+            catalog_and_requalify_tests
+        ),
+        "configs/quality/external_resource_inventory_pr12748_status_cache_review.json": (
+            catalog_and_requalify_tests
+        ),
+        "configs/quality/external_resource_inventory_pr12730_rf001_004_review.json": (
+            catalog_and_requalify_tests
+        ),
         "configs/quality/quality_move_qm09_reference_decisions.json": {
             "tests/unit/scripts/engineering/qa/test_verify_quality_move.py",
         },
