@@ -49,7 +49,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "TransformStepRuntimeOptions",
-    "WorkflowStepDispatchDeps",
+    "WorkflowStepDispatchDependencies",
     "apply_workflow_step_transition",
     "dispatch_workflow_step",
     "execute_pipeline_step",
@@ -221,7 +221,7 @@ class TransformStepRuntimeOptions:
 
 
 @dataclass(frozen=True, slots=True)
-class WorkflowStepDispatchDeps:
+class WorkflowStepDispatchDependencies:
     """Shared runner/transform collaborators for one workflow step dispatch."""
 
     pipeline_runner: PipelineRunnerService
@@ -282,7 +282,7 @@ async def execute_transform_step(
 
 async def dispatch_workflow_step(
     *,
-    deps: WorkflowStepDispatchDeps,
+    deps: WorkflowStepDispatchDependencies,
     workflow_name: str,
     step: WorkflowStepDefinition,
     step_outputs: dict[str, object],

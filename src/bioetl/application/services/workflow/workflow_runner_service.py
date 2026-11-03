@@ -15,7 +15,7 @@ from bioetl.application.services.evidence_location import (
 )
 from bioetl.application.services.execution.workflow_runner_step_execution import (
     TransformStepRuntimeOptions,
-    WorkflowStepDispatchDeps,
+    WorkflowStepDispatchDependencies,
     apply_workflow_step_transition,
     dispatch_workflow_step,
 )
@@ -372,7 +372,7 @@ class WorkflowRunnerService:
         capture_producer_snapshot: bool = False,
     ) -> WorkflowStepExecutionResult:
         return await dispatch_workflow_step(
-            deps=WorkflowStepDispatchDeps(
+            deps=WorkflowStepDispatchDependencies(
                 pipeline_runner=self.pipeline_runner,
                 cohort_resolver=self.cohort_resolver,
                 transform_service=self.transform_service,
