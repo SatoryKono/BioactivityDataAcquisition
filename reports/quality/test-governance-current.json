@@ -33,20 +33,6 @@
   "assertion_branch_reachability_percent": 100.0,
   "assertless_candidates": [
     {
-      "category": "weak_no_value",
-      "line": "310",
-      "path": "tests/e2e/test_full_pipeline_chain_e2e.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_run_normal_a_b_a"
-    },
-    {
-      "category": "weak_no_value",
-      "line": "321",
-      "path": "tests/e2e/test_full_pipeline_chain_e2e.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_run_cancellation_and_restart"
-    },
-    {
       "category": "intentional_no_exception_contract",
       "line": "84",
       "path": "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py",
@@ -185,13 +171,6 @@
       "path": "tests/unit/domain/ports/test_protocol_stubs.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_protocol_stubs_are_callable"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "126",
-      "path": "tests/unit/domain/run_reports/test_contracts.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_every_report_schema_is_valid_json_schema"
     },
     {
       "category": "intentional_no_exception_contract",
@@ -541,12 +520,10 @@
     "architecture_helper_guard": 0,
     "benchmark_or_performance": 0,
     "helper_asserted": 1,
-    "intentional_no_exception_contract": 69,
-    "weak_no_value": 2
+    "intentional_no_exception_contract": 68,
+    "weak_no_value": 0
   },
   "assertless_examples": [
-    "tests/e2e/test_full_pipeline_chain_e2e.py:310",
-    "tests/e2e/test_full_pipeline_chain_e2e.py:321",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
     "tests/unit/application/test_issue_10518_app_leftovers_branches.py:100",
@@ -567,17 +544,13 @@
     "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py:178",
     "tests/unit/domain/ports/test_noop_audit.py:90",
     "tests/unit/domain/ports/test_protocol_stubs.py:235",
-    "tests/unit/domain/run_reports/test_contracts.py:126",
     "tests/unit/domain/workflow/test_delete_orphans_scope.py:159",
-    "tests/unit/infrastructure/test_checkpoint.py:135"
+    "tests/unit/infrastructure/test_checkpoint.py:135",
+    "tests/unit/infrastructure/test_checkpoint.py:189",
+    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fifteen.py:44",
+    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py:221"
   ],
   "assertless_families": {
-    "tests/e2e/test_full_pipeline_chain_e2e.py": {
-      "assertless_tests": 2,
-      "categories": {
-        "weak_no_value": 2
-      }
-    },
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py": {
       "assertless_tests": 1,
       "categories": {
@@ -670,12 +643,6 @@
       }
     },
     "tests/unit/domain/ports/test_protocol_stubs.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "intentional_no_exception_contract": 1
-      }
-    },
-    "tests/unit/domain/run_reports/test_contracts.py": {
       "assertless_tests": 1,
       "categories": {
         "intentional_no_exception_contract": 1
@@ -856,33 +823,8 @@
       }
     }
   },
-  "assertless_total_candidates": 72,
-  "budget_violations": [
-    {
-      "actual": 2,
-      "budget": "refined_assertless_max",
-      "expected_max": 0,
-      "metric": "refined_assertless_tests"
-    },
-    {
-      "actual": 1,
-      "budget": "duplicate_test_names_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_names"
-    },
-    {
-      "actual": 2,
-      "budget": "duplicate_test_name_occurrences_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_name_occurrences"
-    },
-    {
-      "actual": 8,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "assertless_total_candidates": 69,
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1027,30 +969,16 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/scripts/engineering/ci/test_pr_lane_results_rf002_routes.py:48",
-        "tests/unit/scripts/engineering/ci/test_pr_lane_results_stub_routing.py:13"
-      ],
-      "name": "test_shadow_compare_routes_domain_ports_stub",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    }
-  ],
+  "duplicate_test_name_inventory": [],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 1,
-    "duplicate_occurrences": 2,
+    "cross_file_groups": 0,
+    "duplicate_occurrences": 0,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 1
+    "total_duplicate_names": 0
   },
-  "duplicate_test_name_occurrences": 2,
-  "duplicate_test_names": 1,
+  "duplicate_test_name_occurrences": 0,
+  "duplicate_test_names": 0,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1058,38 +986,29 @@
     "max_group_size": 0,
     "scan_root": "tests/fixtures",
     "scope_file_counts": {
-      "fixture": 86,
+      "fixture": 87,
       "golden": 30,
       "vcr": 344
     },
-    "total_files": 460,
+    "total_files": 461,
     "tracked_extensions": [
       ".json",
       ".yaml",
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 69,
-  "markerless_examples": [
-    "tests/unit/interfaces/http/test_run_type_universe_options.py:12",
-    "tests/unit/interfaces/http/test_run_type_universe_options.py:31",
-    "tests/unit/interfaces/http/test_run_type_universe_options.py:49",
-    "tests/unit/interfaces/http/test_run_type_universe_options.py:56",
-    "tests/unit/interfaces/http/test_run_type_universe_options.py:96",
-    "tests/unit/interfaces/http/test_run_type_universe_options.py:120",
-    "tests/unit/interfaces/http/test_run_type_universe_options.py:149",
-    "tests/unit/interfaces/http/test_run_type_universe_options.py:179"
-  ],
-  "markerless_test_functions": 8,
+  "intentional_no_exception_contract": 68,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
-  "refined_assertless_tests": 2,
+  "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 76,
+    "marked_test_files": 77,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 76,
+    "test_files": 77,
     "unmarked_test_files": []
   },
   "report": {
@@ -1126,20 +1045,6 @@
     },
     "assertion_branch_reachability_percent": 100.0,
     "assertless_candidates": [
-      {
-        "category": "weak_no_value",
-        "line": "310",
-        "path": "tests/e2e/test_full_pipeline_chain_e2e.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_run_normal_a_b_a"
-      },
-      {
-        "category": "weak_no_value",
-        "line": "321",
-        "path": "tests/e2e/test_full_pipeline_chain_e2e.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_run_cancellation_and_restart"
-      },
       {
         "category": "intentional_no_exception_contract",
         "line": "84",
@@ -1279,13 +1184,6 @@
         "path": "tests/unit/domain/ports/test_protocol_stubs.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_protocol_stubs_are_callable"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "126",
-        "path": "tests/unit/domain/run_reports/test_contracts.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_every_report_schema_is_valid_json_schema"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1635,12 +1533,10 @@
       "architecture_helper_guard": 0,
       "benchmark_or_performance": 0,
       "helper_asserted": 1,
-      "intentional_no_exception_contract": 69,
-      "weak_no_value": 2
+      "intentional_no_exception_contract": 68,
+      "weak_no_value": 0
     },
     "assertless_examples": [
-      "tests/e2e/test_full_pipeline_chain_e2e.py:310",
-      "tests/e2e/test_full_pipeline_chain_e2e.py:321",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
       "tests/unit/application/test_issue_10518_app_leftovers_branches.py:100",
@@ -1661,11 +1557,13 @@
       "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py:178",
       "tests/unit/domain/ports/test_noop_audit.py:90",
       "tests/unit/domain/ports/test_protocol_stubs.py:235",
-      "tests/unit/domain/run_reports/test_contracts.py:126",
       "tests/unit/domain/workflow/test_delete_orphans_scope.py:159",
-      "tests/unit/infrastructure/test_checkpoint.py:135"
+      "tests/unit/infrastructure/test_checkpoint.py:135",
+      "tests/unit/infrastructure/test_checkpoint.py:189",
+      "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fifteen.py:44",
+      "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py:221"
     ],
-    "assertless_total_candidates": 72,
+    "assertless_total_candidates": 69,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -1810,30 +1708,16 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/scripts/engineering/ci/test_pr_lane_results_rf002_routes.py:48",
-          "tests/unit/scripts/engineering/ci/test_pr_lane_results_stub_routing.py:13"
-        ],
-        "name": "test_shadow_compare_routes_domain_ports_stub",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      }
-    ],
+    "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 1,
-      "duplicate_occurrences": 2,
+      "cross_file_groups": 0,
+      "duplicate_occurrences": 0,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 1
+      "total_duplicate_names": 0
     },
-    "duplicate_test_name_occurrences": 2,
-    "duplicate_test_names": 1,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -1841,37 +1725,28 @@
       "max_group_size": 0,
       "scan_root": "tests/fixtures",
       "scope_file_counts": {
-        "fixture": 86,
+        "fixture": 87,
         "golden": 30,
         "vcr": 344
       },
-      "total_files": 460,
+      "total_files": 461,
       "tracked_extensions": [
         ".json",
         ".yaml",
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:12",
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:31",
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:49",
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:56",
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:96",
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:120",
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:149",
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:179"
-    ],
-    "markerless_test_functions": 8,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
-    "refined_assertless_tests": 2,
+    "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 76,
+      "marked_test_files": 77,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 76,
+      "test_files": 77,
       "unmarked_test_files": []
     },
     "root": ".",
@@ -1880,8 +1755,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3215,
-      "test_python_file_count": 3466,
+      "test_glob_file_count": 3220,
+      "test_python_file_count": 3471,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1921,43 +1796,25 @@
       "top_level_directory_count": 16,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/scripts/engineering/ci/test_pr_lane_results_rf002_routes.py:48",
-          "tests/unit/scripts/engineering/ci/test_pr_lane_results_stub_routing.py:13"
-        ],
-        "name": "test_shadow_compare_routes_domain_ports_stub"
-      }
-    ],
-    "total_test_files": 3215,
-    "total_test_functions": 31869,
+    "top_duplicate_test_names": [],
+    "total_test_files": 3220,
+    "total_test_functions": 31910,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "189b184392c5b098f3b1a27b26c0df3c02e61d8c921c1e9e6f8ae30ae7864e04",
+  "source_tree_sha256": "022eec5890ba94eb64966ab0b6b359c7fd671d31c03a0070af3d5facf46be034",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 72,
+    "assertless_total_candidates": 69,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 2,
-    "duplicate_test_names": 1,
-    "intentional_no_exception_contract": 69,
-    "markerless_examples": [
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:12",
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:31",
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:49",
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:56",
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:96",
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:120",
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:149",
-      "tests/unit/interfaces/http/test_run_type_universe_options.py:179"
-    ],
-    "markerless_test_functions": 8,
-    "refined_assertless_tests": 2,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
+    "intentional_no_exception_contract": 68,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
+    "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
@@ -1966,8 +1823,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3215,
-    "test_python_file_count": 3466,
+    "test_glob_file_count": 3220,
+    "test_python_file_count": 3471,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2007,18 +1864,9 @@
     "top_level_directory_count": 16,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/scripts/engineering/ci/test_pr_lane_results_rf002_routes.py:48",
-        "tests/unit/scripts/engineering/ci/test_pr_lane_results_stub_routing.py:13"
-      ],
-      "name": "test_shadow_compare_routes_domain_ports_stub"
-    }
-  ],
-  "total_test_files": 3215,
-  "total_test_functions": 31869,
+  "top_duplicate_test_names": [],
+  "total_test_files": 3220,
+  "total_test_functions": 31910,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

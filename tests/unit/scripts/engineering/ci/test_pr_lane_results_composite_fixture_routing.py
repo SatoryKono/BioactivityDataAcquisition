@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from scripts.engineering.ci.pr_lane_results import build_shadow_compare
+
+pytestmark = pytest.mark.unit
 
 
 def test_shadow_compare_routes_composite_fixtures() -> None:
