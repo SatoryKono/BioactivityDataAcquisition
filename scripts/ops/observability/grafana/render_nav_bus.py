@@ -2775,10 +2775,18 @@ def apply_to_dashboard(
 def _apply_phase25_srs_prr_budget(payload: dict[str, Any], *, current_uid: str) -> None:
     """Re-apply Phase 2.5 donors after nav/layout builders (idempotent)."""
     from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
+        _stamp_no_runs_value_maps,
         apply_control_plane,
         apply_dq,
         apply_incident,
         apply_overview,
+    )
+    from scripts.ops.observability.grafana.apply_phase2_remainder import (
+        _ensure_run_id_on_cp_scope_links,
+        _move_data_links_to_panel_links,
+        _named_f13_rule,
+        _rewrite_links_in_obj,
+        _walk as _walk_remainder_panels,
     )
 
     applicators = {
@@ -2790,6 +2798,34 @@ def _apply_phase25_srs_prr_budget(payload: dict[str, Any], *, current_uid: str) 
     apply = applicators.get(current_uid)
     if apply is not None:
         apply(payload)
+    # evidence_readability stamps SELECT RUN maps before Phase 2.5 renames
+    # Processing/Overall verdict/Trust; re-apply against the donor organize titles.
+    from scripts.ops.observability.grafana._evidence_readability import (
+        _selection_summary,
+    )
+
+    for panel in _walk_remainder_panels(payload.get("panels", [])):
+        if panel.get("title") == "Review Selected Run Status":
+            _selection_summary(panel)
+    # A2 empty-catalog maps live in phase25 main(); keep them on every regenerate.
+    _stamp_no_runs_value_maps(payload)
+    # Phase 2 remainder link/F-13 rules must follow donors so render_nav_bus alone
+    # stays the durable path (no separate remainder CLI required).
+    for panel in _walk_remainder_panels(payload.get("panels", [])):
+        if panel.get("id") == 9400:
+            _move_data_links_to_panel_links(panel)
+            if current_uid == "bioetl-control-plane-v1":
+                _ensure_run_id_on_cp_scope_links(panel)
+    _rewrite_links_in_obj(payload)
+    _named_f13_rule(payload)
+    if current_uid == "bioetl-incident-v1":
+        # Phase 4.2/4.3: keep 8808 band widths and domains 9451 h=8 after layout
+        # builders that still stamp h=12 for domain tables.
+        from scripts.ops.observability.grafana.apply_phase4_reflow import (
+            apply_incident as apply_phase4_incident_reflow,
+        )
+
+        apply_phase4_incident_reflow(payload)
 
 
 def _keep_healthy_zero_threshold(panel: dict[str, Any], titles: set[str]) -> bool:

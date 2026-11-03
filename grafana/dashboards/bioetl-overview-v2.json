@@ -963,6 +963,10 @@
             },
             "properties": [
               {
+                "id": "displayName",
+                "value": "Overall verdict"
+              },
+              {
                 "id": "links",
                 "value": []
               },
@@ -983,10 +987,6 @@
                     }
                   }
                 ]
-              },
-              {
-                "id": "displayName",
-                "value": "Overall verdict"
               }
             ]
           },
@@ -1011,10 +1011,6 @@
             },
             "properties": [
               {
-                "id": "links",
-                "value": []
-              },
-              {
                 "id": "displayName",
                 "value": "Processing"
               },
@@ -1024,6 +1020,14 @@
                   "type": "color-text",
                   "wrapText": false
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 80
+              },
+              {
+                "id": "links",
+                "value": []
               },
               {
                 "id": "mappings",
@@ -1058,10 +1062,6 @@
                     }
                   }
                 ]
-              },
-              {
-                "id": "custom.width",
-                "value": 80
               }
             ]
           },
@@ -1204,6 +1204,28 @@
               {
                 "id": "custom.width",
                 "value": 80
+              },
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "SELECT RUN": {
+                        "text": "—",
+                        "color": "text"
+                      },
+                      "НЕТ ЗАПУСКОВ": {
+                        "text": "НЕТ ЗАПУСКОВ",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           }
@@ -1627,7 +1649,7 @@
         "type": "datasource",
         "uid": "-- Dashboard --"
       },
-      "description": "SELECTED RUN · Saved provider check result via check_result_display. Cached Bronze (provider API not called) shows —. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health. SELECT RUN means no Run ID is selected. VALID EMPTY means no saved provider check. QUERY ERROR means backend unavailable or request failure.",
+      "description": "SELECTED RUN · Saved provider check result via check_result_display. Cached Bronze (provider API not called) shows —. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health. SELECT RUN means no Run ID is selected. VALID EMPTY means no saved provider check. QUERY ERROR means backend unavailable or request failure. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "options": {
         "reduceOptions": {
           "calcs": [
@@ -1690,21 +1712,21 @@
                   "text": "N/A",
                   "color": "gray"
                 },
-                "SELECT RUN": {
-                  "text": "SELECT RUN",
-                  "color": "gray"
-                },
-                "INCOMPLETE": {
-                  "text": "INCOMPLETE",
-                  "color": "orange"
-                },
                 "—": {
                   "text": "—",
+                  "color": "gray"
+                },
+                "SELECT RUN": {
+                  "text": "SELECT RUN",
                   "color": "gray"
                 },
                 "НЕТ ЗАПУСКОВ": {
                   "text": "НЕТ ЗАПУСКОВ",
                   "color": "gray"
+                },
+                "INCOMPLETE": {
+                  "text": "INCOMPLETE",
+                  "color": "orange"
                 }
               }
             },

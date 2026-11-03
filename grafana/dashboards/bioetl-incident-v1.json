@@ -1108,7 +1108,7 @@
                 "value": [
                   {
                     "title": "Open domain diagnostics",
-                    "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?var-workflow=$__all&var-pipeline=${__data.fields.route_pipeline:percentencode}&var-run_type=$__all&var-run_id=-&${__data.fields.action_scope}&from=${__from}&to=${__to}",
+                    "url": "/d/${__data.fields.action_dashboard_uid}/?var-workflow=$__all&var-pipeline=${__data.fields.route_pipeline:percentencode}&var-run_type=$__all&var-run_id=-&${__data.fields.action_scope}&from=${__from}&to=${__to}",
                     "targetBlank": false,
                     "includeVars": false
                   }
@@ -1567,7 +1567,7 @@
         {
           "includeVars": false,
           "title": "Show all rows and total (summary: up to 2)",
-          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=22005&${__url_time_range}",
+          "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=22005&${__url_time_range}",
           "targetBlank": false
         }
       ]
@@ -2743,6 +2743,36 @@
                           },
                           "archive_evidence_not_recorded": {
                             "text": "No verified archive"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Trust"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": []
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "SELECT RUN": {
+                            "text": "—",
+                            "color": "text"
+                          },
+                          "НЕТ ЗАПУСКОВ": {
+                            "text": "НЕТ ЗАПУСКОВ",
+                            "color": "gray"
                           }
                         }
                       }
@@ -11363,7 +11393,7 @@
                     "value": [
                       {
                         "title": "Open domain diagnostics",
-                        "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?var-workflow=$__all&var-pipeline=${__data.fields.route_pipeline:percentencode}&var-run_type=$__all&var-run_id=-&${__data.fields.action_scope}&from=${__from}&to=${__to}",
+                        "url": "/d/${__data.fields.action_dashboard_uid}/?var-workflow=$__all&var-pipeline=${__data.fields.route_pipeline:percentencode}&var-run_type=$__all&var-run_id=-&${__data.fields.action_scope}&from=${__from}&to=${__to}",
                         "targetBlank": false,
                         "includeVars": false
                       }

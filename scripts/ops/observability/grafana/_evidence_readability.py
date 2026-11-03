@@ -583,19 +583,18 @@ def _selection_summary(panel: dict) -> None:
         rename.get("execution_state") or rename.get("run_execution") or "Result"
     )
     verdict = rename.get("verdict") or rename.get("run_verdict") or "Status"
-    for field in (processing, verdict):
+    trust = rename.get("saved_trust")
+    select_run_map = [
+        {
+            "type": "value",
+            "options": {_SELECT_RUN: {"text": "—", "color": "text"}},
+        }
+    ]
+    for field in (processing, verdict, trust):
+        if not field:
+            continue
         _override(panel, field, "links", [])
-        _override(
-            panel,
-            field,
-            "mappings",
-            [
-                {
-                    "type": "value",
-                    "options": {_SELECT_RUN: {"text": "—", "color": "text"}},
-                }
-            ],
-        )
+        _override(panel, field, "mappings", select_run_map)
     rules = rename.get("rules_version")
     if rules:
         _override(panel, rules, _HIDDEN, True)
