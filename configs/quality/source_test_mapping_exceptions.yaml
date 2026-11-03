@@ -30,3 +30,11 @@ exemptions:
     owner_tests:
       - tests/unit/domain/control_plane/test_run_manifest_dq.py
       - tests/unit/domain/control_plane/test_run_manifest_immutability.py
+  - source: src/bioetl/application/services/effective_config/config_source_hashing.py
+    policy: aggregate_owner
+    reason: >
+      Relocated out of control_plane hotspot for #12728 residual shrink; ownership
+      remains covered by the pre-move control_plane hashing unit tests rather than a
+      mirrored thin-package sibling under services/effective_config/.
+    owner_tests:
+      - tests/unit/application/control_plane/test_config_source_hashing.py

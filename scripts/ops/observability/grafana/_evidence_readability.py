@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 from copy import deepcopy
-from scripts.ops.observability.grafana._gr_db_corrections import _override, _panels
+from scripts.ops.observability.grafana._gr_db_corrections import (
+    _OVERALL_VERDICT_FIELD,
+    _override,
+    _panels,
+)
 from scripts.ops.observability.grafana._visual_usability import _bands
 
 _WIDTH = "custom.width"
@@ -700,10 +704,10 @@ def _bind_selected_run_envelope(summary: dict, source: dict) -> None:
     summary["targets"] = deepcopy(source["targets"])
     summary["targets"][0]["root_selector"] = (
         '[$merge([presentation_summary[0], {"saved_trust": presentation_trust[0].trust_status, "reason_display": '
-        "presentation_trust[0].reasons_display ? "
-        "presentation_trust[0].reasons_display : ($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; "
+        "($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'НЕТ ЗАПУСКОВ']; "
         "$count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & "
-        "($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : presentation_summary[0].reason)}])]"
+        "($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : "
+        "(presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason))}])]"
     )
     target = summary["targets"][0]
     target["parser"] = "uql"
@@ -716,15 +720,15 @@ def _overview_share_projection() -> str:
     """JSONata that projects domain rows with shared run envelope fields."""
     return (
         "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; "
-        "$issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; "
+        "$issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'НЕТ ЗАПУСКОВ']; "
         "$map(presentation_domains, function($d) { $merge([$d, {"
         "'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, "
         "'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, "
         "'run_execution': $s.execution_state, 'run_verdict': $s.verdict, "
         "'saved_trust': $t, "
-        "'run_reason': $r ? $r : ("
-        "$count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & "
-        "($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))"
+        "'run_reason': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & "
+        "($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : "
+        "($r ? $r : $s.reason)}]) }))"
     )
 
 
