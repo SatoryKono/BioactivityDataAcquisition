@@ -391,7 +391,10 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
                 },
                 {
                     "type": "value",
-                    "options": {"UNKNOWN": {"text": "UNKNOWN", "color": "gray"}},
+                    "options": {
+                        "UNKNOWN": {"text": "UNKNOWN", "color": "gray"},
+                        "SELECT RUN": {"text": "SELECT RUN", "color": "gray"},
+                    },
                 },
             ],
             "color": {"mode": "fixed", "fixedColor": "gray"},

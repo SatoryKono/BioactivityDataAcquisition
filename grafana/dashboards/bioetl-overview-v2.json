@@ -2445,6 +2445,10 @@
                 "UNKNOWN": {
                   "text": "UNKNOWN",
                   "color": "gray"
+                },
+                "SELECT RUN": {
+                  "text": "SELECT RUN",
+                  "color": "gray"
                 }
               }
             }
