@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import os
 import stat
+import os
 import tempfile
 from collections.abc import Callable
 from contextlib import suppress
@@ -42,8 +42,6 @@ __all__ = [
     "resolve_registration_runtime_source_id",
 ]
 
-_DASHBOARD_DATA_ROOT_ENV = "BIOETL_DASHBOARD_DATA_ROOT"
-
 
 @dataclass(frozen=True, slots=True)
 class EvidenceLocationBindingContext:
@@ -63,10 +61,14 @@ class EvidenceLocationBindingContext:
         return self.skip_reason is None and self.runtime_source_id is not None
 
 
-def resolve_dashboard_data_alias_base(*, write_data_root: Path) -> Path | None:
+def resolve_dashboard_data_alias_base(
+    *, write_data_root: Path, settings: Settings
+) -> Path | None:
     """Resolve the trusted ``dashboard_data`` alias base at composition edge."""
-    raw = os.environ.get(_DASHBOARD_DATA_ROOT_ENV, "").strip()
-    return Path(raw).expanduser().resolve(strict=False) if raw else None
+    configured = getattr(settings, "dashboard_data_root", None)
+    if configured is None or not str(configured).strip():
+        return None
+    return Path(configured).expanduser().resolve(strict=False)
 
 
 def relative_data_root_under_alias(
@@ -93,10 +95,6 @@ def resolve_registration_runtime_source_id(settings: Settings) -> str | None:
         if configured is not None and str(configured).strip()
         else {}
     )
-    if not process_environment:
-        env_value = os.environ.get(RUNTIME_SOURCE_ID_ENV, "").strip()
-        if env_value:
-            process_environment[RUNTIME_SOURCE_ID_ENV] = env_value
     repository_environment = load_repository_source_environment(
         _repository_root(),
         names=(RUNTIME_SOURCE_ID_ENV,),

@@ -67,6 +67,7 @@ def test_register_skips_when_write_root_outside_dashboard_alias(
     settings = SimpleNamespace(
         data_dir=write_root,
         report_root=report_root,
+        dashboard_data_root=alias,
         runtime_source_id=_SOURCE,
     )
     binding = build_evidence_location_binding_context(settings)  # type: ignore[arg-type]
@@ -104,6 +105,7 @@ def test_register_pipeline_manifest_writes_catalog(
     settings = SimpleNamespace(
         data_dir=data_root,
         report_root=report_root,
+        dashboard_data_root=data_root,
         runtime_source_id=_SOURCE,
     )
     binding = build_evidence_location_binding_context(settings)  # type: ignore[arg-type]
@@ -145,6 +147,7 @@ def test_register_workflow_manifest_parent(
     settings = SimpleNamespace(
         data_dir=data_root,
         report_root=report_root,
+        dashboard_data_root=data_root,
         runtime_source_id=_SOURCE,
     )
     manifest = WorkflowManifest(

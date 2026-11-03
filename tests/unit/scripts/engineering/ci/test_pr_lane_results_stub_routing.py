@@ -10,7 +10,7 @@ from scripts.engineering.ci.pr_lane_results import build_shadow_compare
 pytestmark = pytest.mark.unit
 
 
-def test_shadow_compare_routes_domain_ports_stub() -> None:
+def test_shadow_compare_routes_domain_ports_stub_from_registry() -> None:
     """Typed ports package stubs map like their .py siblings under tests/unit."""
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(

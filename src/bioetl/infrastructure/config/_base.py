@@ -136,6 +136,10 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
         default=None,
         description="Run-report root override (BIOETL_REPORT_ROOT)",
     )
+    dashboard_data_root: Path | None = Field(
+        default=None,
+        description="Trusted dashboard data-root alias (BIOETL_DASHBOARD_DATA_ROOT)",
+    )
     enforce_report_root_marker: bool = Field(
         default=False,
         description=(
@@ -181,7 +185,9 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
         """Coerce invalid or non-positive timeout values back to the safe default."""
         return coerce_silver_dedup_timeout_seconds(value)
 
-    @field_validator("report_root", "runtime_source_id", mode="before")
+    @field_validator(
+        "dashboard_data_root", "report_root", "runtime_source_id", mode="before"
+    )
     @classmethod
     def _empty_runtime_setting_to_none(cls, value: object) -> object:
         """Normalize blank optional environment values to ``None``."""

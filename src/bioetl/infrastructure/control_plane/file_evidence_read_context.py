@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "FileEvidenceReadContext",
-    "FileEvidenceReadContextFactory",
+    "FileEvidenceReadContextOpener",
 ]
 
 # Shared Sonar-safe suffix for control-plane JSON records (manifest / config).
@@ -172,7 +172,7 @@ class FileEvidenceReadContext:
 
 
 @dataclass(frozen=True, slots=True)
-class FileEvidenceReadContextFactory:
+class FileEvidenceReadContextOpener:
     """Open file-backed read ports under a trusted alias base (RF-003)."""
 
     metrics: MetricsPort | None = None

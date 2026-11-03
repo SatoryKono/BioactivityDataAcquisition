@@ -69,7 +69,7 @@ class EvidenceReadContext(Protocol):
 
 
 @runtime_checkable
-class EvidenceReadContextOpenerPort(Protocol):
+class EvidenceReadContextOpenerProtocol(Protocol):
     """Open read-only stores beneath a trusted data-root alias."""
 
     def open(

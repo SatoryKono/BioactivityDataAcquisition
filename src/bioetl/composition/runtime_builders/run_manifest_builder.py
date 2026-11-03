@@ -4,7 +4,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.control_plane.evidence_location.registration_observations import (
+    record_registration_exception_observation,
+    record_registration_outcome_observation,
+)
 from bioetl.application.services.control_plane.ledger.service import RunLedgerService
+from bioetl.composition.runtime_builders.evidence_location_registration import (
+    register_pipeline_manifest_location,
+)
 from bioetl.composition.runtime_builders.run_manifest_support import (
     ManifestControlPlaneRefs as ManifestControlPlaneRefs,
     RunManifestContractIdentity,
@@ -35,6 +42,8 @@ from bioetl.composition.runtime_builders._runner_control_plane_policy import (
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
+from bioetl.domain.control_plane.run_manifest import RunManifest
+from bioetl.infrastructure.config.settings_api import Settings
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.manifest.service import (
@@ -152,18 +161,7 @@ def _register_evidence_location_soft(
     settings: object,
 ) -> None:
     """RF-004: publish locator after durable manifest save (never fail ETL)."""
-    from bioetl.application.services.control_plane.evidence_location.registration import (
-        record_registration_exception_observation,
-        record_registration_outcome_observation,
-    )
-
     try:
-        from bioetl.composition.runtime_builders.evidence_location_registration import (
-            register_pipeline_manifest_location,
-        )
-        from bioetl.domain.control_plane.run_manifest import RunManifest
-        from bioetl.infrastructure.config.settings_api import Settings
-
         if not isinstance(manifest, RunManifest):
             return
         if not isinstance(settings, Settings):
@@ -177,11 +175,11 @@ def _register_evidence_location_soft(
             owner=str(manifest.pipeline_name),
             run_id=str(manifest.run_id),
         )
-    except Exception as exc:
+    except (OSError, RuntimeError, ValueError) as exc:
         # Registration is additive diagnostics; processing success is independent.
         try:
             record_registration_exception_observation(kind="pipeline", exc=exc)
-        except Exception:
+        except (OSError, RuntimeError, ValueError):
             return
 
 

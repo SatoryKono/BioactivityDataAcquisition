@@ -8,7 +8,7 @@ from __future__ import annotations
 from bioetl.application.ports.control_plane import (
     ControlPlaneArtifactLifecycleStoreProtocol,
     EvidenceReadContext,
-    EvidenceReadContextOpenerPort,
+    EvidenceReadContextOpenerProtocol,
     ForensicRunDiffServiceProtocol,
     HistoricalReplayClosureServiceProtocol,
     HistoricalReplayCorpusServiceProtocol,
@@ -91,7 +91,7 @@ __all__ = [
     "DataSourceCreatorProtocol",
     "DeleteResult",
     "EvidenceReadContext",
-    "EvidenceReadContextOpenerPort",
+    "EvidenceReadContextOpenerProtocol",
     "ExportServiceProtocol",
     "ForensicRunDiffServiceProtocol",
     "GoldMergedWriteProtocol",

@@ -242,7 +242,7 @@ class WorkflowRunnerService:
             if self.evidence_location_verify is not None:
                 try:
                     self.evidence_location_verify(identified_result)
-                except Exception as exc:
+                except (OSError, RuntimeError, ValueError) as exc:
                     # Consistency diagnostics must not mask processing success.
                     record_verify_exception_observation(
                         kind="workflow",

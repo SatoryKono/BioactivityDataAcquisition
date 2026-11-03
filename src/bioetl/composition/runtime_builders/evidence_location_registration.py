@@ -60,7 +60,9 @@ def build_evidence_location_binding_context(
     registration is skipped with diagnostics.
     """
     write_root = resolve_data_root(settings).resolve(strict=False)
-    configured_alias = resolve_dashboard_data_alias_base(write_data_root=write_root)
+    configured_alias = resolve_dashboard_data_alias_base(
+        write_data_root=write_root, settings=settings
+    )
     report_root = getattr(settings, "report_root", None)
     runtime_source_id = resolve_registration_runtime_source_id(settings)
 

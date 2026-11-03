@@ -368,7 +368,7 @@ class PipelineRunnerService:
         if self.evidence_location_verify is not None:
             try:
                 self.evidence_location_verify(result, options)
-            except Exception as exc:
+            except (OSError, RuntimeError, ValueError) as exc:
                 # Consistency diagnostics must not mask processing success.
                 record_verify_exception_observation(
                     kind="pipeline",

@@ -95,7 +95,7 @@ class WorkflowManifestService:
             run_id = str(manifest.workflow_run_id)
             try:
                 outcome = self.evidence_location_register(manifest)
-            except Exception as exc:
+            except (OSError, RuntimeError, ValueError) as exc:
                 # Locator publication must not mask workflow processing success.
                 record_registration_exception_observation(
                     kind="workflow",

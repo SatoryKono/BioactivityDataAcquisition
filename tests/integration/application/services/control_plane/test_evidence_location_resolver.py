@@ -34,7 +34,7 @@ from bioetl.infrastructure.control_plane.file_evidence_location_store import (
     FileEvidenceLocationStore,
 )
 from bioetl.infrastructure.control_plane.file_evidence_read_context import (
-    FileEvidenceReadContextFactory,
+    FileEvidenceReadContextOpener,
 )
 from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
@@ -104,7 +104,7 @@ def _resolver(
     resolver = EvidenceLocationResolver(
         locations=store,
         aliases=aliases,
-        opener=FileEvidenceReadContextFactory(),
+        opener=FileEvidenceReadContextOpener(),
         legacy_root_policy=legacy,
     )
     return resolver, store, data_root
@@ -353,7 +353,7 @@ def test_explicit_dot_relative_uses_standard_root(tmp_path: Path) -> None:
 def test_context_rechecks_child_paths_before_manifest_read(tmp_path: Path) -> None:
     data_root = (tmp_path / "data").resolve()
     data_root.mkdir()
-    context = FileEvidenceReadContextFactory().open(
+    context = FileEvidenceReadContextOpener().open(
         data_root,
         trusted_alias_base=data_root,
     )
@@ -372,7 +372,7 @@ def test_context_rejects_symlinked_manifest_index_and_record(
 ) -> None:
     data_root = (tmp_path / "data").resolve()
     data_root.mkdir()
-    context = FileEvidenceReadContextFactory().open(
+    context = FileEvidenceReadContextOpener().open(
         data_root,
         trusted_alias_base=data_root,
     )
@@ -401,7 +401,7 @@ def test_context_rejects_symlinked_effective_config_index_and_record(
     """Outward effective-config symlinks must not verify as trusted evidence."""
     data_root = (tmp_path / "data").resolve()
     data_root.mkdir()
-    context = FileEvidenceReadContextFactory().open(
+    context = FileEvidenceReadContextOpener().open(
         data_root,
         trusted_alias_base=data_root,
     )
