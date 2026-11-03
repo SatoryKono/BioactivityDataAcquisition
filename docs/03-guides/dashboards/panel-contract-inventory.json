@@ -197,7 +197,7 @@
       "kind": "http",
       "panel_id": 9403,
       "panel_title": "Inspect Processed Records",
-      "query": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query": "/ops/observability/processed-records?pipeline=${selected_pipeline}&run_type=${run_type:csv}&run_id=${selected_run_id}",
       "query_tokens": [
         "/ops/observability/processed-records",
         "pipeline",
@@ -220,7 +220,7 @@
       "kind": "http",
       "panel_id": 9403,
       "panel_title": "Inspect Processed Records",
-      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}",
+      "query": "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}",
       "query_tokens": [
         "/ops/observability/selected-run-status",
         "pipeline",
