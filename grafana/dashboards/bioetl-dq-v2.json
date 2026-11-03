@@ -1366,7 +1366,7 @@
           "parser": "uql",
           "format": "table",
           "root_selector": "",
-          "url": "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+          "url": "/ops/observability/pipeline-run-report?pipeline=${selected_pipeline}&run_id=${selected_run_id}",
           "url_options": {
             "method": "GET",
             "data": ""

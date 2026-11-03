@@ -994,7 +994,7 @@ def _dq_processed_records(panel: dict[str, Any]) -> None:
             "source": "url",
             "parser": "uql",
             "format": "table",
-            "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+            "url": "/ops/observability/pipeline-run-report?pipeline=${selected_pipeline}&run_id=${selected_run_id}",
             "url_options": {"method": "GET", "data": ""},
             "uql": 'parse-json | jsonata "' + expression + '"',
         }

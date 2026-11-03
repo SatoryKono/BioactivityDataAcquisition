@@ -516,15 +516,16 @@ def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
             )
 
 
-def test_runtime_contextual_handoffs_do_not_duplicate_top_level_dq_provider_links() -> (
-    None
-):
-    """Contextual DQ/provider CTAs stay on panels; Phase 2 bus may also list DQ."""
+def test_runtime_contextual_handoffs_keep_single_top_level_dq_bus_link() -> None:
+    """DQ has one first-class bus link while provider evidence stays contextual."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     nav = get_dashboard_navigation_links(dashboard)
-    # Phase 2.1 five-chip bus includes Data Quality; provider evidence stays contextual.
-    assert any(
-        _extract_dashboard_uid(candidate["url"]) == "bioetl-dq-v2" for candidate in nav
+    assert (
+        sum(
+            _extract_dashboard_uid(candidate["url"]) == "bioetl-dq-v2"
+            for candidate in nav
+        )
+        == 1
     )
     assert all(
         "viewPanel=9480" not in str(candidate.get("url") or "") for candidate in nav
