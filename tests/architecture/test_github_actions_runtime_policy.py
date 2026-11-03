@@ -494,10 +494,11 @@ def test_release_publish_requires_same_sha_quality_gates() -> None:
         str(step.get("run", "")) for step in jobs["release-tests"]["steps"]
     )
     assert "pytest" in step_runs
-    needs = jobs["publish-testpypi"]["needs"]
-    assert "security-gate" in needs
-    assert "release-tests" in needs
-    assert "test-install" in needs
+    for publish in ("publish-testpypi",):
+        needs = jobs[publish]["needs"]
+        assert "security-gate" in needs
+        assert "release-tests" in needs
+        assert "test-install" in needs
 
 
 def test_release_wheel_smoke_installs_locked_dependencies_before_local_artifact() -> (
@@ -809,7 +810,6 @@ def test_syft_sbom_is_generated_on_release_and_ghcr_push() -> None:
 
     assert f"anchore/sbom-action@{sbom_sha}" in release_uses
     assert f"anchore/sbom-action@{sbom_sha}" in docker_uses
-
 
 
 _WRITE_PERMISSION_KEYS = (

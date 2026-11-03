@@ -1,9 +1,11 @@
 name: Release
-# KEEP-DISABLED (#11182): Actions billing will not return. Do not re-enable.
-# Publish stays outside GitHub Actions. workflow_dispatch is not a substitute.
+# KEEP-DISABLED (#11182): Actions billing will not return. Do not re-enable the
+# `release` event or production PyPI / GitHub Release asset jobs.
+# Sole remaining publish path in YAML: `publish-testpypi` on workflow_dispatch
+# with dry_run == false (TestPyPI only). That is not a substitute for PyPI.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  # Deploy/publish path: do not cancel mid-flight OIDC publish or asset upload.
+  # Deploy/publish path: do not cancel mid-flight OIDC TestPyPI publish.
   cancel-in-progress: false
 
 permissions:
@@ -202,7 +204,7 @@ jobs:
     needs: [build, test-install, security-gate, release-tests]
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Only publish on manual non-dry-run (release event was removed #11182)
+    # Only publish on manual non-dry-run
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false'
     environment:
       name: testpypi
@@ -222,3 +224,4 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
+
