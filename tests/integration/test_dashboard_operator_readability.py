@@ -77,6 +77,16 @@ def test_overview_stages_and_quality_are_outside_saved_evidence() -> None:
     donor = panels[9002]["targets"][0]
     assert "contract_exclusions_status" in donor["root_selector"]
     assert "contract_exclusions_status" in donor["uql"]
+    # No-selection must surface SELECT RUN on status, not UNKNOWN (Codex P2).
+    select_guard = "verdict='SELECT RUN' ? 'SELECT RUN' : contract_exclusions_status"
+    assert select_guard in donor["root_selector"]
+    assert select_guard in donor["uql"]
+    assert "Choose a run" in donor["root_selector"]
+    assert any(
+        item.get("type") == "value"
+        and "SELECT RUN" in ((item.get("options") or {}))
+        for item in quality["fieldConfig"]["defaults"]["mappings"]
+    )
 
 
 DESIGN_SYSTEM = Path("docs/03-guides/dashboards/design-system.md")

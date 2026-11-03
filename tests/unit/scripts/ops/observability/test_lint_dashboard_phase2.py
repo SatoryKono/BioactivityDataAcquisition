@@ -13,8 +13,10 @@ from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
     _CP_DONOR,
     _jsonata_brackets_balanced,
     _DONOR_SCHEMA,
+    _ensure_exclusions_crit_color,
     _MERGED_PRR,
     _OV_DONOR,
+    _OV_EXCL,
     _DQ_DONOR,
     _INC_DONOR,
     _OV_PROVIDER,
@@ -221,4 +223,42 @@ def test_mapping_value_text_tokens_count_as_status() -> None:
                 "1": {"text": "OK"},
             },
         }
+    )
+
+
+def test_overview_exclusions_status_preserves_select_run() -> None:
+    """No Run ID must not collapse into UNKNOWN next to Choose a run."""
+    assert (
+        "verdict='SELECT RUN' ? 'SELECT RUN' : contract_exclusions_status" in _OV_EXCL
+    )
+    assert "verdict='SELECT RUN' ? 'Choose a run'" in _OV_EXCL
+    assert _OV_EXCL in _OV_DONOR
+
+
+def test_exclusions_canvas_keeps_select_run_value_mapping() -> None:
+    panel: dict = {
+        "fieldConfig": {
+            "defaults": {
+                "mappings": [
+                    {
+                        "type": "value",
+                        "options": {
+                            "UNKNOWN": {"text": "UNKNOWN", "color": "gray"},
+                        },
+                    }
+                ]
+            }
+        }
+    }
+    _ensure_exclusions_crit_color(panel)
+    mappings = panel["fieldConfig"]["defaults"]["mappings"]
+    value_options = next(
+        item["options"] for item in mappings if item.get("type") == "value"
+    )
+    assert value_options["SELECT RUN"] == {"text": "SELECT RUN", "color": "gray"}
+    assert value_options["UNKNOWN"] == {"text": "UNKNOWN", "color": "gray"}
+    assert any(
+        item.get("type") == "regex"
+        and (item.get("options") or {}).get("pattern") == "^CRIT.*"
+        for item in mappings
     )

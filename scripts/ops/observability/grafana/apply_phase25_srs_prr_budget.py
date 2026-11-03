@@ -34,6 +34,7 @@ SRS_URL = (
 FRAME = "_bioetl_frame"
 VIEW_PANEL_TRUST_SELF = "viewPanel=9418"
 VIEW_PANEL_TRUST_SIBLING = "viewPanel=9414"
+_SELECT_RUN = "SELECT RUN"
 
 OV_IDENTITY = (
     "/d/bioetl-overview-v2/2-overview"
@@ -520,10 +521,18 @@ def _regex_pattern(item: Any) -> str | None:
     return str((item.get("options") or {}).get("pattern") or "")
 
 
+def _value_mapping_options(item: Any) -> dict[str, Any] | None:
+    if not isinstance(item, dict) or item.get("type") != "value":
+        return None
+    options = item.get("options")
+    return options if isinstance(options, dict) else None
+
+
 def _ensure_exclusions_crit_color(panel: dict[str, Any]) -> None:
-    """Canvas 9482 must color hard-limit ``CRIT`` (legacy ``ERROR`` kept)."""
+    """Canvas 9482 colors CRIT and keeps SELECT RUN distinct from UNKNOWN."""
     defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
     mappings = list(defaults.get("mappings") or [])
+    changed = False
     if not any(_regex_pattern(item) == "^CRIT.*" for item in mappings):
         insert_at = next(
             (
@@ -540,6 +549,25 @@ def _ensure_exclusions_crit_color(panel: dict[str, Any]) -> None:
                 "options": {"pattern": "^CRIT.*", "result": {"color": "red"}},
             },
         )
+        changed = True
+    # No-selection must not reuse the UNKNOWN value map (Codex P2 #4449151423).
+    select_run = {"text": _SELECT_RUN, "color": "gray"}
+    value_maps = [
+        (index, options)
+        for index, item in enumerate(mappings)
+        if (options := _value_mapping_options(item)) is not None
+    ]
+    if value_maps:
+        index, options = value_maps[0]
+        if options.get(_SELECT_RUN) != select_run:
+            options = dict(options)
+            options[_SELECT_RUN] = select_run
+            mappings[index] = {"type": "value", "options": options}
+            changed = True
+    else:
+        mappings.append({"type": "value", "options": {_SELECT_RUN: select_run}})
+        changed = True
+    if changed:
         defaults["mappings"] = mappings
     description = str(panel.get("description") or "")
     if "hard limit ERROR" in description:
