@@ -260,7 +260,7 @@ def test_http_identity_panel_docs_match_shipped_datasource_contract(
     identity_panel_id: int,
     processed_panel_id: int | None,
 ) -> None:
-    """HTTP-backed identity panels must not drift back to Prometheus docs."""
+    """Identity docs must track Phase 2.5 handoff / Dashboard-donor wiring."""
     dashboard_path = DASHBOARD_DIR / f"{dashboard_name}.json"
     doc_text = (PANEL_DOCS_DIR / f"{dashboard_name}-panels.md").read_text(
         encoding="utf-8"
@@ -278,38 +278,46 @@ def test_http_identity_panel_docs_match_shipped_datasource_contract(
         if processed_panel_id
         else None
     )
-    identity_target = identity_panel["targets"][0]
-    processed_target = processed_panel["targets"][0] if processed_panel else None
 
-    for panel in (identity_panel, processed_panel):
-        if panel is not None:
-            assert panel["datasource"] == {
-                "type": "yesoreyeram-infinity-datasource",
-                "uid": "bioetl-ops-http",
-            }
-    identity_endpoint = (
-        "/ops/observability/selected-run-status"
-        if dashboard_name == "bioetl-overview-v2"
-        else "/ops/control-plane/identity-table"
-    )
-    assert str(identity_target["url"]).startswith(identity_endpoint)
-    if processed_target is not None:
+    if dashboard_name == "bioetl-dq-v2":
+        assert identity_panel["type"] == "text"
+        assert not identity_panel.get("targets")
+        for token in (
+            "Text",
+            "Review Run Identity",
+            "9300",
+            "Not a Prometheus panel",
+        ):
+            assert token in identity_section
+    else:
+        assert identity_panel["datasource"] == {
+            "type": "datasource",
+            "uid": "-- Dashboard --",
+        }
+        assert identity_panel["targets"][0].get("panelId") == 9002
+        for token in (
+            "BioETL Ops HTTP",
+            "/ops/observability/selected-run-status",
+            "this is not a Prometheus panel",
+            "9002",
+        ):
+            assert token in identity_section
+
+    if processed_panel is not None:
+        processed_target = processed_panel["targets"][0]
+        assert processed_panel["datasource"] == {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http",
+        }
         assert str(processed_target["url"]).startswith(
             "/ops/observability/processed-records"
         )
-
-    for token in (
-        "BioETL Ops HTTP",
-        identity_endpoint,
-        "this is not a Prometheus panel",
-    ):
-        assert token in identity_section
-    for token in (
-        "BioETL Ops HTTP",
-        "/ops/observability/processed-records",
-        "this is not a Prometheus panel",
-    ):
-        if processed_section is not None:
+        assert processed_section is not None
+        for token in (
+            "BioETL Ops HTTP",
+            "/ops/observability/processed-records",
+            "this is not a Prometheus panel",
+        ):
             assert token in processed_section
 
 
@@ -321,16 +329,15 @@ def test_overview_identity_docs_match_selected_run_status_contract() -> None:
     )
     section = _documented_panel_section(doc_text, "Review Run Identity")
     assert panel["datasource"] == {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "bioetl-ops-http",
+        "type": "datasource",
+        "uid": "-- Dashboard --",
     }
-    assert str(panel["targets"][0]["url"]).startswith(
-        "/ops/observability/selected-run-status"
-    )
+    assert panel["targets"][0].get("panelId") == 9002
     for token in (
         "BioETL Ops HTTP",
         "/ops/observability/selected-run-status",
         "this is not a Prometheus panel",
+        "9002",
     ):
         assert token in section
     panels = _iter_dashboard_panels(
