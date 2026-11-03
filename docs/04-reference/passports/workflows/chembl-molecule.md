@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:chembl_molecule`
 - Schema: `1.0.0`
-- Source revision: `sha256:f9c86300e6c9695e47ecb1f4387ff3245261613fade4400da8b23c5976c3074b`
+- Source revision: `sha256:5395cf0e57dfdf6cc3f099a091df149c10f33a7f003162d111c285b124493f8b`
 
 ## Evidence
 
@@ -75,7 +75,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:668b8650301346ef70e9a7ed872709bc59f856cd0641aa34754788051e015f16",
-    "source_revision": "sha256:f9c86300e6c9695e47ecb1f4387ff3245261613fade4400da8b23c5976c3074b"
+    "source_revision": "sha256:5395cf0e57dfdf6cc3f099a091df149c10f33a7f003162d111c285b124493f8b"
   },
   "source_references": [
     {

@@ -11,6 +11,25 @@ _WRAP = "custom.wrapText"
 _CELL = "custom.cellOptions"
 _SELECT_RUN = "SELECT RUN"
 _OPEN_REPORT = "Open report"
+# F-15 Review Selected Run Status column titles (parity with phase25 donors).
+_COL_PROCESSING = "Processing"
+_COL_OVERALL_VERDICT = "Overall verdict"
+_COL_TRUST = "Trust"
+_COL_REASON = "Reason"
+_STATUS_DONOR_COLUMNS = frozenset(
+    {_COL_PROCESSING, _COL_OVERALL_VERDICT, _COL_TRUST, _COL_REASON}
+)
+_LEGACY_STATUS_OVERRIDE_REMAP = {
+    "Result": _COL_PROCESSING,
+    "Status": _COL_OVERALL_VERDICT,
+}
+_STALE_STATUS_ORGANIZE_KEYS = (
+    "execution_state",
+    "verdict",
+    "evidence_completeness",
+    "rules_version",
+    "domain",
+)
 
 
 def _table(panel: dict, widths: dict[str, int] | None = None) -> None:
@@ -79,12 +98,21 @@ def _selected_run_selectors(p: dict[int, dict]) -> None:
                     target["root_selector"] = "presentation_" + selector
 
 
+def _is_dashboard_ds_target(target: dict) -> bool:
+    ds = target.get("datasource") or {}
+    return ds.get("uid") == "-- Dashboard --" or "panelId" in target
+
+
 def _saved_run(p: dict[int, dict]) -> None:
     _selected_run_selectors(p)
     if 9451 not in p or 9450 not in p:
         return
     panel = p[9451]
-    panel["targets"][0]["root_selector"] = "presentation_domains"
+    target0 = panel["targets"][0]
+    # Phase 2.5: domains consumers reuse the SRS donor via Dashboard DS; do not
+    # rewrite Infinity root_selector on those targets.
+    if not _is_dashboard_ds_target(target0):
+        target0["root_selector"] = "presentation_domains"
     for transform in panel["transformations"]:
         if transform["id"] == "filterFieldsByName":
             names = transform["options"]["include"]["names"]
@@ -129,7 +157,7 @@ def _saved_run(p: dict[int, dict]) -> None:
         [
             {
                 "title": "Inspect saved run report",
-                "url": "/${__data.fields.action_path}&var-pipeline=${pipeline:percentencode}&var-run_type=${run_type:percentencode}&var-workflow=${workflow:percentencode}&${__url_time_range}",
+                "url": "/${__data.fields.action_path}",
                 "targetBlank": True,
             }
         ],
@@ -150,7 +178,8 @@ def _saved_run(p: dict[int, dict]) -> None:
         ],
     )
     panel["links"] = []
-    if 9452 in p:
+    # §2.4: identity copies 9452 are markdown handoffs to Overview 9300.
+    if 9452 in p and p[9452].get("type") != "text":
         for field in ("Pipeline", "Run ID"):
             _override(
                 p[9452],
@@ -174,11 +203,12 @@ def _saved_run(p: dict[int, dict]) -> None:
         identity_custom["cellOptions"]["wrapText"] = True
         p[9452]["options"]["footer"]["enablePagination"] = True
         p[9452]["description"] = _DQ_IDENTITY_DESCRIPTION
-    p[9451]["options"]["footer"]["enablePagination"] = False
+    p[9451]["options"].setdefault("footer", {})["enablePagination"] = False
     heights: dict[int, int] = {}
-    if 9460 in p:
+    if 9460 in p and p[9460].get("type") != "text":
         heights[9460] = 8
-    heights[9451] = 12
+    # rev7 §4.3 / F-30: domains table h in 7–8 at limitField 6 (was 12).
+    heights[9451] = 8
     if 9452 in p:
         heights[9452] = 8
     _stack(p[9450], heights)
@@ -507,6 +537,11 @@ def _incident(p: dict[int, dict]) -> None:
     p[9400]["gridPos"]["h"] = 3
     p[9401]["gridPos"]["h"] = 3
     p[9401]["fieldConfig"]["defaults"]["displayName"] = "Monitor Scope Status"
+    _override(p[2101], "Reason", _WRAP, True)
+    _override(p[2101], "Reason", _CELL, {"type": "auto", "wrapText": True})
+    _override(
+        p[2101], "Reason", "mappings", [{"type": "value", "options": _REASON_MAPPINGS}]
+    )
     p[2001]["gridPos"].update(y=5, h=2)
     p[2010]["gridPos"].update(y=7, h=5)
     p[2005]["gridPos"].update(y=12, h=5)
@@ -543,29 +578,59 @@ def _incident(p: dict[int, dict]) -> None:
     _incident_alert_tables(p)
 
 
-def _selection_summary(panel: dict) -> None:
-    """Present one selection action; preserve the selected-run verdict values."""
-    if panel.get("title") != "Review Selected Run Status":
-        return
-    for field in ("Result", "Status"):
-        _override(panel, field, "links", [])
-        _override(
-            panel,
-            field,
-            "mappings",
-            [
-                {
-                    "type": "value",
-                    "options": {_SELECT_RUN: {"text": "—", "color": "text"}},
+def _status_panel_rename_targets(panel: dict) -> dict[str, str]:
+    """Return organize renameByName for Review Selected Run Status panels."""
+    for transform in panel.get("transformations") or []:
+        if transform.get("id") == "organize":
+            rename = (transform.get("options") or {}).get("renameByName") or {}
+            if isinstance(rename, dict):
+                return {
+                    str(key): str(value)
+                    for key, value in rename.items()
+                    if isinstance(key, str) and isinstance(value, str)
                 }
-            ],
-        )
-    _override(panel, "Rules", _HIDDEN, True)
+    return {}
+
+
+def _status_panel_display_titles(rename: dict[str, str]) -> tuple[str, str, str | None]:
+    """Resolve Processing / Overall verdict / Trust titles from organize renames."""
+    processing = (
+        rename.get("run_execution") or rename.get("execution_state") or _COL_PROCESSING
+    )
+    verdict = rename.get("run_verdict") or rename.get("verdict") or _COL_OVERALL_VERDICT
+    return processing, verdict, rename.get("saved_trust")
+
+
+def _stamp_select_run_column_maps(
+    panel: dict, *, processing: str, verdict: str, trust: str | None
+) -> None:
+    """Clear links and stamp SELECT RUN maps on status columns."""
+    select_run_map = [
+        {
+            "type": "value",
+            "options": {_SELECT_RUN: {"text": "—", "color": "text"}},
+        }
+    ]
+    for field in (processing, verdict, trust):
+        if not field:
+            continue
+        _override(panel, field, "links", [])
+        _override(panel, field, "mappings", select_run_map)
+
+
+def _stamp_legacy_rules_evidence_overrides(panel: dict, rename: dict[str, str]) -> None:
+    """Hide rules_version; keep a single evidence link when still present."""
+    rules = rename.get("rules_version")
+    if rules:
+        _override(panel, rules, _HIDDEN, True)
+    evidence = rename.get("evidence_completeness")
+    if not evidence:
+        return
     links = panel["fieldConfig"]["defaults"].get("links", [])
-    _override(panel, "Evidence", "links", links[:1])
+    _override(panel, evidence, "links", links[:1])
     _override(
         panel,
-        "Evidence",
+        evidence,
         "mappings",
         [
             {
@@ -574,6 +639,18 @@ def _selection_summary(panel: dict) -> None:
             }
         ],
     )
+
+
+def _selection_summary(panel: dict) -> None:
+    """Present one selection action; preserve the selected-run verdict values."""
+    if panel.get("title") != "Review Selected Run Status":
+        return
+    rename = _status_panel_rename_targets(panel)
+    processing, verdict, trust = _status_panel_display_titles(rename)
+    _stamp_select_run_column_maps(
+        panel, processing=processing, verdict=verdict, trust=trust
+    )
+    _stamp_legacy_rules_evidence_overrides(panel, rename)
 
 
 # DQ-subset of reason codes for panel 9451 (uid bioetl-dq-v2, #11686).
@@ -635,10 +712,9 @@ def _bind_selected_run_envelope(summary: dict, source: dict) -> None:
     )
 
 
-def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
-    # Share one envelope; never substitute the first domain verdict for trust.
-    source_target = source["targets"][0]
-    projection = (
+def _overview_share_projection() -> str:
+    """JSONata that projects domain rows with shared run envelope fields."""
+    return (
         "($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; "
         "$issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; "
         "$map(presentation_domains, function($d) { $merge([$d, {"
@@ -650,20 +726,91 @@ def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
         "$count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & "
         "($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))"
     )
+
+
+def _apply_f15_status_organize_renames(summary: dict) -> None:
+    """Set F-15 Processing/Overall verdict titles; drop stale organize keys."""
+    for transform in summary.get("transformations") or []:
+        if transform.get("id") != "organize":
+            continue
+        rename = transform["options"]["renameByName"]
+        for stale in _STALE_STATUS_ORGANIZE_KEYS:
+            rename.pop(stale, None)
+        rename.update(
+            run_execution=_COL_PROCESSING,
+            run_verdict=_COL_OVERALL_VERDICT,
+            run_reason=_COL_REASON,
+            saved_trust=_COL_TRUST,
+        )
+
+
+def _strip_echo_display_name(override: dict, target: str) -> None:
+    """Drop displayName props that only repeat the post-organize column title."""
+    props = override.get("properties")
+    if not isinstance(props, list):
+        return
+    override["properties"] = [
+        prop
+        for prop in props
+        if not (
+            isinstance(prop, dict)
+            and prop.get("id") == "displayName"
+            and prop.get("value") == target
+        )
+    ]
+
+
+def _retarget_one_legacy_status_override(
+    override: dict, *, seen_targets: set[str]
+) -> dict | None:
+    """Keep, retarget, or drop one byName override for Overview 9603."""
+    matcher = override.get("matcher")
+    if not isinstance(matcher, dict) or matcher.get("id") != "byName":
+        return override
+    name = matcher.get("options")
+    if not isinstance(name, str):
+        return override
+    target = _LEGACY_STATUS_OVERRIDE_REMAP.get(name, name)
+    if target not in _STATUS_DONOR_COLUMNS and name not in _STATUS_DONOR_COLUMNS:
+        return override
+    if target in seen_targets:
+        return None
+    seen_targets.add(target)
+    matcher["options"] = target
+    _strip_echo_display_name(override, target)
+    return override
+
+
+def _retarget_legacy_status_overrides(summary: dict) -> None:
+    """Retarget Result/Status byName overrides to F-15 column titles."""
+    field_config = summary.setdefault("fieldConfig", {})
+    overrides = field_config.setdefault("overrides", [])
+    if not isinstance(overrides, list):
+        return
+    seen: set[str] = set()
+    kept: list[dict] = []
+    for override in overrides:
+        if not isinstance(override, dict):
+            kept.append(override)
+            continue
+        retained = _retarget_one_legacy_status_override(override, seen_targets=seen)
+        if retained is not None:
+            kept.append(retained)
+    field_config["overrides"] = kept
+
+
+def _overview_share_envelope(summary: dict, source: dict) -> list[str]:
+    # Share one envelope; never substitute the first domain verdict for trust.
+    source_target = source["targets"][0]
+    projection = _overview_share_projection()
     source_target["parser"] = "uql"
     source_target["root_selector"] = projection
     source_target["uql"] = 'parse-json | jsonata "' + projection + '"'
     summary["datasource"] = {"type": "datasource", "uid": "-- Dashboard --"}
     summary["targets"] = [{"panelId": 9002, "refId": "A", "withTransforms": False}]
-    for transform in summary["transformations"]:
-        if transform["id"] == "organize":
-            transform["options"]["renameByName"].update(
-                run_execution="Result",
-                run_verdict="Status",
-                run_reason="Reason",
-                saved_trust="Trust",
-            )
-    return ["run_execution", "saved_trust", "run_reason"]
+    _apply_f15_status_organize_renames(summary)
+    _retarget_legacy_status_overrides(summary)
+    return ["run_execution", "run_verdict", "saved_trust", "run_reason"]
 
 
 def _apply_reason_columns(panel: dict, fields: list[str]) -> None:
@@ -718,12 +865,12 @@ def _overview_selected_run_layout(p: dict[int, dict], summary: dict) -> None:
             "Severity",
         }:
             rule["properties"] = [v for v in rule["properties"] if v["id"] != _WIDTH]
-    _override(summary, "Result", _WIDTH, 100)
-    _override(summary, "Status", _WIDTH, 115)
+    _override(summary, _COL_PROCESSING, _WIDTH, 100)
+    _override(summary, _COL_OVERALL_VERDICT, _WIDTH, 115)
     for field in ("Domain", "Status", "Reason"):
         _override(p[9002], field, "links", [])
-    _override(summary, "Trust", "displayName", "Trust")
-    _override(summary, "Trust", _WIDTH, 150)
+    _override(summary, _COL_TRUST, "displayName", _COL_TRUST)
+    _override(summary, _COL_TRUST, _WIDTH, 150)
     # Auto-wrapped content grows each table independently. Use the same fixed
     # row height for the paired first-window tables; full reasons stay inspectable.
     for panel in (summary, p[9002]):
@@ -743,10 +890,12 @@ def _overview_selected_run_layout(p: dict[int, dict], summary: dict) -> None:
     for panel in (summary, p[9002]):
         _override(panel, "Reason", _WRAP, True)
         _override(panel, "Reason", _CELL, {"type": "auto", "wrapText": True})
-    _override(summary, "Result", _CELL, {"type": "color-text", "wrapText": False})
+    _override(
+        summary, _COL_PROCESSING, _CELL, {"type": "color-text", "wrapText": False}
+    )
     _override(
         summary,
-        "Result",
+        _COL_PROCESSING,
         "mappings",
         [
             {
@@ -781,10 +930,35 @@ def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
                 transform["options"]["renameByName"]["status_display"] = "Status"
     for panel, fields in views:
         _apply_reason_columns(panel, fields)
-    _override(summary, "Result", "displayName", "Processing")
-    _override(summary, "Status", "displayName", "Overall verdict")
+    # F-15: organize titles are already Processing / Overall verdict on all three
+    # Review Selected Run Status panels; drop legacy Result/Status displayName
+    # shims that fought donor matchers.
     if overview:
         _overview_selected_run_layout(p, summary)
+    # `_selection_summary` may run before organize rename and leave dead
+    # Result/Status byName rows; drop them after F-15 titles are final.
+    _drop_legacy_status_override_names(summary)
+
+
+def _drop_legacy_status_override_names(panel: dict) -> None:
+    """Remove byName overrides that still target pre-F-15 Result/Status titles."""
+    field_config = panel.get("fieldConfig")
+    if not isinstance(field_config, dict):
+        return
+    overrides = field_config.get("overrides")
+    if not isinstance(overrides, list):
+        return
+    dead = {"Result", "Status", "Rules", "Evidence"}
+    field_config["overrides"] = [
+        override
+        for override in overrides
+        if not (
+            isinstance(override, dict)
+            and isinstance(override.get("matcher"), dict)
+            and override["matcher"].get("id") == "byName"
+            and override["matcher"].get("options") in dead
+        )
+    ]
 
 
 def _apply_stat_value_sizes(p: dict[int, dict]) -> None:

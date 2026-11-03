@@ -50,6 +50,9 @@ def _deep_merge(
 def _load_yaml_mapping(path: Path) -> JsonDict | None:
     """Load one YAML mapping via a full-file read.
 
+    Invariant: We must use SafeLoader (via yaml.safe_load) or a SafeLoader subclass.
+    Unsafe Loader (or bare yaml.load without Loader) must not be used (S506 rule).
+
     Prefer ``read_bytes`` + ``safe_load`` over a streaming file handle. On
     cloud-synced Windows worktrees a mid-stream ``yaml.safe_load(open(...))``
     can stall long enough to trip pytest-timeout while architecture suites
